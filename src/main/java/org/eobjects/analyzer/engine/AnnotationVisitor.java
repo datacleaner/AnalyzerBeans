@@ -9,16 +9,13 @@ import org.objectweb.asm.CodeVisitor;
 
 public class AnnotationVisitor implements ClassVisitor {
 
-	private final static Log _log = LogFactory
-			.getLog(AnnotationVisitor.class);
-	public static final String ANALYZER_DESC = 'L' + AnalyzerBean.class
-			.getCanonicalName().replace('.', '/') + ';';
+	private final static Log _log = LogFactory.getLog(AnnotationVisitor.class);
+	public static final String ANALYZER_DESC = 'L' + AnalyzerBean.class.getCanonicalName().replace('.', '/') + ';';
 	private Class<?> _analyzerClazz;
 	private String _name;
 
 	@Override
-	public void visit(int version, int access, String name, String superName,
-			String[] interfaces, String sourceFile) {
+	public void visit(int version, int access, String name, String superName, String[] interfaces, String sourceFile) {
 		_log.info("Visiting class: " + name);
 		_name = name;
 	}
@@ -44,8 +41,7 @@ public class AnnotationVisitor implements ClassVisitor {
 	}
 
 	@Override
-	public void visitField(int access, String name, String desc, Object value,
-			Attribute attrs) {
+	public void visitField(int access, String name, String desc, Object value, Attribute attrs) {
 	}
 
 	@Override
@@ -53,8 +49,7 @@ public class AnnotationVisitor implements ClassVisitor {
 	}
 
 	@Override
-	public CodeVisitor visitMethod(int access, String name, String desc,
-			String[] exceptions, Attribute attrs) {
+	public CodeVisitor visitMethod(int access, String name, String desc, String[] exceptions, Attribute attrs) {
 		return null;
 	}
 

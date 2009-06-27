@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Defines methods that provide the result(s) of an analyser. The return types
+ * Defines methods that provide the result(s) of an AnalyzerBean. The return types
  * of @Result annotated methods are single instances or arrays of
  * AnalysisResult.
  * 

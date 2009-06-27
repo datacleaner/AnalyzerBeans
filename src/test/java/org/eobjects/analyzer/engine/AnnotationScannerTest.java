@@ -21,12 +21,12 @@ public class AnnotationScannerTest extends TestCase {
 		AnnotationScanner scanner = new AnnotationScanner();
 		List<AnalyzerBeanDescriptor> analyzerDescriptors = scanner.scanPackage("org.eobjects.analyzer.engine", true);
 		assertEquals(
-				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.ExploringAnalyser],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.RowProcessingAnalyser]}",
+				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.RowProcessingAnalyzerBean],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.ExploringAnalyzerBean]}",
 				ArrayUtils.toString(analyzerDescriptors.toArray()));
 
 		analyzerDescriptors = scanner.scanPackage("org.eobjects.analyzer.engine", true);
 		assertEquals(
-				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.ExploringAnalyser],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.RowProcessingAnalyser]}",
+				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.RowProcessingAnalyzerBean],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.ExploringAnalyzerBean]}",
 				ArrayUtils.toString(analyzerDescriptors.toArray()));
 
 		assertEquals(2, scanner.getDescriptors().size());

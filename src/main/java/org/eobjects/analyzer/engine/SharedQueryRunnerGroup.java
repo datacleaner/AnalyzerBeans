@@ -20,12 +20,12 @@ import dk.eobjects.metamodel.schema.Table;
 public class SharedQueryRunnerGroup {
 
 	private Table _table;
-	private List<Object[]> _analysersAndRunDescriptors;
+	private List<Object[]> _analyzersAndRunDescriptors;
 	private Set<Column> _columns = new HashSet<Column>();
 
 	public SharedQueryRunnerGroup(Table table) {
 		_table = table;
-		_analysersAndRunDescriptors = new LinkedList<Object[]>();
+		_analyzersAndRunDescriptors = new LinkedList<Object[]>();
 	}
 
 	public Table getTable() {
@@ -36,8 +36,8 @@ public class SharedQueryRunnerGroup {
 		return Collections.unmodifiableSet(_columns);
 	}
 
-	public void registerAnalyzer(Object analyser, AnalyzerBeanDescriptor descriptor, Column[] columns) {
-		_analysersAndRunDescriptors.add(new Object[] { analyser, descriptor });
+	public void registerAnalyzer(Object analyzerBean, AnalyzerBeanDescriptor descriptor, Column[] columns) {
+		_analyzersAndRunDescriptors.add(new Object[] { analyzerBean, descriptor });
 		for (Column column : columns) {
 			_columns.add(column);
 		}
@@ -78,22 +78,22 @@ public class SharedQueryRunnerGroup {
 	}
 
 	private void processRow(Row row, Long count) {
-		for (Object[] analyserAndRunDescriptor : _analysersAndRunDescriptors) {
-			Object analyser = analyserAndRunDescriptor[0];
-			AnalyzerBeanDescriptor analyserDescriptor = (AnalyzerBeanDescriptor) analyserAndRunDescriptor[1];
-			List<RunDescriptor> runDescriptors = analyserDescriptor.getRunDescriptors();
+		for (Object[] analyzerAndRunDescriptor : _analyzersAndRunDescriptors) {
+			Object analyzerBean = analyzerAndRunDescriptor[0];
+			AnalyzerBeanDescriptor analyzerBeanDescriptor = (AnalyzerBeanDescriptor) analyzerAndRunDescriptor[1];
+			List<RunDescriptor> runDescriptors = analyzerBeanDescriptor.getRunDescriptors();
 			for (RunDescriptor runDescriptor : runDescriptors) {
-				runDescriptor.processRow(analyser, row, count);
+				runDescriptor.processRow(analyzerBean, row, count);
 			}
 		}
 	}
 
 	public List<TableAnalysisResult> getResults() {
 		List<TableAnalysisResult> results = new LinkedList<TableAnalysisResult>();
-		for (Object[] analyserAndRunDescriptor : _analysersAndRunDescriptors) {
-			Object analyser = analyserAndRunDescriptor[0];
-			AnalyzerBeanDescriptor analyserDescriptor = (AnalyzerBeanDescriptor) analyserAndRunDescriptor[1];
-			List<AnalysisResult> analysisResults = ResultDescriptor.getResults(analyser, analyserDescriptor);
+		for (Object[] analyzerAndRunDescriptor : _analyzersAndRunDescriptors) {
+			Object analyzerBean = analyzerAndRunDescriptor[0];
+			AnalyzerBeanDescriptor analyzerBeanDescriptor = (AnalyzerBeanDescriptor) analyzerAndRunDescriptor[1];
+			List<AnalysisResult> analysisResults = ResultDescriptor.getResults(analyzerBean, analyzerBeanDescriptor);
 			for (AnalysisResult analysisResult : analysisResults) {
 				results.add((TableAnalysisResult) analysisResult);
 			}
@@ -104,6 +104,6 @@ public class SharedQueryRunnerGroup {
 	@Override
 	public String toString() {
 		return "SharedQueryRunnerGroup[table=" + _table.getQualifiedLabel() + ",columns=" + _columns.size()
-				+ ",analysers=" + _analysersAndRunDescriptors.size() + "]";
+				+ ",analyzerBeans=" + _analyzersAndRunDescriptors.size() + "]";
 	}
 }

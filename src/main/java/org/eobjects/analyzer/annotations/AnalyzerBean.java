@@ -9,20 +9,23 @@ import java.lang.annotation.Target;
 
 import org.eobjects.analyzer.engine.ExecutionType;
 
-
 /**
- * Classes that are annotated with the @Analyser annotation are components for
+ * Classes that are annotated with the @AnalyzerBean annotation are components for
  * data analysis.
  * 
- * The life-cycle of an analyser is as follows:
+ * The life-cycle of an AnalyzerBean is as follows:
  * <ul>
- * <li>Instantiation. All analysers need to provide a no-args constructor</li>
- * <li>All methods or fields with the Require annotation are invoked/assigned to
- * configure the Analyser before execution</li>
- * <li>All methods with the Run annotation are executed</li>
- * <li>All methods with the Result annotation are invoked to retrieve the result
- * </li>
- * <li>The analyser object is dereferenced and garbage collected</li>
+ * <li>Instantiation. All AnalyzerBeans need to provide a no-args constructor.</li>
+ * <li>All methods or fields with the @Require annotation are invoked/assigned
+ * to configure the AnalyzerBean before execution.</li>
+ * <li>All methods with the @Run annotation are executed.</li>
+ * <li>All methods with the @Result annotation are invoked to retrieve the
+ * result.</li>
+ * <li>Any no-args methods with the @Close annotation are invoked if the
+ * analyzer needs to release any resources.</li>
+ * <li>If the analyzer implements the java.io.Closeable interface, the close()
+ * method is also invoked.</li>
+ * <li>The AnalyzerBean object is dereferenced and garbage collected</li>
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -32,20 +35,20 @@ import org.eobjects.analyzer.engine.ExecutionType;
 public @interface AnalyzerBean {
 
 	/**
-	 * The display name of the analyser. The display name should be humanly
+	 * The display name of the AnalyzerBean. The display name should be humanly
 	 * readable and is presented to the user in User Interfaces.
 	 * 
-	 * @return the name of the analyser
+	 * @return the name of the AnalyzerBean
 	 */
 	String displayName();
 
 	/**
-	 * The execution type of the analyser, which basically determines whether or
-	 * not the analyser is able to perform it's own queries (explore the data
-	 * context) or if it shares queries with other analysers and just processes
+	 * The execution type of the AnalyzerBean, which basically determines whether or
+	 * not the AnalyzerBean is able to perform it's own queries (explore the data
+	 * context) or if it shares queries with other AnalyzerBeans and just processes
 	 * incoming rows.
 	 * 
-	 * @return the type of execution mechanism to use for the analyser
+	 * @return the type of execution mechanism to use for the AnalyzerBean
 	 */
 	ExecutionType execution();
 }

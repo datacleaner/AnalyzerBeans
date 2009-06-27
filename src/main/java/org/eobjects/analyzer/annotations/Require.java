@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 /**
  * Methods and fields with the @Require annotation are used to configure an
- * analyser before execution. Methods annotated with Require need to have a
+ * AnalyzerBean before execution. Methods annotated with Require need to have a
  * single argument, equivalent to a property setter/modifier method.
  * 
  * Valid types for @Require annotated fields and method arguments are single

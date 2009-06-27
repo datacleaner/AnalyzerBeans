@@ -20,52 +20,52 @@ import dk.eobjects.metamodel.data.Row;
 public class AnalyzerBeanDescriptorTest extends TestCase {
 
 	public void testExploringType() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(ExploringAnalyser.class);
+		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(ExploringAnalyzerBean.class);
 		assertEquals(ExecutionType.EXPLORING, descriptor.getExecutionType());
 		assertEquals(true, descriptor.isExploringExecutionType());
 		assertEquals(false, descriptor.isRowProcessingExecutionType());
 
 		assertEquals(
-				"{RequireDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.ExploringAnalyser._configString],RequireDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyser.setBlabla(boolean),field=null]}",
+				"{RequireDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.ExploringAnalyzerBean._configString],RequireDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyzerBean.setBlabla(boolean),field=null]}",
 				ArrayUtils.toString(descriptor.getRequireDescriptors().toArray()));
 		assertEquals(
-				"{RunDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyser.run(dk.eobjects.metamodel.DataContext)]}",
+				"{RunDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyzerBean.run(dk.eobjects.metamodel.DataContext)]}",
 				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
 		assertEquals(
-				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalysisResult org.eobjects.analyzer.engine.ExploringAnalyser.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalysisResult org.eobjects.analyzer.engine.ExploringAnalyser.result2()]}",
+				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalysisResult org.eobjects.analyzer.engine.ExploringAnalyzerBean.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalysisResult org.eobjects.analyzer.engine.ExploringAnalyzerBean.result2()]}",
 				ArrayUtils.toString(descriptor.getResultDescriptors().toArray()));
 	}
 
 	public void testRowProcessingType() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(RowProcessingAnalyser.class);
+		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(RowProcessingAnalyzerBean.class);
 		assertEquals(ExecutionType.ROW_PROCESSING, descriptor.getExecutionType());
 		assertEquals(false, descriptor.isExploringExecutionType());
 		assertEquals(true, descriptor.isRowProcessingExecutionType());
 
 		List<RequireDescriptor> requireDescriptors = descriptor.getRequireDescriptors();
 		assertEquals(
-				"{RequireDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.RowProcessingAnalyser._configString],RequireDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyser.setBlabla(boolean),field=null]}",
+				"{RequireDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.RowProcessingAnalyzerBean._configString],RequireDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.setBlabla(boolean),field=null]}",
 				ArrayUtils.toString(requireDescriptors.toArray()));
 		assertEquals(
-				"{RunDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyser.run(dk.eobjects.metamodel.data.Row,java.lang.Long)]}",
+				"{RunDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.run(dk.eobjects.metamodel.data.Row,java.lang.Long)]}",
 				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
 		assertEquals(
-				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalysisResult org.eobjects.analyzer.engine.RowProcessingAnalyser.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalysisResult org.eobjects.analyzer.engine.RowProcessingAnalyser.result2()]}",
+				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalysisResult org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalysisResult org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.result2()]}",
 				ArrayUtils.toString(descriptor.getResultDescriptors().toArray()));
 
-		RowProcessingAnalyser analyser = new RowProcessingAnalyser();
+		RowProcessingAnalyzerBean analyzerBean = new RowProcessingAnalyzerBean();
 		RequireDescriptor requireDescriptor = requireDescriptors.get(0);
-		requireDescriptor.assignValue(analyser, "foobar");
-		assertEquals("foobar", analyser.getConfigString());
+		requireDescriptor.assignValue(analyzerBean, "foobar");
+		assertEquals("foobar", analyzerBean.getConfigString());
 
 		requireDescriptor = requireDescriptors.get(1);
-		requireDescriptor.assignValue(analyser, true);
-		assertEquals("true", analyser.getConfigString());
+		requireDescriptor.assignValue(analyzerBean, true);
+		assertEquals("true", analyzerBean.getConfigString());
 	}
 }
 
-@AnalyzerBean(displayName = "Analyser mock-up", execution = ExecutionType.EXPLORING)
-class ExploringAnalyser {
+@AnalyzerBean(displayName = "AnalyzerBean mock-up", execution = ExecutionType.EXPLORING)
+class ExploringAnalyzerBean {
 
 	@Require("config string")
 	public String _configString;
@@ -91,8 +91,8 @@ class ExploringAnalyser {
 	}
 }
 
-@AnalyzerBean(displayName = "Analyser mock-up", execution = ExecutionType.ROW_PROCESSING)
-class RowProcessingAnalyser {
+@AnalyzerBean(displayName = "AnalyzerBean mock-up", execution = ExecutionType.ROW_PROCESSING)
+class RowProcessingAnalyzerBean {
 
 	@Require("config string")
 	public String _configString;

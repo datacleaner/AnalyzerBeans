@@ -8,7 +8,7 @@ import dk.eobjects.metamodel.schema.Table;
 public interface TableAnalysisResult extends AnalysisResult {
 
 	public void setTable(Table table);
-	
+
 	public Table getTable();
-	
+
 }

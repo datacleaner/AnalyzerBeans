@@ -14,13 +14,11 @@ public class ResultDescriptor {
 	private boolean _array;
 	private Method _method;
 
-	public ResultDescriptor(Method method, Result resultAnnotation)
-			throws IllegalArgumentException {
+	public ResultDescriptor(Method method, Result resultAnnotation) throws IllegalArgumentException {
 		_method = method;
 		_name = resultAnnotation.value();
 		if (method.getParameterTypes().length != 0) {
-			throw new IllegalArgumentException(
-					"@Result annotated methods cannot have parameters");
+			throw new IllegalArgumentException("@Result annotated methods cannot have parameters");
 		}
 		Class<?> returnType = method.getReturnType();
 		if (returnType.isArray()) {
@@ -34,9 +32,7 @@ public class ResultDescriptor {
 
 	private void validateType(Class<?> type) throws IllegalArgumentException {
 		if (AnalysisResult.class != type) {
-			throw new IllegalArgumentException(
-					"Unsupported return type for @Result annotated method: "
-							+ type);
+			throw new IllegalArgumentException("Unsupported return type for @Result annotated method: " + type);
 		}
 	}
 
@@ -53,9 +49,9 @@ public class ResultDescriptor {
 		return "ResultDescriptor[method=" + _method + "]";
 	}
 
-	public AnalysisResult[] getResults(Object analyser) {
+	public AnalysisResult[] getResults(Object analyzerBean) {
 		try {
-			Object resultObject = _method.invoke(analyser, new Object[0]);
+			Object resultObject = _method.invoke(analyzerBean, new Object[0]);
 			Class<? extends Object> resultClass = resultObject.getClass();
 			AnalysisResult[] result;
 			if (resultClass.isArray()) {
@@ -69,14 +65,13 @@ public class ResultDescriptor {
 			}
 			return result;
 		} catch (Exception e) {
-			throw new IllegalArgumentException(
-					"Could not invoke @Result method " + _method, e);
+			throw new IllegalArgumentException("Could not invoke @Result method " + _method, e);
 		}
 	}
 
-	public AnalysisResult getResult(Object analyser) {
+	public AnalysisResult getResult(Object analyzerBean) {
 		try {
-			Object resultObject = _method.invoke(analyser, new Object[0]);
+			Object resultObject = _method.invoke(analyzerBean, new Object[0]);
 			Class<? extends Object> resultClass = resultObject.getClass();
 			if (resultClass.isArray()) {
 				throw new IllegalArgumentException(
@@ -84,36 +79,31 @@ public class ResultDescriptor {
 			}
 			return (AnalysisResult) resultObject;
 		} catch (Exception e) {
-			throw new IllegalArgumentException(
-					"Could not invoke @Result method " + _method, e);
+			throw new IllegalArgumentException("Could not invoke @Result method " + _method, e);
 		}
 	}
 
-	public static List<AnalysisResult> getResults(Object analyser,
-			AnalyzerBeanDescriptor analyserDescriptor) {
+	public static List<AnalysisResult> getResults(Object analyzerBean, AnalyzerBeanDescriptor analyzerBeanDescriptor) {
 		List<AnalysisResult> results = new LinkedList<AnalysisResult>();
-		List<ResultDescriptor> resultDescriptors = analyserDescriptor
-				.getResultDescriptors();
+		List<ResultDescriptor> resultDescriptors = analyzerBeanDescriptor.getResultDescriptors();
 		for (ResultDescriptor resultDescriptor : resultDescriptors) {
 			if (resultDescriptor.isArray()) {
-				AnalysisResult[] analysisResult = resultDescriptor
-						.getResults(analyser);
+				AnalysisResult[] analysisResult = resultDescriptor.getResults(analyzerBean);
 				for (AnalysisResult result : analysisResult) {
-					if (result.getAnalyserClass() == null) {
-						result.setAnalyserClass(analyserDescriptor
-								.getAnalyzerClass());
+					if (result.getAnalyzerClass() == null) {
+						result.setAnalyzerClass(analyzerBeanDescriptor.getAnalyzerClass());
 					}
 					results.add(result);
 				}
 			} else {
-				AnalysisResult result = resultDescriptor.getResult(analyser);
-				if (result.getAnalyserClass() == null) {
-					result.setAnalyserClass(analyserDescriptor
-							.getAnalyzerClass());
+				AnalysisResult result = resultDescriptor.getResult(analyzerBean);
+				if (result.getAnalyzerClass() == null) {
+					result.setAnalyzerClass(analyzerBeanDescriptor.getAnalyzerClass());
 				}
 				results.add(result);
 			}
 		}
+		CloseDescriptor.close(analyzerBean, analyzerBeanDescriptor);
 		return results;
 	}
 }

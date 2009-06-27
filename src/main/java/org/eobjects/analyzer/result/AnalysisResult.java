@@ -11,8 +11,8 @@ public interface AnalysisResult extends Serializable {
 
 	public boolean isSuccesful();
 
-	public Class<?> getAnalyserClass();
+	public Class<?> getAnalyzerClass();
 
-	public void setAnalyserClass(Class<?> analyzerClass);
-	
+	public void setAnalyzerClass(Class<?> analyzerClass);
+
 }

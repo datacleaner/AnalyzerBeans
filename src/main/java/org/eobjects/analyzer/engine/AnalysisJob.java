@@ -12,11 +12,11 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
 /**
- * Represents the information used to run an analyser. The AnalyserJob itself
+ * Represents the information used to run an AnalyzerBean. The AnalysisJob itself
  * contains no execution logic but is used as configuration objects to the
- * AnalyserRunner, so that it will know what to run.
+ * AnalysisRunner, so that it will know what to run.
  * 
- * The AnalyserJob class contains maps that create the link between @Require
+ * The AnalysisJob class contains maps that create the link between @Require
  * annotated methods and fields and the values to assign to them before
  * execution. To represent column and table objects in these maps String are
  * used to ensure easy serialisation. The strings used are equal to the
@@ -26,7 +26,7 @@ public final class AnalysisJob implements Serializable {
 
 	private static final long serialVersionUID = 6996682701564901059L;
 
-	private Class<?> _analyserClass;
+	private Class<?> _analyzerClass;
 	private Map<String, Boolean[]> _booleanProperties;
 	private Map<String, Integer[]> _integerProperties;
 	private Map<String, Long[]> _longProperties;
@@ -39,8 +39,8 @@ public final class AnalysisJob implements Serializable {
 		this(null);
 	}
 
-	public AnalysisJob(Class<?> analyserClass) {
-		_analyserClass = analyserClass;
+	public AnalysisJob(Class<?> analyzerClass) {
+		_analyzerClass = analyzerClass;
 		_booleanProperties = new HashMap<String, Boolean[]>();
 		_integerProperties = new HashMap<String, Integer[]>();
 		_longProperties = new HashMap<String, Long[]>();
@@ -51,11 +51,11 @@ public final class AnalysisJob implements Serializable {
 	}
 
 	public Class<?> getAnalyzerClass() {
-		return _analyserClass;
+		return _analyzerClass;
 	}
 
-	public void setAnalyserClass(Class<?> analyserClass) {
-		_analyserClass = analyserClass;
+	public void setAnalyzerClass(Class<?> analyzerClass) {
+		_analyzerClass = analyzerClass;
 	}
 
 	public Map<String, Boolean[]> getBooleanProperties() {
@@ -162,14 +162,10 @@ public final class AnalysisJob implements Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("analyserClass", _analyserClass).append(
-						"booleanProperties", _booleanProperties).append(
-						"integerProperties", _integerProperties).append(
-						"longProperties", _longProperties).append(
-						"doubleProperties", _doubleProperties).append(
-						"stringProperties", _stringProperties).append(
-						"columnProperties", _columnProperties).append(
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("analyzerClass", _analyzerClass)
+				.append("booleanProperties", _booleanProperties).append("integerProperties", _integerProperties)
+				.append("longProperties", _longProperties).append("doubleProperties", _doubleProperties).append(
+						"stringProperties", _stringProperties).append("columnProperties", _columnProperties).append(
 						"tableProperties", _tableProperties).toString();
 	}
 }

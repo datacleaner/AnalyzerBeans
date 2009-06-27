@@ -16,22 +16,19 @@ public class RequireDescriptor {
 	private Field _field;
 	private Method _method;
 
-	public RequireDescriptor(Field field, Require requireAnnotation)
-			throws IllegalArgumentException {
+	public RequireDescriptor(Field field, Require requireAnnotation) throws IllegalArgumentException {
 		_name = requireAnnotation.value();
 		_field = field;
 		setType(field.getType());
 	}
 
-	public RequireDescriptor(Method method, Require requireAnnotation)
-			throws IllegalArgumentException {
+	public RequireDescriptor(Method method, Require requireAnnotation) throws IllegalArgumentException {
 		_name = requireAnnotation.value();
 		_method = method;
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if (parameterTypes.length != 1) {
-			throw new IllegalArgumentException("The @Require annotated method "
-					+ method + " defines " + parameterTypes.length
-					+ " parameters, a single parameter is required");
+			throw new IllegalArgumentException("The @Require annotated method " + method + " defines "
+					+ parameterTypes.length + " parameters, a single parameter is required");
 		}
 		setType(parameterTypes[0]);
 	}
@@ -76,10 +73,8 @@ public class RequireDescriptor {
 
 	private void setBaseType(Class<?> type) {
 		_baseType = type;
-		if (!(isBoolean() || isInteger() || isLong() || isDouble()
-				|| isString() || isColumn() || isTable())) {
-			throw new IllegalArgumentException("The type " + _baseType
-					+ " is not supported by the @Require annotation");
+		if (!(isBoolean() || isInteger() || isLong() || isDouble() || isString() || isColumn() || isTable())) {
+			throw new IllegalArgumentException("The type " + _baseType + " is not supported by the @Require annotation");
 		}
 	}
 
@@ -95,17 +90,16 @@ public class RequireDescriptor {
 		return (_baseType == Integer.class || _baseType == int.class);
 	}
 
-	public void assignValue(Object analyser, Object value)
-			throws IllegalArgumentException {
+	public void assignValue(Object analyzerBean, Object value) throws IllegalArgumentException {
 		try {
 			if (_method != null) {
-				_method.invoke(analyser, value);
+				_method.invoke(analyzerBean, value);
 			} else {
-				_field.set(analyser, value);
+				_field.set(analyzerBean, value);
 			}
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not assign value '"
-					+ value + "' to " + (_method == null ? _field : _method), e);
+			throw new IllegalArgumentException("Could not assign value '" + value + "' to "
+					+ (_method == null ? _field : _method), e);
 		}
 	}
 
