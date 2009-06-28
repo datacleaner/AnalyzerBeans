@@ -10,15 +10,18 @@ import java.lang.annotation.Target;
 import org.eobjects.analyzer.engine.ExecutionType;
 
 /**
- * Classes that are annotated with the @AnalyzerBean annotation are components for
- * data analysis.
+ * Classes that are annotated with the @AnalyzerBean annotation are components
+ * for data analysis.
  * 
  * The life-cycle of an AnalyzerBean is as follows:
  * <ul>
  * <li>Instantiation. All AnalyzerBeans need to provide a no-args constructor.</li>
- * <li>All methods or fields with the @Require annotation are invoked/assigned
- * to configure the AnalyzerBean before execution.</li>
- * <li>All methods with the @Run annotation are executed.</li>
+ * <li>All methods or fields with the @Configured annotation are
+ * invoked/assigned to configure the AnalyzerBean before execution.</li>
+ * <li>All methods or fields with the @Provided annotation are invoked/assigned</li>
+ * <li>Any no-args methods with the @Initialize annotation are executed.</li>
+ * <li>All methods with the @Run annotation are executed (A number of times,
+ * depending on the ExecutionType parameter).</li>
  * <li>All methods with the @Result annotation are invoked to retrieve the
  * result.</li>
  * <li>Any no-args methods with the @Close annotation are invoked if the
@@ -40,15 +43,15 @@ public @interface AnalyzerBean {
 	 * 
 	 * @return the name of the AnalyzerBean
 	 */
-	String displayName();
+	String displayName() default "";
 
 	/**
-	 * The execution type of the AnalyzerBean, which basically determines whether or
-	 * not the AnalyzerBean is able to perform it's own queries (explore the data
-	 * context) or if it shares queries with other AnalyzerBeans and just processes
-	 * incoming rows.
+	 * The execution type of the AnalyzerBean, which basically determines
+	 * whether or not the AnalyzerBean is able to perform it's own queries
+	 * (explore the data context) or if it shares queries with other
+	 * AnalyzerBeans and just processes incoming rows.
 	 * 
 	 * @return the type of execution mechanism to use for the AnalyzerBean
 	 */
-	ExecutionType execution();
+	ExecutionType execution() default ExecutionType.ROW_PROCESSING;
 }

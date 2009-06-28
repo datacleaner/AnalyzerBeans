@@ -6,12 +6,12 @@ import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.annotations.Require;
+import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.annotations.Run;
 import org.eobjects.analyzer.engine.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.engine.ExecutionType;
-import org.eobjects.analyzer.engine.RequireDescriptor;
+import org.eobjects.analyzer.engine.ConfiguredDescriptor;
 import org.eobjects.analyzer.result.AnalysisResult;
 
 import dk.eobjects.metamodel.DataContext;
@@ -26,8 +26,8 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 		assertEquals(false, descriptor.isRowProcessingExecutionType());
 
 		assertEquals(
-				"{RequireDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.ExploringAnalyzerBean._configString],RequireDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyzerBean.setBlabla(boolean),field=null]}",
-				ArrayUtils.toString(descriptor.getRequireDescriptors().toArray()));
+				"{ConfiguredDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.ExploringAnalyzerBean._configString],ConfiguredDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyzerBean.setBlabla(boolean),field=null]}",
+				ArrayUtils.toString(descriptor.getConfiguredDescriptors().toArray()));
 		assertEquals(
 				"{RunDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyzerBean.run(dk.eobjects.metamodel.DataContext)]}",
 				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
@@ -42,10 +42,10 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 		assertEquals(false, descriptor.isExploringExecutionType());
 		assertEquals(true, descriptor.isRowProcessingExecutionType());
 
-		List<RequireDescriptor> requireDescriptors = descriptor.getRequireDescriptors();
+		List<ConfiguredDescriptor> configuredDescriptors = descriptor.getConfiguredDescriptors();
 		assertEquals(
-				"{RequireDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.RowProcessingAnalyzerBean._configString],RequireDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.setBlabla(boolean),field=null]}",
-				ArrayUtils.toString(requireDescriptors.toArray()));
+				"{ConfiguredDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.RowProcessingAnalyzerBean._configString],ConfiguredDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.setBlabla(boolean),field=null]}",
+				ArrayUtils.toString(configuredDescriptors.toArray()));
 		assertEquals(
 				"{RunDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.run(dk.eobjects.metamodel.data.Row,java.lang.Long)]}",
 				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
@@ -54,12 +54,12 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 				ArrayUtils.toString(descriptor.getResultDescriptors().toArray()));
 
 		RowProcessingAnalyzerBean analyzerBean = new RowProcessingAnalyzerBean();
-		RequireDescriptor requireDescriptor = requireDescriptors.get(0);
-		requireDescriptor.assignValue(analyzerBean, "foobar");
+		ConfiguredDescriptor configuredDescriptor = configuredDescriptors.get(0);
+		configuredDescriptor.assignValue(analyzerBean, "foobar");
 		assertEquals("foobar", analyzerBean.getConfigString());
 
-		requireDescriptor = requireDescriptors.get(1);
-		requireDescriptor.assignValue(analyzerBean, true);
+		configuredDescriptor = configuredDescriptors.get(1);
+		configuredDescriptor.assignValue(analyzerBean, true);
 		assertEquals("true", analyzerBean.getConfigString());
 	}
 }
@@ -67,10 +67,10 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 @AnalyzerBean(displayName = "AnalyzerBean mock-up", execution = ExecutionType.EXPLORING)
 class ExploringAnalyzerBean {
 
-	@Require("config string")
+	@Configured("config string")
 	public String _configString;
 
-	@Require("config bool")
+	@Configured("config bool")
 	public void setBlabla(boolean bool) {
 		_configString = Boolean.toString(bool);
 	}
@@ -94,10 +94,10 @@ class ExploringAnalyzerBean {
 @AnalyzerBean(displayName = "AnalyzerBean mock-up", execution = ExecutionType.ROW_PROCESSING)
 class RowProcessingAnalyzerBean {
 
-	@Require("config string")
+	@Configured("config string")
 	public String _configString;
 
-	@Require("config bool")
+	@Configured("config bool")
 	public void setBlabla(boolean bool) {
 		_configString = Boolean.toString(bool);
 	}

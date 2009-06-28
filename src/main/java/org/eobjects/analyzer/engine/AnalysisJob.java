@@ -9,14 +9,15 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
 /**
- * Represents the information used to run an AnalyzerBean. The AnalysisJob itself
- * contains no execution logic but is used as configuration objects to the
- * AnalysisRunner, so that it will know what to run.
+ * Represents the information used to run an AnalyzerBean. The AnalysisJob
+ * itself contains no execution logic but is used as configuration objects to
+ * the AnalysisRunner, so that it will know what to run.
  * 
- * The AnalysisJob class contains maps that create the link between @Require
+ * The AnalysisJob class contains maps that create the link between @Configured
  * annotated methods and fields and the values to assign to them before
  * execution. To represent column and table objects in these maps String are
  * used to ensure easy serialisation. The strings used are equal to the
@@ -34,6 +35,7 @@ public final class AnalysisJob implements Serializable {
 	private Map<String, String[]> _stringProperties;
 	private Map<String, String[]> _columnProperties;
 	private Map<String, String[]> _tableProperties;
+	private Map<String, String[]> _schemaProperties;
 
 	public AnalysisJob() {
 		this(null);
@@ -157,7 +159,28 @@ public final class AnalysisJob implements Serializable {
 			Table table = tables[i];
 			strings[i] = table.getQualifiedLabel();
 		}
-		putColumnProperty(key, strings);
+		putTableProperty(key, strings);
+	}
+
+	public Map<String, String[]> getSchemaProperties() {
+		return _schemaProperties;
+	}
+
+	public void setSchemaProperties(Map<String, String[]> schemaProperties) {
+		_schemaProperties = schemaProperties;
+	}
+
+	public void putSchemaProperty(String key, String... tablePaths) {
+		_schemaProperties.put(key, tablePaths);
+	}
+
+	public void putSchemaProperty(String key, Schema... schemas) {
+		String[] strings = new String[schemas.length];
+		for (int i = 0; i < schemas.length; i++) {
+			Schema schema = schemas[i];
+			strings[i] = schema.getName();
+		}
+		putSchemaProperty(key, strings);
 	}
 
 	@Override

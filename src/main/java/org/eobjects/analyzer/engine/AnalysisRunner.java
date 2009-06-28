@@ -19,6 +19,7 @@ import org.eobjects.analyzer.result.TableAnalysisResult;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.MetaModelHelper;
 import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
 public final class AnalysisRunner {
@@ -102,45 +103,48 @@ public final class AnalysisRunner {
 		return Collections.unmodifiableList(_results);
 	}
 
-	private void initializeRowProcessingAnalyzers(AnalysisJob job, AnalyzerBeanDescriptor analyzerDescriptor,
+	private void initializeRowProcessingAnalyzers(AnalysisJob job, AnalyzerBeanDescriptor analyzerBeanDescriptor,
 			Map<Table, SharedQueryRunnerGroup> sharedTableQueries, DataContext dataContext) {
 		try {
-			// Create list of all RequireDescriptors except the ones who require
-			// a column array.
-			List<RequireDescriptor> requireDescriptorsExceptColumns = new LinkedList<RequireDescriptor>(
-					analyzerDescriptor.getRequireDescriptors());
-			for (Iterator<RequireDescriptor> it = requireDescriptorsExceptColumns.iterator(); it.hasNext();) {
-				RequireDescriptor requireDescriptor = it.next();
-				if (requireDescriptor.isColumn() && requireDescriptor.isArray()) {
+			// Create list of all ConfiguredDescriptors except the ones who
+			// require a column array.
+			List<ConfiguredDescriptor> configuredDescriptorsExceptColumns = new LinkedList<ConfiguredDescriptor>(
+					analyzerBeanDescriptor.getConfiguredDescriptors());
+			for (Iterator<ConfiguredDescriptor> it = configuredDescriptorsExceptColumns.iterator(); it.hasNext();) {
+				ConfiguredDescriptor configuredDescriptor = it.next();
+				if (configuredDescriptor.isColumn() && configuredDescriptor.isArray()) {
 					it.remove();
 				}
 			}
 
 			// Create an analyzer instance for each table that is represented in
-			// the column array based RequireDescriptors
+			// the column array based ConfiguredDescriptors
 			Map<String, String[]> columnProperties = job.getColumnProperties();
 			Set<Entry<String, String[]>> columnPropertyEntries = columnProperties.entrySet();
 			for (Entry<String, String[]> entry : columnPropertyEntries) {
-				String requireName = entry.getKey();
-				RequireDescriptor requireDescriptor = analyzerDescriptor.getRequireDescriptor(requireName);
-				if (requireDescriptor == null) {
-					throw new IllegalStateException("Analyzer class '" + analyzerDescriptor.getAnalyzerClass()
-							+ "' does not specify @Require field or method with name: " + requireName);
+				String configuredName = entry.getKey();
+				ConfiguredDescriptor configuredDescriptor = analyzerBeanDescriptor
+						.getConfiguredDescriptor(configuredName);
+				if (configuredDescriptor == null) {
+					throw new IllegalStateException("Analyzer class '" + analyzerBeanDescriptor.getAnalyzerClass()
+							+ "' does not specify @Configured field or method with name: " + configuredName);
 				}
-				if (requireDescriptor.isArray()) {
+				if (configuredDescriptor.isArray()) {
 					String[] columnNames = entry.getValue();
 					Column[] columns = convertToColumns(dataContext, columnNames);
 					Table[] tables = MetaModelHelper.getTables(columns);
 					for (Table table : tables) {
 						Column[] columnsForAnalyzer = MetaModelHelper.getTableColumns(table, columns);
 
-						Object analyzer = analyzerDescriptor.getAnalyzerClass().newInstance();
+						Object analyzerBean = analyzerBeanDescriptor.getAnalyzerClass().newInstance();
 
 						// First assign the columns to the analyzer
-						requireDescriptor.assignValue(analyzer, columnsForAnalyzer);
+						configuredDescriptor.assignValue(analyzerBean, columnsForAnalyzer);
 
 						// Then initialize the rest of the properties
-						initializeRequiredProperties(analyzer, job, requireDescriptorsExceptColumns, dataContext);
+						initializeConfiguredProperties(analyzerBean, job, configuredDescriptorsExceptColumns,
+								dataContext);
+						InitializeDescriptor.initialize(analyzerBean, analyzerBeanDescriptor);
 
 						// Add the analysis to a shared query group
 						SharedQueryRunnerGroup group = sharedTableQueries.get(table);
@@ -148,7 +152,7 @@ public final class AnalysisRunner {
 							group = new SharedQueryRunnerGroup(table);
 							sharedTableQueries.put(table, group);
 						}
-						group.registerAnalyzer(analyzer, analyzerDescriptor, columnsForAnalyzer);
+						group.registerAnalyzer(analyzerBean, analyzerBeanDescriptor, columnsForAnalyzer);
 					}
 				}
 			}
@@ -164,46 +168,50 @@ public final class AnalysisRunner {
 		}
 	}
 
-	private void initializeRequiredProperties(Object analyzer, AnalysisJob job,
-			List<RequireDescriptor> requireDescriptors, DataContext dataContext) {
-		for (RequireDescriptor requireDescriptor : requireDescriptors) {
-			Object requireValue = null;
-			String requireName = requireDescriptor.getName();
-			if (requireDescriptor.isBoolean()) {
-				requireValue = job.getBooleanProperties().get(requireName);
-			} else if (requireDescriptor.isInteger()) {
-				requireValue = job.getIntegerProperties().get(requireName);
-			} else if (requireDescriptor.isLong()) {
-				requireValue = job.getLongProperties().get(requireName);
-			} else if (requireDescriptor.isDouble()) {
-				requireValue = job.getDoubleProperties().get(requireName);
-			} else if (requireDescriptor.isString()) {
-				requireValue = job.getStringProperties().get(requireName);
-			} else if (requireDescriptor.isColumn()) {
-				String[] columnNames = job.getColumnProperties().get(requireName);
-				requireValue = convertToColumns(dataContext, columnNames);
-			} else if (requireDescriptor.isTable()) {
-				String[] tableNames = job.getTableProperties().get(requireName);
-				requireValue = convertToTables(dataContext, tableNames);
+	private void initializeConfiguredProperties(Object analyzer, AnalysisJob job,
+			List<ConfiguredDescriptor> configuredDescriptors, DataContext dataContext) {
+		for (ConfiguredDescriptor configuredDescriptor : configuredDescriptors) {
+			Object configuredValue = null;
+			String configuredName = configuredDescriptor.getName();
+			if (configuredDescriptor.isBoolean()) {
+				configuredValue = job.getBooleanProperties().get(configuredName);
+			} else if (configuredDescriptor.isInteger()) {
+				configuredValue = job.getIntegerProperties().get(configuredName);
+			} else if (configuredDescriptor.isLong()) {
+				configuredValue = job.getLongProperties().get(configuredName);
+			} else if (configuredDescriptor.isDouble()) {
+				configuredValue = job.getDoubleProperties().get(configuredName);
+			} else if (configuredDescriptor.isString()) {
+				configuredValue = job.getStringProperties().get(configuredName);
+			} else if (configuredDescriptor.isColumn()) {
+				String[] columnNames = job.getColumnProperties().get(configuredName);
+				configuredValue = convertToColumns(dataContext, columnNames);
+			} else if (configuredDescriptor.isTable()) {
+				String[] tableNames = job.getTableProperties().get(configuredName);
+				configuredValue = convertToTables(dataContext, tableNames);
+			} else if (configuredDescriptor.isSchema()) {
+				String[] schemaNames = job.getSchemaProperties().get(configuredName);
+				configuredValue = convertToSchemas(dataContext, schemaNames);
 			}
-			if (requireDescriptor.isArray()) {
-				requireDescriptor.assignValue(analyzer, requireValue);
+			if (configuredDescriptor.isArray()) {
+				configuredDescriptor.assignValue(analyzer, configuredValue);
 			} else {
-				if (requireValue.getClass().isArray()) {
-					requireValue = Array.get(requireValue, 0);
+				if (configuredValue.getClass().isArray()) {
+					configuredValue = Array.get(configuredValue, 0);
 				}
-				requireDescriptor.assignValue(analyzer, requireValue);
+				configuredDescriptor.assignValue(analyzer, configuredValue);
 			}
 		}
 	}
 
-	private Object initializeExploringAnalyzer(AnalysisJob job, AnalyzerBeanDescriptor analyzerDescriptor,
+	private Object initializeExploringAnalyzer(AnalysisJob job, AnalyzerBeanDescriptor analyzerBeanDescriptor,
 			DataContext dataContext) {
-		List<RequireDescriptor> requireDescriptors = analyzerDescriptor.getRequireDescriptors();
+		List<ConfiguredDescriptor> configuredDescriptors = analyzerBeanDescriptor.getConfiguredDescriptors();
 		try {
-			Object analyzer = analyzerDescriptor.getAnalyzerClass().newInstance();
-			initializeRequiredProperties(analyzer, job, requireDescriptors, dataContext);
-			return analyzer;
+			Object analyzerBean = analyzerBeanDescriptor.getAnalyzerClass().newInstance();
+			initializeConfiguredProperties(analyzerBean, job, configuredDescriptors, dataContext);
+			InitializeDescriptor.initialize(analyzerBean, analyzerBeanDescriptor);
+			return analyzerBean;
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Could not initialize analyzer based on job: " + job, e);
 		}
@@ -213,6 +221,14 @@ public final class AnalysisRunner {
 		Table[] result = new Table[tableNames.length];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = dataContext.getTableByQualifiedLabel(tableNames[i]);
+		}
+		return result;
+	}
+
+	private Schema[] convertToSchemas(DataContext dataContext, String[] schemaNames) {
+		Schema[] result = new Schema[schemaNames.length];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = dataContext.getSchemaByName(schemaNames[i]);
 		}
 		return result;
 	}

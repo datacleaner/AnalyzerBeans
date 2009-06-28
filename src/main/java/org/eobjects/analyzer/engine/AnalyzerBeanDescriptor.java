@@ -8,7 +8,9 @@ import java.util.List;
 
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Close;
-import org.eobjects.analyzer.annotations.Require;
+import org.eobjects.analyzer.annotations.Configured;
+import org.eobjects.analyzer.annotations.Initialize;
+import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.annotations.Run;
 
@@ -17,7 +19,9 @@ public class AnalyzerBeanDescriptor {
 	private Class<?> _analyzerClass;
 	private String _displayName;
 	private ExecutionType _executionType;
-	private List<RequireDescriptor> _requireDescriptors = new LinkedList<RequireDescriptor>();
+	private List<ConfiguredDescriptor> _configuredDescriptors = new LinkedList<ConfiguredDescriptor>();
+	private List<ProvidedDescriptor> _providedDescriptors = new LinkedList<ProvidedDescriptor>();
+	private List<InitializeDescriptor> _initializeDescriptors = new LinkedList<InitializeDescriptor>();
 	private List<RunDescriptor> _runDescriptors = new LinkedList<RunDescriptor>();
 	private List<ResultDescriptor> _resultDescriptors = new LinkedList<ResultDescriptor>();
 	private List<CloseDescriptor> _closeDescriptors = new LinkedList<CloseDescriptor>();
@@ -29,21 +33,39 @@ public class AnalyzerBeanDescriptor {
 			throw new IllegalArgumentException(analyzerClass + " doesn't implement the AnalyzerBean annotation");
 		}
 		_displayName = analyzerAnnotation.displayName();
+		if (_displayName == null || _displayName.trim().equals("")) {
+			_displayName = AnnotationHelper.explodeCamelCase(_analyzerClass.getSimpleName());
+		}
 		_executionType = analyzerAnnotation.execution();
 
 		Field[] fields = _analyzerClass.getFields();
 		for (Field field : fields) {
-			Require requireAnnotation = field.getAnnotation(Require.class);
-			if (requireAnnotation != null) {
-				_requireDescriptors.add(new RequireDescriptor(field, requireAnnotation));
+			Configured configuredAnnotation = field.getAnnotation(Configured.class);
+			if (configuredAnnotation != null) {
+				_configuredDescriptors.add(new ConfiguredDescriptor(field, configuredAnnotation));
+			}
+
+			Provided providedAnnotation = field.getAnnotation(Provided.class);
+			if (providedAnnotation != null) {
+				_providedDescriptors.add(new ProvidedDescriptor(field, providedAnnotation));
 			}
 		}
 
 		Method[] methods = _analyzerClass.getMethods();
 		for (Method method : methods) {
-			Require requireAnnotation = method.getAnnotation(Require.class);
-			if (requireAnnotation != null) {
-				_requireDescriptors.add(new RequireDescriptor(method, requireAnnotation));
+			Configured configuredAnnotation = method.getAnnotation(Configured.class);
+			if (configuredAnnotation != null) {
+				_configuredDescriptors.add(new ConfiguredDescriptor(method, configuredAnnotation));
+			}
+
+			Provided providedAnnotation = method.getAnnotation(Provided.class);
+			if (providedAnnotation != null) {
+				_providedDescriptors.add(new ProvidedDescriptor(method, providedAnnotation));
+			}
+
+			Initialize initializeAnnotation = method.getAnnotation(Initialize.class);
+			if (initializeAnnotation != null) {
+				_initializeDescriptors.add(new InitializeDescriptor(method, initializeAnnotation));
 			}
 
 			Run runAnnotation = method.getAnnotation(Run.class);
@@ -71,7 +93,7 @@ public class AnalyzerBeanDescriptor {
 		}
 
 		// Make the descriptor lists read-only
-		_requireDescriptors = Collections.unmodifiableList(_requireDescriptors);
+		_configuredDescriptors = Collections.unmodifiableList(_configuredDescriptors);
 		_runDescriptors = Collections.unmodifiableList(_runDescriptors);
 		_resultDescriptors = Collections.unmodifiableList(_resultDescriptors);
 	}
@@ -96,14 +118,22 @@ public class AnalyzerBeanDescriptor {
 		return _executionType == ExecutionType.ROW_PROCESSING;
 	}
 
-	public List<RequireDescriptor> getRequireDescriptors() {
-		return _requireDescriptors;
+	public List<ConfiguredDescriptor> getConfiguredDescriptors() {
+		return _configuredDescriptors;
+	}
+	
+	public List<InitializeDescriptor> getInitializeDescriptors() {
+		return _initializeDescriptors;
+	}
+	
+	public List<ProvidedDescriptor> getProvidedDescriptors() {
+		return _providedDescriptors;
 	}
 
-	public RequireDescriptor getRequireDescriptor(String requireName) {
-		for (RequireDescriptor requireDescriptor : _requireDescriptors) {
-			if (requireName.equals(requireDescriptor.getName())) {
-				return requireDescriptor;
+	public ConfiguredDescriptor getConfiguredDescriptor(String configuredName) {
+		for (ConfiguredDescriptor configuredDescriptor : _configuredDescriptors) {
+			if (configuredName.equals(configuredDescriptor.getName())) {
+				return configuredDescriptor;
 			}
 		}
 		return null;
@@ -116,7 +146,7 @@ public class AnalyzerBeanDescriptor {
 	public List<RunDescriptor> getRunDescriptors() {
 		return _runDescriptors;
 	}
-	
+
 	public List<CloseDescriptor> getCloseDescriptors() {
 		return _closeDescriptors;
 	}

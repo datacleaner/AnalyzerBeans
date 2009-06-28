@@ -8,11 +8,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Methods and fields with the @Require annotation are used to configure an
- * AnalyzerBean before execution. Methods annotated with Require need to have a
- * single argument, equivalent to a property setter/modifier method.
+ * Methods and fields with the @Configured annotation are used to configure an
+ * AnalyzerBean before execution. Typically, the @Configured annotated
+ * methods/fields will be used to prompt the user for configuration. Methods
+ * annotated with @Configured need to have a single argument, equivalent to a
+ * property setter/modifier method.
  * 
- * Valid types for @Require annotated fields and method arguments are single
+ * Valid types for @Configured annotated fields and method arguments are single
  * instances or arrays of:
  * <ul>
  * <li>Boolean</li>
@@ -22,18 +24,19 @@ import java.lang.annotation.Target;
  * <li>String</li>
  * <li>Column</li>
  * <li>Table</li>
+ * <li>Schema</li>
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target( { ElementType.METHOD, ElementType.FIELD })
 @Documented
 @Inherited
-public @interface Require {
+public @interface Configured {
 
 	/**
 	 * Defines the name of the required configuration property.
 	 * 
 	 * @return the name of the configuration property
 	 */
-	String value();
+	String value() default "";
 }
