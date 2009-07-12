@@ -26,6 +26,10 @@ public class AnnotationHelper {
 		return Schema.class.isAssignableFrom(type);
 	}
 
+	public static boolean isCloseable(Class<?> type) {
+		return Cloneable.class.isAssignableFrom(type);
+	}
+
 	public static boolean isBoolean(Type type) {
 		return (type == Boolean.class || type == boolean.class);
 	}
@@ -52,6 +56,16 @@ public class AnnotationHelper {
 
 	public static boolean isList(Type type) {
 		return type == List.class;
+	}
+
+	public static boolean isByteArray(Type type) {
+		if (type instanceof Class<?>) {
+			Class<?> clazz = (Class<?>) type;
+			if (clazz == byte[].class || clazz == Byte[].class) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static String explodeCamelCase(String str) {

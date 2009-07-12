@@ -66,9 +66,6 @@ public class ProvidedDescriptor {
 		}
 	}
 
-	/**
-	 * TODO: This is not called yet, provider-framework not impmlemented
-	 */
 	public void assignValue(Object analyzerBean, Object value) throws IllegalArgumentException {
 		try {
 			if (_method != null) {
@@ -80,5 +77,21 @@ public class ProvidedDescriptor {
 			throw new IllegalArgumentException("Could not assign value '" + value + "' to "
 					+ (_method == null ? _field : _method), e);
 		}
+	}
+	
+	public boolean isList() {
+		return AnnotationHelper.isList(_baseType);
+	}
+	
+	public boolean isMap() {
+		return AnnotationHelper.isMap(_baseType);
+	}
+	
+	public int getTypeArgumentCount() {
+		return _typeArguments.length;
+	}
+
+	public Type getTypeArgument(int i) {
+		return _typeArguments[i];
 	}
 }

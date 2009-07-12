@@ -22,10 +22,11 @@ import java.lang.annotation.Target;
  * Generic/parameterized types for these collections can be any of:
  * <ul>
  * <li>Boolean</li>
- * <li>Long</li>
  * <li>Integer</li>
+ * <li>Long</li>
  * <li>Double</li>
  * <li>String</li>
+ * <li>Byte[] or byte[]</li>
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)

@@ -1,7 +1,5 @@
 package org.eobjects.analyzer.engine;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -11,12 +9,19 @@ public class CloseDescriptor {
 
 	private Method _method;
 
-	public CloseDescriptor(Method method, Close closeAnnotation) throws IllegalArgumentException {
+	public CloseDescriptor(Method method) {
+		this(method, null);
+	}
+
+	public CloseDescriptor(Method method, Close closeAnnotation)
+			throws IllegalArgumentException {
 		if (method.getParameterTypes().length != 0) {
-			throw new IllegalArgumentException("@Close annotated methods cannot have parameters");
+			throw new IllegalArgumentException(
+					"@Close annotated methods cannot have parameters");
 		}
 		if (method.getReturnType() != Void.class) {
-			throw new IllegalArgumentException("@Close annotated methods can only be void");
+			throw new IllegalArgumentException(
+					"@Close annotated methods can only be void");
 		}
 		_method = method;
 	}
@@ -25,22 +30,18 @@ public class CloseDescriptor {
 		try {
 			_method.invoke(analyzerBean);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not invoke @Close method " + _method, e);
+			throw new IllegalStateException("Could not invoke @Close method "
+					+ _method, e);
 		}
 	}
 
-	public static void close(Object analyzerBean, AnalyzerBeanDescriptor analyzerBeanDescriptor)
+	public static void close(Object analyzerBean,
+			AnalyzerBeanDescriptor analyzerBeanDescriptor)
 			throws IllegalStateException {
-		List<CloseDescriptor> closeDescriptors = analyzerBeanDescriptor.getCloseDescriptors();
+		List<CloseDescriptor> closeDescriptors = analyzerBeanDescriptor
+				.getCloseDescriptors();
 		for (CloseDescriptor closeDescriptor : closeDescriptors) {
 			closeDescriptor.close(analyzerBean);
-		}
-		if (analyzerBean instanceof Closeable) {
-			try {
-				((Closeable) analyzerBean).close();
-			} catch (IOException e) {
-				throw new IllegalStateException("Could not invoke java.io.Closeable.close() method", e);
-			}
 		}
 	}
 
