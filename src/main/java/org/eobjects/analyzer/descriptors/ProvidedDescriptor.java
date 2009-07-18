@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -17,12 +17,14 @@ public class ProvidedDescriptor {
 
 	public ProvidedDescriptor(Field field, Provided providedAnnotation) throws IllegalArgumentException {
 		_field = field;
+		_field.setAccessible(true);
 		setType(_field.getType());
 		setGenericType(_field.getGenericType());
 	}
 
 	public ProvidedDescriptor(Method method, Provided providedAnnotation) throws IllegalArgumentException {
 		_method = method;
+		_method.setAccessible(true);
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if (parameterTypes.length != 1) {
 			throw new IllegalArgumentException("The @Provided annotated method " + method + " defines "

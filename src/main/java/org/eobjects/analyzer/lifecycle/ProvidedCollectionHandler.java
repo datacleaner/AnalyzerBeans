@@ -1,10 +1,11 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.lifecycle;
 
 import java.io.File;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+
+import org.eobjects.analyzer.descriptors.AnnotationHelper;
+import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
 
 import com.sleepycat.bind.ByteArrayBinding;
 import com.sleepycat.bind.EntryBinding;
@@ -13,6 +14,7 @@ import com.sleepycat.bind.tuple.DoubleBinding;
 import com.sleepycat.bind.tuple.IntegerBinding;
 import com.sleepycat.bind.tuple.LongBinding;
 import com.sleepycat.bind.tuple.StringBinding;
+import com.sleepycat.collections.StoredContainer;
 import com.sleepycat.collections.StoredList;
 import com.sleepycat.collections.StoredMap;
 import com.sleepycat.je.Database;
@@ -23,31 +25,31 @@ import com.sleepycat.je.EnvironmentConfig;
 
 import dk.eobjects.metamodel.util.FileHelper;
 
-public class ProvidedCollectionProvider {
+public class ProvidedCollectionHandler {
 
 	private Environment environment;
 
-	public void provide(Object analyzerBean,
-			AnalyzerBeanDescriptor analyzerBeanDescriptor) {
-		List<ProvidedDescriptor> providedDescriptors = analyzerBeanDescriptor.getProvidedDescriptors();
-		for (ProvidedDescriptor providedDescriptor : providedDescriptors) {
-			if (providedDescriptor.isList()) {
-				List<?> list = createList(providedDescriptor.getTypeArgument(0));
-				providedDescriptor.assignValue(analyzerBean, list);
-				
-				//TODO: Add clean up mechanism
-			} else if (providedDescriptor.isMap()) {
-				Map<?, ?> map = createMap(providedDescriptor.getTypeArgument(0),
-						providedDescriptor.getTypeArgument(1));
-				providedDescriptor.assignValue(analyzerBean, map);
-				
-				//TODO: Add clean up mechanism
-			} else {
-				throw new IllegalStateException();
-			}
+	public StoredContainer createProvidedCollection(
+			ProvidedDescriptor providedDescriptor) {
+		if (providedDescriptor.isList()) {
+			StoredList list = createList(providedDescriptor.getTypeArgument(0));
+			return list;
+		} else if (providedDescriptor.isMap()) {
+			StoredMap map = createMap(providedDescriptor.getTypeArgument(0),
+					providedDescriptor.getTypeArgument(1));
+			return map;
+		} else {
+			// This should never happen (is checked by the ProvidedDescriptor)
+			throw new IllegalStateException();
 		}
 	}
-	
+
+	public void cleanUp(StoredContainer container) {
+		container.clear();
+		// TODO: Find out if we can clean it up further (eg. delete it
+		// physically from disk?)
+	}
+
 	private Environment getEnvironment() throws DatabaseException {
 		if (environment == null) {
 			EnvironmentConfig config = new EnvironmentConfig();
@@ -68,7 +70,7 @@ public class ProvidedCollectionProvider {
 		return database;
 	}
 
-	private List<?> createList(Type valueType) {
+	private StoredList createList(Type valueType) {
 		try {
 			EntryBinding valueBinding = createBinding(valueType);
 			return new StoredList(createDatabase(), valueBinding, true);
@@ -77,7 +79,7 @@ public class ProvidedCollectionProvider {
 		}
 	}
 
-	private Map<?, ?> createMap(Type keyType, Type valueType) {
+	private StoredMap createMap(Type keyType, Type valueType) {
 		try {
 			EntryBinding keyBinding = createBinding(keyType);
 			EntryBinding valueBinding = createBinding(valueType);

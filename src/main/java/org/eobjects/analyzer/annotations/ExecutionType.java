@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.annotations;
 
 /**
  * Determines the type of mechanism to use for executing AnalyzerBean.

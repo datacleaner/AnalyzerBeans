@@ -1,7 +1,6 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
 import org.eobjects.analyzer.annotations.Close;
 
@@ -24,6 +23,7 @@ public class CloseDescriptor {
 					"@Close annotated methods can only be void");
 		}
 		_method = method;
+		_method.setAccessible(true);
 	}
 
 	public void close(Object analyzerBean) throws IllegalStateException {
@@ -32,16 +32,6 @@ public class CloseDescriptor {
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not invoke @Close method "
 					+ _method, e);
-		}
-	}
-
-	public static void close(Object analyzerBean,
-			AnalyzerBeanDescriptor analyzerBeanDescriptor)
-			throws IllegalStateException {
-		List<CloseDescriptor> closeDescriptors = analyzerBeanDescriptor
-				.getCloseDescriptors();
-		for (CloseDescriptor closeDescriptor : closeDescriptors) {
-			closeDescriptor.close(analyzerBean);
 		}
 	}
 

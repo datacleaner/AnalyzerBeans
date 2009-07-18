@@ -1,7 +1,8 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Method;
 
+import org.eobjects.analyzer.annotations.ExecutionType;
 import org.eobjects.analyzer.annotations.Run;
 
 import dk.eobjects.metamodel.DataContext;
@@ -17,6 +18,7 @@ public class RunDescriptor {
 
 	public RunDescriptor(Method method, Run runAnnotation, ExecutionType executionType) {
 		_method = method;
+		_method.setAccessible(true);
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		_parameters = parameterTypes.length;
 		for (short i = 0; i < parameterTypes.length; i++) {

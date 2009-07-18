@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.job;
 
 import java.io.Serializable;
 import java.util.Collections;

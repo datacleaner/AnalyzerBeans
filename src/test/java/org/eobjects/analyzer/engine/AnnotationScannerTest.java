@@ -3,8 +3,8 @@ package org.eobjects.analyzer.engine;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.eobjects.analyzer.engine.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.engine.AnnotationScanner;
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.AnnotationScanner;
 
 import junit.framework.TestCase;
 

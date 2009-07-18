@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -20,6 +20,7 @@ public class ConfiguredDescriptor {
 			_name = AnnotationHelper.explodeCamelCase(_field.getName());
 		}
 		_field = field;
+		_field.setAccessible(true);
 		setType(field.getType());
 	}
 
@@ -35,6 +36,7 @@ public class ConfiguredDescriptor {
 			}
 		}
 		_method = method;
+		_method.setAccessible(true);
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if (parameterTypes.length != 1) {
 			throw new IllegalArgumentException("The @Configured annotated method " + method + " defines "

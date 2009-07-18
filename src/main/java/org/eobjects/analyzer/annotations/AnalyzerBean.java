@@ -7,7 +7,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.eobjects.analyzer.engine.ExecutionType;
 
 /**
  * Classes that are annotated with the @AnalyzerBean annotation are components
@@ -30,6 +29,8 @@ import org.eobjects.analyzer.engine.ExecutionType;
  * method is also invoked.</li>
  * <li>The AnalyzerBean object is dereferenced and garbage collected</li>
  * </ul>
+ * 
+ * @see org.eobjects.analyzer.lifecycle.LifeCycleState
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

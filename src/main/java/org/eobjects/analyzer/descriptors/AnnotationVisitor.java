@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.descriptors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
