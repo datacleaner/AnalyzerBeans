@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.descriptors.AnnotationHelper;
 

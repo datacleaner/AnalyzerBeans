@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.engine;
+package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
