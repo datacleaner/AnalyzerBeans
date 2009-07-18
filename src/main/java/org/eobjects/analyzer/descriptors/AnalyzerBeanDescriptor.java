@@ -44,7 +44,7 @@ public class AnalyzerBeanDescriptor {
 		}
 		_executionType = analyzerAnnotation.execution();
 
-		Field[] fields = _analyzerClass.getFields();
+		Field[] fields = _analyzerClass.getDeclaredFields();
 		for (Field field : fields) {
 			Configured configuredAnnotation = field
 					.getAnnotation(Configured.class);
@@ -72,7 +72,7 @@ public class AnalyzerBeanDescriptor {
 			}
 		}
 
-		Method[] methods = _analyzerClass.getMethods();
+		Method[] methods = _analyzerClass.getDeclaredMethods();
 		for (Method method : methods) {
 			Configured configuredAnnotation = method
 					.getAnnotation(Configured.class);

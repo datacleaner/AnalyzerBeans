@@ -37,19 +37,11 @@ public class ReturnResultsCallback implements LifeCycleCallback {
 				AnalyzerBeanResult[] analysisResult = resultDescriptor
 						.getResults(analyzerBean);
 				for (AnalyzerBeanResult result : analysisResult) {
-					if (result.getAnalyzerClass() == null) {
-						result.setAnalyzerClass(analyzerBeanDescriptor
-								.getAnalyzerClass());
-					}
 					results.add(result);
 				}
 			} else {
 				AnalyzerBeanResult result = resultDescriptor
 						.getResult(analyzerBean);
-				if (result.getAnalyzerClass() == null) {
-					result.setAnalyzerClass(analyzerBeanDescriptor
-							.getAnalyzerClass());
-				}
 				results.add(result);
 			}
 		}

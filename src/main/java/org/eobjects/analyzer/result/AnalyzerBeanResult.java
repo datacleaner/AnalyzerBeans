@@ -13,6 +13,4 @@ public interface AnalyzerBeanResult extends Serializable {
 
 	public Class<?> getAnalyzerClass();
 
-	public void setAnalyzerClass(Class<?> analyzerClass);
-
 }
