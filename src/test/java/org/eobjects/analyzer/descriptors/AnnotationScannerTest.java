@@ -1,12 +1,11 @@
 package org.eobjects.analyzer.descriptors;
 
+import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.descriptors.AnnotationScanner;
-
 import junit.framework.TestCase;
+
+import org.apache.commons.lang.ArrayUtils;
 
 public class AnnotationScannerTest extends TestCase {
 
@@ -21,13 +20,14 @@ public class AnnotationScannerTest extends TestCase {
 		AnnotationScanner scanner = new AnnotationScanner();
 		List<AnalyzerBeanDescriptor> analyzerDescriptors = scanner.scanPackage(
 				"org.eobjects.analyzer.beans.mock", true);
+		Collections.sort(analyzerDescriptors);
 		assertEquals(
-				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.beans.mock.RowProcessingBeanMock],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.beans.mock.ExploringBeanMock]}",
+				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.beans.mock.ExploringBeanMock],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.beans.mock.RowProcessingBeanMock]}",
 				ArrayUtils.toString(analyzerDescriptors.toArray()));
 
 		analyzerDescriptors = scanner.scanPackage(
 				"org.eobjects.analyzer.descriptors", true);
-		assertEquals("{}", ArrayUtils.toString(analyzerDescriptors.toArray()));
+		assertEquals(0, analyzerDescriptors.size());
 
 		assertEquals(2, scanner.getDescriptors().size());
 	}

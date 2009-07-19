@@ -15,7 +15,8 @@ import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.annotations.Run;
 
-public class AnalyzerBeanDescriptor {
+public class AnalyzerBeanDescriptor implements
+		Comparable<AnalyzerBeanDescriptor> {
 
 	private Class<?> _analyzerClass;
 	private String _displayName;
@@ -30,6 +31,9 @@ public class AnalyzerBeanDescriptor {
 
 	public AnalyzerBeanDescriptor(Class<?> analyzerClass)
 			throws DescriptorException {
+		if (analyzerClass == null) {
+			throw new IllegalArgumentException("analyzerClass cannot be null");
+		}
 		_analyzerClass = analyzerClass;
 		AnalyzerBean analyzerAnnotation = _analyzerClass
 				.getAnnotation(AnalyzerBean.class);
@@ -210,5 +214,12 @@ public class AnalyzerBeanDescriptor {
 	@Override
 	public int hashCode() {
 		return _analyzerClass.hashCode();
+	}
+
+	@Override
+	public int compareTo(AnalyzerBeanDescriptor o) {
+		String thisAnalyzerClassName = this.getAnalyzerClass().toString();
+		String thatAnalyzerClassName = o.getAnalyzerClass().toString();
+		return thisAnalyzerClassName.compareTo(thatAnalyzerClassName);
 	}
 }
