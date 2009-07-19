@@ -19,14 +19,16 @@ public class AnnotationScannerTest extends TestCase {
 
 	public void testScanPackageRecursive() throws Exception {
 		AnnotationScanner scanner = new AnnotationScanner();
-		List<AnalyzerBeanDescriptor> analyzerDescriptors = scanner.scanPackage("org.eobjects.analyzer.engine", true);
+		List<AnalyzerBeanDescriptor> analyzerDescriptors = scanner.scanPackage(
+				"org.eobjects.analyzer.descriptors", true);
 		assertEquals(
-				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.RowProcessingAnalyzerBean],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.ExploringAnalyzerBean]}",
+				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.descriptors.ExploringAnalyzerBean]}",
 				ArrayUtils.toString(analyzerDescriptors.toArray()));
 
-		analyzerDescriptors = scanner.scanPackage("org.eobjects.analyzer.engine", true);
+		analyzerDescriptors = scanner.scanPackage(
+				"org.eobjects.analyzer.descriptors", true);
 		assertEquals(
-				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.RowProcessingAnalyzerBean],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.engine.ExploringAnalyzerBean]}",
+				"{AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean],AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.descriptors.ExploringAnalyzerBean]}",
 				ArrayUtils.toString(analyzerDescriptors.toArray()));
 
 		assertEquals(2, scanner.getDescriptors().size());

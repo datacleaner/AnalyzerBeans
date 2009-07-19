@@ -27,14 +27,14 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 		assertEquals(false, descriptor.isRowProcessingExecutionType());
 
 		assertEquals(
-				"{ConfiguredDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.ExploringAnalyzerBean.configString],ConfiguredDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyzerBean.setBlabla(boolean),field=null]}",
+				"{ConfiguredDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.configString],ConfiguredDescriptor[method=public void org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.setBlabla(boolean),field=null]}",
 				ArrayUtils.toString(descriptor.getConfiguredDescriptors()
 						.toArray()));
 		assertEquals(
-				"{RunDescriptor[method=public void org.eobjects.analyzer.engine.ExploringAnalyzerBean.run(dk.eobjects.metamodel.DataContext)]}",
+				"{RunDescriptor[method=public void org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.run(dk.eobjects.metamodel.DataContext)]}",
 				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
 		assertEquals(
-				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.engine.ExploringAnalyzerBean.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.engine.ExploringAnalyzerBean.result2()]}",
+				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.result2()]}",
 				ArrayUtils
 						.toString(descriptor.getResultDescriptors().toArray()));
 	}
@@ -50,13 +50,13 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 		List<ConfiguredDescriptor> configuredDescriptors = descriptor
 				.getConfiguredDescriptors();
 		assertEquals(
-				"{ConfiguredDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.configString],ConfiguredDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.setBlabla(boolean),field=null]}",
+				"{ConfiguredDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.configString],ConfiguredDescriptor[method=public void org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.setBlabla(boolean),field=null]}",
 				ArrayUtils.toString(configuredDescriptors.toArray()));
 		assertEquals(
-				"{RunDescriptor[method=public void org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.run(dk.eobjects.metamodel.data.Row,java.lang.Long)]}",
+				"{RunDescriptor[method=public void org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.run(dk.eobjects.metamodel.data.Row,java.lang.Long)]}",
 				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
 		assertEquals(
-				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.engine.RowProcessingAnalyzerBean.result2()]}",
+				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.result2()]}",
 				ArrayUtils
 						.toString(descriptor.getResultDescriptors().toArray()));
 
