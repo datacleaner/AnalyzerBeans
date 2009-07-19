@@ -35,9 +35,11 @@ public class AnalysisRunner {
 	private ProvidedCollectionHandler collectionProvider;
 	private AnnotationScanner scanner;
 	private AnalysisResultImpl result;
+	private Integer rowProcessorCount;
 
 	public void addJob(AnalysisJob job) {
 		jobs.add(job);
+		rowProcessorCount = null;
 	}
 
 	public AnalysisResult run(DataContext dataContext) {
@@ -78,6 +80,7 @@ public class AnalysisRunner {
 			initRowProcessingBeans(schemaNavigator, job, descriptor,
 					analyzerBeanInstances, rowProcessors);
 		}
+		rowProcessorCount = rowProcessors.size();
 
 		// Add shared callbacks
 		InitializeCallback initializeCallback = new InitializeCallback();
@@ -119,6 +122,10 @@ public class AnalysisRunner {
 	
 	public AnalysisResult getResult() {
 		return result;
+	}
+	
+	public Integer getRowProcessorCount() {
+		return rowProcessorCount;
 	}
 
 	private void initRowProcessingBeans(SchemaNavigator schemaNavigator,

@@ -28,13 +28,21 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 				.getConfiguredDescriptors();
 		for (ConfiguredDescriptor configuredDescriptor : configuredDescriptors) {
 			Object configuredValue = getConfiguredValue(configuredDescriptor);
-			if (configuredDescriptor.isArray()) {
-				configuredDescriptor.assignValue(analyzerBean, configuredValue);
+			if (configuredValue == null) {
+				throw new IllegalStateException(
+						"No value for @Configured property: "
+								+ configuredDescriptor.getName());
 			} else {
-				if (configuredValue.getClass().isArray()) {
-					configuredValue = Array.get(configuredValue, 0);
+				if (configuredDescriptor.isArray()) {
+					configuredDescriptor.assignValue(analyzerBean,
+							configuredValue);
+				} else {
+					if (configuredValue.getClass().isArray()) {
+						configuredValue = Array.get(configuredValue, 0);
+					}
+					configuredDescriptor.assignValue(analyzerBean,
+							configuredValue);
 				}
-				configuredDescriptor.assignValue(analyzerBean, configuredValue);
 			}
 		}
 	}

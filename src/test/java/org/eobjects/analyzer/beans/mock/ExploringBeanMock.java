@@ -130,20 +130,15 @@ public class ExploringBeanMock {
 		return close2;
 	}
 	
-	private boolean result1 = false;
-	private boolean result2 = false;
-
-	public boolean isResult1() {
-		return result1;
-	}
+	private boolean result = false;
 
 	@Result
 	public AnalyzerBeanResult runCount() {
-		result2 = true;
+		result = true;
 		return new NumberResult(getClass(), runCount);
 	}
 	
-	public boolean isResult2() {
-		return result2;
+	public boolean isResult() {
+		return result;
 	}
 }
