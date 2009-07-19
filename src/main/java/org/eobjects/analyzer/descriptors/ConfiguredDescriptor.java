@@ -13,19 +13,21 @@ public class ConfiguredDescriptor {
 	private Field _field;
 	private Method _method;
 
-	public ConfiguredDescriptor(Field field, Configured configuredAnnotation) throws IllegalArgumentException {
+	public ConfiguredDescriptor(Field field, Configured configuredAnnotation) throws DescriptorException {
 		_name = configuredAnnotation.value();
+		_field = field;
+		_field.setAccessible(true);
 		if (_name == null || _name.trim().equals("")) {
 			// Use the fields name if no name has been set
 			_name = AnnotationHelper.explodeCamelCase(_field.getName());
 		}
-		_field = field;
-		_field.setAccessible(true);
 		setType(field.getType());
 	}
 
-	public ConfiguredDescriptor(Method method, Configured configuredAnnotation) throws IllegalArgumentException {
+	public ConfiguredDescriptor(Method method, Configured configuredAnnotation) throws DescriptorException {
 		_name = configuredAnnotation.value();
+		_method = method;
+		_method.setAccessible(true);
 		if (_name == null || _name.trim().equals("")) {
 			// Use the methods name if no name has been set
 			_name = _method.getName();
@@ -35,11 +37,9 @@ public class ConfiguredDescriptor {
 				_name = AnnotationHelper.explodeCamelCase(_name);
 			}
 		}
-		_method = method;
-		_method.setAccessible(true);
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if (parameterTypes.length != 1) {
-			throw new IllegalArgumentException("The @Configured annotated method " + method + " defines "
+			throw new DescriptorException("The @Configured annotated method " + method + " defines "
 					+ parameterTypes.length + " parameters, a single parameter is required");
 		}
 		setType(parameterTypes[0]);
@@ -71,13 +71,13 @@ public class ConfiguredDescriptor {
 		if (!(AnnotationHelper.isBoolean(type) || AnnotationHelper.isInteger(type) || AnnotationHelper.isLong(type)
 				|| AnnotationHelper.isDouble(type) || AnnotationHelper.isString(type)
 				|| AnnotationHelper.isColumn(type) || AnnotationHelper.isTable(type) || AnnotationHelper.isSchema(type))) {
-			throw new IllegalArgumentException("The type " + _baseType
+			throw new DescriptorException("The type " + _baseType
 					+ " is not supported by the @Configured annotation");
 		}
 		_baseType = type;
 	}
 
-	public void assignValue(Object analyzerBean, Object value) throws IllegalArgumentException {
+	public void assignValue(Object analyzerBean, Object value) throws IllegalStateException {
 		try {
 			if (_method != null) {
 				_method.invoke(analyzerBean, value);
@@ -85,7 +85,7 @@ public class ConfiguredDescriptor {
 				_field.set(analyzerBean, value);
 			}
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not assign value '" + value + "' to "
+			throw new IllegalStateException("Could not assign value '" + value + "' to "
 					+ (_method == null ? _field : _method), e);
 		}
 	}

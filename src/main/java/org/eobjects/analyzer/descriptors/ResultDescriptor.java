@@ -13,11 +13,11 @@ public class ResultDescriptor {
 	private Method _method;
 
 	public ResultDescriptor(Method method, Result resultAnnotation)
-			throws IllegalArgumentException {
+			throws DescriptorException {
 		_method = method;
 		_name = resultAnnotation.value();
 		if (method.getParameterTypes().length != 0) {
-			throw new IllegalArgumentException(
+			throw new DescriptorException(
 					"@Result annotated methods cannot have parameters");
 		}
 		Class<?> returnType = method.getReturnType();
@@ -30,9 +30,9 @@ public class ResultDescriptor {
 		}
 	}
 
-	private void validateType(Class<?> type) throws IllegalArgumentException {
+	private void validateType(Class<?> type) throws DescriptorException {
 		if (AnalyzerBeanResult.class != type) {
-			throw new IllegalArgumentException(
+			throw new DescriptorException(
 					"Unsupported return type for @Result annotated method: "
 							+ type);
 		}
@@ -51,7 +51,8 @@ public class ResultDescriptor {
 		return "ResultDescriptor[method=" + _method + "]";
 	}
 
-	public AnalyzerBeanResult[] getResults(Object analyzerBean) {
+	public AnalyzerBeanResult[] getResults(Object analyzerBean)
+			throws IllegalStateException {
 		try {
 			Object resultObject = _method.invoke(analyzerBean, new Object[0]);
 			Class<? extends Object> resultClass = resultObject.getClass();
@@ -67,23 +68,24 @@ public class ResultDescriptor {
 			}
 			return result;
 		} catch (Exception e) {
-			throw new IllegalArgumentException(
-					"Could not invoke @Result method " + _method, e);
+			throw new IllegalStateException("Could not invoke @Result method "
+					+ _method, e);
 		}
 	}
 
-	public AnalyzerBeanResult getResult(Object analyzerBean) {
+	public AnalyzerBeanResult getResult(Object analyzerBean)
+			throws IllegalStateException {
 		try {
 			Object resultObject = _method.invoke(analyzerBean, new Object[0]);
 			Class<? extends Object> resultClass = resultObject.getClass();
 			if (resultClass.isArray()) {
-				throw new IllegalArgumentException(
+				throw new IllegalStateException(
 						"Invoked @Result method returns an array of AnalysisResult objects but getResult() was used to retrieve it. Please use getResults() instead");
 			}
 			return (AnalyzerBeanResult) resultObject;
 		} catch (Exception e) {
-			throw new IllegalArgumentException(
-					"Could not invoke @Result method " + _method, e);
+			throw new IllegalStateException("Could not invoke @Result method "
+					+ _method, e);
 		}
 	}
 }

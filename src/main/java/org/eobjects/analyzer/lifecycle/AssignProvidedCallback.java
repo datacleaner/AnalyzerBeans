@@ -6,8 +6,6 @@ import java.util.List;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
 
-import com.sleepycat.collections.StoredContainer;
-
 public class AssignProvidedCallback implements LifeCycleCallback {
 
 	private AnalyzerBeanInstance analyzerBeanInstance;
@@ -24,20 +22,20 @@ public class AssignProvidedCallback implements LifeCycleCallback {
 			AnalyzerBeanDescriptor descriptor) {
 		assert state == LifeCycleState.ASSIGN_PROVIDED;
 
-		List<StoredContainer> storedContainers = new LinkedList<StoredContainer>();
+		List<Object> providedObjects = new LinkedList<Object>();
 		List<ProvidedDescriptor> providedDescriptors = descriptor
 				.getProvidedDescriptors();
 		for (ProvidedDescriptor providedDescriptor : providedDescriptors) {
-			StoredContainer col = collectionHandler
+			Object providedObject = collectionHandler
 					.createProvidedCollection(providedDescriptor);
-			providedDescriptor.assignValue(analyzerBean, col);
-			storedContainers.add(col);
+			providedDescriptor.assignValue(analyzerBean, providedObject);
+			providedObjects.add(providedObject);
 		}
 
 		// Add a callback for cleaning up the provided collections
 		analyzerBeanInstance.getCloseCallbacks().add(
 				new ProvidedCollectionCloseCallback(collectionHandler,
-						storedContainers));
+						providedObjects));
 	}
 
 }

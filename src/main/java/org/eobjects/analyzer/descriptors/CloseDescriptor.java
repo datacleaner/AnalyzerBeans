@@ -13,13 +13,13 @@ public class CloseDescriptor {
 	}
 
 	public CloseDescriptor(Method method, Close closeAnnotation)
-			throws IllegalArgumentException {
+			throws DescriptorException {
 		if (method.getParameterTypes().length != 0) {
-			throw new IllegalArgumentException(
+			throw new DescriptorException(
 					"@Close annotated methods cannot have parameters");
 		}
-		if (method.getReturnType() != Void.class) {
-			throw new IllegalArgumentException(
+		if (method.getReturnType() != void.class) {
+			throw new DescriptorException(
 					"@Close annotated methods can only be void");
 		}
 		_method = method;

@@ -29,12 +29,12 @@ public class AnalyzerBeanDescriptor {
 	private List<RunDescriptor> _runDescriptors = new LinkedList<RunDescriptor>();
 
 	public AnalyzerBeanDescriptor(Class<?> analyzerClass)
-			throws IllegalArgumentException {
+			throws DescriptorException {
 		_analyzerClass = analyzerClass;
 		AnalyzerBean analyzerAnnotation = _analyzerClass
 				.getAnnotation(AnalyzerBean.class);
 		if (analyzerAnnotation == null) {
-			throw new IllegalArgumentException(analyzerClass
+			throw new DescriptorException(analyzerClass
 					+ " doesn't implement the AnalyzerBean annotation");
 		}
 		_displayName = analyzerAnnotation.displayName();
@@ -114,23 +114,27 @@ public class AnalyzerBeanDescriptor {
 		}
 
 		if (_runDescriptors.isEmpty()) {
-			throw new IllegalArgumentException(analyzerClass
-					+ " doesn't define any Run annotated methods");
+			throw new DescriptorException(analyzerClass
+					+ " doesn't define any @Run annotated methods");
 		}
 
 		if (_resultDescriptors.isEmpty()) {
-			throw new IllegalArgumentException(analyzerClass
-					+ " doesn't define any Result annotated methods");
+			throw new DescriptorException(analyzerClass
+					+ " doesn't define any @Result annotated methods");
 		}
 
-		if (!_providedDescriptors.isEmpty()) {
-			// Add a clean-up mechanism for the @Provided properties
-
-			// TODO: We need to provide a means to add bean-external closing
-			// methods. Currently the CloseDescriptor class only supports
-			// methods within the bean class and only at a structural level (not
-			// a per-bean level which would be more appropriate for this
-			// use-case)
+		if (_executionType == ExecutionType.ROW_PROCESSING) {
+			boolean hasConfiguredColumnArray = false;
+			for (ConfiguredDescriptor cd : _configuredDescriptors) {
+				if (cd.isArray() && cd.isColumn()) {
+					hasConfiguredColumnArray = true;
+					break;
+				}
+			}
+			if (!hasConfiguredColumnArray) {
+				throw new DescriptorException(analyzerClass
+						+ " does not define any @Configured column-arrays");
+			}
 		}
 
 		// Make the descriptor lists read-only

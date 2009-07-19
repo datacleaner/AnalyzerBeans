@@ -4,18 +4,16 @@ import java.util.List;
 
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
-import com.sleepycat.collections.StoredContainer;
-
 public class ProvidedCollectionCloseCallback implements LifeCycleCallback {
 
 	private ProvidedCollectionHandler collectionHandler;
-	private List<StoredContainer> storedContainers;
-	
+	private List<Object> providedObjects;
+
 	public ProvidedCollectionCloseCallback(
 			ProvidedCollectionHandler collectionHandler,
-			List<StoredContainer> storedContainers) {
+			List<Object> providedObjects) {
 		this.collectionHandler = collectionHandler;
-		this.storedContainers = storedContainers;
+		this.providedObjects = providedObjects;
 	}
 
 	@Override
@@ -23,8 +21,8 @@ public class ProvidedCollectionCloseCallback implements LifeCycleCallback {
 			AnalyzerBeanDescriptor descriptor) {
 		assert state == LifeCycleState.CLOSE;
 
-		for (StoredContainer container : storedContainers) {
-			collectionHandler.cleanUp(container);
+		for (Object providedObject : providedObjects) {
+			collectionHandler.cleanUp(providedObject);
 		}
 	}
 

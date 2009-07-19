@@ -117,7 +117,7 @@ public class AnalysisRunner {
 		return result;
 	}
 	
-	public AnalysisResultImpl getResult() {
+	public AnalysisResult getResult() {
 		return result;
 	}
 

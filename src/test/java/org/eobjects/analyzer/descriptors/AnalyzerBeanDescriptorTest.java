@@ -5,43 +5,42 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.ExecutionType;
-import org.eobjects.analyzer.annotations.Result;
-import org.eobjects.analyzer.annotations.Run;
-import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
-import org.eobjects.analyzer.result.AnalyzerBeanResult;
-
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.data.Row;
+import org.eobjects.analyzer.beans.mock.ExploringBeanMock;
+import org.eobjects.analyzer.beans.mock.RowProcessingBeanMock;
 
 public class AnalyzerBeanDescriptorTest extends TestCase {
+	
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		ExploringBeanMock.clearInstances();
+		RowProcessingBeanMock.clearInstances();
+	}
 
 	public void testExploringType() throws Exception {
 		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
-				ExploringAnalyzerBean.class);
+				ExploringBeanMock.class);
 		assertEquals(ExecutionType.EXPLORING, descriptor.getExecutionType());
 		assertEquals(true, descriptor.isExploringExecutionType());
 		assertEquals(false, descriptor.isRowProcessingExecutionType());
 
 		assertEquals(
-				"{ConfiguredDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.configString],ConfiguredDescriptor[method=public void org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.setBlabla(boolean),field=null]}",
+				"{ConfiguredDescriptor[method=null,field=private java.lang.String org.eobjects.analyzer.beans.mock.ExploringBeanMock.configured1],ConfiguredDescriptor[method=public void org.eobjects.analyzer.beans.mock.ExploringBeanMock.setConfigured2(java.lang.Integer),field=null]}",
 				ArrayUtils.toString(descriptor.getConfiguredDescriptors()
 						.toArray()));
 		assertEquals(
-				"{RunDescriptor[method=public void org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.run(dk.eobjects.metamodel.DataContext)]}",
+				"{RunDescriptor[method=public void org.eobjects.analyzer.beans.mock.ExploringBeanMock.run(dk.eobjects.metamodel.DataContext)]}",
 				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
 		assertEquals(
-				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.descriptors.ExploringAnalyzerBean.result2()]}",
+				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.ExploringBeanMock.runCount()]}",
 				ArrayUtils
 						.toString(descriptor.getResultDescriptors().toArray()));
 	}
 
 	public void testRowProcessingType() throws Exception {
 		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
-				RowProcessingAnalyzerBean.class);
+				RowProcessingBeanMock.class);
 		assertEquals(ExecutionType.ROW_PROCESSING, descriptor
 				.getExecutionType());
 		assertEquals(false, descriptor.isExploringExecutionType());
@@ -50,82 +49,22 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 		List<ConfiguredDescriptor> configuredDescriptors = descriptor
 				.getConfiguredDescriptors();
 		assertEquals(
-				"{ConfiguredDescriptor[method=null,field=public java.lang.String org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.configString],ConfiguredDescriptor[method=public void org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.setBlabla(boolean),field=null]}",
+				"{ConfiguredDescriptor[method=null,field=private dk.eobjects.metamodel.schema.Column[] org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.columns]," +
+				"ConfiguredDescriptor[method=null,field=private java.lang.String org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.configured1]," +
+				"ConfiguredDescriptor[method=public void org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.setConfigured2(java.lang.Integer),field=null]}",
 				ArrayUtils.toString(configuredDescriptors.toArray()));
 		assertEquals(
-				"{RunDescriptor[method=public void org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.run(dk.eobjects.metamodel.data.Row,java.lang.Long)]}",
+				"{RunDescriptor[method=public void org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.run(dk.eobjects.metamodel.data.Row,java.lang.Long)]}",
 				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
 		assertEquals(
-				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.result1()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.descriptors.RowProcessingAnalyzerBean.result2()]}",
+				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.runCount()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.rowCountResult()]}",
 				ArrayUtils
 						.toString(descriptor.getResultDescriptors().toArray()));
 
-		RowProcessingAnalyzerBean analyzerBean = new RowProcessingAnalyzerBean();
+		RowProcessingBeanMock analyzerBean = new RowProcessingBeanMock();
 		ConfiguredDescriptor configuredDescriptor = configuredDescriptors
-				.get(0);
+				.get(1);
 		configuredDescriptor.assignValue(analyzerBean, "foobar");
-		assertEquals("foobar", analyzerBean.getConfigString());
-
-		configuredDescriptor = configuredDescriptors.get(1);
-		configuredDescriptor.assignValue(analyzerBean, true);
-		assertEquals("true", analyzerBean.getConfigString());
-	}
-}
-
-@AnalyzerBean(displayName = "AnalyzerBean mock-up", execution = ExecutionType.EXPLORING)
-class ExploringAnalyzerBean {
-
-	@Configured("config string")
-	public String configString;
-
-	@Configured("config bool")
-	public void setBlabla(boolean bool) {
-		configString = Boolean.toString(bool);
-	}
-
-	@Run()
-	public void run(DataContext dc) {
-		System.out.println(configString);
-	}
-
-	@Result("TableModel result")
-	public AnalyzerBeanResult result1() {
-		return null;
-	}
-
-	@Result("Row result")
-	public AnalyzerBeanResult result2() {
-		return null;
-	}
-}
-
-@AnalyzerBean(displayName = "AnalyzerBean mock-up", execution = ExecutionType.ROW_PROCESSING)
-class RowProcessingAnalyzerBean {
-
-	@Configured("config string")
-	public String configString;
-
-	@Configured("config bool")
-	public void setBlabla(boolean bool) {
-		configString = Boolean.toString(bool);
-	}
-
-	public String getConfigString() {
-		return configString;
-	}
-
-	@Run()
-	public void run(Row row, Long count) {
-		System.out.println(configString);
-	}
-
-	@Result("TableModel result")
-	public AnalyzerBeanResult result1() {
-		return null;
-	}
-
-	@Result("Row result")
-	public AnalyzerBeanResult result2() {
-		return null;
+		assertEquals("foobar", analyzerBean.getConfigured1());
 	}
 }
