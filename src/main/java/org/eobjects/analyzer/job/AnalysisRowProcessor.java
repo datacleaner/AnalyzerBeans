@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.RunDescriptor;
 
-import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.query.Query;
@@ -15,11 +14,16 @@ import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
-public class AnalysisRowProcessor {
+public class AnalysisRowProcessor implements Runnable {
 
 	private List<Object[]> analyzerBeansAndRunDescriptors = new LinkedList<Object[]>();
-	private Set<Column> columns = new HashSet<Column>();;
+	private Set<Column> columns = new HashSet<Column>();
+	private DataContextProvider dataContextProvider;
 	private Table table;
+	
+	public AnalysisRowProcessor(DataContextProvider dataContextProvider) {
+		this.dataContextProvider = dataContextProvider;
+	}
 
 	public void addColumns(Column... newColumns) {
 		for (Column column : newColumns) {
@@ -38,7 +42,7 @@ public class AnalysisRowProcessor {
 				runDescriptor });
 	}
 
-	public void run(DataContext dataContext) {
+	public void run() {
 		if (table == null) {
 			throw new IllegalStateException(
 					"No table and no columns defined to process");
@@ -54,7 +58,7 @@ public class AnalysisRowProcessor {
 
 		DataSet dataSet = null;
 		try {
-			dataSet = dataContext.executeQuery(q);
+			dataSet = dataContextProvider.getDataContext().executeQuery(q);
 			while (dataSet.next()) {
 				Row row = dataSet.getRow();
 				Long count;

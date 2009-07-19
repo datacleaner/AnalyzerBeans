@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -22,7 +23,6 @@ import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
 import org.eobjects.analyzer.lifecycle.RunRowProcessorsCallback;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalysisResultImpl;
-import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.MetaModelHelper;
@@ -43,6 +43,12 @@ public class AnalysisRunner {
 	}
 
 	public AnalysisResult run(DataContext dataContext) {
+		return run(new SingleDataContextProvider(dataContext),
+				new SingleThreadedRunnableConsumer());
+	}
+
+	public AnalysisResult run(DataContextProvider dataContextProvider,
+			RunnableConsumer runnableConsumer) {
 		if (scanner == null) {
 			scanner = new AnnotationScanner();
 		}
@@ -52,7 +58,6 @@ public class AnalysisRunner {
 		if (result == null) {
 			result = new AnalysisResultImpl();
 		}
-		SchemaNavigator schemaNavigator = new SchemaNavigator(dataContext);
 		Map<Class<?>, AnalyzerBeanDescriptor> descriptors = scanner
 				.getDescriptors();
 		List<AnalysisJob> explorerJobs = new LinkedList<AnalysisJob>();
@@ -62,7 +67,7 @@ public class AnalysisRunner {
 
 		// Instantiate beans and set specific lifecycle-callbacks
 		RunExplorerCallback runExplorerCallback = new RunExplorerCallback(
-				dataContext);
+				dataContextProvider);
 		List<AnalyzerBeanInstance> analyzerBeanInstances = new LinkedList<AnalyzerBeanInstance>();
 		for (AnalysisJob job : explorerJobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
@@ -70,21 +75,22 @@ public class AnalysisRunner {
 			AnalyzerBeanInstance analyzer = instantiateAnalyzerBean(descriptor);
 			analyzer.getRunCallbacks().add(runExplorerCallback);
 			analyzer.getAssignConfiguredCallbacks().add(
-					new AssignConfiguredCallback(job, schemaNavigator));
+					new AssignConfiguredCallback(job, dataContextProvider.getSchemaNavigator()));
 			analyzerBeanInstances.add(analyzer);
 		}
 		Map<Table, AnalysisRowProcessor> rowProcessors = new HashMap<Table, AnalysisRowProcessor>();
 		for (AnalysisJob job : rowProcessingJobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptors.get(analyzerClass);
-			initRowProcessingBeans(schemaNavigator, job, descriptor,
-					analyzerBeanInstances, rowProcessors);
+			initRowProcessingBeans(job, descriptor,
+					analyzerBeanInstances, rowProcessors, dataContextProvider);
 		}
 		rowProcessorCount = rowProcessors.size();
 
 		// Add shared callbacks
 		InitializeCallback initializeCallback = new InitializeCallback();
-		ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(result);
+		ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(
+				result);
 		CloseCallback closeCallback = new CloseCallback();
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
 			AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(
@@ -99,39 +105,37 @@ public class AnalysisRunner {
 			analyzerBeanInstance.getCloseCallbacks().add(closeCallback);
 		}
 
-		// TODO: This is a very simple execution mechanism just for prototyping
-		// purposes.
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
 			analyzerBeanInstance.assignConfigured();
 			analyzerBeanInstance.assignProvided();
 			analyzerBeanInstance.initialize();
-			analyzerBeanInstance.run();
 		}
 
-		for (AnalysisRowProcessor rowProcessor : rowProcessors.values()) {
-			rowProcessor.run(dataContext);
-		}
+		Queue<Runnable> runnableQueue = new LinkedList<Runnable>();
+		runnableQueue.addAll(analyzerBeanInstances);
+		runnableQueue.addAll(rowProcessors.values());
+		runnableConsumer.execute(runnableQueue);
 
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
 			analyzerBeanInstance.returnResults();
 			analyzerBeanInstance.close();
 		}
-		
+
 		return result;
 	}
-	
+
 	public AnalysisResult getResult() {
 		return result;
 	}
-	
+
 	public Integer getRowProcessorCount() {
 		return rowProcessorCount;
 	}
 
-	private void initRowProcessingBeans(SchemaNavigator schemaNavigator,
-			AnalysisJob job, AnalyzerBeanDescriptor descriptor,
+	private void initRowProcessingBeans(AnalysisJob job, AnalyzerBeanDescriptor descriptor,
 			List<AnalyzerBeanInstance> analyzerBeanInstances,
-			Map<Table, AnalysisRowProcessor> rowProcessors) {
+			Map<Table, AnalysisRowProcessor> rowProcessors,
+			DataContextProvider dataContextProvider) {
 		try {
 
 			Map<String, String[]> columnProperties = job.getColumnProperties();
@@ -155,7 +159,7 @@ public class AnalysisRunner {
 					// bean per represented table
 
 					String[] columnNames = entry.getValue();
-					Column[] columns = schemaNavigator
+					Column[] columns = dataContextProvider.getSchemaNavigator()
 							.convertToColumns(columnNames);
 					Table[] tables = MetaModelHelper.getTables(columns);
 
@@ -163,7 +167,8 @@ public class AnalysisRunner {
 						AnalysisRowProcessor rowProcessor = rowProcessors
 								.get(table);
 						if (rowProcessor == null) {
-							rowProcessor = new AnalysisRowProcessor();
+							rowProcessor = new AnalysisRowProcessor(
+									dataContextProvider);
 							rowProcessors.put(table, rowProcessor);
 						}
 
@@ -176,7 +181,7 @@ public class AnalysisRunner {
 
 						// Add a callback for assigning @Configured properties
 						AssignConfiguredRowProcessingCallback assignConfiguredCallback = new AssignConfiguredRowProcessingCallback(
-								job, schemaNavigator, columnsForAnalyzer);
+								job, dataContextProvider.getSchemaNavigator(), columnsForAnalyzer);
 						analyzerBeanInstance.getAssignConfiguredCallbacks()
 								.add(assignConfiguredCallback);
 

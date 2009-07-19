@@ -4,15 +4,14 @@ import java.util.List;
 
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.RunDescriptor;
-
-import dk.eobjects.metamodel.DataContext;
+import org.eobjects.analyzer.job.DataContextProvider;
 
 public class RunExplorerCallback implements LifeCycleCallback {
 
-	private DataContext dataContext;
+	private DataContextProvider dataContextProvider;
 
-	public RunExplorerCallback(DataContext dataContext) {
-		this.dataContext = dataContext;
+	public RunExplorerCallback(DataContextProvider dataContextProvider) {
+		this.dataContextProvider = dataContextProvider;
 	}
 
 	@Override
@@ -23,7 +22,7 @@ public class RunExplorerCallback implements LifeCycleCallback {
 
 		List<RunDescriptor> runDescriptors = descriptor.getRunDescriptors();
 		for (RunDescriptor runDescriptor : runDescriptors) {
-			runDescriptor.explore(analyzerBean, dataContext);
+			runDescriptor.explore(analyzerBean, dataContextProvider.getDataContext());
 		}
 	}
 

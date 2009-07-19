@@ -11,7 +11,7 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
  * at an per-instance level. This makes it possible to add callbacks at various
  * stages in the life-cycle of an AnalyzerBean
  */
-public class AnalyzerBeanInstance {
+public class AnalyzerBeanInstance implements Runnable {
 
 	private Object analyzerBean;
 	private AnalyzerBeanDescriptor descriptor;
