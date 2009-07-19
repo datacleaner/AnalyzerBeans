@@ -17,11 +17,6 @@ public class NumberResult implements AnalyzerBeanResult {
 		return analyzerClass;
 	}
 
-	@Override
-	public boolean isSuccesful() {
-		return true;
-	}
-
 	public Number getNumber() {
 		return number;
 	}

@@ -44,7 +44,7 @@ public class AnalyzerBeanDescriptor implements
 		_displayName = analyzerAnnotation.displayName();
 		if (_displayName == null || _displayName.trim().equals("")) {
 			_displayName = AnnotationHelper.explodeCamelCase(_analyzerClass
-					.getSimpleName());
+					.getSimpleName(), false);
 		}
 		_executionType = analyzerAnnotation.execution();
 

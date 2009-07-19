@@ -68,12 +68,17 @@ public class AnnotationHelper {
 		return false;
 	}
 
-	public static String explodeCamelCase(String str) {
+	public static String explodeCamelCase(String str, boolean excludeGetOrSet) {
 		if (str == null) {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder(str.trim());
 		if (sb.length() > 1) {
+			if (excludeGetOrSet) {
+				if (str.startsWith("get") || str.startsWith("set")) {
+					sb.delete(0, 3);
+				}
+			}
 
 			// Special handling for instance variables that have the "_" prefix
 			if (sb.charAt(0) == '_') {

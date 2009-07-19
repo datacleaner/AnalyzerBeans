@@ -9,8 +9,6 @@ import java.io.Serializable;
  */
 public interface AnalyzerBeanResult extends Serializable {
 
-	public boolean isSuccesful();
-
 	public Class<?> getAnalyzerClass();
 
 }

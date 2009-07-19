@@ -16,6 +16,9 @@ public class ResultDescriptor {
 			throws DescriptorException {
 		_method = method;
 		_name = resultAnnotation.value();
+		if (_name == null || "".equals(_name.trim())) {
+			_name = AnnotationHelper.explodeCamelCase(_method.getName(), true);
+		}
 		if (method.getParameterTypes().length != 0) {
 			throw new DescriptorException(
 					"@Result annotated methods cannot have parameters");
@@ -31,7 +34,7 @@ public class ResultDescriptor {
 	}
 
 	private void validateType(Class<?> type) throws DescriptorException {
-		if (AnalyzerBeanResult.class != type) {
+		if (type.isAssignableFrom(AnalyzerBeanResult.class)) {
 			throw new DescriptorException(
 					"Unsupported return type for @Result annotated method: "
 							+ type);

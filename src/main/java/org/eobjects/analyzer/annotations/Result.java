@@ -24,5 +24,5 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Result {
 
-	public String value() default "Output";
+	public String value() default "";
 }

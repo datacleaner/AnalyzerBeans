@@ -19,7 +19,7 @@ public class ConfiguredDescriptor {
 		_field.setAccessible(true);
 		if (_name == null || _name.trim().equals("")) {
 			// Use the fields name if no name has been set
-			_name = AnnotationHelper.explodeCamelCase(_field.getName());
+			_name = AnnotationHelper.explodeCamelCase(_field.getName(), true);
 		}
 		setType(field.getType());
 	}
@@ -31,11 +31,7 @@ public class ConfiguredDescriptor {
 		if (_name == null || _name.trim().equals("")) {
 			// Use the methods name if no name has been set
 			_name = _method.getName();
-			if (_name.startsWith("set")) {
-				_name = AnnotationHelper.explodeCamelCase(_name.substring(3));
-			} else {
-				_name = AnnotationHelper.explodeCamelCase(_name);
-			}
+			_name = AnnotationHelper.explodeCamelCase(_name.substring(3), true);
 		}
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if (parameterTypes.length != 1) {
