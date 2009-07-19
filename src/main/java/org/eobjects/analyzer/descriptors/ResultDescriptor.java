@@ -34,7 +34,7 @@ public class ResultDescriptor {
 	}
 
 	private void validateType(Class<?> type) throws DescriptorException {
-		if (type.isAssignableFrom(AnalyzerBeanResult.class)) {
+		if (!AnnotationHelper.is(type, AnalyzerBeanResult.class)) {
 			throw new DescriptorException(
 					"Unsupported return type for @Result annotated method: "
 							+ type);

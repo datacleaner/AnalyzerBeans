@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.descriptors;
 
+import java.io.Closeable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -14,20 +15,24 @@ public class AnnotationHelper {
 		// Prevent instantiation
 	}
 
+	public static boolean is(Class<?> thisType, Class<?> ofThatType) {
+		return ofThatType.isAssignableFrom(thisType);
+	}
+
 	public static boolean isColumn(Class<?> type) {
-		return Column.class.isAssignableFrom(type);
+		return is(type, Column.class);
 	}
 
 	public static boolean isTable(Class<?> type) {
-		return Table.class.isAssignableFrom(type);
+		return is(type, Table.class);
 	}
 
 	public static boolean isSchema(Class<?> type) {
-		return Schema.class.isAssignableFrom(type);
+		return is(type, Schema.class);
 	}
 
 	public static boolean isCloseable(Class<?> type) {
-		return Cloneable.class.isAssignableFrom(type);
+		return is(type, Closeable.class);
 	}
 
 	public static boolean isBoolean(Type type) {

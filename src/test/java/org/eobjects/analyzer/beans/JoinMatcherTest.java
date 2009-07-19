@@ -6,16 +6,12 @@ import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.ResultDescriptor;
-import org.eobjects.analyzer.result.AnalyzerBeanResult;
 import org.eobjects.analyzer.result.DataSetAnalyzerBeanResult;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 import dk.eobjects.metamodel.MetaModelTestCase;
-import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.schema.Relationship;
-
-import junit.framework.TestCase;
 
 public class JoinMatcherTest extends MetaModelTestCase {
 
