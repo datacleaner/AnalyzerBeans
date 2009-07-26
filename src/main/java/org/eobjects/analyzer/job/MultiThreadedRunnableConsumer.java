@@ -39,8 +39,10 @@ public class MultiThreadedRunnableConsumer implements RunnableConsumer {
 			}
 		}
 
-		private synchronized Runnable poll() {
-			return runnables.poll();
+		private Runnable poll() {
+			synchronized (runnables) {
+				return runnables.poll();
+			}
 		}
 	}
 }
