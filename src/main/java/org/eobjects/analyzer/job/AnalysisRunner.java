@@ -75,15 +75,16 @@ public class AnalysisRunner {
 			AnalyzerBeanInstance analyzer = instantiateAnalyzerBean(descriptor);
 			analyzer.getRunCallbacks().add(runExplorerCallback);
 			analyzer.getAssignConfiguredCallbacks().add(
-					new AssignConfiguredCallback(job, dataContextProvider.getSchemaNavigator()));
+					new AssignConfiguredCallback(job, dataContextProvider
+							.getSchemaNavigator()));
 			analyzerBeanInstances.add(analyzer);
 		}
 		Map<Table, AnalysisRowProcessor> rowProcessors = new HashMap<Table, AnalysisRowProcessor>();
 		for (AnalysisJob job : rowProcessingJobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptors.get(analyzerClass);
-			initRowProcessingBeans(job, descriptor,
-					analyzerBeanInstances, rowProcessors, dataContextProvider);
+			initRowProcessingBeans(job, descriptor, analyzerBeanInstances,
+					rowProcessors, dataContextProvider);
 		}
 		rowProcessorCount = rowProcessors.size();
 
@@ -132,7 +133,8 @@ public class AnalysisRunner {
 		return rowProcessorCount;
 	}
 
-	private void initRowProcessingBeans(AnalysisJob job, AnalyzerBeanDescriptor descriptor,
+	private void initRowProcessingBeans(AnalysisJob job,
+			AnalyzerBeanDescriptor descriptor,
 			List<AnalyzerBeanInstance> analyzerBeanInstances,
 			Map<Table, AnalysisRowProcessor> rowProcessors,
 			DataContextProvider dataContextProvider) {
@@ -181,7 +183,8 @@ public class AnalysisRunner {
 
 						// Add a callback for assigning @Configured properties
 						AssignConfiguredRowProcessingCallback assignConfiguredCallback = new AssignConfiguredRowProcessingCallback(
-								job, dataContextProvider.getSchemaNavigator(), columnsForAnalyzer);
+								job, dataContextProvider.getSchemaNavigator(),
+								columnsForAnalyzer);
 						analyzerBeanInstance.getAssignConfiguredCallbacks()
 								.add(assignConfiguredCallback);
 
@@ -211,6 +214,11 @@ public class AnalysisRunner {
 
 	/**
 	 * Categorize jobs corresponding to their execution type
+	 * 
+	 * TODO: Perhaps we can optimize a little bit if there are any beans that
+	 * implement BOTH ExploringAnalyzer and RowProcessingAnalyzer. In such cases
+	 * the RowProcessing execution should be used if more analyzers require the
+	 * same data and the Exploring execution if not.
 	 */
 	private void categorizeJobs(
 			Map<Class<?>, AnalyzerBeanDescriptor> descriptors,
@@ -222,15 +230,10 @@ public class AnalysisRunner {
 				descriptor = new AnalyzerBeanDescriptor(analyzerClass);
 				scanner.putDescriptor(analyzerClass, descriptor);
 			}
-			if (descriptor.isExploringExecutionType()) {
+			if (descriptor.isExploringAnalyzer()) {
 				explorerJobs.add(job);
-			} else if (descriptor.isRowProcessingExecutionType()) {
+			} else if (descriptor.isRowProcessingAnalyzer()) {
 				rowProcessingJobs.add(job);
-			} else {
-				throw new UnsupportedOperationException(
-						"Analysis execution type "
-								+ descriptor.getExecutionType()
-								+ " is not supported by AnalysisRunner");
 			}
 		}
 	}

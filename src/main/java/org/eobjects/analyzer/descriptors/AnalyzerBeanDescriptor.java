@@ -9,57 +9,69 @@ import java.util.List;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.ExecutionType;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
-import org.eobjects.analyzer.annotations.Run;
+import org.eobjects.analyzer.beans.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 
 public class AnalyzerBeanDescriptor implements
 		Comparable<AnalyzerBeanDescriptor> {
 
-	private Class<?> _analyzerClass;
-	private String _displayName;
-	private ExecutionType _executionType;
+	private Class<?> analyzerClass;
+	private String displayName;
+	private boolean exploringAnalyzer;
+	private boolean rowProcessingAnalyzer;
 
-	private List<CloseDescriptor> _closeDescriptors = new LinkedList<CloseDescriptor>();
-	private List<ConfiguredDescriptor> _configuredDescriptors = new LinkedList<ConfiguredDescriptor>();
-	private List<InitializeDescriptor> _initializeDescriptors = new LinkedList<InitializeDescriptor>();
-	private List<ProvidedDescriptor> _providedDescriptors = new LinkedList<ProvidedDescriptor>();
-	private List<ResultDescriptor> _resultDescriptors = new LinkedList<ResultDescriptor>();
-	private List<RunDescriptor> _runDescriptors = new LinkedList<RunDescriptor>();
+	private List<CloseDescriptor> closeDescriptors = new LinkedList<CloseDescriptor>();
+	private List<ConfiguredDescriptor> configuredDescriptors = new LinkedList<ConfiguredDescriptor>();
+	private List<InitializeDescriptor> initializeDescriptors = new LinkedList<InitializeDescriptor>();
+	private List<ProvidedDescriptor> providedDescriptors = new LinkedList<ProvidedDescriptor>();
+	private List<ResultDescriptor> resultDescriptors = new LinkedList<ResultDescriptor>();
 
 	public AnalyzerBeanDescriptor(Class<?> analyzerClass)
 			throws DescriptorException {
 		if (analyzerClass == null) {
 			throw new IllegalArgumentException("analyzerClass cannot be null");
 		}
-		_analyzerClass = analyzerClass;
-		AnalyzerBean analyzerAnnotation = _analyzerClass
+		this.analyzerClass = analyzerClass;
+
+		rowProcessingAnalyzer = AnnotationHelper.is(analyzerClass,
+				RowProcessingAnalyzer.class);
+		exploringAnalyzer = AnnotationHelper.is(analyzerClass,
+				ExploringAnalyzer.class);
+
+		if (!rowProcessingAnalyzer && !exploringAnalyzer) {
+			throw new DescriptorException(analyzerClass
+					+ " does not implement either "
+					+ RowProcessingAnalyzer.class.getName() + " or "
+					+ ExploringAnalyzer.class.getName());
+		}
+
+		AnalyzerBean analyzerAnnotation = analyzerClass
 				.getAnnotation(AnalyzerBean.class);
 		if (analyzerAnnotation == null) {
 			throw new DescriptorException(analyzerClass
 					+ " doesn't implement the AnalyzerBean annotation");
 		}
-		_displayName = analyzerAnnotation.displayName();
-		if (_displayName == null || _displayName.trim().equals("")) {
-			_displayName = AnnotationHelper.explodeCamelCase(_analyzerClass
+		displayName = analyzerAnnotation.value();
+		if (displayName == null || displayName.trim().equals("")) {
+			displayName = AnnotationHelper.explodeCamelCase(analyzerClass
 					.getSimpleName(), false);
 		}
-		_executionType = analyzerAnnotation.execution();
 
-		Field[] fields = _analyzerClass.getDeclaredFields();
+		Field[] fields = analyzerClass.getDeclaredFields();
 		for (Field field : fields) {
 			Configured configuredAnnotation = field
 					.getAnnotation(Configured.class);
 			if (configuredAnnotation != null) {
-				_configuredDescriptors.add(new ConfiguredDescriptor(field,
+				configuredDescriptors.add(new ConfiguredDescriptor(field,
 						configuredAnnotation));
 			}
 
 			Provided providedAnnotation = field.getAnnotation(Provided.class);
 			if (providedAnnotation != null) {
-				_providedDescriptors.add(new ProvidedDescriptor(field,
+				providedDescriptors.add(new ProvidedDescriptor(field,
 						providedAnnotation));
 			}
 		}
@@ -68,7 +80,7 @@ public class AnalyzerBeanDescriptor implements
 			try {
 				Method method = analyzerClass.getMethod("close",
 						new Class<?>[0]);
-				_closeDescriptors.add(new CloseDescriptor(method));
+				closeDescriptors.add(new CloseDescriptor(method));
 			} catch (NoSuchMethodException e) {
 				// This is impossible since all closeable's have a no-arg close
 				// method
@@ -76,60 +88,49 @@ public class AnalyzerBeanDescriptor implements
 			}
 		}
 
-		Method[] methods = _analyzerClass.getDeclaredMethods();
+		Method[] methods = analyzerClass.getDeclaredMethods();
 		for (Method method : methods) {
 			Configured configuredAnnotation = method
 					.getAnnotation(Configured.class);
 			if (configuredAnnotation != null) {
-				_configuredDescriptors.add(new ConfiguredDescriptor(method,
+				configuredDescriptors.add(new ConfiguredDescriptor(method,
 						configuredAnnotation));
 			}
 
 			Provided providedAnnotation = method.getAnnotation(Provided.class);
 			if (providedAnnotation != null) {
-				_providedDescriptors.add(new ProvidedDescriptor(method,
+				providedDescriptors.add(new ProvidedDescriptor(method,
 						providedAnnotation));
 			}
 
 			Initialize initializeAnnotation = method
 					.getAnnotation(Initialize.class);
 			if (initializeAnnotation != null) {
-				_initializeDescriptors.add(new InitializeDescriptor(method,
+				initializeDescriptors.add(new InitializeDescriptor(method,
 						initializeAnnotation));
-			}
-
-			Run runAnnotation = method.getAnnotation(Run.class);
-			if (runAnnotation != null) {
-				_runDescriptors.add(new RunDescriptor(method, runAnnotation,
-						_executionType));
 			}
 
 			Result resultAnnotation = method.getAnnotation(Result.class);
 			if (resultAnnotation != null) {
-				_resultDescriptors.add(new ResultDescriptor(method,
+				resultDescriptors.add(new ResultDescriptor(method,
 						resultAnnotation));
 			}
 
 			Close closeAnnotation = method.getAnnotation(Close.class);
 			if (closeAnnotation != null) {
-				_closeDescriptors.add(new CloseDescriptor(method,
+				closeDescriptors.add(new CloseDescriptor(method,
 						closeAnnotation));
 			}
 		}
 
-		if (_runDescriptors.isEmpty()) {
-			throw new DescriptorException(analyzerClass
-					+ " doesn't define any @Run annotated methods");
-		}
-
-		if (_resultDescriptors.isEmpty()) {
+		if (resultDescriptors.isEmpty()) {
 			throw new DescriptorException(analyzerClass
 					+ " doesn't define any @Result annotated methods");
 		}
 
-		if (_executionType == ExecutionType.ROW_PROCESSING) {
+		if (rowProcessingAnalyzer) {
 			boolean hasConfiguredColumnArray = false;
-			for (ConfiguredDescriptor cd : _configuredDescriptors) {
+			for (ConfiguredDescriptor cd : configuredDescriptors) {
 				if (cd.isArray() && cd.isColumn()) {
 					hasConfiguredColumnArray = true;
 					break;
@@ -142,51 +143,45 @@ public class AnalyzerBeanDescriptor implements
 		}
 
 		// Make the descriptor lists read-only
-		_closeDescriptors = Collections.unmodifiableList(_closeDescriptors);
-		_configuredDescriptors = Collections
-				.unmodifiableList(_configuredDescriptors);
-		_initializeDescriptors = Collections
-				.unmodifiableList(_initializeDescriptors);
-		_providedDescriptors = Collections
-				.unmodifiableList(_providedDescriptors);
-		_resultDescriptors = Collections.unmodifiableList(_resultDescriptors);
-		_runDescriptors = Collections.unmodifiableList(_runDescriptors);
+		closeDescriptors = Collections.unmodifiableList(closeDescriptors);
+		configuredDescriptors = Collections
+				.unmodifiableList(configuredDescriptors);
+		initializeDescriptors = Collections
+				.unmodifiableList(initializeDescriptors);
+		providedDescriptors = Collections.unmodifiableList(providedDescriptors);
+		resultDescriptors = Collections.unmodifiableList(resultDescriptors);
 	}
 
 	public Class<?> getAnalyzerClass() {
-		return _analyzerClass;
+		return analyzerClass;
 	}
 
 	public String getDisplayName() {
-		return _displayName;
+		return displayName;
 	}
 
-	public ExecutionType getExecutionType() {
-		return _executionType;
+	public boolean isExploringAnalyzer() {
+		return exploringAnalyzer;
 	}
 
-	public boolean isExploringExecutionType() {
-		return _executionType == ExecutionType.EXPLORING;
-	}
-
-	public boolean isRowProcessingExecutionType() {
-		return _executionType == ExecutionType.ROW_PROCESSING;
+	public boolean isRowProcessingAnalyzer() {
+		return rowProcessingAnalyzer;
 	}
 
 	public List<ConfiguredDescriptor> getConfiguredDescriptors() {
-		return _configuredDescriptors;
+		return configuredDescriptors;
 	}
 
 	public List<InitializeDescriptor> getInitializeDescriptors() {
-		return _initializeDescriptors;
+		return initializeDescriptors;
 	}
 
 	public List<ProvidedDescriptor> getProvidedDescriptors() {
-		return _providedDescriptors;
+		return providedDescriptors;
 	}
 
 	public ConfiguredDescriptor getConfiguredDescriptor(String configuredName) {
-		for (ConfiguredDescriptor configuredDescriptor : _configuredDescriptors) {
+		for (ConfiguredDescriptor configuredDescriptor : configuredDescriptors) {
 			if (configuredName.equals(configuredDescriptor.getName())) {
 				return configuredDescriptor;
 			}
@@ -195,25 +190,21 @@ public class AnalyzerBeanDescriptor implements
 	}
 
 	public List<ResultDescriptor> getResultDescriptors() {
-		return _resultDescriptors;
-	}
-
-	public List<RunDescriptor> getRunDescriptors() {
-		return _runDescriptors;
+		return resultDescriptors;
 	}
 
 	public List<CloseDescriptor> getCloseDescriptors() {
-		return _closeDescriptors;
+		return closeDescriptors;
 	}
 
 	@Override
 	public String toString() {
-		return "AnalyzerBeanDescriptor[analyzerClass=" + _analyzerClass + "]";
+		return "AnalyzerBeanDescriptor[analyzerClass=" + analyzerClass + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return _analyzerClass.hashCode();
+		return analyzerClass.hashCode();
 	}
 
 	@Override

@@ -6,14 +6,14 @@ import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.Row;
 
 
-public class DataSetAnalyzerBeanResult implements AnalyzerBeanResult {
+public class DataSetResult implements AnalyzerBeanResult {
 
 	private static final long serialVersionUID = 1L;
 	private transient DataSet dataSet;
 	private List<Row> rows;
 	private Class<?> analyzerClass;
 	
-	public DataSetAnalyzerBeanResult(List<Row> rows, Class<?> analyzerClass) {
+	public DataSetResult(List<Row> rows, Class<?> analyzerClass) {
 		this.rows = rows;
 		this.analyzerClass = analyzerClass;
 	}

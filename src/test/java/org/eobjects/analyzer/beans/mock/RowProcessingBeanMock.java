@@ -9,19 +9,18 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.ExecutionType;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
-import org.eobjects.analyzer.annotations.Run;
+import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.result.AnalyzerBeanResult;
 import org.eobjects.analyzer.result.NumberResult;
 
 import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.schema.Column;
 
-@AnalyzerBean(displayName = "Row-processing mock", execution = ExecutionType.ROW_PROCESSING)
-public class RowProcessingBeanMock {
+@AnalyzerBean("Row-processing mock")
+public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 
 	private static List<RowProcessingBeanMock> instances = new LinkedList<RowProcessingBeanMock>();
 
@@ -36,9 +35,10 @@ public class RowProcessingBeanMock {
 	public RowProcessingBeanMock() {
 		instances.add(this);
 	}
-	
+
 	@Configured
 	private Column[] columns;
+
 	public Column[] getColumns() {
 		return columns;
 	}
@@ -107,8 +107,8 @@ public class RowProcessingBeanMock {
 	private int runCount;
 	private long rowCount;
 
-	@Run
-	public void run(Row row, Long count) {
+	@Override
+	public void run(Row row, long count) {
 		TestCase.assertNotNull(row);
 		TestCase.assertNotNull(count);
 		this.runCount++;
@@ -143,7 +143,7 @@ public class RowProcessingBeanMock {
 	public boolean isClose2() {
 		return close2;
 	}
-	
+
 	private boolean result1 = false;
 	private boolean result2 = false;
 
@@ -152,7 +152,7 @@ public class RowProcessingBeanMock {
 		result1 = true;
 		return new NumberResult(getClass(), rowCount);
 	}
-	
+
 	public boolean isResult1() {
 		return result1;
 	}
@@ -162,7 +162,7 @@ public class RowProcessingBeanMock {
 		result2 = true;
 		return new NumberResult(getClass(), runCount);
 	}
-	
+
 	public boolean isResult2() {
 		return result2;
 	}

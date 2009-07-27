@@ -6,7 +6,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.ResultDescriptor;
-import org.eobjects.analyzer.result.DataSetAnalyzerBeanResult;
+import org.eobjects.analyzer.result.DataSetResult;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
@@ -51,7 +51,7 @@ public class JoinMatcherTest extends MetaModelTestCase {
 
 		bean.run(dc);
 
-		DataSetAnalyzerBeanResult unmatchedRows = bean.getUnmatchedRows();
+		DataSetResult unmatchedRows = bean.getUnmatchedRows();
 		List<Object[]> rowData = unmatchedRows.getDataSet().toObjectArrays();
 
 		// There is a single product registered in the test-database that is not

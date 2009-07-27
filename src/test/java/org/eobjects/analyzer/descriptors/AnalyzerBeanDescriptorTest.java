@@ -5,7 +5,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.eobjects.analyzer.annotations.ExecutionType;
 import org.eobjects.analyzer.beans.mock.ExploringBeanMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingBeanMock;
 
@@ -21,17 +20,13 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 	public void testExploringType() throws Exception {
 		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
 				ExploringBeanMock.class);
-		assertEquals(ExecutionType.EXPLORING, descriptor.getExecutionType());
-		assertEquals(true, descriptor.isExploringExecutionType());
-		assertEquals(false, descriptor.isRowProcessingExecutionType());
+		assertEquals(true, descriptor.isExploringAnalyzer());
+		assertEquals(false, descriptor.isRowProcessingAnalyzer());
 
 		assertEquals(
 				"{ConfiguredDescriptor[method=null,field=private java.lang.String org.eobjects.analyzer.beans.mock.ExploringBeanMock.configured1],ConfiguredDescriptor[method=public void org.eobjects.analyzer.beans.mock.ExploringBeanMock.setConfigured2(java.lang.Integer),field=null]}",
 				ArrayUtils.toString(descriptor.getConfiguredDescriptors()
 						.toArray()));
-		assertEquals(
-				"{RunDescriptor[method=public void org.eobjects.analyzer.beans.mock.ExploringBeanMock.run(dk.eobjects.metamodel.DataContext)]}",
-				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
 		assertEquals(
 				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.ExploringBeanMock.runCount()]}",
 				ArrayUtils
@@ -41,10 +36,8 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 	public void testRowProcessingType() throws Exception {
 		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
 				RowProcessingBeanMock.class);
-		assertEquals(ExecutionType.ROW_PROCESSING, descriptor
-				.getExecutionType());
-		assertEquals(false, descriptor.isExploringExecutionType());
-		assertEquals(true, descriptor.isRowProcessingExecutionType());
+		assertEquals(false, descriptor.isExploringAnalyzer());
+		assertEquals(true, descriptor.isRowProcessingAnalyzer());
 
 		List<ConfiguredDescriptor> configuredDescriptors = descriptor
 				.getConfiguredDescriptors();
@@ -53,9 +46,6 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 				"ConfiguredDescriptor[method=null,field=private java.lang.String org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.configured1]," +
 				"ConfiguredDescriptor[method=public void org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.setConfigured2(java.lang.Integer),field=null]}",
 				ArrayUtils.toString(configuredDescriptors.toArray()));
-		assertEquals(
-				"{RunDescriptor[method=public void org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.run(dk.eobjects.metamodel.data.Row,java.lang.Long)]}",
-				ArrayUtils.toString(descriptor.getRunDescriptors().toArray()));
 		assertEquals(
 				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.runCount()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.rowCountResult()]}",
 				ArrayUtils

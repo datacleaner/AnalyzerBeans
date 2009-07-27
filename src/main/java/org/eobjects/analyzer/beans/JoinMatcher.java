@@ -5,10 +5,8 @@ import java.util.List;
 
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.ExecutionType;
 import org.eobjects.analyzer.annotations.Result;
-import org.eobjects.analyzer.annotations.Run;
-import org.eobjects.analyzer.result.DataSetAnalyzerBeanResult;
+import org.eobjects.analyzer.result.DataSetResult;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.MetaModelHelper;
@@ -24,8 +22,8 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
-@AnalyzerBean(displayName = "Join matcher", execution = ExecutionType.EXPLORING)
-public class JoinMatcher {
+@AnalyzerBean("Join matcher")
+public class JoinMatcher implements ExploringAnalyzer {
 
 	@Configured
 	private Table leftTable;
@@ -57,7 +55,7 @@ public class JoinMatcher {
 
 	private List<Row> unmatchedRows = new ArrayList<Row>();
 
-	@Run
+	@Override
 	public void run(DataContext dc) {
 		DataSet ds;
 		Schema leftSchema = leftTable.getSchema();
@@ -91,7 +89,7 @@ public class JoinMatcher {
 	}
 
 	@Result
-	public DataSetAnalyzerBeanResult getUnmatchedRows() {
-		return new DataSetAnalyzerBeanResult(unmatchedRows, getClass());
+	public DataSetResult getUnmatchedRows() {
+		return new DataSetResult(unmatchedRows, getClass());
 	}
 }

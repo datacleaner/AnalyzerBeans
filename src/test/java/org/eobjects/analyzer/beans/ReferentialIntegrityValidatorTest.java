@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.easymock.EasyMock;
-import org.eobjects.analyzer.result.DataSetAnalyzerBeanResult;
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.test.QueryMatcher;
 
 import dk.eobjects.metamodel.DataContext;
@@ -43,6 +44,31 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 		con.close();
 	}
 
+	public void testDescriptor() throws Exception {
+		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
+				ReferentialIntegrityValidator.class);
+		assertEquals(
+				"AnalyzerBeanDescriptor[analyzerClass=class org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
+				descriptor.toString());
+
+		assertEquals(
+				"[ConfiguredDescriptor[method=null,field=dk.eobjects.metamodel.schema.Column org.eobjects.analyzer.beans.ReferentialIntegrityValidator.primaryKeyColumn], ConfiguredDescriptor[method=null,field=dk.eobjects.metamodel.schema.Column org.eobjects.analyzer.beans.ReferentialIntegrityValidator.foreignKeyColumn], ConfiguredDescriptor[method=null,field=boolean org.eobjects.analyzer.beans.ReferentialIntegrityValidator.acceptNullForeignKey]]",
+				descriptor.getConfiguredDescriptors().toString());
+
+		assertEquals("[]", descriptor.getProvidedDescriptors().toString());
+
+		assertEquals("[]", descriptor.getInitializeDescriptors().toString());
+		
+		assertTrue(descriptor.isExploringAnalyzer());
+		assertFalse(descriptor.isRowProcessingAnalyzer());
+
+		assertEquals(
+				"[ResultDescriptor[method=public org.eobjects.analyzer.result.DataSetResult org.eobjects.analyzer.beans.ReferentialIntegrityValidator.invalidRows()]]",
+				descriptor.getResultDescriptors().toString());
+
+		assertEquals("[]", descriptor.getCloseDescriptors().toString());
+	}
+
 	public void testSeparateTables() throws Exception {
 		Column columnInOfficesTable = officesTable
 				.getColumnByName("OFFICECODE");
@@ -56,7 +82,7 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 
 		bean.run(dc);
 
-		DataSetAnalyzerBeanResult invalidRows = bean.invalidRows();
+		DataSetResult invalidRows = bean.invalidRows();
 		assertEquals(0, invalidRows.getRows().size());
 	}
 
@@ -116,7 +142,7 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 
 		verifyMocks();
 
-		DataSetAnalyzerBeanResult invalidRows = bean.invalidRows();
+		DataSetResult invalidRows = bean.invalidRows();
 		assertEquals(2, invalidRows.getRows().size());
 
 		assertEquals("Row[values={bar,<null>}]", invalidRows.getRows().get(0)
@@ -134,7 +160,7 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 
 		bean.run(dc);
 
-		DataSetAnalyzerBeanResult invalidRows = bean.invalidRows();
+		DataSetResult invalidRows = bean.invalidRows();
 		assertEquals(1, invalidRows.getRows().size());
 		assertEquals(
 				"Row[values={<null>,<null>,1002,Murphy,Diane,x5800,dmurphy@classicmodelcars.com,1,President}]",

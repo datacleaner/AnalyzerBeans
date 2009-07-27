@@ -7,10 +7,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Classes that are annotated with the @AnalyzerBean annotation are components
- * for data analysis.
+ * for data analysis. All @AnalyzerBean classes must implement either
+ * <code>org.eobjects.analyzer.beans.ExploringAnalyzer</code> or <code>org.eobjects.analyzer.beans.RowProcessingAnalyzer</code>.
  * 
  * The life-cycle of an AnalyzerBean is as follows:
  * <ul>
@@ -44,15 +44,5 @@ public @interface AnalyzerBean {
 	 * 
 	 * @return the name of the AnalyzerBean
 	 */
-	String displayName() default "";
-
-	/**
-	 * The execution type of the AnalyzerBean, which basically determines
-	 * whether or not the AnalyzerBean is able to perform it's own queries
-	 * (explore the data context) or if it shares queries with other
-	 * AnalyzerBeans and just processes incoming rows.
-	 * 
-	 * @return the type of execution mechanism to use for the AnalyzerBean
-	 */
-	ExecutionType execution() default ExecutionType.ROW_PROCESSING;
+	String value() default "";
 }

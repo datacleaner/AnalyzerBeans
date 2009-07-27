@@ -9,18 +9,17 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.ExecutionType;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
-import org.eobjects.analyzer.annotations.Run;
+import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.result.AnalyzerBeanResult;
 import org.eobjects.analyzer.result.NumberResult;
 
 import dk.eobjects.metamodel.DataContext;
 
-@AnalyzerBean(displayName = "Exploring mock", execution = ExecutionType.EXPLORING)
-public class ExploringBeanMock {
+@AnalyzerBean("Exploring mock")
+public class ExploringBeanMock implements ExploringAnalyzer {
 
 	private static List<ExploringBeanMock> instances = new LinkedList<ExploringBeanMock>();
 
@@ -35,7 +34,7 @@ public class ExploringBeanMock {
 	public ExploringBeanMock() {
 		instances.add(this);
 	}
-	
+
 	// A field-level @Configured property
 	@Configured
 	private String configured1;
@@ -99,7 +98,7 @@ public class ExploringBeanMock {
 
 	private int runCount;
 
-	@Run
+	@Override
 	public void run(DataContext dc) {
 		TestCase.assertNotNull(dc);
 		this.runCount++;
@@ -129,7 +128,7 @@ public class ExploringBeanMock {
 	public boolean isClose2() {
 		return close2;
 	}
-	
+
 	private boolean result = false;
 
 	@Result
@@ -137,7 +136,7 @@ public class ExploringBeanMock {
 		result = true;
 		return new NumberResult(getClass(), runCount);
 	}
-	
+
 	public boolean isResult() {
 		return result;
 	}

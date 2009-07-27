@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.eobjects.analyzer.descriptors.RunDescriptor;
+import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 
 import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.Row;
@@ -16,11 +16,11 @@ import dk.eobjects.metamodel.schema.Table;
 
 public class AnalysisRowProcessor implements Runnable {
 
-	private List<Object[]> analyzerBeansAndRunDescriptors = new LinkedList<Object[]>();
+	private List<RowProcessingAnalyzer> analyzerBeansAndRunDescriptors = new LinkedList<RowProcessingAnalyzer>();
 	private Set<Column> columns = new HashSet<Column>();
 	private DataContextProvider dataContextProvider;
 	private Table table;
-	
+
 	public AnalysisRowProcessor(DataContextProvider dataContextProvider) {
 		this.dataContextProvider = dataContextProvider;
 	}
@@ -37,9 +37,8 @@ public class AnalysisRowProcessor implements Runnable {
 		}
 	}
 
-	public void addEndPoint(Object analyzerBean, RunDescriptor runDescriptor) {
-		analyzerBeansAndRunDescriptors.add(new Object[] { analyzerBean,
-				runDescriptor });
+	public void addEndPoint(RowProcessingAnalyzer analyzerBean) {
+		analyzerBeansAndRunDescriptors.add(analyzerBean);
 	}
 
 	public void run() {
@@ -83,10 +82,8 @@ public class AnalysisRowProcessor implements Runnable {
 	}
 
 	protected void processRow(Row row, Long count) {
-		for (Object[] obj : analyzerBeansAndRunDescriptors) {
-			Object analyzerBean = obj[0];
-			RunDescriptor runDescriptor = (RunDescriptor) obj[1];
-			runDescriptor.processRow(analyzerBean, row, count);
+		for (RowProcessingAnalyzer analyzerBean : analyzerBeansAndRunDescriptors) {
+			analyzerBean.run(row, count);
 		}
 	}
 }

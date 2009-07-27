@@ -7,9 +7,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.ExecutionType;
-import org.eobjects.analyzer.annotations.Run;
-import org.eobjects.analyzer.result.DataSetAnalyzerBeanResult;
+import org.eobjects.analyzer.annotations.Result;
+import org.eobjects.analyzer.result.DataSetResult;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;
@@ -22,8 +21,8 @@ import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
-@AnalyzerBean(displayName = "Referential Integrity validator", execution = ExecutionType.EXPLORING)
-public class ReferentialIntegrityValidator {
+@AnalyzerBean("Referential Integrity validator")
+public class ReferentialIntegrityValidator implements ExploringAnalyzer {
 
 	private Log log = LogFactory.getLog(getClass());
 	private List<Row> invalidRows;
@@ -92,7 +91,7 @@ public class ReferentialIntegrityValidator {
 		return q;
 	}
 
-	@Run
+	@Override
 	public void run(DataContext dc) {
 		invalidRows = new ArrayList<Row>();
 
@@ -145,7 +144,8 @@ public class ReferentialIntegrityValidator {
 		this.foreignKeyColumn = parentIdColumn;
 	}
 
-	public DataSetAnalyzerBeanResult invalidRows() {
-		return new DataSetAnalyzerBeanResult(invalidRows, getClass());
+	@Result
+	public DataSetResult invalidRows() {
+		return new DataSetResult(invalidRows, getClass());
 	}
 }
