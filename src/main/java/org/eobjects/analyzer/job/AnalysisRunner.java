@@ -188,7 +188,7 @@ public class AnalysisRunner {
 						analyzerBeanInstance.getAssignConfiguredCallbacks()
 								.add(assignConfiguredCallback);
 
-						// Add a callback for executing the @Run method
+						// Add a callback for executing the run(...) method
 						analyzerBeanInstance.getRunCallbacks().add(
 								new RunRowProcessorsCallback(rowProcessor));
 					}

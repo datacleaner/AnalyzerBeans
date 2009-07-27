@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * if you need to initialize the state of a bean before it starts executing.
  * 
  * The method is invoked after any @Configured and @Provided methods/fields are
- * invoked/assigned but before any @Run annotated methods are invoked.
+ * invoked/assigned but before any run(...) methods are invoked.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

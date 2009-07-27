@@ -10,7 +10,8 @@ import java.lang.annotation.Target;
 /**
  * Classes that are annotated with the @AnalyzerBean annotation are components
  * for data analysis. All @AnalyzerBean classes must implement either
- * <code>org.eobjects.analyzer.beans.ExploringAnalyzer</code> or <code>org.eobjects.analyzer.beans.RowProcessingAnalyzer</code>.
+ * <code>org.eobjects.analyzer.beans.ExploringAnalyzer</code> or
+ * <code>org.eobjects.analyzer.beans.RowProcessingAnalyzer</code>.
  * 
  * The life-cycle of an AnalyzerBean is as follows:
  * <ul>
@@ -19,8 +20,9 @@ import java.lang.annotation.Target;
  * invoked/assigned to configure the AnalyzerBean before execution.</li>
  * <li>All methods or fields with the @Provided annotation are invoked/assigned</li>
  * <li>Any no-args methods with the @Initialize annotation are executed.</li>
- * <li>All methods with the @Run annotation are executed (A number of times,
- * depending on the ExecutionType parameter).</li>
+ * <li>If the AnalyzerBean is an ExploringAnalyzer then the run(DataContext)
+ * method is called once. If the AnalyzerBean is a RowProcessingAnalyzer then
+ * the run(Row,long) method is called for each row in the analyzed DataSet.</li>
  * <li>All methods with the @Result annotation are invoked to retrieve the
  * result.</li>
  * <li>Any no-args methods with the @Close annotation are invoked if the
