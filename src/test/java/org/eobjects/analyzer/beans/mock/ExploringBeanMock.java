@@ -13,7 +13,7 @@ import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
-import org.eobjects.analyzer.result.AnalyzerBeanResult;
+import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
 
 import dk.eobjects.metamodel.DataContext;
@@ -132,7 +132,7 @@ public class ExploringBeanMock implements ExploringAnalyzer {
 	private boolean result = false;
 
 	@Result
-	public AnalyzerBeanResult runCount() {
+	public AnalyzerResult runCount() {
 		result = true;
 		return new NumberResult(getClass(), runCount);
 	}

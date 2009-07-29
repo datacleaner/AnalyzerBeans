@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.result;
 
-public class CrosstabResult implements AnalyzerBeanResult {
+public class CrosstabResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 	private Class<?> analyzerClass;
@@ -13,7 +13,7 @@ public class CrosstabResult implements AnalyzerBeanResult {
 	}
 
 	@Override
-	public Class<?> getAnalyzerClass() {
+	public Class<?> getProducerClass() {
 		return analyzerClass;
 	}
 	

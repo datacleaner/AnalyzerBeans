@@ -13,9 +13,13 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.QueryResultProducer;
+import org.eobjects.analyzer.result.SerializableRowFilter;
 import org.eobjects.analyzer.util.AverageBuilder;
 
 import dk.eobjects.metamodel.data.Row;
+import dk.eobjects.metamodel.query.Query;
+import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.util.FormatHelper;
 
@@ -218,12 +222,30 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 			final Long maxBlanks = columnCounts[INDEX_MAX_BLANKS];
 			final Long minBlanks = columnCounts[INDEX_MIN_BLANKS];
 
+			// base query for exploration data result producers
+			Query baseQuery = getBaseQuery(column);
+			QueryResultProducer resultProducer;
+
 			nav.where(measureDimension, "Char count").put(
 					Long.toString(numChars));
 			nav.where(measureDimension, "Max chars").put(
 					Long.toString(maxChars));
+
+			if (maxChars != null) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new CharRowFilter(column, maxChars));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Min chars").put(
 					Long.toString(minChars));
+
+			if (minChars != null) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new CharRowFilter(column, minChars));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Avg chars").put(avgChars);
 			nav.where(measureDimension, "Max white spaces").put(
 					Long.toString(maxBlanks));
@@ -237,36 +259,73 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 					Long.toString(numWords));
 			nav.where(measureDimension, "Max words").put(
 					Long.toString(maxWords));
+
+			if (maxWords != null) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new WordRowFilter(column, maxWords));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Min words").put(
 					Long.toString(minWords));
 
-			// TODO: Attach queries / drill to detail sources / action
-			// listeners?
-			// if (maxChars != null) {
-			// MatrixValue mv = matrixValues[1];
-			// mv.setDetailSource(getBaseQuery(column));
-			// mv.addDetailRowFilter(getCharFilter(column, maxChars));
-			// }
-			//
-			// if (minChars != null) {
-			// MatrixValue mv = matrixValues[2];
-			// mv.setDetailSource(getBaseQuery(column));
-			// mv.addDetailRowFilter(getCharFilter(column, minChars));
-			// }
-			//
-			// if (maxWords != null) {
-			// MatrixValue mv = matrixValues[11];
-			// mv.setDetailSource(getBaseQuery(column));
-			// mv.addDetailRowFilter(getWordFilter(column, maxWords));
-			// }
-			//
-			// if (minWords != null) {
-			// MatrixValue mv = matrixValues[12];
-			// mv.setDetailSource(getBaseQuery(column));
-			// mv.addDetailRowFilter(getWordFilter(column, minWords));
-			// }
+			if (minWords != null) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new WordRowFilter(column, minWords));
+				nav.attach(resultProducer);
+			}
 		}
 
 		return new CrosstabResult(getClass(), crosstab);
+	}
+
+	private Query getBaseQuery(Column column) {
+		return new Query().from(column.getTable()).select(
+				new SelectItem(column)).selectCount().groupBy(column);
+	}
+	
+	class CharRowFilter implements SerializableRowFilter {
+		private static final long serialVersionUID = 1L;
+		
+		private Column column;
+		private Long numChars;
+
+		public CharRowFilter(Column column, Long numChars) {
+			this.column = column;
+			this.numChars = numChars;
+		}
+
+		@Override
+		public boolean accept(Row row) {
+			Object value = row.getValue(column);
+			if (value != null && value.toString().length() == numChars) {
+				return true;
+			}
+			return false;
+		}
+
+	}
+
+	class WordRowFilter implements SerializableRowFilter {
+		private static final long serialVersionUID = 1L;
+		
+		private Column column;
+		private Long numWords;
+
+		public WordRowFilter(Column column, Long numWords) {
+			this.column = column;
+			this.numWords = numWords;
+		}
+
+		@Override
+		public boolean accept(Row row) {
+			Object value = row.getValue(column);
+			if (value != null
+					&& new StringTokenizer(value.toString()).countTokens() == numWords) {
+				return true;
+			}
+			return false;
+		}
+
 	}
 }

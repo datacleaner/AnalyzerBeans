@@ -7,8 +7,8 @@ import java.io.Serializable;
  * execution. Hence an @AnalyzerBean object can yield one or more AnalysisResult
  * objects.
  */
-public interface AnalyzerBeanResult extends Serializable {
+public interface AnalyzerResult extends Serializable {
 
-	public Class<?> getAnalyzerClass();
+	public Class<?> getProducerClass();
 
 }

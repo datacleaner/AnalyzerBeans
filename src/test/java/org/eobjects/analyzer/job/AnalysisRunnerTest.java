@@ -7,8 +7,7 @@ import java.util.Map;
 import org.eobjects.analyzer.beans.mock.ExploringBeanMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingBeanMock;
 import org.eobjects.analyzer.lifecycle.ProvidedList;
-import org.eobjects.analyzer.result.AnalysisResult;
-import org.eobjects.analyzer.result.AnalyzerBeanResult;
+import org.eobjects.analyzer.result.AnalyzerResult;
 
 import com.sleepycat.collections.StoredMap;
 
@@ -67,8 +66,7 @@ public class AnalysisRunnerTest extends MetaModelTestCase {
 		bean = beans.get(1);
 		performReusableMockTests(bean);
 
-		List<AnalyzerBeanResult> results = runner.getResult()
-				.getAnalyzerBeanResults();
+		List<AnalyzerResult> results = runner.getResults();
 		assertEquals(2, results.size());
 	}
 
@@ -105,8 +103,7 @@ public class AnalysisRunnerTest extends MetaModelTestCase {
 		assertEquals(1, columns.length);
 		assertEquals(customerColumns[0], columns[0]);
 
-		AnalysisResult result = runner.getResult();
-		List<AnalyzerBeanResult> results = result.getAnalyzerBeanResults();
+		List<AnalyzerResult> results = runner.getResults();
 		assertEquals(4, results.size());
 	}
 

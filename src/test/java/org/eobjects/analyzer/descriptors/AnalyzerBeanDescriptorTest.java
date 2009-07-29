@@ -28,7 +28,7 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 				ArrayUtils.toString(descriptor.getConfiguredDescriptors()
 						.toArray()));
 		assertEquals(
-				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.ExploringBeanMock.runCount()]}",
+				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerResult org.eobjects.analyzer.beans.mock.ExploringBeanMock.runCount()]}",
 				ArrayUtils
 						.toString(descriptor.getResultDescriptors().toArray()));
 	}
@@ -47,7 +47,7 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 				"ConfiguredDescriptor[method=public void org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.setConfigured2(java.lang.Integer),field=null]}",
 				ArrayUtils.toString(configuredDescriptors.toArray()));
 		assertEquals(
-				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.runCount()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerBeanResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.rowCountResult()]}",
+				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.runCount()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.rowCountResult()]}",
 				ArrayUtils
 						.toString(descriptor.getResultDescriptors().toArray()));
 

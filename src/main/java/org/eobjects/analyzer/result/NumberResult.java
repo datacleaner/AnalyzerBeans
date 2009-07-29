@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.result;
 
-public class NumberResult implements AnalyzerBeanResult {
+public class NumberResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 	private Class<?> analyzerClass;
@@ -13,7 +13,7 @@ public class NumberResult implements AnalyzerBeanResult {
 	}
 
 	@Override
-	public Class<?> getAnalyzerClass() {
+	public Class<?> getProducerClass() {
 		return analyzerClass;
 	}
 

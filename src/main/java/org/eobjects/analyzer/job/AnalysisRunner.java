@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.job;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,8 +22,7 @@ import org.eobjects.analyzer.lifecycle.ProvidedCollectionHandler;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
 import org.eobjects.analyzer.lifecycle.RunRowProcessorsCallback;
-import org.eobjects.analyzer.result.AnalysisResult;
-import org.eobjects.analyzer.result.AnalysisResultImpl;
+import org.eobjects.analyzer.result.AnalyzerResult;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.MetaModelHelper;
@@ -34,7 +34,7 @@ public class AnalysisRunner {
 	private List<AnalysisJob> jobs = new LinkedList<AnalysisJob>();
 	private ProvidedCollectionHandler collectionProvider;
 	private AnnotationScanner scanner;
-	private AnalysisResultImpl result;
+	private List<AnalyzerResult> result;
 	private Integer rowProcessorCount;
 
 	public void addJob(AnalysisJob job) {
@@ -42,12 +42,12 @@ public class AnalysisRunner {
 		rowProcessorCount = null;
 	}
 
-	public AnalysisResult run(DataContext dataContext) {
+	public List<AnalyzerResult> run(DataContext dataContext) {
 		return run(new SingleDataContextProvider(dataContext),
 				new SingleThreadedRunnableConsumer());
 	}
 
-	public AnalysisResult run(DataContextProvider dataContextProvider,
+	public List<AnalyzerResult> run(DataContextProvider dataContextProvider,
 			RunnableConsumer runnableConsumer) {
 		if (scanner == null) {
 			scanner = new AnnotationScanner();
@@ -56,7 +56,7 @@ public class AnalysisRunner {
 			collectionProvider = new ProvidedCollectionHandler();
 		}
 		if (result == null) {
-			result = new AnalysisResultImpl();
+			result = new ArrayList<AnalyzerResult>();
 		}
 		Map<Class<?>, AnalyzerBeanDescriptor> descriptors = scanner
 				.getDescriptors();
@@ -95,7 +95,8 @@ public class AnalysisRunner {
 		CloseCallback closeCallback = new CloseCallback();
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
 			AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(
-					analyzerBeanInstance, collectionProvider);
+					analyzerBeanInstance, collectionProvider,
+					dataContextProvider);
 
 			analyzerBeanInstance.getAssignProvidedCallbacks().add(
 					assignProvidedCallback);
@@ -125,7 +126,7 @@ public class AnalysisRunner {
 		return result;
 	}
 
-	public AnalysisResult getResult() {
+	public List<AnalyzerResult> getResults() {
 		return result;
 	}
 

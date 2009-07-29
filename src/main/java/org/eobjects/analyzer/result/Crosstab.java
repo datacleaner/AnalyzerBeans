@@ -18,6 +18,8 @@ public class Crosstab<E extends Serializable> implements Serializable {
 
 	private List<CrosstabDimension> dimensions;
 	private Map<String, E> values = new HashMap<String, E>();
+	private Map<String, ResultProducer> serializableResultProducers = new HashMap<String, ResultProducer>();
+	private transient Map<String, ResultProducer> transientResultProducers = new HashMap<String, ResultProducer>();
 	private Class<E> valueClass;
 
 	public Crosstab(Class<E> valueClass, CrosstabDimension... dimensions) {
@@ -156,5 +158,34 @@ public class Crosstab<E extends Serializable> implements Serializable {
 
 	public CrosstabDimension getDimension(int i) {
 		return dimensions.get(i);
+	}
+
+	protected void attachResultProducer(ResultProducer resultProducer,
+			String[] categories) throws IllegalArgumentException,
+			NullPointerException {
+		String key = getKey(categories);
+
+		if (resultProducer == null) {
+			transientResultProducers.remove(key);
+			serializableResultProducers.remove(key);
+		} else {
+			if (AnnotationHelper.is(resultProducer.getClass(),
+					Serializable.class)) {
+				serializableResultProducers.put(key, resultProducer);
+				transientResultProducers.remove(key);
+			} else {
+				transientResultProducers.put(key, resultProducer);
+				serializableResultProducers.remove(key);
+			}
+		}
+	}
+
+	protected ResultProducer explore(String[] categories) {
+		String key = getKey(categories);
+		ResultProducer resultProducer = serializableResultProducers.get(key);
+		if (resultProducer == null) {
+			resultProducer = transientResultProducers.get(key);
+		}
+		return resultProducer;
 	}
 }

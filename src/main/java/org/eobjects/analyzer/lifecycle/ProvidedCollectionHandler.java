@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eobjects.analyzer.descriptors.AnnotationHelper;
 import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
 
@@ -26,7 +28,10 @@ import dk.eobjects.metamodel.util.FileHelper;
 
 public class ProvidedCollectionHandler {
 
+	private Log log = LogFactory.getLog(getClass());
 	private Environment environment;
+	private Boolean deleteOnExit;
+	private File targetDir;
 
 	public Object createProvidedCollection(ProvidedDescriptor providedDescriptor) {
 		if (providedDescriptor.isList()) {
@@ -47,41 +52,80 @@ public class ProvidedCollectionHandler {
 		if (obj instanceof ProvidedList<?>) {
 			ProvidedList<?> list = (ProvidedList<?>) obj;
 			map = (StoredMap<?, ?>) list.getWrappedMap();
-		} else if (obj instanceof StoredMap<?, ?> ) {
+		} else if (obj instanceof StoredMap<?, ?>) {
 			map = (StoredMap<?, ?>) obj;
 		} else {
 			throw new IllegalStateException("Cannot clean up object: " + obj);
 		}
 		map.clear();
 
-		// _environment.removeDatabase(null, databaseName);
-		// _environment.compress();
-		// _environment.cleanLog();
-		// _environment.sync();
-		// File home = _environment.getHome();
-		// _environment.close();
-		// File[] databaseFiles = home.listFiles(new FilenameFilter() {
-		//
-		// public boolean accept(File dir, String name) {
-		// return name.endsWith(".jdb");
-		// }
-		// });
-		// for (File file : databaseFiles) {
-		// file.deleteOnExit();
-		// }
+		try {
+			getEnvironment().compress();
+			getEnvironment().cleanLog();
+			getEnvironment().sync();
+		} catch (DatabaseException e) {
+			log.error("Exception occurred while cleaning up object: " + obj, e);
+		}
 
-		// TODO: Find out if we can clean it up further (eg. delete it
-		// physically from disk?)
+		if (deleteOnExit) {
+			initDeleteOnExit(targetDir);
+		}
+	}
+
+	private void initDeleteOnExit(File dir) {
+		dir.deleteOnExit();
+		File[] files = dir.listFiles();
+		for (File file : files) {
+			if (file.isDirectory()) {
+				initDeleteOnExit(file);
+			} else if (file.isFile()) {
+				file.deleteOnExit();
+			} else {
+				log
+						.warn("Unable to set the deleteOnExit flag on file: "
+								+ file);
+			}
+		}
 	}
 
 	private Environment getEnvironment() throws DatabaseException {
 		if (environment == null) {
 			EnvironmentConfig config = new EnvironmentConfig();
 			config.setAllowCreate(true);
-			File tempDir = FileHelper.getTempDir();
-			environment = new Environment(tempDir, config);
+			File targetDir = createTargetDir();
+			environment = new Environment(targetDir, config);
 		}
 		return environment;
+	}
+
+	private File createTargetDir() {
+		File tempDir = FileHelper.getTempDir();
+		deleteOnExit = false;
+		while (targetDir == null) {
+			try {
+				File candidateDir = new File(tempDir.getAbsolutePath()
+						+ File.separatorChar + "analyzerBeans_"
+						+ UUID.randomUUID().toString());
+				if (!candidateDir.exists() && candidateDir.mkdir()) {
+					targetDir = candidateDir;
+					deleteOnExit = true;
+				}
+			} catch (Exception e) {
+				log
+						.error(
+								"Exception thrown while trying to create targetDir inside tempDir",
+								e);
+				targetDir = tempDir;
+			}
+		}
+		if (log.isInfoEnabled()) {
+			log
+					.info("Using target directory for persistent collections (deleteOnExit="
+							+ deleteOnExit
+							+ "): "
+							+ targetDir.getAbsolutePath());
+		}
+		return targetDir;
 	}
 
 	private Database createDatabase() throws DatabaseException {

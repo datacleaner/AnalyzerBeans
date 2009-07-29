@@ -13,7 +13,7 @@ import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
-import org.eobjects.analyzer.result.AnalyzerBeanResult;
+import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
 
 import dk.eobjects.metamodel.data.Row;
@@ -148,7 +148,7 @@ public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 	private boolean result2 = false;
 
 	@Result("Row count")
-	public AnalyzerBeanResult rowCountResult() {
+	public AnalyzerResult rowCountResult() {
 		result1 = true;
 		return new NumberResult(getClass(), rowCount);
 	}
@@ -158,7 +158,7 @@ public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 	}
 
 	@Result
-	public AnalyzerBeanResult runCount() {
+	public AnalyzerResult runCount() {
 		result2 = true;
 		return new NumberResult(getClass(), runCount);
 	}

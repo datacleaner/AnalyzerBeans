@@ -5,15 +5,14 @@ import java.util.List;
 
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ResultDescriptor;
-import org.eobjects.analyzer.result.AnalysisResultImpl;
-import org.eobjects.analyzer.result.AnalyzerBeanResult;
+import org.eobjects.analyzer.result.AnalyzerResult;
 
 public class ReturnResultsCallback implements LifeCycleCallback {
 
-	private AnalysisResultImpl analysisResult;
+	private List<AnalyzerResult> results;
 
-	public ReturnResultsCallback(AnalysisResultImpl results) {
-		this.analysisResult = results;
+	public ReturnResultsCallback(List<AnalyzerResult> results) {
+		this.results = results;
 	}
 
 	@Override
@@ -21,26 +20,26 @@ public class ReturnResultsCallback implements LifeCycleCallback {
 			AnalyzerBeanDescriptor descriptor) {
 		assert state == LifeCycleState.RETURN_RESULTS;
 
-		List<AnalyzerBeanResult> results = getResults(analyzerBean, descriptor);
-		for (AnalyzerBeanResult result : results) {
-			analysisResult.addResult(result);
+		List<AnalyzerResult> resultsForBean = getResults(analyzerBean, descriptor);
+		for (AnalyzerResult result : resultsForBean) {
+			this.results.add(result);
 		}
 	}
 
-	protected List<AnalyzerBeanResult> getResults(Object analyzerBean,
+	protected List<AnalyzerResult> getResults(Object analyzerBean,
 			AnalyzerBeanDescriptor analyzerBeanDescriptor) {
-		List<AnalyzerBeanResult> results = new LinkedList<AnalyzerBeanResult>();
+		List<AnalyzerResult> results = new LinkedList<AnalyzerResult>();
 		List<ResultDescriptor> resultDescriptors = analyzerBeanDescriptor
 				.getResultDescriptors();
 		for (ResultDescriptor resultDescriptor : resultDescriptors) {
 			if (resultDescriptor.isArray()) {
-				AnalyzerBeanResult[] analysisResult = resultDescriptor
+				AnalyzerResult[] analysisResult = resultDescriptor
 						.getResults(analyzerBean);
-				for (AnalyzerBeanResult result : analysisResult) {
+				for (AnalyzerResult result : analysisResult) {
 					results.add(result);
 				}
 			} else {
-				AnalyzerBeanResult result = resultDescriptor
+				AnalyzerResult result = resultDescriptor
 						.getResult(analyzerBean);
 				results.add(result);
 			}
