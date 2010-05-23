@@ -133,7 +133,8 @@ public class AnalysisRunnerTest extends MetaModelTestCase {
 		runner.addJob(job4);
 		runner.run(dc);
 
-		List<RowProcessingBeanMock> rowProcessors = RowProcessingBeanMock.getInstances();
+		List<RowProcessingBeanMock> rowProcessors = RowProcessingBeanMock
+				.getInstances();
 		assertEquals(3, rowProcessors.size());
 		for (RowProcessingBeanMock bean : rowProcessors) {
 			performReusableMockTests(bean);
@@ -163,7 +164,7 @@ public class AnalysisRunnerTest extends MetaModelTestCase {
 
 		Map<String, Long> providedMap = bean.getProvidedMap();
 		assertNotNull(providedMap);
-		assertTrue(providedMap instanceof StoredMap<?, ?>);
+		assertTrue(providedMap instanceof StoredMap);
 	}
 
 	private void performReusableMockTests(ExploringBeanMock bean) {
@@ -180,7 +181,7 @@ public class AnalysisRunnerTest extends MetaModelTestCase {
 
 		Map<String, Long> providedMap = bean.getProvidedMap();
 		assertNotNull(providedMap);
-		assertTrue(providedMap instanceof StoredMap<?, ?>);
+		assertTrue(providedMap instanceof StoredMap);
 
 		assertEquals(1, bean.getRunCount());
 	}

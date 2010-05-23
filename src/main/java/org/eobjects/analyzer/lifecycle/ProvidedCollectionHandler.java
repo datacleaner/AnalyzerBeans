@@ -48,12 +48,12 @@ public class ProvidedCollectionHandler {
 	}
 
 	public void cleanUp(Object obj) {
-		StoredMap<?, ?> map;
+		StoredMap map;
 		if (obj instanceof ProvidedList<?>) {
 			ProvidedList<?> list = (ProvidedList<?>) obj;
-			map = (StoredMap<?, ?>) list.getWrappedMap();
-		} else if (obj instanceof StoredMap<?, ?>) {
-			map = (StoredMap<?, ?>) obj;
+			map = (StoredMap) list.getWrappedMap();
+		} else if (obj instanceof StoredMap) {
+			map = (StoredMap) obj;
 		} else {
 			throw new IllegalStateException("Cannot clean up object: " + obj);
 		}
@@ -147,38 +147,38 @@ public class ProvidedCollectionHandler {
 		return new ProvidedList<E>(map);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType)
 			throws IllegalStateException {
 		try {
-			EntryBinding<K> keyBinding = createBinding(keyType);
-			EntryBinding<V> valueBinding = createBinding(valueType);
-			return new StoredMap<K, V>(createDatabase(), keyBinding,
-					valueBinding, true);
+			EntryBinding keyBinding = createBinding(keyType);
+			EntryBinding valueBinding = createBinding(valueType);
+			return new StoredMap(createDatabase(), keyBinding, valueBinding,
+					true);
 		} catch (DatabaseException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private <E> EntryBinding<E> createBinding(Class<E> type)
+	private EntryBinding createBinding(Class<?> type)
 			throws UnsupportedOperationException {
 		if (AnnotationHelper.isBoolean(type)) {
-			return (EntryBinding<E>) new BooleanBinding();
+			return new BooleanBinding();
 		}
 		if (AnnotationHelper.isInteger(type)) {
-			return (EntryBinding<E>) new IntegerBinding();
+			return new IntegerBinding();
 		}
 		if (AnnotationHelper.isLong(type)) {
-			return (EntryBinding<E>) new LongBinding();
+			return new LongBinding();
 		}
 		if (AnnotationHelper.isDouble(type)) {
-			return (EntryBinding<E>) new DoubleBinding();
+			return new DoubleBinding();
 		}
 		if (AnnotationHelper.isString(type)) {
-			return (EntryBinding<E>) new StringBinding();
+			return new StringBinding();
 		}
 		if (AnnotationHelper.isByteArray(type)) {
-			return (EntryBinding<E>) new ByteArrayBinding();
+			return new ByteArrayBinding();
 		}
 		throw new UnsupportedOperationException(
 				"Cannot provide collection of type " + type);
