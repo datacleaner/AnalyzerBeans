@@ -85,6 +85,11 @@
 			<version>1</version>
 		</dependency>
 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
 			<groupId>dk.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-testware</artifactId>
 			<version>1.2</version>

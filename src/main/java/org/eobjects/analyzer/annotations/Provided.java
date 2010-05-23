@@ -7,6 +7,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.inject.Qualifier;
+
 /**
  * Methods and fields with the @Provided annotation are used to let
  * AnalyzerBeans and ResultProducers retrieve service-objects such as persistent
@@ -45,5 +47,6 @@ import java.lang.annotation.Target;
 @Target( { ElementType.METHOD, ElementType.FIELD })
 @Documented
 @Inherited
+@Qualifier
 public @interface Provided {
 }

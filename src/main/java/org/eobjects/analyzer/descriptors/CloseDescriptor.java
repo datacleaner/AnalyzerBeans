@@ -2,6 +2,8 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Method;
 
+import javax.annotation.PreDestroy;
+
 import org.eobjects.analyzer.annotations.Close;
 
 public class CloseDescriptor {
@@ -9,11 +11,6 @@ public class CloseDescriptor {
 	private Method _method;
 
 	public CloseDescriptor(Method method) {
-		this(method, null);
-	}
-
-	public CloseDescriptor(Method method, Close closeAnnotation)
-			throws DescriptorException {
 		if (method.getParameterTypes().length != 0) {
 			throw new DescriptorException(
 					"@Close annotated methods cannot have parameters");
@@ -26,11 +23,20 @@ public class CloseDescriptor {
 		_method.setAccessible(true);
 	}
 
+	public CloseDescriptor(Method method, Close closeAnnotation)
+			throws DescriptorException {
+		this(method);
+	}
+
+	public CloseDescriptor(Method method, PreDestroy preDestroyAnnotation) {
+		this(method);
+	}
+
 	public void close(Object analyzerBean) throws IllegalStateException {
 		try {
 			_method.invoke(analyzerBean);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not invoke @Close method "
+			throw new IllegalStateException("Could not invoke closing method "
 					+ _method, e);
 		}
 	}

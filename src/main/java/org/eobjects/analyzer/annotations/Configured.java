@@ -7,6 +7,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.inject.Qualifier;
+
 /**
  * Methods and fields with the @Configured annotation are used to configure an
  * AnalyzerBean before execution. Typically, the @Configured annotated
@@ -31,6 +33,7 @@ import java.lang.annotation.Target;
 @Target( { ElementType.METHOD, ElementType.FIELD })
 @Documented
 @Inherited
+@Qualifier
 public @interface Configured {
 
 	/**

@@ -6,6 +6,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
@@ -14,9 +18,13 @@ import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AnalyzerBeanDescriptor implements
 		Comparable<AnalyzerBeanDescriptor> {
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private Class<?> analyzerClass;
 	private String displayName;
@@ -62,15 +70,28 @@ public class AnalyzerBeanDescriptor implements
 
 		Field[] fields = analyzerClass.getDeclaredFields();
 		for (Field field : fields) {
+
 			Configured configuredAnnotation = field
 					.getAnnotation(Configured.class);
 			if (configuredAnnotation != null) {
+				if (!field.isAnnotationPresent(Inject.class)) {
+					logger
+							.warn(
+									"No @Inject annotation found for @Configured field: {}",
+									field);
+				}
 				configuredDescriptors.add(new ConfiguredDescriptor(field,
 						configuredAnnotation));
 			}
 
 			Provided providedAnnotation = field.getAnnotation(Provided.class);
 			if (providedAnnotation != null) {
+				if (!field.isAnnotationPresent(Inject.class)) {
+					logger
+							.warn(
+									"No @Inject annotation found for @Provided field: {}",
+									field);
+				}
 				providedDescriptors.add(new ProvidedDescriptor(field,
 						providedAnnotation));
 			}
@@ -93,12 +114,24 @@ public class AnalyzerBeanDescriptor implements
 			Configured configuredAnnotation = method
 					.getAnnotation(Configured.class);
 			if (configuredAnnotation != null) {
+				if (!method.isAnnotationPresent(Inject.class)) {
+					logger
+							.warn(
+									"No @Inject annotation found for @Configured method: {}",
+									method);
+				}
 				configuredDescriptors.add(new ConfiguredDescriptor(method,
 						configuredAnnotation));
 			}
 
 			Provided providedAnnotation = method.getAnnotation(Provided.class);
 			if (providedAnnotation != null) {
+				if (!method.isAnnotationPresent(Inject.class)) {
+					logger
+							.warn(
+									"No @Inject annotation found for @Provided method: {}",
+									method);
+				}
 				providedDescriptors.add(new ProvidedDescriptor(method,
 						providedAnnotation));
 			}
@@ -108,6 +141,13 @@ public class AnalyzerBeanDescriptor implements
 			if (initializeAnnotation != null) {
 				initializeDescriptors.add(new InitializeDescriptor(method,
 						initializeAnnotation));
+			}
+
+			// @PostConstruct is a valid substitution for @Initialize
+			PostConstruct postConstructAnnotation = method.getAnnotation(PostConstruct.class);
+			if (postConstructAnnotation != null) {
+				initializeDescriptors.add(new InitializeDescriptor(method,
+						postConstructAnnotation));
 			}
 
 			Result resultAnnotation = method.getAnnotation(Result.class);
@@ -120,6 +160,13 @@ public class AnalyzerBeanDescriptor implements
 			if (closeAnnotation != null) {
 				closeDescriptors.add(new CloseDescriptor(method,
 						closeAnnotation));
+			}
+			
+			// @PreDestroy is a valid substitution for @Close
+			PreDestroy preDestroyAnnotation = method.getAnnotation(PreDestroy.class);
+			if (preDestroyAnnotation != null) {
+				closeDescriptors.add(new CloseDescriptor(method,
+						preDestroyAnnotation));
 			}
 		}
 
