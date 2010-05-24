@@ -1,7 +1,8 @@
 package org.eobjects.analyzer.beans.stringpattern;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -15,12 +16,12 @@ public class PredefinedTokenDefinition implements Serializable {
 
 	public PredefinedTokenDefinition(String name, Set<String> tokenRegexes) {
 		_name = name;
-		_tokenRegexes = new HashSet<String>(tokenRegexes);
+		_tokenRegexes = tokenRegexes;
 	}
 
 	public PredefinedTokenDefinition(String name, String... tokenRegexes) {
 		_name = name;
-		_tokenRegexes = new HashSet<String>();
+		_tokenRegexes = new LinkedHashSet<String>();
 		for (String string : tokenRegexes) {
 			_tokenRegexes.add(string);
 		}
@@ -31,12 +32,12 @@ public class PredefinedTokenDefinition implements Serializable {
 	}
 
 	public Set<String> getTokenRegexes() {
-		return _tokenRegexes;
+		return Collections.unmodifiableSet(_tokenRegexes);
 	}
 
 	public Set<Pattern> getTokenRegexPatterns() {
 		if (_tokenRegexPatterns == null) {
-			_tokenRegexPatterns = new HashSet<Pattern>();
+			_tokenRegexPatterns = new LinkedHashSet<Pattern>();
 			for (String tokenRegex : _tokenRegexes) {
 				Pattern pattern = Pattern.compile(tokenRegex);
 				_tokenRegexPatterns.add(pattern);

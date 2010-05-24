@@ -49,6 +49,6 @@ public class SimpleToken implements Token {
 
 	@Override
 	public String toString() {
-		return "Token[" + getString() + " (" + _type + ")]";
+		return "Token['" + getString() + "' (" + _type + ")]";
 	}
 }

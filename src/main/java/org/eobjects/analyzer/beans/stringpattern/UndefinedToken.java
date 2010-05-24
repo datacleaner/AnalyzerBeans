@@ -19,6 +19,6 @@ public class UndefinedToken implements Token {
 
 	@Override
 	public String toString() {
-		return "UndefinedToken[" + _string + "]";
+		return "UndefinedToken['" + _string + "']";
 	}
 }

@@ -54,7 +54,17 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		return tokens;
 	}
 
-	protected static List<SimpleToken> tokenizeInternal(String string) {
+	private List<SimpleToken> tokenizeInternal(String string) {
+		List<SimpleToken> tokens = preliminaryTokenize(string);
+
+		if (_configuration.isTokenTypeEnabled(TokenType.MIXED)) {
+			tokens = flattenMixedTokens(tokens);
+		}
+
+		return tokens;
+	}
+
+	protected static List<SimpleToken> preliminaryTokenize(String string) {
 		LinkedList<SimpleToken> result = new LinkedList<SimpleToken>();
 		SimpleToken lastToken = null;
 
@@ -93,12 +103,13 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 				}
 			}
 		}
-		
+
 		SimpleToken previousToken = null;
 		// concat similar typed tokens
 		for (ListIterator<SimpleToken> it = result.listIterator(); it.hasNext();) {
 			SimpleToken token = it.next();
-			if (previousToken == null || token.getType() != previousToken.getType()) {
+			if (previousToken == null
+					|| token.getType() != previousToken.getType()) {
 				// move on
 				previousToken = token;
 			} else {
@@ -123,5 +134,32 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 			result.add(lastToken);
 		}
 		return lastToken;
+	}
+
+	public static List<SimpleToken> flattenMixedTokens(List<SimpleToken> tokens) {
+		SimpleToken previousToken = null;
+		for (ListIterator<SimpleToken> it = tokens.listIterator(); it.hasNext();) {
+			SimpleToken token = it.next();
+			if (previousToken == null) {
+				previousToken = token;
+			} else {
+				TokenType previousType = previousToken.getType();
+				TokenType currentType = token.getType();
+				if (isMixedCandidate(previousType)
+						&& isMixedCandidate(currentType)) {
+					previousToken.appendString(token.getString());
+					previousToken.setType(TokenType.MIXED);
+					it.remove();
+				} else {
+					previousToken = token;
+				}
+			}
+		}
+		return tokens;
+	}
+
+	private static boolean isMixedCandidate(TokenType type) {
+		return type == TokenType.MIXED || type == TokenType.NUMBER
+				|| type == TokenType.TEXT;
 	}
 }

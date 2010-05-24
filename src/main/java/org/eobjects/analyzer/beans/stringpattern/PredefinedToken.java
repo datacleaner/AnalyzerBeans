@@ -27,7 +27,7 @@ public class PredefinedToken implements Token {
 
 	@Override
 	public String toString() {
-		return "Token[" + _string + " (PREDEFINED "
+		return "Token['" + _string + "' (PREDEFINED "
 				+ _predefinedTokenDefintion.getName() + ")]";
 	}
 }
