@@ -19,7 +19,7 @@ public class TokenizerConfiguration implements Serializable {
 	private boolean _discriminateWhiteSpaces = true;
 	private boolean _discriminateDecimalNumbers = true;
 	private boolean _discriminateNegativeNumbers = true;
-	private Set<String> _decimalSeparatorTokens = new HashSet<String>();
+	private Set<Character> _decimalSeparatorCharacters = new HashSet<Character>();
 	private List<PredefinedTokenDefinition> _predefinedTokens = new LinkedList<PredefinedTokenDefinition>();
 
 	public void setTokenTypes(EnumSet<TokenType> tokenTypes) {
@@ -86,20 +86,21 @@ public class TokenizerConfiguration implements Serializable {
 		_discriminateDecimalNumbers = discriminateDecimalNumbers;
 	}
 
-	public Set<String> getDecimalSeparatorTokens() {
-		return _decimalSeparatorTokens;
+	public Set<Character> getDecimalSeparatorCharacters() {
+		return _decimalSeparatorCharacters;
 	}
 
-	public void setDecimalSeparatorTokens(Set<String> decimalSeparatorTokens) {
-		_decimalSeparatorTokens = decimalSeparatorTokens;
+	public void setDecimalSeparatorCharacters(
+			Set<Character> decimalSeparatorCharacters) {
+		_decimalSeparatorCharacters = decimalSeparatorCharacters;
 	}
 
-	public void addDecimalSeparatorToken(String decimalSeparatorToken) {
-		_decimalSeparatorTokens.add(decimalSeparatorToken);
+	public void addDecimalSeparatorCharacter(Character decimalSeparatorCharacter) {
+		_decimalSeparatorCharacters.add(decimalSeparatorCharacter);
 	}
 
-	public void removeDecimalSeparatorToken(String decimalSeparatorToken) {
-		_decimalSeparatorTokens.remove(decimalSeparatorToken);
+	public void removeDecimalSeparatorCharacter(String decimalSeparatorCharacter) {
+		_decimalSeparatorCharacters.remove(decimalSeparatorCharacter);
 	}
 
 	public boolean isDiscriminateNegativeNumbers() {

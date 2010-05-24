@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 public class DefaultTokenizer implements Serializable, Tokenizer {
 
@@ -59,6 +60,11 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 
 		if (_configuration.isTokenTypeEnabled(TokenType.MIXED)) {
 			tokens = flattenMixedTokens(tokens);
+		}
+		
+		Set<Character> decimalSeparatorCharacters = _configuration.getDecimalSeparatorCharacters();
+		if (!decimalSeparatorCharacters.isEmpty()) {
+			tokens = flattenDecimalNumberTokens(tokens, decimalSeparatorCharacters);
 		}
 
 		return tokens;
@@ -134,6 +140,52 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 			result.add(lastToken);
 		}
 		return lastToken;
+	}
+	
+	public static List<SimpleToken> flattenDecimalNumberTokens(
+			List<SimpleToken> tokens, Set<Character> decimalSeparatorCharacters) {
+		SimpleToken previousToken = null;
+		for (ListIterator<SimpleToken> it = tokens.listIterator(); it.hasNext();) {
+			SimpleToken token = it.next();
+			if (previousToken == null) {
+				previousToken = token;
+			} else {
+				if (token.getType() == TokenType.DELIM && previousToken.getType() == TokenType.NUMBER) {
+					if (token.getString().length() == 1) {
+						char tokenChar = token.getString().charAt(0);
+						if (decimalSeparatorCharacters.contains(tokenChar)) {
+							if (it.hasNext()) {
+								SimpleToken nextToken = it.next();
+								if (nextToken.getType() == TokenType.NUMBER) {
+									if (!isInteger(previousToken)) {
+										previousToken.setType(TokenType.MIXED);
+									}
+									previousToken.appendChar(tokenChar);
+									previousToken.appendString(nextToken.getString());
+									it.remove();
+									it.previous();
+									it.remove();
+									continue;
+								}
+							}
+						}
+					}
+				}
+				previousToken = token;
+			}
+		}
+		return tokens;
+	}
+	
+	private static boolean isInteger(Token token) {
+		assert token.getType() == TokenType.NUMBER;
+		String string = token.getString();
+		for (int i = 0; i < string.length(); i++) {
+			if (!Character.isDigit(string.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static List<SimpleToken> flattenMixedTokens(List<SimpleToken> tokens) {
