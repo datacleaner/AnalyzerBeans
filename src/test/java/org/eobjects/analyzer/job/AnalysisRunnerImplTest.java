@@ -17,7 +17,7 @@ import dk.eobjects.metamodel.MetaModelTestCase;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
-public class AnalysisRunnerTest extends MetaModelTestCase {
+public class AnalysisRunnerImplTest extends MetaModelTestCase {
 
 	private static final int NUM_EMPLOYEES = 23;
 	private static final int NUM_CUSTOMERS = 122;

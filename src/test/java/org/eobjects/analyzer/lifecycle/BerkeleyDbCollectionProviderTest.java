@@ -5,7 +5,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-public class ProvidedCollectionHandlerTest extends TestCase {
+public class BerkeleyDbCollectionProviderTest extends TestCase {
 
 	BerkeleyDbCollectionProvider handler = new BerkeleyDbCollectionProvider();
 
