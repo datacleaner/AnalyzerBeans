@@ -1,7 +1,5 @@
 package org.eobjects.analyzer.descriptors;
 
-import org.eobjects.analyzer.descriptors.AnnotationHelper;
-
 import junit.framework.TestCase;
 
 public class AnnotationHelperTest extends TestCase {

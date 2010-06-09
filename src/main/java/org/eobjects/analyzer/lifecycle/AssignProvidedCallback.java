@@ -11,11 +11,11 @@ import org.eobjects.analyzer.job.DataContextProvider;
 public class AssignProvidedCallback implements LifeCycleCallback {
 
 	private AnalyzerBeanInstance analyzerBeanInstance;
-	private ProvidedCollectionHandler collectionHandler;
+	private CollectionProvider collectionHandler;
 	private DataContextProvider dataContextProvider;
 
 	public AssignProvidedCallback(AnalyzerBeanInstance analyzerBeanInstance,
-			ProvidedCollectionHandler collectionProvider,
+			CollectionProvider collectionProvider,
 			DataContextProvider dataContextProvider) {
 		this.analyzerBeanInstance = analyzerBeanInstance;
 		this.collectionHandler = collectionProvider;

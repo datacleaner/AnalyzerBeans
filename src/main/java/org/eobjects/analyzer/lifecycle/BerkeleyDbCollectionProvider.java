@@ -26,7 +26,7 @@ import com.sleepycat.je.EnvironmentConfig;
 
 import dk.eobjects.metamodel.util.FileHelper;
 
-public class ProvidedCollectionHandler {
+public class BerkeleyDbCollectionProvider implements CollectionProvider {
 
 	private Log log = LogFactory.getLog(getClass());
 	private Environment environment;
@@ -137,6 +137,7 @@ public class ProvidedCollectionHandler {
 		return database;
 	}
 
+	@Override
 	public <E> List<E> createList(Class<E> valueType)
 			throws IllegalStateException {
 		Map<Integer, E> map = createMap(Integer.class, valueType);
@@ -147,6 +148,7 @@ public class ProvidedCollectionHandler {
 		return new ProvidedList<E>(map);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType)
 			throws IllegalStateException {

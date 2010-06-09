@@ -4,10 +4,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
-
 import junit.framework.TestCase;
+
+import org.eobjects.analyzer.annotations.Provided;
 
 public class ProvidedDescriptorTest extends TestCase {
 

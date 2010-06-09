@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 public class ProvidedCollectionHandlerTest extends TestCase {
 
-	ProvidedCollectionHandler handler = new ProvidedCollectionHandler();
+	BerkeleyDbCollectionProvider handler = new BerkeleyDbCollectionProvider();
 
 	public void testCreateMap() throws Exception {
 		Map<String, Long> map = handler.createMap(String.class, Long.class);

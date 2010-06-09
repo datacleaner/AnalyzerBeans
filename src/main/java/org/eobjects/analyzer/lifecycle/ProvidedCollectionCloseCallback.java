@@ -6,11 +6,11 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 public class ProvidedCollectionCloseCallback implements LifeCycleCallback {
 
-	private ProvidedCollectionHandler collectionHandler;
+	private CollectionProvider collectionHandler;
 	private List<Object> providedObjects;
 
 	public ProvidedCollectionCloseCallback(
-			ProvidedCollectionHandler collectionHandler,
+			CollectionProvider collectionHandler,
 			List<Object> providedObjects) {
 		this.collectionHandler = collectionHandler;
 		this.providedObjects = providedObjects;
