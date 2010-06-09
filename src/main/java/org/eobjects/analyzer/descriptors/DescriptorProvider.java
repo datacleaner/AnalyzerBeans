@@ -5,6 +5,7 @@ import java.util.Collection;
 public interface DescriptorProvider {
 
 	public Collection<AnalyzerBeanDescriptor> getDescriptors();
-	
-	public AnalyzerBeanDescriptor getDescriptorForClass(Class<?> analyzerBeanClass);
+
+	public AnalyzerBeanDescriptor getDescriptorForClass(
+			Class<?> analyzerBeanClass);
 }

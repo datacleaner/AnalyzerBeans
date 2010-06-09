@@ -13,8 +13,7 @@ public class AnnotationHelperTest extends TestCase {
 				"MyNameIsJohnDoe", false));
 		assertEquals("H e l l o", AnnotationHelper.explodeCamelCase(
 				"h e l l o", false));
-		
-		assertEquals("Name", AnnotationHelper.explodeCamelCase(
-				"getName", true));
+
+		assertEquals("Name", AnnotationHelper.explodeCamelCase("getName", true));
 	}
 }

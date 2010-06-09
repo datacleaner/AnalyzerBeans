@@ -74,7 +74,8 @@ public class TokenizerConfiguration implements Serializable {
 		return _predefinedTokens;
 	}
 
-	public void setPredefinedTokens(List<PredefinedTokenDefinition> predefinedTokens) {
+	public void setPredefinedTokens(
+			List<PredefinedTokenDefinition> predefinedTokens) {
 		_predefinedTokens = predefinedTokens;
 	}
 
@@ -111,7 +112,7 @@ public class TokenizerConfiguration implements Serializable {
 			boolean discriminateNegativeNumbers) {
 		_discriminateNegativeNumbers = discriminateNegativeNumbers;
 	}
-	
+
 	public boolean isTokenTypeEnabled(TokenType tokenType) {
 		return _tokenTypes.contains(tokenType);
 	}

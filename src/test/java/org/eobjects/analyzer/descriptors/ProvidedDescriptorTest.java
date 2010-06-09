@@ -22,15 +22,21 @@ public class ProvidedDescriptorTest extends TestCase {
 
 	public void testGenericTypes() throws Exception {
 		Field stringMapField = SampleClass.class.getDeclaredField("stringMap");
-		ProvidedDescriptor descriptor = new ProvidedDescriptor(stringMapField, stringMapField
+		ProvidedDescriptor descriptor = new ProvidedDescriptor(stringMapField,
+				stringMapField.getAnnotation(Provided.class));
+
+		assertEquals(
+				"ProvidedDescriptor[field=stringMap,baseType=interface java.util.Map,"
+						+ "typeParameters={class java.lang.String,class java.lang.Boolean}]",
+				descriptor.toString());
+
+		Method method = SampleClass.class.getDeclaredMethod("setIntMap",
+				Map.class);
+		descriptor = new ProvidedDescriptor(method, method
 				.getAnnotation(Provided.class));
-
-		assertEquals("ProvidedDescriptor[field=stringMap,baseType=interface java.util.Map,"
-				+ "typeParameters={class java.lang.String,class java.lang.Boolean}]", descriptor.toString());
-
-		Method method = SampleClass.class.getDeclaredMethod("setIntMap", Map.class);
-		descriptor = new ProvidedDescriptor(method, method.getAnnotation(Provided.class));
-		assertEquals("ProvidedDescriptor[method=setIntMap,baseType=interface java.util.Map,"
-				+ "typeParameters={class java.lang.String,class java.lang.Integer}]", descriptor.toString());
+		assertEquals(
+				"ProvidedDescriptor[method=setIntMap,baseType=interface java.util.Map,"
+						+ "typeParameters={class java.lang.String,class java.lang.Integer}]",
+				descriptor.toString());
 	}
 }

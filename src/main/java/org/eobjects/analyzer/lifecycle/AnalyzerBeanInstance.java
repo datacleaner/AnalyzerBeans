@@ -30,12 +30,12 @@ public class AnalyzerBeanInstance implements Runnable {
 		this.analyzerBean = analyzerBean;
 		this.descriptor = descriptor;
 	}
-	
+
 	public void assignConfigured() {
 		runCallbacks(assignConfiguredCallbacks,
 				LifeCycleState.ASSIGN_CONFIGURED);
 	}
-	
+
 	public List<LifeCycleCallback> getAssignConfiguredCallbacks() {
 		return assignConfiguredCallbacks;
 	}
@@ -43,15 +43,15 @@ public class AnalyzerBeanInstance implements Runnable {
 	public void assignProvided() {
 		runCallbacks(assignProvidedCallbacks, LifeCycleState.ASSIGN_PROVIDED);
 	}
-	
+
 	public List<LifeCycleCallback> getAssignProvidedCallbacks() {
 		return assignProvidedCallbacks;
 	}
-	
+
 	public void initialize() {
 		runCallbacks(initializeCallbacks, LifeCycleState.INITIALIZE);
 	}
-	
+
 	public List<LifeCycleCallback> getInitializeCallbacks() {
 		return initializeCallbacks;
 	}
@@ -59,7 +59,7 @@ public class AnalyzerBeanInstance implements Runnable {
 	public void run() {
 		runCallbacks(runCallbacks, LifeCycleState.RUN);
 	}
-	
+
 	public List<LifeCycleCallback> getRunCallbacks() {
 		return runCallbacks;
 	}
@@ -67,7 +67,7 @@ public class AnalyzerBeanInstance implements Runnable {
 	public void returnResults() {
 		runCallbacks(returnResultsCallbacks, LifeCycleState.RETURN_RESULTS);
 	}
-	
+
 	public List<LifeCycleCallback> getReturnResultsCallbacks() {
 		return returnResultsCallbacks;
 	}
@@ -75,7 +75,7 @@ public class AnalyzerBeanInstance implements Runnable {
 	public void close() {
 		runCallbacks(closeCallbacks, LifeCycleState.CLOSE);
 	}
-	
+
 	public List<LifeCycleCallback> getCloseCallbacks() {
 		return closeCallbacks;
 	}

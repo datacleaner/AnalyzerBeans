@@ -63,7 +63,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 	public Map<String, Long> getValueDistribution() {
 		return valueDistribution;
 	}
-	
+
 	public void setValueDistribution(Map<String, Long> valueDistribution) {
 		this.valueDistribution = valueDistribution;
 	}

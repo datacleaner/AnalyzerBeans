@@ -13,7 +13,8 @@ public class ConfiguredDescriptor {
 	private Field _field;
 	private Method _method;
 
-	public ConfiguredDescriptor(Field field, Configured configuredAnnotation) throws DescriptorException {
+	public ConfiguredDescriptor(Field field, Configured configuredAnnotation)
+			throws DescriptorException {
 		_name = configuredAnnotation.value();
 		_field = field;
 		_field.setAccessible(true);
@@ -24,7 +25,8 @@ public class ConfiguredDescriptor {
 		setType(field.getType());
 	}
 
-	public ConfiguredDescriptor(Method method, Configured configuredAnnotation) throws DescriptorException {
+	public ConfiguredDescriptor(Method method, Configured configuredAnnotation)
+			throws DescriptorException {
 		_name = configuredAnnotation.value();
 		_method = method;
 		_method.setAccessible(true);
@@ -35,8 +37,9 @@ public class ConfiguredDescriptor {
 		}
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if (parameterTypes.length != 1) {
-			throw new DescriptorException("The @Configured annotated method " + method + " defines "
-					+ parameterTypes.length + " parameters, a single parameter is required");
+			throw new DescriptorException("The @Configured annotated method "
+					+ method + " defines " + parameterTypes.length
+					+ " parameters, a single parameter is required");
 		}
 		setType(parameterTypes[0]);
 	}
@@ -64,16 +67,22 @@ public class ConfiguredDescriptor {
 	}
 
 	private void setBaseType(Class<?> type) {
-		if (!(AnnotationHelper.isBoolean(type) || AnnotationHelper.isInteger(type) || AnnotationHelper.isLong(type)
-				|| AnnotationHelper.isDouble(type) || AnnotationHelper.isString(type)
-				|| AnnotationHelper.isColumn(type) || AnnotationHelper.isTable(type) || AnnotationHelper.isSchema(type))) {
+		if (!(AnnotationHelper.isBoolean(type)
+				|| AnnotationHelper.isInteger(type)
+				|| AnnotationHelper.isLong(type)
+				|| AnnotationHelper.isDouble(type)
+				|| AnnotationHelper.isString(type)
+				|| AnnotationHelper.isColumn(type)
+				|| AnnotationHelper.isTable(type) || AnnotationHelper
+				.isSchema(type))) {
 			throw new DescriptorException("The type " + _baseType
 					+ " is not supported by the @Configured annotation");
 		}
 		_baseType = type;
 	}
 
-	public void assignValue(Object analyzerBean, Object value) throws IllegalStateException {
+	public void assignValue(Object analyzerBean, Object value)
+			throws IllegalStateException {
 		try {
 			if (_method != null) {
 				_method.invoke(analyzerBean, value);
@@ -81,14 +90,15 @@ public class ConfiguredDescriptor {
 				_field.set(analyzerBean, value);
 			}
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not assign value '" + value + "' to "
-					+ (_method == null ? _field : _method), e);
+			throw new IllegalStateException("Could not assign value '" + value
+					+ "' to " + (_method == null ? _field : _method), e);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "ConfiguredDescriptor[method=" + _method + ",field=" + _field + "]";
+		return "ConfiguredDescriptor[method=" + _method + ",field=" + _field
+				+ "]";
 	}
 
 	public boolean isColumn() {

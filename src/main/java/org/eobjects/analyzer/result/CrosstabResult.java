@@ -16,7 +16,7 @@ public class CrosstabResult implements AnalyzerResult {
 	public Class<?> getProducerClass() {
 		return analyzerClass;
 	}
-	
+
 	public Crosstab<?> getCrosstab() {
 		return crosstab;
 	}

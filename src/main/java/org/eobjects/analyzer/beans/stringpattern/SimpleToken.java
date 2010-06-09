@@ -29,7 +29,7 @@ public class SimpleToken implements Token {
 	public void appendChar(char c) {
 		_stringBuilder.append(c);
 	}
-	
+
 	public void appendString(String s) {
 		_stringBuilder.append(s);
 	}

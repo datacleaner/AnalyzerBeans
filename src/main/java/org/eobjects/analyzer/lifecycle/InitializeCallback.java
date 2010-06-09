@@ -11,8 +11,9 @@ public class InitializeCallback implements LifeCycleCallback {
 	public void onEvent(LifeCycleState state, Object analyzerBean,
 			AnalyzerBeanDescriptor descriptor) {
 		assert state == LifeCycleState.INITIALIZE;
-		
-		List<InitializeDescriptor> initializeDescriptors = descriptor.getInitializeDescriptors();
+
+		List<InitializeDescriptor> initializeDescriptors = descriptor
+				.getInitializeDescriptors();
 		for (InitializeDescriptor initializeDescriptor : initializeDescriptors) {
 			initializeDescriptor.initialize(analyzerBean);
 		}

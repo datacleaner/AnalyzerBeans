@@ -11,18 +11,20 @@ public class PredefinedTokenTokenizerTest extends TestCase {
 	public void testOverlappingPatterns() throws Exception {
 		PredefinedTokenDefinition pt = new PredefinedTokenDefinition(
 				"greeting", "hello .*", "hi .*");
-		
+
 		Set<Pattern> patterns = pt.getTokenRegexPatterns();
 		assertEquals(2, patterns.size());
 		for (Pattern pattern : patterns) {
 			// both patterns can find a match here
 			assertTrue(pattern.matcher("hello hi there").find());
 		}
-		
-		List<Token> tokens = new PredefinedTokenTokenizer(pt).tokenize("hello hi there");
+
+		List<Token> tokens = new PredefinedTokenTokenizer(pt)
+				.tokenize("hello hi there");
 		assertEquals(2, tokens.size());
 		assertEquals("UndefinedToken['hello ']", tokens.get(0).toString());
-		assertEquals("Token['hi there' (PREDEFINED greeting)]", tokens.get(1).toString());
+		assertEquals("Token['hi there' (PREDEFINED greeting)]", tokens.get(1)
+				.toString());
 	}
 
 	public void testTokenizeInternal() throws Exception {

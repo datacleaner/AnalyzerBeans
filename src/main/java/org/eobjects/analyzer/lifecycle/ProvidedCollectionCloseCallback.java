@@ -10,8 +10,7 @@ public class ProvidedCollectionCloseCallback implements LifeCycleCallback {
 	private List<Object> providedObjects;
 
 	public ProvidedCollectionCloseCallback(
-			CollectionProvider collectionHandler,
-			List<Object> providedObjects) {
+			CollectionProvider collectionHandler, List<Object> providedObjects) {
 		this.collectionHandler = collectionHandler;
 		this.providedObjects = providedObjects;
 	}

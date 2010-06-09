@@ -17,7 +17,7 @@ public class RunRowProcessorsCallback implements LifeCycleCallback {
 			AnalyzerBeanDescriptor descriptor) {
 		assert state == LifeCycleState.RUN;
 		assert descriptor.isRowProcessingAnalyzer();
-		
+
 		RowProcessingAnalyzer rowProcessingAnalyzer = (RowProcessingAnalyzer) analyzerBean;
 		processor.addEndPoint(rowProcessingAnalyzer);
 	}

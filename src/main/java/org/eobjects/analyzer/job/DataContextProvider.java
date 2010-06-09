@@ -7,6 +7,6 @@ import dk.eobjects.metamodel.DataContext;
 public interface DataContextProvider {
 
 	public DataContext getDataContext();
-	
+
 	public SchemaNavigator getSchemaNavigator();
 }

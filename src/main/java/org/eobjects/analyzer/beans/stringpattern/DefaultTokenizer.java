@@ -61,10 +61,12 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		if (_configuration.isTokenTypeEnabled(TokenType.MIXED)) {
 			tokens = flattenMixedTokens(tokens);
 		}
-		
-		Set<Character> decimalSeparatorCharacters = _configuration.getDecimalSeparatorCharacters();
+
+		Set<Character> decimalSeparatorCharacters = _configuration
+				.getDecimalSeparatorCharacters();
 		if (!decimalSeparatorCharacters.isEmpty()) {
-			tokens = flattenDecimalNumberTokens(tokens, decimalSeparatorCharacters);
+			tokens = flattenDecimalNumberTokens(tokens,
+					decimalSeparatorCharacters);
 		}
 
 		return tokens;
@@ -141,7 +143,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		}
 		return lastToken;
 	}
-	
+
 	public static List<SimpleToken> flattenDecimalNumberTokens(
 			List<SimpleToken> tokens, Set<Character> decimalSeparatorCharacters) {
 		SimpleToken previousToken = null;
@@ -150,7 +152,8 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 			if (previousToken == null) {
 				previousToken = token;
 			} else {
-				if (token.getType() == TokenType.DELIM && previousToken.getType() == TokenType.NUMBER) {
+				if (token.getType() == TokenType.DELIM
+						&& previousToken.getType() == TokenType.NUMBER) {
 					if (token.getString().length() == 1) {
 						char tokenChar = token.getString().charAt(0);
 						if (decimalSeparatorCharacters.contains(tokenChar)) {
@@ -161,7 +164,8 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 										previousToken.setType(TokenType.MIXED);
 									}
 									previousToken.appendChar(tokenChar);
-									previousToken.appendString(nextToken.getString());
+									previousToken.appendString(nextToken
+											.getString());
 									it.remove();
 									it.previous();
 									it.remove();
@@ -176,7 +180,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		}
 		return tokens;
 	}
-	
+
 	private static boolean isInteger(Token token) {
 		assert token.getType() == TokenType.NUMBER;
 		String string = token.getString();

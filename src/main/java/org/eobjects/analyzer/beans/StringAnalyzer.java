@@ -283,10 +283,10 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 		return new Query().from(column.getTable()).select(
 				new SelectItem(column)).selectCount().groupBy(column);
 	}
-	
+
 	class CharRowFilter implements SerializableRowFilter {
 		private static final long serialVersionUID = 1L;
-		
+
 		private Column column;
 		private Long numChars;
 
@@ -308,7 +308,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 
 	class WordRowFilter implements SerializableRowFilter {
 		private static final long serialVersionUID = 1L;
-		
+
 		private Column column;
 		private Long numWords;
 

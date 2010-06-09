@@ -58,7 +58,7 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 		assertEquals("[]", descriptor.getProvidedDescriptors().toString());
 
 		assertEquals("[]", descriptor.getInitializeDescriptors().toString());
-		
+
 		assertTrue(descriptor.isExploringAnalyzer());
 		assertFalse(descriptor.isRowProcessingAnalyzer());
 

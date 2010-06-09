@@ -22,12 +22,14 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 	protected final Log _log = LogFactory.getLog(getClass());
 	private Map<Class<?>, AnalyzerBeanDescriptor> _descriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
 
-	public List<AnalyzerBeanDescriptor> scanPackage(String packageName, boolean recursive) {
+	public List<AnalyzerBeanDescriptor> scanPackage(String packageName,
+			boolean recursive) {
 		List<AnalyzerBeanDescriptor> analyzerDescriptors = new LinkedList<AnalyzerBeanDescriptor>();
 
 		String packagePath = packageName.replace('.', '/');
 		try {
-			Enumeration<URL> resources = ClassLoader.getSystemResources(packagePath);
+			Enumeration<URL> resources = ClassLoader
+					.getSystemResources(packagePath);
 			while (resources.hasMoreElements()) {
 				URL resource = resources.nextElement();
 				File dir = new File(resource.getFile());
@@ -40,12 +42,15 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 		return analyzerDescriptors;
 	}
 
-	private List<AnalyzerBeanDescriptor> scanDirectory(File dir, boolean recursive) {
+	private List<AnalyzerBeanDescriptor> scanDirectory(File dir,
+			boolean recursive) {
 		if (!dir.exists()) {
-			throw new IllegalArgumentException("Directory '" + dir + "' does not exist");
+			throw new IllegalArgumentException("Directory '" + dir
+					+ "' does not exist");
 		}
 		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException("The file '" + dir + "' is not a directory");
+			throw new IllegalArgumentException("The file '" + dir
+					+ "' is not a directory");
 		}
 		_log.info("Scanning directory: " + dir);
 
@@ -61,12 +66,14 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 		for (File file : classFiles) {
 			try {
 				AnalyzerBeansClassVisitor visitor = new AnalyzerBeansClassVisitor();
-				ClassReader classReader = new ClassReader(new FileInputStream(file));
+				ClassReader classReader = new ClassReader(new FileInputStream(
+						file));
 				classReader.accept(visitor, ClassReader.SKIP_CODE);
 
 				if (visitor.isAnalyzer()) {
 					Class<?> analyzerClass = visitor.getAnalyzerClass();
-					AnalyzerBeanDescriptor descriptor = _descriptors.get(analyzerClass);
+					AnalyzerBeanDescriptor descriptor = _descriptors
+							.get(analyzerClass);
 					if (descriptor == null) {
 						descriptor = new AnalyzerBeanDescriptor(analyzerClass);
 						_descriptors.put(analyzerClass, descriptor);
@@ -86,7 +93,8 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 				}
 			});
 			if (_log.isInfoEnabled() && subDirectories.length > 0) {
-				_log.info("Recursively scanning " + subDirectories.length + " subdirectories");
+				_log.info("Recursively scanning " + subDirectories.length
+						+ " subdirectories");
 			}
 			for (File subDir : subDirectories) {
 				analyzerDescriptors.addAll(scanDirectory(subDir, true));
@@ -100,10 +108,11 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 		return _descriptors.values();
 	}
 
-	public void putDescriptor(Class<?> analyzerClass, AnalyzerBeanDescriptor descriptor) {
+	public void putDescriptor(Class<?> analyzerClass,
+			AnalyzerBeanDescriptor descriptor) {
 		_descriptors.put(analyzerClass, descriptor);
 	}
-	
+
 	@Override
 	public AnalyzerBeanDescriptor getDescriptorForClass(
 			Class<?> analyzerBeanClass) {

@@ -9,7 +9,7 @@ import org.eobjects.analyzer.beans.mock.ExploringBeanMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingBeanMock;
 
 public class AnalyzerBeanDescriptorTest extends TestCase {
-	
+
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
@@ -42,9 +42,9 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 		List<ConfiguredDescriptor> configuredDescriptors = descriptor
 				.getConfiguredDescriptors();
 		assertEquals(
-				"{ConfiguredDescriptor[method=null,field=private dk.eobjects.metamodel.schema.Column[] org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.columns]," +
-				"ConfiguredDescriptor[method=null,field=private java.lang.String org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.configured1]," +
-				"ConfiguredDescriptor[method=public void org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.setConfigured2(java.lang.Integer),field=null]}",
+				"{ConfiguredDescriptor[method=null,field=private dk.eobjects.metamodel.schema.Column[] org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.columns],"
+						+ "ConfiguredDescriptor[method=null,field=private java.lang.String org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.configured1],"
+						+ "ConfiguredDescriptor[method=public void org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.setConfigured2(java.lang.Integer),field=null]}",
 				ArrayUtils.toString(configuredDescriptors.toArray()));
 		assertEquals(
 				"{ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.runCount()],ResultDescriptor[method=public org.eobjects.analyzer.result.AnalyzerResult org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.rowCountResult()]}",

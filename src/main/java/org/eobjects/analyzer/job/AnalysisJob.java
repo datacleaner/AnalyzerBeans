@@ -185,10 +185,14 @@ public final class AnalysisJob implements Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("analyzerClass", _analyzerClass)
-				.append("booleanProperties", _booleanProperties).append("integerProperties", _integerProperties)
-				.append("longProperties", _longProperties).append("doubleProperties", _doubleProperties).append(
-						"stringProperties", _stringProperties).append("columnProperties", _columnProperties).append(
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("analyzerClass", _analyzerClass).append(
+						"booleanProperties", _booleanProperties).append(
+						"integerProperties", _integerProperties).append(
+						"longProperties", _longProperties).append(
+						"doubleProperties", _doubleProperties).append(
+						"stringProperties", _stringProperties).append(
+						"columnProperties", _columnProperties).append(
 						"tableProperties", _tableProperties).toString();
 	}
 }

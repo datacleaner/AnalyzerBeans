@@ -144,7 +144,8 @@ public class AnalyzerBeanDescriptor implements
 			}
 
 			// @PostConstruct is a valid substitution for @Initialize
-			PostConstruct postConstructAnnotation = method.getAnnotation(PostConstruct.class);
+			PostConstruct postConstructAnnotation = method
+					.getAnnotation(PostConstruct.class);
 			if (postConstructAnnotation != null) {
 				initializeDescriptors.add(new InitializeDescriptor(method,
 						postConstructAnnotation));
@@ -161,9 +162,10 @@ public class AnalyzerBeanDescriptor implements
 				closeDescriptors.add(new CloseDescriptor(method,
 						closeAnnotation));
 			}
-			
+
 			// @PreDestroy is a valid substitution for @Close
-			PreDestroy preDestroyAnnotation = method.getAnnotation(PreDestroy.class);
+			PreDestroy preDestroyAnnotation = method
+					.getAnnotation(PreDestroy.class);
 			if (preDestroyAnnotation != null) {
 				closeDescriptors.add(new CloseDescriptor(method,
 						preDestroyAnnotation));

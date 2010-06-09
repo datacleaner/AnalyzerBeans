@@ -12,7 +12,7 @@ import java.util.Map;
 public class ProvidedList<E> extends AbstractList<E> implements List<E> {
 
 	private Map<Integer, E> wrappedMap;
-	
+
 	public Map<Integer, E> getWrappedMap() {
 		return wrappedMap;
 	}

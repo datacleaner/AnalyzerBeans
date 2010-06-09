@@ -41,7 +41,8 @@ public class AverageBuilder {
 
 	@Override
 	public String toString() {
-		return "AverageBuilder[average=" + _average + ",numValues=" + _numValues + "]";
+		return "AverageBuilder[average=" + _average + ",numValues="
+				+ _numValues + "]";
 	}
 
 	@Override

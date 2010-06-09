@@ -16,7 +16,7 @@ public class MultiThreadedRunnableConsumer implements RunnableConsumer {
 		if (runnables.size() < maxThreads) {
 			threadCount = runnables.size();
 		}
-		
+
 		Thread[] threads = new Thread[threadCount];
 		for (int i = 0; i < threads.length; i++) {
 			threads[i] = new QueueConsumingThread(runnables);

@@ -20,7 +20,8 @@ public class ReturnResultsCallback implements LifeCycleCallback {
 			AnalyzerBeanDescriptor descriptor) {
 		assert state == LifeCycleState.RETURN_RESULTS;
 
-		List<AnalyzerResult> resultsForBean = getResults(analyzerBean, descriptor);
+		List<AnalyzerResult> resultsForBean = getResults(analyzerBean,
+				descriptor);
 		for (AnalyzerResult result : resultsForBean) {
 			this.results.add(result);
 		}
