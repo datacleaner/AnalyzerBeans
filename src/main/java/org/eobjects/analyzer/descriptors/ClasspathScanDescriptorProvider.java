@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -17,7 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 
-public class AnnotationScanner {
+public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 
 	protected final Log _log = LogFactory.getLog(getClass());
 	private Map<Class<?>, AnalyzerBeanDescriptor> _descriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
@@ -60,9 +60,9 @@ public class AnnotationScanner {
 
 		for (File file : classFiles) {
 			try {
-				AnnotationVisitor visitor = new AnnotationVisitor();
+				AnalyzerBeansClassVisitor visitor = new AnalyzerBeansClassVisitor();
 				ClassReader classReader = new ClassReader(new FileInputStream(file));
-				classReader.accept(visitor, true);
+				classReader.accept(visitor, ClassReader.SKIP_CODE);
 
 				if (visitor.isAnalyzer()) {
 					Class<?> analyzerClass = visitor.getAnalyzerClass();
@@ -95,11 +95,18 @@ public class AnnotationScanner {
 		return analyzerDescriptors;
 	}
 
-	public Map<Class<?>, AnalyzerBeanDescriptor> getDescriptors() {
-		return Collections.unmodifiableMap(_descriptors);
+	@Override
+	public Collection<AnalyzerBeanDescriptor> getDescriptors() {
+		return _descriptors.values();
 	}
 
 	public void putDescriptor(Class<?> analyzerClass, AnalyzerBeanDescriptor descriptor) {
 		_descriptors.put(analyzerClass, descriptor);
+	}
+	
+	@Override
+	public AnalyzerBeanDescriptor getDescriptorForClass(
+			Class<?> analyzerBeanClass) {
+		return _descriptors.get(analyzerBeanClass);
 	}
 }

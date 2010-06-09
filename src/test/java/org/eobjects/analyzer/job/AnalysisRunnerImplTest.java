@@ -52,7 +52,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		AnalysisJob job2 = new AnalysisJob(ExploringBeanMock.class);
 		setReusableMockProperties(job2);
 
-		AnalysisRunnerImpl runner = new AnalysisRunnerImpl();
+		AnalysisRunner runner = new AnalysisRunnerImpl();
 		runner.addJob(job1);
 		runner.addJob(job2);
 		runner.run(dc);
@@ -78,7 +78,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		job.putColumnProperty("Columns", employeeColumns[0],
 				employeeColumns[1], customerColumns[0]);
 
-		AnalysisRunnerImpl runner = new AnalysisRunnerImpl();
+		AnalysisRunner runner = new AnalysisRunnerImpl();
 		runner.addJob(job);
 		runner.run(dc);
 

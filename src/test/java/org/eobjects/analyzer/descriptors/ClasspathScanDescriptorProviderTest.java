@@ -7,17 +7,17 @@ import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
 
-public class AnnotationScannerTest extends TestCase {
+public class ClasspathScanDescriptorProviderTest extends TestCase {
 
 	public void testScanNonExistingPackage() throws Exception {
-		AnnotationScanner scanner = new AnnotationScanner();
+		ClasspathScanDescriptorProvider scanner = new ClasspathScanDescriptorProvider();
 		List<AnalyzerBeanDescriptor> analyzerDescriptors = scanner.scanPackage(
 				"org.eobjects.analyzer.nonexistingbeans", true);
 		assertEquals("{}", ArrayUtils.toString(analyzerDescriptors.toArray()));
 	}
 
 	public void testScanPackageRecursive() throws Exception {
-		AnnotationScanner scanner = new AnnotationScanner();
+		ClasspathScanDescriptorProvider scanner = new ClasspathScanDescriptorProvider();
 		List<AnalyzerBeanDescriptor> analyzerDescriptors = scanner.scanPackage(
 				"org.eobjects.analyzer.beans.mock", true);
 		Collections.sort(analyzerDescriptors);
