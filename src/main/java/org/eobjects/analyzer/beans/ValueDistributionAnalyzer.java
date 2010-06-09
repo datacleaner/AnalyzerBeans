@@ -10,7 +10,7 @@ import org.eobjects.analyzer.annotations.Result;
 import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.schema.Column;
 
-@AnalyzerBean
+@AnalyzerBean("Value distribution")
 public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 
 	@Configured
