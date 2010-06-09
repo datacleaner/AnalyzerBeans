@@ -4,9 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
-import org.eobjects.analyzer.job.DataContextProvider;
 
 public class AssignProvidedCallback implements LifeCycleCallback {
 

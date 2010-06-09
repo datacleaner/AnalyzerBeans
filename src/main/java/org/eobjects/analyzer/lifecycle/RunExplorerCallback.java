@@ -1,8 +1,8 @@
 package org.eobjects.analyzer.lifecycle;
 
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.job.DataContextProvider;
 
 public class RunExplorerCallback implements LifeCycleCallback {
 

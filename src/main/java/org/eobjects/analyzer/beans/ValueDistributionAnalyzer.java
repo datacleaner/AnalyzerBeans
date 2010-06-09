@@ -2,6 +2,8 @@ package org.eobjects.analyzer.beans;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Provided;
@@ -13,9 +15,11 @@ import dk.eobjects.metamodel.schema.Column;
 @AnalyzerBean("Value distribution")
 public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 
+	@Inject
 	@Configured
 	Column column;
 
+	@Inject
 	@Provided
 	Map<String, Long> valueDistribution;
 

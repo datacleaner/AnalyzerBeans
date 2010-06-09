@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.connection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

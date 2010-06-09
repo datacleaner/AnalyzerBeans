@@ -9,6 +9,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;

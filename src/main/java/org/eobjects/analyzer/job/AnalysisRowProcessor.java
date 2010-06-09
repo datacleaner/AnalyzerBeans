@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.connection.DataContextProvider;
 
 import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.Row;

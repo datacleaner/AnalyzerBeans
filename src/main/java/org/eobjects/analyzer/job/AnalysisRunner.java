@@ -2,6 +2,7 @@ package org.eobjects.analyzer.job;
 
 import java.util.List;
 
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 import dk.eobjects.metamodel.DataContext;
