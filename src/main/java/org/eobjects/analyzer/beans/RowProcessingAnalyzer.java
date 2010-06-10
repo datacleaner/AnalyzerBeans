@@ -4,5 +4,5 @@ import dk.eobjects.metamodel.data.Row;
 
 public interface RowProcessingAnalyzer {
 
-	public void run(Row row, long distinctCount);
+	public void run(Row row, int distinctCount);
 }

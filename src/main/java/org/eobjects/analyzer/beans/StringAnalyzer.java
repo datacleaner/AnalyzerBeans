@@ -41,7 +41,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 	private static final short INDEX_MIN_WHITE_SPACES = 12;
 
 	private NumberFormat numberFormat = FormatHelper.getUiNumberFormat();
-	private Map<Column, Long[]> counts = new HashMap<Column, Long[]>();
+	private Map<Column, Integer[]> counts = new HashMap<Column, Integer[]>();
 	private Map<Column, AverageBuilder> charAverages = new HashMap<Column, AverageBuilder>();
 	private Map<Column, AverageBuilder> blanksAverages = new HashMap<Column, AverageBuilder>();
 
@@ -59,23 +59,23 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 	}
 
 	@Override
-	public void run(Row row, long distinctCount) {
+	public void run(Row row, int distinctCount) {
 		for (Column column : columns) {
 			Object value = row.getValue(column);
-			Long[] counters = counts.get(column);
+			Integer[] counters = counts.get(column);
 			AverageBuilder charAverageBuilder = charAverages.get(column);
 			AverageBuilder blanksAverageBuilder = blanksAverages.get(column);
 			if (counters == null) {
-				counters = new Long[13];
-				counters[INDEX_NUM_CHARS] = 0l;
+				counters = new Integer[13];
+				counters[INDEX_NUM_CHARS] = 0;
 				counters[INDEX_MIN_CHARS] = null;
 				counters[INDEX_MAX_CHARS] = null;
 				counters[INDEX_MAX_BLANKS] = null;
 				counters[INDEX_MIN_BLANKS] = null;
-				counters[INDEX_NUM_UPPERCASE] = 0l;
-				counters[INDEX_NUM_LOWERCASE] = 0l;
-				counters[INDEX_NUM_NONLETTER] = 0l;
-				counters[INDEX_NUM_WORDS] = 0l;
+				counters[INDEX_NUM_UPPERCASE] = 0;
+				counters[INDEX_NUM_LOWERCASE] = 0;
+				counters[INDEX_NUM_NONLETTER] = 0;
+				counters[INDEX_NUM_WORDS] = 0;
 				counters[INDEX_MIN_WORDS] = null;
 				counters[INDEX_MAX_WORDS] = null;
 				counters[INDEX_MIN_WHITE_SPACES] = null;
@@ -90,9 +90,9 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 			}
 			if (value != null) {
 				String string = value.toString();
-				long numChars = string.length();
-				long numWords = new StringTokenizer(string).countTokens();
-				long numBlanks = countBlanks(string);
+				int numChars = string.length();
+				int numWords = new StringTokenizer(string).countTokens();
+				int numBlanks = countBlanks(string);
 
 				if (counters[INDEX_MIN_CHARS] == null) {
 					// This is the first time we encounter a non-null value, so
@@ -149,7 +149,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 		}
 	}
 
-	public static long countBlanks(String str) {
+	public static int countBlanks(String str) {
 		int count = 0;
 		char[] chars = str.toCharArray();
 		for (char c : chars) {
@@ -189,13 +189,45 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 			CrosstabNavigator<String> nav = crosstab.where(columnDimension,
 					columnName);
 
-			Long[] columnCounts = this.counts.get(column);
-			AverageBuilder charAverageBuilder = charAverages.get(column);
-			AverageBuilder blanksAverageBuilder = blanksAverages.get(column);
+			Integer[] columnCounts = this.counts.get(column);
+			final Integer numChars;
+			final Integer maxChars;
+			final Integer minChars;
+			final Integer numWords;
+			final Integer maxWords;
+			final Integer minWords;
+			final Integer maxBlanks;
+			final Integer minBlanks;
+			if (columnCounts != null) {
+				numChars = columnCounts[INDEX_NUM_CHARS];
+				maxChars = columnCounts[INDEX_MAX_CHARS];
+				minChars = columnCounts[INDEX_MIN_CHARS];
+				numWords = columnCounts[INDEX_NUM_WORDS];
+				maxWords = columnCounts[INDEX_MAX_WORDS];
+				minWords = columnCounts[INDEX_MIN_WORDS];
+				maxBlanks = columnCounts[INDEX_MAX_BLANKS];
+				minBlanks = columnCounts[INDEX_MIN_BLANKS];
+			} else {
+				numChars = null;
+				maxChars = null;
+				minChars = null;
+				numWords = null;
+				maxWords = null;
+				minWords = null;
+				maxBlanks = null;
+				minBlanks = null;
+			}
 
-			Long numChars = columnCounts[INDEX_NUM_CHARS];
-			final Long maxChars = columnCounts[INDEX_MAX_CHARS];
-			final Long minChars = columnCounts[INDEX_MIN_CHARS];
+			AverageBuilder charAverageBuilder = charAverages.get(column);
+			if (charAverageBuilder == null) {
+				charAverageBuilder = new AverageBuilder();
+			}
+
+			AverageBuilder blanksAverageBuilder = blanksAverages.get(column);
+			if (blanksAverageBuilder == null) {
+				blanksAverageBuilder = new AverageBuilder();
+			}
+
 			String avgChars = null;
 			if (charAverageBuilder.getNumValues() > 0) {
 				avgChars = numberFormat.format(charAverageBuilder.getAverage());
@@ -208,7 +240,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 			String numUppercase = "0%";
 			String numLowercase = "0%";
 			String numNonletter = "0%";
-			if (numChars > 0) {
+			if (numChars != null && numChars > 0) {
 				numUppercase = (columnCounts[INDEX_NUM_UPPERCASE] * 100 / numChars)
 						+ "%";
 				numLowercase = (columnCounts[INDEX_NUM_LOWERCASE] * 100 / numChars)
@@ -216,60 +248,60 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 				numNonletter = (columnCounts[INDEX_NUM_NONLETTER] * 100 / numChars)
 						+ "%";
 			}
-			final Long numWords = columnCounts[INDEX_NUM_WORDS];
-			final Long maxWords = columnCounts[INDEX_MAX_WORDS];
-			final Long minWords = columnCounts[INDEX_MIN_WORDS];
-			final Long maxBlanks = columnCounts[INDEX_MAX_BLANKS];
-			final Long minBlanks = columnCounts[INDEX_MIN_BLANKS];
 
 			// base query for exploration data result producers
 			Query baseQuery = getBaseQuery(column);
 			QueryResultProducer resultProducer;
 
-			nav.where(measureDimension, "Char count").put(
-					Long.toString(numChars));
-			nav.where(measureDimension, "Max chars").put(
-					Long.toString(maxChars));
-
+			if (numChars != null) {
+				nav.where(measureDimension, "Char count").put(
+						Long.toString(numChars));
+			}
 			if (maxChars != null) {
+				nav.where(measureDimension, "Max chars").put(
+						Long.toString(maxChars));
+
 				resultProducer = new QueryResultProducer(baseQuery);
 				resultProducer.addFilter(new CharRowFilter(column, maxChars));
 				nav.attach(resultProducer);
 			}
 
-			nav.where(measureDimension, "Min chars").put(
-					Long.toString(minChars));
-
 			if (minChars != null) {
+				nav.where(measureDimension, "Min chars").put(
+						Long.toString(minChars));
 				resultProducer = new QueryResultProducer(baseQuery);
 				resultProducer.addFilter(new CharRowFilter(column, minChars));
 				nav.attach(resultProducer);
 			}
 
-			nav.where(measureDimension, "Avg chars").put(avgChars);
-			nav.where(measureDimension, "Max white spaces").put(
-					Long.toString(maxBlanks));
-			nav.where(measureDimension, "Min white spaces").put(
-					Long.toString(minBlanks));
-			nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
-			nav.where(measureDimension, "Uppercase chars").put(numUppercase);
-			nav.where(measureDimension, "Lowercase chars").put(numLowercase);
-			nav.where(measureDimension, "Non-letter chars").put(numNonletter);
-			nav.where(measureDimension, "Word count").put(
-					Long.toString(numWords));
-			nav.where(measureDimension, "Max words").put(
-					Long.toString(maxWords));
+			if (columnCounts != null) {
+				nav.where(measureDimension, "Avg chars").put(avgChars);
+				nav.where(measureDimension, "Max white spaces").put(
+						Long.toString(maxBlanks));
+				nav.where(measureDimension, "Min white spaces").put(
+						Long.toString(minBlanks));
+				nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
+				nav.where(measureDimension, "Uppercase chars")
+						.put(numUppercase);
+				nav.where(measureDimension, "Lowercase chars")
+						.put(numLowercase);
+				nav.where(measureDimension, "Non-letter chars").put(
+						numNonletter);
+				nav.where(measureDimension, "Word count").put(
+						Long.toString(numWords));
+			}
 
 			if (maxWords != null) {
+				nav.where(measureDimension, "Max words").put(
+						Long.toString(maxWords));
 				resultProducer = new QueryResultProducer(baseQuery);
 				resultProducer.addFilter(new WordRowFilter(column, maxWords));
 				nav.attach(resultProducer);
 			}
 
-			nav.where(measureDimension, "Min words").put(
-					Long.toString(minWords));
-
 			if (minWords != null) {
+				nav.where(measureDimension, "Min words").put(
+						Long.toString(minWords));
 				resultProducer = new QueryResultProducer(baseQuery);
 				resultProducer.addFilter(new WordRowFilter(column, minWords));
 				nav.attach(resultProducer);
@@ -288,9 +320,9 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 		private static final long serialVersionUID = 1L;
 
 		private Column column;
-		private Long numChars;
+		private Integer numChars;
 
-		public CharRowFilter(Column column, Long numChars) {
+		public CharRowFilter(Column column, Integer numChars) {
 			this.column = column;
 			this.numChars = numChars;
 		}
@@ -310,9 +342,9 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 		private static final long serialVersionUID = 1L;
 
 		private Column column;
-		private Long numWords;
+		private Integer numWords;
 
-		public WordRowFilter(Column column, Long numWords) {
+		public WordRowFilter(Column column, Integer numWords) {
 			this.column = column;
 			this.numWords = numWords;
 		}

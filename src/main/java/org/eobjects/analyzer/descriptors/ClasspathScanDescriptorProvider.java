@@ -22,7 +22,7 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 	protected final Log _log = LogFactory.getLog(getClass());
 	private Map<Class<?>, AnalyzerBeanDescriptor> _descriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
 
-	public List<AnalyzerBeanDescriptor> scanPackage(String packageName,
+	public ClasspathScanDescriptorProvider scanPackage(String packageName,
 			boolean recursive) {
 		List<AnalyzerBeanDescriptor> analyzerDescriptors = new LinkedList<AnalyzerBeanDescriptor>();
 
@@ -39,7 +39,7 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 			_log.error(e);
 		}
 
-		return analyzerDescriptors;
+		return this;
 	}
 
 	private List<AnalyzerBeanDescriptor> scanDirectory(File dir,

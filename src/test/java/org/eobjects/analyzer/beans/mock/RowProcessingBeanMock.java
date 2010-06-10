@@ -108,7 +108,7 @@ public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 	private long rowCount;
 
 	@Override
-	public void run(Row row, long count) {
+	public void run(Row row, int count) {
 		TestCase.assertNotNull(row);
 		TestCase.assertNotNull(count);
 		this.runCount++;

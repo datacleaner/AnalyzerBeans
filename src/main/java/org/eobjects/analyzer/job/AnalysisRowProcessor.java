@@ -61,14 +61,14 @@ public class AnalysisRowProcessor implements Runnable {
 			dataSet = dataContextProvider.getDataContext().executeQuery(q);
 			while (dataSet.next()) {
 				Row row = dataSet.getRow();
-				Long count;
+				Integer count;
 				Object countValue = row.getValue(countAllItem);
-				if (countValue instanceof Long) {
-					count = (Long) countValue;
+				if (countValue instanceof Integer) {
+					count = (Integer) countValue;
 				} else if (countValue instanceof Number) {
-					count = ((Number) countValue).longValue();
+					count = ((Number) countValue).intValue();
 				} else {
-					count = new Long(countValue.toString());
+					count = Integer.parseInt(countValue.toString());
 				}
 
 				processRow(row, count);
@@ -82,7 +82,7 @@ public class AnalysisRowProcessor implements Runnable {
 		}
 	}
 
-	protected void processRow(Row row, Long count) {
+	protected void processRow(Row row, Integer count) {
 		for (RowProcessingAnalyzer analyzerBean : analyzerBeansAndRunDescriptors) {
 			analyzerBean.run(row, count);
 		}

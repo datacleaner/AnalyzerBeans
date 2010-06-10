@@ -178,16 +178,27 @@ public class AnalyzerBeanDescriptor implements
 		}
 
 		if (rowProcessingAnalyzer) {
-			boolean hasConfiguredColumnArray = false;
+			int numConfiguredColumns = 0;
+			int numConfiguredColumnArrays = 0;
 			for (ConfiguredDescriptor cd : configuredDescriptors) {
-				if (cd.isArray() && cd.isColumn()) {
-					hasConfiguredColumnArray = true;
-					break;
+				if (cd.isColumn()) {
+					if (cd.isArray()) {
+						numConfiguredColumnArrays++;
+					} else {
+						numConfiguredColumns++;
+					}
 				}
 			}
-			if (!hasConfiguredColumnArray) {
-				throw new DescriptorException(analyzerClass
-						+ " does not define any @Configured column-arrays");
+			int totalColumns = numConfiguredColumns + numConfiguredColumnArrays;
+			if (totalColumns == 0) {
+				throw new DescriptorException(
+						analyzerClass
+								+ " does not define a @Configured column or column-array");
+			}
+			if (totalColumns > 1) {
+				throw new DescriptorException(
+						analyzerClass
+								+ " defines multiple @Configured columns, cannot determine which one to use for row processing");
 			}
 		}
 
