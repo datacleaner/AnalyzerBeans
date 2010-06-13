@@ -13,13 +13,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ClasspathScanDescriptorProvider implements DescriptorProvider {
+public final class ClasspathScanDescriptorProvider implements DescriptorProvider {
 
-	protected final Log _log = LogFactory.getLog(getClass());
+	private static final Logger logger = LoggerFactory.getLogger(ClasspathScanDescriptorProvider.class);
 	private Map<Class<?>, AnalyzerBeanDescriptor> _descriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
 
 	public ClasspathScanDescriptorProvider scanPackage(String packageName,
@@ -36,7 +36,7 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 				analyzerDescriptors.addAll(scanDirectory(dir, recursive));
 			}
 		} catch (IOException e) {
-			_log.error(e);
+			logger.error("Could not open classpath resource", e);
 		}
 
 		return this;
@@ -52,7 +52,7 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 			throw new IllegalArgumentException("The file '" + dir
 					+ "' is not a directory");
 		}
-		_log.info("Scanning directory: " + dir);
+		logger.info("Scanning directory: " + dir);
 
 		List<AnalyzerBeanDescriptor> analyzerDescriptors = new LinkedList<AnalyzerBeanDescriptor>();
 
@@ -81,7 +81,7 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 					analyzerDescriptors.add(descriptor);
 				}
 			} catch (IOException e) {
-				_log.error(e);
+				logger.error("Could not read file", e);
 			}
 		}
 
@@ -92,8 +92,8 @@ public class ClasspathScanDescriptorProvider implements DescriptorProvider {
 					return file.isDirectory();
 				}
 			});
-			if (_log.isInfoEnabled() && subDirectories.length > 0) {
-				_log.info("Recursively scanning " + subDirectories.length
+			if (logger.isInfoEnabled() && subDirectories.length > 0) {
+				logger.info("Recursively scanning " + subDirectories.length
 						+ " subdirectories");
 			}
 			for (File subDir : subDirectories) {
