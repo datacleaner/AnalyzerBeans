@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eobjects.analyzer.descriptors.AnnotationHelper;
 import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sleepycat.bind.ByteArrayBinding;
 import com.sleepycat.bind.EntryBinding;
@@ -28,7 +28,7 @@ import dk.eobjects.metamodel.util.FileHelper;
 
 public class BerkeleyDbCollectionProvider implements CollectionProvider {
 
-	private Log log = LogFactory.getLog(getClass());
+	private Logger log = LoggerFactory.getLogger(getClass());
 	private Environment environment;
 	private Boolean deleteOnExit;
 	private File targetDir;
