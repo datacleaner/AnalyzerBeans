@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents an instance of an @AnalyzerBean annotated class at runtime. The
@@ -12,6 +14,9 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
  * stages in the life-cycle of an AnalyzerBean
  */
 public class AnalyzerBeanInstance implements Runnable {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(AnalyzerBeanInstance.class);
 
 	private Object analyzerBean;
 	private AnalyzerBeanDescriptor descriptor;
@@ -32,6 +37,9 @@ public class AnalyzerBeanInstance implements Runnable {
 	}
 
 	public void assignConfigured() {
+		if (logger.isInfoEnabled()) {
+			logger.info("assignConfigured (" + analyzerBean + ")");
+		}
 		runCallbacks(assignConfiguredCallbacks,
 				LifeCycleState.ASSIGN_CONFIGURED);
 	}
@@ -41,6 +49,9 @@ public class AnalyzerBeanInstance implements Runnable {
 	}
 
 	public void assignProvided() {
+		if (logger.isInfoEnabled()) {
+			logger.info("assignProvided (" + analyzerBean + ")");
+		}
 		runCallbacks(assignProvidedCallbacks, LifeCycleState.ASSIGN_PROVIDED);
 	}
 
@@ -49,6 +60,9 @@ public class AnalyzerBeanInstance implements Runnable {
 	}
 
 	public void initialize() {
+		if (logger.isInfoEnabled()) {
+			logger.info("initialize (" + analyzerBean + ")");
+		}
 		runCallbacks(initializeCallbacks, LifeCycleState.INITIALIZE);
 	}
 
@@ -57,6 +71,9 @@ public class AnalyzerBeanInstance implements Runnable {
 	}
 
 	public void run() {
+		if (logger.isInfoEnabled()) {
+			logger.info("run (" + analyzerBean + ")");
+		}
 		runCallbacks(runCallbacks, LifeCycleState.RUN);
 	}
 
@@ -65,6 +82,9 @@ public class AnalyzerBeanInstance implements Runnable {
 	}
 
 	public void returnResults() {
+		if (logger.isInfoEnabled()) {
+			logger.info("returnResults (" + analyzerBean + ")");
+		}
 		runCallbacks(returnResultsCallbacks, LifeCycleState.RETURN_RESULTS);
 	}
 
@@ -73,6 +93,9 @@ public class AnalyzerBeanInstance implements Runnable {
 	}
 
 	public void close() {
+		if (logger.isInfoEnabled()) {
+			logger.info("close (" + analyzerBean + ")");
+		}
 		runCallbacks(closeCallbacks, LifeCycleState.CLOSE);
 	}
 

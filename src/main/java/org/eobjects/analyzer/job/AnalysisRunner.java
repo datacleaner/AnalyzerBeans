@@ -25,9 +25,11 @@ public interface AnalysisRunner {
 
 	public void addJob(AnalysisJob job);
 
-	public List<AnalyzerResult> run(DataContextProvider dataContextProvider);
+	public void run(DataContextProvider dataContextProvider);
 
-	public List<AnalyzerResult> run(DataContext dataContext);
+	public void run(DataContext dataContext);
+	
+	public boolean isDone();
 
-	List<AnalyzerResult> getResults();
+	public List<AnalyzerResult> getResults();
 }

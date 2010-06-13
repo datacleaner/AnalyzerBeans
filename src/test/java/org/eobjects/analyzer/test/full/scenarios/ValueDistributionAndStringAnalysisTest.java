@@ -2,7 +2,6 @@ package org.eobjects.analyzer.test.full.scenarios;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
@@ -12,8 +11,7 @@ import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalysisRunner;
 import org.eobjects.analyzer.job.AnalysisRunnerImpl;
-import org.eobjects.analyzer.job.MultiThreadedRunnableConsumer;
-import org.eobjects.analyzer.job.Executor;
+import org.eobjects.analyzer.job.ConcurrencyProvider;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -32,11 +30,12 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 	public void testScenario() throws Exception {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
 				.scanPackage("org.eobjects.analyzer.beans", true);
-		Executor runnableConsumer = new MultiThreadedRunnableConsumer(5);
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
 
+		ConcurrencyProvider concurrencyProvider = null;
+		
 		AnalysisRunner runner = new AnalysisRunnerImpl(descriptorProvider,
-				runnableConsumer, collectionProvider);
+				concurrencyProvider, collectionProvider);
 
 		DataContext dc = DataContextFactory
 				.createJdbcDataContext(getTestDbConnection());
@@ -63,13 +62,11 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		saJob.putColumnProperty("Columns", columns);
 		runner.addJob(saJob);
 
-		Future<List<AnalyzerResult>> resultsFuture = runner.run(dc);
+		runner.run(dc);
 		
 		// TODO: any assertions on the future?
 		
-		List<AnalyzerResult> results = resultsFuture.get();
-		
-		
+		List<AnalyzerResult> results = runner.getResults();
 		
 		// expect 1 result for each column (the value distributions) and 1
 		// result for the string analyzer

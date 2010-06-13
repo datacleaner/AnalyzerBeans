@@ -16,6 +16,8 @@ import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.QueryResultProducer;
 import org.eobjects.analyzer.result.SerializableRowFilter;
 import org.eobjects.analyzer.util.AverageBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.query.Query;
@@ -25,6 +27,9 @@ import dk.eobjects.metamodel.util.FormatHelper;
 
 @AnalyzerBean("String analyzer")
 public class StringAnalyzer implements RowProcessingAnalyzer {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(StringAnalyzer.class);
 
 	private static final short INDEX_NUM_CHARS = 0;
 	private static final short INDEX_MAX_CHARS = 1;
@@ -162,6 +167,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 
 	@Result
 	public CrosstabResult result() {
+		logger.info("getResult()");
 		CrosstabDimension measureDimension = new CrosstabDimension("measure");
 		measureDimension.addCategory("Char count");
 		measureDimension.addCategory("Max chars");

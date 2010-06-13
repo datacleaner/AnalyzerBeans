@@ -1,13 +1,17 @@
 package org.eobjects.analyzer.job;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
@@ -27,6 +31,8 @@ import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
 import org.eobjects.analyzer.lifecycle.RunRowProcessorsCallback;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.MetaModelHelper;
@@ -35,21 +41,25 @@ import dk.eobjects.metamodel.schema.Table;
 
 public class AnalysisRunnerImpl implements AnalysisRunner {
 
+	private static final Logger logger = LoggerFactory
+			.getLogger(AnalysisRunnerImpl.class);
+
 	private List<AnalysisJob> _jobs = new LinkedList<AnalysisJob>();
 	private CollectionProvider _collectionProvider;
 	private DescriptorProvider _descriptorProvider;
 	private List<AnalyzerResult> _result;
 	private Integer _rowProcessorCount;
-	private RunnableConsumer _runnableConsumer;
+	private ConcurrencyProvider _concurrencyProvider;
+	private Future<Collection<Future<?>>> _finalFuture;
 
 	public AnalysisRunnerImpl() {
 	}
 
 	public AnalysisRunnerImpl(DescriptorProvider descriptorProvider,
-			RunnableConsumer runnableConsumer,
+			ConcurrencyProvider concurrencyProvider,
 			CollectionProvider collectionProvider) {
 		_descriptorProvider = descriptorProvider;
-		_runnableConsumer = runnableConsumer;
+		_concurrencyProvider = concurrencyProvider;
 		_collectionProvider = collectionProvider;
 	}
 
@@ -60,12 +70,17 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	}
 
 	@Override
-	public List<AnalyzerResult> run(DataContext dataContext) {
-		return run(new SingleDataContextProvider(dataContext));
+	public void run(DataContext dataContext) {
+		run(new SingleDataContextProvider(dataContext));
 	}
 
 	@Override
-	public List<AnalyzerResult> run(DataContextProvider dataContextProvider) {
+	public void run(DataContextProvider dataContextProvider) {
+		logger.info("run(...) invoked.");
+		logger.info("jobs: " + _jobs.size());
+		for (AnalysisJob job : _jobs) {
+			logger.info(" - " + job);
+		}
 		DescriptorProvider descriptorProvider = getDescriptorProvider();
 		if (descriptorProvider == null) {
 			descriptorProvider = new JobListDescriptorProvider(_jobs);
@@ -74,9 +89,9 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		if (collectionProvider == null) {
 			collectionProvider = new BerkeleyDbCollectionProvider();
 		}
-		RunnableConsumer runnableConsumer = getRunnableConsumer();
-		if (runnableConsumer == null) {
-			runnableConsumer = new SingleThreadedRunnableConsumer();
+		ConcurrencyProvider concurrencyProvider = getConcurrencyProvider();
+		if (concurrencyProvider == null) {
+			concurrencyProvider = new SingleThreadedConcurrencyProvider();
 		}
 		if (_result == null) {
 			_result = new ArrayList<AnalyzerResult>();
@@ -130,28 +145,73 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 			analyzerBeanInstance.getCloseCallbacks().add(closeCallback);
 		}
 
+		Collection<Callable<?>> assignCallables = new LinkedList<Callable<?>>();
+		Collection<Callable<?>> runCallables = new LinkedList<Callable<?>>();
+		List<Callable<?>> collectResultsAndCloseAnalyzersCallables = new LinkedList<Callable<?>>();
+
+		logger
+				.info("Scheduling tasks for assinging @Configured and @Provided properties, and running @Initialize methods");
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			analyzerBeanInstance.assignConfigured();
-			analyzerBeanInstance.assignProvided();
-			analyzerBeanInstance.initialize();
+			assignCallables.add(Executors
+					.callable(new AssignAndInitializeRunnable(
+							analyzerBeanInstance)));
 		}
 
-		Queue<Runnable> runnableQueue = new LinkedList<Runnable>();
-		runnableQueue.addAll(analyzerBeanInstances);
-		runnableQueue.addAll(rowProcessors.values());
-		runnableConsumer.execute(runnableQueue);
-
+		logger.info("Scheduling tasks for exploring analyzers");
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			analyzerBeanInstance.returnResults();
-			analyzerBeanInstance.close();
+			runCallables.add(Executors.callable(analyzerBeanInstance));
 		}
 
-		return _result;
+		logger.info("Scheduling tasks for row processing analyzers");
+		for (AnalysisRowProcessor analysisRowProcessor : rowProcessors.values()) {
+			runCallables.add(Executors.callable(analysisRowProcessor));
+		}
+
+		logger
+				.info("Scheduling tasks for retreiving results and closing beans");
+		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
+			collectResultsAndCloseAnalyzersCallables.add(Executors
+					.callable(new CollectResultsAndCloseAnalyzerBeanRunnable(
+							analyzerBeanInstance)));
+		}
+
+		Future<Collection<Future<?>>> assignFutures = concurrencyProvider
+				.schedule(new SynchronizeCallable("schedule initial tasks",
+						concurrencyProvider, assignCallables));
+
+		Future<Collection<Future<?>>> runFutures = concurrencyProvider
+				.schedule(new SynchronizeCallable(
+						"assign properties and initialize",
+						concurrencyProvider, assignFutures, runCallables));
+
+		Future<Collection<Future<?>>> collectResultsFuture = concurrencyProvider
+				.schedule(new SynchronizeCallable("run analyzers",
+						concurrencyProvider, runFutures,
+						collectResultsAndCloseAnalyzersCallables));
+
+		_finalFuture = concurrencyProvider.schedule(new SynchronizeCallable(
+				"collect results", concurrencyProvider, collectResultsFuture,
+				new EmptyCallable<Boolean>(true)));
 	}
 
 	@Override
 	public List<AnalyzerResult> getResults() {
-		return _result;
+		while (!isDone()) {
+			try {
+				_finalFuture.get();
+			} catch (Exception e) {
+				logger.error("Unexpected error while retreiving results", e);
+			}
+		}
+		return Collections.unmodifiableList(_result);
+	}
+
+	@Override
+	public boolean isDone() {
+		if (_finalFuture == null) {
+			return false;
+		}
+		return _finalFuture.isDone();
 	}
 
 	public Integer getRowProcessorCount() {
@@ -280,11 +340,11 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		_descriptorProvider = descriptorProvider;
 	}
 
-	public RunnableConsumer getRunnableConsumer() {
-		return _runnableConsumer;
+	public ConcurrencyProvider getConcurrencyProvider() {
+		return _concurrencyProvider;
 	}
 
-	public void setRunnableConsumer(RunnableConsumer runnableConsumer) {
-		_runnableConsumer = runnableConsumer;
+	public void setConcurrencyProvider(ConcurrencyProvider concurrencyProvider) {
+		_concurrencyProvider = concurrencyProvider;
 	}
 }

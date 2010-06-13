@@ -13,12 +13,16 @@ import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.schema.Column;
 
 @AnalyzerBean("Value distribution")
 public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ValueDistributionAnalyzer.class);
 
 	@Inject
 	@Configured
@@ -50,6 +54,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 
 	public void runInternal(Object value, int distinctCount) {
 		if (value == null) {
+			logger.debug("value is null");
 			_nullCount += distinctCount;
 		} else {
 			String stringValue = value.toString();
@@ -65,6 +70,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 
 	@Result
 	public ValueDistributionResult getResult() {
+		logger.info("getResult()");
 		ValueCountListImpl topValues;
 		ValueCountListImpl bottomValues;
 		if (_topFrequentValues == null && _bottomFrequentValues == null) {
