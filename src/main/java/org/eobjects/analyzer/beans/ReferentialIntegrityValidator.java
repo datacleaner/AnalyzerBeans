@@ -3,12 +3,12 @@ package org.eobjects.analyzer.beans;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.result.DataSetResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;
@@ -24,7 +24,7 @@ import dk.eobjects.metamodel.schema.Table;
 @AnalyzerBean("Referential Integrity validator")
 public class ReferentialIntegrityValidator implements ExploringAnalyzer {
 
-	private Log log = LogFactory.getLog(getClass());
+	private Logger logger = LoggerFactory.getLogger(getClass());
 	private List<Row> invalidRows;
 
 	@Configured("Primary key column")
@@ -64,9 +64,9 @@ public class ReferentialIntegrityValidator implements ExploringAnalyzer {
 										.size()])).from(foreignTable);
 		Query rightQuery = new Query().select(primaryKeyColumn).from(
 				primaryTable);
-		if (log.isDebugEnabled()) {
-			log.debug("Left query: " + leftQuery);
-			log.debug("Right query: " + rightQuery);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Left query: " + leftQuery);
+			logger.debug("Right query: " + rightQuery);
 		}
 
 		FromItem leftSide = new FromItem(leftQuery).setAlias("a");
@@ -107,8 +107,9 @@ public class ReferentialIntegrityValidator implements ExploringAnalyzer {
 			Object foreignKey = row.getValue(foreignKeySelectItem);
 			if (foreignKey == null) {
 				if (acceptNullForeignKey) {
-					if (log.isInfoEnabled()) {
-						log.info("Accepting row with NULL primary key: " + row);
+					if (logger.isInfoEnabled()) {
+						logger.info("Accepting row with NULL primary key: "
+								+ row);
 					}
 				} else {
 					invalidRows.add(row);
@@ -119,8 +120,8 @@ public class ReferentialIntegrityValidator implements ExploringAnalyzer {
 				if (primaryKey == null) {
 					invalidRows.add(row);
 				} else if (!primaryKey.equals(foreignKey)) {
-					if (log.isWarnEnabled()) {
-						log
+					if (logger.isWarnEnabled()) {
+						logger
 								.warn("Unexpected state! Primary and foreign key values are not null and different! PK="
 										+ primaryKey + ", FK=" + foreignKey);
 					}
