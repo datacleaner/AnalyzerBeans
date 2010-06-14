@@ -1,15 +1,16 @@
 package org.eobjects.analyzer.job;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
@@ -44,7 +45,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	private List<AnalysisJob> _jobs = new LinkedList<AnalysisJob>();
 	private CollectionProvider _collectionProvider;
 	private DescriptorProvider _descriptorProvider;
-	private List<AnalyzerResult> _result;
+	private Queue<AnalyzerResult> _result;
 	private Integer _rowProcessorAnalyzersCount;
 	private ConcurrencyProvider _concurrencyProvider;
 	private CountDownLatch _resultCountDown;
@@ -91,7 +92,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 			concurrencyProvider = new SingleThreadedConcurrencyProvider();
 		}
 		if (_result == null) {
-			_result = new ArrayList<AnalyzerResult>();
+			_result = new LinkedBlockingQueue<AnalyzerResult>();
 		}
 		List<AnalysisJob> explorerJobs = new LinkedList<AnalysisJob>();
 		List<AnalysisJob> rowProcessingJobs = new LinkedList<AnalysisJob>();
@@ -180,7 +181,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 				logger.error("Unexpected error while retreiving results", e);
 			}
 		}
-		return Collections.unmodifiableList(_result);
+		return new ArrayList<AnalyzerResult>(_result);
 	}
 
 	@Override

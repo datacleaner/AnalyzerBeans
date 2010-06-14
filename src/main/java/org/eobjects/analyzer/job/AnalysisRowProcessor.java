@@ -1,11 +1,11 @@
 package org.eobjects.analyzer.job;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
@@ -24,7 +24,7 @@ public class AnalysisRowProcessor {
 	private static final Logger logger = LoggerFactory
 			.getLogger(AnalysisRowProcessor.class);
 
-	private List<RowProcessingAnalyzer> analyzerBeansAndRunDescriptors = new LinkedList<RowProcessingAnalyzer>();
+	private Queue<RowProcessingAnalyzer> analyzerBeansAndRunDescriptors = new LinkedBlockingQueue<RowProcessingAnalyzer>();
 	private Set<Column> columns = new HashSet<Column>();
 	private DataContextProvider dataContextProvider;
 	private Table table;
@@ -70,6 +70,7 @@ public class AnalysisRowProcessor {
 			dataSet = dataContextProvider.getDataContext().executeQuery(q);
 			int i = 0;
 			while (dataSet.next()) {
+				logger.info("2");
 				Row row = dataSet.getRow();
 				Integer count;
 				Object countValue = row.getValue(countAllItem);
@@ -100,8 +101,8 @@ public class AnalysisRowProcessor {
 		}
 	}
 
-	public Callable<Object> createCallable(final CountDownLatch initializeCount,
-			final CountDownLatch runCount) {
+	public Callable<Object> createCallable(
+			final CountDownLatch initializeCount, final CountDownLatch runCount) {
 		return new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
@@ -109,7 +110,8 @@ public class AnalysisRowProcessor {
 				initializeCount.await();
 				run();
 				runCount.countDown();
-				logger.info("runCount.countDown() returned count=" + runCount.getCount());
+				logger.info("runCount.countDown() returned count="
+						+ runCount.getCount());
 				return Boolean.TRUE;
 			}
 		};

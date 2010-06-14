@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.lifecycle;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,9 +10,9 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 
 public class ReturnResultsCallback implements LifeCycleCallback {
 
-	private List<AnalyzerResult> results;
+	private Collection<AnalyzerResult> results;
 
-	public ReturnResultsCallback(List<AnalyzerResult> results) {
+	public ReturnResultsCallback(Collection<AnalyzerResult> results) {
 		this.results = results;
 	}
 
