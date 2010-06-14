@@ -2,6 +2,8 @@ package org.eobjects.analyzer.lifecycle;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.slf4j.Logger;
@@ -13,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * at an per-instance level. This makes it possible to add callbacks at various
  * stages in the life-cycle of an AnalyzerBean
  */
-public class AnalyzerBeanInstance implements Runnable {
+public class AnalyzerBeanInstance {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(AnalyzerBeanInstance.class);
@@ -68,6 +70,22 @@ public class AnalyzerBeanInstance implements Runnable {
 
 	public List<LifeCycleCallback> getInitializeCallbacks() {
 		return initializeCallbacks;
+	}
+
+	public Callable<Object> createCallable(
+			final CountDownLatch initializeCount, final CountDownLatch runCount) {
+		return new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				logger.debug("initializeCount.await()");
+				initializeCount.await();
+				run();
+				runCount.countDown();
+				logger.info("runCount.countDown() returned count="
+						+ runCount.getCount() + " (" + analyzerBean + ")");
+				return Boolean.TRUE;
+			}
+		};
 	}
 
 	public void run() {

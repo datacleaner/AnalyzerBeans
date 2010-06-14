@@ -5,6 +5,8 @@ import java.util.Collections;
 
 import org.eobjects.analyzer.result.AnalyzerResult;
 
+import dk.eobjects.metamodel.schema.Column;
+
 public class ValueDistributionResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
@@ -13,24 +15,28 @@ public class ValueDistributionResult implements AnalyzerResult {
 	private int _nullCount;
 	private Collection<String> _uniqueValues;
 	private int _uniqueValueCount;
+	private String _columnName;
+	private String _qualifiedColumnName;
 
-	private ValueDistributionResult(ValueCountList topValues,
+	private ValueDistributionResult(Column column, ValueCountList topValues,
 			ValueCountList bottomValues, int nullCount) {
+		_columnName = column.getName();
+		_qualifiedColumnName = column.getQualifiedLabel();
 		_topValues = topValues;
 		_bottomValues = bottomValues;
 		_nullCount = nullCount;
 	}
 
-	public ValueDistributionResult(ValueCountList topValues,
+	public ValueDistributionResult(Column column, ValueCountList topValues,
 			ValueCountListImpl bottomValues, int nullCount,
 			Collection<String> uniqueValues) {
-		this(topValues, bottomValues, nullCount);
+		this(column, topValues, bottomValues, nullCount);
 		_uniqueValues = uniqueValues;
 	}
 
-	public ValueDistributionResult(ValueCountList topValues,
+	public ValueDistributionResult(Column column, ValueCountList topValues,
 			ValueCountListImpl bottomValues, int nullCount, int uniqueValueCount) {
-		this(topValues, bottomValues, nullCount);
+		this(column, topValues, bottomValues, nullCount);
 		_uniqueValueCount = uniqueValueCount;
 	}
 
@@ -60,5 +66,13 @@ public class ValueDistributionResult implements AnalyzerResult {
 
 	public Collection<String> getUniqueValues() {
 		return Collections.unmodifiableCollection(_uniqueValues);
+	}
+
+	public String getColumnName() {
+		return _columnName;
+	}
+
+	public String getQualifiedColumnName() {
+		return _qualifiedColumnName;
 	}
 }

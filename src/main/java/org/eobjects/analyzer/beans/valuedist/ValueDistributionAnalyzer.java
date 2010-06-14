@@ -21,12 +21,13 @@ import dk.eobjects.metamodel.schema.Column;
 
 @AnalyzerBean("Value distribution")
 public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
-	
-	private static final Logger logger = LoggerFactory.getLogger(ValueDistributionAnalyzer.class);
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(ValueDistributionAnalyzer.class);
 
 	@Inject
-	@Configured
-	Column column;
+	@Configured("Column")
+	Column _column;
 
 	@Inject
 	@Configured("Record unique values")
@@ -46,9 +47,20 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 
 	private int _nullCount;
 
+	public ValueDistributionAnalyzer(Column column, boolean recordUniqueValues,
+			Integer topFrequentValues, Integer bottomFrequentValues) {
+		_column = column;
+		_recordUniqueValues = recordUniqueValues;
+		_topFrequentValues = topFrequentValues;
+		_bottomFrequentValues = bottomFrequentValues;
+	}
+	
+	public ValueDistributionAnalyzer() {
+	}
+
 	@Override
 	public void run(Row row, int distinctCount) {
-		Object value = row.getValue(column);
+		Object value = row.getValue(_column);
 		runInternal(value, distinctCount);
 	}
 
@@ -102,11 +114,11 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 		}
 
 		if (_recordUniqueValues) {
-			return new ValueDistributionResult(topValues, bottomValues,
-					_nullCount, uniqueValues);
+			return new ValueDistributionResult(_column, topValues,
+					bottomValues, _nullCount, uniqueValues);
 		} else {
-			return new ValueDistributionResult(topValues, bottomValues,
-					_nullCount, uniqueCount);
+			return new ValueDistributionResult(_column, topValues,
+					bottomValues, _nullCount, uniqueCount);
 		}
 	}
 

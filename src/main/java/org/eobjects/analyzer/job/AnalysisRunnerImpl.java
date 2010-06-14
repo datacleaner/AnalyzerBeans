@@ -1,7 +1,6 @@
 package org.eobjects.analyzer.job;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,8 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.CountDownLatch;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
@@ -22,7 +20,6 @@ import org.eobjects.analyzer.descriptors.JobListDescriptorProvider;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredRowProcessingCallback;
-import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
@@ -48,9 +45,9 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	private CollectionProvider _collectionProvider;
 	private DescriptorProvider _descriptorProvider;
 	private List<AnalyzerResult> _result;
-	private Integer _rowProcessorCount;
+	private Integer _rowProcessorAnalyzersCount;
 	private ConcurrencyProvider _concurrencyProvider;
-	private Future<Collection<Future<?>>> _finalFuture;
+	private CountDownLatch _resultCountDown;
 
 	public AnalysisRunnerImpl() {
 	}
@@ -66,7 +63,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	@Override
 	public void addJob(AnalysisJob job) {
 		_jobs.add(job);
-		_rowProcessorCount = null;
+		_rowProcessorAnalyzersCount = null;
 	}
 
 	@Override
@@ -124,81 +121,61 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 			initRowProcessingBeans(job, descriptor, analyzerBeanInstances,
 					rowProcessors, dataContextProvider);
 		}
-		_rowProcessorCount = rowProcessors.size();
+		_rowProcessorAnalyzersCount = rowProcessors.size();
 
 		// Add shared callbacks
 		InitializeCallback initializeCallback = new InitializeCallback();
 		ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(
 				_result);
 		CloseCallback closeCallback = new CloseCallback();
-		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(
-					analyzerBeanInstance, collectionProvider,
-					dataContextProvider);
 
-			analyzerBeanInstance.getAssignProvidedCallbacks().add(
-					assignProvidedCallback);
-			analyzerBeanInstance.getInitializeCallbacks().add(
-					initializeCallback);
-			analyzerBeanInstance.getReturnResultsCallbacks().add(
-					returnResultsCallback);
-			analyzerBeanInstance.getCloseCallbacks().add(closeCallback);
-		}
-
-		Collection<Callable<?>> assignCallables = new LinkedList<Callable<?>>();
-		Collection<Callable<?>> runCallables = new LinkedList<Callable<?>>();
-		List<Callable<?>> collectResultsAndCloseAnalyzersCallables = new LinkedList<Callable<?>>();
+		CountDownLatch assignCountDown = new CountDownLatch(
+				analyzerBeanInstances.size());
 
 		logger
 				.info("Scheduling tasks for assinging @Configured and @Provided properties, and running @Initialize methods");
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			assignCallables.add(Executors
-					.callable(new AssignAndInitializeRunnable(
-							analyzerBeanInstance)));
+			Callable<Object> task = new AssignAndInitializeTask(
+					assignCountDown, analyzerBeanInstance, collectionProvider,
+					dataContextProvider, initializeCallback,
+					returnResultsCallback, closeCallback);
+			concurrencyProvider.exec(task);
 		}
 
-		logger.info("Scheduling tasks for exploring analyzers");
+		CountDownLatch runCountDown = new CountDownLatch(rowProcessors.size()
+				+ analyzerBeanInstances.size());
+		logger.info("Scheduling tasks for " + analyzerBeanInstances.size()
+				+ " analyzers");
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			runCallables.add(Executors.callable(analyzerBeanInstance));
+			concurrencyProvider.exec(analyzerBeanInstance.createCallable(
+					assignCountDown, runCountDown));
 		}
 
-		logger.info("Scheduling tasks for row processing analyzers");
+		logger.info("Scheduling tasks for " + rowProcessors.size()
+				+ " row processors");
 		for (AnalysisRowProcessor analysisRowProcessor : rowProcessors.values()) {
-			runCallables.add(Executors.callable(analysisRowProcessor));
+			concurrencyProvider.exec(analysisRowProcessor.createCallable(
+					assignCountDown, runCountDown));
 		}
 
+		_resultCountDown = new CountDownLatch(analyzerBeanInstances.size());
 		logger
 				.info("Scheduling tasks for retreiving results and closing beans");
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			collectResultsAndCloseAnalyzersCallables.add(Executors
-					.callable(new CollectResultsAndCloseAnalyzerBeanRunnable(
-							analyzerBeanInstance)));
+			Callable<Object> task = new CollectResultsAndCloseAnalyzerBeanTask(
+					runCountDown, _resultCountDown, analyzerBeanInstance);
+			concurrencyProvider.exec(task);
 		}
 
-		Future<Collection<Future<?>>> assignFutures = concurrencyProvider
-				.schedule(new SynchronizeCallable("schedule initial tasks",
-						concurrencyProvider, assignCallables));
-
-		Future<Collection<Future<?>>> runFutures = concurrencyProvider
-				.schedule(new SynchronizeCallable(
-						"assign properties and initialize",
-						concurrencyProvider, assignFutures, runCallables));
-
-		Future<Collection<Future<?>>> collectResultsFuture = concurrencyProvider
-				.schedule(new SynchronizeCallable("run analyzers",
-						concurrencyProvider, runFutures,
-						collectResultsAndCloseAnalyzersCallables));
-
-		_finalFuture = concurrencyProvider.schedule(new SynchronizeCallable(
-				"collect results", concurrencyProvider, collectResultsFuture,
-				new EmptyCallable<Boolean>(true)));
+		logger.info("run(...) returning.");
 	}
 
 	@Override
 	public List<AnalyzerResult> getResults() {
 		while (!isDone()) {
 			try {
-				_finalFuture.get();
+				logger.debug("_resultCountDown.await()");
+				_resultCountDown.await();
 			} catch (Exception e) {
 				logger.error("Unexpected error while retreiving results", e);
 			}
@@ -208,14 +185,14 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 
 	@Override
 	public boolean isDone() {
-		if (_finalFuture == null) {
+		if (_resultCountDown == null) {
 			return false;
 		}
-		return _finalFuture.isDone();
+		return _resultCountDown.getCount() == 0;
 	}
 
 	public Integer getRowProcessorCount() {
-		return _rowProcessorCount;
+		return _rowProcessorAnalyzersCount;
 	}
 
 	private void initRowProcessingBeans(AnalysisJob job,
@@ -241,42 +218,37 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 									+ configuredName);
 				}
 
-				if (configuredDescriptor.isArray()) {
-					// For each @Configured column-array we will instantiate one
-					// bean per represented table
+				String[] columnNames = entry.getValue();
+				Column[] columns = dataContextProvider.getSchemaNavigator()
+						.convertToColumns(columnNames);
+				Table[] tables = MetaModelHelper.getTables(columns);
 
-					String[] columnNames = entry.getValue();
-					Column[] columns = dataContextProvider.getSchemaNavigator()
-							.convertToColumns(columnNames);
-					Table[] tables = MetaModelHelper.getTables(columns);
-
-					for (Table table : tables) {
-						AnalysisRowProcessor rowProcessor = rowProcessors
-								.get(table);
-						if (rowProcessor == null) {
-							rowProcessor = new AnalysisRowProcessor(
-									dataContextProvider);
-							rowProcessors.put(table, rowProcessor);
-						}
-
-						Column[] columnsForAnalyzer = MetaModelHelper
-								.getTableColumns(table, columns);
-						rowProcessor.addColumns(columnsForAnalyzer);
-
-						AnalyzerBeanInstance analyzerBeanInstance = instantiateAnalyzerBean(descriptor);
-						analyzerBeanInstances.add(analyzerBeanInstance);
-
-						// Add a callback for assigning @Configured properties
-						AssignConfiguredRowProcessingCallback assignConfiguredCallback = new AssignConfiguredRowProcessingCallback(
-								job, dataContextProvider.getSchemaNavigator(),
-								columnsForAnalyzer);
-						analyzerBeanInstance.getAssignConfiguredCallbacks()
-								.add(assignConfiguredCallback);
-
-						// Add a callback for executing the run(...) method
-						analyzerBeanInstance.getRunCallbacks().add(
-								new RunRowProcessorsCallback(rowProcessor));
+				for (Table table : tables) {
+					AnalysisRowProcessor rowProcessor = rowProcessors
+							.get(table);
+					if (rowProcessor == null) {
+						rowProcessor = new AnalysisRowProcessor(
+								dataContextProvider);
+						rowProcessors.put(table, rowProcessor);
 					}
+
+					Column[] columnsForAnalyzer = MetaModelHelper
+							.getTableColumns(table, columns);
+					rowProcessor.addColumns(columnsForAnalyzer);
+
+					AnalyzerBeanInstance analyzerBeanInstance = instantiateAnalyzerBean(descriptor);
+					analyzerBeanInstances.add(analyzerBeanInstance);
+
+					// Add a callback for assigning @Configured properties
+					AssignConfiguredRowProcessingCallback assignConfiguredCallback = new AssignConfiguredRowProcessingCallback(
+							job, dataContextProvider.getSchemaNavigator(),
+							columnsForAnalyzer);
+					analyzerBeanInstance.getAssignConfiguredCallbacks().add(
+							assignConfiguredCallback);
+
+					// Add a callback for executing the run(...) method
+					analyzerBeanInstance.getRunCallbacks().add(
+							new RunRowProcessorsCallback(rowProcessor));
 				}
 			}
 		} catch (Exception e) {

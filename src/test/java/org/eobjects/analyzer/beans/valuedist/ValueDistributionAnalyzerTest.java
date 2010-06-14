@@ -3,13 +3,29 @@ package org.eobjects.analyzer.beans.valuedist;
 import java.util.HashMap;
 
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+
+import dk.eobjects.metamodel.schema.Column;
 
 import junit.framework.TestCase;
 
 public class ValueDistributionAnalyzerTest extends TestCase {
 
+	public void testDescriptor() throws Exception {
+		AnalyzerBeanDescriptor desc = new AnalyzerBeanDescriptor(
+				ValueDistributionAnalyzer.class);
+		assertEquals(true, desc.isRowProcessingAnalyzer());
+		assertEquals(false, desc.isExploringAnalyzer());
+		assertEquals(0, desc.getInitializeDescriptors().size());
+		assertEquals(4, desc.getConfiguredDescriptors().size());
+		assertEquals(1, desc.getProvidedDescriptors().size());
+		assertEquals(1, desc.getResultDescriptors().size());
+		assertEquals("Value distribution", desc.getDisplayName());
+	}
+
 	public void testGetNullAndUniqueCount() throws Exception {
-		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer();
+		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
+				new Column("col"), true, null, null);
 		vd.setValueDistribution(new HashMap<String, Integer>());
 
 		assertEquals(0, vd.getResult().getUniqueCount());
@@ -40,7 +56,8 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 	}
 
 	public void testGetValueDistribution() throws Exception {
-		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer();
+		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
+				new Column("col"), true, null, null);
 		vd.setValueDistribution(new HashMap<String, Integer>());
 
 		vd.runInternal("hello", 1);

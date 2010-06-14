@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 public class SingleThreadedConcurrencyProvider implements ConcurrencyProvider {
 
 	@Override
-	public <T> Future<T> schedule(Callable<T> callable) {
+	public <T> Future<T> exec(Callable<T> callable) {
 		T call;
 		try {
 			call = callable.call();
@@ -16,4 +16,8 @@ public class SingleThreadedConcurrencyProvider implements ConcurrencyProvider {
 		}
 	}
 
+	@Override
+	public void exec(Runnable runnable) {
+		runnable.run();
+	}
 }

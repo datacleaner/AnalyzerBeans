@@ -4,9 +4,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.Row;
@@ -15,7 +19,10 @@ import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
-public class AnalysisRowProcessor implements Runnable {
+public class AnalysisRowProcessor {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(AnalysisRowProcessor.class);
 
 	private List<RowProcessingAnalyzer> analyzerBeansAndRunDescriptors = new LinkedList<RowProcessingAnalyzer>();
 	private Set<Column> columns = new HashSet<Column>();
@@ -43,6 +50,7 @@ public class AnalysisRowProcessor implements Runnable {
 	}
 
 	public void run() {
+		logger.info("run()");
 		if (table == null) {
 			throw new IllegalStateException(
 					"No table and no columns defined to process");
@@ -58,7 +66,9 @@ public class AnalysisRowProcessor implements Runnable {
 
 		DataSet dataSet = null;
 		try {
+			logger.info("executing query: " + q);
 			dataSet = dataContextProvider.getDataContext().executeQuery(q);
+			int i = 0;
 			while (dataSet.next()) {
 				Row row = dataSet.getRow();
 				Integer count;
@@ -72,7 +82,9 @@ public class AnalysisRowProcessor implements Runnable {
 				}
 
 				processRow(row, count);
+				i++;
 			}
+			logger.info(i + " rows successfully processed");
 		} catch (RuntimeException e) {
 			throw e;
 		} finally {
@@ -86,5 +98,20 @@ public class AnalysisRowProcessor implements Runnable {
 		for (RowProcessingAnalyzer analyzerBean : analyzerBeansAndRunDescriptors) {
 			analyzerBean.run(row, count);
 		}
+	}
+
+	public Callable<Object> createCallable(final CountDownLatch initializeCount,
+			final CountDownLatch runCount) {
+		return new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				logger.debug("initializeCount.await()");
+				initializeCount.await();
+				run();
+				runCount.countDown();
+				logger.info("runCount.countDown() returned count=" + runCount.getCount());
+				return Boolean.TRUE;
+			}
+		};
 	}
 }

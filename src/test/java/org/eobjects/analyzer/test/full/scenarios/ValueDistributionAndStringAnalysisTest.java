@@ -12,6 +12,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalysisRunner;
 import org.eobjects.analyzer.job.AnalysisRunnerImpl;
 import org.eobjects.analyzer.job.ConcurrencyProvider;
+import org.eobjects.analyzer.job.ThreadPoolConcurrencyProvider;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -32,8 +33,8 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				.scanPackage("org.eobjects.analyzer.beans", true);
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
 
-		ConcurrencyProvider concurrencyProvider = null;
-		
+		ConcurrencyProvider concurrencyProvider = new ThreadPoolConcurrencyProvider(3);
+
 		AnalysisRunner runner = new AnalysisRunnerImpl(descriptorProvider,
 				concurrencyProvider, collectionProvider);
 
@@ -63,11 +64,17 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		runner.addJob(saJob);
 
 		runner.run(dc);
-		
+
 		// TODO: any assertions on the future?
-		
+		// assertFalse(runner.isDone());
+
+		// TODO: It seems that the value dist profiler is being categorized as
+		// an exploring profiler!
+
 		List<AnalyzerResult> results = runner.getResults();
-		
+
+		assertTrue(runner.isDone());
+
 		// expect 1 result for each column (the value distributions) and 1
 		// result for the string analyzer
 		assertEquals(table.getColumnCount() + 1, results.size());
@@ -79,7 +86,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 			if (StringAnalyzer.class.getName().equals(
 					result.getProducerClass().getName())) {
 				stringAnalyzerResults++;
-				
+
 				assertTrue(result instanceof CrosstabResult);
 				CrosstabResult cr = (CrosstabResult) result;
 				Crosstab<?> crosstab = cr.getCrosstab();
@@ -99,12 +106,35 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				assertEquals(ValueDistributionAnalyzer.class.getName(), result
 						.getProducerClass().getName());
 				assertTrue(result instanceof ValueDistributionResult);
-				
+
 				valueDistributionResults++;
 			}
 		}
-		
+
 		assertEquals(1, stringAnalyzerResults);
 		assertEquals(8, valueDistributionResults);
+
+		ValueDistributionResult jobTitleResult = null;
+		ValueDistributionResult lastnameResult = null;
+		for (AnalyzerResult result : results) {
+			if (result.getProducerClass() == ValueDistributionAnalyzer.class) {
+				ValueDistributionResult vdResult = (ValueDistributionResult) result;
+				if ("JOBTITLE".equals(vdResult.getColumnName())) {
+					jobTitleResult = vdResult;
+				} else if ("LASTNAME".equals(vdResult.getColumnName())) {
+					lastnameResult = vdResult;
+				}
+			}
+		}
+		
+		assertNotNull(jobTitleResult);
+		assertNotNull(lastnameResult);
+		
+		assertEquals("Patterson", lastnameResult.getTopValues().getValueCounts().get(0).getValue());
+		assertEquals(3, lastnameResult.getTopValues().getValueCounts().get(0).getCount());
+		assertEquals(16, lastnameResult.getUniqueCount());
+		assertEquals(0, lastnameResult.getNullCount());
+		
+		assertEquals("Sales Rep", jobTitleResult.getTopValues().getValueCounts().get(0).getValue());
 	}
 }

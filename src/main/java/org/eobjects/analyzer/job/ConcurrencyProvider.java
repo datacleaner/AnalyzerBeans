@@ -5,5 +5,7 @@ import java.util.concurrent.Future;
 
 public interface ConcurrencyProvider {
 
-	public <T> Future<T> schedule(Callable<T> callable);
+	public <T> Future<T> exec(Callable<T> callable);
+	
+	public void exec(Runnable runnable);
 }
