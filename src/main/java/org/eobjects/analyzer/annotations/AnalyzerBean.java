@@ -46,5 +46,5 @@ public @interface AnalyzerBean {
 	 * 
 	 * @return the name of the AnalyzerBean
 	 */
-	String value() default "";
+	String value();
 }
