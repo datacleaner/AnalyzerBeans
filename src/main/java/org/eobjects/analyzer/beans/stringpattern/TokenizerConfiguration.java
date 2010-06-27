@@ -100,7 +100,7 @@ public class TokenizerConfiguration implements Serializable {
 		_decimalSeparatorCharacters.add(decimalSeparatorCharacter);
 	}
 
-	public void removeDecimalSeparatorCharacter(String decimalSeparatorCharacter) {
+	public void removeDecimalSeparatorCharacter(Character decimalSeparatorCharacter) {
 		_decimalSeparatorCharacters.remove(decimalSeparatorCharacter);
 	}
 

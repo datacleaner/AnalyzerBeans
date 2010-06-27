@@ -6,9 +6,16 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DefaultTokenizer implements Serializable, Tokenizer {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(DefaultTokenizer.class);
+
 	private final TokenizerConfiguration _configuration;
 
 	public DefaultTokenizer() {
@@ -84,12 +91,17 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 				lastToken = registerChar(result, lastToken, c,
 						TokenType.UNDEFINED);
 			} else if (Character.isDigit(c)) {
+				logger.debug("Digit categorized as TokenType.NUMBER: {}", c);
 				lastToken = registerChar(result, lastToken, c, TokenType.NUMBER);
 			} else if (Character.isLetter(c)) {
+				logger.debug("Letter categorized as TokenType.TEXT: {}", c);
 				lastToken = registerChar(result, lastToken, c, TokenType.TEXT);
 			} else if (Character.isWhitespace(c)) {
+				logger.debug("Whitespace categorized as TokenType.DELIM: {}", c);
 				lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
 			} else {
+				logger.debug("Unknown char categorized as TokenType.DELIM: {}",
+						c);
 				lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
 			}
 		}

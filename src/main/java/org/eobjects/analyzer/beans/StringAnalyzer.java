@@ -322,7 +322,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 				new SelectItem(column)).selectCount().groupBy(column);
 	}
 
-	class CharRowFilter implements SerializableRowFilter {
+	static class CharRowFilter implements SerializableRowFilter {
 		private static final long serialVersionUID = 1L;
 
 		private Column column;
@@ -344,7 +344,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 
 	}
 
-	class WordRowFilter implements SerializableRowFilter {
+	static class WordRowFilter implements SerializableRowFilter {
 		private static final long serialVersionUID = 1L;
 
 		private Column column;

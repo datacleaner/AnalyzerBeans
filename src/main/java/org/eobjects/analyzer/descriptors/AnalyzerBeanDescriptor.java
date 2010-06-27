@@ -64,8 +64,8 @@ public class AnalyzerBeanDescriptor implements
 		}
 		displayName = analyzerAnnotation.value();
 		if (displayName == null || displayName.trim().equals("")) {
-			displayName = AnnotationHelper.explodeCamelCase(analyzerClass
-					.getSimpleName(), false);
+			displayName = AnnotationHelper.explodeCamelCase(
+					analyzerClass.getSimpleName(), false);
 		}
 
 		Field[] fields = analyzerClass.getDeclaredFields();
@@ -75,10 +75,9 @@ public class AnalyzerBeanDescriptor implements
 					.getAnnotation(Configured.class);
 			if (configuredAnnotation != null) {
 				if (!field.isAnnotationPresent(Inject.class)) {
-					logger
-							.warn(
-									"No @Inject annotation found for @Configured field: {}",
-									field);
+					logger.warn(
+							"No @Inject annotation found for @Configured field: {}",
+							field);
 				}
 				configuredDescriptors.add(new ConfiguredDescriptor(field,
 						configuredAnnotation));
@@ -87,10 +86,9 @@ public class AnalyzerBeanDescriptor implements
 			Provided providedAnnotation = field.getAnnotation(Provided.class);
 			if (providedAnnotation != null) {
 				if (!field.isAnnotationPresent(Inject.class)) {
-					logger
-							.warn(
-									"No @Inject annotation found for @Provided field: {}",
-									field);
+					logger.warn(
+							"No @Inject annotation found for @Provided field: {}",
+							field);
 				}
 				providedDescriptors.add(new ProvidedDescriptor(field,
 						providedAnnotation));
@@ -115,10 +113,9 @@ public class AnalyzerBeanDescriptor implements
 					.getAnnotation(Configured.class);
 			if (configuredAnnotation != null) {
 				if (!method.isAnnotationPresent(Inject.class)) {
-					logger
-							.warn(
-									"No @Inject annotation found for @Configured method: {}",
-									method);
+					logger.warn(
+							"No @Inject annotation found for @Configured method: {}",
+							method);
 				}
 				configuredDescriptors.add(new ConfiguredDescriptor(method,
 						configuredAnnotation));
@@ -127,10 +124,9 @@ public class AnalyzerBeanDescriptor implements
 			Provided providedAnnotation = method.getAnnotation(Provided.class);
 			if (providedAnnotation != null) {
 				if (!method.isAnnotationPresent(Inject.class)) {
-					logger
-							.warn(
-									"No @Inject annotation found for @Provided method: {}",
-									method);
+					logger.warn(
+							"No @Inject annotation found for @Provided method: {}",
+							method);
 				}
 				providedDescriptors.add(new ProvidedDescriptor(method,
 						providedAnnotation));
@@ -265,6 +261,21 @@ public class AnalyzerBeanDescriptor implements
 	@Override
 	public int hashCode() {
 		return analyzerClass.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (obj.getClass() == AnalyzerBeanDescriptor.class) {
+			AnalyzerBeanDescriptor that = (AnalyzerBeanDescriptor) obj;
+			return this.analyzerClass == that.analyzerClass;
+		}
+		return false;
 	}
 
 	@Override

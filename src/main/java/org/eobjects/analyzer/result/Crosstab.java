@@ -19,9 +19,9 @@ public class Crosstab<E extends Serializable> implements Serializable {
 	private List<CrosstabDimension> dimensions;
 	private Map<String, E> values = new HashMap<String, E>();
 	private Map<String, ResultProducer> serializableResultProducers = new HashMap<String, ResultProducer>();
-	private transient Map<String, ResultProducer> transientResultProducers = new HashMap<String, ResultProducer>();
+	private transient Map<String, ResultProducer> transientResultProducers;
 	private Class<E> valueClass;
-
+	
 	public Crosstab(Class<E> valueClass, CrosstabDimension... dimensions) {
 		this.valueClass = valueClass;
 		this.dimensions = Arrays.asList(dimensions);
@@ -163,6 +163,10 @@ public class Crosstab<E extends Serializable> implements Serializable {
 	protected void attachResultProducer(ResultProducer resultProducer,
 			String[] categories) throws IllegalArgumentException,
 			NullPointerException {
+		if (transientResultProducers == null) {
+			transientResultProducers = new HashMap<String, ResultProducer>();
+		}
+
 		String key = getKey(categories);
 
 		if (resultProducer == null) {
@@ -184,6 +188,9 @@ public class Crosstab<E extends Serializable> implements Serializable {
 		String key = getKey(categories);
 		ResultProducer resultProducer = serializableResultProducers.get(key);
 		if (resultProducer == null) {
+			if (transientResultProducers == null) {
+				transientResultProducers = new HashMap<String, ResultProducer>();
+			}
 			resultProducer = transientResultProducers.get(key);
 		}
 		return resultProducer;

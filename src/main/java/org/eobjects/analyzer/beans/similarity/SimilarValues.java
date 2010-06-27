@@ -36,11 +36,17 @@ public class SimilarValues implements Serializable, Comparable<SimilarValues> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj != null && obj.getClass() == SimilarValues.class) {
+		if (obj == null) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (obj.getClass() == SimilarValues.class) {
 			SimilarValues that = (SimilarValues) obj;
 			return that._s1.equals(this._s1) && that._s2.equals(this._s2);
 		}
-		return super.equals(obj);
+		return false;
 	}
 
 	public String[] getValues() {
