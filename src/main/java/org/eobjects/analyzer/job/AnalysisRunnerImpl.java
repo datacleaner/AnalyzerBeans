@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -43,22 +43,13 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 			.getLogger(AnalysisRunnerImpl.class);
 
 	private List<AnalysisJob> _jobs = new LinkedList<AnalysisJob>();
-	private CollectionProvider _collectionProvider;
-	private DescriptorProvider _descriptorProvider;
+	private AnalyzerBeansConfiguration _configuration;
 	private Queue<AnalyzerResult> _result;
 	private Integer _rowProcessorAnalyzersCount;
-	private ConcurrencyProvider _concurrencyProvider;
 	private CountDownLatch _resultCountDown;
 
-	public AnalysisRunnerImpl() {
-	}
-
-	public AnalysisRunnerImpl(DescriptorProvider descriptorProvider,
-			ConcurrencyProvider concurrencyProvider,
-			CollectionProvider collectionProvider) {
-		_descriptorProvider = descriptorProvider;
-		_concurrencyProvider = concurrencyProvider;
-		_collectionProvider = collectionProvider;
+	public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration) {
+		_configuration = configuration;
 	}
 
 	@Override
@@ -79,15 +70,19 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		for (AnalysisJob job : _jobs) {
 			logger.info(" - " + job);
 		}
-		DescriptorProvider descriptorProvider = getDescriptorProvider();
+
+		DescriptorProvider descriptorProvider = _configuration
+				.getDescriptorProvider();
 		if (descriptorProvider == null) {
 			descriptorProvider = new JobListDescriptorProvider(_jobs);
 		}
-		CollectionProvider collectionProvider = getCollectionProvider();
+		CollectionProvider collectionProvider = _configuration
+				.getCollectionProvider();
 		if (collectionProvider == null) {
 			collectionProvider = new BerkeleyDbCollectionProvider();
 		}
-		ConcurrencyProvider concurrencyProvider = getConcurrencyProvider();
+		ConcurrencyProvider concurrencyProvider = _configuration
+				.getConcurrencyProvider();
 		if (concurrencyProvider == null) {
 			concurrencyProvider = new SingleThreadedConcurrencyProvider();
 		}
@@ -133,8 +128,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		CountDownLatch assignCountDown = new CountDownLatch(
 				analyzerBeanInstances.size());
 
-		logger
-				.info("Scheduling tasks for assinging @Configured and @Provided properties, and running @Initialize methods");
+		logger.info("Scheduling tasks for assinging @Configured and @Provided properties, and running @Initialize methods");
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
 			Callable<Object> task = new AssignAndInitializeTask(
 					assignCountDown, analyzerBeanInstance, collectionProvider,
@@ -160,8 +154,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		}
 
 		_resultCountDown = new CountDownLatch(analyzerBeanInstances.size());
-		logger
-				.info("Scheduling tasks for retreiving results and closing beans");
+		logger.info("Scheduling tasks for retreiving results and closing beans");
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
 			Callable<Object> task = new CollectResultsAndCloseAnalyzerBeanTask(
 					runCountDown, _resultCountDown, analyzerBeanInstance);
@@ -295,29 +288,5 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 				rowProcessingJobs.add(job);
 			}
 		}
-	}
-
-	public CollectionProvider getCollectionProvider() {
-		return _collectionProvider;
-	}
-
-	public void setCollectionProvider(CollectionProvider collectionProvider) {
-		_collectionProvider = collectionProvider;
-	}
-
-	public DescriptorProvider getDescriptorProvider() {
-		return _descriptorProvider;
-	}
-
-	public void setDescriptorProvider(DescriptorProvider descriptorProvider) {
-		_descriptorProvider = descriptorProvider;
-	}
-
-	public ConcurrencyProvider getConcurrencyProvider() {
-		return _concurrencyProvider;
-	}
-
-	public void setConcurrencyProvider(ConcurrencyProvider concurrencyProvider) {
-		_concurrencyProvider = concurrencyProvider;
 	}
 }

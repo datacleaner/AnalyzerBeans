@@ -8,6 +8,7 @@ import org.eobjects.analyzer.beans.mock.ExploringBeanMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingBeanMock;
 import org.eobjects.analyzer.lifecycle.ProvidedList;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.test.TestHelper;
 
 import com.sleepycat.collections.StoredMap;
 
@@ -52,7 +53,8 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		AnalysisJob job2 = new AnalysisJob(ExploringBeanMock.class);
 		setReusableMockProperties(job2);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl();
+		AnalysisRunner runner = new AnalysisRunnerImpl(
+				TestHelper.createAnalyzerBeansConfiguration());
 		runner.addJob(job1);
 		runner.addJob(job2);
 		runner.run(dc);
@@ -78,7 +80,8 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		job.putColumnProperty("Columns", employeeColumns[0],
 				employeeColumns[1], customerColumns[0]);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl();
+		AnalysisRunner runner = new AnalysisRunnerImpl(
+				TestHelper.createAnalyzerBeansConfiguration());
 		runner.addJob(job);
 		runner.run(dc);
 
@@ -126,7 +129,8 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		job4.putColumnProperty("Columns", employeeColumns[0],
 				employeeColumns[1]);
 
-		AnalysisRunnerImpl runner = new AnalysisRunnerImpl();
+		AnalysisRunnerImpl runner = new AnalysisRunnerImpl(
+				TestHelper.createAnalyzerBeansConfiguration());
 		runner.addJob(job1);
 		runner.addJob(job2);
 		runner.addJob(job3);

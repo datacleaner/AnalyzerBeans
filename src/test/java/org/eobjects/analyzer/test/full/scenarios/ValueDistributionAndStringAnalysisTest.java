@@ -11,6 +11,8 @@ import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalysisRunner;
 import org.eobjects.analyzer.job.AnalysisRunnerImpl;
+import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.job.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.job.ConcurrencyProvider;
 import org.eobjects.analyzer.job.ThreadPoolConcurrencyProvider;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
@@ -32,11 +34,14 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
 				.scanPackage("org.eobjects.analyzer.beans", true);
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
+		ConcurrencyProvider concurrencyProvider = new ThreadPoolConcurrencyProvider(
+				3);
 
-		ConcurrencyProvider concurrencyProvider = new ThreadPoolConcurrencyProvider(3);
+		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(
+				null, descriptorProvider, concurrencyProvider,
+				collectionProvider);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(descriptorProvider,
-				concurrencyProvider, collectionProvider);
+		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
 		DataContext dc = DataContextFactory
 				.createJdbcDataContext(getTestDbConnection());
@@ -90,8 +95,8 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				assertTrue(result instanceof CrosstabResult);
 				CrosstabResult cr = (CrosstabResult) result;
 				Crosstab<?> crosstab = cr.getCrosstab();
-				assertEquals("[column, measure]", Arrays.toString(crosstab
-						.getDimensionNames()));
+				assertEquals("[column, measure]",
+						Arrays.toString(crosstab.getDimensionNames()));
 				assertEquals(
 						"[LASTNAME, FIRSTNAME, EXTENSION, EMAIL, OFFICECODE, JOBTITLE]",
 						crosstab.getDimension(0).getCategories().toString());
@@ -126,15 +131,18 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				}
 			}
 		}
-		
+
 		assertNotNull(jobTitleResult);
 		assertNotNull(lastnameResult);
-		
-		assertEquals("Patterson", lastnameResult.getTopValues().getValueCounts().get(0).getValue());
-		assertEquals(3, lastnameResult.getTopValues().getValueCounts().get(0).getCount());
+
+		assertEquals("Patterson", lastnameResult.getTopValues()
+				.getValueCounts().get(0).getValue());
+		assertEquals(3, lastnameResult.getTopValues().getValueCounts().get(0)
+				.getCount());
 		assertEquals(16, lastnameResult.getUniqueCount());
 		assertEquals(0, lastnameResult.getNullCount());
-		
-		assertEquals("Sales Rep", jobTitleResult.getTopValues().getValueCounts().get(0).getValue());
+
+		assertEquals("Sales Rep", jobTitleResult.getTopValues()
+				.getValueCounts().get(0).getValue());
 	}
 }
