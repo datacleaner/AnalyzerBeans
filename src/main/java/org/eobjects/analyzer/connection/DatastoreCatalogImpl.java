@@ -7,6 +7,9 @@ public class DatastoreCatalogImpl implements DatastoreCatalog {
 	private Collection<Datastore> _datastores;
 
 	public DatastoreCatalogImpl(Collection<Datastore> datastores) {
+		if (datastores == null) {
+			throw new IllegalArgumentException("datastores cannot be null");
+		}
 		_datastores = datastores;
 	}
 
@@ -16,6 +19,7 @@ public class DatastoreCatalogImpl implements DatastoreCatalog {
 		int i = 0;
 		for (Datastore ds : _datastores) {
 			names[i] = ds.getName();
+			i++;
 		}
 		return names;
 	}

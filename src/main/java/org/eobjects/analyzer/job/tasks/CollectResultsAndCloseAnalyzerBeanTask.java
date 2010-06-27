@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.tasks;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -7,7 +7,7 @@ import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class CollectResultsAndCloseAnalyzerBeanTask implements Callable<Object> {
+public class CollectResultsAndCloseAnalyzerBeanTask implements Callable<Object> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(CollectResultsAndCloseAnalyzerBeanTask.class);

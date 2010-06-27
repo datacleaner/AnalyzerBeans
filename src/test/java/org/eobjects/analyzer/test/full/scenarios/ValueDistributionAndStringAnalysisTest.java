@@ -6,6 +6,7 @@ import java.util.List;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
+import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -13,14 +14,16 @@ import org.eobjects.analyzer.job.AnalysisRunner;
 import org.eobjects.analyzer.job.AnalysisRunnerImpl;
 import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.job.ConcurrencyProvider;
-import org.eobjects.analyzer.job.ThreadPoolConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.ThreadPoolConcurrencyProvider;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
+import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
@@ -37,9 +40,13 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		ConcurrencyProvider concurrencyProvider = new ThreadPoolConcurrencyProvider(
 				3);
 
+		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
+		ReferenceDataCatalog referenceDataCatalog = TestHelper
+				.createReferenceDataCatalog();
+
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(
-				null, descriptorProvider, concurrencyProvider,
-				collectionProvider);
+				datastoreCatalog, referenceDataCatalog, descriptorProvider,
+				concurrencyProvider, collectionProvider);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 

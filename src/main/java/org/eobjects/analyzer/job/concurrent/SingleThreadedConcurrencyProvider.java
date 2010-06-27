@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.concurrent;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;

@@ -18,6 +18,10 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.JobListDescriptorProvider;
+import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.SingleThreadedConcurrencyProvider;
+import org.eobjects.analyzer.job.tasks.AssignAndInitializeTask;
+import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredRowProcessingCallback;
@@ -49,6 +53,9 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	private CountDownLatch _resultCountDown;
 
 	public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration) {
+		if (configuration == null) {
+			throw new IllegalArgumentException("configuration cannot be null");
+		}
 		_configuration = configuration;
 	}
 

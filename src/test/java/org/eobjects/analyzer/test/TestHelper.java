@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.test;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,10 +11,14 @@ import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.job.ConcurrencyProvider;
-import org.eobjects.analyzer.job.SingleThreadedConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.SingleThreadedConcurrencyProvider;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
+import org.eobjects.analyzer.reference.Dictionary;
+import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
+import org.eobjects.analyzer.reference.SynonymCatalog;
 
 public final class TestHelper {
 
@@ -21,11 +26,21 @@ public final class TestHelper {
 			.scanPackage("org.eobjects.analyzer", true);
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration() {
-		List<Datastore> emptyList = Collections.emptyList();
-		DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(emptyList);
 		ConcurrencyProvider concurrencyProvider = new SingleThreadedConcurrencyProvider();
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
-		return new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				descriptorProvider, concurrencyProvider, collectionProvider);
+		return new AnalyzerBeansConfigurationImpl(createDatastoreCatalog(),
+				createReferenceDataCatalog(), descriptorProvider,
+				concurrencyProvider, collectionProvider);
+	}
+
+	public static ReferenceDataCatalog createReferenceDataCatalog() {
+		Collection<Dictionary> dictionaries = Collections.emptyList();
+		Collection<SynonymCatalog> synonymCatalogs = Collections.emptyList();
+		return new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs);
+	}
+
+	public static DatastoreCatalog createDatastoreCatalog() {
+		List<Datastore> datastores = Collections.emptyList();
+		return new DatastoreCatalogImpl(datastores);
 	}
 }
