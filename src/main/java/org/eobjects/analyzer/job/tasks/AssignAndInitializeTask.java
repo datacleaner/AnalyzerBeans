@@ -1,30 +1,25 @@
 package org.eobjects.analyzer.job.tasks;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AssignAndInitializeTask implements Callable<Object> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(AssignAndInitializeTask.class);
-
 	private AnalyzerBeanInstance analyzerBeanInstance;
-	private CountDownLatch initializeCount;
+	private CompletionListener completionListener;
 	private CollectionProvider collectionProvider;
 	private DataContextProvider dataContextProvider;
 	private LifeCycleCallback initializeCallback;
 	private LifeCycleCallback returnResultsCallback;
 	private LifeCycleCallback closeCallback;
 
-	public AssignAndInitializeTask(CountDownLatch countDownLatch,
+	public AssignAndInitializeTask(CompletionListener completionListener,
 			AnalyzerBeanInstance analyzerBeanInstance,
 			CollectionProvider collectionProvider,
 			DataContextProvider dataContextProvider,
@@ -32,7 +27,7 @@ public class AssignAndInitializeTask implements Callable<Object> {
 			LifeCycleCallback returnResultsCallback,
 			LifeCycleCallback closeCallback) {
 		this.analyzerBeanInstance = analyzerBeanInstance;
-		this.initializeCount = countDownLatch;
+		this.completionListener = completionListener;
 		this.collectionProvider = collectionProvider;
 		this.dataContextProvider = dataContextProvider;
 		this.initializeCallback = initializeCallback;
@@ -55,9 +50,7 @@ public class AssignAndInitializeTask implements Callable<Object> {
 		analyzerBeanInstance.assignConfigured();
 		analyzerBeanInstance.assignProvided();
 		analyzerBeanInstance.initialize();
-		initializeCount.countDown();
-		logger.info("initializeCount.countDown() returned count="
-				+ initializeCount.getCount());
+		completionListener.onComplete();
 		return Boolean.TRUE;
 	}
 }

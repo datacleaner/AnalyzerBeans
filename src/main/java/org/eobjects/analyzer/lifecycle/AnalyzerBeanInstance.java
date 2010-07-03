@@ -3,9 +3,9 @@ package org.eobjects.analyzer.lifecycle;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,17 +72,12 @@ public class AnalyzerBeanInstance {
 		return initializeCallbacks;
 	}
 
-	public Callable<Object> createCallable(
-			final CountDownLatch initializeCount, final CountDownLatch runCount) {
+	public Callable<Object> createCallable(final CompletionListener completionListener) {
 		return new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
-				logger.debug("initializeCount.await()");
-				initializeCount.await();
 				run();
-				runCount.countDown();
-				logger.info("runCount.countDown() returned count="
-						+ runCount.getCount() + " (" + analyzerBean + ")");
+				completionListener.onComplete();
 				return Boolean.TRUE;
 			}
 		};

@@ -1,39 +1,28 @@
 package org.eobjects.analyzer.job.tasks;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 
+import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CollectResultsAndCloseAnalyzerBeanTask implements Callable<Object> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(CollectResultsAndCloseAnalyzerBeanTask.class);
-
 	private AnalyzerBeanInstance analyzerBeanInstance;
-	private CountDownLatch runCount;
-	private CountDownLatch collectResultsCount;
+	private CompletionListener completionListener;
 
 	public CollectResultsAndCloseAnalyzerBeanTask(
-			CountDownLatch countDownToWaitFor, CountDownLatch countDownToCount,
+			CompletionListener completionListener,
 			AnalyzerBeanInstance analyzerBeanInstance) {
-		this.runCount = countDownToWaitFor;
-		this.collectResultsCount = countDownToCount;
+		this.completionListener = completionListener;
 		this.analyzerBeanInstance = analyzerBeanInstance;
 	}
 
 	@Override
 	public Object call() throws Exception {
-		logger.debug("runCount.await()");
-		runCount.await();
 		analyzerBeanInstance.returnResults();
-		collectResultsCount.countDown();
-		logger.info("collectResultsCount.countDown() returned count="
-				+ collectResultsCount.getCount());
+		completionListener.onComplete();
 
-		// close can occur AFTER counting down the countDownLatch
+		// close can occur AFTER completion
 		analyzerBeanInstance.close();
 		return Boolean.TRUE;
 	}

@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.job;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
@@ -18,8 +18,11 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.JobListDescriptorProvider;
+import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.ScheduleTasksCompletionListener;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.WaitableCompletionListener;
 import org.eobjects.analyzer.job.tasks.AssignAndInitializeTask;
 import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
@@ -50,7 +53,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	private AnalyzerBeansConfiguration _configuration;
 	private Queue<AnalyzerResult> _result;
 	private Integer _rowProcessorAnalyzersCount;
-	private CountDownLatch _resultCountDown;
+	private WaitableCompletionListener _closeCompletionListener;
 
 	public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration) {
 		if (configuration == null) {
@@ -72,10 +75,12 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 
 	@Override
 	public void run(DataContextProvider dataContextProvider) {
-		logger.info("run(...) invoked.");
-		logger.info("jobs: " + _jobs.size());
-		for (AnalysisJob job : _jobs) {
-			logger.info(" - " + job);
+		if (logger.isInfoEnabled()) {
+			logger.info("run(...) invoked.");
+			logger.info("jobs: " + _jobs.size());
+			for (AnalysisJob job : _jobs) {
+				logger.info(" - " + job);
+			}
 		}
 
 		DescriptorProvider descriptorProvider = _configuration
@@ -132,41 +137,50 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 				_result);
 		CloseCallback closeCallback = new CloseCallback();
 
-		CountDownLatch assignCountDown = new CountDownLatch(
+		Collection<Callable<?>> initializeAnalyzersTasks = new LinkedList<Callable<?>>();
+		Collection<Callable<?>> runAnalyzersTasks = new LinkedList<Callable<?>>();
+		Collection<Callable<?>> closeAnalyzersTasks = new LinkedList<Callable<?>>();
+
+		// create the tasks for cleaning up after running the analyzers
+		_closeCompletionListener = new WaitableCompletionListener(
 				analyzerBeanInstances.size());
-
-		logger.info("Scheduling tasks for assinging @Configured and @Provided properties, and running @Initialize methods");
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			Callable<Object> task = new AssignAndInitializeTask(
-					assignCountDown, analyzerBeanInstance, collectionProvider,
-					dataContextProvider, initializeCallback,
-					returnResultsCallback, closeCallback);
-			concurrencyProvider.exec(task);
+			CollectResultsAndCloseAnalyzerBeanTask closeTask = new CollectResultsAndCloseAnalyzerBeanTask(
+					_closeCompletionListener, analyzerBeanInstance);
+			closeAnalyzersTasks.add(closeTask);
 		}
 
-		CountDownLatch runCountDown = new CountDownLatch(rowProcessors.size()
-				+ analyzerBeanInstances.size());
-		logger.info("Scheduling tasks for " + analyzerBeanInstances.size()
-				+ " analyzers");
+		// create the tasks for running the analyzers
+		int numRunTasks = rowProcessors.size() + analyzerBeanInstances.size();
+		CompletionListener runCompletionListener = new ScheduleTasksCompletionListener(
+				concurrencyProvider, numRunTasks, closeAnalyzersTasks);
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			concurrencyProvider.exec(analyzerBeanInstance.createCallable(
-					assignCountDown, runCountDown));
+			Callable<Object> runTask = analyzerBeanInstance
+					.createCallable(runCompletionListener);
+			runAnalyzersTasks.add(runTask);
 		}
-
-		logger.info("Scheduling tasks for " + rowProcessors.size()
-				+ " row processors");
 		for (AnalysisRowProcessor analysisRowProcessor : rowProcessors.values()) {
-			concurrencyProvider.exec(analysisRowProcessor.createCallable(
-					assignCountDown, runCountDown));
+			Callable<Object> runTask = analysisRowProcessor
+					.createCallable(runCompletionListener);
+			runAnalyzersTasks.add(runTask);
 		}
 
-		_resultCountDown = new CountDownLatch(analyzerBeanInstances.size());
-		logger.info("Scheduling tasks for retreiving results and closing beans");
+		// create the tasks for initializing the analyzers
+		CompletionListener initializeCompletionListener = new ScheduleTasksCompletionListener(
+				concurrencyProvider, analyzerBeanInstances.size(),
+				runAnalyzersTasks);
+
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			Callable<Object> task = new CollectResultsAndCloseAnalyzerBeanTask(
-					runCountDown, _resultCountDown, analyzerBeanInstance);
-			concurrencyProvider.exec(task);
+			Callable<Object> initializeTask = new AssignAndInitializeTask(
+					initializeCompletionListener, analyzerBeanInstance,
+					collectionProvider, dataContextProvider,
+					initializeCallback, returnResultsCallback, closeCallback);
+			initializeAnalyzersTasks.add(initializeTask);
 		}
+
+		// begin!
+		new ScheduleTasksCompletionListener(concurrencyProvider, 1,
+				initializeAnalyzersTasks).onComplete();
 
 		logger.info("run(...) returning.");
 	}
@@ -175,8 +189,8 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	public List<AnalyzerResult> getResults() {
 		while (!isDone()) {
 			try {
-				logger.debug("_resultCountDown.await()");
-				_resultCountDown.await();
+				logger.debug("_closeCompletionListener.await()");
+				_closeCompletionListener.await();
 			} catch (Exception e) {
 				logger.error("Unexpected error while retreiving results", e);
 			}
@@ -186,10 +200,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 
 	@Override
 	public boolean isDone() {
-		if (_resultCountDown == null) {
-			return false;
-		}
-		return _resultCountDown.getCount() == 0;
+		return _closeCompletionListener.isDone();
 	}
 
 	public Integer getRowProcessorCount() {

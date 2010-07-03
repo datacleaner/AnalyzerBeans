@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,16 +102,12 @@ public class AnalysisRowProcessor {
 	}
 
 	public Callable<Object> createCallable(
-			final CountDownLatch initializeCount, final CountDownLatch runCount) {
+			final CompletionListener completionListener) {
 		return new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
-				logger.debug("initializeCount.await()");
-				initializeCount.await();
 				run();
-				runCount.countDown();
-				logger.info("runCount.countDown() returned count="
-						+ runCount.getCount());
+				completionListener.onComplete();
 				return Boolean.TRUE;
 			}
 		};
