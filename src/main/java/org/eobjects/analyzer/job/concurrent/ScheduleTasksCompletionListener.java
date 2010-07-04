@@ -1,9 +1,9 @@
 package org.eobjects.analyzer.job.concurrent;
 
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,15 +13,14 @@ public class ScheduleTasksCompletionListener implements CompletionListener {
 			.getLogger(ScheduleTasksCompletionListener.class);
 
 	private AtomicInteger _countDown;
-	private ConcurrencyProvider _concurrencyProvider;
-	private Collection<? extends Callable<?>> _callables;
+	private TaskRunner _taskRunner;
+	private Collection<? extends Task> _tasks;
 
-	public ScheduleTasksCompletionListener(
-			ConcurrencyProvider concurrencyProvider, int callablesToWaitFor,
-			Collection<? extends Callable<?>> callablesToSchedule) {
-		_concurrencyProvider = concurrencyProvider;
-		_callables = callablesToSchedule;
-		_countDown = new AtomicInteger(callablesToWaitFor);
+	public ScheduleTasksCompletionListener(TaskRunner taskRunner,
+			int tasksToWaitFor, Collection<? extends Task> tasksToSchedule) {
+		_taskRunner = taskRunner;
+		_tasks = tasksToSchedule;
+		_countDown = new AtomicInteger(tasksToWaitFor);
 	}
 
 	@Override
@@ -29,9 +28,9 @@ public class ScheduleTasksCompletionListener implements CompletionListener {
 		int count = _countDown.decrementAndGet();
 		logger.debug("onComplete(), count = {}", count);
 		if (count == 0) {
-			logger.info("Scheduling {} callables", _callables.size());
-			for (Callable<?> callable : _callables) {
-				_concurrencyProvider.exec(callable);
+			logger.info("Scheduling {} tasks", _tasks.size());
+			for (Task task : _tasks) {
+				_taskRunner.run(task);
 			}
 		}
 	}

@@ -3,12 +3,12 @@ package org.eobjects.analyzer.job;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
+import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,14 +101,12 @@ public class AnalysisRowProcessor {
 		}
 	}
 
-	public Callable<Object> createCallable(
-			final CompletionListener completionListener) {
-		return new Callable<Object>() {
+	public Task createTask(final CompletionListener completionListener) {
+		return new Task() {
 			@Override
-			public Object call() throws Exception {
+			public void execute() throws Exception {
 				run();
 				completionListener.onComplete();
-				return Boolean.TRUE;
 			}
 		};
 	}

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
@@ -25,5 +25,5 @@ public interface AnalyzerBeansConfiguration extends Serializable {
 
 	public CollectionProvider getCollectionProvider();
 
-	public ConcurrencyProvider getConcurrencyProvider();
+	public TaskRunner getTaskRunner();
 }

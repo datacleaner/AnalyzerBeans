@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
@@ -19,12 +18,13 @@ import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.JobListDescriptorProvider;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
-import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
 import org.eobjects.analyzer.job.concurrent.ScheduleTasksCompletionListener;
-import org.eobjects.analyzer.job.concurrent.SingleThreadedConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.concurrent.WaitableCompletionListener;
 import org.eobjects.analyzer.job.tasks.AssignAndInitializeTask;
 import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
+import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredRowProcessingCallback;
@@ -93,10 +93,10 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		if (collectionProvider == null) {
 			collectionProvider = new BerkeleyDbCollectionProvider();
 		}
-		ConcurrencyProvider concurrencyProvider = _configuration
-				.getConcurrencyProvider();
-		if (concurrencyProvider == null) {
-			concurrencyProvider = new SingleThreadedConcurrencyProvider();
+		TaskRunner taskRunner = _configuration
+				.getTaskRunner();
+		if (taskRunner == null) {
+			taskRunner = new SingleThreadedTaskRunner();
 		}
 		if (_result == null) {
 			_result = new LinkedBlockingQueue<AnalyzerResult>();
@@ -137,9 +137,9 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 				_result);
 		CloseCallback closeCallback = new CloseCallback();
 
-		Collection<Callable<?>> initializeAnalyzersTasks = new LinkedList<Callable<?>>();
-		Collection<Callable<?>> runAnalyzersTasks = new LinkedList<Callable<?>>();
-		Collection<Callable<?>> closeAnalyzersTasks = new LinkedList<Callable<?>>();
+		Collection<Task> initializeAnalyzersTasks = new LinkedList<Task>();
+		Collection<Task> runAnalyzersTasks = new LinkedList<Task>();
+		Collection<Task> closeAnalyzersTasks = new LinkedList<Task>();
 
 		// create the tasks for cleaning up after running the analyzers
 		_closeCompletionListener = new WaitableCompletionListener(
@@ -153,25 +153,25 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		// create the tasks for running the analyzers
 		int numRunTasks = rowProcessors.size() + analyzerBeanInstances.size();
 		CompletionListener runCompletionListener = new ScheduleTasksCompletionListener(
-				concurrencyProvider, numRunTasks, closeAnalyzersTasks);
+				taskRunner, numRunTasks, closeAnalyzersTasks);
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			Callable<Object> runTask = analyzerBeanInstance
-					.createCallable(runCompletionListener);
+			Task runTask = analyzerBeanInstance
+					.createTask(runCompletionListener);
 			runAnalyzersTasks.add(runTask);
 		}
 		for (AnalysisRowProcessor analysisRowProcessor : rowProcessors.values()) {
-			Callable<Object> runTask = analysisRowProcessor
-					.createCallable(runCompletionListener);
+			Task runTask = analysisRowProcessor
+					.createTask(runCompletionListener);
 			runAnalyzersTasks.add(runTask);
 		}
 
 		// create the tasks for initializing the analyzers
 		CompletionListener initializeCompletionListener = new ScheduleTasksCompletionListener(
-				concurrencyProvider, analyzerBeanInstances.size(),
+				taskRunner, analyzerBeanInstances.size(),
 				runAnalyzersTasks);
 
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
-			Callable<Object> initializeTask = new AssignAndInitializeTask(
+			Task initializeTask = new AssignAndInitializeTask(
 					initializeCompletionListener, analyzerBeanInstance,
 					collectionProvider, dataContextProvider,
 					initializeCallback, returnResultsCallback, closeCallback);
@@ -179,7 +179,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		}
 
 		// begin!
-		new ScheduleTasksCompletionListener(concurrencyProvider, 1,
+		new ScheduleTasksCompletionListener(taskRunner, 1,
 				initializeAnalyzersTasks).onComplete();
 
 		logger.info("run(...) returning.");

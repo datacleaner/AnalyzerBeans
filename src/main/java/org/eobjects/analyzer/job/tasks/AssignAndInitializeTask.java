@@ -1,7 +1,5 @@
 package org.eobjects.analyzer.job.tasks;
 
-import java.util.concurrent.Callable;
-
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
@@ -9,7 +7,7 @@ import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 
-public class AssignAndInitializeTask implements Callable<Object> {
+public class AssignAndInitializeTask implements Task {
 
 	private AnalyzerBeanInstance analyzerBeanInstance;
 	private CompletionListener completionListener;
@@ -36,7 +34,7 @@ public class AssignAndInitializeTask implements Callable<Object> {
 	}
 
 	@Override
-	public Object call() throws Exception {
+	public void execute() throws Exception {
 		AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(
 				analyzerBeanInstance, collectionProvider, dataContextProvider);
 
@@ -51,6 +49,5 @@ public class AssignAndInitializeTask implements Callable<Object> {
 		analyzerBeanInstance.assignProvided();
 		analyzerBeanInstance.initialize();
 		completionListener.onComplete();
-		return Boolean.TRUE;
 	}
 }

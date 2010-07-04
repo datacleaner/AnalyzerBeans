@@ -2,10 +2,10 @@ package org.eobjects.analyzer.lifecycle;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
+import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,13 +72,12 @@ public class AnalyzerBeanInstance {
 		return initializeCallbacks;
 	}
 
-	public Callable<Object> createCallable(final CompletionListener completionListener) {
-		return new Callable<Object>() {
+	public Task createTask(final CompletionListener completionListener) {
+		return new Task() {
 			@Override
-			public Object call() throws Exception {
+			public void execute() throws Exception {
 				run();
 				completionListener.onComplete();
-				return Boolean.TRUE;
 			}
 		};
 	}

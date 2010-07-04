@@ -2,7 +2,7 @@ package org.eobjects.analyzer.job;
 
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
@@ -14,14 +14,14 @@ public class AnalyzerBeansConfigurationImpl implements
 	private DescriptorProvider _descriptorProvider;
 	private CollectionProvider _collectionProvider;
 	private DatastoreCatalog _datastoreCatalog;
-	private ConcurrencyProvider _concurrencyProvider;
+	private TaskRunner _taskRunner;
 
 	private ReferenceDataCatalog _referenceDataCatalog;
 
 	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog,
 			ReferenceDataCatalog referenceDataCatalog,
 			DescriptorProvider descriptorProvider,
-			ConcurrencyProvider concurrencyProvider,
+			TaskRunner taskRunner,
 			CollectionProvider collectionProvider) {
 		if (datastoreCatalog == null) {
 			throw new IllegalArgumentException(
@@ -35,9 +35,9 @@ public class AnalyzerBeansConfigurationImpl implements
 			throw new IllegalArgumentException(
 					"descriptorProvider cannot be null");
 		}
-		if (concurrencyProvider == null) {
+		if (taskRunner == null) {
 			throw new IllegalArgumentException(
-					"concurrencyProvider cannot be null");
+					"taskRunner cannot be null");
 		}
 		if (collectionProvider == null) {
 			throw new IllegalArgumentException(
@@ -46,7 +46,7 @@ public class AnalyzerBeansConfigurationImpl implements
 		_datastoreCatalog = datastoreCatalog;
 		_referenceDataCatalog = referenceDataCatalog;
 		_descriptorProvider = descriptorProvider;
-		_concurrencyProvider = concurrencyProvider;
+		_taskRunner = taskRunner;
 		_collectionProvider = collectionProvider;
 	}
 
@@ -71,8 +71,8 @@ public class AnalyzerBeansConfigurationImpl implements
 	}
 
 	@Override
-	public ConcurrencyProvider getConcurrencyProvider() {
-		return _concurrencyProvider;
+	public TaskRunner getTaskRunner() {
+		return _taskRunner;
 	}
 
 }

@@ -11,8 +11,8 @@ import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
-import org.eobjects.analyzer.job.concurrent.SingleThreadedConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
+import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.Dictionary;
@@ -26,11 +26,11 @@ public final class TestHelper {
 			.scanPackage("org.eobjects.analyzer", true);
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration() {
-		ConcurrencyProvider concurrencyProvider = new SingleThreadedConcurrencyProvider();
+		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
 		return new AnalyzerBeansConfigurationImpl(createDatastoreCatalog(),
 				createReferenceDataCatalog(), descriptorProvider,
-				concurrencyProvider, collectionProvider);
+				taskRunner, collectionProvider);
 	}
 
 	public static ReferenceDataCatalog createReferenceDataCatalog() {

@@ -14,8 +14,8 @@ import org.eobjects.analyzer.job.AnalysisRunner;
 import org.eobjects.analyzer.job.AnalysisRunnerImpl;
 import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.job.concurrent.ConcurrencyProvider;
-import org.eobjects.analyzer.job.concurrent.ThreadPoolConcurrencyProvider;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
+import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
@@ -37,8 +37,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
 				.scanPackage("org.eobjects.analyzer.beans", true);
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
-		ConcurrencyProvider concurrencyProvider = new ThreadPoolConcurrencyProvider(
-				3);
+		TaskRunner taskRunner = new MultiThreadedTaskRunner(3);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper
@@ -46,7 +45,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(
 				datastoreCatalog, referenceDataCatalog, descriptorProvider,
-				concurrencyProvider, collectionProvider);
+				taskRunner, collectionProvider);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
@@ -77,11 +76,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 		runner.run(dc);
 
-		// TODO: any assertions on the future?
-		// assertFalse(runner.isDone());
-
-		// TODO: It seems that the value dist profiler is being categorized as
-		// an exploring profiler!
+		assertFalse(runner.isDone());
 
 		List<AnalyzerResult> results = runner.getResults();
 
