@@ -14,10 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Stateless
-public class TaskRunnerEjbBean implements TaskRunnerEjb {
+public class EjbTimerTaskRunnerBean implements EjbTimerTaskRunner {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(TaskRunnerEjbBean.class);
+			.getLogger(EjbTimerTaskRunnerBean.class);
 
 	// shared queue of callables
 	private static final BlockingQueue<Task> taskQueue = new LinkedBlockingQueue<Task>();
