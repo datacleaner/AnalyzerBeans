@@ -2,11 +2,11 @@ package org.eobjects.analyzer.data;
 
 import dk.eobjects.metamodel.schema.Column;
 
-public class TokenizedInputColumn extends AbstractInputColumn<String> {
+public class VirtualStringInputColumn extends AbstractInputColumn<String> {
 
 	private String _name;
 
-	public TokenizedInputColumn(String name) {
+	public VirtualStringInputColumn(String name) {
 		_name = name;
 	}
 

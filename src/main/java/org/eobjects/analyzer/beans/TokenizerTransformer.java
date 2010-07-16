@@ -6,7 +6,7 @@ import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.data.TokenizedInputColumn;
+import org.eobjects.analyzer.data.VirtualStringInputColumn;
 
 @TransformerBean("Tokenizer")
 public class TokenizerTransformer implements Transformer<String> {
@@ -30,7 +30,7 @@ public class TokenizerTransformer implements Transformer<String> {
 		@SuppressWarnings("unchecked")
 		InputColumn<String>[] result = new InputColumn[tokenNames.length];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = new TokenizedInputColumn(tokenNames[i]);
+			result[i] = new VirtualStringInputColumn(tokenNames[i]);
 		}
 		return result;
 	}

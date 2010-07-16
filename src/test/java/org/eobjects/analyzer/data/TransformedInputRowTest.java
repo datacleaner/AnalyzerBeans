@@ -10,7 +10,7 @@ public class TransformedInputRowTest extends TestCase {
 		Column col2 = new Column("bar");
 		InputColumn<?> inputColumn1 = new MetaModelInputColumn(col1);
 		InputColumn<?> inputColumn2 = new MetaModelInputColumn(col2);
-		InputColumn<String> inputColumn3 = new TokenizedInputColumn("w00p");
+		InputColumn<String> inputColumn3 = new VirtualStringInputColumn("w00p");
 		
 		TransformedInputRow row1 = new TransformedInputRow(null);
 		row1.addValue(inputColumn1, "f");
