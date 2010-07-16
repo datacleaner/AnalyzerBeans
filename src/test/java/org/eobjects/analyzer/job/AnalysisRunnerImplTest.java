@@ -52,10 +52,10 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 	}
 
 	public void testExploringBeans() throws Exception {
-		AnalysisJob job1 = new AnalysisJob(ExploringBeanMock.class);
+		SimpleAnalyzerJob job1 = new SimpleAnalyzerJob(ExploringBeanMock.class);
 		setReusableMockProperties(job1);
 
-		AnalysisJob job2 = new AnalysisJob(ExploringBeanMock.class);
+		SimpleAnalyzerJob job2 = new SimpleAnalyzerJob(ExploringBeanMock.class);
 		setReusableMockProperties(job2);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(
@@ -76,7 +76,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 	}
 
 	public void testRowProcessingBeans() throws Exception {
-		AnalysisJob job = new AnalysisJob(RowProcessingBeanMock.class);
+		SimpleAnalyzerJob job = new SimpleAnalyzerJob(RowProcessingBeanMock.class);
 		setReusableMockProperties(job);
 		Column[] employeeColumns = employeesTable.getColumns();
 		Column[] customerColumns = customersTable.getColumns();
@@ -113,20 +113,20 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 	}
 
 	public void testCombination() throws Exception {
-		AnalysisJob job1 = new AnalysisJob(ExploringBeanMock.class);
+		SimpleAnalyzerJob job1 = new SimpleAnalyzerJob(ExploringBeanMock.class);
 		setReusableMockProperties(job1);
 
-		AnalysisJob job2 = new AnalysisJob(ExploringBeanMock.class);
+		SimpleAnalyzerJob job2 = new SimpleAnalyzerJob(ExploringBeanMock.class);
 		setReusableMockProperties(job2);
 
-		AnalysisJob job3 = new AnalysisJob(RowProcessingBeanMock.class);
+		SimpleAnalyzerJob job3 = new SimpleAnalyzerJob(RowProcessingBeanMock.class);
 		setReusableMockProperties(job3);
 		Column[] employeeColumns = employeesTable.getColumns();
 		Column[] customerColumns = customersTable.getColumns();
 		job3.putColumnProperty("Columns", employeeColumns[0],
 				employeeColumns[1], customerColumns[0]);
 
-		AnalysisJob job4 = new AnalysisJob(RowProcessingBeanMock.class);
+		SimpleAnalyzerJob job4 = new SimpleAnalyzerJob(RowProcessingBeanMock.class);
 		setReusableMockProperties(job4);
 		job4.putColumnProperty("Columns", employeeColumns[0],
 				employeeColumns[1]);
@@ -190,7 +190,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		assertEquals(1, bean.getRunCount());
 	}
 
-	private void setReusableMockProperties(AnalysisJob job) {
+	private void setReusableMockProperties(SimpleAnalyzerJob job) {
 		job.putStringProperty("Configured1", CONFIGURED1_VALUE);
 		job.putIntegerProperty("Configured2", CONFIGURED2_VALUE);
 	}

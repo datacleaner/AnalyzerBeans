@@ -7,17 +7,17 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
-import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.SimpleAnalyzerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.schema.Column;
 
 public class AssignConfiguredCallback implements LifeCycleCallback {
 
-	private AnalysisJob job;
+	private SimpleAnalyzerJob job;
 	private SchemaNavigator schemaNavigator;
 
-	public AssignConfiguredCallback(AnalysisJob job,
+	public AssignConfiguredCallback(SimpleAnalyzerJob job,
 			SchemaNavigator schemaNavigator) {
 		this.job = job;
 		this.schemaNavigator = schemaNavigator;

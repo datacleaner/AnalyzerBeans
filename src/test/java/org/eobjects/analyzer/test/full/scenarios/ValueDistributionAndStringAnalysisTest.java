@@ -13,7 +13,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.SimpleAnalyzerJob;
 import org.eobjects.analyzer.job.AnalysisResultFuture;
 import org.eobjects.analyzer.job.AnalysisRunner;
 import org.eobjects.analyzer.job.AnalysisRunnerImpl;
@@ -63,10 +63,10 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 		Column[] columns = table.getColumns();
 
-		Collection<AnalysisJob> jobs = new LinkedList<AnalysisJob>();
+		Collection<SimpleAnalyzerJob> jobs = new LinkedList<SimpleAnalyzerJob>();
 
 		for (Column column : columns) {
-			AnalysisJob vdJob = new AnalysisJob(ValueDistributionAnalyzer.class);
+			SimpleAnalyzerJob vdJob = new SimpleAnalyzerJob(ValueDistributionAnalyzer.class);
 			vdJob.putColumnProperty("Column", column.getQualifiedLabel());
 			vdJob.putBooleanProperty("Record unique values", false);
 			vdJob.putIntegerProperty("Top n most frequent values",
@@ -78,7 +78,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 		columns = table.getLiteralColumns();
 
-		AnalysisJob saJob = new AnalysisJob(StringAnalyzer.class);
+		SimpleAnalyzerJob saJob = new SimpleAnalyzerJob(StringAnalyzer.class);
 		saJob.putColumnProperty("Columns", columns);
 		jobs.add(saJob);
 

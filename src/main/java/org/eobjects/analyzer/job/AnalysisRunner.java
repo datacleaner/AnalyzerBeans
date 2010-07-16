@@ -21,8 +21,8 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 public interface AnalysisRunner {
 
 	public AnalysisResultFuture run(DataContextProvider dataContextProvider,
-			Collection<? extends AnalysisJob> jobs);
+			Collection<? extends SimpleAnalyzerJob> jobs);
 
 	public AnalysisResultFuture run(DataContextProvider dataContextProvider,
-			AnalysisJob firstJob, AnalysisJob... additionalJobs);
+			SimpleAnalyzerJob firstJob, SimpleAnalyzerJob... additionalJobs);
 }

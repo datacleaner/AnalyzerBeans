@@ -23,7 +23,7 @@ import dk.eobjects.metamodel.schema.Table;
  * used to ensure easy serialisation. The strings used are equal to the
  * getPath() method on Column and Table objects.
  */
-public final class AnalysisJob implements Serializable {
+public final class SimpleAnalyzerJob implements Serializable {
 
 	private static final long serialVersionUID = 6996682701564901059L;
 
@@ -37,11 +37,11 @@ public final class AnalysisJob implements Serializable {
 	private Map<String, String[]> _tableProperties;
 	private Map<String, String[]> _schemaProperties;
 
-	public AnalysisJob() {
+	public SimpleAnalyzerJob() {
 		this(null);
 	}
 
-	public AnalysisJob(Class<?> analyzerClass) {
+	public SimpleAnalyzerJob(Class<?> analyzerClass) {
 		_analyzerClass = analyzerClass;
 		_booleanProperties = new HashMap<String, Boolean[]>();
 		_integerProperties = new HashMap<String, Integer[]>();

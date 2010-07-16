@@ -59,8 +59,8 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 
 	@Override
 	public AnalysisResultFuture run(DataContextProvider dataContextProvider,
-			AnalysisJob firstJob, AnalysisJob... additionalJobs) {
-		ArrayList<AnalysisJob> jobs = new ArrayList<AnalysisJob>(
+			SimpleAnalyzerJob firstJob, SimpleAnalyzerJob... additionalJobs) {
+		ArrayList<SimpleAnalyzerJob> jobs = new ArrayList<SimpleAnalyzerJob>(
 				additionalJobs.length + 1);
 		jobs.add(firstJob);
 		for (int i = 0; i < additionalJobs.length; i++) {
@@ -71,11 +71,11 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 
 	@Override
 	public AnalysisResultFuture run(DataContextProvider dataContextProvider,
-			Collection<? extends AnalysisJob> jobs) {
+			Collection<? extends SimpleAnalyzerJob> jobs) {
 		if (logger.isInfoEnabled()) {
 			logger.info("run(...) invoked.");
 			logger.info("jobs: " + jobs.size());
-			for (AnalysisJob job : jobs) {
+			for (SimpleAnalyzerJob job : jobs) {
 				logger.info(" - " + job);
 			}
 		}
@@ -97,8 +97,8 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		if (taskRunner == null) {
 			taskRunner = new SingleThreadedTaskRunner();
 		}
-		List<AnalysisJob> explorerJobs = new LinkedList<AnalysisJob>();
-		List<AnalysisJob> rowProcessingJobs = new LinkedList<AnalysisJob>();
+		List<SimpleAnalyzerJob> explorerJobs = new LinkedList<SimpleAnalyzerJob>();
+		List<SimpleAnalyzerJob> rowProcessingJobs = new LinkedList<SimpleAnalyzerJob>();
 
 		categorizeJobs(jobs, descriptorProvider, explorerJobs,
 				rowProcessingJobs);
@@ -107,7 +107,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		RunExplorerCallback runExplorerCallback = new RunExplorerCallback(
 				dataContextProvider);
 		List<AnalyzerBeanInstance> analyzerBeanInstances = new LinkedList<AnalyzerBeanInstance>();
-		for (AnalysisJob job : explorerJobs) {
+		for (SimpleAnalyzerJob job : explorerJobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
 					.getDescriptorForClass(analyzerClass);
@@ -119,7 +119,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 			analyzerBeanInstances.add(analyzer);
 		}
 		Map<Table, AnalysisRowProcessor> rowProcessors = new HashMap<Table, AnalysisRowProcessor>();
-		for (AnalysisJob job : rowProcessingJobs) {
+		for (SimpleAnalyzerJob job : rowProcessingJobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
 					.getDescriptorForClass(analyzerClass);
@@ -187,7 +187,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		return _rowProcessorAnalyzersCount;
 	}
 
-	private void initRowProcessingBeans(AnalysisJob job,
+	private void initRowProcessingBeans(SimpleAnalyzerJob job,
 			AnalyzerBeanDescriptor descriptor,
 			List<AnalyzerBeanInstance> analyzerBeanInstances,
 			Map<Table, AnalysisRowProcessor> rowProcessors,
@@ -269,11 +269,11 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	 * the RowProcessing execution should be used if more analyzers require the
 	 * same data and the Exploring execution if not.
 	 */
-	private void categorizeJobs(Collection<? extends AnalysisJob> jobs,
+	private void categorizeJobs(Collection<? extends SimpleAnalyzerJob> jobs,
 			DescriptorProvider descriptorProvider,
-			List<AnalysisJob> explorerJobs, List<AnalysisJob> rowProcessingJobs)
+			List<SimpleAnalyzerJob> explorerJobs, List<SimpleAnalyzerJob> rowProcessingJobs)
 			throws IllegalStateException {
-		for (AnalysisJob job : jobs) {
+		for (SimpleAnalyzerJob job : jobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
 					.getDescriptorForClass(analyzerClass);

@@ -4,15 +4,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.SimpleAnalyzerJob;
 
 public class JobListDescriptorProvider implements DescriptorProvider {
 
 	private Map<Class<?>, AnalyzerBeanDescriptor> _descriptors;
 
-	public JobListDescriptorProvider(Collection<? extends AnalysisJob> jobs) {
+	public JobListDescriptorProvider(Collection<? extends SimpleAnalyzerJob> jobs) {
 		_descriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
-		for (AnalysisJob job : jobs) {
+		for (SimpleAnalyzerJob job : jobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
 					analyzerClass);

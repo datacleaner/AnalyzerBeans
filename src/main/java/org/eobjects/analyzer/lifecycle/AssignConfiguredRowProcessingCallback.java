@@ -3,7 +3,7 @@ package org.eobjects.analyzer.lifecycle;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
-import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.SimpleAnalyzerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.schema.Column;
@@ -13,7 +13,7 @@ public class AssignConfiguredRowProcessingCallback extends
 
 	private Column[] tableColumns;
 
-	public AssignConfiguredRowProcessingCallback(AnalysisJob job,
+	public AssignConfiguredRowProcessingCallback(SimpleAnalyzerJob job,
 			SchemaNavigator schemaNavigator, Column[] tableColumns) {
 		super(job, schemaNavigator);
 		this.tableColumns = tableColumns;

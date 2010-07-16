@@ -36,7 +36,7 @@ public abstract class AbstractInputColumn<E> implements InputColumn<E> {
 
 	@Override
 	public int hashCode() {
-		return hashCodeInternal();
+		return getClass().hashCode() + hashCodeInternal();
 	}
 
 	@Override
