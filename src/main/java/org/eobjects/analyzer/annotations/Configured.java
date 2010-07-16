@@ -24,13 +24,20 @@ import javax.inject.Qualifier;
  * <li>Integer</li>
  * <li>Double</li>
  * <li>String</li>
- * <li>Column</li>
- * <li>Table</li>
- * <li>Schema</li>
+ * <li>org.eobjects.analyzer.data.InputColumn</li>
+ * </ul>
+ * 
+ * Additionally exploring analyzers are allowed to inject these @Configured
+ * types (for querying purposes):
+ * 
+ * <ul>
+ * <li>dk.eobjects.metamodel.schema.Column</li>
+ * <li>dk.eobjects.metamodel.schema.Table</li>
+ * <li>dk.eobjects.metamodel.schema.Schema</li>
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target({ ElementType.METHOD, ElementType.FIELD })
 @Documented
 @Inherited
 @Qualifier

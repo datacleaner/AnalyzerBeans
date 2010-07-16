@@ -7,6 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
@@ -96,8 +97,9 @@ public class AnalysisRowProcessor {
 	}
 
 	protected void processRow(Row row, Integer count) {
+		MetaModelInputRow inputRow = new MetaModelInputRow(row);
 		for (RowProcessingAnalyzer analyzerBean : analyzerBeansAndRunDescriptors) {
-			analyzerBean.run(row, count);
+			analyzerBean.run(inputRow, count);
 		}
 	}
 

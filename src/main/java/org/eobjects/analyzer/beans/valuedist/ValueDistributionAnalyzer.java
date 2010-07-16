@@ -3,8 +3,8 @@ package org.eobjects.analyzer.beans.valuedist;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -13,11 +13,10 @@ import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.schema.Column;
 
 @AnalyzerBean("Value distribution")
 public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
@@ -27,7 +26,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 
 	@Inject
 	@Configured("Column")
-	Column _column;
+	InputColumn<?> _column;
 
 	@Inject
 	@Configured("Record unique values")
@@ -47,19 +46,20 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 
 	private int _nullCount;
 
-	public ValueDistributionAnalyzer(Column column, boolean recordUniqueValues,
-			Integer topFrequentValues, Integer bottomFrequentValues) {
+	public ValueDistributionAnalyzer(InputColumn<?> column,
+			boolean recordUniqueValues, Integer topFrequentValues,
+			Integer bottomFrequentValues) {
 		_column = column;
 		_recordUniqueValues = recordUniqueValues;
 		_topFrequentValues = topFrequentValues;
 		_bottomFrequentValues = bottomFrequentValues;
 	}
-	
+
 	public ValueDistributionAnalyzer() {
 	}
 
 	@Override
-	public void run(Row row, int distinctCount) {
+	public void run(InputRow row, int distinctCount) {
 		Object value = row.getValue(_column);
 		runInternal(value, distinctCount);
 	}

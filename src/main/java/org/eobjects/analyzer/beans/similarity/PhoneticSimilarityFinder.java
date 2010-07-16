@@ -15,11 +15,10 @@ import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.schema.Column;
 
 @AnalyzerBean("Phonetic similarity finder")
 public class PhoneticSimilarityFinder implements RowProcessingAnalyzer {
@@ -32,28 +31,27 @@ public class PhoneticSimilarityFinder implements RowProcessingAnalyzer {
 
 	@Inject
 	@Configured
-	Column column;
+	InputColumn<String> column;
 
 	@Inject
 	@Provided
 	Map<String, Integer> values;
 
 	@Override
-	public void run(Row row, int distinctCount) {
-		Object value = row.getValue(column);
+	public void run(InputRow row, int distinctCount) {
+		String value = row.getValue(column);
 		run(value, distinctCount);
 	}
 
-	protected void run(Object value, int distinctCount) {
+	protected void run(String value, int distinctCount) {
 		if (value != null) {
-			String stringValue = value.toString();
-			stringValue = stringValue.trim().toLowerCase();
-			if (!"".equals(stringValue)) {
-				Integer count = values.get(stringValue);
+			value = value.trim().toLowerCase();
+			if (!"".equals(value)) {
+				Integer count = values.get(value);
 				if (count == null) {
-					values.put(stringValue, distinctCount);
+					values.put(value, distinctCount);
 				} else {
-					values.put(stringValue, count + distinctCount);
+					values.put(value, count + distinctCount);
 				}
 			}
 		}
@@ -114,7 +112,7 @@ public class PhoneticSimilarityFinder implements RowProcessingAnalyzer {
 	}
 
 	// setter for test-purposes
-	public void setColumn(Column column) {
+	public void setColumn(InputColumn<String> column) {
 		this.column = column;
 	}
 }

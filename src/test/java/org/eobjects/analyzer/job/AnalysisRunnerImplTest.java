@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.eobjects.analyzer.beans.mock.ExploringBeanMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingBeanMock;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.lifecycle.ProvidedList;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.test.TestHelper;
@@ -93,10 +94,10 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		performReusableMockTests(bean);
 		assertEquals(NUM_EMPLOYEES, bean.getRowCount());
 		assertEquals(NUM_EMPLOYEES, bean.getRunCount());
-		Column[] columns = bean.getColumns();
+		InputColumn<?>[] columns = bean.getColumns();
 		assertEquals(2, columns.length);
-		assertEquals(employeeColumns[0], columns[0]);
-		assertEquals(employeeColumns[1], columns[1]);
+		assertEquals(employeeColumns[0], columns[0].getPhysicalColumn());
+		assertEquals(employeeColumns[1], columns[1].getPhysicalColumn());
 
 		bean = beans.get(1);
 		performReusableMockTests(bean);
@@ -104,7 +105,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		assertEquals(NUM_CUSTOMERS, bean.getRunCount());
 		columns = bean.getColumns();
 		assertEquals(1, columns.length);
-		assertEquals(customerColumns[0], columns[0]);
+		assertEquals(customerColumns[0], columns[0].getPhysicalColumn());
 
 		List<AnalyzerResult> results = runner.getResults();
 		assertEquals(4, results.size());

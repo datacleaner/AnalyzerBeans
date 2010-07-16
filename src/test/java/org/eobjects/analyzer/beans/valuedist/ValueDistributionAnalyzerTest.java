@@ -2,12 +2,12 @@ package org.eobjects.analyzer.beans.valuedist;
 
 import java.util.HashMap;
 
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import junit.framework.TestCase;
+
+import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 import dk.eobjects.metamodel.schema.Column;
-
-import junit.framework.TestCase;
 
 public class ValueDistributionAnalyzerTest extends TestCase {
 
@@ -25,7 +25,7 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 
 	public void testGetNullAndUniqueCount() throws Exception {
 		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
-				new Column("col"), true, null, null);
+				new MetaModelInputColumn(new Column("col")), true, null, null);
 		vd.setValueDistribution(new HashMap<String, Integer>());
 
 		assertEquals(0, vd.getResult().getUniqueCount());
@@ -57,7 +57,7 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 
 	public void testGetValueDistribution() throws Exception {
 		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
-				new Column("col"), true, null, null);
+				new MetaModelInputColumn(new Column("col")), true, null, null);
 		vd.setValueDistribution(new HashMap<String, Integer>());
 
 		vd.runInternal("hello", 1);

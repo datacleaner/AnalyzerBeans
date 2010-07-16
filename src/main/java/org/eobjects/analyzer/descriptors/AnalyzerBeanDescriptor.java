@@ -177,7 +177,7 @@ public class AnalyzerBeanDescriptor implements
 			int numConfiguredColumns = 0;
 			int numConfiguredColumnArrays = 0;
 			for (ConfiguredDescriptor cd : configuredDescriptors) {
-				if (cd.isColumn()) {
+				if (cd.isInputColumn()) {
 					if (cd.isArray()) {
 						numConfiguredColumnArrays++;
 					} else {

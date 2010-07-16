@@ -13,11 +13,10 @@ import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
-
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.schema.Column;
 
 @AnalyzerBean("Row-processing mock")
 public class RowProcessingBeanMock implements RowProcessingAnalyzer {
@@ -37,9 +36,9 @@ public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 	}
 
 	@Configured
-	private Column[] columns;
+	private InputColumn<?>[] columns;
 
-	public Column[] getColumns() {
+	public InputColumn<?>[] getColumns() {
 		return columns;
 	}
 
@@ -108,7 +107,7 @@ public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 	private long rowCount;
 
 	@Override
-	public void run(Row row, int count) {
+	public void run(InputRow row, int count) {
 		TestCase.assertNotNull(row);
 		TestCase.assertNotNull(count);
 		this.runCount++;

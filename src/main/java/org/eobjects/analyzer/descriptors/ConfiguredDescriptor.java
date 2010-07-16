@@ -72,6 +72,7 @@ public class ConfiguredDescriptor {
 				|| AnnotationHelper.isLong(type)
 				|| AnnotationHelper.isDouble(type)
 				|| AnnotationHelper.isString(type)
+				|| AnnotationHelper.isInputColumn(type)
 				|| AnnotationHelper.isColumn(type)
 				|| AnnotationHelper.isTable(type) || AnnotationHelper
 				.isSchema(type))) {
@@ -99,6 +100,10 @@ public class ConfiguredDescriptor {
 	public String toString() {
 		return "ConfiguredDescriptor[method=" + _method + ",field=" + _field
 				+ "]";
+	}
+
+	public boolean isInputColumn() {
+		return AnnotationHelper.isInputColumn(_baseType);
 	}
 
 	public boolean isColumn() {

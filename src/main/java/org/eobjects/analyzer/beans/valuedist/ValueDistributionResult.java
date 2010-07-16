@@ -3,9 +3,8 @@ package org.eobjects.analyzer.beans.valuedist;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
-
-import dk.eobjects.metamodel.schema.Column;
 
 public class ValueDistributionResult implements AnalyzerResult {
 
@@ -16,26 +15,25 @@ public class ValueDistributionResult implements AnalyzerResult {
 	private Collection<String> _uniqueValues;
 	private int _uniqueValueCount;
 	private String _columnName;
-	private String _qualifiedColumnName;
 
-	private ValueDistributionResult(Column column, ValueCountList topValues,
-			ValueCountList bottomValues, int nullCount) {
+	private ValueDistributionResult(InputColumn<?> column,
+			ValueCountList topValues, ValueCountList bottomValues, int nullCount) {
 		_columnName = column.getName();
-		_qualifiedColumnName = column.getQualifiedLabel();
 		_topValues = topValues;
 		_bottomValues = bottomValues;
 		_nullCount = nullCount;
 	}
 
-	public ValueDistributionResult(Column column, ValueCountList topValues,
-			ValueCountListImpl bottomValues, int nullCount,
-			Collection<String> uniqueValues) {
+	public ValueDistributionResult(InputColumn<?> column,
+			ValueCountList topValues, ValueCountListImpl bottomValues,
+			int nullCount, Collection<String> uniqueValues) {
 		this(column, topValues, bottomValues, nullCount);
 		_uniqueValues = uniqueValues;
 	}
 
-	public ValueDistributionResult(Column column, ValueCountList topValues,
-			ValueCountListImpl bottomValues, int nullCount, int uniqueValueCount) {
+	public ValueDistributionResult(InputColumn<?> column,
+			ValueCountList topValues, ValueCountListImpl bottomValues,
+			int nullCount, int uniqueValueCount) {
 		this(column, topValues, bottomValues, nullCount);
 		_uniqueValueCount = uniqueValueCount;
 	}
@@ -70,9 +68,5 @@ public class ValueDistributionResult implements AnalyzerResult {
 
 	public String getColumnName() {
 		return _columnName;
-	}
-
-	public String getQualifiedColumnName() {
-		return _qualifiedColumnName;
 	}
 }

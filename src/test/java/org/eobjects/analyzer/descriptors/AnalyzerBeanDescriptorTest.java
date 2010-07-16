@@ -42,7 +42,7 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 		List<ConfiguredDescriptor> configuredDescriptors = descriptor
 				.getConfiguredDescriptors();
 		assertEquals(
-				"{ConfiguredDescriptor[method=null,field=private dk.eobjects.metamodel.schema.Column[] org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.columns],"
+				"{ConfiguredDescriptor[method=null,field=private org.eobjects.analyzer.data.InputColumn[] org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.columns],"
 						+ "ConfiguredDescriptor[method=null,field=private java.lang.String org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.configured1],"
 						+ "ConfiguredDescriptor[method=public void org.eobjects.analyzer.beans.mock.RowProcessingBeanMock.setConfigured2(java.lang.Integer),field=null]}",
 				ArrayUtils.toString(configuredDescriptors.toArray()));

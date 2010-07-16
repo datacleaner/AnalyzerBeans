@@ -5,6 +5,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
+import org.eobjects.analyzer.data.InputColumn;
+
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
@@ -17,6 +19,10 @@ public class AnnotationHelper {
 
 	public static boolean is(Class<?> thisType, Class<?> ofThatType) {
 		return ofThatType.isAssignableFrom(thisType);
+	}
+
+	public static boolean isInputColumn(Class<?> type) {
+		return is(type, InputColumn.class);
 	}
 
 	public static boolean isColumn(Class<?> type) {

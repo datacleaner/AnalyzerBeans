@@ -1,8 +1,8 @@
 package org.eobjects.analyzer.beans;
 
-import dk.eobjects.metamodel.data.Row;
+import org.eobjects.analyzer.data.InputRow;
 
-public interface RowProcessingAnalyzer {
-
-	public void run(Row row, int distinctCount);
+public interface RowProcessingAnalyzer extends Analyzer {
+	
+	public void run(InputRow row, int distinctCount);
 }

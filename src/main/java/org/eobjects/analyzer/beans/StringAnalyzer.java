@@ -7,8 +7,9 @@ import java.util.StringTokenizer;
 
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Result;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
@@ -46,27 +47,17 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 	private static final short INDEX_MIN_WHITE_SPACES = 12;
 
 	private NumberFormat numberFormat = FormatHelper.getUiNumberFormat();
-	private Map<Column, Integer[]> counts = new HashMap<Column, Integer[]>();
-	private Map<Column, AverageBuilder> charAverages = new HashMap<Column, AverageBuilder>();
-	private Map<Column, AverageBuilder> blanksAverages = new HashMap<Column, AverageBuilder>();
+	private Map<InputColumn<String>, Integer[]> counts = new HashMap<InputColumn<String>, Integer[]>();
+	private Map<InputColumn<String>, AverageBuilder> charAverages = new HashMap<InputColumn<String>, AverageBuilder>();
+	private Map<InputColumn<String>, AverageBuilder> blanksAverages = new HashMap<InputColumn<String>, AverageBuilder>();
 
 	@Configured
-	Column[] columns;
-
-	@Initialize
-	public void init() {
-		for (Column column : columns) {
-			if (!column.getType().isLiteral()) {
-				throw new IllegalArgumentException(
-						"Column is not of literal type: " + column);
-			}
-		}
-	}
+	InputColumn<String>[] columns;
 
 	@Override
-	public void run(Row row, int distinctCount) {
-		for (Column column : columns) {
-			Object value = row.getValue(column);
+	public void run(InputRow row, int distinctCount) {
+		for (InputColumn<String> column : columns) {
+			String value = row.getValue(column);
 			Integer[] counters = counts.get(column);
 			AverageBuilder charAverageBuilder = charAverages.get(column);
 			AverageBuilder blanksAverageBuilder = blanksAverages.get(column);
@@ -94,10 +85,9 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 				blanksAverages.put(column, blanksAverageBuilder);
 			}
 			if (value != null) {
-				String string = value.toString();
-				int numChars = string.length();
-				int numWords = new StringTokenizer(string).countTokens();
-				int numBlanks = countBlanks(string);
+				int numChars = value.length();
+				int numWords = new StringTokenizer(value).countTokens();
+				int numBlanks = countBlanks(value);
 
 				if (counters[INDEX_MIN_CHARS] == null) {
 					// This is the first time we encounter a non-null value, so
@@ -136,7 +126,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 				}
 
 				for (int i = 0; i < numChars; i++) {
-					char c = string.charAt(i);
+					char c = value.charAt(i);
 					if (Character.isLetter(c)) {
 						if (Character.isUpperCase(c)) {
 							counters[INDEX_NUM_UPPERCASE] = counters[INDEX_NUM_UPPERCASE] + 1;
@@ -188,7 +178,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 		Crosstab<String> crosstab = new Crosstab<String>(String.class,
 				columnDimension, measureDimension);
 
-		for (Column column : columns) {
+		for (InputColumn<String> column : columns) {
 			String columnName = column.getName();
 
 			columnDimension.addCategory(columnName);
@@ -255,9 +245,14 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 						+ "%";
 			}
 
+			boolean isPhysicalColumn = column.isPhysicalColumn();
+
 			// base query for exploration data result producers
-			Query baseQuery = getBaseQuery(column);
+			Query baseQuery = null;
 			QueryResultProducer resultProducer;
+			if (isPhysicalColumn) {
+				baseQuery = getBaseQuery(column.getPhysicalColumn());
+			}
 
 			if (numChars != null) {
 				nav.where(measureDimension, "Char count").put(
@@ -267,17 +262,23 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 				nav.where(measureDimension, "Max chars").put(
 						Long.toString(maxChars));
 
-				resultProducer = new QueryResultProducer(baseQuery);
-				resultProducer.addFilter(new CharRowFilter(column, maxChars));
-				nav.attach(resultProducer);
+				if (isPhysicalColumn) {
+					resultProducer = new QueryResultProducer(baseQuery);
+					resultProducer.addFilter(new CharRowFilter(column
+							.getPhysicalColumn(), maxChars));
+					nav.attach(resultProducer);
+				}
 			}
 
 			if (minChars != null) {
 				nav.where(measureDimension, "Min chars").put(
 						Long.toString(minChars));
-				resultProducer = new QueryResultProducer(baseQuery);
-				resultProducer.addFilter(new CharRowFilter(column, minChars));
-				nav.attach(resultProducer);
+				if (isPhysicalColumn) {
+					resultProducer = new QueryResultProducer(baseQuery);
+					resultProducer.addFilter(new CharRowFilter(column
+							.getPhysicalColumn(), minChars));
+					nav.attach(resultProducer);
+				}
 			}
 
 			if (columnCounts != null) {
@@ -300,17 +301,23 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 			if (maxWords != null) {
 				nav.where(measureDimension, "Max words").put(
 						Long.toString(maxWords));
-				resultProducer = new QueryResultProducer(baseQuery);
-				resultProducer.addFilter(new WordRowFilter(column, maxWords));
-				nav.attach(resultProducer);
+				if (isPhysicalColumn) {
+					resultProducer = new QueryResultProducer(baseQuery);
+					resultProducer.addFilter(new WordRowFilter(column
+							.getPhysicalColumn(), maxWords));
+					nav.attach(resultProducer);
+				}
 			}
 
 			if (minWords != null) {
 				nav.where(measureDimension, "Min words").put(
 						Long.toString(minWords));
-				resultProducer = new QueryResultProducer(baseQuery);
-				resultProducer.addFilter(new WordRowFilter(column, minWords));
-				nav.attach(resultProducer);
+				if (isPhysicalColumn) {
+					resultProducer = new QueryResultProducer(baseQuery);
+					resultProducer.addFilter(new WordRowFilter(column
+							.getPhysicalColumn(), minWords));
+					nav.attach(resultProducer);
+				}
 			}
 		}
 
@@ -318,8 +325,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 	}
 
 	private Query getBaseQuery(Column column) {
-		return new Query().from(column.getTable()).select(
-				new SelectItem(column)).selectCount().groupBy(column);
+		return new Query().from(column.getTable())
+				.select(new SelectItem(column)).selectCount().groupBy(column);
 	}
 
 	static class CharRowFilter implements SerializableRowFilter {
