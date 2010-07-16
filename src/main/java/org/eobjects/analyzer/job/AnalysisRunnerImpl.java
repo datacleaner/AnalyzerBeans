@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
-import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
@@ -39,7 +38,6 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.MetaModelHelper;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
@@ -49,11 +47,8 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	private static final Logger logger = LoggerFactory
 			.getLogger(AnalysisRunnerImpl.class);
 
-	private List<AnalysisJob> _jobs = new LinkedList<AnalysisJob>();
 	private AnalyzerBeansConfiguration _configuration;
-	private Queue<AnalyzerResult> _result;
 	private Integer _rowProcessorAnalyzersCount;
-	private WaitableCompletionListener _closeCompletionListener;
 
 	public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration) {
 		if (configuration == null) {
@@ -63,48 +58,50 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	}
 
 	@Override
-	public void addJob(AnalysisJob job) {
-		_jobs.add(job);
-		_rowProcessorAnalyzersCount = null;
+	public AnalysisResultFuture run(DataContextProvider dataContextProvider,
+			AnalysisJob firstJob, AnalysisJob... additionalJobs) {
+		ArrayList<AnalysisJob> jobs = new ArrayList<AnalysisJob>(
+				additionalJobs.length + 1);
+		jobs.add(firstJob);
+		for (int i = 0; i < additionalJobs.length; i++) {
+			jobs.add(additionalJobs[i]);
+		}
+		return run(dataContextProvider, jobs);
 	}
 
 	@Override
-	public void run(DataContext dataContext) {
-		run(new SingleDataContextProvider(dataContext));
-	}
-
-	@Override
-	public void run(DataContextProvider dataContextProvider) {
+	public AnalysisResultFuture run(DataContextProvider dataContextProvider,
+			Collection<? extends AnalysisJob> jobs) {
 		if (logger.isInfoEnabled()) {
 			logger.info("run(...) invoked.");
-			logger.info("jobs: " + _jobs.size());
-			for (AnalysisJob job : _jobs) {
+			logger.info("jobs: " + jobs.size());
+			for (AnalysisJob job : jobs) {
 				logger.info(" - " + job);
 			}
 		}
 
+		final Queue<AnalyzerResult> resultQueue = new LinkedBlockingQueue<AnalyzerResult>();
+		final WaitableCompletionListener closeCompletionListener;
+
 		DescriptorProvider descriptorProvider = _configuration
 				.getDescriptorProvider();
 		if (descriptorProvider == null) {
-			descriptorProvider = new JobListDescriptorProvider(_jobs);
+			descriptorProvider = new JobListDescriptorProvider(jobs);
 		}
 		CollectionProvider collectionProvider = _configuration
 				.getCollectionProvider();
 		if (collectionProvider == null) {
 			collectionProvider = new BerkeleyDbCollectionProvider();
 		}
-		TaskRunner taskRunner = _configuration
-				.getTaskRunner();
+		TaskRunner taskRunner = _configuration.getTaskRunner();
 		if (taskRunner == null) {
 			taskRunner = new SingleThreadedTaskRunner();
-		}
-		if (_result == null) {
-			_result = new LinkedBlockingQueue<AnalyzerResult>();
 		}
 		List<AnalysisJob> explorerJobs = new LinkedList<AnalysisJob>();
 		List<AnalysisJob> rowProcessingJobs = new LinkedList<AnalysisJob>();
 
-		categorizeJobs(descriptorProvider, explorerJobs, rowProcessingJobs);
+		categorizeJobs(jobs, descriptorProvider, explorerJobs,
+				rowProcessingJobs);
 
 		// Instantiate beans and set specific lifecycle-callbacks
 		RunExplorerCallback runExplorerCallback = new RunExplorerCallback(
@@ -134,7 +131,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		// Add shared callbacks
 		InitializeCallback initializeCallback = new InitializeCallback();
 		ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(
-				_result);
+				resultQueue);
 		CloseCallback closeCallback = new CloseCallback();
 
 		Collection<Task> initializeAnalyzersTasks = new LinkedList<Task>();
@@ -142,11 +139,11 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		Collection<Task> closeAnalyzersTasks = new LinkedList<Task>();
 
 		// create the tasks for cleaning up after running the analyzers
-		_closeCompletionListener = new WaitableCompletionListener(
+		closeCompletionListener = new WaitableCompletionListener(
 				analyzerBeanInstances.size());
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
 			CollectResultsAndCloseAnalyzerBeanTask closeTask = new CollectResultsAndCloseAnalyzerBeanTask(
-					_closeCompletionListener, analyzerBeanInstance);
+					closeCompletionListener, analyzerBeanInstance);
 			closeAnalyzersTasks.add(closeTask);
 		}
 
@@ -167,8 +164,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 
 		// create the tasks for initializing the analyzers
 		CompletionListener initializeCompletionListener = new ScheduleTasksCompletionListener(
-				taskRunner, analyzerBeanInstances.size(),
-				runAnalyzersTasks);
+				taskRunner, analyzerBeanInstances.size(), runAnalyzersTasks);
 
 		for (AnalyzerBeanInstance analyzerBeanInstance : analyzerBeanInstances) {
 			Task initializeTask = new AssignAndInitializeTask(
@@ -183,24 +179,8 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 				initializeAnalyzersTasks).onComplete();
 
 		logger.info("run(...) returning.");
-	}
-
-	@Override
-	public List<AnalyzerResult> getResults() {
-		while (!isDone()) {
-			try {
-				logger.debug("_closeCompletionListener.await()");
-				_closeCompletionListener.await();
-			} catch (Exception e) {
-				logger.error("Unexpected error while retreiving results", e);
-			}
-		}
-		return new ArrayList<AnalyzerResult>(_result);
-	}
-
-	@Override
-	public boolean isDone() {
-		return _closeCompletionListener.isDone();
+		return new AnalysisResultFutureImpl(resultQueue,
+				closeCompletionListener);
 	}
 
 	public Integer getRowProcessorCount() {
@@ -289,10 +269,11 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	 * the RowProcessing execution should be used if more analyzers require the
 	 * same data and the Exploring execution if not.
 	 */
-	private void categorizeJobs(DescriptorProvider descriptorProvider,
+	private void categorizeJobs(Collection<? extends AnalysisJob> jobs,
+			DescriptorProvider descriptorProvider,
 			List<AnalysisJob> explorerJobs, List<AnalysisJob> rowProcessingJobs)
 			throws IllegalStateException {
-		for (AnalysisJob job : _jobs) {
+		for (AnalysisJob job : jobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
 					.getDescriptorForClass(analyzerClass);

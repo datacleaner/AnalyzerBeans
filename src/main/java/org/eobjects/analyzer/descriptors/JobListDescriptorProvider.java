@@ -2,7 +2,6 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -11,7 +10,7 @@ public class JobListDescriptorProvider implements DescriptorProvider {
 
 	private Map<Class<?>, AnalyzerBeanDescriptor> _descriptors;
 
-	public JobListDescriptorProvider(List<AnalysisJob> jobs) {
+	public JobListDescriptorProvider(Collection<? extends AnalysisJob> jobs) {
 		_descriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
 		for (AnalysisJob job : jobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();

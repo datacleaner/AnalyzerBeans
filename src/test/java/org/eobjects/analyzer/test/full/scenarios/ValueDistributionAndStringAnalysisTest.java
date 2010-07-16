@@ -1,15 +1,20 @@
 package org.eobjects.analyzer.test.full.scenarios;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.AnalysisResultFuture;
 import org.eobjects.analyzer.job.AnalysisRunner;
 import org.eobjects.analyzer.job.AnalysisRunnerImpl;
 import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
@@ -51,11 +56,14 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 		DataContext dc = DataContextFactory
 				.createJdbcDataContext(getTestDbConnection());
+		DataContextProvider dcp = new SingleDataContextProvider(dc);
 
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
 
 		Column[] columns = table.getColumns();
+
+		Collection<AnalysisJob> jobs = new LinkedList<AnalysisJob>();
 
 		for (Column column : columns) {
 			AnalysisJob vdJob = new AnalysisJob(ValueDistributionAnalyzer.class);
@@ -65,22 +73,22 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 					(Integer) null);
 			vdJob.putIntegerProperty("Bottom n most frequent values",
 					(Integer) null);
-			runner.addJob(vdJob);
+			jobs.add(vdJob);
 		}
 
 		columns = table.getLiteralColumns();
 
 		AnalysisJob saJob = new AnalysisJob(StringAnalyzer.class);
 		saJob.putColumnProperty("Columns", columns);
-		runner.addJob(saJob);
+		jobs.add(saJob);
 
-		runner.run(dc);
+		AnalysisResultFuture resultFuture = runner.run(dcp, jobs);
 
-		assertFalse(runner.isDone());
+		assertFalse(resultFuture.isDone());
 
-		List<AnalyzerResult> results = runner.getResults();
+		List<AnalyzerResult> results = resultFuture.getResults();
 
-		assertTrue(runner.isDone());
+		assertTrue(resultFuture.isDone());
 
 		// expect 1 result for each column (the value distributions) and 1
 		// result for the string analyzer

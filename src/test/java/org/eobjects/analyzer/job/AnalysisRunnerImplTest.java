@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.eobjects.analyzer.beans.mock.ExploringBeanMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingBeanMock;
+import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.lifecycle.ProvidedList;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -26,6 +28,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 	private static final Integer CONFIGURED2_VALUE = 1337;
 	private static final String CONFIGURED1_VALUE = "configString1";
 	private DataContext dc;
+	private DataContextProvider dcp;
 	private Table employeesTable;
 	private Table customersTable;
 
@@ -35,6 +38,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		if (dc == null) {
 			Connection connection = getTestDbConnection();
 			dc = DataContextFactory.createJdbcDataContext(connection);
+			dcp = new SingleDataContextProvider(dc);
 			employeesTable = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 			customersTable = dc.getDefaultSchema().getTableByName("CUSTOMERS");
 		}
@@ -56,9 +60,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(
 				TestHelper.createAnalyzerBeansConfiguration());
-		runner.addJob(job1);
-		runner.addJob(job2);
-		runner.run(dc);
+		AnalysisResultFuture resultFuture = runner.run(dcp, job1, job2);
 
 		List<ExploringBeanMock> beans = ExploringBeanMock.getInstances();
 		assertEquals(2, beans.size());
@@ -69,7 +71,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		bean = beans.get(1);
 		performReusableMockTests(bean);
 
-		List<AnalyzerResult> results = runner.getResults();
+		List<AnalyzerResult> results = resultFuture.getResults();
 		assertEquals(2, results.size());
 	}
 
@@ -83,8 +85,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(
 				TestHelper.createAnalyzerBeansConfiguration());
-		runner.addJob(job);
-		runner.run(dc);
+		AnalysisResultFuture resultFuture = runner.run(dcp, job);
 
 		List<RowProcessingBeanMock> beans = RowProcessingBeanMock
 				.getInstances();
@@ -107,7 +108,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		assertEquals(1, columns.length);
 		assertEquals(customerColumns[0], columns[0].getPhysicalColumn());
 
-		List<AnalyzerResult> results = runner.getResults();
+		List<AnalyzerResult> results = resultFuture.getResults();
 		assertEquals(4, results.size());
 	}
 
@@ -132,11 +133,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 
 		AnalysisRunnerImpl runner = new AnalysisRunnerImpl(
 				TestHelper.createAnalyzerBeansConfiguration());
-		runner.addJob(job1);
-		runner.addJob(job2);
-		runner.addJob(job3);
-		runner.addJob(job4);
-		runner.run(dc);
+		AnalysisResultFuture resultFuture = runner.run(dcp, job1,job2,job3,job4);
 
 		List<RowProcessingBeanMock> rowProcessors = RowProcessingBeanMock
 				.getInstances();
@@ -149,6 +146,8 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		assertEquals(NUM_EMPLOYEES, rowProcessors.get(2).getRowCount());
 		assertEquals(2, ExploringBeanMock.getInstances().size());
 
+		resultFuture.await();
+		
 		// Assert that only two queries have been run even though 3 row
 		// processor instances exist
 		assertEquals(new Integer(2), runner.getRowProcessorCount());
