@@ -2,6 +2,7 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import org.eobjects.analyzer.annotations.Configured;
 
@@ -50,6 +51,14 @@ public class ConfiguredDescriptor {
 
 	public Class<?> getBaseType() {
 		return _baseType;
+	}
+
+	public Type getGenericType() {
+		if (_field != null) {
+			return _field.getGenericType();
+		} else {
+			return _method.getGenericReturnType();
+		}
 	}
 
 	public String getName() {

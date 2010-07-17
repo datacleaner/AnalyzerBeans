@@ -13,9 +13,14 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E>
 
 	private String _id;
 	private String _name;
+	private DataTypeFamily _type;
 
-	public TransformedInputColumn(String name, IdGenerator idGenerator) {
+	public TransformedInputColumn(String name, DataTypeFamily type, IdGenerator idGenerator) {
 		_name = name;
+		_type = type;
+		if (type == null) {
+			_type = DataTypeFamily.UNDEFINED;
+		}
 		_id = idGenerator.nextId();
 	}
 
@@ -59,5 +64,10 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E>
 	@Override
 	protected int hashCodeInternal() {
 		return _id.hashCode();
+	}
+	
+	@Override
+	public DataTypeFamily getDataTypeFamily() {
+		return _type;
 	}
 }

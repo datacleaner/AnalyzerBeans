@@ -6,6 +6,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,10 @@ public class AnnotationHelper {
 		return String.class == type;
 	}
 
+	public static boolean isShort(Type type) {
+		return (type == Short.class || type == short.class);
+	}
+
 	public static boolean isDouble(Type type) {
 		return (type == Double.class || type == double.class);
 	}
@@ -65,12 +70,28 @@ public class AnnotationHelper {
 		return (type == Integer.class || type == int.class);
 	}
 
+	public static boolean isFloat(Type type) {
+		return (type == Float.class || type == float.class);
+	}
+
 	public static boolean isMap(Type type) {
 		return type == Map.class;
 	}
 
 	public static boolean isList(Type type) {
 		return type == List.class;
+	}
+
+	public static boolean isDate(Class<?> javaDataType) {
+		return javaDataType == Date.class;
+	}
+
+	public static boolean isNumber(Type type) {
+		if (type instanceof Class<?>) {
+			Class<?> clazz = (Class<?>) type;
+			return Number.class.isAssignableFrom(clazz);
+		}
+		return false;
 	}
 
 	public static boolean isByteArray(Type type) {
@@ -143,7 +164,10 @@ public class AnnotationHelper {
 
 	public static Class<?> getTypeParameter(Field field, int parameterIndex) {
 		Type genericType = field.getGenericType();
-		
+		return getTypeParameter(genericType, parameterIndex);
+	}
+
+	public static Class<?> getTypeParameter(Type genericType, int parameterIndex) {
 		if (genericType instanceof GenericArrayType) {
 			GenericArrayType gaType = (GenericArrayType) genericType;
 			genericType = gaType.getGenericComponentType();
@@ -168,7 +192,7 @@ public class AnnotationHelper {
 			GenericArrayType gaType = (GenericArrayType) someType;
 			someType = gaType.getGenericComponentType();
 		}
-		
+
 		if (someType instanceof WildcardType) {
 			WildcardType wildcardType = (WildcardType) someType;
 

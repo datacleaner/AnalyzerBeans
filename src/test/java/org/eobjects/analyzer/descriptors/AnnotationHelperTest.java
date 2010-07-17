@@ -62,4 +62,11 @@ public class AnnotationHelperTest extends TestCase {
 		assertEquals(1, AnnotationHelper.getTypeParameterCount(field));
 		assertEquals(Comparable.class, AnnotationHelper.getTypeParameter(field, 0));
 	}
+	
+	public void testIsNumber() throws Exception {
+		assertTrue(AnnotationHelper.isNumber(Long.class));
+		assertTrue(AnnotationHelper.isNumber(Float.class));
+		assertFalse(AnnotationHelper.isNumber(String.class));
+		assertFalse(AnnotationHelper.isNumber(Object.class));
+	}
 }

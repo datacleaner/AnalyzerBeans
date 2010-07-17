@@ -214,4 +214,12 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 	public List<ResultDescriptor> getResultDescriptors() {
 		return resultDescriptors;
 	}
+	
+	@Override
+	public ConfiguredDescriptor getConfiguredDescriptorForInput() {
+		if (isRowProcessingAnalyzer()) {
+			return super.getConfiguredDescriptorForInput();
+		}
+		return null;
+	}
 }

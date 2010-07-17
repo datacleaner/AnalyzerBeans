@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.data;
 
 import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.ColumnType;
 
 public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 
@@ -29,5 +30,23 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 	@Override
 	protected int hashCodeInternal() {
 		return _column.hashCode();
+	}
+
+	@Override
+	public DataTypeFamily getDataTypeFamily() {
+		ColumnType type = _column.getType();
+		if (type.isBoolean()) {
+			return DataTypeFamily.BOOLEAN;
+		}
+		if (type.isLiteral()) {
+			return DataTypeFamily.STRING;
+		}
+		if (type.isNumber()) {
+			return DataTypeFamily.NUMBER;
+		}
+		if (type.isTimeBased()) {
+			return DataTypeFamily.DATE;
+		}
+		return DataTypeFamily.UNDEFINED;
 	}
 }

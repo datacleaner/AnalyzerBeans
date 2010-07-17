@@ -2,6 +2,8 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +18,7 @@ import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.data.DataTypeFamily;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,5 +207,19 @@ public class TransformerBeanDescriptor extends AbstractBeanDescriptor {
 
 	public List<CloseDescriptor> getCloseDescriptors() {
 		return closeDescriptors;
+	}
+
+	public DataTypeFamily getOutputDataTypeFamily() {
+		Type[] interfaces = getBeanClass().getGenericInterfaces();
+		for (Type type : interfaces) {
+			if (type instanceof ParameterizedType) {
+				ParameterizedType pType = (ParameterizedType) type;
+				if (pType.getRawType() == Transformer.class) {
+					Class<?> typeParameter = AnnotationHelper.getTypeParameter(pType, 0);
+					return DataTypeFamily.valueOf(typeParameter);
+				}
+			}
+		}
+		return DataTypeFamily.UNDEFINED;
 	}
 }

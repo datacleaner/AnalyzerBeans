@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
@@ -71,7 +72,8 @@ public class TransformerJobBuilder {
 				for (int i = 0; i < colDiff; i++) {
 					String name = _descriptor.getDisplayName() + " "
 							+ (_outputColumns.size() + 1);
-					_outputColumns.add(new TransformedInputColumn<Object>(name,
+					DataTypeFamily type = _descriptor.getOutputDataTypeFamily();
+					_outputColumns.add(new TransformedInputColumn<Object>(name,type,
 							_idGenerator));
 				}
 			} else if (colDiff < 0) {

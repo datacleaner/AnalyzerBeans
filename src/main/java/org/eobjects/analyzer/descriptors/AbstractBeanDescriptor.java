@@ -1,7 +1,10 @@
 package org.eobjects.analyzer.descriptors;
 
+import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.eobjects.analyzer.data.DataTypeFamily;
 
 public abstract class AbstractBeanDescriptor implements
 		Comparable<AbstractBeanDescriptor> {
@@ -46,6 +49,27 @@ public abstract class AbstractBeanDescriptor implements
 
 	public List<CloseDescriptor> getCloseDescriptors() {
 		return closeDescriptors;
+	}
+
+	public ConfiguredDescriptor getConfiguredDescriptorForInput() {
+		List<ConfiguredDescriptor> descriptors = getConfiguredDescriptors();
+		for (ConfiguredDescriptor configuredDescriptor : descriptors) {
+			if (configuredDescriptor.isInputColumn()) {
+				return configuredDescriptor;
+			}
+		}
+		return null;
+	}
+
+	public DataTypeFamily getInputDataTypeFamily() {
+		ConfiguredDescriptor configuredDescriptor = getConfiguredDescriptorForInput();
+		if (configuredDescriptor == null) {
+			return DataTypeFamily.UNDEFINED;
+		}
+		Type genericType = configuredDescriptor.getGenericType();
+		Class<?> typeParameter = AnnotationHelper.getTypeParameter(genericType,
+				0);
+		return DataTypeFamily.valueOf(typeParameter);
 	}
 
 	@Override

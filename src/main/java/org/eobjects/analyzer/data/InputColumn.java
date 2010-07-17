@@ -8,11 +8,13 @@ import dk.eobjects.metamodel.schema.Column;
  * virtual if the values yielded by this column are have been transformed (eg.
  * tokenized, sampled etc.)
  * 
+ * @see DataTypeFamily
+ * 
  * @author Kasper Sørensen
  * 
  * @param <E>
- *            the data type of the column. Supported types are:
- *            java.lang.String, java.util.Date and primitive types.
+ *            the data type family of the column. See
+ *            <code>DataTypeFamily</code> for available values.
  */
 public interface InputColumn<E> extends Comparable<InputColumn<E>> {
 
@@ -39,4 +41,10 @@ public interface InputColumn<E> extends Comparable<InputColumn<E>> {
 	 *             if isPhysicalColumn() is false
 	 */
 	public Column getPhysicalColumn() throws IllegalStateException;
+
+	/**
+	 * @return the family of datatypes that matches column's data type. This
+	 *         value should be corresponding to the type-parameter <E>.
+	 */
+	public DataTypeFamily getDataTypeFamily();
 }

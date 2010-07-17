@@ -13,7 +13,7 @@ public class TransformedInputRowTest extends TestCase {
 		InputColumn<?> inputColumn1 = new MetaModelInputColumn(col1);
 		InputColumn<?> inputColumn2 = new MetaModelInputColumn(col2);
 		MutableInputColumn<String> inputColumn3 = new TransformedInputColumn<String>(
-				"bar", new PrefixedIdGenerator("test"));
+				"bar", DataTypeFamily.STRING, new PrefixedIdGenerator("test"));
 		assertEquals("test-1", inputColumn3.getId());
 
 		TransformedInputRow row1 = new TransformedInputRow(null);

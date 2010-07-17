@@ -5,8 +5,11 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.mock.ExploringBeanMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingBeanMock;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import org.eobjects.analyzer.data.DataTypeFamily;
 
 public class AnalyzerBeanDescriptorTest extends TestCase {
 
@@ -56,5 +59,14 @@ public class AnalyzerBeanDescriptorTest extends TestCase {
 				.get(1);
 		configuredDescriptor.assignValue(analyzerBean, "foobar");
 		assertEquals("foobar", analyzerBean.getConfigured1());
+	}
+
+	public void testGetInputDataTypeFamily() throws Exception {
+		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
+				StringAnalyzer.class);
+		assertEquals(DataTypeFamily.STRING, descriptor.getInputDataTypeFamily());
+
+		descriptor = new AnalyzerBeanDescriptor(ValueDistributionAnalyzer.class);
+		assertEquals(DataTypeFamily.UNDEFINED, descriptor.getInputDataTypeFamily());
 	}
 }

@@ -49,8 +49,10 @@ public abstract class AbstractInputColumn<E> implements InputColumn<E> {
 		}
 		if (obj.getClass() == this.getClass()) {
 			AbstractInputColumn<?> that = (AbstractInputColumn<?>) obj;
-			if (that.isPhysicalColumn() == this.isPhysicalColumn()) {
-				return equalsInternal(that);
+			if (that.getDataTypeFamily() == this.getDataTypeFamily()) {
+				if (that.isPhysicalColumn() == this.isPhysicalColumn()) {
+					return equalsInternal(that);
+				}
 			}
 		}
 		return false;

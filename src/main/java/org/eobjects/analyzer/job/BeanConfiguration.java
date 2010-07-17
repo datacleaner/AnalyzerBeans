@@ -8,7 +8,7 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
-public interface ComponentConfiguration {
+public interface BeanConfiguration {
 
 	public Map<String, Boolean> getBooleanProperties();
 
