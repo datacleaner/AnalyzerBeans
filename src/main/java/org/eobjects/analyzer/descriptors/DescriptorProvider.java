@@ -9,8 +9,13 @@ import java.util.Collection;
  */
 public interface DescriptorProvider {
 
-	public Collection<AnalyzerBeanDescriptor> getDescriptors();
+	public Collection<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors();
 
-	public AnalyzerBeanDescriptor getDescriptorForClass(
+	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
 			Class<?> analyzerBeanClass);
+	
+	public Collection<TransformerBeanDescriptor> getTransformerBeanDescriptors();
+
+	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
+			Class<?> transformerBeanClass);
 }

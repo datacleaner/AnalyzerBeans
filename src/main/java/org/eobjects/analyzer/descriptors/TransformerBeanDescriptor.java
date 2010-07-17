@@ -9,13 +9,13 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.xml.transform.Transformer;
 
 import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.TransformerBean;
+import org.eobjects.analyzer.beans.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

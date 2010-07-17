@@ -1,38 +1,43 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.lang.ArrayUtils;
-
 public class ClasspathScanDescriptorProviderTest extends TestCase {
 
 	public void testScanNonExistingPackage() throws Exception {
 		Collection<AnalyzerBeanDescriptor> analyzerDescriptors = new ClasspathScanDescriptorProvider()
 				.scanPackage("org.eobjects.analyzer.nonexistingbeans", true)
-				.getDescriptors();
-		assertEquals("{}", ArrayUtils.toString(analyzerDescriptors.toArray()));
+				.getAnalyzerBeanDescriptors();
+		assertEquals("[]", Arrays.toString(analyzerDescriptors.toArray()));
 	}
 
 	public void testScanPackageRecursive() throws Exception {
-		Collection<AnalyzerBeanDescriptor> analyzerDescriptors = new ClasspathScanDescriptorProvider()
+		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
+		Collection<AnalyzerBeanDescriptor> analyzerDescriptors = descriptorProvider
 				.scanPackage("org.eobjects.analyzer.beans.mock", true)
-				.getDescriptors();
-		List<AnalyzerBeanDescriptor> list = new ArrayList<AnalyzerBeanDescriptor>(
-				analyzerDescriptors);
-		Collections.sort(list);
+				.getAnalyzerBeanDescriptors();
+		Object[] array = analyzerDescriptors.toArray();
+		Arrays.sort(array);
 		assertEquals(
-				"{AnalyzerBeanDescriptor[beanClass=class org.eobjects.analyzer.beans.mock.ExploringBeanMock]," +
-				"AnalyzerBeanDescriptor[beanClass=class org.eobjects.analyzer.beans.mock.RowProcessingBeanMock]}",
-				ArrayUtils.toString(list.toArray()));
+				"[AnalyzerBeanDescriptor[beanClass=class org.eobjects.analyzer.beans.mock.ExploringBeanMock], "
+						+ "AnalyzerBeanDescriptor[beanClass=class org.eobjects.analyzer.beans.mock.RowProcessingBeanMock]]",
+				Arrays.toString(array));
+
+		Collection<TransformerBeanDescriptor> transformerBeanDescriptors = descriptorProvider
+				.getTransformerBeanDescriptors();
+		assertEquals(
+				"[TransformerBeanDescriptor[beanClass=class org.eobjects.analyzer.beans.mock.TransformerMock]]",
+				Arrays.toString(transformerBeanDescriptors.toArray()));
 
 		analyzerDescriptors = new ClasspathScanDescriptorProvider()
 				.scanPackage("org.eobjects.analyzer.descriptors", true)
-				.getDescriptors();
+				.getAnalyzerBeanDescriptors();
 		assertEquals(0, analyzerDescriptors.size());
 	}
 }

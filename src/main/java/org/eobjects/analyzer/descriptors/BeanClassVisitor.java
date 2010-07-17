@@ -1,21 +1,22 @@
 package org.eobjects.analyzer.descriptors;
 
+import java.lang.annotation.Annotation;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
+import org.eobjects.analyzer.annotations.TransformerBean;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 
-public class AnalyzerBeansClassVisitor implements ClassVisitor {
+public class BeanClassVisitor implements ClassVisitor {
 
 	private final static Log _log = LogFactory
-			.getLog(AnalyzerBeansClassVisitor.class);
-	public static final String ANALYZER_DESC = 'L' + AnalyzerBean.class
-			.getCanonicalName().replace('.', '/') + ';';
-	private Class<?> _analyzerClazz;
+			.getLog(BeanClassVisitor.class);
+	private Class<?> _beanClazz;
 	private String _name;
 
 	@Override
@@ -26,33 +27,47 @@ public class AnalyzerBeansClassVisitor implements ClassVisitor {
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		if (desc.indexOf(AnalyzerBean.class.getName().replace('.', '/')) != -1) {
+		if (isAnnotation(desc, AnalyzerBean.class)
+				|| isAnnotation(desc, TransformerBean.class)) {
 			initializeClass();
 		}
 		return null;
 	}
 
+	private boolean isAnnotation(String annotationDesc,
+			Class<? extends Annotation> annotationClass) {
+		return annotationDesc.indexOf(annotationClass.getName().replace('.',
+				'/')) != -1;
+	}
+
 	private Class<?> initializeClass() {
-		if (_analyzerClazz == null) {
+		if (_beanClazz == null) {
 			String javaName = _name.replace('/', '.');
 			try {
-				_analyzerClazz = Class.forName(javaName);
+				_beanClazz = Class.forName(javaName);
 			} catch (ClassNotFoundException e) {
 				_log.fatal(e);
 			}
 		}
-		return _analyzerClazz;
+		return _beanClazz;
 	}
 
 	public boolean isAnalyzer() {
-		if (_analyzerClazz != null) {
-			return _analyzerClazz.isAnnotationPresent(AnalyzerBean.class);
+		if (_beanClazz != null) {
+			return _beanClazz.isAnnotationPresent(AnalyzerBean.class);
+		}
+		return false;
+	}
+	
+	public boolean isTransformer() {
+		if (_beanClazz != null) {
+			return _beanClazz.isAnnotationPresent(TransformerBean.class);
 		}
 		return false;
 	}
 
-	public Class<?> getAnalyzerClass() {
-		return _analyzerClazz;
+	public Class<?> getBeanClass() {
+		return _beanClazz;
 	}
 
 	@Override

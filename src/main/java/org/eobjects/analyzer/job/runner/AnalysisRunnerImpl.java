@@ -112,7 +112,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		for (SimpleAnalyzerJob job : explorerJobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
-					.getDescriptorForClass(analyzerClass);
+					.getAnalyzerBeanDescriptorForClass(analyzerClass);
 			AnalyzerBeanInstance analyzer = new AnalyzerBeanInstance(descriptor);
 			analyzer.getRunCallbacks().add(runExplorerCallback);
 			analyzer.getAssignConfiguredCallbacks().add(
@@ -124,7 +124,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		for (SimpleAnalyzerJob job : rowProcessingJobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
-					.getDescriptorForClass(analyzerClass);
+					.getAnalyzerBeanDescriptorForClass(analyzerClass);
 			initRowProcessingBeans(job, descriptor, analyzerBeanInstances,
 					rowProcessors, dataContextProvider);
 		}
@@ -267,7 +267,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		for (SimpleAnalyzerJob job : jobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
-					.getDescriptorForClass(analyzerClass);
+					.getAnalyzerBeanDescriptorForClass(analyzerClass);
 			if (descriptor == null) {
 				throw new IllegalStateException("No descriptor found for "
 						+ analyzerClass);

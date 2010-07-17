@@ -9,23 +9,22 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ClasspathScanDescriptorProvider implements DescriptorProvider {
+public final class ClasspathScanDescriptorProvider implements
+		DescriptorProvider {
 
-	private static final Logger logger = LoggerFactory.getLogger(ClasspathScanDescriptorProvider.class);
-	private Map<Class<?>, AnalyzerBeanDescriptor> _descriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
+	private static final Logger logger = LoggerFactory
+			.getLogger(ClasspathScanDescriptorProvider.class);
+	private Map<Class<?>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
+	private Map<Class<?>, TransformerBeanDescriptor> _transformerBeanDescriptors = new HashMap<Class<?>, TransformerBeanDescriptor>();
 
 	public ClasspathScanDescriptorProvider scanPackage(String packageName,
 			boolean recursive) {
-		List<AnalyzerBeanDescriptor> analyzerDescriptors = new LinkedList<AnalyzerBeanDescriptor>();
-
 		String packagePath = packageName.replace('.', '/');
 		try {
 			Enumeration<URL> resources = ClassLoader
@@ -33,7 +32,7 @@ public final class ClasspathScanDescriptorProvider implements DescriptorProvider
 			while (resources.hasMoreElements()) {
 				URL resource = resources.nextElement();
 				File dir = new File(resource.getFile());
-				analyzerDescriptors.addAll(scanDirectory(dir, recursive));
+				scanDirectory(dir, recursive);
 			}
 		} catch (IOException e) {
 			logger.error("Could not open classpath resource", e);
@@ -42,8 +41,7 @@ public final class ClasspathScanDescriptorProvider implements DescriptorProvider
 		return this;
 	}
 
-	private List<AnalyzerBeanDescriptor> scanDirectory(File dir,
-			boolean recursive) {
+	private void scanDirectory(File dir, boolean recursive) {
 		if (!dir.exists()) {
 			throw new IllegalArgumentException("Directory '" + dir
 					+ "' does not exist");
@@ -54,8 +52,6 @@ public final class ClasspathScanDescriptorProvider implements DescriptorProvider
 		}
 		logger.info("Scanning directory: " + dir);
 
-		List<AnalyzerBeanDescriptor> analyzerDescriptors = new LinkedList<AnalyzerBeanDescriptor>();
-
 		File[] classFiles = dir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File file, String filename) {
@@ -65,20 +61,30 @@ public final class ClasspathScanDescriptorProvider implements DescriptorProvider
 
 		for (File file : classFiles) {
 			try {
-				AnalyzerBeansClassVisitor visitor = new AnalyzerBeansClassVisitor();
+				BeanClassVisitor visitor = new BeanClassVisitor();
 				ClassReader classReader = new ClassReader(new FileInputStream(
 						file));
 				classReader.accept(visitor, ClassReader.SKIP_CODE);
 
 				if (visitor.isAnalyzer()) {
-					Class<?> analyzerClass = visitor.getAnalyzerClass();
-					AnalyzerBeanDescriptor descriptor = _descriptors
+					Class<?> analyzerClass = visitor.getBeanClass();
+					AnalyzerBeanDescriptor descriptor = _analyzerBeanDescriptors
 							.get(analyzerClass);
 					if (descriptor == null) {
 						descriptor = new AnalyzerBeanDescriptor(analyzerClass);
-						_descriptors.put(analyzerClass, descriptor);
+						_analyzerBeanDescriptors.put(analyzerClass, descriptor);
 					}
-					analyzerDescriptors.add(descriptor);
+				}
+				if (visitor.isTransformer()) {
+					Class<?> transformerClass = visitor.getBeanClass();
+					TransformerBeanDescriptor descriptor = _transformerBeanDescriptors
+							.get(transformerClass);
+					if (descriptor == null) {
+						descriptor = new TransformerBeanDescriptor(
+								transformerClass);
+						_transformerBeanDescriptors.put(transformerClass,
+								descriptor);
+					}
 				}
 			} catch (IOException e) {
 				logger.error("Could not read file", e);
@@ -97,25 +103,30 @@ public final class ClasspathScanDescriptorProvider implements DescriptorProvider
 						+ " subdirectories");
 			}
 			for (File subDir : subDirectories) {
-				analyzerDescriptors.addAll(scanDirectory(subDir, true));
+				scanDirectory(subDir, true);
 			}
 		}
-		return analyzerDescriptors;
 	}
 
 	@Override
-	public Collection<AnalyzerBeanDescriptor> getDescriptors() {
-		return _descriptors.values();
-	}
-
-	public void putDescriptor(Class<?> analyzerClass,
-			AnalyzerBeanDescriptor descriptor) {
-		_descriptors.put(analyzerClass, descriptor);
+	public Collection<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors() {
+		return _analyzerBeanDescriptors.values();
 	}
 
 	@Override
-	public AnalyzerBeanDescriptor getDescriptorForClass(
+	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
 			Class<?> analyzerBeanClass) {
-		return _descriptors.get(analyzerBeanClass);
+		return _analyzerBeanDescriptors.get(analyzerBeanClass);
+	}
+
+	@Override
+	public Collection<TransformerBeanDescriptor> getTransformerBeanDescriptors() {
+		return _transformerBeanDescriptors.values();
+	}
+
+	@Override
+	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
+			Class<?> transformerBeanClass) {
+		return _transformerBeanDescriptors.get(transformerBeanClass);
 	}
 }
