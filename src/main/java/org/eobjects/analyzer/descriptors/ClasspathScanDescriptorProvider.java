@@ -11,6 +11,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.Transformer;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +22,8 @@ public final class ClasspathScanDescriptorProvider implements
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(ClasspathScanDescriptorProvider.class);
-	private Map<Class<?>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<?>, AnalyzerBeanDescriptor>();
-	private Map<Class<?>, TransformerBeanDescriptor> _transformerBeanDescriptors = new HashMap<Class<?>, TransformerBeanDescriptor>();
+	private Map<Class<? extends Analyzer>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer>, AnalyzerBeanDescriptor>();
+	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor>();
 
 	public ClasspathScanDescriptorProvider scanPackage(String packageName,
 			boolean recursive) {
@@ -67,7 +69,9 @@ public final class ClasspathScanDescriptorProvider implements
 				classReader.accept(visitor, ClassReader.SKIP_CODE);
 
 				if (visitor.isAnalyzer()) {
-					Class<?> analyzerClass = visitor.getBeanClass();
+					@SuppressWarnings("unchecked")
+					Class<? extends Analyzer> analyzerClass = (Class<? extends Analyzer>) visitor
+							.getBeanClass();
 					AnalyzerBeanDescriptor descriptor = _analyzerBeanDescriptors
 							.get(analyzerClass);
 					if (descriptor == null) {
@@ -76,7 +80,9 @@ public final class ClasspathScanDescriptorProvider implements
 					}
 				}
 				if (visitor.isTransformer()) {
-					Class<?> transformerClass = visitor.getBeanClass();
+					@SuppressWarnings("unchecked")
+					Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) visitor
+							.getBeanClass();
 					TransformerBeanDescriptor descriptor = _transformerBeanDescriptors
 							.get(transformerClass);
 					if (descriptor == null) {
@@ -115,7 +121,7 @@ public final class ClasspathScanDescriptorProvider implements
 
 	@Override
 	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<?> analyzerBeanClass) {
+			Class<? extends Analyzer> analyzerBeanClass) {
 		return _analyzerBeanDescriptors.get(analyzerBeanClass);
 	}
 
@@ -126,7 +132,7 @@ public final class ClasspathScanDescriptorProvider implements
 
 	@Override
 	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
-			Class<?> transformerBeanClass) {
+			Class<? extends Transformer<?>> transformerBeanClass) {
 		return _transformerBeanDescriptors.get(transformerBeanClass);
 	}
 }

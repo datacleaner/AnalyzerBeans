@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.Transformer;
+
 /**
  * A simple descriptor provider with a method signature suitable externalizing
  * class names of analyzer and transformer beans. For example, if you're using
@@ -59,7 +62,7 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 
 	@Override
 	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<?> analyzerBeanClass) {
+			Class<? extends Analyzer> analyzerBeanClass) {
 		for (AnalyzerBeanDescriptor descriptor : _analyzerBeanDescriptors) {
 			if (descriptor.getBeanClass() == analyzerBeanClass) {
 				return descriptor;
@@ -70,7 +73,7 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 
 	@Override
 	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
-			Class<?> transformerBeanClass) {
+			Class<? extends Transformer<?>> transformerBeanClass) {
 		for (TransformerBeanDescriptor descriptor : _transformerBeanDescriptors) {
 			if (descriptor.getBeanClass() == transformerBeanClass) {
 				return descriptor;
@@ -87,7 +90,9 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 	public void setAnalyzerClassNames(Collection<String> classNames)
 			throws ClassNotFoundException {
 		for (String className : classNames) {
-			Class<?> c = Class.forName(className);
+			@SuppressWarnings("unchecked")
+			Class<? extends Analyzer> c = (Class<? extends Analyzer>) Class
+					.forName(className);
 			AnalyzerBeanDescriptor descriptor = getAnalyzerBeanDescriptorForClass(c);
 			if (descriptor == null) {
 				addAnalyzerBeanDescriptor(new AnalyzerBeanDescriptor(c));
@@ -98,7 +103,9 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 	public void setTransformerClassNames(Collection<String> classNames)
 			throws ClassNotFoundException {
 		for (String className : classNames) {
-			Class<?> c = Class.forName(className);
+			@SuppressWarnings("unchecked")
+			Class<? extends Transformer<?>> c = (Class<? extends Transformer<?>>) Class
+					.forName(className);
 			TransformerBeanDescriptor descriptor = getTransformerBeanDescriptorForClass(c);
 			if (descriptor == null) {
 				addTransformerBeanDescriptor(new TransformerBeanDescriptor(c));

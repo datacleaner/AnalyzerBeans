@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.eobjects.analyzer.beans.Analyzer;
 
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Schema;
@@ -27,7 +28,7 @@ public final class SimpleAnalyzerJob implements Serializable {
 
 	private static final long serialVersionUID = 6996682701564901059L;
 
-	private Class<?> _analyzerClass;
+	private Class<? extends Analyzer> _analyzerClass;
 	private Map<String, Boolean[]> _booleanProperties;
 	private Map<String, Integer[]> _integerProperties;
 	private Map<String, Long[]> _longProperties;
@@ -41,7 +42,7 @@ public final class SimpleAnalyzerJob implements Serializable {
 		this(null);
 	}
 
-	public SimpleAnalyzerJob(Class<?> analyzerClass) {
+	public SimpleAnalyzerJob(Class<? extends Analyzer> analyzerClass) {
 		_analyzerClass = analyzerClass;
 		_booleanProperties = new HashMap<String, Boolean[]>();
 		_integerProperties = new HashMap<String, Integer[]>();
@@ -52,11 +53,11 @@ public final class SimpleAnalyzerJob implements Serializable {
 		_tableProperties = new HashMap<String, String[]>();
 	}
 
-	public Class<?> getAnalyzerClass() {
+	public Class<? extends Analyzer> getAnalyzerClass() {
 		return _analyzerClass;
 	}
 
-	public void setAnalyzerClass(Class<?> analyzerClass) {
+	public void setAnalyzerClass(Class<? extends Analyzer> analyzerClass) {
 		_analyzerClass = analyzerClass;
 	}
 

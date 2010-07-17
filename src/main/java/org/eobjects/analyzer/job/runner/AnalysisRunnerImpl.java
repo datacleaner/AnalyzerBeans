@@ -11,6 +11,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
@@ -110,7 +111,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 				dataContextProvider);
 		List<AnalyzerBeanInstance> analyzerBeanInstances = new LinkedList<AnalyzerBeanInstance>();
 		for (SimpleAnalyzerJob job : explorerJobs) {
-			Class<?> analyzerClass = job.getAnalyzerClass();
+			Class<? extends Analyzer> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
 					.getAnalyzerBeanDescriptorForClass(analyzerClass);
 			AnalyzerBeanInstance analyzer = new AnalyzerBeanInstance(descriptor);
@@ -122,7 +123,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		}
 		Map<Table, AnalysisRowProcessor> rowProcessors = new HashMap<Table, AnalysisRowProcessor>();
 		for (SimpleAnalyzerJob job : rowProcessingJobs) {
-			Class<?> analyzerClass = job.getAnalyzerClass();
+			Class<? extends Analyzer> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
 					.getAnalyzerBeanDescriptorForClass(analyzerClass);
 			initRowProcessingBeans(job, descriptor, analyzerBeanInstances,
@@ -230,7 +231,8 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 							.getTableColumns(table, columns);
 					rowProcessor.addColumns(columnsForAnalyzer);
 
-					AnalyzerBeanInstance analyzerBeanInstance = new AnalyzerBeanInstance(descriptor);
+					AnalyzerBeanInstance analyzerBeanInstance = new AnalyzerBeanInstance(
+							descriptor);
 					analyzerBeanInstances.add(analyzerBeanInstance);
 
 					// Add a callback for assigning @Configured properties
@@ -265,7 +267,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 			List<SimpleAnalyzerJob> rowProcessingJobs)
 			throws IllegalStateException {
 		for (SimpleAnalyzerJob job : jobs) {
-			Class<?> analyzerClass = job.getAnalyzerClass();
+			Class<? extends Analyzer> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
 					.getAnalyzerBeanDescriptorForClass(analyzerClass);
 			if (descriptor == null) {
