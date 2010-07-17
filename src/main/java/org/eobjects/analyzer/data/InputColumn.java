@@ -11,7 +11,8 @@ import dk.eobjects.metamodel.schema.Column;
  * @author Kasper Sørensen
  * 
  * @param <E>
- *            the data type of the column.
+ *            the data type of the column. Supported types are:
+ *            java.lang.String, java.util.Date and primitive types.
  */
 public interface InputColumn<E> extends Comparable<InputColumn<E>> {
 

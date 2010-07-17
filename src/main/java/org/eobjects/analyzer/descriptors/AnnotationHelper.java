@@ -1,7 +1,11 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.io.Closeable;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 
@@ -117,5 +121,73 @@ public class AnnotationHelper {
 			}
 		}
 		return sb.toString();
+	}
+
+	public static int getTypeParameterCount(Field field) {
+		Type genericType = field.getGenericType();
+		return getTypeParameterCount(genericType);
+	}
+
+	public static int getTypeParameterCount(Type genericType) {
+		if (genericType instanceof GenericArrayType) {
+			GenericArrayType gaType = (GenericArrayType) genericType;
+			genericType = gaType.getGenericComponentType();
+		}
+		if (genericType instanceof ParameterizedType) {
+			ParameterizedType pType = (ParameterizedType) genericType;
+			Type[] typeArguments = pType.getActualTypeArguments();
+			return typeArguments.length;
+		}
+		return 0;
+	}
+
+	public static Class<?> getTypeParameter(Field field, int parameterIndex) {
+		Type genericType = field.getGenericType();
+		
+		if (genericType instanceof GenericArrayType) {
+			GenericArrayType gaType = (GenericArrayType) genericType;
+			genericType = gaType.getGenericComponentType();
+		}
+		if (genericType instanceof ParameterizedType) {
+			ParameterizedType ptype = (ParameterizedType) genericType;
+			Type[] typeArguments = ptype.getActualTypeArguments();
+			if (typeArguments.length > parameterIndex) {
+				Type argument = typeArguments[parameterIndex];
+				return getSafeClassToUse(argument);
+			} else {
+				throw new IllegalArgumentException("Only "
+						+ typeArguments.length + " parameters available");
+			}
+		}
+		throw new IllegalArgumentException("Field type is not parameterized: "
+				+ genericType);
+	}
+
+	private static Class<?> getSafeClassToUse(Type someType) {
+		if (someType instanceof GenericArrayType) {
+			GenericArrayType gaType = (GenericArrayType) someType;
+			someType = gaType.getGenericComponentType();
+		}
+		
+		if (someType instanceof WildcardType) {
+			WildcardType wildcardType = (WildcardType) someType;
+
+			Type[] upperBounds = wildcardType.getUpperBounds();
+			if (upperBounds != null && upperBounds.length > 0) {
+				return (Class<?>) upperBounds[0];
+			}
+
+			Type[] lowerBounds = wildcardType.getLowerBounds();
+			if (lowerBounds != null && lowerBounds.length > 0) {
+				return (Class<?>) lowerBounds[0];
+			}
+		} else if (someType instanceof Class) {
+			return (Class<?>) someType;
+		} else if (someType instanceof ParameterizedType) {
+			ParameterizedType pType = (ParameterizedType) someType;
+			return (Class<?>) pType.getRawType();
+		}
+		throw new UnsupportedOperationException(
+				"Parameter type not supported: " + someType);
 	}
 }
