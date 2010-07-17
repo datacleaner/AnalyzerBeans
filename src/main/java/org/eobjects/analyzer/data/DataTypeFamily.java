@@ -1,5 +1,7 @@
 package org.eobjects.analyzer.data;
 
+import java.util.Date;
+
 import org.eobjects.analyzer.descriptors.AnnotationHelper;
 
 /**
@@ -34,6 +36,21 @@ import org.eobjects.analyzer.descriptors.AnnotationHelper;
 public enum DataTypeFamily {
 
 	UNDEFINED, STRING, BOOLEAN, NUMBER, DATE;
+
+	public Class<?> getJavaType() {
+		switch (this) {
+		case STRING:
+			return String.class;
+		case BOOLEAN:
+			return Boolean.class;
+		case NUMBER:
+			return Number.class;
+		case DATE:
+			return Date.class;
+		default:
+			return Object.class;
+		}
+	}
 
 	public static DataTypeFamily valueOf(Class<?> javaDataType) {
 		if (AnnotationHelper.isString(javaDataType)) {

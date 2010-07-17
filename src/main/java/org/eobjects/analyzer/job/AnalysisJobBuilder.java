@@ -1,12 +1,17 @@
 package org.eobjects.analyzer.job;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MetaModelInputColumn;
+import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
 import dk.eobjects.metamodel.schema.Column;
@@ -15,7 +20,8 @@ public class AnalysisJobBuilder {
 
 	private AnalyzerBeansConfiguration _configuration;
 	private DataContextProvider _dataContextProvider;
-	private List<Column> _sourceColumns = new ArrayList<Column>();
+	private List<MetaModelInputColumn> _sourceColumns = new ArrayList<MetaModelInputColumn>();
+	private List<TransformerJobBuilder> _transformerJobBuilders = new ArrayList<TransformerJobBuilder>();
 	private IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator(
 			"trans");
 
@@ -57,8 +63,13 @@ public class AnalysisJobBuilder {
 	}
 
 	public AnalysisJobBuilder addSourceColumn(Column column) {
-		if (!_sourceColumns.contains(column)) {
-			_sourceColumns.add(column);
+		MetaModelInputColumn inputColumn = new MetaModelInputColumn(column);
+		return addSourceColumn(inputColumn);
+	}
+
+	public AnalysisJobBuilder addSourceColumn(MetaModelInputColumn inputColumn) {
+		if (!_sourceColumns.contains(inputColumn)) {
+			_sourceColumns.add(inputColumn);
 		}
 		return this;
 	}
@@ -70,13 +81,27 @@ public class AnalysisJobBuilder {
 		return this;
 	}
 
+	public AnalysisJobBuilder addSourceColumns(
+			MetaModelInputColumn... inputColumns) {
+		for (MetaModelInputColumn metaModelInputColumn : inputColumns) {
+			addSourceColumn(metaModelInputColumn);
+		}
+		return this;
+	}
+
 	public AnalysisJobBuilder removeSourceColumn(Column column) {
-		_sourceColumns.remove(column);
+		MetaModelInputColumn inputColumn = new MetaModelInputColumn(column);
+		return removeSourceColumn(inputColumn);
+	}
+
+	public AnalysisJobBuilder removeSourceColumn(
+			MetaModelInputColumn inputColumn) {
+		_sourceColumns.remove(inputColumn);
 		// TODO: Notify consumers
 		return this;
 	}
 
-	public List<Column> getSourceColumns() {
+	public List<MetaModelInputColumn> getSourceColumns() {
 		return Collections.unmodifiableList(_sourceColumns);
 	}
 
@@ -85,12 +110,47 @@ public class AnalysisJobBuilder {
 		TransformerBeanDescriptor descriptor = _configuration
 				.getDescriptorProvider().getTransformerBeanDescriptorForClass(
 						transformerClass);
+		if (descriptor == null) {
+			throw new IllegalArgumentException("No descriptor found for: "
+					+ transformerClass);
+		}
 		return addTransformer(descriptor);
 	}
 
 	public TransformerJobBuilder addTransformer(
 			TransformerBeanDescriptor descriptor) {
-		return new TransformerJobBuilder(descriptor,
-				transformedColumnIdGenerator, this);
+		TransformerJobBuilder transformerJobBuilder = new TransformerJobBuilder(
+				descriptor, transformedColumnIdGenerator, this);
+		_transformerJobBuilders.add(transformerJobBuilder);
+		return transformerJobBuilder;
+	}
+
+	public Collection<InputColumn<?>> getAvailableInputColumns(
+			DataTypeFamily dataTypeFamily) {
+		if (dataTypeFamily == null) {
+			dataTypeFamily = DataTypeFamily.UNDEFINED;
+		}
+
+		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
+		List<MetaModelInputColumn> sourceColumns = getSourceColumns();
+		for (MetaModelInputColumn sourceColumn : sourceColumns) {
+			if (dataTypeFamily == DataTypeFamily.UNDEFINED
+					|| sourceColumn.getDataTypeFamily() == dataTypeFamily) {
+				result.add(sourceColumn);
+			}
+		}
+
+		for (TransformerJobBuilder transformerJobBuilder : _transformerJobBuilders) {
+			List<MutableInputColumn<?>> outputColumns = transformerJobBuilder
+					.getOutputColumns();
+			for (MutableInputColumn<?> outputColumn : outputColumns) {
+				if (dataTypeFamily == DataTypeFamily.UNDEFINED
+						|| outputColumn.getDataTypeFamily() == dataTypeFamily) {
+					result.add(outputColumn);
+				}
+			}
+		}
+
+		return result;
 	}
 }
