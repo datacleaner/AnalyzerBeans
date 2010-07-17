@@ -9,57 +9,49 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.xml.transform.Transformer;
 
-import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.annotations.Result;
-import org.eobjects.analyzer.beans.ExploringAnalyzer;
-import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.annotations.TransformerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
+public class TransformerBeanDescriptor extends AbstractBeanDescriptor {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private String displayName;
-	private boolean exploringAnalyzer;
-	private boolean rowProcessingAnalyzer;
 
-	private List<ResultDescriptor> resultDescriptors = new LinkedList<ResultDescriptor>();
+	private List<CloseDescriptor> closeDescriptors = new LinkedList<CloseDescriptor>();
+	private List<ConfiguredDescriptor> configuredDescriptors = new LinkedList<ConfiguredDescriptor>();
+	private List<InitializeDescriptor> initializeDescriptors = new LinkedList<InitializeDescriptor>();
+	private List<ProvidedDescriptor> providedDescriptors = new LinkedList<ProvidedDescriptor>();
 
-	public AnalyzerBeanDescriptor(Class<?> analyzerClass)
+	public TransformerBeanDescriptor(Class<?> transformerClass)
 			throws DescriptorException {
-		super(analyzerClass);
+		super(transformerClass);
 
-		rowProcessingAnalyzer = AnnotationHelper.is(analyzerClass,
-				RowProcessingAnalyzer.class);
-		exploringAnalyzer = AnnotationHelper.is(analyzerClass,
-				ExploringAnalyzer.class);
-
-		if (!rowProcessingAnalyzer && !exploringAnalyzer) {
-			throw new DescriptorException(analyzerClass
-					+ " does not implement either "
-					+ RowProcessingAnalyzer.class.getName() + " or "
-					+ ExploringAnalyzer.class.getName());
+		if (!AnnotationHelper.is(transformerClass, Transformer.class)) {
+			throw new DescriptorException(transformerClass
+					+ " does not implement " + Transformer.class.getName());
 		}
 
-		AnalyzerBean analyzerAnnotation = analyzerClass
-				.getAnnotation(AnalyzerBean.class);
-		if (analyzerAnnotation == null) {
-			throw new DescriptorException(analyzerClass
-					+ " doesn't implement the AnalyzerBean annotation");
+		TransformerBean transformerAnnotation = transformerClass
+				.getAnnotation(TransformerBean.class);
+		if (transformerAnnotation == null) {
+			throw new DescriptorException(transformerClass
+					+ " doesn't implement the TransformerBean annotation");
 		}
-		displayName = analyzerAnnotation.value();
+		displayName = transformerAnnotation.value();
 		if (displayName == null || displayName.trim().equals("")) {
 			displayName = AnnotationHelper.explodeCamelCase(
-					analyzerClass.getSimpleName(), false);
+					transformerClass.getSimpleName(), false);
 		}
 
-		Field[] fields = analyzerClass.getDeclaredFields();
+		Field[] fields = transformerClass.getDeclaredFields();
 		for (Field field : fields) {
 
 			Configured configuredAnnotation = field
@@ -86,9 +78,9 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 			}
 		}
 
-		if (AnnotationHelper.isCloseable(analyzerClass)) {
+		if (AnnotationHelper.isCloseable(transformerClass)) {
 			try {
-				Method method = analyzerClass.getMethod("close",
+				Method method = transformerClass.getMethod("close",
 						new Class<?>[0]);
 				closeDescriptors.add(new CloseDescriptor(method));
 			} catch (NoSuchMethodException e) {
@@ -98,7 +90,7 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 			}
 		}
 
-		Method[] methods = analyzerClass.getDeclaredMethods();
+		Method[] methods = transformerClass.getDeclaredMethods();
 		for (Method method : methods) {
 			Configured configuredAnnotation = method
 					.getAnnotation(Configured.class);
@@ -138,12 +130,6 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 						postConstructAnnotation));
 			}
 
-			Result resultAnnotation = method.getAnnotation(Result.class);
-			if (resultAnnotation != null) {
-				resultDescriptors.add(new ResultDescriptor(method,
-						resultAnnotation));
-			}
-
 			Close closeAnnotation = method.getAnnotation(Close.class);
 			if (closeAnnotation != null) {
 				closeDescriptors.add(new CloseDescriptor(method,
@@ -159,34 +145,27 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 			}
 		}
 
-		if (resultDescriptors.isEmpty()) {
-			throw new DescriptorException(analyzerClass
-					+ " doesn't define any @Result annotated methods");
-		}
-
-		if (rowProcessingAnalyzer) {
-			int numConfiguredColumns = 0;
-			int numConfiguredColumnArrays = 0;
-			for (ConfiguredDescriptor cd : configuredDescriptors) {
-				if (cd.isInputColumn()) {
-					if (cd.isArray()) {
-						numConfiguredColumnArrays++;
-					} else {
-						numConfiguredColumns++;
-					}
+		int numConfiguredColumns = 0;
+		int numConfiguredColumnArrays = 0;
+		for (ConfiguredDescriptor cd : configuredDescriptors) {
+			if (cd.isInputColumn()) {
+				if (cd.isArray()) {
+					numConfiguredColumnArrays++;
+				} else {
+					numConfiguredColumns++;
 				}
 			}
-			int totalColumns = numConfiguredColumns + numConfiguredColumnArrays;
-			if (totalColumns == 0) {
-				throw new DescriptorException(
-						analyzerClass
-								+ " does not define a @Configured InputColumn or InputColumn-array");
-			}
-			if (totalColumns > 1) {
-				throw new DescriptorException(
-						analyzerClass
-								+ " defines multiple @Configured InputColumns, cannot determine which one to use for row processing");
-			}
+		}
+		int totalColumns = numConfiguredColumns + numConfiguredColumnArrays;
+		if (totalColumns == 0) {
+			throw new DescriptorException(
+					transformerClass
+							+ " does not define a @Configured InputColumn or InputColumn-array");
+		}
+		if (totalColumns > 1) {
+			throw new DescriptorException(
+					transformerClass
+							+ " defines multiple @Configured InputColumns, cannot determine which one to use for transformation");
 		}
 
 		// Make the descriptor lists read-only
@@ -196,22 +175,34 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 		initializeDescriptors = Collections
 				.unmodifiableList(initializeDescriptors);
 		providedDescriptors = Collections.unmodifiableList(providedDescriptors);
-		resultDescriptors = Collections.unmodifiableList(resultDescriptors);
 	}
 
 	public String getDisplayName() {
 		return displayName;
 	}
 
-	public boolean isExploringAnalyzer() {
-		return exploringAnalyzer;
+	public List<ConfiguredDescriptor> getConfiguredDescriptors() {
+		return configuredDescriptors;
 	}
 
-	public boolean isRowProcessingAnalyzer() {
-		return rowProcessingAnalyzer;
+	public List<InitializeDescriptor> getInitializeDescriptors() {
+		return initializeDescriptors;
 	}
 
-	public List<ResultDescriptor> getResultDescriptors() {
-		return resultDescriptors;
+	public List<ProvidedDescriptor> getProvidedDescriptors() {
+		return providedDescriptors;
+	}
+
+	public ConfiguredDescriptor getConfiguredDescriptor(String configuredName) {
+		for (ConfiguredDescriptor configuredDescriptor : configuredDescriptors) {
+			if (configuredName.equals(configuredDescriptor.getName())) {
+				return configuredDescriptor;
+			}
+		}
+		return null;
+	}
+
+	public List<CloseDescriptor> getCloseDescriptors() {
+		return closeDescriptors;
 	}
 }

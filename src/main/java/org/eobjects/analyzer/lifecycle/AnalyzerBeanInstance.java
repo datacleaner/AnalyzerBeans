@@ -15,61 +15,46 @@ import org.slf4j.LoggerFactory;
  * at an per-instance level. This makes it possible to add callbacks at various
  * stages in the life-cycle of an AnalyzerBean
  */
-public class AnalyzerBeanInstance {
+public class AnalyzerBeanInstance extends AbstractBeanInstance {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(AnalyzerBeanInstance.class);
 
-	private Object analyzerBean;
-	private AnalyzerBeanDescriptor descriptor;
-	private List<LifeCycleCallback> assignConfiguredCallbacks = new LinkedList<LifeCycleCallback>();
-	private List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
-	private List<LifeCycleCallback> initializeCallbacks = new LinkedList<LifeCycleCallback>();
-	private List<LifeCycleCallback> runCallbacks = new LinkedList<LifeCycleCallback>();
-	private List<LifeCycleCallback> returnResultsCallbacks = new LinkedList<LifeCycleCallback>();
-	private List<LifeCycleCallback> closeCallbacks = new LinkedList<LifeCycleCallback>();
+	private List<AnalyzerLifeCycleCallback> runCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
+	private List<AnalyzerLifeCycleCallback> returnResultsCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
 
-	public AnalyzerBeanInstance(Object analyzerBean,
-			AnalyzerBeanDescriptor descriptor) {
-		if (analyzerBean == null || descriptor == null) {
-			throw new NullPointerException();
-		}
-		this.analyzerBean = analyzerBean;
-		this.descriptor = descriptor;
+	public AnalyzerBeanInstance(AnalyzerBeanDescriptor descriptor) {
+		super(descriptor);
 	}
 
-	public void assignConfigured() {
+	public void run() {
 		if (logger.isInfoEnabled()) {
-			logger.info("assignConfigured (" + analyzerBean + ")");
+			logger.info("run (" + getBean() + ")");
 		}
-		runCallbacks(assignConfiguredCallbacks,
-				LifeCycleState.ASSIGN_CONFIGURED);
+		runAnalyzerCallbacks(runCallbacks, LifeCycleState.RUN);
 	}
 
-	public List<LifeCycleCallback> getAssignConfiguredCallbacks() {
-		return assignConfiguredCallbacks;
+	public List<AnalyzerLifeCycleCallback> getRunCallbacks() {
+		return runCallbacks;
 	}
 
-	public void assignProvided() {
+	public void returnResults() {
 		if (logger.isInfoEnabled()) {
-			logger.info("assignProvided (" + analyzerBean + ")");
+			logger.info("returnResults (" + getBean() + ")");
 		}
-		runCallbacks(assignProvidedCallbacks, LifeCycleState.ASSIGN_PROVIDED);
+		runAnalyzerCallbacks(returnResultsCallbacks,
+				LifeCycleState.RETURN_RESULTS);
 	}
 
-	public List<LifeCycleCallback> getAssignProvidedCallbacks() {
-		return assignProvidedCallbacks;
+	public List<AnalyzerLifeCycleCallback> getReturnResultsCallbacks() {
+		return returnResultsCallbacks;
 	}
 
-	public void initialize() {
-		if (logger.isInfoEnabled()) {
-			logger.info("initialize (" + analyzerBean + ")");
+	private void runAnalyzerCallbacks(
+			List<AnalyzerLifeCycleCallback> callbacks, LifeCycleState state) {
+		for (AnalyzerLifeCycleCallback lifeCycleCallback : callbacks) {
+			lifeCycleCallback.onEvent(state, getBean(), (AnalyzerBeanDescriptor) getDescriptor());
 		}
-		runCallbacks(initializeCallbacks, LifeCycleState.INITIALIZE);
-	}
-
-	public List<LifeCycleCallback> getInitializeCallbacks() {
-		return initializeCallbacks;
 	}
 
 	public Task createTask(final CompletionListener completionListener) {
@@ -80,45 +65,5 @@ public class AnalyzerBeanInstance {
 				completionListener.onComplete();
 			}
 		};
-	}
-
-	public void run() {
-		if (logger.isInfoEnabled()) {
-			logger.info("run (" + analyzerBean + ")");
-		}
-		runCallbacks(runCallbacks, LifeCycleState.RUN);
-	}
-
-	public List<LifeCycleCallback> getRunCallbacks() {
-		return runCallbacks;
-	}
-
-	public void returnResults() {
-		if (logger.isInfoEnabled()) {
-			logger.info("returnResults (" + analyzerBean + ")");
-		}
-		runCallbacks(returnResultsCallbacks, LifeCycleState.RETURN_RESULTS);
-	}
-
-	public List<LifeCycleCallback> getReturnResultsCallbacks() {
-		return returnResultsCallbacks;
-	}
-
-	public void close() {
-		if (logger.isInfoEnabled()) {
-			logger.info("close (" + analyzerBean + ")");
-		}
-		runCallbacks(closeCallbacks, LifeCycleState.CLOSE);
-	}
-
-	public List<LifeCycleCallback> getCloseCallbacks() {
-		return closeCallbacks;
-	}
-
-	private void runCallbacks(List<LifeCycleCallback> callbacks,
-			LifeCycleState state) {
-		for (LifeCycleCallback lifeCycleCallback : callbacks) {
-			lifeCycleCallback.onEvent(state, analyzerBean, descriptor);
-		}
 	}
 }

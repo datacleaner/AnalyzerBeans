@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.runner;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +16,8 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.JobListDescriptorProvider;
+import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.job.SimpleAnalyzerJob;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.job.concurrent.ScheduleTasksCompletionListener;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -111,7 +113,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 			Class<?> analyzerClass = job.getAnalyzerClass();
 			AnalyzerBeanDescriptor descriptor = descriptorProvider
 					.getDescriptorForClass(analyzerClass);
-			AnalyzerBeanInstance analyzer = instantiateAnalyzerBean(descriptor);
+			AnalyzerBeanInstance analyzer = new AnalyzerBeanInstance(descriptor);
 			analyzer.getRunCallbacks().add(runExplorerCallback);
 			analyzer.getAssignConfiguredCallbacks().add(
 					new AssignConfiguredCallback(job, dataContextProvider
@@ -205,7 +207,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 				if (configuredDescriptor == null) {
 					throw new IllegalStateException(
 							"Analyzer class '"
-									+ descriptor.getAnalyzerClass()
+									+ descriptor.getBeanClass()
 									+ "' does not specify @Configured field or method with name: "
 									+ configuredName);
 				}
@@ -228,7 +230,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 							.getTableColumns(table, columns);
 					rowProcessor.addColumns(columnsForAnalyzer);
 
-					AnalyzerBeanInstance analyzerBeanInstance = instantiateAnalyzerBean(descriptor);
+					AnalyzerBeanInstance analyzerBeanInstance = new AnalyzerBeanInstance(descriptor);
 					analyzerBeanInstances.add(analyzerBeanInstance);
 
 					// Add a callback for assigning @Configured properties
@@ -249,18 +251,6 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		}
 	}
 
-	private AnalyzerBeanInstance instantiateAnalyzerBean(
-			AnalyzerBeanDescriptor descriptor) {
-		try {
-			Object analyzerBean = descriptor.getAnalyzerClass().newInstance();
-			return new AnalyzerBeanInstance(analyzerBean, descriptor);
-		} catch (Exception e) {
-			throw new IllegalArgumentException(
-					"Could not instantiate analyzer bean type: "
-							+ descriptor.getAnalyzerClass(), e);
-		}
-	}
-
 	/**
 	 * Categorize jobs corresponding to their execution type
 	 * 
@@ -271,7 +261,8 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	 */
 	private void categorizeJobs(Collection<? extends SimpleAnalyzerJob> jobs,
 			DescriptorProvider descriptorProvider,
-			List<SimpleAnalyzerJob> explorerJobs, List<SimpleAnalyzerJob> rowProcessingJobs)
+			List<SimpleAnalyzerJob> explorerJobs,
+			List<SimpleAnalyzerJob> rowProcessingJobs)
 			throws IllegalStateException {
 		for (SimpleAnalyzerJob job : jobs) {
 			Class<?> analyzerClass = job.getAnalyzerClass();

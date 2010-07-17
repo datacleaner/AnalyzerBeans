@@ -4,7 +4,6 @@ import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.data.VirtualStringInputColumn;
 
 @TransformerBean("Concatenator")
 public class ConcatenatorTransformer implements Transformer<String> {
@@ -12,13 +11,9 @@ public class ConcatenatorTransformer implements Transformer<String> {
 	@Configured
 	InputColumn<?>[] columns;
 
-	@Configured("Output name")
-	String outputName;
-
-	@SuppressWarnings("unchecked")
 	@Override
-	public InputColumn<String>[] getVirtualInputColumns() {
-		return new InputColumn[] { new VirtualStringInputColumn(outputName) };
+	public int getOutputColumns() {
+		return 1;
 	}
 
 	@Override

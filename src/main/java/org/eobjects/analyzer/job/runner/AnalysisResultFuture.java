@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.runner;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

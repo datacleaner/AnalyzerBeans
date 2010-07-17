@@ -1,8 +1,9 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.runner;
 
 import java.util.Collection;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.job.SimpleAnalyzerJob;
 
 /**
  * Represents an interface for the central execution mechanism in AnalyzerBeans.

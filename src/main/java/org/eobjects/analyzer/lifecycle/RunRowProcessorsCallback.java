@@ -2,9 +2,9 @@ package org.eobjects.analyzer.lifecycle;
 
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.job.AnalysisRowProcessor;
+import org.eobjects.analyzer.job.runner.AnalysisRowProcessor;
 
-public class RunRowProcessorsCallback implements LifeCycleCallback {
+public class RunRowProcessorsCallback implements AnalyzerLifeCycleCallback {
 
 	private AnalysisRowProcessor processor;
 

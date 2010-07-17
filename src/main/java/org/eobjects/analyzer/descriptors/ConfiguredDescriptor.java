@@ -82,13 +82,13 @@ public class ConfiguredDescriptor {
 		_baseType = type;
 	}
 
-	public void assignValue(Object analyzerBean, Object value)
+	public void assignValue(Object bean, Object value)
 			throws IllegalStateException {
 		try {
 			if (_method != null) {
-				_method.invoke(analyzerBean, value);
+				_method.invoke(bean, value);
 			} else {
-				_field.set(analyzerBean, value);
+				_field.set(bean, value);
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not assign value '" + value

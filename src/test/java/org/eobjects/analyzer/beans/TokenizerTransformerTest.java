@@ -15,14 +15,9 @@ public class TokenizerTransformerTest extends TestCase {
 
 		@SuppressWarnings("unchecked")
 		TokenizerTransformer transformer = new TokenizerTransformer(
-				new String[] { "first name", "last name" },
-				(InputColumn<String>) col);
-
-		InputColumn<String>[] virtualInputColumns = transformer
-				.getVirtualInputColumns();
-		assertEquals(2, virtualInputColumns.length);
-		assertEquals("first name", virtualInputColumns[0].getName());
-		assertEquals("last name", virtualInputColumns[1].getName());
+				(InputColumn<String>) col, 2);
+		
+		assertEquals(2, transformer.getOutputColumns());
 
 		TransformedInputRow row = new TransformedInputRow(null);
 		row.addValue(col, "Kasper Sorensen");

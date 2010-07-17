@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
-import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
 
 public class AssignProvidedCallback implements LifeCycleCallback {
@@ -24,7 +24,7 @@ public class AssignProvidedCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			AnalyzerBeanDescriptor descriptor) {
+			AbstractBeanDescriptor descriptor) {
 		assert state == LifeCycleState.ASSIGN_PROVIDED;
 
 		List<Object> providedCollections = new LinkedList<Object>();

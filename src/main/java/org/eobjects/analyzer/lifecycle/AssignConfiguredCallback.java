@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
-import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.job.SimpleAnalyzerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
@@ -25,7 +25,7 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			AnalyzerBeanDescriptor descriptor) {
+			AbstractBeanDescriptor descriptor) {
 		assert state == LifeCycleState.ASSIGN_CONFIGURED;
 
 		List<ConfiguredDescriptor> configuredDescriptors = descriptor

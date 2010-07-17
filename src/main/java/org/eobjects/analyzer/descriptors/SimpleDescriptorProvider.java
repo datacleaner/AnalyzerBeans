@@ -47,7 +47,7 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 	public AnalyzerBeanDescriptor getDescriptorForClass(
 			Class<?> analyzerBeanClass) {
 		for (AnalyzerBeanDescriptor descriptor : _descriptors) {
-			if (descriptor.getAnalyzerClass() == analyzerBeanClass) {
+			if (descriptor.getBeanClass() == analyzerBeanClass) {
 				return descriptor;
 			}
 		}

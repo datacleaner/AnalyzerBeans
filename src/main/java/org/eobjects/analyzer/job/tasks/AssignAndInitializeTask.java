@@ -3,6 +3,7 @@ package org.eobjects.analyzer.job.tasks;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
+import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
@@ -14,7 +15,7 @@ public class AssignAndInitializeTask implements Task {
 	private CollectionProvider collectionProvider;
 	private DataContextProvider dataContextProvider;
 	private LifeCycleCallback initializeCallback;
-	private LifeCycleCallback returnResultsCallback;
+	private AnalyzerLifeCycleCallback returnResultsCallback;
 	private LifeCycleCallback closeCallback;
 
 	public AssignAndInitializeTask(CompletionListener completionListener,
@@ -22,7 +23,7 @@ public class AssignAndInitializeTask implements Task {
 			CollectionProvider collectionProvider,
 			DataContextProvider dataContextProvider,
 			LifeCycleCallback initializeCallback,
-			LifeCycleCallback returnResultsCallback,
+			AnalyzerLifeCycleCallback returnResultsCallback,
 			LifeCycleCallback closeCallback) {
 		this.analyzerBeanInstance = analyzerBeanInstance;
 		this.completionListener = completionListener;

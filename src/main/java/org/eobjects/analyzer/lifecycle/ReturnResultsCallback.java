@@ -8,7 +8,7 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ResultDescriptor;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
-public class ReturnResultsCallback implements LifeCycleCallback {
+public class ReturnResultsCallback implements AnalyzerLifeCycleCallback {
 
 	private Collection<AnalyzerResult> results;
 
