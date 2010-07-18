@@ -2,11 +2,13 @@ package org.eobjects.analyzer.test;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
@@ -29,8 +31,8 @@ public final class TestHelper {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
 		return new AnalyzerBeansConfigurationImpl(createDatastoreCatalog(),
-				createReferenceDataCatalog(), descriptorProvider,
-				taskRunner, collectionProvider);
+				createReferenceDataCatalog(), descriptorProvider, taskRunner,
+				collectionProvider);
 	}
 
 	public static ReferenceDataCatalog createReferenceDataCatalog() {
@@ -40,7 +42,12 @@ public final class TestHelper {
 	}
 
 	public static DatastoreCatalog createDatastoreCatalog() {
-		List<Datastore> datastores = Collections.emptyList();
+		List<Datastore> datastores = new LinkedList<Datastore>();
 		return new DatastoreCatalogImpl(datastores);
+	}
+
+	public static JdbcDatastore createSampleDatabaseDatastore(String name) {
+		return new JdbcDatastore(name,
+				"jdbc:hsqldb:res:metamodel", "org.hsqldb.jdbcDriver");
 	}
 }

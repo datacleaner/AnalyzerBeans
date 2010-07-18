@@ -1,6 +1,9 @@
 package org.eobjects.analyzer.connection;
 
-public interface Datastore {
+import java.io.Closeable;
+import java.io.Serializable;
+
+public interface Datastore extends Closeable, Serializable {
 
 	public String getName();
 	

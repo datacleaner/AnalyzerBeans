@@ -3,6 +3,7 @@ package org.eobjects.analyzer.job;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.Transformer;
@@ -12,6 +13,7 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
 import dk.eobjects.metamodel.schema.Column;
@@ -22,6 +24,7 @@ public class AnalysisJobBuilder {
 	private DataContextProvider _dataContextProvider;
 	private List<MetaModelInputColumn> _sourceColumns = new ArrayList<MetaModelInputColumn>();
 	private List<TransformerJobBuilder> _transformerJobBuilders = new ArrayList<TransformerJobBuilder>();
+	private List<AnalyzerJobBuilder> _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder>();
 	private IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator(
 			"trans");
 
@@ -117,12 +120,37 @@ public class AnalysisJobBuilder {
 		return addTransformer(descriptor);
 	}
 
+	public List<TransformerJobBuilder> getTransformerJobBuilders() {
+		return Collections.unmodifiableList(_transformerJobBuilders);
+	}
+
 	public TransformerJobBuilder addTransformer(
 			TransformerBeanDescriptor descriptor) {
 		TransformerJobBuilder transformerJobBuilder = new TransformerJobBuilder(
 				descriptor, transformedColumnIdGenerator, this);
 		_transformerJobBuilders.add(transformerJobBuilder);
 		return transformerJobBuilder;
+	}
+
+	public AnalysisJobBuilder removeTransformer(TransformerJobBuilder tjb) {
+		_transformerJobBuilders.remove(tjb);
+		return this;
+	}
+
+	public List<AnalyzerJobBuilder> getAnalyzerJobBuilders() {
+		return Collections.unmodifiableList(_analyzerJobBuilders);
+	}
+
+	public AnalyzerJobBuilder addAnalyzer(AnalyzerBeanDescriptor descriptor) {
+		AnalyzerJobBuilder analyzerJobBuilder = new AnalyzerJobBuilder(
+				descriptor, this);
+		_analyzerJobBuilders.add(analyzerJobBuilder);
+		return analyzerJobBuilder;
+	}
+
+	public AnalysisJobBuilder removeAnalyzer(AnalyzerJobBuilder ajb) {
+		_analyzerJobBuilders.remove(ajb);
+		return this;
 	}
 
 	public Collection<InputColumn<?>> getAvailableInputColumns(
@@ -152,5 +180,58 @@ public class AnalysisJobBuilder {
 		}
 
 		return result;
+	}
+
+	public boolean isConfigured() {
+		if (_sourceColumns.isEmpty()) {
+			return false;
+		}
+		
+		if (_analyzerJobBuilders.isEmpty()) {
+			return false;
+		}
+		
+		for (TransformerJobBuilder tjb : _transformerJobBuilders) {
+			if (!tjb.isConfigured()) {
+				return false;
+			}
+		}
+
+		for (AnalyzerJobBuilder ajb : _analyzerJobBuilders) {
+			if (!ajb.isConfigured()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public AnalysisJob toAnalysisJob() throws IllegalStateException {
+		Collection<TransformerJob> transformerJobs = new LinkedList<TransformerJob>();
+		for (TransformerJobBuilder tjb : _transformerJobBuilders) {
+			try {
+				TransformerJob transformerJob = tjb.toTransformerJob();
+				transformerJobs.add(transformerJob);
+			} catch (IllegalStateException e) {
+				throw new IllegalStateException(
+						"Could not create transformer job from builder: " + tjb
+								+ ", (" + e.getMessage() + ")", e);
+			}
+		}
+
+		Collection<AnalyzerJob> analyzerJobs = new LinkedList<AnalyzerJob>();
+		for (AnalyzerJobBuilder ajb : _analyzerJobBuilders) {
+			try {
+				AnalyzerJob analyzerJob = ajb.toAnalyzerJob();
+				analyzerJobs.add(analyzerJob);
+			} catch (IllegalArgumentException e) {
+				throw new IllegalStateException(
+						"Could not create analyzer job from builder: " + ajb
+								+ ", (" + e.getMessage() + ")", e);
+			}
+		}
+
+		return new ImmutableAnalysisJob(_dataContextProvider, _sourceColumns,
+				transformerJobs, analyzerJobs);
 	}
 }

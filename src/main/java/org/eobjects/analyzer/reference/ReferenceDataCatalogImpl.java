@@ -1,11 +1,16 @@
 package org.eobjects.analyzer.reference;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 
 	private Collection<Dictionary> _dictionaries;
 	private Collection<SynonymCatalog> _synonymCatalogs;
+
+	public ReferenceDataCatalogImpl() {
+		this(new ArrayList<Dictionary>(), new ArrayList<SynonymCatalog>());
+	}
 
 	public ReferenceDataCatalogImpl(Collection<Dictionary> dictionaries,
 			Collection<SynonymCatalog> synonymCatalogs) {
