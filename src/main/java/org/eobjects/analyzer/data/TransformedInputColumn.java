@@ -70,4 +70,10 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E>
 	public DataTypeFamily getDataTypeFamily() {
 		return _type;
 	}
+
+	@Override
+	public String toString() {
+		return "TransformedInputColumn[id=" + _id + ",name=" + _name
+				+ ",type=" + _type + "]";
+	}
 }

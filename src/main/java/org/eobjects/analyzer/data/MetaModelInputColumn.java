@@ -49,4 +49,9 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 		}
 		return DataTypeFamily.UNDEFINED;
 	}
+	
+	@Override
+	public String toString() {
+		return "MetaModelInputColumn[" + _column + "]";
+	}
 }

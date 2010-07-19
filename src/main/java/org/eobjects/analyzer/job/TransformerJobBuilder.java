@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.job;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -53,6 +54,14 @@ public class TransformerJobBuilder {
 			}
 		}
 		_inputColumns.add(inputColumn);
+		return this;
+	}
+
+	public TransformerJobBuilder addInputColumns(
+			Collection<InputColumn<?>> inputColumns) {
+		for (InputColumn<?> inputColumn : inputColumns) {
+			addInputColumn(inputColumn);
+		}
 		return this;
 	}
 
@@ -165,8 +174,18 @@ public class TransformerJobBuilder {
 			throw new IllegalStateException(
 					"Transformer job is not correctly configured");
 		}
+		Map<ConfiguredDescriptor, Object> properties = new HashMap<ConfiguredDescriptor, Object>(
+				_properties);
+
+		// explicitly add the input columns (because they are handled as a
+		// separate variable in this builder
+		properties
+				.put(_descriptor.getConfiguredDescriptorForInput(),
+						_inputColumns.toArray(new InputColumn<?>[_inputColumns
+								.size()]));
+
 		return new ImmutableTransformerJob(_descriptor,
-				new ImmutableBeanConfiguration(_properties), getOutputColumns());
+				new ImmutableBeanConfiguration(properties), getOutputColumns());
 	}
 
 	@Override

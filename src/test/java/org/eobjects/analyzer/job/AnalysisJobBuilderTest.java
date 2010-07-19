@@ -1,8 +1,10 @@
 package org.eobjects.analyzer.job;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.StringConverterTransformer;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -10,6 +12,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -25,7 +28,7 @@ import dk.eobjects.metamodel.schema.Table;
 
 public class AnalysisJobBuilderTest extends MetaModelTestCase {
 
-	private AnalysisJobBuilder ajb;
+	private AnalysisJobBuilder analysisJobBuilder;
 	private AnalyzerBeansConfigurationImpl configuration;
 	private JdbcDatastore datastore;
 
@@ -48,28 +51,107 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 				referenceDataCatalog, descriptorProvider, taskRunner,
 				collectionProvider);
 
-		ajb = new AnalysisJobBuilder(configuration);
+		analysisJobBuilder = new AnalysisJobBuilder(configuration);
+	}
+
+	public void testGetParentBuilder() throws Exception {
+		AnalyzerJobBuilder ajb = analysisJobBuilder
+				.addAnalyzer(StringAnalyzer.class);
+		TransformerJobBuilder tjb = analysisJobBuilder
+				.addTransformer(StringConverterTransformer.class);
+		assertSame(ajb.parentBuilder(), analysisJobBuilder);
+		assertSame(tjb.parentBuilder(), analysisJobBuilder);
+		
+		assertEquals("AnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[]]", ajb.toString());
+		assertEquals("TransformerJobBuilder[transformer=String converter,inputColumns=[]]", tjb.toString());
 	}
 
 	public void testToAnalysisJob() throws Exception {
-		ajb.setDatastore("my db");
+		analysisJobBuilder.setDatastore("my db");
 		Table employeeTable = datastore.getDataContextProvider()
 				.getDataContext().getDefaultSchema()
 				.getTableByName("EMPLOYEES");
 		assertNotNull(employeeTable);
 
-		ajb.addSourceColumns(employeeTable.getColumns());
+		analysisJobBuilder.addSourceColumns(
+				employeeTable.getColumnByName("EMPLOYEENUMBER"),
+				employeeTable.getColumnByName("FIRSTNAME"),
+				employeeTable.getColumnByName("EMAIL"));
 
-		TransformerJobBuilder tjb = ajb
+		TransformerJobBuilder transformerJobBuilder = analysisJobBuilder
 				.addTransformer(StringConverterTransformer.class);
 
-		Collection<InputColumn<?>> numberColumns = ajb
+		Collection<InputColumn<?>> numberColumns = analysisJobBuilder
 				.getAvailableInputColumns(DataTypeFamily.NUMBER);
-		assertEquals(2, numberColumns.size());
-		
-		tjb.addInputColumn(numberColumns.iterator().next());
-		assertTrue(tjb.isConfigured());
-		
-		// TODO: Expand testcase
+		assertEquals(1, numberColumns.size());
+		assertEquals(
+				"[MetaModelInputColumn[JdbcColumn[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
+				Arrays.toString(numberColumns.toArray()));
+
+		transformerJobBuilder.addInputColumn(numberColumns.iterator().next());
+		assertTrue(transformerJobBuilder.isConfigured());
+
+		// the AnalyzerJob has no Analyzers yet, so it is not "configured".
+		assertFalse(analysisJobBuilder.isConfigured());
+
+		AnalyzerJobBuilder analyzerJobBuilder = analysisJobBuilder
+				.addAnalyzer(StringAnalyzer.class);
+
+		Collection<InputColumn<?>> stringInputColumns = analysisJobBuilder
+				.getAvailableInputColumns(DataTypeFamily.STRING);
+		assertEquals(
+				"[MetaModelInputColumn[JdbcColumn[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
+						+ "MetaModelInputColumn[JdbcColumn[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]], "
+						+ "TransformedInputColumn[id=trans-1,name=String converter 1,type=STRING]]",
+				Arrays.toString(stringInputColumns.toArray()));
+
+		analyzerJobBuilder.addInputColumns(stringInputColumns);
+		assertTrue(analyzerJobBuilder.isConfigured());
+
+		// now there is: source columns, configured analyzers and configured
+		// transformers.
+		assertTrue(analysisJobBuilder.isConfigured());
+
+		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
+		assertEquals(
+				"ImmutableAnalysisJob[sourceColumns=3,transformerJobs=1,analyzerJobs=1]",
+				analysisJob.toString());
+
+		// test hashcode and equals
+		assertNotSame(analysisJobBuilder.toAnalysisJob(), analysisJob);
+		assertEquals(analysisJobBuilder.toAnalysisJob(), analysisJob);
+		assertEquals(analysisJobBuilder.toAnalysisJob().hashCode(),
+				analysisJob.hashCode());
+
+		Collection<InputColumn<?>> sourceColumns = analysisJob
+				.getSourceColumns();
+		assertEquals(3, sourceColumns.size());
+
+		try {
+			sourceColumns.add(new TransformedInputColumn<Boolean>("bla",
+					DataTypeFamily.BOOLEAN, new PrefixedIdGenerator("mock")));
+			fail("Exception expected");
+		} catch (UnsupportedOperationException e) {
+			// do nothing
+		}
+
+		Collection<TransformerJob> transformerJobs = analysisJob
+				.getTransformerJobs();
+		assertEquals(1, transformerJobs.size());
+
+		TransformerJob transformerJob = transformerJobs.iterator().next();
+		assertEquals("ImmutableTransformerJob[transformer=String converter]",
+				transformerJob.toString());
+
+		assertEquals(
+				"[MetaModelInputColumn[JdbcColumn[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
+				Arrays.toString(transformerJob.getInput()));
+
+		Collection<AnalyzerJob> analyzerJobs = analysisJob.getAnalyzerJobs();
+		assertEquals(1, analyzerJobs.size());
+
+		AnalyzerJob analyzerJob = analyzerJobs.iterator().next();
+		assertEquals("ImmutableAnalyzerJob[analyzer=String analyzer]",
+				analyzerJob.toString());
 	}
 }

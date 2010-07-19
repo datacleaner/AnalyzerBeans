@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
@@ -141,6 +142,18 @@ public class AnalysisJobBuilder {
 		return Collections.unmodifiableList(_analyzerJobBuilders);
 	}
 
+	public AnalyzerJobBuilder addAnalyzer(
+			Class<? extends Analyzer> analyzerClass) {
+		AnalyzerBeanDescriptor descriptor = _configuration
+				.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
+						analyzerClass);
+		if (descriptor == null) {
+			throw new IllegalArgumentException("No descriptor found for: "
+					+ analyzerClass);
+		}
+		return addAnalyzer(descriptor);
+	}
+
 	public AnalyzerJobBuilder addAnalyzer(AnalyzerBeanDescriptor descriptor) {
 		AnalyzerJobBuilder analyzerJobBuilder = new AnalyzerJobBuilder(
 				descriptor, this);
@@ -186,11 +199,11 @@ public class AnalysisJobBuilder {
 		if (_sourceColumns.isEmpty()) {
 			return false;
 		}
-		
+
 		if (_analyzerJobBuilders.isEmpty()) {
 			return false;
 		}
-		
+
 		for (TransformerJobBuilder tjb : _transformerJobBuilders) {
 			if (!tjb.isConfigured()) {
 				return false;
