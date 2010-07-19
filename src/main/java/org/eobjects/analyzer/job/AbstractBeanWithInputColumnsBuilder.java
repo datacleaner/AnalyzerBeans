@@ -12,13 +12,14 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 
-class AbstractBeanWithInputColumnsBuilder<E extends AbstractBeanDescriptor>
-		extends AbstractBeanJobBuilder<E> {
+@SuppressWarnings("unchecked")
+class AbstractBeanWithInputColumnsBuilder<D extends AbstractBeanDescriptor, B>
+		extends AbstractBeanJobBuilder<D, B> {
 
 	private List<InputColumn<?>> _inputColumns = new ArrayList<InputColumn<?>>();
 
-	public AbstractBeanWithInputColumnsBuilder(E descriptor) {
-		super(descriptor);
+	public AbstractBeanWithInputColumnsBuilder(D descriptor, Class<B> builderClass) {
+		super(descriptor, builderClass);
 	}
 
 	/**
@@ -28,7 +29,7 @@ class AbstractBeanWithInputColumnsBuilder<E extends AbstractBeanDescriptor>
 	 *             if the input column data type family doesn't match the types
 	 *             accepted by this transformer.
 	 */
-	public void addInputColumn(InputColumn<?> inputColumn)
+	public B addInputColumn(InputColumn<?> inputColumn)
 			throws IllegalArgumentException {
 		DataTypeFamily expectedDataTypeFamily = getDescriptor()
 				.getInputDataTypeFamily();
@@ -42,23 +43,27 @@ class AbstractBeanWithInputColumnsBuilder<E extends AbstractBeanDescriptor>
 			}
 		}
 		_inputColumns.add(inputColumn);
+		return (B) this;
 	}
 
-	public void addInputColumns(Collection<InputColumn<?>> inputColumns) {
+	public B addInputColumns(Collection<InputColumn<?>> inputColumns) {
 		for (InputColumn<?> inputColumn : inputColumns) {
 			addInputColumn(inputColumn);
 		}
+		return (B) this;
 	}
 
-	public void addInputColumns(InputColumn<?>... inputColumns) {
+	public B addInputColumns(InputColumn<?>... inputColumns) {
 		for (InputColumn<?> inputColumn : inputColumns) {
 			addInputColumn(inputColumn);
 		}
+		return (B) this;
 	}
 
-	public void removeInputColumn(InputColumn<?> inputColumn) {
+	public B removeInputColumn(InputColumn<?> inputColumn) {
 		_inputColumns.remove(inputColumn);
 		// TODO: Notify consumers
+		return (B) this;
 	}
 
 	public List<InputColumn<?>> getInputColumns() {

@@ -8,16 +8,21 @@ import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
 import org.eobjects.analyzer.descriptors.AnnotationHelper;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 
-class AbstractBeanJobBuilder<E extends AbstractBeanDescriptor> {
+@SuppressWarnings("unchecked")
+class AbstractBeanJobBuilder<D extends AbstractBeanDescriptor, B> {
 
 	private Map<ConfiguredDescriptor, Object> _properties = new HashMap<ConfiguredDescriptor, Object>();
-	private E _descriptor;
+	private D _descriptor;
 
-	public AbstractBeanJobBuilder(E descriptor) {
+	public AbstractBeanJobBuilder(D descriptor, Class<B> builderClass) {
 		_descriptor = descriptor;
+		if (!AnnotationHelper.is(getClass(), builderClass)) {
+			throw new IllegalArgumentException(
+					"Builder class does not correspond to actual class of builder");
+		}
 	}
 
-	public E getDescriptor() {
+	public D getDescriptor() {
 		return _descriptor;
 	}
 
@@ -31,18 +36,18 @@ class AbstractBeanJobBuilder<E extends AbstractBeanDescriptor> {
 		return true;
 	}
 
-	public void setConfiguredProperty(String configuredName, Object value) {
+	public B setConfiguredProperty(String configuredName, Object value) {
 		ConfiguredDescriptor configuredDescriptor = _descriptor
 				.getConfiguredDescriptor(configuredName);
 		if (configuredDescriptor == null) {
 			throw new IllegalArgumentException("No such configured property: "
 					+ configuredName);
 		}
-		setConfiguredProperty(configuredDescriptor, value);
+		return setConfiguredProperty(configuredDescriptor, value);
 	}
 
-	public void setConfiguredProperty(
-			ConfiguredDescriptor configuredDescriptor, Object value) {
+	public B setConfiguredProperty(ConfiguredDescriptor configuredDescriptor,
+			Object value) {
 		if (configuredDescriptor == null) {
 			throw new IllegalArgumentException(
 					"configuredDescriptor cannot be null");
@@ -56,6 +61,7 @@ class AbstractBeanJobBuilder<E extends AbstractBeanDescriptor> {
 			}
 		}
 		_properties.put(configuredDescriptor, value);
+		return (B) this;
 	}
 
 	public Map<ConfiguredDescriptor, Object> getConfiguredProperties() {

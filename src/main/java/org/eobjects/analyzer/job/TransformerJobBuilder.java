@@ -9,15 +9,16 @@ import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
-public class TransformerJobBuilder extends
-		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor> {
+public class TransformerJobBuilder
+		extends
+		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor, TransformerJobBuilder> {
 
 	private LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
 	private IdGenerator _idGenerator;
 
 	public TransformerJobBuilder(TransformerBeanDescriptor descriptor,
 			IdGenerator idGenerator) {
-		super(descriptor);
+		super(descriptor, TransformerJobBuilder.class);
 		_idGenerator = idGenerator;
 	}
 

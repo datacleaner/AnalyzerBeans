@@ -156,7 +156,7 @@ public class AnalysisJobBuilder {
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 		return analyzerJobBuilder;
 	}
-	
+
 	public AnalysisJobBuilder removeAnalyzer(RowProcessingAnalyzerJobBuilder ajb) {
 		_analyzerJobBuilders.remove(ajb);
 		return this;

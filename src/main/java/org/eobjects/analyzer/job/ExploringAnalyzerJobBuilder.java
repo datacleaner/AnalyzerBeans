@@ -3,10 +3,10 @@ package org.eobjects.analyzer.job;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 public class ExploringAnalyzerJobBuilder extends
-		AbstractBeanJobBuilder<AnalyzerBeanDescriptor> {
+		AbstractBeanJobBuilder<AnalyzerBeanDescriptor, ExploringAnalyzerJobBuilder> {
 
 	public ExploringAnalyzerJobBuilder(AnalyzerBeanDescriptor descriptor) {
-		super(descriptor);
+		super(descriptor, ExploringAnalyzerJobBuilder.class);
 	}
 
 	public AnalyzerJob toAnalyzerJob() throws IllegalStateException {
