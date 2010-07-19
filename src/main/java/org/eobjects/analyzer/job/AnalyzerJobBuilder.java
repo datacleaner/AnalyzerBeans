@@ -34,7 +34,26 @@ public class AnalyzerJobBuilder {
 		return _descriptor;
 	}
 
-	public AnalyzerJobBuilder addInputColumn(InputColumn<?> inputColumn) {
+	public boolean isInputColumnsConfigurable() {
+		return _descriptor.isRowProcessingAnalyzer();
+	}
+
+	/**
+	 * @param inputColumn
+	 * @return
+	 * @throws IllegalArgumentException
+	 *             if the input column data type family doesn't match the types
+	 *             accepted by this analyzer.
+	 * @throws IllegalStateException
+	 *             if this analyzer is not a row processor (ie.
+	 *             isInputColumnsConfigurable() is false).
+	 */
+	public AnalyzerJobBuilder addInputColumn(InputColumn<?> inputColumn)
+			throws IllegalArgumentException, IllegalStateException {
+		if (!isInputColumnsConfigurable()) {
+			throw new IllegalStateException(
+					"This analyzer doesn't support InputColumn configuration");
+		}
 		DataTypeFamily expectedDataTypeFamily = _descriptor
 				.getInputDataTypeFamily();
 		if (expectedDataTypeFamily != DataTypeFamily.UNDEFINED) {
@@ -51,14 +70,16 @@ public class AnalyzerJobBuilder {
 	}
 
 	public AnalyzerJobBuilder addInputColumns(
-			Collection<InputColumn<?>> inputColumns) {
+			Collection<InputColumn<?>> inputColumns)
+			throws IllegalArgumentException, IllegalStateException {
 		for (InputColumn<?> inputColumn : inputColumns) {
 			addInputColumn(inputColumn);
 		}
 		return this;
 	}
 
-	public AnalyzerJobBuilder addInputColumns(InputColumn<?>... inputColumns) {
+	public AnalyzerJobBuilder addInputColumns(InputColumn<?>... inputColumns)
+			throws IllegalArgumentException, IllegalStateException {
 		for (InputColumn<?> inputColumn : inputColumns) {
 			addInputColumn(inputColumn);
 		}

@@ -41,7 +41,16 @@ public class TransformerJobBuilder {
 		return _descriptor;
 	}
 
-	public TransformerJobBuilder addInputColumn(InputColumn<?> inputColumn) {
+	/**
+	 * 
+	 * @param inputColumn
+	 * @return
+	 * @throws IllegalArgumentException
+	 *             if the input column data type family doesn't match the types
+	 *             accepted by this transformer.
+	 */
+	public TransformerJobBuilder addInputColumn(InputColumn<?> inputColumn)
+			throws IllegalArgumentException {
 		DataTypeFamily expectedDataTypeFamily = _descriptor
 				.getInputDataTypeFamily();
 		if (expectedDataTypeFamily != DataTypeFamily.UNDEFINED) {

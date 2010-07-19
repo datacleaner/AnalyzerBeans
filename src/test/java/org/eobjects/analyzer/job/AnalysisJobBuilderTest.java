@@ -53,7 +53,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 
 		analysisJobBuilder = new AnalysisJobBuilder(configuration);
 	}
-
+	
 	public void testGetParentBuilder() throws Exception {
 		AnalyzerJobBuilder ajb = analysisJobBuilder
 				.addAnalyzer(StringAnalyzer.class);
