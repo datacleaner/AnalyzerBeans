@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 
-public class ImmutableBeanConfiguration implements BeanConfiguration {
+class ImmutableBeanConfiguration implements BeanConfiguration {
 
 	private Map<ConfiguredDescriptor, Object> _properties;
 

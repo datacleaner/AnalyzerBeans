@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
@@ -25,7 +25,7 @@ public class AnalysisJobBuilder {
 	private DataContextProvider _dataContextProvider;
 	private List<MetaModelInputColumn> _sourceColumns = new ArrayList<MetaModelInputColumn>();
 	private List<TransformerJobBuilder> _transformerJobBuilders = new ArrayList<TransformerJobBuilder>();
-	private List<AnalyzerJobBuilder> _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder>();
+	private List<RowProcessingAnalyzerJobBuilder> _analyzerJobBuilders = new ArrayList<RowProcessingAnalyzerJobBuilder>();
 	private IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator(
 			"trans");
 
@@ -128,7 +128,7 @@ public class AnalysisJobBuilder {
 	public TransformerJobBuilder addTransformer(
 			TransformerBeanDescriptor descriptor) {
 		TransformerJobBuilder transformerJobBuilder = new TransformerJobBuilder(
-				descriptor, transformedColumnIdGenerator, this);
+				descriptor, transformedColumnIdGenerator);
 		_transformerJobBuilders.add(transformerJobBuilder);
 		return transformerJobBuilder;
 	}
@@ -138,12 +138,12 @@ public class AnalysisJobBuilder {
 		return this;
 	}
 
-	public List<AnalyzerJobBuilder> getAnalyzerJobBuilders() {
+	public List<RowProcessingAnalyzerJobBuilder> getAnalyzerJobBuilders() {
 		return Collections.unmodifiableList(_analyzerJobBuilders);
 	}
 
-	public AnalyzerJobBuilder addAnalyzer(
-			Class<? extends Analyzer> analyzerClass) {
+	public RowProcessingAnalyzerJobBuilder addAnalyzer(
+			Class<? extends RowProcessingAnalyzer> analyzerClass) {
 		AnalyzerBeanDescriptor descriptor = _configuration
 				.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
 						analyzerClass);
@@ -151,17 +151,13 @@ public class AnalysisJobBuilder {
 			throw new IllegalArgumentException("No descriptor found for: "
 					+ analyzerClass);
 		}
-		return addAnalyzer(descriptor);
-	}
-
-	public AnalyzerJobBuilder addAnalyzer(AnalyzerBeanDescriptor descriptor) {
-		AnalyzerJobBuilder analyzerJobBuilder = new AnalyzerJobBuilder(
-				descriptor, this);
+		RowProcessingAnalyzerJobBuilder analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder(
+				descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 		return analyzerJobBuilder;
 	}
-
-	public AnalysisJobBuilder removeAnalyzer(AnalyzerJobBuilder ajb) {
+	
+	public AnalysisJobBuilder removeAnalyzer(RowProcessingAnalyzerJobBuilder ajb) {
 		_analyzerJobBuilders.remove(ajb);
 		return this;
 	}
@@ -210,7 +206,7 @@ public class AnalysisJobBuilder {
 			}
 		}
 
-		for (AnalyzerJobBuilder ajb : _analyzerJobBuilders) {
+		for (RowProcessingAnalyzerJobBuilder ajb : _analyzerJobBuilders) {
 			if (!ajb.isConfigured()) {
 				return false;
 			}
@@ -233,7 +229,7 @@ public class AnalysisJobBuilder {
 		}
 
 		Collection<AnalyzerJob> analyzerJobs = new LinkedList<AnalyzerJob>();
-		for (AnalyzerJobBuilder ajb : _analyzerJobBuilders) {
+		for (RowProcessingAnalyzerJobBuilder ajb : _analyzerJobBuilders) {
 			try {
 				AnalyzerJob analyzerJob = ajb.toAnalyzerJob();
 				analyzerJobs.add(analyzerJob);

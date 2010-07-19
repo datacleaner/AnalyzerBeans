@@ -1,155 +1,29 @@
 package org.eobjects.analyzer.job;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.eobjects.analyzer.data.DataTypeFamily;
-import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
-import org.eobjects.analyzer.descriptors.AnnotationHelper;
-import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
-public class TransformerJobBuilder {
+public class TransformerJobBuilder extends
+		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor> {
 
-	private List<InputColumn<?>> _inputColumns = new ArrayList<InputColumn<?>>();
 	private LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
-	private Map<ConfiguredDescriptor, Object> _properties = new HashMap<ConfiguredDescriptor, Object>();
-	private AnalysisJobBuilder _analysisJobBuilder;
-	private TransformerBeanDescriptor _descriptor;
 	private IdGenerator _idGenerator;
 
 	public TransformerJobBuilder(TransformerBeanDescriptor descriptor,
-			IdGenerator idGenerator, AnalysisJobBuilder analysisJobBuilder) {
-		_descriptor = descriptor;
+			IdGenerator idGenerator) {
+		super(descriptor);
 		_idGenerator = idGenerator;
-		_analysisJobBuilder = analysisJobBuilder;
-	}
-
-	public AnalysisJobBuilder parentBuilder() {
-		return _analysisJobBuilder;
-	}
-
-	public TransformerBeanDescriptor getDescriptor() {
-		return _descriptor;
-	}
-
-	/**
-	 * 
-	 * @param inputColumn
-	 * @return
-	 * @throws IllegalArgumentException
-	 *             if the input column data type family doesn't match the types
-	 *             accepted by this transformer.
-	 */
-	public TransformerJobBuilder addInputColumn(InputColumn<?> inputColumn)
-			throws IllegalArgumentException {
-		DataTypeFamily expectedDataTypeFamily = _descriptor
-				.getInputDataTypeFamily();
-		if (expectedDataTypeFamily != DataTypeFamily.UNDEFINED) {
-			DataTypeFamily actualDataTypeFamily = inputColumn
-					.getDataTypeFamily();
-			if (expectedDataTypeFamily != actualDataTypeFamily) {
-				throw new IllegalArgumentException(
-						"Unsupported InputColumn type: " + actualDataTypeFamily
-								+ ", expected: " + expectedDataTypeFamily);
-			}
-		}
-		_inputColumns.add(inputColumn);
-		return this;
-	}
-
-	public TransformerJobBuilder addInputColumns(
-			Collection<InputColumn<?>> inputColumns) {
-		for (InputColumn<?> inputColumn : inputColumns) {
-			addInputColumn(inputColumn);
-		}
-		return this;
-	}
-
-	public TransformerJobBuilder addInputColumns(InputColumn<?>... inputColumns) {
-		for (InputColumn<?> inputColumn : inputColumns) {
-			addInputColumn(inputColumn);
-		}
-		return this;
-	}
-
-	public TransformerJobBuilder removeInputColumn(InputColumn<?> inputColumn) {
-		_inputColumns.remove(inputColumn);
-		// TODO: Notify consumers
-		return this;
-	}
-
-	public List<InputColumn<?>> getInputColumns() {
-		return Collections.unmodifiableList(_inputColumns);
-	}
-
-	public TransformerJobBuilder setConfiguredProperty(String configuredName,
-			Object value) {
-		ConfiguredDescriptor configuredDescriptor = _descriptor
-				.getConfiguredDescriptor(configuredName);
-		if (configuredDescriptor == null) {
-			throw new IllegalArgumentException("No such configured property: "
-					+ configuredName);
-		}
-		return setConfiguredProperty(configuredDescriptor, value);
-	}
-
-	public TransformerJobBuilder setConfiguredProperty(
-			ConfiguredDescriptor configuredDescriptor, Object value) {
-		if (configuredDescriptor == null) {
-			throw new IllegalArgumentException(
-					"configuredDescriptor cannot be null");
-		}
-		if (value != null) {
-			if (!AnnotationHelper.is(value.getClass(),
-					configuredDescriptor.getBaseType())) {
-				throw new IllegalArgumentException("Invalid value type: "
-						+ value.getClass().getName() + ", expected: "
-						+ configuredDescriptor.getBaseType().getName());
-			}
-		}
-		_properties.put(configuredDescriptor, value);
-		return this;
-	}
-
-	public boolean isConfigured() {
-		if (_inputColumns.isEmpty()) {
-			// no input given
-			return false;
-		}
-		ConfiguredDescriptor configuredDescriptorForInput = _descriptor
-				.getConfiguredDescriptorForInput();
-		if (!configuredDescriptorForInput.isArray()) {
-			if (_inputColumns.size() != 1) {
-				// exactly one input column is required
-				return false;
-			}
-		}
-
-		List<ConfiguredDescriptor> configuredDescriptors = new ArrayList<ConfiguredDescriptor>(
-				_descriptor.getConfiguredDescriptors());
-		configuredDescriptors.remove(configuredDescriptorForInput);
-
-		for (ConfiguredDescriptor configuredDescriptor : configuredDescriptors) {
-			if (!_properties.containsKey(configuredDescriptor)) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	public List<MutableInputColumn<?>> getOutputColumns() {
 		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(
-				_descriptor);
+				getDescriptor());
 		// TODO: Configure the instance
 		transformerBeanInstance.assignConfigured();
 
@@ -159,9 +33,10 @@ public class TransformerJobBuilder {
 			int colDiff = expectedCols - existingCols;
 			if (colDiff > 0) {
 				for (int i = 0; i < colDiff; i++) {
-					String name = _descriptor.getDisplayName() + " "
+					String name = getDescriptor().getDisplayName() + " "
 							+ (_outputColumns.size() + 1);
-					DataTypeFamily type = _descriptor.getOutputDataTypeFamily();
+					DataTypeFamily type = getDescriptor()
+							.getOutputDataTypeFamily();
 					_outputColumns.add(new TransformedInputColumn<Object>(name,
 							type, _idGenerator));
 				}
@@ -183,24 +58,16 @@ public class TransformerJobBuilder {
 			throw new IllegalStateException(
 					"Transformer job is not correctly configured");
 		}
-		Map<ConfiguredDescriptor, Object> properties = new HashMap<ConfiguredDescriptor, Object>(
-				_properties);
 
-		// explicitly add the input columns (because they are handled as a
-		// separate variable in this builder
-		properties
-				.put(_descriptor.getConfiguredDescriptorForInput(),
-						_inputColumns.toArray(new InputColumn<?>[_inputColumns
-								.size()]));
-
-		return new ImmutableTransformerJob(_descriptor,
-				new ImmutableBeanConfiguration(properties), getOutputColumns());
+		return new ImmutableTransformerJob(getDescriptor(),
+				new ImmutableBeanConfiguration(getConfiguredProperties()),
+				getOutputColumns());
 	}
 
 	@Override
 	public String toString() {
 		return "TransformerJobBuilder[transformer="
-				+ _descriptor.getDisplayName() + ",inputColumns="
-				+ _inputColumns + "]";
+				+ getDescriptor().getDisplayName() + ",inputColumns="
+				+ getInputColumns() + "]";
 	}
 }

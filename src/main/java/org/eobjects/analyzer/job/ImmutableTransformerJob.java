@@ -9,7 +9,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
-public class ImmutableTransformerJob implements TransformerJob {
+class ImmutableTransformerJob implements TransformerJob {
 
 	private TransformerBeanDescriptor _descriptor;
 	private BeanConfiguration _beanConfiguration;

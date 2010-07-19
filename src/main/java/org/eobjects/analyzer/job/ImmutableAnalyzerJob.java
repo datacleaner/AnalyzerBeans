@@ -3,7 +3,7 @@ package org.eobjects.analyzer.job;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
-public class ImmutableAnalyzerJob implements AnalyzerJob {
+class ImmutableAnalyzerJob implements AnalyzerJob {
 
 	private AnalyzerBeanDescriptor _descriptor;
 	private BeanConfiguration _beanConfiguration;

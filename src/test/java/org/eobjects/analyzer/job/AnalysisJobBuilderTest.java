@@ -53,17 +53,19 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 
 		analysisJobBuilder = new AnalysisJobBuilder(configuration);
 	}
-	
-	public void testGetParentBuilder() throws Exception {
-		AnalyzerJobBuilder ajb = analysisJobBuilder
+
+	public void testToString() throws Exception {
+		RowProcessingAnalyzerJobBuilder ajb = analysisJobBuilder
 				.addAnalyzer(StringAnalyzer.class);
 		TransformerJobBuilder tjb = analysisJobBuilder
 				.addTransformer(StringConverterTransformer.class);
-		assertSame(ajb.parentBuilder(), analysisJobBuilder);
-		assertSame(tjb.parentBuilder(), analysisJobBuilder);
-		
-		assertEquals("AnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[]]", ajb.toString());
-		assertEquals("TransformerJobBuilder[transformer=String converter,inputColumns=[]]", tjb.toString());
+
+		assertEquals(
+				"RowProcessingAnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[]]",
+				ajb.toString());
+		assertEquals(
+				"TransformerJobBuilder[transformer=String converter,inputColumns=[]]",
+				tjb.toString());
 	}
 
 	public void testToAnalysisJob() throws Exception {
@@ -94,7 +96,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		// the AnalyzerJob has no Analyzers yet, so it is not "configured".
 		assertFalse(analysisJobBuilder.isConfigured());
 
-		AnalyzerJobBuilder analyzerJobBuilder = analysisJobBuilder
+		RowProcessingAnalyzerJobBuilder analyzerJobBuilder = analysisJobBuilder
 				.addAnalyzer(StringAnalyzer.class);
 
 		Collection<InputColumn<?>> stringInputColumns = analysisJobBuilder
