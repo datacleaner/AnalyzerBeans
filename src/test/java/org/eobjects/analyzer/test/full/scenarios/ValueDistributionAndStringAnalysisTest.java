@@ -19,8 +19,8 @@ import org.eobjects.analyzer.job.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
-import org.eobjects.analyzer.job.runner.AnalysisRunner;
-import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
+import org.eobjects.analyzer.job.runner.SimpleAnalysisRunner;
+import org.eobjects.analyzer.job.runner.SimpleAnalysisRunnerImpl;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
@@ -52,7 +52,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				datastoreCatalog, referenceDataCatalog, descriptorProvider,
 				taskRunner, collectionProvider);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+		SimpleAnalysisRunner runner = new SimpleAnalysisRunnerImpl(configuration);
 
 		DataContext dc = DataContextFactory
 				.createJdbcDataContext(getTestDbConnection());

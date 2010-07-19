@@ -10,8 +10,8 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
-import org.eobjects.analyzer.job.runner.AnalysisRunner;
-import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
+import org.eobjects.analyzer.job.runner.SimpleAnalysisRunner;
+import org.eobjects.analyzer.job.runner.SimpleAnalysisRunnerImpl;
 import org.eobjects.analyzer.lifecycle.ProvidedList;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.test.TestHelper;
@@ -24,7 +24,7 @@ import dk.eobjects.metamodel.MetaModelTestCase;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
-public class AnalysisRunnerImplTest extends MetaModelTestCase {
+public class SimpleAnalysisRunnerImplTest extends MetaModelTestCase {
 
 	private static final int NUM_EMPLOYEES = 23;
 	private static final int NUM_CUSTOMERS = 122;
@@ -61,7 +61,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		SimpleAnalyzerJob job2 = new SimpleAnalyzerJob(ExploringBeanMock.class);
 		setReusableMockProperties(job2);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(
+		SimpleAnalysisRunner runner = new SimpleAnalysisRunnerImpl(
 				TestHelper.createAnalyzerBeansConfiguration());
 		AnalysisResultFuture resultFuture = runner.run(dcp, job1, job2);
 
@@ -86,7 +86,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		job.putColumnProperty("Columns", employeeColumns[0],
 				employeeColumns[1], customerColumns[0]);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(
+		SimpleAnalysisRunner runner = new SimpleAnalysisRunnerImpl(
 				TestHelper.createAnalyzerBeansConfiguration());
 		AnalysisResultFuture resultFuture = runner.run(dcp, job);
 
@@ -134,7 +134,7 @@ public class AnalysisRunnerImplTest extends MetaModelTestCase {
 		job4.putColumnProperty("Columns", employeeColumns[0],
 				employeeColumns[1]);
 
-		AnalysisRunnerImpl runner = new AnalysisRunnerImpl(
+		SimpleAnalysisRunnerImpl runner = new SimpleAnalysisRunnerImpl(
 				TestHelper.createAnalyzerBeansConfiguration());
 		AnalysisResultFuture resultFuture = runner.run(dcp, job1,job2,job3,job4);
 

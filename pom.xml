@@ -91,6 +91,7 @@
 			<groupId>berkeleydb</groupId>
 			<artifactId>je</artifactId>
 			<version>3.2.76</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>

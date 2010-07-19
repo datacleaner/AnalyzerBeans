@@ -45,15 +45,15 @@ import dk.eobjects.metamodel.MetaModelHelper;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
-public class AnalysisRunnerImpl implements AnalysisRunner {
+public class SimpleAnalysisRunnerImpl implements SimpleAnalysisRunner {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(AnalysisRunnerImpl.class);
+			.getLogger(SimpleAnalysisRunnerImpl.class);
 
 	private AnalyzerBeansConfiguration _configuration;
 	private Integer _rowProcessorAnalyzersCount;
 
-	public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration) {
+	public SimpleAnalysisRunnerImpl(AnalyzerBeansConfiguration configuration) {
 		if (configuration == null) {
 			throw new IllegalArgumentException("configuration cannot be null");
 		}

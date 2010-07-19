@@ -19,7 +19,7 @@ import org.eobjects.analyzer.job.SimpleAnalyzerJob;
  * @author Kasper Sørensen
  * 
  */
-public interface AnalysisRunner {
+public interface SimpleAnalysisRunner {
 
 	public AnalysisResultFuture run(DataContextProvider dataContextProvider,
 			Collection<? extends SimpleAnalyzerJob> jobs);
