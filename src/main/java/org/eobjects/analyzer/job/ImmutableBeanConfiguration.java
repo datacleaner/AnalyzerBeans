@@ -21,7 +21,7 @@ class ImmutableBeanConfiguration implements BeanConfiguration {
 		}
 
 		// validate contents
-		for (Map.Entry<ConfiguredDescriptor, Object> entry : properties
+		for (Map.Entry<ConfiguredDescriptor, Object> entry : _properties
 				.entrySet()) {
 			Object value = entry.getValue();
 			if (value instanceof Collection) {

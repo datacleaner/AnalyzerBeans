@@ -1,6 +1,8 @@
 package org.eobjects.analyzer.reference;
 
-public interface Dictionary {
+import java.io.Serializable;
+
+public interface Dictionary extends Serializable {
 
 	public String getName();
 	

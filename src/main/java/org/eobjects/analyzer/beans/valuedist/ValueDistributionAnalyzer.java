@@ -85,7 +85,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 		logger.info("getResult()");
 		ValueCountListImpl topValues;
 		ValueCountListImpl bottomValues;
-		if (_topFrequentValues == null && _bottomFrequentValues == null) {
+		if (_topFrequentValues == null || _bottomFrequentValues == null) {
 			topValues = ValueCountListImpl.createFullList();
 			bottomValues = null;
 		} else {

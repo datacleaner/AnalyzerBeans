@@ -1,8 +1,9 @@
 package org.eobjects.analyzer.reference;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-public interface SynonymCatalog {
+public interface SynonymCatalog extends Serializable {
 
 	/**
 	 * @return The name of this synonym catalog

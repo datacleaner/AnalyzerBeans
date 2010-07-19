@@ -1,6 +1,8 @@
 package org.eobjects.analyzer.reference;
 
-public interface ReferenceDataCatalog {
+import java.io.Serializable;
+
+public interface ReferenceDataCatalog extends Serializable {
 
 	public String[] getDictionaryNames();
 	

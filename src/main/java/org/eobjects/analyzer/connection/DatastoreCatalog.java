@@ -1,6 +1,8 @@
 package org.eobjects.analyzer.connection;
 
-public interface DatastoreCatalog {
+import java.io.Serializable;
+
+public interface DatastoreCatalog extends Serializable {
 
 	public String[] getDatastoreNames();
 

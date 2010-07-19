@@ -11,17 +11,15 @@ public class AnalyzerBeansConfigurationImpl implements
 
 	private static final long serialVersionUID = 1L;
 
-	private DescriptorProvider _descriptorProvider;
-	private CollectionProvider _collectionProvider;
+	private transient DescriptorProvider _descriptorProvider;
+	private transient CollectionProvider _collectionProvider;
+	private transient TaskRunner _taskRunner;
 	private DatastoreCatalog _datastoreCatalog;
-	private TaskRunner _taskRunner;
-
 	private ReferenceDataCatalog _referenceDataCatalog;
 
 	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog,
 			ReferenceDataCatalog referenceDataCatalog,
-			DescriptorProvider descriptorProvider,
-			TaskRunner taskRunner,
+			DescriptorProvider descriptorProvider, TaskRunner taskRunner,
 			CollectionProvider collectionProvider) {
 		if (datastoreCatalog == null) {
 			throw new IllegalArgumentException(
@@ -36,8 +34,7 @@ public class AnalyzerBeansConfigurationImpl implements
 					"descriptorProvider cannot be null");
 		}
 		if (taskRunner == null) {
-			throw new IllegalArgumentException(
-					"taskRunner cannot be null");
+			throw new IllegalArgumentException("taskRunner cannot be null");
 		}
 		if (collectionProvider == null) {
 			throw new IllegalArgumentException(

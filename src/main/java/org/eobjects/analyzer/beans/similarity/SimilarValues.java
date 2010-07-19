@@ -42,7 +42,7 @@ public class SimilarValues implements Serializable, Comparable<SimilarValues> {
 		if (this == obj) {
 			return true;
 		}
-		if (obj.getClass() == SimilarValues.class) {
+		if (obj.getClass() == getClass()) {
 			SimilarValues that = (SimilarValues) obj;
 			return that._s1.equals(this._s1) && that._s2.equals(this._s2);
 		}

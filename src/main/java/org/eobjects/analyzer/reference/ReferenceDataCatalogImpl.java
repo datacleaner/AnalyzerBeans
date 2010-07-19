@@ -5,6 +5,7 @@ import java.util.Collection;
 
 public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 
+	private static final long serialVersionUID = 1L;
 	private Collection<Dictionary> _dictionaries;
 	private Collection<SynonymCatalog> _synonymCatalogs;
 

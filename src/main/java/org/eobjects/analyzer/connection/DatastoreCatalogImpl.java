@@ -4,6 +4,8 @@ import java.util.Collection;
 
 public class DatastoreCatalogImpl implements DatastoreCatalog {
 
+	private static final long serialVersionUID = 1L;
+
 	private Collection<Datastore> _datastores;
 
 	public DatastoreCatalogImpl(Collection<Datastore> datastores) {
