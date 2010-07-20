@@ -192,6 +192,10 @@ public class AnalysisJobBuilder {
 	}
 
 	public boolean isConfigured() {
+		if (_dataContextProvider == null) {
+			return false;
+		}
+
 		if (_sourceColumns.isEmpty()) {
 			return false;
 		}
@@ -216,6 +220,11 @@ public class AnalysisJobBuilder {
 	}
 
 	public AnalysisJob toAnalysisJob() throws IllegalStateException {
+		if (!isConfigured()) {
+			throw new IllegalStateException(
+					"Analysis job is not correctly configured");
+		}
+
 		Collection<TransformerJob> transformerJobs = new LinkedList<TransformerJob>();
 		for (TransformerJobBuilder tjb : _transformerJobBuilders) {
 			try {

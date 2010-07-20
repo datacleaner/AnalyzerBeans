@@ -46,7 +46,7 @@ class AbstractBeanWithInputColumnsBuilder<D extends AbstractBeanDescriptor, B>
 		return (B) this;
 	}
 
-	public B addInputColumns(Collection<InputColumn<?>> inputColumns) {
+	public B addInputColumns(Collection<? extends InputColumn<?>> inputColumns) {
 		for (InputColumn<?> inputColumn : inputColumns) {
 			addInputColumn(inputColumn);
 		}

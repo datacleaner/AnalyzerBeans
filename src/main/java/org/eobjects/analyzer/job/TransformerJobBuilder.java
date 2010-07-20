@@ -7,6 +7,12 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
+import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
+import org.eobjects.analyzer.lifecycle.InMemoryCollectionProvider;
+import org.eobjects.analyzer.lifecycle.InitializeCallback;
+import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
+import org.eobjects.analyzer.lifecycle.LifeCycleState;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
 public class TransformerJobBuilder
@@ -25,8 +31,23 @@ public class TransformerJobBuilder
 	public List<MutableInputColumn<?>> getOutputColumns() {
 		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(
 				getDescriptor());
-		// TODO: Configure the instance
-		transformerBeanInstance.assignConfigured();
+
+		// mimic the configuration of a real transformer bean instance
+
+		// TODO: Should be AssignConfiguredRowProcessingCallback
+		LifeCycleCallback callback = new AssignConfiguredCallback(
+				new ImmutableBeanConfiguration(getConfiguredProperties()));
+		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED,
+				transformerBeanInstance.getBean(), getDescriptor());
+
+		callback = new AssignProvidedCallback(transformerBeanInstance,
+				new InMemoryCollectionProvider(), null);
+		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED,
+				transformerBeanInstance.getBean(), getDescriptor());
+
+		callback = new InitializeCallback();
+		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED,
+				transformerBeanInstance.getBean(), getDescriptor());
 
 		int expectedCols = transformerBeanInstance.getBean().getOutputColumns();
 		int existingCols = _outputColumns.size();

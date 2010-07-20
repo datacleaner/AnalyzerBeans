@@ -17,7 +17,7 @@ public abstract class AbstractBeanInstance {
 	private List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
 	private List<LifeCycleCallback> initializeCallbacks = new LinkedList<LifeCycleCallback>();
 	private List<LifeCycleCallback> closeCallbacks = new LinkedList<LifeCycleCallback>();
-	
+
 	public AbstractBeanInstance(AbstractBeanDescriptor descriptor) {
 		if (descriptor == null) {
 			throw new IllegalArgumentException("Descriptor cannot be null");
@@ -31,11 +31,11 @@ public abstract class AbstractBeanInstance {
 		}
 		this.descriptor = descriptor;
 	}
-	
+
 	public Object getBean() {
 		return bean;
 	}
-	
+
 	public AbstractBeanDescriptor getDescriptor() {
 		return descriptor;
 	}
@@ -87,8 +87,14 @@ public abstract class AbstractBeanInstance {
 
 	private void runCallbacks(List<LifeCycleCallback> callbacks,
 			LifeCycleState state) {
+		logger.debug("running {} callbacks: {}", callbacks.size(), callbacks);
 		for (LifeCycleCallback lifeCycleCallback : callbacks) {
 			lifeCycleCallback.onEvent(state, bean, descriptor);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[descriptor=" + descriptor + "]";
 	}
 }

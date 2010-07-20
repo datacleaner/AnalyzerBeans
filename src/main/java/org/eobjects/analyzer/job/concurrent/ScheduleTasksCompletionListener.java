@@ -15,18 +15,26 @@ public class ScheduleTasksCompletionListener implements CompletionListener {
 	private AtomicInteger _countDown;
 	private TaskRunner _taskRunner;
 	private Collection<? extends Task> _tasks;
+	private String _name;
 
-	public ScheduleTasksCompletionListener(TaskRunner taskRunner,
+	public ScheduleTasksCompletionListener(String name, TaskRunner taskRunner,
 			int tasksToWaitFor, Collection<? extends Task> tasksToSchedule) {
+		_name = name;
 		_taskRunner = taskRunner;
 		_tasks = tasksToSchedule;
 		_countDown = new AtomicInteger(tasksToWaitFor);
+		
+		if (tasksToWaitFor == 0) {
+			// immediate completion
+			_countDown = new AtomicInteger(1);
+			onComplete();
+		}
 	}
 
 	@Override
 	public void onComplete() {
 		int count = _countDown.decrementAndGet();
-		logger.debug("onComplete(), count = {}", count);
+		logger.debug("onComplete({}), remaining count = {}", _name, count);
 		if (count == 0) {
 			logger.info("Scheduling {} tasks", _tasks.size());
 			for (Task task : _tasks) {

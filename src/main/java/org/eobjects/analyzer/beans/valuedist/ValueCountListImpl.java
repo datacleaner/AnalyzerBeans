@@ -85,4 +85,9 @@ public class ValueCountListImpl implements Serializable, ValueCountList {
 	public int getActualSize() {
 		return _values.size();
 	}
+	
+	@Override
+	public String toString() {
+		return "ValueCountList[" + _values + "]";
+	}
 }

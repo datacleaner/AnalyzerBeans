@@ -10,5 +10,4 @@ import java.io.Serializable;
 public interface AnalyzerResult extends Serializable {
 
 	public Class<?> getProducerClass();
-
 }

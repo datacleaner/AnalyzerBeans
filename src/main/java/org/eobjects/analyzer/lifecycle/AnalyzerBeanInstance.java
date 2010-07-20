@@ -4,8 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.job.concurrent.CompletionListener;
-import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,15 +53,5 @@ public class AnalyzerBeanInstance extends AbstractBeanInstance {
 		for (AnalyzerLifeCycleCallback lifeCycleCallback : callbacks) {
 			lifeCycleCallback.onEvent(state, getBean(), (AnalyzerBeanDescriptor) getDescriptor());
 		}
-	}
-
-	public Task createTask(final CompletionListener completionListener) {
-		return new Task() {
-			@Override
-			public void execute() throws Exception {
-				run();
-				completionListener.onComplete();
-			}
-		};
 	}
 }

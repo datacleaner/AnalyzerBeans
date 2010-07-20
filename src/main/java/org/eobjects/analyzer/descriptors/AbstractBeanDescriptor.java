@@ -101,6 +101,7 @@ public abstract class AbstractBeanDescriptor implements
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[beanClass=" + beanClass + "]";
+		return getClass().getSimpleName() + "[beanClass=" + beanClass.getName()
+				+ "]";
 	}
 }

@@ -23,7 +23,37 @@ public class AnnotationHelper {
 	}
 
 	public static boolean is(Class<?> thisType, Class<?> ofThatType) {
+		if (thisType.isPrimitive() != ofThatType.isPrimitive()) {
+			if (isByte(thisType) && isByte(ofThatType)) {
+				return true;
+			}
+			if (isCharacter(thisType) && isCharacter(ofThatType)) {
+				return true;
+			}
+			if (isBoolean(thisType) && isBoolean(ofThatType)) {
+				return true;
+			}
+			if (isShort(thisType) && isShort(ofThatType)) {
+				return true;
+			}
+			if (isInteger(thisType) && isInteger(ofThatType)) {
+				return true;
+			}
+			if (isLong(thisType) && isLong(ofThatType)) {
+				return true;
+			}
+			if (isFloat(thisType) && isFloat(ofThatType)) {
+				return true;
+			}
+			if (isDouble(thisType) && isDouble(ofThatType)) {
+				return true;
+			}
+		}
 		return ofThatType.isAssignableFrom(thisType);
+	}
+
+	private static boolean isCharacter(Class<?> type) {
+		return (type == char.class || type == Character.class);
 	}
 
 	public static boolean isInputColumn(Class<?> type) {
@@ -92,6 +122,10 @@ public class AnnotationHelper {
 			return Number.class.isAssignableFrom(clazz);
 		}
 		return false;
+	}
+
+	public static boolean isByte(Type type) {
+		return type == byte.class || type == Byte.class;
 	}
 
 	public static boolean isByteArray(Type type) {

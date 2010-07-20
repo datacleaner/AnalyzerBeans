@@ -10,15 +10,15 @@ import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
 
 public class AssignProvidedCallback implements LifeCycleCallback {
 
-	private AnalyzerBeanInstance analyzerBeanInstance;
-	private CollectionProvider collectionHandler;
+	private CollectionProvider collectionProvider;
 	private DataContextProvider dataContextProvider;
+	private AbstractBeanInstance beanInstance;
 
-	public AssignProvidedCallback(AnalyzerBeanInstance analyzerBeanInstance,
+	public AssignProvidedCallback(AbstractBeanInstance beanInstance,
 			CollectionProvider collectionProvider,
 			DataContextProvider dataContextProvider) {
-		this.analyzerBeanInstance = analyzerBeanInstance;
-		this.collectionHandler = collectionProvider;
+		this.beanInstance = beanInstance;
+		this.collectionProvider = collectionProvider;
 		this.dataContextProvider = dataContextProvider;
 	}
 
@@ -32,14 +32,14 @@ public class AssignProvidedCallback implements LifeCycleCallback {
 				.getProvidedDescriptors();
 		for (ProvidedDescriptor providedDescriptor : providedDescriptors) {
 			if (providedDescriptor.isList()) {
-				List<?> list = collectionHandler.createList(providedDescriptor
+				List<?> list = collectionProvider.createList(providedDescriptor
 						.getTypeArgument(0));
 				providedDescriptor.assignValue(analyzerBean, list);
 				providedCollections.add(list);
 			} else if (providedDescriptor.isMap()) {
-				Map<?, ?> map = collectionHandler.createMap(providedDescriptor
-						.getTypeArgument(0), providedDescriptor
-						.getTypeArgument(1));
+				Map<?, ?> map = collectionProvider.createMap(
+						providedDescriptor.getTypeArgument(0),
+						providedDescriptor.getTypeArgument(1));
 				providedDescriptor.assignValue(analyzerBean, map);
 				providedCollections.add(map);
 			} else if (providedDescriptor.isDataContext()) {
@@ -53,8 +53,8 @@ public class AssignProvidedCallback implements LifeCycleCallback {
 
 		if (!providedCollections.isEmpty()) {
 			// Add a callback for cleaning up the provided collections
-			analyzerBeanInstance.getCloseCallbacks().add(
-					new ProvidedCollectionCloseCallback(collectionHandler,
+			beanInstance.getCloseCallbacks().add(
+					new ProvidedCollectionCloseCallback(collectionProvider,
 							providedCollections));
 		}
 	}

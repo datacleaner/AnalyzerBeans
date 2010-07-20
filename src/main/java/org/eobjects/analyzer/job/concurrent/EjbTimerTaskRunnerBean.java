@@ -24,9 +24,10 @@ public class EjbTimerTaskRunnerBean implements EjbTimerTaskRunner {
 
 	@Resource
 	TimerService timerService;
-	
+
 	@Override
 	public void run(Task task) {
+		logger.debug("run({})", task);
 		taskQueue.add(task);
 		timerService.createTimer(0, null);
 	}

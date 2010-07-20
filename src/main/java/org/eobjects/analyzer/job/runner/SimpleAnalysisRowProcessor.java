@@ -20,17 +20,17 @@ import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
-public class AnalysisRowProcessor {
+public class SimpleAnalysisRowProcessor {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(AnalysisRowProcessor.class);
+			.getLogger(SimpleAnalysisRowProcessor.class);
 
 	private Queue<RowProcessingAnalyzer> analyzerBeansAndRunDescriptors = new LinkedBlockingQueue<RowProcessingAnalyzer>();
 	private Set<Column> columns = new HashSet<Column>();
 	private DataContextProvider dataContextProvider;
 	private Table table;
 
-	public AnalysisRowProcessor(DataContextProvider dataContextProvider) {
+	public SimpleAnalysisRowProcessor(DataContextProvider dataContextProvider) {
 		this.dataContextProvider = dataContextProvider;
 	}
 

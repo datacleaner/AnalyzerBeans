@@ -1,36 +1,33 @@
 package org.eobjects.analyzer.lifecycle;
 
-import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.MetaModelInputColumn;
-import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
-import org.eobjects.analyzer.job.SimpleAnalyzerJob;
-import org.eobjects.analyzer.util.SchemaNavigator;
+import java.util.Arrays;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
+import org.eobjects.analyzer.job.BeanConfiguration;
 
 public class AssignConfiguredRowProcessingCallback extends
 		AssignConfiguredCallback {
 
-	private Column[] tableColumns;
+	private InputColumn<?>[] _localInputColumns;
 
-	public AssignConfiguredRowProcessingCallback(SimpleAnalyzerJob job,
-			SchemaNavigator schemaNavigator, Column[] tableColumns) {
-		super(job, schemaNavigator);
-		this.tableColumns = tableColumns;
+	public AssignConfiguredRowProcessingCallback(
+			BeanConfiguration beanConfiguration,
+			InputColumn<?>[] localInputColumns) {
+		super(beanConfiguration);
+		_localInputColumns = localInputColumns;
 	}
 
 	@Override
 	protected Object getConfiguredValue(
 			ConfiguredDescriptor configuredDescriptor) {
-		if (configuredDescriptor.isArray() && configuredDescriptor.isColumn()) {
-			return tableColumns;
-		}
-		if (configuredDescriptor.isArray() && configuredDescriptor.isInputColumn()) {
-			InputColumn<?>[] inputColumns = new InputColumn[tableColumns.length];
-			for (int i = 0; i < tableColumns.length; i++) {
-				inputColumns[i] = new MetaModelInputColumn(tableColumns[i]);
+		if (configuredDescriptor.isInputColumn()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(
+						"ConfiguredDescriptor is InputColumn type. Returning: {}",
+						Arrays.toString(_localInputColumns));
 			}
-			return inputColumns;
+			return _localInputColumns;
 		}
 		return super.getConfiguredValue(configuredDescriptor);
 	}

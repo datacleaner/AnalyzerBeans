@@ -3,28 +3,24 @@ package org.eobjects.analyzer.lifecycle;
 import java.lang.reflect.Array;
 import java.util.List;
 
-import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
-import org.eobjects.analyzer.job.SimpleAnalyzerJob;
-import org.eobjects.analyzer.util.SchemaNavigator;
-
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.analyzer.job.BeanConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AssignConfiguredCallback implements LifeCycleCallback {
 
-	private SimpleAnalyzerJob job;
-	private SchemaNavigator schemaNavigator;
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	public AssignConfiguredCallback(SimpleAnalyzerJob job,
-			SchemaNavigator schemaNavigator) {
-		this.job = job;
-		this.schemaNavigator = schemaNavigator;
+	private BeanConfiguration _beanConfiguration;
+
+	public AssignConfiguredCallback(BeanConfiguration beanConfiguration) {
+		_beanConfiguration = beanConfiguration;
 	}
 
 	@Override
-	public void onEvent(LifeCycleState state, Object analyzerBean,
+	public void onEvent(LifeCycleState state, Object bean,
 			AbstractBeanDescriptor descriptor) {
 		assert state == LifeCycleState.ASSIGN_CONFIGURED;
 
@@ -33,19 +29,19 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 		for (ConfiguredDescriptor configuredDescriptor : configuredDescriptors) {
 			Object configuredValue = getConfiguredValue(configuredDescriptor);
 			if (configuredValue == null) {
-				throw new IllegalStateException(
-						"No value for @Configured property: "
-								+ configuredDescriptor.getName());
+				configuredDescriptor.assignValue(bean, null);
 			} else {
 				if (configuredDescriptor.isArray()) {
-					configuredDescriptor.assignValue(analyzerBean,
-							configuredValue);
+					configuredDescriptor.assignValue(bean, configuredValue);
 				} else {
 					if (configuredValue.getClass().isArray()) {
-						configuredValue = Array.get(configuredValue, 0);
+						if (Array.getLength(configuredValue) > 0) {
+							configuredValue = Array.get(configuredValue, 0);
+						} else {
+							configuredValue = null;
+						}
 					}
-					configuredDescriptor.assignValue(analyzerBean,
-							configuredValue);
+					configuredDescriptor.assignValue(bean, configuredValue);
 				}
 			}
 		}
@@ -53,42 +49,9 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 
 	protected Object getConfiguredValue(
 			ConfiguredDescriptor configuredDescriptor) {
-		Object configuredValue = null;
-		String configuredName = configuredDescriptor.getName();
-		if (configuredDescriptor.isBoolean()) {
-			configuredValue = job.getBooleanProperties().get(configuredName);
-		} else if (configuredDescriptor.isInteger()) {
-			configuredValue = job.getIntegerProperties().get(configuredName);
-		} else if (configuredDescriptor.isLong()) {
-			configuredValue = job.getLongProperties().get(configuredName);
-		} else if (configuredDescriptor.isDouble()) {
-			configuredValue = job.getDoubleProperties().get(configuredName);
-		} else if (configuredDescriptor.isString()) {
-			configuredValue = job.getStringProperties().get(configuredName);
-		} else if (configuredDescriptor.isColumn()) {
-			String[] columnNames = job.getColumnProperties()
-					.get(configuredName);
-			Column[] physicalColumns = schemaNavigator
-					.convertToColumns(columnNames);
-			configuredValue = physicalColumns;
-		} else if (configuredDescriptor.isInputColumn()) {
-			String[] columnNames = job.getColumnProperties()
-					.get(configuredName);
-			Column[] physicalColumns = schemaNavigator
-					.convertToColumns(columnNames);
-			InputColumn<?>[] inputColumns = new InputColumn[physicalColumns.length];
-			for (int i = 0; i < physicalColumns.length; i++) {
-				inputColumns[i] = new MetaModelInputColumn(physicalColumns[i]);
-			}
-			configuredValue = inputColumns;
-		} else if (configuredDescriptor.isTable()) {
-			String[] tableNames = job.getTableProperties().get(configuredName);
-			configuredValue = schemaNavigator.convertToTables(tableNames);
-		} else if (configuredDescriptor.isSchema()) {
-			String[] schemaNames = job.getSchemaProperties()
-					.get(configuredName);
-			configuredValue = schemaNavigator.convertToSchemas(schemaNames);
-		}
-		return configuredValue;
+		logger.debug("Getting property from bean configuration");
+		Object value = _beanConfiguration.getProperty(configuredDescriptor);
+		logger.debug("{} -> {}", configuredDescriptor.getName(), value);
+		return value;
 	}
 }

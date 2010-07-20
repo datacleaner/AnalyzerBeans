@@ -6,7 +6,7 @@ import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeDescriptor;
 
 public class InitializeCallback implements LifeCycleCallback {
-
+	
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
 			AbstractBeanDescriptor descriptor) {
