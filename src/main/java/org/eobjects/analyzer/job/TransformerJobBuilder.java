@@ -42,11 +42,11 @@ public class TransformerJobBuilder
 
 		callback = new AssignProvidedCallback(transformerBeanInstance,
 				new InMemoryCollectionProvider(), null);
-		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED,
+		callback.onEvent(LifeCycleState.ASSIGN_PROVIDED,
 				transformerBeanInstance.getBean(), getDescriptor());
 
 		callback = new InitializeCallback();
-		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED,
+		callback.onEvent(LifeCycleState.INITIALIZE,
 				transformerBeanInstance.getBean(), getDescriptor());
 
 		int expectedCols = transformerBeanInstance.getBean().getOutputColumns();
