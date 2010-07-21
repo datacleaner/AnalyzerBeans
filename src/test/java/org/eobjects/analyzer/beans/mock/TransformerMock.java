@@ -31,5 +31,4 @@ public class TransformerMock implements Transformer<Integer> {
 	public Integer[] transform(InputRow inputRow) {
 		return new Integer[] { i.incrementAndGet() };
 	}
-
 }

@@ -12,18 +12,18 @@ import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
-import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
-import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
 
-@AnalyzerBean("Row-processing mock")
-public class RowProcessingBeanMock implements RowProcessingAnalyzer {
+import dk.eobjects.metamodel.DataContext;
 
-	private static List<RowProcessingBeanMock> instances = new LinkedList<RowProcessingBeanMock>();
+@AnalyzerBean("Exploring mock")
+public class ExploringAnalyzerMock implements ExploringAnalyzer {
 
-	public static List<RowProcessingBeanMock> getInstances() {
+	private static List<ExploringAnalyzerMock> instances = new LinkedList<ExploringAnalyzerMock>();
+
+	public static List<ExploringAnalyzerMock> getInstances() {
 		return instances;
 	}
 
@@ -31,15 +31,8 @@ public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 		instances.clear();
 	}
 
-	public RowProcessingBeanMock() {
+	public ExploringAnalyzerMock() {
 		instances.add(this);
-	}
-
-	@Configured
-	private InputColumn<?>[] columns;
-
-	public InputColumn<?>[] getColumns() {
-		return columns;
 	}
 
 	// A field-level @Configured property
@@ -104,18 +97,11 @@ public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 	}
 
 	private int runCount;
-	private long rowCount;
 
 	@Override
-	public void run(InputRow row, int count) {
-		TestCase.assertNotNull(row);
-		TestCase.assertNotNull(count);
+	public void run(DataContext dc) {
+		TestCase.assertNotNull(dc);
 		this.runCount++;
-		this.rowCount += count;
-	}
-
-	public long getRowCount() {
-		return rowCount;
 	}
 
 	public int getRunCount() {
@@ -143,26 +129,15 @@ public class RowProcessingBeanMock implements RowProcessingAnalyzer {
 		return close2;
 	}
 
-	private boolean result1 = false;
-	private boolean result2 = false;
-
-	@Result("Row count")
-	public AnalyzerResult rowCountResult() {
-		result1 = true;
-		return new NumberResult(getClass(), rowCount);
-	}
-
-	public boolean isResult1() {
-		return result1;
-	}
+	private boolean result = false;
 
 	@Result
 	public AnalyzerResult runCount() {
-		result2 = true;
+		result = true;
 		return new NumberResult(getClass(), runCount);
 	}
 
-	public boolean isResult2() {
-		return result2;
+	public boolean isResult() {
+		return result;
 	}
 }

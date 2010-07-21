@@ -93,7 +93,7 @@ public class RowProcessingPublisher {
 		q.from(_table);
 		q.groupBy(columnArray);
 
-		Iterable<RowProcessingConsumer> consumers = createProcessOrderedConsumerList();
+		Iterable<RowProcessingConsumer> consumers = createProcessOrderedConsumerList(_consumers);
 
 		DataContext dataContext = _dataContextProvider.getDataContext();
 		DataSet dataSet = dataContext.executeQuery(q);
@@ -109,11 +109,12 @@ public class RowProcessingPublisher {
 		}
 	}
 
-	private Iterable<RowProcessingConsumer> createProcessOrderedConsumerList() {
+	protected static List<RowProcessingConsumer> createProcessOrderedConsumerList(
+			Collection<? extends RowProcessingConsumer> consumers) {
 		List<RowProcessingConsumer> result = new LinkedList<RowProcessingConsumer>();
 
 		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(
-				_consumers);
+				consumers);
 		Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
 
 		while (!remainingConsumers.isEmpty()) {

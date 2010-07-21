@@ -52,4 +52,9 @@ class TransformerConsumer implements RowProcessingConsumer {
 	public TransformerJob getBeanJob() {
 		return _transformerJob;
 	}
+
+	@Override
+	public String toString() {
+		return "TransformerConsumer[" + _transformerBeanInstance + "]";
+	}
 }

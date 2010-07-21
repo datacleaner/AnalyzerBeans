@@ -22,8 +22,8 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 		Object[] array = analyzerDescriptors.toArray();
 		Arrays.sort(array);
 		assertEquals(
-				"[AnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.mock.ExploringBeanMock], "
-						+ "AnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.mock.RowProcessingBeanMock]]",
+				"[AnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock], "
+						+ "AnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.mock.RowProcessingAnalyzerMock]]",
 				Arrays.toString(array));
 
 		Collection<TransformerBeanDescriptor> transformerBeanDescriptors = descriptorProvider

@@ -41,4 +41,9 @@ class AnalyzerConsumer implements RowProcessingConsumer {
 	public AnalyzerJob getBeanJob() {
 		return _analyzerJob;
 	}
+	
+	@Override
+	public String toString() {
+		return "AnalyzerConsumer[" + _analyzerBeanInstance + "]";
+	}
 }

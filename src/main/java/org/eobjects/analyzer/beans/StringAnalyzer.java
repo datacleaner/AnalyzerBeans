@@ -371,6 +371,5 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 			}
 			return false;
 		}
-
 	}
 }

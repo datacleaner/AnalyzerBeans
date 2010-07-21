@@ -12,18 +12,18 @@ import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.annotations.Result;
-import org.eobjects.analyzer.beans.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
 
-import dk.eobjects.metamodel.DataContext;
+@AnalyzerBean("Row-processing mock")
+public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer {
 
-@AnalyzerBean("Exploring mock")
-public class ExploringBeanMock implements ExploringAnalyzer {
+	private static List<RowProcessingAnalyzerMock> instances = new LinkedList<RowProcessingAnalyzerMock>();
 
-	private static List<ExploringBeanMock> instances = new LinkedList<ExploringBeanMock>();
-
-	public static List<ExploringBeanMock> getInstances() {
+	public static List<RowProcessingAnalyzerMock> getInstances() {
 		return instances;
 	}
 
@@ -31,8 +31,15 @@ public class ExploringBeanMock implements ExploringAnalyzer {
 		instances.clear();
 	}
 
-	public ExploringBeanMock() {
+	public RowProcessingAnalyzerMock() {
 		instances.add(this);
+	}
+
+	@Configured
+	private InputColumn<?>[] columns;
+
+	public InputColumn<?>[] getColumns() {
+		return columns;
 	}
 
 	// A field-level @Configured property
@@ -97,11 +104,18 @@ public class ExploringBeanMock implements ExploringAnalyzer {
 	}
 
 	private int runCount;
+	private long rowCount;
 
 	@Override
-	public void run(DataContext dc) {
-		TestCase.assertNotNull(dc);
+	public void run(InputRow row, int count) {
+		TestCase.assertNotNull(row);
+		TestCase.assertNotNull(count);
 		this.runCount++;
+		this.rowCount += count;
+	}
+
+	public long getRowCount() {
+		return rowCount;
 	}
 
 	public int getRunCount() {
@@ -129,15 +143,26 @@ public class ExploringBeanMock implements ExploringAnalyzer {
 		return close2;
 	}
 
-	private boolean result = false;
+	private boolean result1 = false;
+	private boolean result2 = false;
+
+	@Result("Row count")
+	public AnalyzerResult rowCountResult() {
+		result1 = true;
+		return new NumberResult(getClass(), rowCount);
+	}
+
+	public boolean isResult1() {
+		return result1;
+	}
 
 	@Result
 	public AnalyzerResult runCount() {
-		result = true;
+		result2 = true;
 		return new NumberResult(getClass(), runCount);
 	}
 
-	public boolean isResult() {
-		return result;
+	public boolean isResult2() {
+		return result2;
 	}
 }
