@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.job;
 
+import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,8 +54,32 @@ class AbstractBeanJobBuilder<D extends AbstractBeanDescriptor, B> {
 					"configuredDescriptor cannot be null");
 		}
 		if (value != null) {
-			if (!AnnotationHelper.is(value.getClass(),
-					configuredDescriptor.getBaseType())) {
+			boolean correctType = true;
+			if (configuredDescriptor.isArray()) {
+				if (value.getClass().isArray()) {
+					int length = Array.getLength(value);
+					for (int i = 0; i < length; i++) {
+						Object valuePart = Array.get(value, i);
+						if (valuePart != null) {
+							if (!AnnotationHelper.is(valuePart.getClass(),
+									configuredDescriptor.getBaseType())) {
+								correctType = false;
+							}
+						}
+					}
+				} else {
+					if (!AnnotationHelper.is(value.getClass(),
+							configuredDescriptor.getBaseType())) {
+						correctType = false;
+					}
+				}
+			} else {
+				if (!AnnotationHelper.is(value.getClass(),
+						configuredDescriptor.getBaseType())) {
+					correctType = false;
+				}
+			}
+			if (!correctType) {
 				throw new IllegalArgumentException("Invalid value type: "
 						+ value.getClass().getName() + ", expected: "
 						+ configuredDescriptor.getBaseType().getName());

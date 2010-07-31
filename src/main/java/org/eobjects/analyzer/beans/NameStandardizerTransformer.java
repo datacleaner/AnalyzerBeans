@@ -29,7 +29,7 @@ public class NameStandardizerTransformer implements Transformer<String> {
 	InputColumn<String> inputColumn;
 
 	@Inject
-	@Configured("name patterns")
+	@Configured("Name patterns")
 	String[] stringPatterns = DEFAULT_PATTERNS;
 
 	private List<NamedPattern<NamePart>> namedPatterns;
