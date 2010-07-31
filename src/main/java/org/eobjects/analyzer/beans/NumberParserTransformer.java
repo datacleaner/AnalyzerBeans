@@ -15,8 +15,8 @@ public class NumberParserTransformer implements Transformer<Double> {
 	InputColumn<String> input;
 
 	@Override
-	public int getOutputColumns() {
-		return 1;
+	public OutputColumns getOutputColumns() {
+		return OutputColumns.singleOutputColumn();
 	}
 
 	@Override

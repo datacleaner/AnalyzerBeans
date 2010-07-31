@@ -3,6 +3,7 @@ package org.eobjects.analyzer.job;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.OutputColumns;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
@@ -49,14 +50,25 @@ public class TransformerJobBuilder
 		callback.onEvent(LifeCycleState.INITIALIZE,
 				transformerBeanInstance.getBean(), getDescriptor());
 
-		int expectedCols = transformerBeanInstance.getBean().getOutputColumns();
+		OutputColumns outputColumns = transformerBeanInstance.getBean()
+				.getOutputColumns();
+		if (outputColumns == null) {
+			throw new IllegalStateException(
+					"getOutputColumns() returned null on transformer: "
+							+ transformerBeanInstance.getBean());
+		}
+		int expectedCols = outputColumns.getColumnCount();
 		int existingCols = _outputColumns.size();
 		if (expectedCols != existingCols) {
 			int colDiff = expectedCols - existingCols;
 			if (colDiff > 0) {
 				for (int i = 0; i < colDiff; i++) {
-					String name = getDescriptor().getDisplayName() + " "
-							+ (_outputColumns.size() + 1);
+					int nextIndex = _outputColumns.size();
+					String name = outputColumns.getColumnName(nextIndex);
+					if (name == null) {
+						name = getDescriptor().getDisplayName() + " "
+								+ (nextIndex + 1);
+					}
 					DataTypeFamily type = getDescriptor()
 							.getOutputDataTypeFamily();
 					_outputColumns.add(new TransformedInputColumn<Object>(name,

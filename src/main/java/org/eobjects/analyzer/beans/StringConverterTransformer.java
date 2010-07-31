@@ -15,8 +15,8 @@ public class StringConverterTransformer implements Transformer<String> {
 	InputColumn<?> input;
 
 	@Override
-	public int getOutputColumns() {
-		return 1;
+	public OutputColumns getOutputColumns() {
+		return OutputColumns.singleOutputColumn();
 	}
 
 	@Override

@@ -16,8 +16,8 @@ public class TokenizerTransformerTest extends TestCase {
 		@SuppressWarnings("unchecked")
 		TokenizerTransformer transformer = new TokenizerTransformer(
 				(InputColumn<String>) col, 2);
-		
-		assertEquals(2, transformer.getOutputColumns());
+
+		assertEquals(2, transformer.getOutputColumns().getColumnCount());
 
 		TransformedInputRow row = new TransformedInputRow(null);
 		row.addValue(col, "Kasper Sorensen");

@@ -5,13 +5,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.TransformerBean;
+import org.eobjects.analyzer.beans.OutputColumns;
 import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Transformer mock")
 public class TransformerMock implements Transformer<Integer> {
-	
+
 	@Configured
 	InputColumn<?> input;
 
@@ -23,8 +24,8 @@ public class TransformerMock implements Transformer<Integer> {
 	}
 
 	@Override
-	public int getOutputColumns() {
-		return 1;
+	public OutputColumns getOutputColumns() {
+		return OutputColumns.singleOutputColumn();
 	}
 
 	@Override

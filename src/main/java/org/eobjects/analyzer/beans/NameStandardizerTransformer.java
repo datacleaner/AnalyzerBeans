@@ -49,8 +49,8 @@ public class NameStandardizerTransformer implements Transformer<String> {
 	}
 
 	@Override
-	public int getOutputColumns() {
-		return NamePart.values().length;
+	public OutputColumns getOutputColumns() {
+		return new OutputColumns("Firstname","Lastname","Middlename");
 	}
 
 	@Override

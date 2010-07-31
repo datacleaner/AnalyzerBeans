@@ -82,12 +82,9 @@ public class NameStringAnalysisAndValueDistribution extends TestCase {
 		List<MutableInputColumn<?>> transformedColumns = transformerJobBuilder
 				.getOutputColumns();
 		assertEquals(3, transformedColumns.size());
-		assertEquals("Name standardizer 1", transformedColumns.get(0).getName());
-		transformedColumns.get(0).setName("Firstname");
-		assertEquals("Name standardizer 2", transformedColumns.get(1).getName());
-		transformedColumns.get(1).setName("Lastname");
-		assertEquals("Name standardizer 3", transformedColumns.get(2).getName());
-		transformedColumns.get(2).setName("Middlename");
+		assertEquals("Firstname", transformedColumns.get(0).getName());
+		assertEquals("Lastname", transformedColumns.get(1).getName());
+		assertEquals("Middlename", transformedColumns.get(2).getName());
 
 		assertTrue(analysisJobBuilder.addAnalyzer(StringAnalyzer.class)
 				.addInputColumns(transformedColumns).isConfigured());

@@ -12,8 +12,8 @@ public class ConcatenatorTransformer implements Transformer<String> {
 	InputColumn<?>[] columns;
 
 	@Override
-	public int getOutputColumns() {
-		return 1;
+	public OutputColumns getOutputColumns() {
+		return OutputColumns.singleOutputColumn();
 	}
 
 	@Override
