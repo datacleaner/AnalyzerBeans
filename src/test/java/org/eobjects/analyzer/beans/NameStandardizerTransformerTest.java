@@ -20,16 +20,22 @@ public class NameStandardizerTransformerTest extends TestCase {
 
 		transformer.init();
 
-		assertEquals("[John, Doh, Doe]",
+		assertEquals("[John, Doh, Doe, null]",
 				Arrays.toString(transformer.transform("John Doe Doh")));
 
-		assertEquals("[John, Doh, Doe]",
+		assertEquals("[John, Doh, Doe, null]",
 				Arrays.toString(transformer.transform("Doh, John Doe")));
 
-		assertEquals("[Kasper, Sørensen, null]",
+		assertEquals("[Kasper, Sørensen, null, null]",
 				Arrays.toString(transformer.transform("Kasper Sørensen")));
 
-		assertEquals("[Kasper, Sørensen, null]",
+		assertEquals("[Kasper, Sørensen, null, null]",
 				Arrays.toString(transformer.transform("Sørensen, Kasper")));
+		
+		assertEquals("[Kasper, Sørensen, null, Mr]",
+				Arrays.toString(transformer.transform("Mr. Kasper Sørensen")));
+		
+		assertEquals("[Jane, Foobar, Doe, Mrs]",
+				Arrays.toString(transformer.transform("Mrs. Jane Doe Foobar")));
 	}
 }

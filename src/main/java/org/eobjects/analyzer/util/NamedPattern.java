@@ -95,7 +95,11 @@ public class NamedPattern<E extends Enum<E>> {
 
 	protected String getGroupLiteral(E group) {
 		if (group instanceof HasGroupLiteral) {
-			return ((HasGroupLiteral) group).getGroupLiteral();
+			String groupLiteral = ((HasGroupLiteral) group).getGroupLiteral();
+			if (groupLiteral == null) {
+				return DEFAULT_GROUP_LITERAL;
+			}
+			return groupLiteral;
 		}
 		return DEFAULT_GROUP_LITERAL;
 	}

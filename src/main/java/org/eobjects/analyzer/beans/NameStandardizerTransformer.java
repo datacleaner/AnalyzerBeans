@@ -10,6 +10,7 @@ import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.HasGroupLiteral;
 import org.eobjects.analyzer.util.NamedPattern;
 import org.eobjects.analyzer.util.NamedPatternMatch;
 
@@ -17,11 +18,20 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
 public class NameStandardizerTransformer implements Transformer<String> {
 
 	public static final String[] DEFAULT_PATTERNS = { "FIRSTNAME LASTNAME",
-			"FIRSTNAME MIDDLENAME LASTNAME", "LASTNAME, FIRSTNAME",
+			"TITULATION. FIRSTNAME LASTNAME", "FIRSTNAME MIDDLENAME LASTNAME",
+			"TITULATION. FIRSTNAME MIDDLENAME LASTNAME", "LASTNAME, FIRSTNAME",
 			"LASTNAME, FIRSTNAME MIDDLENAME" };
 
-	public static enum NamePart {
-		FIRSTNAME, LASTNAME, MIDDLENAME
+	public static enum NamePart implements HasGroupLiteral {
+		FIRSTNAME, LASTNAME, MIDDLENAME, TITULATION;
+
+		@Override
+		public String getGroupLiteral() {
+			if (this == TITULATION) {
+				return "(Mr|Ms|Mrs|Hr|Fru|Frk)";
+			}
+			return null;
+		}
 	}
 
 	@Inject
@@ -50,7 +60,8 @@ public class NameStandardizerTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns("Firstname","Lastname","Middlename");
+		return new OutputColumns("Firstname", "Lastname", "Middlename",
+				"Titulation");
 	}
 
 	@Override
@@ -63,6 +74,7 @@ public class NameStandardizerTransformer implements Transformer<String> {
 		String firstName = null;
 		String lastName = null;
 		String middleName = null;
+		String titulation = null;
 
 		if (value != null) {
 			for (NamedPattern<NamePart> namedPattern : namedPatterns) {
@@ -71,11 +83,12 @@ public class NameStandardizerTransformer implements Transformer<String> {
 					firstName = match.get(NamePart.FIRSTNAME);
 					lastName = match.get(NamePart.LASTNAME);
 					middleName = match.get(NamePart.MIDDLENAME);
+					titulation = match.get(NamePart.TITULATION);
 					break;
 				}
 			}
 		}
-		return new String[] { firstName, lastName, middleName };
+		return new String[] { firstName, lastName, middleName, titulation };
 	}
 
 	@SuppressWarnings("unchecked")

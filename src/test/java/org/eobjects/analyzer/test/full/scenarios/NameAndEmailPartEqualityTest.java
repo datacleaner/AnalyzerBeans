@@ -87,10 +87,11 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		List<MutableInputColumn<?>> nameColumns = nameTransformerJobBuilder
 				.getOutputColumns();
-		assertEquals(3, nameColumns.size());
+		assertEquals(4, nameColumns.size());
 		assertEquals("Firstname", nameColumns.get(0).getName());
 		assertEquals("Lastname", nameColumns.get(1).getName());
 		assertEquals("Middlename", nameColumns.get(2).getName());
+		assertEquals("Titulation", nameColumns.get(3).getName());
 
 		TransformerJobBuilder emailTransformerJobBuilder = analysisJobBuilder
 				.addTransformer(EmailStandardizerTransformer.class);
@@ -131,7 +132,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 				.toAnalysisJob());
 		List<AnalyzerResult> results = resultFuture.getResults();
 
-		assertEquals(5, results.size());
+		assertEquals(6, results.size());
 
 		AnalyzerResult result = results.get(0);
 		assertEquals("StringAnalyzer", result.getProducerClass()
@@ -159,7 +160,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		assertEquals("ValueCountList[[[hussein->2]]]", vdResult.getTopValues()
 				.toString());
 
-		ValidationResult validationResult = (ValidationResult) results.get(4);
+		ValidationResult validationResult = (ValidationResult) results.get(5);
 		assertEquals("[Firstname, Username]",
 				Arrays.toString(validationResult.getColumnNames()));
 		List<Object[]> invalidRows = validationResult.getInvalidRows();
