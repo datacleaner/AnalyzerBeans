@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
-import org.eobjects.analyzer.descriptors.ResultDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
 
 import dk.eobjects.metamodel.DataContext;
@@ -28,11 +27,6 @@ public class JoinMatcherTest extends MetaModelTestCase {
 				.getName());
 		assertEquals("Right table join column", configuredDescriptors.get(3)
 				.getName());
-
-		List<ResultDescriptor> resultDescriptors = descriptor
-				.getResultDescriptors();
-		assertEquals(1, resultDescriptors.size());
-		assertEquals("Unmatched rows", resultDescriptors.get(0).getName());
 	}
 
 	public void testNoMismatch() throws Exception {
@@ -51,7 +45,7 @@ public class JoinMatcherTest extends MetaModelTestCase {
 
 		bean.run(dc);
 
-		DataSetResult unmatchedRows = bean.getUnmatchedRows();
+		DataSetResult unmatchedRows = bean.getResult();
 		List<Object[]> rowData = unmatchedRows.getDataSet().toObjectArrays();
 
 		// There is a single product registered in the test-database that is not

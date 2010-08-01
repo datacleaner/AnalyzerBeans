@@ -11,5 +11,5 @@ import org.eobjects.analyzer.beans.Analyzer;
  */
 public interface AnalyzerResult extends Serializable {
 
-	public Class<? extends Analyzer> getProducerClass();
+	public Class<? extends Analyzer<?>> getProducerClass();
 }

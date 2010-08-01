@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -19,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Value distribution")
-public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
+public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDistributionResult> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(ValueDistributionAnalyzer.class);
@@ -80,7 +79,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer {
 		}
 	}
 
-	@Result
+	@Override
 	public ValueDistributionResult getResult() {
 		logger.info("getResult()");
 		ValueCountListImpl topValues;

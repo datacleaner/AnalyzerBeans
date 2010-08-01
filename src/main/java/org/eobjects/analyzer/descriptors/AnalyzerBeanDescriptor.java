@@ -3,8 +3,6 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -15,7 +13,6 @@ import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.slf4j.Logger;
@@ -28,8 +25,6 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 	private String displayName;
 	private boolean exploringAnalyzer;
 	private boolean rowProcessingAnalyzer;
-
-	private List<ResultDescriptor> resultDescriptors = new LinkedList<ResultDescriptor>();
 
 	public AnalyzerBeanDescriptor(Class<?> analyzerClass)
 			throws DescriptorException {
@@ -138,12 +133,6 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 						postConstructAnnotation));
 			}
 
-			Result resultAnnotation = method.getAnnotation(Result.class);
-			if (resultAnnotation != null) {
-				resultDescriptors.add(new ResultDescriptor(method,
-						resultAnnotation));
-			}
-
 			Close closeAnnotation = method.getAnnotation(Close.class);
 			if (closeAnnotation != null) {
 				closeDescriptors.add(new CloseDescriptor(method,
@@ -157,11 +146,6 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 				closeDescriptors.add(new CloseDescriptor(method,
 						preDestroyAnnotation));
 			}
-		}
-
-		if (resultDescriptors.isEmpty()) {
-			throw new DescriptorException(analyzerClass
-					+ " doesn't define any @Result annotated methods");
 		}
 
 		if (rowProcessingAnalyzer) {
@@ -196,7 +180,6 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 		initializeDescriptors = Collections
 				.unmodifiableList(initializeDescriptors);
 		providedDescriptors = Collections.unmodifiableList(providedDescriptors);
-		resultDescriptors = Collections.unmodifiableList(resultDescriptors);
 	}
 
 	public String getDisplayName() {
@@ -211,10 +194,6 @@ public class AnalyzerBeanDescriptor extends AbstractBeanDescriptor {
 		return rowProcessingAnalyzer;
 	}
 
-	public List<ResultDescriptor> getResultDescriptors() {
-		return resultDescriptors;
-	}
-	
 	@Override
 	public ConfiguredDescriptor getConfiguredDescriptorForInput() {
 		if (isRowProcessingAnalyzer()) {

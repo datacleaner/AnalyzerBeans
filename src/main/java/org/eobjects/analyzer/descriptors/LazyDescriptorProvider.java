@@ -10,12 +10,12 @@ import org.eobjects.analyzer.beans.Transformer;
 
 public class LazyDescriptorProvider implements DescriptorProvider {
 
-	private Map<Class<? extends Analyzer>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer>, AnalyzerBeanDescriptor>();
+	private Map<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor>();
 	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor>();
 
 	@Override
 	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<? extends Analyzer> analyzerBeanClass) {
+			Class<? extends Analyzer<?>> analyzerBeanClass) {
 		AnalyzerBeanDescriptor descriptor = _analyzerBeanDescriptors
 				.get(analyzerBeanClass);
 		if (descriptor == null) {

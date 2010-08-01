@@ -19,7 +19,6 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 		assertEquals(0, desc.getInitializeDescriptors().size());
 		assertEquals(4, desc.getConfiguredDescriptors().size());
 		assertEquals(1, desc.getProvidedDescriptors().size());
-		assertEquals(1, desc.getResultDescriptors().size());
 		assertEquals("Value distribution", desc.getDisplayName());
 	}
 

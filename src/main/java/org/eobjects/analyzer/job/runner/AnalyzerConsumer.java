@@ -26,7 +26,7 @@ class AnalyzerConsumer implements RowProcessingConsumer {
 
 	@Override
 	public InputRow consume(InputRow row, int distinctCount) {
-		RowProcessingAnalyzer analyzer = (RowProcessingAnalyzer) _analyzerBeanInstance
+		RowProcessingAnalyzer<?> analyzer = (RowProcessingAnalyzer<?>) _analyzerBeanInstance
 				.getBean();
 		analyzer.run(row, distinctCount);
 		return row;

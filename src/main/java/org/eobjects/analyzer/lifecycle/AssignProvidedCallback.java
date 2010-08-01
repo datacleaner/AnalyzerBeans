@@ -12,9 +12,9 @@ public class AssignProvidedCallback implements LifeCycleCallback {
 
 	private CollectionProvider collectionProvider;
 	private DataContextProvider dataContextProvider;
-	private AbstractBeanInstance beanInstance;
+	private AbstractBeanInstance<?> beanInstance;
 
-	public AssignProvidedCallback(AbstractBeanInstance beanInstance,
+	public AssignProvidedCallback(AbstractBeanInstance<?> beanInstance,
 			CollectionProvider collectionProvider,
 			DataContextProvider dataContextProvider) {
 		this.beanInstance = beanInstance;

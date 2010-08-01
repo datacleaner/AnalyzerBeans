@@ -7,7 +7,6 @@ import java.util.StringTokenizer;
 
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.Crosstab;
@@ -27,7 +26,7 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.util.FormatHelper;
 
 @AnalyzerBean("String analyzer")
-public class StringAnalyzer implements RowProcessingAnalyzer {
+public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(StringAnalyzer.class);
@@ -155,8 +154,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 		return count;
 	}
 
-	@Result
-	public CrosstabResult result() {
+	@Override
+	public CrosstabResult getResult() {
 		logger.info("getResult()");
 		CrosstabDimension measureDimension = new CrosstabDimension("measure");
 		measureDimension.addCategory("Char count");

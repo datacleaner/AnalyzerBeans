@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.lifecycle;
 
+import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
@@ -13,12 +14,12 @@ public class RunExplorerCallback implements AnalyzerLifeCycleCallback {
 	}
 
 	@Override
-	public void onEvent(LifeCycleState state, Object analyzerBean,
+	public void onEvent(LifeCycleState state, Analyzer<?> analyzerBean,
 			AnalyzerBeanDescriptor descriptor) {
 		assert state == LifeCycleState.RUN;
 		assert descriptor.isExploringAnalyzer();
 
-		ExploringAnalyzer exploringAnalyzer = (ExploringAnalyzer) analyzerBean;
+		ExploringAnalyzer<?> exploringAnalyzer = (ExploringAnalyzer<?>) analyzerBean;
 		exploringAnalyzer.run(dataContextProvider.getDataContext());
 	}
 

@@ -11,7 +11,7 @@ interface RowProcessingConsumer {
 
 	public InputRow consume(InputRow row, int distinctCount);
 
-	public AbstractBeanInstance getBeanInstance();
+	public AbstractBeanInstance<?> getBeanInstance();
 	
 	public BeanJob<?> getBeanJob();
 }

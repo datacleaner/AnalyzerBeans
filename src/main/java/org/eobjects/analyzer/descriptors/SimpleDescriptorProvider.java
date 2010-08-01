@@ -62,7 +62,7 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 
 	@Override
 	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<? extends Analyzer> analyzerBeanClass) {
+			Class<? extends Analyzer<?>> analyzerBeanClass) {
 		for (AnalyzerBeanDescriptor descriptor : _analyzerBeanDescriptors) {
 			if (descriptor.getBeanClass() == analyzerBeanClass) {
 				return descriptor;
@@ -91,7 +91,7 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 			throws ClassNotFoundException {
 		for (String className : classNames) {
 			@SuppressWarnings("unchecked")
-			Class<? extends Analyzer> c = (Class<? extends Analyzer>) Class
+			Class<? extends Analyzer<?>> c = (Class<? extends Analyzer<?>>) Class
 					.forName(className);
 			AnalyzerBeanDescriptor descriptor = getAnalyzerBeanDescriptorForClass(c);
 			if (descriptor == null) {

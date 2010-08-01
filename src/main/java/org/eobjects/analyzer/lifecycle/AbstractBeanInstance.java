@@ -7,23 +7,30 @@ import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractBeanInstance {
+/**
+ * 
+ * @author kasper
+ *
+ * @param <E> the bean type, typically Analyzer or Transformer
+ */
+public abstract class AbstractBeanInstance<E> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private AbstractBeanDescriptor descriptor;
-	private Object bean;
+	private E bean;
 	private List<LifeCycleCallback> assignConfiguredCallbacks = new LinkedList<LifeCycleCallback>();
 	private List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
 	private List<LifeCycleCallback> initializeCallbacks = new LinkedList<LifeCycleCallback>();
 	private List<LifeCycleCallback> closeCallbacks = new LinkedList<LifeCycleCallback>();
 
+	@SuppressWarnings("unchecked")
 	public AbstractBeanInstance(AbstractBeanDescriptor descriptor) {
 		if (descriptor == null) {
 			throw new IllegalArgumentException("Descriptor cannot be null");
 		}
 		try {
-			this.bean = descriptor.getBeanClass().newInstance();
+			this.bean = (E) descriptor.getBeanClass().newInstance();
 		} catch (Exception e) {
 			throw new IllegalArgumentException(
 					"Could not instantiate analyzer bean type: "
@@ -32,7 +39,7 @@ public abstract class AbstractBeanInstance {
 		this.descriptor = descriptor;
 	}
 
-	public Object getBean() {
+	public E getBean() {
 		return bean;
 	}
 

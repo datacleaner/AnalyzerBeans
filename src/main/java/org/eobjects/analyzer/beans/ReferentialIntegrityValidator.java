@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,8 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
 @AnalyzerBean("Referential Integrity validator")
-public class ReferentialIntegrityValidator implements ExploringAnalyzer {
+public class ReferentialIntegrityValidator implements
+		ExploringAnalyzer<DataSetResult> {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private List<Row> invalidRows;
@@ -57,11 +57,11 @@ public class ReferentialIntegrityValidator implements ExploringAnalyzer {
 			}
 		}
 
-		Query leftQuery = new Query().select(foreignKeyColumn)
-				.select(
-						informationalForeignColumns
-								.toArray(new Column[informationalForeignColumns
-										.size()])).from(foreignTable);
+		Query leftQuery = new Query()
+				.select(foreignKeyColumn)
+				.select(informationalForeignColumns
+						.toArray(new Column[informationalForeignColumns.size()]))
+				.from(foreignTable);
 		Query rightQuery = new Query().select(primaryKeyColumn).from(
 				primaryTable);
 		if (logger.isDebugEnabled()) {
@@ -121,9 +121,8 @@ public class ReferentialIntegrityValidator implements ExploringAnalyzer {
 					invalidRows.add(row);
 				} else if (!primaryKey.equals(foreignKey)) {
 					if (logger.isWarnEnabled()) {
-						logger
-								.warn("Unexpected state! Primary and foreign key values are not null and different! PK="
-										+ primaryKey + ", FK=" + foreignKey);
+						logger.warn("Unexpected state! Primary and foreign key values are not null and different! PK="
+								+ primaryKey + ", FK=" + foreignKey);
 					}
 					invalidRows.add(row);
 				}
@@ -145,8 +144,8 @@ public class ReferentialIntegrityValidator implements ExploringAnalyzer {
 		this.foreignKeyColumn = parentIdColumn;
 	}
 
-	@Result
-	public DataSetResult invalidRows() {
+	@Override
+	public DataSetResult getResult() {
 		return new DataSetResult(invalidRows, getClass());
 	}
 }

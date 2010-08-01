@@ -19,9 +19,9 @@ public class QueryResultProducer implements ResultProducer {
 
 	private Query query;
 	private List<SerializableRowFilter> filters;
-	private Class<? extends Analyzer> analyzerClass;
+	private Class<? extends Analyzer<?>> analyzerClass;
 
-	public QueryResultProducer(Query query, Class<? extends Analyzer> analyzerClass) {
+	public QueryResultProducer(Query query, Class<? extends Analyzer<?>> analyzerClass) {
 		if (query == null) {
 			throw new IllegalArgumentException("query cannot be null");
 		}

@@ -13,7 +13,6 @@ import org.apache.commons.codec.language.Soundex;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -21,7 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Phonetic similarity finder")
-public class PhoneticSimilarityFinder implements RowProcessingAnalyzer {
+public class PhoneticSimilarityFinder implements
+		RowProcessingAnalyzer<SimilarityResult> {
 
 	private final static Logger logger = LoggerFactory
 			.getLogger(PhoneticSimilarityFinder.class);
@@ -57,7 +57,7 @@ public class PhoneticSimilarityFinder implements RowProcessingAnalyzer {
 		}
 	}
 
-	@Result
+	@Override
 	public SimilarityResult getResult() {
 		Set<SimilarValues> similarValues = new TreeSet<SimilarValues>();
 

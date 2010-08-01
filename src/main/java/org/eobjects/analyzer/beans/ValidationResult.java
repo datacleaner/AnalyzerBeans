@@ -8,13 +8,14 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 public class ValidationResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
-	
-	private Analyzer analyzer;
+
 	private List<Object[]> invalidRows;
 	private String[] columnNames;
-	
-	public ValidationResult(Analyzer analyzer, InputColumn<?>[] inputColumns, List<Object[]> invalidRows) {
-		this.analyzer = analyzer;
+	private Class<? extends Analyzer<?>> analyzerClass;
+
+	public ValidationResult(Class<? extends Analyzer<?>> analyzerClass,
+			InputColumn<?>[] inputColumns, List<Object[]> invalidRows) {
+		this.analyzerClass = analyzerClass;
 		this.invalidRows = invalidRows;
 		this.columnNames = new String[inputColumns.length];
 		for (int i = 0; i < inputColumns.length; i++) {
@@ -23,14 +24,14 @@ public class ValidationResult implements AnalyzerResult {
 	}
 
 	@Override
-	public Class<? extends Analyzer> getProducerClass() {
-		return analyzer.getClass();
+	public Class<? extends Analyzer<?>> getProducerClass() {
+		return analyzerClass;
 	}
 
 	public String[] getColumnNames() {
 		return columnNames;
 	}
-	
+
 	public List<Object[]> getInvalidRows() {
 		return invalidRows;
 	}

@@ -26,12 +26,11 @@ public class AssignCallbacksAndInitializeTask implements Task {
 	private AnalyzerLifeCycleCallback _runCallback;
 	private AnalyzerLifeCycleCallback _returnResultsCallback;
 	private LifeCycleCallback _closeCallback;
-	private AbstractBeanInstance _beanInstance;
+	private AbstractBeanInstance<?> _beanInstance;
 	private AnalyzerBeanInstance _analyzerBeanInstance;
 
-	private AssignCallbacksAndInitializeTask(
-			CompletionListener completionListener,
-			AbstractBeanInstance beanInstance,
+	private void init(CompletionListener completionListener,
+			AbstractBeanInstance<?> beanInstance,
 			CollectionProvider collectionProvider,
 			DataContextProvider dataContextProvider,
 			LifeCycleCallback assignConfiguredCallback,
@@ -54,10 +53,9 @@ public class AssignCallbacksAndInitializeTask implements Task {
 			LifeCycleCallback assignConfiguredCallback,
 			LifeCycleCallback initializeCallback,
 			LifeCycleCallback closeCallback) {
-		this(completionListener,
-				(AbstractBeanInstance) transformerBeanInstance,
-				collectionProvider, dataContextProvider,
-				assignConfiguredCallback, initializeCallback, closeCallback);
+		init(completionListener, transformerBeanInstance, collectionProvider,
+				dataContextProvider, assignConfiguredCallback,
+				initializeCallback, closeCallback);
 	}
 
 	public AssignCallbacksAndInitializeTask(
@@ -70,7 +68,7 @@ public class AssignCallbacksAndInitializeTask implements Task {
 			AnalyzerLifeCycleCallback runCallback,
 			AnalyzerLifeCycleCallback returnResultsCallback,
 			LifeCycleCallback closeCallback) {
-		this(completionListener, analyzerBeanInstance, collectionProvider,
+		init(completionListener, analyzerBeanInstance, collectionProvider,
 				dataContextProvider, assignConfiguredCallback,
 				initializeCallback, closeCallback);
 		_analyzerBeanInstance = analyzerBeanInstance;

@@ -11,10 +11,10 @@ public class SimilarityResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private Class<? extends Analyzer> _analyzerBeanClass;
+	private Class<? extends Analyzer<?>> _analyzerBeanClass;
 	private Set<SimilarValues> _similarValues;
 
-	public SimilarityResult(Class<? extends Analyzer> analyzerBeanClass,
+	public SimilarityResult(Class<? extends Analyzer<?>> analyzerBeanClass,
 			Set<SimilarValues> similarValues) {
 		_analyzerBeanClass = analyzerBeanClass;
 		_similarValues = similarValues;
@@ -22,7 +22,7 @@ public class SimilarityResult implements AnalyzerResult {
 	}
 
 	@Override
-	public Class<? extends Analyzer> getProducerClass() {
+	public Class<? extends Analyzer<?>> getProducerClass() {
 		return _analyzerBeanClass;
 	}
 

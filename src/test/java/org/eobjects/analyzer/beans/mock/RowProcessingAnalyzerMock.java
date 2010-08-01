@@ -11,15 +11,13 @@ import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
 
 @AnalyzerBean("Row-processing mock")
-public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer {
+public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer<NumberResult> {
 
 	private static List<RowProcessingAnalyzerMock> instances = new LinkedList<RowProcessingAnalyzerMock>();
 
@@ -143,26 +141,7 @@ public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer {
 		return close2;
 	}
 
-	private boolean result1 = false;
-	private boolean result2 = false;
-
-	@Result("Row count")
-	public AnalyzerResult rowCountResult() {
-		result1 = true;
+	public NumberResult getResult() {
 		return new NumberResult(getClass(), rowCount);
-	}
-
-	public boolean isResult1() {
-		return result1;
-	}
-
-	@Result
-	public AnalyzerResult runCount() {
-		result2 = true;
-		return new NumberResult(getClass(), runCount);
-	}
-
-	public boolean isResult2() {
-		return result2;
 	}
 }

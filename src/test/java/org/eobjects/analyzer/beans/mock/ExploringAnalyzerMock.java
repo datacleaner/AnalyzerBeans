@@ -11,15 +11,13 @@ import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
-import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
 
 import dk.eobjects.metamodel.DataContext;
 
 @AnalyzerBean("Exploring mock")
-public class ExploringAnalyzerMock implements ExploringAnalyzer {
+public class ExploringAnalyzerMock implements ExploringAnalyzer<NumberResult> {
 
 	private static List<ExploringAnalyzerMock> instances = new LinkedList<ExploringAnalyzerMock>();
 
@@ -131,8 +129,8 @@ public class ExploringAnalyzerMock implements ExploringAnalyzer {
 
 	private boolean result = false;
 
-	@Result
-	public AnalyzerResult runCount() {
+	@Override
+	public NumberResult getResult() {
 		result = true;
 		return new NumberResult(getClass(), runCount);
 	}

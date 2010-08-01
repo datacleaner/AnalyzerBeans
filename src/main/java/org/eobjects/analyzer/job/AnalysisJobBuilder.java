@@ -143,7 +143,7 @@ public class AnalysisJobBuilder {
 	}
 
 	public RowProcessingAnalyzerJobBuilder addAnalyzer(
-			Class<? extends RowProcessingAnalyzer> analyzerClass) {
+			Class<? extends RowProcessingAnalyzer<?>> analyzerClass) {
 		AnalyzerBeanDescriptor descriptor = _configuration
 				.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
 						analyzerClass);

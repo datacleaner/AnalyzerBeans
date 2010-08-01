@@ -15,7 +15,7 @@ public interface DescriptorProvider {
 	public Collection<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors();
 
 	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<? extends Analyzer> analyzerBeanClass);
+			Class<? extends Analyzer<?>> analyzerBeanClass);
 
 	public Collection<TransformerBeanDescriptor> getTransformerBeanDescriptors();
 

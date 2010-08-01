@@ -8,12 +8,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang.ObjectUtils;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.Result;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @AnalyzerBean("Equality analyzer")
-public class EqualityAnalyzer implements RowProcessingAnalyzer {
+public class EqualityAnalyzer implements
+		RowProcessingAnalyzer<ValidationResult> {
 
 	@Inject
 	@Configured
@@ -42,9 +42,9 @@ public class EqualityAnalyzer implements RowProcessingAnalyzer {
 			invalidRows.add(rowValues);
 		}
 	}
-	
-	@Result
+
+	@Override
 	public ValidationResult getResult() {
-		return new ValidationResult(this, input, invalidRows);
+		return new ValidationResult(getClass(), input, invalidRows);
 	}
 }

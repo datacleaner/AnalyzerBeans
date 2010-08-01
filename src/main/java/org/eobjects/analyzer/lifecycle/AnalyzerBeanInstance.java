@@ -3,6 +3,7 @@ package org.eobjects.analyzer.lifecycle;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * at an per-instance level. This makes it possible to add callbacks at various
  * stages in the life-cycle of an AnalyzerBean
  */
-public class AnalyzerBeanInstance extends AbstractBeanInstance {
+public class AnalyzerBeanInstance extends AbstractBeanInstance<Analyzer<?>> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(AnalyzerBeanInstance.class);

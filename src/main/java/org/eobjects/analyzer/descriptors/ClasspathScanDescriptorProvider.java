@@ -22,7 +22,7 @@ public final class ClasspathScanDescriptorProvider implements
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(ClasspathScanDescriptorProvider.class);
-	private Map<Class<? extends Analyzer>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer>, AnalyzerBeanDescriptor>();
+	private Map<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor>();
 	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor>();
 
 	public ClasspathScanDescriptorProvider scanPackage(String packageName,
@@ -70,7 +70,7 @@ public final class ClasspathScanDescriptorProvider implements
 
 				if (visitor.isAnalyzer()) {
 					@SuppressWarnings("unchecked")
-					Class<? extends Analyzer> analyzerClass = (Class<? extends Analyzer>) visitor
+					Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) visitor
 							.getBeanClass();
 					AnalyzerBeanDescriptor descriptor = _analyzerBeanDescriptors
 							.get(analyzerClass);
@@ -121,7 +121,7 @@ public final class ClasspathScanDescriptorProvider implements
 
 	@Override
 	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<? extends Analyzer> analyzerBeanClass) {
+			Class<? extends Analyzer<?>> analyzerBeanClass) {
 		return _analyzerBeanDescriptors.get(analyzerBeanClass);
 	}
 
