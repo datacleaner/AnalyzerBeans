@@ -104,4 +104,16 @@ public class TransformerJobBuilder
 				+ getDescriptor().getDisplayName() + ",inputColumns="
 				+ getInputColumns() + "]";
 	}
+
+	public MutableInputColumn<?> getOutputColumnByName(String name) {
+		if (name != null) {
+			List<MutableInputColumn<?>> outputColumns = getOutputColumns();
+			for (MutableInputColumn<?> inputColumn : outputColumns) {
+				if (name.equals(inputColumn.getName())) {
+					return inputColumn;
+				}
+			}
+		}
+		return null;
+	}
 }

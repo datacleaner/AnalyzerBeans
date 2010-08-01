@@ -263,7 +263,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 						Long.toString(maxChars));
 
 				if (isPhysicalColumn) {
-					resultProducer = new QueryResultProducer(baseQuery);
+					resultProducer = new QueryResultProducer(baseQuery,
+							getClass());
 					resultProducer.addFilter(new CharRowFilter(column
 							.getPhysicalColumn(), maxChars));
 					nav.attach(resultProducer);
@@ -274,7 +275,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 				nav.where(measureDimension, "Min chars").put(
 						Long.toString(minChars));
 				if (isPhysicalColumn) {
-					resultProducer = new QueryResultProducer(baseQuery);
+					resultProducer = new QueryResultProducer(baseQuery,
+							getClass());
 					resultProducer.addFilter(new CharRowFilter(column
 							.getPhysicalColumn(), minChars));
 					nav.attach(resultProducer);
@@ -284,9 +286,9 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 			if (columnCounts != null) {
 				nav.where(measureDimension, "Avg chars").put(avgChars);
 				nav.where(measureDimension, "Max white spaces").put(
-						Long.toString(maxBlanks));
+						numberToString(maxBlanks));
 				nav.where(measureDimension, "Min white spaces").put(
-						Long.toString(minBlanks));
+						numberToString(minBlanks));
 				nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
 				nav.where(measureDimension, "Uppercase chars")
 						.put(numUppercase);
@@ -295,14 +297,15 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 				nav.where(measureDimension, "Non-letter chars").put(
 						numNonletter);
 				nav.where(measureDimension, "Word count").put(
-						Long.toString(numWords));
+						numberToString(numWords));
 			}
 
 			if (maxWords != null) {
 				nav.where(measureDimension, "Max words").put(
 						Long.toString(maxWords));
 				if (isPhysicalColumn) {
-					resultProducer = new QueryResultProducer(baseQuery);
+					resultProducer = new QueryResultProducer(baseQuery,
+							getClass());
 					resultProducer.addFilter(new WordRowFilter(column
 							.getPhysicalColumn(), maxWords));
 					nav.attach(resultProducer);
@@ -313,7 +316,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 				nav.where(measureDimension, "Min words").put(
 						Long.toString(minWords));
 				if (isPhysicalColumn) {
-					resultProducer = new QueryResultProducer(baseQuery);
+					resultProducer = new QueryResultProducer(baseQuery,
+							getClass());
 					resultProducer.addFilter(new WordRowFilter(column
 							.getPhysicalColumn(), minWords));
 					nav.attach(resultProducer);
@@ -322,6 +326,13 @@ public class StringAnalyzer implements RowProcessingAnalyzer {
 		}
 
 		return new CrosstabResult(getClass(), crosstab);
+	}
+
+	private static String numberToString(Number n) {
+		if (n == null) {
+			return null;
+		}
+		return n.toString();
 	}
 
 	private Query getBaseQuery(Column column) {

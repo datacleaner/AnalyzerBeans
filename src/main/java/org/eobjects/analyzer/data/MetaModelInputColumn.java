@@ -8,6 +8,9 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 	private Column _column;
 
 	public MetaModelInputColumn(Column column) {
+		if (column == null) {
+			throw new IllegalArgumentException("column cannot be null");
+		}
 		_column = column;
 	}
 
@@ -35,6 +38,9 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 	@Override
 	public DataTypeFamily getDataTypeFamily() {
 		ColumnType type = _column.getType();
+		if (type == null) {
+			return DataTypeFamily.UNDEFINED;
+		}
 		if (type.isBoolean()) {
 			return DataTypeFamily.BOOLEAN;
 		}

@@ -18,15 +18,15 @@ import java.util.regex.Pattern;
  */
 public class NamedPattern<E extends Enum<E>> {
 
-	public static final String SPECIAL_CHARACTERS= "æøåâäáàôöóòêëéèûüúùîïíìñńǹḿ";
-	public static final String GROUP_LITERAL;
-	
+	public static final String SPECIAL_CHARACTERS = "æøåâäáàôöóòêëéèûüúùîïíìñńǹḿ";
+	public static final String DEFAULT_GROUP_LITERAL;
+
 	static {
 		StringBuilder sb = new StringBuilder("([a-zA-Z0-9");
 		sb.append(SPECIAL_CHARACTERS.toLowerCase());
 		sb.append(SPECIAL_CHARACTERS.toUpperCase());
 		sb.append("]+)");
-		GROUP_LITERAL = sb.toString();
+		DEFAULT_GROUP_LITERAL = sb.toString();
 	}
 
 	private EnumMap<E, Integer> groupIndexes;
@@ -80,7 +80,8 @@ public class NamedPattern<E extends Enum<E>> {
 
 			groupIndexes.put(group, usedGroupNames.size() + 1);
 
-			pattern = pattern.replace(getGroupToken(group), GROUP_LITERAL);
+			pattern = pattern.replace(getGroupToken(group),
+					getGroupLiteral(group));
 
 			groupIndex = getIndexOfHighest(groupNameStringIndexOfs);
 		}
@@ -90,6 +91,13 @@ public class NamedPattern<E extends Enum<E>> {
 
 	protected String getGroupToken(E group) {
 		return group.name();
+	}
+
+	protected String getGroupLiteral(E group) {
+		if (group instanceof HasGroupLiteral) {
+			return ((HasGroupLiteral) group).getGroupLiteral();
+		}
+		return DEFAULT_GROUP_LITERAL;
 	}
 
 	private Integer getIndexOfHighest(List<Integer> integerList) {
@@ -108,10 +116,10 @@ public class NamedPattern<E extends Enum<E>> {
 	public NamedPatternMatch<E> match(String string) {
 		Matcher matcher = pattern.matcher(string);
 		while (matcher.find()) {
-			
+
 			int start = matcher.start();
 			int end = matcher.end();
-			
+
 			if (start == 0 && end == string.length()) {
 				Map<E, String> resultMap = new EnumMap<E, String>(groupEnum);
 				Set<Entry<E, Integer>> entries = groupIndexes.entrySet();
@@ -130,5 +138,9 @@ public class NamedPattern<E extends Enum<E>> {
 
 	public Pattern getPattern() {
 		return pattern;
+	}
+	
+	public Set<E> getUsedGroups() {
+		return groupIndexes.keySet();
 	}
 }

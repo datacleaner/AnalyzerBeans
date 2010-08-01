@@ -3,6 +3,8 @@ package org.eobjects.analyzer.result;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.Analyzer;
+
 import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.Row;
 
@@ -14,15 +16,14 @@ public class DataSetResult implements AnalyzerResult {
 	// this class uses a list of rows in order to make it serializable (a
 	// DataSet is not serializable)
 	private List<Row> rows;
-	private Class<?> producerClass;
+	private Class<? extends Analyzer> producerClass;
 
-	public DataSetResult(List<Row> rows, Class<?> producerClass) {
+	public DataSetResult(List<Row> rows, Class<? extends Analyzer> producerClass) {
 		this.rows = rows;
 		this.producerClass = producerClass;
 	}
 
-	public DataSetResult(DataSet ds,
-			Class<? extends QueryResultProducer> producerClass) {
+	public DataSetResult(DataSet ds, Class<? extends Analyzer> producerClass) {
 		this.producerClass = producerClass;
 		this.rows = new ArrayList<Row>();
 		while (ds.next()) {
@@ -43,7 +44,7 @@ public class DataSetResult implements AnalyzerResult {
 	}
 
 	@Override
-	public Class<?> getProducerClass() {
+	public Class<? extends Analyzer> getProducerClass() {
 		return this.producerClass;
 	}
 

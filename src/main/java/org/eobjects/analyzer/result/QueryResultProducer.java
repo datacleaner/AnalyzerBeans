@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.annotations.Provided;
+import org.eobjects.analyzer.beans.Analyzer;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;
@@ -18,12 +19,14 @@ public class QueryResultProducer implements ResultProducer {
 
 	private Query query;
 	private List<SerializableRowFilter> filters;
+	private Class<? extends Analyzer> analyzerClass;
 
-	public QueryResultProducer(Query query) {
+	public QueryResultProducer(Query query, Class<? extends Analyzer> analyzerClass) {
 		if (query == null) {
-			throw new NullPointerException("query");
+			throw new IllegalArgumentException("query cannot be null");
 		}
 		this.query = query;
+		this.analyzerClass = analyzerClass;
 	}
 
 	public void addFilter(SerializableRowFilter filter) {
@@ -44,7 +47,7 @@ public class QueryResultProducer implements ResultProducer {
 			ds = new DataSet(new RowFilterDataSetStrategyWrapper(ds, filters
 					.toArray(new IRowFilter[filters.size()])));
 		}
-		return new DataSetResult(ds, getClass());
+		return new DataSetResult(ds, analyzerClass);
 	}
 
 }

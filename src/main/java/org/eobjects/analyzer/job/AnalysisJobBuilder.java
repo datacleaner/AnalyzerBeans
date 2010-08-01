@@ -252,4 +252,15 @@ public class AnalysisJobBuilder {
 		return new ImmutableAnalysisJob(_dataContextProvider, _sourceColumns,
 				transformerJobs, analyzerJobs);
 	}
+
+	public InputColumn<?> getSourceColumnByName(String name) {
+		if (name != null) {
+			for (MetaModelInputColumn inputColumn : _sourceColumns) {
+				if (name.equals(inputColumn.getName())) {
+					return inputColumn;
+				}
+			}
+		}
+		return null;
+	}
 }

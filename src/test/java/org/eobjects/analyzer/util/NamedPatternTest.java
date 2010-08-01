@@ -1,6 +1,10 @@
 package org.eobjects.analyzer.util;
 
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import org.eobjects.analyzer.beans.EmailStandardizerTransformer;
+import org.eobjects.analyzer.beans.EmailStandardizerTransformer.EmailPart;
 
 import junit.framework.TestCase;
 
@@ -10,8 +14,22 @@ public class NamedPatternTest extends TestCase {
 		FOO, BARRR, W00P
 	}
 
+	public void testHasGroupLiteral() throws Exception {
+		NamedPattern<EmailPart> emailPattern = EmailStandardizerTransformer.EMAIL_PATTERN;
+
+		NamedPatternMatch<EmailPart> match = emailPattern
+				.match("kasper@eobjects.dk");
+		assertNotNull(match);
+		assertEquals("kasper", match.get(EmailPart.USERNAME));
+		assertEquals("eobjects.dk", match.get(EmailPart.DOMAIN));
+
+		assertEquals(EmailPart.USERNAME.getGroupLiteral() + "@"
+				+ EmailPart.DOMAIN.getGroupLiteral(), emailPattern.getPattern()
+				.toString());
+	}
+
 	public void testGroupLiteral() throws Exception {
-		String groupLiteral = NamedPattern.GROUP_LITERAL;
+		String groupLiteral = NamedPattern.DEFAULT_GROUP_LITERAL;
 		assertTrue(Pattern.matches(groupLiteral, "hello"));
 		assertFalse(Pattern.matches(groupLiteral, "hello world"));
 		assertFalse(Pattern.matches(groupLiteral, "hello\nworld"));
@@ -44,6 +62,16 @@ public class NamedPatternTest extends TestCase {
 		NamedPattern<ExamplePatternGroup> namedPattern = new NamedPattern<ExamplePatternGroup>(
 				"FOO BARRR", ExamplePatternGroup.class);
 		assertNull(namedPattern.match("Sørensen, Kasper"));
+	}
+	
+	public void testGetUsedGroups() throws Exception {
+		NamedPattern<ExamplePatternGroup> namedPattern = new NamedPattern<ExamplePatternGroup>(
+				"FOO BARRR", ExamplePatternGroup.class);
+		Set<ExamplePatternGroup> usedGroups = namedPattern.getUsedGroups();
+		assertEquals(2, usedGroups.size());
+		assertTrue(usedGroups.contains(ExamplePatternGroup.FOO));
+		assertTrue(usedGroups.contains(ExamplePatternGroup.BARRR));
+		assertFalse(usedGroups.contains(ExamplePatternGroup.W00P));
 	}
 
 	public void testScandnavianChars() throws Exception {

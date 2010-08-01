@@ -39,7 +39,7 @@ public class ValueDistributionResult implements AnalyzerResult {
 	}
 
 	@Override
-	public Class<?> getProducerClass() {
+	public Class<ValueDistributionAnalyzer> getProducerClass() {
 		return ValueDistributionAnalyzer.class;
 	}
 
