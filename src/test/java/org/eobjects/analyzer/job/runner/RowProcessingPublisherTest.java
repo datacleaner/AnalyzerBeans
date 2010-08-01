@@ -9,7 +9,7 @@ import java.util.Queue;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
-import org.eobjects.analyzer.beans.StringConverterTransformer;
+import org.eobjects.analyzer.beans.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalysisJobBuilder;
@@ -47,7 +47,7 @@ public class RowProcessingPublisherTest extends TestCase {
 		TransformerJobBuilder tjb2 = ajb.addTransformer(TransformerMock.class)
 				.addInputColumn(tjb1.getOutputColumns().get(0));
 		TransformerJobBuilder tjb3 = ajb.addTransformer(
-				StringConverterTransformer.class).addInputColumn(
+				ConvertToStringTransformer.class).addInputColumn(
 				tjb2.getOutputColumns().get(0));
 
 		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(

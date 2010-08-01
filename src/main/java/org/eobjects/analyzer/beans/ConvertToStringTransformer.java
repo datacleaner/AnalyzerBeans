@@ -7,8 +7,8 @@ import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-@TransformerBean("String converter")
-public class StringConverterTransformer implements Transformer<String> {
+@TransformerBean("Convert to string")
+public class ConvertToStringTransformer implements Transformer<String> {
 
 	@Inject
 	@Configured

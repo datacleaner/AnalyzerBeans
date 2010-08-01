@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
-import org.eobjects.analyzer.beans.StringConverterTransformer;
+import org.eobjects.analyzer.beans.ConvertToStringTransformer;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
@@ -58,13 +58,13 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		RowProcessingAnalyzerJobBuilder ajb = analysisJobBuilder
 				.addAnalyzer(StringAnalyzer.class);
 		TransformerJobBuilder tjb = analysisJobBuilder
-				.addTransformer(StringConverterTransformer.class);
+				.addTransformer(ConvertToStringTransformer.class);
 
 		assertEquals(
 				"RowProcessingAnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[]]",
 				ajb.toString());
 		assertEquals(
-				"TransformerJobBuilder[transformer=String converter,inputColumns=[]]",
+				"TransformerJobBuilder[transformer=Convert to string,inputColumns=[]]",
 				tjb.toString());
 	}
 
@@ -81,7 +81,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 				employeeTable.getColumnByName("EMAIL"));
 
 		TransformerJobBuilder transformerJobBuilder = analysisJobBuilder
-				.addTransformer(StringConverterTransformer.class);
+				.addTransformer(ConvertToStringTransformer.class);
 
 		Collection<InputColumn<?>> numberColumns = analysisJobBuilder
 				.getAvailableInputColumns(DataTypeFamily.NUMBER);
@@ -104,7 +104,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertEquals(
 				"[MetaModelInputColumn[JdbcColumn[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
 						+ "MetaModelInputColumn[JdbcColumn[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]], "
-						+ "TransformedInputColumn[id=trans-1,name=String converter 1,type=STRING]]",
+						+ "TransformedInputColumn[id=trans-1,name=Convert to string 1,type=STRING]]",
 				Arrays.toString(stringInputColumns.toArray()));
 
 		analyzerJobBuilder.addInputColumns(stringInputColumns);
@@ -142,7 +142,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertEquals(1, transformerJobs.size());
 
 		TransformerJob transformerJob = transformerJobs.iterator().next();
-		assertEquals("ImmutableTransformerJob[transformer=String converter]",
+		assertEquals("ImmutableTransformerJob[transformer=Convert to string]",
 				transformerJob.toString());
 
 		assertEquals(

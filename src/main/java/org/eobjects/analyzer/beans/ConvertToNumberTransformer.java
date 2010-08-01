@@ -7,8 +7,8 @@ import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-@TransformerBean("Number parser")
-public class NumberParserTransformer implements Transformer<Double> {
+@TransformerBean("Convert to number")
+public class ConvertToNumberTransformer implements Transformer<Double> {
 
 	@Inject
 	@Configured

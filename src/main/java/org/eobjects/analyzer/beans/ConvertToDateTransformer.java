@@ -1,0 +1,122 @@
+package org.eobjects.analyzer.beans;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.eobjects.analyzer.annotations.Configured;
+import org.eobjects.analyzer.annotations.TransformerBean;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+@TransformerBean("Convert to date")
+public class ConvertToDateTransformer implements Transformer<Date> {
+
+	private static final List<DateTimeFormatter> dateTimeFormatters;
+
+	static {
+		dateTimeFormatters = new ArrayList<DateTimeFormatter>();
+		String[] prototypePatterns = { "yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy" };
+		for (String string : prototypePatterns) {
+			dateTimeFormatters.add(DateTimeFormat.forPattern(string));
+			string = string.replaceAll("\\-", "\\.");
+			dateTimeFormatters.add(DateTimeFormat.forPattern(string));
+			string = string.replaceAll("\\.", "\\/");
+			dateTimeFormatters.add(DateTimeFormat.forPattern(string));
+		}
+	}
+
+	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_LONG = DateTimeFormat
+			.forPattern("yyyyMMdd");
+	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_SHORT = DateTimeFormat
+			.forPattern("yyMMdd");
+
+	@Inject
+	@Configured
+	InputColumn<?> input;
+
+	@Override
+	public OutputColumns getOutputColumns() {
+		return OutputColumns.singleOutputColumn();
+	}
+
+	@Override
+	public Date[] transform(InputRow inputRow) {
+		Object value = inputRow.getValue(input);
+		Date d = null;
+		if (value != null) {
+			if (value instanceof Date) {
+				d = (Date) value;
+			} else if (value instanceof java.sql.Date) {
+				java.sql.Date sqlDate = (java.sql.Date) value;
+				d = new Date(sqlDate.getTime());
+			} else if (value instanceof String) {
+				d = convertFromString((String) value);
+			} else if (value instanceof Number) {
+				d = convertFromNumber((Number) value);
+			}
+		}
+		return new Date[] { d };
+	}
+
+	protected static Date convertFromString(String value) {
+		try {
+			long longValue = Long.parseLong(value);
+			return convertFromNumber(longValue);
+		} catch (NumberFormatException e) {
+			// do nothing, proceed to dateFormat parsing
+		}
+
+		for (DateTimeFormatter formatter : dateTimeFormatters) {
+			try {
+				return formatter.parseDateTime(value).toDate();
+			} catch (Exception e) {
+				// proceed to next formatter
+			}
+		}
+
+		return null;
+	}
+
+	protected static Date convertFromNumber(Number value) {
+		Number numberValue = (Number) value;
+		long longValue = numberValue.longValue();
+
+		String stringValue = Long.toString(longValue);
+		// test if the number is actually a format of the type yyyyMMdd
+		if (stringValue.length() == 8
+				&& (stringValue.startsWith("1") || stringValue.startsWith("2"))) {
+			try {
+				return NUMBER_BASED_DATE_FORMAT_LONG.parseDateTime(stringValue)
+						.toDate();
+			} catch (Exception e) {
+				// do nothing, proceed to next method of conversion
+			}
+		}
+
+		// test if the number is actually a format of the type yyMMdd
+		if (stringValue.length() == 6) {
+			try {
+				return NUMBER_BASED_DATE_FORMAT_SHORT
+						.parseDateTime(stringValue).toDate();
+			} catch (Exception e) {
+				// do nothing, proceed to next method of conversion
+			}
+		}
+
+		if (longValue > 5000000) {
+			// this number is most probably amount of milliseconds since
+			// 1970
+			return new Date(longValue);
+		} else {
+			// this number is most probably the amount of days since
+			// 1970
+			return new Date(longValue * 1000 * 60 * 60 * 24);
+		}
+	}
+
+}

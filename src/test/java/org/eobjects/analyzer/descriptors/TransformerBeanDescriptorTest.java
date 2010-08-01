@@ -1,8 +1,8 @@
 package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.beans.ConcatenatorTransformer;
-import org.eobjects.analyzer.beans.NumberParserTransformer;
-import org.eobjects.analyzer.beans.StringConverterTransformer;
+import org.eobjects.analyzer.beans.ConvertToNumberTransformer;
+import org.eobjects.analyzer.beans.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.TokenizerTransformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 
@@ -17,12 +17,12 @@ public class TransformerBeanDescriptorTest extends TestCase {
 		assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
 		
 		descriptor = new TransformerBeanDescriptor(
-				NumberParserTransformer.class);
+				ConvertToNumberTransformer.class);
 		assertEquals(DataTypeFamily.STRING, descriptor.getInputDataTypeFamily());
 		assertEquals(DataTypeFamily.NUMBER, descriptor.getOutputDataTypeFamily());
 		
 		descriptor = new TransformerBeanDescriptor(
-				StringConverterTransformer.class);
+				ConvertToStringTransformer.class);
 		assertEquals(DataTypeFamily.UNDEFINED, descriptor.getInputDataTypeFamily());
 		assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
 		

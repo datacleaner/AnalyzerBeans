@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.job;
 
-import org.eobjects.analyzer.beans.NumberParserTransformer;
+import org.eobjects.analyzer.beans.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.TokenizerTransformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.test.TestHelper;
@@ -66,7 +66,7 @@ public class TransformerJobBuilderTest extends TestCase {
 
 	public void testInvalidInputColumnType() throws Exception {
 		TransformerJobBuilder tjb = ajb
-				.addTransformer(NumberParserTransformer.class);
+				.addTransformer(ConvertToNumberTransformer.class);
 		assertEquals(1, tjb.getOutputColumns().size());
 		assertEquals(0, tjb.getInputColumns().size());
 		assertFalse(tjb.isConfigured());
