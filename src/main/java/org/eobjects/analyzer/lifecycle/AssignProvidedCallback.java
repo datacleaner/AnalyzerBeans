@@ -3,10 +3,11 @@ package org.eobjects.analyzer.lifecycle;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
-import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
-import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
+import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
 
 public class AssignProvidedCallback implements LifeCycleCallback {
 
@@ -24,13 +25,13 @@ public class AssignProvidedCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			AbstractBeanDescriptor descriptor) {
+			BeanDescriptor descriptor) {
 		assert state == LifeCycleState.ASSIGN_PROVIDED;
 
 		List<Object> providedCollections = new LinkedList<Object>();
-		List<ProvidedDescriptor> providedDescriptors = descriptor
-				.getProvidedDescriptors();
-		for (ProvidedDescriptor providedDescriptor : providedDescriptors) {
+		Set<ProvidedPropertyDescriptor> providedDescriptors = descriptor
+				.getProvidedProperties();
+		for (ProvidedPropertyDescriptor providedDescriptor : providedDescriptors) {
 			if (providedDescriptor.isList()) {
 				List<?> list = collectionProvider.createList(providedDescriptor
 						.getTypeArgument(0));

@@ -9,16 +9,17 @@ import java.util.Map;
 
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
-import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
+import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 
 @SuppressWarnings("unchecked")
-class AbstractBeanWithInputColumnsBuilder<D extends AbstractBeanDescriptor, B>
-		extends AbstractBeanJobBuilder<D, B> {
+class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor, B> extends
+		AbstractBeanJobBuilder<D, B> {
 
 	private List<InputColumn<?>> _inputColumns = new ArrayList<InputColumn<?>>();
 
-	public AbstractBeanWithInputColumnsBuilder(D descriptor, Class<B> builderClass) {
+	public AbstractBeanWithInputColumnsBuilder(D descriptor,
+			Class<B> builderClass) {
 		super(descriptor, builderClass);
 	}
 
@@ -80,9 +81,9 @@ class AbstractBeanWithInputColumnsBuilder<D extends AbstractBeanDescriptor, B>
 			return false;
 		}
 
-		ConfiguredDescriptor configuredDescriptorForInput = getDescriptor()
-				.getConfiguredDescriptorForInput();
-		if (!configuredDescriptorForInput.isArray()) {
+		ConfiguredPropertyDescriptor configuredPropertyForInput = getDescriptor()
+				.getConfiguredPropertyForInput();
+		if (!configuredPropertyForInput.isArray()) {
 			if (_inputColumns.size() != 1) {
 				// exactly one input column is required
 				return false;
@@ -92,14 +93,14 @@ class AbstractBeanWithInputColumnsBuilder<D extends AbstractBeanDescriptor, B>
 	}
 
 	@Override
-	public Map<ConfiguredDescriptor, Object> getConfiguredProperties() {
-		Map<ConfiguredDescriptor, Object> properties = new HashMap<ConfiguredDescriptor, Object>(
+	public Map<ConfiguredPropertyDescriptor, Object> getConfiguredProperties() {
+		Map<ConfiguredPropertyDescriptor, Object> properties = new HashMap<ConfiguredPropertyDescriptor, Object>(
 				super.getConfiguredProperties());
 
 		// explicitly add the input columns (because they are handled as a
 		// separate variable in this builder
 		List<InputColumn<?>> inputColumns = getInputColumns();
-		properties.put(getDescriptor().getConfiguredDescriptorForInput(),
+		properties.put(getDescriptor().getConfiguredPropertyForInput(),
 				inputColumns.toArray(new InputColumn<?>[inputColumns.size()]));
 
 		return Collections.unmodifiableMap(properties);

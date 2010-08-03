@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.test.QueryMatcher;
 
@@ -45,24 +46,26 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 	}
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
+		AnalyzerBeanDescriptor descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
 				ReferentialIntegrityValidator.class);
 		assertEquals(
-				"AnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
+				"AnnotationBasedAnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
 				descriptor.toString());
 
 		assertEquals(
-				"[ConfiguredDescriptor[method=null,field=dk.eobjects.metamodel.schema.Column org.eobjects.analyzer.beans.ReferentialIntegrityValidator.primaryKeyColumn], ConfiguredDescriptor[method=null,field=dk.eobjects.metamodel.schema.Column org.eobjects.analyzer.beans.ReferentialIntegrityValidator.foreignKeyColumn], ConfiguredDescriptor[method=null,field=boolean org.eobjects.analyzer.beans.ReferentialIntegrityValidator.acceptNullForeignKey]]",
-				descriptor.getConfiguredDescriptors().toString());
+				"[ConfiguredPropertyDescriptorImpl[field=acceptNullForeignKey,baseType=boolean], "
+						+ "ConfiguredPropertyDescriptorImpl[field=foreignKeyColumn,baseType=class dk.eobjects.metamodel.schema.Column], "
+						+ "ConfiguredPropertyDescriptorImpl[field=primaryKeyColumn,baseType=class dk.eobjects.metamodel.schema.Column]]",
+				descriptor.getConfiguredProperties().toString());
 
-		assertEquals("[]", descriptor.getProvidedDescriptors().toString());
+		assertEquals("[]", descriptor.getProvidedProperties().toString());
 
-		assertEquals("[]", descriptor.getInitializeDescriptors().toString());
+		assertEquals("[]", descriptor.getInitializeMethods().toString());
 
 		assertTrue(descriptor.isExploringAnalyzer());
 		assertFalse(descriptor.isRowProcessingAnalyzer());
 
-		assertEquals("[]", descriptor.getCloseDescriptors().toString());
+		assertEquals("[]", descriptor.getCloseMethods().toString());
 	}
 
 	public void testSeparateTables() throws Exception {
@@ -106,8 +109,8 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 		SelectItem leftOn = leftSide.getSubQuery().getSelectClause().getItem(0);
 		FromItem rightSide = new FromItem(new Query().select(primaryKeyColumn)
 				.from(primaryKeyColumn.getTable())).setAlias("b");
-		SelectItem rightOn = rightSide.getSubQuery().getSelectClause().getItem(
-				0);
+		SelectItem rightOn = rightSide.getSubQuery().getSelectClause()
+				.getItem(0);
 		SelectItem primaryKeySelectItem = new SelectItem(rightOn, rightSide);
 		SelectItem foreignKeySelectItem = new SelectItem(leftOn, leftSide);
 
@@ -124,12 +127,11 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 		rows.add(new Row(new SelectItem[] { foreignKeySelectItem,
 				primaryKeySelectItem }, new Object[] { "foo", "foo" }));
 
-		EasyMock
-				.reportMatcher(new QueryMatcher(
-						"SELECT b.contributor_id, a.contributor_id, a.project_id, a.name "
-								+ "FROM (SELECT role.contributor_id, role.project_id, role.name FROM MetaModelSchema.role) a "
-								+ "LEFT JOIN (SELECT contributor.contributor_id FROM MetaModelSchema.contributor) b "
-								+ "ON a.contributor_id = b.contributor_id"));
+		EasyMock.reportMatcher(new QueryMatcher(
+				"SELECT b.contributor_id, a.contributor_id, a.project_id, a.name "
+						+ "FROM (SELECT role.contributor_id, role.project_id, role.name FROM MetaModelSchema.role) a "
+						+ "LEFT JOIN (SELECT contributor.contributor_id FROM MetaModelSchema.contributor) b "
+						+ "ON a.contributor_id = b.contributor_id"));
 		EasyMock.expect(dcMock.executeQuery(null)).andReturn(new DataSet(rows));
 
 		replayMocks();

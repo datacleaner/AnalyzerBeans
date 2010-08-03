@@ -75,7 +75,7 @@ public final class ClasspathScanDescriptorProvider implements
 					AnalyzerBeanDescriptor descriptor = _analyzerBeanDescriptors
 							.get(analyzerClass);
 					if (descriptor == null) {
-						descriptor = new AnalyzerBeanDescriptor(analyzerClass);
+						descriptor = new AnnotationBasedAnalyzerBeanDescriptor(analyzerClass);
 						_analyzerBeanDescriptors.put(analyzerClass, descriptor);
 					}
 				}
@@ -86,7 +86,7 @@ public final class ClasspathScanDescriptorProvider implements
 					TransformerBeanDescriptor descriptor = _transformerBeanDescriptors
 							.get(transformerClass);
 					if (descriptor == null) {
-						descriptor = new TransformerBeanDescriptor(
+						descriptor = new AnnotationBasedTransformerBeanDescriptor(
 								transformerClass);
 						_transformerBeanDescriptors.put(transformerClass,
 								descriptor);

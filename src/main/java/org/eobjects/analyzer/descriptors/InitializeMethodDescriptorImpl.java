@@ -6,37 +6,38 @@ import java.util.Set;
 
 import org.eobjects.analyzer.util.CollectionUtils;
 
-public class CloseDescriptor implements CloseMethodDescriptor {
+public class InitializeMethodDescriptorImpl implements
+		InitializeMethodDescriptor {
 
 	private Method _method;
 
-	public CloseDescriptor(Method method) {
+	public InitializeMethodDescriptorImpl(Method method) {
 		if (method.getParameterTypes().length != 0) {
 			throw new DescriptorException(
-					"Close methods cannot have parameters");
+					"Initialize methods cannot have parameters");
 		}
 		if (method.getReturnType() != void.class) {
 			throw new DescriptorException(
-					"Close methods can only be void");
+					"Initialize methods can only be void");
 		}
 		_method = method;
 		_method.setAccessible(true);
 	}
 
-	public void close(Object analyzerBean) throws IllegalStateException {
+	public void initialize(Object bean) throws IllegalStateException {
 		try {
-			_method.invoke(analyzerBean);
+			_method.invoke(bean);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not invoke closing method "
-					+ _method, e);
+			throw new IllegalStateException(
+					"Could not invoke initializing method " + _method, e);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "CloseDescriptor[method=" + _method + "]";
+		return "InitializeDescriptor[method=" + _method + "]";
 	}
-
+	
 	@Override
 	public Set<Annotation> getAnnotations() {
 		return CollectionUtils.set(_method.getAnnotations());

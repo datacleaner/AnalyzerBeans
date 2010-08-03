@@ -22,21 +22,17 @@ public class ProvidedDescriptorTest extends TestCase {
 
 	public void testGenericTypes() throws Exception {
 		Field stringMapField = SampleClass.class.getDeclaredField("stringMap");
-		ProvidedDescriptor descriptor = new ProvidedDescriptor(stringMapField,
-				stringMapField.getAnnotation(Provided.class));
+		ProvidedPropertyDescriptorImpl descriptor = new ProvidedPropertyDescriptorImpl(stringMapField);
 
 		assertEquals(
-				"ProvidedDescriptor[field=stringMap,baseType=interface java.util.Map,"
-						+ "typeParameters={class java.lang.String,class java.lang.Boolean}]",
+				"ProvidedPropertyDescriptorImpl[field=stringMap,baseType=interface java.util.Map]",
 				descriptor.toString());
 
 		Method method = SampleClass.class.getDeclaredMethod("setIntMap",
 				Map.class);
-		descriptor = new ProvidedDescriptor(method, method
-				.getAnnotation(Provided.class));
+		descriptor = new ProvidedPropertyDescriptorImpl(method);
 		assertEquals(
-				"ProvidedDescriptor[method=setIntMap,baseType=interface java.util.Map,"
-						+ "typeParameters={class java.lang.String,class java.lang.Integer}]",
+				"ProvidedPropertyDescriptorImpl[method=setIntMap,baseType=interface java.util.Map]",
 				descriptor.toString());
 	}
 }

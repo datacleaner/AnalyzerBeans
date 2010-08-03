@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.data;
 
+import java.lang.reflect.Type;
 import java.util.Date;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -52,7 +53,7 @@ public enum DataTypeFamily {
 		}
 	}
 
-	public static DataTypeFamily valueOf(Class<?> javaDataType) {
+	public static DataTypeFamily valueOf(Type javaDataType) {
 		if (ReflectionUtils.isString(javaDataType)) {
 			return STRING;
 		}

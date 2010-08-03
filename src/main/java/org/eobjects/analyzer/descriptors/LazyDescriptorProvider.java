@@ -19,7 +19,8 @@ public class LazyDescriptorProvider implements DescriptorProvider {
 		AnalyzerBeanDescriptor descriptor = _analyzerBeanDescriptors
 				.get(analyzerBeanClass);
 		if (descriptor == null) {
-			descriptor = new AnalyzerBeanDescriptor(analyzerBeanClass);
+			descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
+					analyzerBeanClass);
 			_analyzerBeanDescriptors.put(analyzerBeanClass, descriptor);
 		}
 		return descriptor;
@@ -43,7 +44,8 @@ public class LazyDescriptorProvider implements DescriptorProvider {
 		TransformerBeanDescriptor descriptor = _transformerBeanDescriptors
 				.get(transformerBeanClass);
 		if (descriptor == null) {
-			descriptor = new TransformerBeanDescriptor(transformerBeanClass);
+			descriptor = new AnnotationBasedTransformerBeanDescriptor(
+					transformerBeanClass);
 			_transformerBeanDescriptors.put(transformerBeanClass, descriptor);
 		}
 		return descriptor;

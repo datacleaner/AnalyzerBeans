@@ -1,10 +1,10 @@
 package org.eobjects.analyzer.lifecycle;
 
 import java.lang.reflect.Array;
-import java.util.List;
+import java.util.Set;
 
-import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
-import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
+import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.BeanConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +21,18 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object bean,
-			AbstractBeanDescriptor descriptor) {
+			BeanDescriptor descriptor) {
 		assert state == LifeCycleState.ASSIGN_CONFIGURED;
 
-		List<ConfiguredDescriptor> configuredDescriptors = descriptor
-				.getConfiguredDescriptors();
-		for (ConfiguredDescriptor configuredDescriptor : configuredDescriptors) {
-			Object configuredValue = getConfiguredValue(configuredDescriptor);
+		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
+				.getConfiguredProperties();
+		for (ConfiguredPropertyDescriptor property : configuredProperties) {
+			Object configuredValue = getValue(property);
 			if (configuredValue == null) {
-				configuredDescriptor.assignValue(bean, null);
+				property.assignValue(bean, null);
 			} else {
-				if (configuredDescriptor.isArray()) {
-					configuredDescriptor.assignValue(bean, configuredValue);
+				if (property.isArray()) {
+					property.assignValue(bean, configuredValue);
 				} else {
 					if (configuredValue.getClass().isArray()) {
 						if (Array.getLength(configuredValue) > 0) {
@@ -41,17 +41,17 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 							configuredValue = null;
 						}
 					}
-					configuredDescriptor.assignValue(bean, configuredValue);
+					property.assignValue(bean, configuredValue);
 				}
 			}
 		}
 	}
 
-	protected Object getConfiguredValue(
-			ConfiguredDescriptor configuredDescriptor) {
+	protected Object getValue(
+			ConfiguredPropertyDescriptor propertyDescriptor) {
 		logger.debug("Getting property from bean configuration");
-		Object value = _beanConfiguration.getProperty(configuredDescriptor);
-		logger.debug("{} -> {}", configuredDescriptor.getName(), value);
+		Object value = _beanConfiguration.getProperty(propertyDescriptor);
+		logger.debug("{} -> {}", propertyDescriptor.getName(), value);
 		return value;
 	}
 }

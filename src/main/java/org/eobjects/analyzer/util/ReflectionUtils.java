@@ -22,34 +22,46 @@ public class ReflectionUtils {
 		// Prevent instantiation
 	}
 
-	public static boolean is(Class<?> thisType, Class<?> ofThatType) {
-		if (thisType.isPrimitive() != ofThatType.isPrimitive()) {
-			if (isByte(thisType) && isByte(ofThatType)) {
+	public static boolean is(Type thisType, Class<?> ofThatType) {
+		Class<?> thisClass = null;
+		if (thisType instanceof Class<?>) {
+			thisClass = (Class<?>) thisType;
+			if (thisClass.isArray()) {
+				thisClass = thisClass.getComponentType();
+			}
+		}
+
+		if (thisClass == ofThatType) {
+			return true;
+		}
+
+		if (thisClass.isPrimitive() != ofThatType.isPrimitive()) {
+			if (isByte(thisClass) && isByte(ofThatType)) {
 				return true;
 			}
-			if (isCharacter(thisType) && isCharacter(ofThatType)) {
+			if (isCharacter(thisClass) && isCharacter(ofThatType)) {
 				return true;
 			}
-			if (isBoolean(thisType) && isBoolean(ofThatType)) {
+			if (isBoolean(thisClass) && isBoolean(ofThatType)) {
 				return true;
 			}
-			if (isShort(thisType) && isShort(ofThatType)) {
+			if (isShort(thisClass) && isShort(ofThatType)) {
 				return true;
 			}
-			if (isInteger(thisType) && isInteger(ofThatType)) {
+			if (isInteger(thisClass) && isInteger(ofThatType)) {
 				return true;
 			}
-			if (isLong(thisType) && isLong(ofThatType)) {
+			if (isLong(thisClass) && isLong(ofThatType)) {
 				return true;
 			}
-			if (isFloat(thisType) && isFloat(ofThatType)) {
+			if (isFloat(thisClass) && isFloat(ofThatType)) {
 				return true;
 			}
-			if (isDouble(thisType) && isDouble(ofThatType)) {
+			if (isDouble(thisClass) && isDouble(ofThatType)) {
 				return true;
 			}
 		}
-		return ofThatType.isAssignableFrom(thisType);
+		return ofThatType.isAssignableFrom(thisClass);
 	}
 
 	private static boolean isCharacter(Class<?> type) {
@@ -81,7 +93,7 @@ public class ReflectionUtils {
 	}
 
 	public static boolean isString(Type type) {
-		return String.class == type;
+		return is(type, String.class);
 	}
 
 	public static boolean isShort(Type type) {
@@ -112,8 +124,8 @@ public class ReflectionUtils {
 		return type == List.class;
 	}
 
-	public static boolean isDate(Class<?> javaDataType) {
-		return javaDataType == Date.class;
+	public static boolean isDate(Type type) {
+		return type == Date.class;
 	}
 
 	public static boolean isNumber(Type type) {
@@ -219,6 +231,10 @@ public class ReflectionUtils {
 		}
 		throw new IllegalArgumentException("Field type is not parameterized: "
 				+ genericType);
+	}
+
+	public static boolean isWildcard(Type type) {
+		return type instanceof WildcardType;
 	}
 
 	private static Class<?> getSafeClassToUse(Type someType) {

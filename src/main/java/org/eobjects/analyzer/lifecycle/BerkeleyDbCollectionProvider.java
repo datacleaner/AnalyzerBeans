@@ -1,11 +1,12 @@
 package org.eobjects.analyzer.lifecycle;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
+import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptorImpl;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,8 @@ public class BerkeleyDbCollectionProvider implements CollectionProvider {
 	private Boolean deleteOnExit;
 	private File targetDir;
 
-	public Object createProvidedCollection(ProvidedDescriptor providedDescriptor) {
+	public Object createProvidedCollection(
+			ProvidedPropertyDescriptorImpl providedDescriptor) {
 		if (providedDescriptor.isList()) {
 			List<?> list = createList(providedDescriptor.getTypeArgument(0));
 			return list;
@@ -81,9 +83,7 @@ public class BerkeleyDbCollectionProvider implements CollectionProvider {
 			} else if (file.isFile()) {
 				file.deleteOnExit();
 			} else {
-				log
-						.warn("Unable to set the deleteOnExit flag on file: "
-								+ file);
+				log.warn("Unable to set the deleteOnExit flag on file: " + file);
 			}
 		}
 	}
@@ -111,19 +111,15 @@ public class BerkeleyDbCollectionProvider implements CollectionProvider {
 					deleteOnExit = true;
 				}
 			} catch (Exception e) {
-				log
-						.error(
-								"Exception thrown while trying to create targetDir inside tempDir",
-								e);
+				log.error(
+						"Exception thrown while trying to create targetDir inside tempDir",
+						e);
 				targetDir = tempDir;
 			}
 		}
 		if (log.isInfoEnabled()) {
-			log
-					.info("Using target directory for persistent collections (deleteOnExit="
-							+ deleteOnExit
-							+ "): "
-							+ targetDir.getAbsolutePath());
+			log.info("Using target directory for persistent collections (deleteOnExit="
+					+ deleteOnExit + "): " + targetDir.getAbsolutePath());
 		}
 		return targetDir;
 	}
@@ -138,8 +134,7 @@ public class BerkeleyDbCollectionProvider implements CollectionProvider {
 	}
 
 	@Override
-	public <E> List<E> createList(Class<E> valueType)
-			throws IllegalStateException {
+	public <E> List<E> createList(Type valueType) throws IllegalStateException {
 		Map<Integer, E> map = createMap(Integer.class, valueType);
 
 		// Berkeley StoredLists are non-functional!
@@ -150,7 +145,7 @@ public class BerkeleyDbCollectionProvider implements CollectionProvider {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType)
+	public <K, V> Map<K, V> createMap(Type keyType, Type valueType)
 			throws IllegalStateException {
 		try {
 			EntryBinding keyBinding = createBinding(keyType);
@@ -162,7 +157,7 @@ public class BerkeleyDbCollectionProvider implements CollectionProvider {
 		}
 	}
 
-	private EntryBinding createBinding(Class<?> type)
+	private EntryBinding createBinding(Type type)
 			throws UnsupportedOperationException {
 		if (ReflectionUtils.isBoolean(type)) {
 			return new BooleanBinding();

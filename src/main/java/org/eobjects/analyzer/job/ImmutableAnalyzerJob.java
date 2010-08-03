@@ -27,7 +27,7 @@ class ImmutableAnalyzerJob implements AnalyzerJob {
 	@Override
 	public InputColumn<?>[] getInput() {
 		return (InputColumn<?>[]) _beanConfiguration.getProperty(_descriptor
-				.getConfiguredDescriptorForInput());
+				.getConfiguredPropertyForInput());
 	}
 
 	@Override
@@ -67,6 +67,7 @@ class ImmutableAnalyzerJob implements AnalyzerJob {
 
 	@Override
 	public String toString() {
-		return "ImmutableAnalyzerJob[analyzer=" + _descriptor.getDisplayName() + "]";
+		return "ImmutableAnalyzerJob[analyzer=" + _descriptor.getDisplayName()
+				+ "]";
 	}
 }

@@ -6,22 +6,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.PropertyDescriptor;
 
 class ImmutableBeanConfiguration implements BeanConfiguration {
 
-	private Map<ConfiguredDescriptor, Object> _properties;
+	private Map<PropertyDescriptor, Object> _properties;
 
 	public ImmutableBeanConfiguration(
-			Map<ConfiguredDescriptor, Object> properties) {
+			Map<ConfiguredPropertyDescriptor, Object> properties) {
 		if (properties == null) {
-			_properties = new HashMap<ConfiguredDescriptor, Object>();
+			_properties = new HashMap<PropertyDescriptor, Object>();
 		} else {
-			_properties = new HashMap<ConfiguredDescriptor, Object>(properties);
+			_properties = new HashMap<PropertyDescriptor, Object>(properties);
 		}
 
 		// validate contents
-		for (Map.Entry<ConfiguredDescriptor, Object> entry : _properties
+		for (Map.Entry<PropertyDescriptor, Object> entry : _properties
 				.entrySet()) {
 			Object value = entry.getValue();
 			if (value instanceof Collection) {
@@ -33,8 +34,8 @@ class ImmutableBeanConfiguration implements BeanConfiguration {
 	}
 
 	@Override
-	public Object getProperty(ConfiguredDescriptor configuredDescriptor) {
-		return _properties.get(configuredDescriptor);
+	public Object getProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
+		return _properties.get(propertyDescriptor);
 	}
 
 	@Override
@@ -60,9 +61,9 @@ class ImmutableBeanConfiguration implements BeanConfiguration {
 		if (getClass() != obj.getClass())
 			return false;
 		ImmutableBeanConfiguration other = (ImmutableBeanConfiguration) obj;
-		Set<ConfiguredDescriptor> keySet = _properties.keySet();
+		Set<PropertyDescriptor> keySet = _properties.keySet();
 		if (other._properties.keySet().equals(keySet)) {
-			for (ConfiguredDescriptor key : keySet) {
+			for (PropertyDescriptor key : keySet) {
 				Object v1 = _properties.get(key);
 				Object v2 = other._properties.get(key);
 				if (v1 != v2 && !v1.equals(v2)) {

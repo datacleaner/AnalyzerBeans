@@ -6,19 +6,20 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 
 import dk.eobjects.metamodel.schema.Column;
 
 public class ValueDistributionAnalyzerTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor desc = new AnalyzerBeanDescriptor(
+		AnalyzerBeanDescriptor desc = new AnnotationBasedAnalyzerBeanDescriptor(
 				ValueDistributionAnalyzer.class);
 		assertEquals(true, desc.isRowProcessingAnalyzer());
 		assertEquals(false, desc.isExploringAnalyzer());
-		assertEquals(0, desc.getInitializeDescriptors().size());
-		assertEquals(4, desc.getConfiguredDescriptors().size());
-		assertEquals(1, desc.getProvidedDescriptors().size());
+		assertEquals(0, desc.getInitializeMethods().size());
+		assertEquals(4, desc.getConfiguredProperties().size());
+		assertEquals(1, desc.getProvidedProperties().size());
 		assertEquals("Value distribution", desc.getDisplayName());
 	}
 

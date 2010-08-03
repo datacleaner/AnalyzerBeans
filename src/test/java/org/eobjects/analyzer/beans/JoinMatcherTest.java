@@ -1,10 +1,12 @@
 package org.eobjects.analyzer.beans;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
+import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
 
 import dk.eobjects.metamodel.DataContext;
@@ -15,17 +17,18 @@ import dk.eobjects.metamodel.schema.Relationship;
 public class JoinMatcherTest extends MetaModelTestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnalyzerBeanDescriptor(
+		AnalyzerBeanDescriptor descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
 				JoinMatcher.class);
 
-		List<ConfiguredDescriptor> configuredDescriptors = descriptor
-				.getConfiguredDescriptors();
-		assertEquals(4, configuredDescriptors.size());
-		assertEquals("Left table", configuredDescriptors.get(0).getName());
-		assertEquals("Right table", configuredDescriptors.get(1).getName());
-		assertEquals("Left table join column", configuredDescriptors.get(2)
+		List<ConfiguredPropertyDescriptor> configuredProperties = new ArrayList<ConfiguredPropertyDescriptor>(
+				descriptor.getConfiguredProperties());
+		assertEquals(4, configuredProperties.size());
+
+		assertEquals("Left table join column", configuredProperties.get(0)
 				.getName());
-		assertEquals("Right table join column", configuredDescriptors.get(3)
+		assertEquals("Left table", configuredProperties.get(1).getName());
+		assertEquals("Right table", configuredProperties.get(2).getName());
+		assertEquals("Right table join column", configuredProperties.get(3)
 				.getName());
 	}
 

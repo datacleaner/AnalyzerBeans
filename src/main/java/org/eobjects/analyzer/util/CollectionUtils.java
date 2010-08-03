@@ -28,7 +28,7 @@ public final class CollectionUtils {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	public static <T> Set<T> set(T... elements) {
 		return set(HashSet.class, elements);
 	}

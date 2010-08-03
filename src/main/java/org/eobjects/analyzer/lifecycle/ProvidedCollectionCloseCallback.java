@@ -2,7 +2,7 @@ package org.eobjects.analyzer.lifecycle;
 
 import java.util.List;
 
-import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
+import org.eobjects.analyzer.descriptors.BeanDescriptor;
 
 public class ProvidedCollectionCloseCallback implements LifeCycleCallback {
 
@@ -17,7 +17,7 @@ public class ProvidedCollectionCloseCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			AbstractBeanDescriptor descriptor) {
+			BeanDescriptor descriptor) {
 		assert state == LifeCycleState.CLOSE;
 
 		for (Object providedObject : providedObjects) {

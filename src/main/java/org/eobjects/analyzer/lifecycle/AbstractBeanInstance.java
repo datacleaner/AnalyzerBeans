@@ -3,7 +3,7 @@ package org.eobjects.analyzer.lifecycle;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
+import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ public abstract class AbstractBeanInstance<E> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private AbstractBeanDescriptor descriptor;
+	private BeanDescriptor descriptor;
 	private E bean;
 	private List<LifeCycleCallback> assignConfiguredCallbacks = new LinkedList<LifeCycleCallback>();
 	private List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
@@ -25,7 +25,7 @@ public abstract class AbstractBeanInstance<E> {
 	private List<LifeCycleCallback> closeCallbacks = new LinkedList<LifeCycleCallback>();
 
 	@SuppressWarnings("unchecked")
-	public AbstractBeanInstance(AbstractBeanDescriptor descriptor) {
+	public AbstractBeanInstance(BeanDescriptor descriptor) {
 		if (descriptor == null) {
 			throw new IllegalArgumentException("Descriptor cannot be null");
 		}
@@ -43,7 +43,7 @@ public abstract class AbstractBeanInstance<E> {
 		return bean;
 	}
 
-	public AbstractBeanDescriptor getDescriptor() {
+	public BeanDescriptor getDescriptor() {
 		return descriptor;
 	}
 

@@ -95,7 +95,8 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 					.forName(className);
 			AnalyzerBeanDescriptor descriptor = getAnalyzerBeanDescriptorForClass(c);
 			if (descriptor == null) {
-				addAnalyzerBeanDescriptor(new AnalyzerBeanDescriptor(c));
+				addAnalyzerBeanDescriptor(new AnnotationBasedAnalyzerBeanDescriptor(
+						c));
 			}
 		}
 	}
@@ -108,7 +109,8 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 					.forName(className);
 			TransformerBeanDescriptor descriptor = getTransformerBeanDescriptorForClass(c);
 			if (descriptor == null) {
-				addTransformerBeanDescriptor(new TransformerBeanDescriptor(c));
+				addTransformerBeanDescriptor(new AnnotationBasedTransformerBeanDescriptor(
+						c));
 			}
 		}
 	}

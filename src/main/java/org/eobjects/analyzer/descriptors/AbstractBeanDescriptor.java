@@ -4,8 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -20,23 +20,22 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractBeanDescriptor implements
-		Comparable<AbstractBeanDescriptor> {
+public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private Class<?> beanClass;
-	protected List<CloseDescriptor> closeDescriptors = new LinkedList<CloseDescriptor>();
-	protected List<ConfiguredDescriptor> configuredDescriptors = new LinkedList<ConfiguredDescriptor>();
-	protected List<InitializeDescriptor> initializeDescriptors = new LinkedList<InitializeDescriptor>();
-	protected List<ProvidedDescriptor> providedDescriptors = new LinkedList<ProvidedDescriptor>();
+	private Class<?> _beanClass;
+	protected Set<InitializeMethodDescriptor> _initializeMethods = new HashSet<InitializeMethodDescriptor>();
+	protected Set<ConfiguredPropertyDescriptor> _configuredProperties = new HashSet<ConfiguredPropertyDescriptor>();
+	protected Set<ProvidedPropertyDescriptor> _providedProperties = new HashSet<ProvidedPropertyDescriptor>();
+	protected Set<CloseMethodDescriptor> _closeMethods = new HashSet<CloseMethodDescriptor>();
 
 	public AbstractBeanDescriptor(Class<?> beanClass,
 			boolean requireInputColumns) {
 		if (beanClass == null) {
 			throw new IllegalArgumentException("beanClass cannot be null");
 		}
-		this.beanClass = beanClass;
+		_beanClass = beanClass;
 
 		Field[] fields = beanClass.getDeclaredFields();
 		for (Field field : fields) {
@@ -49,8 +48,7 @@ public abstract class AbstractBeanDescriptor implements
 							"No @Inject annotation found for @Configured field: {}",
 							field);
 				}
-				configuredDescriptors.add(new ConfiguredDescriptor(field,
-						configuredAnnotation));
+				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(field));
 			}
 
 			Provided providedAnnotation = field.getAnnotation(Provided.class);
@@ -60,15 +58,14 @@ public abstract class AbstractBeanDescriptor implements
 							"No @Inject annotation found for @Provided field: {}",
 							field);
 				}
-				providedDescriptors.add(new ProvidedDescriptor(field,
-						providedAnnotation));
+				_providedProperties.add(new ProvidedPropertyDescriptorImpl(field));
 			}
 		}
 
 		if (ReflectionUtils.isCloseable(beanClass)) {
 			try {
 				Method method = beanClass.getMethod("close", new Class<?>[0]);
-				closeDescriptors.add(new CloseDescriptor(method));
+				_closeMethods.add(new CloseDescriptor(method));
 			} catch (NoSuchMethodException e) {
 				// This is impossible since all closeable's have a no-arg close
 				// method
@@ -86,8 +83,7 @@ public abstract class AbstractBeanDescriptor implements
 							"No @Inject annotation found for @Configured method: {}",
 							method);
 				}
-				configuredDescriptors.add(new ConfiguredDescriptor(method,
-						configuredAnnotation));
+				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(method));
 			}
 
 			Provided providedAnnotation = method.getAnnotation(Provided.class);
@@ -97,44 +93,35 @@ public abstract class AbstractBeanDescriptor implements
 							"No @Inject annotation found for @Provided method: {}",
 							method);
 				}
-				providedDescriptors.add(new ProvidedDescriptor(method,
-						providedAnnotation));
+				_providedProperties.add(new ProvidedPropertyDescriptorImpl(method));
 			}
 
 			Initialize initializeAnnotation = method
 					.getAnnotation(Initialize.class);
-			if (initializeAnnotation != null) {
-				initializeDescriptors.add(new InitializeDescriptor(method,
-						initializeAnnotation));
-			}
 
 			// @PostConstruct is a valid substitution for @Initialize
 			PostConstruct postConstructAnnotation = method
 					.getAnnotation(PostConstruct.class);
-			if (postConstructAnnotation != null) {
-				initializeDescriptors.add(new InitializeDescriptor(method,
-						postConstructAnnotation));
+			if (initializeAnnotation != null || postConstructAnnotation != null) {
+				_initializeMethods.add(new InitializeMethodDescriptorImpl(
+						method));
 			}
 
 			Close closeAnnotation = method.getAnnotation(Close.class);
-			if (closeAnnotation != null) {
-				closeDescriptors.add(new CloseDescriptor(method,
-						closeAnnotation));
-			}
 
 			// @PreDestroy is a valid substitution for @Close
 			PreDestroy preDestroyAnnotation = method
 					.getAnnotation(PreDestroy.class);
-			if (preDestroyAnnotation != null) {
-				closeDescriptors.add(new CloseDescriptor(method,
-						preDestroyAnnotation));
+
+			if (closeAnnotation != null || preDestroyAnnotation != null) {
+				_closeMethods.add(new CloseDescriptor(method));
 			}
 		}
 
 		if (requireInputColumns) {
 			int numConfiguredColumns = 0;
 			int numConfiguredColumnArrays = 0;
-			for (ConfiguredDescriptor cd : configuredDescriptors) {
+			for (ConfiguredPropertyDescriptor cd : _configuredProperties) {
 				if (cd.isInputColumn()) {
 					if (cd.isArray()) {
 						numConfiguredColumnArrays++;
@@ -155,34 +142,17 @@ public abstract class AbstractBeanDescriptor implements
 								+ " defines multiple @Configured InputColumns, cannot determine which one to use for transformation");
 			}
 		}
-
-		// Make the descriptor lists read-only
-		closeDescriptors = Collections.unmodifiableList(closeDescriptors);
-		configuredDescriptors = Collections
-				.unmodifiableList(configuredDescriptors);
-		initializeDescriptors = Collections
-				.unmodifiableList(initializeDescriptors);
-		providedDescriptors = Collections.unmodifiableList(providedDescriptors);
 	}
 
+	@Override
 	public Class<?> getBeanClass() {
-		return beanClass;
+		return _beanClass;
 	}
 
-	public List<InitializeDescriptor> getInitializeDescriptors() {
-		return initializeDescriptors;
-	}
-
-	public List<ProvidedDescriptor> getProvidedDescriptors() {
-		return providedDescriptors;
-	}
-
-	public List<ConfiguredDescriptor> getConfiguredDescriptors() {
-		return configuredDescriptors;
-	}
-
-	public ConfiguredDescriptor getConfiguredDescriptor(String configuredName) {
-		for (ConfiguredDescriptor configuredDescriptor : configuredDescriptors) {
+	@Override
+	public ConfiguredPropertyDescriptor getConfiguredProperty(
+			String configuredName) {
+		for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
 			if (configuredName.equals(configuredDescriptor.getName())) {
 				return configuredDescriptor;
 			}
@@ -190,13 +160,10 @@ public abstract class AbstractBeanDescriptor implements
 		return null;
 	}
 
-	public List<CloseDescriptor> getCloseDescriptors() {
-		return closeDescriptors;
-	}
-
-	public ConfiguredDescriptor getConfiguredDescriptorForInput() {
-		List<ConfiguredDescriptor> descriptors = getConfiguredDescriptors();
-		for (ConfiguredDescriptor configuredDescriptor : descriptors) {
+	@Override
+	public ConfiguredPropertyDescriptor getConfiguredPropertyForInput() {
+		Set<ConfiguredPropertyDescriptor> descriptors = _configuredProperties;
+		for (ConfiguredPropertyDescriptor configuredDescriptor : descriptors) {
 			if (configuredDescriptor.isInputColumn()) {
 				return configuredDescriptor;
 			}
@@ -204,20 +171,22 @@ public abstract class AbstractBeanDescriptor implements
 		return null;
 	}
 
+	@Override
 	public DataTypeFamily getInputDataTypeFamily() {
-		ConfiguredDescriptor configuredDescriptor = getConfiguredDescriptorForInput();
+		ConfiguredPropertyDescriptor configuredDescriptor = getConfiguredPropertyForInput();
 		if (configuredDescriptor == null) {
 			return DataTypeFamily.UNDEFINED;
 		}
-		Type genericType = configuredDescriptor.getGenericType();
-		Class<?> typeParameter = ReflectionUtils.getTypeParameter(genericType,
-				0);
+		if (configuredDescriptor.getTypeArgumentCount() == 0) {
+			return DataTypeFamily.UNDEFINED;
+		}
+		Type typeParameter = configuredDescriptor.getTypeArgument(0);
 		return DataTypeFamily.valueOf(typeParameter);
 	}
 
 	@Override
 	public int hashCode() {
-		return beanClass.hashCode();
+		return _beanClass.hashCode();
 	}
 
 	@Override
@@ -230,13 +199,13 @@ public abstract class AbstractBeanDescriptor implements
 		}
 		if (obj.getClass() == this.getClass()) {
 			AbstractBeanDescriptor that = (AbstractBeanDescriptor) obj;
-			return this.beanClass == that.beanClass;
+			return this._beanClass == that._beanClass;
 		}
 		return false;
 	}
 
 	@Override
-	public int compareTo(AbstractBeanDescriptor o) {
+	public int compareTo(BeanDescriptor o) {
 		String thisAnalyzerClassName = this.getBeanClass().toString();
 		String thatAnalyzerClassName = o.getBeanClass().toString();
 		return thisAnalyzerClassName.compareTo(thatAnalyzerClassName);
@@ -244,7 +213,27 @@ public abstract class AbstractBeanDescriptor implements
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[beanClass=" + beanClass.getName()
-				+ "]";
+		return getClass().getSimpleName() + "[beanClass="
+				+ _beanClass.getName() + "]";
+	}
+
+	@Override
+	public Set<CloseMethodDescriptor> getCloseMethods() {
+		return Collections.unmodifiableSet(_closeMethods);
+	}
+
+	@Override
+	public Set<ConfiguredPropertyDescriptor> getConfiguredProperties() {
+		return Collections.unmodifiableSet(_configuredProperties);
+	}
+
+	@Override
+	public Set<InitializeMethodDescriptor> getInitializeMethods() {
+		return Collections.unmodifiableSet(_initializeMethods);
+	}
+
+	@Override
+	public Set<ProvidedPropertyDescriptor> getProvidedProperties() {
+		return Collections.unmodifiableSet(_providedProperties);
 	}
 }

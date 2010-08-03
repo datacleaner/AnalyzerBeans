@@ -37,7 +37,7 @@ class ImmutableTransformerJob implements TransformerJob {
 	@Override
 	public InputColumn<?>[] getInput() {
 		return (InputColumn<?>[]) _beanConfiguration.getProperty(_descriptor
-				.getConfiguredDescriptorForInput());
+				.getConfiguredPropertyForInput());
 	}
 
 	@Override

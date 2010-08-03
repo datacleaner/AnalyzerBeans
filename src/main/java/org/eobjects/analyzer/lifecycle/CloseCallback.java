@@ -1,20 +1,20 @@
 package org.eobjects.analyzer.lifecycle;
 
-import java.util.List;
+import java.util.Set;
 
-import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
-import org.eobjects.analyzer.descriptors.CloseDescriptor;
+import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.descriptors.CloseMethodDescriptor;
 
 public class CloseCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			AbstractBeanDescriptor descriptor) {
+			BeanDescriptor descriptor) {
 		assert state == LifeCycleState.CLOSE;
 
-		List<CloseDescriptor> closeDescriptors = descriptor
-				.getCloseDescriptors();
-		for (CloseDescriptor closeDescriptor : closeDescriptors) {
+		Set<CloseMethodDescriptor> closeMethods = descriptor
+				.getCloseMethods();
+		for (CloseMethodDescriptor closeDescriptor : closeMethods) {
 			closeDescriptor.close(analyzerBean);
 		}
 	}

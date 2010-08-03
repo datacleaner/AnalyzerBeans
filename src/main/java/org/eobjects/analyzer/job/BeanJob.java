@@ -1,9 +1,9 @@
 package org.eobjects.analyzer.job;
 
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
+import org.eobjects.analyzer.descriptors.BeanDescriptor;
 
-public interface BeanJob<E extends AbstractBeanDescriptor> {
+public interface BeanJob<E extends BeanDescriptor> {
 
 	public E getDescriptor();
 
