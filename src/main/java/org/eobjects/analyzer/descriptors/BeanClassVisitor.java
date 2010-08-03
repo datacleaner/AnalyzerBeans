@@ -8,6 +8,7 @@ import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -56,7 +57,7 @@ public class BeanClassVisitor implements ClassVisitor {
 	public boolean isAnalyzer() {
 		if (_beanClazz != null) {
 			return _beanClazz.isAnnotationPresent(AnalyzerBean.class)
-					&& AnnotationHelper.is(_beanClazz, Analyzer.class);
+					&& ReflectionUtils.is(_beanClazz, Analyzer.class);
 		}
 		return false;
 	}
@@ -64,7 +65,7 @@ public class BeanClassVisitor implements ClassVisitor {
 	public boolean isTransformer() {
 		if (_beanClazz != null) {
 			return _beanClazz.isAnnotationPresent(TransformerBean.class)
-					&& AnnotationHelper.is(_beanClazz, Transformer.class);
+					&& ReflectionUtils.is(_beanClazz, Transformer.class);
 		}
 		return false;
 	}

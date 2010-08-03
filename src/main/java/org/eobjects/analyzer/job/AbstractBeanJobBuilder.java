@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eobjects.analyzer.descriptors.AbstractBeanDescriptor;
-import org.eobjects.analyzer.descriptors.AnnotationHelper;
 import org.eobjects.analyzer.descriptors.ConfiguredDescriptor;
+import org.eobjects.analyzer.util.ReflectionUtils;
 
 @SuppressWarnings("unchecked")
 class AbstractBeanJobBuilder<D extends AbstractBeanDescriptor, B> {
@@ -17,7 +17,7 @@ class AbstractBeanJobBuilder<D extends AbstractBeanDescriptor, B> {
 
 	public AbstractBeanJobBuilder(D descriptor, Class<B> builderClass) {
 		_descriptor = descriptor;
-		if (!AnnotationHelper.is(getClass(), builderClass)) {
+		if (!ReflectionUtils.is(getClass(), builderClass)) {
 			throw new IllegalArgumentException(
 					"Builder class does not correspond to actual class of builder");
 		}
@@ -61,20 +61,20 @@ class AbstractBeanJobBuilder<D extends AbstractBeanDescriptor, B> {
 					for (int i = 0; i < length; i++) {
 						Object valuePart = Array.get(value, i);
 						if (valuePart != null) {
-							if (!AnnotationHelper.is(valuePart.getClass(),
+							if (!ReflectionUtils.is(valuePart.getClass(),
 									configuredDescriptor.getBaseType())) {
 								correctType = false;
 							}
 						}
 					}
 				} else {
-					if (!AnnotationHelper.is(value.getClass(),
+					if (!ReflectionUtils.is(value.getClass(),
 							configuredDescriptor.getBaseType())) {
 						correctType = false;
 					}
 				}
 			} else {
-				if (!AnnotationHelper.is(value.getClass(),
+				if (!ReflectionUtils.is(value.getClass(),
 						configuredDescriptor.getBaseType())) {
 					correctType = false;
 				}

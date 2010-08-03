@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.eobjects.analyzer.annotations.Configured;
+import org.eobjects.analyzer.util.ReflectionUtils;
 
 public class ConfiguredDescriptor {
 
@@ -21,7 +22,7 @@ public class ConfiguredDescriptor {
 		_field.setAccessible(true);
 		if (_name == null || _name.trim().equals("")) {
 			// Use the fields name if no name has been set
-			_name = AnnotationHelper.explodeCamelCase(_field.getName(), true);
+			_name = ReflectionUtils.explodeCamelCase(_field.getName(), true);
 		}
 		setType(field.getType());
 	}
@@ -34,7 +35,7 @@ public class ConfiguredDescriptor {
 		if (_name == null || _name.trim().equals("")) {
 			// Use the methods name if no name has been set
 			_name = _method.getName();
-			_name = AnnotationHelper.explodeCamelCase(_name.substring(3), true);
+			_name = ReflectionUtils.explodeCamelCase(_name.substring(3), true);
 		}
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		if (parameterTypes.length != 1) {
@@ -76,14 +77,14 @@ public class ConfiguredDescriptor {
 	}
 
 	private void setBaseType(Class<?> type) {
-		if (!(AnnotationHelper.isBoolean(type)
-				|| AnnotationHelper.isInteger(type)
-				|| AnnotationHelper.isLong(type)
-				|| AnnotationHelper.isDouble(type)
-				|| AnnotationHelper.isString(type)
-				|| AnnotationHelper.isInputColumn(type)
-				|| AnnotationHelper.isColumn(type)
-				|| AnnotationHelper.isTable(type) || AnnotationHelper
+		if (!(ReflectionUtils.isBoolean(type)
+				|| ReflectionUtils.isInteger(type)
+				|| ReflectionUtils.isLong(type)
+				|| ReflectionUtils.isDouble(type)
+				|| ReflectionUtils.isString(type)
+				|| ReflectionUtils.isInputColumn(type)
+				|| ReflectionUtils.isColumn(type)
+				|| ReflectionUtils.isTable(type) || ReflectionUtils
 				.isSchema(type))) {
 			throw new DescriptorException("The type " + _baseType
 					+ " is not supported by the @Configured annotation");
@@ -112,38 +113,38 @@ public class ConfiguredDescriptor {
 	}
 
 	public boolean isInputColumn() {
-		return AnnotationHelper.isInputColumn(_baseType);
+		return ReflectionUtils.isInputColumn(_baseType);
 	}
 
 	public boolean isColumn() {
-		return AnnotationHelper.isColumn(_baseType);
+		return ReflectionUtils.isColumn(_baseType);
 	}
 
 	public boolean isBoolean() {
-		return AnnotationHelper.isBoolean(_baseType);
+		return ReflectionUtils.isBoolean(_baseType);
 	}
 
 	public boolean isInteger() {
-		return AnnotationHelper.isInteger(_baseType);
+		return ReflectionUtils.isInteger(_baseType);
 	}
 
 	public boolean isLong() {
-		return AnnotationHelper.isLong(_baseType);
+		return ReflectionUtils.isLong(_baseType);
 	}
 
 	public boolean isDouble() {
-		return AnnotationHelper.isDouble(_baseType);
+		return ReflectionUtils.isDouble(_baseType);
 	}
 
 	public boolean isString() {
-		return AnnotationHelper.isString(_baseType);
+		return ReflectionUtils.isString(_baseType);
 	}
 
 	public boolean isTable() {
-		return AnnotationHelper.isTable(_baseType);
+		return ReflectionUtils.isTable(_baseType);
 	}
 
 	public boolean isSchema() {
-		return AnnotationHelper.isSchema(_baseType);
+		return ReflectionUtils.isSchema(_baseType);
 	}
 }

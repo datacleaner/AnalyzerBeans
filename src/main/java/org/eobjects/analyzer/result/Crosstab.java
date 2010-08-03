@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.eobjects.analyzer.descriptors.AnnotationHelper;
+import org.eobjects.analyzer.util.ReflectionUtils;
 
 public class Crosstab<E extends Serializable> implements Serializable {
 
@@ -48,7 +48,7 @@ public class Crosstab<E extends Serializable> implements Serializable {
 	@SuppressWarnings("unchecked")
 	public <T extends Serializable> Crosstab<T> castValueClass(
 			Class<T> valueClass) {
-		if (AnnotationHelper.is(this.valueClass, valueClass)) {
+		if (ReflectionUtils.is(this.valueClass, valueClass)) {
 			return (Crosstab<T>) this;
 		}
 		throw new IllegalArgumentException("Unable to cast [" + this.valueClass
@@ -108,7 +108,7 @@ public class Crosstab<E extends Serializable> implements Serializable {
 	protected void putValue(E value, String[] categories)
 			throws IllegalArgumentException, NullPointerException {
 		if (value != null) {
-			if (!AnnotationHelper.is(value.getClass(), valueClass)) {
+			if (!ReflectionUtils.is(value.getClass(), valueClass)) {
 				throw new IllegalArgumentException("Cannot put value [" + value
 						+ "] of type [" + value.getClass()
 						+ "] when Crosstab.valueClass is [" + valueClass + "]");
@@ -173,7 +173,7 @@ public class Crosstab<E extends Serializable> implements Serializable {
 			transientResultProducers.remove(key);
 			serializableResultProducers.remove(key);
 		} else {
-			if (AnnotationHelper.is(resultProducer.getClass(),
+			if (ReflectionUtils.is(resultProducer.getClass(),
 					Serializable.class)) {
 				serializableResultProducers.put(key, resultProducer);
 				transientResultProducers.remove(key);

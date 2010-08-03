@@ -2,7 +2,7 @@ package org.eobjects.analyzer.data;
 
 import java.util.Date;
 
-import org.eobjects.analyzer.descriptors.AnnotationHelper;
+import org.eobjects.analyzer.util.ReflectionUtils;
 
 /**
  * An enum with high-level data types. The enum values represent the valid type
@@ -53,16 +53,16 @@ public enum DataTypeFamily {
 	}
 
 	public static DataTypeFamily valueOf(Class<?> javaDataType) {
-		if (AnnotationHelper.isString(javaDataType)) {
+		if (ReflectionUtils.isString(javaDataType)) {
 			return STRING;
 		}
-		if (AnnotationHelper.isBoolean(javaDataType)) {
+		if (ReflectionUtils.isBoolean(javaDataType)) {
 			return BOOLEAN;
 		}
-		if (AnnotationHelper.isNumber(javaDataType)) {
+		if (ReflectionUtils.isNumber(javaDataType)) {
 			return NUMBER;
 		}
-		if (AnnotationHelper.isDate(javaDataType)) {
+		if (ReflectionUtils.isDate(javaDataType)) {
 			return DATE;
 		}
 		return UNDEFINED;

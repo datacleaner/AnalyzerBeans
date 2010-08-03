@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.annotations.Provided;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.DataContext;
@@ -41,7 +42,7 @@ public class ProvidedDescriptor {
 	}
 
 	private void setType(Class<?> type) throws DescriptorException {
-		if (!(AnnotationHelper.isMap(type) || AnnotationHelper.isList(type) || SchemaNavigator.class != type)) {
+		if (!(ReflectionUtils.isMap(type) || ReflectionUtils.isList(type) || SchemaNavigator.class != type)) {
 			throw new DescriptorException("The type " + _baseType
 					+ " is not supported by the @Provided annotation");
 		}
@@ -53,10 +54,10 @@ public class ProvidedDescriptor {
 			ParameterizedType parameterizedType = (ParameterizedType) genericType;
 			_typeArguments = parameterizedType.getActualTypeArguments();
 			for (Type type : _typeArguments) {
-				if (!(AnnotationHelper.isString(type)
-						|| AnnotationHelper.isBoolean(type)
-						|| AnnotationHelper.isDouble(type)
-						|| AnnotationHelper.isInteger(type) || AnnotationHelper
+				if (!(ReflectionUtils.isString(type)
+						|| ReflectionUtils.isBoolean(type)
+						|| ReflectionUtils.isDouble(type)
+						|| ReflectionUtils.isInteger(type) || ReflectionUtils
 						.isLong(type))) {
 					throw new DescriptorException("The type " + _baseType
 							+ " is not supported by the @Provided annotation");
@@ -93,11 +94,11 @@ public class ProvidedDescriptor {
 	}
 
 	public boolean isList() {
-		return AnnotationHelper.isList(_baseType);
+		return ReflectionUtils.isList(_baseType);
 	}
 
 	public boolean isMap() {
-		return AnnotationHelper.isMap(_baseType);
+		return ReflectionUtils.isMap(_baseType);
 	}
 
 	public boolean isSchemaNavigator() {

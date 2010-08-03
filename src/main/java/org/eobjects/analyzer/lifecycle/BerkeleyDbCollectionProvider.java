@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.eobjects.analyzer.descriptors.AnnotationHelper;
 import org.eobjects.analyzer.descriptors.ProvidedDescriptor;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,22 +164,22 @@ public class BerkeleyDbCollectionProvider implements CollectionProvider {
 
 	private EntryBinding createBinding(Class<?> type)
 			throws UnsupportedOperationException {
-		if (AnnotationHelper.isBoolean(type)) {
+		if (ReflectionUtils.isBoolean(type)) {
 			return new BooleanBinding();
 		}
-		if (AnnotationHelper.isInteger(type)) {
+		if (ReflectionUtils.isInteger(type)) {
 			return new IntegerBinding();
 		}
-		if (AnnotationHelper.isLong(type)) {
+		if (ReflectionUtils.isLong(type)) {
 			return new LongBinding();
 		}
-		if (AnnotationHelper.isDouble(type)) {
+		if (ReflectionUtils.isDouble(type)) {
 			return new DoubleBinding();
 		}
-		if (AnnotationHelper.isString(type)) {
+		if (ReflectionUtils.isString(type)) {
 			return new StringBinding();
 		}
-		if (AnnotationHelper.isByteArray(type)) {
+		if (ReflectionUtils.isByteArray(type)) {
 			return new ByteArrayBinding();
 		}
 		throw new UnsupportedOperationException(

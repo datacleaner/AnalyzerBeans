@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.descriptors;
+package org.eobjects.analyzer.util;
 
 import java.io.Closeable;
 import java.lang.reflect.Field;
@@ -16,9 +16,9 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
-public class AnnotationHelper {
+public class ReflectionUtils {
 
-	private AnnotationHelper() {
+	private ReflectionUtils() {
 		// Prevent instantiation
 	}
 
