@@ -6,11 +6,11 @@ import java.util.Set;
 
 import org.eobjects.analyzer.util.CollectionUtils;
 
-public class CloseDescriptor implements CloseMethodDescriptor {
+public class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 
 	private Method _method;
 
-	public CloseDescriptor(Method method) {
+	public CloseMethodDescriptorImpl(Method method) {
 		if (method.getParameterTypes().length != 0) {
 			throw new DescriptorException(
 					"Close methods cannot have parameters");
@@ -34,7 +34,7 @@ public class CloseDescriptor implements CloseMethodDescriptor {
 
 	@Override
 	public String toString() {
-		return "CloseDescriptor[method=" + _method + "]";
+		return "CloseMethodDescriptorImpl[method=" + _method.getName() + "]";
 	}
 
 	@Override

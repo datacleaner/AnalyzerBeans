@@ -65,7 +65,7 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 		if (ReflectionUtils.isCloseable(beanClass)) {
 			try {
 				Method method = beanClass.getMethod("close", new Class<?>[0]);
-				_closeMethods.add(new CloseDescriptor(method));
+				_closeMethods.add(new CloseMethodDescriptorImpl(method));
 			} catch (NoSuchMethodException e) {
 				// This is impossible since all closeable's have a no-arg close
 				// method
@@ -114,7 +114,7 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 					.getAnnotation(PreDestroy.class);
 
 			if (closeAnnotation != null || preDestroyAnnotation != null) {
-				_closeMethods.add(new CloseDescriptor(method));
+				_closeMethods.add(new CloseMethodDescriptorImpl(method));
 			}
 		}
 

@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.annotations.Provided;
 
-public class ProvidedPropertyDescriptorTest extends TestCase {
+public class ProvidedPropertyDescriptorImplTest extends TestCase {
 
 	class SampleClass {
 		@Provided

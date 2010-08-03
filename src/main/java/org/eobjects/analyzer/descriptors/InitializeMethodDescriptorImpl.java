@@ -35,7 +35,7 @@ public class InitializeMethodDescriptorImpl implements
 
 	@Override
 	public String toString() {
-		return "InitializeDescriptor[method=" + _method + "]";
+		return "InitializeMethodDescriptorImpl[method=" + _method.getName() + "]";
 	}
 	
 	@Override
