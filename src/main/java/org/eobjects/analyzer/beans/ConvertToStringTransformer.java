@@ -7,6 +7,11 @@ import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
+/**
+ * Attempts to convert anything to a String value.
+ * 
+ * @author Kasper Sørensen
+ */
 @TransformerBean("Convert to string")
 public class ConvertToStringTransformer implements Transformer<String> {
 

@@ -12,7 +12,6 @@ import org.eobjects.analyzer.beans.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.EqualityAnalyzer;
 import org.eobjects.analyzer.beans.NameStandardizerTransformer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
-import org.eobjects.analyzer.beans.ValidationResult;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -35,6 +34,7 @@ import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.lifecycle.InMemoryCollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.ValidationResult;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.DataContext;

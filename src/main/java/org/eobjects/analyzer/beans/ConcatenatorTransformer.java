@@ -5,6 +5,11 @@ import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
+/**
+ * Concatenates several values into one String value.
+ * 
+ * @author Kasper Sørensen
+ */
 @TransformerBean("Concatenator")
 public class ConcatenatorTransformer implements Transformer<String> {
 

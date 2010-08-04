@@ -25,6 +25,11 @@ import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.util.FormatHelper;
 
+/**
+ * An analyzer for various typical String measures.
+ * 
+ * @author Kasper Sørensen
+ */
 @AnalyzerBean("String analyzer")
 public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 

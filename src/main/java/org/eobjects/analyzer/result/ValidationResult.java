@@ -1,9 +1,9 @@
-package org.eobjects.analyzer.beans;
+package org.eobjects.analyzer.result;
 
 import java.util.List;
 
+import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.result.AnalyzerResult;
 
 public class ValidationResult implements AnalyzerResult {
 

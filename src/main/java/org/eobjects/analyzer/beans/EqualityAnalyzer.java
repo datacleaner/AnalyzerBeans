@@ -10,7 +10,13 @@ import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.result.ValidationResult;
 
+/**
+ * An analyzer that picks up rows where configured values are not equal
+ * 
+ * @author Kasper Sørensen
+ */
 @AnalyzerBean("Equality analyzer")
 public class EqualityAnalyzer implements
 		RowProcessingAnalyzer<ValidationResult> {

@@ -14,6 +14,12 @@ import org.eobjects.analyzer.util.HasGroupLiteral;
 import org.eobjects.analyzer.util.NamedPattern;
 import org.eobjects.analyzer.util.NamedPatternMatch;
 
+/**
+ * Tokenizes/standardizes four components of a full name: Firstname, Lastname,
+ * Middlename and Titulation.
+ * 
+ * @author Kasper Sørensen
+ */
 @TransformerBean("Name standardizer")
 public class NameStandardizerTransformer implements Transformer<String> {
 

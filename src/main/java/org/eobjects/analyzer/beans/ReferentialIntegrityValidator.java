@@ -20,6 +20,11 @@ import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
+/**
+ * An analyzer that performs a check on a weak foreign key / reference.
+ * 
+ * @author Kasper Sørensen
+ */
 @AnalyzerBean("Referential Integrity validator")
 public class ReferentialIntegrityValidator implements
 		ExploringAnalyzer<DataSetResult> {

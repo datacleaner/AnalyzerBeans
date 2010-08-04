@@ -21,6 +21,12 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
+/**
+ * Matches values from separate tables and returns rows where the values does
+ * not match
+ * 
+ * @author Kasper Sørensen
+ */
 @AnalyzerBean("Join matcher")
 public class JoinMatcher implements ExploringAnalyzer<DataSetResult> {
 
@@ -64,8 +70,8 @@ public class JoinMatcher implements ExploringAnalyzer<DataSetResult> {
 					leftTable), new FromItem(rightTable),
 					new SelectItem[] { new SelectItem(leftTableJoinColumn) },
 					new SelectItem[] { new SelectItem(rightTableJoinColumn) });
-			Query q = new Query().select(leftTable.getColumns()).select(
-					rightTable.getColumns()).from(joinFromItem);
+			Query q = new Query().select(leftTable.getColumns())
+					.select(rightTable.getColumns()).from(joinFromItem);
 			ds = dc.executeQuery(q);
 		} else {
 			DataSet ds1 = dc.executeQuery(new Query().select(

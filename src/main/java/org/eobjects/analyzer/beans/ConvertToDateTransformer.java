@@ -13,6 +13,11 @@ import org.eobjects.analyzer.data.InputRow;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+/**
+ * Attempts to convert anything to a Date value
+ * 
+ * @author Kasper Sørensen
+ */
 @TransformerBean("Convert to date")
 public class ConvertToDateTransformer implements Transformer<Date> {
 

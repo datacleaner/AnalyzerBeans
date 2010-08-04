@@ -7,6 +7,11 @@ import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
+/**
+ * Tokenizes values into a configurable amount of tokens.
+ * 
+ * @author Kasper Sørensen
+ */
 @TransformerBean("Tokenizer")
 public class TokenizerTransformer implements Transformer<String> {
 

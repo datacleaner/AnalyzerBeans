@@ -10,6 +10,11 @@ import org.eobjects.analyzer.util.HasGroupLiteral;
 import org.eobjects.analyzer.util.NamedPattern;
 import org.eobjects.analyzer.util.NamedPatternMatch;
 
+/**
+ * Tokenizes/standardizes the components of an email: Username and Domain
+ * 
+ * @author Kasper Sørensen
+ */
 @TransformerBean("Email standardizer")
 public class EmailStandardizerTransformer implements Transformer<String> {
 
