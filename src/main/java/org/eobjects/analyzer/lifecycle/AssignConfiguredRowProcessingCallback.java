@@ -9,7 +9,7 @@ import org.eobjects.analyzer.job.BeanConfiguration;
 public class AssignConfiguredRowProcessingCallback extends
 		AssignConfiguredCallback {
 
-	private InputColumn<?>[] _localInputColumns;
+	private final InputColumn<?>[] _localInputColumns;
 
 	public AssignConfiguredRowProcessingCallback(
 			BeanConfiguration beanConfiguration,

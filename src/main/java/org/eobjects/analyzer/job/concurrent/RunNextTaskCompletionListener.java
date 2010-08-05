@@ -8,8 +8,8 @@ public class RunNextTaskCompletionListener implements CompletionListener {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private Task _nextTask;
-	private TaskRunner _taskRunner;
+	private final Task _nextTask;
+	private final TaskRunner _taskRunner;
 	
 	public RunNextTaskCompletionListener(TaskRunner taskRunner, Task nextTask) {
 		_taskRunner = taskRunner;

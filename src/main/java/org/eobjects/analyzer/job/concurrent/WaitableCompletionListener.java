@@ -13,7 +13,7 @@ public class WaitableCompletionListener implements CompletionListener {
 	private static final Logger logger = LoggerFactory
 			.getLogger(ScheduleTasksCompletionListener.class);
 
-	private CountDownLatch _countDownLatch;
+	private final CountDownLatch _countDownLatch;
 
 	public WaitableCompletionListener(CountDownLatch countDownLatch) {
 		_countDownLatch = countDownLatch;

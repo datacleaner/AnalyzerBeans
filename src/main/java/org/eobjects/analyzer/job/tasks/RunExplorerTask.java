@@ -9,8 +9,8 @@ public class RunExplorerTask implements Task {
 	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private AnalyzerBeanInstance _analyzerBeanInstance;
-	private CompletionListener _completionListener;
+	private final AnalyzerBeanInstance _analyzerBeanInstance;
+	private final CompletionListener _completionListener;
 
 	public RunExplorerTask(AnalyzerBeanInstance analyzerBeanInstance,
 			CompletionListener completionListener) {

@@ -6,7 +6,7 @@ public class DatastoreCatalogImpl implements DatastoreCatalog {
 
 	private static final long serialVersionUID = 1L;
 
-	private Collection<Datastore> _datastores;
+	private final Collection<Datastore> _datastores;
 
 	public DatastoreCatalogImpl(Collection<Datastore> datastores) {
 		if (datastores == null) {

@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 
-public class ProvidedCollectionCloseCallback implements LifeCycleCallback {
+public final class ProvidedCollectionCloseCallback implements LifeCycleCallback {
 
-	private CollectionProvider collectionHandler;
-	private List<Object> providedObjects;
+	private final CollectionProvider collectionHandler;
+	private final List<Object> providedObjects;
 
 	public ProvidedCollectionCloseCallback(
 			CollectionProvider collectionHandler, List<Object> providedObjects) {

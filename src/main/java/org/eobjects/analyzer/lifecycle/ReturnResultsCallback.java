@@ -6,9 +6,9 @@ import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
-public class ReturnResultsCallback implements AnalyzerLifeCycleCallback {
+public final class ReturnResultsCallback implements AnalyzerLifeCycleCallback {
 
-	private Collection<AnalyzerResult> results;
+	private final Collection<AnalyzerResult> results;
 
 	public ReturnResultsCallback(Collection<AnalyzerResult> results) {
 		this.results = results;

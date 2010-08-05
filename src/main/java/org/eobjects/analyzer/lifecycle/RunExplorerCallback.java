@@ -5,9 +5,9 @@ import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
-public class RunExplorerCallback implements AnalyzerLifeCycleCallback {
+public final class RunExplorerCallback implements AnalyzerLifeCycleCallback {
 
-	private DataContextProvider dataContextProvider;
+	private final DataContextProvider dataContextProvider;
 
 	public RunExplorerCallback(DataContextProvider dataContextProvider) {
 		this.dataContextProvider = dataContextProvider;

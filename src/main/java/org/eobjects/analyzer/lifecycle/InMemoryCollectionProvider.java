@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InMemoryCollectionProvider implements CollectionProvider {
+public final class InMemoryCollectionProvider implements CollectionProvider {
 
 	@Override
 	public <E> List<E> createList(Type valueType)

@@ -11,8 +11,8 @@ public class SingleThreadedTaskRunner implements TaskRunner {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private BlockingQueue<Task> _tasks = new LinkedBlockingQueue<Task>();
-	private boolean _queueTasks;
+	private final BlockingQueue<Task> _tasks = new LinkedBlockingQueue<Task>();
+	private final boolean _queueTasks;
 	private boolean _running = false;
 
 	public SingleThreadedTaskRunner() {

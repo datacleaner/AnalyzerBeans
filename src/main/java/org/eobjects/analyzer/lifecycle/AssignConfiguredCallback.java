@@ -13,7 +13,7 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private BeanConfiguration _beanConfiguration;
+	private final BeanConfiguration _beanConfiguration;
 
 	public AssignConfiguredCallback(BeanConfiguration beanConfiguration) {
 		_beanConfiguration = beanConfiguration;

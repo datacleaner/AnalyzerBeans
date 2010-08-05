@@ -9,8 +9,8 @@ public class CloseBeanTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private AbstractBeanInstance<?> _beanInstance;
-	private CompletionListener _completionListener;
+	private final AbstractBeanInstance<?> _beanInstance;
+	private final CompletionListener _completionListener;
 
 	public CloseBeanTask(CompletionListener completionListener,
 			AbstractBeanInstance<?> beanInstance) {

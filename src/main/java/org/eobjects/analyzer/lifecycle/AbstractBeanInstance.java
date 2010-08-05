@@ -10,19 +10,20 @@ import org.slf4j.LoggerFactory;
 /**
  * 
  * @author kasper
- *
- * @param <E> the bean type, typically Analyzer or Transformer
+ * 
+ * @param <E>
+ *            the bean type, typically Analyzer or Transformer
  */
 public abstract class AbstractBeanInstance<E> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private BeanDescriptor descriptor;
-	private E bean;
-	private List<LifeCycleCallback> assignConfiguredCallbacks = new LinkedList<LifeCycleCallback>();
-	private List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
-	private List<LifeCycleCallback> initializeCallbacks = new LinkedList<LifeCycleCallback>();
-	private List<LifeCycleCallback> closeCallbacks = new LinkedList<LifeCycleCallback>();
+	private final BeanDescriptor descriptor;
+	private final E bean;
+	private final List<LifeCycleCallback> assignConfiguredCallbacks = new LinkedList<LifeCycleCallback>();
+	private final List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
+	private final List<LifeCycleCallback> initializeCallbacks = new LinkedList<LifeCycleCallback>();
+	private final List<LifeCycleCallback> closeCallbacks = new LinkedList<LifeCycleCallback>();
 
 	@SuppressWarnings("unchecked")
 	public AbstractBeanInstance(BeanDescriptor descriptor) {

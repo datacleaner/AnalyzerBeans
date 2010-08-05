@@ -6,8 +6,8 @@ import dk.eobjects.metamodel.DataContext;
 
 public class SingleDataContextProvider implements DataContextProvider {
 
-	private DataContext dataContext;
-	private SchemaNavigator schemaNavigator;
+	private final DataContext dataContext;
+	private final SchemaNavigator schemaNavigator;
 
 	public SingleDataContextProvider(DataContext dataContext) {
 		this.dataContext = dataContext;

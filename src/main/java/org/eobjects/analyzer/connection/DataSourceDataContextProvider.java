@@ -9,8 +9,8 @@ import dk.eobjects.metamodel.DataContextFactory;
 
 public class DataSourceDataContextProvider implements DataContextProvider {
 
-	private DataContext dataContext;
-	private SchemaNavigator schemaNavigator;
+	private final DataContext dataContext;
+	private final SchemaNavigator schemaNavigator;
 
 	// TODO: Lazy load datacontext based on JNDI name?
 

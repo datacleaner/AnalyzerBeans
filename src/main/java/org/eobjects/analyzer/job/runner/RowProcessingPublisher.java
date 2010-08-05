@@ -44,13 +44,13 @@ import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
-public class RowProcessingPublisher {
+public final class RowProcessingPublisher {
 
-	private Set<Column> _physicalColumns = new HashSet<Column>();
-	private List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
-	private DataContextProvider _dataContextProvider;
-	private CollectionProvider _collectionProvider;
-	private Table _table;
+	private final Set<Column> _physicalColumns = new HashSet<Column>();
+	private final List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
+	private final DataContextProvider _dataContextProvider;
+	private final CollectionProvider _collectionProvider;
+	private final Table _table;
 
 	public RowProcessingPublisher(DataContextProvider dataContextProvider,
 			CollectionProvider collectionProvider, Table table) {

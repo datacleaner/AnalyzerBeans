@@ -27,9 +27,9 @@ import com.sleepycat.je.EnvironmentConfig;
 
 import dk.eobjects.metamodel.util.FileHelper;
 
-public class BerkeleyDbCollectionProvider implements CollectionProvider {
+public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 
-	private Logger log = LoggerFactory.getLogger(getClass());
+	private final Logger log = LoggerFactory.getLogger(getClass());
 	private Environment environment;
 	private Boolean deleteOnExit;
 	private File targetDir;

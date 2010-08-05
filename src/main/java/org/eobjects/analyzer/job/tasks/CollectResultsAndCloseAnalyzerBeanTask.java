@@ -9,7 +9,7 @@ public class CollectResultsAndCloseAnalyzerBeanTask extends CloseBeanTask {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private AnalyzerBeanInstance analyzerBeanInstance;
+	private final AnalyzerBeanInstance analyzerBeanInstance;
 
 	public CollectResultsAndCloseAnalyzerBeanTask(
 			CompletionListener completionListener,

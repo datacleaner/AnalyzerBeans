@@ -9,8 +9,8 @@ public class RunRowProcessingPublisherTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private RowProcessingPublisher _rowProcessingPublisher;
-	private CompletionListener _completionListener;
+	private final RowProcessingPublisher _rowProcessingPublisher;
+	private final CompletionListener _completionListener;
 
 	public RunRowProcessingPublisherTask(
 			RowProcessingPublisher rowProcessingPublisher,

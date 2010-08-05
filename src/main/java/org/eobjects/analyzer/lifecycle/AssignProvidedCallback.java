@@ -11,9 +11,9 @@ import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
 
 public class AssignProvidedCallback implements LifeCycleCallback {
 
-	private CollectionProvider collectionProvider;
-	private DataContextProvider dataContextProvider;
-	private AbstractBeanInstance<?> beanInstance;
+	private final CollectionProvider collectionProvider;
+	private final DataContextProvider dataContextProvider;
+	private final AbstractBeanInstance<?> beanInstance;
 
 	public AssignProvidedCallback(AbstractBeanInstance<?> beanInstance,
 			CollectionProvider collectionProvider,

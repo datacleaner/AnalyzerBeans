@@ -9,9 +9,9 @@ import java.util.Map;
  * does not support persistent lists, but only maps. Instead a persistent map is
  * wrapped by this List-implementation.
  */
-public class ProvidedList<E> extends AbstractList<E> implements List<E> {
+public final class ProvidedList<E> extends AbstractList<E> implements List<E> {
 
-	private Map<Integer, E> wrappedMap;
+	private final Map<Integer, E> wrappedMap;
 
 	public Map<Integer, E> getWrappedMap() {
 		return wrappedMap;

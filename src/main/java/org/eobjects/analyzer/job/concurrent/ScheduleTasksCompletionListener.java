@@ -12,22 +12,23 @@ public class ScheduleTasksCompletionListener implements CompletionListener {
 	private static final Logger logger = LoggerFactory
 			.getLogger(ScheduleTasksCompletionListener.class);
 
-	private AtomicInteger _countDown;
-	private TaskRunner _taskRunner;
-	private Collection<? extends Task> _tasks;
-	private String _name;
+	private final AtomicInteger _countDown;
+	private final TaskRunner _taskRunner;
+	private final Collection<? extends Task> _tasks;
+	private final String _name;
 
 	public ScheduleTasksCompletionListener(String name, TaskRunner taskRunner,
 			int tasksToWaitFor, Collection<? extends Task> tasksToSchedule) {
 		_name = name;
 		_taskRunner = taskRunner;
 		_tasks = tasksToSchedule;
-		_countDown = new AtomicInteger(tasksToWaitFor);
 		
 		if (tasksToWaitFor == 0) {
 			// immediate completion
 			_countDown = new AtomicInteger(1);
 			onComplete();
+		} else {
+			_countDown = new AtomicInteger(tasksToWaitFor);
 		}
 	}
 

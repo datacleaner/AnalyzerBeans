@@ -19,8 +19,8 @@ public class AnalyzerBeanInstance extends AbstractBeanInstance<Analyzer<?>> {
 	private static final Logger logger = LoggerFactory
 			.getLogger(AnalyzerBeanInstance.class);
 
-	private List<AnalyzerLifeCycleCallback> runCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
-	private List<AnalyzerLifeCycleCallback> returnResultsCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
+	private final List<AnalyzerLifeCycleCallback> runCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
+	private final List<AnalyzerLifeCycleCallback> returnResultsCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
 
 	public AnalyzerBeanInstance(AnalyzerBeanDescriptor descriptor) {
 		super(descriptor);

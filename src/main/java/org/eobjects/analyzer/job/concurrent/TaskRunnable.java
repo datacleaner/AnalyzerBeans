@@ -2,9 +2,9 @@ package org.eobjects.analyzer.job.concurrent;
 
 import org.eobjects.analyzer.job.tasks.Task;
 
-public class TaskRunnable implements Runnable {
+public final class TaskRunnable implements Runnable {
 	
-	private Task _task;
+	private final Task _task;
 	
 	public TaskRunnable(Task task) {
 		_task = task;
