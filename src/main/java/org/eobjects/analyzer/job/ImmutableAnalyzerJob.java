@@ -3,10 +3,10 @@ package org.eobjects.analyzer.job;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
-class ImmutableAnalyzerJob implements AnalyzerJob {
+final class ImmutableAnalyzerJob implements AnalyzerJob {
 
-	private AnalyzerBeanDescriptor _descriptor;
-	private BeanConfiguration _beanConfiguration;
+	private final AnalyzerBeanDescriptor _descriptor;
+	private final BeanConfiguration _beanConfiguration;
 
 	public ImmutableAnalyzerJob(AnalyzerBeanDescriptor descriptor,
 			BeanConfiguration beanConfiguration) {

@@ -8,10 +8,10 @@ import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public class AnnotationBasedTransformerBeanDescriptor extends
+public final class AnnotationBasedTransformerBeanDescriptor extends
 		AbstractBeanDescriptor implements TransformerBeanDescriptor {
 
-	private String _displayName;
+	private final String _displayName;
 
 	public AnnotationBasedTransformerBeanDescriptor(Class<?> transformerClass)
 			throws DescriptorException {
@@ -29,11 +29,12 @@ public class AnnotationBasedTransformerBeanDescriptor extends
 					+ " doesn't implement the TransformerBean annotation");
 		}
 
-		_displayName = transformerAnnotation.value();
-		if (_displayName == null || _displayName.trim().length() == 0) {
-			_displayName = ReflectionUtils.explodeCamelCase(
+		String displayName = transformerAnnotation.value();
+		if (displayName == null || displayName.trim().length() == 0) {
+			displayName = ReflectionUtils.explodeCamelCase(
 					transformerClass.getSimpleName(), false);
 		}
+		_displayName = displayName;
 	}
 
 	@Override

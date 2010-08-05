@@ -5,9 +5,9 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
-public class SchemaNavigator {
+public final class SchemaNavigator {
 
-	private DataContext dataContext;
+	private final DataContext dataContext;
 
 	public SchemaNavigator(DataContext dataContext) {
 		this.dataContext = dataContext;

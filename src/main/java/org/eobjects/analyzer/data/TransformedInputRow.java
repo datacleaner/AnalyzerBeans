@@ -3,10 +3,10 @@ package org.eobjects.analyzer.data;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TransformedInputRow implements InputRow {
+public final class TransformedInputRow implements InputRow {
 
-	private InputRow _delegate;
-	private Map<InputColumn<?>, Object> _values;
+	private final InputRow _delegate;
+	private final Map<InputColumn<?>, Object> _values;
 
 	public TransformedInputRow(InputRow delegate) {
 		this(delegate, new HashMap<InputColumn<?>, Object>());

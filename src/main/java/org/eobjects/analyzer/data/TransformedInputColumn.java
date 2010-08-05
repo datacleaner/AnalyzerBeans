@@ -11,15 +11,16 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E>
 
 	private static final long serialVersionUID = 1L;
 
-	private String _id;
+	private final String _id;
+	private final DataTypeFamily _type;
 	private String _name;
-	private DataTypeFamily _type;
 
 	public TransformedInputColumn(String name, DataTypeFamily type, IdGenerator idGenerator) {
 		_name = name;
-		_type = type;
 		if (type == null) {
 			_type = DataTypeFamily.UNDEFINED;
+		} else {
+			_type = type;
 		}
 		_id = idGenerator.nextId();
 	}

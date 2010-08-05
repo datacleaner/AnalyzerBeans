@@ -5,7 +5,7 @@ import dk.eobjects.metamodel.schema.ColumnType;
 
 public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 
-	private Column _column;
+	private final Column _column;
 
 	public MetaModelInputColumn(Column column) {
 		if (column == null) {

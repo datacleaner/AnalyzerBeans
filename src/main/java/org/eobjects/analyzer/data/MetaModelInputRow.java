@@ -5,7 +5,7 @@ import dk.eobjects.metamodel.schema.Column;
 
 public final class MetaModelInputRow implements InputRow {
 
-	private Row _row;
+	private final Row _row;
 
 	public MetaModelInputRow(Row row) {
 		_row = row;

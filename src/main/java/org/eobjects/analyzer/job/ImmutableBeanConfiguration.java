@@ -9,9 +9,9 @@ import java.util.Set;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.PropertyDescriptor;
 
-class ImmutableBeanConfiguration implements BeanConfiguration {
+final class ImmutableBeanConfiguration implements BeanConfiguration {
 
-	private Map<PropertyDescriptor, Object> _properties;
+	private final Map<PropertyDescriptor, Object> _properties;
 
 	public ImmutableBeanConfiguration(
 			Map<ConfiguredPropertyDescriptor, Object> properties) {

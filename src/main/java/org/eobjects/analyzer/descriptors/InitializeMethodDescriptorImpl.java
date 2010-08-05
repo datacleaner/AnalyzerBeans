@@ -6,10 +6,10 @@ import java.util.Set;
 
 import org.eobjects.analyzer.util.CollectionUtils;
 
-public class InitializeMethodDescriptorImpl implements
+public final class InitializeMethodDescriptorImpl implements
 		InitializeMethodDescriptor {
 
-	private Method _method;
+	private final Method _method;
 
 	public InitializeMethodDescriptorImpl(Method method) {
 		if (method.getParameterTypes().length != 0) {

@@ -5,12 +5,12 @@ import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public class AnnotationBasedAnalyzerBeanDescriptor extends
+public final class AnnotationBasedAnalyzerBeanDescriptor extends
 		AbstractBeanDescriptor implements AnalyzerBeanDescriptor {
 
-	private String _displayName;
-	private boolean _exploringAnalyzer;
-	private boolean _rowProcessingAnalyzer;
+	private final String _displayName;
+	private final boolean _exploringAnalyzer;
+	private final boolean _rowProcessingAnalyzer;
 
 	public AnnotationBasedAnalyzerBeanDescriptor(Class<?> analyzerClass)
 			throws DescriptorException {
@@ -36,11 +36,12 @@ public class AnnotationBasedAnalyzerBeanDescriptor extends
 					+ " doesn't implement the AnalyzerBean annotation");
 		}
 
-		_displayName = analyzerAnnotation.value();
-		if (_displayName == null || _displayName.trim().length() == 0) {
-			_displayName = ReflectionUtils.explodeCamelCase(
+		String displayName = analyzerAnnotation.value();
+		if (displayName == null || displayName.trim().length() == 0) {
+			displayName = ReflectionUtils.explodeCamelCase(
 					analyzerClass.getSimpleName(), false);
 		}
+		_displayName = displayName;
 	}
 
 	@Override

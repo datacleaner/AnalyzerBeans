@@ -24,11 +24,11 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private Class<?> _beanClass;
-	protected Set<InitializeMethodDescriptor> _initializeMethods = new HashSet<InitializeMethodDescriptor>();
-	protected Set<ConfiguredPropertyDescriptor> _configuredProperties = new HashSet<ConfiguredPropertyDescriptor>();
-	protected Set<ProvidedPropertyDescriptor> _providedProperties = new HashSet<ProvidedPropertyDescriptor>();
-	protected Set<CloseMethodDescriptor> _closeMethods = new HashSet<CloseMethodDescriptor>();
+	private final Class<?> _beanClass;
+	protected final Set<InitializeMethodDescriptor> _initializeMethods = new HashSet<InitializeMethodDescriptor>();
+	protected final Set<ConfiguredPropertyDescriptor> _configuredProperties = new HashSet<ConfiguredPropertyDescriptor>();
+	protected final Set<ProvidedPropertyDescriptor> _providedProperties = new HashSet<ProvidedPropertyDescriptor>();
+	protected final Set<CloseMethodDescriptor> _closeMethods = new HashSet<CloseMethodDescriptor>();
 
 	public AbstractBeanDescriptor(Class<?> beanClass,
 			boolean requireInputColumns) {

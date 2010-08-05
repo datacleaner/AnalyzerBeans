@@ -15,7 +15,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 
-public class BeanClassVisitor implements ClassVisitor {
+public final class BeanClassVisitor implements ClassVisitor {
 
 	private final static Log _log = LogFactory.getLog(BeanClassVisitor.class);
 	private Class<?> _beanClazz;

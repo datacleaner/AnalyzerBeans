@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * @author Kasper Sørensen
  */
-public class PrefixedIdGenerator implements IdGenerator {
+public final class PrefixedIdGenerator implements IdGenerator {
 
-	private String prefix;
-	private AtomicInteger counter;
+	private final String prefix;
+	private final AtomicInteger counter;
 
 	public PrefixedIdGenerator(String prefix) {
 		this.prefix = prefix;

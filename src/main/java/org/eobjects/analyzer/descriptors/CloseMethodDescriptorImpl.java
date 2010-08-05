@@ -6,9 +6,9 @@ import java.util.Set;
 
 import org.eobjects.analyzer.util.CollectionUtils;
 
-public class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
+public final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 
-	private Method _method;
+	private final Method _method;
 
 	public CloseMethodDescriptorImpl(Method method) {
 		if (method.getParameterTypes().length != 0) {

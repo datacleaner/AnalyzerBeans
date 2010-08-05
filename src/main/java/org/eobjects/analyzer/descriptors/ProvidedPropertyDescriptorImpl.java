@@ -8,7 +8,7 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.DataContext;
 
-public class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
+public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
 		ProvidedPropertyDescriptor {
 
 	public ProvidedPropertyDescriptorImpl(Field field) throws DescriptorException {

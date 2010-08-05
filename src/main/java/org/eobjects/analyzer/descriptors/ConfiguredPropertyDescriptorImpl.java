@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
+public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
 		ConfiguredPropertyDescriptor {
 
 	public ConfiguredPropertyDescriptorImpl(Field field) throws DescriptorException {

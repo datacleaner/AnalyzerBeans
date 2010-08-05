@@ -16,6 +16,15 @@
  */
 package org.eobjects.analyzer.util;
 
+/**
+ * Utility class for building an average from the values added using the
+ * addValue(Number) method.
+ * 
+ * Note that this class is NOT thread-safe, so do not share an instance between
+ * threads (or at least make sure to synchronize).
+ * 
+ * @author Kasper Sørensen
+ */
 public class AverageBuilder {
 
 	public double _average;

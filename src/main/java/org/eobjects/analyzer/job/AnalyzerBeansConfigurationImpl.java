@@ -6,16 +6,16 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
-public class AnalyzerBeansConfigurationImpl implements
+public final class AnalyzerBeansConfigurationImpl implements
 		AnalyzerBeansConfiguration {
 
 	private static final long serialVersionUID = 1L;
 
-	private transient DescriptorProvider _descriptorProvider;
-	private transient CollectionProvider _collectionProvider;
-	private transient TaskRunner _taskRunner;
-	private DatastoreCatalog _datastoreCatalog;
-	private ReferenceDataCatalog _referenceDataCatalog;
+	private final transient DescriptorProvider _descriptorProvider;
+	private final transient CollectionProvider _collectionProvider;
+	private final transient TaskRunner _taskRunner;
+	private final DatastoreCatalog _datastoreCatalog;
+	private final ReferenceDataCatalog _referenceDataCatalog;
 
 	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog,
 			ReferenceDataCatalog referenceDataCatalog,

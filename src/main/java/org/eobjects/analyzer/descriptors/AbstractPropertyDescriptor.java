@@ -12,12 +12,13 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 
 public class AbstractPropertyDescriptor implements PropertyDescriptor {
 
-	private Method _method;
-	private Field _field;
-	private Class<?> _baseType;
-	private Type _genericType;
+	private final Method _method;
+	private final Field _field;
+	private final Class<?> _baseType;
+	private final Type _genericType;
 
 	public AbstractPropertyDescriptor(Method setterMethod) {
+		_field = null;
 		_method = setterMethod;
 		_method.setAccessible(true);
 		Class<?>[] parameterTypes = setterMethod.getParameterTypes();
@@ -26,27 +27,26 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 					+ " defines " + parameterTypes.length
 					+ " parameters, a single parameter is required");
 		}
-		setType(parameterTypes[0]);
-		setGenericType(_method.getGenericParameterTypes()[0]);
+		_baseType = parameterTypes[0];
+		_genericType = _method.getGenericParameterTypes()[0];
+		init();
 	}
 
 	public AbstractPropertyDescriptor(Field field) {
+		_method = null;
 		_field = field;
 		_field.setAccessible(true);
-		setType(_field.getType());
-		setGenericType(_field.getGenericType());
+		_baseType = _field.getType();
+		_genericType = _field.getGenericType();
+		init();
 	}
 
-	private void setType(Class<?> type) throws DescriptorException {
-		if (!(ReflectionUtils.isMap(type) || ReflectionUtils.isList(type) || SchemaNavigator.class != type)) {
+	private void init() {
+		if (!(ReflectionUtils.isMap(_baseType)
+				|| ReflectionUtils.isList(_baseType) || SchemaNavigator.class != _baseType)) {
 			throw new DescriptorException("The type " + _baseType
 					+ " is not supported by the @Provided annotation");
 		}
-		_baseType = type;
-	}
-
-	private void setGenericType(Type genericType) throws DescriptorException {
-		_genericType = genericType;
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 		}
 		return _baseType;
 	}
-	
+
 	@Override
 	public boolean isArray() {
 		return _baseType.isArray();
