@@ -6,11 +6,14 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.eobjects.analyzer.annotations.AnalyzerBean;
+import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingAnalyzerMock;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.result.AnalyzerResult;
 
 public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 
@@ -60,5 +63,21 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 				ValueDistributionAnalyzer.class);
 		assertEquals(DataTypeFamily.UNDEFINED,
 				descriptor.getInputDataTypeFamily());
+	}
+
+	public void testAbstractBeanClass() throws Exception {
+		try {
+			new AnnotationBasedAnalyzerBeanDescriptor(InvalidAnalyzer.class);
+			fail("Exception expected");
+		} catch (DescriptorException e) {
+			assertEquals(
+					"Bean (class org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptorTest$InvalidAnalyzer) is not a non-abstract class",
+					e.getMessage());
+		}
+	}
+
+	@AnalyzerBean("invalid analyzer")
+	public abstract class InvalidAnalyzer implements
+			RowProcessingAnalyzer<AnalyzerResult> {
 	}
 }

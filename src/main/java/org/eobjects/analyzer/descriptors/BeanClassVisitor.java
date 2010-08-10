@@ -5,9 +5,11 @@ import java.lang.annotation.Annotation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
+import org.eobjects.analyzer.annotations.RendererBean;
 import org.eobjects.analyzer.annotations.TransformerBean;
 import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.result.renderer.Renderer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -30,7 +32,8 @@ public final class BeanClassVisitor implements ClassVisitor {
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		if (isAnnotation(desc, AnalyzerBean.class)
-				|| isAnnotation(desc, TransformerBean.class)) {
+				|| isAnnotation(desc, TransformerBean.class)
+				|| isAnnotation(desc, RendererBean.class)) {
 			initializeClass();
 		}
 		return null;
@@ -66,6 +69,14 @@ public final class BeanClassVisitor implements ClassVisitor {
 		if (_beanClazz != null) {
 			return _beanClazz.isAnnotationPresent(TransformerBean.class)
 					&& ReflectionUtils.is(_beanClazz, Transformer.class);
+		}
+		return false;
+	}
+
+	public boolean isRenderer() {
+		if (_beanClazz != null) {
+			return _beanClazz.isAnnotationPresent(RendererBean.class)
+					&& ReflectionUtils.is(_beanClazz, Renderer.class);
 		}
 		return false;
 	}

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.result.renderer.Renderer;
 
 /**
  * A simple descriptor provider with a method signature suitable externalizing
@@ -27,6 +28,12 @@ import org.eobjects.analyzer.beans.Transformer;
  *       ...
  *     &lt;/list&gt;
  *   &lt;/property&gt;
+ *   &lt;property name="rendererClassNames"&gt;
+ *     &lt;list&gt;
+ *       &lt;value&gt;org.eobjects.analyzer.result.renderer.DefaultTextRenderer&lt;/value&gt;
+ *       ...
+ *     &lt;/list&gt;
+ *   &lt;/property&gt;
  * &lt;/bean&gt;
  * </pre>
  * 
@@ -36,6 +43,7 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 
 	private List<AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new ArrayList<AnalyzerBeanDescriptor>();
 	private List<TransformerBeanDescriptor> _transformerBeanDescriptors = new ArrayList<TransformerBeanDescriptor>();
+	private List<RendererBeanDescriptor> _rendererBeanDescriptors = new ArrayList<RendererBeanDescriptor>();
 
 	public SimpleDescriptorProvider() {
 	}
@@ -50,8 +58,13 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 		_transformerBeanDescriptors.add(transformerBeanDescriptor);
 	}
 
+	public void addRendererBeanDescriptor(
+			RendererBeanDescriptor rendererBeanDescriptor) {
+		_rendererBeanDescriptors.add(rendererBeanDescriptor);
+	}
+
 	@Override
-	public Collection<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors() {
+	public List<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors() {
 		return _analyzerBeanDescriptors;
 	}
 
@@ -83,8 +96,34 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 	}
 
 	@Override
-	public Collection<TransformerBeanDescriptor> getTransformerBeanDescriptors() {
+	public List<TransformerBeanDescriptor> getTransformerBeanDescriptors() {
 		return _transformerBeanDescriptors;
+	}
+
+	public void setTransformerBeanDescriptors(
+			List<TransformerBeanDescriptor> transformerBeanDescriptors) {
+		_transformerBeanDescriptors = transformerBeanDescriptors;
+	}
+
+	@Override
+	public List<RendererBeanDescriptor> getRendererBeanDescriptors() {
+		return _rendererBeanDescriptors;
+	}
+
+	public void setRendererBeanDescriptors(
+			List<RendererBeanDescriptor> rendererBeanDescriptors) {
+		_rendererBeanDescriptors = rendererBeanDescriptors;
+	}
+
+	@Override
+	public RendererBeanDescriptor getRendererBeanDescriptorForClass(
+			Class<? extends Renderer<?, ?>> rendererBeanClass) {
+		for (RendererBeanDescriptor descriptor : _rendererBeanDescriptors) {
+			if (descriptor.getBeanClass() == rendererBeanClass) {
+				return descriptor;
+			}
+		}
+		return null;
 	}
 
 	public void setAnalyzerClassNames(Collection<String> classNames)
@@ -110,6 +149,20 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 			TransformerBeanDescriptor descriptor = getTransformerBeanDescriptorForClass(c);
 			if (descriptor == null) {
 				addTransformerBeanDescriptor(new AnnotationBasedTransformerBeanDescriptor(
+						c));
+			}
+		}
+	}
+
+	public void setRendererClassNames(Collection<String> classNames)
+			throws ClassNotFoundException {
+		for (String className : classNames) {
+			@SuppressWarnings("unchecked")
+			Class<? extends Renderer<?, ?>> c = (Class<? extends Renderer<?, ?>>) Class
+					.forName(className);
+			RendererBeanDescriptor descriptor = getRendererBeanDescriptorForClass(c);
+			if (descriptor == null) {
+				addRendererBeanDescriptor(new AnnotationBasedRendererBeanDescriptor(
 						c));
 			}
 		}

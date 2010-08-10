@@ -7,11 +7,13 @@ import java.util.Map;
 
 import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.result.renderer.Renderer;
 
 public class LazyDescriptorProvider implements DescriptorProvider {
 
 	private Map<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor>();
 	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor>();
+	private Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
 
 	@Override
 	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
@@ -51,4 +53,15 @@ public class LazyDescriptorProvider implements DescriptorProvider {
 		return descriptor;
 	}
 
+	@Override
+	public RendererBeanDescriptor getRendererBeanDescriptorForClass(
+			Class<? extends Renderer<?, ?>> rendererBeanClass) {
+		return _rendererBeanDescriptors.get(rendererBeanClass);
+	}
+
+	@Override
+	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors() {
+		return Collections.unmodifiableCollection(_rendererBeanDescriptors
+				.values());
+	}
 }

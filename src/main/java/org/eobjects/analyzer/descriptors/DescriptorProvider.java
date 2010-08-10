@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.result.renderer.Renderer;
 
 /**
  * An interface for components that provide descriptors for analyzer beans.
@@ -21,4 +22,9 @@ public interface DescriptorProvider {
 
 	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
 			Class<? extends Transformer<?>> transformerBeanClass);
+
+	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors();
+
+	public RendererBeanDescriptor getRendererBeanDescriptorForClass(
+			Class<? extends Renderer<?, ?>> rendererBeanClass);
 }

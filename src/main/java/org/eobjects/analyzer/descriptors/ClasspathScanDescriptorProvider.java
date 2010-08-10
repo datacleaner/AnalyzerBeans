@@ -7,12 +7,14 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.result.renderer.Renderer;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ public final class ClasspathScanDescriptorProvider implements
 			.getLogger(ClasspathScanDescriptorProvider.class);
 	private Map<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor>();
 	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor>();
+	private Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
 
 	public ClasspathScanDescriptorProvider scanPackage(String packageName,
 			boolean recursive) {
@@ -75,7 +78,8 @@ public final class ClasspathScanDescriptorProvider implements
 					AnalyzerBeanDescriptor descriptor = _analyzerBeanDescriptors
 							.get(analyzerClass);
 					if (descriptor == null) {
-						descriptor = new AnnotationBasedAnalyzerBeanDescriptor(analyzerClass);
+						descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
+								analyzerClass);
 						_analyzerBeanDescriptors.put(analyzerClass, descriptor);
 					}
 				}
@@ -90,6 +94,18 @@ public final class ClasspathScanDescriptorProvider implements
 								transformerClass);
 						_transformerBeanDescriptors.put(transformerClass,
 								descriptor);
+					}
+				}
+				if (visitor.isRenderer()) {
+					@SuppressWarnings("unchecked")
+					Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) visitor
+							.getBeanClass();
+					RendererBeanDescriptor descriptor = _rendererBeanDescriptors
+							.get(rendererClass);
+					if (descriptor == null) {
+						descriptor = new AnnotationBasedRendererBeanDescriptor(
+								rendererClass);
+						_rendererBeanDescriptors.put(rendererClass, descriptor);
 					}
 				}
 			} catch (IOException e) {
@@ -116,7 +132,8 @@ public final class ClasspathScanDescriptorProvider implements
 
 	@Override
 	public Collection<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors() {
-		return _analyzerBeanDescriptors.values();
+		return Collections.unmodifiableCollection(_analyzerBeanDescriptors
+				.values());
 	}
 
 	@Override
@@ -127,12 +144,25 @@ public final class ClasspathScanDescriptorProvider implements
 
 	@Override
 	public Collection<TransformerBeanDescriptor> getTransformerBeanDescriptors() {
-		return _transformerBeanDescriptors.values();
+		return Collections.unmodifiableCollection(_transformerBeanDescriptors
+				.values());
 	}
 
 	@Override
 	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
 			Class<? extends Transformer<?>> transformerBeanClass) {
 		return _transformerBeanDescriptors.get(transformerBeanClass);
+	}
+
+	@Override
+	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors() {
+		return Collections.unmodifiableCollection(_rendererBeanDescriptors
+				.values());
+	}
+
+	@Override
+	public RendererBeanDescriptor getRendererBeanDescriptorForClass(
+			Class<? extends Renderer<?, ?>> rendererBeanClass) {
+		return _rendererBeanDescriptors.get(rendererBeanClass);
 	}
 }

@@ -25,7 +25,8 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
 public final class TestHelper {
 
 	private static DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
-			.scanPackage("org.eobjects.analyzer", true);
+			.scanPackage("org.eobjects.analyzer.beans", true).scanPackage(
+					"org.eobjects.analyzer.renderer", true);
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration() {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
@@ -47,7 +48,7 @@ public final class TestHelper {
 	}
 
 	public static JdbcDatastore createSampleDatabaseDatastore(String name) {
-		return new JdbcDatastore(name,
-				"jdbc:hsqldb:res:metamodel", "org.hsqldb.jdbcDriver");
+		return new JdbcDatastore(name, "jdbc:hsqldb:res:metamodel",
+				"org.hsqldb.jdbcDriver");
 	}
 }

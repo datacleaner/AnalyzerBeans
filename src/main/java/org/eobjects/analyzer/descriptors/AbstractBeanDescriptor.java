@@ -1,7 +1,9 @@
 package org.eobjects.analyzer.descriptors;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,6 +18,7 @@ import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +40,12 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 		}
 		_beanClass = beanClass;
 
+		if (_beanClass.isInterface()
+				|| Modifier.isAbstract(_beanClass.getModifiers())) {
+			throw new DescriptorException("Bean (" + _beanClass
+					+ ") is not a non-abstract class");
+		}
+
 		Field[] fields = beanClass.getDeclaredFields();
 		for (Field field : fields) {
 
@@ -48,7 +57,8 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 							"No @Inject annotation found for @Configured field: {}",
 							field);
 				}
-				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(field));
+				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(
+						field));
 			}
 
 			Provided providedAnnotation = field.getAnnotation(Provided.class);
@@ -58,7 +68,8 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 							"No @Inject annotation found for @Provided field: {}",
 							field);
 				}
-				_providedProperties.add(new ProvidedPropertyDescriptorImpl(field));
+				_providedProperties.add(new ProvidedPropertyDescriptorImpl(
+						field));
 			}
 		}
 
@@ -83,7 +94,8 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 							"No @Inject annotation found for @Configured method: {}",
 							method);
 				}
-				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(method));
+				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(
+						method));
 			}
 
 			Provided providedAnnotation = method.getAnnotation(Provided.class);
@@ -93,7 +105,8 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 							"No @Inject annotation found for @Provided method: {}",
 							method);
 				}
-				_providedProperties.add(new ProvidedPropertyDescriptorImpl(method));
+				_providedProperties.add(new ProvidedPropertyDescriptorImpl(
+						method));
 			}
 
 			Initialize initializeAnnotation = method
@@ -206,9 +219,16 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 
 	@Override
 	public int compareTo(BeanDescriptor o) {
-		String thisAnalyzerClassName = this.getBeanClass().toString();
-		String thatAnalyzerClassName = o.getBeanClass().toString();
-		return thisAnalyzerClassName.compareTo(thatAnalyzerClassName);
+		if (o == null) {
+			return 1;
+		}
+		Class<?> otherBeanClass = o.getBeanClass();
+		if (otherBeanClass == null) {
+			return 1;
+		}
+		String thisBeanClassName = this.getBeanClass().toString();
+		String thatBeanClassName = otherBeanClass.toString();
+		return thisBeanClassName.compareTo(thatBeanClassName);
 	}
 
 	@Override
@@ -235,5 +255,15 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 	@Override
 	public Set<ProvidedPropertyDescriptor> getProvidedProperties() {
 		return Collections.unmodifiableSet(_providedProperties);
+	}
+
+	@Override
+	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+		return _beanClass.getAnnotation(annotationClass);
+	}
+
+	@Override
+	public Set<Annotation> getAnnotations() {
+		return CollectionUtils.set(_beanClass.getAnnotations());
 	}
 }
