@@ -31,4 +31,12 @@ public class NumberResult implements AnalyzerResult {
 	public Number getNumber() {
 		return number;
 	}
+	
+	@Override
+	public String toString() {
+		if (number == null) {
+			return "<null>";
+		}
+		return number.toString();
+	}
 }
