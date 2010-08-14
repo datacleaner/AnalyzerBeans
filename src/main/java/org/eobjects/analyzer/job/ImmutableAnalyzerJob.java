@@ -2,6 +2,7 @@ package org.eobjects.analyzer.job;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.util.CollectionUtils;
 
 final class ImmutableAnalyzerJob implements AnalyzerJob {
 
@@ -26,8 +27,10 @@ final class ImmutableAnalyzerJob implements AnalyzerJob {
 
 	@Override
 	public InputColumn<?>[] getInput() {
-		return (InputColumn<?>[]) _beanConfiguration.getProperty(_descriptor
+		Object property = _beanConfiguration.getProperty(_descriptor
 				.getConfiguredPropertyForInput());
+		return (InputColumn<?>[]) CollectionUtils.arrayOf(InputColumn.class,
+				property);
 	}
 
 	@Override

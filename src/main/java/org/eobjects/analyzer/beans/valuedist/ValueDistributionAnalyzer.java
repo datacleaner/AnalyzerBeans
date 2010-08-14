@@ -18,7 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Value distribution")
-public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDistributionResult> {
+public class ValueDistributionAnalyzer implements
+		RowProcessingAnalyzer<ValueDistributionResult> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(ValueDistributionAnalyzer.class);
@@ -29,14 +30,14 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 
 	@Inject
 	@Configured("Record unique values")
-	boolean _recordUniqueValues;
+	boolean _recordUniqueValues = true;
 
 	@Inject
-	@Configured("Top n most frequent values")
+	@Configured(value = "Top n most frequent values", required = false)
 	Integer _topFrequentValues;
 
 	@Inject
-	@Configured("Bottom n most frequent values")
+	@Configured(value = "Bottom n most frequent values", required = false)
 	Integer _bottomFrequentValues;
 
 	@Inject

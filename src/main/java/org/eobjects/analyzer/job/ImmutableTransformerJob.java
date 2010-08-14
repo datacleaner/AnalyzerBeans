@@ -8,6 +8,7 @@ import java.util.List;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.util.CollectionUtils;
 
 final class ImmutableTransformerJob implements TransformerJob {
 
@@ -36,8 +37,9 @@ final class ImmutableTransformerJob implements TransformerJob {
 
 	@Override
 	public InputColumn<?>[] getInput() {
-		return (InputColumn<?>[]) _beanConfiguration.getProperty(_descriptor
+		Object property = _beanConfiguration.getProperty(_descriptor
 				.getConfiguredPropertyForInput());
+		return CollectionUtils.arrayOf(InputColumn.class, property);
 	}
 
 	@Override

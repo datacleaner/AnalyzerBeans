@@ -30,4 +30,13 @@ public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDesc
 		boolean result = ReflectionUtils.isInputColumn(baseType);
 		return result;
 	}
+	
+	@Override
+	public boolean isRequired() {
+		Configured configured = getAnnotation(Configured.class);
+		if (configured == null) {
+			return true;
+		}
+		return configured.required();
+	}
 }

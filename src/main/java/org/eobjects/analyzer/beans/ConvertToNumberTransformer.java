@@ -38,4 +38,7 @@ public class ConvertToNumberTransformer implements Transformer<Double> {
 		return new Double[] { d };
 	}
 
+	public void setInput(InputColumn<String> input) {
+		this.input = input;
+	}
 }

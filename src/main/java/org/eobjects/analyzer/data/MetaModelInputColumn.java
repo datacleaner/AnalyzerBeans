@@ -1,5 +1,7 @@
 package org.eobjects.analyzer.data;
 
+import org.eobjects.analyzer.util.ReflectionUtils;
+
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.ColumnType;
 
@@ -12,6 +14,18 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 			throw new IllegalArgumentException("column cannot be null");
 		}
 		_column = column;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <E> InputColumn<E> narrow(Class<E> e) {
+		Class<?> javaEquivalentClass = _column.getType()
+				.getJavaEquivalentClass();
+		if (ReflectionUtils.is(javaEquivalentClass, e)) {
+			return (InputColumn<E>) this;
+		}
+		throw new IllegalArgumentException(
+				"Can only narrow this column to supertypes of: "
+						+ javaEquivalentClass);
 	}
 
 	@Override
@@ -55,7 +69,7 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 		}
 		return DataTypeFamily.UNDEFINED;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "MetaModelInputColumn[" + _column + "]";

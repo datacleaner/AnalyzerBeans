@@ -49,4 +49,6 @@ public @interface Configured {
 	 * @return the name of the configuration property
 	 */
 	String value() default "";
+	
+	boolean required() default true;
 }

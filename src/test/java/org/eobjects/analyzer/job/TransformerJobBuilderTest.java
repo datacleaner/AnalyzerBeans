@@ -1,14 +1,17 @@
 package org.eobjects.analyzer.job;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.TokenizerTransformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.TransformedInputColumn;
+import org.eobjects.analyzer.descriptors.AnnotationBasedTransformerBeanDescriptor;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.ColumnType;
-
-import junit.framework.TestCase;
 
 public class TransformerJobBuilderTest extends TestCase {
 
@@ -83,5 +86,27 @@ public class TransformerJobBuilderTest extends TestCase {
 		tjb.addInputColumn(ajb.getSourceColumns().get(1));
 		assertEquals(1, tjb.getInputColumns().size());
 		assertTrue(tjb.isConfigured());
+	}
+
+	public void testConfigureByConfigurableBean() throws Exception {
+		IdGenerator IdGenerator = new PrefixedIdGenerator("");
+
+		AnnotationBasedTransformerBeanDescriptor<ConvertToNumberTransformer> descriptor = AnnotationBasedTransformerBeanDescriptor
+				.create(ConvertToNumberTransformer.class);
+		TransformerJobBuilder<ConvertToNumberTransformer> builder = new TransformerJobBuilder<ConvertToNumberTransformer>(
+				descriptor, IdGenerator);
+		assertFalse(builder.isConfigured());
+
+		ConvertToNumberTransformer configurableBean = builder
+				.getConfigurableBean();
+		InputColumn<String> input = new TransformedInputColumn<String>("foo",
+				DataTypeFamily.STRING, IdGenerator);
+		configurableBean.setInput(input);
+
+		assertTrue(builder.isConfigured());
+		Object object = builder.getConfiguredProperties().get(
+				descriptor.getConfiguredPropertyForInput());
+		assertEquals("TransformedInputColumn[id=-1,name=foo,type=STRING]",
+				object.toString());
 	}
 }
