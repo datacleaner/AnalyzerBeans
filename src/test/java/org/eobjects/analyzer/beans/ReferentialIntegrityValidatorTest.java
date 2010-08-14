@@ -46,7 +46,7 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 	}
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
+		AnalyzerBeanDescriptor<ReferentialIntegrityValidator> descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(
 				ReferentialIntegrityValidator.class);
 		assertEquals(
 				"AnnotationBasedAnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",

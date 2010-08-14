@@ -21,7 +21,7 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object bean,
-			BeanDescriptor descriptor) {
+			BeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.ASSIGN_CONFIGURED;
 
 		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
@@ -47,8 +47,7 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 		}
 	}
 
-	protected Object getValue(
-			ConfiguredPropertyDescriptor propertyDescriptor) {
+	protected Object getValue(ConfiguredPropertyDescriptor propertyDescriptor) {
 		logger.debug("Getting property from bean configuration");
 		Object value = _beanConfiguration.getProperty(propertyDescriptor);
 		logger.debug("{} -> {}", propertyDescriptor.getName(), value);

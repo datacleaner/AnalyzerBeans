@@ -16,7 +16,7 @@ public final class ReturnResultsCallback implements AnalyzerLifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Analyzer<?> analyzerBean,
-			AnalyzerBeanDescriptor descriptor) {
+			AnalyzerBeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.RETURN_RESULTS;
 		
 		this.results.add(analyzerBean.getResult());

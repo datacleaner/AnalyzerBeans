@@ -25,7 +25,7 @@ public class RunExplorerCallbackTest extends TestCase {
 				.createMock(DataContextProvider.class);
 		ExploringAnalyzer<?> analyzer = EasyMock
 				.createMock(ExploringAnalyzer.class);
-		AnalyzerBeanDescriptor descriptor = EasyMock
+		AnalyzerBeanDescriptor<?> descriptor = EasyMock
 				.createMock(AnalyzerBeanDescriptor.class);
 
 		DataContext dataContext = DataContextFactory

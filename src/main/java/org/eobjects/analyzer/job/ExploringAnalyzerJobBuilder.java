@@ -1,11 +1,13 @@
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
-public class ExploringAnalyzerJobBuilder extends
-		AbstractBeanJobBuilder<AnalyzerBeanDescriptor, ExploringAnalyzerJobBuilder> {
+public class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>>
+		extends
+		AbstractBeanJobBuilder<AnalyzerBeanDescriptor<A>, A, ExploringAnalyzerJobBuilder<A>> {
 
-	public ExploringAnalyzerJobBuilder(AnalyzerBeanDescriptor descriptor) {
+	public ExploringAnalyzerJobBuilder(AnalyzerBeanDescriptor<A> descriptor) {
 		super(descriptor, ExploringAnalyzerJobBuilder.class);
 	}
 

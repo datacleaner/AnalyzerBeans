@@ -9,7 +9,7 @@ public class InitializeCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			BeanDescriptor descriptor) {
+			BeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.INITIALIZE;
 
 		Set<InitializeMethodDescriptor> initializeDescriptors = descriptor

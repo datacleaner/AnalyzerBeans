@@ -1,18 +1,24 @@
 package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.annotations.AnalyzerBean;
+import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public final class AnnotationBasedAnalyzerBeanDescriptor extends
-		AbstractBeanDescriptor implements AnalyzerBeanDescriptor {
+public final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>>
+		extends AbstractBeanDescriptor<A> implements AnalyzerBeanDescriptor<A> {
 
 	private final String _displayName;
 	private final boolean _exploringAnalyzer;
 	private final boolean _rowProcessingAnalyzer;
 
-	public AnnotationBasedAnalyzerBeanDescriptor(Class<?> analyzerClass)
+	public static <A extends Analyzer<?>> AnnotationBasedAnalyzerBeanDescriptor<A> create(
+			Class<A> analyzerClass) {
+		return new AnnotationBasedAnalyzerBeanDescriptor<A>(analyzerClass);
+	}
+
+	private AnnotationBasedAnalyzerBeanDescriptor(Class<A> analyzerClass)
 			throws DescriptorException {
 		super(analyzerClass, ReflectionUtils.is(analyzerClass,
 				RowProcessingAnalyzer.class));

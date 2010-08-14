@@ -13,13 +13,13 @@ import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 
 @SuppressWarnings("unchecked")
-class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor, B> extends
-		AbstractBeanJobBuilder<D, B> {
+class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B>
+		extends AbstractBeanJobBuilder<D, E, B> {
 
 	private List<InputColumn<?>> _inputColumns = new ArrayList<InputColumn<?>>();
 
 	public AbstractBeanWithInputColumnsBuilder(D descriptor,
-			Class<B> builderClass) {
+			Class<?> builderClass) {
 		super(descriptor, builderClass);
 	}
 

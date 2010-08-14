@@ -13,15 +13,15 @@ import org.eobjects.analyzer.result.renderer.Renderer;
  */
 public interface DescriptorProvider {
 
-	public Collection<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors();
+	public Collection<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors();
 
-	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<? extends Analyzer<?>> analyzerBeanClass);
+	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(
+			Class<A> analyzerBeanClass);
 
-	public Collection<TransformerBeanDescriptor> getTransformerBeanDescriptors();
+	public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors();
 
-	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
-			Class<? extends Transformer<?>> transformerBeanClass);
+	public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
+			Class<T> transformerBeanClass);
 
 	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors();
 

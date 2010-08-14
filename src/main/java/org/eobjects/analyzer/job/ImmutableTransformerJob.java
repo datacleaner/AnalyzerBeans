@@ -11,11 +11,11 @@ import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
 final class ImmutableTransformerJob implements TransformerJob {
 
-	private final TransformerBeanDescriptor _descriptor;
+	private final TransformerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
 	private final List<MutableInputColumn<?>> _output;
 
-	public ImmutableTransformerJob(TransformerBeanDescriptor descriptor,
+	public ImmutableTransformerJob(TransformerBeanDescriptor<?> descriptor,
 			BeanConfiguration beanConfiguration,
 			Collection<MutableInputColumn<?>> output) {
 		_descriptor = descriptor;
@@ -25,7 +25,7 @@ final class ImmutableTransformerJob implements TransformerJob {
 	}
 
 	@Override
-	public TransformerBeanDescriptor getDescriptor() {
+	public TransformerBeanDescriptor<?> getDescriptor() {
 		return _descriptor;
 	}
 

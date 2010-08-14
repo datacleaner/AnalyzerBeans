@@ -5,17 +5,17 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 final class ImmutableAnalyzerJob implements AnalyzerJob {
 
-	private final AnalyzerBeanDescriptor _descriptor;
+	private final AnalyzerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
 
-	public ImmutableAnalyzerJob(AnalyzerBeanDescriptor descriptor,
+	public ImmutableAnalyzerJob(AnalyzerBeanDescriptor<?> descriptor,
 			BeanConfiguration beanConfiguration) {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
 	}
 
 	@Override
-	public AnalyzerBeanDescriptor getDescriptor() {
+	public AnalyzerBeanDescriptor<?> getDescriptor() {
 		return _descriptor;
 	}
 

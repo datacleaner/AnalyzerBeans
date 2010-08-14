@@ -10,12 +10,12 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 @SuppressWarnings("unchecked")
-class AbstractBeanJobBuilder<D extends BeanDescriptor, B> {
+class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 
 	private Map<ConfiguredPropertyDescriptor, Object> _properties = new HashMap<ConfiguredPropertyDescriptor, Object>();
 	private D _descriptor;
 
-	public AbstractBeanJobBuilder(D descriptor, Class<B> builderClass) {
+	public AbstractBeanJobBuilder(D descriptor, Class<?> builderClass) {
 		_descriptor = descriptor;
 		if (!ReflectionUtils.is(getClass(), builderClass)) {
 			throw new IllegalArgumentException(

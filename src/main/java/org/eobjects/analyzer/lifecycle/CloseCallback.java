@@ -9,7 +9,7 @@ public class CloseCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			BeanDescriptor descriptor) {
+			BeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.CLOSE;
 
 		Set<CloseMethodDescriptor> closeMethods = descriptor

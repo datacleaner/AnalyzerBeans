@@ -17,8 +17,8 @@ import dk.eobjects.metamodel.schema.Relationship;
 public class JoinMatcherTest extends MetaModelTestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
-				JoinMatcher.class);
+		AnalyzerBeanDescriptor<JoinMatcher> descriptor = AnnotationBasedAnalyzerBeanDescriptor
+				.create(JoinMatcher.class);
 
 		List<ConfiguredPropertyDescriptor> configuredProperties = new ArrayList<ConfiguredPropertyDescriptor>(
 				descriptor.getConfiguredProperties());

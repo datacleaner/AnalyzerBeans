@@ -11,46 +11,48 @@ import org.eobjects.analyzer.result.renderer.Renderer;
 
 public class LazyDescriptorProvider implements DescriptorProvider {
 
-	private Map<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor>();
-	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor>();
+	private Map<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor<?>>();
+	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>>();
 	private Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<? extends Analyzer<?>> analyzerBeanClass) {
-		AnalyzerBeanDescriptor descriptor = _analyzerBeanDescriptors
+	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(
+			Class<A> analyzerBeanClass) {
+		AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors
 				.get(analyzerBeanClass);
 		if (descriptor == null) {
-			descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
+			descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(
 					analyzerBeanClass);
 			_analyzerBeanDescriptors.put(analyzerBeanClass, descriptor);
 		}
-		return descriptor;
+		return (AnalyzerBeanDescriptor<A>) descriptor;
 	}
 
 	@Override
-	public Collection<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors() {
+	public Collection<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
 		return Collections.unmodifiableCollection(_analyzerBeanDescriptors
 				.values());
 	}
 
 	@Override
-	public Collection<TransformerBeanDescriptor> getTransformerBeanDescriptors() {
+	public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
 		return Collections.unmodifiableCollection(_transformerBeanDescriptors
 				.values());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
-			Class<? extends Transformer<?>> transformerBeanClass) {
-		TransformerBeanDescriptor descriptor = _transformerBeanDescriptors
+	public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
+			Class<T> transformerBeanClass) {
+		TransformerBeanDescriptor<?> descriptor = _transformerBeanDescriptors
 				.get(transformerBeanClass);
 		if (descriptor == null) {
-			descriptor = new AnnotationBasedTransformerBeanDescriptor(
+			descriptor = AnnotationBasedTransformerBeanDescriptor.create(
 					transformerBeanClass);
 			_transformerBeanDescriptors.put(transformerBeanClass, descriptor);
 		}
-		return descriptor;
+		return (TransformerBeanDescriptor<T>) descriptor;
 	}
 
 	@Override

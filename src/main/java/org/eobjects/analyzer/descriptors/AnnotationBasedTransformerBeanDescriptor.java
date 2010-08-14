@@ -8,12 +8,18 @@ import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public final class AnnotationBasedTransformerBeanDescriptor extends
-		AbstractBeanDescriptor implements TransformerBeanDescriptor {
+public final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>>
+		extends AbstractBeanDescriptor<T> implements
+		TransformerBeanDescriptor<T> {
 
 	private final String _displayName;
 
-	public AnnotationBasedTransformerBeanDescriptor(Class<?> transformerClass)
+	public static <T extends Transformer<?>> AnnotationBasedTransformerBeanDescriptor<T> create(
+			Class<T> transformerClass) {
+		return new AnnotationBasedTransformerBeanDescriptor<T>(transformerClass);
+	}
+
+	private AnnotationBasedTransformerBeanDescriptor(Class<T> transformerClass)
 			throws DescriptorException {
 		super(transformerClass, true);
 

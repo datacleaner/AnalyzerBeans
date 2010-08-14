@@ -27,7 +27,7 @@ public class TransformerJobBuilderTest extends TestCase {
 	}
 
 	public void testSetInvalidPropertyType() throws Exception {
-		TransformerJobBuilder tjb = ajb
+		TransformerJobBuilder<TokenizerTransformer> tjb = ajb
 				.addTransformer(TokenizerTransformer.class);
 		try {
 			tjb.setConfiguredProperty("Number of tokens", "hello");
@@ -40,7 +40,7 @@ public class TransformerJobBuilderTest extends TestCase {
 	}
 
 	public void testIsConfigured() throws Exception {
-		TransformerJobBuilder tjb = ajb
+		TransformerJobBuilder<TokenizerTransformer> tjb = ajb
 				.addTransformer(TokenizerTransformer.class);
 		assertFalse(tjb.isConfigured());
 
@@ -65,7 +65,7 @@ public class TransformerJobBuilderTest extends TestCase {
 	}
 
 	public void testInvalidInputColumnType() throws Exception {
-		TransformerJobBuilder tjb = ajb
+		TransformerJobBuilder<ConvertToNumberTransformer> tjb = ajb
 				.addTransformer(ConvertToNumberTransformer.class);
 		assertEquals(1, tjb.getOutputColumns().size());
 		assertEquals(0, tjb.getInputColumns().size());

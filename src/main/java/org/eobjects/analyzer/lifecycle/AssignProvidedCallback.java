@@ -25,7 +25,7 @@ public class AssignProvidedCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			BeanDescriptor descriptor) {
+			BeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.ASSIGN_PROVIDED;
 
 		List<Object> providedCollections = new LinkedList<Object>();

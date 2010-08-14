@@ -81,7 +81,7 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 		List<AnalyzerJob> explorerJobs = new ArrayList<AnalyzerJob>();
 		List<AnalyzerJob> rowProcessingJobs = new ArrayList<AnalyzerJob>();
 		for (AnalyzerJob analyzerJob : analyzerJobs) {
-			AnalyzerBeanDescriptor descriptor = analyzerJob.getDescriptor();
+			AnalyzerBeanDescriptor<?> descriptor = analyzerJob.getDescriptor();
 			if (descriptor.isExploringAnalyzer()) {
 				explorerJobs.add(analyzerJob);
 			} else if (descriptor.isRowProcessingAnalyzer()) {

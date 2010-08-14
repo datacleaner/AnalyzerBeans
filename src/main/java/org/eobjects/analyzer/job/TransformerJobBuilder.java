@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.OutputColumns;
+import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
@@ -16,14 +17,20 @@ import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleState;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
-public class TransformerJobBuilder
+/**
+ * @author Kasper Sørensen
+ * 
+ * @param <T>
+ *            the transformer type being configured
+ */
+public class TransformerJobBuilder<T extends Transformer<?>>
 		extends
-		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor, TransformerJobBuilder> {
+		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> {
 
 	private LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
 	private IdGenerator _idGenerator;
 
-	public TransformerJobBuilder(TransformerBeanDescriptor descriptor,
+	public TransformerJobBuilder(TransformerBeanDescriptor<T> descriptor,
 			IdGenerator idGenerator) {
 		super(descriptor, TransformerJobBuilder.class);
 		_idGenerator = idGenerator;

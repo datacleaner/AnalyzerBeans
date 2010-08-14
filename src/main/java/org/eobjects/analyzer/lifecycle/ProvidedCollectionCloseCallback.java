@@ -17,7 +17,7 @@ public final class ProvidedCollectionCloseCallback implements LifeCycleCallback 
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,
-			BeanDescriptor descriptor) {
+			BeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.CLOSE;
 
 		for (Object providedObject : providedObjects) {

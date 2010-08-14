@@ -42,13 +42,15 @@ public class RowProcessingPublisherTest extends TestCase {
 		Column physicalColumn = new Column("foo", ColumnType.VARCHAR);
 		ajb.addSourceColumn(physicalColumn);
 
-		TransformerJobBuilder tjb1 = ajb.addTransformer(TransformerMock.class)
-				.addInputColumn(ajb.getSourceColumns().get(0));
-		TransformerJobBuilder tjb2 = ajb.addTransformer(TransformerMock.class)
-				.addInputColumn(tjb1.getOutputColumns().get(0));
-		TransformerJobBuilder tjb3 = ajb.addTransformer(
-				ConvertToStringTransformer.class).addInputColumn(
-				tjb2.getOutputColumns().get(0));
+		TransformerJobBuilder<TransformerMock> tjb1 = ajb.addTransformer(
+				TransformerMock.class).addInputColumn(
+				ajb.getSourceColumns().get(0));
+		TransformerJobBuilder<TransformerMock> tjb2 = ajb.addTransformer(
+				TransformerMock.class).addInputColumn(
+				tjb1.getOutputColumns().get(0));
+		TransformerJobBuilder<ConvertToStringTransformer> tjb3 = ajb
+				.addTransformer(ConvertToStringTransformer.class)
+				.addInputColumn(tjb2.getOutputColumns().get(0));
 
 		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(
 				ajb.getSourceColumns().get(0));
@@ -94,7 +96,7 @@ public class RowProcessingPublisherTest extends TestCase {
 		jobDependencies.add(transformerJobs.get(1));
 		jobDependencies.add(transformerJobs.get(2));
 		jobDependencies.add(analyzerJobs.get(1));
-		
+
 		int jobDependenciesFound = 0;
 		boolean analyzerJob1found = false;
 
@@ -112,7 +114,7 @@ public class RowProcessingPublisherTest extends TestCase {
 						+ " but expected: " + nextJobDependency);
 			}
 		}
-		
+
 		assertTrue(analyzerJob1found);
 		assertEquals(4, jobDependenciesFound);
 	}

@@ -18,7 +18,7 @@ public abstract class AbstractBeanInstance<E> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final BeanDescriptor descriptor;
+	private final BeanDescriptor<?> descriptor;
 	private final E bean;
 	private final List<LifeCycleCallback> assignConfiguredCallbacks = new LinkedList<LifeCycleCallback>();
 	private final List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
@@ -26,7 +26,7 @@ public abstract class AbstractBeanInstance<E> {
 	private final List<LifeCycleCallback> closeCallbacks = new LinkedList<LifeCycleCallback>();
 
 	@SuppressWarnings("unchecked")
-	public AbstractBeanInstance(BeanDescriptor descriptor) {
+	public AbstractBeanInstance(BeanDescriptor<?> descriptor) {
 		if (descriptor == null) {
 			throw new IllegalArgumentException("Descriptor cannot be null");
 		}
@@ -44,7 +44,7 @@ public abstract class AbstractBeanInstance<E> {
 		return bean;
 	}
 
-	public BeanDescriptor getDescriptor() {
+	public BeanDescriptor<?> getDescriptor() {
 		return descriptor;
 	}
 

@@ -41,20 +41,20 @@ import org.eobjects.analyzer.result.renderer.Renderer;
  */
 public class SimpleDescriptorProvider implements DescriptorProvider {
 
-	private List<AnalyzerBeanDescriptor> _analyzerBeanDescriptors = new ArrayList<AnalyzerBeanDescriptor>();
-	private List<TransformerBeanDescriptor> _transformerBeanDescriptors = new ArrayList<TransformerBeanDescriptor>();
+	private List<AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new ArrayList<AnalyzerBeanDescriptor<?>>();
+	private List<TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new ArrayList<TransformerBeanDescriptor<?>>();
 	private List<RendererBeanDescriptor> _rendererBeanDescriptors = new ArrayList<RendererBeanDescriptor>();
 
 	public SimpleDescriptorProvider() {
 	}
 
 	public void addAnalyzerBeanDescriptor(
-			AnalyzerBeanDescriptor analyzerBeanDescriptor) {
+			AnalyzerBeanDescriptor<?> analyzerBeanDescriptor) {
 		_analyzerBeanDescriptors.add(analyzerBeanDescriptor);
 	}
 
 	public void addTransformerBeanDescriptor(
-			TransformerBeanDescriptor transformerBeanDescriptor) {
+			TransformerBeanDescriptor<?> transformerBeanDescriptor) {
 		_transformerBeanDescriptors.add(transformerBeanDescriptor);
 	}
 
@@ -64,44 +64,46 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 	}
 
 	@Override
-	public List<AnalyzerBeanDescriptor> getAnalyzerBeanDescriptors() {
+	public List<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
 		return _analyzerBeanDescriptors;
 	}
 
 	public void setAnalyzerBeanDescriptors(
-			List<AnalyzerBeanDescriptor> descriptors) {
+			List<AnalyzerBeanDescriptor<?>> descriptors) {
 		_analyzerBeanDescriptors = descriptors;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public AnalyzerBeanDescriptor getAnalyzerBeanDescriptorForClass(
-			Class<? extends Analyzer<?>> analyzerBeanClass) {
-		for (AnalyzerBeanDescriptor descriptor : _analyzerBeanDescriptors) {
+	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(
+			Class<A> analyzerBeanClass) {
+		for (AnalyzerBeanDescriptor<?> descriptor : _analyzerBeanDescriptors) {
 			if (descriptor.getBeanClass() == analyzerBeanClass) {
-				return descriptor;
+				return (AnalyzerBeanDescriptor<A>) descriptor;
 			}
 		}
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public TransformerBeanDescriptor getTransformerBeanDescriptorForClass(
-			Class<? extends Transformer<?>> transformerBeanClass) {
-		for (TransformerBeanDescriptor descriptor : _transformerBeanDescriptors) {
+	public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
+			Class<T> transformerBeanClass) {
+		for (TransformerBeanDescriptor<?> descriptor : _transformerBeanDescriptors) {
 			if (descriptor.getBeanClass() == transformerBeanClass) {
-				return descriptor;
+				return (TransformerBeanDescriptor<T>) descriptor;
 			}
 		}
 		return null;
 	}
 
 	@Override
-	public List<TransformerBeanDescriptor> getTransformerBeanDescriptors() {
+	public List<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
 		return _transformerBeanDescriptors;
 	}
 
 	public void setTransformerBeanDescriptors(
-			List<TransformerBeanDescriptor> transformerBeanDescriptors) {
+			List<TransformerBeanDescriptor<?>> transformerBeanDescriptors) {
 		_transformerBeanDescriptors = transformerBeanDescriptors;
 	}
 
@@ -132,10 +134,10 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 			@SuppressWarnings("unchecked")
 			Class<? extends Analyzer<?>> c = (Class<? extends Analyzer<?>>) Class
 					.forName(className);
-			AnalyzerBeanDescriptor descriptor = getAnalyzerBeanDescriptorForClass(c);
+			AnalyzerBeanDescriptor<?> descriptor = getAnalyzerBeanDescriptorForClass(c);
 			if (descriptor == null) {
-				addAnalyzerBeanDescriptor(new AnnotationBasedAnalyzerBeanDescriptor(
-						c));
+				addAnalyzerBeanDescriptor(AnnotationBasedAnalyzerBeanDescriptor
+						.create(c));
 			}
 		}
 	}
@@ -146,10 +148,10 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 			@SuppressWarnings("unchecked")
 			Class<? extends Transformer<?>> c = (Class<? extends Transformer<?>>) Class
 					.forName(className);
-			TransformerBeanDescriptor descriptor = getTransformerBeanDescriptorForClass(c);
+			TransformerBeanDescriptor<?> descriptor = getTransformerBeanDescriptorForClass(c);
 			if (descriptor == null) {
-				addTransformerBeanDescriptor(new AnnotationBasedTransformerBeanDescriptor(
-						c));
+				addTransformerBeanDescriptor(AnnotationBasedTransformerBeanDescriptor
+						.create(c));
 			}
 		}
 	}

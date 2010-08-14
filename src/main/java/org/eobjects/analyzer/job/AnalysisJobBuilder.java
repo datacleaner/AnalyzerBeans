@@ -24,8 +24,8 @@ public class AnalysisJobBuilder {
 	private AnalyzerBeansConfiguration _configuration;
 	private DataContextProvider _dataContextProvider;
 	private List<MetaModelInputColumn> _sourceColumns = new ArrayList<MetaModelInputColumn>();
-	private List<TransformerJobBuilder> _transformerJobBuilders = new ArrayList<TransformerJobBuilder>();
-	private List<RowProcessingAnalyzerJobBuilder> _analyzerJobBuilders = new ArrayList<RowProcessingAnalyzerJobBuilder>();
+	private List<TransformerJobBuilder<?>> _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
+	private List<RowProcessingAnalyzerJobBuilder<?>> _analyzerJobBuilders = new ArrayList<RowProcessingAnalyzerJobBuilder<?>>();
 	private IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator(
 			"trans");
 
@@ -109,9 +109,9 @@ public class AnalysisJobBuilder {
 		return Collections.unmodifiableList(_sourceColumns);
 	}
 
-	public TransformerJobBuilder addTransformer(
-			Class<? extends Transformer<?>> transformerClass) {
-		TransformerBeanDescriptor descriptor = _configuration
+	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(
+			Class<T> transformerClass) {
+		TransformerBeanDescriptor<T> descriptor = _configuration
 				.getDescriptorProvider().getTransformerBeanDescriptorForClass(
 						transformerClass);
 		if (descriptor == null) {
@@ -121,43 +121,44 @@ public class AnalysisJobBuilder {
 		return addTransformer(descriptor);
 	}
 
-	public List<TransformerJobBuilder> getTransformerJobBuilders() {
+	public List<TransformerJobBuilder<?>> getTransformerJobBuilders() {
 		return Collections.unmodifiableList(_transformerJobBuilders);
 	}
 
-	public TransformerJobBuilder addTransformer(
-			TransformerBeanDescriptor descriptor) {
-		TransformerJobBuilder transformerJobBuilder = new TransformerJobBuilder(
+	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(
+			TransformerBeanDescriptor<T> descriptor) {
+		TransformerJobBuilder<T> transformerJobBuilder = new TransformerJobBuilder<T>(
 				descriptor, transformedColumnIdGenerator);
 		_transformerJobBuilders.add(transformerJobBuilder);
 		return transformerJobBuilder;
 	}
 
-	public AnalysisJobBuilder removeTransformer(TransformerJobBuilder tjb) {
+	public AnalysisJobBuilder removeTransformer(TransformerJobBuilder<?> tjb) {
 		_transformerJobBuilders.remove(tjb);
 		return this;
 	}
 
-	public List<RowProcessingAnalyzerJobBuilder> getAnalyzerJobBuilders() {
+	public List<RowProcessingAnalyzerJobBuilder<?>> getAnalyzerJobBuilders() {
 		return Collections.unmodifiableList(_analyzerJobBuilders);
 	}
 
-	public RowProcessingAnalyzerJobBuilder addAnalyzer(
-			Class<? extends RowProcessingAnalyzer<?>> analyzerClass) {
-		AnalyzerBeanDescriptor descriptor = _configuration
+	public <A extends RowProcessingAnalyzer<?>> RowProcessingAnalyzerJobBuilder<A> addAnalyzer(
+			Class<A> analyzerClass) {
+		AnalyzerBeanDescriptor<A> descriptor = _configuration
 				.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
 						analyzerClass);
 		if (descriptor == null) {
 			throw new IllegalArgumentException("No descriptor found for: "
 					+ analyzerClass);
 		}
-		RowProcessingAnalyzerJobBuilder analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder(
+		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(
 				descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 		return analyzerJobBuilder;
 	}
 
-	public AnalysisJobBuilder removeAnalyzer(RowProcessingAnalyzerJobBuilder ajb) {
+	public AnalysisJobBuilder removeAnalyzer(
+			RowProcessingAnalyzerJobBuilder<?> ajb) {
 		_analyzerJobBuilders.remove(ajb);
 		return this;
 	}
@@ -177,7 +178,7 @@ public class AnalysisJobBuilder {
 			}
 		}
 
-		for (TransformerJobBuilder transformerJobBuilder : _transformerJobBuilders) {
+		for (TransformerJobBuilder<?> transformerJobBuilder : _transformerJobBuilders) {
 			List<MutableInputColumn<?>> outputColumns = transformerJobBuilder
 					.getOutputColumns();
 			for (MutableInputColumn<?> outputColumn : outputColumns) {
@@ -204,13 +205,13 @@ public class AnalysisJobBuilder {
 			return false;
 		}
 
-		for (TransformerJobBuilder tjb : _transformerJobBuilders) {
+		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
 			if (!tjb.isConfigured()) {
 				return false;
 			}
 		}
 
-		for (RowProcessingAnalyzerJobBuilder ajb : _analyzerJobBuilders) {
+		for (RowProcessingAnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
 			if (!ajb.isConfigured()) {
 				return false;
 			}
@@ -226,7 +227,7 @@ public class AnalysisJobBuilder {
 		}
 
 		Collection<TransformerJob> transformerJobs = new LinkedList<TransformerJob>();
-		for (TransformerJobBuilder tjb : _transformerJobBuilders) {
+		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
 			try {
 				TransformerJob transformerJob = tjb.toTransformerJob();
 				transformerJobs.add(transformerJob);
@@ -238,7 +239,7 @@ public class AnalysisJobBuilder {
 		}
 
 		Collection<AnalyzerJob> analyzerJobs = new LinkedList<AnalyzerJob>();
-		for (RowProcessingAnalyzerJobBuilder ajb : _analyzerJobBuilders) {
+		for (RowProcessingAnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
 			try {
 				AnalyzerJob analyzerJob = ajb.toAnalyzerJob();
 				analyzerJobs.add(analyzerJob);

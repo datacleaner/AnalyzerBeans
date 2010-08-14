@@ -13,7 +13,7 @@ import dk.eobjects.metamodel.schema.Column;
 public class ValueDistributionAnalyzerTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor desc = new AnnotationBasedAnalyzerBeanDescriptor(
+		AnalyzerBeanDescriptor<?> desc = AnnotationBasedAnalyzerBeanDescriptor.create(
 				ValueDistributionAnalyzer.class);
 		assertEquals(true, desc.isRowProcessingAnalyzer());
 		assertEquals(false, desc.isExploringAnalyzer());

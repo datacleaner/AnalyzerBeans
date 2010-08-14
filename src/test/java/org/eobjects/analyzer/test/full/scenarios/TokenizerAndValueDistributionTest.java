@@ -68,7 +68,7 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 
 		analysisJobBuilder.addSourceColumns(jobTitleColumn);
 
-		TransformerJobBuilder transformerJobBuilder = analysisJobBuilder
+		TransformerJobBuilder<TokenizerTransformer> transformerJobBuilder = analysisJobBuilder
 				.addTransformer(TokenizerTransformer.class);
 		transformerJobBuilder.addInputColumn(analysisJobBuilder
 				.getSourceColumns().get(0));
@@ -83,7 +83,7 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 		transformerOutput.get(3).setName("fourth words");
 
 		for (InputColumn<?> inputColumn : transformerOutput) {
-			RowProcessingAnalyzerJobBuilder valueDistribuitionJobBuilder = analysisJobBuilder
+			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
 					.addAnalyzer(ValueDistributionAnalyzer.class);
 			valueDistribuitionJobBuilder.addInputColumn(inputColumn);
 			valueDistribuitionJobBuilder.setConfiguredProperty(

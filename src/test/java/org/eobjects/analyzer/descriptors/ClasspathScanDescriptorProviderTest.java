@@ -9,7 +9,7 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 
 	public void testScanNonExistingPackage() throws Exception {
 		ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider();
-		Collection<AnalyzerBeanDescriptor> analyzerDescriptors = provider
+		Collection<AnalyzerBeanDescriptor<?>> analyzerDescriptors = provider
 				.scanPackage("org.eobjects.analyzer.nonexistingbeans", true)
 				.getAnalyzerBeanDescriptors();
 		assertEquals("[]", Arrays.toString(analyzerDescriptors.toArray()));
@@ -20,7 +20,7 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 
 	public void testScanPackageRecursive() throws Exception {
 		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
-		Collection<AnalyzerBeanDescriptor> analyzerDescriptors = descriptorProvider
+		Collection<AnalyzerBeanDescriptor<?>> analyzerDescriptors = descriptorProvider
 				.scanPackage("org.eobjects.analyzer.beans.mock", true)
 				.getAnalyzerBeanDescriptors();
 		Object[] array = analyzerDescriptors.toArray();
@@ -29,7 +29,7 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 				"[AnnotationBasedAnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock], AnnotationBasedAnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.mock.RowProcessingAnalyzerMock]]",
 				Arrays.toString(array));
 
-		Collection<TransformerBeanDescriptor> transformerBeanDescriptors = descriptorProvider
+		Collection<TransformerBeanDescriptor<?>> transformerBeanDescriptors = descriptorProvider
 				.getTransformerBeanDescriptors();
 		assertEquals(
 				"[AnnotationBasedTransformerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.mock.TransformerMock]]",

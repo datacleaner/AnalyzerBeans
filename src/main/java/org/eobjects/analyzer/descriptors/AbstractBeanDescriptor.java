@@ -23,17 +23,17 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractBeanDescriptor implements BeanDescriptor {
+public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final Class<?> _beanClass;
+	private final Class<B> _beanClass;
 	protected final Set<InitializeMethodDescriptor> _initializeMethods = new HashSet<InitializeMethodDescriptor>();
 	protected final Set<ConfiguredPropertyDescriptor> _configuredProperties = new HashSet<ConfiguredPropertyDescriptor>();
 	protected final Set<ProvidedPropertyDescriptor> _providedProperties = new HashSet<ProvidedPropertyDescriptor>();
 	protected final Set<CloseMethodDescriptor> _closeMethods = new HashSet<CloseMethodDescriptor>();
 
-	public AbstractBeanDescriptor(Class<?> beanClass,
+	public AbstractBeanDescriptor(Class<B> beanClass,
 			boolean requireInputColumns) {
 		if (beanClass == null) {
 			throw new IllegalArgumentException("beanClass cannot be null");
@@ -143,7 +143,7 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 	}
 
 	@Override
-	public Class<?> getBeanClass() {
+	public Class<B> getBeanClass() {
 		return _beanClass;
 	}
 
@@ -196,14 +196,14 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 			return false;
 		}
 		if (obj.getClass() == this.getClass()) {
-			AbstractBeanDescriptor that = (AbstractBeanDescriptor) obj;
+			AbstractBeanDescriptor<?> that = (AbstractBeanDescriptor<?>) obj;
 			return this._beanClass == that._beanClass;
 		}
 		return false;
 	}
 
 	@Override
-	public int compareTo(BeanDescriptor o) {
+	public int compareTo(BeanDescriptor<?> o) {
 		if (o == null) {
 			return 1;
 		}

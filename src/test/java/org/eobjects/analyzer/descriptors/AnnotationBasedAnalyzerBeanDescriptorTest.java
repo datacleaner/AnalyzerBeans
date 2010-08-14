@@ -25,8 +25,8 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testExploringType() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
-				ExploringAnalyzerMock.class);
+		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor
+				.create(ExploringAnalyzerMock.class);
 		assertEquals(true, descriptor.isExploringAnalyzer());
 		assertEquals(false, descriptor.isRowProcessingAnalyzer());
 
@@ -36,8 +36,8 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testRowProcessingType() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
-				RowProcessingAnalyzerMock.class);
+		AnalyzerBeanDescriptor<RowProcessingAnalyzerMock> descriptor = AnnotationBasedAnalyzerBeanDescriptor
+				.create(RowProcessingAnalyzerMock.class);
 		assertEquals(false, descriptor.isExploringAnalyzer());
 		assertEquals(true, descriptor.isRowProcessingAnalyzer());
 
@@ -55,19 +55,19 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testGetInputDataTypeFamily() throws Exception {
-		AnalyzerBeanDescriptor descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
-				StringAnalyzer.class);
+		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor
+				.create(StringAnalyzer.class);
 		assertEquals(DataTypeFamily.STRING, descriptor.getInputDataTypeFamily());
 
-		descriptor = new AnnotationBasedAnalyzerBeanDescriptor(
-				ValueDistributionAnalyzer.class);
+		descriptor = AnnotationBasedAnalyzerBeanDescriptor
+				.create(ValueDistributionAnalyzer.class);
 		assertEquals(DataTypeFamily.UNDEFINED,
 				descriptor.getInputDataTypeFamily());
 	}
 
 	public void testAbstractBeanClass() throws Exception {
 		try {
-			new AnnotationBasedAnalyzerBeanDescriptor(InvalidAnalyzer.class);
+			AnnotationBasedAnalyzerBeanDescriptor.create(InvalidAnalyzer.class);
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(

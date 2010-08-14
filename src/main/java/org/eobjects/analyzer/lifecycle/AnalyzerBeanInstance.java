@@ -22,7 +22,7 @@ public class AnalyzerBeanInstance extends AbstractBeanInstance<Analyzer<?>> {
 	private final List<AnalyzerLifeCycleCallback> runCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
 	private final List<AnalyzerLifeCycleCallback> returnResultsCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
 
-	public AnalyzerBeanInstance(AnalyzerBeanDescriptor descriptor) {
+	public AnalyzerBeanInstance(AnalyzerBeanDescriptor<?> descriptor) {
 		super(descriptor);
 	}
 
@@ -52,7 +52,7 @@ public class AnalyzerBeanInstance extends AbstractBeanInstance<Analyzer<?>> {
 	private void runAnalyzerCallbacks(
 			List<AnalyzerLifeCycleCallback> callbacks, LifeCycleState state) {
 		for (AnalyzerLifeCycleCallback lifeCycleCallback : callbacks) {
-			lifeCycleCallback.onEvent(state, getBean(), (AnalyzerBeanDescriptor) getDescriptor());
+			lifeCycleCallback.onEvent(state, getBean(), (AnalyzerBeanDescriptor<?>) getDescriptor());
 		}
 	}
 }

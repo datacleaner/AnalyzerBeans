@@ -5,7 +5,7 @@ import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
 public class TransformerBeanInstance extends AbstractBeanInstance<Transformer<?>> {
 
-	public TransformerBeanInstance(TransformerBeanDescriptor descriptor) {
+	public TransformerBeanInstance(TransformerBeanDescriptor<?> descriptor) {
 		super(descriptor);
 	}
 }

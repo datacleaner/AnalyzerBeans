@@ -15,7 +15,7 @@ public final class RunExplorerCallback implements AnalyzerLifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Analyzer<?> analyzerBean,
-			AnalyzerBeanDescriptor descriptor) {
+			AnalyzerBeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.RUN;
 		assert descriptor.isExploringAnalyzer();
 

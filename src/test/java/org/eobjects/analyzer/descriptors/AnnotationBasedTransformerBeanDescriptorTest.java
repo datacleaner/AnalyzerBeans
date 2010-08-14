@@ -11,32 +11,32 @@ import junit.framework.TestCase;
 public class AnnotationBasedTransformerBeanDescriptorTest extends TestCase {
 
 	public void testGetDataTypeFamilies() throws Exception {
-		TransformerBeanDescriptor descriptor = new AnnotationBasedTransformerBeanDescriptor(
-				TokenizerTransformer.class);
+		TransformerBeanDescriptor<?> descriptor = AnnotationBasedTransformerBeanDescriptor
+				.create(TokenizerTransformer.class);
 		assertEquals(DataTypeFamily.STRING, descriptor.getInputDataTypeFamily());
 		assertEquals(DataTypeFamily.STRING,
 				descriptor.getOutputDataTypeFamily());
 
-		descriptor = new AnnotationBasedTransformerBeanDescriptor(
-				ConvertToNumberTransformer.class);
+		descriptor = AnnotationBasedTransformerBeanDescriptor
+				.create(ConvertToNumberTransformer.class);
 		assertEquals(DataTypeFamily.STRING, descriptor.getInputDataTypeFamily());
 		assertEquals(DataTypeFamily.NUMBER,
 				descriptor.getOutputDataTypeFamily());
 
-		descriptor = new AnnotationBasedTransformerBeanDescriptor(
-				ConvertToStringTransformer.class);
+		descriptor = AnnotationBasedTransformerBeanDescriptor
+				.create(ConvertToStringTransformer.class);
 		assertEquals(DataTypeFamily.UNDEFINED,
 				descriptor.getInputDataTypeFamily());
 		assertEquals(DataTypeFamily.STRING,
 				descriptor.getOutputDataTypeFamily());
 	}
-	
+
 	public void testConcatenator() throws Exception {
-		TransformerBeanDescriptor descriptor = new AnnotationBasedTransformerBeanDescriptor(
-				ConcatenatorTransformer.class);
+		TransformerBeanDescriptor<?> descriptor = AnnotationBasedTransformerBeanDescriptor
+				.create(ConcatenatorTransformer.class);
 		assertEquals(DataTypeFamily.UNDEFINED,
 				descriptor.getInputDataTypeFamily());
 		assertEquals(DataTypeFamily.STRING,
-				descriptor.getOutputDataTypeFamily());		
+				descriptor.getOutputDataTypeFamily());
 	}
 }
