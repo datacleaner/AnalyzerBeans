@@ -1,7 +1,6 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -10,29 +9,33 @@ import org.eobjects.analyzer.annotations.Provided;
 
 public class ProvidedPropertyDescriptorImplTest extends TestCase {
 
-	class SampleClass {
-		@Provided
-		Map<String, Boolean> stringMap;
+	@Provided
+	Map<String, Boolean> stringMap;
 
-		@Provided
-		void setIntMap(Map<String, Integer> map) {
-
-		}
-	}
+	@Provided
+	Map<String, Integer> intMap;
 
 	public void testGenericTypes() throws Exception {
-		Field stringMapField = SampleClass.class.getDeclaredField("stringMap");
-		ProvidedPropertyDescriptorImpl descriptor = new ProvidedPropertyDescriptorImpl(stringMapField);
+		Field stringMapField = getClass().getDeclaredField("stringMap");
+		ProvidedPropertyDescriptorImpl descriptor = new ProvidedPropertyDescriptorImpl(
+				stringMapField);
 
 		assertEquals(
 				"ProvidedPropertyDescriptorImpl[field=stringMap,baseType=interface java.util.Map]",
 				descriptor.toString());
+		
+		assertEquals(2, descriptor.getTypeArgumentCount());
+		assertEquals(String.class, descriptor.getTypeArgument(0));
+		assertEquals(Boolean.class, descriptor.getTypeArgument(1));
 
-		Method method = SampleClass.class.getDeclaredMethod("setIntMap",
-				Map.class);
-		descriptor = new ProvidedPropertyDescriptorImpl(method);
+		Field intMapField = getClass().getDeclaredField("intMap");
+		descriptor = new ProvidedPropertyDescriptorImpl(intMapField);
 		assertEquals(
-				"ProvidedPropertyDescriptorImpl[method=setIntMap,baseType=interface java.util.Map]",
+				"ProvidedPropertyDescriptorImpl[field=intMap,baseType=interface java.util.Map]",
 				descriptor.toString());
+		
+		assertEquals(2, descriptor.getTypeArgumentCount());
+		assertEquals(String.class, descriptor.getTypeArgument(0));
+		assertEquals(Integer.class, descriptor.getTypeArgument(1));
 	}
 }

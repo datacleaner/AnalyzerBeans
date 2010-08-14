@@ -1,7 +1,6 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -13,10 +12,6 @@ public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDesc
 		super(field);
 	}
 
-	public ConfiguredPropertyDescriptorImpl(Method method) throws DescriptorException {
-		super(method);
-	}
-	
 	@Override
 	public String getName() {
 		Configured configured = getAnnotation(Configured.class);

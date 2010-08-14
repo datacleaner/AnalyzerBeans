@@ -24,12 +24,12 @@ public class JoinMatcherTest extends MetaModelTestCase {
 				descriptor.getConfiguredProperties());
 		assertEquals(4, configuredProperties.size());
 
-		assertEquals("Left table join column", configuredProperties.get(0)
+		assertEquals("Right table", configuredProperties.get(0).getName());
+		assertEquals("Left table join column", configuredProperties.get(1)
 				.getName());
-		assertEquals("Left table", configuredProperties.get(1).getName());
-		assertEquals("Right table", configuredProperties.get(2).getName());
-		assertEquals("Right table join column", configuredProperties.get(3)
+		assertEquals("Right table join column", configuredProperties.get(2)
 				.getName());
+		assertEquals("Left table", configuredProperties.get(3).getName());
 	}
 
 	public void testNoMismatch() throws Exception {

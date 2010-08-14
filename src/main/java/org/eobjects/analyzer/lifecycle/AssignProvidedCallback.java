@@ -35,19 +35,19 @@ public class AssignProvidedCallback implements LifeCycleCallback {
 			if (providedDescriptor.isList()) {
 				List<?> list = collectionProvider.createList(providedDescriptor
 						.getTypeArgument(0));
-				providedDescriptor.assignValue(analyzerBean, list);
+				providedDescriptor.setValue(analyzerBean, list);
 				providedCollections.add(list);
 			} else if (providedDescriptor.isMap()) {
 				Map<?, ?> map = collectionProvider.createMap(
 						providedDescriptor.getTypeArgument(0),
 						providedDescriptor.getTypeArgument(1));
-				providedDescriptor.assignValue(analyzerBean, map);
+				providedDescriptor.setValue(analyzerBean, map);
 				providedCollections.add(map);
 			} else if (providedDescriptor.isDataContext()) {
-				providedDescriptor.assignValue(analyzerBean,
+				providedDescriptor.setValue(analyzerBean,
 						dataContextProvider.getDataContext());
 			} else if (providedDescriptor.isSchemaNavigator()) {
-				providedDescriptor.assignValue(analyzerBean,
+				providedDescriptor.setValue(analyzerBean,
 						dataContextProvider.getSchemaNavigator());
 			}
 		}

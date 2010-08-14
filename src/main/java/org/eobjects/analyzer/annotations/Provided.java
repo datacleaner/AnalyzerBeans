@@ -44,7 +44,7 @@ import javax.inject.Qualifier;
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target( { ElementType.FIELD })
 @Documented
 @Inherited
 @Qualifier

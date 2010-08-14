@@ -53,9 +53,9 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 				descriptor.toString());
 
 		assertEquals(
-				"[ConfiguredPropertyDescriptorImpl[field=acceptNullForeignKey,baseType=boolean], "
-						+ "ConfiguredPropertyDescriptorImpl[field=foreignKeyColumn,baseType=class dk.eobjects.metamodel.schema.Column], "
-						+ "ConfiguredPropertyDescriptorImpl[field=primaryKeyColumn,baseType=class dk.eobjects.metamodel.schema.Column]]",
+				"[ConfiguredPropertyDescriptorImpl[field=primaryKeyColumn,baseType=class dk.eobjects.metamodel.schema.Column], "
+						+ "ConfiguredPropertyDescriptorImpl[field=acceptNullForeignKey,baseType=boolean], "
+						+ "ConfiguredPropertyDescriptorImpl[field=foreignKeyColumn,baseType=class dk.eobjects.metamodel.schema.Column]]",
 				descriptor.getConfiguredProperties().toString());
 
 		assertEquals("[]", descriptor.getProvidedProperties().toString());

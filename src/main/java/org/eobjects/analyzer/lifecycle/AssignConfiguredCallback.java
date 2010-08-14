@@ -29,10 +29,10 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 		for (ConfiguredPropertyDescriptor property : configuredProperties) {
 			Object configuredValue = getValue(property);
 			if (configuredValue == null) {
-				property.assignValue(bean, null);
+				property.setValue(bean, null);
 			} else {
 				if (property.isArray()) {
-					property.assignValue(bean, configuredValue);
+					property.setValue(bean, configuredValue);
 				} else {
 					if (configuredValue.getClass().isArray()) {
 						if (Array.getLength(configuredValue) > 0) {
@@ -41,7 +41,7 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 							configuredValue = null;
 						}
 					}
-					property.assignValue(bean, configuredValue);
+					property.setValue(bean, configuredValue);
 				}
 			}
 		}

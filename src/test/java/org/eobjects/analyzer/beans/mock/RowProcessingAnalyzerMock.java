@@ -48,13 +48,8 @@ public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer<NumberRe
 		return configured1;
 	}
 
-	// A method-level @Configured property
-	private Integer configured2;
-
 	@Configured
-	public void setConfigured2(Integer configured2) {
-		this.configured2 = configured2;
-	}
+	private Integer configured2;
 
 	public Integer getConfigured2() {
 		return configured2;
@@ -68,13 +63,8 @@ public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer<NumberRe
 		return providedMap;
 	}
 
-	// A method-level @Provided property
-	private List<Boolean> providedList;
-
 	@Provided
-	public void setProvidedList(List<Boolean> providedList) {
-		this.providedList = providedList;
-	}
+	private List<Boolean> providedList;
 
 	public List<Boolean> getProvidedList() {
 		return providedList;

@@ -51,6 +51,15 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 
 			Configured configuredAnnotation = field
 					.getAnnotation(Configured.class);
+			Provided providedAnnotation = field.getAnnotation(Provided.class);
+
+			if (configuredAnnotation != null && providedAnnotation != null) {
+				throw new DescriptorException(
+						"The field "
+								+ field
+								+ " is annotated with both @Configured and @Provided, which are mutually exclusive.");
+			}
+
 			if (configuredAnnotation != null) {
 				if (!field.isAnnotationPresent(Inject.class)) {
 					logger.warn(
@@ -61,7 +70,6 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 						field));
 			}
 
-			Provided providedAnnotation = field.getAnnotation(Provided.class);
 			if (providedAnnotation != null) {
 				if (!field.isAnnotationPresent(Inject.class)) {
 					logger.warn(
@@ -86,29 +94,6 @@ public abstract class AbstractBeanDescriptor implements BeanDescriptor {
 
 		Method[] methods = beanClass.getDeclaredMethods();
 		for (Method method : methods) {
-			Configured configuredAnnotation = method
-					.getAnnotation(Configured.class);
-			if (configuredAnnotation != null) {
-				if (!method.isAnnotationPresent(Inject.class)) {
-					logger.warn(
-							"No @Inject annotation found for @Configured method: {}",
-							method);
-				}
-				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(
-						method));
-			}
-
-			Provided providedAnnotation = method.getAnnotation(Provided.class);
-			if (providedAnnotation != null) {
-				if (!method.isAnnotationPresent(Inject.class)) {
-					logger.warn(
-							"No @Inject annotation found for @Provided method: {}",
-							method);
-				}
-				_providedProperties.add(new ProvidedPropertyDescriptorImpl(
-						method));
-			}
-
 			Initialize initializeAnnotation = method
 					.getAnnotation(Initialize.class);
 

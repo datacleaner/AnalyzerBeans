@@ -2,7 +2,6 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Set;
 
@@ -10,30 +9,17 @@ import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-public class AbstractPropertyDescriptor implements PropertyDescriptor {
+public class AbstractPropertyDescriptor implements PropertyDescriptor,
+		Comparable<AbstractPropertyDescriptor> {
 
-	private final Method _method;
 	private final Field _field;
 	private final Class<?> _baseType;
 	private final Type _genericType;
 
-	public AbstractPropertyDescriptor(Method setterMethod) {
-		_field = null;
-		_method = setterMethod;
-		_method.setAccessible(true);
-		Class<?>[] parameterTypes = setterMethod.getParameterTypes();
-		if (parameterTypes.length != 1) {
-			throw new DescriptorException("The method " + setterMethod
-					+ " defines " + parameterTypes.length
-					+ " parameters, a single parameter is required");
-		}
-		_baseType = parameterTypes[0];
-		_genericType = _method.getGenericParameterTypes()[0];
-		init();
-	}
-
 	public AbstractPropertyDescriptor(Field field) {
-		_method = null;
+		if (field == null) {
+			throw new IllegalArgumentException("field cannot be null");
+		}
 		_field = field;
 		_field.setAccessible(true);
 		_baseType = _field.getType();
@@ -51,40 +37,41 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 
 	@Override
 	public String getName() {
-		return (_method == null ? _field.getName() : _method.getName());
+		return _field.getName();
 	}
 
 	@Override
-	public void assignValue(Object bean, Object value)
+	public void setValue(Object bean, Object value)
 			throws IllegalArgumentException {
 		try {
-			if (_method != null) {
-				_method.invoke(bean, value);
-			} else {
-				_field.set(bean, value);
-			}
+			_field.set(bean, value);
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not assign value '" + value
-					+ "' to " + (_method == null ? _field : _method), e);
+					+ "' to " + _field, e);
+		}
+	}
+
+	@Override
+	public Object getValue(Object bean) throws IllegalArgumentException {
+		if (bean == null) {
+			throw new IllegalArgumentException("bean cannot be null");
+		}
+		try {
+			return _field.get(bean);
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Could not retrieve property '"
+					+ getName() + "' from bean: " + bean);
 		}
 	}
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		if (_field == null) {
-			return CollectionUtils.set(_method.getAnnotations());
-		} else {
-			return CollectionUtils.set(_field.getAnnotations());
-		}
+		return CollectionUtils.set(_field.getAnnotations());
 	}
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		if (_field == null) {
-			return _method.getAnnotation(annotationClass);
-		} else {
-			return _field.getAnnotation(annotationClass);
-		}
+		return _field.getAnnotation(annotationClass);
 	}
 
 	@Override
@@ -115,7 +102,6 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((_field == null) ? 0 : _field.hashCode());
-		result = prime * result + ((_method == null) ? 0 : _method.hashCode());
 		return result;
 	}
 
@@ -133,22 +119,21 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 				return false;
 		} else if (!_field.equals(other._field))
 			return false;
-		if (_method == null) {
-			if (other._method != null)
-				return false;
-		} else if (!_method.equals(other._method))
-			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		if (_field == null) {
-			return getClass().getSimpleName() + "[method=" + _method.getName()
-					+ ",baseType=" + _baseType + "]";
-		} else {
-			return getClass().getSimpleName() + "[field=" + _field.getName()
-					+ ",baseType=" + _baseType + "]";
+		return getClass().getSimpleName() + "[field=" + _field.getName()
+				+ ",baseType=" + _baseType + "]";
+	}
+
+	@Override
+	public int compareTo(AbstractPropertyDescriptor o) {
+		Field otherField = o._field;
+		if (_field == otherField) {
+			return 0;
 		}
+		return _field.toString().compareTo(otherField.toString());
 	}
 }

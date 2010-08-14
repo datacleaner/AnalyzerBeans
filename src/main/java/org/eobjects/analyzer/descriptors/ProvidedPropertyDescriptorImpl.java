@@ -1,7 +1,6 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
@@ -13,10 +12,6 @@ public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescri
 
 	public ProvidedPropertyDescriptorImpl(Field field) throws DescriptorException {
 		super(field);
-	}
-
-	public ProvidedPropertyDescriptorImpl(Method method) throws DescriptorException {
-		super(method);
 	}
 
 	public boolean isList() {

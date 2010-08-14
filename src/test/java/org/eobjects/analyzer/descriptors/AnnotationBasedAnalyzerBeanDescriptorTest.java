@@ -31,7 +31,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		assertEquals(false, descriptor.isRowProcessingAnalyzer());
 
 		assertEquals(
-				"[ConfiguredPropertyDescriptorImpl[method=setConfigured2,baseType=class java.lang.Integer], ConfiguredPropertyDescriptorImpl[field=configured1,baseType=class java.lang.String]]",
+				"[ConfiguredPropertyDescriptorImpl[field=configured2,baseType=class java.lang.Integer], ConfiguredPropertyDescriptorImpl[field=configured1,baseType=class java.lang.String]]",
 				Arrays.toString(descriptor.getConfiguredProperties().toArray()));
 	}
 
@@ -44,13 +44,13 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
 				.getConfiguredProperties();
 		assertEquals(
-				"{ConfiguredPropertyDescriptorImpl[field=configured1,baseType=class java.lang.String],ConfiguredPropertyDescriptorImpl[method=setConfigured2,baseType=class java.lang.Integer],ConfiguredPropertyDescriptorImpl[field=columns,baseType=class [Lorg.eobjects.analyzer.data.InputColumn;]}",
+				"{ConfiguredPropertyDescriptorImpl[field=configured1,baseType=class java.lang.String],ConfiguredPropertyDescriptorImpl[field=configured2,baseType=class java.lang.Integer],ConfiguredPropertyDescriptorImpl[field=columns,baseType=class [Lorg.eobjects.analyzer.data.InputColumn;]}",
 				ArrayUtils.toString(configuredProperties.toArray()));
 
 		RowProcessingAnalyzerMock analyzerBean = new RowProcessingAnalyzerMock();
 		ConfiguredPropertyDescriptor configuredProperty = configuredProperties
 				.iterator().next();
-		configuredProperty.assignValue(analyzerBean, "foobar");
+		configuredProperty.setValue(analyzerBean, "foobar");
 		assertEquals("foobar", analyzerBean.getConfigured1());
 	}
 
