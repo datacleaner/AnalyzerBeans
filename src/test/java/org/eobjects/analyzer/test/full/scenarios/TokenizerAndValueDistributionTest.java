@@ -84,7 +84,7 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 
 		for (InputColumn<?> inputColumn : transformerOutput) {
 			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
-					.addAnalyzer(ValueDistributionAnalyzer.class);
+					.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
 			valueDistribuitionJobBuilder.addInputColumn(inputColumn);
 			valueDistribuitionJobBuilder.setConfiguredProperty(
 					"Record unique values", true);

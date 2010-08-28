@@ -28,6 +28,19 @@ public final class TestHelper {
 			.scanPackage("org.eobjects.analyzer.beans", true).scanPackage(
 					"org.eobjects.analyzer.renderer", true);
 
+	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(
+			Datastore datastore) {
+		TaskRunner taskRunner = new SingleThreadedTaskRunner();
+		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
+
+		List<Datastore> datastores = new LinkedList<Datastore>();
+		datastores.add(datastore);
+
+		return new AnalyzerBeansConfigurationImpl(new DatastoreCatalogImpl(
+				datastores), createReferenceDataCatalog(), descriptorProvider,
+				taskRunner, collectionProvider);
+	}
+
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration() {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();

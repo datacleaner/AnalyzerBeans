@@ -103,14 +103,14 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 				.getOutputColumnByName("Username");
 		assertNotNull(usernameColumn);
 
-		assertTrue(analysisJobBuilder.addAnalyzer(StringAnalyzer.class)
+		assertTrue(analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class)
 				.addInputColumns(nameColumns)
 				.addInputColumns(emailTransformerJobBuilder.getOutputColumns())
 				.isConfigured());
 
 		for (InputColumn<?> inputColumn : nameColumns) {
 			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> analyzerJobBuilder = analysisJobBuilder
-					.addAnalyzer(ValueDistributionAnalyzer.class);
+					.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
 			analyzerJobBuilder.addInputColumn(inputColumn);
 			analyzerJobBuilder.setConfiguredProperty("Record unique values",
 					false);
@@ -122,7 +122,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		}
 
 		RowProcessingAnalyzerJobBuilder<EqualityAnalyzer> equalsAnalyzerJobBuilder = analysisJobBuilder
-				.addAnalyzer(EqualityAnalyzer.class);
+				.addRowProcessingAnalyzer(EqualityAnalyzer.class);
 		equalsAnalyzerJobBuilder.addInputColumns(
 				nameTransformerJobBuilder.getOutputColumnByName("Firstname"),
 				usernameColumn);

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://eobjects.org/analyzerbeans/job/1.0"
+	xmlns:ab="http://eobjects.org/analyzerbeans/job/1.0"
+	elementFormDefault="qualified">
+
+	<element name="job">
+		<complexType>
+			<sequence>
+				<element name="job-metadata" type="ab:jobMetadataType"
+					minOccurs="0" maxOccurs="1" />
+				<element name="source" type="ab:sourceType" minOccurs="0"
+					maxOccurs="1" />
+				<element name="transformation" type="ab:transformationType"
+					minOccurs="0" maxOccurs="1" />
+				<element name="analysis" type="ab:analysisType" minOccurs="1"
+					maxOccurs="1" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<complexType name="jobMetadataType">
+		<sequence>
+			<element name="job-name" type="normalizedString" minOccurs="0"
+				maxOccurs="1" />
+			<element name="job-description" type="normalizedString"
+				minOccurs="0" maxOccurs="1" />
+			<element name="job-version" type="normalizedString"
+				minOccurs="0" maxOccurs="1" />
+			<element name="author" type="normalizedString" minOccurs="0"
+				maxOccurs="1" />
+			<element name="created-date" type="date" minOccurs="0"
+				maxOccurs="1" />
+			<element name="updated-date" type="date" minOccurs="0"
+				maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<complexType name="sourceType">
+		<sequence>
+			<element name="data-context" type="ab:dataContextType"
+				minOccurs="1" maxOccurs="1" />
+			<element name="columns" type="ab:columnsType" minOccurs="0"
+				maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<complexType name="transformationType">
+		<sequence>
+			<element name="transformer" type="ab:transformerType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="analysisType">
+		<sequence>
+			<element name="analyzer" type="ab:analyzerType" minOccurs="1"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="dataContextType">
+		<attribute name="ref" type="token" use="required" />
+	</complexType>
+
+	<complexType name="columnsType">
+		<sequence>
+			<element name="column" type="ab:columnType" minOccurs="1"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="columnType">
+		<attribute name="id" type="ID" use="required" />
+		<attribute name="path" type="normalizedString" use="required" />
+	</complexType>
+
+	<complexType name="transformerType">
+		<sequence>
+			<element name="descriptor" type="ab:transformerDescriptorType"
+				minOccurs="1" maxOccurs="1" />
+			<element name="properties" type="ab:configuredPropertiesType"
+				minOccurs="0" maxOccurs="1" />
+			<element name="input" type="ab:inputType" minOccurs="1"
+				maxOccurs="unbounded" />
+			<element name="output" type="ab:outputType" minOccurs="1"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="transformerDescriptorType">
+		<attribute name="ref" type="token" use="required" />
+	</complexType>
+
+	<complexType name="inputType">
+		<attribute name="ref" type="token" use="required" />
+	</complexType>
+
+	<complexType name="outputType">
+		<attribute name="name" type="string" use="optional" />
+		<attribute name="id" type="token" use="required" />
+	</complexType>
+
+	<complexType name="analyzerType">
+		<sequence>
+			<element name="descriptor" type="ab:analyzerDescriptorType"
+				minOccurs="1" maxOccurs="1" />
+			<element name="properties" type="ab:configuredPropertiesType"
+				minOccurs="0" maxOccurs="1" />
+			<element name="input" type="ab:inputType" minOccurs="1"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="analyzerDescriptorType">
+		<attribute name="ref" type="token" use="required" />
+	</complexType>
+
+	<complexType name="configuredPropertiesType">
+		<sequence>
+			<element name="property" minOccurs="0" maxOccurs="unbounded">
+				<complexType>
+					<attribute name="name" type="token" use="required" />
+					<attribute name="value" type="token" use="required" />
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="providedPropertyTypeEnum">
+		<restriction base="token">
+			<enumeration value="list" />
+			<enumeration value="map" />
+		</restriction>
+	</simpleType>
+
+</schema>

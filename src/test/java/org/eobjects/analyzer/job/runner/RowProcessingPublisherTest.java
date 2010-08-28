@@ -52,9 +52,9 @@ public class RowProcessingPublisherTest extends TestCase {
 				.addTransformer(ConvertToStringTransformer.class)
 				.addInputColumn(tjb2.getOutputColumns().get(0));
 
-		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(
+		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(
 				ajb.getSourceColumns().get(0));
-		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(
+		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(
 				tjb3.getOutputColumns().get(0));
 
 		ajb.setDataContextProvider(new MockDataContextProvider());

@@ -22,8 +22,8 @@ public class LazyDescriptorProvider implements DescriptorProvider {
 		AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors
 				.get(analyzerBeanClass);
 		if (descriptor == null) {
-			descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(
-					analyzerBeanClass);
+			descriptor = AnnotationBasedAnalyzerBeanDescriptor
+					.create(analyzerBeanClass);
 			_analyzerBeanDescriptors.put(analyzerBeanClass, descriptor);
 		}
 		return (AnalyzerBeanDescriptor<A>) descriptor;
@@ -41,6 +41,30 @@ public class LazyDescriptorProvider implements DescriptorProvider {
 				.values());
 	}
 
+	@Override
+	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(
+			String name) {
+		Collection<AnalyzerBeanDescriptor<?>> analyzerBeanDescriptors = getAnalyzerBeanDescriptors();
+		for (AnalyzerBeanDescriptor<?> analyzerBeanDescriptor : analyzerBeanDescriptors) {
+			if (name.equals(analyzerBeanDescriptor.getDisplayName())) {
+				return analyzerBeanDescriptor;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(
+			String name) {
+		Collection<TransformerBeanDescriptor<?>> transformerBeanDescriptors = getTransformerBeanDescriptors();
+		for (TransformerBeanDescriptor<?> transformerBeanDescriptor : transformerBeanDescriptors) {
+			if (name.equals(transformerBeanDescriptor.getDisplayName())) {
+				return transformerBeanDescriptor;
+			}
+		}
+		return null;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
@@ -48,8 +72,8 @@ public class LazyDescriptorProvider implements DescriptorProvider {
 		TransformerBeanDescriptor<?> descriptor = _transformerBeanDescriptors
 				.get(transformerBeanClass);
 		if (descriptor == null) {
-			descriptor = AnnotationBasedTransformerBeanDescriptor.create(
-					transformerBeanClass);
+			descriptor = AnnotationBasedTransformerBeanDescriptor
+					.create(transformerBeanClass);
 			_transformerBeanDescriptors.put(transformerBeanClass, descriptor);
 		}
 		return (TransformerBeanDescriptor<T>) descriptor;

@@ -18,10 +18,16 @@ public interface DescriptorProvider {
 	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(
 			Class<A> analyzerBeanClass);
 
+	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(
+			String name);
+
 	public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors();
 
 	public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
 			Class<T> transformerBeanClass);
+
+	public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(
+			String name);
 
 	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors();
 

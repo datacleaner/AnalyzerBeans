@@ -56,7 +56,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 
 	public void testToString() throws Exception {
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder
-				.addAnalyzer(StringAnalyzer.class);
+				.addRowProcessingAnalyzer(StringAnalyzer.class);
 		TransformerJobBuilder<ConvertToStringTransformer> tjb = analysisJobBuilder
 				.addTransformer(ConvertToStringTransformer.class);
 
@@ -97,7 +97,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertFalse(analysisJobBuilder.isConfigured());
 
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> analyzerJobBuilder = analysisJobBuilder
-				.addAnalyzer(StringAnalyzer.class);
+				.addRowProcessingAnalyzer(StringAnalyzer.class);
 
 		Collection<InputColumn<?>> stringInputColumns = analysisJobBuilder
 				.getAvailableInputColumns(DataTypeFamily.STRING);

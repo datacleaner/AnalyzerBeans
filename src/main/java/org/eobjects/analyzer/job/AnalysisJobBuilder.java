@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.connection.DataContextProvider;
@@ -25,7 +26,7 @@ public class AnalysisJobBuilder {
 	private DataContextProvider _dataContextProvider;
 	private List<MetaModelInputColumn> _sourceColumns = new ArrayList<MetaModelInputColumn>();
 	private List<TransformerJobBuilder<?>> _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
-	private List<RowProcessingAnalyzerJobBuilder<?>> _analyzerJobBuilders = new ArrayList<RowProcessingAnalyzerJobBuilder<?>>();
+	private List<AnalyzerJobBuilder<?>> _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder<?>>();
 	private IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator(
 			"trans");
 
@@ -138,11 +139,26 @@ public class AnalysisJobBuilder {
 		return this;
 	}
 
-	public List<RowProcessingAnalyzerJobBuilder<?>> getAnalyzerJobBuilders() {
+	public List<AnalyzerJobBuilder<?>> getAnalyzerJobBuilders() {
 		return Collections.unmodifiableList(_analyzerJobBuilders);
 	}
 
-	public <A extends RowProcessingAnalyzer<?>> RowProcessingAnalyzerJobBuilder<A> addAnalyzer(
+	public <A extends ExploringAnalyzer<?>> ExploringAnalyzerJobBuilder<A> addExploringAnalyzer(
+			Class<A> analyzerClass) {
+		AnalyzerBeanDescriptor<A> descriptor = _configuration
+				.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
+						analyzerClass);
+		if (descriptor == null) {
+			throw new IllegalArgumentException("No descriptor found for: "
+					+ analyzerClass);
+		}
+		ExploringAnalyzerJobBuilder<A> analyzerJobBuilder = new ExploringAnalyzerJobBuilder<A>(
+				descriptor);
+		_analyzerJobBuilders.add(analyzerJobBuilder);
+		return analyzerJobBuilder;
+	}
+
+	public <A extends RowProcessingAnalyzer<?>> RowProcessingAnalyzerJobBuilder<A> addRowProcessingAnalyzer(
 			Class<A> analyzerClass) {
 		AnalyzerBeanDescriptor<A> descriptor = _configuration
 				.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
@@ -211,7 +227,7 @@ public class AnalysisJobBuilder {
 			}
 		}
 
-		for (RowProcessingAnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
+		for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
 			if (!ajb.isConfigured()) {
 				return false;
 			}
@@ -239,7 +255,7 @@ public class AnalysisJobBuilder {
 		}
 
 		Collection<AnalyzerJob> analyzerJobs = new LinkedList<AnalyzerJob>();
-		for (RowProcessingAnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
+		for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
 			try {
 				AnalyzerJob analyzerJob = ajb.toAnalyzerJob();
 				analyzerJobs.add(analyzerJob);

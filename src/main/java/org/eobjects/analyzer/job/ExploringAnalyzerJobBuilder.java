@@ -5,12 +5,14 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 public class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>>
 		extends
-		AbstractBeanJobBuilder<AnalyzerBeanDescriptor<A>, A, ExploringAnalyzerJobBuilder<A>> {
+		AbstractBeanJobBuilder<AnalyzerBeanDescriptor<A>, A, ExploringAnalyzerJobBuilder<A>>
+		implements AnalyzerJobBuilder<A> {
 
 	public ExploringAnalyzerJobBuilder(AnalyzerBeanDescriptor<A> descriptor) {
 		super(descriptor, ExploringAnalyzerJobBuilder.class);
 	}
 
+	@Override
 	public AnalyzerJob toAnalyzerJob() throws IllegalStateException {
 		if (!isConfigured()) {
 			throw new IllegalStateException(

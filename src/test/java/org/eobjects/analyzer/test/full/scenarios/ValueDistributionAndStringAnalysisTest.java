@@ -72,7 +72,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 		for (InputColumn<?> inputColumn : analysisJobBuilder.getSourceColumns()) {
 			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
-					.addAnalyzer(ValueDistributionAnalyzer.class);
+					.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
 			valueDistribuitionJobBuilder.addInputColumn(inputColumn);
 			valueDistribuitionJobBuilder.setConfiguredProperty(
 					"Record unique values", false);
@@ -85,7 +85,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		columns = table.getLiteralColumns();
 
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder
-				.addAnalyzer(StringAnalyzer.class);
+				.addRowProcessingAnalyzer(StringAnalyzer.class);
 		stringAnalyzerJob.addInputColumns(analysisJobBuilder
 				.getAvailableInputColumns(DataTypeFamily.STRING));
 

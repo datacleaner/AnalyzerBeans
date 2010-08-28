@@ -5,12 +5,14 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 public class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyzer<?>>
 		extends
-		AbstractBeanWithInputColumnsBuilder<AnalyzerBeanDescriptor<A>, A, RowProcessingAnalyzerJobBuilder<A>> {
+		AbstractBeanWithInputColumnsBuilder<AnalyzerBeanDescriptor<A>, A, RowProcessingAnalyzerJobBuilder<A>>
+		implements AnalyzerJobBuilder<A> {
 
 	public RowProcessingAnalyzerJobBuilder(AnalyzerBeanDescriptor<A> descriptor) {
 		super(descriptor, RowProcessingAnalyzerJobBuilder.class);
 	}
 
+	@Override
 	public AnalyzerJob toAnalyzerJob() throws IllegalStateException {
 		if (!isConfigured()) {
 			throw new IllegalStateException(

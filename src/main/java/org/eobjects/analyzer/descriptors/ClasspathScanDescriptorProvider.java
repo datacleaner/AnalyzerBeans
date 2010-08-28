@@ -28,6 +28,30 @@ public final class ClasspathScanDescriptorProvider implements
 	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>>();
 	private Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
 
+	@Override
+	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(
+			String name) {
+		Collection<AnalyzerBeanDescriptor<?>> analyzerBeanDescriptors = getAnalyzerBeanDescriptors();
+		for (AnalyzerBeanDescriptor<?> analyzerBeanDescriptor : analyzerBeanDescriptors) {
+			if (name.equals(analyzerBeanDescriptor.getDisplayName())) {
+				return analyzerBeanDescriptor;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(
+			String name) {
+		Collection<TransformerBeanDescriptor<?>> transformerBeanDescriptors = getTransformerBeanDescriptors();
+		for (TransformerBeanDescriptor<?> transformerBeanDescriptor : transformerBeanDescriptors) {
+			if (name.equals(transformerBeanDescriptor.getDisplayName())) {
+				return transformerBeanDescriptor;
+			}
+		}
+		return null;
+	}
+
 	public ClasspathScanDescriptorProvider scanPackage(String packageName,
 			boolean recursive) {
 		String packagePath = packageName.replace('.', '/');
@@ -78,8 +102,8 @@ public final class ClasspathScanDescriptorProvider implements
 					AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors
 							.get(analyzerClass);
 					if (descriptor == null) {
-						descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(
-								analyzerClass);
+						descriptor = AnnotationBasedAnalyzerBeanDescriptor
+								.create(analyzerClass);
 						_analyzerBeanDescriptors.put(analyzerClass, descriptor);
 					}
 				}
@@ -90,8 +114,8 @@ public final class ClasspathScanDescriptorProvider implements
 					TransformerBeanDescriptor<?> descriptor = _transformerBeanDescriptors
 							.get(transformerClass);
 					if (descriptor == null) {
-						descriptor = AnnotationBasedTransformerBeanDescriptor.create(
-								transformerClass);
+						descriptor = AnnotationBasedTransformerBeanDescriptor
+								.create(transformerClass);
 						_transformerBeanDescriptors.put(transformerClass,
 								descriptor);
 					}

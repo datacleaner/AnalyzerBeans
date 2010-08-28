@@ -169,4 +169,28 @@ public class SimpleDescriptorProvider implements DescriptorProvider {
 			}
 		}
 	}
+
+	@Override
+	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(
+			String name) {
+		Collection<AnalyzerBeanDescriptor<?>> analyzerBeanDescriptors = getAnalyzerBeanDescriptors();
+		for (AnalyzerBeanDescriptor<?> analyzerBeanDescriptor : analyzerBeanDescriptors) {
+			if (name.equals(analyzerBeanDescriptor.getDisplayName())) {
+				return analyzerBeanDescriptor;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(
+			String name) {
+		Collection<TransformerBeanDescriptor<?>> transformerBeanDescriptors = getTransformerBeanDescriptors();
+		for (TransformerBeanDescriptor<?> transformerBeanDescriptor : transformerBeanDescriptors) {
+			if (name.equals(transformerBeanDescriptor.getDisplayName())) {
+				return transformerBeanDescriptor;
+			}
+		}
+		return null;
+	}
 }
