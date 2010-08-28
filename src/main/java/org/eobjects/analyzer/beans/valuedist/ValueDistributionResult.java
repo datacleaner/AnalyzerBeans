@@ -2,6 +2,7 @@ package org.eobjects.analyzer.beans.valuedist;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -68,5 +69,49 @@ public class ValueDistributionResult implements AnalyzerResult {
 
 	public String getColumnName() {
 		return _columnName;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Value distribution for column: ");
+		sb.append(_columnName);
+		sb.append('\n');
+
+		if (_topValues != null && _topValues.getActualSize() > 0) {
+			sb.append("Top values:");
+			List<ValueCount> valueCounts = _topValues.getValueCounts();
+			for (ValueCount valueCount : valueCounts) {
+				sb.append("\n - ");
+				sb.append(valueCount.getValue());
+				sb.append(": ");
+				sb.append(valueCount.getCount());
+			}
+		}
+
+		if (_bottomValues != null && _bottomValues.getActualSize() > 0) {
+			sb.append("Bottom values:");
+			List<ValueCount> valueCounts = _bottomValues.getValueCounts();
+			for (ValueCount valueCount : valueCounts) {
+				sb.append("\n - ");
+				sb.append(valueCount.getValue());
+				sb.append(": ");
+				sb.append(valueCount.getCount());
+			}
+		}
+
+		sb.append("\nNull count: ");
+		sb.append(_nullCount);
+
+		sb.append("\nUnique values: ");
+		if (_uniqueValues == null) {
+			sb.append(_uniqueValueCount);
+		} else {
+			for (String value : _uniqueValues) {
+				sb.append("\n - ");
+				sb.append(value);
+			}
+		}
+		return sb.toString();
 	}
 }

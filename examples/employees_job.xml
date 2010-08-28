@@ -2,14 +2,14 @@
 <job xmlns="http://eobjects.org/analyzerbeans/job/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<job-metadata>
-		
+
 	</job-metadata>
 
 	<source>
 		<data-context ref="employees_csv" />
 		<columns>
 			<column id="col_name" path="employees.csv.employees.name" />
-			<column id="col_email" path="employees.csv.employees.name" />
+			<column id="col_email" path="employees.csv.employees.email" />
 		</columns>
 	</source>
 
@@ -17,14 +17,14 @@
 		<transformer>
 			<descriptor ref="Email standardizer" />
 			<input ref="col_email" />
-			<output id="col_username" name="username" />
-			<output id="col_domain" name="domain" />
+			<output id="col_username" name="Email username" />
+			<output id="col_domain" name="Email domain" />
 		</transformer>
-		
+
 		<transformer>
 			<descriptor ref="Name standardizer" />
 			<input ref="col_name" />
-			<output id="col_firstname" />
+			<output id="col_firstname" name="First name" />
 			<output id="col_lastname" />
 			<output id="col_middlename" />
 			<output id="col_titulation" />
@@ -39,6 +39,26 @@
 			<input ref="col_firstname" />
 			<input ref="col_lastname" />
 			<input ref="col_titulation" />
+		</analyzer>
+
+		<analyzer>
+			<descriptor ref="Value distribution" />
+			<input ref="col_firstname" />
+		</analyzer>
+
+		<analyzer>
+			<descriptor ref="Value distribution" />
+			<input ref="col_lastname" />
+		</analyzer>
+
+		<analyzer>
+			<descriptor ref="Value distribution" />
+			<input ref="col_username" />
+		</analyzer>
+
+		<analyzer>
+			<descriptor ref="Value distribution" />
+			<input ref="col_domain" />
 		</analyzer>
 	</analysis>
 

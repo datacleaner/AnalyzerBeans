@@ -267,6 +267,10 @@ public class JaxbJobFactory {
 					}
 
 					InputColumn<?> inputColumn = inputColumns.get(ref);
+					if (inputColumn == null) {
+						throw new IllegalStateException(
+								"No such input column: " + ref);
+					}
 					analyzerJobBuilder.addInputColumn(inputColumn);
 				}
 				applyProperties(analyzerJobBuilder,

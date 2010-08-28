@@ -37,17 +37,20 @@ public final class Main {
 	public void run() {
 		AnalyzerBeansConfiguration configuration = new JaxbConfigurationFactory()
 				.create(configurationFile);
-		AnalysisJobBuilder analysisJobBuilder = new JaxbJobFactory(
-				configuration).create(jobFile);
+		try {
+			AnalysisJobBuilder analysisJobBuilder = new JaxbJobFactory(
+					configuration).create(jobFile);
 
-		List<AnalyzerResult> results = new AnalysisRunnerImpl(configuration)
-				.run(analysisJobBuilder.toAnalysisJob()).getResults();
+			List<AnalyzerResult> results = new AnalysisRunnerImpl(configuration)
+					.run(analysisJobBuilder.toAnalysisJob()).getResults();
 
-		for (AnalyzerResult analyzerResult : results) {
-			System.out.println("RESULT: " + analyzerResult);
+			for (AnalyzerResult analyzerResult : results) {
+				System.out.println("\nRESULT:");
+				System.out.println(analyzerResult);
+			}
+		} finally {
+			TaskRunner taskRunner = configuration.getTaskRunner();
+			taskRunner.shutdown();
 		}
-
-		TaskRunner taskRunner = configuration.getTaskRunner();
-		taskRunner.shutdown();
 	}
 }

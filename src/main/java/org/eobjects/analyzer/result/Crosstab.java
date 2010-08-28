@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -201,15 +201,15 @@ public class Crosstab<E extends Serializable> implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("Crosstab:");
-		
-		Set<Entry<String, E>> entrySet = values.entrySet();
-		for (Entry<String, E> entry : entrySet) {
+
+		Set<String> keySet = new TreeSet<String>(values.keySet());
+		for (String key : keySet) {
 			sb.append('\n');
-			sb.append(entry.getKey().replaceAll("\\^", ","));
+			sb.append(key.replaceAll("\\^", ","));
 			sb.append(": ");
-			sb.append(entry.getValue());
+			sb.append(values.get(key));
 		}
-		
+
 		return sb.toString();
 	}
 }

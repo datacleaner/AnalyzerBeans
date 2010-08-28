@@ -13,6 +13,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType;
+import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType.Package;
 import org.eobjects.analyzer.configuration.jaxb.CompositeDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.Configuration;
 import org.eobjects.analyzer.configuration.jaxb.ConfigurationMetadataType;
@@ -30,7 +32,6 @@ import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.JaxbJobFactory;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -101,11 +102,26 @@ public class JaxbConfigurationFactory {
 		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration
 				.getDatastoreCatalog());
 
+		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
+		ClasspathScannerType classpathScanner = configuration
+				.getClasspathScanner();
+		if (classpathScanner != null) {
+			List<Package> packages = classpathScanner.getPackage();
+			for (Package pkg : packages) {
+				String packageName = pkg.getValue();
+				if (packageName != null) {
+					packageName = packageName.trim();
+					Boolean recursive = pkg.isRecursive();
+					if (recursive == null) {
+						recursive = true;
+					}
+					descriptorProvider.scanPackage(packageName, recursive);
+				}
+			}
+		}
+
 		// TODO: Make these components configurable as well
 		ReferenceDataCatalog referenceDataCatalog = new ReferenceDataCatalogImpl();
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
-				.scanPackage("org.eobjects.analyzer.beans", true).scanPackage(
-						"org.eobjects.analyzer.result.renderer", true);
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog,
 				referenceDataCatalog, descriptorProvider, taskRunner,

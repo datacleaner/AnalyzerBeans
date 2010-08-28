@@ -19,6 +19,8 @@
 					<element name="custom-taskrunner" type="ab:customTaskrunnerType"
 						minOccurs="1" maxOccurs="1" />
 				</choice>
+				<element name="classpath-scanner" minOccurs="0" maxOccurs="1"
+					type="ab:classpathScannerType" />
 			</sequence>
 		</complexType>
 	</element>
@@ -37,6 +39,20 @@
 				maxOccurs="1" />
 			<element name="updated-date" type="date" minOccurs="0"
 				maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<complexType name="classpathScannerType">
+		<sequence>
+			<element name="package" minOccurs="1" maxOccurs="unbounded">
+				<complexType>
+					<simpleContent>
+						<extension base="string">
+							<attribute name="recursive" type="boolean" use="optional" />
+						</extension>
+					</simpleContent>
+				</complexType>
+			</element>
 		</sequence>
 	</complexType>
 
