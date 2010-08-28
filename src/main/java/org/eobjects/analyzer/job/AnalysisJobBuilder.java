@@ -9,6 +9,7 @@ import java.util.List;
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.DataTypeFamily;

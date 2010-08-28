@@ -7,7 +7,7 @@ import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SingleThreadedTaskRunner implements TaskRunner {
+public final class SingleThreadedTaskRunner implements TaskRunner {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -47,5 +47,10 @@ public class SingleThreadedTaskRunner implements TaskRunner {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	@Override
+	public void shutdown() {
+		logger.info("shutdown() called, nothing to do");
 	}
 }

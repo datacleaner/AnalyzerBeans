@@ -10,12 +10,12 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.BeanJob;
 import org.eobjects.analyzer.job.TransformerJob;

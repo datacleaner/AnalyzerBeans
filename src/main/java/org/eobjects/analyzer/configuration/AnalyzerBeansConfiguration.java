@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.configuration;
 
 import java.io.Serializable;
 

@@ -12,8 +12,6 @@ public class DataSourceDataContextProvider implements DataContextProvider {
 	private final DataContext dataContext;
 	private final SchemaNavigator schemaNavigator;
 
-	// TODO: Lazy load datacontext based on JNDI name?
-
 	public DataSourceDataContextProvider(DataSource ds) {
 		this.dataContext = DataContextFactory.createJdbcDataContext(ds);
 		this.schemaNavigator = new SchemaNavigator(dataContext);

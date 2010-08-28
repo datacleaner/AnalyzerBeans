@@ -13,11 +13,10 @@ import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.ValidationEvent;
-import javax.xml.bind.ValidationEventHandler;
 
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
@@ -36,13 +35,16 @@ import org.eobjects.analyzer.job.jaxb.ConfiguredPropertiesType.Property;
 import org.eobjects.analyzer.job.jaxb.DataContextType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
+import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutputType;
 import org.eobjects.analyzer.job.jaxb.SourceType;
 import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
+import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.analyzer.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,21 +80,7 @@ public class JaxbJobFactory {
 		try {
 			Unmarshaller unmarshaller = _jaxbContext.createUnmarshaller();
 
-			unmarshaller.setEventHandler(new ValidationEventHandler() {
-				@Override
-				public boolean handleEvent(ValidationEvent event) {
-					int severity = event.getSeverity();
-					if (severity == ValidationEvent.WARNING) {
-						logger.warn("encountered JAXB parsing warning: "
-								+ event.getMessage());
-						return true;
-					}
-
-					logger.warn("encountered JAXB parsing error: "
-							+ event.getMessage());
-					return false;
-				}
-			});
+			unmarshaller.setEventHandler(new JaxbValidationEventHandler());
 			Job job = (Job) unmarshaller.unmarshal(inputStream);
 			return create(job);
 		} catch (JAXBException e) {
@@ -101,6 +89,16 @@ public class JaxbJobFactory {
 	}
 
 	public AnalysisJobBuilder create(Job job) {
+		JobMetadataType metadata = job.getJobMetadata();
+		if (metadata != null) {
+			logger.info("Job name: {}", metadata.getJobName());
+			logger.info("Job version: {}", metadata.getJobVersion());
+			logger.info("Job description: {}", metadata.getJobDescription());
+			logger.info("Author: {}", metadata.getAuthor());
+			logger.info("Created date: {}", metadata.getCreatedDate());
+			logger.info("Updated date: {}", metadata.getUpdatedDate());
+		}
+
 		SourceType source = job.getSource();
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
@@ -108,7 +106,7 @@ public class JaxbJobFactory {
 
 		DataContextType dataContext = source.getDataContext();
 		String ref = dataContext.getRef();
-		if (isNullOrEmpty(ref)) {
+		if (StringUtils.isNullOrEmpty(ref)) {
 			throw new IllegalStateException("Datastore ref cannot be null");
 		}
 
@@ -130,7 +128,7 @@ public class JaxbJobFactory {
 		List<ColumnType> columns = columnsType.getColumn();
 		for (ColumnType column : columns) {
 			String path = column.getPath();
-			if (isNullOrEmpty(path)) {
+			if (StringUtils.isNullOrEmpty(path)) {
 				throw new IllegalStateException("Column path cannot be null");
 			}
 			Column physicalColumn = schemaNavigator.convertToColumn(path);
@@ -140,7 +138,7 @@ public class JaxbJobFactory {
 			MetaModelInputColumn inputColumn = new MetaModelInputColumn(
 					physicalColumn);
 			String id = column.getId();
-			if (isNullOrEmpty(id)) {
+			if (StringUtils.isNullOrEmpty(id)) {
 				throw new IllegalStateException(
 						"Source column id cannot be null");
 			}
@@ -157,7 +155,7 @@ public class JaxbJobFactory {
 		for (TransformerType transformer : transformers) {
 			TransformerDescriptorType descriptor = transformer.getDescriptor();
 			ref = descriptor.getRef();
-			if (isNullOrEmpty(ref)) {
+			if (StringUtils.isNullOrEmpty(ref)) {
 				throw new IllegalStateException(
 						"Transformer descriptor ref cannot be null");
 			}
@@ -188,7 +186,7 @@ public class JaxbJobFactory {
 				List<InputType> input = unconfiguredTransformerKey.getInput();
 				for (InputType inputType : input) {
 					ref = inputType.getRef();
-					if (isNullOrEmpty(ref)) {
+					if (StringUtils.isNullOrEmpty(ref)) {
 						throw new IllegalStateException(
 								"Transformer input column ref cannot be null");
 					}
@@ -219,11 +217,11 @@ public class JaxbJobFactory {
 						OutputType o1 = output.get(i);
 						MutableInputColumn<?> o2 = outputColumns.get(i);
 						String name = o1.getName();
-						if (!isNullOrEmpty(name)) {
+						if (!StringUtils.isNullOrEmpty(name)) {
 							o2.setName(name);
 						}
 						String id = o1.getId();
-						if (isNullOrEmpty(id)) {
+						if (StringUtils.isNullOrEmpty(id)) {
 							throw new IllegalStateException(
 									"Transformer output column id cannot be null");
 						}
@@ -239,7 +237,7 @@ public class JaxbJobFactory {
 		List<AnalyzerType> analyzers = analysis.getAnalyzer();
 		for (AnalyzerType analyzerType : analyzers) {
 			ref = analyzerType.getDescriptor().getRef();
-			if (isNullOrEmpty(ref)) {
+			if (StringUtils.isNullOrEmpty(ref)) {
 				throw new IllegalStateException(
 						"Analyzer descriptor ref cannot be null");
 			}
@@ -263,7 +261,7 @@ public class JaxbJobFactory {
 				List<InputType> input = analyzerType.getInput();
 				for (InputType inputType : input) {
 					ref = inputType.getRef();
-					if (isNullOrEmpty(ref)) {
+					if (StringUtils.isNullOrEmpty(ref)) {
 						throw new IllegalStateException(
 								"Analyzer input column ref cannot be null");
 					}
@@ -299,10 +297,6 @@ public class JaxbJobFactory {
 		inputColumns.put(id, inputColumn);
 	}
 
-	private boolean isNullOrEmpty(String str) {
-		return str == null || str.trim().length() == 0;
-	}
-
 	private void applyProperties(
 			AbstractBeanJobBuilder<? extends BeanDescriptor<?>, ?, ?> builder,
 			ConfiguredPropertiesType configuredPropertiesType) {
@@ -312,10 +306,10 @@ public class JaxbJobFactory {
 			for (Property property : properties) {
 				String name = property.getName();
 				String value = property.getValue();
-				
+
 				ConfiguredPropertyDescriptor configuredProperty = descriptor
-				.getConfiguredProperty(name);
-				
+						.getConfiguredProperty(name);
+
 				// TODO: Convert value according to configuredProperty's type
 				builder.setConfiguredProperty(configuredProperty, value);
 			}

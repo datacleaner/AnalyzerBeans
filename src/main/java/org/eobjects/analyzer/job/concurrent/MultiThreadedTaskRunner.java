@@ -7,23 +7,34 @@ import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MultiThreadedTaskRunner implements TaskRunner {
+public final class MultiThreadedTaskRunner implements TaskRunner {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	
-	private ExecutorService threadPool;
+
+	private ExecutorService executorService;
 
 	public MultiThreadedTaskRunner() {
-		threadPool = Executors.newCachedThreadPool();
+		executorService = Executors.newCachedThreadPool();
 	}
-	
+
 	public MultiThreadedTaskRunner(int numThreads) {
-		threadPool = Executors.newFixedThreadPool(numThreads);
+		executorService = Executors.newFixedThreadPool(numThreads);
 	}
-	
+
 	@Override
 	public void run(Task task) {
 		logger.debug("run({})", task);
-		threadPool.submit(new TaskRunnable(task));
+		executorService.submit(new TaskRunnable(task));
+	}
+
+	@Override
+	public void shutdown() {
+		logger.info("shutdown() called, shutting down executor service");
+		executorService.shutdown();
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		shutdown();
 	}
 }

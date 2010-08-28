@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://eobjects.org/analyzerbeans/configuration/1.0"
+	xmlns:ab="http://eobjects.org/analyzerbeans/configuration/1.0"
+	elementFormDefault="qualified">
+
+	<element name="configuration">
+		<complexType>
+			<sequence>
+				<element name="configuration-metadata" type="ab:configurationMetadataType"
+					minOccurs="0" maxOccurs="1" />
+				<element name="datastore-catalog" type="ab:datastoreCatalogType"
+					minOccurs="1" maxOccurs="1" />
+				<choice minOccurs="1" maxOccurs="1">
+					<element name="multithreaded-taskrunner" type="ab:multithreadedTaskrunnerType"
+						minOccurs="1" maxOccurs="1" />
+					<element name="singlethreaded-taskrunner" type="ab:singlethreadedTaskrunnerType"
+						minOccurs="1" maxOccurs="1" />
+					<element name="custom-taskrunner" type="ab:customTaskrunnerType"
+						minOccurs="1" maxOccurs="1" />
+				</choice>
+			</sequence>
+		</complexType>
+	</element>
+
+	<complexType name="configurationMetadataType">
+		<sequence>
+			<element name="configuration-name" type="normalizedString"
+				minOccurs="0" maxOccurs="1" />
+			<element name="configuration-description" type="normalizedString"
+				minOccurs="0" maxOccurs="1" />
+			<element name="configuration-version" type="normalizedString"
+				minOccurs="0" maxOccurs="1" />
+			<element name="author" type="normalizedString" minOccurs="0"
+				maxOccurs="1" />
+			<element name="created-date" type="date" minOccurs="0"
+				maxOccurs="1" />
+			<element name="updated-date" type="date" minOccurs="0"
+				maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<complexType name="datastoreCatalogType">
+		<sequence>
+			<element name="jdbc-datastore" type="ab:jdbcDatastoreType"
+				minOccurs="0" maxOccurs="unbounded" />
+			<element name="csv-datastore" type="ab:csvDatastoreType"
+				minOccurs="0" maxOccurs="unbounded" />
+			<element name="composite-datastore" type="ab:compositeDatastoreType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="jdbcDatastoreType">
+		<choice>
+			<sequence>
+				<element name="url" minOccurs="1" maxOccurs="1" type="string" />
+				<element name="driver" minOccurs="1" maxOccurs="1" type="string" />
+				<element name="username" minOccurs="0" maxOccurs="1" type="string" />
+				<element name="password" minOccurs="0" maxOccurs="1" type="string" />
+			</sequence>
+			<element name="datasource-jndi-url" minOccurs="0" maxOccurs="1"
+				type="string" />
+		</choice>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="csvDatastoreType">
+		<sequence>
+			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="quote-char" minOccurs="0" maxOccurs="1" type="token" />
+			<element name="separator-char" minOccurs="0" maxOccurs="1"
+				type="token" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="compositeDatastoreType">
+		<sequence>
+			<element name="datastore-name" minOccurs="1" maxOccurs="unbounded"
+				type="string" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="multithreadedTaskrunnerType">
+		<attribute name="max-threads" type="short" use="optional" />
+	</complexType>
+
+	<complexType name="singlethreadedTaskrunnerType">
+		<attribute name="queue-tasks" type="boolean" use="optional" />
+	</complexType>
+
+	<complexType name="customTaskrunnerType">
+		<attribute name="class-name" type="string" use="required" />
+	</complexType>
+
+</schema>

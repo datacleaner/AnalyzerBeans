@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.configuration;
 
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;

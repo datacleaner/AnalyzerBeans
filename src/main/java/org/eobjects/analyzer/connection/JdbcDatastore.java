@@ -5,6 +5,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+
+import org.eobjects.analyzer.util.StringUtils;
+
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
@@ -13,16 +18,17 @@ public class JdbcDatastore implements Datastore {
 	private static final long serialVersionUID = 1L;
 
 	private String _name;
-	private String _url;
+	private String _jdbcUrl;
 	private String _username;
 	private String _password;
 	private String _driverClass;
+	private String _datasourceJndiUrl;
 	private transient DataContextProvider _dataContextProvider;
 	private transient Connection _connection;
 
-	public JdbcDatastore(String name, String url, String driverClass) {
+	public JdbcDatastore(String name, String jdbcUrl, String driverClass) {
 		_name = name;
-		_url = url;
+		_jdbcUrl = jdbcUrl;
 		_driverClass = driverClass;
 	}
 
@@ -33,40 +39,26 @@ public class JdbcDatastore implements Datastore {
 		_password = password;
 	}
 
-	public String getUrl() {
-		return _url;
+	public JdbcDatastore(String name, String datasourceJndiUrl) {
+		_name = name;
+		_datasourceJndiUrl = datasourceJndiUrl;
+
 	}
 
-	public void setUrl(String url) {
-		_url = url;
+	public String getJdbcUrl() {
+		return _jdbcUrl;
 	}
 
 	public String getUsername() {
 		return _username;
 	}
 
-	public void setUsername(String username) {
-		synchronized (this) {
-			_username = username;
-		}
-	}
-
 	public String getPassword() {
 		return _password;
 	}
 
-	public void setPassword(String password) {
-		synchronized (this) {
-			_password = password;
-		}
-	}
-
 	public String getDriverClass() {
 		return _driverClass;
-	}
-
-	public void setDriverClass(String driverClass) {
-		_driverClass = driverClass;
 	}
 
 	@Override
@@ -74,8 +66,8 @@ public class JdbcDatastore implements Datastore {
 		return _name;
 	}
 
-	public void setName(String name) {
-		_name = name;
+	public String getDatasourceJndiUrl() {
+		return _datasourceJndiUrl;
 	}
 
 	@Override
@@ -83,28 +75,41 @@ public class JdbcDatastore implements Datastore {
 		if (_dataContextProvider == null) {
 			synchronized (this) {
 				if (_dataContextProvider == null) {
-					try {
-						Class.forName(_driverClass);
-					} catch (ClassNotFoundException e) {
-						throw new IllegalStateException(
-								"Could not initialize JDBC driver", e);
-					}
-					try {
-						if (_username == null && _password == null) {
-							_connection = DriverManager.getConnection(_url);
-						} else {
-							_connection = DriverManager.getConnection(_url,
-									_username, _password);
+					if (StringUtils.isNullOrEmpty(_datasourceJndiUrl)) {
+						try {
+							Class.forName(_driverClass);
+						} catch (ClassNotFoundException e) {
+							throw new IllegalStateException(
+									"Could not initialize JDBC driver", e);
 						}
-					} catch (SQLException e) {
-						throw new IllegalStateException(
-								"Could not establish JDBC connection", e);
-					}
+						try {
+							if (_username == null && _password == null) {
+								_connection = DriverManager
+										.getConnection(_jdbcUrl);
+							} else {
+								_connection = DriverManager.getConnection(
+										_jdbcUrl, _username, _password);
+							}
+						} catch (SQLException e) {
+							throw new IllegalStateException(
+									"Could not establish JDBC connection", e);
+						}
 
-					DataContext dataContext = DataContextFactory
-							.createJdbcDataContext(_connection);
-					_dataContextProvider = new SingleDataContextProvider(
-							dataContext);
+						DataContext dataContext = DataContextFactory
+								.createJdbcDataContext(_connection);
+						_dataContextProvider = new SingleDataContextProvider(
+								dataContext);
+					} else {
+						try {
+							InitialContext initialContext = new InitialContext();
+							DataSource dataSource = (DataSource) initialContext
+									.lookup(_datasourceJndiUrl);
+							_dataContextProvider = new DataSourceDataContextProvider(
+									dataSource);
+						} catch (Exception e) {
+							throw new IllegalStateException(e);
+						}
+					}
 				}
 			}
 		}

@@ -5,14 +5,14 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.job.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.job.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;

@@ -42,4 +42,9 @@ public class EjbTimerTaskRunnerBean implements EjbTimerTaskRunner {
 			logger.error("An uncaught exception was thrown by callable", e);
 		}
 	}
+
+	@Override
+	public void shutdown() {
+		logger.info("shutdown() called, nothing to do");
+	}
 }

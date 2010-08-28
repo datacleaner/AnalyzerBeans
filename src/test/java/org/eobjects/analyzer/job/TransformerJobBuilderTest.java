@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.TokenizerTransformer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
