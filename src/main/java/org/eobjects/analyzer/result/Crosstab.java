@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -21,7 +23,7 @@ public class Crosstab<E extends Serializable> implements Serializable {
 	private Map<String, ResultProducer> serializableResultProducers = new HashMap<String, ResultProducer>();
 	private transient Map<String, ResultProducer> transientResultProducers;
 	private Class<E> valueClass;
-	
+
 	public Crosstab(Class<E> valueClass, CrosstabDimension... dimensions) {
 		this.valueClass = valueClass;
 		this.dimensions = Arrays.asList(dimensions);
@@ -194,5 +196,20 @@ public class Crosstab<E extends Serializable> implements Serializable {
 			resultProducer = transientResultProducers.get(key);
 		}
 		return resultProducer;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("Crosstab:");
+		
+		Set<Entry<String, E>> entrySet = values.entrySet();
+		for (Entry<String, E> entry : entrySet) {
+			sb.append('\n');
+			sb.append(entry.getKey().replaceAll("\\^", ","));
+			sb.append(": ");
+			sb.append(entry.getValue());
+		}
+		
+		return sb.toString();
 	}
 }

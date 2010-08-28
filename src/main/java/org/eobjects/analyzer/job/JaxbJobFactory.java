@@ -306,17 +306,19 @@ public class JaxbJobFactory {
 	private void applyProperties(
 			AbstractBeanJobBuilder<? extends BeanDescriptor<?>, ?, ?> builder,
 			ConfiguredPropertiesType configuredPropertiesType) {
-		List<Property> properties = configuredPropertiesType.getProperty();
-		BeanDescriptor<?> descriptor = builder.getDescriptor();
-		for (Property property : properties) {
-			String name = property.getName();
-			String value = property.getValue();
-
-			ConfiguredPropertyDescriptor configuredProperty = descriptor
-					.getConfiguredProperty(name);
-
-			// TODO: Convert value according to configuredProperty's type
-			builder.setConfiguredProperty(configuredProperty, value);
+		if (configuredPropertiesType != null) {
+			List<Property> properties = configuredPropertiesType.getProperty();
+			BeanDescriptor<?> descriptor = builder.getDescriptor();
+			for (Property property : properties) {
+				String name = property.getName();
+				String value = property.getValue();
+				
+				ConfiguredPropertyDescriptor configuredProperty = descriptor
+				.getConfiguredProperty(name);
+				
+				// TODO: Convert value according to configuredProperty's type
+				builder.setConfiguredProperty(configuredProperty, value);
+			}
 		}
 	}
 }

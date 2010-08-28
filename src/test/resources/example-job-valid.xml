@@ -8,43 +8,28 @@
 	<source>
 		<data-context ref="my database" />
 		<columns>
-			<column id="col1" path="PUBLIC.EMPLOYEES.EMPLOYEENUMBER" />
-			<column id="col2" path="PUBLIC.EMPLOYEES.FIRSTNAME" />
-			<column id="col3" path="PUBLIC.EMPLOYEES.LASTNAME" />
+			<column id="col_fn" path="PUBLIC.EMPLOYEES.FIRSTNAME" />
+			<column id="col_ln" path="PUBLIC.EMPLOYEES.LASTNAME" />
+			<column id="col_email" path="PUBLIC.EMPLOYEES.EMAIL" />
 		</columns>
 	</source>
 
 	<transformation>
 		<transformer>
-			<descriptor ref="tokenizerDescriptor" />
-			<input ref="col3" />
-			<output id="pp1" />
-			<output id="pp2" />
-			<output id="pp3" />
-		</transformer>
-
-		<transformer>
-			<descriptor ref="trimDescriptor" />
-			<input ref="col2" />
-			<output id="pp4" />
-		</transformer>
-
-		<transformer>
-			<descriptor ref="replaceEmptyStringWithNullDescriptor" />
-			<input ref="pp4" />
-			<output id="pp5" />
+			<descriptor ref="Email standardizer" />
+			<input ref="col_email" />
+			<output id="col_username" name="username" />
+			<output id="col_domain" name="domain" />
 		</transformer>
 	</transformation>
 
 	<analysis>
 		<analyzer>
 			<descriptor ref="String analyzer" />
-			<input ref="col1" />
-			<input ref="col2" />
-			<input ref="pp1" />
-			<input ref="pp2" />
-			<input ref="pp3" />
-			<input ref="pp5" />
+			<input ref="col_username" />
+			<input ref="col_domain" />
+			<input ref="col_fn" />
+			<input ref="col_ln" />
 		</analyzer>
 	</analysis>
 

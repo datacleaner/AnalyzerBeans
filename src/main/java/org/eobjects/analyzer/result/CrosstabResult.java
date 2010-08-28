@@ -22,4 +22,9 @@ public class CrosstabResult implements AnalyzerResult {
 	public Crosstab<?> getCrosstab() {
 		return crosstab;
 	}
+	
+	@Override
+	public String toString() {
+		return crosstab.toString();
+	}
 }
