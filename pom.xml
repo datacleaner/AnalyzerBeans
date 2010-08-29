@@ -52,6 +52,7 @@
 		</license>
 	</licenses>
 	<build>
+		<finalName>AnalyzerBeans</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
