@@ -76,10 +76,9 @@ public class ValueDistributionResult implements AnalyzerResult {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Value distribution for column: ");
 		sb.append(_columnName);
-		sb.append('\n');
 
 		if (_topValues != null && _topValues.getActualSize() > 0) {
-			sb.append("Top values:");
+			sb.append("\nTop values:");
 			List<ValueCount> valueCounts = _topValues.getValueCounts();
 			for (ValueCount valueCount : valueCounts) {
 				sb.append("\n - ");
@@ -90,7 +89,7 @@ public class ValueDistributionResult implements AnalyzerResult {
 		}
 
 		if (_bottomValues != null && _bottomValues.getActualSize() > 0) {
-			sb.append("Bottom values:");
+			sb.append("\nBottom values:");
 			List<ValueCount> valueCounts = _bottomValues.getValueCounts();
 			for (ValueCount valueCount : valueCounts) {
 				sb.append("\n - ");
