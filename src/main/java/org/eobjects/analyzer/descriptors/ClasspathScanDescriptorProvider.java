@@ -92,12 +92,12 @@ public final class ClasspathScanDescriptorProvider extends
 						InputStream inputStream = jarFile.getInputStream(entry);
 						scanInputStream(inputStream);
 					} else {
-						logger.info("Omitting recursive JAR file entry: {}",
+						logger.debug("Omitting recursive JAR file entry: {}",
 								entryName);
 					}
 				}
 			} else {
-				logger.info("Omitting JAR file entry: {}", entryName);
+				logger.debug("Omitting JAR file entry: {}", entryName);
 			}
 		}
 	}

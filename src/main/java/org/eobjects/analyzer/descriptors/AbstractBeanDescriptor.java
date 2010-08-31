@@ -62,7 +62,7 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 
 			if (configuredAnnotation != null) {
 				if (!field.isAnnotationPresent(Inject.class)) {
-					logger.warn(
+					logger.info(
 							"No @Inject annotation found for @Configured field: {}",
 							field);
 				}
@@ -72,7 +72,7 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 
 			if (providedAnnotation != null) {
 				if (!field.isAnnotationPresent(Inject.class)) {
-					logger.warn(
+					logger.info(
 							"No @Inject annotation found for @Provided field: {}",
 							field);
 				}
