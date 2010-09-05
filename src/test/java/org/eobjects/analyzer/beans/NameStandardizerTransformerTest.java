@@ -35,6 +35,9 @@ public class NameStandardizerTransformerTest extends TestCase {
 		assertEquals("[Kasper, Sørensen, null, Mr]",
 				Arrays.toString(transformer.transform("Mr. Kasper Sørensen")));
 		
+		assertEquals("[Kasper, Sørensen, null, Mister]",
+				Arrays.toString(transformer.transform("Mister Kasper Sørensen")));
+		
 		assertEquals("[Jane, Foobar, Doe, Mrs]",
 				Arrays.toString(transformer.transform("Mrs. Jane Doe Foobar")));
 	}

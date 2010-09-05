@@ -24,7 +24,8 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
 public class NameStandardizerTransformer implements Transformer<String> {
 
 	public static final String[] DEFAULT_PATTERNS = { "FIRSTNAME LASTNAME",
-			"TITULATION. FIRSTNAME LASTNAME", "FIRSTNAME MIDDLENAME LASTNAME",
+			"TITULATION. FIRSTNAME LASTNAME", "TITULATION FIRSTNAME LASTNAME",
+			"FIRSTNAME MIDDLENAME LASTNAME",
 			"TITULATION. FIRSTNAME MIDDLENAME LASTNAME", "LASTNAME, FIRSTNAME",
 			"LASTNAME, FIRSTNAME MIDDLENAME" };
 
@@ -34,7 +35,7 @@ public class NameStandardizerTransformer implements Transformer<String> {
 		@Override
 		public String getGroupLiteral() {
 			if (this == TITULATION) {
-				return "(Mr|Ms|Mrs|Hr|Fru|Frk)";
+				return "(Mr|Ms|Mrs|Hr|Fru|Frk|Miss|Mister)";
 			}
 			return null;
 		}
