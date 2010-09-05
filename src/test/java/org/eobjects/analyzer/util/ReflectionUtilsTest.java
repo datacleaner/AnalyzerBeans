@@ -5,6 +5,8 @@ import java.lang.reflect.Field;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 public class ReflectionUtilsTest extends TestCase {
@@ -69,5 +71,16 @@ public class ReflectionUtilsTest extends TestCase {
 		assertTrue(ReflectionUtils.isNumber(Float.class));
 		assertFalse(ReflectionUtils.isNumber(String.class));
 		assertFalse(ReflectionUtils.isNumber(Object.class));
+	}
+	
+	public void testGetHierarchyDistance() throws Exception {
+		assertEquals(0, ReflectionUtils.getHierarchyDistance(String.class, String.class));
+		assertEquals(1, ReflectionUtils.getHierarchyDistance(String.class, CharSequence.class));
+		assertEquals(1, ReflectionUtils.getHierarchyDistance(String.class, Object.class));
+		assertEquals(1, ReflectionUtils.getHierarchyDistance(Number.class, Object.class));
+		assertEquals(2, ReflectionUtils.getHierarchyDistance(Integer.class, Object.class));
+		assertEquals(1, ReflectionUtils.getHierarchyDistance(Integer.class, Number.class));
+		
+		assertEquals(1, ReflectionUtils.getHierarchyDistance(CrosstabResult.class, AnalyzerResult.class));
 	}
 }

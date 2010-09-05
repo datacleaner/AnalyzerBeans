@@ -3,6 +3,7 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.renderer.Renderer;
 import org.eobjects.analyzer.result.renderer.RenderingFormat;
 
@@ -15,4 +16,6 @@ public interface RendererBeanDescriptor extends Comparable<RendererBeanDescripto
 	public Set<Annotation> getAnnotations();
 
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+	
+	public Class<? extends AnalyzerResult> getAnalyzerResultType();
 }

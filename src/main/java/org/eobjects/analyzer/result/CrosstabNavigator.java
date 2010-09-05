@@ -2,7 +2,7 @@ package org.eobjects.analyzer.result;
 
 import java.io.Serializable;
 
-public class CrosstabNavigator<E extends Serializable> {
+public class CrosstabNavigator<E extends Serializable> implements Cloneable {
 
 	private Crosstab<E> crosstab;
 	private String[] categories;
@@ -93,5 +93,17 @@ public class CrosstabNavigator<E extends Serializable> {
 
 	public ResultProducer explore() {
 		return crosstab.explore(categories);
+	}
+
+	@Override
+	public CrosstabNavigator<E> clone() {
+		CrosstabNavigator<E> n = new CrosstabNavigator<E>(crosstab);
+		n.categories = categories.clone();
+		return n;
+	}
+
+	public String getCategory(CrosstabDimension dimension) {
+		int index = crosstab.getDimensionIndex(dimension);
+		return categories[index];
 	}
 }

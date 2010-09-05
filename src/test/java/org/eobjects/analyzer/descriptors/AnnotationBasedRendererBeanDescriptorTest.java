@@ -2,9 +2,11 @@ package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.annotations.RendererBean;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.DefaultTextRenderer;
 import org.eobjects.analyzer.result.renderer.Renderer;
 import org.eobjects.analyzer.result.renderer.RenderingFormat;
+import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 
 import junit.framework.TestCase;
@@ -16,6 +18,16 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 
 	public void testGetRenderingFormat() throws Exception {
 		assertEquals(TextRenderingFormat.class, descriptor.getRenderingFormat());
+	}
+
+	public void testGetAnalyzerResultType() throws Exception {
+		Class<? extends AnalyzerResult> analyzerResultType = descriptor
+				.getAnalyzerResultType();
+		assertEquals(AnalyzerResult.class, analyzerResultType);
+
+		AnnotationBasedRendererBeanDescriptor desc2 = new AnnotationBasedRendererBeanDescriptor(
+				CrosstabTextRenderer.class);
+		assertEquals(CrosstabResult.class, desc2.getAnalyzerResultType());
 	}
 
 	public void testIsOutputApplicableFor() throws Exception {

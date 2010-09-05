@@ -2,6 +2,7 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
@@ -47,7 +48,8 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 				.scanPackage("org.eobjects.analyzer.result.renderer", true)
 				.getRendererBeanDescriptors();
 		assertEquals(
-				"[AnnotationBasedRendererBeanDescriptor[beanClass=org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
-				rendererBeanDescriptors.toString());
+				"[AnnotationBasedRendererBeanDescriptor[beanClass=org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], AnnotationBasedRendererBeanDescriptor[beanClass=org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
+				new TreeSet<RendererBeanDescriptor>(rendererBeanDescriptors)
+						.toString());
 	}
 }

@@ -45,19 +45,30 @@ public class CrosstabDimension implements Serializable, Iterable<String> {
 	public Iterator<String> iterator() {
 		return getCategories().iterator();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return name.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj.getClass() == getClass()) {
 			CrosstabDimension that = (CrosstabDimension) obj;
-			return new EqualsBuilder().append(this.name, that.name).append(
-					this.categories, that.categories).isEquals();
+			return new EqualsBuilder().append(this.name, that.name)
+					.append(this.categories, that.categories).isEquals();
 		}
 		return false;
 	}
+
+	public int getCategoryCount() {
+		return categories.size();
+	}
+
+	@Override
+	public String toString() {
+		return "CrosstabDimension[name=" + name + ", categories="
+				+ categories + "]";
+	}
+
 }

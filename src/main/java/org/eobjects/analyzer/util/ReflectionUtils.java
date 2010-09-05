@@ -264,4 +264,30 @@ public class ReflectionUtils {
 		throw new UnsupportedOperationException(
 				"Parameter type not supported: " + someType);
 	}
+
+	public static int getHierarchyDistance(Class<?> subtype, Class<?> supertype) {
+		assert subtype != null;
+		assert supertype != null;
+		
+		if (subtype == supertype) {
+			return 0;
+		}
+
+		if (!ReflectionUtils.is(subtype, supertype)) {
+			throw new IllegalArgumentException("Not a valid subtype of "
+					+ supertype.getName() + ": " + subtype.getName());
+		}
+
+		if (supertype.isInterface()) {
+			Class<?>[] interfaces = subtype.getInterfaces();
+			for (Class<?> i : interfaces) {
+				if (i == supertype) {
+					return 1;
+				}
+			}
+		}
+		
+		Class<?> subSuperclass = subtype.getSuperclass();
+		return 1 + getHierarchyDistance(subSuperclass, supertype);
+	}
 }

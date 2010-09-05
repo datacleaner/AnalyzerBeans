@@ -3,11 +3,14 @@ package org.eobjects.analyzer.descriptors;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.Transformer;
 import org.eobjects.analyzer.result.renderer.Renderer;
+import org.eobjects.analyzer.result.renderer.RenderingFormat;
 
 public class LazyDescriptorProvider implements DescriptorProvider {
 
@@ -89,5 +92,20 @@ public class LazyDescriptorProvider implements DescriptorProvider {
 	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors() {
 		return Collections.unmodifiableCollection(_rendererBeanDescriptors
 				.values());
+	}
+
+	@Override
+	public Collection<RendererBeanDescriptor> getRendererBeanDescriptorsForRenderingFormat(
+			Class<? extends RenderingFormat<?>> renderingFormat) {
+		Set<RendererBeanDescriptor> result = new HashSet<RendererBeanDescriptor>();
+		Collection<RendererBeanDescriptor> descriptors = getRendererBeanDescriptors();
+		for (RendererBeanDescriptor descriptor : descriptors) {
+			Class<? extends RenderingFormat<?>> descriptorsRenderingFormat = descriptor
+					.getRenderingFormat();
+			if (descriptorsRenderingFormat == renderingFormat) {
+				result.add(descriptor);
+			}
+		}
+		return result;
 	}
 }

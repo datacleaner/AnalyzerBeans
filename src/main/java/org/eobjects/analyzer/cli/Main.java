@@ -16,6 +16,9 @@ import org.eobjects.analyzer.job.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.JaxbJobFactory;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.renderer.Renderer;
+import org.eobjects.analyzer.result.renderer.RendererFactory;
+import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -223,9 +226,17 @@ public final class Main {
 		List<AnalyzerResult> results = new AnalysisRunnerImpl(configuration)
 				.run(analysisJobBuilder.toAnalysisJob()).getResults();
 
-		for (AnalyzerResult analyzerResult : results) {
+		RendererFactory rendererFinder = new RendererFactory(
+				configuration.getDescriptorProvider());
+
+		for (AnalyzerResult result : results) {
 			System.out.println("\nRESULT:");
-			System.out.println(analyzerResult);
+
+			Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFinder
+					.getRenderer(result, TextRenderingFormat.class);
+			CharSequence renderedResult = renderer.render(result);
+
+			System.out.println(renderedResult);
 		}
 	}
 

@@ -26,7 +26,7 @@ public final class TestHelper {
 
 	private static DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
 			.scanPackage("org.eobjects.analyzer.beans", true).scanPackage(
-					"org.eobjects.analyzer.renderer", true);
+					"org.eobjects.analyzer.result.renderer", true);
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(
 			Datastore datastore) {

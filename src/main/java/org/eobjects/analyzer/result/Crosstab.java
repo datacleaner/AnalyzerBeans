@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 public class Crosstab<E extends Serializable> implements Serializable {
@@ -67,9 +66,13 @@ public class Crosstab<E extends Serializable> implements Serializable {
 			throw new IllegalArgumentException(
 					"Not all dimensions have been specified (differences in size of parameter and Crosstab's dimensions)");
 		}
-		if (ArrayUtils.contains(categories, null)) {
-			throw new NullPointerException(
-					"Not all dimensions have been specified (some are null)");
+		for (int i = 0; i < categories.length; i++) {
+			if (categories[i] == null) {
+				CrosstabDimension dimension = dimensions.get(i);
+				throw new NullPointerException(
+						"Not all dimensions have been specified ('" + dimension.getName() + "' is null)");
+
+			}
 		}
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < categories.length; i++) {

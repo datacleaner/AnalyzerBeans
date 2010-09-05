@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.Set;
 
 import org.eobjects.analyzer.annotations.RendererBean;
+import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.renderer.Renderer;
 import org.eobjects.analyzer.result.renderer.RenderingFormat;
 import org.eobjects.analyzer.util.CollectionUtils;
@@ -24,8 +25,10 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 	private RendererBean _rendererBeanAnnotation;
 	private Class<? extends RenderingFormat<?>> _renderingFormat;
 	private Class<?> _formatOutputType = null;
+	private Class<? extends AnalyzerResult> _rendererInputType = null;
 	private Class<?> _rendererOutputType = null;
 
+	@SuppressWarnings("unchecked")
 	public AnnotationBasedRendererBeanDescriptor(
 			Class<? extends Renderer<?, ?>> beanClass)
 			throws DescriptorException {
@@ -77,6 +80,10 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;
 				if (pType.getRawType() == Renderer.class) {
+					_rendererInputType = (Class<? extends AnalyzerResult>) ReflectionUtils
+							.getTypeParameter(pType, 0);
+					logger.debug("Found renderer input type: {}",
+							_rendererInputType);
 					_rendererOutputType = ReflectionUtils.getTypeParameter(
 							pType, 1);
 					logger.debug("Found renderer output type: {}",
@@ -162,5 +169,10 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 		}
 
 		return result;
+	}
+
+	@Override
+	public Class<? extends AnalyzerResult> getAnalyzerResultType() {
+		return _rendererInputType;
 	}
 }
