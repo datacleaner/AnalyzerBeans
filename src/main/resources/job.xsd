@@ -106,7 +106,7 @@
 				minOccurs="1" maxOccurs="1" />
 			<element name="properties" type="ab:configuredPropertiesType"
 				minOccurs="0" maxOccurs="1" />
-			<element name="input" type="ab:inputType" minOccurs="1"
+			<element name="input" type="ab:inputType" minOccurs="0"
 				maxOccurs="unbounded" />
 		</sequence>
 	</complexType>

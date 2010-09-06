@@ -4,14 +4,18 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
+import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.TableComparisonResult;
+import org.eobjects.analyzer.result.TableDifference;
 import org.eobjects.analyzer.test.TestHelper;
-
-import junit.framework.TestCase;
 
 public class JaxbJobFactoryTest extends TestCase {
 
@@ -29,6 +33,57 @@ public class JaxbJobFactoryTest extends TestCase {
 							+ "Expected elements are <{http://eobjects.org/analyzerbeans/job/1.0}columns>,"
 							+ "<{http://eobjects.org/analyzerbeans/job/1.0}data-context>",
 					e.getMessage());
+		}
+	}
+
+	public void testDeserializeTableReference() throws Exception {
+		AnalyzerBeansConfiguration configuration = TestHelper
+				.createAnalyzerBeansConfiguration(TestHelper
+						.createSampleDatabaseDatastore("my database"));
+		JaxbJobFactory factory = new JaxbJobFactory(configuration);
+		AnalysisJobBuilder builder = factory.create(new File(
+				"src/test/resources/example-job-compare-tables.xml"));
+		AnalysisJob analysisJob = builder.toAnalysisJob();
+
+		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(
+				configuration).run(analysisJob);
+		List<AnalyzerResult> results = resultFuture.getResults();
+		assertEquals(1, results.size());
+
+		TableComparisonResult result = (TableComparisonResult) results.get(0);
+		List<TableDifference<?>> tableDifferences = result
+				.getTableDifferences();
+		assertEquals(4, tableDifferences.size());
+		assertEquals(
+				"Tables 'CUSTOMER_W_TER' and 'CUSTOMERS' differ on 'name': [CUSTOMER_W_TER] vs. [CUSTOMERS]",
+				tableDifferences.get(0).toString());
+		assertEquals(
+				"Tables 'CUSTOMER_W_TER' and 'CUSTOMERS' differ on 'unmatched column': [EMPLOYEENUMBER] vs. [null]",
+				tableDifferences.get(1).toString());
+		assertEquals(
+				"Tables 'CUSTOMER_W_TER' and 'CUSTOMERS' differ on 'unmatched column': [TERRITORY] vs. [null]",
+				tableDifferences.get(2).toString());
+		assertEquals(
+				"Tables 'CUSTOMER_W_TER' and 'CUSTOMERS' differ on 'unmatched column': [null] vs. [SALESREPEMPLOYEENUMBER]",
+				tableDifferences.get(3).toString());
+
+		List<ColumnComparisonResult> columnComparisonResults = result
+				.getColumnComparisonResults();
+		assertEquals(9, columnComparisonResults.size());
+
+		for (ColumnComparisonResult columnComparisonResult : columnComparisonResults) {
+			int differences = columnComparisonResult.getColumnDifferences()
+					.size();
+			if (differences == 1) {
+				assertEquals("nullable", columnComparisonResult
+						.getColumnDifferences().get(0).getValueName());
+			} else {
+				assertEquals(
+						"[Columns 'CREDITLIMIT' and 'CREDITLIMIT' differ on 'type': [DECIMAL] vs. [NUMERIC], "
+								+ "Columns 'CREDITLIMIT' and 'CREDITLIMIT' differ on 'native type': [DECIMAL] vs. [NUMERIC]]",
+						columnComparisonResult.getColumnDifferences()
+								.toString());
+			}
 		}
 	}
 

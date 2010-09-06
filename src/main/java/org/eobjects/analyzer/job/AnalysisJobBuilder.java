@@ -214,10 +214,6 @@ public class AnalysisJobBuilder {
 			return false;
 		}
 
-		if (_sourceColumns.isEmpty()) {
-			return false;
-		}
-
 		if (_analyzerJobBuilders.isEmpty()) {
 			return false;
 		}

@@ -77,7 +77,7 @@ class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 			ConfiguredPropertyDescriptor configuredProperty, Object value) {
 		if (configuredProperty == null) {
 			throw new IllegalArgumentException(
-					"configuredDescriptor cannot be null");
+					"configuredProperty cannot be null");
 		}
 		if (value != null) {
 			boolean correctType = true;
