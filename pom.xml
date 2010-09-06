@@ -114,6 +114,7 @@
 					<docletArtifact>
 						<groupId>org.umlgraph</groupId>
 						<artifactId>doclet</artifactId>
+						<version>5.1</version>
 					</docletArtifact>
 					<additionalparam>-views</additionalparam>
 					<useStandardDocletOptions>true</useStandardDocletOptions>
