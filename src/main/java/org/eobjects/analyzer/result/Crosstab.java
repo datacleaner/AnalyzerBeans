@@ -70,7 +70,8 @@ public class Crosstab<E extends Serializable> implements Serializable {
 			if (categories[i] == null) {
 				CrosstabDimension dimension = dimensions.get(i);
 				throw new NullPointerException(
-						"Not all dimensions have been specified ('" + dimension.getName() + "' is null)");
+						"Not all dimensions have been specified ('"
+								+ dimension.getName() + "' is null)");
 
 			}
 		}
@@ -210,7 +211,8 @@ public class Crosstab<E extends Serializable> implements Serializable {
 			sb.append('\n');
 			sb.append(key.replaceAll("\\^", ","));
 			sb.append(": ");
-			sb.append(values.get(key));
+			E value = values.get(key);
+			sb.append(value);
 		}
 
 		return sb.toString();

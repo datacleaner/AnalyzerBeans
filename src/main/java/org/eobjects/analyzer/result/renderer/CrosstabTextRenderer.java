@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.result.renderer;
 
+import java.text.NumberFormat;
 import java.util.List;
 
 import org.eobjects.analyzer.annotations.RendererBean;
@@ -7,6 +8,9 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.ResultProducer;
+import org.eobjects.analyzer.util.ReflectionUtils;
+
+import dk.eobjects.metamodel.util.FormatHelper;
 
 @RendererBean(TextRenderingFormat.class)
 public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
@@ -14,6 +18,9 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 	private static class TextCrosstabRendererCallback implements
 			CrosstabRendererCallback<String> {
 
+		private NumberFormat decimalFormat = FormatHelper.getUiNumberFormat();
+
+		private boolean leftAligned;
 		private StringBuilder sb;
 		private int horizontalDimensionWidth;
 
@@ -29,6 +36,15 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 					horizontalDimensionWidth = Math.max(
 							horizontalDimensionWidth, category.length());
 				}
+			}
+
+			// minimum width = 6
+			horizontalDimensionWidth = Math.max(horizontalDimensionWidth, 6);
+
+			if (ReflectionUtils.is(crosstab.getValueClass(), Number.class)) {
+				leftAligned = false;
+			} else {
+				leftAligned = true;
 			}
 		}
 
@@ -48,11 +64,19 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 		@Override
 		public void horizontalHeaderCell(String category,
 				CrosstabDimension dimension, int width) {
-			sb.append(category);
+			int trailingBlanks = horizontalDimensionWidth * width
+					- category.length();
 
-			int trailingBlanks = horizontalDimensionWidth - category.length();
-			for (int i = 0; i < trailingBlanks; i++) {
-				sb.append(' ');
+			if (leftAligned) {
+				sb.append(category);
+				for (int i = 0; i < trailingBlanks; i++) {
+					sb.append(' ');
+				}
+			} else {
+				for (int i = 0; i < trailingBlanks; i++) {
+					sb.append(' ');
+				}
+				sb.append(category);
 			}
 
 			// separator
@@ -81,19 +105,22 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 				value = "<null>";
 			}
 			String stringValue = value.toString();
+			if (value instanceof Double || value instanceof Float) {
+				stringValue = decimalFormat.format(value);
+			}
 
 			int trailingBlanks = horizontalDimensionWidth
 					- stringValue.length();
-			if (value instanceof Number) {
+			if (leftAligned) {
+				sb.append(stringValue);
 				for (int i = 0; i < trailingBlanks; i++) {
 					sb.append(' ');
 				}
-				sb.append(stringValue);
 			} else {
-				sb.append(stringValue);
 				for (int i = 0; i < trailingBlanks; i++) {
 					sb.append(' ');
 				}
+				sb.append(stringValue);
 			}
 
 			// separator

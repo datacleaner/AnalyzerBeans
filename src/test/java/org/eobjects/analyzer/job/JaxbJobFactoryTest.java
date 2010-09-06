@@ -98,25 +98,14 @@ public class JaxbJobFactoryTest extends TestCase {
 				.run(builder.toAnalysisJob()).getResults();
 		assertEquals(1, results.size());
 		CrosstabResult crosstabResult = (CrosstabResult) results.get(0);
-		assertEquals(
-				"Crosstab:|FIRSTNAME,Avg chars: 5,39|FIRSTNAME,Avg white spaces: 0,04|"
-						+ "FIRSTNAME,Char count: 124|FIRSTNAME,Lowercase chars: 79%|FIRSTNAME,Max chars: 8|"
-						+ "FIRSTNAME,Max white spaces: 1|FIRSTNAME,Max words: 2|FIRSTNAME,Min chars: 3|"
-						+ "FIRSTNAME,Min white spaces: 0|FIRSTNAME,Min words: 1|FIRSTNAME,Non-letter chars: 0%|"
-						+ "FIRSTNAME,Uppercase chars: 19%|FIRSTNAME,Word count: 24|LASTNAME,Avg chars: 6,39|"
-						+ "LASTNAME,Avg white spaces: 0|LASTNAME,Char count: 147|LASTNAME,Lowercase chars: 84%|"
-						+ "LASTNAME,Max chars: 9|LASTNAME,Max white spaces: 0|LASTNAME,Max words: 1|"
-						+ "LASTNAME,Min chars: 3|LASTNAME,Min white spaces: 0|LASTNAME,Min words: 1|"
-						+ "LASTNAME,Non-letter chars: 0%|LASTNAME,Uppercase chars: 15%|LASTNAME,Word count: 23|"
-						+ "domain,Avg chars: 20|domain,Avg white spaces: 0|domain,Char count: 460|"
-						+ "domain,Lowercase chars: 95%|domain,Max chars: 20|domain,Max white spaces: 0|"
-						+ "domain,Max words: 1|domain,Min chars: 20|domain,Min white spaces: 0|"
-						+ "domain,Min words: 1|domain,Non-letter chars: 5%|domain,Uppercase chars: 0%|"
-						+ "domain,Word count: 23|username,Avg chars: 7,48|username,Avg white spaces: 0|"
-						+ "username,Char count: 172|username,Lowercase chars: 100%|username,Max chars: 10|"
-						+ "username,Max white spaces: 0|username,Max words: 1|username,Min chars: 5|"
-						+ "username,Min white spaces: 0|username,Min words: 1|username,Non-letter chars: 0%|"
-						+ "username,Uppercase chars: 0%|username,Word count: 23",
-				crosstabResult.toString().replaceAll("\n", "|"));
+
+		String[] resultLines = crosstabResult.toString().split("\n");
+		assertEquals(53, resultLines.length);
+		assertEquals("Crosstab:", resultLines[0]);
+		assertEquals("FIRSTNAME,Avg chars: 5.391304347826087", resultLines[1]);
+		assertEquals("FIRSTNAME,Avg white spaces: 0.043478260869565216",
+				resultLines[2]);
+		assertEquals("FIRSTNAME,Char count: 124", resultLines[3]);
+		assertEquals("FIRSTNAME,Lowercase chars: 79%", resultLines[4]);
 	}
 }
