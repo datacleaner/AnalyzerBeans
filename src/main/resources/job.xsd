@@ -126,11 +126,4 @@
 		</sequence>
 	</complexType>
 
-	<simpleType name="providedPropertyTypeEnum">
-		<restriction base="token">
-			<enumeration value="list" />
-			<enumeration value="map" />
-		</restriction>
-	</simpleType>
-
 </schema>
