@@ -43,13 +43,13 @@ public class DateToAgeTransformerTest extends TestCase {
 		assertEquals(1, result[1].intValue());
 
 		// 1982-03-11
-		c2.set(Calendar.YEAR, 1982);
-		c2.set(Calendar.MONTH, Calendar.MARCH);
-		c2.set(Calendar.DAY_OF_MONTH, 11);
+		c2.set(Calendar.YEAR, 1980);
+		c2.set(Calendar.MONTH, Calendar.DECEMBER);
+		c2.set(Calendar.DAY_OF_MONTH, 31);
 
 		result = t.transform(new MockInputRow().put(col, c2.getTime()));
 		assertEquals(2, result.length);
-		assertEquals(10158, result[0].intValue());
-		assertEquals(27, result[1].intValue());
+		assertEquals(10593, result[0].intValue());
+		assertEquals(29, result[1].intValue());
 	}
 }
