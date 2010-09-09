@@ -43,14 +43,13 @@ import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
-import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.analyzer.util.StringConversionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.util.BooleanComparator;
 
 public class JaxbJobFactory {
 
@@ -323,7 +322,6 @@ public class JaxbJobFactory {
 			for (Property property : properties) {
 				String name = property.getName();
 				String stringValue = property.getValue();
-				Object value;
 
 				ConfiguredPropertyDescriptor configuredProperty = descriptor
 						.getConfiguredProperty(name);
@@ -332,35 +330,9 @@ public class JaxbJobFactory {
 					throw new IllegalStateException("No such property: " + name);
 				}
 
-				Class<?> baseType = configuredProperty.getBaseType();
-				if (ReflectionUtils.isString(baseType)) {
-					value = stringValue;
-				} else if (ReflectionUtils.isBoolean(baseType)) {
-					value = BooleanComparator.parseBoolean(stringValue);
-				} else if (ReflectionUtils.isSchema(baseType)) {
-					value = schemaNavigator.convertToSchema(stringValue);
-					if (value == null) {
-						throw new IllegalStateException("No such schema: " + stringValue);
-					}
-				} else if (ReflectionUtils.isTable(baseType)) {
-					value = schemaNavigator.convertToTable(stringValue);
-					if (value == null) {
-						throw new IllegalStateException("No such table: " + stringValue);
-					}
-				} else if (ReflectionUtils.isColumn(baseType)) {
-					value = schemaNavigator.convertToColumn(stringValue);
-					if (value == null) {
-						throw new IllegalStateException("No such column: " + stringValue);
-					}
-				} else {
-					logger.warn("Could not properly convert {} to {}",
-							stringValue, baseType);
-					value = stringValue;
-				}
+				Object value = StringConversionUtils.deserialize(stringValue,
+						configuredProperty.getType(), schemaNavigator);
 
-				// TODO: Handle numbers, dates and arrays of all-of-the-above
-
-				// TODO: Convert value according to configuredProperty's type
 				logger.debug("Setting property '{}' to {}", name, value);
 				builder.setConfiguredProperty(configuredProperty, value);
 			}

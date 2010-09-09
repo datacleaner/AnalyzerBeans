@@ -290,4 +290,11 @@ public class ReflectionUtils {
 		Class<?> subSuperclass = subtype.getSuperclass();
 		return 1 + getHierarchyDistance(subSuperclass, supertype);
 	}
+
+	public static boolean isArray(Object o) {
+		if (o == null) {
+			return false;
+		}
+		return o.getClass().isArray();
+	}
 }

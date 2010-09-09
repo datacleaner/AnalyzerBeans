@@ -17,11 +17,27 @@ public interface PropertyDescriptor {
 
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
+	/**
+	 * Gets the property type, as specified by the field representing the
+	 * property
+	 * 
+	 * @return
+	 */
+	public Class<?> getType();
+
+	/**
+	 * @return whether or not the type of the property type is an array
+	 */
+	public boolean isArray();
+
+	/**
+	 * @return the type of the property or the component type of the array, if
+	 *         the property type is an array
+	 */
 	public Class<?> getBaseType();
 
 	public int getTypeArgumentCount();
 
 	public Type getTypeArgument(int i) throws IndexOutOfBoundsException;
 
-	public boolean isArray();
 }
