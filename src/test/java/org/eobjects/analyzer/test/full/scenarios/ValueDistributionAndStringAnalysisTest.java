@@ -82,8 +82,6 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 					"Bottom n most frequent values", null);
 		}
 
-		columns = table.getLiteralColumns();
-
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder
 				.addRowProcessingAnalyzer(StringAnalyzer.class);
 		stringAnalyzerJob.addInputColumns(analysisJobBuilder

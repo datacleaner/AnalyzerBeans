@@ -12,7 +12,7 @@ public class CrosstabTest extends TestCase {
 
 		Crosstab<Serializable> c2 = c1.castValueClass(Serializable.class);
 		try {
-			c2.where("foo", "a").where("bar", "b").put(new Long(3));
+			c2.where("foo", "a").where("bar", "b").put(3l);
 			fail("Excepted exception");
 		} catch (IllegalArgumentException e) {
 			assertEquals(

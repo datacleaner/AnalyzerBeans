@@ -51,8 +51,7 @@ public final class StringConversionUtils {
 			{ "&euro;", "\u20a0" } };
 
 	// ISO 8601
-	private static final DateFormat dateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss S");
+	private static final String dateFormatString = "yyyy-MM-dd'T'HH:mm:ss S";
 
 	public static final String serialize(Object o) {
 		if (o == null) {
@@ -94,7 +93,7 @@ public final class StringConversionUtils {
 			o = ((Calendar) o).getTime();
 		}
 		if (o instanceof Date) {
-			return dateFormat.format((Date) o);
+			return new SimpleDateFormat(dateFormatString).format((Date) o);
 		}
 
 		logger.warn("Could not convert type: {}", o.getClass().getName());
@@ -199,7 +198,7 @@ public final class StringConversionUtils {
 
 	private static final Date toDate(String str) {
 		try {
-			return (Date) dateFormat.parse(str);
+			return (Date) new SimpleDateFormat(dateFormatString).parse(str);
 		} catch (ParseException e) {
 			logger.error("Could not parse date: " + str, e);
 			throw new IllegalArgumentException(e);

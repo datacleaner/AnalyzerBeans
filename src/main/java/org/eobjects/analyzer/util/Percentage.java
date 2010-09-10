@@ -5,7 +5,7 @@ public class Percentage extends Number {
 	private static final long serialVersionUID = 1L;
 
 	private short percentage;
-	
+
 	public Percentage(int percentage) {
 		this((short) percentage);
 	}
@@ -69,9 +69,7 @@ public class Percentage extends Number {
 	public static Percentage parsePercentage(String str)
 			throws NumberFormatException {
 		if (str == null) {
-			{
-				throw new NumberFormatException(str);
-			}
+			throw new NumberFormatException("cannot parse null");
 		}
 		str = str.trim();
 

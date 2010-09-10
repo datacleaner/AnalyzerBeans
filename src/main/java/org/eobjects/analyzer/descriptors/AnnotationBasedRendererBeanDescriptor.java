@@ -93,7 +93,7 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 			}
 		}
 
-		if (_formatOutputType == null) {
+		if (_rendererOutputType == null) {
 			throw new DescriptorException(
 					"Could not determine output type of renderer: "
 							+ _beanClass);
@@ -151,6 +151,21 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 	@Override
 	public int hashCode() {
 		return _beanClass.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (obj.getClass() == AnnotationBasedRendererBeanDescriptor.class) {
+			AnnotationBasedRendererBeanDescriptor that = (AnnotationBasedRendererBeanDescriptor) obj;
+			return this._beanClass.equals(that._beanClass);
+		}
+		return false;
 	}
 
 	public boolean isOutputApplicableFor(Class<?> inquiredClass) {
