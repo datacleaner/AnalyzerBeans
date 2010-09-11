@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-
 public class CrosstabDimension implements Serializable, Iterable<String> {
 
 	private static final long serialVersionUID = 1L;
@@ -48,17 +46,34 @@ public class CrosstabDimension implements Serializable, Iterable<String> {
 
 	@Override
 	public int hashCode() {
-		return name.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((categories == null) ? 0 : categories.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj != null && obj.getClass() == getClass()) {
-			CrosstabDimension that = (CrosstabDimension) obj;
-			return new EqualsBuilder().append(this.name, that.name)
-					.append(this.categories, that.categories).isEquals();
-		}
-		return false;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CrosstabDimension other = (CrosstabDimension) obj;
+		if (categories == null) {
+			if (other.categories != null)
+				return false;
+		} else if (!categories.equals(other.categories))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
 	}
 
 	public int getCategoryCount() {
@@ -67,8 +82,8 @@ public class CrosstabDimension implements Serializable, Iterable<String> {
 
 	@Override
 	public String toString() {
-		return "CrosstabDimension[name=" + name + ", categories="
-				+ categories + "]";
+		return "CrosstabDimension[name=" + name + ", categories=" + categories
+				+ "]";
 	}
 
 }

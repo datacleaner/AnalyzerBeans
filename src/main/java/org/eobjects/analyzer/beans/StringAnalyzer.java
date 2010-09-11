@@ -167,7 +167,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 	@Override
 	public CrosstabResult getResult() {
 		logger.info("getResult()");
-		CrosstabDimension measureDimension = new CrosstabDimension("measure");
+		CrosstabDimension measureDimension = new CrosstabDimension("Measure");
 		measureDimension.addCategory("Char count");
 		measureDimension.addCategory("Max chars");
 		measureDimension.addCategory("Min chars");
@@ -182,7 +182,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 		measureDimension.addCategory("Max words");
 		measureDimension.addCategory("Min words");
 
-		CrosstabDimension columnDimension = new CrosstabDimension("column");
+		CrosstabDimension columnDimension = new CrosstabDimension("Column");
 
 		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class,
 				columnDimension, measureDimension);
@@ -253,12 +253,12 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 						* 100 / numChars);
 			}
 
-			boolean isPhysicalColumn = column.isPhysicalColumn();
+			boolean queryable = column.isPhysicalColumn();
 
 			// base query for exploration data result producers
 			Query baseQuery = null;
 			QueryResultProducer resultProducer;
-			if (isPhysicalColumn) {
+			if (queryable) {
 				baseQuery = getBaseQuery(column.getPhysicalColumn());
 			}
 
@@ -268,7 +268,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			if (maxChars != null) {
 				nav.where(measureDimension, "Max chars").put(maxChars);
 
-				if (isPhysicalColumn) {
+				if (queryable) {
 					resultProducer = new QueryResultProducer(baseQuery,
 							getClass());
 					resultProducer.addFilter(new CharRowFilter(column
@@ -279,7 +279,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 			if (minChars != null) {
 				nav.where(measureDimension, "Min chars").put(minChars);
-				if (isPhysicalColumn) {
+				if (queryable) {
 					resultProducer = new QueryResultProducer(baseQuery,
 							getClass());
 					resultProducer.addFilter(new CharRowFilter(column
@@ -304,7 +304,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 			if (maxWords != null) {
 				nav.where(measureDimension, "Max words").put(maxWords);
-				if (isPhysicalColumn) {
+				if (queryable) {
 					resultProducer = new QueryResultProducer(baseQuery,
 							getClass());
 					resultProducer.addFilter(new WordRowFilter(column
@@ -315,7 +315,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 			if (minWords != null) {
 				nav.where(measureDimension, "Min words").put(minWords);
-				if (isPhysicalColumn) {
+				if (queryable) {
 					resultProducer = new QueryResultProducer(baseQuery,
 							getClass());
 					resultProducer.addFilter(new WordRowFilter(column

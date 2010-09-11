@@ -4,8 +4,6 @@ import java.util.HashMap;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.lang.ArrayUtils;
-
 public class PhoneticSimilarityFinderTest extends TestCase {
 
 	public void testGetResult() throws Exception {
@@ -29,14 +27,14 @@ public class PhoneticSimilarityFinderTest extends TestCase {
 		SimilarityResult result = analyzer.getResult();
 
 		assertEquals(3, result.getSimilarValues("kasper").size());
-		assertEquals("{kaspar,gasper,qasper}", ArrayUtils.toString(result
-				.getSimilarValues("kasper").toArray()));
+		assertEquals("[kaspar, gasper, qasper]",
+				result.getSimilarValues("kasper").toString());
 		assertEquals(3, result.getSimilarValues("gasper").size());
 		assertEquals(3, result.getSimilarValues("qasper").size());
 		assertEquals(3, result.getSimilarValues("kaspar").size());
 
-		assertEquals("[hellow, hallo]",
-				ArrayUtils.toString(result.getSimilarValues("hello")));
+		assertEquals("[hellow, hallo]", result.getSimilarValues("hello")
+				.toString());
 		assertEquals(2, result.getSimilarValues("hallo").size());
 		assertEquals(2, result.getSimilarValues("hellow").size());
 		assertEquals(0, result.getSimilarValues("wowsers").size());

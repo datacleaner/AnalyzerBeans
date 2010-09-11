@@ -1,13 +1,13 @@
 package org.eobjects.analyzer.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.reference.SimpleDictionary;
@@ -140,13 +140,13 @@ public class StringConversionUtilsTest extends TestCase {
 		Object o2 = StringConversionUtils.deserialize(s, o.getClass(), null,
 				null);
 		if (ReflectionUtils.isArray(o)) {
-			boolean equals = ArrayUtils.isEquals(o, o2);
+			boolean equals = CompareUtils.equals(o, o2);
 			if (!equals) {
 				System.out.println("Not equals:");
 				System.out.println(" expected: " + o + ": "
-						+ ArrayUtils.toString(o));
+						+ Arrays.toString((Object[]) o));
 				System.out.println(" actual:   " + o2 + ": "
-						+ ArrayUtils.toString(o2));
+						+ Arrays.toString((Object[]) o2));
 			}
 			assertTrue(equals);
 		} else {

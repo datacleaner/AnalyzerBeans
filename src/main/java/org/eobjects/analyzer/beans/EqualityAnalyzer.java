@@ -5,12 +5,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.ValidationResult;
+import org.eobjects.analyzer.util.CompareUtils;
 
 /**
  * An analyzer that picks up rows where configured values are not equal
@@ -38,7 +38,7 @@ public class EqualityAnalyzer implements
 		for (int i = 1; i < rowValues.length; i++) {
 			Object value1 = rowValues[i - 1];
 			Object value2 = rowValues[i];
-			if (!ObjectUtils.equals(value1, value2)) {
+			if (!CompareUtils.equals(value1, value2)) {
 				valid = false;
 				break;
 			}

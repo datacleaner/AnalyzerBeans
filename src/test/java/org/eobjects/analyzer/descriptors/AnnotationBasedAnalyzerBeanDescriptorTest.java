@@ -5,7 +5,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
@@ -44,8 +43,8 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
 				.getConfiguredProperties();
 		assertEquals(
-				"{ConfiguredPropertyDescriptorImpl[field=configured1,baseType=class java.lang.String],ConfiguredPropertyDescriptorImpl[field=configured2,baseType=class java.lang.Integer],ConfiguredPropertyDescriptorImpl[field=columns,baseType=class [Lorg.eobjects.analyzer.data.InputColumn;]}",
-				ArrayUtils.toString(configuredProperties.toArray()));
+				"[ConfiguredPropertyDescriptorImpl[field=configured1,baseType=class java.lang.String], ConfiguredPropertyDescriptorImpl[field=configured2,baseType=class java.lang.Integer], ConfiguredPropertyDescriptorImpl[field=columns,baseType=class [Lorg.eobjects.analyzer.data.InputColumn;]]",
+				Arrays.toString(configuredProperties.toArray()));
 
 		RowProcessingAnalyzerMock analyzerBean = new RowProcessingAnalyzerMock();
 		ConfiguredPropertyDescriptor configuredProperty = configuredProperties

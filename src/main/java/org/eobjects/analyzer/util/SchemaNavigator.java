@@ -51,39 +51,57 @@ public final class SchemaNavigator {
 		for (String schemaName : schemaNames) {
 			if (columnName.startsWith(schemaName)) {
 				schema = dataContext.getSchemaByName(schemaName);
-				String remainingPath1 = columnName.substring(schemaName.length());
-				
-				assert remainingPath1.charAt(0) == '.';
-				
-				remainingPath1 = remainingPath1.substring(1);
-				
-				Table table = null;
-				String[] tableNames = schema.getTableNames();
-				for (String tableName : tableNames) {
-					if (remainingPath1.startsWith(tableName)) {
-						table = schema.getTableByName(tableName);
-						String remainingPath2 = remainingPath1.substring(tableName.length());
-						
-						assert remainingPath2.charAt(0) == '.';
-						
-						remainingPath2 = remainingPath2.substring(1);
-						
-						Column column = table.getColumnByName(remainingPath2);
-						if (column != null) {
-							return column;
-						}
-					}
+				String tableAndColumnPath = columnName.substring(schemaName
+						.length());
+
+				assert tableAndColumnPath.charAt(0) == '.';
+
+				tableAndColumnPath = tableAndColumnPath.substring(1);
+
+				Column column = getColumn(schema, tableAndColumnPath);
+				if (column != null) {
+					return column;
 				}
 			}
 		}
-		
+
 		schema = dataContext.getDefaultSchema();
-		if (schema != null && schema.getTableCount() == 1) {
-			Table table = schema.getTables()[0];
-			return table.getColumnByName(columnName);
+		if (schema != null) {
+			Column column = getColumn(schema, columnName);
+			if (column != null) {
+				return column;
+			}
 		}
-		
-		
+
+		return null;
+	}
+
+	private Column getColumn(Schema schema, final String tableAndColumnPath) {
+		Table table = null;
+		String columnPath = tableAndColumnPath;
+		String[] tableNames = schema.getTableNames();
+		for (String tableName : tableNames) {
+			if (tableAndColumnPath.startsWith(tableName)) {
+				table = schema.getTableByName(tableName);
+				columnPath = tableAndColumnPath.substring(tableName.length());
+
+				assert columnPath.charAt(0) == '.';
+
+				columnPath = columnPath.substring(1);
+				break;
+			}
+		}
+		if (table == null && tableNames.length == 1) {
+			table = schema.getTables()[0];
+		}
+
+		if (table != null) {
+			Column column = table.getColumnByName(columnPath);
+			if (column != null) {
+				return column;
+			}
+		}
+
 		return null;
 	}
 }

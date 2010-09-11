@@ -1,9 +1,9 @@
 package org.eobjects.analyzer.beans;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -55,7 +55,7 @@ public class JoinMatcherTest extends MetaModelTestCase {
 		// referenced by an order
 		assertEquals(1, rowData.size());
 		assertEquals(
-				"{S18_3233,1985 Toyota Supra,Classic Cars,1:18,Highway 66 Mini Classics,This model features soft rubber tires, working steering, rubber mud guards, authentic Ford logos, detailed undercarriage, opening doors and hood, removable split rear gate, full size spare mounted in bed, detailed interior with opening glove box,7733,57.01,107.57,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>,<null>}",
-				ArrayUtils.toString(rowData.get(0)));
+				"[S18_3233, 1985 Toyota Supra, Classic Cars, 1:18, Highway 66 Mini Classics, This model features soft rubber tires, working steering, rubber mud guards, authentic Ford logos, detailed undercarriage, opening doors and hood, removable split rear gate, full size spare mounted in bed, detailed interior with opening glove box, 7733, 57.01, 107.57, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]",
+				Arrays.toString(rowData.get(0)));
 	}
 }

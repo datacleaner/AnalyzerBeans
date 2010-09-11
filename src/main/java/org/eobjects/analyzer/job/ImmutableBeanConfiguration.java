@@ -1,6 +1,5 @@
 package org.eobjects.analyzer.job;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +7,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.PropertyDescriptor;
+import org.eobjects.analyzer.util.CompareUtils;
 
 final class ImmutableBeanConfiguration implements BeanConfiguration {
 
@@ -68,7 +68,7 @@ final class ImmutableBeanConfiguration implements BeanConfiguration {
 				Object v2 = other._properties.get(key);
 				if (v1 != v2 && !v1.equals(v2)) {
 					if (v1.getClass().isArray() && v2.getClass().isArray()) {
-						if (!Arrays.equals((Object[]) v1, (Object[]) v2)) {
+						if (!CompareUtils.equals(v1, v2)) {
 							return false;
 						}
 					} else {

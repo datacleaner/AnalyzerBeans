@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.Table;
 
 public class SchemaNavigatorTest extends TestCase {
 
@@ -25,10 +26,15 @@ public class SchemaNavigatorTest extends TestCase {
 				column.toString());
 	}
 	
-	public void testConvertToColumnWithNoSchemaOrTable() throws Exception {
+	public void testConvertToColumnWithNoSchema() throws Exception {
 		CsvDatastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
 		SchemaNavigator schemaNavigator = datastore.getDataContextProvider().getSchemaNavigator();
 		Column col = schemaNavigator.convertToColumn("product");
+		assertNotNull(col);
+
+		Table table = datastore.getDataContextProvider().getDataContext().getDefaultSchema().getTables()[0];
+		assertEquals("projects", table.getName());
+		col = schemaNavigator.convertToColumn("projects.product");
 		assertNotNull(col);
 	}
 }

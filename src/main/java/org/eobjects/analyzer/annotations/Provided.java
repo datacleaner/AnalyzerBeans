@@ -36,12 +36,18 @@ import javax.inject.Qualifier;
  * Generic/parameterized types for the List or Map can be any of:
  * <ul>
  * <li>Boolean</li>
+ * <li>Byte</li>
+ * <li>Short</li>
  * <li>Integer</li>
  * <li>Long</li>
+ * <li>Float</li>
  * <li>Double</li>
+ * <li>Character</li>
  * <li>String</li>
  * <li>Byte[] or byte[]</li>
  * </ul>
+ * 
+ * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target( { ElementType.FIELD })
