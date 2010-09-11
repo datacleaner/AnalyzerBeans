@@ -19,7 +19,7 @@
 	</element>
 
 	<complexType name="jobMetadataType">
-		<sequence>
+		<all>
 			<element name="job-name" type="normalizedString" minOccurs="0"
 				maxOccurs="1" />
 			<element name="job-description" type="normalizedString"
@@ -32,7 +32,7 @@
 				maxOccurs="1" />
 			<element name="updated-date" type="date" minOccurs="0"
 				maxOccurs="1" />
-		</sequence>
+		</all>
 	</complexType>
 
 	<complexType name="sourceType">
