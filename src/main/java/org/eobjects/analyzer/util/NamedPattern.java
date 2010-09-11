@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Provides a useful abstraction over regular expressions where the groups are
  * named and not nescesarily ordered in the way specified by the enum that holds
@@ -17,6 +20,9 @@ import java.util.regex.Pattern;
  * @author Kasper Sørensen
  */
 public class NamedPattern<E extends Enum<E>> {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(NamedPattern.class);
 
 	public static final String SPECIAL_CHARACTERS = "æøåâäáàôöóòêëéèûüúùîïíìñńǹḿ";
 	public static final String DEFAULT_GROUP_LITERAL;
@@ -86,6 +92,7 @@ public class NamedPattern<E extends Enum<E>> {
 			groupIndex = getIndexOfHighest(groupNameStringIndexOfs);
 		}
 
+		logger.info("compiling pattern: {}", pattern);
 		this.pattern = Pattern.compile(pattern);
 	}
 
@@ -143,7 +150,7 @@ public class NamedPattern<E extends Enum<E>> {
 	public Pattern getPattern() {
 		return pattern;
 	}
-	
+
 	public Set<E> getUsedGroups() {
 		return groupIndexes.keySet();
 	}

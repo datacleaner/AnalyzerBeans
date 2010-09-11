@@ -1,7 +1,6 @@
 package org.eobjects.analyzer.util;
 
 import java.lang.reflect.Array;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -83,7 +82,8 @@ public final class StringConversionUtils {
 		if (o instanceof Column) {
 			return escape(((Column) o).getQualifiedLabel());
 		}
-		if (o instanceof Boolean || o instanceof Number || o instanceof String) {
+		if (o instanceof Boolean || o instanceof Number || o instanceof String
+				|| o instanceof Character) {
 			return escape(o.toString());
 		}
 		if (o instanceof java.sql.Date) {
@@ -150,6 +150,9 @@ public final class StringConversionUtils {
 		}
 		if (ReflectionUtils.isBoolean(type)) {
 			return (E) Boolean.valueOf(str);
+		}
+		if (ReflectionUtils.isCharacter(type)) {
+			return (E) Character.valueOf(str.charAt(0));
 		}
 		if (ReflectionUtils.isInteger(type)) {
 			return (E) Integer.valueOf(str);

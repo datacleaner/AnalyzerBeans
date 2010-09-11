@@ -64,7 +64,7 @@ public class ReflectionUtils {
 		return ofThatType.isAssignableFrom(thisClass);
 	}
 
-	private static boolean isCharacter(Class<?> type) {
+	public static boolean isCharacter(Type type) {
 		return (type == char.class || type == Character.class);
 	}
 
@@ -141,11 +141,8 @@ public class ReflectionUtils {
 	}
 
 	public static boolean isByteArray(Type type) {
-		if (type instanceof Class<?>) {
-			Class<?> clazz = (Class<?>) type;
-			if (clazz == byte[].class || clazz == Byte[].class) {
-				return true;
-			}
+		if (type == byte[].class || type == Byte[].class) {
+			return true;
 		}
 		return false;
 	}
@@ -268,7 +265,7 @@ public class ReflectionUtils {
 	public static int getHierarchyDistance(Class<?> subtype, Class<?> supertype) {
 		assert subtype != null;
 		assert supertype != null;
-		
+
 		if (subtype == supertype) {
 			return 0;
 		}
@@ -286,7 +283,7 @@ public class ReflectionUtils {
 				}
 			}
 		}
-		
+
 		Class<?> subSuperclass = subtype.getSuperclass();
 		return 1 + getHierarchyDistance(subSuperclass, supertype);
 	}

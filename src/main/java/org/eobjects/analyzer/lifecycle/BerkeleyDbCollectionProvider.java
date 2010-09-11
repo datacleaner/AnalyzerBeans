@@ -14,9 +14,13 @@ import org.slf4j.LoggerFactory;
 import com.sleepycat.bind.ByteArrayBinding;
 import com.sleepycat.bind.EntryBinding;
 import com.sleepycat.bind.tuple.BooleanBinding;
+import com.sleepycat.bind.tuple.ByteBinding;
+import com.sleepycat.bind.tuple.CharacterBinding;
 import com.sleepycat.bind.tuple.DoubleBinding;
+import com.sleepycat.bind.tuple.FloatBinding;
 import com.sleepycat.bind.tuple.IntegerBinding;
 import com.sleepycat.bind.tuple.LongBinding;
+import com.sleepycat.bind.tuple.ShortBinding;
 import com.sleepycat.bind.tuple.StringBinding;
 import com.sleepycat.collections.StoredMap;
 import com.sleepycat.je.Database;
@@ -159,8 +163,8 @@ public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 
 	private EntryBinding createBinding(Type type)
 			throws UnsupportedOperationException {
-		if (ReflectionUtils.isBoolean(type)) {
-			return new BooleanBinding();
+		if (ReflectionUtils.isString(type)) {
+			return new StringBinding();
 		}
 		if (ReflectionUtils.isInteger(type)) {
 			return new IntegerBinding();
@@ -168,11 +172,23 @@ public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 		if (ReflectionUtils.isLong(type)) {
 			return new LongBinding();
 		}
+		if (ReflectionUtils.isBoolean(type)) {
+			return new BooleanBinding();
+		}
+		if (ReflectionUtils.isShort(type)) {
+			return new ShortBinding();
+		}
+		if (ReflectionUtils.isByte(type)) {
+			return new ByteBinding();
+		}
 		if (ReflectionUtils.isDouble(type)) {
 			return new DoubleBinding();
 		}
-		if (ReflectionUtils.isString(type)) {
-			return new StringBinding();
+		if (ReflectionUtils.isFloat(type)) {
+			return new FloatBinding();
+		}
+		if (ReflectionUtils.isCharacter(type)) {
+			return new CharacterBinding();
 		}
 		if (ReflectionUtils.isByteArray(type)) {
 			return new ByteArrayBinding();

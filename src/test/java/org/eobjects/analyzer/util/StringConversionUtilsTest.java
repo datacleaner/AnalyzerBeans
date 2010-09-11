@@ -7,6 +7,10 @@ import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.Schema;
+import dk.eobjects.metamodel.schema.Table;
+
 public class StringConversionUtilsTest extends TestCase {
 
 	public void testConvertSimpleTypes() throws Exception {
@@ -14,6 +18,9 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests("hello", "hello");
 		runTests(1337, "1337");
 		runTests(12l, "12");
+		runTests('a', "a");
+		runTests(true, "true");
+		runTests(false, "false");
 		runTests((short) 12, "12");
 		runTests((byte) 12, "12");
 		runTests(1337.0, "1337.0");
@@ -21,6 +28,24 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests(new Date(1234), "1970-01-01T01:00:01 234");
 		runTests(Calendar.getInstance(), null);
 		runTests(new java.sql.Date(1234), "1970-01-01T01:00:01 234");
+	}
+	
+	public void testSerializeUnknownTypes() throws Exception {
+		String result = StringConversionUtils.serialize(new Percentage(50));
+		assertEquals("50%", result);
+	}
+	
+	public void testSerializeSchemaElements() throws Exception {
+		Schema schema = new Schema("s1");
+		assertEquals("s1", StringConversionUtils.serialize(schema));
+		
+		Table table = new Table("t1");
+		table.setSchema(schema);
+		assertEquals("s1.t1", StringConversionUtils.serialize(table));
+		
+		Column column = new Column("c1");
+		column.setTable(table);
+		assertEquals("s1.t1.c1", StringConversionUtils.serialize(column));
 	}
 
 	public void testNullArgument() throws Exception {

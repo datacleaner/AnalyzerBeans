@@ -9,6 +9,23 @@ import org.eobjects.analyzer.data.InputRow;
 import org.joda.time.DateTime;
 import org.joda.time.Years;
 
+/**
+ * A transformer for turning a date into age (both in years and in days).
+ * 
+ * The transformer and it's intended usage is depicted in this graph:
+ * 
+ * <img src="doc-files/DateToAgeTransformer.jpg" alt=""/>
+ * 
+ * <p>
+ * The transformer has been more thouroughly explained at kasper's source, see
+ * link below.
+ * </p>
+ * 
+ * @see http
+ *      ://kasper.eobjects.org/2010/09/developing-value-transformer-using.html
+ * 
+ * @author Kasper Sørensen
+ */
 @TransformerBean("Date to age")
 public class DateToAgeTransformer implements Transformer<Integer> {
 
@@ -46,7 +63,7 @@ public class DateToAgeTransformer implements Transformer<Integer> {
 	public void setToday(Date today) {
 		this.today = today;
 	}
-	
+
 	// injection for testing purposes only
 	public void setDateColumn(InputColumn<Date> dateColumn) {
 		this.dateColumn = dateColumn;
