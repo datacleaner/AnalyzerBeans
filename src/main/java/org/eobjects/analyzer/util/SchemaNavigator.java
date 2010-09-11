@@ -77,6 +77,13 @@ public final class SchemaNavigator {
 			}
 		}
 		
+		schema = dataContext.getDefaultSchema();
+		if (schema != null && schema.getTableCount() == 1) {
+			Table table = schema.getTables()[0];
+			return table.getColumnByName(columnName);
+		}
+		
+		
 		return null;
 	}
 }

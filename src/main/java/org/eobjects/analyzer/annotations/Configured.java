@@ -20,11 +20,16 @@ import javax.inject.Qualifier;
  * instances or arrays of:
  * <ul>
  * <li>Boolean</li>
- * <li>Long</li>
+ * <li>Byte</li>
  * <li>Integer</li>
+ * <li>Long</li>
+ * <li>Float</li>
  * <li>Double</li>
  * <li>String</li>
+ * <li>Character</li>
  * <li>org.eobjects.analyzer.data.InputColumn</li>
+ * <li>org.eobjects.analyzer.reference.Dictionary</li>
+ * <li>org.eobjects.analyzer.reference.SynonymCatalog</li> *
  * </ul>
  * 
  * Additionally exploring analyzers are allowed to inject these @Configured
@@ -49,6 +54,6 @@ public @interface Configured {
 	 * @return the name of the configuration property
 	 */
 	String value() default "";
-	
+
 	boolean required() default true;
 }

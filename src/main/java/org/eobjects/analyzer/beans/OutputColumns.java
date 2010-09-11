@@ -27,6 +27,16 @@ public class OutputColumns implements Serializable {
 		columnNames = new String[columns];
 	}
 
+	public OutputColumns(String[] columnNames) {
+		if (columnNames == null) {
+			throw new IllegalArgumentException("column cannot be null");
+		}
+		if (columnNames.length < 1) {
+			throw new IllegalArgumentException("columns must be 1 or higher");
+		}
+		this.columnNames = columnNames.clone();
+	}
+
 	public OutputColumns(String firstColumnName,
 			String... additionalColumnNames) {
 		columnNames = new String[additionalColumnNames.length + 1];

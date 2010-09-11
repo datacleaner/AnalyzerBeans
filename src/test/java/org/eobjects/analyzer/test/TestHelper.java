@@ -1,7 +1,7 @@
 package org.eobjects.analyzer.test;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,13 +13,16 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
+import org.eobjects.analyzer.reference.SimpleDictionary;
+import org.eobjects.analyzer.reference.SimpleSynonym;
+import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 
 public final class TestHelper {
@@ -50,8 +53,20 @@ public final class TestHelper {
 	}
 
 	public static ReferenceDataCatalog createReferenceDataCatalog() {
-		Collection<Dictionary> dictionaries = Collections.emptyList();
-		Collection<SynonymCatalog> synonymCatalogs = Collections.emptyList();
+		Collection<Dictionary> dictionaries = new ArrayList<Dictionary>();
+		dictionaries.add(new SimpleDictionary("eobjects.org products",
+				"MetaModel", "DataCleaner", "AnalyzerBeans"));
+		dictionaries.add(new SimpleDictionary("apache products",
+				"commons-lang", "commons-math", "commons-codec",
+				"commons-logging"));
+		dictionaries.add(new SimpleDictionary("logging products",
+				"commons-logging", "log4j", "slf4j", "java.util.Logging"));
+		Collection<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
+
+		synonymCatalogs.add(new SimpleSynonymCatalog("translated terms",
+				new SimpleSynonym("hello", "howdy", "hi", "yo", "hey"),
+				new SimpleSynonym("goodbye", "bye", "see you", "hey")));
+
 		return new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs);
 	}
 

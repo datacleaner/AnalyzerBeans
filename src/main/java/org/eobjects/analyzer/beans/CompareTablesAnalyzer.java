@@ -105,7 +105,7 @@ public class CompareTablesAnalyzer implements
 		}
 
 		if (isRelationshipsAnalyzed()) {
-			// TODO: Include relatinship analysis
+			// TODO: Include relationship analysis?
 		} else {
 			logger.debug("Skipping relationship analysis");
 		}

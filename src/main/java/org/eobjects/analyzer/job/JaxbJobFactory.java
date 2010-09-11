@@ -331,7 +331,8 @@ public class JaxbJobFactory {
 				}
 
 				Object value = StringConversionUtils.deserialize(stringValue,
-						configuredProperty.getType(), schemaNavigator);
+						configuredProperty.getType(), schemaNavigator,
+						_configuration.getReferenceDataCatalog());
 
 				logger.debug("Setting property '{}' to {}", name, value);
 				builder.setConfiguredProperty(configuredProperty, value);

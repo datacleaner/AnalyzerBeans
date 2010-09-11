@@ -26,7 +26,7 @@ public class PercentageTest extends TestCase {
 			Percentage.parsePercentage(null);
 			fail("Exception expected");
 		} catch (NumberFormatException e) {
-			assertEquals(null, e.getMessage());
+			assertEquals("cannot parse null", e.getMessage());
 		}
 		
 		try {

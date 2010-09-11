@@ -100,7 +100,7 @@ public class CompareSchemasAnalyzer implements
 			}
 		}
 
-		// TODO: Include relatinship analysis
+		// TODO: Include relationship analysis?
 
 		result = new SchemaComparisonResult(differences, tableComparisonResults);
 	}

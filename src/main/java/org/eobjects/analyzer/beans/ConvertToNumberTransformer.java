@@ -13,11 +13,11 @@ import org.eobjects.analyzer.data.InputRow;
  * @author Kasper Sørensen
  */
 @TransformerBean("Convert to number")
-public class ConvertToNumberTransformer implements Transformer<Double> {
+public class ConvertToNumberTransformer implements Transformer<Number> {
 
 	@Inject
 	@Configured
-	InputColumn<String> input;
+	InputColumn<?> input;
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -25,17 +25,27 @@ public class ConvertToNumberTransformer implements Transformer<Double> {
 	}
 
 	@Override
-	public Double[] transform(InputRow inputRow) {
-		String value = inputRow.getValue(input);
-		Double d = null;
+	public Number[] transform(InputRow inputRow) {
+		Object value = inputRow.getValue(input);
+		Number n = null;
 		if (value != null) {
-			try {
-				d = Double.parseDouble(value);
-			} catch (NumberFormatException e) {
-				// ignore
+			if (value instanceof Boolean) {
+				if (Boolean.TRUE.equals(value)) {
+					n = 1;
+				} else {
+					n = 0;
+				}
+			} else {
+				String stringValue = value.toString();
+				try {
+					n = Double.parseDouble(stringValue);
+				} catch (NumberFormatException e) {
+					// ignore
+				}
 			}
+
 		}
-		return new Double[] { d };
+		return new Number[] { n };
 	}
 
 	public void setInput(InputColumn<String> input) {

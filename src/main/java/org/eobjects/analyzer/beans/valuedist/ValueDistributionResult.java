@@ -113,4 +113,36 @@ public class ValueDistributionResult implements AnalyzerResult {
 		}
 		return sb.toString();
 	}
+
+	public Integer getCount(final String value) {
+		if (value == null) {
+			return _nullCount;
+		}
+
+		if (_topValues != null) {
+			List<ValueCount> valueCounts = _topValues.getValueCounts();
+			for (ValueCount valueCount : valueCounts) {
+				if (value.equals(valueCount.getValue())) {
+					return valueCount.getCount();
+				}
+			}
+		}
+
+		if (_bottomValues != null) {
+			List<ValueCount> valueCounts = _bottomValues.getValueCounts();
+			for (ValueCount valueCount : valueCounts) {
+				if (value.equals(valueCount.getValue())) {
+					return valueCount.getCount();
+				}
+			}
+		}
+
+		if (_uniqueValues != null) {
+			if (_uniqueValues.contains(value)) {
+				return 1;
+			}
+		}
+
+		return null;
+	}
 }

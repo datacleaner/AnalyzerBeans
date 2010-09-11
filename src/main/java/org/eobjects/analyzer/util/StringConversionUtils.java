@@ -8,6 +8,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.eobjects.analyzer.reference.Dictionary;
+import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +27,17 @@ import dk.eobjects.metamodel.schema.Table;
  * <li>Boolean</li>
  * <li>Byte</li>
  * <li>Short</li>
- * <li>Long</li>
  * <li>Integer</li>
+ * <li>Long</li>
+ * <li>Float</li>
  * <li>Double</li>
+ * <li>Character</li>
  * <li>String</li>
  * <li>java.util.Date</li>
  * <li>java.sql.Date</li>
  * <li>java.util.Calendar</li>
+ * <li>org.eobjects.analyzer.reference.Dictionary</li>
+ * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
  * <li>dk.eobjects.metamodel.schema.Column</li>
  * <li>dk.eobjects.metamodel.schema.Table</li>
  * <li>dk.eobjects.metamodel.schema.Schema</li>
@@ -82,6 +89,12 @@ public final class StringConversionUtils {
 		if (o instanceof Column) {
 			return escape(((Column) o).getQualifiedLabel());
 		}
+		if (o instanceof Dictionary) {
+			return escape(((Dictionary) o).getName());
+		}
+		if (o instanceof SynonymCatalog) {
+			return escape(((SynonymCatalog) o).getName());
+		}
 		if (o instanceof Boolean || o instanceof Number || o instanceof String
 				|| o instanceof Character) {
 			return escape(o.toString());
@@ -132,7 +145,8 @@ public final class StringConversionUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static final <E> E deserialize(String str, Class<E> type,
-			SchemaNavigator schemaNavigator) {
+			SchemaNavigator schemaNavigator,
+			ReferenceDataCatalog referenceDataCatalog) {
 		logger.debug("deserialize(\"{}\", {})", str, type);
 		if (type == null) {
 			throw new IllegalArgumentException("type cannot be null");
@@ -143,7 +157,8 @@ public final class StringConversionUtils {
 		}
 
 		if (type.isArray()) {
-			return (E) deserializeArray(str, type, schemaNavigator);
+			return (E) deserializeArray(str, type, schemaNavigator,
+					referenceDataCatalog);
 		}
 		if (ReflectionUtils.isString(type)) {
 			return (E) unescape(str);
@@ -186,13 +201,40 @@ public final class StringConversionUtils {
 			return (E) new java.sql.Date(date.getTime());
 		}
 		if (ReflectionUtils.isColumn(type)) {
-			return (E) schemaNavigator.convertToColumn(str);
+			Column column = schemaNavigator.convertToColumn(str);
+			if (column == null) {
+				logger.warn("Column not found: {}", str);
+			}
+			return (E) column;
 		}
 		if (ReflectionUtils.isTable(type)) {
-			return (E) schemaNavigator.convertToTable(str);
+			Table table = schemaNavigator.convertToTable(str);
+			if (table == null) {
+				logger.warn("Table not found: {}", str);
+			}
+			return (E) table;
 		}
 		if (ReflectionUtils.isSchema(type)) {
-			return (E) schemaNavigator.convertToSchema(str);
+			Schema schema = schemaNavigator.convertToSchema(str);
+			if (schema == null) {
+				logger.warn("Schema not found: {}", str);
+			}
+			return (E) schema;
+		}
+		if (ReflectionUtils.is(type, Dictionary.class)) {
+			Dictionary dictionary = referenceDataCatalog.getDictionary(str);
+			if (dictionary == null) {
+				logger.warn("Dictionary not found: {}", str);
+			}
+			return (E) dictionary;
+		}
+		if (ReflectionUtils.is(type, SynonymCatalog.class)) {
+			SynonymCatalog synonymCatalog = referenceDataCatalog
+					.getSynonymCatalog(str);
+			if (synonymCatalog == null) {
+				logger.warn("SynonymCatalog not found: {}", str);
+			}
+			return (E) synonymCatalog;
 		}
 
 		throw new IllegalArgumentException("Could not convert to type: "
@@ -209,7 +251,8 @@ public final class StringConversionUtils {
 	}
 
 	private static final Object deserializeArray(final String str,
-			Class<?> type, SchemaNavigator schemaNavigator) {
+			Class<?> type, SchemaNavigator schemaNavigator,
+			ReferenceDataCatalog referenceDataCatalog) {
 		Class<?> componentType = type.getComponentType();
 
 		if (logger.isDebugEnabled()) {
@@ -241,8 +284,11 @@ public final class StringConversionUtils {
 		if (!str.startsWith("[") || !str.endsWith("]")) {
 			if (str.indexOf(',') == -1) {
 				Object result = Array.newInstance(componentType, 1);
-				Array.set(result, 0,
-						deserialize(str, componentType, schemaNavigator));
+				Array.set(
+						result,
+						0,
+						deserialize(str, componentType, schemaNavigator,
+								referenceDataCatalog));
 				return result;
 			}
 			throw new IllegalArgumentException(
@@ -265,7 +311,8 @@ public final class StringConversionUtils {
 			if (commaIndex == -1) {
 				logger.debug("no comma found");
 				String s = innerString.substring(offset);
-				objects.add(deserialize(s, componentType, schemaNavigator));
+				objects.add(deserialize(s, componentType, schemaNavigator,
+						referenceDataCatalog));
 				offset = innerString.length();
 			} else if (bracketBeginIndex == -1
 					|| commaIndex < bracketBeginIndex) {
@@ -274,7 +321,8 @@ public final class StringConversionUtils {
 					offset++;
 				} else {
 					logger.debug("no brackets in next element: \"{}\"", s);
-					objects.add(deserialize(s, componentType, schemaNavigator));
+					objects.add(deserialize(s, componentType, schemaNavigator,
+							referenceDataCatalog));
 					offset = commaIndex + 1;
 				}
 			} else {
@@ -318,7 +366,8 @@ public final class StringConversionUtils {
 				logger.debug("recursing to nested array: {}", s);
 
 				logger.debug("inner array string: " + s);
-				objects.add(deserializeArray(s, componentType, schemaNavigator));
+				objects.add(deserializeArray(s, componentType, schemaNavigator,
+						referenceDataCatalog));
 
 				offset = bracketBeginIndex + s.length();
 			}

@@ -19,7 +19,7 @@ public class AnnotationBasedTransformerBeanDescriptorTest extends TestCase {
 
 		descriptor = AnnotationBasedTransformerBeanDescriptor
 				.create(ConvertToNumberTransformer.class);
-		assertEquals(DataTypeFamily.STRING, descriptor.getInputDataTypeFamily());
+		assertEquals(DataTypeFamily.UNDEFINED, descriptor.getInputDataTypeFamily());
 		assertEquals(DataTypeFamily.NUMBER,
 				descriptor.getOutputDataTypeFamily());
 

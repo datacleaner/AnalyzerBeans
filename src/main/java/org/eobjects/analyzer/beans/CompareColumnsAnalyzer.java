@@ -88,7 +88,7 @@ public class CompareColumnsAnalyzer implements
 			if (table1 == null || table2 == null) {
 				logger.warn("Not analyzing relationships - could not resolve table for one or both columns");
 			} else {
-				// TODO: Include relatinship analysis
+				// TODO: Include relationship analysis?
 			}
 		} else {
 			logger.debug("Skipping relationship analysis");
