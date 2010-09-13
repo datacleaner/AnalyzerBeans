@@ -19,6 +19,7 @@ public class DateToAgeTransformerTest extends TestCase {
 
 		// 2010-01-01
 		Calendar c1 = Calendar.getInstance();
+		c1.setTimeInMillis(0l);
 		c1.set(Calendar.YEAR, 2010);
 		c1.set(Calendar.MONTH, Calendar.JANUARY);
 		c1.set(Calendar.DAY_OF_MONTH, 1);
@@ -26,6 +27,7 @@ public class DateToAgeTransformerTest extends TestCase {
 
 		// 2009-01-02
 		Calendar c2 = Calendar.getInstance();
+		c2.setTimeInMillis(0l);
 		c2.set(Calendar.YEAR, 2009);
 		c2.set(Calendar.MONTH, Calendar.JANUARY);
 		c2.set(Calendar.DAY_OF_MONTH, 2);

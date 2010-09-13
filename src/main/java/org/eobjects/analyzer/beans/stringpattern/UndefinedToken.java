@@ -21,4 +21,14 @@ public class UndefinedToken implements Token {
 	public String toString() {
 		return "UndefinedToken['" + _string + "']";
 	}
+
+	@Override
+	public int length() {
+		return _string.length();
+	}
+
+	@Override
+	public char charAt(int index) {
+		return _string.charAt(index);
+	}
 }

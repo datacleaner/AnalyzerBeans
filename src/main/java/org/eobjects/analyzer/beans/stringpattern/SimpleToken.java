@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.beans.stringpattern;
 
+
 public class SimpleToken implements Token {
 
 	private TokenType _type;
@@ -36,6 +37,16 @@ public class SimpleToken implements Token {
 
 	public void prependChar(char c) {
 		_stringBuilder.insert(0, c);
+	}
+	
+	@Override
+	public int length() {
+		return _stringBuilder.length();
+	}
+	
+	@Override
+	public char charAt(int index) {
+		return _stringBuilder.charAt(index);
 	}
 
 	@Override

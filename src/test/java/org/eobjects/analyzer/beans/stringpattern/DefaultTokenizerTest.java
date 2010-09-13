@@ -8,6 +8,12 @@ public class DefaultTokenizerTest extends TestCase {
 
 	private TokenizerConfiguration conf = new TokenizerConfiguration(false,
 			'.', ',', '-');
+	
+	public void testTokenizeEmptyString() throws Exception {
+		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize(
+				"", conf);
+		assertTrue(tokens.isEmpty());
+	}
 
 	public void testPreliminaryTokenizeAndMixedTokens() throws Exception {
 		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize(
@@ -75,15 +81,35 @@ public class DefaultTokenizerTest extends TestCase {
 		assertEquals("Token['20,632' (NUMBER)]", tokens.get(0).toString());
 		assertEquals("Token[',.' (DELIM)]", tokens.get(1).toString());
 		assertEquals("Token['20213' (NUMBER)]", tokens.get(2).toString());
-		
-		tokens = DefaultTokenizer.preliminaryTokenize(",20,632.20213", conf);
+
+		tokens = DefaultTokenizer.preliminaryTokenize(",-20,632.20213", conf);
 		assertEquals(2, tokens.size());
 		assertEquals("Token[',' (DELIM)]", tokens.get(0).toString());
-		assertEquals("Token['20,632.20213' (NUMBER)]", tokens.get(1).toString());
-		
+		assertEquals("Token['-20,632.20213' (NUMBER)]", tokens.get(1)
+				.toString());
+
 		tokens = DefaultTokenizer.preliminaryTokenize("20,632.20213,", conf);
 		assertEquals(2, tokens.size());
 		assertEquals("Token['20,632.20213' (NUMBER)]", tokens.get(0).toString());
 		assertEquals("Token[',' (DELIM)]", tokens.get(1).toString());
+
+		tokens = DefaultTokenizer.preliminaryTokenize("20,632-20213,", conf);
+		assertEquals(3, tokens.size());
+		assertEquals("Token['20,632' (NUMBER)]", tokens.get(0).toString());
+		assertEquals("Token['-20213' (NUMBER)]", tokens.get(1).toString());
+		assertEquals("Token[',' (DELIM)]", tokens.get(2).toString());
+	}
+
+	public void testNumberParsingWithoutSeparatorChars() throws Exception {
+		TokenizerConfiguration c = new TokenizerConfiguration(false, null,
+				null, null);
+		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize(
+				"20,-632.20213", c);
+		assertEquals(5, tokens.size());
+		assertEquals("Token['20' (NUMBER)]", tokens.get(0).toString());
+		assertEquals("Token[',-' (DELIM)]", tokens.get(1).toString());
+		assertEquals("Token['632' (NUMBER)]", tokens.get(2).toString());
+		assertEquals("Token['.' (DELIM)]", tokens.get(3).toString());
+		assertEquals("Token['20213' (NUMBER)]", tokens.get(4).toString());
 	}
 }

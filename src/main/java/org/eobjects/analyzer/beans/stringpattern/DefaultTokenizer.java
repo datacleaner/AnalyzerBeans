@@ -87,12 +87,12 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 				if (lastToken != null
 						&& lastToken.getType() == TokenType.NUMBER) {
 					// there's a previous NUMBER token
-					
+
 					if (ci.hasNext()) {
 						char next = ci.next();
 						if (ci.isDigit()) {
 							// the next token is also a NUMBER
-							
+
 							// now we're ready to assume that this is a
 							// separator
 							treatAsSeparator = true;
@@ -137,6 +137,20 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 			} else if (ci.isDigit()) {
 				lastToken = registerChar(result, lastToken, c, TokenType.NUMBER);
 			} else if (ci.isLetter()) {
+				if (configuration.isDiscriminateTextCase()) {
+					if (lastToken != null
+							&& lastToken.getType() == TokenType.TEXT) {
+						// if we need to discriminate on case then we should
+						// check the previous token and make sure that we only
+						// append to that if they share the same case.
+						char charFromPreviousToken = lastToken.getString()
+								.charAt(0);
+						if (Character.isUpperCase(charFromPreviousToken) != Character
+								.isUpperCase(c)) {
+							lastToken = null;
+						}
+					}
+				}
 				lastToken = registerChar(result, lastToken, c, TokenType.TEXT);
 			} else if (ci.isWhitespace()) {
 				lastToken = registerChar(result, lastToken, c,
@@ -167,20 +181,6 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		return lastToken;
 	}
 
-	private static boolean isInteger(Token token, Character thousandSeparator) {
-		assert token.getType() == TokenType.NUMBER;
-		CharIterator it = new CharIterator(token.getString());
-		while (it.hasNext()) {
-			it.next();
-			if (!it.isDigit()) {
-				if (!it.is(thousandSeparator)) {
-					return false;
-				}
-			}
-		}
-		return false;
-	}
-
 	public static List<SimpleToken> flattenMixedTokens(List<SimpleToken> tokens) {
 		SimpleToken previousToken = null;
 		for (ListIterator<SimpleToken> it = tokens.listIterator(); it.hasNext();) {
@@ -188,14 +188,21 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 			if (previousToken == null) {
 				previousToken = token;
 			} else {
+				boolean mix = false;
+
 				TokenType previousType = previousToken.getType();
 				TokenType currentType = token.getType();
-				if (isMixedCandidate(previousType)
-						&& isMixedCandidate(currentType)) {
-					previousToken.appendString(token.getString());
-					previousToken.setType(TokenType.MIXED);
-					it.remove();
-				} else {
+				if (previousType != currentType) {
+					if (isMixedCandidate(previousType)
+							&& isMixedCandidate(currentType)) {
+						mix = true;
+						previousToken.appendString(token.getString());
+						previousToken.setType(TokenType.MIXED);
+						it.remove();
+					}
+				}
+
+				if (!mix) {
 					previousToken = token;
 				}
 			}

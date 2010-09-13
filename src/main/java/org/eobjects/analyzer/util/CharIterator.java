@@ -53,7 +53,10 @@ public class CharIterator implements ListIterator<Character> {
 		return new CharIterator(chars);
 	}
 
-	public boolean is(char c) {
+	public boolean is(Character c) {
+		if (c == null) {
+			return false;
+		}
 		return c == current();
 	}
 
