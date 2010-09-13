@@ -24,13 +24,12 @@ public class NamedPattern<E extends Enum<E>> {
 	private static final Logger logger = LoggerFactory
 			.getLogger(NamedPattern.class);
 
-	public static final String SPECIAL_CHARACTERS = "æøåâäáàôöóòêëéèûüúùîïíìñńǹḿ";
 	public static final String DEFAULT_GROUP_LITERAL;
 
 	static {
 		StringBuilder sb = new StringBuilder("([a-zA-Z0-9");
-		sb.append(SPECIAL_CHARACTERS.toLowerCase());
-		sb.append(SPECIAL_CHARACTERS.toUpperCase());
+		sb.append(StringUtils.DIACRITICS.toLowerCase());
+		sb.append(StringUtils.DIACRITICS.toUpperCase());
 		sb.append("]+)");
 		DEFAULT_GROUP_LITERAL = sb.toString();
 	}

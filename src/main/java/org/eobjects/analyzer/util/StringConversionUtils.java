@@ -253,32 +253,38 @@ public final class StringConversionUtils {
 	private static final Object deserializeArray(final String str,
 			Class<?> type, SchemaNavigator schemaNavigator,
 			ReferenceDataCatalog referenceDataCatalog) {
+		assert type.isArray();
+
 		Class<?> componentType = type.getComponentType();
+
+		if ("[]".equals(str)) {
+			logger.debug("found [], returning empty array");
+			return Array.newInstance(componentType, 0);
+		}
+
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("deserializeArray(\"{}\")", str);
 			logger.debug("component type is: {}", componentType);
 
-			char[] charArray = str.toCharArray();
 			int beginningBrackets = 0;
 			int endingBrackets = 0;
-			for (char c : charArray) {
-				if (c == '[') {
+
+			CharIterator it = new CharIterator(str);
+			while (it.hasNext()) {
+				it.next();
+				if (it.is('[')) {
 					beginningBrackets++;
-				} else if (c == ']') {
+				} else if (it.is(']')) {
 					endingBrackets++;
 				}
 			}
+			it.reset();
 			logger.debug("brackets statistics: beginning={}, ending={}",
 					beginningBrackets, endingBrackets);
 			if (beginningBrackets != endingBrackets) {
 				logger.warn("Unbalanced beginning and ending brackets!");
 			}
-		}
-
-		if ("[]".equals(str)) {
-			logger.debug("found [], returning empty array");
-			return Array.newInstance(componentType, 0);
 		}
 
 		if (!str.startsWith("[") || !str.endsWith("]")) {
