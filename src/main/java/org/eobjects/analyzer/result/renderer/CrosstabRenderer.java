@@ -19,7 +19,7 @@ import org.eobjects.analyzer.result.CrosstabNavigator;
  */
 public class CrosstabRenderer {
 
-	private static final int MAX_HORIZONTAL_CELLS_10 = 10;
+	private static final int MAX_HORIZONTAL_CELLS = 10;
 
 	private Crosstab<?> crosstab;
 	private List<CrosstabDimension> horizontalDimensions;
@@ -41,31 +41,33 @@ public class CrosstabRenderer {
 		// out horizontally
 
 		List<CrosstabDimension> dimensions = crosstab.getDimensions();
-		List<CrosstabDimension> autoAssignedDimensions = new LinkedList<CrosstabDimension>();
+		List<CrosstabDimension> autoAssignDimensions = new LinkedList<CrosstabDimension>();
 
 		for (CrosstabDimension dimension : dimensions) {
 			if (!isAssigned(dimension)) {
+				autoAssignDimensions.add(dimension);
+			}
+		}
+		
+		if (autoAssignDimensions.size() == 2) {
+			makeHorizontal(autoAssignDimensions.get(0));
+			makeVertical(autoAssignDimensions.get(1));
+		} else {
+			for (CrosstabDimension dimension : autoAssignDimensions) {
 				boolean horizontal = false;
 				int categoryCount = dimension.getCategoryCount();
-				if (horizontalCells <= MAX_HORIZONTAL_CELLS_10
-						&& categoryCount <= MAX_HORIZONTAL_CELLS_10) {
-					if (horizontalCells == 1
-							|| horizontalCells * categoryCount <= MAX_HORIZONTAL_CELLS_10) {
+				if (horizontalCells <= MAX_HORIZONTAL_CELLS
+						&& categoryCount <= MAX_HORIZONTAL_CELLS) {
+					if (horizontalCells * categoryCount <= MAX_HORIZONTAL_CELLS) {
 						makeHorizontal(dimension);
 						horizontal = true;
 					}
 				}
-
+				
 				if (!horizontal) {
 					makeVertical(dimension);
 				}
-
-				autoAssignedDimensions.add(dimension);
 			}
-		}
-
-		if (verticalDimensions.isEmpty() && autoAssignedDimensions.size() >= 2) {
-			makeHorizontal(autoAssignedDimensions.get(0));
 		}
 	}
 

@@ -6,6 +6,8 @@ import org.eobjects.analyzer.util.CompareUtils;
 
 public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 
+	private static final long serialVersionUID = 1L;
+
 	private TokenType _tokenType;
 	private int _length;
 	private boolean _upperCaseOnly = false;

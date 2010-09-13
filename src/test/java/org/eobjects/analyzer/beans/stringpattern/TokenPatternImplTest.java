@@ -4,7 +4,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-public class TokenPatternTest extends TestCase {
+public class TokenPatternImplTest extends TestCase {
 
 	private TokenizerConfiguration configuration = new TokenizerConfiguration(
 			true, '.', ',', '-');
@@ -15,24 +15,24 @@ public class TokenPatternTest extends TestCase {
 
 		tokens = tokenizer.tokenize("hello world");
 
-		TokenPattern tp1 = new TokenPattern(tokens, configuration);
+		TokenPatternImpl tp1 = new TokenPatternImpl(tokens, configuration);
 		assertEquals("aaaaa aaaaa", tp1.toSymbolicString());
 
 		tokens = tokenizer.tokenize("hello pinnochio");
-		assertTrue(tp1.matches(tokens));
+		assertTrue(tp1.match(tokens));
 		assertEquals("aaaaa aaaaaaaaa", tp1.toSymbolicString());
-		
+
 		tokens = tokenizer.tokenize("hello you");
-		assertTrue(tp1.matches(tokens));
+		assertTrue(tp1.match(tokens));
 		assertEquals("aaaaa aaaaaaaaa", tp1.toSymbolicString());
-		
+
 		tokens = tokenizer.tokenize("hello Mr. FanDango");
-		assertFalse(tp1.matches(tokens));
+		assertFalse(tp1.match(tokens));
 		assertEquals("aaaaa aaaaaaaaa", tp1.toSymbolicString());
-		
+
 		configuration.setDiscriminateTextCase(true);
 		tokens = tokenizer.tokenize("hello Mr. FanDango");
-		TokenPattern tp2 = new TokenPattern(tokens, configuration);
+		TokenPatternImpl tp2 = new TokenPatternImpl(tokens, configuration);
 		assertEquals("aaaaa Aa. AaaAaaaa", tp2.toSymbolicString());
 	}
 }

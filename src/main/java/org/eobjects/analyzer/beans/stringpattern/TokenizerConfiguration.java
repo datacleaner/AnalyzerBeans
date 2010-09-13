@@ -24,6 +24,17 @@ public class TokenizerConfiguration implements Serializable {
 
 	private List<PredefinedTokenDefinition> _predefinedTokens = new LinkedList<PredefinedTokenDefinition>();
 
+	public TokenizerConfiguration() {
+		this(true);
+	}
+
+	public TokenizerConfiguration(boolean enableMixedTokens) {
+		this(enableMixedTokens, DecimalFormatSymbols.getInstance()
+				.getDecimalSeparator(), DecimalFormatSymbols.getInstance()
+				.getGroupingSeparator(), DecimalFormatSymbols.getInstance()
+				.getMinusSign());
+	}
+
 	public TokenizerConfiguration(boolean enableMixed,
 			Character decimalSeparator, Character thousandSeparator,
 			Character minusSign) {
@@ -41,7 +52,6 @@ public class TokenizerConfiguration implements Serializable {
 		_discriminateTokenLength.put(TokenType.PREDEFINED, false);
 		_discriminateTokenLength.put(TokenType.WHITESPACE, true);
 		_discriminateTokenLength.put(TokenType.DELIM, true);
-		
 
 		_discriminateTextCase = true;
 		_discriminateWhiteSpaces = true;
@@ -51,12 +61,6 @@ public class TokenizerConfiguration implements Serializable {
 		_decimalSeparator = decimalSeparator;
 		_thousandSeparator = thousandSeparator;
 		_minusSign = minusSign;
-	}
-
-	public TokenizerConfiguration() {
-		this(true, DecimalFormatSymbols.getInstance().getDecimalSeparator(),
-				DecimalFormatSymbols.getInstance().getGroupingSeparator(),
-				DecimalFormatSymbols.getInstance().getMinusSign());
 	}
 
 	/**

@@ -104,9 +104,15 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 			if (value == null) {
 				value = "<null>";
 			}
+
+			boolean leftAligned = this.leftAligned;
+
 			String stringValue = value.toString();
-			if (value instanceof Double || value instanceof Float) {
-				stringValue = decimalFormat.format(value);
+			if (value instanceof Number) {
+				leftAligned = false;
+				if (value instanceof Double || value instanceof Float) {
+					stringValue = decimalFormat.format(value);
+				}
 			}
 
 			int trailingBlanks = horizontalDimensionWidth
