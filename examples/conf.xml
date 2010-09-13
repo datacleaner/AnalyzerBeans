@@ -3,10 +3,17 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<configuration-metadata>
-		<configuration-name>Example configuration - employees</configuration-name>
+		<configuration-name>Example configuration</configuration-name>
 	</configuration-metadata>
 
 	<datastore-catalog>
+		<jdbc-datastore name="orderdb">
+			<url>jdbc:hsqldb:file:examples/orderdb</url>
+			<driver>org.hsqldb.jdbcDriver</driver>
+			<username>SA</username>
+			<password></password>
+		</jdbc-datastore>
+
 		<csv-datastore name="employees_csv">
 			<filename>examples/employees.csv</filename>
 			<quote-char>"</quote-char>
