@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 
+import org.eobjects.analyzer.util.CharIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,145 +63,122 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 	}
 
 	private List<SimpleToken> tokenizeInternal(String string) {
-		List<SimpleToken> tokens = preliminaryTokenize(string);
+		List<SimpleToken> tokens = preliminaryTokenize(string, _configuration);
 
 		if (_configuration.isTokenTypeEnabled(TokenType.MIXED)) {
 			tokens = flattenMixedTokens(tokens);
 		}
 
-		Set<Character> decimalSeparatorCharacters = _configuration
-				.getDecimalSeparatorCharacters();
-		if (!decimalSeparatorCharacters.isEmpty()) {
-			tokens = flattenDecimalNumberTokens(tokens,
-					decimalSeparatorCharacters);
-		}
-
 		return tokens;
 	}
 
-	protected static List<SimpleToken> preliminaryTokenize(String string) {
+	protected static List<SimpleToken> preliminaryTokenize(final String string,
+			final TokenizerConfiguration configuration) {
 		LinkedList<SimpleToken> result = new LinkedList<SimpleToken>();
 		SimpleToken lastToken = null;
 
-		for (int i = 0; i < string.length(); i++) {
-			char c = string.charAt(i);
-			if ('-' == c) {
-				// the meaning of '-' is dependent on the next token (maybe it's
-				// a negative number operator)
-				lastToken = registerChar(result, lastToken, c,
-						TokenType.UNDEFINED);
-			} else if (Character.isDigit(c)) {
-				logger.debug("Digit categorized as TokenType.NUMBER: {}", c);
-				lastToken = registerChar(result, lastToken, c, TokenType.NUMBER);
-			} else if (Character.isLetter(c)) {
-				logger.debug("Letter categorized as TokenType.TEXT: {}", c);
-				lastToken = registerChar(result, lastToken, c, TokenType.TEXT);
-			} else if (Character.isWhitespace(c)) {
-				logger.debug("Whitespace categorized as TokenType.DELIM: {}", c);
-				lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
-			} else {
-				logger.debug("Unknown char categorized as TokenType.DELIM: {}",
-						c);
-				lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
-			}
-		}
+		CharIterator ci = new CharIterator(string);
+		while (ci.hasNext()) {
+			char c = ci.next();
 
-		for (ListIterator<SimpleToken> it = result.listIterator(); it.hasNext();) {
-			SimpleToken token = it.next();
-			if (token.getType() == TokenType.UNDEFINED) {
-				if ("-".equals(token.getString())) {
-					int nextIndex = it.nextIndex();
-					if (nextIndex != -1) {
-						SimpleToken nextToken = result.get(nextIndex);
-						if (nextToken.getType() == TokenType.NUMBER) {
-							nextToken.prependChar('-');
-							it.remove();
-							continue;
+			if (ci.is(configuration.getThousandSeparator())
+					|| ci.is(configuration.getDecimalSeparator())) {
+				boolean treatAsSeparator = false;
+				if (lastToken != null
+						&& lastToken.getType() == TokenType.NUMBER) {
+					// there's a previous NUMBER token
+					
+					if (ci.hasNext()) {
+						char next = ci.next();
+						if (ci.isDigit()) {
+							// the next token is also a NUMBER
+							
+							// now we're ready to assume that this is a
+							// separator
+							treatAsSeparator = true;
+							lastToken = registerChar(result, lastToken, c,
+									TokenType.NUMBER);
+							lastToken = registerChar(result, lastToken, next,
+									TokenType.NUMBER);
+						} else {
+							ci.previous();
 						}
 					}
-					token.setType(TokenType.DELIM);
 				}
-			}
-		}
 
-		SimpleToken previousToken = null;
-		// concat similar typed tokens
-		for (ListIterator<SimpleToken> it = result.listIterator(); it.hasNext();) {
-			SimpleToken token = it.next();
-			if (previousToken == null
-					|| token.getType() != previousToken.getType()) {
-				// move on
-				previousToken = token;
+				if (!treatAsSeparator) {
+					// the thousand separator is treated as a delim
+					lastToken = registerChar(result, lastToken, c,
+							TokenType.DELIM);
+				}
+			} else if (ci.is(configuration.getMinusSign())) {
+				// the meaning of minus sign is dependent on the next token
+				// (maybe it's the negative number operator)
+				boolean treatAsOperator = false;
+				if (ci.hasNext()) {
+					char next = ci.next();
+					if (ci.isDigit()) {
+						// the minus sign was the number operator
+						treatAsOperator = true;
+						lastToken = registerChar(result, null, c,
+								TokenType.NUMBER);
+						lastToken = registerChar(result, lastToken, next,
+								TokenType.NUMBER);
+					} else {
+						ci.previous();
+					}
+				}
+
+				if (!treatAsOperator) {
+					// the minus sign is treated as a delim
+					lastToken = registerChar(result, lastToken, c,
+							TokenType.DELIM);
+				}
+			} else if (ci.isDigit()) {
+				lastToken = registerChar(result, lastToken, c, TokenType.NUMBER);
+			} else if (ci.isLetter()) {
+				lastToken = registerChar(result, lastToken, c, TokenType.TEXT);
+			} else if (ci.isWhitespace()) {
+				lastToken = registerChar(result, lastToken, c,
+						TokenType.WHITESPACE);
 			} else {
-				// concat
-				previousToken.appendString(token.getString());
-				it.remove();
+				lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
 			}
 		}
 
 		return result;
 	}
 
-	private static SimpleToken registerChar(LinkedList<SimpleToken> result,
+	private static SimpleToken registerChar(List<SimpleToken> result,
 			SimpleToken lastToken, char c, TokenType tokenType) {
 		if (lastToken == null) {
+			logger.debug("Creating new {} token", tokenType);
 			lastToken = new SimpleToken(tokenType, c);
 			result.add(lastToken);
 		} else if (lastToken.getType() == tokenType) {
+			logger.debug("Appending to previous token", tokenType);
 			lastToken.appendChar(c);
 		} else {
+			logger.debug("Creating new {} token", tokenType);
 			lastToken = new SimpleToken(tokenType, c);
 			result.add(lastToken);
 		}
+		logger.debug("{} registered as {}", c, tokenType);
 		return lastToken;
 	}
 
-	public static List<SimpleToken> flattenDecimalNumberTokens(
-			List<SimpleToken> tokens, Set<Character> decimalSeparatorCharacters) {
-		SimpleToken previousToken = null;
-		for (ListIterator<SimpleToken> it = tokens.listIterator(); it.hasNext();) {
-			SimpleToken token = it.next();
-			if (previousToken == null) {
-				previousToken = token;
-			} else {
-				if (token.getType() == TokenType.DELIM
-						&& previousToken.getType() == TokenType.NUMBER) {
-					if (token.getString().length() == 1) {
-						char tokenChar = token.getString().charAt(0);
-						if (decimalSeparatorCharacters.contains(tokenChar)) {
-							if (it.hasNext()) {
-								SimpleToken nextToken = it.next();
-								if (nextToken.getType() == TokenType.NUMBER) {
-									if (!isInteger(previousToken)) {
-										previousToken.setType(TokenType.MIXED);
-									}
-									previousToken.appendChar(tokenChar);
-									previousToken.appendString(nextToken
-											.getString());
-									it.remove();
-									it.previous();
-									it.remove();
-									continue;
-								}
-							}
-						}
-					}
-				}
-				previousToken = token;
-			}
-		}
-		return tokens;
-	}
-
-	private static boolean isInteger(Token token) {
+	private static boolean isInteger(Token token, Character thousandSeparator) {
 		assert token.getType() == TokenType.NUMBER;
-		String string = token.getString();
-		for (int i = 0; i < string.length(); i++) {
-			if (!Character.isDigit(string.charAt(i))) {
-				return false;
+		CharIterator it = new CharIterator(token.getString());
+		while (it.hasNext()) {
+			it.next();
+			if (!it.isDigit()) {
+				if (!it.is(thousandSeparator)) {
+					return false;
+				}
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public static List<SimpleToken> flattenMixedTokens(List<SimpleToken> tokens) {
