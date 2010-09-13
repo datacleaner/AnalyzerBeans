@@ -11,9 +11,11 @@
 	</job-metadata>
 
 	<source>
-		<data-context ref="orderdb" />
+		<data-context ref="all_datastores" />
 		<columns>
-			<column id="col_title" path="EMPLOYEES.JOBTITLE" />
+			<column id="col_title" path="PUBLIC.EMPLOYEES.JOBTITLE" />
+			<column id="col_email" path="employees.csv.employees.email" />
+			<column id="col_name" path="employees.csv.employees.name" />
 		</columns>
 	</source>
 
@@ -21,6 +23,24 @@
 		<analyzer>
 			<descriptor ref="Pattern finder" />
 			<input ref="col_title" />
+		</analyzer>
+
+		<analyzer>
+			<descriptor ref="Pattern finder" />
+			<properties>
+				<property name="Predefined token name" value="Domain suffix" />
+				<property name="Predefined token regexes" value="[\.com,\.org]" />
+			</properties>
+			<input ref="col_email" />
+		</analyzer>
+
+		<analyzer>
+			<descriptor ref="Pattern finder" />
+			<properties>
+				<property name="Discriminate text case" value="false" />
+				<property name="Enable mixed tokens" value="false" />
+			</properties>
+			<input ref="col_name" />
 		</analyzer>
 	</analysis>
 

@@ -19,6 +19,11 @@
 			<quote-char>"</quote-char>
 			<separator-char>,</separator-char>
 		</csv-datastore>
+
+		<composite-datastore name="all_datastores">
+			<datastore-name>orderdb</datastore-name>
+			<datastore-name>employees_csv</datastore-name>
+		</composite-datastore>
 	</datastore-catalog>
 
 	<multithreaded-taskrunner max-threads="20" />
