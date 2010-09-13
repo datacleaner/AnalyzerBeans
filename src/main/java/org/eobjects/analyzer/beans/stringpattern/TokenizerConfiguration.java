@@ -18,7 +18,7 @@ public class TokenizerConfiguration implements Serializable {
 	private boolean _discriminateWhiteSpaces;
 	private boolean _discriminateDecimalNumbers;
 	private boolean _discriminateNegativeNumbers;
-	private Character _thousandSeparator;
+	private Character _thousandsSeparator;
 	private Character _decimalSeparator;
 	private Character _minusSign;
 
@@ -36,7 +36,7 @@ public class TokenizerConfiguration implements Serializable {
 	}
 
 	public TokenizerConfiguration(boolean enableMixed,
-			Character decimalSeparator, Character thousandSeparator,
+			Character decimalSeparator, Character thousandsSeparator,
 			Character minusSign) {
 		_tokenTypes = EnumSet.allOf(TokenType.class);
 		if (!enableMixed) {
@@ -59,7 +59,7 @@ public class TokenizerConfiguration implements Serializable {
 		_discriminateNegativeNumbers = false;
 
 		_decimalSeparator = decimalSeparator;
-		_thousandSeparator = thousandSeparator;
+		_thousandsSeparator = thousandsSeparator;
 		_minusSign = minusSign;
 	}
 
@@ -177,18 +177,18 @@ public class TokenizerConfiguration implements Serializable {
 	}
 
 	/**
-	 * Characters to use for thousand separator in numbers (typically ',')
+	 * Characters to use for thousands separator in numbers (typically ',')
 	 */
-	public Character getThousandSeparator() {
-		return _thousandSeparator;
+	public Character getThousandsSeparator() {
+		return _thousandsSeparator;
 	}
 
 	/**
-	 * Sets the characters to use for thousand separator in numbers (typically
+	 * Sets the characters to use for thousands separator in numbers (typically
 	 * ',')
 	 */
-	public void setThousandSeparator(Character thousandSeparator) {
-		_thousandSeparator = thousandSeparator;
+	public void setThousandsSeparator(Character thousandSeparator) {
+		_thousandsSeparator = thousandSeparator;
 	}
 
 	/**

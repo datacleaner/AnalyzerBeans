@@ -81,7 +81,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		while (ci.hasNext()) {
 			char c = ci.next();
 
-			if (ci.is(configuration.getThousandSeparator())
+			if (ci.is(configuration.getThousandsSeparator())
 					|| ci.is(configuration.getDecimalSeparator())) {
 				boolean treatAsSeparator = false;
 				if (lastToken != null

@@ -52,6 +52,18 @@ public class PatternFinderAnalyzer implements
 	@Configured(required = false)
 	private Boolean enableMixedTokens;
 
+	@Configured(required = false)
+	private Boolean ignoreRepeatedSpaces;
+
+	@Configured(required = false)
+	private Character decimalSeparator;
+
+	@Configured(required = false)
+	private Character thousandsSeparator;
+
+	@Configured(required = false)
+	private Character minusSign;
+
 	@Initialize
 	public void init() {
 		patterns = new HashMap<TokenPattern, List<String>>();
@@ -73,6 +85,24 @@ public class PatternFinderAnalyzer implements
 
 		if (discriminateTextCase != null) {
 			configuration.setDiscriminateTextCase(discriminateTextCase);
+		}
+
+		if (ignoreRepeatedSpaces != null) {
+			boolean ignoreSpacesLength = ignoreRepeatedSpaces.booleanValue();
+			configuration.setDistriminateTokenLength(TokenType.WHITESPACE,
+					!ignoreSpacesLength);
+		}
+
+		if (decimalSeparator != null) {
+			configuration.setDecimalSeparator(decimalSeparator);
+		}
+
+		if (thousandsSeparator != null) {
+			configuration.setThousandsSeparator(thousandsSeparator);
+		}
+
+		if (minusSign != null) {
+			configuration.setMinusSign(minusSign);
 		}
 
 		if (predefinedTokenName != null && predefinedTokenPatterns != null) {
