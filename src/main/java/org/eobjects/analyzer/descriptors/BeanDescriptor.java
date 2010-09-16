@@ -3,8 +3,6 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
-import org.eobjects.analyzer.data.DataTypeFamily;
-
 /**
  * 
  * @author Kasper Sørensen
@@ -26,13 +24,11 @@ public interface BeanDescriptor<B> extends Comparable<BeanDescriptor<?>> {
 
 	public ConfiguredPropertyDescriptor getConfiguredProperty(String name);
 
-	public ConfiguredPropertyDescriptor getConfiguredPropertyForInput();
+	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput();
 
 	public Set<ProvidedPropertyDescriptor> getProvidedProperties();
 
 	public Set<InitializeMethodDescriptor> getInitializeMethods();
 
 	public Set<CloseMethodDescriptor> getCloseMethods();
-
-	public DataTypeFamily getInputDataTypeFamily();
 }

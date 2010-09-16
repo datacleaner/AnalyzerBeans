@@ -1,7 +1,12 @@
 package org.eobjects.analyzer.job;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 final class ImmutableAnalyzerJob implements AnalyzerJob {
@@ -27,10 +32,19 @@ final class ImmutableAnalyzerJob implements AnalyzerJob {
 
 	@Override
 	public InputColumn<?>[] getInput() {
-		Object property = _beanConfiguration.getProperty(_descriptor
-				.getConfiguredPropertyForInput());
-		return (InputColumn<?>[]) CollectionUtils.arrayOf(InputColumn.class,
-				property);
+		List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
+		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor
+				.getConfiguredPropertiesForInput();
+		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
+			Object property = _beanConfiguration
+					.getProperty(propertyDescriptor);
+			InputColumn<?>[] inputs = CollectionUtils.arrayOf(
+					InputColumn.class, property);
+			for (InputColumn<?> inputColumn : inputs) {
+				result.add(inputColumn);
+			}
+		}
+		return result.toArray(new InputColumn<?>[result.size()]);
 	}
 
 	@Override

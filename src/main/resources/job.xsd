@@ -93,6 +93,7 @@
 
 	<complexType name="inputType">
 		<attribute name="ref" type="token" use="required" />
+		<attribute name="name" type="token" use="optional" />
 	</complexType>
 
 	<complexType name="outputType">

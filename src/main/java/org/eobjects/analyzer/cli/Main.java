@@ -268,19 +268,50 @@ public final class Main {
 			Collection<? extends BeanDescriptor<?>> descriptors) {
 		for (BeanDescriptor<?> descriptor : descriptors) {
 			System.out.println("name: " + descriptor.getDisplayName());
-			ConfiguredPropertyDescriptor propertyForInput = descriptor
-					.getConfiguredPropertyForInput();
-			if (propertyForInput != null) {
-				if (propertyForInput.isArray()) {
-					System.out.println(" - Consumes multiple input columns");
-				} else {
-					System.out.println(" - Consumes a single input column");
+			Set<ConfiguredPropertyDescriptor> propertiesForInput = descriptor
+					.getConfiguredPropertiesForInput();
+			if (propertiesForInput.size() == 1) {
+				ConfiguredPropertyDescriptor propertyForInput = propertiesForInput
+						.iterator().next();
+				if (propertyForInput != null) {
+					if (propertyForInput.isArray()) {
+						System.out
+								.println(" - Consumes multiple input columns (type: "
+										+ propertyForInput
+												.getInputColumnDataTypeFamily()
+										+ ")");
+					} else {
+						System.out
+								.println(" - Consumes a single input column (type: "
+										+ propertyForInput
+												.getInputColumnDataTypeFamily()
+										+ ")");
+					}
+				}
+			} else {
+				System.out.println(" - Consumes " + propertiesForInput.size()
+						+ " named inputs");
+				for (ConfiguredPropertyDescriptor propertyForInput : propertiesForInput) {
+					if (propertyForInput.isArray()) {
+						System.out.println("   Input columns: "
+								+ propertyForInput.getName()
+								+ " (type: "
+								+ propertyForInput
+										.getInputColumnDataTypeFamily() + ")");
+					} else {
+						System.out.println("   Input column: "
+								+ propertyForInput.getName()
+								+ " (type: "
+								+ propertyForInput
+										.getInputColumnDataTypeFamily() + ")");
+					}
 				}
 			}
+
 			Set<ConfiguredPropertyDescriptor> properties = descriptor
 					.getConfiguredProperties();
 			for (ConfiguredPropertyDescriptor property : properties) {
-				if (property != propertyForInput) {
+				if (!property.isInputColumn()) {
 					System.out.println(" - Property: name="
 							+ property.getName() + ", type="
 							+ property.getBaseType().getSimpleName()

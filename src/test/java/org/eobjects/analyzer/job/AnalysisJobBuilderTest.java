@@ -105,7 +105,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertEquals(
 				"[MetaModelInputColumn[JdbcColumn[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
 						+ "MetaModelInputColumn[JdbcColumn[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]], "
-						+ "TransformedInputColumn[id=trans-1,name=Convert to string 1,type=STRING]]",
+						+ "TransformedInputColumn[id=trans-1,name=Convert to string,type=STRING]]",
 				Arrays.toString(stringInputColumns.toArray()));
 
 		analyzerJobBuilder.addInputColumns(stringInputColumns);

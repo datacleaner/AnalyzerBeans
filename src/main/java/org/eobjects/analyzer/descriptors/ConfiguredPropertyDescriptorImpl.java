@@ -1,8 +1,10 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 import org.eobjects.analyzer.annotations.Configured;
+import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
@@ -38,5 +40,18 @@ public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDesc
 			return true;
 		}
 		return configured.required();
+	}
+	
+	@Override
+	public DataTypeFamily getInputColumnDataTypeFamily() {
+		if (isInputColumn()) {
+			int count = getTypeArgumentCount();
+			if (count == 0) {
+				return DataTypeFamily.UNDEFINED;
+			}
+			Type typeArgument = getTypeArgument(0);
+			return DataTypeFamily.valueOf(typeArgument);
+		}
+		return null;
 	}
 }

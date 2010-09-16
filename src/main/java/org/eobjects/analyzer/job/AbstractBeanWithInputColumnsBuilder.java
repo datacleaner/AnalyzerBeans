@@ -1,10 +1,11 @@
 package org.eobjects.analyzer.job;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
@@ -30,8 +31,24 @@ class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B>
 	 */
 	public B addInputColumn(InputColumn<?> inputColumn)
 			throws IllegalArgumentException {
-		DataTypeFamily expectedDataTypeFamily = getDescriptor()
-				.getInputDataTypeFamily();
+		Set<ConfiguredPropertyDescriptor> propertyDescriptors = getDescriptor()
+				.getConfiguredPropertiesForInput();
+		if (propertyDescriptors.size() == 1) {
+			ConfiguredPropertyDescriptor propertyDescriptor = propertyDescriptors
+					.iterator().next();
+			return addInputColumn(inputColumn, propertyDescriptor);
+		} else {
+			throw new UnsupportedOperationException(
+					"There are "
+							+ propertyDescriptors.size()
+							+ " named input columns, please specify which one to configure");
+		}
+	}
+
+	public B addInputColumn(InputColumn<?> inputColumn,
+			ConfiguredPropertyDescriptor propertyDescriptor) {
+		DataTypeFamily expectedDataTypeFamily = propertyDescriptor
+				.getInputColumnDataTypeFamily();
 		if (expectedDataTypeFamily != DataTypeFamily.UNDEFINED) {
 			DataTypeFamily actualDataTypeFamily = inputColumn
 					.getDataTypeFamily();
@@ -42,21 +59,19 @@ class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B>
 			}
 		}
 
-		ConfiguredPropertyDescriptor configuredPropertyForInput = getDescriptor()
-				.getConfiguredPropertyForInput();
-		Object inputColumns = configuredPropertyForInput
+		Object inputColumns = propertyDescriptor
 				.getValue(getConfigurableBean());
 		if (inputColumns == null) {
-			if (configuredPropertyForInput.isArray()) {
+			if (propertyDescriptor.isArray()) {
 				inputColumns = new InputColumn[] { inputColumn };
 			} else {
 				inputColumns = inputColumn;
 			}
 		} else {
-			inputColumns = CollectionUtils.array(InputColumn.class, inputColumns, inputColumn);
+			inputColumns = CollectionUtils.array(InputColumn.class,
+					inputColumns, inputColumn);
 		}
-		configuredPropertyForInput
-				.setValue(getConfigurableBean(), inputColumns);
+		propertyDescriptor.setValue(getConfigurableBean(), inputColumns);
 
 		return (B) this;
 	}
@@ -76,9 +91,23 @@ class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B>
 	}
 
 	public B removeInputColumn(InputColumn<?> inputColumn) {
-		ConfiguredPropertyDescriptor configuredPropertyForInput = getDescriptor()
-				.getConfiguredPropertyForInput();
-		Object inputColumns = configuredPropertyForInput
+		Set<ConfiguredPropertyDescriptor> propertyDescriptors = getDescriptor()
+				.getConfiguredPropertiesForInput();
+		if (propertyDescriptors.size() == 1) {
+			ConfiguredPropertyDescriptor propertyDescriptor = propertyDescriptors
+					.iterator().next();
+			return removeInputColumn(inputColumn, propertyDescriptor);
+		} else {
+			throw new UnsupportedOperationException(
+					"There are "
+							+ propertyDescriptors.size()
+							+ " named input columns, please specify which one to configure");
+		}
+	}
+
+	public B removeInputColumn(InputColumn<?> inputColumn,
+			ConfiguredPropertyDescriptor propertyDescriptor) {
+		Object inputColumns = propertyDescriptor
 				.getValue(getConfigurableBean());
 		if (inputColumns != null) {
 			if (inputColumns == inputColumn) {
@@ -89,30 +118,29 @@ class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B>
 							inputColumn);
 				}
 			}
-			configuredPropertyForInput.setValue(getConfigurableBean(),
-					inputColumns);
+			propertyDescriptor.setValue(getConfigurableBean(), inputColumns);
 		}
 		return (B) this;
 	}
 
 	public List<InputColumn<?>> getInputColumns() {
-		ConfiguredPropertyDescriptor configuredPropertyForInput = getDescriptor()
-				.getConfiguredPropertyForInput();
-		Object inputColumns = configuredPropertyForInput
-				.getValue(getConfigurableBean());
-		if (inputColumns == null) {
-			return Collections.emptyList();
-		}
-		List<InputColumn<?>> result;
-		if (inputColumns.getClass().isArray()) {
-			int length = Array.getLength(inputColumns);
-			result = new ArrayList<InputColumn<?>>(length);
-			for (int i = 0; i < length; i++) {
-				result.add((InputColumn<?>) Array.get(inputColumns, i));
+		List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
+		Set<ConfiguredPropertyDescriptor> configuredPropertiesForInput = getDescriptor()
+				.getConfiguredPropertiesForInput();
+		for (ConfiguredPropertyDescriptor configuredPropertyForInput : configuredPropertiesForInput) {
+			Object inputColumns = configuredPropertyForInput
+					.getValue(getConfigurableBean());
+			if (inputColumns == null) {
+				return Collections.emptyList();
 			}
-		} else {
-			result = new ArrayList<InputColumn<?>>(1);
-			result.add((InputColumn<?>) inputColumns);
+			if (inputColumns.getClass().isArray()) {
+				int length = Array.getLength(inputColumns);
+				for (int i = 0; i < length; i++) {
+					result.add((InputColumn<?>) Array.get(inputColumns, i));
+				}
+			} else {
+				result.add((InputColumn<?>) inputColumns);
+			}
 		}
 		return Collections.unmodifiableList(result);
 	}

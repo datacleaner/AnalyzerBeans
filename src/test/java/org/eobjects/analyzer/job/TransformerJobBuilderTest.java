@@ -10,6 +10,7 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.AnnotationBasedTransformerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.schema.Column;
@@ -106,8 +107,10 @@ public class TransformerJobBuilderTest extends TestCase {
 		configurableBean.setInput(input);
 
 		assertTrue(builder.isConfigured());
+		ConfiguredPropertyDescriptor propertyDescriptor = descriptor
+				.getConfiguredPropertiesForInput().iterator().next();
 		Object object = builder.getConfiguredProperties().get(
-				descriptor.getConfiguredPropertyForInput());
+				propertyDescriptor);
 		assertEquals("TransformedInputColumn[id=-1,name=foo,type=STRING]",
 				object.toString());
 	}

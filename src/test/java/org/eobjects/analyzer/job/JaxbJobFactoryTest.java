@@ -19,6 +19,37 @@ import org.eobjects.analyzer.test.TestHelper;
 
 public class JaxbJobFactoryTest extends TestCase {
 
+	public void testNamedInputs() throws Exception {
+		JaxbJobFactory factory = new JaxbJobFactory(
+				TestHelper.createAnalyzerBeansConfiguration(TestHelper
+						.createSampleDatabaseDatastore("my database")));
+		AnalysisJobBuilder jobBuilder = factory.create(new File(
+				"src/test/resources/example-job-named-inputs.xml"));
+		assertEquals(true, jobBuilder.isConfigured());
+
+		assertEquals(2, jobBuilder.getTransformerJobBuilders().size());
+
+		List<AnalyzerJobBuilder<?>> analyzerJobBuilders = jobBuilder
+				.getAnalyzerJobBuilders();
+		assertEquals(1, analyzerJobBuilders.size());
+
+		AnalyzerJobBuilder<?> analyzerJobBuilder = analyzerJobBuilders.get(0);
+		AnalyzerJob analyzerJob = analyzerJobBuilder.toAnalyzerJob();
+		BeanConfiguration configuration = analyzerJob.getConfiguration();
+
+		Object col1 = configuration.getProperty(analyzerJob.getDescriptor()
+				.getConfiguredProperty("From column"));
+		assertEquals(
+				"TransformedInputColumn[id=trans-1,name=date 1,type=DATE]",
+				col1.toString());
+
+		Object col2 = configuration.getProperty(analyzerJob.getDescriptor()
+				.getConfiguredProperty("To column"));
+		assertEquals(
+				"TransformedInputColumn[id=trans-2,name=date 2,type=DATE]",
+				col2.toString());
+	}
+
 	public void testInvalidRead() throws Exception {
 		JaxbJobFactory factory = new JaxbJobFactory(
 				TestHelper.createAnalyzerBeansConfiguration());

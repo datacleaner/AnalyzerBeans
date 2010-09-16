@@ -213,7 +213,17 @@ public class JaxbJobFactory {
 						for (InputType inputType : input) {
 							InputColumn<?> inputColumn = inputColumns
 									.get(inputType.getRef());
-							transformerJobBuilder.addInputColumn(inputColumn);
+							String name = inputType.getName();
+							if (StringUtils.isNullOrEmpty(name)) {
+								transformerJobBuilder
+										.addInputColumn(inputColumn);
+							} else {
+								ConfiguredPropertyDescriptor configuredProperty = transformerJobBuilder
+										.getDescriptor().getConfiguredProperty(
+												name);
+								transformerJobBuilder.addInputColumn(
+										inputColumn, configuredProperty);
+							}
 						}
 
 						List<MutableInputColumn<?>> outputColumns = transformerJobBuilder
@@ -272,6 +282,7 @@ public class JaxbJobFactory {
 				List<InputType> input = analyzerType.getInput();
 				for (InputType inputType : input) {
 					ref = inputType.getRef();
+
 					if (StringUtils.isNullOrEmpty(ref)) {
 						throw new IllegalStateException(
 								"Analyzer input column ref cannot be null");
@@ -282,7 +293,15 @@ public class JaxbJobFactory {
 						throw new IllegalStateException(
 								"No such input column: " + ref);
 					}
-					analyzerJobBuilder.addInputColumn(inputColumn);
+					String name = inputType.getName();
+					if (StringUtils.isNullOrEmpty(name)) {
+						analyzerJobBuilder.addInputColumn(inputColumn);
+					} else {
+						ConfiguredPropertyDescriptor propertyDescriptor = analyzerJobBuilder
+								.getDescriptor().getConfiguredProperty(name);
+						analyzerJobBuilder.addInputColumn(inputColumn,
+								propertyDescriptor);
+					}
 				}
 				applyProperties(analyzerJobBuilder,
 						analyzerType.getProperties(), schemaNavigator);

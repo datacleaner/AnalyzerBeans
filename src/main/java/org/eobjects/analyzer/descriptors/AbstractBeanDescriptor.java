@@ -4,9 +4,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -17,7 +17,6 @@ import org.eobjects.analyzer.annotations.Close;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
 import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
@@ -134,11 +133,6 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 						beanClass
 								+ " does not define a @Configured InputColumn or InputColumn-array");
 			}
-			if (totalColumns > 1) {
-				throw new DescriptorException(
-						beanClass
-								+ " defines multiple @Configured InputColumns, cannot determine which one to use for transformation");
-			}
 		}
 	}
 
@@ -159,27 +153,17 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 	}
 
 	@Override
-	public ConfiguredPropertyDescriptor getConfiguredPropertyForInput() {
-		Set<ConfiguredPropertyDescriptor> descriptors = _configuredProperties;
-		for (ConfiguredPropertyDescriptor configuredDescriptor : descriptors) {
-			if (configuredDescriptor.isInputColumn()) {
-				return configuredDescriptor;
+	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
+		Set<ConfiguredPropertyDescriptor> descriptors = new HashSet<ConfiguredPropertyDescriptor>(
+				_configuredProperties);
+		for (Iterator<ConfiguredPropertyDescriptor> it = descriptors.iterator(); it
+				.hasNext();) {
+			ConfiguredPropertyDescriptor propertyDescriptor = it.next();
+			if (!propertyDescriptor.isInputColumn()) {
+				it.remove();
 			}
 		}
-		return null;
-	}
-
-	@Override
-	public DataTypeFamily getInputDataTypeFamily() {
-		ConfiguredPropertyDescriptor configuredDescriptor = getConfiguredPropertyForInput();
-		if (configuredDescriptor == null) {
-			return DataTypeFamily.UNDEFINED;
-		}
-		if (configuredDescriptor.getTypeArgumentCount() == 0) {
-			return DataTypeFamily.UNDEFINED;
-		}
-		Type typeParameter = configuredDescriptor.getTypeArgument(0);
-		return DataTypeFamily.valueOf(typeParameter);
+		return descriptors;
 	}
 
 	@Override

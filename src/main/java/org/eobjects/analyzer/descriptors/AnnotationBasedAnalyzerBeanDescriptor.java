@@ -1,5 +1,7 @@
 package org.eobjects.analyzer.descriptors;
 
+import java.util.Set;
+
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.ExploringAnalyzer;
@@ -66,9 +68,9 @@ public final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>>
 	}
 
 	@Override
-	public ConfiguredPropertyDescriptor getConfiguredPropertyForInput() {
+	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
 		if (isRowProcessingAnalyzer()) {
-			return super.getConfiguredPropertyForInput();
+			return super.getConfiguredPropertiesForInput();
 		}
 		return null;
 	}

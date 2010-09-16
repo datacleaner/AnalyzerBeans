@@ -56,12 +56,22 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	public void testGetInputDataTypeFamily() throws Exception {
 		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor
 				.create(StringAnalyzer.class);
-		assertEquals(DataTypeFamily.STRING, descriptor.getInputDataTypeFamily());
+		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
+				.getConfiguredPropertiesForInput();
+		assertEquals(1, configuredProperties.size());
+		ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties
+				.iterator().next();
+
+		assertEquals(DataTypeFamily.STRING,
+				propertyDescriptor.getInputColumnDataTypeFamily());
 
 		descriptor = AnnotationBasedAnalyzerBeanDescriptor
 				.create(ValueDistributionAnalyzer.class);
+		configuredProperties = descriptor.getConfiguredPropertiesForInput();
+		assertEquals(1, configuredProperties.size());
+		propertyDescriptor = configuredProperties.iterator().next();
 		assertEquals(DataTypeFamily.UNDEFINED,
-				descriptor.getInputDataTypeFamily());
+				propertyDescriptor.getInputColumnDataTypeFamily());
 	}
 
 	public void testAbstractBeanClass() throws Exception {
