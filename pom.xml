@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eobjects.analyzerbeans</groupId>
 	<artifactId>AnalyzerBeans</artifactId>
-	<name>AnalyzerBeans</name>
 	<version>1.0-SNAPSHOT</version>
+	<name>AnalyzerBeans</name>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -140,27 +140,39 @@
 			<artifactId>commons-codec</artifactId>
 			<version>1.4</version>
 		</dependency>
+
+		<!-- Used for classpath scanning. Required if the ClasspathScanDescriptorProvider 
+			is used -->
 		<dependency>
 			<groupId>asm</groupId>
 			<artifactId>asm</artifactId>
 			<version>3.2</version>
+			<optional>true</optional>
 		</dependency>
+
+		<!-- Needed if BerkeleyDbCollectionProvider is used -->
 		<dependency>
 			<groupId>berkeleydb</groupId>
 			<artifactId>je</artifactId>
 			<version>3.2.76</version>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- JSR 330: Dependency Injection -->
 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 			<version>1</version>
 		</dependency>
+
+		<!-- Command line args parsing -->
 		<dependency>
 			<groupId>args4j</groupId>
 			<artifactId>args4j</artifactId>
 			<version>2.0.12</version>
 		</dependency>
+
+		<!-- Logging dependencies -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -176,6 +188,8 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
 		</dependency>
+
+		<!-- Needed if the EjbTimerTaskRunner is used -->
 		<dependency>
 			<groupId>javax.ejb</groupId>
 			<artifactId>ejb-api</artifactId>
@@ -183,6 +197,8 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- The MetaModel-testware module includes junit, easymock and some sampledata -->
 		<dependency>
 			<groupId>dk.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-testware</artifactId>

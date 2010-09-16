@@ -4,6 +4,21 @@ import junit.framework.TestCase;
 
 public class CharIteratorTest extends TestCase {
 
+	public void testRemove() throws Exception {
+		CharIterator it = new CharIterator("1234");
+		it.next();
+		it.remove();
+		assertEquals(-1, it.currentIndex());
+		assertTrue(it.hasNext());
+		it.next();
+		assertTrue(it.is('2'));
+		assertEquals("234", it.toString());
+		it.next();
+		assertTrue(it.hasNext());
+		it.next();
+		assertFalse(it.hasNext());
+	}
+
 	public void testSimpleIteration() throws Exception {
 		CharIterator c = new CharIterator("Hi there Kasper Sørensen");
 
@@ -122,7 +137,7 @@ public class CharIteratorTest extends TestCase {
 		assertTrue(c.isDigit());
 		assertFalse(c.hasNext());
 	}
-	
+
 	public void testFirstAndLast() throws Exception {
 		CharIterator c = new CharIterator("1234");
 		assertEquals('1', c.first().charValue());

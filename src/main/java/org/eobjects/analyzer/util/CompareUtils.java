@@ -3,6 +3,10 @@ package org.eobjects.analyzer.util;
 import java.lang.reflect.Array;
 
 public final class CompareUtils {
+	
+	private CompareUtils() {
+		// prevent instantiation
+	}
 
 	public static final boolean equals(final Object obj1, final Object obj2) {
 		if (obj1 == obj2) {

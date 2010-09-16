@@ -4,7 +4,7 @@ import java.util.ListIterator;
 
 /**
  * An iterator (with additional helper methods) for characters. The iterator
- * does not support any of the mutating methods like add and remove.
+ * does not support the add(...) method.
  * 
  * @author Kasper Sørensen
  */
@@ -12,6 +12,7 @@ public class CharIterator implements ListIterator<Character> {
 
 	private char[] _chars;
 	private int _index = -1;
+	private int _length;
 
 	public CharIterator(CharSequence charSequence) {
 		if (charSequence == null) {
@@ -19,6 +20,7 @@ public class CharIterator implements ListIterator<Character> {
 		} else {
 			_chars = charSequence.toString().toCharArray();
 		}
+		_length = _chars.length;
 	}
 
 	public CharIterator(char[] chars) {
@@ -27,6 +29,7 @@ public class CharIterator implements ListIterator<Character> {
 		} else {
 			_chars = chars;
 		}
+		_length = _chars.length;
 	}
 
 	public void reset() {
@@ -126,25 +129,38 @@ public class CharIterator implements ListIterator<Character> {
 
 	@Override
 	public void remove() {
-		throw new UnsupportedOperationException();
+		// algorythm adapted from ArrayList.remove(int)
+		int numMoved = length() - _index - 1;
+		if (numMoved > 0) {
+			System.arraycopy(_chars, _index + 1, _chars, _index, numMoved);
+		}
+		_index--;
+		_length--;
 	}
 
 	@Override
 	public void set(Character e) {
-		throw new UnsupportedOperationException();
+		_chars[_index] = e;
 	}
 
 	@Override
 	public void add(Character e) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				"CharIterator does not support add(...)");
 	}
 
 	@Override
 	public String toString() {
+		int length = length();
+		if (length != _chars.length) {
+			char[] tmp = _chars;
+			_chars = new char[length];
+			System.arraycopy(tmp, 0, _chars, 0, length);
+		}
 		return new String(_chars);
 	}
 
 	public int length() {
-		return _chars.length;
+		return _length;
 	}
 }
