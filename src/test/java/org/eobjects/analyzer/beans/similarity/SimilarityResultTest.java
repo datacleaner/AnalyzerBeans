@@ -3,6 +3,8 @@ package org.eobjects.analyzer.beans.similarity;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eobjects.analyzer.result.SimilarityResult;
+
 import junit.framework.TestCase;
 
 public class SimilarityResultTest extends TestCase {

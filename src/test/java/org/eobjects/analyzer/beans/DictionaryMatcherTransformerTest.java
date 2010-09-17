@@ -6,7 +6,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
@@ -18,6 +17,7 @@ import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class DictionaryMatcherTransformerTest extends TestCase {

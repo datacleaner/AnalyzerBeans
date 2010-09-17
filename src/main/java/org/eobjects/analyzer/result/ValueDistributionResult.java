@@ -1,11 +1,14 @@
-package org.eobjects.analyzer.beans.valuedist;
+package org.eobjects.analyzer.result;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.valuedist.ValueCount;
+import org.eobjects.analyzer.beans.valuedist.ValueCountList;
+import org.eobjects.analyzer.beans.valuedist.ValueCountListImpl;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.result.AnalyzerResult;
 
 public class ValueDistributionResult implements AnalyzerResult {
 

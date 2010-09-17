@@ -27,7 +27,7 @@ import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
-import org.eobjects.analyzer.lifecycle.AssignConfiguredRowProcessingCallback;
+import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
@@ -232,9 +232,8 @@ public final class RowProcessingPublisher {
 	private Task createInitTask(RowProcessingConsumer consumer,
 			CompletionListener completionListener,
 			Queue<AnalyzerResult> resultQueue) {
-		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredRowProcessingCallback(
-				consumer.getBeanJob().getConfiguration(),
-				consumer.getRequiredInput());
+		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredCallback(
+				consumer.getBeanJob().getConfiguration());
 		LifeCycleCallback initializeCallback = new InitializeCallback();
 		LifeCycleCallback closeCallback = new CloseCallback();
 

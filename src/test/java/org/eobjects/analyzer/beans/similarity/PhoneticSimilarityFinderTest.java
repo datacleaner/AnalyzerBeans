@@ -2,6 +2,8 @@ package org.eobjects.analyzer.beans.similarity;
 
 import java.util.HashMap;
 
+import org.eobjects.analyzer.result.SimilarityResult;
+
 import junit.framework.TestCase;
 
 public class PhoneticSimilarityFinderTest extends TestCase {

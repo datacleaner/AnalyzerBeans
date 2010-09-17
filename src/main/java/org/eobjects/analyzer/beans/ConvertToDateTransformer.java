@@ -52,6 +52,11 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 	@Override
 	public Date[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
+		Date d = transformValue(value);
+		return new Date[] { d };
+	}
+
+	public static Date transformValue(Object value) {
 		Date d = null;
 		if (value != null) {
 			if (value instanceof Date) {
@@ -65,7 +70,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 				d = convertFromNumber((Number) value);
 			}
 		}
-		return new Date[] { d };
+		return d;
 	}
 
 	protected static Date convertFromString(String value) {

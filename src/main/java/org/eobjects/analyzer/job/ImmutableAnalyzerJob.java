@@ -40,8 +40,10 @@ final class ImmutableAnalyzerJob implements AnalyzerJob {
 					.getProperty(propertyDescriptor);
 			InputColumn<?>[] inputs = CollectionUtils.arrayOf(
 					InputColumn.class, property);
-			for (InputColumn<?> inputColumn : inputs) {
-				result.add(inputColumn);
+			if (inputs != null) {
+				for (InputColumn<?> inputColumn : inputs) {
+					result.add(inputColumn);
+				}
 			}
 		}
 		return result.toArray(new InputColumn<?>[result.size()]);

@@ -3,26 +3,42 @@ package org.eobjects.analyzer.util;
 import java.io.Serializable;
 import java.util.Date;
 
-public class TimeInterval implements Serializable, Comparable<TimeInterval> {
+/**
+ * Represents an interval consisting of two points in time. Either points (from
+ * and to) in time can also be infinite, meaning that they span from "the past"
+ * to a point in time or from a point in time to "the future".
+ * 
+ * @author Kasper Sørensen
+ * 
+ */
+public class TimeInterval implements Serializable, Comparable<TimeInterval>,
+		Cloneable {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean _infiniteFrom = false;
-	private boolean _infiniteTo = false;
 	private long _from;
 	private long _to;
 
+	public static TimeInterval merge(TimeInterval o1, TimeInterval o2) {
+		long from = Math.min(o1.getFrom(), o2.getFrom());
+		long to = Math.max(o1.getTo(), o2.getTo());
+		return new TimeInterval(from, to);
+	}
+
 	public TimeInterval(Date from, Date to) {
 		if (from == null) {
-			_infiniteFrom = true;
-		} else {
-			_from = from.getTime();
+			throw new IllegalArgumentException("from cannot be null");
 		}
 		if (to == null) {
-			_infiniteTo = true;
-		} else {
-			_to = to.getTime();
+			throw new IllegalArgumentException("to cannot be null");
 		}
+		_from = from.getTime();
+		_to = to.getTime();
+	}
+
+	public TimeInterval(long from, long to) {
+		_from = from;
+		_to = to;
 	}
 
 	public boolean before(TimeInterval o) {
@@ -33,54 +49,18 @@ public class TimeInterval implements Serializable, Comparable<TimeInterval> {
 		return compareTo(o) > 0;
 	}
 
-	public TimeInterval(Long from, Long to) {
-		if (from == null) {
-			_infiniteFrom = true;
-		} else {
-			_from = from;
-		}
-		if (to == null) {
-			_infiniteTo = true;
-		} else {
-			_to = to;
-		}
-	}
-
-	public Long getFrom() {
-		if (_infiniteFrom) {
-			return null;
-		}
+	public long getFrom() {
 		return _from;
 	}
 
-	public Long getTo() {
-		if (_infiniteTo) {
-			return null;
-		}
+	public long getTo() {
 		return _to;
-	}
-
-	public boolean isInfiniteFrom() {
-		return _infiniteFrom;
-	}
-
-	public boolean isInfiniteTo() {
-		return _infiniteTo;
 	}
 
 	@Override
 	public int compareTo(TimeInterval o) {
 		int diff = CompareUtils.compare(getFrom(), o.getFrom());
 		if (diff == 0) {
-			if (isInfiniteTo() && o.isInfiniteTo()) {
-				return 0;
-			}
-			if (isInfiniteTo()) {
-				return 1;
-			}
-			if (o.isInfiniteTo()) {
-				return -1;
-			}
 			diff = CompareUtils.compare(getTo(), o.getTo());
 		}
 		return diff;
@@ -91,8 +71,6 @@ public class TimeInterval implements Serializable, Comparable<TimeInterval> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (int) (_from ^ (_from >>> 32));
-		result = prime * result + (_infiniteFrom ? 1231 : 1237);
-		result = prime * result + (_infiniteTo ? 1231 : 1237);
 		result = prime * result + (int) (_to ^ (_to >>> 32));
 		return result;
 	}
@@ -108,10 +86,6 @@ public class TimeInterval implements Serializable, Comparable<TimeInterval> {
 		TimeInterval other = (TimeInterval) obj;
 		if (_from != other._from)
 			return false;
-		if (_infiniteFrom != other._infiniteFrom)
-			return false;
-		if (_infiniteTo != other._infiniteTo)
-			return false;
 		if (_to != other._to)
 			return false;
 		return true;
@@ -120,5 +94,40 @@ public class TimeInterval implements Serializable, Comparable<TimeInterval> {
 	@Override
 	public String toString() {
 		return "TimeInterval[" + getFrom() + "->" + getTo() + "]";
+	}
+
+	@Override
+	public TimeInterval clone() {
+		try {
+			return (TimeInterval) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// should never happen
+			throw new IllegalStateException("Clone failed.");
+		}
+	}
+
+	public boolean overlapsWith(TimeInterval interval) {
+		return getOverlap(interval) != null;
+	}
+
+	public TimeInterval getOverlap(TimeInterval interval) {
+		long from = interval.getFrom();
+		long to = interval.getTo();
+
+		long maximumFrom = Math.max(_from, from);
+		long minimumTo = Math.min(_to, to);
+
+		if (maximumFrom <= minimumTo) {
+			return new TimeInterval(maximumFrom, minimumTo);
+		}
+		return null;
+	}
+
+	/**
+	 * @return true if this interval represents a single point in time (ie. from
+	 *         and to are the same)
+	 */
+	public boolean isSingleTimeInstance() {
+		return _from == _to;
 	}
 }

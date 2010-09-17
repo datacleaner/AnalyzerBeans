@@ -1,5 +1,7 @@
 package org.eobjects.analyzer.beans;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 import org.eobjects.analyzer.annotations.Configured;
@@ -27,6 +29,11 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 	@Override
 	public Number[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
+		Number n = transformValue(value);
+		return new Number[] { n };
+	}
+
+	public static Number transformValue(Object value) {
 		Number n = null;
 		if (value != null) {
 			if (value instanceof Boolean) {
@@ -35,6 +42,9 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 				} else {
 					n = 0;
 				}
+			} else if (value instanceof Date) {
+				Date d = (Date) value;
+				n = d.getTime();
 			} else {
 				String stringValue = value.toString();
 				try {
@@ -43,9 +53,8 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 					// ignore
 				}
 			}
-
 		}
-		return new Number[] { n };
+		return n;
 	}
 
 	public void setInput(InputColumn<String> input) {

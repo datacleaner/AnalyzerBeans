@@ -48,7 +48,9 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 				.scanPackage("org.eobjects.analyzer.result.renderer", true)
 				.getRendererBeanDescriptors();
 		assertEquals(
-				"[AnnotationBasedRendererBeanDescriptor[beanClass=org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], AnnotationBasedRendererBeanDescriptor[beanClass=org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
+				"[AnnotationBasedRendererBeanDescriptor[beanClass=org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
+						+ "AnnotationBasedRendererBeanDescriptor[beanClass=org.eobjects.analyzer.result.renderer.DateGapTextRenderer], "
+						+ "AnnotationBasedRendererBeanDescriptor[beanClass=org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
 				new TreeSet<RendererBeanDescriptor>(rendererBeanDescriptors)
 						.toString());
 	}

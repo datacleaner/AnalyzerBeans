@@ -11,6 +11,9 @@ public final class ReturnResultsCallback implements AnalyzerLifeCycleCallback {
 	private final Collection<AnalyzerResult> results;
 
 	public ReturnResultsCallback(Collection<AnalyzerResult> results) {
+		if (results == null) {
+			throw new IllegalArgumentException("results cannot be null");
+		}
 		this.results = results;
 	}
 
@@ -18,7 +21,12 @@ public final class ReturnResultsCallback implements AnalyzerLifeCycleCallback {
 	public void onEvent(LifeCycleState state, Analyzer<?> analyzerBean,
 			AnalyzerBeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.RETURN_RESULTS;
-		
-		this.results.add(analyzerBean.getResult());
+
+		AnalyzerResult result = analyzerBean.getResult();
+		if (result == null) {
+			throw new IllegalStateException("Analyzer (" + analyzerBean
+					+ ") returned null as a result");
+		}
+		this.results.add(result);
 	}
 }

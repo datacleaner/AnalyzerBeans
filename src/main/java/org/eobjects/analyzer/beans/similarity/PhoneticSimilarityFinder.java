@@ -16,6 +16,7 @@ import org.eobjects.analyzer.annotations.Provided;
 import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.result.SimilarityResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

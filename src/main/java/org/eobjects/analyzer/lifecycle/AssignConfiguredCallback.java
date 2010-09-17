@@ -35,8 +35,14 @@ public class AssignConfiguredCallback implements LifeCycleCallback {
 					property.setValue(bean, configuredValue);
 				} else {
 					if (configuredValue.getClass().isArray()) {
-						if (Array.getLength(configuredValue) > 0) {
+						if (Array.getLength(configuredValue) == 1) {
 							configuredValue = Array.get(configuredValue, 0);
+						} else if (Array.getLength(configuredValue) > 1) {
+							throw new IllegalStateException(
+									"Cannot assign an array-value ("
+											+ configuredValue
+											+ ") to a non-array property ("
+											+ property + ")");
 						} else {
 							configuredValue = null;
 						}

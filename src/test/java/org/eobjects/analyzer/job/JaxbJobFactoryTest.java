@@ -7,22 +7,26 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.DateGapAnalyzerResult;
 import org.eobjects.analyzer.result.TableComparisonResult;
 import org.eobjects.analyzer.result.TableDifference;
+import org.eobjects.analyzer.result.renderer.DateGapTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class JaxbJobFactoryTest extends TestCase {
 
 	public void testNamedInputs() throws Exception {
-		JaxbJobFactory factory = new JaxbJobFactory(
-				TestHelper.createAnalyzerBeansConfiguration(TestHelper
-						.createSampleDatabaseDatastore("my database")));
+		AnalyzerBeansConfiguration conf = TestHelper
+				.createAnalyzerBeansConfiguration(TestHelper
+						.createSampleDatabaseDatastore("my database"));
+		JaxbJobFactory factory = new JaxbJobFactory(conf);
 		AnalysisJobBuilder jobBuilder = factory.create(new File(
 				"src/test/resources/example-job-named-inputs.xml"));
 		assertEquals(true, jobBuilder.isConfigured());
@@ -37,17 +41,34 @@ public class JaxbJobFactoryTest extends TestCase {
 		AnalyzerJob analyzerJob = analyzerJobBuilder.toAnalyzerJob();
 		BeanConfiguration configuration = analyzerJob.getConfiguration();
 
-		Object col1 = configuration.getProperty(analyzerJob.getDescriptor()
-				.getConfiguredProperty("From column"));
-		assertEquals(
-				"TransformedInputColumn[id=trans-1,name=date 1,type=DATE]",
-				col1.toString());
+		InputColumn<?> col1 = (InputColumn<?>) configuration
+				.getProperty(analyzerJob.getDescriptor().getConfiguredProperty(
+						"From column"));
+		assertEquals("date 1", col1.getName());
 
-		Object col2 = configuration.getProperty(analyzerJob.getDescriptor()
-				.getConfiguredProperty("To column"));
-		assertEquals(
-				"TransformedInputColumn[id=trans-2,name=date 2,type=DATE]",
-				col2.toString());
+		InputColumn<?> col2 = (InputColumn<?>) configuration
+				.getProperty(analyzerJob.getDescriptor().getConfiguredProperty(
+						"To column"));
+		assertEquals("date 2", col2.getName());
+
+		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(jobBuilder.toAnalysisJob());
+		List<AnalyzerResult> results = resultFuture.getResults();
+		assertEquals(1, results.size());
+		DateGapAnalyzerResult result = (DateGapAnalyzerResult) results.get(0);
+		String[] resultLines = new DateGapTextRenderer().render(result).split("\n");
+		assertEquals(12, resultLines.length);
+		assertEquals(" - time gap: 2003-01-18 to 2003-01-29", resultLines[0]);
+		assertEquals(" - time gap: 2003-02-09 to 2003-02-11", resultLines[1]);
+		assertEquals(" - time gap: 2003-05-16 to 2003-05-20", resultLines[2]);
+		assertEquals(" - time gap: 2003-07-23 to 2003-07-24", resultLines[3]);
+		assertEquals(" - time gap: 2003-08-21 to 2003-08-25", resultLines[4]);
+		assertEquals(" - time gap: 2003-09-02 to 2003-09-03", resultLines[5]);
+		assertEquals(" - time gap: 2003-11-03 to 2003-11-04", resultLines[6]);
+		assertEquals(" - time gap: 2003-12-17 to 2004-01-02", resultLines[7]);
+		assertEquals(" - time gap: 2004-05-24 to 2004-05-26", resultLines[8]);
+		assertEquals(" - time gap: 2004-09-22 to 2004-09-27", resultLines[9]);
+		assertEquals(" - time gap: 2004-12-24 to 2005-01-05", resultLines[10]);
+		assertEquals(" - time gap: 2005-05-28 to 2005-05-29", resultLines[11]);
 	}
 
 	public void testInvalidRead() throws Exception {

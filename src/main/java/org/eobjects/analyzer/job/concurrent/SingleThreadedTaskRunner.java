@@ -42,6 +42,9 @@ public final class SingleThreadedTaskRunner implements TaskRunner {
 	}
 
 	private void exec(Task task) {
+		if (task == null) {
+			throw new IllegalArgumentException("task cannot be null");
+		}
 		try {
 			task.execute();
 		} catch (Exception e) {

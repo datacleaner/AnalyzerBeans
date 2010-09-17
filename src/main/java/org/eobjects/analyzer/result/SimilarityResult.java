@@ -1,11 +1,11 @@
-package org.eobjects.analyzer.beans.similarity;
+package org.eobjects.analyzer.result;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.Analyzer;
-import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.beans.similarity.SimilarValues;
 
 public class SimilarityResult implements AnalyzerResult {
 

@@ -27,6 +27,11 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 	@Override
 	public Boolean[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
+		Boolean b = transformValue(value);
+		return new Boolean[] { b };
+	}
+
+	public static Boolean transformValue(Object value) {
 		Boolean b = null;
 		if (value != null) {
 			if (value instanceof String) {
@@ -52,7 +57,7 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 				b = (Boolean) value;
 			}
 		}
-		return new Boolean[] { b };
+		return b;
 	}
 
 }
