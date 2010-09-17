@@ -51,12 +51,14 @@ public class JaxbJobFactoryTest extends TestCase {
 						"To column"));
 		assertEquals("date 2", col2.getName());
 
-		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(jobBuilder.toAnalysisJob());
+		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf)
+				.run(jobBuilder.toAnalysisJob());
 		List<AnalyzerResult> results = resultFuture.getResults();
 		assertEquals(1, results.size());
 		DateGapAnalyzerResult result = (DateGapAnalyzerResult) results.get(0);
-		String[] resultLines = new DateGapTextRenderer().render(result).split("\n");
-		assertEquals(12, resultLines.length);
+		String[] resultLines = new DateGapTextRenderer().render(result).split(
+				"\n");
+		assertEquals(58, resultLines.length);
 		assertEquals(" - time gap: 2003-01-18 to 2003-01-29", resultLines[0]);
 		assertEquals(" - time gap: 2003-02-09 to 2003-02-11", resultLines[1]);
 		assertEquals(" - time gap: 2003-05-16 to 2003-05-20", resultLines[2]);
@@ -69,6 +71,12 @@ public class JaxbJobFactoryTest extends TestCase {
 		assertEquals(" - time gap: 2004-09-22 to 2004-09-27", resultLines[9]);
 		assertEquals(" - time gap: 2004-12-24 to 2005-01-05", resultLines[10]);
 		assertEquals(" - time gap: 2005-05-28 to 2005-05-29", resultLines[11]);
+		assertEquals(" - time overlap: 2003-01-09 to 2003-01-18",
+				resultLines[12]);
+		assertEquals(" - time overlap: 2003-01-31 to 2003-02-07",
+				resultLines[13]);
+		assertEquals(" - time overlap: 2005-05-29 to 2005-06-08",
+				resultLines[57]);
 	}
 
 	public void testInvalidRead() throws Exception {

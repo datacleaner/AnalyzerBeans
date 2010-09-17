@@ -33,7 +33,7 @@ public class DateGapAnalyzer implements
 	@Configured(required = false)
 	InputColumn<String> groupColumn;
 
-	@Configured(required = false, value = "Count intersecting from- and to-dates as overlaps")
+	@Configured(required = false, value = "Count intersecting from and to dates as overlaps")
 	Boolean singleDateOverlaps = false;
 
 	Map<String, TimeLine> timelines;

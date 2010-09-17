@@ -43,17 +43,14 @@ public class DateGapTextRenderer implements
 				}
 			}
 
-			// TODO: Include overlaps
 			SortedSet<TimeInterval> overlaps = result.getOverlaps().get(name);
 			if (overlaps.isEmpty()) {
-				if (overlaps.isEmpty()) {
-					sb.append(" - no time overlaps!\n");
-				} else {
-					for (TimeInterval timeInterval : overlaps) {
-						sb.append(" - time overlap: ");
-						sb.append(format(timeInterval));
-						sb.append('\n');
-					}
+				sb.append(" - no time overlaps!\n");
+			} else {
+				for (TimeInterval timeInterval : overlaps) {
+					sb.append(" - time overlap: ");
+					sb.append(format(timeInterval));
+					sb.append('\n');
 				}
 			}
 		}
