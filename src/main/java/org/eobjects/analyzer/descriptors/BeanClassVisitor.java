@@ -16,10 +16,12 @@ import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class BeanClassVisitor implements ClassVisitor {
 
-	private final static Log _log = LogFactory.getLog(BeanClassVisitor.class);
+	private final static Logger _logger = LoggerFactory.getLogger(BeanClassVisitor.class);
 	private Class<?> _beanClazz;
 	private String _name;
 
@@ -51,7 +53,7 @@ public final class BeanClassVisitor implements ClassVisitor {
 			try {
 				_beanClazz = Class.forName(javaName);
 			} catch (ClassNotFoundException e) {
-				_log.fatal(e);
+				_logger.error("Could not load class: " + javaName, e);
 			}
 		}
 		return _beanClazz;
