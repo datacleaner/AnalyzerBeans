@@ -2,8 +2,6 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.RendererBean;
 import org.eobjects.analyzer.annotations.TransformerBean;
