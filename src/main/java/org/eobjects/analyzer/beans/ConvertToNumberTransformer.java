@@ -36,7 +36,9 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 	public static Number transformValue(Object value) {
 		Number n = null;
 		if (value != null) {
-			if (value instanceof Boolean) {
+			if (value instanceof Number) {
+				n = (Number) value;
+			} else if (value instanceof Boolean) {
 				if (Boolean.TRUE.equals(value)) {
 					n = 1;
 				} else {

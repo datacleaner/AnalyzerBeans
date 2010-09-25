@@ -5,11 +5,12 @@ import java.io.Serializable;
 import org.eobjects.analyzer.beans.Analyzer;
 
 /**
- * An AnalysisResult represents the result or part of the result of an analysis
- * execution. Hence an @AnalyzerBean object can yield one or more AnalysisResult
- * objects.
+ * An AnalysisResult represents the result of an analysis execution.
  */
 public interface AnalyzerResult extends Serializable {
 
+	/**
+	 * @return The Analyzer class that have produced this result.
+	 */
 	public Class<? extends Analyzer<?>> getProducerClass();
 }
