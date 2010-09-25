@@ -9,6 +9,15 @@ import org.eobjects.analyzer.data.InputRow;
 public class MockInputRow implements InputRow {
 
 	Map<InputColumn<?>, Object> map = new HashMap<InputColumn<?>, Object>();
+	
+	public MockInputRow() {
+	}
+	
+	public MockInputRow(InputColumn<?>[] columns, Object[] values) {
+		for (int i = 0; i < values.length; i++) {
+			put(columns[i], values[i]);
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override

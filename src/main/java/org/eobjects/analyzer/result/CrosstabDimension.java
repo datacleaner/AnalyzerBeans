@@ -21,10 +21,11 @@ public class CrosstabDimension implements Serializable, Iterable<String> {
 		this.name = name;
 	}
 
-	public void addCategory(String category) {
+	public CrosstabDimension addCategory(String category) {
 		if (!categories.contains(category)) {
 			categories.add(category);
 		}
+		return this;
 	}
 
 	public String getName() {
