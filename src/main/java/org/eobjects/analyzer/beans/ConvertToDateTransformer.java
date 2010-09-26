@@ -35,14 +35,15 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 		}
 	}
 
-	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_LONG = DateTimeFormat
-			.forPattern("yyyyMMdd");
-	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_SHORT = DateTimeFormat
-			.forPattern("yyMMdd");
+	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_LONG = DateTimeFormat.forPattern("yyyyMMdd");
+	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_SHORT = DateTimeFormat.forPattern("yyMMdd");
 
 	@Inject
 	@Configured
 	InputColumn<?> input;
+
+	@Configured(required = false)
+	Date nullReplacement;
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -53,6 +54,9 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 	public Date[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
 		Date d = transformValue(value);
+		if (d == null) {
+			d = nullReplacement;
+		}
 		return new Date[] { d };
 	}
 
@@ -98,11 +102,9 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 
 		String stringValue = Long.toString(longValue);
 		// test if the number is actually a format of the type yyyyMMdd
-		if (stringValue.length() == 8
-				&& (stringValue.startsWith("1") || stringValue.startsWith("2"))) {
+		if (stringValue.length() == 8 && (stringValue.startsWith("1") || stringValue.startsWith("2"))) {
 			try {
-				return NUMBER_BASED_DATE_FORMAT_LONG.parseDateTime(stringValue)
-						.toDate();
+				return NUMBER_BASED_DATE_FORMAT_LONG.parseDateTime(stringValue).toDate();
 			} catch (Exception e) {
 				// do nothing, proceed to next method of conversion
 			}
@@ -111,8 +113,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 		// test if the number is actually a format of the type yyMMdd
 		if (stringValue.length() == 6) {
 			try {
-				return NUMBER_BASED_DATE_FORMAT_SHORT
-						.parseDateTime(stringValue).toDate();
+				return NUMBER_BASED_DATE_FORMAT_SHORT.parseDateTime(stringValue).toDate();
 			} catch (Exception e) {
 				// do nothing, proceed to next method of conversion
 			}

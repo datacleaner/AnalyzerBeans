@@ -21,6 +21,9 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 	@Configured
 	InputColumn<?> input;
 
+	@Configured(required = false)
+	Number nullReplacement;
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		return OutputColumns.singleOutputColumn();
@@ -30,6 +33,9 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 	public Number[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
 		Number n = transformValue(value);
+		if (n == null) {
+			n = nullReplacement;
+		}
 		return new Number[] { n };
 	}
 

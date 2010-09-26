@@ -18,6 +18,9 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 	@Inject
 	@Configured
 	InputColumn<?> input;
+	
+	@Configured(required=false)
+	Boolean nullReplacement;
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -28,6 +31,9 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 	public Boolean[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
 		Boolean b = transformValue(value);
+		if (b == null) {
+			b = nullReplacement;
+		}
 		return new Boolean[] { b };
 	}
 

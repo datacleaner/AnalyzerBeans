@@ -26,6 +26,9 @@ public class ConvertToStringTransformer implements Transformer<String> {
 	@Configured
 	InputColumn<?> input;
 
+	@Configured(required = false)
+	String nullReplacement;
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		return OutputColumns.singleOutputColumn();
@@ -35,6 +38,9 @@ public class ConvertToStringTransformer implements Transformer<String> {
 	public String[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
 		String stringValue = transformValue(value);
+		if (stringValue == null) {
+			stringValue = nullReplacement;
+		}
 		return new String[] { stringValue };
 	}
 
@@ -42,16 +48,14 @@ public class ConvertToStringTransformer implements Transformer<String> {
 		String stringValue = null;
 		if (value != null) {
 			if (value instanceof InputStream) {
-				value = new InputStreamReader(new BufferedInputStream(
-						(InputStream) value));
+				value = new InputStreamReader(new BufferedInputStream((InputStream) value));
 			}
 			if (value instanceof Reader) {
 				StringBuilder sb = new StringBuilder();
 				Reader reader = (Reader) value;
 				BufferedReader br = new BufferedReader(reader);
 				try {
-					for (String line = br.readLine(); line != null; line = br
-							.readLine()) {
+					for (String line = br.readLine(); line != null; line = br.readLine()) {
 						sb.append(line);
 						sb.append('\n');
 					}
