@@ -21,15 +21,16 @@ import javax.inject.Qualifier;
  * <ul>
  * <li>Boolean</li>
  * <li>Byte</li>
+ * <li>Short</li>
  * <li>Integer</li>
  * <li>Long</li>
  * <li>Float</li>
  * <li>Double</li>
- * <li>String</li>
  * <li>Character</li>
+ * <li>String</li>
  * <li>org.eobjects.analyzer.data.InputColumn</li>
  * <li>org.eobjects.analyzer.reference.Dictionary</li>
- * <li>org.eobjects.analyzer.reference.SynonymCatalog</li> *
+ * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
  * </ul>
  * 
  * Additionally exploring analyzers are allowed to inject these @Configured
