@@ -8,13 +8,12 @@ import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 
-import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.MutableColumn;
 
 public class ValueDistributionAnalyzerTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor<?> desc = AnnotationBasedAnalyzerBeanDescriptor.create(
-				ValueDistributionAnalyzer.class);
+		AnalyzerBeanDescriptor<?> desc = AnnotationBasedAnalyzerBeanDescriptor.create(ValueDistributionAnalyzer.class);
 		assertEquals(true, desc.isRowProcessingAnalyzer());
 		assertEquals(false, desc.isExploringAnalyzer());
 		assertEquals(0, desc.getInitializeMethods().size());
@@ -24,8 +23,8 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 	}
 
 	public void testGetNullAndUniqueCount() throws Exception {
-		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
-				new MetaModelInputColumn(new Column("col")), true, null, null);
+		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(new MetaModelInputColumn(new MutableColumn("col")),
+				true, null, null);
 		vd.setValueDistribution(new HashMap<String, Integer>());
 
 		assertEquals(0, vd.getResult().getUniqueCount());
@@ -56,8 +55,8 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 	}
 
 	public void testGetValueDistribution() throws Exception {
-		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
-				new MetaModelInputColumn(new Column("col")), true, null, null);
+		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(new MetaModelInputColumn(new MutableColumn("col")),
+				true, null, null);
 		vd.setValueDistribution(new HashMap<String, Integer>());
 
 		vd.runInternal("hello", 1);

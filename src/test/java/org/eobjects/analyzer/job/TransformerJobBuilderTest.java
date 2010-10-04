@@ -13,8 +13,8 @@ import org.eobjects.analyzer.descriptors.AnnotationBasedTransformerBeanDescripto
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.ColumnType;
+import dk.eobjects.metamodel.schema.MutableColumn;
 
 public class TransformerJobBuilderTest extends TestCase {
 
@@ -28,26 +28,22 @@ public class TransformerJobBuilderTest extends TestCase {
 
 		ajb = new AnalysisJobBuilder(configuration);
 
-		ajb.addSourceColumn(new Column("fooInt", ColumnType.INTEGER));
-		ajb.addSourceColumn(new Column("fooStr", ColumnType.VARCHAR));
+		ajb.addSourceColumn(new MutableColumn("fooInt", ColumnType.INTEGER));
+		ajb.addSourceColumn(new MutableColumn("fooStr", ColumnType.VARCHAR));
 	}
 
 	public void testSetInvalidPropertyType() throws Exception {
-		TransformerJobBuilder<TokenizerTransformer> tjb = ajb
-				.addTransformer(TokenizerTransformer.class);
+		TransformerJobBuilder<TokenizerTransformer> tjb = ajb.addTransformer(TokenizerTransformer.class);
 		try {
 			tjb.setConfiguredProperty("Number of tokens", "hello");
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
-			assertEquals(
-					"Invalid value type: java.lang.String, expected: java.lang.Integer",
-					e.getMessage());
+			assertEquals("Invalid value type: java.lang.String, expected: java.lang.Integer", e.getMessage());
 		}
 	}
 
 	public void testIsConfigured() throws Exception {
-		TransformerJobBuilder<TokenizerTransformer> tjb = ajb
-				.addTransformer(TokenizerTransformer.class);
+		TransformerJobBuilder<TokenizerTransformer> tjb = ajb.addTransformer(TokenizerTransformer.class);
 		assertFalse(tjb.isConfigured());
 
 		tjb.addInputColumn(ajb.getSourceColumns().get(1));
@@ -61,18 +57,14 @@ public class TransformerJobBuilderTest extends TestCase {
 	}
 
 	public void testGetAvailableInputColumns() throws Exception {
-		assertEquals(2, ajb.getAvailableInputColumns(DataTypeFamily.UNDEFINED)
-				.size());
+		assertEquals(2, ajb.getAvailableInputColumns(DataTypeFamily.UNDEFINED).size());
 		assertEquals(2, ajb.getAvailableInputColumns(null).size());
-		assertEquals(1, ajb.getAvailableInputColumns(DataTypeFamily.STRING)
-				.size());
-		assertEquals(0, ajb.getAvailableInputColumns(DataTypeFamily.DATE)
-				.size());
+		assertEquals(1, ajb.getAvailableInputColumns(DataTypeFamily.STRING).size());
+		assertEquals(0, ajb.getAvailableInputColumns(DataTypeFamily.DATE).size());
 	}
 
 	public void testInvalidInputColumnType() throws Exception {
-		TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb
-				.addTransformer(EmailStandardizerTransformer.class);
+		TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb.addTransformer(EmailStandardizerTransformer.class);
 		assertEquals(2, tjb.getOutputColumns().size());
 		assertEquals(0, tjb.getInputColumns().size());
 		assertFalse(tjb.isConfigured());
@@ -80,9 +72,7 @@ public class TransformerJobBuilderTest extends TestCase {
 			tjb.addInputColumn(ajb.getSourceColumns().get(0));
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
-			assertEquals(
-					"Unsupported InputColumn type: NUMBER, expected: STRING",
-					e.getMessage());
+			assertEquals("Unsupported InputColumn type: NUMBER, expected: STRING", e.getMessage());
 		}
 		assertFalse(tjb.isConfigured());
 
@@ -100,18 +90,13 @@ public class TransformerJobBuilderTest extends TestCase {
 				descriptor, IdGenerator);
 		assertFalse(builder.isConfigured());
 
-		ConvertToNumberTransformer configurableBean = builder
-				.getConfigurableBean();
-		InputColumn<String> input = new TransformedInputColumn<String>("foo",
-				DataTypeFamily.STRING, IdGenerator);
+		ConvertToNumberTransformer configurableBean = builder.getConfigurableBean();
+		InputColumn<String> input = new TransformedInputColumn<String>("foo", DataTypeFamily.STRING, IdGenerator);
 		configurableBean.setInput(input);
 
 		assertTrue(builder.isConfigured());
-		ConfiguredPropertyDescriptor propertyDescriptor = descriptor
-				.getConfiguredPropertiesForInput().iterator().next();
-		Object object = builder.getConfiguredProperties().get(
-				propertyDescriptor);
-		assertEquals("TransformedInputColumn[id=-1,name=foo,type=STRING]",
-				object.toString());
+		ConfiguredPropertyDescriptor propertyDescriptor = descriptor.getConfiguredPropertiesForInput().iterator().next();
+		Object object = builder.getConfiguredProperties().get(propertyDescriptor);
+		assertEquals("TransformedInputColumn[id=-1,name=foo,type=STRING]", object.toString());
 	}
 }

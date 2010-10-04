@@ -88,7 +88,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 				.getAvailableInputColumns(DataTypeFamily.NUMBER);
 		assertEquals(1, numberColumns.size());
 		assertEquals(
-				"[MetaModelInputColumn[JdbcColumn[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
+				"[MetaModelInputColumn[Column[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
 				Arrays.toString(numberColumns.toArray()));
 
 		transformerJobBuilder.addInputColumn(numberColumns.iterator().next());
@@ -103,8 +103,8 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		Collection<InputColumn<?>> stringInputColumns = analysisJobBuilder
 				.getAvailableInputColumns(DataTypeFamily.STRING);
 		assertEquals(
-				"[MetaModelInputColumn[JdbcColumn[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
-						+ "MetaModelInputColumn[JdbcColumn[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]], "
+				"[MetaModelInputColumn[Column[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
+						+ "MetaModelInputColumn[Column[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]], "
 						+ "TransformedInputColumn[id=trans-1,name=Convert to string,type=STRING]]",
 				Arrays.toString(stringInputColumns.toArray()));
 
@@ -147,7 +147,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 				transformerJob.toString());
 
 		assertEquals(
-				"[MetaModelInputColumn[JdbcColumn[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
+				"[MetaModelInputColumn[Column[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
 				Arrays.toString(transformerJob.getInput()));
 
 		Collection<AnalyzerJob> analyzerJobs = analysisJob.getAnalyzerJobs();

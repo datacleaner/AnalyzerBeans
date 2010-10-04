@@ -13,8 +13,8 @@ import dk.eobjects.metamodel.schema.Table;
 public class SchemaNavigatorTest extends TestCase {
 
 	public void testSchemaWithDot() throws Exception {
-		DataContext dc = DataContextFactory.createCsvDataContext(new File(
-				"src/test/resources/employees.csv"), ',', '\"', false);
+		DataContext dc = DataContextFactory.createCsvDataContext(new File("src/test/resources/employees.csv"), ',', '\"',
+				false);
 
 		assertEquals(2, dc.getDefaultSchema().getTables()[0].getColumnCount());
 
@@ -22,10 +22,10 @@ public class SchemaNavigatorTest extends TestCase {
 
 		Column column = sn.convertToColumn("employees.csv.employees.email");
 		assertEquals(
-				"Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,indexed=false,nativeType=<null>,columnSize=<null>]",
+				"Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,indexed=false,nativeType=null,columnSize=null]",
 				column.toString());
 	}
-	
+
 	public void testConvertToColumnWithNoSchema() throws Exception {
 		CsvDatastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
 		SchemaNavigator schemaNavigator = datastore.getDataContextProvider().getSchemaNavigator();

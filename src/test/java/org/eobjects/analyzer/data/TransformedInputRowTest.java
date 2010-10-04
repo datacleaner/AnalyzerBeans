@@ -3,13 +3,14 @@ package org.eobjects.analyzer.data;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 
 import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.MutableColumn;
 import junit.framework.TestCase;
 
 public class TransformedInputRowTest extends TestCase {
 
 	public void testGetValue() throws Exception {
-		Column col1 = new Column("foo");
-		Column col2 = new Column("bar");
+		Column col1 = new MutableColumn("foo");
+		Column col2 = new MutableColumn("bar");
 		InputColumn<?> inputColumn1 = new MetaModelInputColumn(col1);
 		InputColumn<?> inputColumn2 = new MetaModelInputColumn(col2);
 		MutableInputColumn<String> inputColumn3 = new TransformedInputColumn<String>(

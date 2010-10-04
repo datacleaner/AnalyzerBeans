@@ -14,9 +14,10 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 
-import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.MutableColumn;
+import dk.eobjects.metamodel.schema.MutableSchema;
+import dk.eobjects.metamodel.schema.MutableTable;
 import dk.eobjects.metamodel.schema.Schema;
-import dk.eobjects.metamodel.schema.Table;
 
 public class StringConversionUtilsTest extends TestCase {
 
@@ -42,8 +43,7 @@ public class StringConversionUtilsTest extends TestCase {
 		SynonymCatalog synonymCatalog = new SimpleSynonymCatalog("my synonyms");
 
 		assertEquals("my dict", StringConversionUtils.serialize(dictionary));
-		assertEquals("my synonyms",
-				StringConversionUtils.serialize(synonymCatalog));
+		assertEquals("my synonyms", StringConversionUtils.serialize(synonymCatalog));
 
 		Collection<Dictionary> dictionaries = new ArrayList<Dictionary>();
 		dictionaries.add(dictionary);
@@ -51,23 +51,19 @@ public class StringConversionUtilsTest extends TestCase {
 		Collection<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
 		synonymCatalogs.add(synonymCatalog);
 
-		ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(
-				dictionaries, synonymCatalogs);
+		ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs);
 
-		Dictionary dictionaryResult = StringConversionUtils.deserialize(
-				"my dict", Dictionary.class, null, referenceDataCatalog);
+		Dictionary dictionaryResult = StringConversionUtils.deserialize("my dict", Dictionary.class, null,
+				referenceDataCatalog);
 		assertSame(dictionaryResult, dictionary);
 
-		dictionaryResult = StringConversionUtils.deserialize("foo",
-				Dictionary.class, null, referenceDataCatalog);
+		dictionaryResult = StringConversionUtils.deserialize("foo", Dictionary.class, null, referenceDataCatalog);
 		assertNull(dictionaryResult);
 
-		SynonymCatalog synonymCatalogResult = StringConversionUtils
-				.deserialize("my synonyms", SynonymCatalog.class, null,
-						referenceDataCatalog);
+		SynonymCatalog synonymCatalogResult = StringConversionUtils.deserialize("my synonyms", SynonymCatalog.class, null,
+				referenceDataCatalog);
 		assertSame(synonymCatalogResult, synonymCatalog);
-		synonymCatalogResult = StringConversionUtils.deserialize("bar",
-				SynonymCatalog.class, null, referenceDataCatalog);
+		synonymCatalogResult = StringConversionUtils.deserialize("bar", SynonymCatalog.class, null, referenceDataCatalog);
 		assertNull(synonymCatalogResult);
 	}
 
@@ -77,14 +73,14 @@ public class StringConversionUtilsTest extends TestCase {
 	}
 
 	public void testSerializeSchemaElements() throws Exception {
-		Schema schema = new Schema("s1");
+		Schema schema = new MutableSchema("s1");
 		assertEquals("s1", StringConversionUtils.serialize(schema));
 
-		Table table = new Table("t1");
+		MutableTable table = new MutableTable("t1");
 		table.setSchema(schema);
 		assertEquals("s1.t1", StringConversionUtils.serialize(table));
 
-		Column column = new Column("c1");
+		MutableColumn column = new MutableColumn("c1");
 		column.setTable(table);
 		assertEquals("s1.t1.c1", StringConversionUtils.serialize(column));
 	}
@@ -92,10 +88,8 @@ public class StringConversionUtilsTest extends TestCase {
 	public void testNullArgument() throws Exception {
 		String s = StringConversionUtils.serialize(null);
 		assertEquals("<null>", s);
-		assertNull(StringConversionUtils.deserialize(s, String.class, null,
-				null));
-		assertNull(StringConversionUtils.deserialize(s, Integer.class, null,
-				null));
+		assertNull(StringConversionUtils.deserialize(s, String.class, null, null));
+		assertNull(StringConversionUtils.deserialize(s, Integer.class, null, null));
 		assertNull(StringConversionUtils.deserialize(s, Date.class, null, null));
 	}
 
@@ -109,27 +103,21 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests(new String[0], "[]");
 		runTests(new String[3], "[<null>,<null>,<null>]");
 
-		Long[] result = StringConversionUtils.deserialize("123", Long[].class,
-				null, null);
+		Long[] result = StringConversionUtils.deserialize("123", Long[].class, null, null);
 		assertEquals(1, result.length);
 		assertEquals(123l, result[0].longValue());
 	}
 
 	public void testDoubleSidedArray() throws Exception {
-		runTests(new String[][] { { "hello", "world" }, { "hi", "there" } },
-				"[[hello,world],[hi,there]]");
-		runTests(new String[][] { { "hello", "world" }, { "howdy" },
-				{ "hi", "there partner", "yiiioowy" } },
+		runTests(new String[][] { { "hello", "world" }, { "hi", "there" } }, "[[hello,world],[hi,there]]");
+		runTests(new String[][] { { "hello", "world" }, { "howdy" }, { "hi", "there partner", "yiiioowy" } },
 				"[[hello,world],[howdy],[hi,there partner,yiiioowy]]");
-		runTests(new String[][] { { "hello", "world" }, { "howdy" },
-				{ "hi", "there partner", "yiiioowy" } },
+		runTests(new String[][] { { "hello", "world" }, { "howdy" }, { "hi", "there partner", "yiiioowy" } },
 				"[[hello,world],[howdy],[hi,there partner,yiiioowy]]");
 	}
 
 	public void testDeepArray() throws Exception {
-		runTests(
-				new Integer[][][][] { { { { 1, 2 }, { 3, 4 } }, { { 5, 6 } } } },
-				"[[[[1,2],[3,4]],[[5,6]]]]");
+		runTests(new Integer[][][][] { { { { 1, 2 }, { 3, 4 } }, { { 5, 6 } } } }, "[[[[1,2],[3,4]],[[5,6]]]]");
 	}
 
 	private void runTests(final Object o, String expectedStringRepresentation) {
@@ -137,16 +125,13 @@ public class StringConversionUtilsTest extends TestCase {
 		if (expectedStringRepresentation != null) {
 			assertEquals(expectedStringRepresentation, s);
 		}
-		Object o2 = StringConversionUtils.deserialize(s, o.getClass(), null,
-				null);
+		Object o2 = StringConversionUtils.deserialize(s, o.getClass(), null, null);
 		if (ReflectionUtils.isArray(o)) {
 			boolean equals = CompareUtils.equals(o, o2);
 			if (!equals) {
 				System.out.println("Not equals:");
-				System.out.println(" expected: " + o + ": "
-						+ Arrays.toString((Object[]) o));
-				System.out.println(" actual:   " + o2 + ": "
-						+ Arrays.toString((Object[]) o2));
+				System.out.println(" expected: " + o + ": " + Arrays.toString((Object[]) o));
+				System.out.println(" actual:   " + o2 + ": " + Arrays.toString((Object[]) o2));
 			}
 			assertTrue(equals);
 		} else {

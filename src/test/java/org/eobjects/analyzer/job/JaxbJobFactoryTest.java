@@ -186,13 +186,13 @@ public class JaxbJobFactoryTest extends TestCase {
 		List<MetaModelInputColumn> sourceColumns = builder.getSourceColumns();
 		assertEquals(3, sourceColumns.size());
 		assertEquals(
-				"MetaModelInputColumn[JdbcColumn[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]",
+				"MetaModelInputColumn[Column[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]",
 				sourceColumns.get(0).toString());
 		assertEquals(
-				"MetaModelInputColumn[JdbcColumn[name=LASTNAME,columnNumber=1,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]",
+				"MetaModelInputColumn[Column[name=LASTNAME,columnNumber=1,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]",
 				sourceColumns.get(1).toString());
 		assertEquals(
-				"MetaModelInputColumn[JdbcColumn[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]]",
+				"MetaModelInputColumn[Column[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]]",
 				sourceColumns.get(2).toString());
 
 		assertEquals(1, builder.getTransformerJobBuilders().size());
@@ -204,8 +204,8 @@ public class JaxbJobFactoryTest extends TestCase {
 		assertEquals(
 				"[TransformedInputColumn[id=trans-1,name=username,type=STRING], "
 						+ "TransformedInputColumn[id=trans-2,name=domain,type=STRING], "
-						+ "MetaModelInputColumn[JdbcColumn[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
-						+ "MetaModelInputColumn[JdbcColumn[name=LASTNAME,columnNumber=1,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]]",
+						+ "MetaModelInputColumn[Column[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
+						+ "MetaModelInputColumn[Column[name=LASTNAME,columnNumber=1,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]]",
 				Arrays.toString(builder.getAnalyzerJobBuilders().get(0)
 						.toAnalyzerJob().getInput()));
 

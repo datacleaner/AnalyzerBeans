@@ -1,17 +1,17 @@
 package org.eobjects.analyzer.beans;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.TransformedInputRow;
 
-import dk.eobjects.metamodel.schema.Column;
-
-import junit.framework.TestCase;
+import dk.eobjects.metamodel.schema.MutableColumn;
 
 public class TokenizerTransformerTest extends TestCase {
 
 	public void testTransform() throws Exception {
-		InputColumn<?> col = new MetaModelInputColumn(new Column("name"));
+		InputColumn<?> col = new MetaModelInputColumn(new MutableColumn("name"));
 
 		@SuppressWarnings("unchecked")
 		TokenizerTransformer transformer = new TokenizerTransformer(

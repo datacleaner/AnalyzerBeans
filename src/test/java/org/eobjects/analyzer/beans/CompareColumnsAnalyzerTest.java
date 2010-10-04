@@ -7,19 +7,20 @@ import org.eobjects.analyzer.result.ColumnDifference;
 
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.ColumnType;
+import dk.eobjects.metamodel.schema.MutableColumn;
 import junit.framework.TestCase;
 
 public class CompareColumnsAnalyzerTest extends TestCase {
 
 	public void testNoDiffs() throws Exception {
-		Column column1 = new Column("column", ColumnType.VARCHAR, null, 4, true);
+		Column column1 = new MutableColumn("column", ColumnType.VARCHAR, null, 4, true);
 
 		CompareColumnsAnalyzer analyzer = new CompareColumnsAnalyzer(column1,
 				column1);
 		analyzer.run(null);
 		assertTrue(analyzer.getResult().isColumnsEqual());
 
-		Column column2 = new Column("column", ColumnType.VARCHAR, null, 4, true);
+		Column column2 = new MutableColumn("column", ColumnType.VARCHAR, null, 4, true);
 
 		analyzer = new CompareColumnsAnalyzer(column1, column2);
 		analyzer.run(null);
@@ -30,9 +31,9 @@ public class CompareColumnsAnalyzerTest extends TestCase {
 	}
 
 	public void testSimpleDiffs() throws Exception {
-		Column column1 = new Column("column1", ColumnType.INTEGER, null, 3,
+		Column column1 = new MutableColumn("column1", ColumnType.INTEGER, null, 3,
 				false);
-		Column column2 = new Column("column2", ColumnType.VARCHAR, null, 4,
+		Column column2 = new MutableColumn("column2", ColumnType.VARCHAR, null, 4,
 				false);
 
 		CompareColumnsAnalyzer analyzer = new CompareColumnsAnalyzer(column1,
@@ -54,7 +55,7 @@ public class CompareColumnsAnalyzerTest extends TestCase {
 				diffs.get(2).toString());
 
 		// new column 2
-		column2 = new Column("column1", ColumnType.INTEGER, null, 3, true);
+		column2 = new MutableColumn("column1", ColumnType.INTEGER, null, 3, true);
 		analyzer = new CompareColumnsAnalyzer(column1, column2);
 		analyzer.run(null);
 		result = analyzer.getResult();

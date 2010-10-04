@@ -7,18 +7,18 @@
 	<name>AnalyzerBeans</name>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
-		<metamodel.version>1.2</metamodel.version>
+		<metamodel.version>1.5-RC1</metamodel.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<scm>
 		<connection>
-			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/ 
+			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
 		</connection>
 		<developerConnection>
-			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/ 
+			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
 		</developerConnection>
 		<url>
-			http://eobjects.org/trac/browser/AnalyzerBeans/trunk 
+			http://eobjects.org/svn/AnalyzerBeans/trunk/ 
 		</url>
 	</scm>
 	<distributionManagement>
@@ -43,13 +43,6 @@
 		<system>trac</system>
 		<url>http://eobjects.org/trac</url>
 	</issueManagement>
-	<mailingLists>
-		<mailingList>
-			<name>AnalyzerBeans mailing list</name>
-			<archive>http://groups.google.com/group/analyzerbeans</archive>
-			<post>analyzerbeans@googlegroups.com</post>
-		</mailingList>
-	</mailingLists>
 	<licenses>
 		<license>
 			<name>Lesser General Public License</name>
@@ -132,27 +125,19 @@
 	</repositories>
 	<dependencies>
 		<dependency>
-			<groupId>dk.eobjects.metamodel</groupId>
+			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-full</artifactId>
 			<version>${metamodel.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-math</groupId>
-					<artifactId>commons-math</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>dk.eobjects.metamodel</groupId>
-					<artifactId>MetaModel-excel</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>dk.eobjects.metamodel</groupId>
-					<artifactId>MetaModel-access</artifactId>
-				</exclusion>
-			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-jdbc</artifactId>
+			<version>${metamodel.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-csv</artifactId>
+			<version>${metamodel.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -240,7 +225,7 @@
 
 		<!-- The MetaModel-testware module includes junit, easymock and some sampledata -->
 		<dependency>
-			<groupId>dk.eobjects.metamodel</groupId>
+			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-testware</artifactId>
 			<version>${metamodel.version}</version>
 			<scope>test</scope>

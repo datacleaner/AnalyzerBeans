@@ -8,12 +8,13 @@ import org.eobjects.analyzer.data.MetaModelInputColumn;
 
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.ColumnType;
+import dk.eobjects.metamodel.schema.MutableColumn;
 
 public class NameStandardizerTransformerTest extends TestCase {
 
 	public void testSimpleScenario() throws Exception {
 		NameStandardizerTransformer transformer = new NameStandardizerTransformer();
-		Column column = new Column("name", ColumnType.VARCHAR);
+		Column column = new MutableColumn("name", ColumnType.VARCHAR);
 
 		MetaModelInputColumn inputColumn = new MetaModelInputColumn(column);
 		transformer.setInputColumn(inputColumn);

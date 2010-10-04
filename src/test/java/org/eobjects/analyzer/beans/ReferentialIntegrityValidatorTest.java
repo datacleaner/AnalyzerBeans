@@ -12,9 +12,9 @@ import org.eobjects.analyzer.test.QueryMatcher;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
-import dk.eobjects.metamodel.IDataContextStrategy;
 import dk.eobjects.metamodel.MetaModelTestCase;
-import dk.eobjects.metamodel.data.DataSet;
+import dk.eobjects.metamodel.data.DefaultRow;
+import dk.eobjects.metamodel.data.InMemoryDataSet;
 import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.query.FromItem;
 import dk.eobjects.metamodel.query.Query;
@@ -46,16 +46,16 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 	}
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor<ReferentialIntegrityValidator> descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(
-				ReferentialIntegrityValidator.class);
+		AnalyzerBeanDescriptor<ReferentialIntegrityValidator> descriptor = AnnotationBasedAnalyzerBeanDescriptor
+				.create(ReferentialIntegrityValidator.class);
 		assertEquals(
 				"AnnotationBasedAnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
 				descriptor.toString());
 
 		assertEquals(
-				"[ConfiguredPropertyDescriptorImpl[field=primaryKeyColumn,baseType=class dk.eobjects.metamodel.schema.Column], "
+				"[ConfiguredPropertyDescriptorImpl[field=primaryKeyColumn,baseType=interface dk.eobjects.metamodel.schema.Column], "
 						+ "ConfiguredPropertyDescriptorImpl[field=acceptNullForeignKey,baseType=boolean], "
-						+ "ConfiguredPropertyDescriptorImpl[field=foreignKeyColumn,baseType=class dk.eobjects.metamodel.schema.Column]]",
+						+ "ConfiguredPropertyDescriptorImpl[field=foreignKeyColumn,baseType=interface dk.eobjects.metamodel.schema.Column]]",
 				descriptor.getConfiguredProperties().toString());
 
 		assertEquals("[]", descriptor.getProvidedProperties().toString());
@@ -69,10 +69,8 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 	}
 
 	public void testSeparateTables() throws Exception {
-		Column columnInOfficesTable = officesTable
-				.getColumnByName("OFFICECODE");
-		Column columnInEmployeesTable = employeesTable
-				.getColumnByName("OFFICECODE");
+		Column columnInOfficesTable = officesTable.getColumnByName("OFFICECODE");
+		Column columnInEmployeesTable = employeesTable.getColumnByName("OFFICECODE");
 
 		ReferentialIntegrityValidator bean = new ReferentialIntegrityValidator();
 		bean.setAcceptNullForeignKey(false);
@@ -87,8 +85,7 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 
 	public void testReferentialInconsistency() throws Exception {
 		Schema schema = getExampleSchema();
-		Column foreignKeyColumn = schema.getTableByName(TABLE_ROLE)
-				.getColumnByName(COLUMN_ROLE_CONTRIBUTOR_ID);
+		Column foreignKeyColumn = schema.getTableByName(TABLE_ROLE).getColumnByName(COLUMN_ROLE_CONTRIBUTOR_ID);
 		Column primaryKeyColumn = schema.getTableByName(TABLE_CONTRIBUTOR)
 				.getColumnByName(COLUMN_CONTRIBUTOR_CONTRIBUTOR_ID);
 
@@ -97,71 +94,64 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 		bean.setPrimaryKeyColumn(primaryKeyColumn);
 		bean.setForeignKeyColumn(foreignKeyColumn);
 
-		IDataContextStrategy dcMock = createMock(IDataContextStrategy.class);
-		DataContext dc = new DataContext(dcMock);
+		DataContext dcMock = createMock(DataContext.class);
 
 		List<Row> rows = new ArrayList<Row>();
 
 		// Create SelectItems similar to those created in the bean (to make
 		// query-mocking work)
-		FromItem leftSide = new FromItem(new Query().select(foreignKeyColumn)
-				.from(foreignKeyColumn.getTable())).setAlias("a");
+		FromItem leftSide = new FromItem(new Query().select(foreignKeyColumn).from(foreignKeyColumn.getTable()))
+				.setAlias("a");
 		SelectItem leftOn = leftSide.getSubQuery().getSelectClause().getItem(0);
-		FromItem rightSide = new FromItem(new Query().select(primaryKeyColumn)
-				.from(primaryKeyColumn.getTable())).setAlias("b");
-		SelectItem rightOn = rightSide.getSubQuery().getSelectClause()
-				.getItem(0);
+		FromItem rightSide = new FromItem(new Query().select(primaryKeyColumn).from(primaryKeyColumn.getTable()))
+				.setAlias("b");
+		SelectItem rightOn = rightSide.getSubQuery().getSelectClause().getItem(0);
 		SelectItem primaryKeySelectItem = new SelectItem(rightOn, rightSide);
 		SelectItem foreignKeySelectItem = new SelectItem(leftOn, leftSide);
 
 		// An valid row
-		rows.add(new Row(new SelectItem[] { foreignKeySelectItem,
-				primaryKeySelectItem }, new Object[] { "foo", "foo" }));
+		rows.add(new DefaultRow(new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem },
+				new Object[] { "foo", "foo" }));
 		// An invalid row
-		rows.add(new Row(new SelectItem[] { foreignKeySelectItem,
-				primaryKeySelectItem }, new Object[] { "bar", null }));
+		rows.add(new DefaultRow(new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem },
+				new Object[] { "bar", null }));
 		// Simulate an (impossible?) error in the join
-		rows.add(new Row(new SelectItem[] { foreignKeySelectItem,
-				primaryKeySelectItem }, new Object[] { "foobar", "foo" }));
+		rows.add(new DefaultRow(new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem }, new Object[] { "foobar",
+				"foo" }));
 		// Another valid row
-		rows.add(new Row(new SelectItem[] { foreignKeySelectItem,
-				primaryKeySelectItem }, new Object[] { "foo", "foo" }));
+		rows.add(new DefaultRow(new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem },
+				new Object[] { "foo", "foo" }));
 
-		EasyMock.reportMatcher(new QueryMatcher(
-				"SELECT b.contributor_id, a.contributor_id, a.project_id, a.name "
-						+ "FROM (SELECT role.contributor_id, role.project_id, role.name FROM MetaModelSchema.role) a "
-						+ "LEFT JOIN (SELECT contributor.contributor_id FROM MetaModelSchema.contributor) b "
-						+ "ON a.contributor_id = b.contributor_id"));
-		EasyMock.expect(dcMock.executeQuery(null)).andReturn(new DataSet(rows));
+		EasyMock.reportMatcher(new QueryMatcher("SELECT b.contributor_id, a.contributor_id, a.project_id, a.name "
+				+ "FROM (SELECT role.contributor_id, role.project_id, role.name FROM MetaModelSchema.role) a "
+				+ "LEFT JOIN (SELECT contributor.contributor_id FROM MetaModelSchema.contributor) b "
+				+ "ON a.contributor_id = b.contributor_id"));
+		EasyMock.expect(dcMock.executeQuery(null)).andReturn(new InMemoryDataSet(rows));
 
 		replayMocks();
 
-		bean.run(dc);
+		bean.run(dcMock);
 
 		verifyMocks();
 
 		DataSetResult invalidRows = bean.getResult();
 		assertEquals(2, invalidRows.getRows().size());
 
-		assertEquals("Row[values={bar,<null>}]", invalidRows.getRows().get(0)
-				.toString());
-		assertEquals("Row[values={foobar,foo}]", invalidRows.getRows().get(1)
-				.toString());
+		assertEquals("Row[values=[bar, null]]", invalidRows.getRows().get(0).toString());
+		assertEquals("Row[values=[foobar, foo]]", invalidRows.getRows().get(1).toString());
 	}
 
 	public void testParentChildRelationship() throws Exception {
 		ReferentialIntegrityValidator bean = new ReferentialIntegrityValidator();
 		bean.setAcceptNullForeignKey(false);
-		bean.setPrimaryKeyColumn(employeesTable
-				.getColumnByName("EMPLOYEENUMBER"));
+		bean.setPrimaryKeyColumn(employeesTable.getColumnByName("EMPLOYEENUMBER"));
 		bean.setForeignKeyColumn(employeesTable.getColumnByName("REPORTSTO"));
 
 		bean.run(dc);
 
 		DataSetResult invalidRows = bean.getResult();
 		assertEquals(1, invalidRows.getRows().size());
-		assertEquals(
-				"Row[values={<null>,<null>,1002,Murphy,Diane,x5800,dmurphy@classicmodelcars.com,1,President}]",
+		assertEquals("Row[values=[null, null, 1002, Murphy, Diane, x5800, dmurphy@classicmodelcars.com, 1, President]]",
 				invalidRows.getRows().get(0).toString());
 
 		bean.setAcceptNullForeignKey(true);

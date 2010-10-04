@@ -24,38 +24,31 @@ import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.ColumnType;
+import dk.eobjects.metamodel.schema.MutableColumn;
 
 public class RowProcessingPublisherTest extends TestCase {
 
-	public void testCreateProcessOrderedConsumerListNoConsumers()
-			throws Exception {
+	public void testCreateProcessOrderedConsumerListNoConsumers() throws Exception {
 		List<RowProcessingConsumer> consumerList = RowProcessingPublisher
 				.createProcessOrderedConsumerList(new ArrayList<RowProcessingConsumer>());
 		assertTrue(consumerList.isEmpty());
 	}
 
-	public void testCreateProcessOrderedConsumerListChainedTransformers()
-			throws Exception {
+	public void testCreateProcessOrderedConsumerListChainedTransformers() throws Exception {
 
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(
-				TestHelper.createAnalyzerBeansConfiguration());
-		Column physicalColumn = new Column("foo", ColumnType.VARCHAR);
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
+		Column physicalColumn = new MutableColumn("foo", ColumnType.VARCHAR);
 		ajb.addSourceColumn(physicalColumn);
 
-		TransformerJobBuilder<TransformerMock> tjb1 = ajb.addTransformer(
-				TransformerMock.class).addInputColumn(
+		TransformerJobBuilder<TransformerMock> tjb1 = ajb.addTransformer(TransformerMock.class).addInputColumn(
 				ajb.getSourceColumns().get(0));
-		TransformerJobBuilder<TransformerMock> tjb2 = ajb.addTransformer(
-				TransformerMock.class).addInputColumn(
+		TransformerJobBuilder<TransformerMock> tjb2 = ajb.addTransformer(TransformerMock.class).addInputColumn(
 				tjb1.getOutputColumns().get(0));
-		TransformerJobBuilder<ConvertToStringTransformer> tjb3 = ajb
-				.addTransformer(ConvertToStringTransformer.class)
+		TransformerJobBuilder<ConvertToStringTransformer> tjb3 = ajb.addTransformer(ConvertToStringTransformer.class)
 				.addInputColumn(tjb2.getOutputColumns().get(0));
 
-		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(
-				ajb.getSourceColumns().get(0));
-		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(
-				tjb3.getOutputColumns().get(0));
+		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
+		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(tjb3.getOutputColumns().get(0));
 
 		ajb.setDataContextProvider(new MockDataContextProvider());
 
@@ -63,21 +56,17 @@ public class RowProcessingPublisherTest extends TestCase {
 		AnalysisJob analysisJob = ajb.toAnalysisJob();
 
 		List<RowProcessingConsumer> consumers = new ArrayList<RowProcessingConsumer>();
-		ArrayList<AnalyzerJob> analyzerJobs = new ArrayList<AnalyzerJob>(
-				analysisJob.getAnalyzerJobs());
-		ArrayList<TransformerJob> transformerJobs = new ArrayList<TransformerJob>(
-				analysisJob.getTransformerJobs());
+		ArrayList<AnalyzerJob> analyzerJobs = new ArrayList<AnalyzerJob>(analysisJob.getAnalyzerJobs());
+		ArrayList<TransformerJob> transformerJobs = new ArrayList<TransformerJob>(analysisJob.getTransformerJobs());
 
 		for (AnalyzerJob analyzerJob : analyzerJobs) {
-			RowProcessingConsumer consumer = new AnalyzerConsumer(
-					new AnalyzerBeanInstance(analyzerJob.getDescriptor()),
+			RowProcessingConsumer consumer = new AnalyzerConsumer(new AnalyzerBeanInstance(analyzerJob.getDescriptor()),
 					analyzerJob, analyzerJob.getInput());
 			consumers.add(consumer);
 		}
 		for (TransformerJob transformerJob : transformerJobs) {
-			RowProcessingConsumer consumer = new TransformerConsumer(
-					new TransformerBeanInstance(transformerJob.getDescriptor()),
-					transformerJob, transformerJob.getInput());
+			RowProcessingConsumer consumer = new TransformerConsumer(new TransformerBeanInstance(
+					transformerJob.getDescriptor()), transformerJob, transformerJob.getInput());
 			consumers.add(consumer);
 		}
 
@@ -85,8 +74,7 @@ public class RowProcessingPublisherTest extends TestCase {
 		// order)
 		Collections.shuffle(consumers);
 
-		consumers = RowProcessingPublisher
-				.createProcessOrderedConsumerList(consumers);
+		consumers = RowProcessingPublisher.createProcessOrderedConsumerList(consumers);
 
 		assertEquals(5, consumers.size());
 
@@ -110,8 +98,7 @@ public class RowProcessingPublisherTest extends TestCase {
 				assertFalse(analyzerJob1found);
 				analyzerJob1found = true;
 			} else {
-				fail("The consumers sort order is wrong! Found: " + job
-						+ " but expected: " + nextJobDependency);
+				fail("The consumers sort order is wrong! Found: " + job + " but expected: " + nextJobDependency);
 			}
 		}
 

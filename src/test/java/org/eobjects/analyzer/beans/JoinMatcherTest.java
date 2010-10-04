@@ -37,7 +37,7 @@ public class JoinMatcherTest extends MetaModelTestCase {
 				.createJdbcDataContext(getTestDbConnection());
 		Relationship r = dc.getDefaultSchema().getRelationships()[0];
 		assertEquals(
-				"Relationship[primaryTable=PRODUCTS,primaryColumns={PRODUCTCODE},foreignTable=ORDERFACT,foreignColumns={PRODUCTCODE}]",
+				"Relationship[primaryTable=PRODUCTS,primaryColumns=[PRODUCTCODE],foreignTable=ORDERFACT,foreignColumns=[PRODUCTCODE]]",
 				r.toString());
 
 		JoinMatcher bean = new JoinMatcher();

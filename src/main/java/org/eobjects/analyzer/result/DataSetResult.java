@@ -6,6 +6,7 @@ import java.util.List;
 import org.eobjects.analyzer.beans.Analyzer;
 
 import dk.eobjects.metamodel.data.DataSet;
+import dk.eobjects.metamodel.data.InMemoryDataSet;
 import dk.eobjects.metamodel.data.Row;
 
 public class DataSetResult implements AnalyzerResult {
@@ -38,7 +39,7 @@ public class DataSetResult implements AnalyzerResult {
 
 	public DataSet getDataSet() {
 		if (dataSet == null) {
-			dataSet = new DataSet(rows);
+			dataSet = new InMemoryDataSet(rows);
 		}
 		return dataSet;
 	}

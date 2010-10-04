@@ -8,8 +8,8 @@ import org.eobjects.analyzer.beans.Analyzer;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;
+import dk.eobjects.metamodel.data.FilteredDataSet;
 import dk.eobjects.metamodel.data.IRowFilter;
-import dk.eobjects.metamodel.data.RowFilterDataSetStrategyWrapper;
 import dk.eobjects.metamodel.query.Query;
 
 public class QueryResultProducer implements ResultProducer {
@@ -44,7 +44,7 @@ public class QueryResultProducer implements ResultProducer {
 	public AnalyzerResult getResult() {
 		DataSet ds = dataContext.executeQuery(query);
 		if (filters != null && !filters.isEmpty()) {
-			ds = new DataSet(new RowFilterDataSetStrategyWrapper(ds, filters.toArray(new IRowFilter[filters.size()])));
+			ds = new FilteredDataSet(ds, filters.toArray(new IRowFilter[filters.size()]));
 		}
 		return new DataSetResult(ds, analyzerClass);
 	}
