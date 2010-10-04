@@ -44,8 +44,7 @@ public class QueryResultProducer implements ResultProducer {
 	public AnalyzerResult getResult() {
 		DataSet ds = dataContext.executeQuery(query);
 		if (filters != null && !filters.isEmpty()) {
-			ds = new DataSet(new RowFilterDataSetStrategyWrapper(ds, filters
-					.toArray(new IRowFilter[filters.size()])));
+			ds = new DataSet(new RowFilterDataSetStrategyWrapper(ds, filters.toArray(new IRowFilter[filters.size()])));
 		}
 		return new DataSetResult(ds, analyzerClass);
 	}

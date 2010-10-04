@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
-import org.apache.commons.math.stat.descriptive.SummaryStatisticsImpl;
 import org.eobjects.analyzer.annotations.AnalyzerBean;
 import org.eobjects.analyzer.annotations.Configured;
 import org.eobjects.analyzer.annotations.Initialize;
@@ -58,7 +57,7 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 		for (InputColumn<? extends Number> column : columns) {
 			SummaryStatistics statistics = _statistics.get(column);
 			if (statistics == null) {
-				statistics = new SummaryStatisticsImpl();
+				statistics = new SummaryStatistics();
 				_statistics.put(column, statistics);
 			}
 			_nullValues.put(column, 0l);
@@ -114,7 +113,7 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 					columnDimension, column.getName());
 			long nonNullCount = s.getN();
 			boolean queryable = column.isPhysicalColumn();
-
+			
 			if (nonNullCount > 0) {
 				double highestValue = s.getMax();
 				double lowestValue = s.getMin();

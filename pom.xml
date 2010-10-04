@@ -7,6 +7,7 @@
 	<name>AnalyzerBeans</name>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
+		<metamodel.version>1.2</metamodel.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<scm>
@@ -133,12 +134,46 @@
 		<dependency>
 			<groupId>dk.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-full</artifactId>
-			<version>1.2</version>
+			<version>${metamodel.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-math</groupId>
+					<artifactId>commons-math</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>dk.eobjects.metamodel</groupId>
+					<artifactId>MetaModel-excel</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>dk.eobjects.metamodel</groupId>
+					<artifactId>MetaModel-access</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math</artifactId>
+			<version>2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>1.6.1</version>
 		</dependency>
 
 		<!-- Used for classpath scanning. Required if the ClasspathScanDescriptorProvider 
@@ -184,6 +219,11 @@
 			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
@@ -202,7 +242,7 @@
 		<dependency>
 			<groupId>dk.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-testware</artifactId>
-			<version>1.2</version>
+			<version>${metamodel.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
