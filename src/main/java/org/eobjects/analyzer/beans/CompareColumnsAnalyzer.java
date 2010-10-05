@@ -5,8 +5,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.annotations.Configured;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.ColumnDifference;
 import org.eobjects.analyzer.util.CompareUtils;

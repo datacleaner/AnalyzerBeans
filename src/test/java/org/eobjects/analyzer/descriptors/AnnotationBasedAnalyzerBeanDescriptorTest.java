@@ -5,9 +5,9 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingAnalyzerMock;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;

@@ -3,8 +3,8 @@ package org.eobjects.analyzer.util;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.eobjects.analyzer.beans.EmailStandardizerTransformer;
-import org.eobjects.analyzer.beans.EmailStandardizerTransformer.EmailPart;
+import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
+import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer.EmailPart;
 
 import junit.framework.TestCase;
 

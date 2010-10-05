@@ -2,7 +2,7 @@ package org.eobjects.analyzer.result;
 
 import java.util.List;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.data.InputColumn;
 
 public class ValidationResult implements AnalyzerResult {

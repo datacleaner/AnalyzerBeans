@@ -3,8 +3,8 @@ package org.eobjects.analyzer.job;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.OutputColumns;
-import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;

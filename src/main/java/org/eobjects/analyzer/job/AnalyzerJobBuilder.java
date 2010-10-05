@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.job;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 
 public interface AnalyzerJobBuilder<A extends Analyzer<?>> {
 

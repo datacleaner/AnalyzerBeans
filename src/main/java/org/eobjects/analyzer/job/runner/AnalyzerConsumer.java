@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.job.runner;
 
-import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalyzerJob;

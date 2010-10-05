@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.job;
 
-import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 public class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyzer<?>>

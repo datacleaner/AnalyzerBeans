@@ -5,7 +5,7 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
-import org.eobjects.analyzer.beans.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 

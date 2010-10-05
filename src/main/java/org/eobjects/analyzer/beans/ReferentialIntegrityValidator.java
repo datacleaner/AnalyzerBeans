@@ -3,8 +3,9 @@ package org.eobjects.analyzer.beans;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.annotations.Configured;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

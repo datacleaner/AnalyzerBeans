@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.Analyzer;
 import org.eobjects.analyzer.beans.CompareSchemasAnalyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 
 public class SchemaComparisonResult implements AnalyzerResult {
 

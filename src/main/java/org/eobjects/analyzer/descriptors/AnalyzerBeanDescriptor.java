@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.descriptors;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 
 public interface AnalyzerBeanDescriptor<B extends Analyzer<?>> extends BeanDescriptor<B> {
 

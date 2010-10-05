@@ -2,10 +2,10 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Set;
 
-import org.eobjects.analyzer.beans.ConcatenatorTransformer;
-import org.eobjects.analyzer.beans.ConvertToNumberTransformer;
-import org.eobjects.analyzer.beans.ConvertToStringTransformer;
-import org.eobjects.analyzer.beans.TokenizerTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
+import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
+import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 
 import junit.framework.TestCase;

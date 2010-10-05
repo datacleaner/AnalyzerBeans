@@ -1,10 +1,10 @@
 package org.eobjects.analyzer.beans.script;
 
-import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.Initialize;
-import org.eobjects.analyzer.annotations.TransformerBean;
-import org.eobjects.analyzer.beans.OutputColumns;
-import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.reference.Function;

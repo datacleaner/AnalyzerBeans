@@ -3,7 +3,7 @@ package org.eobjects.analyzer.result;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 
 import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.InMemoryDataSet;

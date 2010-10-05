@@ -2,7 +2,7 @@ package org.eobjects.analyzer.result;
 
 import java.io.Serializable;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 
 /**
  * An AnalysisResult represents the result of an analysis execution.

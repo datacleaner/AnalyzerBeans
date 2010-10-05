@@ -5,7 +5,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.annotations.Provided;
+import org.eobjects.analyzer.beans.api.Provided;
 
 public class ProvidedPropertyDescriptorImplTest extends TestCase {
 

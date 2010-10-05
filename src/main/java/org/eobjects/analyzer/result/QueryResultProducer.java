@@ -3,8 +3,8 @@ package org.eobjects.analyzer.result;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Provided;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;

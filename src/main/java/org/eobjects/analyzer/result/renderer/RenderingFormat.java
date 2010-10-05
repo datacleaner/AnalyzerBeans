@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.result.renderer;
 
-import org.eobjects.analyzer.annotations.RendererBean;
+import org.eobjects.analyzer.beans.api.RendererBean;
 
 /**
  * Represents a rendering format to be used for rendering. AnalyzerBeans ships

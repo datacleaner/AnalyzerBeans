@@ -2,7 +2,7 @@ package org.eobjects.analyzer.test.full.scenarios;
 
 import java.util.List;
 
-import org.eobjects.analyzer.beans.TokenizerTransformer;
+import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;

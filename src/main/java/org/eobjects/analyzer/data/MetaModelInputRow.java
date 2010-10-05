@@ -1,9 +1,9 @@
 package org.eobjects.analyzer.data;
 
-import org.eobjects.analyzer.beans.ConvertToBooleanTransformer;
-import org.eobjects.analyzer.beans.ConvertToDateTransformer;
-import org.eobjects.analyzer.beans.ConvertToNumberTransformer;
-import org.eobjects.analyzer.beans.ConvertToStringTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 
 import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.schema.Column;

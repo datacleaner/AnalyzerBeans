@@ -2,7 +2,7 @@ package org.eobjects.analyzer.result;
 
 import java.util.List;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 
 /**
  * A very simple AnalyzerResult that simply holds a list of values

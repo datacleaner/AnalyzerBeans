@@ -5,8 +5,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.annotations.Configured;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.ValidationResult;

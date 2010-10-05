@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.job.runner;
 
-import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;

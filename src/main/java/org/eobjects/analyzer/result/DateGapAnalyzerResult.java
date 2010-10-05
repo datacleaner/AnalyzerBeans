@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.util.TimeInterval;
 
 public class DateGapAnalyzerResult implements AnalyzerResult {

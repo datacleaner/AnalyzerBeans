@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.job;
 
-import org.eobjects.analyzer.beans.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 public class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>>

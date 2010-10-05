@@ -2,9 +2,9 @@ package org.eobjects.analyzer.job;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.ConvertToNumberTransformer;
-import org.eobjects.analyzer.beans.EmailStandardizerTransformer;
-import org.eobjects.analyzer.beans.TokenizerTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
+import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
+import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;

@@ -2,11 +2,11 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
 
-import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.annotations.RendererBean;
-import org.eobjects.analyzer.annotations.TransformerBean;
-import org.eobjects.analyzer.beans.Analyzer;
-import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.RendererBean;
+import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.result.renderer.Renderer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.objectweb.asm.AnnotationVisitor;

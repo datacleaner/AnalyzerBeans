@@ -2,10 +2,10 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Set;
 
-import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.beans.Analyzer;
-import org.eobjects.analyzer.beans.ExploringAnalyzer;
-import org.eobjects.analyzer.beans.RowProcessingAnalyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 public final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>>

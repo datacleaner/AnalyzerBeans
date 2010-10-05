@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.Analyzer;
-import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.result.renderer.Renderer;
 
 /**

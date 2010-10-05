@@ -6,12 +6,12 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.annotations.AnalyzerBean;
-import org.eobjects.analyzer.annotations.Close;
-import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.Initialize;
-import org.eobjects.analyzer.annotations.Provided;
-import org.eobjects.analyzer.beans.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.result.NumberResult;
 
 import dk.eobjects.metamodel.DataContext;

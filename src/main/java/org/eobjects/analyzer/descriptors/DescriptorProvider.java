@@ -2,8 +2,8 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Collection;
 
-import org.eobjects.analyzer.beans.Analyzer;
-import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.result.renderer.Renderer;
 import org.eobjects.analyzer.result.renderer.RenderingFormat;
 

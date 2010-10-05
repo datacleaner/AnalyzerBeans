@@ -3,7 +3,7 @@ package org.eobjects.analyzer.lifecycle;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

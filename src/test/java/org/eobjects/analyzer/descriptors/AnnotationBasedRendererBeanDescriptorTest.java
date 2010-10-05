@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.descriptors;
 
-import org.eobjects.analyzer.annotations.RendererBean;
+import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.DefaultTextRenderer;

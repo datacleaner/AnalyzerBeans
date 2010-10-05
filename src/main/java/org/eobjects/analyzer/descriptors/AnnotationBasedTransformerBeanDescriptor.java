@@ -3,8 +3,8 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import org.eobjects.analyzer.annotations.TransformerBean;
-import org.eobjects.analyzer.beans.Transformer;
+import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 

@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.result;
 
-import org.eobjects.analyzer.beans.Analyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 
 public class CrosstabResult implements AnalyzerResult {
 

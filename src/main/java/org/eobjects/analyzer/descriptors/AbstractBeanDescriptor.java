@@ -13,10 +13,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.eobjects.analyzer.annotations.Close;
-import org.eobjects.analyzer.annotations.Configured;
-import org.eobjects.analyzer.annotations.Initialize;
-import org.eobjects.analyzer.annotations.Provided;
+import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;

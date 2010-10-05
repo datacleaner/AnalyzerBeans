@@ -8,10 +8,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.EqualityAnalyzer;
-import org.eobjects.analyzer.beans.NameStandardizerTransformer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
+import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
+import org.eobjects.analyzer.beans.standardize.NameStandardizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
