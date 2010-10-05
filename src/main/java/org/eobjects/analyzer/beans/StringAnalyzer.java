@@ -33,8 +33,7 @@ import dk.eobjects.metamodel.schema.Column;
 @AnalyzerBean("String analyzer")
 public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(StringAnalyzer.class);
+	private static final Logger logger = LoggerFactory.getLogger(StringAnalyzer.class);
 
 	private static final short INDEX_NUM_CHARS = 0;
 	private static final short INDEX_MAX_CHARS = 1;
@@ -56,11 +55,11 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	@Configured
 	InputColumn<String>[] columns;
-	
+
 	public StringAnalyzer() {
 	}
-	
-	public StringAnalyzer(InputColumn<String> ... columns) {
+
+	public StringAnalyzer(InputColumn<String>... columns) {
 		this.columns = columns;
 	}
 
@@ -111,10 +110,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 					counters[INDEX_MAX_BLANKS] = numBlanks;
 				}
 
-				counters[INDEX_NUM_CHARS] = counters[INDEX_NUM_CHARS]
-						+ numChars;
-				counters[INDEX_NUM_WORDS] = counters[INDEX_NUM_WORDS]
-						+ numWords;
+				counters[INDEX_NUM_CHARS] = counters[INDEX_NUM_CHARS] + numChars;
+				counters[INDEX_NUM_WORDS] = counters[INDEX_NUM_WORDS] + numWords;
 
 				if (counters[INDEX_MAX_CHARS] < numChars) {
 					counters[INDEX_MAX_CHARS] = numChars;
@@ -185,15 +182,13 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 		CrosstabDimension columnDimension = new CrosstabDimension("Column");
 
-		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class,
-				columnDimension, measureDimension);
+		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
 
 		for (InputColumn<String> column : columns) {
 			String columnName = column.getName();
 
 			columnDimension.addCategory(columnName);
-			CrosstabNavigator<Number> nav = crosstab.where(columnDimension,
-					columnName);
+			CrosstabNavigator<Number> nav = crosstab.where(columnDimension, columnName);
 
 			Integer[] columnCounts = this.counts.get(column);
 			final Integer numChars;
@@ -246,12 +241,9 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			Percentage numLowercase = new Percentage(0);
 			Percentage numNonletter = new Percentage(0);
 			if (numChars != null && numChars > 0) {
-				numUppercase = new Percentage(columnCounts[INDEX_NUM_UPPERCASE]
-						* 100 / numChars);
-				numLowercase = new Percentage(columnCounts[INDEX_NUM_LOWERCASE]
-						* 100 / numChars);
-				numNonletter = new Percentage(columnCounts[INDEX_NUM_NONLETTER]
-						* 100 / numChars);
+				numUppercase = new Percentage(columnCounts[INDEX_NUM_UPPERCASE] * 100 / numChars);
+				numLowercase = new Percentage(columnCounts[INDEX_NUM_LOWERCASE] * 100 / numChars);
+				numNonletter = new Percentage(columnCounts[INDEX_NUM_NONLETTER] * 100 / numChars);
 			}
 
 			boolean queryable = column.isPhysicalColumn();
@@ -270,10 +262,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				nav.where(measureDimension, "Max chars").put(maxChars);
 
 				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery,
-							getClass());
-					resultProducer.addFilter(new CharRowFilter(column
-							.getPhysicalColumn(), maxChars));
+					resultProducer = new QueryResultProducer(baseQuery, getClass());
+					resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), maxChars));
 					nav.attach(resultProducer);
 				}
 			}
@@ -281,10 +271,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			if (minChars != null) {
 				nav.where(measureDimension, "Min chars").put(minChars);
 				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery,
-							getClass());
-					resultProducer.addFilter(new CharRowFilter(column
-							.getPhysicalColumn(), minChars));
+					resultProducer = new QueryResultProducer(baseQuery, getClass());
+					resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), minChars));
 					nav.attach(resultProducer);
 				}
 			}
@@ -294,22 +282,17 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				nav.where(measureDimension, "Max white spaces").put(maxBlanks);
 				nav.where(measureDimension, "Min white spaces").put(minBlanks);
 				nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
-				nav.where(measureDimension, "Uppercase chars")
-						.put(numUppercase);
-				nav.where(measureDimension, "Lowercase chars")
-						.put(numLowercase);
-				nav.where(measureDimension, "Non-letter chars").put(
-						numNonletter);
+				nav.where(measureDimension, "Uppercase chars").put(numUppercase);
+				nav.where(measureDimension, "Lowercase chars").put(numLowercase);
+				nav.where(measureDimension, "Non-letter chars").put(numNonletter);
 				nav.where(measureDimension, "Word count").put(numWords);
 			}
 
 			if (maxWords != null) {
 				nav.where(measureDimension, "Max words").put(maxWords);
 				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery,
-							getClass());
-					resultProducer.addFilter(new WordRowFilter(column
-							.getPhysicalColumn(), maxWords));
+					resultProducer = new QueryResultProducer(baseQuery, getClass());
+					resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), maxWords));
 					nav.attach(resultProducer);
 				}
 			}
@@ -317,10 +300,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			if (minWords != null) {
 				nav.where(measureDimension, "Min words").put(minWords);
 				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery,
-							getClass());
-					resultProducer.addFilter(new WordRowFilter(column
-							.getPhysicalColumn(), minWords));
+					resultProducer = new QueryResultProducer(baseQuery, getClass());
+					resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), minWords));
 					nav.attach(resultProducer);
 				}
 			}
@@ -330,8 +311,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 	}
 
 	private Query getBaseQuery(Column column) {
-		return new Query().from(column.getTable())
-				.select(new SelectItem(column)).selectCount().groupBy(column);
+		return new Query().from(column.getTable()).select(new SelectItem(column)).selectCount().groupBy(column);
 	}
 
 	static class CharRowFilter implements SerializableRowFilter {
@@ -370,8 +350,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 		@Override
 		public boolean accept(Row row) {
 			Object value = row.getValue(column);
-			if (value != null
-					&& new StringTokenizer(value.toString()).countTokens() == numWords) {
+			if (value != null && new StringTokenizer(value.toString()).countTokens() == numWords) {
 				return true;
 			}
 			return false;

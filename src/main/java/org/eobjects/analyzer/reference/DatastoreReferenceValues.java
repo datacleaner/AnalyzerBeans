@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 
+import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.query.OperatorType;
 import dk.eobjects.metamodel.query.Query;
 import dk.eobjects.metamodel.schema.Column;
 
@@ -17,20 +17,18 @@ public class DatastoreReferenceValues implements ReferenceValues<String> {
 	private DataContextProvider _dataContextProvider;
 	private Column _column;
 
-	public DatastoreReferenceValues(DataContextProvider dataContextProvider,
-			Column column) {
+	public DatastoreReferenceValues(DataContextProvider dataContextProvider, Column column) {
 		_dataContextProvider = dataContextProvider;
 		_column = column;
 	}
 
 	@Override
 	public boolean containsValue(String value) {
-		Query q = new Query();
-		q.selectCount();
-		q.from(_column.getTable());
-		q.where(_column, OperatorType.EQUALS_TO, value);
+		DataContext dataContext = _dataContextProvider.getDataContext();
 
-		DataSet dataSet = _dataContextProvider.getDataContext().executeQuery(q);
+		Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).equals(value).toQuery();
+
+		DataSet dataSet = dataContext.executeQuery(q);
 
 		assert dataSet.next();
 
@@ -46,12 +44,12 @@ public class DatastoreReferenceValues implements ReferenceValues<String> {
 
 	@Override
 	public Collection<String> getValues() {
-		Query q = new Query();
-		q.selectDistinct();
-		q.select(_column);
-		q.from(_column.getTable());
+		DataContext dataContext = _dataContextProvider.getDataContext();
 
-		DataSet dataSet = _dataContextProvider.getDataContext().executeQuery(q);
+		Query q = dataContext.query().from(_column.getTable()).select(_column).toQuery();
+		q.selectDistinct();
+
+		DataSet dataSet = dataContext.executeQuery(q);
 		List<String> values = new ArrayList<String>();
 		while (dataSet.next()) {
 			Row row = dataSet.getRow();

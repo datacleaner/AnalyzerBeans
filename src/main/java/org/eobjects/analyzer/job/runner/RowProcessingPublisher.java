@@ -52,15 +52,12 @@ public final class RowProcessingPublisher {
 	private final CollectionProvider _collectionProvider;
 	private final Table _table;
 
-	public RowProcessingPublisher(DataContextProvider dataContextProvider,
-			CollectionProvider collectionProvider, Table table) {
+	public RowProcessingPublisher(DataContextProvider dataContextProvider, CollectionProvider collectionProvider, Table table) {
 		if (dataContextProvider == null) {
-			throw new IllegalArgumentException(
-					"DataContextProvider cannot be null");
+			throw new IllegalArgumentException("DataContextProvider cannot be null");
 		}
 		if (collectionProvider == null) {
-			throw new IllegalArgumentException(
-					"CollectionProvider cannot be null");
+			throw new IllegalArgumentException("CollectionProvider cannot be null");
 		}
 		if (table == null) {
 			throw new IllegalArgumentException("Table cannot be null");
@@ -74,28 +71,24 @@ public final class RowProcessingPublisher {
 	public void addPhysicalColumns(Column... columns) {
 		for (Column column : columns) {
 			if (!_table.equals(column.getTable())) {
-				throw new IllegalArgumentException(
-						"Column does not pertain to the correct table. Expected table: "
-								+ _table + ", actual table: "
-								+ column.getTable());
+				throw new IllegalArgumentException("Column does not pertain to the correct table. Expected table: " + _table
+						+ ", actual table: " + column.getTable());
 			}
 			_physicalColumns.add(column);
 		}
 	}
 
 	public void run() {
-		Column[] columnArray = _physicalColumns
-				.toArray(new Column[_physicalColumns.size()]);
-		Query q = new Query();
-		q.select(columnArray);
+		Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
+
+		DataContext dataContext = _dataContextProvider.getDataContext();
+		Query q = dataContext.query().from(_table).select(columnArray).toQuery();
 		SelectItem countAllItem = SelectItem.getCountAllItem();
 		q.select(countAllItem);
-		q.from(_table);
 		q.groupBy(columnArray);
 
 		Iterable<RowProcessingConsumer> consumers = createProcessOrderedConsumerList(_consumers);
 
-		DataContext dataContext = _dataContextProvider.getDataContext();
 		DataSet dataSet = dataContext.executeQuery(q);
 		while (dataSet.next()) {
 			Row metaModelRow = dataSet.getRow();
@@ -103,8 +96,7 @@ public final class RowProcessingPublisher {
 			InputRow inputRow = new MetaModelInputRow(metaModelRow);
 
 			for (RowProcessingConsumer rowProcessingConsumer : consumers) {
-				inputRow = rowProcessingConsumer.consume(inputRow,
-						distinctCount.intValue());
+				inputRow = rowProcessingConsumer.consume(inputRow, distinctCount.intValue());
 			}
 		}
 	}
@@ -113,14 +105,12 @@ public final class RowProcessingPublisher {
 			Collection<? extends RowProcessingConsumer> consumers) {
 		List<RowProcessingConsumer> result = new LinkedList<RowProcessingConsumer>();
 
-		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(
-				consumers);
+		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(consumers);
 		Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
 
 		while (!remainingConsumers.isEmpty()) {
 			boolean changed = false;
-			for (Iterator<RowProcessingConsumer> it = remainingConsumers
-					.iterator(); it.hasNext();) {
+			for (Iterator<RowProcessingConsumer> it = remainingConsumers.iterator(); it.hasNext();) {
 				RowProcessingConsumer consumer = it.next();
 
 				boolean accepted = true;
@@ -141,8 +131,7 @@ public final class RowProcessingPublisher {
 					changed = true;
 					if (consumer instanceof TransformerConsumer) {
 						TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
-						MutableInputColumn<?>[] virtualColumns = transformerConsumer
-								.getBeanJob().getOutput();
+						MutableInputColumn<?>[] virtualColumns = transformerConsumer.getBeanJob().getOutput();
 						for (MutableInputColumn<?> virtualColumn : virtualColumns) {
 							availableVirtualColumns.add(virtualColumn);
 						}
@@ -153,120 +142,94 @@ public final class RowProcessingPublisher {
 			if (!changed) {
 				// should never happen, but if a bug enters the
 				// algorithm this exception will quickly expose it
-				throw new IllegalStateException(
-						"Could not detect next consumer in processing order");
+				throw new IllegalStateException("Could not detect next consumer in processing order");
 			}
 		}
 
 		return result;
 	}
 
-	public void addRowProcessingAnalyzerBean(
-			AnalyzerBeanInstance analyzerBeanInstance, AnalyzerJob analyzerJob,
+	public void addRowProcessingAnalyzerBean(AnalyzerBeanInstance analyzerBeanInstance, AnalyzerJob analyzerJob,
 			InputColumn<?>[] inputColumns) {
-		addConsumer(new AnalyzerConsumer(analyzerBeanInstance, analyzerJob,
-				inputColumns));
+		addConsumer(new AnalyzerConsumer(analyzerBeanInstance, analyzerJob, inputColumns));
 	}
 
-	public void addTransformerBean(
-			TransformerBeanInstance transformerBeanInstance,
-			TransformerJob transformerJob, InputColumn<?>[] inputColumns) {
-		addConsumer(new TransformerConsumer(transformerBeanInstance,
-				transformerJob, inputColumns));
+	public void addTransformerBean(TransformerBeanInstance transformerBeanInstance, TransformerJob transformerJob,
+			InputColumn<?>[] inputColumns) {
+		addConsumer(new TransformerConsumer(transformerBeanInstance, transformerJob, inputColumns));
 	}
 
 	private void addConsumer(RowProcessingConsumer consumer) {
 		_consumers.add(consumer);
 	}
 
-	public List<Task> createInitialTasks(TaskRunner taskRunner,
-			Queue<AnalyzerResult> resultQueue,
+	public List<Task> createInitialTasks(TaskRunner taskRunner, Queue<AnalyzerResult> resultQueue,
 			CompletionListener rowProcessorPublishersDoneCompletionListener) {
 		int numConsumers = _consumers.size();
 
-		CompletionListener closeCompletionListener = new NestedCompletionListener(
-				"row processor consumers", numConsumers,
+		CompletionListener closeCompletionListener = new NestedCompletionListener("row processor consumers", numConsumers,
 				rowProcessorPublishersDoneCompletionListener);
 
 		List<Task> closeTasks = new ArrayList<Task>(numConsumers);
 		for (RowProcessingConsumer consumer : _consumers) {
-			closeTasks.add(createCloseTask(consumer, resultQueue,
-					closeCompletionListener));
+			closeTasks.add(createCloseTask(consumer, resultQueue, closeCompletionListener));
 		}
 
-		CompletionListener runCompletionListener = new ScheduleTasksCompletionListener(
-				"run row processing", taskRunner, 1, closeTasks);
+		CompletionListener runCompletionListener = new ScheduleTasksCompletionListener("run row processing", taskRunner, 1,
+				closeTasks);
 
 		Collection<Task> runTasksToSchedule = new ArrayList<Task>(1);
-		runTasksToSchedule.add(new RunRowProcessingPublisherTask(this,
-				runCompletionListener));
+		runTasksToSchedule.add(new RunRowProcessingPublisherTask(this, runCompletionListener));
 
-		CompletionListener initCompletionListener = new ScheduleTasksCompletionListener(
-				"initialize row consumers", taskRunner, numConsumers,
-				runTasksToSchedule);
+		CompletionListener initCompletionListener = new ScheduleTasksCompletionListener("initialize row consumers",
+				taskRunner, numConsumers, runTasksToSchedule);
 
 		List<Task> initTasks = new ArrayList<Task>(numConsumers);
 		for (RowProcessingConsumer consumer : _consumers) {
-			initTasks.add(createInitTask(consumer, initCompletionListener,
-					resultQueue));
+			initTasks.add(createInitTask(consumer, initCompletionListener, resultQueue));
 		}
 		return initTasks;
 	}
 
-	private Task createCloseTask(RowProcessingConsumer consumer,
-			Queue<AnalyzerResult> resultQueue,
+	private Task createCloseTask(RowProcessingConsumer consumer, Queue<AnalyzerResult> resultQueue,
 			CompletionListener completionListener) {
 		if (consumer instanceof TransformerConsumer) {
-			return new CloseBeanTask(completionListener,
-					consumer.getBeanInstance());
+			return new CloseBeanTask(completionListener, consumer.getBeanInstance());
 		} else if (consumer instanceof AnalyzerConsumer) {
-			return new CollectResultsAndCloseAnalyzerBeanTask(
-					completionListener,
+			return new CollectResultsAndCloseAnalyzerBeanTask(completionListener,
 					((AnalyzerBeanInstance) consumer.getBeanInstance()));
 		} else {
-			throw new IllegalStateException("Unknown consumer type: "
-					+ consumer);
+			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}
 	}
 
-	private Task createInitTask(RowProcessingConsumer consumer,
-			CompletionListener completionListener,
+	private Task createInitTask(RowProcessingConsumer consumer, CompletionListener completionListener,
 			Queue<AnalyzerResult> resultQueue) {
-		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredCallback(
-				consumer.getBeanJob().getConfiguration());
+		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredCallback(consumer.getBeanJob().getConfiguration());
 		LifeCycleCallback initializeCallback = new InitializeCallback();
 		LifeCycleCallback closeCallback = new CloseCallback();
 
 		if (consumer instanceof TransformerConsumer) {
 			TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
-			TransformerBeanInstance transformerBeanInstance = transformerConsumer
-					.getBeanInstance();
+			TransformerBeanInstance transformerBeanInstance = transformerConsumer.getBeanInstance();
 
-			return new AssignCallbacksAndInitializeTask(completionListener,
-					transformerBeanInstance, _collectionProvider,
-					_dataContextProvider, assignConfiguredCallback,
-					initializeCallback, closeCallback);
+			return new AssignCallbacksAndInitializeTask(completionListener, transformerBeanInstance, _collectionProvider,
+					_dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
-			AnalyzerBeanInstance analyzerBeanInstance = analyzerConsumer
-					.getBeanInstance();
-			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(
-					resultQueue);
+			AnalyzerBeanInstance analyzerBeanInstance = analyzerConsumer.getBeanInstance();
+			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(resultQueue);
 
-			return new AssignCallbacksAndInitializeTask(completionListener,
-					analyzerBeanInstance, _collectionProvider,
-					_dataContextProvider, assignConfiguredCallback,
-					initializeCallback, null, returnResultsCallback,
+			return new AssignCallbacksAndInitializeTask(completionListener, analyzerBeanInstance, _collectionProvider,
+					_dataContextProvider, assignConfiguredCallback, initializeCallback, null, returnResultsCallback,
 					closeCallback);
 		} else {
-			throw new IllegalStateException("Unknown consumer type: "
-					+ consumer);
+			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "RowProcessingPublisher[table=" + _table.getQualifiedLabel()
-				+ ", consumers=" + _consumers.size() + "]";
+		return "RowProcessingPublisher[table=" + _table.getQualifiedLabel() + ", consumers=" + _consumers.size() + "]";
 	}
 }
