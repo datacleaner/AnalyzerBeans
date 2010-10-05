@@ -21,18 +21,13 @@ import org.slf4j.LoggerFactory;
  */
 public class NamedPattern<E extends Enum<E>> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(NamedPattern.class);
+	private static final Logger logger = LoggerFactory.getLogger(NamedPattern.class);
 
-	public static final String DEFAULT_GROUP_LITERAL;
-
-	static {
-		StringBuilder sb = new StringBuilder("([a-zA-Z0-9");
-		sb.append(StringUtils.DIACRITICS.toLowerCase());
-		sb.append(StringUtils.DIACRITICS.toUpperCase());
-		sb.append("]+)");
-		DEFAULT_GROUP_LITERAL = sb.toString();
-	}
+	/**
+	 * Defines a default group literal which resolves to a single word with any
+	 * kind of letter (including diacritics)
+	 */
+	public static final String DEFAULT_GROUP_LITERAL = "([\\p{Lu}\\p{Ll}]+)";
 
 	private EnumMap<E, Integer> groupIndexes;
 	private Pattern pattern;
@@ -72,8 +67,7 @@ public class NamedPattern<E extends Enum<E>> {
 		}
 
 		if (usedGroupNames.isEmpty()) {
-			throw new IllegalArgumentException("None of the groups defined in "
-					+ groupEnum.getSimpleName()
+			throw new IllegalArgumentException("None of the groups defined in " + groupEnum.getSimpleName()
 					+ " where found in the pattern: " + pattern);
 		}
 
@@ -85,8 +79,7 @@ public class NamedPattern<E extends Enum<E>> {
 
 			groupIndexes.put(group, usedGroupNames.size() + 1);
 
-			pattern = pattern.replace(getGroupToken(group),
-					getGroupLiteral(group));
+			pattern = pattern.replace(getGroupToken(group), getGroupLiteral(group));
 
 			groupIndex = getIndexOfHighest(groupNameStringIndexOfs);
 		}

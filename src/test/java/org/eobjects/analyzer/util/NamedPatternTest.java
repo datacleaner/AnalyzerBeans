@@ -35,7 +35,7 @@ public class NamedPatternTest extends TestCase {
 		assertFalse(Pattern.matches(groupLiteral, "hello\nworld"));
 		assertFalse(Pattern.matches(groupLiteral, "hello_world"));
 		assertEquals(
-				"([a-zA-Z0-9æøåâäáàôöóòêëéèûüúùîïíìñńǹḿÆØÅÂÄÁÀÔÖÓÒÊËÉÈÛÜÚÙÎÏÍÌÑŃǸḾ]+)",
+				"([\\p{Lu}\\p{Ll}]+)",
 				groupLiteral);
 	}
 

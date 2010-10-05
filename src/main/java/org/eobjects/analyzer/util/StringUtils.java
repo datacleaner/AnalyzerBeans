@@ -2,14 +2,21 @@ package org.eobjects.analyzer.util;
 
 public final class StringUtils {
 
-	public static final String DIACRITICS = "æøåâäáàôöóòêëéèûüúùîïíìñńǹḿ";
+	public static final String LATIN_CHARACTERS = "";
 
 	public static boolean isNullOrEmpty(String str) {
 		return str == null || str.trim().isEmpty();
 	}
 
 	public static boolean isDiacritic(char c) {
-		return DIACRITICS.indexOf(Character.toLowerCase(c)) != -1;
+		if (Character.isLetter(c)) {
+			return !isLatin(c);
+		}
+		return false;
+	}
+
+	public static boolean isLatin(char c) {
+		return c >= 'A' && c <= 'z';
 	}
 
 	public static String leftTrim(String str) {
