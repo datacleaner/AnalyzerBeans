@@ -31,31 +31,26 @@ public class JavaClassHandlerImpl implements JavaClassHandler {
 	private File _classDirectory;
 	private JavaCompiler _compiler;
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(JavaClassHandlerImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(JavaClassHandlerImpl.class);
 
-	public JavaClassHandlerImpl(File classDirectory)
-			throws IllegalArgumentException {
+	public JavaClassHandlerImpl(File classDirectory) throws IllegalArgumentException {
 		if (classDirectory == null) {
 			throw new IllegalArgumentException("class directory cannot be null");
 		}
 		if (!classDirectory.exists() || !classDirectory.isDirectory()) {
-			throw new IllegalArgumentException(
-					"class directory must be an existing directory");
+			throw new IllegalArgumentException("class directory must be an existing directory");
 		}
 
 		_classDirectory = classDirectory;
 		try {
-			_classLoader = new URLClassLoader(new URL[] { classDirectory
-					.toURI().toURL() }, getClass().getClassLoader());
+			_classLoader = new URLClassLoader(new URL[] { classDirectory.toURI().toURL() }, getClass().getClassLoader());
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
 	@Override
-	public Class<?> compileAndLoad(String javaCode)
-			throws IllegalArgumentException, IllegalStateException {
+	public Class<?> compileAndLoad(String javaCode) throws IllegalArgumentException, IllegalStateException {
 		if (javaCode == null) {
 			throw new IllegalArgumentException("javaCode cannot be null");
 		}
@@ -73,37 +68,32 @@ public class JavaClassHandlerImpl implements JavaClassHandler {
 			dir = _classDirectory;
 		} else {
 			qualifiedClassName = packageName + '.' + className;
-			String folderName = packageName.replaceAll("\\.", File.separator);
+			String folderName = packageName.replaceAll("\\.", "\\" + File.separatorChar);
 			dir = new File(_classDirectory, folderName);
 		}
 
 		if (dir.exists()) {
 			if (dir.isDirectory()) {
-				logger.debug("directory {} already exists",
-						dir.getAbsolutePath());
+				logger.debug("directory {} already exists", dir.getAbsolutePath());
 			} else {
-				throw new IllegalStateException(dir.getAbsolutePath()
-						+ " exists but is not a directory!");
+				throw new IllegalStateException(dir.getAbsolutePath() + " exists but is not a directory!");
 			}
 		} else {
 			boolean result = dir.mkdirs();
 			if (result) {
 				logger.debug("{} created", dir.getAbsolutePath());
 			} else {
-				throw new IllegalStateException("Could not create directory: "
-						+ dir.getAbsolutePath());
+				throw new IllegalStateException("Could not create directory: " + dir.getAbsolutePath());
 			}
 		}
 
 		File file = new File(dir, className + ".java");
-		logger.info("Saving java code for class {} in {}", qualifiedClassName,
-				file.getAbsolutePath());
+		logger.info("Saving java code for class {} in {}", qualifiedClassName, file.getAbsolutePath());
 		if (!file.exists()) {
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
-				throw new IllegalStateException(
-						"Could not create source .java file", e);
+				throw new IllegalStateException("Could not create source .java file", e);
 			}
 		}
 
@@ -113,22 +103,22 @@ public class JavaClassHandlerImpl implements JavaClassHandler {
 			_compiler = ToolProvider.getSystemJavaCompiler();
 		}
 
-		StandardJavaFileManager standardFileManager = _compiler
-				.getStandardFileManager(null, null, null);
-		JavaFileManager fileManager = new JavaClassHandlerFileManager(
-				standardFileManager, _classLoader);
+		if (_compiler == null) {
+			throw new IllegalStateException(
+					"No Java compiler available, please use a JDK and not a JRE for custom user-written Java classes");
+		}
 
-		Iterable<? extends JavaFileObject> javaFiles = standardFileManager
-				.getJavaFileObjects(file);
+		StandardJavaFileManager standardFileManager = _compiler.getStandardFileManager(null, null, null);
+		JavaFileManager fileManager = new JavaClassHandlerFileManager(standardFileManager, _classLoader);
+
+		Iterable<? extends JavaFileObject> javaFiles = standardFileManager.getJavaFileObjects(file);
 		JavaFileObject javaFile = javaFiles.iterator().next();
 
 		StringWriter out = new StringWriter();
 		List<String> options = new LinkedList<String>();
 
-		Collection<JavaFileObject> compilationUnits = CollectionUtils
-				.set(javaFile);
-		CompilationTask task = _compiler.getTask(out, fileManager, null,
-				options, null, compilationUnits);
+		Collection<JavaFileObject> compilationUnits = CollectionUtils.set(javaFile);
+		CompilationTask task = _compiler.getTask(out, fileManager, null, options, null, compilationUnits);
 
 		boolean result = task.call();
 		String output = out.toString();
@@ -160,8 +150,7 @@ public class JavaClassHandlerImpl implements JavaClassHandler {
 		if (i1 != -1) {
 			int i2 = javaCode.indexOf(";", i1 + PACKAGE_TOKEN.length());
 			if (i2 != -1) {
-				packageName = trimJavaSymbol(javaCode.substring(i1
-						+ PACKAGE_TOKEN.length(), i2));
+				packageName = trimJavaSymbol(javaCode.substring(i1 + PACKAGE_TOKEN.length(), i2));
 				logger.debug("found package name: {}", packageName);
 			}
 		}
@@ -200,15 +189,11 @@ public class JavaClassHandlerImpl implements JavaClassHandler {
 
 		int bodyIndex = javaCode.indexOf("{", i1 + CLASS_TOKEN.length());
 		int typeParamIndex = javaCode.indexOf("<", i1 + CLASS_TOKEN.length());
-		int implIndex = javaCode.indexOf(" implements",
-				i1 + CLASS_TOKEN.length());
-		int extendsIndex = javaCode.indexOf(" extends",
-				i1 + CLASS_TOKEN.length());
+		int implIndex = javaCode.indexOf(" implements", i1 + CLASS_TOKEN.length());
+		int extendsIndex = javaCode.indexOf(" extends", i1 + CLASS_TOKEN.length());
 
-		int i2 = minButPositive(bodyIndex, typeParamIndex, implIndex,
-				extendsIndex);
-		String className = trimJavaSymbol(javaCode.substring(
-				i1 + CLASS_TOKEN.length(), i2));
+		int i2 = minButPositive(bodyIndex, typeParamIndex, implIndex, extendsIndex);
+		String className = trimJavaSymbol(javaCode.substring(i1 + CLASS_TOKEN.length(), i2));
 
 		return className;
 	}
