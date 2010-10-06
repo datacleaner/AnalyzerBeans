@@ -25,6 +25,7 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.jaxb.AnalysisType;
 import org.eobjects.analyzer.job.jaxb.AnalyzerType;
@@ -38,10 +39,10 @@ import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
+import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
 import org.eobjects.analyzer.job.jaxb.SourceType;
 import org.eobjects.analyzer.job.jaxb.TransformationType;
-import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.SchemaNavigator;
@@ -143,17 +144,20 @@ public class JaxbJobFactory {
 			}
 		}
 
+		Map<String, FilterOutcome> outcomeMapping = new HashMap<String, FilterOutcome>();
+
 		TransformationType transformation = job.getTransformation();
 		if (transformation != null) {
 			List<Object> transformersAndFilters = transformation.getTransformerOrFilter();
 
 			Map<TransformerType, TransformerJobBuilder<?>> transformerJobBuilders = new HashMap<TransformerType, TransformerJobBuilder<?>>();
+			Map<FilterType, FilterJobBuilder<?, ?>> filterJobBuilders = new HashMap<FilterType, FilterJobBuilder<?, ?>>();
 
+			// iterate to initialize transformers
 			for (Object o : transformersAndFilters) {
 				if (o instanceof TransformerType) {
 					TransformerType transformer = (TransformerType) o;
-					TransformerDescriptorType descriptor = transformer.getDescriptor();
-					ref = descriptor.getRef();
+					ref = transformer.getDescriptor().getRef();
 					if (StringUtils.isNullOrEmpty(ref)) {
 						throw new IllegalStateException("Transformer descriptor ref cannot be null");
 					}
@@ -165,17 +169,13 @@ public class JaxbJobFactory {
 					TransformerJobBuilder<?> transformerJobBuilder = analysisJobBuilder
 							.addTransformer(transformerBeanDescriptor);
 
-					ConfiguredPropertiesType properties = transformer.getProperties();
-					applyProperties(transformerJobBuilder, properties, schemaNavigator);
+					applyProperties(transformerJobBuilder, transformer.getProperties(), schemaNavigator);
 
 					transformerJobBuilders.put(transformer, transformerJobBuilder);
-				} else if (o instanceof FilterType) {
-					// TODO: Handle filters
-				} else {
-					throw new IllegalStateException("Unexpected transformation child element: " + o);
 				}
 			}
 
+			// iterate again to set up transformed column dependencies
 			List<TransformerType> unconfiguredTransformerKeys = new LinkedList<TransformerType>(
 					transformerJobBuilders.keySet());
 			while (!unconfiguredTransformerKeys.isEmpty()) {
@@ -234,6 +234,88 @@ public class JaxbJobFactory {
 					}
 				}
 			}
+
+			// iterate again to initialize all filters and collect all filter
+			// outcomes
+			for (Object o : transformersAndFilters) {
+				if (o instanceof FilterType) {
+					FilterType filter = (FilterType) o;
+					ref = filter.getDescriptor().getRef();
+					if (StringUtils.isNullOrEmpty(ref)) {
+						throw new IllegalStateException("Filter descriptor ref cannot be null");
+					}
+					FilterBeanDescriptor<?, ?> filterBeanDescriptor = _configuration.getDescriptorProvider()
+							.getFilterBeanDescriptorByDisplayName(ref);
+					if (filterBeanDescriptor == null) {
+						throw new IllegalStateException("No such filter descriptor: " + ref);
+					}
+					FilterJobBuilder<?, ?> filterJobBuilder = analysisJobBuilder.addFilter(filterBeanDescriptor);
+
+					List<InputType> input = filter.getInput();
+					for (InputType inputType : input) {
+						ref = inputType.getRef();
+
+						if (StringUtils.isNullOrEmpty(ref)) {
+							throw new IllegalStateException("Filter input column ref cannot be null");
+						}
+
+						InputColumn<?> inputColumn = inputColumns.get(ref);
+						if (inputColumn == null) {
+							throw new IllegalStateException("No such input column: " + ref);
+						}
+						String name = inputType.getName();
+						if (StringUtils.isNullOrEmpty(name)) {
+							filterJobBuilder.addInputColumn(inputColumn);
+						} else {
+							ConfiguredPropertyDescriptor propertyDescriptor = filterJobBuilder.getDescriptor()
+									.getConfiguredProperty(name);
+							filterJobBuilder.addInputColumn(inputColumn, propertyDescriptor);
+						}
+					}
+
+					applyProperties(filterJobBuilder, filter.getProperties(), schemaNavigator);
+
+					filterJobBuilders.put(filter, filterJobBuilder);
+
+					List<OutcomeType> outcomeTypes = filter.getOutcome();
+					for (OutcomeType outcomeType : outcomeTypes) {
+						String categoryName = outcomeType.getCategory();
+						Enum<?> category = filterJobBuilder.getDescriptor().getCategoryByName(categoryName);
+						if (category == null) {
+							throw new IllegalStateException("No such outcome category name: " + categoryName + " (in "
+									+ filterJobBuilder.getDescriptor().getDisplayName());
+						}
+						outcomeMapping.put(outcomeType.getId(), new LazyFilterOutcome(filterJobBuilder, category));
+					}
+				}
+			}
+
+			// iterate again to set up filter outcome dependencies
+			for (Object o : transformersAndFilters) {
+				if (o instanceof TransformerType) {
+					ref = ((TransformerType) o).getRequires();
+					if (ref != null) {
+						TransformerJobBuilder<?> builder = transformerJobBuilders.get(o);
+						FilterOutcome requirement = outcomeMapping.get(ref);
+						if (requirement == null) {
+							throw new IllegalStateException("No such outcome id: " + ref);
+						}
+						builder.setRequirement(requirement);
+					}
+				} else if (o instanceof FilterType) {
+					ref = ((FilterType) o).getRequires();
+					if (ref != null) {
+						FilterJobBuilder<?, ?> builder = filterJobBuilders.get(o);
+						FilterOutcome requirement = outcomeMapping.get(ref);
+						if (requirement == null) {
+							throw new IllegalStateException("No such outcome id: " + ref);
+						}
+						builder.setRequirement(requirement);
+					}
+				} else {
+					throw new IllegalStateException("Unexpected transformation child element: " + o);
+				}
+			}
 		}
 
 		AnalysisType analysis = job.getAnalysis();
@@ -280,6 +362,15 @@ public class JaxbJobFactory {
 					}
 				}
 				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator);
+
+				ref = analyzerType.getRequires();
+				if (ref != null) {
+					FilterOutcome requirement = outcomeMapping.get(ref);
+					if (requirement == null) {
+						throw new IllegalStateException("No such outcome id: " + ref);
+					}
+					analyzerJobBuilder.setRequirement(requirement);
+				}
 			} else if (descriptor.isExploringAnalyzer()) {
 				@SuppressWarnings("unchecked")
 				Class<? extends ExploringAnalyzer<?>> beanClass = (Class<? extends ExploringAnalyzer<?>>) descriptor
@@ -287,6 +378,11 @@ public class JaxbJobFactory {
 				ExploringAnalyzerJobBuilder<? extends ExploringAnalyzer<?>> analyzerJobBuilder = analysisJobBuilder
 						.addExploringAnalyzer(beanClass);
 				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator);
+
+				if (analyzerType.getRequires() != null) {
+					throw new IllegalStateException("Cannot add outcome requirement to exploring analyzer: "
+							+ analyzerJobBuilder.getDescriptor().getDisplayName());
+				}
 			} else {
 				throw new IllegalStateException("AnalyzerBeanDescriptor is neither row processing or exploring: "
 						+ descriptor);

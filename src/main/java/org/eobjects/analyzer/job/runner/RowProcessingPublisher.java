@@ -228,7 +228,7 @@ public final class RowProcessingPublisher {
 
 	private Task createCloseTask(RowProcessingConsumer consumer, Queue<AnalyzerResult> resultQueue,
 			CompletionListener completionListener) {
-		if (consumer instanceof TransformerConsumer) {
+		if (consumer instanceof TransformerConsumer || consumer instanceof FilterConsumer) {
 			return new CloseBeanTask(completionListener, consumer.getBeanInstance());
 		} else if (consumer instanceof AnalyzerConsumer) {
 			return new CollectResultsAndCloseAnalyzerBeanTask(completionListener,
@@ -249,6 +249,12 @@ public final class RowProcessingPublisher {
 			TransformerBeanInstance transformerBeanInstance = transformerConsumer.getBeanInstance();
 
 			return new AssignCallbacksAndInitializeTask(completionListener, transformerBeanInstance, _collectionProvider,
+					_dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
+		} else if (consumer instanceof FilterConsumer) {
+			FilterConsumer filterConsumer = (FilterConsumer) consumer;
+			FilterBeanInstance filterBeanInstance = filterConsumer.getBeanInstance();
+
+			return new AssignCallbacksAndInitializeTask(completionListener, filterBeanInstance, _collectionProvider,
 					_dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;

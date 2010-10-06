@@ -12,4 +12,6 @@ public interface FilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> ex
 	public EnumSet<C> getCategories();
 
 	public Set<String> getCategoryNames();
+
+	public Enum<C> getCategoryByName(String category);
 }

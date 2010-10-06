@@ -7,7 +7,6 @@ import org.eobjects.analyzer.job.BeanJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
-import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 
 final class FilterConsumer implements RowProcessingConsumer {
@@ -37,7 +36,7 @@ final class FilterConsumer implements RowProcessingConsumer {
 	}
 
 	@Override
-	public AbstractBeanInstance<?> getBeanInstance() {
+	public FilterBeanInstance getBeanInstance() {
 		return _filterBeanInstance;
 	}
 

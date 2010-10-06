@@ -157,6 +157,10 @@ public class AnalysisJobBuilder {
 		return Collections.unmodifiableList(_analyzerJobBuilders);
 	}
 
+	public List<FilterJobBuilder<?, ?>> getFilterJobBuilders() {
+		return Collections.unmodifiableList(_filterJobBuilders);
+	}
+
 	public <A extends ExploringAnalyzer<?>> ExploringAnalyzerJobBuilder<A> addExploringAnalyzer(Class<A> analyzerClass) {
 		AnalyzerBeanDescriptor<A> descriptor = _configuration.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
 				analyzerClass);

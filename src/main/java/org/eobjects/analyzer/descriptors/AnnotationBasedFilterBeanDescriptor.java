@@ -74,4 +74,15 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 		}
 		return result;
 	}
+
+	@Override
+	public Enum<C> getCategoryByName(String categoryName) {
+		EnumSet<C> categories = getCategories();
+		for (Enum<C> c : categories) {
+			if (c.name().equals(categoryName)) {
+				return c;
+			}
+		}
+		return null;
+	}
 }

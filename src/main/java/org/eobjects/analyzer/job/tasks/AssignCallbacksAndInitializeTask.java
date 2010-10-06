@@ -8,7 +8,6 @@ import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
-import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +28,9 @@ public class AssignCallbacksAndInitializeTask implements Task {
 	private AbstractBeanInstance<?> _beanInstance;
 	private AnalyzerBeanInstance _analyzerBeanInstance;
 
-	private void init(CompletionListener completionListener,
-			AbstractBeanInstance<?> beanInstance,
-			CollectionProvider collectionProvider,
-			DataContextProvider dataContextProvider,
-			LifeCycleCallback assignConfiguredCallback,
-			LifeCycleCallback initializeCallback,
-			LifeCycleCallback closeCallback) {
+	private void init(CompletionListener completionListener, AbstractBeanInstance<?> beanInstance,
+			CollectionProvider collectionProvider, DataContextProvider dataContextProvider,
+			LifeCycleCallback assignConfiguredCallback, LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
 		_completionListener = completionListener;
 		_beanInstance = beanInstance;
 		_collectionProvider = collectionProvider;
@@ -45,31 +40,20 @@ public class AssignCallbacksAndInitializeTask implements Task {
 		_closeCallback = closeCallback;
 	}
 
-	public AssignCallbacksAndInitializeTask(
-			CompletionListener completionListener,
-			TransformerBeanInstance transformerBeanInstance,
-			CollectionProvider collectionProvider,
-			DataContextProvider dataContextProvider,
-			LifeCycleCallback assignConfiguredCallback,
-			LifeCycleCallback initializeCallback,
-			LifeCycleCallback closeCallback) {
-		init(completionListener, transformerBeanInstance, collectionProvider,
-				dataContextProvider, assignConfiguredCallback,
+	public AssignCallbacksAndInitializeTask(CompletionListener completionListener,
+			AbstractBeanInstance<?> transformerBeanInstance, CollectionProvider collectionProvider,
+			DataContextProvider dataContextProvider, LifeCycleCallback assignConfiguredCallback,
+			LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
+		init(completionListener, transformerBeanInstance, collectionProvider, dataContextProvider, assignConfiguredCallback,
 				initializeCallback, closeCallback);
 	}
 
-	public AssignCallbacksAndInitializeTask(
-			CompletionListener completionListener,
-			AnalyzerBeanInstance analyzerBeanInstance,
-			CollectionProvider collectionProvider,
-			DataContextProvider dataContextProvider,
-			LifeCycleCallback assignConfiguredCallback,
-			LifeCycleCallback initializeCallback,
-			AnalyzerLifeCycleCallback runCallback,
-			AnalyzerLifeCycleCallback returnResultsCallback,
-			LifeCycleCallback closeCallback) {
-		init(completionListener, analyzerBeanInstance, collectionProvider,
-				dataContextProvider, assignConfiguredCallback,
+	public AssignCallbacksAndInitializeTask(CompletionListener completionListener,
+			AnalyzerBeanInstance analyzerBeanInstance, CollectionProvider collectionProvider,
+			DataContextProvider dataContextProvider, LifeCycleCallback assignConfiguredCallback,
+			LifeCycleCallback initializeCallback, AnalyzerLifeCycleCallback runCallback,
+			AnalyzerLifeCycleCallback returnResultsCallback, LifeCycleCallback closeCallback) {
+		init(completionListener, analyzerBeanInstance, collectionProvider, dataContextProvider, assignConfiguredCallback,
 				initializeCallback, closeCallback);
 		_analyzerBeanInstance = analyzerBeanInstance;
 		_runCallback = runCallback;
@@ -81,12 +65,11 @@ public class AssignCallbacksAndInitializeTask implements Task {
 		logger.debug("execute()");
 
 		if (_assignConfiguredCallback != null) {
-			_beanInstance.getAssignConfiguredCallbacks().add(
-					_assignConfiguredCallback);
+			_beanInstance.getAssignConfiguredCallbacks().add(_assignConfiguredCallback);
 		}
 
-		AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(
-				_beanInstance, _collectionProvider, _dataContextProvider);
+		AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(_beanInstance, _collectionProvider,
+				_dataContextProvider);
 		_beanInstance.getAssignProvidedCallbacks().add(assignProvidedCallback);
 
 		if (_initializeCallback != null) {
@@ -98,8 +81,7 @@ public class AssignCallbacksAndInitializeTask implements Task {
 		}
 
 		if (_returnResultsCallback != null) {
-			_analyzerBeanInstance.getReturnResultsCallbacks().add(
-					_returnResultsCallback);
+			_analyzerBeanInstance.getReturnResultsCallbacks().add(_returnResultsCallback);
 		}
 
 		if (_closeCallback != null) {
@@ -121,7 +103,6 @@ public class AssignCallbacksAndInitializeTask implements Task {
 
 	@Override
 	public String toString() {
-		return "AssignCallbacksAndInitializeTasks[beanInstance="
-				+ _beanInstance + "]";
+		return "AssignCallbacksAndInitializeTasks[beanInstance=" + _beanInstance + "]";
 	}
 }
