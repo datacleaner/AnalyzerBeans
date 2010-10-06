@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.result.renderer.Renderer;
 import org.eobjects.analyzer.result.renderer.RenderingFormat;
@@ -12,8 +13,7 @@ import org.eobjects.analyzer.result.renderer.RenderingFormat;
 public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@Override
-	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(
-			String name) {
+	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name) {
 		if (name != null) {
 			for (AnalyzerBeanDescriptor<?> descriptor : getAnalyzerBeanDescriptors()) {
 				if (name.equals(descriptor.getDisplayName())) {
@@ -26,8 +26,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(
-			Class<A> analyzerBeanClass) {
+	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(Class<A> analyzerBeanClass) {
 		for (AnalyzerBeanDescriptor<?> descriptor : getAnalyzerBeanDescriptors()) {
 			if (descriptor.getBeanClass() == analyzerBeanClass) {
 				return (AnalyzerBeanDescriptor<A>) descriptor;
@@ -37,8 +36,30 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	}
 
 	@Override
-	public RendererBeanDescriptor getRendererBeanDescriptorForClass(
-			Class<? extends Renderer<?, ?>> rendererBeanClass) {
+	public FilterBeanDescriptor<?, ?> getFilterBeanDescriptorByDisplayName(String name) {
+		if (name != null) {
+			for (FilterBeanDescriptor<?, ?> descriptor : getFilterBeanDescriptors()) {
+				if (name.equals(descriptor.getDisplayName())) {
+					return descriptor;
+				}
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <F extends Filter<?>> FilterBeanDescriptor<F, ?> getFilterBeanDescriptorForClass(Class<F> filterClass) {
+		for (FilterBeanDescriptor<?, ?> descriptor : getFilterBeanDescriptors()) {
+			if (filterClass == descriptor.getBeanClass()) {
+				return (FilterBeanDescriptor<F, ?>) descriptor;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public RendererBeanDescriptor getRendererBeanDescriptorForClass(Class<? extends Renderer<?, ?>> rendererBeanClass) {
 		for (RendererBeanDescriptor descriptor : getRendererBeanDescriptors()) {
 			if (descriptor.getBeanClass() == rendererBeanClass) {
 				return descriptor;
@@ -48,8 +69,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	}
 
 	@Override
-	public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(
-			String name) {
+	public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(String name) {
 		if (name != null) {
 			for (TransformerBeanDescriptor<?> descriptor : getTransformerBeanDescriptors()) {
 				if (name.equals(descriptor.getDisplayName())) {
@@ -78,8 +98,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 		Set<RendererBeanDescriptor> result = new HashSet<RendererBeanDescriptor>();
 		Collection<RendererBeanDescriptor> descriptors = getRendererBeanDescriptors();
 		for (RendererBeanDescriptor descriptor : descriptors) {
-			Class<? extends RenderingFormat<?>> descriptorsRenderingFormat = descriptor
-					.getRenderingFormat();
+			Class<? extends RenderingFormat<?>> descriptorsRenderingFormat = descriptor.getRenderingFormat();
 			if (descriptorsRenderingFormat == renderingFormat) {
 				result.add(descriptor);
 			}

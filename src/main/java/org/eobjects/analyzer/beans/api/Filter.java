@@ -3,7 +3,7 @@ package org.eobjects.analyzer.beans.api;
 import org.eobjects.analyzer.data.InputRow;
 
 /**
- * Interface for components that categorize rows 
+ * Interface for components that filter/categorize rows.
  * 
  * @author Kasper Sørensen
  *

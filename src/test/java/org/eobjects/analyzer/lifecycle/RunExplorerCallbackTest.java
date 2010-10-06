@@ -35,7 +35,7 @@ public class RunExplorerCallbackTest extends TestCase {
 		if (isAssertEnabled()) {
 			EasyMock.expect(descriptor.isExploringAnalyzer()).andReturn(true);
 		}
-
+		
 		EasyMock.expect(dataContextProvider.getDataContext()).andReturn(
 				dataContext);
 		analyzer.run(dataContext);

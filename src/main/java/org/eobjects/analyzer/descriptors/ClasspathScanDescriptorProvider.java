@@ -18,47 +18,42 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.result.renderer.Renderer;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ClasspathScanDescriptorProvider extends
-		AbstractDescriptorProvider {
+public final class ClasspathScanDescriptorProvider extends AbstractDescriptorProvider {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(ClasspathScanDescriptorProvider.class);
+	private static final Logger logger = LoggerFactory.getLogger(ClasspathScanDescriptorProvider.class);
 
 	private Map<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor<?>>();
+	private Map<Class<? extends Filter<?>>, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<Class<? extends Filter<?>>, FilterBeanDescriptor<?, ?>>();
 	private Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>>();
 	private Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
 
-	public ClasspathScanDescriptorProvider scanPackage(String packageName,
-			boolean recursive) {
+	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive) {
 		String packagePath = packageName.replace('.', '/');
 		logger.debug("Scanning package path: {}", packagePath);
 		try {
-			Enumeration<URL> resources = ClassLoader
-					.getSystemResources(packagePath);
+			Enumeration<URL> resources = ClassLoader.getSystemResources(packagePath);
 			while (resources.hasMoreElements()) {
 				URL resource = resources.nextElement();
 				File dir = new File(resource.getFile());
 
 				if (dir.isDirectory()) {
-					logger.debug("Resource is a file, scanning directory: {}",
-							dir.getAbsolutePath());
+					logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
 					scanDirectory(dir, recursive);
 				} else {
 					URLConnection connection = resource.openConnection();
 					if (connection instanceof JarURLConnection) {
 						JarURLConnection jarUrlConnection = (JarURLConnection) connection;
-						logger.debug("Resource is a JAR file, scanning file: "
-								+ jarUrlConnection.getJarFile().getName());
+						logger.debug("Resource is a JAR file, scanning file: " + jarUrlConnection.getJarFile().getName());
 						scanJar(jarUrlConnection, packagePath, recursive);
 					} else {
-						throw new IllegalStateException(
-								"Unknown connection type: " + connection);
+						throw new IllegalStateException("Unknown connection type: " + connection);
 					}
 				}
 			}
@@ -69,22 +64,19 @@ public final class ClasspathScanDescriptorProvider extends
 		return this;
 	}
 
-	private void scanJar(JarURLConnection jarUrlConnection, String packagePath,
-			boolean recursive) throws IOException {
+	private void scanJar(JarURLConnection jarUrlConnection, String packagePath, boolean recursive) throws IOException {
 		JarFile jarFile = jarUrlConnection.getJarFile();
 		Enumeration<JarEntry> entries = jarFile.entries();
 
 		while (entries.hasMoreElements()) {
 			JarEntry entry = entries.nextElement();
 			String entryName = entry.getName();
-			if (entryName.startsWith(packagePath)
-					&& entryName.endsWith(".class")) {
+			if (entryName.startsWith(packagePath) && entryName.endsWith(".class")) {
 				if (recursive) {
 					InputStream inputStream = jarFile.getInputStream(entry);
 					scanInputStream(inputStream);
 				} else {
-					String trailingPart = entryName.substring(packagePath
-							.length());
+					String trailingPart = entryName.substring(packagePath.length());
 					if (trailingPart.startsWith("/")) {
 						trailingPart = trailingPart.substring(1);
 					}
@@ -92,8 +84,7 @@ public final class ClasspathScanDescriptorProvider extends
 						InputStream inputStream = jarFile.getInputStream(entry);
 						scanInputStream(inputStream);
 					} else {
-						logger.debug("Omitting recursive JAR file entry: {}",
-								entryName);
+						logger.debug("Omitting recursive JAR file entry: {}", entryName);
 					}
 				}
 			} else {
@@ -104,12 +95,10 @@ public final class ClasspathScanDescriptorProvider extends
 
 	private void scanDirectory(File dir, boolean recursive) {
 		if (!dir.exists()) {
-			throw new IllegalArgumentException("Directory '" + dir
-					+ "' does not exist");
+			throw new IllegalArgumentException("Directory '" + dir + "' does not exist");
 		}
 		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException("The file '" + dir
-					+ "' is not a directory");
+			throw new IllegalArgumentException("The file '" + dir + "' is not a directory");
 		}
 		logger.info("Scanning directory: " + dir);
 
@@ -137,8 +126,7 @@ public final class ClasspathScanDescriptorProvider extends
 				}
 			});
 			if (logger.isInfoEnabled() && subDirectories.length > 0) {
-				logger.info("Recursively scanning " + subDirectories.length
-						+ " subdirectories");
+				logger.info("Recursively scanning " + subDirectories.length + " subdirectories");
 			}
 			for (File subDir : subDirectories) {
 				scanDirectory(subDir, true);
@@ -153,57 +141,59 @@ public final class ClasspathScanDescriptorProvider extends
 
 		if (visitor.isAnalyzer()) {
 			@SuppressWarnings("unchecked")
-			Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) visitor
-					.getBeanClass();
-			AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors
-					.get(analyzerClass);
+			Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) visitor.getBeanClass();
+			AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(analyzerClass);
 			if (descriptor == null) {
-				descriptor = AnnotationBasedAnalyzerBeanDescriptor
-						.create(analyzerClass);
+				descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(analyzerClass);
 				_analyzerBeanDescriptors.put(analyzerClass, descriptor);
 			}
 		}
 		if (visitor.isTransformer()) {
 			@SuppressWarnings("unchecked")
-			Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) visitor
-					.getBeanClass();
-			TransformerBeanDescriptor<?> descriptor = _transformerBeanDescriptors
-					.get(transformerClass);
+			Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) visitor.getBeanClass();
+			TransformerBeanDescriptor<?> descriptor = _transformerBeanDescriptors.get(transformerClass);
 			if (descriptor == null) {
-				descriptor = AnnotationBasedTransformerBeanDescriptor
-						.create(transformerClass);
+				descriptor = AnnotationBasedTransformerBeanDescriptor.create(transformerClass);
 				_transformerBeanDescriptors.put(transformerClass, descriptor);
+			}
+		}
+		if (visitor.isFilter()) {
+			@SuppressWarnings("unchecked")
+			Class<? extends Filter<?>> filterClass = (Class<? extends Filter<?>>) visitor.getBeanClass();
+			FilterBeanDescriptor<?, ?> descriptor = _filterBeanDescriptors.get(filterClass);
+			if (descriptor == null) {
+				descriptor = AnnotationBasedFilterBeanDescriptor.create(filterClass);
+				_filterBeanDescriptors.put(filterClass, descriptor);
 			}
 		}
 		if (visitor.isRenderer()) {
 			@SuppressWarnings("unchecked")
-			Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) visitor
-					.getBeanClass();
-			RendererBeanDescriptor descriptor = _rendererBeanDescriptors
-					.get(rendererClass);
+			Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) visitor.getBeanClass();
+			RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(rendererClass);
 			if (descriptor == null) {
-				descriptor = new AnnotationBasedRendererBeanDescriptor(
-						rendererClass);
+				descriptor = new AnnotationBasedRendererBeanDescriptor(rendererClass);
 				_rendererBeanDescriptors.put(rendererClass, descriptor);
 			}
 		}
 	}
 
 	@Override
+	public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors() {
+		return Collections.unmodifiableCollection(_filterBeanDescriptors.values());
+	}
+
+	@Override
 	public Collection<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
-		return Collections.unmodifiableCollection(_analyzerBeanDescriptors
-				.values());
+		return Collections.unmodifiableCollection(_analyzerBeanDescriptors.values());
 	}
 
 	@Override
 	public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
-		return Collections.unmodifiableCollection(_transformerBeanDescriptors
-				.values());
+		return Collections.unmodifiableCollection(_transformerBeanDescriptors.values());
 	}
 
 	@Override
 	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors() {
-		return Collections.unmodifiableCollection(_rendererBeanDescriptors
-				.values());
+		return Collections.unmodifiableCollection(_rendererBeanDescriptors.values());
 	}
 }

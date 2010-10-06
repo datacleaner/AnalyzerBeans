@@ -4,6 +4,8 @@ import java.lang.annotation.Annotation;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -17,32 +19,28 @@ import org.objectweb.asm.MethodVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class BeanClassVisitor implements ClassVisitor {
+final class BeanClassVisitor implements ClassVisitor {
 
 	private final static Logger _logger = LoggerFactory.getLogger(BeanClassVisitor.class);
 	private Class<?> _beanClazz;
 	private String _name;
 
 	@Override
-	public void visit(int version, int access, String name, String signature,
-			String superName, String[] interfaces) {
+	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
 		_name = name;
 	}
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		if (isAnnotation(desc, AnalyzerBean.class)
-				|| isAnnotation(desc, TransformerBean.class)
-				|| isAnnotation(desc, RendererBean.class)) {
+		if (isAnnotation(desc, AnalyzerBean.class) || isAnnotation(desc, TransformerBean.class)
+				|| isAnnotation(desc, FilterBean.class) || isAnnotation(desc, RendererBean.class)) {
 			initializeClass();
 		}
 		return null;
 	}
 
-	private boolean isAnnotation(String annotationDesc,
-			Class<? extends Annotation> annotationClass) {
-		return annotationDesc.indexOf(annotationClass.getName().replace('.',
-				'/')) != -1;
+	private boolean isAnnotation(String annotationDesc, Class<? extends Annotation> annotationClass) {
+		return annotationDesc.indexOf(annotationClass.getName().replace('.', '/')) != -1;
 	}
 
 	private Class<?> initializeClass() {
@@ -59,8 +57,7 @@ public final class BeanClassVisitor implements ClassVisitor {
 
 	public boolean isAnalyzer() {
 		if (_beanClazz != null) {
-			return _beanClazz.isAnnotationPresent(AnalyzerBean.class)
-					&& ReflectionUtils.is(_beanClazz, Analyzer.class);
+			return _beanClazz.isAnnotationPresent(AnalyzerBean.class) && ReflectionUtils.is(_beanClazz, Analyzer.class);
 		}
 		return false;
 	}
@@ -75,8 +72,14 @@ public final class BeanClassVisitor implements ClassVisitor {
 
 	public boolean isRenderer() {
 		if (_beanClazz != null) {
-			return _beanClazz.isAnnotationPresent(RendererBean.class)
-					&& ReflectionUtils.is(_beanClazz, Renderer.class);
+			return _beanClazz.isAnnotationPresent(RendererBean.class) && ReflectionUtils.is(_beanClazz, Renderer.class);
+		}
+		return false;
+	}
+
+	public boolean isFilter() {
+		if (_beanClazz != null) {
+			return _beanClazz.isAnnotationPresent(FilterBean.class) && ReflectionUtils.is(_beanClazz, Filter.class);
 		}
 		return false;
 	}
@@ -94,8 +97,7 @@ public final class BeanClassVisitor implements ClassVisitor {
 	}
 
 	@Override
-	public FieldVisitor visitField(int arg0, String arg1, String arg2,
-			String arg3, Object arg4) {
+	public FieldVisitor visitField(int arg0, String arg1, String arg2, String arg3, Object arg4) {
 		return null;
 	}
 
@@ -104,8 +106,7 @@ public final class BeanClassVisitor implements ClassVisitor {
 	}
 
 	@Override
-	public MethodVisitor visitMethod(int arg0, String arg1, String arg2,
-			String arg3, String[] arg4) {
+	public MethodVisitor visitMethod(int arg0, String arg1, String arg2, String arg3, String[] arg4) {
 		return null;
 	}
 
