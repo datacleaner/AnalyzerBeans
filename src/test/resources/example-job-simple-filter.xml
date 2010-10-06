@@ -10,25 +10,27 @@
 	</source>
 
 	<transformation>
-
 		<filter>
 			<descriptor ref="Not null" />
 			<input ref="col_supervisor" />
-			<outcome id="col_name_employee" category="VALID" />
-			<outcome id="col_name_president" category="INVALID" />
+			<outcome id="is_employee" category="VALID" />
+			<outcome id="is_manager" category="INVALID" />
 		</filter>
-
-		
 	</transformation>
 
 	<analysis>
-		<analyzer requires="col_name_employee">
+		<analyzer requires="is_employee">
 			<descriptor ref="Value distribution" />
 			<input ref="col_fn" />
 		</analyzer>
-		
-		<analyzer requires="col_name_president">
+
+		<analyzer requires="is_manager">
 			<descriptor ref="Value distribution" />
+			<input ref="col_fn" />
+		</analyzer>
+
+		<analyzer>
+			<descriptor ref="String analyzer" />
 			<input ref="col_fn" />
 		</analyzer>
 	</analysis>

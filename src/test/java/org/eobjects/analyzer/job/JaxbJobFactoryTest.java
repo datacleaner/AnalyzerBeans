@@ -32,27 +32,32 @@ public class JaxbJobFactoryTest extends TestCase {
 		JaxbJobFactory factory = new JaxbJobFactory(conf);
 		AnalysisJobBuilder jobBuilder = factory.create(new File("src/test/resources/example-job-simple-filter.xml"));
 		assertEquals(1, jobBuilder.getFilterJobBuilders().size());
-		assertEquals(2, jobBuilder.getAnalyzerJobBuilders().size());
+		assertEquals(3, jobBuilder.getAnalyzerJobBuilders().size());
 
 		AnalysisJob analysisJob = jobBuilder.toAnalysisJob();
 
 		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(analysisJob);
 
 		List<AnalyzerResult> results = resultFuture.getResults();
-		assertEquals(2, results.size());
+		assertEquals(3, results.size());
 
 		// sort it to make sure test is deterministic
 		Collections.sort(results, ToStringComparator.getComparator());
 
+		// the first result is for the unfiltered String analyzer
+		CrosstabResult res3 = (CrosstabResult) results.get(0);
+		assertEquals(1, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measure", "Min words").get());
+		assertEquals(2, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measure", "Max words").get());
+
 		// this result represents the single manager (one unique and no repeated
 		// values)
-		ValueDistributionResult res1 = (ValueDistributionResult) results.get(0);
+		ValueDistributionResult res1 = (ValueDistributionResult) results.get(1);
 		assertEquals(1, res1.getUniqueCount());
 		assertEquals("ValueCountList[[]]", res1.getTopValues().toString());
 
 		// this result represents all the employees: Two repeated values and 18
 		// unique
-		ValueDistributionResult res2 = (ValueDistributionResult) results.get(1);
+		ValueDistributionResult res2 = (ValueDistributionResult) results.get(2);
 		assertEquals(18, res2.getUniqueCount());
 		assertEquals("ValueCountList[[[Gerard->2], [Leslie->2]]]", res2.getTopValues().toString());
 	}
