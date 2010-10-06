@@ -32,10 +32,14 @@
 			<outcome id="col_name_multi_string" category="INVALID" />
 		</filter>
 
-		<transformer requires="[col_name_single_string,col_name_multi_string]">
+		<transformer requires="col_name_not_null">
 			<descriptor ref="Coalesce strings" />
 			<!-- TODO: Figure out how the flow can continue even though col_firstname 
 				may not have been generated for "col_name_single_string" outcomes -->
+
+			<!-- Note to self: This will be possible if the columns get assigned as 
+				they currently do but the filter is just skipped for the particular rows 
+				that aren't annotated with the required outcome -->
 			<input ref="col_firstname" />
 			<input ref="col_name" />
 			<output id="col_single_name_token" />

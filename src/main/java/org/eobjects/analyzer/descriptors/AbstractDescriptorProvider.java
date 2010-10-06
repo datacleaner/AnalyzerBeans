@@ -49,10 +49,10 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <F extends Filter<?>> FilterBeanDescriptor<F, ?> getFilterBeanDescriptorForClass(Class<F> filterClass) {
+	public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(Class<F> filterClass) {
 		for (FilterBeanDescriptor<?, ?> descriptor : getFilterBeanDescriptors()) {
 			if (filterClass == descriptor.getBeanClass()) {
-				return (FilterBeanDescriptor<F, ?>) descriptor;
+				return (FilterBeanDescriptor<F, C>) descriptor;
 			}
 		}
 		return null;

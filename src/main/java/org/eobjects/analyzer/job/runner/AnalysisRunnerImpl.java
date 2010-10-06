@@ -18,6 +18,7 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.BeanJob;
+import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.job.concurrent.NestedCompletionListener;
@@ -32,6 +33,7 @@ import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
+import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
@@ -64,16 +66,14 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 	@Override
 	public AnalysisResultFuture run(final AnalysisJob job) {
 		// declare all the "constants" of the job as final variables
-		final DataContextProvider dataContextProvider = job
-				.getDataContextProvider();
+		final DataContextProvider dataContextProvider = job.getDataContextProvider();
+		final Collection<FilterJob> filterJobs = job.getFilterJobs();
+		final Collection<TransformerJob> transformerJobs = job.getTransformerJobs();
 		final Collection<AnalyzerJob> analyzerJobs = job.getAnalyzerJobs();
-		final Collection<TransformerJob> transformerJobs = job
-				.getTransformerJobs();
 
 		// A completion listener that simply waits for two onComplete() calls.
 		// One for the explorers, one for the row processor publishers
-		WaitableCompletionListener finalCompletionListener = new WaitableCompletionListener(
-				2);
+		WaitableCompletionListener finalCompletionListener = new WaitableCompletionListener(2);
 
 		List<AnalyzerBeanInstance> analyzerBeanInstances = new ArrayList<AnalyzerBeanInstance>();
 		List<TransformerBeanInstance> transformerBeanInstances = new ArrayList<TransformerBeanInstance>();
@@ -87,155 +87,126 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 			} else if (descriptor.isRowProcessingAnalyzer()) {
 				rowProcessingJobs.add(analyzerJob);
 			} else {
-				throw new IllegalStateException(
-						"AnalyzerBeanDescriptor is neither exploring nor row processing: "
-								+ descriptor);
+				throw new IllegalStateException("AnalyzerBeanDescriptor is neither exploring nor row processing: "
+						+ descriptor);
 			}
 		}
 
 		Queue<AnalyzerResult> resultQueue = new LinkedBlockingQueue<AnalyzerResult>();
 
 		// shared callbacks
-		ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(
-				resultQueue);
-		RunExplorerCallback runExplorerCallback = new RunExplorerCallback(
-				dataContextProvider);
+		ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(resultQueue);
+		RunExplorerCallback runExplorerCallback = new RunExplorerCallback(dataContextProvider);
 
-		CompletionListener explorersDoneCompletionListener = new NestedCompletionListener(
-				"exploring analyzers", explorerJobs.size(),
-				finalCompletionListener);
+		CompletionListener explorersDoneCompletionListener = new NestedCompletionListener("exploring analyzers",
+				explorerJobs.size(), finalCompletionListener);
 
 		// begin explorer jobs first because they can run independently (
 		for (AnalyzerJob explorerJob : explorerJobs) {
-			AnalyzerBeanInstance instance = new AnalyzerBeanInstance(
-					explorerJob.getDescriptor());
+			AnalyzerBeanInstance instance = new AnalyzerBeanInstance(explorerJob.getDescriptor());
 			analyzerBeanInstances.add(instance);
 
 			// set up scheduling for the explorers
-			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(
-					explorersDoneCompletionListener, instance);
-			CompletionListener runExplorerCompletionListener = new RunNextTaskCompletionListener(
-					_taskRunner, closeTask);
-			Task runTask = new RunExplorerTask(instance,
-					runExplorerCompletionListener);
-			CompletionListener initExplorerCompletionListener = new RunNextTaskCompletionListener(
-					_taskRunner, runTask);
-			Task initTask = new AssignCallbacksAndInitializeTask(
-					initExplorerCompletionListener,
-					instance,
-					_collectionProvider,
-					dataContextProvider,
-					new AssignConfiguredCallback(explorerJob.getConfiguration()),
-					new InitializeCallback(), runExplorerCallback,
-					returnResultsCallback, new CloseCallback());
+			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(explorersDoneCompletionListener, instance);
+			CompletionListener runExplorerCompletionListener = new RunNextTaskCompletionListener(_taskRunner, closeTask);
+			Task runTask = new RunExplorerTask(instance, runExplorerCompletionListener);
+			CompletionListener initExplorerCompletionListener = new RunNextTaskCompletionListener(_taskRunner, runTask);
+			Task initTask = new AssignCallbacksAndInitializeTask(initExplorerCompletionListener, instance,
+					_collectionProvider, dataContextProvider, new AssignConfiguredCallback(explorerJob.getConfiguration()),
+					new InitializeCallback(), runExplorerCallback, returnResultsCallback, new CloseCallback());
 
 			// begin the explorers
 			_taskRunner.run(initTask);
 		}
 
 		Map<Table, RowProcessingPublisher> rowProcessingPublishers = new HashMap<Table, RowProcessingPublisher>();
-		for (AnalyzerJob analyzerJob : rowProcessingJobs) {
-			registerRowProcessingPublishers(job, rowProcessingPublishers,
-					analyzerJob, analyzerBeanInstances, null, resultQueue);
+		for (FilterJob filterJob : filterJobs) {
+			registerRowProcessingPublishers(job, rowProcessingPublishers, filterJob, null, transformerBeanInstances,
+					resultQueue);
 		}
 		for (TransformerJob transformerJob : transformerJobs) {
-			registerRowProcessingPublishers(job, rowProcessingPublishers,
-					transformerJob, null, transformerBeanInstances, resultQueue);
+			registerRowProcessingPublishers(job, rowProcessingPublishers, transformerJob, null, transformerBeanInstances,
+					resultQueue);
+		}
+		for (AnalyzerJob analyzerJob : rowProcessingJobs) {
+			registerRowProcessingPublishers(job, rowProcessingPublishers, analyzerJob, analyzerBeanInstances, null,
+					resultQueue);
 		}
 
-		logger.info("Created {} row processor publishers",
-				rowProcessingPublishers.size());
+		logger.info("Created {} row processor publishers", rowProcessingPublishers.size());
 
 		CompletionListener rowProcessorPublishersDoneCompletionListener = new NestedCompletionListener(
-				"row processor publishers", rowProcessingPublishers.size(),
-				finalCompletionListener);
+				"row processor publishers", rowProcessingPublishers.size(), finalCompletionListener);
 
-		for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers
-				.values()) {
-			List<Task> initTasks = rowProcessingPublisher.createInitialTasks(
-					_taskRunner, resultQueue,
+		for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers.values()) {
+			List<Task> initTasks = rowProcessingPublisher.createInitialTasks(_taskRunner, resultQueue,
 					rowProcessorPublishersDoneCompletionListener);
-			logger.debug(
-					"Scheduling {} tasks for row processing publisher: {}",
-					initTasks.size(), rowProcessingPublisher);
+			logger.debug("Scheduling {} tasks for row processing publisher: {}", initTasks.size(), rowProcessingPublisher);
 			for (Task task : initTasks) {
 				_taskRunner.run(task);
 			}
 		}
 
-		return new AnalysisResultFutureImpl(resultQueue,
-				finalCompletionListener);
+		return new AnalysisResultFutureImpl(resultQueue, finalCompletionListener);
 	}
 
 	private void registerRowProcessingPublishers(AnalysisJob analysisJob,
-			Map<Table, RowProcessingPublisher> rowProcessingPublishers,
-			BeanJob<?> beanJob,
-			List<AnalyzerBeanInstance> analyzerBeanInstances,
-			List<TransformerBeanInstance> transformerBeanInstances,
+			Map<Table, RowProcessingPublisher> rowProcessingPublishers, BeanJob<?> beanJob,
+			List<AnalyzerBeanInstance> analyzerBeanInstances, List<TransformerBeanInstance> transformerBeanInstances,
 			Collection<AnalyzerResult> resultQueue) {
 		InputColumn<?>[] inputColumns = beanJob.getInput();
 		Set<Column> physicalColumns = new HashSet<Column>();
 		for (InputColumn<?> inputColumn : inputColumns) {
-			physicalColumns.addAll(getSourcePhysicalColumns(analysisJob,
-					inputColumn));
+			physicalColumns.addAll(getSourcePhysicalColumns(analysisJob, inputColumn));
 		}
 
-		Column[] physicalColumnsArray = physicalColumns
-				.toArray(new Column[physicalColumns.size()]);
+		Column[] physicalColumnsArray = physicalColumns.toArray(new Column[physicalColumns.size()]);
 
 		Table[] tables = MetaModelHelper.getTables(physicalColumnsArray);
 		for (Table table : tables) {
-			RowProcessingPublisher rowPublisher = rowProcessingPublishers
-					.get(table);
+			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
-				rowPublisher = new RowProcessingPublisher(
-						analysisJob.getDataContextProvider(),
-						_collectionProvider, table);
+				rowPublisher = new RowProcessingPublisher(analysisJob.getDataContextProvider(), _collectionProvider, table);
 				rowProcessingPublishers.put(table, rowPublisher);
 			}
 
 			// register the physical columns needed by this job
-			Column[] tableColumns = MetaModelHelper.getTableColumns(table,
-					physicalColumnsArray);
+			Column[] tableColumns = MetaModelHelper.getTableColumns(table, physicalColumnsArray);
 			rowPublisher.addPhysicalColumns(tableColumns);
 
 			// find which input columns (both physical or virtual) are needed by
 			// this per-table instance
-			InputColumn<?>[] localInputColumns = getLocalInputColumns(table,
-					inputColumns, analysisJob);
+			InputColumn<?>[] localInputColumns = getLocalInputColumns(table, inputColumns, analysisJob);
 
 			if (beanJob instanceof AnalyzerJob) {
 				AnalyzerJob analyzerJob = (AnalyzerJob) beanJob;
-				AnalyzerBeanInstance analyzerBeanInstance = new AnalyzerBeanInstance(
-						analyzerJob.getDescriptor());
-				rowPublisher.addRowProcessingAnalyzerBean(analyzerBeanInstance,
-						analyzerJob, localInputColumns);
+				AnalyzerBeanInstance analyzerBeanInstance = new AnalyzerBeanInstance(analyzerJob.getDescriptor());
+				rowPublisher.addRowProcessingAnalyzerBean(analyzerBeanInstance, analyzerJob, localInputColumns);
 
 				analyzerBeanInstances.add(analyzerBeanInstance);
 			} else if (beanJob instanceof TransformerJob) {
 				TransformerJob transformerJob = (TransformerJob) beanJob;
-				TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(
-						transformerJob.getDescriptor());
-				rowPublisher.addTransformerBean(transformerBeanInstance,
-						transformerJob, localInputColumns);
+				TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(transformerJob.getDescriptor());
+				rowPublisher.addTransformerBean(transformerBeanInstance, transformerJob, localInputColumns);
 
 				transformerBeanInstances.add(transformerBeanInstance);
+			} else if (beanJob instanceof FilterJob) {
+				FilterJob filterJob = (FilterJob) beanJob;
+				FilterBeanInstance filterBeanInstance = new FilterBeanInstance(filterJob.getDescriptor());
+				rowPublisher.addFilterBean(filterBeanInstance, filterJob, localInputColumns);
 			} else {
-				throw new UnsupportedOperationException(
-						"Unsupported job type: " + beanJob);
+				throw new UnsupportedOperationException("Unsupported job type: " + beanJob);
 			}
 		}
 	}
 
-	private InputColumn<?>[] getLocalInputColumns(Table table,
-			InputColumn<?>[] inputColumns, AnalysisJob analysisJob) {
+	private InputColumn<?>[] getLocalInputColumns(Table table, InputColumn<?>[] inputColumns, AnalysisJob analysisJob) {
 		if (table == null || inputColumns == null || inputColumns.length == 0) {
 			return new InputColumn<?>[0];
 		}
 		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
 		for (InputColumn<?> inputColumn : inputColumns) {
-			Set<Column> sourcePhysicalColumns = getSourcePhysicalColumns(
-					analysisJob, inputColumn);
+			Set<Column> sourcePhysicalColumns = getSourcePhysicalColumns(analysisJob, inputColumn);
 			for (Column physicalColumn : sourcePhysicalColumns) {
 				if (table.equals(physicalColumn.getTable())) {
 					result.add(inputColumn);
@@ -248,14 +219,12 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 
 	// helper method for recursively finding all physical columns by traversing
 	// the transformers input and output
-	private Set<Column> getSourcePhysicalColumns(AnalysisJob analysisJob,
-			InputColumn<?> inputColumn) {
+	private Set<Column> getSourcePhysicalColumns(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
 		Set<Column> physicalColumns = new HashSet<Column>();
 		if (inputColumn.isPhysicalColumn()) {
 			physicalColumns.add(inputColumn.getPhysicalColumn());
 		} else {
-			Collection<TransformerJob> transformerJobs = analysisJob
-					.getTransformerJobs();
+			Collection<TransformerJob> transformerJobs = analysisJob.getTransformerJobs();
 			boolean found = false;
 			for (TransformerJob transformerJob : transformerJobs) {
 				MutableInputColumn<?>[] output = transformerJob.getOutput();
@@ -264,16 +233,13 @@ public class AnalysisRunnerImpl implements AnalysisRunner {
 						found = true;
 						InputColumn<?>[] input = transformerJob.getInput();
 						for (InputColumn<?> transformerInputColumn : input) {
-							physicalColumns.addAll(getSourcePhysicalColumns(
-									analysisJob, transformerInputColumn));
+							physicalColumns.addAll(getSourcePhysicalColumns(analysisJob, transformerInputColumn));
 						}
 					}
 				}
 			}
 			if (!found) {
-				throw new IllegalStateException(
-						"Could not find source physical column for: "
-								+ inputColumn);
+				throw new IllegalStateException("Could not find source physical column for: " + inputColumn);
 			}
 		}
 		return physicalColumns;

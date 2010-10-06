@@ -8,11 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Abstract class for use of bean instances at runtime. A bean instance is a
+ * wrapper for the actual beans that get instantiated during a job execution.
  * 
- * @author kasper
+ * @author Kasper Sørensen
  * 
  * @param <E>
- *            the bean type, typically Analyzer or Transformer
+ *            the bean type, ie. Filter, Analyzer or Transformer
  */
 public abstract class AbstractBeanInstance<E> {
 
@@ -33,9 +35,7 @@ public abstract class AbstractBeanInstance<E> {
 		try {
 			this.bean = (E) descriptor.getBeanClass().newInstance();
 		} catch (Exception e) {
-			throw new IllegalArgumentException(
-					"Could not instantiate analyzer bean type: "
-							+ descriptor.getBeanClass(), e);
+			throw new IllegalArgumentException("Could not instantiate analyzer bean type: " + descriptor.getBeanClass(), e);
 		}
 		this.descriptor = descriptor;
 	}
@@ -52,8 +52,7 @@ public abstract class AbstractBeanInstance<E> {
 		if (logger.isInfoEnabled()) {
 			logger.info("assignConfigured (" + bean + ")");
 		}
-		runCallbacks(assignConfiguredCallbacks,
-				LifeCycleState.ASSIGN_CONFIGURED);
+		runCallbacks(assignConfiguredCallbacks, LifeCycleState.ASSIGN_CONFIGURED);
 	}
 
 	public List<LifeCycleCallback> getAssignConfiguredCallbacks() {
@@ -93,8 +92,7 @@ public abstract class AbstractBeanInstance<E> {
 		return closeCallbacks;
 	}
 
-	private void runCallbacks(List<LifeCycleCallback> callbacks,
-			LifeCycleState state) {
+	private void runCallbacks(List<LifeCycleCallback> callbacks, LifeCycleState state) {
 		logger.debug("running {} callbacks: {}", callbacks.size(), callbacks);
 		for (LifeCycleCallback lifeCycleCallback : callbacks) {
 			lifeCycleCallback.onEvent(state, bean, descriptor);

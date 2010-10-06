@@ -4,16 +4,16 @@ import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 
-class AnalyzerConsumer implements RowProcessingConsumer {
+final class AnalyzerConsumer implements RowProcessingConsumer {
 
-	private AnalyzerJob _analyzerJob;
-	private AnalyzerBeanInstance _analyzerBeanInstance;
-	private InputColumn<?>[] _inputColumns;
+	private final AnalyzerJob _analyzerJob;
+	private final AnalyzerBeanInstance _analyzerBeanInstance;
+	private final InputColumn<?>[] _inputColumns;
 
-	public AnalyzerConsumer(AnalyzerBeanInstance analyzerBeanInstance,
-			AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns) {
+	public AnalyzerConsumer(AnalyzerBeanInstance analyzerBeanInstance, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns) {
 		_analyzerBeanInstance = analyzerBeanInstance;
 		_analyzerJob = analyzerJob;
 		_inputColumns = inputColumns;
@@ -25,9 +25,8 @@ class AnalyzerConsumer implements RowProcessingConsumer {
 	}
 
 	@Override
-	public InputRow consume(InputRow row, int distinctCount) {
-		RowProcessingAnalyzer<?> analyzer = (RowProcessingAnalyzer<?>) _analyzerBeanInstance
-				.getBean();
+	public InputRow consume(InputRow row, int distinctCount, FilterOutcomeSink outcomes) {
+		RowProcessingAnalyzer<?> analyzer = (RowProcessingAnalyzer<?>) _analyzerBeanInstance.getBean();
 		analyzer.run(row, distinctCount);
 		return row;
 	}
@@ -36,14 +35,19 @@ class AnalyzerConsumer implements RowProcessingConsumer {
 	public AnalyzerBeanInstance getBeanInstance() {
 		return _analyzerBeanInstance;
 	}
-	
+
 	@Override
 	public AnalyzerJob getBeanJob() {
 		return _analyzerJob;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "AnalyzerConsumer[" + _analyzerBeanInstance + "]";
+	}
+
+	@Override
+	public FilterOutcome getRequiredOutcome() {
+		return _analyzerJob.getRequirement();
 	}
 }

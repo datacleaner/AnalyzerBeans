@@ -25,7 +25,7 @@ final class ImmutableTransformerJob implements TransformerJob {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
 		_output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
-		_requirement = requirement;
+		_requirement = LazyFilterOutcome.load(requirement);
 	}
 
 	@Override

@@ -5,17 +5,18 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputRow;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
-class TransformerConsumer implements RowProcessingConsumer {
+final class TransformerConsumer implements RowProcessingConsumer {
 
-	private TransformerBeanInstance _transformerBeanInstance;
-	private TransformerJob _transformerJob;
-	private InputColumn<?>[] _inputColumns;
+	private final TransformerBeanInstance _transformerBeanInstance;
+	private final TransformerJob _transformerJob;
+	private final InputColumn<?>[] _inputColumns;
 
-	public TransformerConsumer(TransformerBeanInstance transformerBeanInstance,
-			TransformerJob transformerJob, InputColumn<?>[] inputColumns) {
+	public TransformerConsumer(TransformerBeanInstance transformerBeanInstance, TransformerJob transformerJob,
+			InputColumn<?>[] inputColumns) {
 		_transformerBeanInstance = transformerBeanInstance;
 		_transformerJob = transformerJob;
 		_inputColumns = inputColumns;
@@ -27,7 +28,7 @@ class TransformerConsumer implements RowProcessingConsumer {
 	}
 
 	@Override
-	public InputRow consume(InputRow row, int distinctCount) {
+	public InputRow consume(InputRow row, int distinctCount, FilterOutcomeSink outcomes) {
 		MutableInputColumn<?>[] outputColumns = _transformerJob.getOutput();
 
 		Transformer<?> transformer = _transformerBeanInstance.getBean();
@@ -51,6 +52,11 @@ class TransformerConsumer implements RowProcessingConsumer {
 	@Override
 	public TransformerJob getBeanJob() {
 		return _transformerJob;
+	}
+	
+	@Override
+	public FilterOutcome getRequiredOutcome() {
+		return _transformerJob.getRequirement();
 	}
 
 	@Override

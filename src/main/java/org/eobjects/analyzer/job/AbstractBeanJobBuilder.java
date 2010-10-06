@@ -30,7 +30,6 @@ class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 
 	private D _descriptor;
 	private E _configurableBean;
-	private FilterOutcome _requirement;
 
 	public AbstractBeanJobBuilder(D descriptor, Class<?> builderClass) {
 		if (descriptor == null) {
@@ -68,25 +67,6 @@ class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 			}
 		}
 		return true;
-	}
-
-	public void setRequirement(FilterJob filterJob, String category) {
-		FilterOutcome[] outcomes = filterJob.getOutcomes();
-		for (FilterOutcome outcome : outcomes) {
-			if (category.equals(outcome.getCategory().name())) {
-				setRequirement(outcome);
-				return;
-			}
-		}
-		throw new IllegalArgumentException("No such category found in available outcomes: " + category);
-	}
-
-	public void setRequirement(FilterOutcome requirement) {
-		_requirement = requirement;
-	}
-
-	public FilterOutcome getRequirement() {
-		return _requirement;
 	}
 
 	public B setConfiguredProperty(String configuredName, Object value) {

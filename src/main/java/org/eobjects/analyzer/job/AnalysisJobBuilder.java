@@ -132,6 +132,15 @@ public class AnalysisJobBuilder {
 		return this;
 	}
 
+	public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(Class<F> filterClass) {
+		FilterBeanDescriptor<F, C> descriptor = _configuration.getDescriptorProvider().getFilterBeanDescriptorForClass(
+				filterClass);
+		if (descriptor == null) {
+			throw new IllegalArgumentException("No descriptor found for: " + filterClass);
+		}
+		return addFilter(descriptor);
+	}
+
 	public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterBeanDescriptor<F, C> descriptor) {
 		FilterJobBuilder<F, C> fjb = new FilterJobBuilder<F, C>(descriptor);
 		_filterJobBuilders.add(fjb);

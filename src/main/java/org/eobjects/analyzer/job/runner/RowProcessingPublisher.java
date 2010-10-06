@@ -15,6 +15,8 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.job.concurrent.NestedCompletionListener;
@@ -30,6 +32,7 @@ import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
+import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
@@ -93,10 +96,21 @@ public final class RowProcessingPublisher {
 		while (dataSet.next()) {
 			Row metaModelRow = dataSet.getRow();
 			Number distinctCount = (Number) metaModelRow.getValue(countAllItem);
+			FilterOutcomeSinkImpl outcomes = new FilterOutcomeSinkImpl();
 			InputRow inputRow = new MetaModelInputRow(metaModelRow);
 
 			for (RowProcessingConsumer rowProcessingConsumer : consumers) {
-				inputRow = rowProcessingConsumer.consume(inputRow, distinctCount.intValue());
+				FilterOutcome requiredOutcome = rowProcessingConsumer.getRequiredOutcome();
+				boolean process;
+				if (requiredOutcome == null) {
+					process = true;
+				} else {
+					process = outcomes.contains(requiredOutcome);
+				}
+
+				if (process) {
+					inputRow = rowProcessingConsumer.consume(inputRow, distinctCount.intValue(), outcomes);
+				}
 			}
 		}
 	}
@@ -107,6 +121,7 @@ public final class RowProcessingPublisher {
 
 		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(consumers);
 		Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
+		Set<FilterJob> addedFilterJobs = new HashSet<FilterJob>();
 
 		while (!remainingConsumers.isEmpty()) {
 			boolean changed = false;
@@ -115,12 +130,25 @@ public final class RowProcessingPublisher {
 
 				boolean accepted = true;
 
-				InputColumn<?>[] requiredInput = consumer.getRequiredInput();
-				for (InputColumn<?> inputColumn : requiredInput) {
-					if (!inputColumn.isPhysicalColumn()) {
-						if (!availableVirtualColumns.contains(inputColumn)) {
-							accepted = false;
-							break;
+				// make sure that any dependent filter outcome is evaluated
+				// before this component
+				FilterOutcome requirement = consumer.getBeanJob().getRequirement();
+				if (requirement != null) {
+					FilterJob filterJob = requirement.getFilterJob();
+					if (!addedFilterJobs.contains(filterJob)) {
+						accepted = false;
+					}
+				}
+
+				// make sure that all the required colums are present
+				if (accepted) {
+					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
+					for (InputColumn<?> inputColumn : requiredInput) {
+						if (!inputColumn.isPhysicalColumn()) {
+							if (!availableVirtualColumns.contains(inputColumn)) {
+								accepted = false;
+								break;
+							}
 						}
 					}
 				}
@@ -135,6 +163,9 @@ public final class RowProcessingPublisher {
 						for (MutableInputColumn<?> virtualColumn : virtualColumns) {
 							availableVirtualColumns.add(virtualColumn);
 						}
+					}
+					if (consumer instanceof FilterConsumer) {
+						addedFilterJobs.add((FilterJob) consumer.getBeanJob());
 					}
 				}
 			}
@@ -157,6 +188,10 @@ public final class RowProcessingPublisher {
 	public void addTransformerBean(TransformerBeanInstance transformerBeanInstance, TransformerJob transformerJob,
 			InputColumn<?>[] inputColumns) {
 		addConsumer(new TransformerConsumer(transformerBeanInstance, transformerJob, inputColumns));
+	}
+
+	public void addFilterBean(FilterBeanInstance filterBeanInstance, FilterJob filterJob, InputColumn<?>[] inputColumns) {
+		addConsumer(new FilterConsumer(filterBeanInstance, filterJob, inputColumns));
 	}
 
 	private void addConsumer(RowProcessingConsumer consumer) {

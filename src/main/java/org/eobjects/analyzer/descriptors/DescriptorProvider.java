@@ -30,7 +30,8 @@ public interface DescriptorProvider {
 
 	public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors();
 
-	public <F extends Filter<?>> FilterBeanDescriptor<F, ?> getFilterBeanDescriptorForClass(Class<F> filterClass);
+	public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(
+			Class<F> filterClass);
 
 	public FilterBeanDescriptor<?, ?> getFilterBeanDescriptorByDisplayName(String name);
 

@@ -117,12 +117,12 @@ public class LazyDescriptorProvider implements DescriptorProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <F extends Filter<?>> FilterBeanDescriptor<F, ?> getFilterBeanDescriptorForClass(Class<F> filterClass) {
+	public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(Class<F> filterClass) {
 		FilterBeanDescriptor<?, ?> descriptor = _filterBeanDescriptors.get(filterClass);
 		if (descriptor == null) {
-			Class<? extends Filter<?>> fc = filterClass;
+			Class<? extends Filter<C>> fc = filterClass;
 			descriptor = AnnotationBasedFilterBeanDescriptor.create(fc);
 		}
-		return (FilterBeanDescriptor<F, ?>) descriptor;
+		return (FilterBeanDescriptor<F, C>) descriptor;
 	}
 }

@@ -17,8 +17,7 @@ public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> e
 			throw new IllegalStateException("Exploring Analyzer job is not correctly configured");
 		}
 
-		return new ImmutableAnalyzerJob(getDescriptor(), new ImmutableBeanConfiguration(getConfiguredProperties()),
-				getRequirement());
+		return new ImmutableAnalyzerJob(getDescriptor(), new ImmutableBeanConfiguration(getConfiguredProperties()), null);
 	}
 
 	@Override

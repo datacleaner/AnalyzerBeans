@@ -19,7 +19,7 @@ final class ImmutableAnalyzerJob implements AnalyzerJob {
 			FilterOutcome requirement) {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
-		_requirement = requirement;
+		_requirement = LazyFilterOutcome.load(requirement);
 	}
 
 	@Override
