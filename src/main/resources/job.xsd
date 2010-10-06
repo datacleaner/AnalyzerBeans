@@ -10,6 +10,8 @@
 					minOccurs="0" maxOccurs="1" />
 				<element name="source" type="ab:sourceType" minOccurs="0"
 					maxOccurs="1" />
+				<element name="filtering" type="ab:filteringType" minOccurs="0"
+					maxOccurs="1" />
 				<element name="transformation" type="ab:transformationType"
 					minOccurs="0" maxOccurs="1" />
 				<element name="analysis" type="ab:analysisType" minOccurs="1"
@@ -51,6 +53,13 @@
 		</sequence>
 	</complexType>
 
+	<complexType name="filteringType">
+		<sequence>
+			<element name="filter" type="ab:filterType" minOccurs="0"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
 	<complexType name="analysisType">
 		<sequence>
 			<element name="analyzer" type="ab:analyzerType" minOccurs="1"
@@ -85,10 +94,25 @@
 			<element name="output" type="ab:outputType" minOccurs="1"
 				maxOccurs="unbounded" />
 		</sequence>
+		<attribute name="requires" type="token" use="optional" />
 	</complexType>
 
 	<complexType name="transformerDescriptorType">
 		<attribute name="ref" type="token" use="required" />
+	</complexType>
+
+	<complexType name="filterType">
+		<sequence>
+			<element name="descriptor" type="ab:filterDescriptorType"
+				minOccurs="1" maxOccurs="1" />
+			<element name="properties" type="ab:configuredPropertiesType"
+				minOccurs="0" maxOccurs="1" />
+			<element name="input" type="ab:inputType" minOccurs="1"
+				maxOccurs="unbounded" />
+			<element name="outcome" type="ab:outcomeType" minOccurs="1"
+				maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="requires" type="token" use="optional" />
 	</complexType>
 
 	<complexType name="inputType">
@@ -110,10 +134,20 @@
 			<element name="input" type="ab:inputType" minOccurs="0"
 				maxOccurs="unbounded" />
 		</sequence>
+		<attribute name="requires" type="token" use="optional" />
 	</complexType>
 
 	<complexType name="analyzerDescriptorType">
 		<attribute name="ref" type="token" use="required" />
+	</complexType>
+
+	<complexType name="filterDescriptorType">
+		<attribute name="ref" type="token" use="required" />
+	</complexType>
+
+	<complexType name="outcomeType">
+		<attribute name="category" type="string" use="required" />
+		<attribute name="id" type="token" use="required" />
 	</complexType>
 
 	<complexType name="configuredPropertiesType">
