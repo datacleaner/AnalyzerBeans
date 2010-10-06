@@ -21,19 +21,19 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
- * <p>Java class for transformerType complex type.
+ * <p>Java class for filterType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="transformerType">
+ * &lt;complexType name="filterType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="descriptor" type="{http://eobjects.org/analyzerbeans/job/1.0}transformerDescriptorType"/>
+ *         &lt;element name="descriptor" type="{http://eobjects.org/analyzerbeans/job/1.0}filterDescriptorType"/>
  *         &lt;element name="properties" type="{http://eobjects.org/analyzerbeans/job/1.0}configuredPropertiesType" minOccurs="0"/>
  *         &lt;element name="input" type="{http://eobjects.org/analyzerbeans/job/1.0}inputType" maxOccurs="unbounded"/>
- *         &lt;element name="output" type="{http://eobjects.org/analyzerbeans/job/1.0}outputType" maxOccurs="unbounded"/>
+ *         &lt;element name="outcome" type="{http://eobjects.org/analyzerbeans/job/1.0}outcomeType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *       &lt;attribute name="requires" type="{http://www.w3.org/2001/XMLSchema}token" />
  *     &lt;/restriction>
@@ -44,21 +44,21 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "transformerType", propOrder = {
+@XmlType(name = "filterType", propOrder = {
     "descriptor",
     "properties",
     "input",
-    "output"
+    "outcome"
 })
-public class TransformerType {
+public class FilterType {
 
     @XmlElement(required = true)
-    protected TransformerDescriptorType descriptor;
+    protected FilterDescriptorType descriptor;
     protected ConfiguredPropertiesType properties;
     @XmlElement(required = true)
     protected List<InputType> input;
     @XmlElement(required = true)
-    protected List<OutputType> output;
+    protected List<OutcomeType> outcome;
     @XmlAttribute
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -69,10 +69,10 @@ public class TransformerType {
      * 
      * @return
      *     possible object is
-     *     {@link TransformerDescriptorType }
+     *     {@link FilterDescriptorType }
      *     
      */
-    public TransformerDescriptorType getDescriptor() {
+    public FilterDescriptorType getDescriptor() {
         return descriptor;
     }
 
@@ -81,10 +81,10 @@ public class TransformerType {
      * 
      * @param value
      *     allowed object is
-     *     {@link TransformerDescriptorType }
+     *     {@link FilterDescriptorType }
      *     
      */
-    public void setDescriptor(TransformerDescriptorType value) {
+    public void setDescriptor(FilterDescriptorType value) {
         this.descriptor = value;
     }
 
@@ -142,32 +142,32 @@ public class TransformerType {
     }
 
     /**
-     * Gets the value of the output property.
+     * Gets the value of the outcome property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the output property.
+     * This is why there is not a <CODE>set</CODE> method for the outcome property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getOutput().add(newItem);
+     *    getOutcome().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link OutputType }
+     * {@link OutcomeType }
      * 
      * 
      */
-    public List<OutputType> getOutput() {
-        if (output == null) {
-            output = new ArrayList<OutputType>();
+    public List<OutcomeType> getOutcome() {
+        if (outcome == null) {
+            outcome = new ArrayList<OutcomeType>();
         }
-        return this.output;
+        return this.outcome;
     }
 
     /**
