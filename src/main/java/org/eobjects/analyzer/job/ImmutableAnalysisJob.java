@@ -13,18 +13,16 @@ final class ImmutableAnalysisJob implements AnalysisJob {
 	private final Collection<InputColumn<?>> _sourceColumns;
 	private final Collection<TransformerJob> _transformerJobs;
 	private final Collection<AnalyzerJob> _analyzerJobs;
+	private final Collection<FilterJob> _filterJobs;
 
-	public ImmutableAnalysisJob(DataContextProvider dataContextProvider,
-			Collection<? extends InputColumn<?>> sourceColumns,
-			Collection<TransformerJob> transformerJobs,
+	public ImmutableAnalysisJob(DataContextProvider dataContextProvider, Collection<? extends InputColumn<?>> sourceColumns,
+			Collection<FilterJob> filterJobs, Collection<TransformerJob> transformerJobs,
 			Collection<AnalyzerJob> analyzerJobs) {
 		_dataContextProvider = dataContextProvider;
-		_sourceColumns = Collections
-				.unmodifiableList(new ArrayList<InputColumn<?>>(sourceColumns));
-		_transformerJobs = Collections
-				.unmodifiableList(new ArrayList<TransformerJob>(transformerJobs));
-		_analyzerJobs = Collections
-				.unmodifiableList(new ArrayList<AnalyzerJob>(analyzerJobs));
+		_sourceColumns = Collections.unmodifiableList(new ArrayList<InputColumn<?>>(sourceColumns));
+		_transformerJobs = Collections.unmodifiableList(new ArrayList<TransformerJob>(transformerJobs));
+		_analyzerJobs = Collections.unmodifiableList(new ArrayList<AnalyzerJob>(analyzerJobs));
+		_filterJobs = Collections.unmodifiableList(new ArrayList<FilterJob>(filterJobs));
 	}
 
 	@Override
@@ -48,16 +46,18 @@ final class ImmutableAnalysisJob implements AnalysisJob {
 	}
 
 	@Override
+	public Collection<FilterJob> getFilterJobs() {
+		return _filterJobs;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((_analyzerJobs == null) ? 0 : _analyzerJobs.hashCode());
-		result = prime * result
-				+ ((_sourceColumns == null) ? 0 : _sourceColumns.hashCode());
-		result = prime
-				* result
-				+ ((_transformerJobs == null) ? 0 : _transformerJobs.hashCode());
+		result = prime * result + ((_analyzerJobs == null) ? 0 : _analyzerJobs.hashCode());
+		result = prime * result + ((_sourceColumns == null) ? 0 : _sourceColumns.hashCode());
+		result = prime * result + ((_transformerJobs == null) ? 0 : _transformerJobs.hashCode());
+		result = prime * result + ((_filterJobs == null) ? 0 : _filterJobs.hashCode());
 		return result;
 	}
 
@@ -85,13 +85,17 @@ final class ImmutableAnalysisJob implements AnalysisJob {
 				return false;
 		} else if (!_transformerJobs.equals(other._transformerJobs))
 			return false;
+		if (_filterJobs == null) {
+			if (other._filterJobs != null)
+				return false;
+		} else if (!_filterJobs.equals(other._filterJobs))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "ImmutableAnalysisJob[sourceColumns=" + _sourceColumns.size()
-				+ ",transformerJobs=" + _transformerJobs.size()
-				+ ",analyzerJobs=" + _analyzerJobs.size() + "]";
+		return "ImmutableAnalysisJob[sourceColumns=" + _sourceColumns.size() + ",filterJobs=" + _filterJobs.size()
+				+ ",transformerJobs=" + _transformerJobs.size() + ",analyzerJobs=" + _analyzerJobs.size() + "]";
 	}
 }

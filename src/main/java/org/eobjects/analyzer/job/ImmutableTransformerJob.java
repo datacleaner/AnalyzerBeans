@@ -18,14 +18,14 @@ final class ImmutableTransformerJob implements TransformerJob {
 	private final TransformerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
 	private final List<MutableInputColumn<?>> _output;
+	private final FilterOutcome _requirement;
 
-	public ImmutableTransformerJob(TransformerBeanDescriptor<?> descriptor,
-			BeanConfiguration beanConfiguration,
-			Collection<MutableInputColumn<?>> output) {
+	public ImmutableTransformerJob(TransformerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
+			Collection<MutableInputColumn<?>> output, FilterOutcome requirement) {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
-		_output = Collections
-				.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
+		_output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
+		_requirement = requirement;
 	}
 
 	@Override
@@ -41,13 +41,10 @@ final class ImmutableTransformerJob implements TransformerJob {
 	@Override
 	public InputColumn<?>[] getInput() {
 		List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
-		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor
-				.getConfiguredPropertiesForInput();
+		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
 		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
-			Object property = _beanConfiguration
-					.getProperty(propertyDescriptor);
-			InputColumn<?>[] inputs = CollectionUtils.arrayOf(
-					InputColumn.class, property);
+			Object property = _beanConfiguration.getProperty(propertyDescriptor);
+			InputColumn<?>[] inputs = CollectionUtils.arrayOf(InputColumn.class, property);
 			for (InputColumn<?> inputColumn : inputs) {
 				result.add(inputColumn);
 			}
@@ -61,16 +58,18 @@ final class ImmutableTransformerJob implements TransformerJob {
 	}
 
 	@Override
+	public FilterOutcome getRequirement() {
+		return _requirement;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime
-				* result
-				+ ((_beanConfiguration == null) ? 0 : _beanConfiguration
-						.hashCode());
-		result = prime * result
-				+ ((_descriptor == null) ? 0 : _descriptor.hashCode());
+		result = prime * result + ((_beanConfiguration == null) ? 0 : _beanConfiguration.hashCode());
+		result = prime * result + ((_descriptor == null) ? 0 : _descriptor.hashCode());
 		result = prime * result + ((_output == null) ? 0 : _output.hashCode());
+		result = prime * result + ((_requirement == null) ? 0 : _requirement.hashCode());
 		return result;
 	}
 
@@ -98,12 +97,16 @@ final class ImmutableTransformerJob implements TransformerJob {
 				return false;
 		} else if (!_output.equals(other._output))
 			return false;
+		if (_requirement == null) {
+			if (other._requirement != null)
+				return false;
+		} else if (!_requirement.equals(other._requirement))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "ImmutableTransformerJob[transformer="
-				+ _descriptor.getDisplayName() + "]";
+		return "ImmutableTransformerJob[transformer=" + _descriptor.getDisplayName() + "]";
 	}
 }

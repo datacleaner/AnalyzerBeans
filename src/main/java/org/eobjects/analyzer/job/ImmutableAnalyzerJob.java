@@ -13,11 +13,13 @@ final class ImmutableAnalyzerJob implements AnalyzerJob {
 
 	private final AnalyzerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
+	private final FilterOutcome _requirement;
 
-	public ImmutableAnalyzerJob(AnalyzerBeanDescriptor<?> descriptor,
-			BeanConfiguration beanConfiguration) {
+	public ImmutableAnalyzerJob(AnalyzerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
+			FilterOutcome requirement) {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
+		_requirement = requirement;
 	}
 
 	@Override
@@ -33,13 +35,10 @@ final class ImmutableAnalyzerJob implements AnalyzerJob {
 	@Override
 	public InputColumn<?>[] getInput() {
 		List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
-		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor
-				.getConfiguredPropertiesForInput();
+		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
 		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
-			Object property = _beanConfiguration
-					.getProperty(propertyDescriptor);
-			InputColumn<?>[] inputs = CollectionUtils.arrayOf(
-					InputColumn.class, property);
+			Object property = _beanConfiguration.getProperty(propertyDescriptor);
+			InputColumn<?>[] inputs = CollectionUtils.arrayOf(InputColumn.class, property);
 			if (inputs != null) {
 				for (InputColumn<?> inputColumn : inputs) {
 					result.add(inputColumn);
@@ -50,15 +49,17 @@ final class ImmutableAnalyzerJob implements AnalyzerJob {
 	}
 
 	@Override
+	public FilterOutcome getRequirement() {
+		return _requirement;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime
-				* result
-				+ ((_beanConfiguration == null) ? 0 : _beanConfiguration
-						.hashCode());
-		result = prime * result
-				+ ((_descriptor == null) ? 0 : _descriptor.hashCode());
+		result = prime * result + ((_beanConfiguration == null) ? 0 : _beanConfiguration.hashCode());
+		result = prime * result + ((_descriptor == null) ? 0 : _descriptor.hashCode());
+		result = prime * result + ((_requirement == null) ? 0 : _requirement.hashCode());
 		return result;
 	}
 
@@ -81,12 +82,16 @@ final class ImmutableAnalyzerJob implements AnalyzerJob {
 				return false;
 		} else if (!_descriptor.equals(other._descriptor))
 			return false;
+		if (_requirement == null) {
+			if (other._requirement != null)
+				return false;
+		} else if (!_requirement.equals(other._requirement))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "ImmutableAnalyzerJob[analyzer=" + _descriptor.getDisplayName()
-				+ "]";
+		return "ImmutableAnalyzerJob[analyzer=" + _descriptor.getDisplayName() + "]";
 	}
 }

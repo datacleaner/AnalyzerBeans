@@ -10,8 +10,6 @@
 					minOccurs="0" maxOccurs="1" />
 				<element name="source" type="ab:sourceType" minOccurs="0"
 					maxOccurs="1" />
-				<element name="filtering" type="ab:filteringType" minOccurs="0"
-					maxOccurs="1" />
 				<element name="transformation" type="ab:transformationType"
 					minOccurs="0" maxOccurs="1" />
 				<element name="analysis" type="ab:analysisType" minOccurs="1"
@@ -47,17 +45,12 @@
 	</complexType>
 
 	<complexType name="transformationType">
-		<sequence>
+		<choice minOccurs="0" maxOccurs="unbounded">
 			<element name="transformer" type="ab:transformerType"
 				minOccurs="0" maxOccurs="unbounded" />
-		</sequence>
-	</complexType>
-
-	<complexType name="filteringType">
-		<sequence>
 			<element name="filter" type="ab:filterType" minOccurs="0"
 				maxOccurs="unbounded" />
-		</sequence>
+		</choice>
 	</complexType>
 
 	<complexType name="analysisType">

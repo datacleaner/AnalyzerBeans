@@ -8,10 +8,12 @@ import org.eobjects.analyzer.data.InputColumn;
 public interface AnalysisJob {
 
 	public DataContextProvider getDataContextProvider();
-	
+
 	public Collection<InputColumn<?>> getSourceColumns();
-	
+
 	public Collection<TransformerJob> getTransformerJobs();
-	
+
+	public Collection<FilterJob> getFilterJobs();
+
 	public Collection<AnalyzerJob> getAnalyzerJobs();
 }

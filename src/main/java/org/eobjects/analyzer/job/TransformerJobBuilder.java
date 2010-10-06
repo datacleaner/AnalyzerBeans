@@ -23,46 +23,36 @@ import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
  * @param <T>
  *            the transformer type being configured
  */
-public class TransformerJobBuilder<T extends Transformer<?>>
-		extends
+public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> {
 
 	private LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
 	private IdGenerator _idGenerator;
 
-	public TransformerJobBuilder(TransformerBeanDescriptor<T> descriptor,
-			IdGenerator idGenerator) {
+	public TransformerJobBuilder(TransformerBeanDescriptor<T> descriptor, IdGenerator idGenerator) {
 		super(descriptor, TransformerJobBuilder.class);
 		_idGenerator = idGenerator;
 	}
 
 	public List<MutableInputColumn<?>> getOutputColumns() {
-		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(
-				getDescriptor());
+		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(getDescriptor());
 
 		// mimic the configuration of a real transformer bean instance
 
 		// TODO: Should be AssignConfiguredRowProcessingCallback
-		LifeCycleCallback callback = new AssignConfiguredCallback(
-				new ImmutableBeanConfiguration(getConfiguredProperties()));
-		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED,
-				transformerBeanInstance.getBean(), getDescriptor());
+		LifeCycleCallback callback = new AssignConfiguredCallback(new ImmutableBeanConfiguration(getConfiguredProperties()));
+		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, transformerBeanInstance.getBean(), getDescriptor());
 
-		callback = new AssignProvidedCallback(transformerBeanInstance,
-				new InMemoryCollectionProvider(), null);
-		callback.onEvent(LifeCycleState.ASSIGN_PROVIDED,
-				transformerBeanInstance.getBean(), getDescriptor());
+		callback = new AssignProvidedCallback(transformerBeanInstance, new InMemoryCollectionProvider(), null);
+		callback.onEvent(LifeCycleState.ASSIGN_PROVIDED, transformerBeanInstance.getBean(), getDescriptor());
 
 		callback = new InitializeCallback();
-		callback.onEvent(LifeCycleState.INITIALIZE,
-				transformerBeanInstance.getBean(), getDescriptor());
+		callback.onEvent(LifeCycleState.INITIALIZE, transformerBeanInstance.getBean(), getDescriptor());
 
-		OutputColumns outputColumns = transformerBeanInstance.getBean()
-				.getOutputColumns();
+		OutputColumns outputColumns = transformerBeanInstance.getBean().getOutputColumns();
 		if (outputColumns == null) {
-			throw new IllegalStateException(
-					"getOutputColumns() returned null on transformer: "
-							+ transformerBeanInstance.getBean());
+			throw new IllegalStateException("getOutputColumns() returned null on transformer: "
+					+ transformerBeanInstance.getBean());
 		}
 		int expectedCols = outputColumns.getColumnCount();
 		int existingCols = _outputColumns.size();
@@ -75,10 +65,8 @@ public class TransformerJobBuilder<T extends Transformer<?>>
 					if (name == null) {
 						name = getDescriptor().getDisplayName();
 					}
-					DataTypeFamily type = getDescriptor()
-							.getOutputDataTypeFamily();
-					_outputColumns.add(new TransformedInputColumn<Object>(name,
-							type, _idGenerator));
+					DataTypeFamily type = getDescriptor().getOutputDataTypeFamily();
+					_outputColumns.add(new TransformedInputColumn<Object>(name, type, _idGenerator));
 				}
 			} else if (colDiff < 0) {
 				for (int i = 0; i < Math.abs(colDiff); i++) {
@@ -95,19 +83,16 @@ public class TransformerJobBuilder<T extends Transformer<?>>
 
 	public TransformerJob toTransformerJob() throws IllegalStateException {
 		if (!isConfigured()) {
-			throw new IllegalStateException(
-					"Transformer job is not correctly configured");
+			throw new IllegalStateException("Transformer job is not correctly configured");
 		}
 
-		return new ImmutableTransformerJob(getDescriptor(),
-				new ImmutableBeanConfiguration(getConfiguredProperties()),
-				getOutputColumns());
+		return new ImmutableTransformerJob(getDescriptor(), new ImmutableBeanConfiguration(getConfiguredProperties()),
+				getOutputColumns(), getRequirement());
 	}
 
 	@Override
 	public String toString() {
-		return "TransformerJobBuilder[transformer="
-				+ getDescriptor().getDisplayName() + ",inputColumns="
+		return "TransformerJobBuilder[transformer=" + getDescriptor().getDisplayName() + ",inputColumns="
 				+ getInputColumns() + "]";
 	}
 

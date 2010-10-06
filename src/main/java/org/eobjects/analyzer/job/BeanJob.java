@@ -10,4 +10,6 @@ public interface BeanJob<E extends BeanDescriptor<?>> {
 	public BeanConfiguration getConfiguration();
 
 	public InputColumn<?>[] getInput();
+	
+	public FilterOutcome getRequirement();
 }

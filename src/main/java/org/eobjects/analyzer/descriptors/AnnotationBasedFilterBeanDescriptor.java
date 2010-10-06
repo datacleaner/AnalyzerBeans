@@ -60,9 +60,14 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 	}
 
 	@Override
-	public Set<String> getCategoryNames() {
+	public EnumSet<C> getCategories() {
 		Class<C> categoryEnum = getCategoryEnum();
-		EnumSet<C> enumSet = EnumSet.allOf(categoryEnum);
+		return EnumSet.allOf(categoryEnum);
+	}
+
+	@Override
+	public Set<String> getCategoryNames() {
+		EnumSet<C> enumSet = getCategories();
 		Set<String> result = new HashSet<String>();
 		for (Enum<C> category : enumSet) {
 			result.add(category.name());

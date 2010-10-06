@@ -4,6 +4,8 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
+ * Defines an abstract descriptor for beans that support configured properties,
+ * provided properties, initialize methods and close methods.
  * 
  * @author Kasper Sørensen
  * 

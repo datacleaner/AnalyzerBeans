@@ -8,22 +8,14 @@
 		</columns>
 	</source>
 
-	<filtering>
+	<transformation>
+
 		<filter>
 			<descriptor ref="Not null" />
 			<input ref="col_name" />
 			<outcome id="col_name_not_null" category="VALID" />
 		</filter>
 
-		<filter requires="col_name_not_null">
-			<descriptor ref="Single word" />
-			<input ref="col_name" />
-			<outcome id="col_name_single_string" category="VALID" />
-			<outcome id="col_name_multi_string" category="INVALID" />
-		</filter>
-	</filtering>
-
-	<transformation>
 		<transformer requires="col_name_multi_string">
 			<descriptor ref="Name standardizer" />
 			<input ref="col_name" />
@@ -32,6 +24,13 @@
 			<output id="col_middlename" />
 			<output id="col_titulation" />
 		</transformer>
+
+		<filter requires="col_name_not_null">
+			<descriptor ref="Single word" />
+			<input ref="col_name" />
+			<outcome id="col_name_single_string" category="VALID" />
+			<outcome id="col_name_multi_string" category="INVALID" />
+		</filter>
 
 		<transformer requires="[col_name_single_string,col_name_multi_string]">
 			<descriptor ref="Coalesce strings" />

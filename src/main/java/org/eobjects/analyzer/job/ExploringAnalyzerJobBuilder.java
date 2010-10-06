@@ -3,10 +3,9 @@ package org.eobjects.analyzer.job;
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
-public class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>>
-		extends
-		AbstractBeanJobBuilder<AnalyzerBeanDescriptor<A>, A, ExploringAnalyzerJobBuilder<A>>
-		implements AnalyzerJobBuilder<A> {
+public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> extends
+		AbstractBeanJobBuilder<AnalyzerBeanDescriptor<A>, A, ExploringAnalyzerJobBuilder<A>> implements
+		AnalyzerJobBuilder<A> {
 
 	public ExploringAnalyzerJobBuilder(AnalyzerBeanDescriptor<A> descriptor) {
 		super(descriptor, ExploringAnalyzerJobBuilder.class);
@@ -15,17 +14,15 @@ public class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>>
 	@Override
 	public AnalyzerJob toAnalyzerJob() throws IllegalStateException {
 		if (!isConfigured()) {
-			throw new IllegalStateException(
-					"Exploring Analyzer job is not correctly configured");
+			throw new IllegalStateException("Exploring Analyzer job is not correctly configured");
 		}
 
-		return new ImmutableAnalyzerJob(getDescriptor(),
-				new ImmutableBeanConfiguration(getConfiguredProperties()));
+		return new ImmutableAnalyzerJob(getDescriptor(), new ImmutableBeanConfiguration(getConfiguredProperties()),
+				getRequirement());
 	}
 
 	@Override
 	public String toString() {
-		return "ExploringAnalyzerJobBuilder[analyzer="
-				+ getDescriptor().getDisplayName() + "]";
+		return "ExploringAnalyzerJobBuilder[analyzer=" + getDescriptor().getDisplayName() + "]";
 	}
 }

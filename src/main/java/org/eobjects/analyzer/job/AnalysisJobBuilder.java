@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
@@ -17,6 +18,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
 import dk.eobjects.metamodel.schema.Column;
@@ -26,21 +28,19 @@ public class AnalysisJobBuilder {
 	private AnalyzerBeansConfiguration _configuration;
 	private DataContextProvider _dataContextProvider;
 	private List<MetaModelInputColumn> _sourceColumns = new ArrayList<MetaModelInputColumn>();
+	private List<FilterJobBuilder<?, ?>> _filterJobBuilders = new ArrayList<FilterJobBuilder<?, ?>>();
 	private List<TransformerJobBuilder<?>> _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
 	private List<AnalyzerJobBuilder<?>> _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder<?>>();
-	private IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator(
-			"trans");
+	private IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
 
 	public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;
 	}
 
 	public AnalysisJobBuilder setDatastore(String datastoreName) {
-		Datastore datastore = _configuration.getDatastoreCatalog()
-				.getDatastore(datastoreName);
+		Datastore datastore = _configuration.getDatastoreCatalog().getDatastore(datastoreName);
 		if (datastore == null) {
-			throw new IllegalArgumentException("No such datastore: "
-					+ datastoreName);
+			throw new IllegalArgumentException("No such datastore: " + datastoreName);
 		}
 		return setDatastore(datastore);
 	}
@@ -49,16 +49,13 @@ public class AnalysisJobBuilder {
 		if (datastore == null) {
 			throw new IllegalArgumentException("Datastore cannot be null");
 		}
-		DataContextProvider dataContextProvider = datastore
-				.getDataContextProvider();
+		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
 		return setDataContextProvider(dataContextProvider);
 	}
 
-	public AnalysisJobBuilder setDataContextProvider(
-			DataContextProvider dataContextProvider) {
+	public AnalysisJobBuilder setDataContextProvider(DataContextProvider dataContextProvider) {
 		if (dataContextProvider == null) {
-			throw new IllegalArgumentException(
-					"DataContextProvider cannot be null");
+			throw new IllegalArgumentException("DataContextProvider cannot be null");
 		}
 		_dataContextProvider = dataContextProvider;
 		return this;
@@ -87,8 +84,7 @@ public class AnalysisJobBuilder {
 		return this;
 	}
 
-	public AnalysisJobBuilder addSourceColumns(
-			MetaModelInputColumn... inputColumns) {
+	public AnalysisJobBuilder addSourceColumns(MetaModelInputColumn... inputColumns) {
 		for (MetaModelInputColumn metaModelInputColumn : inputColumns) {
 			addSourceColumn(metaModelInputColumn);
 		}
@@ -100,10 +96,9 @@ public class AnalysisJobBuilder {
 		return removeSourceColumn(inputColumn);
 	}
 
-	public AnalysisJobBuilder removeSourceColumn(
-			MetaModelInputColumn inputColumn) {
+	public AnalysisJobBuilder removeSourceColumn(MetaModelInputColumn inputColumn) {
 		_sourceColumns.remove(inputColumn);
-		// TODO: Notify consumers
+		// TODO: Notify source column consumers
 		return this;
 	}
 
@@ -111,14 +106,11 @@ public class AnalysisJobBuilder {
 		return Collections.unmodifiableList(_sourceColumns);
 	}
 
-	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(
-			Class<T> transformerClass) {
-		TransformerBeanDescriptor<T> descriptor = _configuration
-				.getDescriptorProvider().getTransformerBeanDescriptorForClass(
-						transformerClass);
+	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(Class<T> transformerClass) {
+		TransformerBeanDescriptor<T> descriptor = _configuration.getDescriptorProvider()
+				.getTransformerBeanDescriptorForClass(transformerClass);
 		if (descriptor == null) {
-			throw new IllegalArgumentException("No descriptor found for: "
-					+ transformerClass);
+			throw new IllegalArgumentException("No descriptor found for: " + transformerClass);
 		}
 		return addTransformer(descriptor);
 	}
@@ -127,16 +119,28 @@ public class AnalysisJobBuilder {
 		return Collections.unmodifiableList(_transformerJobBuilders);
 	}
 
-	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(
-			TransformerBeanDescriptor<T> descriptor) {
-		TransformerJobBuilder<T> transformerJobBuilder = new TransformerJobBuilder<T>(
-				descriptor, transformedColumnIdGenerator);
+	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor) {
+		TransformerJobBuilder<T> transformerJobBuilder = new TransformerJobBuilder<T>(descriptor,
+				transformedColumnIdGenerator);
 		_transformerJobBuilders.add(transformerJobBuilder);
 		return transformerJobBuilder;
 	}
 
 	public AnalysisJobBuilder removeTransformer(TransformerJobBuilder<?> tjb) {
 		_transformerJobBuilders.remove(tjb);
+		// TODO: Notify transformed column consumers
+		return this;
+	}
+
+	public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterBeanDescriptor<F, C> descriptor) {
+		FilterJobBuilder<F, C> fjb = new FilterJobBuilder<F, C>(descriptor);
+		_filterJobBuilders.add(fjb);
+		return fjb;
+	}
+
+	public AnalysisJobBuilder removeFilter(FilterJobBuilder<?, ?> fjb) {
+		_filterJobBuilders.remove(fjb);
+		// TODO: Notify outcome consumers
 		return this;
 	}
 
@@ -144,44 +148,35 @@ public class AnalysisJobBuilder {
 		return Collections.unmodifiableList(_analyzerJobBuilders);
 	}
 
-	public <A extends ExploringAnalyzer<?>> ExploringAnalyzerJobBuilder<A> addExploringAnalyzer(
-			Class<A> analyzerClass) {
-		AnalyzerBeanDescriptor<A> descriptor = _configuration
-				.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
-						analyzerClass);
+	public <A extends ExploringAnalyzer<?>> ExploringAnalyzerJobBuilder<A> addExploringAnalyzer(Class<A> analyzerClass) {
+		AnalyzerBeanDescriptor<A> descriptor = _configuration.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
+				analyzerClass);
 		if (descriptor == null) {
-			throw new IllegalArgumentException("No descriptor found for: "
-					+ analyzerClass);
+			throw new IllegalArgumentException("No descriptor found for: " + analyzerClass);
 		}
-		ExploringAnalyzerJobBuilder<A> analyzerJobBuilder = new ExploringAnalyzerJobBuilder<A>(
-				descriptor);
+		ExploringAnalyzerJobBuilder<A> analyzerJobBuilder = new ExploringAnalyzerJobBuilder<A>(descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 		return analyzerJobBuilder;
 	}
 
 	public <A extends RowProcessingAnalyzer<?>> RowProcessingAnalyzerJobBuilder<A> addRowProcessingAnalyzer(
 			Class<A> analyzerClass) {
-		AnalyzerBeanDescriptor<A> descriptor = _configuration
-				.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
-						analyzerClass);
+		AnalyzerBeanDescriptor<A> descriptor = _configuration.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
+				analyzerClass);
 		if (descriptor == null) {
-			throw new IllegalArgumentException("No descriptor found for: "
-					+ analyzerClass);
+			throw new IllegalArgumentException("No descriptor found for: " + analyzerClass);
 		}
-		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(
-				descriptor);
+		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 		return analyzerJobBuilder;
 	}
 
-	public AnalysisJobBuilder removeAnalyzer(
-			RowProcessingAnalyzerJobBuilder<?> ajb) {
+	public AnalysisJobBuilder removeAnalyzer(RowProcessingAnalyzerJobBuilder<?> ajb) {
 		_analyzerJobBuilders.remove(ajb);
 		return this;
 	}
 
-	public Collection<InputColumn<?>> getAvailableInputColumns(
-			DataTypeFamily dataTypeFamily) {
+	public Collection<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily) {
 		if (dataTypeFamily == null) {
 			dataTypeFamily = DataTypeFamily.UNDEFINED;
 		}
@@ -189,18 +184,15 @@ public class AnalysisJobBuilder {
 		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
 		List<MetaModelInputColumn> sourceColumns = getSourceColumns();
 		for (MetaModelInputColumn sourceColumn : sourceColumns) {
-			if (dataTypeFamily == DataTypeFamily.UNDEFINED
-					|| sourceColumn.getDataTypeFamily() == dataTypeFamily) {
+			if (dataTypeFamily == DataTypeFamily.UNDEFINED || sourceColumn.getDataTypeFamily() == dataTypeFamily) {
 				result.add(sourceColumn);
 			}
 		}
 
 		for (TransformerJobBuilder<?> transformerJobBuilder : _transformerJobBuilders) {
-			List<MutableInputColumn<?>> outputColumns = transformerJobBuilder
-					.getOutputColumns();
+			List<MutableInputColumn<?>> outputColumns = transformerJobBuilder.getOutputColumns();
 			for (MutableInputColumn<?> outputColumn : outputColumns) {
-				if (dataTypeFamily == DataTypeFamily.UNDEFINED
-						|| outputColumn.getDataTypeFamily() == dataTypeFamily) {
+				if (dataTypeFamily == DataTypeFamily.UNDEFINED || outputColumn.getDataTypeFamily() == dataTypeFamily) {
 					result.add(outputColumn);
 				}
 			}
@@ -216,6 +208,12 @@ public class AnalysisJobBuilder {
 
 		if (_analyzerJobBuilders.isEmpty()) {
 			return false;
+		}
+
+		for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
+			if (!fjb.isConfigured()) {
+				return false;
+			}
 		}
 
 		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
@@ -235,8 +233,18 @@ public class AnalysisJobBuilder {
 
 	public AnalysisJob toAnalysisJob() throws IllegalStateException {
 		if (!isConfigured()) {
-			throw new IllegalStateException(
-					"Analysis job is not correctly configured");
+			throw new IllegalStateException("Analysis job is not correctly configured");
+		}
+
+		Collection<FilterJob> filterJobs = new LinkedList<FilterJob>();
+		for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
+			try {
+				FilterJob filterJob = fjb.toFilterJob();
+				filterJobs.add(filterJob);
+			} catch (IllegalStateException e) {
+				throw new IllegalStateException("Could not create filter job from builder: " + fjb + ", (" + e.getMessage()
+						+ ")", e);
+			}
 		}
 
 		Collection<TransformerJob> transformerJobs = new LinkedList<TransformerJob>();
@@ -245,9 +253,8 @@ public class AnalysisJobBuilder {
 				TransformerJob transformerJob = tjb.toTransformerJob();
 				transformerJobs.add(transformerJob);
 			} catch (IllegalStateException e) {
-				throw new IllegalStateException(
-						"Could not create transformer job from builder: " + tjb
-								+ ", (" + e.getMessage() + ")", e);
+				throw new IllegalStateException("Could not create transformer job from builder: " + tjb + ", ("
+						+ e.getMessage() + ")", e);
 			}
 		}
 
@@ -257,14 +264,12 @@ public class AnalysisJobBuilder {
 				AnalyzerJob analyzerJob = ajb.toAnalyzerJob();
 				analyzerJobs.add(analyzerJob);
 			} catch (IllegalArgumentException e) {
-				throw new IllegalStateException(
-						"Could not create analyzer job from builder: " + ajb
-								+ ", (" + e.getMessage() + ")", e);
+				throw new IllegalStateException("Could not create analyzer job from builder: " + ajb + ", ("
+						+ e.getMessage() + ")", e);
 			}
 		}
 
-		return new ImmutableAnalysisJob(_dataContextProvider, _sourceColumns,
-				transformerJobs, analyzerJobs);
+		return new ImmutableAnalysisJob(_dataContextProvider, _sourceColumns, filterJobs, transformerJobs, analyzerJobs);
 	}
 
 	public InputColumn<?> getSourceColumnByName(String name) {

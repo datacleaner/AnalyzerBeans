@@ -3,7 +3,7 @@ package org.eobjects.analyzer.job;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
-public class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyzer<?>>
+public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyzer<?>>
 		extends
 		AbstractBeanWithInputColumnsBuilder<AnalyzerBeanDescriptor<A>, A, RowProcessingAnalyzerJobBuilder<A>>
 		implements AnalyzerJobBuilder<A> {
@@ -20,7 +20,8 @@ public class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyzer<?>>
 		}
 
 		return new ImmutableAnalyzerJob(getDescriptor(),
-				new ImmutableBeanConfiguration(getConfiguredProperties()));
+				new ImmutableBeanConfiguration(getConfiguredProperties()),
+				getRequirement());
 	}
 
 	@Override
