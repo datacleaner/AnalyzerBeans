@@ -8,9 +8,11 @@ import java.util.Set;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationFactory;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.JaxbJobFactory;
@@ -32,13 +34,12 @@ import dk.eobjects.metamodel.schema.Table;
 public final class Main {
 
 	public static enum ListType {
-		ANALYZERS, TRANSFORMERS, DATASTORES, SCHEMAS, TABLES, COLUMNS
+		ANALYZERS, TRANSFORMERS, FILTERS, DATASTORES, SCHEMAS, TABLES, COLUMNS
 	}
 
 	private final static Logger logger = LoggerFactory.getLogger(Main.class);
 
-	@Option(name = "-conf", aliases = { "-configuration",
-			"--configuration-file" }, usage = "XML file describing the configuration of AnalyzerBeans", required = true)
+	@Option(name = "-conf", aliases = { "-configuration", "--configuration-file" }, usage = "XML file describing the configuration of AnalyzerBeans", required = true)
 	private File configurationFile;
 
 	@Option(name = "-job", aliases = { "--job-file" }, usage = "An analysis job XML file to execute")
@@ -69,8 +70,7 @@ public final class Main {
 	}
 
 	public void run() {
-		AnalyzerBeansConfiguration configuration = new JaxbConfigurationFactory()
-				.create(configurationFile);
+		AnalyzerBeansConfiguration configuration = new JaxbConfigurationFactory().create(configurationFile);
 		try {
 			if (jobFile != null) {
 				runJob(configuration);
@@ -81,6 +81,9 @@ public final class Main {
 					break;
 				case TRANSFORMERS:
 					printTransformers(configuration);
+					break;
+				case FILTERS:
+					printFilters(configuration);
 					break;
 				case DATASTORES:
 					printDatastores(configuration);
@@ -95,8 +98,7 @@ public final class Main {
 					printColumns(configuration);
 					break;
 				default:
-					throw new IllegalArgumentException("Unknown list type: "
-							+ listType);
+					throw new IllegalArgumentException("Unknown list type: " + listType);
 				}
 			} else {
 				throw new IllegalArgumentException(
@@ -116,8 +118,7 @@ public final class Main {
 		} else if (tableName == null) {
 			System.err.println("You need to specify a table name!");
 		} else {
-			Datastore ds = configuration.getDatastoreCatalog().getDatastore(
-					datastoreName);
+			Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
@@ -151,8 +152,7 @@ public final class Main {
 		if (datastoreName == null) {
 			System.err.println("You need to specify the datastore name!");
 		} else {
-			Datastore ds = configuration.getDatastoreCatalog().getDatastore(
-					datastoreName);
+			Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
@@ -185,13 +185,11 @@ public final class Main {
 		if (datastoreName == null) {
 			System.err.println("You need to specify the datastore name!");
 		} else {
-			Datastore ds = configuration.getDatastoreCatalog().getDatastore(
-					datastoreName);
+			Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
-				String[] schemaNames = ds.getDataContextProvider()
-						.getDataContext().getSchemaNames();
+				String[] schemaNames = ds.getDataContextProvider().getDataContext().getSchemaNames();
 				if (schemaNames == null || schemaNames.length == 0) {
 					System.out.println("No schemas in datastore!");
 				} else {
@@ -206,8 +204,7 @@ public final class Main {
 	}
 
 	private void printDatastores(AnalyzerBeansConfiguration configuration) {
-		String[] datastoreNames = configuration.getDatastoreCatalog()
-				.getDatastoreNames();
+		String[] datastoreNames = configuration.getDatastoreCatalog().getDatastoreNames();
 		if (datastoreNames == null || datastoreNames.length == 0) {
 			System.out.println("No datastores configured!");
 		} else {
@@ -220,20 +217,18 @@ public final class Main {
 	}
 
 	protected void runJob(AnalyzerBeansConfiguration configuration) {
-		AnalysisJobBuilder analysisJobBuilder = new JaxbJobFactory(
-				configuration).create(jobFile);
+		AnalysisJobBuilder analysisJobBuilder = new JaxbJobFactory(configuration).create(jobFile);
 
-		List<AnalyzerResult> results = new AnalysisRunnerImpl(configuration)
-				.run(analysisJobBuilder.toAnalysisJob()).getResults();
+		List<AnalyzerResult> results = new AnalysisRunnerImpl(configuration).run(analysisJobBuilder.toAnalysisJob())
+				.getResults();
 
-		RendererFactory rendererFinder = new RendererFactory(
-				configuration.getDescriptorProvider());
+		RendererFactory rendererFinder = new RendererFactory(configuration.getDescriptorProvider());
 
 		for (AnalyzerResult result : results) {
 			System.out.println("\nRESULT:");
 
-			Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFinder
-					.getRenderer(result, TextRenderingFormat.class);
+			Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFinder.getRenderer(result,
+					TextRenderingFormat.class);
 			CharSequence renderedResult = renderer.render(result);
 
 			System.out.println(renderedResult);
@@ -241,8 +236,8 @@ public final class Main {
 	}
 
 	protected void printAnalyzers(AnalyzerBeansConfiguration configuration) {
-		Collection<AnalyzerBeanDescriptor<?>> descriptors = configuration
-				.getDescriptorProvider().getAnalyzerBeanDescriptors();
+		Collection<AnalyzerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
+				.getAnalyzerBeanDescriptors();
 		if (descriptors == null || descriptors.isEmpty()) {
 			System.out.println("No analyzers configured!");
 		} else {
@@ -253,8 +248,8 @@ public final class Main {
 	}
 
 	private void printTransformers(AnalyzerBeansConfiguration configuration) {
-		Collection<TransformerBeanDescriptor<?>> descriptors = configuration
-				.getDescriptorProvider().getTransformerBeanDescriptors();
+		Collection<TransformerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
+				.getTransformerBeanDescriptors();
 		if (descriptors == null || descriptors.isEmpty()) {
 			System.out.println("No transformers configured!");
 		} else {
@@ -264,58 +259,63 @@ public final class Main {
 		}
 	}
 
-	protected void printBeanDescriptors(
-			Collection<? extends BeanDescriptor<?>> descriptors) {
+	private void printFilters(AnalyzerBeansConfiguration configuration) {
+		Collection<FilterBeanDescriptor<?, ?>> descriptors = configuration.getDescriptorProvider()
+				.getFilterBeanDescriptors();
+		if (descriptors == null || descriptors.isEmpty()) {
+			System.out.println("No filters configured!");
+		} else {
+			System.out.println("Filters:");
+			System.out.println("--------");
+			printBeanDescriptors(descriptors);
+		}
+	}
+
+	protected void printBeanDescriptors(Collection<? extends BeanDescriptor<?>> descriptors) {
 		for (BeanDescriptor<?> descriptor : descriptors) {
 			System.out.println("name: " + descriptor.getDisplayName());
-			Set<ConfiguredPropertyDescriptor> propertiesForInput = descriptor
-					.getConfiguredPropertiesForInput();
+			Set<ConfiguredPropertyDescriptor> propertiesForInput = descriptor.getConfiguredPropertiesForInput();
 			if (propertiesForInput.size() == 1) {
-				ConfiguredPropertyDescriptor propertyForInput = propertiesForInput
-						.iterator().next();
+				ConfiguredPropertyDescriptor propertyForInput = propertiesForInput.iterator().next();
 				if (propertyForInput != null) {
 					if (propertyForInput.isArray()) {
-						System.out
-								.println(" - Consumes multiple input columns (type: "
-										+ propertyForInput
-												.getInputColumnDataTypeFamily()
-										+ ")");
+						System.out.println(" - Consumes multiple input columns (type: "
+								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
 					} else {
-						System.out
-								.println(" - Consumes a single input column (type: "
-										+ propertyForInput
-												.getInputColumnDataTypeFamily()
-										+ ")");
+						System.out.println(" - Consumes a single input column (type: "
+								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
 					}
 				}
 			} else {
-				System.out.println(" - Consumes " + propertiesForInput.size()
-						+ " named inputs");
+				System.out.println(" - Consumes " + propertiesForInput.size() + " named inputs");
 				for (ConfiguredPropertyDescriptor propertyForInput : propertiesForInput) {
 					if (propertyForInput.isArray()) {
-						System.out.println("   Input columns: "
-								+ propertyForInput.getName()
-								+ " (type: "
-								+ propertyForInput
-										.getInputColumnDataTypeFamily() + ")");
+						System.out.println("   Input columns: " + propertyForInput.getName() + " (type: "
+								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
 					} else {
-						System.out.println("   Input column: "
-								+ propertyForInput.getName()
-								+ " (type: "
-								+ propertyForInput
-										.getInputColumnDataTypeFamily() + ")");
+						System.out.println("   Input column: " + propertyForInput.getName() + " (type: "
+								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
 					}
 				}
 			}
 
-			Set<ConfiguredPropertyDescriptor> properties = descriptor
-					.getConfiguredProperties();
+			Set<ConfiguredPropertyDescriptor> properties = descriptor.getConfiguredProperties();
 			for (ConfiguredPropertyDescriptor property : properties) {
 				if (!property.isInputColumn()) {
-					System.out.println(" - Property: name="
-							+ property.getName() + ", type="
-							+ property.getBaseType().getSimpleName()
-							+ ", required=" + property.isRequired());
+					System.out.println(" - Property: name=" + property.getName() + ", type="
+							+ property.getBaseType().getSimpleName() + ", required=" + property.isRequired());
+				}
+			}
+
+			if (descriptor instanceof TransformerBeanDescriptor<?>) {
+				DataTypeFamily dataTypeFamily = ((TransformerBeanDescriptor<?>) descriptor).getOutputDataTypeFamily();
+				System.out.println(" - Output type is: " + dataTypeFamily);
+			}
+
+			if (descriptor instanceof FilterBeanDescriptor<?, ?>) {
+				Set<String> categoryNames = ((FilterBeanDescriptor<?, ?>) descriptor).getCategoryNames();
+				for (String categoryName : categoryNames) {
+					System.out.println(" - Outcome category: " + categoryName);
 				}
 			}
 		}
@@ -323,12 +323,8 @@ public final class Main {
 
 	@Override
 	public String toString() {
-		return "Main[configurationFile="
-				+ (configurationFile == null ? "null" : configurationFile
-						.getName()) + ", jobFile="
-				+ (jobFile == null ? "null" : jobFile.getName())
-				+ ", listType=" + listType + ", datastoreName=" + datastoreName
-				+ ", schemaName=" + schemaName + ", tableName=" + tableName
-				+ "]";
+		return "Main[configurationFile=" + (configurationFile == null ? "null" : configurationFile.getName()) + ", jobFile="
+				+ (jobFile == null ? "null" : jobFile.getName()) + ", listType=" + listType + ", datastoreName="
+				+ datastoreName + ", schemaName=" + schemaName + ", tableName=" + tableName + "]";
 	}
 }

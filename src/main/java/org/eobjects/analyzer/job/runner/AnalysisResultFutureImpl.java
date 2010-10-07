@@ -82,7 +82,7 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	@Override
 	public List<Throwable> getErrors() {
 		if (_errors == null) {
-			return null;
+			return Collections.emptyList();
 		}
 		return Collections.unmodifiableList(_errors);
 	}
@@ -95,7 +95,7 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 			}
 			return JobStatus.ERRORNOUS;
 		}
-		if (_errors.isEmpty()) {
+		if (_errors == null) {
 			return JobStatus.NOT_FINISHED;
 		}
 		return JobStatus.ERRORNOUS;
