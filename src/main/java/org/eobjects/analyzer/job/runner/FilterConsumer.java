@@ -50,4 +50,8 @@ final class FilterConsumer implements RowProcessingConsumer {
 		return _filterJob.getRequirement();
 	}
 
+	@Override
+	public String toString() {
+		return "FilterConsumer[" + _filterBeanInstance + "]";
+	}
 }

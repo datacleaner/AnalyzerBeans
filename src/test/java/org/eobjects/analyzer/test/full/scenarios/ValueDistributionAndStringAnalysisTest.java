@@ -8,6 +8,7 @@ import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
@@ -40,28 +41,23 @@ import dk.eobjects.metamodel.schema.Table;
 public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 	public void testScenario() throws Exception {
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
-				.scanPackage("org.eobjects.analyzer.beans", true);
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
+				"org.eobjects.analyzer.beans", true);
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
 		TaskRunner taskRunner = new MultiThreadedTaskRunner(3);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
-		ReferenceDataCatalog referenceDataCatalog = TestHelper
-				.createReferenceDataCatalog();
+		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
 
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(
-				datastoreCatalog, referenceDataCatalog, descriptorProvider,
-				taskRunner, collectionProvider);
+		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
+				referenceDataCatalog, descriptorProvider, taskRunner, collectionProvider);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		DataContext dc = DataContextFactory
-				.createJdbcDataContext(getTestDbConnection());
+		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
 
-		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
-				configuration);
-		analysisJobBuilder
-				.setDataContextProvider(new SingleDataContextProvider(dc));
+		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
+		analysisJobBuilder.setDataContextProvider(new SingleDataContextProvider(dc, new JdbcDatastore("foobar", dc)));
 
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
@@ -74,18 +70,14 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
 					.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
 			valueDistribuitionJobBuilder.addInputColumn(inputColumn);
-			valueDistribuitionJobBuilder.setConfiguredProperty(
-					"Record unique values", false);
-			valueDistribuitionJobBuilder.setConfiguredProperty(
-					"Top n most frequent values", null);
-			valueDistribuitionJobBuilder.setConfiguredProperty(
-					"Bottom n most frequent values", null);
+			valueDistribuitionJobBuilder.setConfiguredProperty("Record unique values", false);
+			valueDistribuitionJobBuilder.setConfiguredProperty("Top n most frequent values", null);
+			valueDistribuitionJobBuilder.setConfiguredProperty("Bottom n most frequent values", null);
 		}
 
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder
 				.addRowProcessingAnalyzer(StringAnalyzer.class);
-		stringAnalyzerJob.addInputColumns(analysisJobBuilder
-				.getAvailableInputColumns(DataTypeFamily.STRING));
+		stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING));
 
 		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
 
@@ -105,18 +97,15 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		int valueDistributionResults = 0;
 
 		for (AnalyzerResult result : results) {
-			if (StringAnalyzer.class.getName().equals(
-					result.getProducerClass().getName())) {
+			if (StringAnalyzer.class.getName().equals(result.getProducerClass().getName())) {
 				stringAnalyzerResults++;
 
 				assertTrue(result instanceof CrosstabResult);
 				CrosstabResult cr = (CrosstabResult) result;
 				Crosstab<?> crosstab = cr.getCrosstab();
-				assertEquals("[Column, Measure]",
-						Arrays.toString(crosstab.getDimensionNames()));
-				assertEquals(
-						"[LASTNAME, FIRSTNAME, EXTENSION, EMAIL, OFFICECODE, JOBTITLE]",
-						crosstab.getDimension(0).getCategories().toString());
+				assertEquals("[Column, Measure]", Arrays.toString(crosstab.getDimensionNames()));
+				assertEquals("[LASTNAME, FIRSTNAME, EXTENSION, EMAIL, OFFICECODE, JOBTITLE]", crosstab.getDimension(0)
+						.getCategories().toString());
 				assertEquals(
 						"[Char count, Max chars, Min chars, Avg chars, Max white spaces, Min white spaces, Avg white spaces, Uppercase chars, Lowercase chars, Non-letter chars, Word count, Max words, Min words]",
 						crosstab.getDimension(1).getCategories().toString());
@@ -125,8 +114,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				nav.where("Measure", "Char count");
 				assertEquals("655", nav.get().toString());
 			} else {
-				assertEquals(ValueDistributionAnalyzer.class.getName(), result
-						.getProducerClass().getName());
+				assertEquals(ValueDistributionAnalyzer.class.getName(), result.getProducerClass().getName());
 				assertTrue(result instanceof ValueDistributionResult);
 
 				valueDistributionResults++;
@@ -152,14 +140,11 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		assertNotNull(jobTitleResult);
 		assertNotNull(lastnameResult);
 
-		assertEquals("Patterson", lastnameResult.getTopValues()
-				.getValueCounts().get(0).getValue());
-		assertEquals(3, lastnameResult.getTopValues().getValueCounts().get(0)
-				.getCount());
+		assertEquals("Patterson", lastnameResult.getTopValues().getValueCounts().get(0).getValue());
+		assertEquals(3, lastnameResult.getTopValues().getValueCounts().get(0).getCount());
 		assertEquals(16, lastnameResult.getUniqueCount());
 		assertEquals(0, lastnameResult.getNullCount());
 
-		assertEquals("Sales Rep", jobTitleResult.getTopValues()
-				.getValueCounts().get(0).getValue());
+		assertEquals("Sales Rep", jobTitleResult.getTopValues().getValueCounts().get(0).getValue());
 	}
 }

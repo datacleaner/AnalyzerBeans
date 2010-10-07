@@ -20,8 +20,8 @@ public abstract class AbstractBeanInstance<E> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final BeanDescriptor<?> descriptor;
-	private final E bean;
+	private final BeanDescriptor<?> _descriptor;
+	private final E _bean;
 	private final List<LifeCycleCallback> assignConfiguredCallbacks = new LinkedList<LifeCycleCallback>();
 	private final List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
 	private final List<LifeCycleCallback> initializeCallbacks = new LinkedList<LifeCycleCallback>();
@@ -33,24 +33,24 @@ public abstract class AbstractBeanInstance<E> {
 			throw new IllegalArgumentException("Descriptor cannot be null");
 		}
 		try {
-			this.bean = (E) descriptor.getBeanClass().newInstance();
+			this._bean = (E) descriptor.getBeanClass().newInstance();
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Could not instantiate analyzer bean type: " + descriptor.getBeanClass(), e);
 		}
-		this.descriptor = descriptor;
+		this._descriptor = descriptor;
 	}
 
 	public E getBean() {
-		return bean;
+		return _bean;
 	}
 
 	public BeanDescriptor<?> getDescriptor() {
-		return descriptor;
+		return _descriptor;
 	}
 
 	public void assignConfigured() {
 		if (logger.isInfoEnabled()) {
-			logger.info("assignConfigured (" + bean + ")");
+			logger.info("assignConfigured (" + _bean + ")");
 		}
 		runCallbacks(assignConfiguredCallbacks, LifeCycleState.ASSIGN_CONFIGURED);
 	}
@@ -61,7 +61,7 @@ public abstract class AbstractBeanInstance<E> {
 
 	public void assignProvided() {
 		if (logger.isInfoEnabled()) {
-			logger.info("assignProvided (" + bean + ")");
+			logger.info("assignProvided (" + _bean + ")");
 		}
 		runCallbacks(assignProvidedCallbacks, LifeCycleState.ASSIGN_PROVIDED);
 	}
@@ -72,7 +72,7 @@ public abstract class AbstractBeanInstance<E> {
 
 	public void initialize() {
 		if (logger.isInfoEnabled()) {
-			logger.info("initialize (" + bean + ")");
+			logger.info("initialize (" + _bean + ")");
 		}
 		runCallbacks(initializeCallbacks, LifeCycleState.INITIALIZE);
 	}
@@ -83,7 +83,7 @@ public abstract class AbstractBeanInstance<E> {
 
 	public void close() {
 		if (logger.isInfoEnabled()) {
-			logger.info("close (" + bean + ")");
+			logger.info("close (" + _bean + ")");
 		}
 		runCallbacks(closeCallbacks, LifeCycleState.CLOSE);
 	}
@@ -95,12 +95,12 @@ public abstract class AbstractBeanInstance<E> {
 	private void runCallbacks(List<LifeCycleCallback> callbacks, LifeCycleState state) {
 		logger.debug("running {} callbacks: {}", callbacks.size(), callbacks);
 		for (LifeCycleCallback lifeCycleCallback : callbacks) {
-			lifeCycleCallback.onEvent(state, bean, descriptor);
+			lifeCycleCallback.onEvent(state, _bean, _descriptor);
 		}
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[descriptor=" + descriptor + "]";
+		return getClass().getSimpleName() + "[descriptor=" + _descriptor + ",bean=" + _bean + "]";
 	}
 }

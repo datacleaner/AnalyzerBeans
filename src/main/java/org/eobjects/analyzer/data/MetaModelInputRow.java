@@ -19,8 +19,10 @@ public final class MetaModelInputRow implements InputRow {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E> E getValue(InputColumn<E> column) {
-		MetaModelInputColumn metaModelInputColumn = (MetaModelInputColumn) column;
-		Column physicalColumn = metaModelInputColumn.getPhysicalColumn();
+		if (!column.isPhysicalColumn()) {
+			return null;
+		}
+		Column physicalColumn = column.getPhysicalColumn();
 		Object value = _row.getValue(physicalColumn);
 
 		DataTypeFamily dataTypeFamily = column.getDataTypeFamily();

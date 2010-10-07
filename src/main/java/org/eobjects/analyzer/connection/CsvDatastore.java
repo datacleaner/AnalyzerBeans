@@ -6,7 +6,7 @@ import java.io.IOException;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
-public class CsvDatastore implements Datastore {
+public final class CsvDatastore implements Datastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -19,8 +19,7 @@ public class CsvDatastore implements Datastore {
 		this(name, filename, null, null);
 	}
 
-	public CsvDatastore(String name, String filename, Character quoteChar,
-			Character separatorChar) {
+	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar) {
 		_name = name;
 		_filename = filename;
 		_quoteChar = quoteChar;
@@ -40,17 +39,13 @@ public class CsvDatastore implements Datastore {
 	public DataContextProvider getDataContextProvider() {
 		DataContext dataContext;
 		if (_quoteChar == null && _separatorChar == null) {
-			dataContext = DataContextFactory.createCsvDataContext(new File(
-					_filename));
+			dataContext = DataContextFactory.createCsvDataContext(new File(_filename));
 		} else {
-			char separatorChar = _separatorChar == null ? DataContextFactory.DEFAULT_CSV_SEPARATOR_CHAR
-					: _separatorChar;
-			char quoteChar = _quoteChar == null ? DataContextFactory.DEFAULT_CSV_QUOTE_CHAR
-					: _quoteChar;
-			dataContext = DataContextFactory.createCsvDataContext(new File(
-					_filename), separatorChar, quoteChar, false);
+			char separatorChar = _separatorChar == null ? DataContextFactory.DEFAULT_CSV_SEPARATOR_CHAR : _separatorChar;
+			char quoteChar = _quoteChar == null ? DataContextFactory.DEFAULT_CSV_QUOTE_CHAR : _quoteChar;
+			dataContext = DataContextFactory.createCsvDataContext(new File(_filename), separatorChar, quoteChar, false);
 		}
-		return new SingleDataContextProvider(dataContext);
+		return new SingleDataContextProvider(dataContext, this);
 	}
 
 }

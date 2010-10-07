@@ -7,6 +7,7 @@ import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -37,28 +38,23 @@ import dk.eobjects.metamodel.schema.Table;
 public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 
 	public void testScenario() throws Exception {
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
-				.scanPackage("org.eobjects.analyzer.beans", true);
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
+				"org.eobjects.analyzer.beans", true);
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
 		TaskRunner taskRunner = new MultiThreadedTaskRunner(3);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
-		ReferenceDataCatalog referenceDataCatalog = TestHelper
-				.createReferenceDataCatalog();
+		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
 
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(
-				datastoreCatalog, referenceDataCatalog, descriptorProvider,
-				taskRunner, collectionProvider);
+		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
+				referenceDataCatalog, descriptorProvider, taskRunner, collectionProvider);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		DataContext dc = DataContextFactory
-				.createJdbcDataContext(getTestDbConnection());
+		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
 
-		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
-				configuration);
-		analysisJobBuilder
-				.setDataContextProvider(new SingleDataContextProvider(dc));
+		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
+		analysisJobBuilder.setDataContextProvider(new SingleDataContextProvider(dc, new JdbcDatastore("foobar", dc)));
 
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
@@ -70,11 +66,9 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 
 		TransformerJobBuilder<TokenizerTransformer> transformerJobBuilder = analysisJobBuilder
 				.addTransformer(TokenizerTransformer.class);
-		transformerJobBuilder.addInputColumn(analysisJobBuilder
-				.getSourceColumns().get(0));
+		transformerJobBuilder.addInputColumn(analysisJobBuilder.getSourceColumns().get(0));
 		transformerJobBuilder.setConfiguredProperty("Number of tokens", 4);
-		List<MutableInputColumn<?>> transformerOutput = transformerJobBuilder
-				.getOutputColumns();
+		List<MutableInputColumn<?>> transformerOutput = transformerJobBuilder.getOutputColumns();
 		assertEquals(4, transformerOutput.size());
 
 		transformerOutput.get(0).setName("first word");
@@ -86,12 +80,9 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
 					.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
 			valueDistribuitionJobBuilder.addInputColumn(inputColumn);
-			valueDistribuitionJobBuilder.setConfiguredProperty(
-					"Record unique values", true);
-			valueDistribuitionJobBuilder.setConfiguredProperty(
-					"Top n most frequent values", null);
-			valueDistribuitionJobBuilder.setConfiguredProperty(
-					"Bottom n most frequent values", null);
+			valueDistribuitionJobBuilder.setConfiguredProperty("Record unique values", true);
+			valueDistribuitionJobBuilder.setConfiguredProperty("Top n most frequent values", null);
+			valueDistribuitionJobBuilder.setConfiguredProperty("Bottom n most frequent values", null);
 		}
 
 		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
@@ -110,29 +101,24 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 		for (AnalyzerResult analyzerResult : results) {
 			ValueDistributionResult result = (ValueDistributionResult) analyzerResult;
 			if ("first word".equals(result.getColumnName())) {
-				assertEquals("ValueCountList[[[Sales->19], [VP->2]]]", result
-						.getTopValues().toString());
+				assertEquals("ValueCountList[[[Sales->19], [VP->2]]]", result.getTopValues().toString());
 				assertNull(result.getBottomValues());
 				assertEquals(0, result.getNullCount());
 				assertEquals(2, result.getUniqueCount());
 			} else if ("second word".equals(result.getColumnName())) {
-				assertEquals("ValueCountList[[[Rep->17], [Manager->3]]]",
-						result.getTopValues().toString());
+				assertEquals("ValueCountList[[[Rep->17], [Manager->3]]]", result.getTopValues().toString());
 				assertNull(result.getBottomValues());
 				assertEquals(1, result.getNullCount());
 				assertEquals(2, result.getUniqueCount());
 			} else if ("third words".equals(result.getColumnName())) {
-				assertEquals("ValueCountList[[]]", result.getTopValues()
-						.toString());
+				assertEquals("ValueCountList[[]]", result.getTopValues().toString());
 				assertNull(result.getBottomValues());
 				assertEquals(20, result.getNullCount());
 
 				assertEquals(3, result.getUniqueCount());
-				assertEquals("[(EMEA), (JAPAN,, (NA)]", result
-						.getUniqueValues().toString());
+				assertEquals("[(EMEA), (JAPAN,, (NA)]", result.getUniqueValues().toString());
 			} else if ("fourth words".equals(result.getColumnName())) {
-				assertEquals("ValueCountList[[]]", result.getTopValues()
-						.toString());
+				assertEquals("ValueCountList[[]]", result.getTopValues().toString());
 				assertNull(result.getBottomValues());
 				assertEquals(22, result.getNullCount());
 

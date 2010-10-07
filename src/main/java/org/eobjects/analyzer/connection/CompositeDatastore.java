@@ -14,8 +14,7 @@ public class CompositeDatastore implements Datastore {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(CompositeDatastore.class);
+	private static final Logger logger = LoggerFactory.getLogger(CompositeDatastore.class);
 
 	private String _name;
 	private List<Datastore> _datastores;
@@ -31,9 +30,7 @@ public class CompositeDatastore implements Datastore {
 			try {
 				datastore.close();
 			} catch (IOException e) {
-				logger.warn(
-						"Error closing child datastore: " + datastore.getName(),
-						e);
+				logger.warn("Error closing child datastore: " + datastore.getName(), e);
 			}
 		}
 	}
@@ -45,15 +42,12 @@ public class CompositeDatastore implements Datastore {
 
 	@Override
 	public DataContextProvider getDataContextProvider() {
-		List<DataContext> dataContexts = new ArrayList<DataContext>(
-				_datastores.size());
+		List<DataContext> dataContexts = new ArrayList<DataContext>(_datastores.size());
 		for (Datastore datastore : _datastores) {
-			DataContext dc = datastore.getDataContextProvider()
-					.getDataContext();
+			DataContext dc = datastore.getDataContextProvider().getDataContext();
 			dataContexts.add(dc);
 		}
-		return new SingleDataContextProvider(
-				DataContextFactory.createCompositeDataContext(dataContexts));
+		return new SingleDataContextProvider(DataContextFactory.createCompositeDataContext(dataContexts), this);
 	}
 
 }

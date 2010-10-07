@@ -9,4 +9,6 @@ public interface DataContextProvider {
 	public DataContext getDataContext();
 
 	public SchemaNavigator getSchemaNavigator();
+
+	public Datastore getDatastore();
 }

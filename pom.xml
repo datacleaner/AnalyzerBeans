@@ -136,6 +136,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-openoffice</artifactId>
+			<version>${metamodel.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-csv</artifactId>
 			<version>${metamodel.version}</version>
 		</dependency>

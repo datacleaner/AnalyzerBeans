@@ -13,7 +13,7 @@ import org.eobjects.analyzer.util.StringUtils;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
-public class JdbcDatastore implements Datastore {
+public final class JdbcDatastore implements Datastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,8 +32,7 @@ public class JdbcDatastore implements Datastore {
 		_driverClass = driverClass;
 	}
 
-	public JdbcDatastore(String name, String url, String driverClass,
-			String username, String password) {
+	public JdbcDatastore(String name, String url, String driverClass, String username, String password) {
 		this(name, url, driverClass);
 		_username = username;
 		_password = password;
@@ -43,6 +42,11 @@ public class JdbcDatastore implements Datastore {
 		_name = name;
 		_datasourceJndiUrl = datasourceJndiUrl;
 
+	}
+
+	public JdbcDatastore(String name, DataContext dc) {
+		_name = name;
+		_dataContextProvider = new SingleDataContextProvider(dc, this);
 	}
 
 	public String getJdbcUrl() {
@@ -79,33 +83,25 @@ public class JdbcDatastore implements Datastore {
 						try {
 							Class.forName(_driverClass);
 						} catch (ClassNotFoundException e) {
-							throw new IllegalStateException(
-									"Could not initialize JDBC driver", e);
+							throw new IllegalStateException("Could not initialize JDBC driver", e);
 						}
 						try {
 							if (_username == null && _password == null) {
-								_connection = DriverManager
-										.getConnection(_jdbcUrl);
+								_connection = DriverManager.getConnection(_jdbcUrl);
 							} else {
-								_connection = DriverManager.getConnection(
-										_jdbcUrl, _username, _password);
+								_connection = DriverManager.getConnection(_jdbcUrl, _username, _password);
 							}
 						} catch (SQLException e) {
-							throw new IllegalStateException(
-									"Could not establish JDBC connection", e);
+							throw new IllegalStateException("Could not establish JDBC connection", e);
 						}
 
-						DataContext dataContext = DataContextFactory
-								.createJdbcDataContext(_connection);
-						_dataContextProvider = new SingleDataContextProvider(
-								dataContext);
+						DataContext dataContext = DataContextFactory.createJdbcDataContext(_connection);
+						_dataContextProvider = new SingleDataContextProvider(dataContext, this);
 					} else {
 						try {
 							InitialContext initialContext = new InitialContext();
-							DataSource dataSource = (DataSource) initialContext
-									.lookup(_datasourceJndiUrl);
-							_dataContextProvider = new DataSourceDataContextProvider(
-									dataSource);
+							DataSource dataSource = (DataSource) initialContext.lookup(_datasourceJndiUrl);
+							_dataContextProvider = new DataSourceDataContextProvider(dataSource, this);
 						} catch (Exception e) {
 							throw new IllegalStateException(e);
 						}

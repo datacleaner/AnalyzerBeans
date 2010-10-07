@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
@@ -38,6 +40,8 @@ import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;
@@ -48,6 +52,8 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
 public final class RowProcessingPublisher {
+
+	private final static Logger logger = LoggerFactory.getLogger(RowProcessingPublisher.class);
 
 	private final Set<Column> _physicalColumns = new HashSet<Column>();
 	private final List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
@@ -82,20 +88,38 @@ public final class RowProcessingPublisher {
 	}
 
 	public void run() {
-		Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
+		final Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
 
-		DataContext dataContext = _dataContextProvider.getDataContext();
-		Query q = dataContext.query().from(_table).select(columnArray).toQuery();
-		SelectItem countAllItem = SelectItem.getCountAllItem();
-		q.select(countAllItem);
-		q.groupBy(columnArray);
+		final DataContext dataContext = _dataContextProvider.getDataContext();
+		final Query q = dataContext.query().from(_table).select(columnArray).toQuery();
 
-		Iterable<RowProcessingConsumer> consumers = createProcessOrderedConsumerList(_consumers);
+		SelectItem countAllItem = null;
+		if (useGroupByOptimization()) {
+			logger.info("Using GROUP BY optimization");
+			q.groupBy(columnArray);
+			countAllItem = SelectItem.getCountAllItem();
+			q.select(countAllItem);
+		}
 
-		DataSet dataSet = dataContext.executeQuery(q);
+		logger.debug("Employing query for row processing: {}", q);
+
+		final Iterable<RowProcessingConsumer> consumers = createProcessOrderedConsumerList(_consumers);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Row processing order ({} consumers):", _consumers.size());
+			int i = 1;
+			for (RowProcessingConsumer rowProcessingConsumer : consumers) {
+				logger.debug(" {}) {}", i, rowProcessingConsumer);
+				i++;
+			}
+		}
+
+		final DataSet dataSet = dataContext.executeQuery(q);
 		while (dataSet.next()) {
 			Row metaModelRow = dataSet.getRow();
-			Number distinctCount = (Number) metaModelRow.getValue(countAllItem);
+			Number distinctCount = 1;
+			if (countAllItem != null) {
+				distinctCount = (Number) metaModelRow.getValue(countAllItem);
+			}
 			FilterOutcomeSinkImpl outcomes = new FilterOutcomeSinkImpl();
 			InputRow inputRow = new MetaModelInputRow(metaModelRow);
 
@@ -113,6 +137,21 @@ public final class RowProcessingPublisher {
 				}
 			}
 		}
+	}
+
+	private boolean useGroupByOptimization() {
+		Datastore datastore = _dataContextProvider.getDatastore();
+		if (datastore == null) {
+			return false;
+		}
+		if (datastore instanceof CsvDatastore) {
+			return false;
+		}
+		if (_physicalColumns.size() > 10) {
+			logger.info("Skipping GROUP BY optimization because of the high column amount");
+			return false;
+		}
+		return true;
 	}
 
 	protected static List<RowProcessingConsumer> createProcessOrderedConsumerList(

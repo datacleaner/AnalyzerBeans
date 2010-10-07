@@ -9,33 +9,35 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
-public class MultiConnectionDataContextProvider implements DataContextProvider {
+public final class MultiConnectionDataContextProvider implements DataContextProvider {
 
-	private DataContext[] dataContexts;
-	private String url;
-	private String user;
-	private String password;
-	private String catalog;
-	private int nextDataContext;
+	private final DataContext[] dataContexts;
+	private final String url;
+	private final String user;
+	private final String password;
+	private final String catalog;
+	private final Datastore datastore;
 	private SchemaNavigator schemaNavigator;
+	private int nextDataContext;
 
-	public MultiConnectionDataContextProvider(int maxConnections, String url) {
-		this(maxConnections, url, null, null);
+	public MultiConnectionDataContextProvider(int maxConnections, String url, Datastore datastore) {
+		this(maxConnections, url, null, null, datastore);
 	}
 
-	public MultiConnectionDataContextProvider(int maxConnections, String url,
-			String user, String password) {
-		this(maxConnections, url, user, password, null);
+	public MultiConnectionDataContextProvider(int maxConnections, String url, String user, String password,
+			Datastore datastore) {
+		this(maxConnections, url, user, password, null, datastore);
 	}
 
-	public MultiConnectionDataContextProvider(int maxConnections, String url,
-			String user, String password, String catalog) {
+	public MultiConnectionDataContextProvider(int maxConnections, String url, String user, String password, String catalog,
+			Datastore datastore) {
 		this.dataContexts = new DataContext[maxConnections];
 		this.url = url;
 		this.user = user;
 		this.password = password;
 		this.catalog = catalog;
 		this.nextDataContext = 0;
+		this.datastore = datastore;
 	}
 
 	@Override
@@ -76,11 +78,21 @@ public class MultiConnectionDataContextProvider implements DataContextProvider {
 
 	@Override
 	public SchemaNavigator getSchemaNavigator() {
-		if (this.schemaNavigator == null) {
-			// Always use the same datacontext for schema navigation purposes
-			schemaNavigator = new SchemaNavigator(getDataContext(0));
+		if (schemaNavigator == null) {
+			synchronized (this) {
+				if (schemaNavigator == null) {
+					// Always use the same datacontext for schema navigation
+					// purposes
+					schemaNavigator = new SchemaNavigator(getDataContext(0));
+				}
+			}
 		}
 		return schemaNavigator;
+	}
+
+	@Override
+	public Datastore getDatastore() {
+		return datastore;
 	}
 
 }
