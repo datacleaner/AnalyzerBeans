@@ -5,16 +5,14 @@ import org.eobjects.analyzer.job.runner.RowProcessingPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RunRowProcessingPublisherTask implements Task {
+public final class RunRowProcessingPublisherTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	
+
 	private final RowProcessingPublisher _rowProcessingPublisher;
 	private final CompletionListener _completionListener;
 
-	public RunRowProcessingPublisherTask(
-			RowProcessingPublisher rowProcessingPublisher,
-			CompletionListener completionListener) {
+	public RunRowProcessingPublisherTask(RowProcessingPublisher rowProcessingPublisher, CompletionListener completionListener) {
 		_rowProcessingPublisher = rowProcessingPublisher;
 		_completionListener = completionListener;
 	}
@@ -22,7 +20,7 @@ public class RunRowProcessingPublisherTask implements Task {
 	@Override
 	public void execute() throws Exception {
 		logger.debug("execute()");
-		
+
 		_rowProcessingPublisher.run();
 		_completionListener.onComplete();
 	}

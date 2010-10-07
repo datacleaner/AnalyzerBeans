@@ -22,9 +22,9 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 	}
 
 	@Override
-	public void run(Task task) {
-		logger.debug("run({})", task);
-		executorService.submit(new TaskRunnable(task));
+	public void run(Task task, ErrorReporter errorReporter) {
+		logger.debug("run({},{})", task, errorReporter);
+		executorService.submit(new TaskRunnable(task, errorReporter));
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 		logger.info("shutdown() called, shutting down executor service");
 		executorService.shutdown();
 	}
-	
+
 	@Override
 	protected void finalize() throws Throwable {
 		shutdown();

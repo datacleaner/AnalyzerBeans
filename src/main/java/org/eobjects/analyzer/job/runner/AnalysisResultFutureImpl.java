@@ -1,26 +1,27 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.eobjects.analyzer.job.concurrent.WaitableCompletionListener;
+import org.eobjects.analyzer.job.concurrent.JobCompletionListener;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(AnalysisResultFutureImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(AnalysisResultFutureImpl.class);
 
 	private Queue<AnalyzerResult> _resultQueue = new LinkedBlockingQueue<AnalyzerResult>();
-	private WaitableCompletionListener _closeCompletionListener;
-	
-	public AnalysisResultFutureImpl(Queue<AnalyzerResult> resultQueue,
-			WaitableCompletionListener closeCompletionListener) {
+	private JobCompletionListener _closeCompletionListener;
+	private List<Throwable> _errors;
+
+	public AnalysisResultFutureImpl(Queue<AnalyzerResult> resultQueue, JobCompletionListener closeCompletionListener) {
 		super();
 		_resultQueue = resultQueue;
 		_closeCompletionListener = closeCompletionListener;
@@ -35,8 +36,7 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	public void await(long timeout, TimeUnit timeUnit) {
 		if (!isDone()) {
 			try {
-				logger.debug("_closeCompletionListener.await({},{})", timeout,
-						timeUnit);
+				logger.debug("_closeCompletionListener.await({},{})", timeout, timeUnit);
 				_closeCompletionListener.await(timeout, timeUnit);
 			} catch (InterruptedException e) {
 				logger.error("Unexpected error while retreiving results", e);
@@ -60,5 +60,30 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	public List<AnalyzerResult> getResults() {
 		await();
 		return new ArrayList<AnalyzerResult>(_resultQueue);
+	}
+
+	@Override
+	public boolean isSuccessful() {
+		await();
+		return getErrors() == null;
+	}
+
+	public void addError(Throwable error) {
+		if (_errors == null) {
+			synchronized (this) {
+				if (_errors == null) {
+					_errors = Collections.synchronizedList(new LinkedList<Throwable>());
+				}
+			}
+		}
+		_errors.add(error);
+	}
+
+	@Override
+	public List<Throwable> getErrors() {
+		if (_errors == null) {
+			return null;
+		}
+		return Collections.unmodifiableList(_errors);
 	}
 }

@@ -21,29 +21,23 @@ public class RunExplorerCallbackTest extends TestCase {
 	}
 
 	public void testOnEvent() throws Exception {
-		DataContextProvider dataContextProvider = EasyMock
-				.createMock(DataContextProvider.class);
-		ExploringAnalyzer<?> analyzer = EasyMock
-				.createMock(ExploringAnalyzer.class);
-		AnalyzerBeanDescriptor<?> descriptor = EasyMock
-				.createMock(AnalyzerBeanDescriptor.class);
+		DataContextProvider dataContextProvider = EasyMock.createMock(DataContextProvider.class);
+		ExploringAnalyzer<?> analyzer = EasyMock.createMock(ExploringAnalyzer.class);
+		AnalyzerBeanDescriptor<?> descriptor = EasyMock.createMock(AnalyzerBeanDescriptor.class);
 
-		DataContext dataContext = DataContextFactory
-				.createCsvDataContext(new File(
-						"src/test/resources/RunExplorerCallbackTest-data.csv"));
+		DataContext dataContext = DataContextFactory.createCsvDataContext(new File(
+				"src/test/resources/RunExplorerCallbackTest-data.csv"));
 
 		if (isAssertEnabled()) {
 			EasyMock.expect(descriptor.isExploringAnalyzer()).andReturn(true);
 		}
-		
-		EasyMock.expect(dataContextProvider.getDataContext()).andReturn(
-				dataContext);
+
+		EasyMock.expect(dataContextProvider.getDataContext()).andReturn(dataContext);
 		analyzer.run(dataContext);
 
 		EasyMock.replay(dataContextProvider, analyzer, descriptor);
 
-		RunExplorerCallback callback = new RunExplorerCallback(
-				dataContextProvider);
+		RunExplorerCallback callback = new RunExplorerCallback(null, null, dataContextProvider, null);
 		callback.onEvent(LifeCycleState.RUN, analyzer, descriptor);
 
 		EasyMock.verify(dataContextProvider, analyzer, descriptor);

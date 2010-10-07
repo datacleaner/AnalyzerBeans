@@ -5,21 +5,26 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputRow;
+import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
 final class TransformerConsumer implements RowProcessingConsumer {
 
+	private final AnalysisJob _job;
 	private final TransformerBeanInstance _transformerBeanInstance;
 	private final TransformerJob _transformerJob;
 	private final InputColumn<?>[] _inputColumns;
+	private final AnalysisListener _analysisListener;
 
-	public TransformerConsumer(TransformerBeanInstance transformerBeanInstance, TransformerJob transformerJob,
-			InputColumn<?>[] inputColumns) {
+	public TransformerConsumer(AnalysisJob job, TransformerBeanInstance transformerBeanInstance,
+			TransformerJob transformerJob, InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
+		_job = job;
 		_transformerBeanInstance = transformerBeanInstance;
 		_transformerJob = transformerJob;
 		_inputColumns = inputColumns;
+		_analysisListener = analysisListener;
 	}
 
 	@Override
@@ -32,7 +37,14 @@ final class TransformerConsumer implements RowProcessingConsumer {
 		MutableInputColumn<?>[] outputColumns = _transformerJob.getOutput();
 
 		Transformer<?> transformer = _transformerBeanInstance.getBean();
-		Object[] outputValues = transformer.transform(row);
+
+		Object[] outputValues;
+		try {
+			outputValues = transformer.transform(row);
+		} catch (RuntimeException e) {
+			_analysisListener.errorInTransformer(_job, _transformerJob, e);
+			outputValues = new Object[outputColumns.length];
+		}
 
 		assert outputColumns.length == outputValues.length;
 
@@ -53,7 +65,7 @@ final class TransformerConsumer implements RowProcessingConsumer {
 	public TransformerJob getBeanJob() {
 		return _transformerJob;
 	}
-	
+
 	@Override
 	public FilterOutcome getRequiredOutcome() {
 		return _transformerJob.getRequirement();

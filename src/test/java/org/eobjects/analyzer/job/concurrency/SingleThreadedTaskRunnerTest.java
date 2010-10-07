@@ -14,8 +14,7 @@ public class SingleThreadedTaskRunnerTest extends TestCase {
 		private char charToPrint;
 		private StringBuilder sb;
 
-		public SimpleRecursiveTask(StringBuilder sb, char c, Task nextTask,
-				TaskRunner taskRunner) {
+		public SimpleRecursiveTask(StringBuilder sb, char c, Task nextTask, TaskRunner taskRunner) {
 			this.sb = sb;
 			this.charToPrint = c;
 			this.nextTask = nextTask;
@@ -26,7 +25,7 @@ public class SingleThreadedTaskRunnerTest extends TestCase {
 		public void execute() throws Exception {
 			sb.append(charToPrint);
 			if (nextTask != null) {
-				taskRunner.run(nextTask);
+				taskRunner.run(nextTask, null);
 			}
 			sb.append(charToPrint);
 		}
@@ -40,7 +39,7 @@ public class SingleThreadedTaskRunnerTest extends TestCase {
 		Task task2 = new SimpleRecursiveTask(sb, 'b', task3, runner);
 		Task task1 = new SimpleRecursiveTask(sb, 'a', task2, runner);
 
-		runner.run(task1);
+		runner.run(task1, null);
 
 		assertEquals("abccba", sb.toString());
 	}
@@ -53,7 +52,7 @@ public class SingleThreadedTaskRunnerTest extends TestCase {
 		Task task2 = new SimpleRecursiveTask(sb, 'b', task3, runner);
 		Task task1 = new SimpleRecursiveTask(sb, 'a', task2, runner);
 
-		runner.run(task1);
+		runner.run(task1, null);
 
 		assertEquals("aabbcc", sb.toString());
 	}

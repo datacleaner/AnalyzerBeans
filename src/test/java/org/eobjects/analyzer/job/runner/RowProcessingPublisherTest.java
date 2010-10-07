@@ -91,19 +91,21 @@ public class RowProcessingPublisherTest extends TestCase {
 	private List<RowProcessingConsumer> getConsumers(AnalysisJob analysisJob) {
 		List<RowProcessingConsumer> consumers = new ArrayList<RowProcessingConsumer>();
 
+		AnalysisListener listener = null;
+
 		for (AnalyzerJob analyzerJob : analysisJob.getAnalyzerJobs()) {
-			RowProcessingConsumer consumer = new AnalyzerConsumer(new AnalyzerBeanInstance(analyzerJob.getDescriptor()),
-					analyzerJob, analyzerJob.getInput());
+			RowProcessingConsumer consumer = new AnalyzerConsumer(analysisJob, new AnalyzerBeanInstance(
+					analyzerJob.getDescriptor()), analyzerJob, analyzerJob.getInput(), listener);
 			consumers.add(consumer);
 		}
 		for (TransformerJob transformerJob : analysisJob.getTransformerJobs()) {
-			RowProcessingConsumer consumer = new TransformerConsumer(new TransformerBeanInstance(
-					transformerJob.getDescriptor()), transformerJob, transformerJob.getInput());
+			RowProcessingConsumer consumer = new TransformerConsumer(analysisJob, new TransformerBeanInstance(
+					transformerJob.getDescriptor()), transformerJob, transformerJob.getInput(), listener);
 			consumers.add(consumer);
 		}
 		for (FilterJob filterJob : analysisJob.getFilterJobs()) {
-			FilterConsumer consumer = new FilterConsumer(new FilterBeanInstance(filterJob.getDescriptor()), filterJob,
-					filterJob.getInput());
+			FilterConsumer consumer = new FilterConsumer(analysisJob, new FilterBeanInstance(filterJob.getDescriptor()),
+					filterJob, filterJob.getInput(), listener);
 			consumers.add(consumer);
 		}
 

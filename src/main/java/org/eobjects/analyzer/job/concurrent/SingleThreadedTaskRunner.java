@@ -11,7 +11,7 @@ public final class SingleThreadedTaskRunner implements TaskRunner {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final BlockingQueue<Task> _tasks = new LinkedBlockingQueue<Task>();
+	private final BlockingQueue<TaskRunnable> _taskRunnableQueue = new LinkedBlockingQueue<TaskRunnable>();
 	private final boolean _queueTasks;
 	private boolean _running = false;
 
@@ -24,34 +24,24 @@ public final class SingleThreadedTaskRunner implements TaskRunner {
 	}
 
 	@Override
-	public void run(Task task) {
+	public void run(final Task task, final ErrorReporter errorReporter) {
 		logger.debug("run({})", task);
+		TaskRunnable taskRunnable = new TaskRunnable(task, errorReporter);
 		if (_queueTasks) {
-			_tasks.add(task);
+			_taskRunnableQueue.add(taskRunnable);
 			if (!_running) {
 				_running = true;
-				while (!_tasks.isEmpty()) {
-					Task nextTask = _tasks.poll();
-					exec(nextTask);
+				while (!_taskRunnableQueue.isEmpty()) {
+					TaskRunnable nextTaskRunnable = _taskRunnableQueue.poll();
+					nextTaskRunnable.run();
 				}
 				_running = false;
 			}
 		} else {
-			exec(task);
+			taskRunnable.run();
 		}
 	}
 
-	private void exec(Task task) {
-		if (task == null) {
-			throw new IllegalArgumentException("task cannot be null");
-		}
-		try {
-			task.execute();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	@Override
 	public void shutdown() {
 		logger.info("shutdown() called, nothing to do");

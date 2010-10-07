@@ -16,6 +16,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
+import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
@@ -23,6 +24,7 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.job.concurrent.NestedCompletionListener;
 import org.eobjects.analyzer.job.concurrent.ScheduleTasksCompletionListener;
+import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.AssignCallbacksAndInitializeTask;
 import org.eobjects.analyzer.job.tasks.CloseBeanTask;
@@ -57,13 +59,16 @@ public final class RowProcessingPublisher {
 
 	private final Set<Column> _physicalColumns = new HashSet<Column>();
 	private final List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
-	private final DataContextProvider _dataContextProvider;
+	private final AnalysisJob _job;
 	private final CollectionProvider _collectionProvider;
 	private final Table _table;
+	private final ErrorReporterFactory _errorReporterFactory;
+	private final AnalysisListener _analysisListener;
 
-	public RowProcessingPublisher(DataContextProvider dataContextProvider, CollectionProvider collectionProvider, Table table) {
-		if (dataContextProvider == null) {
-			throw new IllegalArgumentException("DataContextProvider cannot be null");
+	public RowProcessingPublisher(AnalysisJob job, CollectionProvider collectionProvider, Table table,
+			AnalysisListener analysisListener, ErrorReporterFactory errorReporterFactory) {
+		if (job == null) {
+			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
 		if (collectionProvider == null) {
 			throw new IllegalArgumentException("CollectionProvider cannot be null");
@@ -71,10 +76,18 @@ public final class RowProcessingPublisher {
 		if (table == null) {
 			throw new IllegalArgumentException("Table cannot be null");
 		}
+		if (analysisListener == null) {
+			throw new IllegalArgumentException("AnalysisListener cannot be null");
+		}
+		if (errorReporterFactory == null) {
+			throw new IllegalArgumentException("ErrorReporterFactory cannot be null");
+		}
 
-		_dataContextProvider = dataContextProvider;
+		_job = job;
 		_collectionProvider = collectionProvider;
 		_table = table;
+		_analysisListener = analysisListener;
+		_errorReporterFactory = errorReporterFactory;
 	}
 
 	public void addPhysicalColumns(Column... columns) {
@@ -88,9 +101,29 @@ public final class RowProcessingPublisher {
 	}
 
 	public void run() {
+		for (RowProcessingConsumer rowProcessingConsumer : _consumers) {
+			if (rowProcessingConsumer instanceof AnalyzerConsumer) {
+				AnalyzerJob analyzerJob = ((AnalyzerConsumer) rowProcessingConsumer).getBeanJob();
+				_analysisListener.analyzerBegin(_job, analyzerJob);
+			}
+		}
+
+		final DataContext dataContext = _job.getDataContextProvider().getDataContext();
+
+		int expectedRows = -1;
+		Query countQuery = dataContext.query().from(_table).selectCount().toQuery();
+		DataSet countDataSet = dataContext.executeQuery(countQuery);
+		if (countDataSet.next()) {
+			Number count = (Number) countDataSet.getRow().getValue(0);
+			if (count != null) {
+				expectedRows = count.intValue();
+			}
+		}
+
+		_analysisListener.rowProcessingBegin(_job, _table, expectedRows);
+
 		final Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
 
-		final DataContext dataContext = _dataContextProvider.getDataContext();
 		final Query q = dataContext.query().from(_table).select(columnArray).toQuery();
 
 		SelectItem countAllItem = null;
@@ -113,14 +146,17 @@ public final class RowProcessingPublisher {
 			}
 		}
 
+		int rowNumber = 0;
 		final DataSet dataSet = dataContext.executeQuery(q);
 		while (dataSet.next()) {
 			Row metaModelRow = dataSet.getRow();
-			Number distinctCount = 1;
+			int distinctCount = 1;
 			if (countAllItem != null) {
-				distinctCount = (Number) metaModelRow.getValue(countAllItem);
+				distinctCount = ((Number) metaModelRow.getValue(countAllItem)).intValue();
 			}
-			FilterOutcomeSinkImpl outcomes = new FilterOutcomeSinkImpl();
+
+			rowNumber += distinctCount;
+			FilterOutcomeSink outcomes = new FilterOutcomeSinkImpl();
 			InputRow inputRow = new MetaModelInputRow(metaModelRow);
 
 			for (RowProcessingConsumer rowProcessingConsumer : consumers) {
@@ -133,22 +169,26 @@ public final class RowProcessingPublisher {
 				}
 
 				if (process) {
-					inputRow = rowProcessingConsumer.consume(inputRow, distinctCount.intValue(), outcomes);
+					inputRow = rowProcessingConsumer.consume(inputRow, distinctCount, outcomes);
 				}
 			}
+			_analysisListener.rowProcessingProgress(_job, _table, rowNumber);
 		}
+		_analysisListener.rowProcessingSuccess(_job, _table);
 	}
 
 	private boolean useGroupByOptimization() {
-		Datastore datastore = _dataContextProvider.getDatastore();
+		if (_physicalColumns.size() > 10) {
+			logger.info("Skipping GROUP BY optimization because of the high column amount");
+			return false;
+		}
+		Datastore datastore = _job.getDataContextProvider().getDatastore();
 		if (datastore == null) {
+			logger.info("Skipping GROUP BY optimization because no datastore is attached to the DataContextProvider");
 			return false;
 		}
 		if (datastore instanceof CsvDatastore) {
-			return false;
-		}
-		if (_physicalColumns.size() > 10) {
-			logger.info("Skipping GROUP BY optimization because of the high column amount");
+			logger.info("Skipping GROUP BY optimization because the Datastore is based on a CSV file");
 			return false;
 		}
 		return true;
@@ -221,16 +261,16 @@ public final class RowProcessingPublisher {
 
 	public void addRowProcessingAnalyzerBean(AnalyzerBeanInstance analyzerBeanInstance, AnalyzerJob analyzerJob,
 			InputColumn<?>[] inputColumns) {
-		addConsumer(new AnalyzerConsumer(analyzerBeanInstance, analyzerJob, inputColumns));
+		addConsumer(new AnalyzerConsumer(_job, analyzerBeanInstance, analyzerJob, inputColumns, _analysisListener));
 	}
 
 	public void addTransformerBean(TransformerBeanInstance transformerBeanInstance, TransformerJob transformerJob,
 			InputColumn<?>[] inputColumns) {
-		addConsumer(new TransformerConsumer(transformerBeanInstance, transformerJob, inputColumns));
+		addConsumer(new TransformerConsumer(_job, transformerBeanInstance, transformerJob, inputColumns, _analysisListener));
 	}
 
 	public void addFilterBean(FilterBeanInstance filterBeanInstance, FilterJob filterJob, InputColumn<?>[] inputColumns) {
-		addConsumer(new FilterConsumer(filterBeanInstance, filterJob, inputColumns));
+		addConsumer(new FilterConsumer(_job, filterBeanInstance, filterJob, inputColumns, _analysisListener));
 	}
 
 	private void addConsumer(RowProcessingConsumer consumer) {
@@ -244,16 +284,18 @@ public final class RowProcessingPublisher {
 		CompletionListener closeCompletionListener = new NestedCompletionListener("row processor consumers", numConsumers,
 				rowProcessorPublishersDoneCompletionListener);
 
-		List<Task> closeTasks = new ArrayList<Task>(numConsumers);
+		List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConsumers);
 		for (RowProcessingConsumer consumer : _consumers) {
-			closeTasks.add(createCloseTask(consumer, resultQueue, closeCompletionListener));
+			Task closeTask = createCloseTask(consumer, resultQueue, closeCompletionListener);
+			closeTasks.add(new TaskRunnable(closeTask, _errorReporterFactory.unknownErrorReporter(_job)));
 		}
 
 		CompletionListener runCompletionListener = new ScheduleTasksCompletionListener("run row processing", taskRunner, 1,
 				closeTasks);
 
-		Collection<Task> runTasksToSchedule = new ArrayList<Task>(1);
-		runTasksToSchedule.add(new RunRowProcessingPublisherTask(this, runCompletionListener));
+		Collection<TaskRunnable> runTasksToSchedule = new ArrayList<TaskRunnable>(1);
+		RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this, runCompletionListener);
+		runTasksToSchedule.add(new TaskRunnable(runTask, _errorReporterFactory.unknownErrorReporter(_job)));
 
 		CompletionListener initCompletionListener = new ScheduleTasksCompletionListener("initialize row consumers",
 				taskRunner, numConsumers, runTasksToSchedule);
@@ -283,25 +325,28 @@ public final class RowProcessingPublisher {
 		LifeCycleCallback initializeCallback = new InitializeCallback();
 		LifeCycleCallback closeCallback = new CloseCallback();
 
+		DataContextProvider dataContextProvider = _job.getDataContextProvider();
+
 		if (consumer instanceof TransformerConsumer) {
 			TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
 			TransformerBeanInstance transformerBeanInstance = transformerConsumer.getBeanInstance();
 
 			return new AssignCallbacksAndInitializeTask(completionListener, transformerBeanInstance, _collectionProvider,
-					_dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
+					dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof FilterConsumer) {
 			FilterConsumer filterConsumer = (FilterConsumer) consumer;
 			FilterBeanInstance filterBeanInstance = filterConsumer.getBeanInstance();
 
 			return new AssignCallbacksAndInitializeTask(completionListener, filterBeanInstance, _collectionProvider,
-					_dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
+					dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
 			AnalyzerBeanInstance analyzerBeanInstance = analyzerConsumer.getBeanInstance();
-			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(resultQueue);
+			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(_job, analyzerConsumer.getBeanJob(),
+					resultQueue, _analysisListener);
 
 			return new AssignCallbacksAndInitializeTask(completionListener, analyzerBeanInstance, _collectionProvider,
-					_dataContextProvider, assignConfiguredCallback, initializeCallback, null, returnResultsCallback,
+					dataContextProvider, assignConfiguredCallback, initializeCallback, null, returnResultsCallback,
 					closeCallback);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
