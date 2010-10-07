@@ -32,7 +32,6 @@ import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
@@ -51,8 +50,6 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final AnalyzerBeansConfiguration _configuration;
-	private final TaskRunner _taskRunner;
-	private final CollectionProvider _collectionProvider;
 	private final AnalysisListener[] _sharedAnalysisListeners;
 
 	/**
@@ -76,8 +73,6 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 			throw new IllegalArgumentException("configuration cannot be null");
 		}
 		_configuration = configuration;
-		_taskRunner = _configuration.getTaskRunner();
-		_collectionProvider = _configuration.getCollectionProvider();
 		_sharedAnalysisListeners = sharedAnalysisListeners;
 	}
 
@@ -92,9 +87,11 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		final AnalysisResultFutureImpl analysisResultFuture = new AnalysisResultFutureImpl(resultQueue,
 				finalCompletionListener);
 
-		final AnalysisCancellationListener cancellationListener = new AnalysisCancellationListener(analysisResultFuture);
+		final AnalysisErrorListener cancellationListener = new AnalysisErrorListener(analysisResultFuture);
 		final AnalysisListener listener = new CompositeAnalysisListener(cancellationListener, _sharedAnalysisListeners);
 		final ErrorReporterFactory errorReporterFactory = new ErrorReporterFactoryImpl(listener);
+
+		final TaskRunner taskRunner = new ErrorAwareTaskRunnerWrapper(analysisResultFuture, _configuration.getTaskRunner());
 
 		listener.jobBegin(job);
 
@@ -135,17 +132,18 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 			// set up scheduling for the explorers
 			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(explorersDoneCompletionListener, instance);
-			CompletionListener runExplorerCompletionListener = new RunNextTaskCompletionListener(_taskRunner, closeTask,
+			CompletionListener runExplorerCompletionListener = new RunNextTaskCompletionListener(taskRunner, closeTask,
 					errorReporterFactory.unknownErrorReporter(job));
 			Task runTask = new RunExplorerTask(instance, runExplorerCompletionListener);
-			CompletionListener initExplorerCompletionListener = new RunNextTaskCompletionListener(_taskRunner, runTask,
+			CompletionListener initExplorerCompletionListener = new RunNextTaskCompletionListener(taskRunner, runTask,
 					errorReporterFactory.analyzerErrorReporter(job, explorerJob));
 			Task initTask = new AssignCallbacksAndInitializeTask(initExplorerCompletionListener, instance,
-					_collectionProvider, dataContextProvider, new AssignConfiguredCallback(explorerJob.getConfiguration()),
-					new InitializeCallback(), runExplorerCallback, returnResultsCallback, new CloseCallback());
+					_configuration.getCollectionProvider(), dataContextProvider, new AssignConfiguredCallback(
+							explorerJob.getConfiguration()), new InitializeCallback(), runExplorerCallback,
+					returnResultsCallback, new CloseCallback());
 
 			// begin the explorers
-			_taskRunner.run(initTask, errorReporterFactory.unknownErrorReporter(job));
+			taskRunner.run(initTask, errorReporterFactory.unknownErrorReporter(job));
 		}
 
 		final Map<Table, RowProcessingPublisher> rowProcessingPublishers = new HashMap<Table, RowProcessingPublisher>();
@@ -168,11 +166,11 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 				"row processor publishers", rowProcessingPublishers.size(), finalCompletionListener);
 
 		for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers.values()) {
-			List<Task> initTasks = rowProcessingPublisher.createInitialTasks(_taskRunner, resultQueue,
+			List<Task> initTasks = rowProcessingPublisher.createInitialTasks(taskRunner, resultQueue,
 					rowProcessorPublishersDoneCompletionListener);
 			logger.debug("Scheduling {} tasks for row processing publisher: {}", initTasks.size(), rowProcessingPublisher);
 			for (Task task : initTasks) {
-				_taskRunner.run(task, errorReporterFactory.unknownErrorReporter(job));
+				taskRunner.run(task, errorReporterFactory.unknownErrorReporter(job));
 			}
 		}
 
@@ -195,8 +193,8 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		for (Table table : tables) {
 			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
-				rowPublisher = new RowProcessingPublisher(analysisJob, _collectionProvider, table, listener,
-						errorReporterFactory);
+				rowPublisher = new RowProcessingPublisher(analysisJob, _configuration.getCollectionProvider(), table,
+						listener, errorReporterFactory);
 				rowProcessingPublishers.put(table, rowPublisher);
 			}
 

@@ -9,15 +9,16 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import dk.eobjects.metamodel.schema.Table;
 
 /**
- * AnalysisListener that will cancel the job if fatal errors occur
+ * AnalysisListener that will register errors and cancel the job if fatal errors
+ * occur
  * 
  * @author Kasper Sørensen
  */
-final class AnalysisCancellationListener implements AnalysisListener {
+final class AnalysisErrorListener implements AnalysisListener {
 
 	private AnalysisResultFutureImpl _analysisResultFuture;
 
-	public AnalysisCancellationListener(AnalysisResultFutureImpl analysisResultFuture) {
+	public AnalysisErrorListener(AnalysisResultFutureImpl analysisResultFuture) {
 		_analysisResultFuture = analysisResultFuture;
 	}
 

@@ -11,7 +11,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * await(long,TimeUnit) methods.
  * 
  * When the result is done it may either be successful or errornous. Clients can
- * find out using the isSuccessful() method.
+ * find out using the isSuccessful() or isErrornous() methods.
  * 
  * If succesful, the results can be retrieved using the getResults() method. If
  * errornous the error messages can be retrieved using the getErrors() method.
@@ -46,6 +46,13 @@ public interface AnalysisResultFuture {
 	 * @return true if the job executed without errors
 	 */
 	public boolean isSuccessful();
+
+	/**
+	 * @return SUCCESSFUL if the job is finished and successful, ERRORNOUS if
+	 *         errors have been reported and NOT_FINISHED if no errors have been
+	 *         reported but the job is not done yet
+	 */
+	public JobStatus getStatus();
 
 	/**
 	 * @return the results from the Analyzers in the executed job

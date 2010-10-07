@@ -5,7 +5,7 @@ import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CollectResultsAndCloseAnalyzerBeanTask extends CloseBeanTask {
+public final class CollectResultsAndCloseAnalyzerBeanTask extends CloseBeanTask {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	

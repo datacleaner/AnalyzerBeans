@@ -11,7 +11,7 @@ import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssignCallbacksAndInitializeTask implements Task {
+public final class AssignCallbacksAndInitializeTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 

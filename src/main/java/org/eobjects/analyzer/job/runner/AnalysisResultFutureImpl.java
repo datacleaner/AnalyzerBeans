@@ -86,4 +86,18 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 		}
 		return Collections.unmodifiableList(_errors);
 	}
+
+	@Override
+	public JobStatus getStatus() {
+		if (isDone()) {
+			if (isSuccessful()) {
+				return JobStatus.SUCCESSFUL;
+			}
+			return JobStatus.ERRORNOUS;
+		}
+		if (_errors.isEmpty()) {
+			return JobStatus.NOT_FINISHED;
+		}
+		return JobStatus.ERRORNOUS;
+	}
 }
