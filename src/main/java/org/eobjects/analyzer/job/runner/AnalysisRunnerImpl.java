@@ -21,7 +21,7 @@ import org.eobjects.analyzer.job.BeanJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
-import org.eobjects.analyzer.job.concurrent.JobCompletionListener;
+import org.eobjects.analyzer.job.concurrent.JobCompletionListenerImpl;
 import org.eobjects.analyzer.job.concurrent.NestedCompletionListener;
 import org.eobjects.analyzer.job.concurrent.RunNextTaskCompletionListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -81,7 +81,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 		// A completion listener that simply waits for two onComplete() calls.
 		// One for the explorers, one for the row processor publishers
-		final JobCompletionListener finalCompletionListener = new JobCompletionListener(job, _sharedAnalysisListeners, 2);
+		final JobCompletionListenerImpl finalCompletionListener = new JobCompletionListenerImpl(job, _sharedAnalysisListeners, 2);
 
 		final Queue<AnalyzerResult> resultQueue = new LinkedBlockingQueue<AnalyzerResult>();
 		final AnalysisResultFutureImpl analysisResultFuture = new AnalysisResultFutureImpl(resultQueue,

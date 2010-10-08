@@ -1,62 +1,14 @@
 package org.eobjects.analyzer.job.concurrent;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.runner.AnalysisListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public interface JobCompletionListener extends CompletionListener {
 
-/**
- * Completion listener for a full AnalysisJob. Use the isDone() method to ask
- * whether or not the job is finished.
- * 
- * @author Kasper Sørensen
- */
-public final class JobCompletionListener implements CompletionListener {
+	public void cancel();
 
-	private static final Logger logger = LoggerFactory.getLogger(ScheduleTasksCompletionListener.class);
+	public boolean isDone();
 
-	private final CountDownLatch _countDownLatch;
-	private final AnalysisJob _job;
-	private final AnalysisListener[] _analysisListeners;
+	public void await() throws InterruptedException;
 
-	public JobCompletionListener(AnalysisJob job, AnalysisListener[] analysisListeners, int callablesToWaitFor) {
-		_job = job;
-		_analysisListeners = analysisListeners;
-		_countDownLatch = new CountDownLatch(callablesToWaitFor);
-	}
-
-	@Override
-	public void onComplete() {
-		logger.debug("onComplete()");
-		_countDownLatch.countDown();
-		if (_countDownLatch.getCount() == 0) {
-			if (_analysisListeners != null) {
-				for (AnalysisListener listener : _analysisListeners) {
-					listener.jobSuccess(_job);
-				}
-			}
-		}
-	}
-
-	public void cancel() {
-		logger.warn("Cancelling job: {}", _job);
-		while (_countDownLatch.getCount() > 0) {
-			_countDownLatch.countDown();
-		}
-	}
-
-	public void await() throws InterruptedException {
-		_countDownLatch.await();
-	}
-
-	public void await(long timeout, TimeUnit unit) throws InterruptedException {
-		_countDownLatch.await(timeout, unit);
-	}
-
-	public boolean isDone() {
-		return _countDownLatch.getCount() == 0;
-	}
+	public void await(long timeout, TimeUnit timeUnit) throws InterruptedException;
 }

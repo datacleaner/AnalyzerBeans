@@ -18,23 +18,22 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	private static final Logger logger = LoggerFactory.getLogger(AnalysisResultFutureImpl.class);
 
 	private Queue<AnalyzerResult> _resultQueue = new LinkedBlockingQueue<AnalyzerResult>();
-	private JobCompletionListener _closeCompletionListener;
+	private JobCompletionListener _jobCompletionListener;
 	private List<Throwable> _errors;
 
-	public AnalysisResultFutureImpl(Queue<AnalyzerResult> resultQueue, JobCompletionListener closeCompletionListener) {
-		super();
+	public AnalysisResultFutureImpl(Queue<AnalyzerResult> resultQueue, JobCompletionListener jobCompletionListener) {
 		_resultQueue = resultQueue;
-		_closeCompletionListener = closeCompletionListener;
+		_jobCompletionListener = jobCompletionListener;
 	}
 
 	@Override
 	public boolean isDone() {
-		return _closeCompletionListener.isDone();
+		return _jobCompletionListener.isDone();
 	}
 
 	@Override
 	public void cancel() {
-		_closeCompletionListener.cancel();
+		_jobCompletionListener.cancel();
 	}
 
 	@Override
@@ -42,7 +41,7 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 		if (!isDone()) {
 			try {
 				logger.debug("_closeCompletionListener.await({},{})", timeout, timeUnit);
-				_closeCompletionListener.await(timeout, timeUnit);
+				_jobCompletionListener.await(timeout, timeUnit);
 			} catch (InterruptedException e) {
 				logger.error("Unexpected error while retreiving results", e);
 			}
@@ -54,7 +53,7 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 		while (!isDone()) {
 			try {
 				logger.debug("_closeCompletionListener.await()");
-				_closeCompletionListener.await();
+				_jobCompletionListener.await();
 			} catch (Exception e) {
 				logger.error("Unexpected error while retreiving results", e);
 			}
@@ -70,7 +69,7 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	@Override
 	public boolean isSuccessful() {
 		await();
-		return getErrors() == null;
+		return getErrors().isEmpty();
 	}
 
 	public void addError(Throwable error) {

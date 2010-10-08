@@ -73,10 +73,9 @@ public final class Main {
 
 	public void run() {
 		AnalyzerBeansConfiguration configuration = new JaxbConfigurationFactory().create(configurationFile);
-		boolean success = true;
 		try {
 			if (jobFile != null) {
-				success = runJob(configuration);
+				runJob(configuration);
 			} else if (listType != null) {
 				switch (listType) {
 				case ANALYZERS:
@@ -112,10 +111,6 @@ public final class Main {
 			System.err.println("Error: " + e.getMessage());
 		} finally {
 			configuration.getTaskRunner().shutdown();
-		}
-
-		if (!success) {
-			System.exit(1);
 		}
 	}
 
@@ -223,7 +218,7 @@ public final class Main {
 		}
 	}
 
-	protected boolean runJob(AnalyzerBeansConfiguration configuration) {
+	protected void runJob(AnalyzerBeansConfiguration configuration) {
 		AnalysisJobBuilder analysisJobBuilder = new JaxbJobFactory(configuration).create(jobFile);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration, new CliProgressAnalysisListener());
@@ -246,7 +241,6 @@ public final class Main {
 
 				System.out.println(renderedResult);
 			}
-			return true;
 		} else {
 			System.out.println("ERROR!");
 			System.out.println("------");
@@ -258,7 +252,6 @@ public final class Main {
 				System.out.println("------");
 				throwable.printStackTrace(System.out);
 			}
-			return false;
 		}
 	}
 
