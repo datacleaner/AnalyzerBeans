@@ -12,6 +12,14 @@ public class CoalesceNumbersTransformer implements Transformer<Number> {
 
 	@Configured
 	InputColumn<Number>[] input;
+	
+	public CoalesceNumbersTransformer() {
+	}
+	
+	public CoalesceNumbersTransformer(InputColumn<Number>... input) {
+		this();
+		this.input = input;
+	}
 
 	@Override
 	public OutputColumns getOutputColumns() {

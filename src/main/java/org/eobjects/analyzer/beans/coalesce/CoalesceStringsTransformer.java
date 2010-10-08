@@ -13,6 +13,14 @@ public class CoalesceStringsTransformer implements Transformer<String> {
 	@Configured
 	InputColumn<String>[] input;
 
+	public CoalesceStringsTransformer() {
+	}
+
+	public CoalesceStringsTransformer(InputColumn<String>... input) {
+		this();
+		this.input = input;
+	}
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		return OutputColumns.singleOutputColumn();

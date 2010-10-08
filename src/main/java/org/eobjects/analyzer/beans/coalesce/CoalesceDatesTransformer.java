@@ -15,6 +15,14 @@ public class CoalesceDatesTransformer implements Transformer<Date> {
 	@Configured
 	InputColumn<Date>[] input;
 
+	public CoalesceDatesTransformer() {
+	}
+
+	public CoalesceDatesTransformer(InputColumn<Date>... input) {
+		this();
+		this.input = input;
+	}
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		return OutputColumns.singleOutputColumn();
