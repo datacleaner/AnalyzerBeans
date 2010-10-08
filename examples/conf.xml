@@ -27,7 +27,7 @@
 	</datastore-catalog>
 
 	<multithreaded-taskrunner max-threads="20" />
-
+	
 	<classpath-scanner>
 		<package recursive="true">org.eobjects.analyzer.beans</package>
 		<package>org.eobjects.analyzer.result.renderer</package>

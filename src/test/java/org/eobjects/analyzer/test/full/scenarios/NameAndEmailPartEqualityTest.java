@@ -49,7 +49,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		CollectionProvider collectionProvider = new InMemoryCollectionProvider();
-		TaskRunner taskRunner = new SingleThreadedTaskRunner(false);
+		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,

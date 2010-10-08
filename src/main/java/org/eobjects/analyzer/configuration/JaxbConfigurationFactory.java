@@ -48,15 +48,13 @@ import org.slf4j.LoggerFactory;
 
 public class JaxbConfigurationFactory {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(JaxbJobFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(JaxbJobFactory.class);
 
 	private JAXBContext _jaxbContext;
 
 	public JaxbConfigurationFactory() {
 		try {
-			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class
-					.getPackage().getName());
+			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
 		} catch (JAXBException e) {
 			throw new IllegalStateException(e);
 		}
@@ -75,8 +73,7 @@ public class JaxbConfigurationFactory {
 			Unmarshaller unmarshaller = _jaxbContext.createUnmarshaller();
 
 			unmarshaller.setEventHandler(new JaxbValidationEventHandler());
-			Configuration configuration = (Configuration) unmarshaller
-					.unmarshal(inputStream);
+			Configuration configuration = (Configuration) unmarshaller.unmarshal(inputStream);
 			return create(configuration);
 		} catch (JAXBException e) {
 			throw new IllegalArgumentException(e);
@@ -84,27 +81,21 @@ public class JaxbConfigurationFactory {
 	}
 
 	public AnalyzerBeansConfiguration create(Configuration configuration) {
-		ConfigurationMetadataType metadata = configuration
-				.getConfigurationMetadata();
+		ConfigurationMetadataType metadata = configuration.getConfigurationMetadata();
 		if (metadata != null) {
-			logger.info("Configuration name: {}",
-					metadata.getConfigurationName());
-			logger.info("Configuration version: {}",
-					metadata.getConfigurationVersion());
-			logger.info("Configuration description: {}",
-					metadata.getConfigurationDescription());
+			logger.info("Configuration name: {}", metadata.getConfigurationName());
+			logger.info("Configuration version: {}", metadata.getConfigurationVersion());
+			logger.info("Configuration description: {}", metadata.getConfigurationDescription());
 			logger.info("Author: {}", metadata.getAuthor());
 			logger.info("Created date: {}", metadata.getCreatedDate());
 			logger.info("Updated date: {}", metadata.getUpdatedDate());
 		}
 
 		TaskRunner taskRunner = createTaskRunner(configuration);
-		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration
-				.getDatastoreCatalog());
+		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog());
 
 		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
-		ClasspathScannerType classpathScanner = configuration
-				.getClasspathScanner();
+		ClasspathScannerType classpathScanner = configuration.getClasspathScanner();
 		if (classpathScanner != null) {
 			List<Package> packages = classpathScanner.getPackage();
 			for (Package pkg : packages) {
@@ -123,17 +114,14 @@ public class JaxbConfigurationFactory {
 		// TODO: Make these components configurable as well
 		ReferenceDataCatalog referenceDataCatalog = new ReferenceDataCatalogImpl();
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
-		return new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				referenceDataCatalog, descriptorProvider, taskRunner,
+		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
 				collectionProvider);
 	}
 
-	private DatastoreCatalog createDatastoreCatalog(
-			DatastoreCatalogType datastoreCatalogType) {
+	private DatastoreCatalog createDatastoreCatalog(DatastoreCatalogType datastoreCatalogType) {
 		Map<String, Datastore> datastores = new HashMap<String, Datastore>();
 
-		List<CsvDatastoreType> csvDatastores = datastoreCatalogType
-				.getCsvDatastore();
+		List<CsvDatastoreType> csvDatastores = datastoreCatalogType.getCsvDatastore();
 		for (CsvDatastoreType csvDatastoreType : csvDatastores) {
 			String name = csvDatastoreType.getName();
 			if (StringUtils.isNullOrEmpty(name)) {
@@ -141,8 +129,7 @@ public class JaxbConfigurationFactory {
 			}
 
 			if (datastores.containsKey(name)) {
-				throw new IllegalStateException(
-						"Datastore name is not unique: " + name);
+				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
 			String filename = csvDatastoreType.getFilename();
@@ -161,12 +148,10 @@ public class JaxbConfigurationFactory {
 				quoteChar = quoteCharString.charAt(0);
 			}
 
-			datastores.put(name, new CsvDatastore(name, filename, quoteChar,
-					separatorChar));
+			datastores.put(name, new CsvDatastore(name, filename, quoteChar, separatorChar));
 		}
 
-		List<JdbcDatastoreType> jdbcDatastores = datastoreCatalogType
-				.getJdbcDatastore();
+		List<JdbcDatastoreType> jdbcDatastores = datastoreCatalogType.getJdbcDatastore();
 		for (JdbcDatastoreType jdbcDatastoreType : jdbcDatastores) {
 			String name = jdbcDatastoreType.getName();
 			if (StringUtils.isNullOrEmpty(name)) {
@@ -174,8 +159,7 @@ public class JaxbConfigurationFactory {
 			}
 
 			if (datastores.containsKey(name)) {
-				throw new IllegalStateException(
-						"Datastore name is not unique: " + name);
+				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
 			JdbcDatastore datastore;
@@ -186,8 +170,7 @@ public class JaxbConfigurationFactory {
 				String driver = jdbcDatastoreType.getDriver();
 				String username = jdbcDatastoreType.getUsername();
 				String password = jdbcDatastoreType.getPassword();
-				datastore = new JdbcDatastore(name, url, driver, username,
-						password);
+				datastore = new JdbcDatastore(name, url, driver, username, password);
 			} else {
 				datastore = new JdbcDatastore(name, datasourceJndiUrl);
 			}
@@ -195,8 +178,7 @@ public class JaxbConfigurationFactory {
 			datastores.put(name, datastore);
 		}
 
-		List<CompositeDatastoreType> compositeDatastores = datastoreCatalogType
-				.getCompositeDatastore();
+		List<CompositeDatastoreType> compositeDatastores = datastoreCatalogType.getCompositeDatastore();
 		for (CompositeDatastoreType compositeDatastoreType : compositeDatastores) {
 			String name = compositeDatastoreType.getName();
 			if (StringUtils.isNullOrEmpty(name)) {
@@ -204,19 +186,15 @@ public class JaxbConfigurationFactory {
 			}
 
 			if (datastores.containsKey(name)) {
-				throw new IllegalStateException(
-						"Datastore name is not unique: " + name);
+				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
-			List<String> datastoreNames = compositeDatastoreType
-					.getDatastoreName();
-			List<Datastore> childDatastores = new ArrayList<Datastore>(
-					datastoreNames.size());
+			List<String> datastoreNames = compositeDatastoreType.getDatastoreName();
+			List<Datastore> childDatastores = new ArrayList<Datastore>(datastoreNames.size());
 			for (String datastoreName : datastoreNames) {
 				Datastore datastore = datastores.get(datastoreName);
 				if (datastore == null) {
-					throw new IllegalStateException("No such datastore: "
-							+ datastoreName
+					throw new IllegalStateException("No such datastore: " + datastoreName
 							+ " (found in composite datastore: " + name + ")");
 				}
 				childDatastores.add(datastore);
@@ -225,27 +203,18 @@ public class JaxbConfigurationFactory {
 			datastores.put(name, new CompositeDatastore(name, childDatastores));
 		}
 
-		DatastoreCatalogImpl result = new DatastoreCatalogImpl(
-				datastores.values());
+		DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
 		return result;
 	}
 
 	private TaskRunner createTaskRunner(Configuration configuration) {
-		SinglethreadedTaskrunnerType singlethreadedTaskrunner = configuration
-				.getSinglethreadedTaskrunner();
-		MultithreadedTaskrunnerType multithreadedTaskrunner = configuration
-				.getMultithreadedTaskrunner();
-		CustomTaskrunnerType customTaskrunner = configuration
-				.getCustomTaskrunner();
+		SinglethreadedTaskrunnerType singlethreadedTaskrunner = configuration.getSinglethreadedTaskrunner();
+		MultithreadedTaskrunnerType multithreadedTaskrunner = configuration.getMultithreadedTaskrunner();
+		CustomTaskrunnerType customTaskrunner = configuration.getCustomTaskrunner();
 
 		TaskRunner taskRunner;
 		if (singlethreadedTaskrunner != null) {
-			if (singlethreadedTaskrunner.isQueueTasks() != null) {
-				taskRunner = new SingleThreadedTaskRunner(
-						singlethreadedTaskrunner.isQueueTasks());
-			} else {
-				taskRunner = new SingleThreadedTaskRunner();
-			}
+			taskRunner = new SingleThreadedTaskRunner();
 		} else if (multithreadedTaskrunner != null) {
 			Short maxThreads = multithreadedTaskrunner.getMaxThreads();
 			if (maxThreads != null) {

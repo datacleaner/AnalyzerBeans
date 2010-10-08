@@ -46,7 +46,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		ReferenceDataCatalog referenceDataCatalog = new ReferenceDataCatalogImpl();
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
 				.scanPackage("org.eobjects.analyzer.beans", true);
-		TaskRunner taskRunner = new SingleThreadedTaskRunner(false);
+		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		CollectionProvider collectionProvider = new InMemoryCollectionProvider();
 		configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
 				referenceDataCatalog, descriptorProvider, taskRunner,

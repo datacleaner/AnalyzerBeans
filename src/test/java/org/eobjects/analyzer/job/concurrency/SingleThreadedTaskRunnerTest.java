@@ -32,7 +32,7 @@ public class SingleThreadedTaskRunnerTest extends TestCase {
 	}
 
 	public void testNonQueuedChronology() throws Exception {
-		SingleThreadedTaskRunner runner = new SingleThreadedTaskRunner(false);
+		SingleThreadedTaskRunner runner = new SingleThreadedTaskRunner();
 
 		StringBuilder sb = new StringBuilder();
 		Task task3 = new SimpleRecursiveTask(sb, 'c', null, null);
@@ -42,18 +42,5 @@ public class SingleThreadedTaskRunnerTest extends TestCase {
 		runner.run(task1, null);
 
 		assertEquals("abccba", sb.toString());
-	}
-
-	public void testQueuedChronology() throws Exception {
-		SingleThreadedTaskRunner runner = new SingleThreadedTaskRunner(true);
-
-		StringBuilder sb = new StringBuilder();
-		Task task3 = new SimpleRecursiveTask(sb, 'c', null, null);
-		Task task2 = new SimpleRecursiveTask(sb, 'b', task3, runner);
-		Task task1 = new SimpleRecursiveTask(sb, 'a', task2, runner);
-
-		runner.run(task1, null);
-
-		assertEquals("aabbcc", sb.toString());
 	}
 }

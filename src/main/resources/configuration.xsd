@@ -104,7 +104,6 @@
 	</complexType>
 
 	<complexType name="singlethreadedTaskrunnerType">
-		<attribute name="queue-tasks" type="boolean" use="optional" />
 	</complexType>
 
 	<complexType name="customTaskrunnerType">
