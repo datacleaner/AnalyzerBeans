@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.job.FilterOutcome;
 
-final class FilterOutcomeSinkImpl implements FilterOutcomeSink {
+public final class FilterOutcomeSinkImpl implements FilterOutcomeSink {
 
 	private final Set<FilterOutcome> outcomes = new HashSet<FilterOutcome>();
 

@@ -45,7 +45,7 @@ public class SingleThreadedTaskRunnerTest extends TestCase {
 	}
 
 	public void testQueuedChronology() throws Exception {
-		SingleThreadedTaskRunner runner = new SingleThreadedTaskRunner();
+		SingleThreadedTaskRunner runner = new SingleThreadedTaskRunner(true);
 
 		StringBuilder sb = new StringBuilder();
 		Task task3 = new SimpleRecursiveTask(sb, 'c', null, null);

@@ -16,10 +16,13 @@ public final class SingleThreadedTaskRunner implements TaskRunner {
 	private boolean _running = false;
 
 	public SingleThreadedTaskRunner() {
-		this(true);
+		this(false);
 	}
 
 	public SingleThreadedTaskRunner(boolean queueTasks) {
+		// TODO: Consider removing the ability to queue tasks = it may introduce
+		// bugs because of endless waiting for tasks (that have been queued) to
+		// complete.
 		_queueTasks = queueTasks;
 	}
 

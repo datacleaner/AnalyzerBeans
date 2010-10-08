@@ -64,4 +64,9 @@ public interface AnalysisResultFuture {
 	 *         successful
 	 */
 	public List<Throwable> getErrors();
+
+	/**
+	 * Cancels the execution of the job
+	 */
+	public void cancel();
 }

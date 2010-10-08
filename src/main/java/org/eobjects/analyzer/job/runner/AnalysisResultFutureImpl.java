@@ -33,6 +33,11 @@ public class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	}
 
 	@Override
+	public void cancel() {
+		_closeCompletionListener.cancel();
+	}
+
+	@Override
 	public void await(long timeout, TimeUnit timeUnit) {
 		if (!isDone()) {
 			try {

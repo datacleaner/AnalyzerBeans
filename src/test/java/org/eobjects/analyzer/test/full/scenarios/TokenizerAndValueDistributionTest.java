@@ -41,7 +41,7 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
-		TaskRunner taskRunner = new MultiThreadedTaskRunner(3);
+		TaskRunner taskRunner = new MultiThreadedTaskRunner(30);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();

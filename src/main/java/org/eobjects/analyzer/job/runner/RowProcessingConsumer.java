@@ -11,7 +11,7 @@ import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
  * 
  * @author Kasper Sørensen
  */
-interface RowProcessingConsumer {
+public interface RowProcessingConsumer {
 
 	public InputColumn<?>[] getRequiredInput();
 

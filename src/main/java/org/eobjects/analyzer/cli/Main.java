@@ -16,6 +16,8 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.JaxbJobFactory;
+import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
+import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.renderer.Renderer;
@@ -71,9 +73,10 @@ public final class Main {
 
 	public void run() {
 		AnalyzerBeansConfiguration configuration = new JaxbConfigurationFactory().create(configurationFile);
+		boolean success = true;
 		try {
 			if (jobFile != null) {
-				runJob(configuration);
+				success = runJob(configuration);
 			} else if (listType != null) {
 				switch (listType) {
 				case ANALYZERS:
@@ -109,6 +112,10 @@ public final class Main {
 			System.err.println("Error: " + e.getMessage());
 		} finally {
 			configuration.getTaskRunner().shutdown();
+		}
+
+		if (!success) {
+			System.exit(1);
 		}
 	}
 
@@ -216,22 +223,42 @@ public final class Main {
 		}
 	}
 
-	protected void runJob(AnalyzerBeansConfiguration configuration) {
+	protected boolean runJob(AnalyzerBeansConfiguration configuration) {
 		AnalysisJobBuilder analysisJobBuilder = new JaxbJobFactory(configuration).create(jobFile);
 
-		List<AnalyzerResult> results = new AnalysisRunnerImpl(configuration).run(analysisJobBuilder.toAnalysisJob())
-				.getResults();
+		AnalysisRunner runner = new AnalysisRunnerImpl(configuration, new CliProgressAnalysisListener());
+		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
 
-		RendererFactory rendererFinder = new RendererFactory(configuration.getDescriptorProvider());
+		resultFuture.await();
 
-		for (AnalyzerResult result : results) {
-			System.out.println("\nRESULT:");
+		if (resultFuture.isSuccessful()) {
+			System.out.println("SUCCESS!");
+			List<AnalyzerResult> results = resultFuture.getResults();
 
-			Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFinder.getRenderer(result,
-					TextRenderingFormat.class);
-			CharSequence renderedResult = renderer.render(result);
+			RendererFactory rendererFinder = new RendererFactory(configuration.getDescriptorProvider());
 
-			System.out.println(renderedResult);
+			for (AnalyzerResult result : results) {
+				System.out.println("\nRESULT:");
+
+				Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFinder.getRenderer(result,
+						TextRenderingFormat.class);
+				CharSequence renderedResult = renderer.render(result);
+
+				System.out.println(renderedResult);
+			}
+			return true;
+		} else {
+			System.out.println("ERROR!");
+			System.out.println("------");
+
+			List<Throwable> errors = resultFuture.getErrors();
+			System.out.println(errors.size() + " error(s) occurred while executing the job:");
+
+			for (Throwable throwable : errors) {
+				System.out.println("------");
+				throwable.printStackTrace(System.out);
+			}
+			return false;
 		}
 	}
 

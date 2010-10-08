@@ -149,15 +149,15 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		final Map<Table, RowProcessingPublisher> rowProcessingPublishers = new HashMap<Table, RowProcessingPublisher>();
 		for (FilterJob filterJob : filterJobs) {
 			registerRowProcessingPublishers(job, rowProcessingPublishers, filterJob, null, transformerBeanInstances,
-					resultQueue, listener, errorReporterFactory);
+					resultQueue, listener, errorReporterFactory, taskRunner);
 		}
 		for (TransformerJob transformerJob : transformerJobs) {
 			registerRowProcessingPublishers(job, rowProcessingPublishers, transformerJob, null, transformerBeanInstances,
-					resultQueue, listener, errorReporterFactory);
+					resultQueue, listener, errorReporterFactory, taskRunner);
 		}
 		for (AnalyzerJob analyzerJob : rowProcessingJobs) {
 			registerRowProcessingPublishers(job, rowProcessingPublishers, analyzerJob, analyzerBeanInstances, null,
-					resultQueue, listener, errorReporterFactory);
+					resultQueue, listener, errorReporterFactory, taskRunner);
 		}
 
 		logger.info("Created {} row processor publishers", rowProcessingPublishers.size());
@@ -180,7 +180,8 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 	private void registerRowProcessingPublishers(AnalysisJob analysisJob,
 			Map<Table, RowProcessingPublisher> rowProcessingPublishers, BeanJob<?> beanJob,
 			List<AnalyzerBeanInstance> analyzerBeanInstances, List<TransformerBeanInstance> transformerBeanInstances,
-			Collection<AnalyzerResult> resultQueue, AnalysisListener listener, ErrorReporterFactory errorReporterFactory) {
+			Collection<AnalyzerResult> resultQueue, AnalysisListener listener, ErrorReporterFactory errorReporterFactory,
+			TaskRunner taskRunner) {
 		InputColumn<?>[] inputColumns = beanJob.getInput();
 		Set<Column> physicalColumns = new HashSet<Column>();
 		for (InputColumn<?> inputColumn : inputColumns) {
@@ -194,7 +195,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
 				rowPublisher = new RowProcessingPublisher(analysisJob, _configuration.getCollectionProvider(), table,
-						listener, errorReporterFactory);
+						taskRunner, listener, errorReporterFactory);
 				rowProcessingPublishers.put(table, rowPublisher);
 			}
 

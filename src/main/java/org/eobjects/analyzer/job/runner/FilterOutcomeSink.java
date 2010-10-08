@@ -8,7 +8,7 @@ import org.eobjects.analyzer.job.FilterOutcome;
  * 
  * @author Kasper Sørensen
  */
-interface FilterOutcomeSink {
+public interface FilterOutcomeSink {
 
 	public void add(FilterOutcome filterOutcome);
 

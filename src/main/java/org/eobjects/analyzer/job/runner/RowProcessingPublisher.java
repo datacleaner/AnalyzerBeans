@@ -8,13 +8,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -22,6 +21,8 @@ import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.CompletionListener;
+import org.eobjects.analyzer.job.concurrent.CompletionListenerAwareErrorReporterWrapper;
+import org.eobjects.analyzer.job.concurrent.ErrorReporter;
 import org.eobjects.analyzer.job.concurrent.NestedCompletionListener;
 import org.eobjects.analyzer.job.concurrent.ScheduleTasksCompletionListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
@@ -29,6 +30,8 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.AssignCallbacksAndInitializeTask;
 import org.eobjects.analyzer.job.tasks.CloseBeanTask;
 import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
+import org.eobjects.analyzer.job.tasks.ConsumeRowTask;
+import org.eobjects.analyzer.job.tasks.ConsumeRowTaskCompletionListener;
 import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
@@ -62,11 +65,12 @@ public final class RowProcessingPublisher {
 	private final AnalysisJob _job;
 	private final CollectionProvider _collectionProvider;
 	private final Table _table;
+	private final TaskRunner _taskRunner;
 	private final ErrorReporterFactory _errorReporterFactory;
 	private final AnalysisListener _analysisListener;
 
 	public RowProcessingPublisher(AnalysisJob job, CollectionProvider collectionProvider, Table table,
-			AnalysisListener analysisListener, ErrorReporterFactory errorReporterFactory) {
+			TaskRunner taskRunner, AnalysisListener analysisListener, ErrorReporterFactory errorReporterFactory) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
@@ -76,16 +80,19 @@ public final class RowProcessingPublisher {
 		if (table == null) {
 			throw new IllegalArgumentException("Table cannot be null");
 		}
+		if (taskRunner == null) {
+			throw new IllegalArgumentException("TaskRunner cannot be null");
+		}
 		if (analysisListener == null) {
 			throw new IllegalArgumentException("AnalysisListener cannot be null");
 		}
 		if (errorReporterFactory == null) {
 			throw new IllegalArgumentException("ErrorReporterFactory cannot be null");
 		}
-
 		_job = job;
 		_collectionProvider = collectionProvider;
 		_table = table;
+		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
 		_errorReporterFactory = errorReporterFactory;
 	}
@@ -146,34 +153,25 @@ public final class RowProcessingPublisher {
 			}
 		}
 
-		int rowNumber = 0;
+		ConsumeRowTaskCompletionListener completionListener = new ConsumeRowTaskCompletionListener();
+
+		final ErrorReporter errorReporter = new CompletionListenerAwareErrorReporterWrapper(completionListener,
+				_errorReporterFactory.unknownErrorReporter(_job));
+
+		int taskCount = 0;
+		final AtomicInteger rowNumber = new AtomicInteger(0);
 		final DataSet dataSet = dataContext.executeQuery(q);
 		while (dataSet.next()) {
 			Row metaModelRow = dataSet.getRow();
-			int distinctCount = 1;
-			if (countAllItem != null) {
-				distinctCount = ((Number) metaModelRow.getValue(countAllItem)).intValue();
-			}
-
-			rowNumber += distinctCount;
-			FilterOutcomeSink outcomes = new FilterOutcomeSinkImpl();
-			InputRow inputRow = new MetaModelInputRow(metaModelRow);
-
-			for (RowProcessingConsumer rowProcessingConsumer : consumers) {
-				FilterOutcome requiredOutcome = rowProcessingConsumer.getRequiredOutcome();
-				boolean process;
-				if (requiredOutcome == null) {
-					process = true;
-				} else {
-					process = outcomes.contains(requiredOutcome);
-				}
-
-				if (process) {
-					inputRow = rowProcessingConsumer.consume(inputRow, distinctCount, outcomes);
-				}
-			}
-			_analysisListener.rowProcessingProgress(_job, _table, rowNumber);
+			ConsumeRowTask task = new ConsumeRowTask(consumers, _table, metaModelRow, countAllItem, rowNumber, _job,
+					_analysisListener, completionListener);
+			_taskRunner.run(task, errorReporter);
+			taskCount++;
 		}
+
+		completionListener.awaitCount(taskCount);
+
+		dataSet.close();
 		_analysisListener.rowProcessingSuccess(_job, _table);
 	}
 
