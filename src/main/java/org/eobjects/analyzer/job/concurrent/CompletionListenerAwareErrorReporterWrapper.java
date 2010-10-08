@@ -12,7 +12,11 @@ public final class CompletionListenerAwareErrorReporterWrapper implements ErrorR
 
 	@Override
 	public void reportError(Throwable throwable) {
-		_delegate.reportError(throwable);
+		if (!(throwable instanceof PreviousErrorsExistException)) {
+			// in the case of a PreviousErrorsExistException we can simply
+			// swallow the exception, see ErrorAwareTaskRunnerWrapper
+			_delegate.reportError(throwable);
+		}
 		_completionListener.onComplete();
 	}
 

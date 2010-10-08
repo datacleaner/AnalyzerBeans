@@ -108,7 +108,8 @@ public final class Main {
 			}
 		} catch (Exception e) {
 			logger.error("Exception thrown in {}", e, this);
-			System.err.println("Error: " + e.getMessage());
+			System.err.println("Error:");
+			e.printStackTrace(System.err);
 		} finally {
 			configuration.getTaskRunner().shutdown();
 		}

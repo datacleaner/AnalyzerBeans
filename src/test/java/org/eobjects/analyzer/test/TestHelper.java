@@ -29,45 +29,41 @@ import org.junit.Ignore;
 @Ignore
 public final class TestHelper {
 
-	private static DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
-			.scanPackage("org.eobjects.analyzer.beans", true).scanPackage(
-					"org.eobjects.analyzer.result.renderer", true);
+	private static final DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
+			"org.eobjects.analyzer.beans", true).scanPackage("org.eobjects.analyzer.result.renderer", true);
 
-	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(
-			Datastore datastore) {
+	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(Datastore datastore) {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
-
-		List<Datastore> datastores = new LinkedList<Datastore>();
-		datastores.add(datastore);
-
-		return new AnalyzerBeansConfigurationImpl(new DatastoreCatalogImpl(
-				datastores), createReferenceDataCatalog(), descriptorProvider,
-				taskRunner, collectionProvider);
+		return createAnalyzerBeansConfiguration(taskRunner, datastore);
 	}
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration() {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
-		return new AnalyzerBeansConfigurationImpl(createDatastoreCatalog(),
-				createReferenceDataCatalog(), descriptorProvider, taskRunner,
-				collectionProvider);
+		return new AnalyzerBeansConfigurationImpl(createDatastoreCatalog(), createReferenceDataCatalog(),
+				descriptorProvider, taskRunner, collectionProvider);
+	}
+
+	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(TaskRunner taskRunner, Datastore datastore) {
+		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
+
+		List<Datastore> datastores = new LinkedList<Datastore>();
+		datastores.add(datastore);
+
+		return new AnalyzerBeansConfigurationImpl(new DatastoreCatalogImpl(datastores), createReferenceDataCatalog(),
+				descriptorProvider, taskRunner, collectionProvider);
 	}
 
 	public static ReferenceDataCatalog createReferenceDataCatalog() {
 		Collection<Dictionary> dictionaries = new ArrayList<Dictionary>();
-		dictionaries.add(new SimpleDictionary("eobjects.org products",
-				"MetaModel", "DataCleaner", "AnalyzerBeans"));
-		dictionaries.add(new SimpleDictionary("apache products",
-				"commons-lang", "commons-math", "commons-codec",
+		dictionaries.add(new SimpleDictionary("eobjects.org products", "MetaModel", "DataCleaner", "AnalyzerBeans"));
+		dictionaries.add(new SimpleDictionary("apache products", "commons-lang", "commons-math", "commons-codec",
 				"commons-logging"));
-		dictionaries.add(new SimpleDictionary("logging products",
-				"commons-logging", "log4j", "slf4j", "java.util.Logging"));
+		dictionaries.add(new SimpleDictionary("logging products", "commons-logging", "log4j", "slf4j", "java.util.Logging"));
 		Collection<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
 
-		synonymCatalogs.add(new SimpleSynonymCatalog("translated terms",
-				new SimpleSynonym("hello", "howdy", "hi", "yo", "hey"),
-				new SimpleSynonym("goodbye", "bye", "see you", "hey")));
+		synonymCatalogs.add(new SimpleSynonymCatalog("translated terms", new SimpleSynonym("hello", "howdy", "hi", "yo",
+				"hey"), new SimpleSynonym("goodbye", "bye", "see you", "hey")));
 
 		return new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs);
 	}
@@ -78,7 +74,6 @@ public final class TestHelper {
 	}
 
 	public static JdbcDatastore createSampleDatabaseDatastore(String name) {
-		return new JdbcDatastore(name, "jdbc:hsqldb:res:metamodel",
-				"org.hsqldb.jdbcDriver");
+		return new JdbcDatastore(name, "jdbc:hsqldb:res:metamodel", "org.hsqldb.jdbcDriver");
 	}
 }

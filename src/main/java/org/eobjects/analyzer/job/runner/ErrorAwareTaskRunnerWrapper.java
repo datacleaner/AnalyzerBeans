@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.job.concurrent.ErrorReporter;
+import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ final class ErrorAwareTaskRunnerWrapper implements TaskRunner {
 			_delegate.run(task, errorReporter);
 		} else {
 			logger.warn("Skipping task ({}) because errors have been reported in previous tasks (status={}).", task, status);
-			// TODO: Add a special exception to the ErrorReporter?
+			errorReporter.reportError(new PreviousErrorsExistException());
 		}
 	}
 

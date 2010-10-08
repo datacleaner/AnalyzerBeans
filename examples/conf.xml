@@ -8,7 +8,7 @@
 
 	<datastore-catalog>
 		<jdbc-datastore name="orderdb">
-			<url>jdbc:hsqldb:file:examples/orderdb</url>
+			<url>jdbc:hsqldb:file:examples/orderdb;readonly=true</url>
 			<driver>org.hsqldb.jdbcDriver</driver>
 			<username>SA</username>
 			<password></password>

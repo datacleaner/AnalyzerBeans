@@ -8,13 +8,12 @@ import org.slf4j.LoggerFactory;
 public final class CollectResultsAndCloseAnalyzerBeanTask extends CloseBeanTask {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	
+
 	private final AnalyzerBeanInstance analyzerBeanInstance;
 
-	public CollectResultsAndCloseAnalyzerBeanTask(
-			CompletionListener completionListener,
+	public CollectResultsAndCloseAnalyzerBeanTask(CompletionListener completionListener,
 			AnalyzerBeanInstance analyzerBeanInstance) {
-		super(completionListener,analyzerBeanInstance);
+		super(completionListener, analyzerBeanInstance);
 		this.analyzerBeanInstance = analyzerBeanInstance;
 	}
 

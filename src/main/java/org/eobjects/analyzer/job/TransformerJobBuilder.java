@@ -38,8 +38,6 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(getDescriptor());
 
 		// mimic the configuration of a real transformer bean instance
-
-		// TODO: Should be AssignConfiguredRowProcessingCallback
 		LifeCycleCallback callback = new AssignConfiguredCallback(new ImmutableBeanConfiguration(getConfiguredProperties()));
 		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, transformerBeanInstance.getBean(), getDescriptor());
 
