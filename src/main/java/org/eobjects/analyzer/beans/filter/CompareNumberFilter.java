@@ -15,15 +15,27 @@ public class CompareNumberFilter implements Filter<CompareCategory> {
 	@Configured
 	InputColumn<Number> input;
 
+	public CompareNumberFilter(Number threshold) {
+		this();
+		this.threshold = threshold.doubleValue();
+	}
+	
+	public CompareNumberFilter() {
+	}
+
 	@Override
 	public CompareCategory categorize(InputRow inputRow) {
 		Number value = inputRow.getValue(input);
+		return filter(value);
+	}
+
+	protected CompareCategory filter(Number value) {
 		if (value == null) {
 			// TODO: Consider a "not comparable" category?
 			return CompareCategory.LOWER;
 		}
 
-		if (threshold.equals(value)) {
+		if (threshold.equals(value.doubleValue())) {
 			return CompareCategory.EQUAL;
 		}
 		if (threshold.doubleValue() > value.doubleValue()) {

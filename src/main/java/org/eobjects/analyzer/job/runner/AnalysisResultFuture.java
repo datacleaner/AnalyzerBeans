@@ -20,7 +20,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * 
  * @author Kasper Sørensen
  */
-public interface AnalysisResultFuture {
+public interface AnalysisResultFuture extends ErrorAware {
 
 	/**
 	 * @return true if the job is still executing
@@ -63,10 +63,6 @@ public interface AnalysisResultFuture {
 	 * @return any errors reported during execution, if the job was not
 	 *         successful
 	 */
+	@Override
 	public List<Throwable> getErrors();
-
-	/**
-	 * Cancels the execution of the job
-	 */
-	public void cancel();
 }

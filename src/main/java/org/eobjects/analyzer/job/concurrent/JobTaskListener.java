@@ -2,9 +2,7 @@ package org.eobjects.analyzer.job.concurrent;
 
 import java.util.concurrent.TimeUnit;
 
-public interface JobCompletionListener extends CompletionListener {
-
-	public void cancel();
+public interface JobTaskListener extends TaskListener {
 
 	public boolean isDone();
 

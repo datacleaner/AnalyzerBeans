@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.connection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class DatastoreCatalogImpl implements DatastoreCatalog {
@@ -13,6 +14,13 @@ public class DatastoreCatalogImpl implements DatastoreCatalog {
 			throw new IllegalArgumentException("datastores cannot be null");
 		}
 		_datastores = datastores;
+	}
+
+	public DatastoreCatalogImpl(Datastore ... datastores) {
+		_datastores = new ArrayList<Datastore>();
+		for (Datastore datastore : datastores) {
+			_datastores.add(datastore);
+		}
 	}
 
 	@Override

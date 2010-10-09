@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
+import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,31 +15,18 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Kasper Sørensen
  */
-public final class JobCompletionListenerImpl implements JobCompletionListener {
+public final class JobTaskListenerImpl implements JobTaskListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(ScheduleTasksCompletionListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ScheduleTasksTaskListener.class);
 
 	private final CountDownLatch _countDownLatch;
 	private final AnalysisJob _job;
-	private final AnalysisListener[] _analysisListeners;
+	private final AnalysisListener _analysisListener;
 
-	public JobCompletionListenerImpl(AnalysisJob job, AnalysisListener[] analysisListeners, int callablesToWaitFor) {
+	public JobTaskListenerImpl(AnalysisJob job, AnalysisListener analysisListener, int callablesToWaitFor) {
 		_job = job;
-		_analysisListeners = analysisListeners;
+		_analysisListener = analysisListener;
 		_countDownLatch = new CountDownLatch(callablesToWaitFor);
-	}
-
-	@Override
-	public void onComplete() {
-		logger.debug("onComplete()");
-		_countDownLatch.countDown();
-		if (_countDownLatch.getCount() == 0) {
-			if (_analysisListeners != null) {
-				for (AnalysisListener listener : _analysisListeners) {
-					listener.jobSuccess(_job);
-				}
-			}
-		}
 	}
 
 	public void cancel() {
@@ -59,5 +47,25 @@ public final class JobCompletionListenerImpl implements JobCompletionListener {
 	@Override
 	public void await(long timeout, TimeUnit timeUnit) throws InterruptedException {
 		_countDownLatch.await(timeout, timeUnit);
+	}
+
+	@Override
+	public void onBegin(Task task) {
+	}
+
+	@Override
+	public void onComplete(Task task) {
+		logger.debug("onComplete(...)");
+		_countDownLatch.countDown();
+		if (_countDownLatch.getCount() == 0) {
+			_analysisListener.jobSuccess(_job);
+		}
+	}
+
+	@Override
+	public void onError(Task task, Throwable throwable) {
+		logger.debug("onError(...)");
+		_analysisListener.errorUknown(_job, throwable);
+		_countDownLatch.countDown();
 	}
 }

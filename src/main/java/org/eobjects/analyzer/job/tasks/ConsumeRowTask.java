@@ -6,7 +6,6 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.FilterOutcome;
-import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.FilterOutcomeSink;
 import org.eobjects.analyzer.job.runner.FilterOutcomeSinkImpl;
@@ -25,11 +24,9 @@ public final class ConsumeRowTask implements Task {
 	private final AnalysisJob _job;
 	private final SelectItem _countAllItem;
 	private final AtomicInteger _rowCounter;
-	private final CompletionListener _completionListener;
 
 	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, Table table, Row row, SelectItem countAllItem,
-			AtomicInteger rowCounter, AnalysisJob job, AnalysisListener analysisListener,
-			CompletionListener completionListener) {
+			AtomicInteger rowCounter, AnalysisJob job, AnalysisListener analysisListener) {
 		_consumers = consumers;
 		_table = table;
 		_row = row;
@@ -37,7 +34,6 @@ public final class ConsumeRowTask implements Task {
 		_rowCounter = rowCounter;
 		_job = job;
 		_analysisListener = analysisListener;
-		_completionListener = completionListener;
 	}
 
 	@Override
@@ -68,7 +64,6 @@ public final class ConsumeRowTask implements Task {
 			}
 		}
 		_analysisListener.rowProcessingProgress(_job, _table, rowNumber);
-		_completionListener.onComplete();
 	}
 
 }

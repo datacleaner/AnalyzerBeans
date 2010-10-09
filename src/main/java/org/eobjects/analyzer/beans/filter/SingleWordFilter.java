@@ -16,6 +16,10 @@ public class SingleWordFilter implements Filter<ValidationCategory> {
 	@Override
 	public ValidationCategory categorize(InputRow inputRow) {
 		String value = inputRow.getValue(input);
+		return filter(value);
+	}
+
+	protected ValidationCategory filter(String value) {
 		if (value == null || value.length() == 0) {
 			return ValidationCategory.INVALID;
 		}

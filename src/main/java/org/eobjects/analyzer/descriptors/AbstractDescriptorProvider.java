@@ -46,7 +46,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 		}
 		return null;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(Class<F> filterClass) {

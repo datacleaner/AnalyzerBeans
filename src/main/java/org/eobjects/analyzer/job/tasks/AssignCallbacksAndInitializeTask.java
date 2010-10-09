@@ -1,7 +1,6 @@
 package org.eobjects.analyzer.job.tasks;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
-import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
@@ -15,7 +14,6 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private CompletionListener _completionListener;
 	private CollectionProvider _collectionProvider;
 	private DataContextProvider _dataContextProvider;
 
@@ -28,10 +26,9 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 	private AbstractBeanInstance<?> _beanInstance;
 	private AnalyzerBeanInstance _analyzerBeanInstance;
 
-	private void init(CompletionListener completionListener, AbstractBeanInstance<?> beanInstance,
-			CollectionProvider collectionProvider, DataContextProvider dataContextProvider,
-			LifeCycleCallback assignConfiguredCallback, LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
-		_completionListener = completionListener;
+	private void init(AbstractBeanInstance<?> beanInstance, CollectionProvider collectionProvider,
+			DataContextProvider dataContextProvider, LifeCycleCallback assignConfiguredCallback,
+			LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
 		_beanInstance = beanInstance;
 		_collectionProvider = collectionProvider;
 		_dataContextProvider = dataContextProvider;
@@ -40,21 +37,20 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 		_closeCallback = closeCallback;
 	}
 
-	public AssignCallbacksAndInitializeTask(CompletionListener completionListener,
-			AbstractBeanInstance<?> transformerBeanInstance, CollectionProvider collectionProvider,
-			DataContextProvider dataContextProvider, LifeCycleCallback assignConfiguredCallback,
-			LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
-		init(completionListener, transformerBeanInstance, collectionProvider, dataContextProvider, assignConfiguredCallback,
-				initializeCallback, closeCallback);
+	public AssignCallbacksAndInitializeTask(AbstractBeanInstance<?> transformerBeanInstance,
+			CollectionProvider collectionProvider, DataContextProvider dataContextProvider,
+			LifeCycleCallback assignConfiguredCallback, LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
+		init(transformerBeanInstance, collectionProvider, dataContextProvider, assignConfiguredCallback, initializeCallback,
+				closeCallback);
 	}
 
-	public AssignCallbacksAndInitializeTask(CompletionListener completionListener,
-			AnalyzerBeanInstance analyzerBeanInstance, CollectionProvider collectionProvider,
-			DataContextProvider dataContextProvider, LifeCycleCallback assignConfiguredCallback,
-			LifeCycleCallback initializeCallback, AnalyzerLifeCycleCallback runCallback,
-			AnalyzerLifeCycleCallback returnResultsCallback, LifeCycleCallback closeCallback) {
-		init(completionListener, analyzerBeanInstance, collectionProvider, dataContextProvider, assignConfiguredCallback,
-				initializeCallback, closeCallback);
+	public AssignCallbacksAndInitializeTask(AnalyzerBeanInstance analyzerBeanInstance,
+			CollectionProvider collectionProvider, DataContextProvider dataContextProvider,
+			LifeCycleCallback assignConfiguredCallback, LifeCycleCallback initializeCallback,
+			AnalyzerLifeCycleCallback runCallback, AnalyzerLifeCycleCallback returnResultsCallback,
+			LifeCycleCallback closeCallback) {
+		init(analyzerBeanInstance, collectionProvider, dataContextProvider, assignConfiguredCallback, initializeCallback,
+				closeCallback);
 		_analyzerBeanInstance = analyzerBeanInstance;
 		_runCallback = runCallback;
 		_returnResultsCallback = returnResultsCallback;
@@ -96,9 +92,6 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 
 		logger.debug("calling initialize() on bean: {}", _beanInstance);
 		_beanInstance.initialize();
-
-		logger.debug("invoking completion listener: {}", _completionListener);
-		_completionListener.onComplete();
 	}
 
 	@Override

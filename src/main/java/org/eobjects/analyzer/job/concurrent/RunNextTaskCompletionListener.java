@@ -1,27 +1,31 @@
 package org.eobjects.analyzer.job.concurrent;
 
 import org.eobjects.analyzer.job.tasks.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public final class RunNextTaskCompletionListener implements CompletionListener {
-
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+public final class RunNextTaskCompletionListener implements TaskListener {
 
 	private final Task _nextTask;
+	private final TaskListener _nextListener;
 	private final TaskRunner _taskRunner;
-	private final ErrorReporter _nextErrorReporter;
 
-	public RunNextTaskCompletionListener(TaskRunner taskRunner, Task nextTask, ErrorReporter nextErrorReporter) {
+	public RunNextTaskCompletionListener(TaskRunner taskRunner, Task nextTask, TaskListener nextListener) {
 		_taskRunner = taskRunner;
 		_nextTask = nextTask;
-		_nextErrorReporter = nextErrorReporter;
+		_nextListener = nextListener;
 	}
 
 	@Override
-	public void onComplete() {
-		logger.debug("onComplete()");
-		_taskRunner.run(_nextTask, _nextErrorReporter);
+	public void onBegin(Task task) {
+	}
+
+	@Override
+	public void onComplete(Task task) {
+		_taskRunner.run(_nextTask, _nextListener);
+	}
+
+	@Override
+	public void onError(Task task, Throwable throwable) {
+		_nextListener.onError(task, throwable);
 	}
 
 }

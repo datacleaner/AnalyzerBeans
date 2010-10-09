@@ -1,11 +1,12 @@
 package org.eobjects.analyzer.job.runner;
 
-import org.eobjects.analyzer.job.concurrent.ErrorReporter;
+import java.util.List;
+
 import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
+import org.eobjects.analyzer.job.concurrent.TaskListener;
+import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper for the TaskRunner that only submits jobs when no errors have been
@@ -14,32 +15,49 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Kasper Sørensen
  */
-final class ErrorAwareTaskRunnerWrapper implements TaskRunner {
+final class ErrorAwareTaskRunnerWrapper implements TaskRunner, ErrorAware {
 
-	private static final Logger logger = LoggerFactory.getLogger(ErrorAwareTaskRunnerWrapper.class);
-	private final AnalysisResultFuture _analysisResultFuture;
-	private final TaskRunner _delegate;
+	// a single shared exception is used if previous exceptions have been
+	// reported. This is to make sure that the error message
+	// ("A previous exception has occurred") will only be saved once.
+	private static final PreviousErrorsExistException exception = new PreviousErrorsExistException(
+			"A previous exception has occurred");
 
-	public ErrorAwareTaskRunnerWrapper(AnalysisResultFuture analysisResultFuture, TaskRunner delegate) {
-		_analysisResultFuture = analysisResultFuture;
-		_delegate = delegate;
+	private final TaskRunner _taskRunner;
+	private final ErrorAware _errorAware;
+
+	public ErrorAwareTaskRunnerWrapper(ErrorAware errorAware, TaskRunner taskRunner) {
+		_taskRunner = taskRunner;
+		_errorAware = errorAware;
 	}
 
 	@Override
-	public void run(Task task, ErrorReporter errorReporter) {
-		JobStatus status = _analysisResultFuture.getStatus();
-
-		if (status == JobStatus.NOT_FINISHED) {
-			_delegate.run(task, errorReporter);
+	public void run(Task task, TaskListener taskListener) {
+		if (isErrornous()) {
+			taskListener.onError(task, exception);
 		} else {
-			logger.warn("Skipping task ({}) because errors have been reported in previous tasks (status={}).", task, status);
-			errorReporter.reportError(new PreviousErrorsExistException());
+			_taskRunner.run(task, taskListener);
 		}
 	}
 
 	@Override
+	public void run(TaskRunnable taskRunnable) {
+		run(taskRunnable.getTask(), taskRunnable.getListener());
+	}
+
+	@Override
 	public void shutdown() {
-		_delegate.shutdown();
+		_taskRunner.shutdown();
+	}
+
+	@Override
+	public boolean isErrornous() {
+		return _errorAware.isErrornous();
+	}
+
+	@Override
+	public List<Throwable> getErrors() {
+		return _errorAware.getErrors();
 	}
 
 }

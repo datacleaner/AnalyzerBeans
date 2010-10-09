@@ -139,7 +139,9 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 		for (String className : classNames) {
 			@SuppressWarnings("unchecked")
 			Class<? extends Filter<?>> c = (Class<? extends Filter<?>>) Class.forName(className);
+
 			FilterBeanDescriptor<?, ?> descriptor = getFilterBeanDescriptorForClass(c);
+
 			if (descriptor == null) {
 				addFilterBeanDescriptor(AnnotationBasedFilterBeanDescriptor.create(c));
 			}

@@ -1,6 +1,5 @@
 package org.eobjects.analyzer.job.tasks;
 
-import org.eobjects.analyzer.job.concurrent.CompletionListener;
 import org.eobjects.analyzer.job.runner.RowProcessingPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +9,9 @@ public final class RunRowProcessingPublisherTask implements Task {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final RowProcessingPublisher _rowProcessingPublisher;
-	private final CompletionListener _completionListener;
 
-	public RunRowProcessingPublisherTask(RowProcessingPublisher rowProcessingPublisher, CompletionListener completionListener) {
+	public RunRowProcessingPublisherTask(RowProcessingPublisher rowProcessingPublisher) {
 		_rowProcessingPublisher = rowProcessingPublisher;
-		_completionListener = completionListener;
 	}
 
 	@Override
@@ -22,7 +19,6 @@ public final class RunRowProcessingPublisherTask implements Task {
 		logger.debug("execute()");
 
 		_rowProcessingPublisher.run();
-		_completionListener.onComplete();
 	}
 
 }

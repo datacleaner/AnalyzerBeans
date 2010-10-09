@@ -20,10 +20,12 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.BeanJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.job.concurrent.CompletionListener;
-import org.eobjects.analyzer.job.concurrent.JobCompletionListenerImpl;
-import org.eobjects.analyzer.job.concurrent.NestedCompletionListener;
+import org.eobjects.analyzer.job.concurrent.JobTaskListener;
+import org.eobjects.analyzer.job.concurrent.JobTaskListenerImpl;
+import org.eobjects.analyzer.job.concurrent.NestedTaskListener;
 import org.eobjects.analyzer.job.concurrent.RunNextTaskCompletionListener;
+import org.eobjects.analyzer.job.concurrent.TaskListener;
+import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.AssignCallbacksAndInitializeTask;
 import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
@@ -78,22 +80,22 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 	@Override
 	public AnalysisResultFuture run(final AnalysisJob job) {
-
-		// A completion listener that simply waits for two onComplete() calls.
-		// One for the explorers, one for the row processor publishers
-		final JobCompletionListenerImpl finalCompletionListener = new JobCompletionListenerImpl(job, _sharedAnalysisListeners, 2);
-
 		final Queue<AnalyzerResult> resultQueue = new LinkedBlockingQueue<AnalyzerResult>();
-		final AnalysisResultFutureImpl analysisResultFuture = new AnalysisResultFutureImpl(resultQueue,
-				finalCompletionListener);
 
-		final AnalysisErrorListener cancellationListener = new AnalysisErrorListener(analysisResultFuture);
-		final AnalysisListener listener = new CompositeAnalysisListener(cancellationListener, _sharedAnalysisListeners);
-		final ErrorReporterFactory errorReporterFactory = new ErrorReporterFactoryImpl(listener);
+		// This analysis listener will keep track of all collected errors
+		final ErrorAwareAnalysisListener errorListener = new ErrorAwareAnalysisListener();
 
-		final TaskRunner taskRunner = new ErrorAwareTaskRunnerWrapper(analysisResultFuture, _configuration.getTaskRunner());
+		// This analysis listener is a composite for all other listeners
+		final AnalysisListener analysisListener = new CompositeAnalysisListener(errorListener, _sharedAnalysisListeners);
 
-		listener.jobBegin(job);
+		// A task listener that will register either succesfull executions or
+		// unexpected errors (which will be delegated to the errorListener)
+		final JobTaskListener finalTaskListener = new JobTaskListenerImpl(job, analysisListener, 2);
+
+		// set up the task runner that is aware of errors
+		final TaskRunner taskRunner = new ErrorAwareTaskRunnerWrapper(errorListener, _configuration.getTaskRunner());
+
+		analysisListener.jobBegin(job);
 
 		// declare all the "constants" of the job as final variables
 		final DataContextProvider dataContextProvider = job.getDataContextProvider();
@@ -118,8 +120,8 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 			}
 		}
 
-		final CompletionListener explorersDoneCompletionListener = new NestedCompletionListener("exploring analyzers",
-				explorerJobs.size(), finalCompletionListener);
+		final TaskListener explorersDoneTaskListener = new NestedTaskListener("exploring analyzers", explorerJobs.size(),
+				finalTaskListener);
 
 		// begin explorer jobs first because they can run independently (
 		for (AnalyzerJob explorerJob : explorerJobs) {
@@ -127,61 +129,60 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 			analyzerBeanInstances.add(instance);
 
 			RunExplorerCallback runExplorerCallback = new RunExplorerCallback(job, explorerJob, dataContextProvider,
-					listener);
-			ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(job, explorerJob, resultQueue, listener);
+					analysisListener);
+			ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(job, explorerJob, resultQueue,
+					analysisListener);
 
 			// set up scheduling for the explorers
-			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(explorersDoneCompletionListener, instance);
-			CompletionListener runExplorerCompletionListener = new RunNextTaskCompletionListener(taskRunner, closeTask,
-					errorReporterFactory.unknownErrorReporter(job));
-			Task runTask = new RunExplorerTask(instance, runExplorerCompletionListener);
-			CompletionListener initExplorerCompletionListener = new RunNextTaskCompletionListener(taskRunner, runTask,
-					errorReporterFactory.analyzerErrorReporter(job, explorerJob));
-			Task initTask = new AssignCallbacksAndInitializeTask(initExplorerCompletionListener, instance,
-					_configuration.getCollectionProvider(), dataContextProvider, new AssignConfiguredCallback(
-							explorerJob.getConfiguration()), new InitializeCallback(), runExplorerCallback,
-					returnResultsCallback, new CloseCallback());
+			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(instance);
+			TaskListener runExplorerTaskListener = new RunNextTaskCompletionListener(taskRunner, closeTask,
+					explorersDoneTaskListener);
+			Task runTask = new RunExplorerTask(instance);
+			TaskListener initExplorerTaskListener = new RunNextTaskCompletionListener(taskRunner, runTask,
+					runExplorerTaskListener);
+			Task initTask = new AssignCallbacksAndInitializeTask(instance, _configuration.getCollectionProvider(),
+					dataContextProvider, new AssignConfiguredCallback(explorerJob.getConfiguration()),
+					new InitializeCallback(), runExplorerCallback, returnResultsCallback, new CloseCallback());
 
 			// begin the explorers
-			taskRunner.run(initTask, errorReporterFactory.unknownErrorReporter(job));
+			taskRunner.run(initTask, initExplorerTaskListener);
 		}
 
 		final Map<Table, RowProcessingPublisher> rowProcessingPublishers = new HashMap<Table, RowProcessingPublisher>();
 		for (FilterJob filterJob : filterJobs) {
 			registerRowProcessingPublishers(job, rowProcessingPublishers, filterJob, null, transformerBeanInstances,
-					resultQueue, listener, errorReporterFactory, taskRunner);
+					resultQueue, analysisListener, taskRunner);
 		}
 		for (TransformerJob transformerJob : transformerJobs) {
 			registerRowProcessingPublishers(job, rowProcessingPublishers, transformerJob, null, transformerBeanInstances,
-					resultQueue, listener, errorReporterFactory, taskRunner);
+					resultQueue, analysisListener, taskRunner);
 		}
 		for (AnalyzerJob analyzerJob : rowProcessingJobs) {
 			registerRowProcessingPublishers(job, rowProcessingPublishers, analyzerJob, analyzerBeanInstances, null,
-					resultQueue, listener, errorReporterFactory, taskRunner);
+					resultQueue, analysisListener, taskRunner);
 		}
 
 		logger.info("Created {} row processor publishers", rowProcessingPublishers.size());
 
-		final CompletionListener rowProcessorPublishersDoneCompletionListener = new NestedCompletionListener(
-				"row processor publishers", rowProcessingPublishers.size(), finalCompletionListener);
+		final TaskListener rowProcessorPublishersDoneCompletionListener = new NestedTaskListener("row processor publishers",
+				rowProcessingPublishers.size(), finalTaskListener);
 
 		for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers.values()) {
-			List<Task> initTasks = rowProcessingPublisher.createInitialTasks(taskRunner, resultQueue,
+			List<TaskRunnable> initTasks = rowProcessingPublisher.createInitialTasks(taskRunner, resultQueue,
 					rowProcessorPublishersDoneCompletionListener);
 			logger.debug("Scheduling {} tasks for row processing publisher: {}", initTasks.size(), rowProcessingPublisher);
-			for (Task task : initTasks) {
-				taskRunner.run(task, errorReporterFactory.unknownErrorReporter(job));
+			for (TaskRunnable taskRunnable : initTasks) {
+				taskRunner.run(taskRunnable);
 			}
 		}
 
-		return analysisResultFuture;
+		return new AnalysisResultFutureImpl(resultQueue, finalTaskListener, errorListener);
 	}
 
 	private void registerRowProcessingPublishers(AnalysisJob analysisJob,
 			Map<Table, RowProcessingPublisher> rowProcessingPublishers, BeanJob<?> beanJob,
 			List<AnalyzerBeanInstance> analyzerBeanInstances, List<TransformerBeanInstance> transformerBeanInstances,
-			Collection<AnalyzerResult> resultQueue, AnalysisListener listener, ErrorReporterFactory errorReporterFactory,
-			TaskRunner taskRunner) {
+			Collection<AnalyzerResult> resultQueue, AnalysisListener listener, TaskRunner taskRunner) {
 		InputColumn<?>[] inputColumns = beanJob.getInput();
 		Set<Column> physicalColumns = new HashSet<Column>();
 		for (InputColumn<?> inputColumn : inputColumns) {
@@ -195,7 +196,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
 				rowPublisher = new RowProcessingPublisher(analysisJob, _configuration.getCollectionProvider(), table,
-						taskRunner, listener, errorReporterFactory);
+						taskRunner, listener);
 				rowProcessingPublishers.put(table, rowPublisher);
 			}
 

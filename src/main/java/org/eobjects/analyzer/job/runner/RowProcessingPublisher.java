@@ -20,18 +20,15 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.job.concurrent.CompletionListener;
-import org.eobjects.analyzer.job.concurrent.CompletionListenerAwareErrorReporterWrapper;
-import org.eobjects.analyzer.job.concurrent.ErrorReporter;
-import org.eobjects.analyzer.job.concurrent.NestedCompletionListener;
-import org.eobjects.analyzer.job.concurrent.ScheduleTasksCompletionListener;
+import org.eobjects.analyzer.job.concurrent.NestedTaskListener;
+import org.eobjects.analyzer.job.concurrent.ScheduleTasksTaskListener;
+import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.AssignCallbacksAndInitializeTask;
 import org.eobjects.analyzer.job.tasks.CloseBeanTask;
 import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
 import org.eobjects.analyzer.job.tasks.ConsumeRowTask;
-import org.eobjects.analyzer.job.tasks.ConsumeRowTaskCompletionListener;
 import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
@@ -66,11 +63,10 @@ public final class RowProcessingPublisher {
 	private final CollectionProvider _collectionProvider;
 	private final Table _table;
 	private final TaskRunner _taskRunner;
-	private final ErrorReporterFactory _errorReporterFactory;
 	private final AnalysisListener _analysisListener;
 
 	public RowProcessingPublisher(AnalysisJob job, CollectionProvider collectionProvider, Table table,
-			TaskRunner taskRunner, AnalysisListener analysisListener, ErrorReporterFactory errorReporterFactory) {
+			TaskRunner taskRunner, AnalysisListener analysisListener) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
@@ -86,15 +82,11 @@ public final class RowProcessingPublisher {
 		if (analysisListener == null) {
 			throw new IllegalArgumentException("AnalysisListener cannot be null");
 		}
-		if (errorReporterFactory == null) {
-			throw new IllegalArgumentException("ErrorReporterFactory cannot be null");
-		}
 		_job = job;
 		_collectionProvider = collectionProvider;
 		_table = table;
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
-		_errorReporterFactory = errorReporterFactory;
 	}
 
 	public void addPhysicalColumns(Column... columns) {
@@ -153,23 +145,22 @@ public final class RowProcessingPublisher {
 			}
 		}
 
-		ConsumeRowTaskCompletionListener completionListener = new ConsumeRowTaskCompletionListener();
-
-		final ErrorReporter errorReporter = new CompletionListenerAwareErrorReporterWrapper(completionListener,
-				_errorReporterFactory.unknownErrorReporter(_job));
-
-		int taskCount = 0;
+		final RowConsumerTaskListener taskListener = new RowConsumerTaskListener();
 		final AtomicInteger rowNumber = new AtomicInteger(0);
 		final DataSet dataSet = dataContext.executeQuery(q);
+		int numTasks = 0;
 		while (dataSet.next()) {
+			if (taskListener.isErrornous()) {
+				break;
+			}
 			Row metaModelRow = dataSet.getRow();
 			ConsumeRowTask task = new ConsumeRowTask(consumers, _table, metaModelRow, countAllItem, rowNumber, _job,
-					_analysisListener, completionListener);
-			_taskRunner.run(task, errorReporter);
-			taskCount++;
+					_analysisListener);
+			_taskRunner.run(task, taskListener);
+			numTasks++;
 		}
 
-		completionListener.awaitCount(taskCount);
+		taskListener.awaitTasks(numTasks);
 
 		dataSet.close();
 		_analysisListener.rowProcessingSuccess(_job, _table);
@@ -275,49 +266,46 @@ public final class RowProcessingPublisher {
 		_consumers.add(consumer);
 	}
 
-	public List<Task> createInitialTasks(TaskRunner taskRunner, Queue<AnalyzerResult> resultQueue,
-			CompletionListener rowProcessorPublishersDoneCompletionListener) {
+	public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<AnalyzerResult> resultQueue,
+			TaskListener rowProcessorPublishersTaskListener) {
 		int numConsumers = _consumers.size();
 
-		CompletionListener closeCompletionListener = new NestedCompletionListener("row processor consumers", numConsumers,
-				rowProcessorPublishersDoneCompletionListener);
+		TaskListener closeTaskListener = new NestedTaskListener("row processor consumers", numConsumers,
+				rowProcessorPublishersTaskListener);
 
 		List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConsumers);
 		for (RowProcessingConsumer consumer : _consumers) {
-			Task closeTask = createCloseTask(consumer, resultQueue, closeCompletionListener);
-			closeTasks.add(new TaskRunnable(closeTask, _errorReporterFactory.unknownErrorReporter(_job)));
+			Task closeTask = createCloseTask(consumer, resultQueue);
+			closeTasks.add(new TaskRunnable(closeTask, closeTaskListener));
 		}
 
-		CompletionListener runCompletionListener = new ScheduleTasksCompletionListener("run row processing", taskRunner, 1,
-				closeTasks);
+		TaskListener runCompletionListener = new ScheduleTasksTaskListener("run row processing", taskRunner, 1, closeTasks);
 
-		Collection<TaskRunnable> runTasksToSchedule = new ArrayList<TaskRunnable>(1);
-		RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this, runCompletionListener);
-		runTasksToSchedule.add(new TaskRunnable(runTask, _errorReporterFactory.unknownErrorReporter(_job)));
+		Collection<TaskRunnable> runTasks = new ArrayList<TaskRunnable>(1);
+		RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this);
+		runTasks.add(new TaskRunnable(runTask, runCompletionListener));
 
-		CompletionListener initCompletionListener = new ScheduleTasksCompletionListener("initialize row consumers",
-				taskRunner, numConsumers, runTasksToSchedule);
+		TaskListener initTaskListener = new ScheduleTasksTaskListener("initialize row consumers", taskRunner, numConsumers,
+				runTasks);
 
-		List<Task> initTasks = new ArrayList<Task>(numConsumers);
+		List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConsumers);
 		for (RowProcessingConsumer consumer : _consumers) {
-			initTasks.add(createInitTask(consumer, initCompletionListener, resultQueue));
+			initTasks.add(createInitTask(consumer, initTaskListener, resultQueue));
 		}
 		return initTasks;
 	}
 
-	private Task createCloseTask(RowProcessingConsumer consumer, Queue<AnalyzerResult> resultQueue,
-			CompletionListener completionListener) {
+	private Task createCloseTask(RowProcessingConsumer consumer, Queue<AnalyzerResult> resultQueue) {
 		if (consumer instanceof TransformerConsumer || consumer instanceof FilterConsumer) {
-			return new CloseBeanTask(completionListener, consumer.getBeanInstance());
+			return new CloseBeanTask(consumer.getBeanInstance());
 		} else if (consumer instanceof AnalyzerConsumer) {
-			return new CollectResultsAndCloseAnalyzerBeanTask(completionListener,
-					((AnalyzerBeanInstance) consumer.getBeanInstance()));
+			return new CollectResultsAndCloseAnalyzerBeanTask(((AnalyzerBeanInstance) consumer.getBeanInstance()));
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}
 	}
 
-	private Task createInitTask(RowProcessingConsumer consumer, CompletionListener completionListener,
+	private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener,
 			Queue<AnalyzerResult> resultQueue) {
 		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredCallback(consumer.getBeanJob().getConfiguration());
 		LifeCycleCallback initializeCallback = new InitializeCallback();
@@ -325,30 +313,31 @@ public final class RowProcessingPublisher {
 
 		DataContextProvider dataContextProvider = _job.getDataContextProvider();
 
+		Task task;
 		if (consumer instanceof TransformerConsumer) {
 			TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
 			TransformerBeanInstance transformerBeanInstance = transformerConsumer.getBeanInstance();
 
-			return new AssignCallbacksAndInitializeTask(completionListener, transformerBeanInstance, _collectionProvider,
-					dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
+			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _collectionProvider, dataContextProvider,
+					assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof FilterConsumer) {
 			FilterConsumer filterConsumer = (FilterConsumer) consumer;
 			FilterBeanInstance filterBeanInstance = filterConsumer.getBeanInstance();
 
-			return new AssignCallbacksAndInitializeTask(completionListener, filterBeanInstance, _collectionProvider,
-					dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
+			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _collectionProvider, dataContextProvider,
+					assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
 			AnalyzerBeanInstance analyzerBeanInstance = analyzerConsumer.getBeanInstance();
 			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(_job, analyzerConsumer.getBeanJob(),
 					resultQueue, _analysisListener);
 
-			return new AssignCallbacksAndInitializeTask(completionListener, analyzerBeanInstance, _collectionProvider,
-					dataContextProvider, assignConfiguredCallback, initializeCallback, null, returnResultsCallback,
-					closeCallback);
+			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _collectionProvider, dataContextProvider,
+					assignConfiguredCallback, initializeCallback, null, returnResultsCallback, closeCallback);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}
+		return new TaskRunnable(task, listener);
 	}
 
 	@Override

@@ -1,5 +1,9 @@
 package org.eobjects.analyzer.job.runner;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
@@ -11,19 +15,15 @@ import org.slf4j.LoggerFactory;
 import dk.eobjects.metamodel.schema.Table;
 
 /**
- * AnalysisListener that will register errors and cancel the job if fatal errors
- * occur
+ * AnalysisListener that will register errors
  * 
  * @author Kasper Sørensen
  */
-final class AnalysisErrorListener implements AnalysisListener {
+final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 
-	private static final Logger logger = LoggerFactory.getLogger(AnalysisErrorListener.class);
-	private final AnalysisResultFutureImpl _analysisResultFuture;
+	private static final Logger logger = LoggerFactory.getLogger(ErrorAwareAnalysisListener.class);
 
-	public AnalysisErrorListener(AnalysisResultFutureImpl analysisResultFuture) {
-		_analysisResultFuture = analysisResultFuture;
-	}
+	private final List<Throwable> _errors = new LinkedList<Throwable>();
 
 	@Override
 	public void jobBegin(AnalysisJob job) {
@@ -34,32 +34,47 @@ final class AnalysisErrorListener implements AnalysisListener {
 	}
 
 	private void storeError(AnalysisJob job, Throwable throwable) {
-		logger.warn("Cancelling job because of error...", throwable);
-		_analysisResultFuture.addError(throwable);
-		_analysisResultFuture.cancel();
+		synchronized (_errors) {
+			if (!_errors.contains(throwable)) {
+				_errors.add(throwable);
+			}
+
+		}
+	}
+
+	@Override
+	public List<Throwable> getErrors() {
+		return Collections.synchronizedList(Collections.unmodifiableList(_errors));
+	}
+
+	@Override
+	public boolean isErrornous() {
+		synchronized (_errors) {
+			return !_errors.isEmpty();
+		}
 	}
 
 	@Override
 	public void errorInFilter(AnalysisJob job, FilterJob filterJob, Throwable throwable) {
-		logger.warn("errorInFilter({},{},...)", job, filterJob);
+		logger.warn("errorInFilter({},{},{})", new Object[] { job, filterJob, throwable });
 		storeError(job, throwable);
 	}
 
 	@Override
 	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, Throwable throwable) {
-		logger.warn("errorInTransformer({},{},...)", job, transformerJob);
+		logger.warn("errorInTransformer({},{},{})", new Object[] { job, transformerJob, throwable });
 		storeError(job, throwable);
 	}
 
 	@Override
 	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, Throwable throwable) {
-		logger.warn("errorInAnalyzer({},{},...)", job, analyzerJob);
+		logger.warn("errorInAnalyzer({},{},{})", new Object[] { job, analyzerJob, throwable });
 		storeError(job, throwable);
 	}
 
 	@Override
 	public void errorUknown(AnalysisJob job, Throwable throwable) {
-		logger.warn("errorUnknown({},...)", job);
+		logger.warn("errorUnknown({},{})", new Object[] { job, throwable });
 		storeError(job, throwable);
 	}
 

@@ -8,34 +8,45 @@ public final class TaskRunnable implements Runnable {
 
 	private final static Logger logger = LoggerFactory.getLogger(TaskRunnable.class);
 	private final Task _task;
-	private final ErrorReporter _errorReporter;
+	private final TaskListener _listener;
 
-	public TaskRunnable(Task task, ErrorReporter errorReporter) {
+	public TaskRunnable(Task task, TaskListener listener) {
 		if (task == null) {
 			throw new IllegalArgumentException("task cannot be null");
 		}
 		_task = task;
-		_errorReporter = errorReporter;
+		_listener = listener;
 	}
 
 	@Override
-	public void run() {
-		try {
-			_task.execute();
-		} catch (Throwable t) {
-			if (_errorReporter == null) {
-				logger.warn("An error occurred while executing task: " + _task, t);
-			} else {
-				_errorReporter.reportError(t);
+	public final void run() {
+		if (_listener == null) {
+
+			// execute without listener
+			try {
+				_task.execute();
+			} catch (Throwable t) {
+				logger.warn("No TaskListener to inform of error!", t);
+			}
+
+		} else {
+
+			// execute with listener
+			_listener.onBegin(_task);
+			try {
+				_task.execute();
+				_listener.onComplete(_task);
+			} catch (Throwable t) {
+				_listener.onError(_task, t);
 			}
 		}
 	}
 
-	public Task getTask() {
+	public final Task getTask() {
 		return _task;
 	}
 
-	public ErrorReporter getErrorReporter() {
-		return _errorReporter;
+	public final TaskListener getListener() {
+		return _listener;
 	}
 }

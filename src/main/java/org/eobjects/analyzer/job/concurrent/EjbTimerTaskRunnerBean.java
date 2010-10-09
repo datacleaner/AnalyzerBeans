@@ -16,31 +16,33 @@ import org.slf4j.LoggerFactory;
 @Stateless
 public class EjbTimerTaskRunnerBean implements EjbTimerTaskRunner {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(EjbTimerTaskRunnerBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(EjbTimerTaskRunnerBean.class);
 
 	// shared queue of callables
-	private static final BlockingQueue<Task> taskQueue = new LinkedBlockingQueue<Task>();
+	private static final BlockingQueue<TaskRunnable> taskQueue = new LinkedBlockingQueue<TaskRunnable>();
 
 	@Resource
 	TimerService timerService;
 
 	@Override
-	public void run(Task task, ErrorReporter errorReporter) {
-		logger.debug("run({})", task);
-		taskQueue.add(task);
+	public void run(Task task, TaskListener listener) {
+		logger.debug("run({},{})", task, listener);
+		taskQueue.add(new TaskRunnable(task, listener));
+		timerService.createTimer(0, null);
+	}
+	
+	@Override
+	public void run(TaskRunnable taskRunnable) {
+		logger.debug("run({})", taskRunnable);
+		taskQueue.add(taskRunnable);
 		timerService.createTimer(0, null);
 	}
 
 	@Timeout
 	public void executeTimer(Timer timer) {
 		logger.info("executeTimer(...)");
-		Task task = taskQueue.poll();
-		try {
-			task.execute();
-		} catch (Exception e) {
-			logger.error("An uncaught exception was thrown by callable", e);
-		}
+		TaskRunnable task = taskQueue.poll();
+		task.run();
 	}
 
 	@Override

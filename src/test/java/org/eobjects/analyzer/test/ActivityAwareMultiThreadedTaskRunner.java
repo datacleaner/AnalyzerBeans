@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.test.full.scenarios;
+package org.eobjects.analyzer.test;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.Assert;
 
-import org.eobjects.analyzer.job.concurrent.ErrorReporter;
+import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
@@ -36,9 +36,15 @@ public final class ActivityAwareMultiThreadedTaskRunner implements TaskRunner {
 	}
 
 	@Override
-	public void run(Task task, ErrorReporter errorReporter) {
-		Future<?> future = _executorService.submit(new TaskRunnable(task, errorReporter));
+	public void run(Task task, TaskListener listener) {
+		Future<?> future = _executorService.submit(new TaskRunnable(task, listener));
 		_tasksAndFutures.put(future, task);
+	}
+
+	@Override
+	public void run(TaskRunnable taskRunnable) {
+		Future<?> future = _executorService.submit(taskRunnable);
+		_tasksAndFutures.put(future, taskRunnable.getTask());
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.job.runner.JobStatus;
+import org.eobjects.analyzer.test.ActivityAwareMultiThreadedTaskRunner;
 import org.eobjects.analyzer.test.TestHelper;
 
 /**
@@ -45,6 +46,7 @@ public class UnavailableFilterErrorHandlingTest extends TestCase {
 
 		List<Throwable> errors = resultFuture.getErrors();
 		assertEquals(1, errors.size());
+		assertEquals(IllegalStateException.class, errors.get(0).getClass());
 		assertEquals("Could not detect next consumer in processing order", errors.get(0).getMessage());
 
 		// We will give the remaining tasks (such as close tasks etc.) a few
