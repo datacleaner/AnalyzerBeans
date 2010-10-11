@@ -129,11 +129,12 @@ public class StringConversionUtilsTest extends TestCase {
 		if (ReflectionUtils.isArray(o)) {
 			boolean equals = CompareUtils.equals(o, o2);
 			if (!equals) {
-				System.out.println("Not equals:");
-				System.out.println(" expected: " + o + ": " + Arrays.toString((Object[]) o));
-				System.out.println(" actual:   " + o2 + ": " + Arrays.toString((Object[]) o2));
+				StringBuilder sb = new StringBuilder();
+				sb.append("Not equals!");
+				sb.append("\n expected: " + o + ": " + Arrays.toString((Object[]) o));
+				sb.append("\n actual:   " + o2 + ": " + Arrays.toString((Object[]) o2));
+				fail(sb.toString());
 			}
-			assertTrue(equals);
 		} else {
 			assertEquals(o, o2);
 		}
