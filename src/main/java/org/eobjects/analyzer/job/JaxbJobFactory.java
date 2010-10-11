@@ -43,6 +43,7 @@ import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
 import org.eobjects.analyzer.job.jaxb.SourceType;
 import org.eobjects.analyzer.job.jaxb.TransformationType;
+import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.SchemaNavigator;
@@ -179,6 +180,7 @@ public class JaxbJobFactory {
 			List<TransformerType> unconfiguredTransformerKeys = new LinkedList<TransformerType>(
 					transformerJobBuilders.keySet());
 			while (!unconfiguredTransformerKeys.isEmpty()) {
+				boolean progress = false;
 				for (Iterator<TransformerType> it = unconfiguredTransformerKeys.iterator(); it.hasNext();) {
 					boolean configurable = true;
 
@@ -196,6 +198,7 @@ public class JaxbJobFactory {
 					}
 
 					if (configurable) {
+						progress = true;
 						TransformerJobBuilder<?> transformerJobBuilder = transformerJobBuilders
 								.get(unconfiguredTransformerKey);
 
@@ -232,6 +235,31 @@ public class JaxbJobFactory {
 
 						it.remove();
 					}
+				}
+
+				if (!progress) {
+					StringBuilder sb = new StringBuilder();
+					for (TransformerType transformerType : unconfiguredTransformerKeys) {
+						if (sb.length() != 0) {
+							sb.append(", ");
+						}
+						TransformerDescriptorType descriptor = transformerType.getDescriptor();
+						sb.append(descriptor.getRef());
+						sb.append("(input: ");
+
+						List<InputType> input = transformerType.getInput();
+						int i = 0;
+						for (InputType inputType : input) {
+							if (i != 0) {
+								sb.append(", ");
+							}
+							sb.append(inputType.getRef());
+							i++;
+						}
+						sb.append(")");
+					}
+					throw new IllegalStateException("Could not connect column dependencies for transformers: "
+							+ sb.toString());
 				}
 			}
 
