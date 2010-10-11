@@ -153,6 +153,11 @@
 			<version>${metamodel.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-excel</artifactId>
+			<version>${metamodel.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.4</version>

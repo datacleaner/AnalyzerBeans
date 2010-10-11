@@ -1,6 +1,5 @@
 package org.eobjects.analyzer.connection;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -119,7 +118,7 @@ public final class JdbcDatastore implements Datastore {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		if (_connection != null) {
 			try {
 				_connection.close();

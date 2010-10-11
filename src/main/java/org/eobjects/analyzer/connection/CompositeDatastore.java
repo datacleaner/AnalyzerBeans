@@ -1,6 +1,5 @@
 package org.eobjects.analyzer.connection;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,12 +24,12 @@ public class CompositeDatastore implements Datastore {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		for (Datastore datastore : _datastores) {
 			try {
 				datastore.close();
-			} catch (IOException e) {
-				logger.warn("Error closing child datastore: " + datastore.getName(), e);
+			} catch (Throwable t) {
+				logger.warn("Error closing child datastore: " + datastore.getName(), t);
 			}
 		}
 	}

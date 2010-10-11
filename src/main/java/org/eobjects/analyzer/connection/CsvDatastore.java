@@ -1,7 +1,6 @@
 package org.eobjects.analyzer.connection;
 
 import java.io.File;
-import java.io.IOException;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
@@ -10,10 +9,10 @@ public final class CsvDatastore implements Datastore {
 
 	private static final long serialVersionUID = 1L;
 
-	private String _name;
-	private String _filename;
-	private Character _quoteChar;
-	private Character _separatorChar;
+	private final String _name;
+	private final String _filename;
+	private final Character _quoteChar;
+	private final Character _separatorChar;
 
 	public CsvDatastore(String name, String filename) {
 		this(name, filename, null, null);
@@ -27,7 +26,7 @@ public final class CsvDatastore implements Datastore {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 	}
 
 	@Override
