@@ -1,24 +1,28 @@
 package org.eobjects.analyzer.reference;
 
-final class TextBasedSynonym implements Synonym {
+import java.io.Serializable;
 
-	private final String _masterTerm;
+final class TextBasedSynonym implements Synonym, Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 	private final String[] _synonyms;
+	private final boolean _caseSensitive;
 
-	public TextBasedSynonym(String line) {
+	public TextBasedSynonym(String line, boolean caseSensitive) {
 		String[] split = line.split("\\,");
-		_masterTerm = split[0];
 		_synonyms = split;
+		_caseSensitive = caseSensitive;
 	}
 
 	@Override
 	public String getMasterTerm() {
-		return _masterTerm;
+		return _synonyms[0];
 	}
 
 	@Override
 	public ReferenceValues<String> getSynonyms() {
-		return new SimpleReferenceValues<String>(_synonyms);
+		return new SimpleStringReferenceValues(_synonyms, _caseSensitive);
 	}
 
 }

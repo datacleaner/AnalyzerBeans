@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class SimpleReferenceValues<E> implements ReferenceValues<E>, Serializable {
+public final class SimpleReferenceValues<E> implements ReferenceValues<E>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private E[] _values;
+	private final E[] _values;
 
 	public SimpleReferenceValues(E... values) {
 		_values = values;
