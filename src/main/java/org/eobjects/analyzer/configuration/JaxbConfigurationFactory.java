@@ -21,6 +21,7 @@ import org.eobjects.analyzer.configuration.jaxb.ConfigurationMetadataType;
 import org.eobjects.analyzer.configuration.jaxb.CsvDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.CustomTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreCatalogType;
+import org.eobjects.analyzer.configuration.jaxb.ExcelDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
@@ -30,6 +31,7 @@ import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.job.JaxbJobFactory;
@@ -40,6 +42,7 @@ import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
+import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
@@ -121,7 +124,9 @@ public class JaxbConfigurationFactory {
 	private DatastoreCatalog createDatastoreCatalog(DatastoreCatalogType datastoreCatalogType) {
 		Map<String, Datastore> datastores = new HashMap<String, Datastore>();
 
-		List<CsvDatastoreType> csvDatastores = datastoreCatalogType.getCsvDatastore();
+		List<Object> datastoreTypes = datastoreCatalogType.getJdbcDatastoreOrCsvDatastoreOrExcelDatastore();
+
+		List<CsvDatastoreType> csvDatastores = CollectionUtils.filterOnClass(datastoreTypes, CsvDatastoreType.class);
 		for (CsvDatastoreType csvDatastoreType : csvDatastores) {
 			String name = csvDatastoreType.getName();
 			if (StringUtils.isNullOrEmpty(name)) {
@@ -151,7 +156,21 @@ public class JaxbConfigurationFactory {
 			datastores.put(name, new CsvDatastore(name, filename, quoteChar, separatorChar));
 		}
 
-		List<JdbcDatastoreType> jdbcDatastores = datastoreCatalogType.getJdbcDatastore();
+		List<ExcelDatastoreType> excelDatastores = CollectionUtils.filterOnClass(datastoreTypes, ExcelDatastoreType.class);
+		for (ExcelDatastoreType excelDatastoreType : excelDatastores) {
+			String name = excelDatastoreType.getName();
+			if (StringUtils.isNullOrEmpty(name)) {
+				throw new IllegalStateException("Datastore name cannot be null");
+			}
+
+			if (datastores.containsKey(name)) {
+				throw new IllegalStateException("Datastore name is not unique: " + name);
+			}
+			String filename = excelDatastoreType.getFilename();
+			datastores.put(name, new ExcelDatastore(name, filename));
+		}
+
+		List<JdbcDatastoreType> jdbcDatastores = CollectionUtils.filterOnClass(datastoreTypes, JdbcDatastoreType.class);
 		for (JdbcDatastoreType jdbcDatastoreType : jdbcDatastores) {
 			String name = jdbcDatastoreType.getName();
 			if (StringUtils.isNullOrEmpty(name)) {
@@ -178,7 +197,8 @@ public class JaxbConfigurationFactory {
 			datastores.put(name, datastore);
 		}
 
-		List<CompositeDatastoreType> compositeDatastores = datastoreCatalogType.getCompositeDatastore();
+		List<CompositeDatastoreType> compositeDatastores = CollectionUtils.filterOnClass(datastoreTypes,
+				CompositeDatastoreType.class);
 		for (CompositeDatastoreType compositeDatastoreType : compositeDatastores) {
 			String name = compositeDatastoreType.getName();
 			if (StringUtils.isNullOrEmpty(name)) {

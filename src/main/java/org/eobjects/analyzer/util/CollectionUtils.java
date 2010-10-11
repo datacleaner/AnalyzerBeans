@@ -17,8 +17,7 @@ public final class CollectionUtils {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <T> List<T> list(Class<? extends List> listClass,
-			T... elements) {
+	public static <T> List<T> list(Class<? extends List> listClass, T... elements) {
 		try {
 			List list = listClass.newInstance();
 			for (T t : elements) {
@@ -52,11 +51,9 @@ public final class CollectionUtils {
 		if (existingArray == null) {
 			return elements;
 		}
-		Object result = Array.newInstance(elements.getClass()
-				.getComponentType(), existingArray.length + elements.length);
+		Object result = Array.newInstance(elements.getClass().getComponentType(), existingArray.length + elements.length);
 		System.arraycopy(existingArray, 0, result, 0, existingArray.length);
-		System.arraycopy(elements, 0, result, existingArray.length,
-				elements.length);
+		System.arraycopy(elements, 0, result, existingArray.length, elements.length);
 		return (E[]) result;
 	}
 
@@ -83,8 +80,7 @@ public final class CollectionUtils {
 	public static <E> E[] arrayRemove(E[] array, E elementToRemove) {
 		boolean found = false;
 		@SuppressWarnings("unchecked")
-		E[] result = (E[]) Array.newInstance(array.getClass()
-				.getComponentType(), array.length - 1);
+		E[] result = (E[]) Array.newInstance(array.getClass().getComponentType(), array.length - 1);
 		int nextIndex = 0;
 		for (E e : array) {
 			if (e == elementToRemove) {
@@ -103,8 +99,7 @@ public final class CollectionUtils {
 	public static Object arrayRemove(Object array, Object elementToRemove) {
 		boolean found = false;
 		int oldLength = Array.getLength(array);
-		Object result = Array.newInstance(array.getClass().getComponentType(),
-				oldLength - 1);
+		Object result = Array.newInstance(array.getClass().getComponentType(), oldLength - 1);
 		int nextIndex = 0;
 		for (int i = 0; i < oldLength; i++) {
 			Object e = Array.get(array, i);
@@ -132,5 +127,18 @@ public final class CollectionUtils {
 		Object result = Array.newInstance(elementClass, 1);
 		Array.set(result, 0, arrayOrElement);
 		return (E[]) result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <E> List<E> filterOnClass(List<?> datastoreTypes, Class<E> clazz) {
+		List<E> result = new ArrayList<E>();
+		for (Object object : datastoreTypes) {
+			if (object != null) {
+				if (ReflectionUtils.is(object.getClass(), clazz)) {
+					result.add((E) object);
+				}
+			}
+		}
+		return result;
 	}
 }

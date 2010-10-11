@@ -57,14 +57,16 @@
 	</complexType>
 
 	<complexType name="datastoreCatalogType">
-		<sequence>
+		<choice minOccurs="0" maxOccurs="unbounded">
 			<element name="jdbc-datastore" type="ab:jdbcDatastoreType"
 				minOccurs="0" maxOccurs="unbounded" />
 			<element name="csv-datastore" type="ab:csvDatastoreType"
 				minOccurs="0" maxOccurs="unbounded" />
+			<element name="excel-datastore" type="ab:excelDatastoreType"
+				minOccurs="0" maxOccurs="unbounded" />
 			<element name="composite-datastore" type="ab:compositeDatastoreType"
 				minOccurs="0" maxOccurs="unbounded" />
-		</sequence>
+		</choice>
 	</complexType>
 
 	<complexType name="jdbcDatastoreType">
@@ -87,6 +89,13 @@
 			<element name="quote-char" minOccurs="0" maxOccurs="1" type="token" />
 			<element name="separator-char" minOccurs="0" maxOccurs="1"
 				type="token" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="excelDatastoreType">
+		<sequence>
+			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 	</complexType>
