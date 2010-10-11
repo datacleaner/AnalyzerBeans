@@ -9,7 +9,7 @@ import org.eobjects.analyzer.job.BeanConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssignConfiguredCallback implements LifeCycleCallback {
+public final class AssignConfiguredCallback implements LifeCycleCallback {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 

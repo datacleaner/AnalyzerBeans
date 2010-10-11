@@ -5,7 +5,7 @@ import java.util.Set;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.CloseMethodDescriptor;
 
-public class CloseCallback implements LifeCycleCallback {
+public final class CloseCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,

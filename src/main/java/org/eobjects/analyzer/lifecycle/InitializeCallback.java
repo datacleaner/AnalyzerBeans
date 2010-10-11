@@ -5,7 +5,7 @@ import java.util.Set;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
 
-public class InitializeCallback implements LifeCycleCallback {
+public final class InitializeCallback implements LifeCycleCallback {
 
 	@Override
 	public void onEvent(LifeCycleState state, Object analyzerBean,

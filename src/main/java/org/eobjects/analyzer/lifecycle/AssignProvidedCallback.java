@@ -9,7 +9,7 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
 
-public class AssignProvidedCallback implements LifeCycleCallback {
+public final class AssignProvidedCallback implements LifeCycleCallback {
 
 	private final CollectionProvider collectionProvider;
 	private final DataContextProvider dataContextProvider;
