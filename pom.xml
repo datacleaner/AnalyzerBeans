@@ -180,7 +180,6 @@
 			<groupId>asm</groupId>
 			<artifactId>asm</artifactId>
 			<version>3.2</version>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- Needed if BerkeleyDbCollectionProvider is used -->
@@ -188,7 +187,6 @@
 			<groupId>berkeleydb</groupId>
 			<artifactId>je</artifactId>
 			<version>3.2.76</version>
-			<optional>true</optional>
 		</dependency>
 
 		<!-- JSR 330: Dependency Injection -->

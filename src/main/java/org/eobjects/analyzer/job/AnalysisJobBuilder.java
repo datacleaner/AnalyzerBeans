@@ -20,6 +20,7 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.schema.Column;
 
@@ -89,6 +90,24 @@ public class AnalysisJobBuilder {
 			addSourceColumn(metaModelInputColumn);
 		}
 		return this;
+	}
+
+	public AnalysisJobBuilder addSourceColumns(String ... columnNames) {
+		if (_dataContextProvider == null) {
+			throw new IllegalStateException("Cannot add source columns by name when no Datastore or DataContextProvider has been set");
+		}
+		SchemaNavigator schemaNavigator = _dataContextProvider
+		.getSchemaNavigator();
+		Column[] columns = new Column[columnNames.length];
+		for (int i = 0; i < columns.length; i++) {
+			String columnName = columnNames[i];
+			Column column = schemaNavigator.convertToColumn(columnName);
+			if (column == null) {
+				throw new IllegalArgumentException("No such column: " + columnName);
+			}
+			columns[i] = column;
+		}
+		return addSourceColumns(columns);
 	}
 
 	public AnalysisJobBuilder removeSourceColumn(Column column) {
