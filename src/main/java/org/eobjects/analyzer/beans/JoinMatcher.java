@@ -96,6 +96,6 @@ public class JoinMatcher implements ExploringAnalyzer<DataSetResult> {
 
 	@Override
 	public DataSetResult getResult() {
-		return new DataSetResult(unmatchedRows, getClass());
+		return new DataSetResult(unmatchedRows);
 	}
 }

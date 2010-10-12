@@ -118,9 +118,6 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		assertEquals(6, results.size());
 
-		AnalyzerResult result = results.get(0);
-		assertEquals("StringAnalyzer", result.getProducerClass().getSimpleName());
-
 		ValueDistributionResult vdResult = (ValueDistributionResult) results.get(1);
 		assertEquals("Firstname", vdResult.getColumnName());
 		assertEquals(0, vdResult.getNullCount());

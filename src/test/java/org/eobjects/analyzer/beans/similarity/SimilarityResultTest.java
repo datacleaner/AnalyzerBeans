@@ -15,11 +15,8 @@ public class SimilarityResultTest extends TestCase {
 		similarValues.add(new SimilarValues("foo", "bar"));
 		similarValues.add(new SimilarValues("foo", "foobar"));
 		similarValues.add(new SimilarValues("foo", "world"));
-		SimilarityResult result = new SimilarityResult(
-				PhoneticSimilarityFinder.class, similarValues);
-		
-		assertEquals("[hello, foobar, foo, bar, world]", result.getValues()
-				.toString());
-		assertEquals(PhoneticSimilarityFinder.class, result.getProducerClass());
+		SimilarityResult result = new SimilarityResult(similarValues);
+
+		assertEquals("[hello, foobar, foo, bar, world]", result.getValues().toString());
 	}
 }

@@ -101,8 +101,7 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			columnDimension.addCategory(column.getName());
 		}
 
-		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class,
-				columnDimension, measureDimension);
+		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
 		for (InputColumn<? extends Number> column : columns) {
 			SummaryStatistics s = _statistics.get(column);
 			Long nullCount = _nullValues.get(column);
@@ -110,11 +109,10 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				nullCount = 0l;
 			}
 
-			CrosstabNavigator<Number> navigator = crosstab.navigate().where(
-					columnDimension, column.getName());
+			CrosstabNavigator<Number> navigator = crosstab.navigate().where(columnDimension, column.getName());
 			long nonNullCount = s.getN();
 			boolean queryable = column.isPhysicalColumn();
-			
+
 			if (nonNullCount > 0) {
 				double highestValue = s.getMax();
 				double lowestValue = s.getMin();
@@ -124,38 +122,28 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				double standardDeviation = s.getStandardDeviation();
 				double variance = s.getVariance();
 
-				navigator.where(measureDimension, "Highest value").put(
-						highestValue);
+				navigator.where(measureDimension, "Highest value").put(highestValue);
 				if (queryable) {
 					Column physicalColumn = column.getPhysicalColumn();
 					Table table = physicalColumn.getTable();
-					Query q = new Query()
-							.select(table.getColumns())
-							.from(table)
-							.where(physicalColumn, OperatorType.EQUALS_TO,
-									highestValue);
+					Query q = new Query().select(table.getColumns()).from(table)
+							.where(physicalColumn, OperatorType.EQUALS_TO, highestValue);
 					navigator.attach(new QueryResultProducer(q, getClass()));
 				}
 
-				navigator.where(measureDimension, "Lowest value").put(
-						lowestValue);
+				navigator.where(measureDimension, "Lowest value").put(lowestValue);
 				if (queryable) {
 					Column physicalColumn = column.getPhysicalColumn();
 					Table table = physicalColumn.getTable();
-					Query q = new Query()
-							.select(table.getColumns())
-							.from(table)
-							.where(physicalColumn, OperatorType.EQUALS_TO,
-									lowestValue);
+					Query q = new Query().select(table.getColumns()).from(table)
+							.where(physicalColumn, OperatorType.EQUALS_TO, lowestValue);
 					navigator.attach(new QueryResultProducer(q, getClass()));
 				}
 
 				navigator.where(measureDimension, "Sum").put(sum);
 				navigator.where(measureDimension, "Mean").put(mean);
-				navigator.where(measureDimension, "Geometric mean").put(
-						geometricMean);
-				navigator.where(measureDimension, "Standard deviation").put(
-						standardDeviation);
+				navigator.where(measureDimension, "Geometric mean").put(geometricMean);
+				navigator.where(measureDimension, "Standard deviation").put(standardDeviation);
 				navigator.where(measureDimension, "Variance").put(variance);
 			}
 			navigator.where(measureDimension, "Null values").put(nullCount);
@@ -167,19 +155,15 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				navigator.attach(new QueryResultProducer(q, getClass()));
 			}
 
-			navigator.where(measureDimension, "Non-null values").put(
-					nonNullCount);
+			navigator.where(measureDimension, "Non-null values").put(nonNullCount);
 			if (queryable) {
 				Column physicalColumn = column.getPhysicalColumn();
 				Table table = physicalColumn.getTable();
-				Query q = new Query()
-						.select(table.getColumns())
-						.from(table)
-						.where(physicalColumn, OperatorType.DIFFERENT_FROM,
-								null);
+				Query q = new Query().select(table.getColumns()).from(table)
+						.where(physicalColumn, OperatorType.DIFFERENT_FROM, null);
 				navigator.attach(new QueryResultProducer(q, getClass()));
 			}
 		}
-		return new CrosstabResult(getClass(), crosstab);
+		return new CrosstabResult(crosstab);
 	}
 }

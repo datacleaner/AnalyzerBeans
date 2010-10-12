@@ -7,7 +7,6 @@ import java.util.List;
 import org.eobjects.analyzer.beans.valuedist.ValueCount;
 import org.eobjects.analyzer.beans.valuedist.ValueCountList;
 import org.eobjects.analyzer.beans.valuedist.ValueCountListImpl;
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 
 public class ValueDistributionResult implements AnalyzerResult {
@@ -40,11 +39,6 @@ public class ValueDistributionResult implements AnalyzerResult {
 			int nullCount, int uniqueValueCount) {
 		this(column, topValues, bottomValues, nullCount);
 		_uniqueValueCount = uniqueValueCount;
-	}
-
-	@Override
-	public Class<ValueDistributionAnalyzer> getProducerClass() {
-		return ValueDistributionAnalyzer.class;
 	}
 
 	public ValueCountList getTopValues() {

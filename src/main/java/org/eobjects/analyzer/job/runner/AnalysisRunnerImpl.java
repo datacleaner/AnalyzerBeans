@@ -39,7 +39,6 @@ import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
-import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +79,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 	@Override
 	public AnalysisResultFuture run(final AnalysisJob job) {
-		final Queue<AnalyzerResult> resultQueue = new LinkedBlockingQueue<AnalyzerResult>();
+		final Queue<AnalyzerJobResult> resultQueue = new LinkedBlockingQueue<AnalyzerJobResult>();
 
 		// This analysis listener will keep track of all collected errors
 		final ErrorAwareAnalysisListener errorListener = new ErrorAwareAnalysisListener();
@@ -182,7 +181,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 	private void registerRowProcessingPublishers(AnalysisJob analysisJob,
 			Map<Table, RowProcessingPublisher> rowProcessingPublishers, BeanJob<?> beanJob,
 			List<AnalyzerBeanInstance> analyzerBeanInstances, List<TransformerBeanInstance> transformerBeanInstances,
-			Collection<AnalyzerResult> resultQueue, AnalysisListener listener, TaskRunner taskRunner) {
+			Collection<AnalyzerJobResult> resultQueue, AnalysisListener listener, TaskRunner taskRunner) {
 		InputColumn<?>[] inputColumns = beanJob.getInput();
 		Set<Column> physicalColumns = new HashSet<Column>();
 		for (InputColumn<?> inputColumn : inputColumns) {

@@ -96,8 +96,11 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		int stringAnalyzerResults = 0;
 		int valueDistributionResults = 0;
 
+		AnalyzerResult stringAnalyzerResult = resultFuture.getResult(stringAnalyzerJob.toAnalyzerJob());
+		assertTrue(stringAnalyzerResult instanceof CrosstabResult);
+
 		for (AnalyzerResult result : results) {
-			if (StringAnalyzer.class.getName().equals(result.getProducerClass().getName())) {
+			if (result instanceof CrosstabResult) {
 				stringAnalyzerResults++;
 
 				assertTrue(result instanceof CrosstabResult);
@@ -114,7 +117,6 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				nav.where("Measure", "Char count");
 				assertEquals("655", nav.get().toString());
 			} else {
-				assertEquals(ValueDistributionAnalyzer.class.getName(), result.getProducerClass().getName());
 				assertTrue(result instanceof ValueDistributionResult);
 
 				valueDistributionResults++;
@@ -127,7 +129,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		ValueDistributionResult jobTitleResult = null;
 		ValueDistributionResult lastnameResult = null;
 		for (AnalyzerResult result : results) {
-			if (result.getProducerClass() == ValueDistributionAnalyzer.class) {
+			if (result instanceof ValueDistributionResult) {
 				ValueDistributionResult vdResult = (ValueDistributionResult) result;
 				if ("JOBTITLE".equals(vdResult.getColumnName())) {
 					jobTitleResult = vdResult;

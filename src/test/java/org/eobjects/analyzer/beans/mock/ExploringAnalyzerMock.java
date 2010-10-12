@@ -122,7 +122,7 @@ public class ExploringAnalyzerMock implements ExploringAnalyzer<NumberResult> {
 	@Override
 	public NumberResult getResult() {
 		result = true;
-		return new NumberResult(getClass(), runCount);
+		return new NumberResult(runCount);
 	}
 
 	public boolean isResult() {

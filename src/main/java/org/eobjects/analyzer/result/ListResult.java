@@ -2,8 +2,6 @@ package org.eobjects.analyzer.result;
 
 import java.util.List;
 
-import org.eobjects.analyzer.beans.api.Analyzer;
-
 /**
  * A very simple AnalyzerResult that simply holds a list of values
  * 
@@ -15,17 +13,10 @@ public class ListResult<E> implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private Class<? extends Analyzer<?>> _producerClass;
 	private List<E> _values;
 
-	public ListResult(List<E> values, Class<? extends Analyzer<?>> producerClass) {
+	public ListResult(List<E> values) {
 		_values = values;
-		_producerClass = producerClass;
-	}
-
-	@Override
-	public Class<? extends Analyzer<?>> getProducerClass() {
-		return _producerClass;
 	}
 
 	public List<E> getValues() {

@@ -104,7 +104,7 @@ public class PhoneticSimilarityFinder implements
 			}
 		}
 
-		return new SimilarityResult(getClass(), similarValues);
+		return new SimilarityResult(similarValues);
 	}
 
 	// setter for test-purposes

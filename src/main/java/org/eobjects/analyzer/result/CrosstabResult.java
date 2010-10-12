@@ -1,28 +1,19 @@
 package org.eobjects.analyzer.result;
 
-import org.eobjects.analyzer.beans.api.Analyzer;
-
 public class CrosstabResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
-	private Class<? extends Analyzer<?>> analyzerClass;
 	private Crosstab<?> crosstab;
 
-	public CrosstabResult(Class<? extends Analyzer<?>> analyzerClass, Crosstab<?> crosstab) {
+	public CrosstabResult(Crosstab<?> crosstab) {
 		super();
-		this.analyzerClass = analyzerClass;
 		this.crosstab = crosstab;
-	}
-
-	@Override
-	public Class<? extends Analyzer<?>> getProducerClass() {
-		return analyzerClass;
 	}
 
 	public Crosstab<?> getCrosstab() {
 		return crosstab;
 	}
-	
+
 	@Override
 	public String toString() {
 		return crosstab.toString();

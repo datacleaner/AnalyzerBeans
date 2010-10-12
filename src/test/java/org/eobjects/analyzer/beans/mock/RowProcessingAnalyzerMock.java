@@ -132,6 +132,6 @@ public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer<NumberRe
 	}
 
 	public NumberResult getResult() {
-		return new NumberResult(getClass(), rowCount);
+		return new NumberResult( rowCount);
 	}
 }

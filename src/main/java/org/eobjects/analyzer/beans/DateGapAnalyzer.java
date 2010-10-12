@@ -101,7 +101,7 @@ public class DateGapAnalyzer implements
 			overlaps.put(name, timelineOverlaps);
 		}
 
-		return new DateGapAnalyzerResult(getClass(), gaps, overlaps);
+		return new DateGapAnalyzerResult(gaps, overlaps);
 	}
 
 }

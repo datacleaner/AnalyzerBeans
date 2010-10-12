@@ -1,7 +1,5 @@
 package org.eobjects.analyzer.result;
 
-import org.eobjects.analyzer.beans.api.Analyzer;
-
 /**
  * Very simple result type for analyzers that simply return a number (maybe a
  * KPI or something like that).
@@ -13,25 +11,16 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 public class NumberResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
-	private Class<? extends Analyzer<?>> analyzerClass;
 	private Number number;
 
-	public NumberResult(Class<? extends Analyzer<?>> analyzerClass,
-			Number number) {
-		super();
-		this.analyzerClass = analyzerClass;
+	public NumberResult(Number number) {
 		this.number = number;
-	}
-
-	@Override
-	public Class<? extends Analyzer<?>> getProducerClass() {
-		return analyzerClass;
 	}
 
 	public Number getNumber() {
 		return number;
 	}
-	
+
 	@Override
 	public String toString() {
 		if (number == null) {

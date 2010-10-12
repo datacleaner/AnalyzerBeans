@@ -48,7 +48,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 
 		@Override
 		public NumberResult getResult() {
-			return new NumberResult(getClass(), counter.get());
+			return new NumberResult(counter.get());
 		}
 
 		@Override
@@ -99,7 +99,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		assertEquals("This analyzer can only analyze two rows!", errors.get(0).getMessage());
 		assertEquals(PreviousErrorsExistException.class, errors.get(1).getClass());
 		assertEquals("A previous exception has occurred", errors.get(1).getMessage());
-		
+
 		int taskCount = taskRunner.assertAllBegunTasksFinished(500);
 		assertTrue(taskCount > 4);
 	}

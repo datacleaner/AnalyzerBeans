@@ -34,7 +34,6 @@ public class WeekdayDistributionAnalyzerTest extends TestCase {
 		analyzer.run(new MockInputRow(dateColumns, new Object[] { d(2010, 4, 1), d(2010, 4, 2), d(2010, 4, 5) }), 1);
 
 		CrosstabResult result = analyzer.getResult();
-		assertEquals(WeekdayDistributionAnalyzer.class, result.getProducerClass());
 
 		String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
 		assertEquals(8, resultLines.length);

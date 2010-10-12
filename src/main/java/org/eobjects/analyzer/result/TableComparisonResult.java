@@ -5,9 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.CompareSchemasAnalyzer;
-import org.eobjects.analyzer.beans.api.Analyzer;
-
 public final class TableComparisonResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
@@ -32,11 +29,6 @@ public final class TableComparisonResult implements AnalyzerResult {
 		this.columnComparisonResults = Collections
 				.unmodifiableList(new ArrayList<ColumnComparisonResult>(
 						columnComparisonResults));
-	}
-
-	@Override
-	public Class<? extends Analyzer<?>> getProducerClass() {
-		return CompareSchemasAnalyzer.class;
 	}
 
 	public List<TableDifference<?>> getTableDifferences() {

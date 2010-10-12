@@ -73,7 +73,7 @@ public class WeekdayDistributionAnalyzer implements RowProcessingAnalyzer<Crosst
 			nav.where(weekdayDimension, "Saturday").put(countMap.get(Calendar.SATURDAY));
 		}
 
-		return new CrosstabResult(getClass(), crosstab);
+		return new CrosstabResult(crosstab);
 	}
 
 	// used only for unittesting

@@ -25,9 +25,6 @@ public class CompareColumnsAnalyzerTest extends TestCase {
 		analyzer = new CompareColumnsAnalyzer(column1, column2);
 		analyzer.run(null);
 		assertTrue(analyzer.getResult().isColumnsEqual());
-
-		assertEquals(CompareColumnsAnalyzer.class, analyzer.getResult()
-				.getProducerClass());
 	}
 
 	public void testSimpleDiffs() throws Exception {

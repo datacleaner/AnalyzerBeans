@@ -4,26 +4,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.similarity.SimilarValues;
 
 public class SimilarityResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private Class<? extends Analyzer<?>> _analyzerBeanClass;
 	private Set<SimilarValues> _similarValues;
 
-	public SimilarityResult(Class<? extends Analyzer<?>> analyzerBeanClass,
-			Set<SimilarValues> similarValues) {
-		_analyzerBeanClass = analyzerBeanClass;
+	public SimilarityResult(Set<SimilarValues> similarValues) {
 		_similarValues = similarValues;
 
-	}
-
-	@Override
-	public Class<? extends Analyzer<?>> getProducerClass() {
-		return _analyzerBeanClass;
 	}
 
 	public Set<SimilarValues> getSimilarValues() {

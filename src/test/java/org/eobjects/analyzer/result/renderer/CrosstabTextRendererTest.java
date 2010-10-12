@@ -14,7 +14,7 @@ public class CrosstabTextRendererTest extends TestCase {
 		c.where("Gender", "Female").where("Region", "EU").put(3, true);
 		c.where("Gender", "Female").where("Region", "USA").put(4, true);
 
-		String s = new CrosstabTextRenderer().render(new CrosstabResult(null, c));
+		String s = new CrosstabTextRenderer().render(new CrosstabResult(c));
 		assertEquals("      Male Female \nEU       1      3 \nUSA      2      4 \n", s);
 	}
 }

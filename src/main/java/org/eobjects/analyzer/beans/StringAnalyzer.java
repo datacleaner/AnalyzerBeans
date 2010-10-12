@@ -307,7 +307,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			}
 		}
 
-		return new CrosstabResult(getClass(), crosstab);
+		return new CrosstabResult(crosstab);
 	}
 
 	private Query getBaseQuery(Column column) {

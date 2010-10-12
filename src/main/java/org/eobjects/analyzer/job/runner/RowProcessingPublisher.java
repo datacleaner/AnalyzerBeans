@@ -41,7 +41,6 @@ import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
-import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -266,7 +265,7 @@ public final class RowProcessingPublisher {
 		_consumers.add(consumer);
 	}
 
-	public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<AnalyzerResult> resultQueue,
+	public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<AnalyzerJobResult> resultQueue,
 			TaskListener rowProcessorPublishersTaskListener) {
 		int numConsumers = _consumers.size();
 
@@ -295,7 +294,7 @@ public final class RowProcessingPublisher {
 		return initTasks;
 	}
 
-	private Task createCloseTask(RowProcessingConsumer consumer, Queue<AnalyzerResult> resultQueue) {
+	private Task createCloseTask(RowProcessingConsumer consumer, Queue<AnalyzerJobResult> resultQueue) {
 		if (consumer instanceof TransformerConsumer || consumer instanceof FilterConsumer) {
 			return new CloseBeanTask(consumer.getBeanInstance());
 		} else if (consumer instanceof AnalyzerConsumer) {
@@ -306,7 +305,7 @@ public final class RowProcessingPublisher {
 	}
 
 	private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener,
-			Queue<AnalyzerResult> resultQueue) {
+			Queue<AnalyzerJobResult> resultQueue) {
 		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredCallback(consumer.getBeanJob().getConfiguration());
 		LifeCycleCallback initializeCallback = new InitializeCallback();
 		LifeCycleCallback closeCallback = new CloseCallback();

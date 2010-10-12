@@ -17,15 +17,12 @@ public class DataSetResult implements AnalyzerResult {
 	// this class uses a list of rows in order to make it serializable (a
 	// DataSet is not serializable)
 	private List<Row> rows;
-	private Class<? extends Analyzer<?>> producerClass;
 
-	public DataSetResult(List<Row> rows, Class<? extends Analyzer<?>> producerClass) {
+	public DataSetResult(List<Row> rows) {
 		this.rows = rows;
-		this.producerClass = producerClass;
 	}
 
 	public DataSetResult(DataSet ds, Class<? extends Analyzer<?>> producerClass) {
-		this.producerClass = producerClass;
 		this.rows = new ArrayList<Row>();
 		while (ds.next()) {
 			rows.add(ds.getRow());
@@ -43,10 +40,4 @@ public class DataSetResult implements AnalyzerResult {
 		}
 		return dataSet;
 	}
-
-	@Override
-	public Class<? extends Analyzer<?>> getProducerClass() {
-		return this.producerClass;
-	}
-
 }

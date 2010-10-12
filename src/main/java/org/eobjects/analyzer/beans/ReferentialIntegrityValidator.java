@@ -153,6 +153,6 @@ public class ReferentialIntegrityValidator implements
 	@Override
 	public DataSetResult getResult() {
 		// TODO: Should probably use validation result?
-		return new DataSetResult(invalidRows, getClass());
+		return new DataSetResult(invalidRows);
 	}
 }

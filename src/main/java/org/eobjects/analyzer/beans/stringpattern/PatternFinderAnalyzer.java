@@ -184,13 +184,13 @@ public class PatternFinderAnalyzer implements
 			List<String> matches = entry.getValue();
 			int size = matches.size();
 			nav.put(size, true);
-			nav.attach(new ListResult<String>(matches, getClass()));
+			nav.attach(new ListResult<String>(matches));
 
 			nav.where(measuresDimension, "Sample");
 			nav.put(matches.get(0), true);
 		}
 
-		return new CrosstabResult(getClass(), crosstab);
+		return new CrosstabResult(crosstab);
 	}
 
 	// setter methods for unittesting purposes

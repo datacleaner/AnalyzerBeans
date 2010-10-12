@@ -52,6 +52,6 @@ public class EqualityAnalyzer implements
 
 	@Override
 	public ValidationResult getResult() {
-		return new ValidationResult(getClass(), input, invalidRows);
+		return new ValidationResult(input, invalidRows);
 	}
 }
