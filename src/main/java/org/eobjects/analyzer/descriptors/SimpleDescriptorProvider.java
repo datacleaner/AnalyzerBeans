@@ -62,7 +62,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 		_rendererBeanDescriptors.add(rendererBeanDescriptor);
 	}
 
-	public void addFilterBeanDescriptor(FilterBeanDescriptor<? extends Filter<?>, ?> descriptor) {
+	public void addFilterBeanDescriptor(FilterBeanDescriptor<?, ?> descriptor) {
 		_filterBeanDescriptors.add(descriptor);
 	}
 
@@ -140,10 +140,10 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 			@SuppressWarnings("unchecked")
 			Class<? extends Filter<?>> c = (Class<? extends Filter<?>>) Class.forName(className);
 
-			FilterBeanDescriptor<?, ?> descriptor = getFilterBeanDescriptorForClass(c);
+			FilterBeanDescriptor<?, ?> descriptor = getFilterBeanDescriptorForClassUnbounded(c);
 
 			if (descriptor == null) {
-				addFilterBeanDescriptor(AnnotationBasedFilterBeanDescriptor.create(c));
+				addFilterBeanDescriptor(AnnotationBasedFilterBeanDescriptor.createUnbound(c));
 			}
 		}
 	}

@@ -19,6 +19,23 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 		return new AnnotationBasedFilterBeanDescriptor<F, C>(filterClass);
 	}
 
+	/**
+	 * Alternative factory method used when sufficient type-information about
+	 * the class is not available.
+	 * 
+	 * This method is basically a hack to make the compiler happy, see Ticket
+	 * #417.
+	 * 
+	 * @see http://eobjects.org/trac/ticket/417
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static FilterBeanDescriptor<?, ?> createUnbound(Class<?> clazz) {
+		return new AnnotationBasedFilterBeanDescriptor(clazz);
+	}
+
 	private AnnotationBasedFilterBeanDescriptor(Class<F> filterClass) throws DescriptorException {
 		super(filterClass, true);
 

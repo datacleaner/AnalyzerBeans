@@ -46,13 +46,30 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 		}
 		return null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(Class<F> filterClass) {
+	public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(
+			Class<F> filterClass) {
+		return (FilterBeanDescriptor<F, C>) getFilterBeanDescriptorForClassUnbounded(filterClass);
+	}
+
+	/**
+	 * Alternative getter method used when sufficient type-information about the
+	 * class is not available.
+	 * 
+	 * This method is basically a hack to make the compiler happy, see Ticket
+	 * #417.
+	 * 
+	 * @see http://eobjects.org/trac/ticket/417
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	protected FilterBeanDescriptor<?, ?> getFilterBeanDescriptorForClassUnbounded(Class<?> filterClass) {
 		for (FilterBeanDescriptor<?, ?> descriptor : getFilterBeanDescriptors()) {
 			if (filterClass == descriptor.getBeanClass()) {
-				return (FilterBeanDescriptor<F, C>) descriptor;
+				return descriptor;
 			}
 		}
 		return null;

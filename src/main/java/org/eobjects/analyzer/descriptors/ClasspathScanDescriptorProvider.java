@@ -159,10 +159,10 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		}
 		if (visitor.isFilter()) {
 			@SuppressWarnings("unchecked")
-			Class<? extends Filter<?>> filterClass = (Class<? extends Filter<?>>) visitor.getBeanClass();
+			Class<? extends Filter<? extends Enum<?>>> filterClass = (Class<? extends Filter<?>>) visitor.getBeanClass();
 			FilterBeanDescriptor<?, ?> descriptor = _filterBeanDescriptors.get(filterClass);
 			if (descriptor == null) {
-				descriptor = AnnotationBasedFilterBeanDescriptor.create(filterClass);
+				descriptor = AnnotationBasedFilterBeanDescriptor.createUnbound(filterClass);
 				_filterBeanDescriptors.put(filterClass, descriptor);
 			}
 		}
