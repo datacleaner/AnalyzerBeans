@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -66,7 +67,7 @@ public interface AnalysisResultFuture extends ErrorAware {
 	public List<AnalyzerResult> getResults() throws IllegalStateException;
 
 	/**
-	 * Finds (and waits if nescesary) the results of a single analyzer.
+	 * Finds (and waits if nescesary) the results of a single Analyzer.
 	 * 
 	 * @param analyzerJob
 	 * @return the result for a given analyzer job
@@ -74,7 +75,18 @@ public interface AnalysisResultFuture extends ErrorAware {
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
-	public AnalyzerResult getResult(AnalyzerJob analyzerJob);
+	public AnalyzerResult getResult(AnalyzerJob analyzerJob) throws IllegalStateException;
+
+	/**
+	 * Finds (and waits if nescesary) the results mapped to the Analyzer jobs
+	 * 
+	 * @return a map with AnalyzerJobs as keys to the corresponding
+	 *         AnalyzerResults.
+	 * @throws IllegalStateException
+	 *             if the analysis did not go well (use isSuccesfull() or
+	 *             isErrornous() to check)
+	 */
+	public Map<AnalyzerJob, AnalyzerResult> getResultMap() throws IllegalStateException;
 
 	/**
 	 * @return any errors reported during execution, if the job was not

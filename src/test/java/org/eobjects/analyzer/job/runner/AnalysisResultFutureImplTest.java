@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import junit.framework.TestCase;
@@ -8,6 +9,7 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.concurrent.JobTaskListener;
+import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
 
 public class AnalysisResultFutureImplTest extends TestCase {
@@ -44,7 +46,7 @@ public class AnalysisResultFutureImplTest extends TestCase {
 		JobTaskListener jobCompletionListener = EasyMock.createMock(JobTaskListener.class);
 		ErrorAware errorAware = EasyMock.createMock(ErrorAware.class);
 		EasyMock.expect(jobCompletionListener.isDone()).andReturn(true);
-		EasyMock.expect(errorAware.isErrornous()).andReturn(false).times(3);
+		EasyMock.expect(errorAware.isErrornous()).andReturn(false).times(4);
 
 		EasyMock.replay(jobCompletionListener, errorAware);
 
@@ -55,7 +57,13 @@ public class AnalysisResultFutureImplTest extends TestCase {
 		assertEquals("1", resultFuture.getResult(analyzerJob1).toString());
 		assertEquals("2", resultFuture.getResult(analyzerJob2).toString());
 		assertNull(resultFuture.getResult(analyzerJob3));
+		
+		Map<AnalyzerJob, AnalyzerResult> resultMap = resultFuture.getResultMap();
 
 		EasyMock.verify(jobCompletionListener, errorAware);
+
+		assertEquals(2, resultMap.size());
+		assertEquals("1", resultMap.get(analyzerJob1).toString());
+		assertEquals("2", resultMap.get(analyzerJob2).toString());
 	}
 }
