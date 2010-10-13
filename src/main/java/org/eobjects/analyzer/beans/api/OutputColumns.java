@@ -8,7 +8,7 @@ import java.io.Serializable;
  * 
  * @author Kasper Sørensen
  */
-public class OutputColumns implements Serializable {
+public final class OutputColumns implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,8 +37,7 @@ public class OutputColumns implements Serializable {
 		this.columnNames = columnNames.clone();
 	}
 
-	public OutputColumns(String firstColumnName,
-			String... additionalColumnNames) {
+	public OutputColumns(String firstColumnName, String... additionalColumnNames) {
 		columnNames = new String[additionalColumnNames.length + 1];
 		columnNames[0] = firstColumnName;
 		for (int i = 0; i < additionalColumnNames.length; i++) {
