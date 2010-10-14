@@ -60,6 +60,8 @@
 		<choice minOccurs="0" maxOccurs="unbounded">
 			<element name="jdbc-datastore" type="ab:jdbcDatastoreType"
 				minOccurs="0" maxOccurs="unbounded" />
+			<element name="access-datastore" type="ab:accessDatastoreType"
+				minOccurs="0" maxOccurs="unbounded" />
 			<element name="csv-datastore" type="ab:csvDatastoreType"
 				minOccurs="0" maxOccurs="unbounded" />
 			<element name="excel-datastore" type="ab:excelDatastoreType"
@@ -94,6 +96,13 @@
 	</complexType>
 
 	<complexType name="excelDatastoreType">
+		<sequence>
+			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="accessDatastoreType">
 		<sequence>
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>

@@ -15,6 +15,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType.Package;
+import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.CompositeDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.Configuration;
 import org.eobjects.analyzer.configuration.jaxb.ConfigurationMetadataType;
@@ -26,6 +27,7 @@ import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
+import org.eobjects.analyzer.connection.AccessDatastore;
 import org.eobjects.analyzer.connection.CompositeDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
@@ -124,7 +126,7 @@ public class JaxbConfigurationFactory {
 	private DatastoreCatalog createDatastoreCatalog(DatastoreCatalogType datastoreCatalogType) {
 		Map<String, Datastore> datastores = new HashMap<String, Datastore>();
 
-		List<Object> datastoreTypes = datastoreCatalogType.getJdbcDatastoreOrCsvDatastoreOrExcelDatastore();
+		List<Object> datastoreTypes = datastoreCatalogType.getJdbcDatastoreOrAccessDatastoreOrCsvDatastore();
 
 		List<CsvDatastoreType> csvDatastores = CollectionUtils.filterOnClass(datastoreTypes, CsvDatastoreType.class);
 		for (CsvDatastoreType csvDatastoreType : csvDatastores) {
@@ -154,6 +156,20 @@ public class JaxbConfigurationFactory {
 			}
 
 			datastores.put(name, new CsvDatastore(name, filename, quoteChar, separatorChar));
+		}
+		
+		List<AccessDatastoreType> accessDatastores = CollectionUtils.filterOnClass(datastoreTypes, AccessDatastoreType.class);
+		for (AccessDatastoreType accessDatastoreType : accessDatastores) {
+			String name = accessDatastoreType.getName();
+			if (StringUtils.isNullOrEmpty(name)) {
+				throw new IllegalStateException("Datastore name cannot be null");
+			}
+
+			if (datastores.containsKey(name)) {
+				throw new IllegalStateException("Datastore name is not unique: " + name);
+			}
+			String filename = accessDatastoreType.getFilename();
+			datastores.put(name, new AccessDatastore(name, filename));
 		}
 
 		List<ExcelDatastoreType> excelDatastores = CollectionUtils.filterOnClass(datastoreTypes, ExcelDatastoreType.class);
