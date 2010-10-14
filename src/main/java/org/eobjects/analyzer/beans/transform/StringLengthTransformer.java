@@ -11,7 +11,14 @@ import org.eobjects.analyzer.data.InputRow;
 public class StringLengthTransformer implements Transformer<Number> {
 
 	@Configured
-	InputColumn<String> input;
+	InputColumn<String> column;
+	
+	public StringLengthTransformer() {
+	}
+	
+	public StringLengthTransformer(InputColumn<String> column) {
+		this.column = column;
+	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -20,7 +27,7 @@ public class StringLengthTransformer implements Transformer<Number> {
 
 	@Override
 	public Number[] transform(InputRow inputRow) {
-		String value = inputRow.getValue(input);
+		String value = inputRow.getValue(column);
 		return transform(value);
 	}
 
