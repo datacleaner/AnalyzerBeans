@@ -29,6 +29,7 @@ import javax.inject.Qualifier;
  * Valid types for @Provided annotated fields and method arguments are:
  * <ul>
  * <li>List</li>
+ * <li>Set</li>
  * <li>Map</li>
  * <li>SchemaNavigator</li>
  * <li>DataContext</li>

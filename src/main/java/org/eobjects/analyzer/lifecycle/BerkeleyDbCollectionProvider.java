@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptorImpl;
@@ -22,6 +23,7 @@ import com.sleepycat.bind.tuple.IntegerBinding;
 import com.sleepycat.bind.tuple.LongBinding;
 import com.sleepycat.bind.tuple.ShortBinding;
 import com.sleepycat.bind.tuple.StringBinding;
+import com.sleepycat.collections.StoredKeySet;
 import com.sleepycat.collections.StoredMap;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
@@ -38,32 +40,39 @@ public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 	private Boolean deleteOnExit;
 	private File targetDir;
 
-	public Object createProvidedCollection(
-			ProvidedPropertyDescriptorImpl providedDescriptor) {
+	public Object createProvidedCollection(ProvidedPropertyDescriptorImpl providedDescriptor) {
+		Type typeArgument = providedDescriptor.getTypeArgument(0);
+		Class<?> clazz1 = (Class<?>) typeArgument;
 		if (providedDescriptor.isList()) {
-			List<?> list = createList(providedDescriptor.getTypeArgument(0));
-			return list;
+			return createList(clazz1);
+		} else if (providedDescriptor.isSet()) {
+			return createSet(clazz1);
 		} else if (providedDescriptor.isMap()) {
-			Map<?, ?> map = createMap(providedDescriptor.getTypeArgument(0),
-					providedDescriptor.getTypeArgument(1));
-			return map;
+			Class<?> clazz2 = (Class<?>) providedDescriptor.getTypeArgument(1);
+			return createMap(clazz1, clazz2);
 		} else {
-			// This should never happen (is checked by the ProvidedDescriptor)
+			// This should never happen (is checked by the
+			// ProvidedDescriptor)
 			throw new IllegalStateException();
 		}
 	}
 
 	public void cleanUp(Object obj) {
-		StoredMap map;
-		if (obj instanceof ProvidedList<?>) {
-			ProvidedList<?> list = (ProvidedList<?>) obj;
-			map = (StoredMap) list.getWrappedMap();
-		} else if (obj instanceof StoredMap) {
-			map = (StoredMap) obj;
+		if (obj instanceof StoredKeySet) {
+			((StoredKeySet) obj).clear();
 		} else {
-			throw new IllegalStateException("Cannot clean up object: " + obj);
+			StoredMap map;
+			if (obj instanceof ProvidedList<?>) {
+				ProvidedList<?> list = (ProvidedList<?>) obj;
+				map = (StoredMap) list.getWrappedMap();
+			} else if (obj instanceof StoredMap) {
+				map = (StoredMap) obj;
+			} else {
+				throw new IllegalStateException("Cannot clean up object: " + obj);
+			}
+			map.clear();
 		}
-		map.clear();
+		
 
 		try {
 			getEnvironment().compress();
@@ -107,23 +116,20 @@ public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 		deleteOnExit = false;
 		while (targetDir == null) {
 			try {
-				File candidateDir = new File(tempDir.getAbsolutePath()
-						+ File.separatorChar + "analyzerBeans_"
+				File candidateDir = new File(tempDir.getAbsolutePath() + File.separatorChar + "analyzerBeans_"
 						+ UUID.randomUUID().toString());
 				if (!candidateDir.exists() && candidateDir.mkdir()) {
 					targetDir = candidateDir;
 					deleteOnExit = true;
 				}
 			} catch (Exception e) {
-				log.error(
-						"Exception thrown while trying to create targetDir inside tempDir",
-						e);
+				log.error("Exception thrown while trying to create targetDir inside tempDir", e);
 				targetDir = tempDir;
 			}
 		}
 		if (log.isInfoEnabled()) {
-			log.info("Using target directory for persistent collections (deleteOnExit="
-					+ deleteOnExit + "): " + targetDir.getAbsolutePath());
+			log.info("Using target directory for persistent collections (deleteOnExit=" + deleteOnExit + "): "
+					+ targetDir.getAbsolutePath());
 		}
 		return targetDir;
 	}
@@ -132,13 +138,12 @@ public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 		DatabaseConfig databaseConfig = new DatabaseConfig();
 		databaseConfig.setAllowCreate(true);
 		String databaseName = UUID.randomUUID().toString();
-		Database database = getEnvironment().openDatabase(null, databaseName,
-				databaseConfig);
+		Database database = getEnvironment().openDatabase(null, databaseName, databaseConfig);
 		return database;
 	}
 
 	@Override
-	public <E> List<E> createList(Type valueType) throws IllegalStateException {
+	public <E> List<E> createList(Class<E> valueType) throws IllegalStateException {
 		Map<Integer, E> map = createMap(Integer.class, valueType);
 
 		// Berkeley StoredLists are non-functional!
@@ -147,22 +152,29 @@ public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 		return new ProvidedList<E>(map);
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
-	public <K, V> Map<K, V> createMap(Type keyType, Type valueType)
-			throws IllegalStateException {
+	@Override
+	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
 		try {
-			EntryBinding keyBinding = createBinding(keyType);
-			EntryBinding valueBinding = createBinding(valueType);
-			return new StoredMap(createDatabase(), keyBinding, valueBinding,
-					true);
+			return new StoredKeySet(createDatabase(), createBinding(valueType), true);
 		} catch (DatabaseException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	private EntryBinding createBinding(Type type)
-			throws UnsupportedOperationException {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
+		try {
+			EntryBinding keyBinding = createBinding(keyType);
+			EntryBinding valueBinding = createBinding(valueType);
+			return new StoredMap(createDatabase(), keyBinding, valueBinding, true);
+		} catch (DatabaseException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private EntryBinding createBinding(Type type) throws UnsupportedOperationException {
 		if (ReflectionUtils.isString(type)) {
 			return new StringBinding();
 		}
@@ -193,7 +205,6 @@ public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 		if (ReflectionUtils.isByteArray(type)) {
 			return new ByteArrayBinding();
 		}
-		throw new UnsupportedOperationException(
-				"Cannot provide collection of type " + type);
+		throw new UnsupportedOperationException("Cannot provide collection of type " + type);
 	}
 }

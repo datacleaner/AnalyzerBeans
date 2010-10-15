@@ -9,6 +9,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
 
@@ -118,6 +119,11 @@ public class ReflectionUtils {
 
 	public static boolean isMap(Type type) {
 		return type == Map.class;
+	}
+	
+
+	public static boolean isSet(Type type) {
+		return type == Set.class;
 	}
 
 	public static boolean isList(Type type) {
