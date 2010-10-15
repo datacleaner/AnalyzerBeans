@@ -26,13 +26,19 @@ import dk.eobjects.metamodel.schema.Column;
 
 public class AnalysisJobBuilder {
 
-	private AnalyzerBeansConfiguration _configuration;
+	private final AnalyzerBeansConfiguration _configuration;
+	private final IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
+
+	// the configurable components
 	private DataContextProvider _dataContextProvider;
-	private List<MetaModelInputColumn> _sourceColumns = new ArrayList<MetaModelInputColumn>();
-	private List<FilterJobBuilder<?, ?>> _filterJobBuilders = new ArrayList<FilterJobBuilder<?, ?>>();
-	private List<TransformerJobBuilder<?>> _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
-	private List<AnalyzerJobBuilder<?>> _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder<?>>();
-	private IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
+	private final List<MetaModelInputColumn> _sourceColumns = new ArrayList<MetaModelInputColumn>();
+	private final List<FilterJobBuilder<?, ?>> _filterJobBuilders = new ArrayList<FilterJobBuilder<?, ?>>();
+	private final List<TransformerJobBuilder<?>> _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
+	private final List<AnalyzerJobBuilder<?>> _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder<?>>();
+
+	// listeners, typically for UI that uses the builders
+	private final List<SourceColumnChangeListener> _sourceColumnListeners = new LinkedList<SourceColumnChangeListener>();
+	private final List<AnalyzerChangeListener> _analyzerChangeListeners = new LinkedList<AnalyzerChangeListener>();
 
 	public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;
@@ -74,6 +80,9 @@ public class AnalysisJobBuilder {
 	public AnalysisJobBuilder addSourceColumn(MetaModelInputColumn inputColumn) {
 		if (!_sourceColumns.contains(inputColumn)) {
 			_sourceColumns.add(inputColumn);
+			for (SourceColumnChangeListener listener : _sourceColumnListeners) {
+				listener.onAdd(inputColumn);
+			}
 		}
 		return this;
 	}
@@ -92,12 +101,12 @@ public class AnalysisJobBuilder {
 		return this;
 	}
 
-	public AnalysisJobBuilder addSourceColumns(String ... columnNames) {
+	public AnalysisJobBuilder addSourceColumns(String... columnNames) {
 		if (_dataContextProvider == null) {
-			throw new IllegalStateException("Cannot add source columns by name when no Datastore or DataContextProvider has been set");
+			throw new IllegalStateException(
+					"Cannot add source columns by name when no Datastore or DataContextProvider has been set");
 		}
-		SchemaNavigator schemaNavigator = _dataContextProvider
-		.getSchemaNavigator();
+		SchemaNavigator schemaNavigator = _dataContextProvider.getSchemaNavigator();
 		Column[] columns = new Column[columnNames.length];
 		for (int i = 0; i < columns.length; i++) {
 			String columnName = columnNames[i];
@@ -117,8 +126,19 @@ public class AnalysisJobBuilder {
 
 	public AnalysisJobBuilder removeSourceColumn(MetaModelInputColumn inputColumn) {
 		_sourceColumns.remove(inputColumn);
-		// TODO: Notify source column consumers
+		for (SourceColumnChangeListener listener : _sourceColumnListeners) {
+			listener.onRemove(inputColumn);
+		}
 		return this;
+	}
+
+	public boolean containsSourceColumn(Column column) {
+		for (MetaModelInputColumn sourceColumn : _sourceColumns) {
+			if (sourceColumn.getPhysicalColumn().equals(column)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public List<MetaModelInputColumn> getSourceColumns() {
@@ -188,6 +208,9 @@ public class AnalysisJobBuilder {
 		}
 		ExploringAnalyzerJobBuilder<A> analyzerJobBuilder = new ExploringAnalyzerJobBuilder<A>(descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
+		for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
+			listener.onAdd(analyzerJobBuilder);
+		}
 		return analyzerJobBuilder;
 	}
 
@@ -200,11 +223,17 @@ public class AnalysisJobBuilder {
 		}
 		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
+		for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
+			listener.onAdd(analyzerJobBuilder);
+		}
 		return analyzerJobBuilder;
 	}
 
 	public AnalysisJobBuilder removeAnalyzer(RowProcessingAnalyzerJobBuilder<?> ajb) {
 		_analyzerJobBuilders.remove(ajb);
+		for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
+			listener.onRemove(ajb);
+		}
 		return this;
 	}
 
@@ -313,5 +342,13 @@ public class AnalysisJobBuilder {
 			}
 		}
 		return null;
+	}
+
+	public List<SourceColumnChangeListener> getSourceColumnListeners() {
+		return _sourceColumnListeners;
+	}
+	
+	public List<AnalyzerChangeListener> getAnalyzerChangeListeners() {
+		return _analyzerChangeListeners;
 	}
 }

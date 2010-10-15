@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  *            RowProcessingAnalyzerJobBuilder)
  */
 @SuppressWarnings("unchecked")
-class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
+public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
