@@ -41,7 +41,9 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 			Enumeration<URL> resources = ClassLoader.getSystemResources(packagePath);
 			while (resources.hasMoreElements()) {
 				URL resource = resources.nextElement();
-				File dir = new File(resource.getFile());
+				String file = resource.getFile();
+				File dir = new File(file);
+				dir = new File(dir.getAbsolutePath().replaceAll("\\%20", " "));
 
 				if (dir.isDirectory()) {
 					logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
