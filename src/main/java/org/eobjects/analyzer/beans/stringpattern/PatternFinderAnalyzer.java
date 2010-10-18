@@ -24,8 +24,7 @@ import org.eobjects.analyzer.result.ListResult;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @AnalyzerBean("Pattern finder")
-public class PatternFinderAnalyzer implements
-		RowProcessingAnalyzer<CrosstabResult> {
+public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	private Map<TokenPattern, List<String>> patterns;
 	private TokenizerConfiguration configuration;
@@ -75,8 +74,7 @@ public class PatternFinderAnalyzer implements
 		}
 
 		if (discriminateNegativeNumbers != null) {
-			configuration
-					.setDiscriminateNegativeNumbers(discriminateNegativeNumbers);
+			configuration.setDiscriminateNegativeNumbers(discriminateNegativeNumbers);
 		}
 
 		if (discriminateDecimals != null) {
@@ -89,8 +87,7 @@ public class PatternFinderAnalyzer implements
 
 		if (ignoreRepeatedSpaces != null) {
 			boolean ignoreSpacesLength = ignoreRepeatedSpaces.booleanValue();
-			configuration.setDistriminateTokenLength(TokenType.WHITESPACE,
-					!ignoreSpacesLength);
+			configuration.setDistriminateTokenLength(TokenType.WHITESPACE, !ignoreSpacesLength);
 		}
 
 		if (decimalSeparator != null) {
@@ -106,11 +103,8 @@ public class PatternFinderAnalyzer implements
 		}
 
 		if (predefinedTokenName != null && predefinedTokenPatterns != null) {
-			Set<String> tokenRegexes = CollectionUtils
-					.set(predefinedTokenPatterns);
-			configuration.getPredefinedTokens().add(
-					new PredefinedTokenDefinition(predefinedTokenName,
-							tokenRegexes));
+			Set<String> tokenRegexes = CollectionUtils.set(predefinedTokenPatterns);
+			configuration.getPredefinedTokens().add(new PredefinedTokenDefinition(predefinedTokenName, tokenRegexes));
 		}
 
 		tokenizer = new DefaultTokenizer(configuration);
@@ -120,10 +114,14 @@ public class PatternFinderAnalyzer implements
 	public void run(InputRow row, int distinctCount) {
 		String value = row.getValue(column);
 		if (value != null) {
+			final List<Token> tokens;
 			boolean match = false;
-			List<Token> tokens = tokenizer.tokenize(value);
-			Set<Entry<TokenPattern, List<String>>> entries = patterns
-					.entrySet();
+			try {
+				tokens = tokenizer.tokenize(value);
+			} catch (RuntimeException e) {
+				throw new IllegalStateException("Error occurred while tokenizing value: " + value, e);
+			}
+			Set<Entry<TokenPattern, List<String>>> entries = patterns.entrySet();
 			for (Entry<TokenPattern, List<String>> entry : entries) {
 				TokenPattern pattern = entry.getKey();
 				List<String> matchingValues = entry.getValue();
@@ -136,10 +134,13 @@ public class PatternFinderAnalyzer implements
 			}
 
 			if (!match) {
-				TokenPattern pattern = new TokenPatternImpl(tokens,
-						configuration);
-				List<String> matchingValues = new ArrayList<String>(
-						distinctCount);
+				final TokenPattern pattern;
+				try {
+					pattern = new TokenPatternImpl(tokens, configuration);
+				} catch (RuntimeException e) {
+					throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
+				}
+				List<String> matchingValues = new ArrayList<String>(distinctCount);
 				for (int i = 0; i < distinctCount; i++) {
 					matchingValues.add(value);
 				}
@@ -153,8 +154,7 @@ public class PatternFinderAnalyzer implements
 		CrosstabDimension measuresDimension = new CrosstabDimension("Measures");
 		measuresDimension.addCategory("Match count");
 		CrosstabDimension patternDimension = new CrosstabDimension("Pattern");
-		Crosstab<Serializable> crosstab = new Crosstab<Serializable>(
-				Serializable.class, measuresDimension, patternDimension);
+		Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, measuresDimension, patternDimension);
 
 		Set<Entry<TokenPattern, List<String>>> entrySet = patterns.entrySet();
 
@@ -162,13 +162,10 @@ public class PatternFinderAnalyzer implements
 		// are at the top
 		Set<Entry<TokenPattern, List<String>>> sortedEntrySet = new TreeSet<Entry<TokenPattern, List<String>>>(
 				new Comparator<Entry<TokenPattern, List<String>>>() {
-					public int compare(Entry<TokenPattern, List<String>> o1,
-							Entry<TokenPattern, List<String>> o2) {
-						int result = o2.getValue().size()
-								- o1.getValue().size();
+					public int compare(Entry<TokenPattern, List<String>> o1, Entry<TokenPattern, List<String>> o2) {
+						int result = o2.getValue().size() - o1.getValue().size();
 						if (result == 0) {
-							result = o1.getKey().toSymbolicString()
-									.compareTo(o2.getKey().toSymbolicString());
+							result = o1.getKey().toSymbolicString().compareTo(o2.getKey().toSymbolicString());
 						}
 						return result;
 					}
@@ -176,8 +173,7 @@ public class PatternFinderAnalyzer implements
 		sortedEntrySet.addAll(entrySet);
 
 		for (Entry<TokenPattern, List<String>> entry : sortedEntrySet) {
-			CrosstabNavigator<Serializable> nav = crosstab.where(
-					patternDimension, entry.getKey().toSymbolicString());
+			CrosstabNavigator<Serializable> nav = crosstab.where(patternDimension, entry.getKey().toSymbolicString());
 
 			nav.where(measuresDimension, "Match count");
 			nav.where(patternDimension, entry.getKey().toSymbolicString());
@@ -211,8 +207,7 @@ public class PatternFinderAnalyzer implements
 		this.discriminateTextCase = discriminateTextCase;
 	}
 
-	public void setDiscriminateNegativeNumbers(
-			Boolean discriminateNegativeNumbers) {
+	public void setDiscriminateNegativeNumbers(Boolean discriminateNegativeNumbers) {
 		this.discriminateNegativeNumbers = discriminateNegativeNumbers;
 	}
 

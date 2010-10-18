@@ -347,8 +347,41 @@ public class AnalysisJobBuilder {
 	public List<SourceColumnChangeListener> getSourceColumnListeners() {
 		return _sourceColumnListeners;
 	}
-	
+
 	public List<AnalyzerChangeListener> getAnalyzerChangeListeners() {
 		return _analyzerChangeListeners;
+	}
+
+	/**
+	 * Convenience method to get all input columns (both source or from
+	 * transformers) that comply to a given data type family.
+	 * 
+	 * @param dataTypeFamily
+	 * @return
+	 */
+	public List<InputColumn<?>> getInputColumns(DataTypeFamily dataTypeFamily) {
+		if (dataTypeFamily == null) {
+			throw new IllegalArgumentException("dataTypeFamily cannot be null. Use " + DataTypeFamily.UNDEFINED
+					+ " for all input columns");
+		}
+		List<InputColumn<?>> inputColumns = new ArrayList<InputColumn<?>>();
+		List<MetaModelInputColumn> sourceColumns = getSourceColumns();
+		for (MetaModelInputColumn col : sourceColumns) {
+			if (dataTypeFamily == DataTypeFamily.UNDEFINED || col.getDataTypeFamily() == dataTypeFamily) {
+				inputColumns.add(col);
+			}
+		}
+
+		List<TransformerJobBuilder<?>> transformerJobBuilders = getTransformerJobBuilders();
+		for (TransformerJobBuilder<?> transformerJobBuilder : transformerJobBuilders) {
+			List<MutableInputColumn<?>> outputColumns = transformerJobBuilder.getOutputColumns();
+			for (MutableInputColumn<?> col : outputColumns) {
+				if (dataTypeFamily == DataTypeFamily.UNDEFINED || col.getDataTypeFamily() == dataTypeFamily) {
+					inputColumns.add(col);
+				}
+			}
+		}
+
+		return inputColumns;
 	}
 }

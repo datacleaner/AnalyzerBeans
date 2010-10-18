@@ -13,8 +13,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(DefaultTokenizer.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultTokenizer.class);
 
 	private final TokenizerConfiguration _configuration;
 
@@ -24,8 +23,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 
 	public DefaultTokenizer(TokenizerConfiguration configuration) {
 		if (configuration == null) {
-			throw new NullPointerException(
-					"configuration argument cannot be null");
+			throw new NullPointerException("configuration argument cannot be null");
 		}
 		_configuration = configuration;
 	}
@@ -38,15 +36,23 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		List<Token> tokens;
 
 		if (_configuration.isTokenTypeEnabled(TokenType.PREDEFINED)) {
-			PredefinedTokenTokenizer tokenizer = new PredefinedTokenTokenizer(
-					_configuration.getPredefinedTokens());
+			logger.info("Predefined tokens are turned ON, using PredefinedTokenTokenizer");
+			PredefinedTokenTokenizer tokenizer = new PredefinedTokenTokenizer(_configuration.getPredefinedTokens());
 			tokens = tokenizer.tokenize(string);
 			for (ListIterator<Token> it = tokens.listIterator(); it.hasNext();) {
 				Token token = it.next();
-				if (token.getType() == TokenType.UNDEFINED) {
-					List<SimpleToken> replacementTokens = tokenizeInternal(token
-							.getString());
-					if (replacementTokens.size() > 1) {
+				TokenType tokenType = token.getType();
+				logger.debug("Next token type is: {}", tokenType);
+				if (tokenType == TokenType.UNDEFINED) {
+					List<SimpleToken> replacementTokens = tokenizeInternal(token.getString());
+					boolean replace = true;
+					if (replacementTokens.size() == 1) {
+						if (token.equals(replacementTokens.get(0))) {
+							replace = false;
+						}
+					}
+
+					if (replace) {
 						it.remove();
 						for (SimpleToken replacementToken : replacementTokens) {
 							it.add(replacementToken);
@@ -55,6 +61,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 				}
 			}
 		} else {
+			logger.info("Predefined tokens are turned OFF, using tokenizeInternal");
 			tokens = new LinkedList<Token>();
 			tokens.addAll(tokenizeInternal(string));
 		}
@@ -72,8 +79,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		return tokens;
 	}
 
-	protected static List<SimpleToken> preliminaryTokenize(final String string,
-			final TokenizerConfiguration configuration) {
+	protected static List<SimpleToken> preliminaryTokenize(final String string, final TokenizerConfiguration configuration) {
 		LinkedList<SimpleToken> result = new LinkedList<SimpleToken>();
 		SimpleToken lastToken = null;
 
@@ -81,11 +87,9 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		while (ci.hasNext()) {
 			char c = ci.next();
 
-			if (ci.is(configuration.getThousandsSeparator())
-					|| ci.is(configuration.getDecimalSeparator())) {
+			if (ci.is(configuration.getThousandsSeparator()) || ci.is(configuration.getDecimalSeparator())) {
 				boolean treatAsSeparator = false;
-				if (lastToken != null
-						&& lastToken.getType() == TokenType.NUMBER) {
+				if (lastToken != null && lastToken.getType() == TokenType.NUMBER) {
 					// there's a previous NUMBER token
 
 					if (ci.hasNext()) {
@@ -96,10 +100,8 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 							// now we're ready to assume that this is a
 							// separator
 							treatAsSeparator = true;
-							lastToken = registerChar(result, lastToken, c,
-									TokenType.NUMBER);
-							lastToken = registerChar(result, lastToken, next,
-									TokenType.NUMBER);
+							lastToken = registerChar(result, lastToken, c, TokenType.NUMBER);
+							lastToken = registerChar(result, lastToken, next, TokenType.NUMBER);
 						} else {
 							ci.previous();
 						}
@@ -108,8 +110,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 
 				if (!treatAsSeparator) {
 					// the thousand separator is treated as a delim
-					lastToken = registerChar(result, lastToken, c,
-							TokenType.DELIM);
+					lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
 				}
 			} else if (ci.is(configuration.getMinusSign())) {
 				// the meaning of minus sign is dependent on the next token
@@ -120,10 +121,8 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 					if (ci.isDigit()) {
 						// the minus sign was the number operator
 						treatAsOperator = true;
-						lastToken = registerChar(result, null, c,
-								TokenType.NUMBER);
-						lastToken = registerChar(result, lastToken, next,
-								TokenType.NUMBER);
+						lastToken = registerChar(result, null, c, TokenType.NUMBER);
+						lastToken = registerChar(result, lastToken, next, TokenType.NUMBER);
 					} else {
 						ci.previous();
 					}
@@ -131,30 +130,25 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 
 				if (!treatAsOperator) {
 					// the minus sign is treated as a delim
-					lastToken = registerChar(result, lastToken, c,
-							TokenType.DELIM);
+					lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
 				}
 			} else if (ci.isDigit()) {
 				lastToken = registerChar(result, lastToken, c, TokenType.NUMBER);
 			} else if (ci.isLetter()) {
 				if (configuration.isDiscriminateTextCase()) {
-					if (lastToken != null
-							&& lastToken.getType() == TokenType.TEXT) {
+					if (lastToken != null && lastToken.getType() == TokenType.TEXT) {
 						// if we need to discriminate on case then we should
 						// check the previous token and make sure that we only
 						// append to that if they share the same case.
-						char charFromPreviousToken = lastToken.getString()
-								.charAt(0);
-						if (Character.isUpperCase(charFromPreviousToken) != Character
-								.isUpperCase(c)) {
+						char charFromPreviousToken = lastToken.getString().charAt(0);
+						if (Character.isUpperCase(charFromPreviousToken) != Character.isUpperCase(c)) {
 							lastToken = null;
 						}
 					}
 				}
 				lastToken = registerChar(result, lastToken, c, TokenType.TEXT);
 			} else if (ci.isWhitespace()) {
-				lastToken = registerChar(result, lastToken, c,
-						TokenType.WHITESPACE);
+				lastToken = registerChar(result, lastToken, c, TokenType.WHITESPACE);
 			} else {
 				lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
 			}
@@ -163,8 +157,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		return result;
 	}
 
-	private static SimpleToken registerChar(List<SimpleToken> result,
-			SimpleToken lastToken, char c, TokenType tokenType) {
+	private static SimpleToken registerChar(List<SimpleToken> result, SimpleToken lastToken, char c, TokenType tokenType) {
 		if (lastToken == null) {
 			logger.debug("Creating new {} token", tokenType);
 			lastToken = new SimpleToken(tokenType, c);
@@ -193,8 +186,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 				TokenType previousType = previousToken.getType();
 				TokenType currentType = token.getType();
 				if (previousType != currentType) {
-					if (isMixedCandidate(previousType)
-							&& isMixedCandidate(currentType)) {
+					if (isMixedCandidate(previousType) && isMixedCandidate(currentType)) {
 						mix = true;
 						previousToken.appendString(token.getString());
 						previousToken.setType(TokenType.MIXED);
@@ -211,7 +203,6 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 	}
 
 	private static boolean isMixedCandidate(TokenType type) {
-		return type == TokenType.MIXED || type == TokenType.NUMBER
-				|| type == TokenType.TEXT;
+		return type == TokenType.MIXED || type == TokenType.NUMBER || type == TokenType.TEXT;
 	}
 }
