@@ -1,7 +1,10 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
 
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ImmutableAnalyzerJob;
+import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 
 public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> extends
 		AbstractBeanJobBuilder<AnalyzerBeanDescriptor<A>, A, ExploringAnalyzerJobBuilder<A>> implements

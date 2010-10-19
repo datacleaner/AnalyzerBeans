@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +9,10 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.job.IdGenerator;
+import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
+import org.eobjects.analyzer.job.ImmutableTransformerJob;
+import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.InMemoryCollectionProvider;
@@ -26,12 +30,15 @@ import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> {
 
-	private LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
-	private IdGenerator _idGenerator;
+	private final LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
+	private final IdGenerator _idGenerator;
+	private final List<TransformerChangeListener> _transformerChangeListeners;
 
-	public TransformerJobBuilder(TransformerBeanDescriptor<T> descriptor, IdGenerator idGenerator) {
+	public TransformerJobBuilder(TransformerBeanDescriptor<T> descriptor, IdGenerator idGenerator,
+			List<TransformerChangeListener> transformerChangeListeners) {
 		super(descriptor, TransformerJobBuilder.class);
 		_idGenerator = idGenerator;
+		_transformerChangeListeners = transformerChangeListeners;
 	}
 
 	public List<MutableInputColumn<?>> getOutputColumns() {
@@ -71,8 +78,11 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 					// remove from the tail
 					_outputColumns.removeLast();
 				}
+			}
 
-				// TODO: Notify consumers of the removed columns
+			// notify listeners
+			for (TransformerChangeListener listener : _transformerChangeListeners) {
+				listener.onOutputChanged(this, _outputColumns);
 			}
 		}
 
@@ -104,5 +114,11 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			}
 		}
 		return null;
+	}
+	
+	@Override
+	protected void onConfigurationChanged() {
+		// trigger getOutputColumns which will notify consumers in the case of output changes
+		getOutputColumns();
 	}
 }

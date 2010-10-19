@@ -7,8 +7,8 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.JaxbJobFactory;
+import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;

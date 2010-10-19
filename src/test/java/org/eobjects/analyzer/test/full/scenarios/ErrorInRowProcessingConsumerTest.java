@@ -17,7 +17,7 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.LazyDescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;

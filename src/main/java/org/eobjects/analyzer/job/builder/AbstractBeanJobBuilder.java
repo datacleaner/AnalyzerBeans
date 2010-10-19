@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
 
 import java.lang.reflect.Array;
 import java.util.Collections;
@@ -28,8 +28,8 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private D _descriptor;
-	private E _configurableBean;
+	private final D _descriptor;
+	private final E _configurableBean;
 
 	public AbstractBeanJobBuilder(D descriptor, Class<?> builderClass) {
 		if (descriptor == null) {
@@ -111,6 +111,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 		}
 
 		configuredProperty.setValue(_configurableBean, value);
+		onConfigurationChanged();
 		return (B) this;
 	}
 
@@ -124,5 +125,12 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 			}
 		}
 		return Collections.unmodifiableMap(map);
+	}
+
+	/**
+	 * method that can be used by sub-classes to add callback logic when the
+	 * configuration of the bean changes
+	 */
+	protected void onConfigurationChanged() {
 	}
 }

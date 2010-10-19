@@ -1,5 +1,7 @@
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
+
 /**
  * Provides hashCode, equals and toString implementations for FilterOutcome,
  * making them comparable across different implementations.

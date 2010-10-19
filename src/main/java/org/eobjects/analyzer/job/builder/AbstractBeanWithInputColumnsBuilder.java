@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -12,6 +12,7 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @SuppressWarnings("unchecked")
@@ -62,7 +63,7 @@ class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> ext
 			inputColumns = CollectionUtils.array(InputColumn.class, inputColumns, inputColumn);
 		}
 		propertyDescriptor.setValue(getConfigurableBean(), inputColumns);
-
+		onConfigurationChanged();
 		return (B) this;
 	}
 
@@ -102,6 +103,7 @@ class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> ext
 				}
 			}
 			propertyDescriptor.setValue(getConfigurableBean(), inputColumns);
+			onConfigurationChanged();
 		}
 		return (B) this;
 	}

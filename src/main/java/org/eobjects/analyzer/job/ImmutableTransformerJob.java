@@ -11,9 +11,10 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
 import org.eobjects.analyzer.util.CollectionUtils;
 
-final class ImmutableTransformerJob implements TransformerJob {
+public final class ImmutableTransformerJob implements TransformerJob {
 
 	private final TransformerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;

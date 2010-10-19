@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
 
 
 public interface AnalyzerChangeListener {

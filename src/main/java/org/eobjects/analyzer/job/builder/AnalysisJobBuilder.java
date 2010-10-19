@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +20,13 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.IdGenerator;
+import org.eobjects.analyzer.job.ImmutableAnalysisJob;
+import org.eobjects.analyzer.job.PrefixedIdGenerator;
+import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.schema.Column;
@@ -39,6 +46,7 @@ public class AnalysisJobBuilder {
 	// listeners, typically for UI that uses the builders
 	private final List<SourceColumnChangeListener> _sourceColumnListeners = new LinkedList<SourceColumnChangeListener>();
 	private final List<AnalyzerChangeListener> _analyzerChangeListeners = new LinkedList<AnalyzerChangeListener>();
+	private final List<TransformerChangeListener> _transformerChangeListeners = new LinkedList<TransformerChangeListener>();
 
 	public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;
@@ -159,15 +167,20 @@ public class AnalysisJobBuilder {
 	}
 
 	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor) {
-		TransformerJobBuilder<T> transformerJobBuilder = new TransformerJobBuilder<T>(descriptor,
-				transformedColumnIdGenerator);
-		_transformerJobBuilders.add(transformerJobBuilder);
-		return transformerJobBuilder;
+		TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(descriptor, transformedColumnIdGenerator,
+				_transformerChangeListeners);
+		_transformerJobBuilders.add(tjb);
+		for (TransformerChangeListener listener : _transformerChangeListeners) {
+			listener.onAdd(tjb);
+		}
+		return tjb;
 	}
 
 	public AnalysisJobBuilder removeTransformer(TransformerJobBuilder<?> tjb) {
 		_transformerJobBuilders.remove(tjb);
-		// TODO: Notify transformed column consumers
+		for (TransformerChangeListener listener : _transformerChangeListeners) {
+			listener.onRemove(tjb);
+		}
 		return this;
 	}
 
@@ -350,6 +363,10 @@ public class AnalysisJobBuilder {
 
 	public List<AnalyzerChangeListener> getAnalyzerChangeListeners() {
 		return _analyzerChangeListeners;
+	}
+	
+	public List<TransformerChangeListener> getTransformerChangeListeners() {
+		return _transformerChangeListeners;
 	}
 
 	/**

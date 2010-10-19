@@ -9,7 +9,7 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.PropertyDescriptor;
 import org.eobjects.analyzer.util.CompareUtils;
 
-final class ImmutableBeanConfiguration implements BeanConfiguration {
+public final class ImmutableBeanConfiguration implements BeanConfiguration {
 
 	private final Map<PropertyDescriptor, Object> _properties;
 

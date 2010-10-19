@@ -1,7 +1,10 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
 
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
+import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
+import org.eobjects.analyzer.job.ImmutableFilterJob;
 
 public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> extends
 		AbstractBeanWithInputColumnsBuilder<FilterBeanDescriptor<F, C>, F, FilterJobBuilder<F, C>> {

@@ -1,5 +1,7 @@
 package org.eobjects.analyzer.job;
 
+import java.util.LinkedList;
+
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
@@ -11,6 +13,9 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.AnnotationBasedTransformerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.builder.TransformerChangeListener;
+import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.schema.ColumnType;
@@ -87,7 +92,7 @@ public class TransformerJobBuilderTest extends TestCase {
 		AnnotationBasedTransformerBeanDescriptor<ConvertToNumberTransformer> descriptor = AnnotationBasedTransformerBeanDescriptor
 				.create(ConvertToNumberTransformer.class);
 		TransformerJobBuilder<ConvertToNumberTransformer> builder = new TransformerJobBuilder<ConvertToNumberTransformer>(
-				descriptor, IdGenerator);
+				descriptor, IdGenerator, new LinkedList<TransformerChangeListener>());
 		assertFalse(builder.isConfigured());
 
 		ConvertToNumberTransformer configurableBean = builder.getConfigurableBean();

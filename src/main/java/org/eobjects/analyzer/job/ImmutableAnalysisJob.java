@@ -7,7 +7,7 @@ import java.util.Collections;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 
-final class ImmutableAnalysisJob implements AnalysisJob {
+public final class ImmutableAnalysisJob implements AnalysisJob {
 
 	private final DataContextProvider _dataContextProvider;
 	private final Collection<InputColumn<?>> _sourceColumns;

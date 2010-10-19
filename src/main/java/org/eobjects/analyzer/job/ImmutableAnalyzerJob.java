@@ -7,9 +7,10 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
 import org.eobjects.analyzer.util.CollectionUtils;
 
-final class ImmutableAnalyzerJob implements AnalyzerJob {
+public final class ImmutableAnalyzerJob implements AnalyzerJob {
 
 	private final AnalyzerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;

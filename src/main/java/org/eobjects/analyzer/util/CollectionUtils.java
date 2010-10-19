@@ -2,6 +2,9 @@ package org.eobjects.analyzer.util;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -140,5 +143,11 @@ public final class CollectionUtils {
 			}
 		}
 		return result;
+	}
+
+	public static <E> List<E> sorted(Collection<E> col, Comparator<? super E> comparator) {
+		ArrayList<E> list = new ArrayList<E>(col);
+		Collections.sort(list, comparator);
+		return list;
 	}
 }

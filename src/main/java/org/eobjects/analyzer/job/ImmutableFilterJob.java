@@ -8,6 +8,7 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
+import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class ImmutableFilterJob implements FilterJob {

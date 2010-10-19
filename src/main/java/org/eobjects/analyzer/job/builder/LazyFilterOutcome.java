@@ -1,7 +1,12 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
+
+import org.eobjects.analyzer.job.AbstractFilterOutcome;
+import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.ImmutableFilterOutcome;
 
 
-final class LazyFilterOutcome extends AbstractFilterOutcome implements FilterOutcome {
+public final class LazyFilterOutcome extends AbstractFilterOutcome implements FilterOutcome {
 
 	private FilterJobBuilder<?, ?> _filterJobBuilder;
 	private Enum<?> _category;
