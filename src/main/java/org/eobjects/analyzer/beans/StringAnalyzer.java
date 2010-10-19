@@ -165,7 +165,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 	@Override
 	public CrosstabResult getResult() {
 		logger.info("getResult()");
-		CrosstabDimension measureDimension = new CrosstabDimension("Measure");
+		CrosstabDimension measureDimension = new CrosstabDimension("Measures");
 		measureDimension.addCategory("Char count");
 		measureDimension.addCategory("Max chars");
 		measureDimension.addCategory("Min chars");
@@ -262,7 +262,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				nav.where(measureDimension, "Max chars").put(maxChars);
 
 				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery, getClass());
+					resultProducer = new QueryResultProducer(baseQuery);
 					resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), maxChars));
 					nav.attach(resultProducer);
 				}
@@ -271,7 +271,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			if (minChars != null) {
 				nav.where(measureDimension, "Min chars").put(minChars);
 				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery, getClass());
+					resultProducer = new QueryResultProducer(baseQuery);
 					resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), minChars));
 					nav.attach(resultProducer);
 				}
@@ -291,7 +291,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			if (maxWords != null) {
 				nav.where(measureDimension, "Max words").put(maxWords);
 				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery, getClass());
+					resultProducer = new QueryResultProducer(baseQuery);
 					resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), maxWords));
 					nav.attach(resultProducer);
 				}
@@ -300,7 +300,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			if (minWords != null) {
 				nav.where(measureDimension, "Min words").put(minWords);
 				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery, getClass());
+					resultProducer = new QueryResultProducer(baseQuery);
 					resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), minWords));
 					nav.attach(resultProducer);
 				}

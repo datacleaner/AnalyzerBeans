@@ -1,6 +1,8 @@
 package org.eobjects.analyzer.result;
 
-public class CrosstabResult implements AnalyzerResult {
+import dk.eobjects.metamodel.DataContext;
+
+public class CrosstabResult implements DataContextAwareAnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 	private Crosstab<?> crosstab;
@@ -17,5 +19,10 @@ public class CrosstabResult implements AnalyzerResult {
 	@Override
 	public String toString() {
 		return crosstab.toString();
+	}
+
+	@Override
+	public void setDataContext(DataContext dataContext) {
+		crosstab.setDataContext(dataContext);
 	}
 }

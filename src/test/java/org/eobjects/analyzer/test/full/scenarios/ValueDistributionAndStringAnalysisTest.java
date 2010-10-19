@@ -106,7 +106,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				assertTrue(result instanceof CrosstabResult);
 				CrosstabResult cr = (CrosstabResult) result;
 				Crosstab<?> crosstab = cr.getCrosstab();
-				assertEquals("[Column, Measure]", Arrays.toString(crosstab.getDimensionNames()));
+				assertEquals("[Column, Measures]", Arrays.toString(crosstab.getDimensionNames()));
 				assertEquals("[LASTNAME, FIRSTNAME, EXTENSION, EMAIL, OFFICECODE, JOBTITLE]", crosstab.getDimension(0)
 						.getCategories().toString());
 				assertEquals(
@@ -114,7 +114,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 						crosstab.getDimension(1).getCategories().toString());
 				CrosstabNavigator<?> nav = crosstab.navigate();
 				nav.where("Column", "EMAIL");
-				nav.where("Measure", "Char count");
+				nav.where("Measures", "Char count");
 				assertEquals("655", nav.get().toString());
 			} else {
 				assertTrue(result instanceof ValueDistributionResult);

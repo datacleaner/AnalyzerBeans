@@ -13,23 +13,25 @@ import java.util.TreeSet;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public class Crosstab<E extends Serializable> implements Serializable {
+import dk.eobjects.metamodel.DataContext;
+
+public final class Crosstab<E extends Serializable> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<CrosstabDimension> dimensions;
-	private Map<String, E> values = new HashMap<String, E>();
-	private Map<String, ResultProducer> serializableResultProducers = new HashMap<String, ResultProducer>();
+	private final List<CrosstabDimension> dimensions;
+	private final Map<String, E> values = new HashMap<String, E>();
+	private final Class<E> valueClass;
+	private final Map<String, ResultProducer> serializableResultProducers = new HashMap<String, ResultProducer>();
 	private transient Map<String, ResultProducer> transientResultProducers;
-	private Class<E> valueClass;
+	private transient DataContext _dataContext;
 
 	public Crosstab(Class<E> valueClass, CrosstabDimension... dimensions) {
 		this.valueClass = valueClass;
 		this.dimensions = Arrays.asList(dimensions);
 	}
 
-	public Crosstab(Class<E> valueClass,
-			Collection<CrosstabDimension> dimensions) {
+	public Crosstab(Class<E> valueClass, Collection<CrosstabDimension> dimensions) {
 		this.valueClass = valueClass;
 		this.dimensions = new ArrayList<CrosstabDimension>(dimensions);
 	}
@@ -47,21 +49,18 @@ public class Crosstab<E extends Serializable> implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends Serializable> Crosstab<T> castValueClass(
-			Class<T> valueClass) {
+	public <T extends Serializable> Crosstab<T> castValueClass(Class<T> valueClass) {
 		if (ReflectionUtils.is(this.valueClass, valueClass)) {
 			return (Crosstab<T>) this;
 		}
-		throw new IllegalArgumentException("Unable to cast [" + this.valueClass
-				+ "] to [" + valueClass + "]");
+		throw new IllegalArgumentException("Unable to cast [" + this.valueClass + "] to [" + valueClass + "]");
 	}
 
 	public List<CrosstabDimension> getDimensions() {
 		return Collections.unmodifiableList(dimensions);
 	}
 
-	private String getKey(String[] categories) throws IllegalArgumentException,
-			NullPointerException {
+	private String getKey(String[] categories) throws IllegalArgumentException, NullPointerException {
 		if (categories.length != dimensions.size()) {
 			throw new IllegalArgumentException(
 					"Not all dimensions have been specified (differences in size of parameter and Crosstab's dimensions)");
@@ -69,9 +68,8 @@ public class Crosstab<E extends Serializable> implements Serializable {
 		for (int i = 0; i < categories.length; i++) {
 			if (categories[i] == null) {
 				CrosstabDimension dimension = dimensions.get(i);
-				throw new NullPointerException(
-						"Not all dimensions have been specified ('"
-								+ dimension.getName() + "' is null)");
+				throw new NullPointerException("Not all dimensions have been specified ('" + dimension.getName()
+						+ "' is null)");
 
 			}
 		}
@@ -80,9 +78,8 @@ public class Crosstab<E extends Serializable> implements Serializable {
 			CrosstabDimension dimension = dimensions.get(i);
 			String category = categories[i];
 			if (!dimension.containsCategory(category)) {
-				throw new IllegalArgumentException("Unknown category ["
-						+ category + "] for dimension [" + dimension.getName()
-						+ "]");
+				throw new IllegalArgumentException("Unknown category [" + category + "] for dimension ["
+						+ dimension.getName() + "]");
 			}
 			if (i != 0) {
 				sb.append('^');
@@ -96,8 +93,7 @@ public class Crosstab<E extends Serializable> implements Serializable {
 		return new CrosstabNavigator<E>(this);
 	}
 
-	protected E getValue(String[] categories) throws IllegalArgumentException,
-			NullPointerException {
+	protected E getValue(String[] categories) throws IllegalArgumentException, NullPointerException {
 		String key = getKey(categories);
 		return values.get(key);
 	}
@@ -106,17 +102,14 @@ public class Crosstab<E extends Serializable> implements Serializable {
 		return navigate().where(dimension, isCategory);
 	}
 
-	public CrosstabNavigator<E> where(CrosstabDimension dimension,
-			String isCategory) {
+	public CrosstabNavigator<E> where(CrosstabDimension dimension, String isCategory) {
 		return navigate().where(dimension, isCategory);
 	}
 
-	protected void putValue(E value, String[] categories)
-			throws IllegalArgumentException, NullPointerException {
+	protected void putValue(E value, String[] categories) throws IllegalArgumentException, NullPointerException {
 		if (value != null) {
 			if (!ReflectionUtils.is(value.getClass(), valueClass)) {
-				throw new IllegalArgumentException("Cannot put value [" + value
-						+ "] of type [" + value.getClass()
+				throw new IllegalArgumentException("Cannot put value [" + value + "] of type [" + value.getClass()
 						+ "] when Crosstab.valueClass is [" + valueClass + "]");
 			}
 		}
@@ -158,16 +151,14 @@ public class Crosstab<E extends Serializable> implements Serializable {
 				}
 			}
 		}
-		throw new IllegalArgumentException("No such dimension: "
-				+ dimensionName);
+		throw new IllegalArgumentException("No such dimension: " + dimensionName);
 	}
 
 	public CrosstabDimension getDimension(int i) {
 		return dimensions.get(i);
 	}
 
-	protected void attachResultProducer(ResultProducer resultProducer,
-			String[] categories) throws IllegalArgumentException,
+	protected void attachResultProducer(ResultProducer resultProducer, String[] categories) throws IllegalArgumentException,
 			NullPointerException {
 		if (transientResultProducers == null) {
 			transientResultProducers = new HashMap<String, ResultProducer>();
@@ -179,8 +170,7 @@ public class Crosstab<E extends Serializable> implements Serializable {
 			transientResultProducers.remove(key);
 			serializableResultProducers.remove(key);
 		} else {
-			if (ReflectionUtils.is(resultProducer.getClass(),
-					Serializable.class)) {
+			if (ReflectionUtils.is(resultProducer.getClass(), Serializable.class)) {
 				serializableResultProducers.put(key, resultProducer);
 				transientResultProducers.remove(key);
 			} else {
@@ -199,6 +189,9 @@ public class Crosstab<E extends Serializable> implements Serializable {
 			}
 			resultProducer = transientResultProducers.get(key);
 		}
+		if (resultProducer != null) {
+			resultProducer.setDataContext(_dataContext);
+		}
 		return resultProducer;
 	}
 
@@ -216,5 +209,9 @@ public class Crosstab<E extends Serializable> implements Serializable {
 		}
 
 		return sb.toString();
+	}
+
+	public void setDataContext(DataContext dataContext) {
+		_dataContext = dataContext;
 	}
 }

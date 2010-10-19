@@ -48,8 +48,8 @@ public class JaxbJobFactoryTest extends TestCase {
 
 		// the first result is for the unfiltered String analyzer
 		CrosstabResult res3 = (CrosstabResult) results.get(0);
-		assertEquals(1, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measure", "Min words").get());
-		assertEquals(2, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measure", "Max words").get());
+		assertEquals(1, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measures", "Min words").get());
+		assertEquals(2, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measures", "Max words").get());
 
 		// this result represents the single manager (one unique and no repeated
 		// values)

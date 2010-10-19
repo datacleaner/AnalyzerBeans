@@ -120,7 +120,6 @@ public class ReflectionUtils {
 	public static boolean isMap(Type type) {
 		return type == Map.class;
 	}
-	
 
 	public static boolean isSet(Type type) {
 		return type == Set.class;
@@ -228,12 +227,10 @@ public class ReflectionUtils {
 				Type argument = typeArguments[parameterIndex];
 				return getSafeClassToUse(argument);
 			} else {
-				throw new IllegalArgumentException("Only "
-						+ typeArguments.length + " parameters available");
+				throw new IllegalArgumentException("Only " + typeArguments.length + " parameters available");
 			}
 		}
-		throw new IllegalArgumentException("Field type is not parameterized: "
-				+ genericType);
+		throw new IllegalArgumentException("Field type is not parameterized: " + genericType);
 	}
 
 	public static boolean isWildcard(Type type) {
@@ -264,8 +261,7 @@ public class ReflectionUtils {
 			ParameterizedType pType = (ParameterizedType) someType;
 			return (Class<?>) pType.getRawType();
 		}
-		throw new UnsupportedOperationException(
-				"Parameter type not supported: " + someType);
+		throw new UnsupportedOperationException("Parameter type not supported: " + someType);
 	}
 
 	public static int getHierarchyDistance(Class<?> subtype, Class<?> supertype) {
@@ -277,21 +273,40 @@ public class ReflectionUtils {
 		}
 
 		if (!ReflectionUtils.is(subtype, supertype)) {
-			throw new IllegalArgumentException("Not a valid subtype of "
-					+ supertype.getName() + ": " + subtype.getName());
+			throw new IllegalArgumentException("Not a valid subtype of " + supertype.getName() + ": " + subtype.getName());
 		}
 
 		if (supertype.isInterface()) {
-			Class<?>[] interfaces = subtype.getInterfaces();
-			for (Class<?> i : interfaces) {
-				if (i == supertype) {
-					return 1;
+			return getInterfaceHierarchyDistance(subtype, supertype);
+		} else {
+			Class<?> subSuperclass = subtype.getSuperclass();
+			return 1 + getHierarchyDistance(subSuperclass, supertype);
+		}
+	}
+
+	private static int getInterfaceHierarchyDistance(Class<?> subtype, Class<?> supertype) {
+		if (subtype == supertype) {
+			return 0;
+		}
+
+		Class<?>[] interfaces = subtype.getInterfaces();
+		for (Class<?> i : interfaces) {
+			if (i == supertype) {
+				return 1;
+			}
+		}
+		for (Class<?> i : interfaces) {
+			Class<?>[] subInterfaces = i.getInterfaces();
+			if (subInterfaces != null && subInterfaces.length > 0) {
+				for (Class<?> subInterface : subInterfaces) {
+					int result = getInterfaceHierarchyDistance(subInterface, supertype);
+					if (result != -1) {
+						return 1 + result;
+					}
 				}
 			}
 		}
-
-		Class<?> subSuperclass = subtype.getSuperclass();
-		return 1 + getHierarchyDistance(subSuperclass, supertype);
+		return -1;
 	}
 
 	public static boolean isArray(Object o) {

@@ -11,8 +11,8 @@ import javax.inject.Qualifier;
 
 /**
  * Methods and fields with the @Provided annotation are used to let
- * AnalyzerBeans and ResultProducers retrieve service-objects such as persistent
- * collections, the current SchemaNavigator or DataContext.
+ * AnalyzerBeans, TransformerBeans and FilterBeans retrieve service-objects such
+ * as persistent collections, the current SchemaNavigator or DataContext.
  * 
  * This features ensures separation of concerns: The AnalyzerBeans framework
  * will make sure that persistence is handled and the bean-developer will not
@@ -47,11 +47,9 @@ import javax.inject.Qualifier;
  * <li>String</li>
  * <li>Byte[] or byte[]</li>
  * </ul>
- * 
- * 
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target( { ElementType.FIELD })
+@Target({ ElementType.FIELD })
 @Documented
 @Inherited
 @Qualifier

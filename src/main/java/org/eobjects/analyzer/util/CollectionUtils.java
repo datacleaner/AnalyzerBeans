@@ -150,4 +150,10 @@ public final class CollectionUtils {
 		Collections.sort(list, comparator);
 		return list;
 	}
+
+	public static <E extends Comparable<E>> List<E> sorted(Collection<E> col) {
+		ArrayList<E> list = new ArrayList<E>(col);
+		Collections.sort(list);
+		return list;
+	}
 }

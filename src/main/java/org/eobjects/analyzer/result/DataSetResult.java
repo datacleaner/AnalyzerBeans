@@ -3,8 +3,6 @@ package org.eobjects.analyzer.result;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.api.Analyzer;
-
 import dk.eobjects.metamodel.data.DataSet;
 import dk.eobjects.metamodel.data.InMemoryDataSet;
 import dk.eobjects.metamodel.data.Row;
@@ -22,7 +20,7 @@ public class DataSetResult implements AnalyzerResult {
 		this.rows = rows;
 	}
 
-	public DataSetResult(DataSet ds, Class<? extends Analyzer<?>> producerClass) {
+	public DataSetResult(DataSet ds) {
 		this.rows = new ArrayList<Row>();
 		while (ds.next()) {
 			rows.add(ds.getRow());
