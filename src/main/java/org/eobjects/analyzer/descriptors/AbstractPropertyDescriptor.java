@@ -9,14 +9,14 @@ import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-public class AbstractPropertyDescriptor implements PropertyDescriptor,
-		Comparable<AbstractPropertyDescriptor> {
+public class AbstractPropertyDescriptor implements PropertyDescriptor, Comparable<AbstractPropertyDescriptor> {
 
 	private final Field _field;
 	private final Class<?> _baseType;
 	private final Type _genericType;
+	private final BeanDescriptor<?> _beanDescriptor;
 
-	public AbstractPropertyDescriptor(Field field) {
+	public AbstractPropertyDescriptor(Field field, BeanDescriptor<?> beanDescriptor) {
 		if (field == null) {
 			throw new IllegalArgumentException("field cannot be null");
 		}
@@ -24,14 +24,13 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor,
 		_field.setAccessible(true);
 		_baseType = _field.getType();
 		_genericType = _field.getGenericType();
+		_beanDescriptor = beanDescriptor;
 		init();
 	}
 
 	private void init() {
-		if (!(ReflectionUtils.isMap(_baseType)
-				|| ReflectionUtils.isList(_baseType) || SchemaNavigator.class != _baseType)) {
-			throw new DescriptorException("The type " + _baseType
-					+ " is not supported by the @Provided annotation");
+		if (!(ReflectionUtils.isMap(_baseType) || ReflectionUtils.isList(_baseType) || SchemaNavigator.class != _baseType)) {
+			throw new DescriptorException("The type " + _baseType + " is not supported by the @Provided annotation");
 		}
 	}
 
@@ -41,13 +40,11 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor,
 	}
 
 	@Override
-	public void setValue(Object bean, Object value)
-			throws IllegalArgumentException {
+	public void setValue(Object bean, Object value) throws IllegalArgumentException {
 		try {
 			_field.set(bean, value);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not assign value '" + value
-					+ "' to " + _field, e);
+			throw new IllegalStateException("Could not assign value '" + value + "' to " + _field, e);
 		}
 	}
 
@@ -59,8 +56,7 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor,
 		try {
 			return _field.get(bean);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not retrieve property '"
-					+ getName() + "' from bean: " + bean);
+			throw new IllegalArgumentException("Could not retrieve property '" + getName() + "' from bean: " + bean);
 		}
 	}
 
@@ -129,8 +125,7 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor,
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[field=" + _field.getName()
-				+ ",baseType=" + _baseType + "]";
+		return getClass().getSimpleName() + "[field=" + _field.getName() + ",baseType=" + _baseType + "]";
 	}
 
 	@Override
@@ -140,5 +135,10 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor,
 			return 0;
 		}
 		return _field.toString().compareTo(otherField.toString());
+	}
+
+	@Override
+	public BeanDescriptor<?> getBeanDescriptor() {
+		return _beanDescriptor;
 	}
 }

@@ -66,7 +66,7 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 							field);
 				}
 				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(
-						field));
+						field, this));
 			}
 
 			if (providedAnnotation != null) {
@@ -76,7 +76,7 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 							field);
 				}
 				_providedProperties.add(new ProvidedPropertyDescriptorImpl(
-						field));
+						field, this));
 			}
 		}
 

@@ -18,7 +18,7 @@ public class ImmutableBeanConfigurationTest extends TestCase {
 	public void testEqualsArrayValue() throws Exception {
 		Field field = getClass().getDeclaredField("conf");
 		ConfiguredPropertyDescriptorImpl descriptor = new ConfiguredPropertyDescriptorImpl(
-				field);
+				field, null);
 
 		Map<ConfiguredPropertyDescriptor, Object> properties1 = new HashMap<ConfiguredPropertyDescriptor, Object>();
 		properties1.put(descriptor, new String[] { "hello", "world" });

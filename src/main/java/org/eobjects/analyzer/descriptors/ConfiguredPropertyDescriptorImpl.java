@@ -10,8 +10,8 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
 		ConfiguredPropertyDescriptor {
 
-	public ConfiguredPropertyDescriptorImpl(Field field) throws DescriptorException {
-		super(field);
+	public ConfiguredPropertyDescriptorImpl(Field field, BeanDescriptor<?> beanDescriptor) throws DescriptorException {
+		super(field, beanDescriptor);
 	}
 
 	@Override

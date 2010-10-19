@@ -8,8 +8,7 @@ public interface PropertyDescriptor {
 
 	public String getName();
 
-	public void setValue(Object bean, Object value)
-			throws IllegalArgumentException;
+	public void setValue(Object bean, Object value) throws IllegalArgumentException;
 
 	public Object getValue(Object bean) throws IllegalArgumentException;
 
@@ -35,6 +34,8 @@ public interface PropertyDescriptor {
 	 *         the property type is an array
 	 */
 	public Class<?> getBaseType();
+
+	public BeanDescriptor<?> getBeanDescriptor();
 
 	public int getTypeArgumentCount();
 

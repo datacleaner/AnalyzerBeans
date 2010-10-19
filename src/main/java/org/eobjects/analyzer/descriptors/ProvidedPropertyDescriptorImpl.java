@@ -9,8 +9,8 @@ import dk.eobjects.metamodel.DataContext;
 
 public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescriptor implements ProvidedPropertyDescriptor {
 
-	public ProvidedPropertyDescriptorImpl(Field field) throws DescriptorException {
-		super(field);
+	public ProvidedPropertyDescriptorImpl(Field field, BeanDescriptor<?> beanDescriptor) throws DescriptorException {
+		super(field, beanDescriptor);
 	}
 
 	@Override
@@ -22,7 +22,7 @@ public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescri
 	public boolean isList() {
 		return ReflectionUtils.isList(getBaseType());
 	}
-	
+
 	@Override
 	public boolean isMap() {
 		return ReflectionUtils.isMap(getBaseType());

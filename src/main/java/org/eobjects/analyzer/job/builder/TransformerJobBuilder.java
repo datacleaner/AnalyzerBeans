@@ -115,10 +115,11 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		}
 		return null;
 	}
-	
+
 	@Override
 	protected void onConfigurationChanged() {
-		// trigger getOutputColumns which will notify consumers in the case of output changes
+		// trigger getOutputColumns which will notify consumers in the case of
+		// output changes
 		if (isConfigured()) {
 			getOutputColumns();
 		}

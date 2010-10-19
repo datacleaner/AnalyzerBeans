@@ -18,7 +18,7 @@ public class ProvidedPropertyDescriptorImplTest extends TestCase {
 	public void testGenericTypes() throws Exception {
 		Field stringMapField = getClass().getDeclaredField("stringMap");
 		ProvidedPropertyDescriptorImpl descriptor = new ProvidedPropertyDescriptorImpl(
-				stringMapField);
+				stringMapField, null);
 
 		assertEquals(
 				"ProvidedPropertyDescriptorImpl[field=stringMap,baseType=interface java.util.Map]",
@@ -29,7 +29,7 @@ public class ProvidedPropertyDescriptorImplTest extends TestCase {
 		assertEquals(Boolean.class, descriptor.getTypeArgument(1));
 
 		Field intMapField = getClass().getDeclaredField("intMap");
-		descriptor = new ProvidedPropertyDescriptorImpl(intMapField);
+		descriptor = new ProvidedPropertyDescriptorImpl(intMapField, null);
 		assertEquals(
 				"ProvidedPropertyDescriptorImpl[field=intMap,baseType=interface java.util.Map]",
 				descriptor.toString());
