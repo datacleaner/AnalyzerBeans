@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.builder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +16,10 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
+import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.PrefixedIdGenerator;
+import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
