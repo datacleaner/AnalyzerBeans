@@ -88,7 +88,9 @@ public class AnalysisJobBuilder {
 	public AnalysisJobBuilder addSourceColumn(MetaModelInputColumn inputColumn) {
 		if (!_sourceColumns.contains(inputColumn)) {
 			_sourceColumns.add(inputColumn);
-			for (SourceColumnChangeListener listener : _sourceColumnListeners) {
+
+			List<SourceColumnChangeListener> listeners = new ArrayList<SourceColumnChangeListener>(_sourceColumnListeners);
+			for (SourceColumnChangeListener listener : listeners) {
 				listener.onAdd(inputColumn);
 			}
 		}
@@ -134,7 +136,8 @@ public class AnalysisJobBuilder {
 
 	public AnalysisJobBuilder removeSourceColumn(MetaModelInputColumn inputColumn) {
 		_sourceColumns.remove(inputColumn);
-		for (SourceColumnChangeListener listener : _sourceColumnListeners) {
+		List<SourceColumnChangeListener> listeners = new ArrayList<SourceColumnChangeListener>(_sourceColumnListeners);
+		for (SourceColumnChangeListener listener : listeners) {
 			listener.onRemove(inputColumn);
 		}
 		return this;
@@ -170,7 +173,11 @@ public class AnalysisJobBuilder {
 		TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(descriptor, transformedColumnIdGenerator,
 				_transformerChangeListeners);
 		_transformerJobBuilders.add(tjb);
-		for (TransformerChangeListener listener : _transformerChangeListeners) {
+
+		// make a copy since some of the listeners may add additional listeners
+		// which will otherwise cause ConcurrentModificationExceptions
+		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(_transformerChangeListeners);
+		for (TransformerChangeListener listener : listeners) {
 			listener.onAdd(tjb);
 		}
 		return tjb;
@@ -178,7 +185,12 @@ public class AnalysisJobBuilder {
 
 	public AnalysisJobBuilder removeTransformer(TransformerJobBuilder<?> tjb) {
 		_transformerJobBuilders.remove(tjb);
-		for (TransformerChangeListener listener : _transformerChangeListeners) {
+
+		// make a copy since some of the listeners may add additional listeners
+		// which will otherwise cause ConcurrentModificationExceptions
+		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(_transformerChangeListeners);
+		for (TransformerChangeListener listener : listeners) {
+			listener.onOutputChanged(tjb, new LinkedList<MutableInputColumn<?>>());
 			listener.onRemove(tjb);
 		}
 		return this;
@@ -221,7 +233,11 @@ public class AnalysisJobBuilder {
 		}
 		ExploringAnalyzerJobBuilder<A> analyzerJobBuilder = new ExploringAnalyzerJobBuilder<A>(descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
-		for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
+
+		// make a copy since some of the listeners may add additional listeners
+		// which will otherwise cause ConcurrentModificationExceptions
+		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(_analyzerChangeListeners);
+		for (AnalyzerChangeListener listener : listeners) {
 			listener.onAdd(analyzerJobBuilder);
 		}
 		return analyzerJobBuilder;
@@ -236,7 +252,11 @@ public class AnalysisJobBuilder {
 		}
 		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
-		for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
+
+		// make a copy since some of the listeners may add additional listeners
+		// which will otherwise cause ConcurrentModificationExceptions
+		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(_analyzerChangeListeners);
+		for (AnalyzerChangeListener listener : listeners) {
 			listener.onAdd(analyzerJobBuilder);
 		}
 		return analyzerJobBuilder;
@@ -364,7 +384,7 @@ public class AnalysisJobBuilder {
 	public List<AnalyzerChangeListener> getAnalyzerChangeListeners() {
 		return _analyzerChangeListeners;
 	}
-	
+
 	public List<TransformerChangeListener> getTransformerChangeListeners() {
 		return _transformerChangeListeners;
 	}
