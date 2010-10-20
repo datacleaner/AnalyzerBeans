@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.beans.stringpattern;
 
 import java.io.Serializable;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,28 +41,28 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 	String[] predefinedTokenPatterns;
 
 	@Configured(required = false)
-	private Boolean discriminateTextCase;
+	private Boolean discriminateTextCase = true;
 
 	@Configured(required = false)
-	private Boolean discriminateNegativeNumbers;
+	private Boolean discriminateNegativeNumbers = false;
 
 	@Configured(required = false)
-	private Boolean discriminateDecimals;
+	private Boolean discriminateDecimals = true;
 
 	@Configured(required = false)
-	private Boolean enableMixedTokens;
+	private Boolean enableMixedTokens = true;
 
 	@Configured(required = false)
-	private Boolean ignoreRepeatedSpaces;
+	private Boolean ignoreRepeatedSpaces = false;
 
 	@Configured(required = false)
-	private Character decimalSeparator;
+	private Character decimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
 
 	@Configured(required = false)
-	private Character thousandsSeparator;
+	private Character thousandsSeparator = DecimalFormatSymbols.getInstance().getGroupingSeparator();
 
 	@Configured(required = false)
-	private Character minusSign;
+	private Character minusSign = DecimalFormatSymbols.getInstance().getMinusSign();
 
 	@Initialize
 	public void init() {
