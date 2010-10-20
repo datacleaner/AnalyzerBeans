@@ -11,8 +11,7 @@ import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.TimeInterval;
 
 @RendererBean(TextRenderingFormat.class)
-public class DateGapTextRenderer implements
-		Renderer<DateGapAnalyzerResult, String> {
+public class DateGapTextRenderer implements Renderer<DateGapAnalyzerResult, String> {
 
 	private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 

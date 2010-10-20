@@ -12,7 +12,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * @param <O>
  *            the output type of the renderer. This should be the same as or a
  *            subclass of the output class of the matching RenderingFormat.
- *            
+ * 
  * @see RendererBean
  * @see RenderingFormat
  */

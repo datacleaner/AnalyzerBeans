@@ -12,10 +12,10 @@ public class StringLengthTransformer implements Transformer<Number> {
 
 	@Configured
 	InputColumn<String> column;
-	
+
 	public StringLengthTransformer() {
 	}
-	
+
 	public StringLengthTransformer(InputColumn<String> column) {
 		this.column = column;
 	}

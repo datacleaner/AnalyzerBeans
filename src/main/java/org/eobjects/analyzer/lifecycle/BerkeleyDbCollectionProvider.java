@@ -72,7 +72,6 @@ public final class BerkeleyDbCollectionProvider implements CollectionProvider {
 			}
 			map.clear();
 		}
-		
 
 		try {
 			getEnvironment().compress();

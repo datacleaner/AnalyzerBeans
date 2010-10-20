@@ -53,8 +53,7 @@ public class DateToAgeTransformer implements Transformer<Integer> {
 			result[0] = diffDays;
 
 			// use Joda time to easily calculate the diff in years
-			int diffYears = Years.yearsBetween(new DateTime(date),
-					new DateTime(today)).getYears();
+			int diffYears = Years.yearsBetween(new DateTime(date), new DateTime(today)).getYears();
 			result[1] = diffYears;
 		}
 

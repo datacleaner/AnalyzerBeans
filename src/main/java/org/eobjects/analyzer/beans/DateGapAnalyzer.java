@@ -19,11 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Date gap analyzer")
-public class DateGapAnalyzer implements
-		RowProcessingAnalyzer<DateGapAnalyzerResult> {
+public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerResult> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(DateGapAnalyzer.class);
+	private static final Logger logger = LoggerFactory.getLogger(DateGapAnalyzer.class);
 
 	@Configured
 	InputColumn<Date> fromColumn;
@@ -42,8 +40,7 @@ public class DateGapAnalyzer implements
 	public DateGapAnalyzer() {
 	}
 
-	public DateGapAnalyzer(InputColumn<Date> fromColumn,
-			InputColumn<Date> toColumn, InputColumn<String> groupColumn) {
+	public DateGapAnalyzer(InputColumn<Date> fromColumn, InputColumn<Date> toColumn, InputColumn<String> groupColumn) {
 		this.fromColumn = fromColumn;
 		this.toColumn = toColumn;
 		this.groupColumn = groupColumn;
@@ -85,18 +82,15 @@ public class DateGapAnalyzer implements
 	public DateGapAnalyzerResult getResult() {
 		boolean includeSingleTimeInstanceIntervals = false;
 		if (singleDateOverlaps != null) {
-			includeSingleTimeInstanceIntervals = singleDateOverlaps
-					.booleanValue();
+			includeSingleTimeInstanceIntervals = singleDateOverlaps.booleanValue();
 		}
 		Map<String, SortedSet<TimeInterval>> gaps = new HashMap<String, SortedSet<TimeInterval>>();
 		Map<String, SortedSet<TimeInterval>> overlaps = new HashMap<String, SortedSet<TimeInterval>>();
 		Set<String> keySet = timelines.keySet();
 		for (String name : keySet) {
 			TimeLine timeline = timelines.get(name);
-			SortedSet<TimeInterval> timelineGaps = timeline
-					.getTimeGapIntervals();
-			SortedSet<TimeInterval> timelineOverlaps = timeline
-					.getOverlappingIntervals(includeSingleTimeInstanceIntervals);
+			SortedSet<TimeInterval> timelineGaps = timeline.getTimeGapIntervals();
+			SortedSet<TimeInterval> timelineOverlaps = timeline.getOverlappingIntervals(includeSingleTimeInstanceIntervals);
 			gaps.put(name, timelineGaps);
 			overlaps.put(name, timelineOverlaps);
 		}

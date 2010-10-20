@@ -34,8 +34,7 @@ public class ValueCountListImpl implements Serializable, ValueCountList {
 	public void register(ValueCount valueCount) {
 		boolean inserted = false;
 		if (_retainHighest) {
-			for (ListIterator<ValueCount> it = _values.listIterator(); it
-					.hasNext();) {
+			for (ListIterator<ValueCount> it = _values.listIterator(); it.hasNext();) {
 				ValueCount v = it.next();
 				if (valueCount.getCount() > v.getCount()) {
 					it.previous();
@@ -47,8 +46,7 @@ public class ValueCountListImpl implements Serializable, ValueCountList {
 				}
 			}
 		} else {
-			for (ListIterator<ValueCount> it = _values.listIterator(); it
-					.hasNext();) {
+			for (ListIterator<ValueCount> it = _values.listIterator(); it.hasNext();) {
 				ValueCount v = it.next();
 				if (valueCount.getCount() < v.getCount()) {
 					it.previous();
@@ -85,7 +83,7 @@ public class ValueCountListImpl implements Serializable, ValueCountList {
 	public int getActualSize() {
 		return _values.size();
 	}
-	
+
 	@Override
 	public String toString() {
 		return "ValueCountList[" + _values + "]";

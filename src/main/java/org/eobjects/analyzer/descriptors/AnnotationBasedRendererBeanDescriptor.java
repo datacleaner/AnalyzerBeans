@@ -15,11 +15,9 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class AnnotationBasedRendererBeanDescriptor implements
-		RendererBeanDescriptor {
+public final class AnnotationBasedRendererBeanDescriptor implements RendererBeanDescriptor {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(AnnotationBasedRendererBeanDescriptor.class);
+	private static final Logger logger = LoggerFactory.getLogger(AnnotationBasedRendererBeanDescriptor.class);
 
 	private Class<? extends Renderer<?, ?>> _beanClass;
 	private RendererBean _rendererBeanAnnotation;
@@ -29,30 +27,24 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 	private Class<?> _rendererOutputType = null;
 
 	@SuppressWarnings("unchecked")
-	public AnnotationBasedRendererBeanDescriptor(
-			Class<? extends Renderer<?, ?>> beanClass)
-			throws DescriptorException {
+	public AnnotationBasedRendererBeanDescriptor(Class<? extends Renderer<?, ?>> beanClass) throws DescriptorException {
 		if (beanClass == null) {
 			throw new IllegalArgumentException("beanClass cannot be null");
 		}
 		_beanClass = beanClass;
 		_rendererBeanAnnotation = _beanClass.getAnnotation(RendererBean.class);
 		if (_rendererBeanAnnotation == null) {
-			throw new DescriptorException(beanClass
-					+ " doesn't implement the RendererBean annotation");
+			throw new DescriptorException(beanClass + " doesn't implement the RendererBean annotation");
 		}
 
-		if (_beanClass.isInterface()
-				|| Modifier.isAbstract(_beanClass.getModifiers())) {
-			throw new DescriptorException("Renderer (" + _beanClass
-					+ ") is not a non-abstract class");
+		if (_beanClass.isInterface() || Modifier.isAbstract(_beanClass.getModifiers())) {
+			throw new DescriptorException("Renderer (" + _beanClass + ") is not a non-abstract class");
 		}
 
 		_renderingFormat = _rendererBeanAnnotation.value();
 		if (_renderingFormat == null || _renderingFormat.isInterface()
 				|| Modifier.isAbstract(_renderingFormat.getModifiers())) {
-			throw new DescriptorException("Rendering format ("
-					+ _renderingFormat + ") is not a non-abstract class");
+			throw new DescriptorException("Rendering format (" + _renderingFormat + ") is not a non-abstract class");
 		}
 
 		Type[] genericInterfaces = _renderingFormat.getGenericInterfaces();
@@ -60,19 +52,15 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;
 				if (pType.getRawType() == RenderingFormat.class) {
-					_formatOutputType = ReflectionUtils.getTypeParameter(pType,
-							0);
-					logger.debug("Found format output type: {}",
-							_formatOutputType);
+					_formatOutputType = ReflectionUtils.getTypeParameter(pType, 0);
+					logger.debug("Found format output type: {}", _formatOutputType);
 					break;
 				}
 			}
 		}
 
 		if (_formatOutputType == null) {
-			throw new DescriptorException(
-					"Could not determine output type of rendering format: "
-							+ _renderingFormat);
+			throw new DescriptorException("Could not determine output type of rendering format: " + _renderingFormat);
 		}
 
 		genericInterfaces = _beanClass.getGenericInterfaces();
@@ -80,31 +68,22 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;
 				if (pType.getRawType() == Renderer.class) {
-					_rendererInputType = (Class<? extends AnalyzerResult>) ReflectionUtils
-							.getTypeParameter(pType, 0);
-					logger.debug("Found renderer input type: {}",
-							_rendererInputType);
-					_rendererOutputType = ReflectionUtils.getTypeParameter(
-							pType, 1);
-					logger.debug("Found renderer output type: {}",
-							_rendererOutputType);
+					_rendererInputType = (Class<? extends AnalyzerResult>) ReflectionUtils.getTypeParameter(pType, 0);
+					logger.debug("Found renderer input type: {}", _rendererInputType);
+					_rendererOutputType = ReflectionUtils.getTypeParameter(pType, 1);
+					logger.debug("Found renderer output type: {}", _rendererOutputType);
 					break;
 				}
 			}
 		}
 
 		if (_rendererOutputType == null) {
-			throw new DescriptorException(
-					"Could not determine output type of renderer: "
-							+ _beanClass);
+			throw new DescriptorException("Could not determine output type of renderer: " + _beanClass);
 		}
 
 		if (!ReflectionUtils.is(_rendererOutputType, _formatOutputType)) {
-			throw new DescriptorException(
-					"The renderer output type ("
-							+ _rendererOutputType
-							+ ") is not a valid instance or sub-class of format output type ("
-							+ _formatOutputType + ")");
+			throw new DescriptorException("The renderer output type (" + _rendererOutputType
+					+ ") is not a valid instance or sub-class of format output type (" + _formatOutputType + ")");
 		}
 	}
 
@@ -144,15 +123,14 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[beanClass="
-				+ _beanClass.getName() + "]";
+		return getClass().getSimpleName() + "[beanClass=" + _beanClass.getName() + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		return _beanClass.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {
@@ -170,17 +148,14 @@ public final class AnnotationBasedRendererBeanDescriptor implements
 
 	public boolean isOutputApplicableFor(Class<?> inquiredClass) {
 		if (!ReflectionUtils.is(inquiredClass, _formatOutputType)) {
-			logger.debug("{} is not applicable to the format output type: {}",
-					inquiredClass, _formatOutputType);
+			logger.debug("{} is not applicable to the format output type: {}", inquiredClass, _formatOutputType);
 			return false;
 		}
 
 		boolean result = ReflectionUtils.is(_rendererOutputType, inquiredClass);
 
 		if (!result) {
-			logger.debug(
-					"{} is not applicable to the renderer output type: {}",
-					inquiredClass, _rendererOutputType);
+			logger.debug("{} is not applicable to the renderer output type: {}", inquiredClass, _rendererOutputType);
 		}
 
 		return result;

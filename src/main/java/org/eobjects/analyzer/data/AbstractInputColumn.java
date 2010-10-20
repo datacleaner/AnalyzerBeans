@@ -17,8 +17,7 @@ public abstract class AbstractInputColumn<E> implements InputColumn<E> {
 	@Override
 	public Column getPhysicalColumn() throws IllegalStateException {
 		if (!isPhysicalColumn()) {
-			throw new IllegalStateException(this
-					+ " is not a physical InputColumn");
+			throw new IllegalStateException(this + " is not a physical InputColumn");
 		}
 		return getPhysicalColumnInternal();
 	}

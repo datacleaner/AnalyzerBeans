@@ -32,51 +32,39 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 	protected final Set<ProvidedPropertyDescriptor> _providedProperties = new HashSet<ProvidedPropertyDescriptor>();
 	protected final Set<CloseMethodDescriptor> _closeMethods = new HashSet<CloseMethodDescriptor>();
 
-	public AbstractBeanDescriptor(Class<B> beanClass,
-			boolean requireInputColumns) {
+	public AbstractBeanDescriptor(Class<B> beanClass, boolean requireInputColumns) {
 		if (beanClass == null) {
 			throw new IllegalArgumentException("beanClass cannot be null");
 		}
 		_beanClass = beanClass;
 
-		if (_beanClass.isInterface()
-				|| Modifier.isAbstract(_beanClass.getModifiers())) {
-			throw new DescriptorException("Bean (" + _beanClass
-					+ ") is not a non-abstract class");
+		if (_beanClass.isInterface() || Modifier.isAbstract(_beanClass.getModifiers())) {
+			throw new DescriptorException("Bean (" + _beanClass + ") is not a non-abstract class");
 		}
 
 		Field[] fields = beanClass.getDeclaredFields();
 		for (Field field : fields) {
 
-			Configured configuredAnnotation = field
-					.getAnnotation(Configured.class);
+			Configured configuredAnnotation = field.getAnnotation(Configured.class);
 			Provided providedAnnotation = field.getAnnotation(Provided.class);
 
 			if (configuredAnnotation != null && providedAnnotation != null) {
-				throw new DescriptorException(
-						"The field "
-								+ field
-								+ " is annotated with both @Configured and @Provided, which are mutually exclusive.");
+				throw new DescriptorException("The field " + field
+						+ " is annotated with both @Configured and @Provided, which are mutually exclusive.");
 			}
 
 			if (configuredAnnotation != null) {
 				if (!field.isAnnotationPresent(Inject.class)) {
-					logger.info(
-							"No @Inject annotation found for @Configured field: {}",
-							field);
+					logger.info("No @Inject annotation found for @Configured field: {}", field);
 				}
-				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(
-						field, this));
+				_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(field, this));
 			}
 
 			if (providedAnnotation != null) {
 				if (!field.isAnnotationPresent(Inject.class)) {
-					logger.info(
-							"No @Inject annotation found for @Provided field: {}",
-							field);
+					logger.info("No @Inject annotation found for @Provided field: {}", field);
 				}
-				_providedProperties.add(new ProvidedPropertyDescriptorImpl(
-						field, this));
+				_providedProperties.add(new ProvidedPropertyDescriptorImpl(field, this));
 			}
 		}
 
@@ -93,22 +81,18 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 
 		Method[] methods = beanClass.getDeclaredMethods();
 		for (Method method : methods) {
-			Initialize initializeAnnotation = method
-					.getAnnotation(Initialize.class);
+			Initialize initializeAnnotation = method.getAnnotation(Initialize.class);
 
 			// @PostConstruct is a valid substitution for @Initialize
-			PostConstruct postConstructAnnotation = method
-					.getAnnotation(PostConstruct.class);
+			PostConstruct postConstructAnnotation = method.getAnnotation(PostConstruct.class);
 			if (initializeAnnotation != null || postConstructAnnotation != null) {
-				_initializeMethods.add(new InitializeMethodDescriptorImpl(
-						method));
+				_initializeMethods.add(new InitializeMethodDescriptorImpl(method));
 			}
 
 			Close closeAnnotation = method.getAnnotation(Close.class);
 
 			// @PreDestroy is a valid substitution for @Close
-			PreDestroy preDestroyAnnotation = method
-					.getAnnotation(PreDestroy.class);
+			PreDestroy preDestroyAnnotation = method.getAnnotation(PreDestroy.class);
 
 			if (closeAnnotation != null || preDestroyAnnotation != null) {
 				_closeMethods.add(new CloseMethodDescriptorImpl(method));
@@ -129,9 +113,7 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 			}
 			int totalColumns = numConfiguredColumns + numConfiguredColumnArrays;
 			if (totalColumns == 0) {
-				throw new DescriptorException(
-						beanClass
-								+ " does not define a @Configured InputColumn or InputColumn-array");
+				throw new DescriptorException(beanClass + " does not define a @Configured InputColumn or InputColumn-array");
 			}
 		}
 	}
@@ -142,8 +124,7 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 	}
 
 	@Override
-	public ConfiguredPropertyDescriptor getConfiguredProperty(
-			String configuredName) {
+	public ConfiguredPropertyDescriptor getConfiguredProperty(String configuredName) {
 		for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
 			if (configuredName.equals(configuredDescriptor.getName())) {
 				return configuredDescriptor;
@@ -154,10 +135,8 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 
 	@Override
 	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
-		Set<ConfiguredPropertyDescriptor> descriptors = new HashSet<ConfiguredPropertyDescriptor>(
-				_configuredProperties);
-		for (Iterator<ConfiguredPropertyDescriptor> it = descriptors.iterator(); it
-				.hasNext();) {
+		Set<ConfiguredPropertyDescriptor> descriptors = new HashSet<ConfiguredPropertyDescriptor>(_configuredProperties);
+		for (Iterator<ConfiguredPropertyDescriptor> it = descriptors.iterator(); it.hasNext();) {
 			ConfiguredPropertyDescriptor propertyDescriptor = it.next();
 			if (!propertyDescriptor.isInputColumn()) {
 				it.remove();
@@ -202,8 +181,7 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[beanClass="
-				+ _beanClass.getName() + "]";
+		return getClass().getSimpleName() + "[beanClass=" + _beanClass.getName() + "]";
 	}
 
 	@Override

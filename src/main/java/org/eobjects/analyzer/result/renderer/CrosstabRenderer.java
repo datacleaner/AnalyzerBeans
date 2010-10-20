@@ -48,7 +48,7 @@ public class CrosstabRenderer {
 				autoAssignDimensions.add(dimension);
 			}
 		}
-		
+
 		if (autoAssignDimensions.size() == 2) {
 			makeHorizontal(autoAssignDimensions.get(0));
 			makeVertical(autoAssignDimensions.get(1));
@@ -56,14 +56,13 @@ public class CrosstabRenderer {
 			for (CrosstabDimension dimension : autoAssignDimensions) {
 				boolean horizontal = false;
 				int categoryCount = dimension.getCategoryCount();
-				if (horizontalCells <= MAX_HORIZONTAL_CELLS
-						&& categoryCount <= MAX_HORIZONTAL_CELLS) {
+				if (horizontalCells <= MAX_HORIZONTAL_CELLS && categoryCount <= MAX_HORIZONTAL_CELLS) {
 					if (horizontalCells * categoryCount <= MAX_HORIZONTAL_CELLS) {
 						makeHorizontal(dimension);
 						horizontal = true;
 					}
 				}
-				
+
 				if (!horizontal) {
 					makeVertical(dimension);
 				}
@@ -72,8 +71,7 @@ public class CrosstabRenderer {
 	}
 
 	public boolean isAssigned(CrosstabDimension dimension) {
-		return verticalDimensions.contains(dimension)
-				|| horizontalDimensions.contains(dimension);
+		return verticalDimensions.contains(dimension) || horizontalDimensions.contains(dimension);
 	}
 
 	public void makeHorizontal(CrosstabDimension dimension) {
@@ -125,8 +123,7 @@ public class CrosstabRenderer {
 				colspan = colspan / categories.size();
 				for (int j = 0; j < repeatHeaders; j++) {
 					for (String category : categories) {
-						callback.horizontalHeaderCell(category, dimension,
-								colspan);
+						callback.horizontalHeaderCell(category, dimension, colspan);
 					}
 				}
 				repeatHeaders = repeatHeaders * categories.size();
@@ -154,16 +151,14 @@ public class CrosstabRenderer {
 						if (i % rowspan == 0) {
 							String category = navigator.getCategory(dimension);
 
-							callback.verticalHeaderCell(category, dimension,
-									rowspan);
+							callback.verticalHeaderCell(category, dimension, rowspan);
 						}
 					}
 				}
 
 				for (int j = 0; j < horizontalCells; j++) {
 
-					navigateOnAxis(horizontalDimensions, j, horizontalCells,
-							navigator);
+					navigateOnAxis(horizontalDimensions, j, horizontalCells, navigator);
 
 					callback.valueCell(navigator.get(), navigator.explore());
 				}
@@ -177,8 +172,8 @@ public class CrosstabRenderer {
 		return callback.getResult();
 	}
 
-	private void navigateOnAxis(List<CrosstabDimension> dimensionsOnAxis,
-			int cellIndex, int cellCount, CrosstabNavigator<?> navigator) {
+	private void navigateOnAxis(List<CrosstabDimension> dimensionsOnAxis, int cellIndex, int cellCount,
+			CrosstabNavigator<?> navigator) {
 		int colspan = cellCount;
 		int category = 0;
 		int localIndex = cellIndex;

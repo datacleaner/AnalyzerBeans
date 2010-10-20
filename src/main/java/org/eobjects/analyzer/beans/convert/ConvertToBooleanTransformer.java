@@ -20,8 +20,8 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 	@Inject
 	@Configured
 	InputColumn<?> input;
-	
-	@Configured(required=false)
+
+	@Configured(required = false)
 	Boolean nullReplacement;
 
 	@Override
@@ -45,12 +45,10 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 			if (value instanceof String) {
 				String stringValue = (String) value;
 				stringValue = stringValue.trim();
-				if ("true".equalsIgnoreCase(stringValue)
-						|| "yes".equalsIgnoreCase(stringValue)
+				if ("true".equalsIgnoreCase(stringValue) || "yes".equalsIgnoreCase(stringValue)
 						|| "1".equalsIgnoreCase(stringValue)) {
 					b = true;
-				} else if ("false".equalsIgnoreCase(stringValue)
-						|| "no".equalsIgnoreCase(stringValue)
+				} else if ("false".equalsIgnoreCase(stringValue) || "no".equalsIgnoreCase(stringValue)
 						|| "0".equalsIgnoreCase(stringValue)) {
 					b = false;
 				}

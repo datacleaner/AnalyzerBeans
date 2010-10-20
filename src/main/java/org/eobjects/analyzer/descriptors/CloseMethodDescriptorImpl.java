@@ -12,12 +12,10 @@ public final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 
 	public CloseMethodDescriptorImpl(Method method) {
 		if (method.getParameterTypes().length != 0) {
-			throw new DescriptorException(
-					"Close methods cannot have parameters");
+			throw new DescriptorException("Close methods cannot have parameters");
 		}
 		if (method.getReturnType() != void.class) {
-			throw new DescriptorException(
-					"Close methods can only be void");
+			throw new DescriptorException("Close methods can only be void");
 		}
 		_method = method;
 		_method.setAccessible(true);
@@ -27,8 +25,7 @@ public final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 		try {
 			_method.invoke(analyzerBean);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not invoke closing method "
-					+ _method, e);
+			throw new IllegalStateException("Could not invoke closing method " + _method, e);
 		}
 	}
 

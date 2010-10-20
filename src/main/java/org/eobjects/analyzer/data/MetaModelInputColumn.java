@@ -18,14 +18,11 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 
 	@SuppressWarnings("unchecked")
 	public <E> InputColumn<E> narrow(Class<E> e) {
-		Class<?> javaEquivalentClass = _column.getType()
-				.getJavaEquivalentClass();
+		Class<?> javaEquivalentClass = _column.getType().getJavaEquivalentClass();
 		if (ReflectionUtils.is(javaEquivalentClass, e)) {
 			return (InputColumn<E>) this;
 		}
-		throw new IllegalArgumentException(
-				"Can only narrow this column to supertypes of: "
-						+ javaEquivalentClass);
+		throw new IllegalArgumentException("Can only narrow this column to supertypes of: " + javaEquivalentClass);
 	}
 
 	@Override

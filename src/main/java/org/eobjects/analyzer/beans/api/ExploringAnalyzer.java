@@ -36,8 +36,7 @@ import dk.eobjects.metamodel.DataContext;
  * @param <R>
  *            the result type returned by this analyzer
  */
-public interface ExploringAnalyzer<R extends AnalyzerResult> extends
-		Analyzer<R> {
+public interface ExploringAnalyzer<R extends AnalyzerResult> extends Analyzer<R> {
 
 	public void run(DataContext dc);
 }

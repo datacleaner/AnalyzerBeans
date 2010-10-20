@@ -51,8 +51,7 @@ public final class SchemaNavigator {
 		for (String schemaName : schemaNames) {
 			if (columnName.startsWith(schemaName)) {
 				schema = dataContext.getSchemaByName(schemaName);
-				String tableAndColumnPath = columnName.substring(schemaName
-						.length());
+				String tableAndColumnPath = columnName.substring(schemaName.length());
 
 				assert tableAndColumnPath.charAt(0) == '.';
 

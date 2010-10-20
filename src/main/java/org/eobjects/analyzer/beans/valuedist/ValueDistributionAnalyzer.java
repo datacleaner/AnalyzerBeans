@@ -19,11 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Value distribution")
-public class ValueDistributionAnalyzer implements
-		RowProcessingAnalyzer<ValueDistributionResult> {
+public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDistributionResult> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(ValueDistributionAnalyzer.class);
+	private static final Logger logger = LoggerFactory.getLogger(ValueDistributionAnalyzer.class);
 
 	@Inject
 	@Configured("Column")
@@ -47,8 +45,7 @@ public class ValueDistributionAnalyzer implements
 
 	private int _nullCount;
 
-	public ValueDistributionAnalyzer(InputColumn<?> column,
-			boolean recordUniqueValues, Integer topFrequentValues,
+	public ValueDistributionAnalyzer(InputColumn<?> column, boolean recordUniqueValues, Integer topFrequentValues,
 			Integer bottomFrequentValues) {
 		_column = column;
 		_recordUniqueValues = recordUniqueValues;
@@ -91,8 +88,7 @@ public class ValueDistributionAnalyzer implements
 			bottomValues = null;
 		} else {
 			topValues = ValueCountListImpl.createTopList(_topFrequentValues);
-			bottomValues = ValueCountListImpl
-					.createBottomList(_bottomFrequentValues);
+			bottomValues = ValueCountListImpl.createBottomList(_bottomFrequentValues);
 		}
 
 		List<String> uniqueValues = new LinkedList<String>();
@@ -115,11 +111,9 @@ public class ValueDistributionAnalyzer implements
 		}
 
 		if (_recordUniqueValues) {
-			return new ValueDistributionResult(_column, topValues,
-					bottomValues, _nullCount, uniqueValues);
+			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueValues);
 		} else {
-			return new ValueDistributionResult(_column, topValues,
-					bottomValues, _nullCount, uniqueCount);
+			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueCount);
 		}
 	}
 

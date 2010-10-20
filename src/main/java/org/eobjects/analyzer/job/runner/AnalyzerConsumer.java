@@ -29,7 +29,7 @@ final class AnalyzerConsumer implements RowProcessingConsumer {
 	public InputColumn<?>[] getRequiredInput() {
 		return _inputColumns;
 	}
-	
+
 	@Override
 	public InputRow consume(InputRow row, int distinctCount, FilterOutcomeSink outcomes) {
 		RowProcessingAnalyzer<?> analyzer = (RowProcessingAnalyzer<?>) _analyzerBeanInstance.getBean();

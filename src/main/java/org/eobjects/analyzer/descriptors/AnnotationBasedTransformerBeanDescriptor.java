@@ -8,37 +8,30 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>>
-		extends AbstractBeanDescriptor<T> implements
-		TransformerBeanDescriptor<T> {
+public final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> extends AbstractBeanDescriptor<T>
+		implements TransformerBeanDescriptor<T> {
 
 	private final String _displayName;
 
-	public static <T extends Transformer<?>> AnnotationBasedTransformerBeanDescriptor<T> create(
-			Class<T> transformerClass) {
+	public static <T extends Transformer<?>> AnnotationBasedTransformerBeanDescriptor<T> create(Class<T> transformerClass) {
 		return new AnnotationBasedTransformerBeanDescriptor<T>(transformerClass);
 	}
 
-	private AnnotationBasedTransformerBeanDescriptor(Class<T> transformerClass)
-			throws DescriptorException {
+	private AnnotationBasedTransformerBeanDescriptor(Class<T> transformerClass) throws DescriptorException {
 		super(transformerClass, true);
 
 		if (!ReflectionUtils.is(transformerClass, Transformer.class)) {
-			throw new DescriptorException(transformerClass
-					+ " does not implement " + Transformer.class.getName());
+			throw new DescriptorException(transformerClass + " does not implement " + Transformer.class.getName());
 		}
 
-		TransformerBean transformerAnnotation = transformerClass
-				.getAnnotation(TransformerBean.class);
+		TransformerBean transformerAnnotation = transformerClass.getAnnotation(TransformerBean.class);
 		if (transformerAnnotation == null) {
-			throw new DescriptorException(transformerClass
-					+ " doesn't implement the TransformerBean annotation");
+			throw new DescriptorException(transformerClass + " doesn't implement the TransformerBean annotation");
 		}
 
 		String displayName = transformerAnnotation.value();
 		if (displayName == null || displayName.trim().length() == 0) {
-			displayName = ReflectionUtils.explodeCamelCase(
-					transformerClass.getSimpleName(), false);
+			displayName = ReflectionUtils.explodeCamelCase(transformerClass.getSimpleName(), false);
 		}
 		_displayName = displayName;
 	}
@@ -55,8 +48,7 @@ public final class AnnotationBasedTransformerBeanDescriptor<T extends Transforme
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;
 				if (pType.getRawType() == Transformer.class) {
-					Class<?> typeParameter = ReflectionUtils.getTypeParameter(
-							pType, 0);
+					Class<?> typeParameter = ReflectionUtils.getTypeParameter(pType, 0);
 					return DataTypeFamily.valueOf(typeParameter);
 				}
 			}

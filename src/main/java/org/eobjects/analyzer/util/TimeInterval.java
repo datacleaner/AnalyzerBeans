@@ -11,8 +11,7 @@ import java.util.Date;
  * @author Kasper Sørensen
  * 
  */
-public class TimeInterval implements Serializable, Comparable<TimeInterval>,
-		Cloneable {
+public class TimeInterval implements Serializable, Comparable<TimeInterval>, Cloneable {
 
 	private static final long serialVersionUID = 1L;
 

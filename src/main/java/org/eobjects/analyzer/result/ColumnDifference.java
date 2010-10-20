@@ -12,8 +12,7 @@ public class ColumnDifference<E> implements StructuralDifference<Column, E> {
 	private E value1;
 	private E value2;
 
-	public ColumnDifference(Column column1, Column column2, String valueName,
-			E value1, E value2) {
+	public ColumnDifference(Column column1, Column column2, String valueName, E value1, E value2) {
 		this.column1 = column1;
 		this.column2 = column2;
 		this.valueName = valueName;
@@ -48,8 +47,7 @@ public class ColumnDifference<E> implements StructuralDifference<Column, E> {
 
 	@Override
 	public String toString() {
-		return "Columns '" + getStructure1().getName() + "' and '"
-				+ getStructure2().getName() + "' differ on '" + getValueName()
-				+ "': [" + getValue1() + "] vs. [" + getValue2() + "]";
+		return "Columns '" + getStructure1().getName() + "' and '" + getStructure2().getName() + "' differ on '"
+				+ getValueName() + "': [" + getValue1() + "] vs. [" + getValue2() + "]";
 	}
 }

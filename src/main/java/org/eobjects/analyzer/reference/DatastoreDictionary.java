@@ -47,19 +47,14 @@ public class DatastoreDictionary implements Dictionary, Serializable {
 	public ReferenceValues<String> getValues() {
 		Datastore datastore = datastoreCatalog.getDatastore(_datastoreName);
 		if (datastore == null) {
-			throw new IllegalStateException("Could not resolve datastore "
-					+ _datastoreName);
+			throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
 		}
 
-		DataContextProvider dataContextProvider = datastore
-				.getDataContextProvider();
-		SchemaNavigator schemaNavigator = dataContextProvider
-				.getSchemaNavigator();
-		Column column = schemaNavigator
-				.convertToColumns(new String[] { _qualifiedColumnName })[0];
+		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+		Column column = schemaNavigator.convertToColumns(new String[] { _qualifiedColumnName })[0];
 		if (column == null) {
-			throw new IllegalStateException("Could not resolve column "
-					+ _qualifiedColumnName);
+			throw new IllegalStateException("Could not resolve column " + _qualifiedColumnName);
 		}
 
 		return new DatastoreReferenceValues(dataContextProvider, column);

@@ -12,8 +12,7 @@ public class TokenPatternImpl implements TokenPattern {
 	private TokenizerConfiguration _configuration;
 	private List<TokenPatternSymbol> _symbols;
 
-	public TokenPatternImpl(List<Token> tokens,
-			TokenizerConfiguration configuration) {
+	public TokenPatternImpl(List<Token> tokens, TokenizerConfiguration configuration) {
 		if (tokens == null) {
 			throw new IllegalArgumentException("tokens cannot be null");
 		}

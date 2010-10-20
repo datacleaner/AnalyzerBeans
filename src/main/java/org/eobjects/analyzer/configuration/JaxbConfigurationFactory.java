@@ -157,8 +157,9 @@ public class JaxbConfigurationFactory {
 
 			datastores.put(name, new CsvDatastore(name, filename, quoteChar, separatorChar));
 		}
-		
-		List<AccessDatastoreType> accessDatastores = CollectionUtils.filterOnClass(datastoreTypes, AccessDatastoreType.class);
+
+		List<AccessDatastoreType> accessDatastores = CollectionUtils
+				.filterOnClass(datastoreTypes, AccessDatastoreType.class);
 		for (AccessDatastoreType accessDatastoreType : accessDatastores) {
 			String name = accessDatastoreType.getName();
 			if (StringUtils.isNullOrEmpty(name)) {

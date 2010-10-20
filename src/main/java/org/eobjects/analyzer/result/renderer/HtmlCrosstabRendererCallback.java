@@ -6,8 +6,7 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.ResultProducer;
 
-public class HtmlCrosstabRendererCallback implements
-		CrosstabRendererCallback<String> {
+public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<String> {
 
 	private StringBuilder sb;
 
@@ -16,8 +15,7 @@ public class HtmlCrosstabRendererCallback implements
 	}
 
 	@Override
-	public void beginTable(Crosstab<?> crosstab,
-			List<CrosstabDimension> horizontalDimensions,
+	public void beginTable(Crosstab<?> crosstab, List<CrosstabDimension> horizontalDimensions,
 			List<CrosstabDimension> verticalDimensions) {
 		sb.append("<table>");
 	}
@@ -38,8 +36,7 @@ public class HtmlCrosstabRendererCallback implements
 	}
 
 	@Override
-	public void horizontalHeaderCell(String category,
-			CrosstabDimension dimension, int width) {
+	public void horizontalHeaderCell(String category, CrosstabDimension dimension, int width) {
 		if (width <= 0) {
 			return;
 		}
@@ -55,8 +52,7 @@ public class HtmlCrosstabRendererCallback implements
 	}
 
 	@Override
-	public void verticalHeaderCell(String category,
-			CrosstabDimension dimension, int height) {
+	public void verticalHeaderCell(String category, CrosstabDimension dimension, int height) {
 		if (height <= 0) {
 			return;
 		}
@@ -72,8 +68,7 @@ public class HtmlCrosstabRendererCallback implements
 	}
 
 	@Override
-	public void valueCell(Object value,
-			ResultProducer drillToDetailResultProducer) {
+	public void valueCell(Object value, ResultProducer drillToDetailResultProducer) {
 		if (value == null) {
 			value = "<null>";
 		}
@@ -83,8 +78,7 @@ public class HtmlCrosstabRendererCallback implements
 	}
 
 	@Override
-	public void emptyHeader(CrosstabDimension verticalDimension,
-			CrosstabDimension horizontalDimension) {
+	public void emptyHeader(CrosstabDimension verticalDimension, CrosstabDimension horizontalDimension) {
 		sb.append("<td></td>");
 	}
 

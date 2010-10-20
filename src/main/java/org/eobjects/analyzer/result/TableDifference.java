@@ -12,8 +12,7 @@ public class TableDifference<E> implements StructuralDifference<Table, E> {
 	private E value1;
 	private E value2;
 
-	public TableDifference(Table table1, Table table2, String valueName,
-			E value1, E value2) {
+	public TableDifference(Table table1, Table table2, String valueName, E value1, E value2) {
 		this.table1 = table1;
 		this.table2 = table2;
 		this.valueName = valueName;
@@ -48,8 +47,7 @@ public class TableDifference<E> implements StructuralDifference<Table, E> {
 
 	@Override
 	public String toString() {
-		return "Tables '" + getStructure1().getName() + "' and '"
-				+ getStructure2().getName() + "' differ on '" + getValueName()
-				+ "': [" + getValue1() + "] vs. [" + getValue2() + "]";
+		return "Tables '" + getStructure1().getName() + "' and '" + getStructure2().getName() + "' differ on '"
+				+ getValueName() + "': [" + getValue1() + "] vs. [" + getValue2() + "]";
 	}
 }

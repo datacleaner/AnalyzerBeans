@@ -27,8 +27,7 @@ import dk.eobjects.metamodel.schema.Table;
  * @author Kasper Sørensen
  */
 @AnalyzerBean("Referential Integrity validator")
-public class ReferentialIntegrityValidator implements
-		ExploringAnalyzer<DataSetResult> {
+public class ReferentialIntegrityValidator implements ExploringAnalyzer<DataSetResult> {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private List<Row> invalidRows;
@@ -63,13 +62,10 @@ public class ReferentialIntegrityValidator implements
 			}
 		}
 
-		Query leftQuery = new Query()
-				.select(foreignKeyColumn)
-				.select(informationalForeignColumns
-						.toArray(new Column[informationalForeignColumns.size()]))
+		Query leftQuery = new Query().select(foreignKeyColumn)
+				.select(informationalForeignColumns.toArray(new Column[informationalForeignColumns.size()]))
 				.from(foreignTable);
-		Query rightQuery = new Query().select(primaryKeyColumn).from(
-				primaryTable);
+		Query rightQuery = new Query().select(primaryKeyColumn).from(primaryTable);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Left query: " + leftQuery);
 			logger.debug("Right query: " + rightQuery);
@@ -85,8 +81,7 @@ public class ReferentialIntegrityValidator implements
 		SelectItem rightOn = rightSelectClause.getItem(0);
 
 		// Create master query
-		Query q = new Query().from(new FromItem(JoinType.LEFT, leftSide,
-				rightSide, new SelectItem[] { leftOn },
+		Query q = new Query().from(new FromItem(JoinType.LEFT, leftSide, rightSide, new SelectItem[] { leftOn },
 				new SelectItem[] { rightOn }));
 		for (SelectItem si : rightSelectClause.getItems()) {
 			q.select(new SelectItem(si, rightSide));
@@ -114,8 +109,7 @@ public class ReferentialIntegrityValidator implements
 			if (foreignKey == null) {
 				if (acceptNullForeignKey) {
 					if (logger.isInfoEnabled()) {
-						logger.info("Accepting row with NULL primary key: "
-								+ row);
+						logger.info("Accepting row with NULL primary key: " + row);
 					}
 				} else {
 					invalidRows.add(row);

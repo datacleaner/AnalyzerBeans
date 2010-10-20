@@ -26,7 +26,7 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 		logger.debug("run({},{})", task, listener);
 		executorService.submit(new TaskRunnable(task, listener));
 	}
-	
+
 	@Override
 	public void run(TaskRunnable taskRunnable) {
 		logger.debug("run({})", taskRunnable);

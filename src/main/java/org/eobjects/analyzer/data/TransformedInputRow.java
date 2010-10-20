@@ -12,12 +12,11 @@ public final class TransformedInputRow implements InputRow {
 		this(delegate, new HashMap<InputColumn<?>, Object>());
 	}
 
-	public TransformedInputRow(InputRow delegateInputRow,
-			Map<InputColumn<?>, Object> values) {
+	public TransformedInputRow(InputRow delegateInputRow, Map<InputColumn<?>, Object> values) {
 		_delegate = delegateInputRow;
 		_values = values;
 	}
-	
+
 	public void addValue(InputColumn<?> inputColumn, Object value) {
 		_values.put(inputColumn, value);
 	}

@@ -16,6 +16,6 @@ public interface RendererBeanDescriptor extends Comparable<RendererBeanDescripto
 	public Set<Annotation> getAnnotations();
 
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
-	
+
 	public Class<? extends AnalyzerResult> getAnalyzerResultType();
 }

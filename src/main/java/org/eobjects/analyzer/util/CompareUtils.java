@@ -3,7 +3,7 @@ package org.eobjects.analyzer.util;
 import java.lang.reflect.Array;
 
 public final class CompareUtils {
-	
+
 	private CompareUtils() {
 		// prevent instantiation
 	}

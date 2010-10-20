@@ -12,8 +12,7 @@ public class SchemaDifference<E> implements StructuralDifference<Schema, E> {
 	private E value1;
 	private E value2;
 
-	public SchemaDifference(Schema schema1, Schema schema2, String valueName,
-			E value1, E value2) {
+	public SchemaDifference(Schema schema1, Schema schema2, String valueName, E value1, E value2) {
 		this.schema1 = schema1;
 		this.schema2 = schema2;
 		this.valueName = valueName;
@@ -48,8 +47,7 @@ public class SchemaDifference<E> implements StructuralDifference<Schema, E> {
 
 	@Override
 	public String toString() {
-		return "Schemas '" + getStructure1().getName() + "' and '"
-				+ getStructure2().getName() + "' differ on '" + getValueName()
-				+ "': [" + getValue1() + "] vs. [" + getValue2() + "]";
+		return "Schemas '" + getStructure1().getName() + "' and '" + getStructure2().getName() + "' differ on '"
+				+ getValueName() + "': [" + getValue1() + "] vs. [" + getValue2() + "]";
 	}
 }

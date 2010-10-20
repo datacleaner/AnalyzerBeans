@@ -19,11 +19,9 @@ import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
 @AnalyzerBean("Compare column structures")
-public class CompareColumnsAnalyzer implements
-		ExploringAnalyzer<ColumnComparisonResult> {
+public class CompareColumnsAnalyzer implements ExploringAnalyzer<ColumnComparisonResult> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(CompareColumnsAnalyzer.class);
+	private static final Logger logger = LoggerFactory.getLogger(CompareColumnsAnalyzer.class);
 
 	@Inject
 	@Configured
@@ -70,18 +68,12 @@ public class CompareColumnsAnalyzer implements
 
 		addDiff(differences, "name", column1.getName(), column2.getName());
 		addDiff(differences, "type", column1.getType(), column2.getType());
-		addDiff(differences, "native type", column1.getNativeType(),
-				column2.getNativeType());
-		addDiff(differences, "size", column1.getColumnSize(),
-				column2.getColumnSize());
-		addDiff(differences, "nullable", column1.isNullable(),
-				column2.isNullable());
-		addDiff(differences, "indexed", column1.isIndexed(),
-				column2.isIndexed());
-		addDiff(differences, "column number", column1.getColumnNumber(),
-				column2.getColumnNumber());
-		addDiff(differences, "remarks", column1.getRemarks(),
-				column2.getRemarks());
+		addDiff(differences, "native type", column1.getNativeType(), column2.getNativeType());
+		addDiff(differences, "size", column1.getColumnSize(), column2.getColumnSize());
+		addDiff(differences, "nullable", column1.isNullable(), column2.isNullable());
+		addDiff(differences, "indexed", column1.isIndexed(), column2.isIndexed());
+		addDiff(differences, "column number", column1.getColumnNumber(), column2.getColumnNumber());
+		addDiff(differences, "remarks", column1.getRemarks(), column2.getRemarks());
 
 		if (isRelationshipsAnalyzed()) {
 			Table table1 = column1.getTable();
@@ -98,11 +90,9 @@ public class CompareColumnsAnalyzer implements
 		result = new ColumnComparisonResult(differences);
 	}
 
-	private <T> void addDiff(List<ColumnDifference<?>> differences,
-			String valueName, T value1, T value2) {
+	private <T> void addDiff(List<ColumnDifference<?>> differences, String valueName, T value1, T value2) {
 		if (!CompareUtils.equals(value1, value2)) {
-			ColumnDifference<T> diff = new ColumnDifference<T>(column1,
-					column2, valueName, value1, value2);
+			ColumnDifference<T> diff = new ColumnDifference<T>(column1, column2, valueName, value1, value2);
 			differences.add(diff);
 		}
 	}

@@ -18,26 +18,22 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 	private char _minusSign;
 	private String _symbolicString;
 
-	public TokenPatternSymbolImpl(Token prototypeToken,
-			TokenizerConfiguration configuration) {
+	public TokenPatternSymbolImpl(Token prototypeToken, TokenizerConfiguration configuration) {
 		_tokenType = prototypeToken.getType();
 		_length = prototypeToken.length();
 		switch (_tokenType) {
 		case TEXT:
 			if (configuration.isDiscriminateTextCase()) {
-				_upperCaseOnly = Character
-						.isUpperCase(prototypeToken.charAt(0));
+				_upperCaseOnly = Character.isUpperCase(prototypeToken.charAt(0));
 				_lowerCaseOnly = !_upperCaseOnly;
 			}
 			break;
 		case NUMBER:
 			if (configuration.isDiscriminateDecimalNumbers()) {
-				Character decimalSeparator = configuration
-						.getDecimalSeparator();
+				Character decimalSeparator = configuration.getDecimalSeparator();
 				if (decimalSeparator != null) {
 					_decimalSeparator = decimalSeparator.charValue();
-					_decimal = prototypeToken.getString().indexOf(
-							_decimalSeparator) != -1;
+					_decimal = prototypeToken.getString().indexOf(_decimalSeparator) != -1;
 				}
 			}
 
@@ -66,8 +62,7 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 			_symbolicString = '[' + pt.getPredefinedTokenDefintion().getName() + ']';
 			break;
 		default:
-			throw new UnsupportedOperationException("Unsupported token type: "
-					+ _tokenType);
+			throw new UnsupportedOperationException("Unsupported token type: " + _tokenType);
 		}
 	}
 
@@ -105,8 +100,7 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 		case MIXED:
 			return '?';
 		}
-		throw new UnsupportedOperationException(
-				"No symbolic char for token type: " + _tokenType);
+		throw new UnsupportedOperationException("No symbolic char for token type: " + _tokenType);
 	}
 
 	@Override
@@ -158,8 +152,7 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 			case PREDEFINED:
 				return matchesPredefined(token);
 			default:
-				throw new UnsupportedOperationException(
-						"Unsupported token type for matching: " + _tokenType);
+				throw new UnsupportedOperationException("Unsupported token type for matching: " + _tokenType);
 			}
 		}
 		return false;
@@ -171,8 +164,7 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 		return _symbolicString.equals('[' + name + ']');
 	}
 
-	private boolean matchesText(Token token,
-			TokenizerConfiguration configuration) {
+	private boolean matchesText(Token token, TokenizerConfiguration configuration) {
 		boolean discriminateTextCase = configuration.isDiscriminateTextCase();
 		if (discriminateTextCase) {
 
@@ -187,12 +179,9 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 		return true;
 	}
 
-	private boolean matchesNumber(Token token,
-			TokenizerConfiguration configuration) {
-		boolean discriminateNegativeNumbers = configuration
-				.isDiscriminateNegativeNumbers();
-		boolean discriminateDecimalNumbers = configuration
-				.isDiscriminateDecimalNumbers();
+	private boolean matchesNumber(Token token, TokenizerConfiguration configuration) {
+		boolean discriminateNegativeNumbers = configuration.isDiscriminateNegativeNumbers();
+		boolean discriminateDecimalNumbers = configuration.isDiscriminateDecimalNumbers();
 		if (!discriminateDecimalNumbers && !discriminateNegativeNumbers) {
 			return true;
 		}
@@ -219,21 +208,18 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 		return true;
 	}
 
-	private boolean matchesDelim(Token token,
-			TokenizerConfiguration configuration) {
+	private boolean matchesDelim(Token token, TokenizerConfiguration configuration) {
 		return toSymbolicString().equals(token.getString());
 	}
 
-	private boolean matchesWhitespace(Token token,
-			TokenizerConfiguration configuration) {
+	private boolean matchesWhitespace(Token token, TokenizerConfiguration configuration) {
 		if (configuration.isDiscriminateWhiteSpaces()) {
 			return toSymbolicString().equals(token.getString());
 		}
 		return true;
 	}
 
-	private boolean matchesMixed(Token token,
-			TokenizerConfiguration configuration) {
+	private boolean matchesMixed(Token token, TokenizerConfiguration configuration) {
 		return true;
 	}
 

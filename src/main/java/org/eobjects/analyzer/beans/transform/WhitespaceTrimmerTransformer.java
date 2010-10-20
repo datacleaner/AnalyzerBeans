@@ -13,13 +13,13 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 
 	@Configured
 	InputColumn<String> column;
-	
+
 	@Configured
 	boolean trimLeft = true;
-	
+
 	@Configured
 	boolean trimRight = true;
-	
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		return OutputColumns.singleOutputColumn();
@@ -40,7 +40,7 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 				}
 			}
 		}
-		return new String[] {value};
+		return new String[] { value };
 	}
 
 }

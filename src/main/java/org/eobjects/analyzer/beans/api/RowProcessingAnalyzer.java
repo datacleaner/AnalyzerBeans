@@ -26,8 +26,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * @param <R>
  *            the result type returned by this analyzer
  */
-public interface RowProcessingAnalyzer<R extends AnalyzerResult> extends
-		Analyzer<R> {
+public interface RowProcessingAnalyzer<R extends AnalyzerResult> extends Analyzer<R> {
 
 	public void run(InputRow row, int distinctCount);
 }

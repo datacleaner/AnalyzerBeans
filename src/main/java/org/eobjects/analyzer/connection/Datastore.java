@@ -6,8 +6,8 @@ import java.io.Serializable;
 public interface Datastore extends Closeable, Serializable {
 
 	public String getName();
-	
+
 	public DataContextProvider getDataContextProvider();
-	
+
 	public void close();
 }

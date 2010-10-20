@@ -25,11 +25,9 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
 @TransformerBean("Name standardizer")
 public class NameStandardizerTransformer implements Transformer<String> {
 
-	public static final String[] DEFAULT_PATTERNS = { "FIRSTNAME LASTNAME",
-			"TITULATION. FIRSTNAME LASTNAME", "TITULATION FIRSTNAME LASTNAME",
-			"FIRSTNAME MIDDLENAME LASTNAME",
-			"TITULATION. FIRSTNAME MIDDLENAME LASTNAME", "LASTNAME, FIRSTNAME",
-			"LASTNAME, FIRSTNAME MIDDLENAME" };
+	public static final String[] DEFAULT_PATTERNS = { "FIRSTNAME LASTNAME", "TITULATION. FIRSTNAME LASTNAME",
+			"TITULATION FIRSTNAME LASTNAME", "FIRSTNAME MIDDLENAME LASTNAME", "TITULATION. FIRSTNAME MIDDLENAME LASTNAME",
+			"LASTNAME, FIRSTNAME", "LASTNAME, FIRSTNAME MIDDLENAME" };
 
 	public static enum NamePart implements HasGroupLiteral {
 		FIRSTNAME, LASTNAME, MIDDLENAME, TITULATION;
@@ -62,15 +60,13 @@ public class NameStandardizerTransformer implements Transformer<String> {
 		namedPatterns = new ArrayList<NamedPattern<NamePart>>();
 
 		for (String stringPattern : stringPatterns) {
-			namedPatterns.add(new NamedPattern<NamePart>(stringPattern,
-					NamePart.class));
+			namedPatterns.add(new NamedPattern<NamePart>(stringPattern, NamePart.class));
 		}
 	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns("Firstname", "Lastname", "Middlename",
-				"Titulation");
+		return new OutputColumns("Firstname", "Lastname", "Middlename", "Titulation");
 	}
 
 	@Override

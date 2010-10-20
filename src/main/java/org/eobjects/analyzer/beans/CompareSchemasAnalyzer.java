@@ -19,8 +19,7 @@ import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
 @AnalyzerBean("Compare schema structures")
-public class CompareSchemasAnalyzer implements
-		ExploringAnalyzer<SchemaComparisonResult> {
+public class CompareSchemasAnalyzer implements ExploringAnalyzer<SchemaComparisonResult> {
 
 	@Inject
 	@Configured
@@ -36,7 +35,7 @@ public class CompareSchemasAnalyzer implements
 		this.schema1 = schema1;
 		this.schema2 = schema2;
 	}
-	
+
 	public CompareSchemasAnalyzer() {
 	}
 
@@ -54,24 +53,21 @@ public class CompareSchemasAnalyzer implements
 		List<TableComparisonResult> tableComparisonResults = new ArrayList<TableComparisonResult>();
 
 		if (schema1 == schema2) {
-			result = new SchemaComparisonResult(differences,
-					tableComparisonResults);
+			result = new SchemaComparisonResult(differences, tableComparisonResults);
 			return;
 		}
 
 		addDiff(differences, "name", schema1.getName(), schema2.getName());
 
-		List<String> tableNames1 = CollectionUtils
-				.list(schema1.getTableNames());
-		List<String> tableNames2 = CollectionUtils
-				.list(schema2.getTableNames());
+		List<String> tableNames1 = CollectionUtils.list(schema1.getTableNames());
+		List<String> tableNames2 = CollectionUtils.list(schema2.getTableNames());
 
 		List<String> tablesOnlyInSchema1 = new ArrayList<String>(tableNames1);
 		tablesOnlyInSchema1.removeAll(tableNames2);
 
 		for (String tableName : tablesOnlyInSchema1) {
-			SchemaDifference<String> diff = new SchemaDifference<String>(
-					schema1, schema2, "unmatched table", tableName, null);
+			SchemaDifference<String> diff = new SchemaDifference<String>(schema1, schema2, "unmatched table", tableName,
+					null);
 			differences.add(diff);
 		}
 
@@ -79,8 +75,8 @@ public class CompareSchemasAnalyzer implements
 		tablesOnlyInSchema2.removeAll(tableNames1);
 
 		for (String tableName : tablesOnlyInSchema2) {
-			SchemaDifference<String> diff = new SchemaDifference<String>(
-					schema1, schema2, "unmatched table", null, tableName);
+			SchemaDifference<String> diff = new SchemaDifference<String>(schema1, schema2, "unmatched table", null,
+					tableName);
 			differences.add(diff);
 		}
 
@@ -91,8 +87,7 @@ public class CompareSchemasAnalyzer implements
 			Table table1 = schema1.getTableByName(tableName);
 			Table table2 = schema2.getTableByName(tableName);
 
-			CompareTablesAnalyzer analyzer = new CompareTablesAnalyzer(table1,
-					table2);
+			CompareTablesAnalyzer analyzer = new CompareTablesAnalyzer(table1, table2);
 			analyzer.run(dc);
 			TableComparisonResult tableComparisonResult = analyzer.getResult();
 
@@ -106,11 +101,9 @@ public class CompareSchemasAnalyzer implements
 		result = new SchemaComparisonResult(differences, tableComparisonResults);
 	}
 
-	private <T> void addDiff(List<SchemaDifference<?>> differences,
-			String valueName, T value1, T value2) {
+	private <T> void addDiff(List<SchemaDifference<?>> differences, String valueName, T value1, T value2) {
 		if (!CompareUtils.equals(value1, value2)) {
-			SchemaDifference<T> diff = new SchemaDifference<T>(schema1,
-					schema2, valueName, value1, value2);
+			SchemaDifference<T> diff = new SchemaDifference<T>(schema1, schema2, valueName, value1, value2);
 			differences.add(diff);
 		}
 	}

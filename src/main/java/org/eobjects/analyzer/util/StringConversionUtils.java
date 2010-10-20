@@ -47,14 +47,11 @@ import dk.eobjects.metamodel.schema.Table;
  */
 public final class StringConversionUtils {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(StringConversionUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(StringConversionUtils.class);
 
-	private static final String[][] ESCAPE_MAPPING = { { "&amp;", "&" },
-			{ "&#91;", "[" }, { "&#93;", "]" }, { "&#44;", "," },
-			{ "&lt;", "<" }, { "&gt;", ">" }, { "&quot;", "\"" },
-			{ "&copy;", "\u00a9" }, { "&reg;", "\u00ae" },
-			{ "&euro;", "\u20a0" } };
+	private static final String[][] ESCAPE_MAPPING = { { "&amp;", "&" }, { "&#91;", "[" }, { "&#93;", "]" },
+			{ "&#44;", "," }, { "&lt;", "<" }, { "&gt;", ">" }, { "&quot;", "\"" }, { "&copy;", "\u00a9" },
+			{ "&reg;", "\u00ae" }, { "&euro;", "\u20a0" } };
 
 	// ISO 8601
 	private static final String dateFormatString = "yyyy-MM-dd'T'HH:mm:ss S";
@@ -95,8 +92,7 @@ public final class StringConversionUtils {
 		if (o instanceof SynonymCatalog) {
 			return escape(((SynonymCatalog) o).getName());
 		}
-		if (o instanceof Boolean || o instanceof Number || o instanceof String
-				|| o instanceof Character) {
+		if (o instanceof Boolean || o instanceof Number || o instanceof String || o instanceof Character) {
 			return escape(o.toString());
 		}
 		if (o instanceof java.sql.Date) {
@@ -144,8 +140,7 @@ public final class StringConversionUtils {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static final <E> E deserialize(String str, Class<E> type,
-			SchemaNavigator schemaNavigator,
+	public static final <E> E deserialize(String str, Class<E> type, SchemaNavigator schemaNavigator,
 			ReferenceDataCatalog referenceDataCatalog) {
 		logger.debug("deserialize(\"{}\", {})", str, type);
 		if (type == null) {
@@ -157,8 +152,7 @@ public final class StringConversionUtils {
 		}
 
 		if (type.isArray()) {
-			return (E) deserializeArray(str, type, schemaNavigator,
-					referenceDataCatalog);
+			return (E) deserializeArray(str, type, schemaNavigator, referenceDataCatalog);
 		}
 		if (ReflectionUtils.isString(type)) {
 			return (E) unescape(str);
@@ -229,16 +223,14 @@ public final class StringConversionUtils {
 			return (E) dictionary;
 		}
 		if (ReflectionUtils.is(type, SynonymCatalog.class)) {
-			SynonymCatalog synonymCatalog = referenceDataCatalog
-					.getSynonymCatalog(str);
+			SynonymCatalog synonymCatalog = referenceDataCatalog.getSynonymCatalog(str);
 			if (synonymCatalog == null) {
 				logger.warn("SynonymCatalog not found: {}", str);
 			}
 			return (E) synonymCatalog;
 		}
 
-		throw new IllegalArgumentException("Could not convert to type: "
-				+ type.getName());
+		throw new IllegalArgumentException("Could not convert to type: " + type.getName());
 	}
 
 	private static final Date toDate(String str) {
@@ -250,8 +242,7 @@ public final class StringConversionUtils {
 		}
 	}
 
-	private static final Object deserializeArray(final String str,
-			Class<?> type, SchemaNavigator schemaNavigator,
+	private static final Object deserializeArray(final String str, Class<?> type, SchemaNavigator schemaNavigator,
 			ReferenceDataCatalog referenceDataCatalog) {
 		assert type.isArray();
 
@@ -261,7 +252,6 @@ public final class StringConversionUtils {
 			logger.debug("found [], returning empty array");
 			return Array.newInstance(componentType, 0);
 		}
-
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("deserializeArray(\"{}\")", str);
@@ -280,8 +270,7 @@ public final class StringConversionUtils {
 				}
 			}
 			it.reset();
-			logger.debug("brackets statistics: beginning={}, ending={}",
-					beginningBrackets, endingBrackets);
+			logger.debug("brackets statistics: beginning={}, ending={}", beginningBrackets, endingBrackets);
 			if (beginningBrackets != endingBrackets) {
 				logger.warn("Unbalanced beginning and ending brackets!");
 			}
@@ -290,16 +279,11 @@ public final class StringConversionUtils {
 		if (!str.startsWith("[") || !str.endsWith("]")) {
 			if (str.indexOf(',') == -1) {
 				Object result = Array.newInstance(componentType, 1);
-				Array.set(
-						result,
-						0,
-						deserialize(str, componentType, schemaNavigator,
-								referenceDataCatalog));
+				Array.set(result, 0, deserialize(str, componentType, schemaNavigator, referenceDataCatalog));
 				return result;
 			}
 			throw new IllegalArgumentException(
-					"Cannot parse string as array, bracket encapsulation and comma delimitors expected. Found: "
-							+ str);
+					"Cannot parse string as array, bracket encapsulation and comma delimitors expected. Found: " + str);
 		}
 
 		final String innerString = str.substring(1, str.length() - 1);
@@ -317,18 +301,15 @@ public final class StringConversionUtils {
 			if (commaIndex == -1) {
 				logger.debug("no comma found");
 				String s = innerString.substring(offset);
-				objects.add(deserialize(s, componentType, schemaNavigator,
-						referenceDataCatalog));
+				objects.add(deserialize(s, componentType, schemaNavigator, referenceDataCatalog));
 				offset = innerString.length();
-			} else if (bracketBeginIndex == -1
-					|| commaIndex < bracketBeginIndex) {
+			} else if (bracketBeginIndex == -1 || commaIndex < bracketBeginIndex) {
 				String s = innerString.substring(offset, commaIndex);
 				if ("".equals(s)) {
 					offset++;
 				} else {
 					logger.debug("no brackets in next element: \"{}\"", s);
-					objects.add(deserialize(s, componentType, schemaNavigator,
-							referenceDataCatalog));
+					objects.add(deserialize(s, componentType, schemaNavigator, referenceDataCatalog));
 					offset = commaIndex + 1;
 				}
 			} else {
@@ -342,9 +323,7 @@ public final class StringConversionUtils {
 					final int searchOffset = nextBracket + 1;
 					int nextEndBracket = s.indexOf(']', searchOffset);
 					if (nextEndBracket == -1) {
-						throw new IllegalStateException(
-								"No ending bracket in array string: "
-										+ s.substring(searchOffset));
+						throw new IllegalStateException("No ending bracket in array string: " + s.substring(searchOffset));
 					}
 					int nextBeginBracket = s.indexOf('[', searchOffset);
 					if (nextBeginBracket == -1) {
@@ -372,8 +351,7 @@ public final class StringConversionUtils {
 				logger.debug("recursing to nested array: {}", s);
 
 				logger.debug("inner array string: " + s);
-				objects.add(deserializeArray(s, componentType, schemaNavigator,
-						referenceDataCatalog));
+				objects.add(deserializeArray(s, componentType, schemaNavigator, referenceDataCatalog));
 
 				offset = bracketBeginIndex + s.length();
 			}

@@ -145,8 +145,7 @@ public class CharIterator implements ListIterator<Character> {
 
 	@Override
 	public void add(Character e) {
-		throw new UnsupportedOperationException(
-				"CharIterator does not support add(...)");
+		throw new UnsupportedOperationException("CharIterator does not support add(...)");
 	}
 
 	@Override

@@ -13,8 +13,7 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
 
 	private final Map<PropertyDescriptor, Object> _properties;
 
-	public ImmutableBeanConfiguration(
-			Map<ConfiguredPropertyDescriptor, Object> properties) {
+	public ImmutableBeanConfiguration(Map<ConfiguredPropertyDescriptor, Object> properties) {
 		if (properties == null) {
 			_properties = new HashMap<PropertyDescriptor, Object>();
 		} else {
@@ -22,13 +21,12 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
 		}
 
 		// validate contents
-		for (Map.Entry<PropertyDescriptor, Object> entry : _properties
-				.entrySet()) {
+		for (Map.Entry<PropertyDescriptor, Object> entry : _properties.entrySet()) {
 			Object value = entry.getValue();
 			if (value instanceof Collection) {
 				throw new IllegalArgumentException(
-						"Collection values are not allowed in BeanConfigurations. Violating entry: "
-								+ entry.getKey() + " -> " + entry.getValue());
+						"Collection values are not allowed in BeanConfigurations. Violating entry: " + entry.getKey()
+								+ " -> " + entry.getValue());
 			}
 		}
 	}
@@ -47,8 +45,7 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((_properties == null) ? 0 : _properties.keySet().hashCode());
+		result = prime * result + ((_properties == null) ? 0 : _properties.keySet().hashCode());
 		return result;
 	}
 

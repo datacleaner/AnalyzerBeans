@@ -15,8 +15,7 @@ import dk.eobjects.metamodel.util.FormatHelper;
 @RendererBean(TextRenderingFormat.class)
 public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 
-	private static class TextCrosstabRendererCallback implements
-			CrosstabRendererCallback<String> {
+	private static class TextCrosstabRendererCallback implements CrosstabRendererCallback<String> {
 
 		private NumberFormat decimalFormat = FormatHelper.getUiNumberFormat();
 
@@ -25,16 +24,14 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 		private int horizontalDimensionWidth;
 
 		@Override
-		public void beginTable(Crosstab<?> crosstab,
-				List<CrosstabDimension> horizontalDimensions,
+		public void beginTable(Crosstab<?> crosstab, List<CrosstabDimension> horizontalDimensions,
 				List<CrosstabDimension> verticalDimensions) {
 			sb = new StringBuilder();
 			horizontalDimensionWidth = 0;
 			for (CrosstabDimension dimension : horizontalDimensions) {
 				List<String> categories = dimension.getCategories();
 				for (String category : categories) {
-					horizontalDimensionWidth = Math.max(
-							horizontalDimensionWidth, category.length());
+					horizontalDimensionWidth = Math.max(horizontalDimensionWidth, category.length());
 				}
 			}
 
@@ -62,10 +59,8 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 		}
 
 		@Override
-		public void horizontalHeaderCell(String category,
-				CrosstabDimension dimension, int width) {
-			int trailingBlanks = horizontalDimensionWidth * width
-					- category.length();
+		public void horizontalHeaderCell(String category, CrosstabDimension dimension, int width) {
+			int trailingBlanks = horizontalDimensionWidth * width - category.length();
 
 			if (leftAligned) {
 				sb.append(category);
@@ -84,8 +79,7 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 		}
 
 		@Override
-		public void verticalHeaderCell(String category,
-				CrosstabDimension dimension, int height) {
+		public void verticalHeaderCell(String category, CrosstabDimension dimension, int height) {
 			sb.append(category);
 
 			int dimensionWidth = getWidth(dimension);
@@ -99,8 +93,7 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 		}
 
 		@Override
-		public void valueCell(Object value,
-				ResultProducer drillToDetailResultProducer) {
+		public void valueCell(Object value, ResultProducer drillToDetailResultProducer) {
 			if (value == null) {
 				value = "<null>";
 			}
@@ -115,8 +108,7 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 				}
 			}
 
-			int trailingBlanks = horizontalDimensionWidth
-					- stringValue.length();
+			int trailingBlanks = horizontalDimensionWidth - stringValue.length();
 			if (leftAligned) {
 				sb.append(stringValue);
 				for (int i = 0; i < trailingBlanks; i++) {
@@ -134,8 +126,7 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 		}
 
 		@Override
-		public void emptyHeader(CrosstabDimension verticalDimension,
-				CrosstabDimension horizontalDimension) {
+		public void emptyHeader(CrosstabDimension verticalDimension, CrosstabDimension horizontalDimension) {
 			int dimensionWidth = getWidth(verticalDimension);
 
 			for (int i = 0; i < dimensionWidth; i++) {
@@ -164,8 +155,7 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 
 	@Override
 	public String render(CrosstabResult result) {
-		return new CrosstabRenderer(result.getCrosstab())
-				.render(new TextCrosstabRendererCallback());
+		return new CrosstabRenderer(result.getCrosstab()).render(new TextCrosstabRendererCallback());
 	}
 
 }

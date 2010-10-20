@@ -16,7 +16,7 @@ public class DatastoreCatalogImpl implements DatastoreCatalog {
 		_datastores = datastores;
 	}
 
-	public DatastoreCatalogImpl(Datastore ... datastores) {
+	public DatastoreCatalogImpl(Datastore... datastores) {
 		_datastores = new ArrayList<Datastore>();
 		for (Datastore datastore : datastores) {
 			_datastores.add(datastore);

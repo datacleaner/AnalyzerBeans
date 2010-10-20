@@ -17,12 +17,9 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
 @TransformerBean("Url standardizer")
 public class UrlStandardizerTransformer implements Transformer<String> {
 
-	public static final String[] PATTERNS = {
-			"PROTOCOL://DOMAIN:PORTPATH\\?QUERYSTRING",
-			"PROTOCOL://DOMAINPATH\\?QUERYSTRING", "PROTOCOL://DOMAIN:PORTPATH",
-			"PROTOCOL://DOMAIN:PORT\\?QUERYSTRING",
-			"PROTOCOL://DOMAIN\\?QUERYSTRING", "PROTOCOL://DOMAINPATH",
-			"PROTOCOL://DOMAIN:PORT", "PROTOCOL://DOMAIN" };
+	public static final String[] PATTERNS = { "PROTOCOL://DOMAIN:PORTPATH\\?QUERYSTRING",
+			"PROTOCOL://DOMAINPATH\\?QUERYSTRING", "PROTOCOL://DOMAIN:PORTPATH", "PROTOCOL://DOMAIN:PORT\\?QUERYSTRING",
+			"PROTOCOL://DOMAIN\\?QUERYSTRING", "PROTOCOL://DOMAINPATH", "PROTOCOL://DOMAIN:PORT", "PROTOCOL://DOMAIN" };
 
 	public static enum UrlPart implements HasGroupLiteral {
 		PROTOCOL, DOMAIN, PORT, PATH, QUERYSTRING;
@@ -54,15 +51,13 @@ public class UrlStandardizerTransformer implements Transformer<String> {
 	public void init() {
 		namedPatterns = new ArrayList<NamedPattern<UrlPart>>(PATTERNS.length);
 		for (String pattern : PATTERNS) {
-			namedPatterns
-					.add(new NamedPattern<UrlPart>(pattern, UrlPart.class));
+			namedPatterns.add(new NamedPattern<UrlPart>(pattern, UrlPart.class));
 		}
 	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns("Protocol", "Domain", "Port", "Path",
-				"Querystring");
+		return new OutputColumns("Protocol", "Domain", "Port", "Path", "Querystring");
 	}
 
 	@Override

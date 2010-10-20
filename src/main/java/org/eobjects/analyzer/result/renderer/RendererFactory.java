@@ -15,22 +15,18 @@ public class RendererFactory {
 		this.descriptorProvider = descriptorProvider;
 	}
 
-	public <I extends AnalyzerResult, O> Renderer<? super I, ? extends O> getRenderer(
-			I analyzerResult,
+	public <I extends AnalyzerResult, O> Renderer<? super I, ? extends O> getRenderer(I analyzerResult,
 			Class<? extends RenderingFormat<O>> renderingFormat) {
 
-		Class<? extends AnalyzerResult> analyzerResultType = analyzerResult
-				.getClass();
+		Class<? extends AnalyzerResult> analyzerResultType = analyzerResult.getClass();
 		RendererBeanDescriptor bestMatchingDescriptor = null;
 
 		Collection<RendererBeanDescriptor> descriptors = descriptorProvider
 				.getRendererBeanDescriptorsForRenderingFormat(renderingFormat);
 		for (RendererBeanDescriptor descriptor : descriptors) {
-			Class<? extends AnalyzerResult> analyzerResultType1 = descriptor
-					.getAnalyzerResultType();
+			Class<? extends AnalyzerResult> analyzerResultType1 = descriptor.getAnalyzerResultType();
 			if (ReflectionUtils.is(analyzerResultType, analyzerResultType1)) {
-				int dist1 = ReflectionUtils.getHierarchyDistance(
-						analyzerResultType, analyzerResultType1);
+				int dist1 = ReflectionUtils.getHierarchyDistance(analyzerResultType, analyzerResultType1);
 				if (dist1 == 0) {
 					bestMatchingDescriptor = descriptor;
 					break;
@@ -38,10 +34,8 @@ public class RendererFactory {
 				if (bestMatchingDescriptor == null) {
 					bestMatchingDescriptor = descriptor;
 				} else {
-					Class<? extends AnalyzerResult> analyzerResultType2 = bestMatchingDescriptor
-							.getAnalyzerResultType();
-					int dist2 = ReflectionUtils.getHierarchyDistance(
-							analyzerResultType, analyzerResultType2);
+					Class<? extends AnalyzerResult> analyzerResultType2 = bestMatchingDescriptor.getAnalyzerResultType();
+					int dist2 = ReflectionUtils.getHierarchyDistance(analyzerResultType, analyzerResultType2);
 					if (dist1 < dist2) {
 						bestMatchingDescriptor = descriptor;
 					}
@@ -57,8 +51,7 @@ public class RendererFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <I extends AnalyzerResult, O> Renderer<I, O> instantiate(
-			RendererBeanDescriptor descriptor) {
+	private <I extends AnalyzerResult, O> Renderer<I, O> instantiate(RendererBeanDescriptor descriptor) {
 		try {
 			Renderer<?, ?> renderer = descriptor.getBeanClass().newInstance();
 			return (Renderer<I, O>) renderer;

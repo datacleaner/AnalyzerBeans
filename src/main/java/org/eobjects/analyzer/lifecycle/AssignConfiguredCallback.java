@@ -20,12 +20,10 @@ public final class AssignConfiguredCallback implements LifeCycleCallback {
 	}
 
 	@Override
-	public void onEvent(LifeCycleState state, Object bean,
-			BeanDescriptor<?> descriptor) {
+	public void onEvent(LifeCycleState state, Object bean, BeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.ASSIGN_CONFIGURED;
 
-		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
-				.getConfiguredProperties();
+		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
 		for (ConfiguredPropertyDescriptor property : configuredProperties) {
 			Object configuredValue = getValue(property);
 			if (configuredValue == null) {
@@ -38,11 +36,8 @@ public final class AssignConfiguredCallback implements LifeCycleCallback {
 						if (Array.getLength(configuredValue) == 1) {
 							configuredValue = Array.get(configuredValue, 0);
 						} else if (Array.getLength(configuredValue) > 1) {
-							throw new IllegalStateException(
-									"Cannot assign an array-value ("
-											+ configuredValue
-											+ ") to a non-array property ("
-											+ property + ")");
+							throw new IllegalStateException("Cannot assign an array-value (" + configuredValue
+									+ ") to a non-array property (" + property + ")");
 						} else {
 							configuredValue = null;
 						}

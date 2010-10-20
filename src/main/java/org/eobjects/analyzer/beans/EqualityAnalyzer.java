@@ -19,8 +19,7 @@ import org.eobjects.analyzer.util.CompareUtils;
  * @author Kasper Sørensen
  */
 @AnalyzerBean("Equality analyzer")
-public class EqualityAnalyzer implements
-		RowProcessingAnalyzer<ValidationResult> {
+public class EqualityAnalyzer implements RowProcessingAnalyzer<ValidationResult> {
 
 	@Inject
 	@Configured

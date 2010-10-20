@@ -6,8 +6,7 @@ import org.eobjects.analyzer.job.IdGenerator;
 
 import dk.eobjects.metamodel.schema.Column;
 
-public class TransformedInputColumn<E> extends AbstractInputColumn<E>
-		implements MutableInputColumn<E>, Serializable {
+public class TransformedInputColumn<E> extends AbstractInputColumn<E> implements MutableInputColumn<E>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -66,7 +65,7 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E>
 	protected int hashCodeInternal() {
 		return _id.hashCode();
 	}
-	
+
 	@Override
 	public DataTypeFamily getDataTypeFamily() {
 		return _type;
@@ -74,7 +73,6 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E>
 
 	@Override
 	public String toString() {
-		return "TransformedInputColumn[id=" + _id + ",name=" + _name
-				+ ",type=" + _type + "]";
+		return "TransformedInputColumn[id=" + _id + ",name=" + _name + ",type=" + _type + "]";
 	}
 }

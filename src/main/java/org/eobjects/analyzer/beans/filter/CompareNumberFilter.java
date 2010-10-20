@@ -19,7 +19,7 @@ public class CompareNumberFilter implements Filter<CompareCategory> {
 		this();
 		this.threshold = threshold.doubleValue();
 	}
-	
+
 	public CompareNumberFilter() {
 	}
 

@@ -19,23 +19,21 @@ public class ValueDistributionResult implements AnalyzerResult {
 	private int _uniqueValueCount;
 	private String _columnName;
 
-	private ValueDistributionResult(InputColumn<?> column,
-			ValueCountList topValues, ValueCountList bottomValues, int nullCount) {
+	private ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
+			int nullCount) {
 		_columnName = column.getName();
 		_topValues = topValues;
 		_bottomValues = bottomValues;
 		_nullCount = nullCount;
 	}
 
-	public ValueDistributionResult(InputColumn<?> column,
-			ValueCountList topValues, ValueCountListImpl bottomValues,
+	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountListImpl bottomValues,
 			int nullCount, Collection<String> uniqueValues) {
 		this(column, topValues, bottomValues, nullCount);
 		_uniqueValues = uniqueValues;
 	}
 
-	public ValueDistributionResult(InputColumn<?> column,
-			ValueCountList topValues, ValueCountListImpl bottomValues,
+	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountListImpl bottomValues,
 			int nullCount, int uniqueValueCount) {
 		this(column, topValues, bottomValues, nullCount);
 		_uniqueValueCount = uniqueValueCount;

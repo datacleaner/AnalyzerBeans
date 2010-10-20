@@ -30,7 +30,7 @@ public class EjbTimerTaskRunnerBean implements EjbTimerTaskRunner {
 		taskQueue.add(new TaskRunnable(task, listener));
 		timerService.createTimer(0, null);
 	}
-	
+
 	@Override
 	public void run(TaskRunnable taskRunnable) {
 		logger.debug("run({})", taskRunnable);

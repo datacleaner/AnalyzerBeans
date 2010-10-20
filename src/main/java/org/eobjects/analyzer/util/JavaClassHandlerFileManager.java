@@ -7,16 +7,13 @@ import javax.tools.StandardLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class JavaClassHandlerFileManager extends
-		ForwardingJavaFileManager<JavaFileManager> {
+final class JavaClassHandlerFileManager extends ForwardingJavaFileManager<JavaFileManager> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(JavaClassHandlerFileManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(JavaClassHandlerFileManager.class);
 
 	private ClassLoader _classPathClassLoader;
 
-	public JavaClassHandlerFileManager(JavaFileManager fileManager,
-			ClassLoader classPathClassLoader) {
+	public JavaClassHandlerFileManager(JavaFileManager fileManager, ClassLoader classPathClassLoader) {
 		super(fileManager);
 		_classPathClassLoader = classPathClassLoader;
 	}

@@ -18,8 +18,8 @@ public interface MutableInputColumn<E> extends InputColumn<E> {
 	public void setName(String name);
 
 	/**
-	 * @return an id that is unique within the AnalysisJob that is being
-	 *         built or executed.
+	 * @return an id that is unique within the AnalysisJob that is being built
+	 *         or executed.
 	 */
 	public String getId();
 }

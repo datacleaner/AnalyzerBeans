@@ -6,19 +6,16 @@ import java.util.Set;
 
 import org.eobjects.analyzer.util.CollectionUtils;
 
-public final class InitializeMethodDescriptorImpl implements
-		InitializeMethodDescriptor {
+public final class InitializeMethodDescriptorImpl implements InitializeMethodDescriptor {
 
 	private final Method _method;
 
 	public InitializeMethodDescriptorImpl(Method method) {
 		if (method.getParameterTypes().length != 0) {
-			throw new DescriptorException(
-					"Initialize methods cannot have parameters");
+			throw new DescriptorException("Initialize methods cannot have parameters");
 		}
 		if (method.getReturnType() != void.class) {
-			throw new DescriptorException(
-					"Initialize methods can only be void");
+			throw new DescriptorException("Initialize methods can only be void");
 		}
 		_method = method;
 		_method.setAccessible(true);
@@ -28,8 +25,7 @@ public final class InitializeMethodDescriptorImpl implements
 		try {
 			_method.invoke(bean);
 		} catch (Exception e) {
-			throw new IllegalStateException(
-					"Could not invoke initializing method " + _method, e);
+			throw new IllegalStateException("Could not invoke initializing method " + _method, e);
 		}
 	}
 
@@ -37,7 +33,7 @@ public final class InitializeMethodDescriptorImpl implements
 	public String toString() {
 		return "InitializeMethodDescriptorImpl[method=" + _method.getName() + "]";
 	}
-	
+
 	@Override
 	public Set<Annotation> getAnnotations() {
 		return CollectionUtils.set(_method.getAnnotations());

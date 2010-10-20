@@ -12,9 +12,7 @@ public class Percentage extends Number {
 
 	public Percentage(short percentage) {
 		if (percentage < 0 || percentage > 100) {
-			throw new IllegalArgumentException(
-					"Percentage has to be between 0 and 100. Invalid: "
-							+ percentage);
+			throw new IllegalArgumentException("Percentage has to be between 0 and 100. Invalid: " + percentage);
 		}
 		this.percentage = percentage;
 	}
@@ -66,8 +64,7 @@ public class Percentage extends Number {
 		return true;
 	}
 
-	public static Percentage parsePercentage(String str)
-			throws NumberFormatException {
+	public static Percentage parsePercentage(String str) throws NumberFormatException {
 		if (str == null) {
 			throw new NumberFormatException("cannot parse null");
 		}

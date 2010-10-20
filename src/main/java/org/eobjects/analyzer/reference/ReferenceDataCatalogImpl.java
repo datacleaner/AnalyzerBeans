@@ -13,8 +13,7 @@ public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 		this(new ArrayList<Dictionary>(), new ArrayList<SynonymCatalog>());
 	}
 
-	public ReferenceDataCatalogImpl(Collection<Dictionary> dictionaries,
-			Collection<SynonymCatalog> synonymCatalogs) {
+	public ReferenceDataCatalogImpl(Collection<Dictionary> dictionaries, Collection<SynonymCatalog> synonymCatalogs) {
 		if (dictionaries == null) {
 			throw new IllegalArgumentException("dictionaries cannot be null");
 		}

@@ -29,14 +29,11 @@ public class TokenizerConfiguration implements Serializable {
 	}
 
 	public TokenizerConfiguration(boolean enableMixedTokens) {
-		this(enableMixedTokens, DecimalFormatSymbols.getInstance()
-				.getDecimalSeparator(), DecimalFormatSymbols.getInstance()
-				.getGroupingSeparator(), DecimalFormatSymbols.getInstance()
-				.getMinusSign());
+		this(enableMixedTokens, DecimalFormatSymbols.getInstance().getDecimalSeparator(), DecimalFormatSymbols.getInstance()
+				.getGroupingSeparator(), DecimalFormatSymbols.getInstance().getMinusSign());
 	}
 
-	public TokenizerConfiguration(boolean enableMixed,
-			Character decimalSeparator, Character thousandsSeparator,
+	public TokenizerConfiguration(boolean enableMixed, Character decimalSeparator, Character thousandsSeparator,
 			Character minusSign) {
 		_tokenTypes = EnumSet.allOf(TokenType.class);
 		if (!enableMixed) {
@@ -44,8 +41,7 @@ public class TokenizerConfiguration implements Serializable {
 		}
 
 		// set default values;
-		_discriminateTokenLength = new EnumMap<TokenType, Boolean>(
-				TokenType.class);
+		_discriminateTokenLength = new EnumMap<TokenType, Boolean>(TokenType.class);
 		_discriminateTokenLength.put(TokenType.TEXT, false);
 		_discriminateTokenLength.put(TokenType.NUMBER, false);
 		_discriminateTokenLength.put(TokenType.MIXED, false);
@@ -94,8 +90,7 @@ public class TokenizerConfiguration implements Serializable {
 	 * should be matched then length discrimination should be true.
 	 */
 	public boolean isDistriminateTokenLength(TokenType tokenType) {
-		Boolean discriminateTokenLength = _discriminateTokenLength
-				.get(tokenType);
+		Boolean discriminateTokenLength = _discriminateTokenLength.get(tokenType);
 		if (discriminateTokenLength == null) {
 			return false;
 		}
@@ -108,8 +103,7 @@ public class TokenizerConfiguration implements Serializable {
 	 * discrimination should be false. If only "hello" and "world", but not "hi"
 	 * should be matched then length discrimination should be true.
 	 */
-	public void setDistriminateTokenLength(
-			EnumMap<TokenType, Boolean> discriminateTokenLength) {
+	public void setDistriminateTokenLength(EnumMap<TokenType, Boolean> discriminateTokenLength) {
 		_discriminateTokenLength = discriminateTokenLength;
 	}
 
@@ -119,10 +113,8 @@ public class TokenizerConfiguration implements Serializable {
 	 * discrimination should be false. If only "hello" and "world", but not "hi"
 	 * should be matched then length discrimination should be true.
 	 */
-	public void setDistriminateTokenLength(TokenType tokenType,
-			boolean discriminateTokenLength) {
-		_discriminateTokenLength.put(tokenType,
-				Boolean.valueOf(discriminateTokenLength));
+	public void setDistriminateTokenLength(TokenType tokenType, boolean discriminateTokenLength) {
+		_discriminateTokenLength.put(tokenType, Boolean.valueOf(discriminateTokenLength));
 	}
 
 	/**
@@ -157,8 +149,7 @@ public class TokenizerConfiguration implements Serializable {
 		return _predefinedTokens;
 	}
 
-	public void setPredefinedTokens(
-			List<PredefinedTokenDefinition> predefinedTokens) {
+	public void setPredefinedTokens(List<PredefinedTokenDefinition> predefinedTokens) {
 		_predefinedTokens = predefinedTokens;
 	}
 
@@ -230,8 +221,7 @@ public class TokenizerConfiguration implements Serializable {
 	/**
 	 * Sets whether to discriminate negative numbers from positive numbers
 	 */
-	public void setDiscriminateNegativeNumbers(
-			boolean discriminateNegativeNumbers) {
+	public void setDiscriminateNegativeNumbers(boolean discriminateNegativeNumbers) {
 		_discriminateNegativeNumbers = discriminateNegativeNumbers;
 	}
 

@@ -15,8 +15,7 @@ public class CrosstabDimension implements Serializable, Iterable<String> {
 
 	public CrosstabDimension(String name) {
 		if (name.contains("|")) {
-			throw new IllegalArgumentException(
-					"Dimensions cannot contain the character '^'");
+			throw new IllegalArgumentException("Dimensions cannot contain the character '^'");
 		}
 		this.name = name;
 	}
@@ -49,8 +48,7 @@ public class CrosstabDimension implements Serializable, Iterable<String> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((categories == null) ? 0 : categories.hashCode());
+		result = prime * result + ((categories == null) ? 0 : categories.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
@@ -83,8 +81,7 @@ public class CrosstabDimension implements Serializable, Iterable<String> {
 
 	@Override
 	public String toString() {
-		return "CrosstabDimension[name=" + name + ", categories=" + categories
-				+ "]";
+		return "CrosstabDimension[name=" + name + ", categories=" + categories + "]";
 	}
 
 }

@@ -20,12 +20,11 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
 @TransformerBean("Email standardizer")
 public class EmailStandardizerTransformer implements Transformer<String> {
 
-	public static final NamedPattern<EmailPart> EMAIL_PATTERN = new NamedPattern<EmailPart>(
-			"USERNAME@DOMAIN", EmailPart.class);
+	public static final NamedPattern<EmailPart> EMAIL_PATTERN = new NamedPattern<EmailPart>("USERNAME@DOMAIN",
+			EmailPart.class);
 
 	public static enum EmailPart implements HasGroupLiteral {
-		USERNAME("([a-zA-Z0-9\\._%+-]+)"), DOMAIN(
-				"([a-zA-Z0-9\\._%+-]+\\.[a-zA-Z0-9\\._%+-]{2,4})");
+		USERNAME("([a-zA-Z0-9\\._%+-]+)"), DOMAIN("([a-zA-Z0-9\\._%+-]+\\.[a-zA-Z0-9\\._%+-]{2,4})");
 
 		private String groupLiteral;
 

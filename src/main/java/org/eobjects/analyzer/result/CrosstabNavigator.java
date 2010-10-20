@@ -18,13 +18,11 @@ public class CrosstabNavigator<E extends Serializable> implements Cloneable {
 		return this;
 	}
 
-	public CrosstabNavigator<E> where(CrosstabDimension dimension,
-			String isCategory) {
+	public CrosstabNavigator<E> where(CrosstabDimension dimension, String isCategory) {
 		return where(dimension.getName(), isCategory);
 	}
 
-	public void put(E value) throws IllegalArgumentException,
-			NullPointerException {
+	public void put(E value) throws IllegalArgumentException, NullPointerException {
 		put(value, false);
 	}
 
@@ -44,8 +42,7 @@ public class CrosstabNavigator<E extends Serializable> implements Cloneable {
 	 * @throws NullPointerException
 	 *             if some of the specified categories are null
 	 */
-	public void put(E value, boolean createCategories)
-			throws IllegalArgumentException, NullPointerException {
+	public void put(E value, boolean createCategories) throws IllegalArgumentException, NullPointerException {
 		if (createCategories) {
 			for (int i = 0; i < categories.length; i++) {
 				String category = categories[i];

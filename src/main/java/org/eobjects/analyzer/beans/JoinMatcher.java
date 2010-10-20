@@ -67,22 +67,16 @@ public class JoinMatcher implements ExploringAnalyzer<DataSetResult> {
 		Schema leftSchema = leftTable.getSchema();
 		Schema rightSchema = rightTable.getSchema();
 		if (leftSchema == rightSchema || leftSchema.equals(rightSchema)) {
-			FromItem joinFromItem = new FromItem(JoinType.LEFT, new FromItem(
-					leftTable), new FromItem(rightTable),
-					new SelectItem[] { new SelectItem(leftTableJoinColumn) },
-					new SelectItem[] { new SelectItem(rightTableJoinColumn) });
-			Query q = new Query().select(leftTable.getColumns())
-					.select(rightTable.getColumns()).from(joinFromItem);
+			FromItem joinFromItem = new FromItem(JoinType.LEFT, new FromItem(leftTable), new FromItem(rightTable),
+					new SelectItem[] { new SelectItem(leftTableJoinColumn) }, new SelectItem[] { new SelectItem(
+							rightTableJoinColumn) });
+			Query q = new Query().select(leftTable.getColumns()).select(rightTable.getColumns()).from(joinFromItem);
 			ds = dc.executeQuery(q);
 		} else {
-			DataSet ds1 = dc.executeQuery(new Query().select(
-					leftTable.getColumns()).from(leftTable));
-			DataSet ds2 = dc.executeQuery(new Query().select(
-					rightTable.getColumns()).from(rightTable));
-			FilterItem[] onConditions = new FilterItem[] { new FilterItem(
-					new SelectItem(leftTableJoinColumn),
-					OperatorType.EQUALS_TO,
-					new SelectItem(rightTableJoinColumn)) };
+			DataSet ds1 = dc.executeQuery(new Query().select(leftTable.getColumns()).from(leftTable));
+			DataSet ds2 = dc.executeQuery(new Query().select(rightTable.getColumns()).from(rightTable));
+			FilterItem[] onConditions = new FilterItem[] { new FilterItem(new SelectItem(leftTableJoinColumn),
+					OperatorType.EQUALS_TO, new SelectItem(rightTableJoinColumn)) };
 			ds = MetaModelHelper.getLeftJoin(ds1, ds2, onConditions);
 		}
 

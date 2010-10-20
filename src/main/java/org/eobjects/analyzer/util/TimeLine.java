@@ -44,8 +44,7 @@ public class TimeLine implements Serializable {
 		return getFlattenedIntervals(intervals);
 	}
 
-	private SortedSet<TimeInterval> getFlattenedIntervals(
-			SortedSet<TimeInterval> intervals) {
+	private SortedSet<TimeInterval> getFlattenedIntervals(SortedSet<TimeInterval> intervals) {
 		SortedSet<TimeInterval> result = new TreeSet<TimeInterval>();
 		for (TimeInterval interval : intervals) {
 			for (Iterator<TimeInterval> it = result.iterator(); it.hasNext();) {
@@ -73,8 +72,7 @@ public class TimeLine implements Serializable {
 	 * 
 	 * @return
 	 */
-	public SortedSet<TimeInterval> getOverlappingIntervals(
-			boolean includeSingleTimeInstanceIntervals) {
+	public SortedSet<TimeInterval> getOverlappingIntervals(boolean includeSingleTimeInstanceIntervals) {
 		SortedSet<TimeInterval> result = new TreeSet<TimeInterval>();
 		for (TimeInterval interval1 : intervals) {
 			for (TimeInterval interval2 : intervals) {

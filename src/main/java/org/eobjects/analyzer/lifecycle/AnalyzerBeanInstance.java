@@ -16,8 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AnalyzerBeanInstance extends AbstractBeanInstance<Analyzer<?>> {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(AnalyzerBeanInstance.class);
+	private static final Logger logger = LoggerFactory.getLogger(AnalyzerBeanInstance.class);
 
 	private final List<AnalyzerLifeCycleCallback> runCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
 	private final List<AnalyzerLifeCycleCallback> returnResultsCallbacks = new LinkedList<AnalyzerLifeCycleCallback>();
@@ -41,16 +40,14 @@ public class AnalyzerBeanInstance extends AbstractBeanInstance<Analyzer<?>> {
 		if (logger.isInfoEnabled()) {
 			logger.info("returnResults (" + getBean() + ")");
 		}
-		runAnalyzerCallbacks(returnResultsCallbacks,
-				LifeCycleState.RETURN_RESULTS);
+		runAnalyzerCallbacks(returnResultsCallbacks, LifeCycleState.RETURN_RESULTS);
 	}
 
 	public List<AnalyzerLifeCycleCallback> getReturnResultsCallbacks() {
 		return returnResultsCallbacks;
 	}
 
-	private void runAnalyzerCallbacks(
-			List<AnalyzerLifeCycleCallback> callbacks, LifeCycleState state) {
+	private void runAnalyzerCallbacks(List<AnalyzerLifeCycleCallback> callbacks, LifeCycleState state) {
 		for (AnalyzerLifeCycleCallback lifeCycleCallback : callbacks) {
 			lifeCycleCallback.onEvent(state, getBean(), (AnalyzerBeanDescriptor<?>) getDescriptor());
 		}
