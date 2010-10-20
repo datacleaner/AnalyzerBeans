@@ -249,6 +249,8 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 	// helper method for recursively finding all physical columns by traversing
 	// the transformers input and output
 	private Set<Column> getSourcePhysicalColumns(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
+		// TODO: Detect cyclic dependencies between
+		// transformers (A depends on B, B depends on A)
 		Set<Column> physicalColumns = new HashSet<Column>();
 		if (inputColumn.isPhysicalColumn()) {
 			physicalColumns.add(inputColumn.getPhysicalColumn());
