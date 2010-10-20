@@ -18,6 +18,7 @@ import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerChangeListener;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
+import org.eobjects.analyzer.test.MockInputColumn;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.schema.ColumnType;
@@ -72,7 +73,6 @@ public class TransformerJobBuilderTest extends TestCase {
 
 	public void testInvalidInputColumnType() throws Exception {
 		TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb.addTransformer(EmailStandardizerTransformer.class);
-		assertEquals(2, tjb.getOutputColumns().size());
 		assertEquals(0, tjb.getInputColumns().size());
 		assertFalse(tjb.isConfigured());
 		try {
@@ -86,6 +86,17 @@ public class TransformerJobBuilderTest extends TestCase {
 		tjb.addInputColumn(ajb.getSourceColumns().get(1));
 		assertEquals(1, tjb.getInputColumns().size());
 		assertTrue(tjb.isConfigured());
+	}
+
+	public void testNoOutputWhenNotConfigured() throws Exception {
+		TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb.addTransformer(EmailStandardizerTransformer.class);
+
+		// not yet configured
+		assertEquals(0, tjb.getOutputColumns().size());
+
+		tjb.getConfigurableBean().setInputColumn(new MockInputColumn<String>("email", String.class));
+		
+		assertEquals(2, tjb.getOutputColumns().size());
 	}
 
 	public void testConfigureByConfigurableBean() throws Exception {

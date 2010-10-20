@@ -133,4 +133,8 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 	 */
 	protected void onConfigurationChanged() {
 	}
+
+	public Object getConfiguredProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
+		return propertyDescriptor.getValue(getConfigurableBean());
+	}
 }

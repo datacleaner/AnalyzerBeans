@@ -64,4 +64,8 @@ public class EmailStandardizerTransformer implements Transformer<String> {
 		}
 		return new String[] { username, domain };
 	}
+	
+	public void setInputColumn(InputColumn<String> inputColumn) {
+		this.inputColumn = inputColumn;
+	}
 }

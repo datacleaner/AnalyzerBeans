@@ -42,6 +42,12 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 	}
 
 	public List<MutableInputColumn<?>> getOutputColumns() {
+		if (!isConfigured()) {
+			// as long as the transformer is not configured, just return an
+			// empty list
+			return new LinkedList<MutableInputColumn<?>>();
+		}
+
 		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(getDescriptor());
 
 		// mimic the configuration of a real transformer bean instance
