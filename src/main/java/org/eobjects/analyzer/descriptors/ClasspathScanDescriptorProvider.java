@@ -36,7 +36,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 
 	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive) {
 		String packagePath = packageName.replace('.', '/');
-		logger.debug("Scanning package path: {}", packagePath);
+		if (recursive) {
+			logger.info("Scanning package path '{}' (and subpackages recursively)", packagePath);
+		} else {
+			logger.info("Scanning package path '{}'", packagePath);
+		}
 		try {
 			Enumeration<URL> resources = ClassLoader.getSystemResources(packagePath);
 			while (resources.hasMoreElements()) {
@@ -102,7 +106,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		if (!dir.isDirectory()) {
 			throw new IllegalArgumentException("The file '" + dir + "' is not a directory");
 		}
-		logger.info("Scanning directory: " + dir);
+		logger.debug("Scanning directory: " + dir);
 
 		File[] classFiles = dir.listFiles(new FilenameFilter() {
 			@Override
