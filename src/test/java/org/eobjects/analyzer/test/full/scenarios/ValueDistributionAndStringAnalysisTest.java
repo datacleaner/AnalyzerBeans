@@ -110,11 +110,11 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				assertEquals("[LASTNAME, FIRSTNAME, EXTENSION, EMAIL, OFFICECODE, JOBTITLE]", crosstab.getDimension(0)
 						.getCategories().toString());
 				assertEquals(
-						"[Char count, Max chars, Min chars, Avg chars, Max white spaces, Min white spaces, Avg white spaces, Uppercase chars, Lowercase chars, Non-letter chars, Word count, Max words, Min words]",
+						"[Row count, Null count, Entirely uppercase count, Entirely lowercase count, Total char count, Max chars, Min chars, Avg chars, Max white spaces, Min white spaces, Avg white spaces, Uppercase chars, Lowercase chars, Digit chars, Diacritic chars, Non-letter chars, Word count, Max words, Min words]",
 						crosstab.getDimension(1).getCategories().toString());
 				CrosstabNavigator<?> nav = crosstab.navigate();
 				nav.where("Column", "EMAIL");
-				nav.where("Measures", "Char count");
+				nav.where("Measures", "Total char count");
 				assertEquals("655", nav.get().toString());
 			} else {
 				assertTrue(result instanceof ValueDistributionResult);

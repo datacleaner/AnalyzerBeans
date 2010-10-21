@@ -16,7 +16,7 @@ import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.QueryResultProducer;
 import org.eobjects.analyzer.result.SerializableRowFilter;
 import org.eobjects.analyzer.util.AverageBuilder;
-import org.eobjects.analyzer.util.Percentage;
+import org.eobjects.analyzer.util.CharIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +35,25 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(StringAnalyzer.class);
 
-	private static final short INDEX_NUM_CHARS = 0;
-	private static final short INDEX_MAX_CHARS = 1;
-	private static final short INDEX_MIN_CHARS = 2;
-	private static final short INDEX_MAX_BLANKS = 3;
-	private static final short INDEX_MIN_BLANKS = 4;
-	private static final short INDEX_NUM_UPPERCASE = 5;
-	private static final short INDEX_NUM_LOWERCASE = 6;
-	private static final short INDEX_NUM_NONLETTER = 7;
-	private static final short INDEX_NUM_WORDS = 8;
-	private static final short INDEX_MAX_WORDS = 9;
-	private static final short INDEX_MIN_WORDS = 10;
-	private static final short INDEX_MAX_WHITE_SPACES = 11;
-	private static final short INDEX_MIN_WHITE_SPACES = 12;
+	private static final short INDEX_NUM_ROWS = 0;
+	private static final short INDEX_NUM_NULL = 1;
+	private static final short INDEX_NUM_ALL_UPPERCASE = 2;
+	private static final short INDEX_NUM_ALL_LOWERCASE = 3;
+	private static final short INDEX_NUM_CHARS = 4;
+	private static final short INDEX_MAX_CHARS = 5;
+	private static final short INDEX_MIN_CHARS = 6;
+	private static final short INDEX_MAX_BLANKS = 7;
+	private static final short INDEX_MIN_BLANKS = 8;
+	private static final short INDEX_NUM_UPPERCASE = 9;
+	private static final short INDEX_NUM_LOWERCASE = 10;
+	private static final short INDEX_NUM_DIGIT = 11;
+	private static final short INDEX_NUM_DIACRITICS = 12;
+	private static final short INDEX_NUM_NONLETTER = 13;
+	private static final short INDEX_NUM_WORDS = 14;
+	private static final short INDEX_MAX_WORDS = 15;
+	private static final short INDEX_MIN_WORDS = 16;
+	private static final short INDEX_MAX_WHITE_SPACES = 17;
+	private static final short INDEX_MIN_WHITE_SPACES = 18;
 
 	private Map<InputColumn<String>, Integer[]> counts = new HashMap<InputColumn<String>, Integer[]>();
 	private Map<InputColumn<String>, AverageBuilder> charAverages = new HashMap<InputColumn<String>, AverageBuilder>();
@@ -71,7 +77,11 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			AverageBuilder charAverageBuilder = charAverages.get(column);
 			AverageBuilder blanksAverageBuilder = blanksAverages.get(column);
 			if (counters == null) {
-				counters = new Integer[13];
+				counters = new Integer[19];
+				counters[INDEX_NUM_ROWS] = 0;
+				counters[INDEX_NUM_NULL] = 0;
+				counters[INDEX_NUM_ALL_UPPERCASE] = 0;
+				counters[INDEX_NUM_ALL_LOWERCASE] = 0;
 				counters[INDEX_NUM_CHARS] = 0;
 				counters[INDEX_MIN_CHARS] = null;
 				counters[INDEX_MAX_CHARS] = null;
@@ -79,6 +89,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				counters[INDEX_MIN_BLANKS] = null;
 				counters[INDEX_NUM_UPPERCASE] = 0;
 				counters[INDEX_NUM_LOWERCASE] = 0;
+				counters[INDEX_NUM_DIGIT] = 0;
+				counters[INDEX_NUM_DIACRITICS] = 0;
 				counters[INDEX_NUM_NONLETTER] = 0;
 				counters[INDEX_NUM_WORDS] = 0;
 				counters[INDEX_MIN_WORDS] = null;
@@ -93,15 +105,55 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				blanksAverageBuilder = new AverageBuilder();
 				blanksAverages.put(column, blanksAverageBuilder);
 			}
-			if (value != null) {
+
+			counters[INDEX_NUM_ROWS] = counters[INDEX_NUM_ROWS] + distinctCount;
+
+			if (value == null) {
+				counters[INDEX_NUM_NULL] = counters[INDEX_NUM_NULL] + distinctCount;
+			} else {
 				int numChars = value.length();
+				int totalChars = numChars * distinctCount;
 				int numWords = new StringTokenizer(value).countTokens();
-				int numBlanks = countBlanks(value);
+				int totalWords = numWords * distinctCount;
+
+				int numBlanks = 0;
+				int numDigits = 0;
+				int numDiacritics = 0;
+				int numLetters = 0;
+				int numNonLetters = 0;
+				int numUppercase = 0;
+				int numLowercase = 0;
+				CharIterator it = new CharIterator(value);
+				while (it.hasNext()) {
+					it.next();
+					if (it.isLetter()) {
+						numLetters += distinctCount;
+						if (it.isUpperCase()) {
+							numUppercase += distinctCount;
+						} else {
+							numLowercase += distinctCount;
+						}
+						if (it.isDiacritic()) {
+							numDiacritics += distinctCount;
+						}
+					} else {
+						numNonLetters += distinctCount;
+						if (it.isDigit()) {
+							numDigits += distinctCount;
+						}
+						if (it.isWhitespace()) {
+							numBlanks++;
+						}
+					}
+				}
+
+				counters[INDEX_NUM_UPPERCASE] = counters[INDEX_NUM_UPPERCASE] + numUppercase;
+				counters[INDEX_NUM_LOWERCASE] = counters[INDEX_NUM_LOWERCASE] + numLowercase;
+				counters[INDEX_NUM_NONLETTER] = counters[INDEX_NUM_NONLETTER] + numNonLetters;
 
 				if (counters[INDEX_MIN_CHARS] == null) {
 					// This is the first time we encounter a non-null value, so
-					// we
-					// just set all counters
+					// we just set all counters
 					counters[INDEX_MAX_CHARS] = numChars;
 					counters[INDEX_MIN_CHARS] = numChars;
 					counters[INDEX_MIN_WORDS] = numWords;
@@ -110,8 +162,16 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 					counters[INDEX_MAX_BLANKS] = numBlanks;
 				}
 
-				counters[INDEX_NUM_CHARS] = counters[INDEX_NUM_CHARS] + numChars;
-				counters[INDEX_NUM_WORDS] = counters[INDEX_NUM_WORDS] + numWords;
+				counters[INDEX_NUM_CHARS] = counters[INDEX_NUM_CHARS] + totalChars;
+				counters[INDEX_NUM_WORDS] = counters[INDEX_NUM_WORDS] + totalWords;
+
+				if (numDiacritics > 0) {
+					counters[INDEX_NUM_DIACRITICS] = counters[INDEX_NUM_DIACRITICS] + numDiacritics;
+				}
+
+				if (numDigits > 0) {
+					counters[INDEX_NUM_DIGIT] = counters[INDEX_NUM_DIGIT] + numDigits;
+				}
 
 				if (counters[INDEX_MAX_CHARS] < numChars) {
 					counters[INDEX_MAX_CHARS] = numChars;
@@ -132,16 +192,13 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 					counters[INDEX_MIN_BLANKS] = numBlanks;
 				}
 
-				for (int i = 0; i < numChars; i++) {
-					char c = value.charAt(i);
-					if (Character.isLetter(c)) {
-						if (Character.isUpperCase(c)) {
-							counters[INDEX_NUM_UPPERCASE] = counters[INDEX_NUM_UPPERCASE] + 1;
-						} else {
-							counters[INDEX_NUM_LOWERCASE] = counters[INDEX_NUM_LOWERCASE] + 1;
-						}
-					} else {
-						counters[INDEX_NUM_NONLETTER] = counters[INDEX_NUM_NONLETTER] + 1;
+				if (numLetters > 0) {
+					if (value.equals(value.toUpperCase())) {
+						counters[INDEX_NUM_ALL_UPPERCASE] = counters[INDEX_NUM_ALL_UPPERCASE] + distinctCount;
+					}
+
+					if (value.equals(value.toLowerCase())) {
+						counters[INDEX_NUM_ALL_LOWERCASE] = counters[INDEX_NUM_ALL_LOWERCASE] + distinctCount;
 					}
 				}
 
@@ -151,22 +208,15 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 		}
 	}
 
-	public static int countBlanks(String str) {
-		int count = 0;
-		char[] chars = str.toCharArray();
-		for (char c : chars) {
-			if (Character.isWhitespace(c)) {
-				count++;
-			}
-		}
-		return count;
-	}
-
 	@Override
 	public CrosstabResult getResult() {
 		logger.info("getResult()");
 		CrosstabDimension measureDimension = new CrosstabDimension("Measures");
-		measureDimension.addCategory("Char count");
+		measureDimension.addCategory("Row count");
+		measureDimension.addCategory("Null count");
+		measureDimension.addCategory("Entirely uppercase count");
+		measureDimension.addCategory("Entirely lowercase count");
+		measureDimension.addCategory("Total char count");
 		measureDimension.addCategory("Max chars");
 		measureDimension.addCategory("Min chars");
 		measureDimension.addCategory("Avg chars");
@@ -175,6 +225,8 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 		measureDimension.addCategory("Avg white spaces");
 		measureDimension.addCategory("Uppercase chars");
 		measureDimension.addCategory("Lowercase chars");
+		measureDimension.addCategory("Digit chars");
+		measureDimension.addCategory("Diacritic chars");
 		measureDimension.addCategory("Non-letter chars");
 		measureDimension.addCategory("Word count");
 		measureDimension.addCategory("Max words");
@@ -188,9 +240,12 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			String columnName = column.getName();
 
 			columnDimension.addCategory(columnName);
-			CrosstabNavigator<Number> nav = crosstab.where(columnDimension, columnName);
 
 			Integer[] columnCounts = this.counts.get(column);
+			final Integer numRows;
+			final Integer numNull;
+			final Integer numAllUppercase;
+			final Integer numAllLowercase;
 			final Integer numChars;
 			final Integer maxChars;
 			final Integer minChars;
@@ -199,7 +254,17 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			final Integer minWords;
 			final Integer maxBlanks;
 			final Integer minBlanks;
+			final Integer numUppercase;
+			final Integer numLowercase;
+			final Integer numDigits;
+			final Integer numDiacritics;
+			final Integer numNonLetter;
+
 			if (columnCounts != null) {
+				numRows = columnCounts[INDEX_NUM_ROWS];
+				numNull = columnCounts[INDEX_NUM_NULL];
+				numAllUppercase = columnCounts[INDEX_NUM_ALL_UPPERCASE];
+				numAllLowercase = columnCounts[INDEX_NUM_ALL_LOWERCASE];
 				numChars = columnCounts[INDEX_NUM_CHARS];
 				maxChars = columnCounts[INDEX_MAX_CHARS];
 				minChars = columnCounts[INDEX_MIN_CHARS];
@@ -208,15 +273,29 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				minWords = columnCounts[INDEX_MIN_WORDS];
 				maxBlanks = columnCounts[INDEX_MAX_BLANKS];
 				minBlanks = columnCounts[INDEX_MIN_BLANKS];
+				numUppercase = columnCounts[INDEX_NUM_UPPERCASE];
+				numLowercase = columnCounts[INDEX_NUM_LOWERCASE];
+				numDigits = columnCounts[INDEX_NUM_DIGIT];
+				numDiacritics = columnCounts[INDEX_NUM_DIACRITICS];
+				numNonLetter = columnCounts[INDEX_NUM_NONLETTER];
 			} else {
-				numChars = null;
+				numRows = 0;
+				numNull = 0;
+				numAllUppercase = 0;
+				numAllLowercase = 0;
+				numChars = 0;
 				maxChars = null;
 				minChars = null;
-				numWords = null;
+				numWords = 0;
 				maxWords = null;
 				minWords = null;
 				maxBlanks = null;
 				minBlanks = null;
+				numUppercase = 0;
+				numLowercase = 0;
+				numDigits = 0;
+				numDiacritics = 0;
+				numNonLetter = 0;
 			}
 
 			AverageBuilder charAverageBuilder = charAverages.get(column);
@@ -237,16 +316,13 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			if (blanksAverageBuilder.getNumValues() > 0) {
 				avgBlanks = blanksAverageBuilder.getAverage();
 			}
-			Percentage numUppercase = new Percentage(0);
-			Percentage numLowercase = new Percentage(0);
-			Percentage numNonletter = new Percentage(0);
-			if (numChars != null && numChars > 0) {
-				numUppercase = new Percentage(columnCounts[INDEX_NUM_UPPERCASE] * 100 / numChars);
-				numLowercase = new Percentage(columnCounts[INDEX_NUM_LOWERCASE] * 100 / numChars);
-				numNonletter = new Percentage(columnCounts[INDEX_NUM_NONLETTER] * 100 / numChars);
-			}
 
-			boolean queryable = column.isPhysicalColumn();
+			boolean queryable;
+			if (columnCounts == null) {
+				queryable = false;
+			} else {
+				queryable = column.isPhysicalColumn();
+			}
 
 			// base query for exploration data result producers
 			Query baseQuery = null;
@@ -255,56 +331,57 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				baseQuery = getBaseQuery(column.getPhysicalColumn());
 			}
 
-			if (numChars != null) {
-				nav.where(measureDimension, "Char count").put(numChars);
-			}
-			if (maxChars != null) {
-				nav.where(measureDimension, "Max chars").put(maxChars);
+			// begin entering numbers into the crosstab
+			CrosstabNavigator<Number> nav = crosstab.where(columnDimension, columnName);
 
-				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery);
-					resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), maxChars));
-					nav.attach(resultProducer);
-				}
-			}
+			nav.where(measureDimension, "Row count").put(numRows);
 
-			if (minChars != null) {
-				nav.where(measureDimension, "Min chars").put(minChars);
-				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery);
-					resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), minChars));
-					nav.attach(resultProducer);
-				}
+			nav.where(measureDimension, "Null count").put(numNull);
+
+			nav.where(measureDimension, "Entirely uppercase count").put(numAllUppercase);
+			nav.where(measureDimension, "Entirely lowercase count").put(numAllLowercase);
+
+			nav.where(measureDimension, "Total char count").put(numChars);
+
+			nav.where(measureDimension, "Max chars").put(maxChars);
+			if (queryable) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), maxChars));
+				nav.attach(resultProducer);
 			}
 
-			if (columnCounts != null) {
-				nav.where(measureDimension, "Avg chars").put(avgChars);
-				nav.where(measureDimension, "Max white spaces").put(maxBlanks);
-				nav.where(measureDimension, "Min white spaces").put(minBlanks);
-				nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
-				nav.where(measureDimension, "Uppercase chars").put(numUppercase);
-				nav.where(measureDimension, "Lowercase chars").put(numLowercase);
-				nav.where(measureDimension, "Non-letter chars").put(numNonletter);
-				nav.where(measureDimension, "Word count").put(numWords);
+			nav.where(measureDimension, "Min chars").put(minChars);
+			if (queryable) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), minChars));
+				nav.attach(resultProducer);
 			}
 
-			if (maxWords != null) {
-				nav.where(measureDimension, "Max words").put(maxWords);
-				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery);
-					resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), maxWords));
-					nav.attach(resultProducer);
-				}
+			nav.where(measureDimension, "Avg chars").put(avgChars);
+			nav.where(measureDimension, "Max white spaces").put(maxBlanks);
+			nav.where(measureDimension, "Min white spaces").put(minBlanks);
+			nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
+			nav.where(measureDimension, "Uppercase chars").put(numUppercase);
+			nav.where(measureDimension, "Lowercase chars").put(numLowercase);
+			nav.where(measureDimension, "Digit chars").put(numDigits);
+			nav.where(measureDimension, "Diacritic chars").put(numDiacritics);
+			nav.where(measureDimension, "Non-letter chars").put(numNonLetter);
+			nav.where(measureDimension, "Word count").put(numWords);
+
+			nav.where(measureDimension, "Max words").put(maxWords);
+			if (queryable) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), maxWords));
+				nav.attach(resultProducer);
 			}
 
-			if (minWords != null) {
-				nav.where(measureDimension, "Min words").put(minWords);
-				if (queryable) {
-					resultProducer = new QueryResultProducer(baseQuery);
-					resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), minWords));
-					nav.attach(resultProducer);
-				}
+			nav.where(measureDimension, "Min words").put(minWords);
+			if (queryable) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), minWords));
+				nav.attach(resultProducer);
 			}
+
 		}
 
 		return new CrosstabResult(crosstab);
