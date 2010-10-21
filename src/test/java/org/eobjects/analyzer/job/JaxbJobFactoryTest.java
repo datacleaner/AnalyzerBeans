@@ -223,7 +223,7 @@ public class JaxbJobFactoryTest extends TestCase {
 		CrosstabResult crosstabResult = (CrosstabResult) results.get(0);
 
 		String[] resultLines = crosstabResult.toString().split("\n");
-		assertEquals(77, resultLines.length);
+		assertEquals(81, resultLines.length);
 		assertEquals("Crosstab:", resultLines[0]);
 		assertEquals("FIRSTNAME,Avg chars: 5.391304347826087", resultLines[1]);
 		assertEquals("FIRSTNAME,Avg white spaces: 0.043478260869565216", resultLines[2]);

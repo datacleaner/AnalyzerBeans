@@ -45,15 +45,16 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 	private static final short INDEX_MAX_BLANKS = 7;
 	private static final short INDEX_MIN_BLANKS = 8;
 	private static final short INDEX_NUM_UPPERCASE = 9;
-	private static final short INDEX_NUM_LOWERCASE = 10;
-	private static final short INDEX_NUM_DIGIT = 11;
-	private static final short INDEX_NUM_DIACRITICS = 12;
-	private static final short INDEX_NUM_NONLETTER = 13;
-	private static final short INDEX_NUM_WORDS = 14;
-	private static final short INDEX_MAX_WORDS = 15;
-	private static final short INDEX_MIN_WORDS = 16;
-	private static final short INDEX_MAX_WHITE_SPACES = 17;
-	private static final short INDEX_MIN_WHITE_SPACES = 18;
+	private static final short INDEX_NUM_UPPERCASE_EXCL_FIRST_LETTER = 10;
+	private static final short INDEX_NUM_LOWERCASE = 11;
+	private static final short INDEX_NUM_DIGIT = 12;
+	private static final short INDEX_NUM_DIACRITICS = 13;
+	private static final short INDEX_NUM_NONLETTER = 14;
+	private static final short INDEX_NUM_WORDS = 15;
+	private static final short INDEX_MAX_WORDS = 16;
+	private static final short INDEX_MIN_WORDS = 17;
+	private static final short INDEX_MAX_WHITE_SPACES = 18;
+	private static final short INDEX_MIN_WHITE_SPACES = 19;
 
 	private Map<InputColumn<String>, Integer[]> counts = new HashMap<InputColumn<String>, Integer[]>();
 	private Map<InputColumn<String>, AverageBuilder> charAverages = new HashMap<InputColumn<String>, AverageBuilder>();
@@ -77,7 +78,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			AverageBuilder charAverageBuilder = charAverages.get(column);
 			AverageBuilder blanksAverageBuilder = blanksAverages.get(column);
 			if (counters == null) {
-				counters = new Integer[19];
+				counters = new Integer[20];
 				counters[INDEX_NUM_ROWS] = 0;
 				counters[INDEX_NUM_NULL] = 0;
 				counters[INDEX_NUM_ALL_UPPERCASE] = 0;
@@ -88,6 +89,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				counters[INDEX_MAX_BLANKS] = null;
 				counters[INDEX_MIN_BLANKS] = null;
 				counters[INDEX_NUM_UPPERCASE] = 0;
+				counters[INDEX_NUM_UPPERCASE_EXCL_FIRST_LETTER] = 0;
 				counters[INDEX_NUM_LOWERCASE] = 0;
 				counters[INDEX_NUM_DIGIT] = 0;
 				counters[INDEX_NUM_DIACRITICS] = 0;
@@ -122,7 +124,10 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				int numLetters = 0;
 				int numNonLetters = 0;
 				int numUppercase = 0;
+				int numUppercaseExclFirstLetter = 0;
 				int numLowercase = 0;
+
+				boolean firstLetter = true;
 				CharIterator it = new CharIterator(value);
 				while (it.hasNext()) {
 					it.next();
@@ -130,12 +135,16 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 						numLetters += distinctCount;
 						if (it.isUpperCase()) {
 							numUppercase += distinctCount;
+							if (!firstLetter) {
+								numUppercaseExclFirstLetter += distinctCount;
+							}
 						} else {
 							numLowercase += distinctCount;
 						}
 						if (it.isDiacritic()) {
 							numDiacritics += distinctCount;
 						}
+						firstLetter = false;
 					} else {
 						numNonLetters += distinctCount;
 						if (it.isDigit()) {
@@ -144,10 +153,15 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 						if (it.isWhitespace()) {
 							numBlanks++;
 						}
+						if (it.is('.')) {
+							firstLetter = true;
+						}
 					}
 				}
 
 				counters[INDEX_NUM_UPPERCASE] = counters[INDEX_NUM_UPPERCASE] + numUppercase;
+				counters[INDEX_NUM_UPPERCASE_EXCL_FIRST_LETTER] = counters[INDEX_NUM_UPPERCASE_EXCL_FIRST_LETTER]
+						+ numUppercaseExclFirstLetter;
 				counters[INDEX_NUM_LOWERCASE] = counters[INDEX_NUM_LOWERCASE] + numLowercase;
 				counters[INDEX_NUM_NONLETTER] = counters[INDEX_NUM_NONLETTER] + numNonLetters;
 
@@ -224,6 +238,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 		measureDimension.addCategory("Min white spaces");
 		measureDimension.addCategory("Avg white spaces");
 		measureDimension.addCategory("Uppercase chars");
+		measureDimension.addCategory("Uppercase chars (excl. first letters)");
 		measureDimension.addCategory("Lowercase chars");
 		measureDimension.addCategory("Digit chars");
 		measureDimension.addCategory("Diacritic chars");
@@ -255,6 +270,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			final Integer maxBlanks;
 			final Integer minBlanks;
 			final Integer numUppercase;
+			final Integer numUppercaseExclFirstLetter;
 			final Integer numLowercase;
 			final Integer numDigits;
 			final Integer numDiacritics;
@@ -274,6 +290,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				maxBlanks = columnCounts[INDEX_MAX_BLANKS];
 				minBlanks = columnCounts[INDEX_MIN_BLANKS];
 				numUppercase = columnCounts[INDEX_NUM_UPPERCASE];
+				numUppercaseExclFirstLetter = columnCounts[INDEX_NUM_UPPERCASE_EXCL_FIRST_LETTER];
 				numLowercase = columnCounts[INDEX_NUM_LOWERCASE];
 				numDigits = columnCounts[INDEX_NUM_DIGIT];
 				numDiacritics = columnCounts[INDEX_NUM_DIACRITICS];
@@ -292,6 +309,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				maxBlanks = null;
 				minBlanks = null;
 				numUppercase = 0;
+				numUppercaseExclFirstLetter = 0;
 				numLowercase = 0;
 				numDigits = 0;
 				numDiacritics = 0;
@@ -362,6 +380,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			nav.where(measureDimension, "Min white spaces").put(minBlanks);
 			nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
 			nav.where(measureDimension, "Uppercase chars").put(numUppercase);
+			nav.where(measureDimension, "Uppercase chars (excl. first letters)").put(numUppercaseExclFirstLetter);
 			nav.where(measureDimension, "Lowercase chars").put(numLowercase);
 			nav.where(measureDimension, "Digit chars").put(numDigits);
 			nav.where(measureDimension, "Diacritic chars").put(numDiacritics);

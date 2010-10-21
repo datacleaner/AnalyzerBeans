@@ -117,10 +117,10 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 			result = (CrosstabResult) resultFuture.getResult(sa.toAnalyzerJob());
 			String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
 
-			assertEquals("                            EMAIL Username   Domain ", resultLines[0]);
-			assertEquals("Total char count              655      172      460 ", resultLines[5]);
-			assertEquals("Max chars                      31       10       20 ", resultLines[6]);
-			assertEquals("Min chars                      26        5       20 ", resultLines[7]);
+			assertEquals("                                         EMAIL Username   Domain ", resultLines[0]);
+			assertEquals("Total char count                           655      172      460 ", resultLines[5]);
+			assertEquals("Max chars                                   31       10       20 ", resultLines[6]);
+			assertEquals("Min chars                                   26        5       20 ", resultLines[7]);
 
 			// username is a virtual columns so it is not queryable
 			ResultProducer resultProducer = result.getCrosstab().where("Column", "Username").where("Measures", "Max chars")
