@@ -46,5 +46,7 @@ public class StringUtilsTest extends TestCase {
 		assertFalse(StringUtils.isDiacritic('Z'));
 		assertTrue(StringUtils.isDiacritic('Ø'));
 		assertTrue(StringUtils.isDiacritic('ó'));
+		assertTrue(StringUtils.isDiacritic('š'));
+		assertTrue(StringUtils.isDiacritic('á'));
 	}
 }

@@ -32,10 +32,21 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
+/**
+ * Main entry to the Job Builder API. Use this class to build jobs either
+ * programmatically, while parsing a marshalled job-representation (such as an
+ * XML job definition) or for making an end-user able to build a job in a UI.
+ * 
+ * The AnalysisJobBuilder supports a wide variety of listeners to make it
+ * possible to be informed of changes to the state and dependencies between the
+ * components/beans that defines the job.
+ * 
+ * @author Kasper Sørensen
+ */
 public class AnalysisJobBuilder {
 
 	private final AnalyzerBeansConfiguration _configuration;
-	private final IdGenerator transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
+	private final IdGenerator _transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
 
 	// the configurable components
 	private DataContextProvider _dataContextProvider;
@@ -48,6 +59,7 @@ public class AnalysisJobBuilder {
 	private final List<SourceColumnChangeListener> _sourceColumnListeners = new LinkedList<SourceColumnChangeListener>();
 	private final List<AnalyzerChangeListener> _analyzerChangeListeners = new LinkedList<AnalyzerChangeListener>();
 	private final List<TransformerChangeListener> _transformerChangeListeners = new LinkedList<TransformerChangeListener>();
+	private final List<FilterChangeListener> _filterChangeListeners = new LinkedList<FilterChangeListener>();
 
 	public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;
@@ -171,7 +183,7 @@ public class AnalysisJobBuilder {
 	}
 
 	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor) {
-		TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(descriptor, transformedColumnIdGenerator,
+		TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(descriptor, _transformedColumnIdGenerator,
 				_transformerChangeListeners);
 		_transformerJobBuilders.add(tjb);
 
@@ -209,12 +221,21 @@ public class AnalysisJobBuilder {
 	public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterBeanDescriptor<F, C> descriptor) {
 		FilterJobBuilder<F, C> fjb = new FilterJobBuilder<F, C>(descriptor);
 		_filterJobBuilders.add(fjb);
+
+		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
+		for (FilterChangeListener listener : listeners) {
+			listener.onAdd(fjb);
+		}
 		return fjb;
 	}
 
 	public AnalysisJobBuilder removeFilter(FilterJobBuilder<?, ?> fjb) {
 		_filterJobBuilders.remove(fjb);
-		// TODO: Notify outcome consumers
+
+		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
+		for (FilterChangeListener listener : listeners) {
+			listener.onRemove(fjb);
+		}
 		return this;
 	}
 
@@ -380,18 +401,6 @@ public class AnalysisJobBuilder {
 		return null;
 	}
 
-	public List<SourceColumnChangeListener> getSourceColumnListeners() {
-		return _sourceColumnListeners;
-	}
-
-	public List<AnalyzerChangeListener> getAnalyzerChangeListeners() {
-		return _analyzerChangeListeners;
-	}
-
-	public List<TransformerChangeListener> getTransformerChangeListeners() {
-		return _transformerChangeListeners;
-	}
-
 	/**
 	 * Convenience method to get all input columns (both source or from
 	 * transformers) that comply to a given data type family.
@@ -438,5 +447,21 @@ public class AnalysisJobBuilder {
 			}
 		}
 		throw new IllegalStateException("Could not find originating table for column: " + inputColumn);
+	}
+
+	public List<SourceColumnChangeListener> getSourceColumnListeners() {
+		return _sourceColumnListeners;
+	}
+
+	public List<AnalyzerChangeListener> getAnalyzerChangeListeners() {
+		return _analyzerChangeListeners;
+	}
+
+	public List<TransformerChangeListener> getTransformerChangeListeners() {
+		return _transformerChangeListeners;
+	}
+
+	public List<FilterChangeListener> getFilterChangeListeners() {
+		return _filterChangeListeners;
 	}
 }
