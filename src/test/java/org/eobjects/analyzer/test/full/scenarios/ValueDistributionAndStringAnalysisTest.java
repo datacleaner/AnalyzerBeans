@@ -29,12 +29,16 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.DataSetResult;
+import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.result.ValueDistributionResult;
+import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 import dk.eobjects.metamodel.MetaModelTestCase;
+import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
@@ -96,8 +100,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		int stringAnalyzerResults = 0;
 		int valueDistributionResults = 0;
 
-		AnalyzerResult stringAnalyzerResult = resultFuture.getResult(stringAnalyzerJob.toAnalyzerJob());
-		assertTrue(stringAnalyzerResult instanceof CrosstabResult);
+		CrosstabResult stringAnalyzerResult = (CrosstabResult) resultFuture.getResult(stringAnalyzerJob.toAnalyzerJob());
 
 		for (AnalyzerResult result : results) {
 			if (result instanceof CrosstabResult) {
@@ -148,5 +151,31 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		assertEquals(0, lastnameResult.getNullCount());
 
 		assertEquals("Sales Rep", jobTitleResult.getTopValues().getValueCounts().get(0).getValue());
+
+		String[] resultLines = new CrosstabTextRenderer().render(stringAnalyzerResult).split("\n");
+		assertEquals(
+				"                                        LASTNAME  FIRSTNAME  EXTENSION      EMAIL OFFICECODE   JOBTITLE ",
+				resultLines[0]);
+		assertEquals(
+				"Uppercase chars (excl. first letters)          0          1          0          0          0         39 ",
+				resultLines[13]);
+		assertEquals(
+				"Diacritic chars                                0          0          0          0          0          0 ",
+				resultLines[16]);
+
+		// do some drill-to-detail on the StringAnalyzerResult
+		Crosstab<?> crosstab = stringAnalyzerResult.getCrosstab();
+
+		ResultProducer resultProducer = crosstab.where("Column", "FIRSTNAME")
+				.where("Measures", "Uppercase chars (excl. first letters)").explore();
+		assertNotNull(resultProducer);
+
+		DataSetResult dsr = (DataSetResult) resultProducer.getResult();
+		List<Row> rows = dsr.getRows();
+		assertEquals(1, rows.size());
+		assertEquals("Row[values=[Foon Yue, 1]]", rows.get(0).toString());
+
+		resultProducer = crosstab.where("Column", "FIRSTNAME").where("Measures", "Diacritic chars").explore();
+		assertNull(resultProducer);
 	}
 }

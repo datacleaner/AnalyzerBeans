@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.data.Row;
+import dk.eobjects.metamodel.query.OperatorType;
 import dk.eobjects.metamodel.query.Query;
 import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
@@ -355,21 +356,37 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			nav.where(measureDimension, "Row count").put(numRows);
 
 			nav.where(measureDimension, "Null count").put(numNull);
+			if (queryable && numNull > 0) {
+				Query q = baseQuery.clone().where(column.getPhysicalColumn(), OperatorType.EQUALS_TO, null);
+				resultProducer = new QueryResultProducer(q);
+				nav.attach(resultProducer);
+			}
 
 			nav.where(measureDimension, "Entirely uppercase count").put(numAllUppercase);
+			if (queryable && numAllUppercase > 0) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new EntireCaseRowFilter(column.getPhysicalColumn(), true));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Entirely lowercase count").put(numAllLowercase);
+			if (queryable && numAllLowercase > 0) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new EntireCaseRowFilter(column.getPhysicalColumn(), false));
+				nav.attach(resultProducer);
+			}
 
 			nav.where(measureDimension, "Total char count").put(numChars);
 
 			nav.where(measureDimension, "Max chars").put(maxChars);
-			if (queryable) {
+			if (queryable && maxChars != null) {
 				resultProducer = new QueryResultProducer(baseQuery);
 				resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), maxChars));
 				nav.attach(resultProducer);
 			}
 
 			nav.where(measureDimension, "Min chars").put(minChars);
-			if (queryable) {
+			if (queryable && minChars != null) {
 				resultProducer = new QueryResultProducer(baseQuery);
 				resultProducer.addFilter(new CharRowFilter(column.getPhysicalColumn(), minChars));
 				nav.attach(resultProducer);
@@ -377,25 +394,55 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 			nav.where(measureDimension, "Avg chars").put(avgChars);
 			nav.where(measureDimension, "Max white spaces").put(maxBlanks);
+			if (queryable && maxBlanks != null) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new WhitespaceRowFilter(column.getPhysicalColumn(), maxBlanks));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Min white spaces").put(minBlanks);
+			if (queryable && minBlanks != null) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new WhitespaceRowFilter(column.getPhysicalColumn(), minBlanks));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
 			nav.where(measureDimension, "Uppercase chars").put(numUppercase);
 			nav.where(measureDimension, "Uppercase chars (excl. first letters)").put(numUppercaseExclFirstLetter);
+			if (queryable && numUppercaseExclFirstLetter > 0) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new UpperCaseExclFirstLetterRowFilter(column.getPhysicalColumn()));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Lowercase chars").put(numLowercase);
 			nav.where(measureDimension, "Digit chars").put(numDigits);
+			if (queryable && numDigits > 0) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new DigitRowFilter(column.getPhysicalColumn()));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Diacritic chars").put(numDiacritics);
+			if (queryable && numDiacritics > 0) {
+				resultProducer = new QueryResultProducer(baseQuery);
+				resultProducer.addFilter(new DiacriticRowFilter(column.getPhysicalColumn()));
+				nav.attach(resultProducer);
+			}
+
 			nav.where(measureDimension, "Non-letter chars").put(numNonLetter);
 			nav.where(measureDimension, "Word count").put(numWords);
 
 			nav.where(measureDimension, "Max words").put(maxWords);
-			if (queryable) {
+			if (queryable && maxWords != null) {
 				resultProducer = new QueryResultProducer(baseQuery);
 				resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), maxWords));
 				nav.attach(resultProducer);
 			}
 
 			nav.where(measureDimension, "Min words").put(minWords);
-			if (queryable) {
+			if (queryable && minWords != null) {
 				resultProducer = new QueryResultProducer(baseQuery);
 				resultProducer.addFilter(new WordRowFilter(column.getPhysicalColumn(), minWords));
 				nav.attach(resultProducer);
@@ -410,13 +457,171 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 		return new Query().from(column.getTable()).select(new SelectItem(column)).selectCount().groupBy(column);
 	}
 
-	static class CharRowFilter implements SerializableRowFilter {
+	static final class DigitRowFilter implements SerializableRowFilter {
 		private static final long serialVersionUID = 1L;
 
-		private Column column;
-		private Integer numChars;
+		private final Column column;
 
-		public CharRowFilter(Column column, Integer numChars) {
+		public DigitRowFilter(Column column) {
+			this.column = column;
+		}
+
+		@Override
+		public boolean accept(Row row) {
+			Object value = row.getValue(column);
+			if (value != null) {
+				String str = value.toString();
+				CharIterator it = new CharIterator(str);
+				while (it.hasNext()) {
+					it.next();
+					if (it.isDigit()) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	static final class DiacriticRowFilter implements SerializableRowFilter {
+		private static final long serialVersionUID = 1L;
+
+		private final Column column;
+
+		public DiacriticRowFilter(Column column) {
+			this.column = column;
+		}
+
+		@Override
+		public boolean accept(Row row) {
+			Object value = row.getValue(column);
+			if (value != null) {
+				String str = value.toString();
+				CharIterator it = new CharIterator(str);
+				while (it.hasNext()) {
+					it.next();
+					if (it.isDiacritic()) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	static final class UpperCaseExclFirstLetterRowFilter implements SerializableRowFilter {
+		private static final long serialVersionUID = 1L;
+
+		private final Column column;
+
+		public UpperCaseExclFirstLetterRowFilter(Column column) {
+			this.column = column;
+		}
+
+		@Override
+		public boolean accept(Row row) {
+			Object value = row.getValue(column);
+			if (value != null) {
+				String str = value.toString();
+				CharIterator it = new CharIterator(str);
+				boolean firstLetter = true;
+				while (it.hasNext()) {
+					it.next();
+					if (it.isLetter()) {
+						if (!firstLetter) {
+							if (it.isUpperCase()) {
+								return true;
+							}
+						}
+						firstLetter = false;
+					} else if (it.is('.')) {
+						firstLetter = true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	static final class EntireCaseRowFilter implements SerializableRowFilter {
+		private static final long serialVersionUID = 1L;
+
+		private final Column column;
+		private final boolean upperCase;
+
+		public EntireCaseRowFilter(Column column, boolean upperCase) {
+			this.column = column;
+			this.upperCase = upperCase;
+		}
+
+		@Override
+		public boolean accept(Row row) {
+			Object value = row.getValue(column);
+			if (value != null) {
+				String str = value.toString();
+				CharIterator it = new CharIterator(str);
+				boolean hasLetters = false;
+				while (it.hasNext()) {
+					it.next();
+					if (it.isLetter()) {
+						hasLetters = true;
+						if (upperCase) {
+							if (it.isLowerCase()) {
+								return false;
+							}
+						} else {
+							if (it.isUpperCase()) {
+								return false;
+							}
+						}
+					}
+				}
+				return hasLetters;
+			}
+			return false;
+		}
+
+	}
+
+	static final class WhitespaceRowFilter implements SerializableRowFilter {
+		private static final long serialVersionUID = 1L;
+
+		private final Column column;
+		private final int numWhitespaces;
+
+		public WhitespaceRowFilter(Column column, int numWhitespaces) {
+			this.column = column;
+			this.numWhitespaces = numWhitespaces;
+		}
+
+		@Override
+		public boolean accept(Row row) {
+			Object value = row.getValue(column);
+			if (value != null) {
+				CharIterator it = new CharIterator(value.toString());
+				int whitespacesFound = 0;
+				while (it.hasNext()) {
+					it.next();
+					if (it.isWhitespace()) {
+						whitespacesFound++;
+						if (whitespacesFound > numWhitespaces) {
+							return false;
+						}
+					}
+				}
+				return whitespacesFound == numWhitespaces;
+			}
+			return false;
+		}
+	}
+
+	static final class CharRowFilter implements SerializableRowFilter {
+		private static final long serialVersionUID = 1L;
+
+		private final Column column;
+		private final int numChars;
+
+		public CharRowFilter(Column column, int numChars) {
 			this.column = column;
 			this.numChars = numChars;
 		}
@@ -429,16 +634,15 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			}
 			return false;
 		}
-
 	}
 
-	static class WordRowFilter implements SerializableRowFilter {
+	static final class WordRowFilter implements SerializableRowFilter {
 		private static final long serialVersionUID = 1L;
 
-		private Column column;
-		private Integer numWords;
+		private final Column column;
+		private final int numWords;
 
-		public WordRowFilter(Column column, Integer numWords) {
+		public WordRowFilter(Column column, int numWords) {
 			this.column = column;
 			this.numWords = numWords;
 		}
