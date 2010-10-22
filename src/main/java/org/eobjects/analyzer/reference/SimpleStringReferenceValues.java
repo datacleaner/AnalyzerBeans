@@ -5,8 +5,8 @@ import java.util.Collection;
 
 public final class SimpleStringReferenceValues implements ReferenceValues<String> {
 
-	private String[] _synonyms;
-	private boolean _caseSensitive;
+	private final String[] _synonyms;
+	private final boolean _caseSensitive;
 
 	public SimpleStringReferenceValues(String[] synonyms, boolean caseSensitive) {
 		_synonyms = synonyms;
