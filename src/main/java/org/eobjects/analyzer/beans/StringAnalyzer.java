@@ -1,6 +1,8 @@
 package org.eobjects.analyzer.beans;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -357,7 +359,18 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 			nav.where(measureDimension, "Null count").put(numNull);
 			if (queryable && numNull > 0) {
-				Query q = baseQuery.clone().where(column.getPhysicalColumn(), OperatorType.EQUALS_TO, null);
+				// the null query should include all other columns because
+				// otherwise it will just be a dataset with pure nulls and no
+				// references!
+				List<Column> physicalColumns = new ArrayList<Column>();
+				for (InputColumn<String> col : columns) {
+					if (col.isPhysicalColumn()) {
+						physicalColumns.add(col.getPhysicalColumn());
+					}
+				}
+				Query q = new Query().select(physicalColumns.toArray(new Column[physicalColumns.size()]))
+						.from(column.getPhysicalColumn().getTable())
+						.where(column.getPhysicalColumn(), OperatorType.EQUALS_TO, null);
 				resultProducer = new QueryResultProducer(q);
 				nav.attach(resultProducer);
 			}
