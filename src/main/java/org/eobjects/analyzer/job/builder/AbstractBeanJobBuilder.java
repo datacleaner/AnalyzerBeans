@@ -59,11 +59,18 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 
 	public boolean isConfigured() {
 		for (ConfiguredPropertyDescriptor configuredProperty : _descriptor.getConfiguredProperties()) {
-			if (configuredProperty.isRequired()) {
-				if (!getConfiguredProperties().containsKey(configuredProperty)) {
-					logger.debug("Configured property is not set: " + configuredProperty);
-					return false;
-				}
+			if (!isConfigured(configuredProperty)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty) {
+		if (configuredProperty.isRequired()) {
+			if (!getConfiguredProperties().containsKey(configuredProperty)) {
+				logger.debug("Configured property is not set: " + configuredProperty);
+				return false;
 			}
 		}
 		return true;

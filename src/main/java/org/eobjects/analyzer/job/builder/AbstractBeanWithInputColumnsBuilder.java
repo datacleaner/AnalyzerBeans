@@ -62,8 +62,7 @@ class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> ext
 		} else {
 			inputColumns = CollectionUtils.array(InputColumn.class, inputColumns, inputColumn);
 		}
-		propertyDescriptor.setValue(getConfigurableBean(), inputColumns);
-		onConfigurationChanged();
+		setConfiguredProperty(propertyDescriptor, inputColumns);
 		return (B) this;
 	}
 

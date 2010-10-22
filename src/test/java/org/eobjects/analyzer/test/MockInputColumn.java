@@ -7,7 +7,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import dk.eobjects.metamodel.schema.Column;
 
 public class MockInputColumn<E> extends AbstractInputColumn<E> implements InputColumn<E> {
-	
+
 	private String _name;
 	private Class<E> _clazz;
 
@@ -41,4 +41,8 @@ public class MockInputColumn<E> extends AbstractInputColumn<E> implements InputC
 		return this == that;
 	}
 
+	@Override
+	public String toString() {
+		return "MockInputColumn[name=" + _name + "]";
+	}
 }

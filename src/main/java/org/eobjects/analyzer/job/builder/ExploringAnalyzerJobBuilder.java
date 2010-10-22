@@ -24,6 +24,11 @@ public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> e
 	}
 
 	@Override
+	public AnalyzerJob[] toAnalyzerJobs() throws IllegalStateException {
+		return new AnalyzerJob[] { toAnalyzerJob() };
+	}
+
+	@Override
 	public String toString() {
 		return "ExploringAnalyzerJobBuilder[analyzer=" + getDescriptor().getDisplayName() + "]";
 	}

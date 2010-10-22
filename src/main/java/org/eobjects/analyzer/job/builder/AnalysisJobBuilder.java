@@ -30,6 +30,7 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.schema.Column;
+import dk.eobjects.metamodel.schema.Table;
 
 public class AnalysisJobBuilder {
 
@@ -250,7 +251,7 @@ public class AnalysisJobBuilder {
 		if (descriptor == null) {
 			throw new IllegalArgumentException("No descriptor found for: " + analyzerClass);
 		}
-		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(descriptor);
+		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(this, descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 
 		// make a copy since some of the listeners may add additional listeners
@@ -355,8 +356,10 @@ public class AnalysisJobBuilder {
 		Collection<AnalyzerJob> analyzerJobs = new LinkedList<AnalyzerJob>();
 		for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
 			try {
-				AnalyzerJob analyzerJob = ajb.toAnalyzerJob();
-				analyzerJobs.add(analyzerJob);
+				AnalyzerJob[] analyzerJob = ajb.toAnalyzerJobs();
+				for (AnalyzerJob job : analyzerJob) {
+					analyzerJobs.add(job);
+				}
 			} catch (IllegalArgumentException e) {
 				throw new IllegalStateException("Could not create analyzer job from builder: " + ajb + ", ("
 						+ e.getMessage() + ")", e);
@@ -420,5 +423,20 @@ public class AnalysisJobBuilder {
 		}
 
 		return inputColumns;
+	}
+
+	protected Table getOriginatingTable(InputColumn<?> inputColumn) {
+		if (inputColumn.isPhysicalColumn()) {
+			return inputColumn.getPhysicalColumn().getTable();
+		}
+		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
+			if (tjb.getOutputColumns().contains(inputColumn)) {
+				List<InputColumn<?>> inputColumns = tjb.getInputColumns();
+				assert !inputColumns.isEmpty();
+
+				return getOriginatingTable(inputColumns.get(0));
+			}
+		}
+		throw new IllegalStateException("Could not find originating table for column: " + inputColumn);
 	}
 }
