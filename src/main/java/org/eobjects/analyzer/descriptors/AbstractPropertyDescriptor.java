@@ -9,7 +9,7 @@ import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-public class AbstractPropertyDescriptor implements PropertyDescriptor, Comparable<AbstractPropertyDescriptor> {
+public class AbstractPropertyDescriptor implements PropertyDescriptor {
 
 	private final Field _field;
 	private final Class<?> _baseType;
@@ -129,12 +129,22 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor, Comparabl
 	}
 
 	@Override
-	public int compareTo(AbstractPropertyDescriptor o) {
-		Field otherField = o._field;
-		if (_field == otherField) {
+	public int compareTo(PropertyDescriptor o) {
+		if (o == null) {
+			return 1;
+		}
+		if (o == this) {
 			return 0;
 		}
-		return _field.toString().compareTo(otherField.toString());
+		if (o instanceof AbstractPropertyDescriptor) {
+			Field otherField = ((AbstractPropertyDescriptor) o)._field;
+			if (_field == otherField) {
+				return 0;
+			}
+
+			return _field.toString().compareTo(otherField.toString());
+		}
+		return getName().compareTo(o.getName());
 	}
 
 	@Override

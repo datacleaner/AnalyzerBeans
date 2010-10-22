@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-public interface PropertyDescriptor {
+public interface PropertyDescriptor extends Comparable<PropertyDescriptor> {
 
 	public String getName();
 
