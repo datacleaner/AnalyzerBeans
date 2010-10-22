@@ -3,9 +3,13 @@ package org.eobjects.analyzer.job.builder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
+import org.eobjects.analyzer.beans.filter.NotNullFilter;
+import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -51,15 +55,15 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 
 		DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(datastores);
 		ReferenceDataCatalog referenceDataCatalog = new ReferenceDataCatalogImpl();
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
-				.scanPackage("org.eobjects.analyzer.beans", true);
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
+				"org.eobjects.analyzer.beans", true);
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		CollectionProvider collectionProvider = new InMemoryCollectionProvider();
-		configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				referenceDataCatalog, descriptorProvider, taskRunner,
-				collectionProvider);
+		configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider,
+				taskRunner, collectionProvider);
 
 		analysisJobBuilder = new AnalysisJobBuilder(configuration);
+		analysisJobBuilder.setDatastore("my db");
 	}
 
 	public void testToString() throws Exception {
@@ -68,31 +72,22 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		TransformerJobBuilder<ConvertToStringTransformer> tjb = analysisJobBuilder
 				.addTransformer(ConvertToStringTransformer.class);
 
-		assertEquals(
-				"RowProcessingAnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[]]",
-				ajb.toString());
-		assertEquals(
-				"TransformerJobBuilder[transformer=Convert to string,inputColumns=[]]",
-				tjb.toString());
+		assertEquals("RowProcessingAnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[]]", ajb.toString());
+		assertEquals("TransformerJobBuilder[transformer=Convert to string,inputColumns=[]]", tjb.toString());
 	}
 
 	public void testToAnalysisJob() throws Exception {
-		analysisJobBuilder.setDatastore("my db");
-		Table employeeTable = datastore.getDataContextProvider()
-				.getDataContext().getDefaultSchema()
+		Table employeeTable = datastore.getDataContextProvider().getDataContext().getDefaultSchema()
 				.getTableByName("EMPLOYEES");
 		assertNotNull(employeeTable);
 
-		analysisJobBuilder.addSourceColumns(
-				employeeTable.getColumnByName("EMPLOYEENUMBER"),
-				employeeTable.getColumnByName("FIRSTNAME"),
-				employeeTable.getColumnByName("EMAIL"));
+		analysisJobBuilder.addSourceColumns(employeeTable.getColumnByName("EMPLOYEENUMBER"),
+				employeeTable.getColumnByName("FIRSTNAME"), employeeTable.getColumnByName("EMAIL"));
 
 		TransformerJobBuilder<ConvertToStringTransformer> transformerJobBuilder = analysisJobBuilder
 				.addTransformer(ConvertToStringTransformer.class);
 
-		Collection<InputColumn<?>> numberColumns = analysisJobBuilder
-				.getAvailableInputColumns(DataTypeFamily.NUMBER);
+		Collection<InputColumn<?>> numberColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.NUMBER);
 		assertEquals(1, numberColumns.size());
 		assertEquals(
 				"[MetaModelInputColumn[Column[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
@@ -107,8 +102,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> analyzerJobBuilder = analysisJobBuilder
 				.addRowProcessingAnalyzer(StringAnalyzer.class);
 
-		Collection<InputColumn<?>> stringInputColumns = analysisJobBuilder
-				.getAvailableInputColumns(DataTypeFamily.STRING);
+		Collection<InputColumn<?>> stringInputColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING);
 		assertEquals(
 				"[MetaModelInputColumn[Column[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
 						+ "MetaModelInputColumn[Column[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]], "
@@ -123,35 +117,30 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertTrue(analysisJobBuilder.isConfigured());
 
 		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
-		assertEquals(
-				"ImmutableAnalysisJob[sourceColumns=3,filterJobs=0,transformerJobs=1,analyzerJobs=1]",
+		assertEquals("ImmutableAnalysisJob[sourceColumns=3,filterJobs=0,transformerJobs=1,analyzerJobs=1]",
 				analysisJob.toString());
 
 		// test hashcode and equals
 		assertNotSame(analysisJobBuilder.toAnalysisJob(), analysisJob);
 		assertEquals(analysisJobBuilder.toAnalysisJob(), analysisJob);
-		assertEquals(analysisJobBuilder.toAnalysisJob().hashCode(),
-				analysisJob.hashCode());
+		assertEquals(analysisJobBuilder.toAnalysisJob().hashCode(), analysisJob.hashCode());
 
-		Collection<InputColumn<?>> sourceColumns = analysisJob
-				.getSourceColumns();
+		Collection<InputColumn<?>> sourceColumns = analysisJob.getSourceColumns();
 		assertEquals(3, sourceColumns.size());
 
 		try {
-			sourceColumns.add(new TransformedInputColumn<Boolean>("bla",
-					DataTypeFamily.BOOLEAN, new PrefixedIdGenerator("mock")));
+			sourceColumns.add(new TransformedInputColumn<Boolean>("bla", DataTypeFamily.BOOLEAN, new PrefixedIdGenerator(
+					"mock")));
 			fail("Exception expected");
 		} catch (UnsupportedOperationException e) {
 			// do nothing
 		}
 
-		Collection<TransformerJob> transformerJobs = analysisJob
-				.getTransformerJobs();
+		Collection<TransformerJob> transformerJobs = analysisJob.getTransformerJobs();
 		assertEquals(1, transformerJobs.size());
 
 		TransformerJob transformerJob = transformerJobs.iterator().next();
-		assertEquals("ImmutableTransformerJob[transformer=Convert to string]",
-				transformerJob.toString());
+		assertEquals("ImmutableTransformerJob[transformer=Convert to string]", transformerJob.toString());
 
 		assertEquals(
 				"[MetaModelInputColumn[Column[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
@@ -161,7 +150,39 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertEquals(1, analyzerJobs.size());
 
 		AnalyzerJob analyzerJob = analyzerJobs.iterator().next();
-		assertEquals("ImmutableAnalyzerJob[analyzer=String analyzer]",
-				analyzerJob.toString());
+		assertEquals("ImmutableAnalyzerJob[analyzer=String analyzer]", analyzerJob.toString());
+	}
+
+	public void testGetAvailableUnfilteredBeans() throws Exception {
+		Table customersTable = datastore.getDataContextProvider().getDataContext().getDefaultSchema()
+				.getTableByName("CUSTOMERS");
+		assertNotNull(customersTable );
+
+		analysisJobBuilder.addSourceColumns(customersTable .getColumnByName("ADDRESSLINE1"),
+				customersTable .getColumnByName("ADDRESSLINE2"));
+		
+		RowProcessingAnalyzerJobBuilder<StringAnalyzer> saAjb = analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class);
+		saAjb.addInputColumns(analysisJobBuilder.getSourceColumns());
+		
+		FilterJobBuilder<NotNullFilter, ValidationCategory> fjb = analysisJobBuilder.addFilter(NotNullFilter.class);
+		fjb.addInputColumn(analysisJobBuilder.getSourceColumns().get(0));
+		
+		List<AbstractBeanWithInputColumnsBuilder<?, ?, ?>> result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
+		assertEquals(1, result.size());
+		assertEquals(result.get(0), saAjb);
+		
+		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pfAjb = analysisJobBuilder.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		pfAjb.addInputColumns(analysisJobBuilder.getSourceColumns());
+		
+		result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
+		assertEquals(2, result.size());
+		assertEquals(result.get(0), saAjb);
+		assertEquals(result.get(1), pfAjb);
+		
+		pfAjb.setRequirement(fjb, ValidationCategory.VALID);
+		
+		result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
+		assertEquals(1, result.size());
+		assertEquals(result.get(0), saAjb);
 	}
 }

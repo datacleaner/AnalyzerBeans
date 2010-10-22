@@ -317,29 +317,47 @@ public class AnalysisJobBuilder {
 		return result;
 	}
 
-	public boolean isConfigured() {
+	/**
+	 * Used to verify whether or not the builder's configuration is valid and
+	 * all properties are satisfied.
+	 * 
+	 * @param throwException
+	 *            whether or not an exception should be thrown in case of
+	 *            invalid configuration. Typically an exception message will
+	 *            contain more detailed information about the cause of the
+	 *            validation error, whereas a boolean contains no details.
+	 * @return true if the analysis job builder is correctly configured
+	 * @throws IllegalStateException
+	 */
+	public boolean isConfigured(final boolean throwException) throws IllegalStateException {
 		if (_dataContextProvider == null) {
+			if (throwException) {
+				throw new IllegalStateException("No DataContextProvider set");
+			}
 			return false;
 		}
 
 		if (_analyzerJobBuilders.isEmpty()) {
+			if (throwException) {
+				throw new IllegalStateException("No Analyzers in job");
+			}
 			return false;
 		}
 
 		for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
-			if (!fjb.isConfigured()) {
+			if (!fjb.isConfigured(throwException)) {
 				return false;
 			}
 		}
 
 		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
-			if (!tjb.isConfigured()) {
+			if (!tjb.isConfigured(throwException)) {
 				return false;
 			}
 		}
 
 		for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
-			if (!ajb.isConfigured()) {
+			if (!ajb.isConfigured(throwException)) {
 				return false;
 			}
 		}
@@ -347,8 +365,18 @@ public class AnalysisJobBuilder {
 		return true;
 	}
 
+	/**
+	 * Used to verify whether or not the builder's configuration is valid and
+	 * all properties are satisfied.
+	 * 
+	 * @return true if the analysis job builder is correctly configured
+	 */
+	public boolean isConfigured() {
+		return isConfigured(false);
+	}
+
 	public AnalysisJob toAnalysisJob() throws IllegalStateException {
-		if (!isConfigured()) {
+		if (!isConfigured(true)) {
 			throw new IllegalStateException("Analysis job is not correctly configured");
 		}
 
@@ -449,6 +477,56 @@ public class AnalysisJobBuilder {
 		throw new IllegalStateException("Could not find originating table for column: " + inputColumn);
 	}
 
+	protected Table getOriginatingTable(AbstractBeanWithInputColumnsBuilder<?, ?, ?> beanJobBuilder) {
+		List<InputColumn<?>> inputColumns = beanJobBuilder.getInputColumns();
+		if (inputColumns.isEmpty()) {
+			return null;
+		} else {
+			return getOriginatingTable(inputColumns.get(0));
+		}
+	}
+
+	public List<AbstractBeanWithInputColumnsBuilder<?, ?, ?>> getAvailableUnfilteredBeans(
+			FilterJobBuilder<?, ?> filterJobBuilder) {
+		List<AbstractBeanWithInputColumnsBuilder<?, ?, ?>> result = new ArrayList<AbstractBeanWithInputColumnsBuilder<?, ?, ?>>();
+		if (filterJobBuilder.isConfigured()) {
+			final Table requiredTable = getOriginatingTable(filterJobBuilder);
+
+			for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
+				if (fjb != filterJobBuilder) {
+					if (fjb.getRequirement() == null) {
+						Table foundTable = getOriginatingTable(fjb);
+						if (requiredTable == null || requiredTable.equals(foundTable)) {
+							result.add(fjb);
+						}
+					}
+				}
+			}
+
+			for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
+				if (tjb.getRequirement() == null) {
+					Table foundTable = getOriginatingTable(tjb);
+					if (requiredTable == null || requiredTable.equals(foundTable)) {
+						result.add(tjb);
+					}
+				}
+			}
+
+			for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
+				if (ajb instanceof RowProcessingAnalyzerJobBuilder<?>) {
+					RowProcessingAnalyzerJobBuilder<?> rpajb = (RowProcessingAnalyzerJobBuilder<?>) ajb;
+					if (rpajb.getRequirement() == null) {
+						Table foundTable = getOriginatingTable(rpajb);
+						if (requiredTable == null || requiredTable.equals(foundTable)) {
+							result.add(rpajb);
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+
 	public List<SourceColumnChangeListener> getSourceColumnListeners() {
 		return _sourceColumnListeners;
 	}
@@ -464,4 +542,5 @@ public class AnalysisJobBuilder {
 	public List<FilterChangeListener> getFilterChangeListeners() {
 		return _filterChangeListeners;
 	}
+
 }

@@ -16,7 +16,7 @@ import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @SuppressWarnings("unchecked")
-class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends AbstractBeanJobBuilder<D, E, B> {
+public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends AbstractBeanJobBuilder<D, E, B> {
 
 	private FilterOutcome _requirement;
 
@@ -111,7 +111,7 @@ class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> ext
 		List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
 		Set<ConfiguredPropertyDescriptor> configuredPropertiesForInput = getDescriptor().getConfiguredPropertiesForInput();
 		for (ConfiguredPropertyDescriptor configuredPropertyForInput : configuredPropertiesForInput) {
-			Object inputColumns = configuredPropertyForInput.getValue(getConfigurableBean());
+			Object inputColumns = getConfiguredProperty(configuredPropertyForInput);
 			if (inputColumns == null) {
 				return Collections.emptyList();
 			}

@@ -124,11 +124,18 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	}
 
 	@Override
-	public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty) {
+	public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty, boolean throwException) {
 		if (_multipleJobsSupported && configuredProperty == _inputProperty) {
-			return !_inputColumns.isEmpty();
+			if (_inputColumns.isEmpty()) {
+				if (throwException) {
+					throw new IllegalStateException("No input columns have been added!");
+				} else {
+					return false;
+				}
+			}
+			return true;
 		}
-		return super.isConfigured(configuredProperty);
+		return super.isConfigured(configuredProperty, throwException);
 	}
 
 	private AnalyzerJob createPartitionedJob(Object columnValue,
@@ -175,7 +182,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 			return super.getConfiguredProperty(propertyDescriptor);
 		}
 	}
-
+	
 	public boolean isMultipleJobsSupported() {
 		return _multipleJobsSupported;
 	}
