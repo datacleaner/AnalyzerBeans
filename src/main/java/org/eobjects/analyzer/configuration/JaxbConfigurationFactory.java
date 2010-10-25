@@ -51,6 +51,8 @@ import org.eobjects.analyzer.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dk.eobjects.metamodel.util.FileHelper;
+
 public class JaxbConfigurationFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(JaxbJobFactory.class);
@@ -154,8 +156,13 @@ public class JaxbConfigurationFactory {
 				assert quoteCharString.length() == 1;
 				quoteChar = quoteCharString.charAt(0);
 			}
+			
+			String encoding = csvDatastoreType.getEncoding();
+			if (!StringUtils.isNullOrEmpty(encoding)) {
+				encoding = FileHelper.UTF_8_ENCODING;
+			}
 
-			datastores.put(name, new CsvDatastore(name, filename, quoteChar, separatorChar));
+			datastores.put(name, new CsvDatastore(name, filename, quoteChar, separatorChar, encoding));
 		}
 
 		List<AccessDatastoreType> accessDatastores = CollectionUtils

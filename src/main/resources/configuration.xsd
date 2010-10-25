@@ -91,6 +91,8 @@
 			<element name="quote-char" minOccurs="0" maxOccurs="1" type="token" />
 			<element name="separator-char" minOccurs="0" maxOccurs="1"
 				type="token" />
+			<element name="encoding" minOccurs="0" maxOccurs="1"
+				type="token" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 	</complexType>
