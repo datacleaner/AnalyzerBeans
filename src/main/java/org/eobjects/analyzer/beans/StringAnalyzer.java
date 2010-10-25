@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -34,6 +35,7 @@ import dk.eobjects.metamodel.schema.Column;
  * @author Kasper Sørensen
  */
 @AnalyzerBean("String analyzer")
+@Description("The String analyzer is used to collect a variety of typical metrics on string values.\nMetrics include statistics on character case, words, diacritics, white-spaces and more...")
 public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(StringAnalyzer.class);

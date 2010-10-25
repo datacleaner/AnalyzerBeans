@@ -13,6 +13,7 @@ import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
@@ -25,6 +26,7 @@ import org.eobjects.analyzer.result.ListResult;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @AnalyzerBean("Pattern finder")
+@Description("The Pattern Finder will inspect your String values and generate and match string patterns that suit your data.\nIt can be used for a lot of purposes but is excellent for verifying or getting ideas about the format of the string-values in a column.")
 public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	private Map<TokenPattern, List<String>> patterns;

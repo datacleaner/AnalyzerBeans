@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.util.CollectionUtils;
@@ -163,6 +164,15 @@ public abstract class AbstractBeanDescriptor<B> implements BeanDescriptor<B> {
 			return this._beanClass == that._beanClass;
 		}
 		return false;
+	}
+	
+	@Override
+	public String getDescription() {
+		Description description = getAnnotation(Description.class);
+		if (description == null) {
+			return null;
+		}
+		return description.value();
 	}
 
 	@Override

@@ -14,7 +14,15 @@ import java.util.Set;
  */
 public interface BeanDescriptor<B> extends Comparable<BeanDescriptor<?>> {
 
+	/**
+	 * @return a humanly readable display name for this bean
+	 */
 	public String getDisplayName();
+
+	/**
+	 * @return a humanly readable description of the bean
+	 */
+	public String getDescription();
 
 	public Set<Annotation> getAnnotations();
 
