@@ -60,7 +60,7 @@ public class CharIterator implements ListIterator<Character> {
 		if (c == null) {
 			return false;
 		}
-		return c == current();
+		return c.charValue() == current();
 	}
 
 	public boolean isLetter() {
@@ -102,7 +102,7 @@ public class CharIterator implements ListIterator<Character> {
 		return _index;
 	}
 
-	public Character current() {
+	public char current() {
 		return _chars[_index];
 	}
 
