@@ -43,7 +43,7 @@ import dk.eobjects.metamodel.schema.Table;
  * 
  * @author Kasper Sørensen
  */
-public class AnalysisJobBuilder {
+public final class AnalysisJobBuilder {
 
 	private final AnalyzerBeansConfiguration _configuration;
 	private final IdGenerator _transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
@@ -462,22 +462,31 @@ public class AnalysisJobBuilder {
 		return inputColumns;
 	}
 
-	protected Table getOriginatingTable(InputColumn<?> inputColumn) {
+	public TransformerJobBuilder<?> getOriginatingTransformer(InputColumn<?> outputColumn) {
+		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
+			if (tjb.getOutputColumns().contains(outputColumn)) {
+				return tjb;
+			}
+		}
+		return null;
+	}
+
+	public Table getOriginatingTable(InputColumn<?> inputColumn) {
 		if (inputColumn.isPhysicalColumn()) {
 			return inputColumn.getPhysicalColumn().getTable();
 		}
-		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
-			if (tjb.getOutputColumns().contains(inputColumn)) {
-				List<InputColumn<?>> inputColumns = tjb.getInputColumns();
-				assert !inputColumns.isEmpty();
 
-				return getOriginatingTable(inputColumns.get(0));
-			}
+		TransformerJobBuilder<?> tjb = getOriginatingTransformer(inputColumn);
+		if (tjb != null) {
+			List<InputColumn<?>> inputColumns = tjb.getInputColumns();
+			assert !inputColumns.isEmpty();
+			return getOriginatingTable(inputColumns.get(0));
 		}
+
 		throw new IllegalStateException("Could not find originating table for column: " + inputColumn);
 	}
 
-	protected Table getOriginatingTable(AbstractBeanWithInputColumnsBuilder<?, ?, ?> beanJobBuilder) {
+	public Table getOriginatingTable(AbstractBeanWithInputColumnsBuilder<?, ?, ?> beanJobBuilder) {
 		List<InputColumn<?>> inputColumns = beanJobBuilder.getInputColumns();
 		if (inputColumns.isEmpty()) {
 			return null;
