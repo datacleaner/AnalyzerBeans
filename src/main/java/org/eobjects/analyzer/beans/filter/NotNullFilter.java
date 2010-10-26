@@ -1,12 +1,14 @@
 package org.eobjects.analyzer.beans.filter;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @FilterBean("Not null")
+@Description("Filter rows that contain null values.")
 public class NotNullFilter implements Filter<ValidationCategory> {
 
 	@Configured

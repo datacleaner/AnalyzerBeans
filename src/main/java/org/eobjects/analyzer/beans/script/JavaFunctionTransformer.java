@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.beans.script;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @TransformerBean("Java function transformer")
+@Description("Perform transformations based on custom Java code")
 public class JavaFunctionTransformer implements Transformer<String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(JavaFunctionTransformer.class);

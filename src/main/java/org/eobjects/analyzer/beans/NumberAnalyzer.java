@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
@@ -35,6 +36,7 @@ import dk.eobjects.metamodel.schema.Table;
  * </ul>
  */
 @AnalyzerBean("Number analyzer")
+@Description("Provides insight into number-column values.")
 public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	private Map<InputColumn<? extends Number>, SummaryStatistics> _statistics;

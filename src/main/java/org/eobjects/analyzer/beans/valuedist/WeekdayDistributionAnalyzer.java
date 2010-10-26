@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
@@ -17,6 +18,7 @@ import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
 
 @AnalyzerBean("Weekday distribution")
+@Description("Finds the distribution of weekdays from Date values.")
 public class WeekdayDistributionAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	private Map<InputColumn<Date>, Map<Integer, Integer>> distributionMap;

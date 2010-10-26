@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -21,6 +22,7 @@ import org.joda.time.format.DateTimeFormatter;
  * @author Kasper Sørensen
  */
 @TransformerBean("Convert to date")
+@Description("Converts anything to a date (or null).")
 public class ConvertToDateTransformer implements Transformer<Date> {
 
 	private static final List<DateTimeFormatter> dateTimeFormatters;

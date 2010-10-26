@@ -3,6 +3,7 @@ package org.eobjects.analyzer.beans.transform;
 import java.util.Date;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -29,6 +30,7 @@ import org.joda.time.Years;
  * @author Kasper Sørensen
  */
 @TransformerBean("Date to age")
+@Description("Turn a Date-column into columns of age (both in years and in days).")
 public class DateToAgeTransformer implements Transformer<Integer> {
 
 	@Configured("Date column")

@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -17,6 +18,7 @@ import org.eobjects.analyzer.data.InputRow;
  * @author Kasper Sørensen
  */
 @TransformerBean("Convert to number")
+@Description("Converts anything to a number (or null).")
 public class ConvertToNumberTransformer implements Transformer<Number> {
 
 	@Inject

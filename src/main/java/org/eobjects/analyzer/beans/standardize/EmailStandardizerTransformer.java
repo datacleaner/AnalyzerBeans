@@ -3,6 +3,7 @@ package org.eobjects.analyzer.beans.standardize;
 import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -18,6 +19,7 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
  * @author Kasper Sørensen
  */
 @TransformerBean("Email standardizer")
+@Description("Retrieve the username or domain from an email address.")
 public class EmailStandardizerTransformer implements Transformer<String> {
 
 	public static final NamedPattern<EmailPart> EMAIL_PATTERN = new NamedPattern<EmailPart>("USERNAME@DOMAIN",

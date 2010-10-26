@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -14,7 +15,8 @@ import org.eobjects.analyzer.util.HasGroupLiteral;
 import org.eobjects.analyzer.util.NamedPattern;
 import org.eobjects.analyzer.util.NamedPatternMatch;
 
-@TransformerBean("Url standardizer")
+@TransformerBean("URL standardizer")
+@Description("Retrieve the individual parts of an URL, including protocol, domain, port, path and querystring.")
 public class UrlStandardizerTransformer implements Transformer<String> {
 
 	public static final String[] PATTERNS = { "PROTOCOL://DOMAIN:PORTPATH\\?QUERYSTRING",

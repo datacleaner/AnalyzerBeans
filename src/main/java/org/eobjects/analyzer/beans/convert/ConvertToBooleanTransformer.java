@@ -3,6 +3,7 @@ package org.eobjects.analyzer.beans.convert;
 import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -15,6 +16,7 @@ import org.eobjects.analyzer.data.InputRow;
  * @author Kasper Sørensen
  */
 @TransformerBean("Convert to boolean")
+@Description("Converts anything to a boolean (or null).")
 public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 
 	@Inject
