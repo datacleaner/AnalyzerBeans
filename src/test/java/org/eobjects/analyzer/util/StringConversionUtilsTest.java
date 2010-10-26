@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -8,6 +9,7 @@ import java.util.Date;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.reference.SimpleDictionary;
@@ -36,6 +38,45 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests(new Date(1234), "1970-01-01T01:00:01 234");
 		runTests(Calendar.getInstance(), null);
 		runTests(new java.sql.Date(1234), "1970-01-01T01:00:01 234");
+	}
+
+	public void testEnum() throws Exception {
+		String serialized = StringConversionUtils.serialize(ValidationCategory.VALID);
+		assertEquals("VALID", serialized);
+		
+		Object deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory.class, null, null);
+		assertEquals(ValidationCategory.VALID, deserialized);
+
+		ValidationCategory[] array = new ValidationCategory[] { ValidationCategory.VALID,
+				ValidationCategory.INVALID };
+		serialized = StringConversionUtils.serialize(array);
+		assertEquals("[VALID,INVALID]", serialized);
+		
+		deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory[].class, null, null);
+		assertTrue(CompareUtils.equals(array, deserialized));
+	}
+	
+	public void testFile() throws Exception {
+		File file1 = new File("pom.xml");
+		File fileAbs = file1.getAbsoluteFile();
+		File dir1 = new File("src");
+		
+		String serialized = StringConversionUtils.serialize(file1);
+		assertEquals("pom.xml", serialized);
+		
+		Object deserialized = StringConversionUtils.deserialize(serialized, File.class, null, null);
+		assertTrue(CompareUtils.equals(file1, deserialized));
+		
+		serialized = StringConversionUtils.serialize(fileAbs);
+		assertEquals(fileAbs.getAbsolutePath(), serialized);
+		
+		File[] arr = new File[] {file1, dir1};
+		
+		serialized = StringConversionUtils.serialize(arr);
+		assertEquals("[pom.xml,src]", serialized);
+		
+		deserialized = StringConversionUtils.deserialize(serialized, File[].class, null, null);
+		assertTrue(CompareUtils.equals(arr, deserialized));
 	}
 
 	public void testReferenceDataSerialization() throws Exception {

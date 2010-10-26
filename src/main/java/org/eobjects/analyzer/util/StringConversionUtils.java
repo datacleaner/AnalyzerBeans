@@ -1,6 +1,8 @@
 package org.eobjects.analyzer.util;
 
+import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import dk.eobjects.metamodel.schema.Table;
  * <li>Double</li>
  * <li>Character</li>
  * <li>String</li>
+ * <li>java.io.File</li>
  * <li>java.util.Date</li>
  * <li>java.sql.Date</li>
  * <li>java.util.Calendar</li>
@@ -95,10 +98,24 @@ public final class StringConversionUtils {
 		if (o instanceof Boolean || o instanceof Number || o instanceof String || o instanceof Character) {
 			return escape(o.toString());
 		}
+		if (o instanceof Enum<?>) {
+			Enum<?> e = (Enum<?>) o;
+			return e.name();
+		}
 		if (o instanceof java.sql.Date) {
+			// will now be picked up by the date conversion
 			o = new Date(((java.sql.Date) o).getTime());
 		}
+		if (o instanceof File) {
+			File file = (File) o;
+			if (file.isAbsolute()) {
+				return file.getAbsolutePath();
+			} else {
+				return file.getPath();
+			}
+		}
 		if (o instanceof Calendar) {
+			// will now be picked up by the date conversion
 			o = ((Calendar) o).getTime();
 		}
 		if (o instanceof Date) {
@@ -181,8 +198,26 @@ public final class StringConversionUtils {
 		if (ReflectionUtils.isFloat(type)) {
 			return (E) Float.valueOf(str);
 		}
+		if (type.isEnum()) {
+			try {
+				E[] enumConstants = type.getEnumConstants();
+				Method nameMethod = Enum.class.getMethod("name");
+				for (E e : enumConstants) {
+					String name = (String) nameMethod.invoke(e);
+					if (name.equals(str)) {
+						return e;
+					}
+				}
+			} catch (Exception e) {
+				throw new IllegalStateException("Unexpected error occurred while examining enum", e);
+			}
+			throw new IllegalArgumentException("No such enum '" + str + "' in enum class: " + type.getName());
+		}
 		if (ReflectionUtils.isDate(type)) {
 			return (E) toDate(str);
+		}
+		if (ReflectionUtils.is(type, File.class)) {
+			return (E) new File(str);
 		}
 		if (ReflectionUtils.is(type, Calendar.class)) {
 			Date date = toDate(str);

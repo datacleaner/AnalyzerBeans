@@ -28,6 +28,8 @@ import javax.inject.Qualifier;
  * <li>Double</li>
  * <li>Character</li>
  * <li>String</li>
+ * <li>java.io.File</li>
+ * <li>enum types</li>
  * <li>org.eobjects.analyzer.data.InputColumn</li>
  * <li>org.eobjects.analyzer.reference.Dictionary</li>
  * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
