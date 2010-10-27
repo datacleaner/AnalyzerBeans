@@ -1,8 +1,15 @@
 package org.eobjects.analyzer.data;
 
-
 import dk.eobjects.metamodel.schema.Column;
 
+/**
+ * A mock-implementation of the input column. Use this only for testing purposes
+ * or in cases where you want to circumvent the actual framework!
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <E>
+ */
 public class MockInputColumn<E> extends AbstractInputColumn<E> implements InputColumn<E> {
 
 	private String _name;
