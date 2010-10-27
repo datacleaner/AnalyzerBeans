@@ -393,6 +393,9 @@ public class JaxbJobFactory {
 					} else {
 						ConfiguredPropertyDescriptor propertyDescriptor = analyzerJobBuilder.getDescriptor()
 								.getConfiguredProperty(name);
+						if (propertyDescriptor == null) {
+							throw new IllegalStateException("No such input property name: " + name);
+						}
 						analyzerJobBuilder.addInputColumn(inputColumn, propertyDescriptor);
 					}
 				}
