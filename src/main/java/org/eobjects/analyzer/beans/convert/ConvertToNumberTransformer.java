@@ -30,7 +30,7 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns(input.getName() + " (as number)");
 	}
 
 	@Override

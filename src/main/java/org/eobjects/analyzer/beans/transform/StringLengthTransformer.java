@@ -24,7 +24,7 @@ public class StringLengthTransformer implements Transformer<Number> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns(column.getName() + " length");
 	}
 
 	@Override

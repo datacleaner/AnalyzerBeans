@@ -174,7 +174,23 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 			String str2 = token.getString();
 			char char2 = str2.charAt(0);
 			boolean upperCase = Character.isUpperCase(char2);
-			return isUpperCaseOnly() == upperCase;
+			
+			boolean caseMatches = isUpperCaseOnly() == upperCase;
+			if (!caseMatches) {
+				return false;
+			}
+			
+			if (upperCase && !configuration.isUpperCaseExpandable()) {
+				// the token is not expandable, we need to verify same length
+				return str2.length() == _length;
+			}
+			
+			if (!upperCase && !configuration.isLowerCaseExpandable()) {
+				// the token is not expandable, we need to verify same length
+				return str2.length() == _length;
+			}
+			
+			return true;
 		}
 		return true;
 	}

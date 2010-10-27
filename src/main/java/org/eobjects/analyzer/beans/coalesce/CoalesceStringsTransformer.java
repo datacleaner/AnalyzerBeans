@@ -25,7 +25,7 @@ public class CoalesceStringsTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns("Coalsced string");
 	}
 
 	@Override

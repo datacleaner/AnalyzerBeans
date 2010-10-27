@@ -18,6 +18,8 @@ public class TokenizerConfiguration implements Serializable {
 	private boolean _discriminateWhiteSpaces;
 	private boolean _discriminateDecimalNumbers;
 	private boolean _discriminateNegativeNumbers;
+	private boolean _upperCaseExpandable;
+	private boolean _lowerCaseExpandable;
 	private Character _thousandsSeparator;
 	private Character _decimalSeparator;
 	private Character _minusSign;
@@ -53,6 +55,9 @@ public class TokenizerConfiguration implements Serializable {
 		_discriminateWhiteSpaces = true;
 		_discriminateDecimalNumbers = true;
 		_discriminateNegativeNumbers = false;
+
+		_upperCaseExpandable = false;
+		_lowerCaseExpandable = true;
 
 		_decimalSeparator = decimalSeparator;
 		_thousandsSeparator = thousandsSeparator;
@@ -225,7 +230,42 @@ public class TokenizerConfiguration implements Serializable {
 		_discriminateNegativeNumbers = discriminateNegativeNumbers;
 	}
 
+	/**
+	 * Are upper case TEXT tokens expandable (ie. "ABC" and "ABCD" is treated as
+	 * a single "AAAA" pattern) or not
+	 */
+	public boolean isUpperCaseExpandable() {
+		return _upperCaseExpandable;
+	}
+
+	/**
+	 * Sets whether or not to make upper case TEXT tokens expandable
+	 * 
+	 * @param upperCaseExpandable
+	 */
+	public void setUpperCaseExpandable(boolean upperCaseExpandable) {
+		_upperCaseExpandable = upperCaseExpandable;
+	}
+
+	/**
+	 * Are lower case TEXT tokens expandable (ie. "hello" and "hi" is treated as
+	 * a single "aaaaa" pattern) or not
+	 */
+	public boolean isLowerCaseExpandable() {
+		return _lowerCaseExpandable;
+	}
+
+	/**
+	 * Sets whether or not to make lower case TEXT tokens expandable
+	 * 
+	 * @param lowerCaseExpandable
+	 */
+	public void setLowerCaseExpandable(boolean lowerCaseExpandable) {
+		_lowerCaseExpandable = lowerCaseExpandable;
+	}
+
 	public boolean isTokenTypeEnabled(TokenType tokenType) {
 		return _tokenTypes.contains(tokenType);
 	}
+
 }

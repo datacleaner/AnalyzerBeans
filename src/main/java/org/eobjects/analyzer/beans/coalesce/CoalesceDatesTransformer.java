@@ -27,7 +27,7 @@ public class CoalesceDatesTransformer implements Transformer<Date> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns("Coalsced date");
 	}
 
 	@Override

@@ -28,7 +28,7 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns(input.getName() + " (as boolean)");
 	}
 
 	@Override

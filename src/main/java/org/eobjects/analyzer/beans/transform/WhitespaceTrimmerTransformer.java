@@ -24,7 +24,7 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns(column.getName() + " (trimmed)");
 	}
 
 	@Override

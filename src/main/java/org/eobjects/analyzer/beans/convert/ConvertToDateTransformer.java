@@ -51,7 +51,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns(input.getName() + " (as date)");
 	}
 
 	@Override

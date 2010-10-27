@@ -35,7 +35,7 @@ public class ConvertToStringTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns(input.getName() + " (as string)");
 	}
 
 	@Override

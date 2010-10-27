@@ -70,7 +70,7 @@ public class JavaFunctionTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns("Java function output");
 	}
 
 	@Override

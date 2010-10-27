@@ -66,6 +66,12 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 	@Configured(required = false)
 	private Character minusSign = DecimalFormatSymbols.getInstance().getMinusSign();
 
+	@Configured(value = "Upper case patterns expand in size", required = false)
+	private boolean upperCaseExpandable = false;
+
+	@Configured(value = "Lower case patterns expand in size", required = false)
+	private boolean lowerCaseExpandable = true;
+
 	@Initialize
 	public void init() {
 		patterns = new HashMap<TokenPattern, List<String>>();
@@ -75,6 +81,9 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 		} else {
 			configuration = new TokenizerConfiguration();
 		}
+		
+		configuration.setUpperCaseExpandable(upperCaseExpandable);
+		configuration.setLowerCaseExpandable(lowerCaseExpandable);
 
 		if (discriminateNegativeNumbers != null) {
 			configuration.setDiscriminateNegativeNumbers(discriminateNegativeNumbers);
@@ -220,5 +229,13 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 
 	public void setEnableMixedTokens(Boolean enableMixedTokens) {
 		this.enableMixedTokens = enableMixedTokens;
+	}
+	
+	public void setUpperCaseExpandable(boolean upperCaseExpandable) {
+		this.upperCaseExpandable = upperCaseExpandable;
+	}
+	
+	public void setLowerCaseExpandable(boolean lowerCaseExpandable) {
+		this.lowerCaseExpandable = lowerCaseExpandable;
 	}
 }

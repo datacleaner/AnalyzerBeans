@@ -6,8 +6,7 @@ import junit.framework.TestCase;
 
 public class TokenPatternImplTest extends TestCase {
 
-	private TokenizerConfiguration configuration = new TokenizerConfiguration(
-			true, '.', ',', '-');
+	private TokenizerConfiguration configuration = new TokenizerConfiguration(true, '.', ',', '-');
 
 	public void testSimpleMatching() throws Exception {
 		DefaultTokenizer tokenizer = new DefaultTokenizer(configuration);
@@ -34,5 +33,46 @@ public class TokenPatternImplTest extends TestCase {
 		tokens = tokenizer.tokenize("hello Mr. FanDango");
 		TokenPatternImpl tp2 = new TokenPatternImpl(tokens, configuration);
 		assertEquals("aaaaa Aa. AaaAaaaa", tp2.toSymbolicString());
+	}
+
+	public void testNoneExpandableMatching() throws Exception {
+
+		DefaultTokenizer tokenizer = new DefaultTokenizer(configuration);
+		TokenPatternImpl tp;
+
+		// both cases non-expandable
+		configuration.setLowerCaseExpandable(false);
+		configuration.setUpperCaseExpandable(false);
+		tp = new TokenPatternImpl(tokenizer.tokenize("Hello"), configuration);
+		assertTrue(tp.match(tokenizer.tokenize("Wooop")));
+		assertFalse(tp.match(tokenizer.tokenize("Greetings")));
+		assertFalse(tp.match(tokenizer.tokenize("Hi")));
+
+		// both cases expandable
+		configuration.setLowerCaseExpandable(true);
+		configuration.setUpperCaseExpandable(true);
+		tp = new TokenPatternImpl(tokenizer.tokenize("Hello"), configuration);
+		assertTrue(tp.match(tokenizer.tokenize("Wooop")));
+		assertTrue(tp.match(tokenizer.tokenize("Greetings")));
+		assertTrue(tp.match(tokenizer.tokenize("Hi")));
+		assertTrue(tp.match(tokenizer.tokenize("HHi")));
+
+		// only lower case expandable
+		configuration.setLowerCaseExpandable(true);
+		configuration.setUpperCaseExpandable(false);
+		tp = new TokenPatternImpl(tokenizer.tokenize("Hello"), configuration);
+		assertTrue(tp.match(tokenizer.tokenize("Wooop")));
+		assertTrue(tp.match(tokenizer.tokenize("Greetings")));
+		assertTrue(tp.match(tokenizer.tokenize("Hi")));
+		assertFalse(tp.match(tokenizer.tokenize("HHi")));
+
+		// only upper case expandable
+		configuration.setLowerCaseExpandable(false);
+		configuration.setUpperCaseExpandable(true);
+		tp = new TokenPatternImpl(tokenizer.tokenize("Hello"), configuration);
+		assertTrue(tp.match(tokenizer.tokenize("Wooop")));
+		assertFalse(tp.match(tokenizer.tokenize("Greetings")));
+		assertFalse(tp.match(tokenizer.tokenize("Hi")));
+		assertTrue(tp.match(tokenizer.tokenize("HHiiii")));
 	}
 }

@@ -22,7 +22,7 @@ public class ConcatenatorTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns("Concatenated string");
 	}
 
 	@Override

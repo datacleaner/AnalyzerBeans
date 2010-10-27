@@ -25,7 +25,7 @@ public class CoalesceNumbersTransformer implements Transformer<Number> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
+		return new OutputColumns("Coalsced number");
 	}
 
 	@Override
