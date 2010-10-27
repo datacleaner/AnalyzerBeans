@@ -2,8 +2,8 @@ package org.eobjects.analyzer.beans.coalesce;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.test.MockInputColumn;
-import org.eobjects.analyzer.test.MockInputRow;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 
 public class CoalesceStringsTransformerTest extends TestCase {
 

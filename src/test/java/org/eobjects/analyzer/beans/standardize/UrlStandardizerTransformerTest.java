@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.standardize.UrlStandardizerTransformer;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.test.MockInputRow;
+import org.eobjects.analyzer.data.MockInputRow;
 
 import junit.framework.TestCase;
 

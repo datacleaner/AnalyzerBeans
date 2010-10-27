@@ -4,8 +4,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.eobjects.analyzer.beans.transform.DateToAgeTransformer;
-import org.eobjects.analyzer.test.MockInputColumn;
-import org.eobjects.analyzer.test.MockInputRow;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 
 import junit.framework.TestCase;
 

@@ -5,9 +5,9 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.test.MockInputColumn;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.schema.ColumnType;

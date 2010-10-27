@@ -1,9 +1,9 @@
 package org.eobjects.analyzer.beans.script;
 
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.reference.Function;
-import org.eobjects.analyzer.test.MockInputColumn;
-import org.eobjects.analyzer.test.MockInputRow;
 
 import junit.framework.TestCase;
 

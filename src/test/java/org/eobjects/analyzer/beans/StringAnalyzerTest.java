@@ -4,12 +4,12 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
-import org.eobjects.analyzer.test.MockInputRow;
 
 public class StringAnalyzerTest extends TestCase {
 

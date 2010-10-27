@@ -1,8 +1,5 @@
-package org.eobjects.analyzer.test;
+package org.eobjects.analyzer.data;
 
-import org.eobjects.analyzer.data.AbstractInputColumn;
-import org.eobjects.analyzer.data.DataTypeFamily;
-import org.eobjects.analyzer.data.InputColumn;
 
 import dk.eobjects.metamodel.schema.Column;
 

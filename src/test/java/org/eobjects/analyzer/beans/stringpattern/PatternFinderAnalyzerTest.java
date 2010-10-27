@@ -2,10 +2,10 @@ package org.eobjects.analyzer.beans.stringpattern;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
-import org.eobjects.analyzer.test.MockInputColumn;
-import org.eobjects.analyzer.test.MockInputRow;
 
 public class PatternFinderAnalyzerTest extends TestCase {
 

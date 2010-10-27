@@ -5,10 +5,10 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
-import org.eobjects.analyzer.test.MockInputColumn;
-import org.eobjects.analyzer.test.MockInputRow;
 
 import junit.framework.TestCase;
 

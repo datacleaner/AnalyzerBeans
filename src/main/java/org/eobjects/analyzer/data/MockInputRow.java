@@ -1,10 +1,8 @@
-package org.eobjects.analyzer.test;
+package org.eobjects.analyzer.data;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.InputRow;
 
 public class MockInputRow implements InputRow {
 

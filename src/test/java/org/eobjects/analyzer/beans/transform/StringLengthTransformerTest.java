@@ -1,7 +1,7 @@
 package org.eobjects.analyzer.beans.transform;
 
-import org.eobjects.analyzer.test.MockInputColumn;
-import org.eobjects.analyzer.test.MockInputRow;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 
 import junit.framework.TestCase;
 
