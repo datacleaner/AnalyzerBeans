@@ -40,6 +40,8 @@ public final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> 
 			displayName = ReflectionUtils.explodeCamelCase(analyzerClass.getSimpleName(), false);
 		}
 		_displayName = displayName;
+
+		visitClass();
 	}
 
 	@Override

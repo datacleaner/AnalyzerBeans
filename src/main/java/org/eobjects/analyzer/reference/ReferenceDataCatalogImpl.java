@@ -2,6 +2,8 @@ package org.eobjects.analyzer.reference;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 
@@ -17,8 +19,26 @@ public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 		if (dictionaries == null) {
 			throw new IllegalArgumentException("dictionaries cannot be null");
 		}
+		Set<String> uniqueNames = new HashSet<String>();
+		for (Dictionary dictionary : dictionaries) {
+			String name = dictionary.getName();
+			if (uniqueNames.contains(name)) {
+				throw new IllegalStateException("Duplicate dictionary names: " + name);
+			} else {
+				uniqueNames.add(name);
+			}
+		}
 		if (synonymCatalogs == null) {
 			throw new IllegalArgumentException("synonymCatalogs cannot be null");
+		}
+		uniqueNames.clear();
+		for (SynonymCatalog synonymCatalog : synonymCatalogs) {
+			String name = synonymCatalog.getName();
+			if (uniqueNames.contains(name)) {
+				throw new IllegalStateException("Duplicate synonym catalog names: " + name);
+			} else {
+				uniqueNames.add(name);
+			}
 		}
 		_dictionaries = dictionaries;
 		_synonymCatalogs = synonymCatalogs;

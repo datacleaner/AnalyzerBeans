@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://eobjects.org/analyzerbeans/configuration/1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<configuration-metadata>
+		<configuration-name>Configuration with all the reference data types</configuration-name>
+	</configuration-metadata>
+
+	<datastore-catalog>
+		<jdbc-datastore name="my_jdbc_connection">
+			<url>jdbc:hsqldb:res:metamodel</url>
+			<driver>org.hsqldb.jdbcDriver</driver>
+			<username>SA</username>
+			<password></password>
+		</jdbc-datastore>
+	</datastore-catalog>
+
+	<reference-data-catalog>
+		<dictionaries>
+			<datastore-dictionary name="datastore_dict">
+				<datastore-name>my_jdbc_connection</datastore-name>
+				<column-path>EMPLOYEES.LASTNAME</column-path>
+			</datastore-dictionary>
+			<text-file-dictionary name="textfile_dict">
+				<filename>src/test/resources/lastnames.txt</filename>
+				<encoding>UTF-8</encoding>
+			</text-file-dictionary>
+			<value-list-dictionary name="valuelist_dict">
+				<value>hello</value>
+				<value>hi</value>
+				<value>greetings</value>
+				<value>godday</value>
+			</value-list-dictionary>
+			<custom-dictionary
+				class-name="org.eobjects.analyzer.configuration.SampleCustomDictionary">
+				<property name="Name" value="custom_dict" />
+				<property name="Values" value="5" />
+			</custom-dictionary>
+		</dictionaries>
+
+		<synonym-catalogs>
+			<text-file-synonym-catalog name="textfile_syn">
+				<filename>src/test/resources/synonym-countries.txt</filename>
+				<encoding>UTF-8</encoding>
+				<case-sensitive>false</case-sensitive>
+			</text-file-synonym-catalog>
+			<custom-synonym-catalog
+				class-name="org.eobjects.analyzer.configuration.SampleCustomSynonymCatalog">
+				<property name="Name" value="custom_syn" />
+				<property name="Values"
+					value="[[DNK,Denmark,Danmark],[GBR,Great Britain,UK,United Kingdom],[NLD,Netherlands]]" />
+			</custom-synonym-catalog>
+		</synonym-catalogs>
+	</reference-data-catalog>
+
+	<multithreaded-taskrunner />
+
+</configuration>

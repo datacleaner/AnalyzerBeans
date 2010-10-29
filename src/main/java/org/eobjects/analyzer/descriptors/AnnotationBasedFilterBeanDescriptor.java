@@ -53,6 +53,8 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 			displayName = ReflectionUtils.explodeCamelCase(filterClass.getSimpleName(), false);
 		}
 		_displayName = displayName;
+
+		visitClass();
 	}
 
 	@Override

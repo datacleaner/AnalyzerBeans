@@ -11,12 +11,14 @@
 					minOccurs="0" maxOccurs="1" />
 				<element name="datastore-catalog" type="ab:datastoreCatalogType"
 					minOccurs="1" maxOccurs="1" />
+				<element name="reference-data-catalog" type="ab:referenceDataCatalogType"
+					minOccurs="0" maxOccurs="1" />
 				<choice minOccurs="1" maxOccurs="1">
 					<element name="multithreaded-taskrunner" type="ab:multithreadedTaskrunnerType"
 						minOccurs="1" maxOccurs="1" />
 					<element name="singlethreaded-taskrunner" type="ab:singlethreadedTaskrunnerType"
 						minOccurs="1" maxOccurs="1" />
-					<element name="custom-taskrunner" type="ab:customTaskrunnerType"
+					<element name="custom-taskrunner" type="ab:customElementType"
 						minOccurs="1" maxOccurs="1" />
 				</choice>
 				<element name="classpath-scanner" minOccurs="0" maxOccurs="1"
@@ -91,8 +93,7 @@
 			<element name="quote-char" minOccurs="0" maxOccurs="1" type="token" />
 			<element name="separator-char" minOccurs="0" maxOccurs="1"
 				type="token" />
-			<element name="encoding" minOccurs="0" maxOccurs="1"
-				type="token" />
+			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 	</complexType>
@@ -119,6 +120,71 @@
 		<attribute name="name" type="string" use="required" />
 	</complexType>
 
+	<complexType name="referenceDataCatalogType">
+		<sequence>
+			<element name="dictionaries" minOccurs="0" maxOccurs="1">
+				<complexType>
+					<choice minOccurs="0" maxOccurs="unbounded">
+						<element name="text-file-dictionary" minOccurs="0"
+							maxOccurs="unbounded" type="ab:textFileDictionaryType" />
+						<element name="value-list-dictionary" minOccurs="0"
+							maxOccurs="unbounded" type="ab:valueListDictionaryType" />
+						<element name="datastore-dictionary" minOccurs="0"
+							maxOccurs="unbounded" type="ab:datastoreDictionaryType" />
+						<element name="custom-dictionary" minOccurs="0" maxOccurs="unbounded"
+							type="ab:customElementType" />
+					</choice>
+				</complexType>
+			</element>
+
+			<element name="synonym-catalogs" minOccurs="0" maxOccurs="1">
+				<complexType>
+					<choice minOccurs="0" maxOccurs="unbounded">
+						<element name="text-file-synonym-catalog" minOccurs="0"
+							maxOccurs="unbounded" type="ab:textFileSynonymCatalogType" />
+						<element name="custom-synonym-catalog" minOccurs="0"
+							maxOccurs="unbounded" type="ab:customElementType" />
+					</choice>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="textFileSynonymCatalogType">
+		<sequence>
+			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
+			<element name="case-sensitive" minOccurs="0" maxOccurs="1"
+				type="boolean" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="textFileDictionaryType">
+		<sequence>
+			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="valueListDictionaryType">
+		<sequence>
+			<element name="value" minOccurs="1" maxOccurs="unbounded"
+				type="string" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="datastoreDictionaryType">
+		<sequence>
+			<element name="datastore-name" minOccurs="1" maxOccurs="1"
+				type="string" />
+			<element name="column-path" minOccurs="1" maxOccurs="1" type="string" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
 	<complexType name="multithreadedTaskrunnerType">
 		<attribute name="max-threads" type="short" use="optional" />
 	</complexType>
@@ -126,7 +192,15 @@
 	<complexType name="singlethreadedTaskrunnerType">
 	</complexType>
 
-	<complexType name="customTaskrunnerType">
+	<complexType name="customElementType">
+		<sequence>
+			<element name="property" minOccurs="0" maxOccurs="unbounded">
+				<complexType>
+					<attribute name="name" use="required" type="string" />
+					<attribute name="value" use="required" type="string" />
+				</complexType>
+			</element>
+		</sequence>
 		<attribute name="class-name" type="string" use="required" />
 	</complexType>
 

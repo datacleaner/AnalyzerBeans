@@ -34,6 +34,8 @@ public final class AnnotationBasedTransformerBeanDescriptor<T extends Transforme
 			displayName = ReflectionUtils.explodeCamelCase(transformerClass.getSimpleName(), false);
 		}
 		_displayName = displayName;
+		
+		visitClass();
 	}
 
 	@Override

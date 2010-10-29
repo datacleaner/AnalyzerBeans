@@ -13,20 +13,28 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType.Package;
-import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.CompositeDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.Configuration;
 import org.eobjects.analyzer.configuration.jaxb.ConfigurationMetadataType;
 import org.eobjects.analyzer.configuration.jaxb.CsvDatastoreType;
-import org.eobjects.analyzer.configuration.jaxb.CustomTaskrunnerType;
+import org.eobjects.analyzer.configuration.jaxb.CustomElementType;
+import org.eobjects.analyzer.configuration.jaxb.CustomElementType.Property;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreCatalogType;
+import org.eobjects.analyzer.configuration.jaxb.DatastoreDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.ExcelDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
+import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType;
+import org.eobjects.analyzer.configuration.jaxb.TextFileSynonymCatalogType;
+import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
+import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
+import org.eobjects.analyzer.configuration.jaxb.TextFileDictionaryType;
+import org.eobjects.analyzer.configuration.jaxb.ValueListDictionaryType;
 import org.eobjects.analyzer.connection.AccessDatastore;
 import org.eobjects.analyzer.connection.CompositeDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -36,17 +44,26 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
 import org.eobjects.analyzer.job.JaxbJobFactory;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
+import org.eobjects.analyzer.reference.DatastoreDictionary;
+import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
+import org.eobjects.analyzer.reference.SimpleDictionary;
+import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.eobjects.analyzer.reference.TextBasedDictionary;
+import org.eobjects.analyzer.reference.TextBasedSynonymCatalog;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.StringConversionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,11 +135,86 @@ public class JaxbConfigurationFactory {
 			}
 		}
 
-		// TODO: Make these components configurable as well
-		ReferenceDataCatalog referenceDataCatalog = new ReferenceDataCatalogImpl();
+		ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(configuration.getReferenceDataCatalog(),
+				datastoreCatalog);
+
+		// TODO: Make this components configurable as well
 		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
 				collectionProvider);
+	}
+
+	private ReferenceDataCatalog createReferenceDataCatalog(ReferenceDataCatalogType referenceDataCatalog,
+			DatastoreCatalog datastoreCatalog) {
+		List<Dictionary> dictionaryList = new ArrayList<Dictionary>();
+		List<SynonymCatalog> synonymCatalogList = new ArrayList<SynonymCatalog>();
+
+		if (referenceDataCatalog != null) {
+
+			Dictionaries dictionaries = referenceDataCatalog.getDictionaries();
+			if (dictionaries != null) {
+				for (Object dictionaryType : dictionaries.getTextFileDictionaryOrValueListDictionaryOrDatastoreDictionary()) {
+					if (dictionaryType instanceof DatastoreDictionaryType) {
+						DatastoreDictionaryType ddt = (DatastoreDictionaryType) dictionaryType;
+
+						String name = ddt.getName();
+						String dsName = ddt.getDatastoreName();
+						String columnPath = ddt.getColumnPath();
+
+						dictionaryList.add(new DatastoreDictionary(name, datastoreCatalog, dsName, columnPath));
+					} else if (dictionaryType instanceof TextFileDictionaryType) {
+						TextFileDictionaryType tfdt = (TextFileDictionaryType) dictionaryType;
+						String name = tfdt.getName();
+						String filename = tfdt.getFilename();
+						String encoding = tfdt.getEncoding();
+						if (encoding == null) {
+							encoding = FileHelper.UTF_8_ENCODING;
+						}
+						dictionaryList.add(new TextBasedDictionary(name, filename, encoding));
+					} else if (dictionaryType instanceof ValueListDictionaryType) {
+						ValueListDictionaryType vldt = (ValueListDictionaryType) dictionaryType;
+						String name = vldt.getName();
+						List<String> values = vldt.getValue();
+						dictionaryList.add(new SimpleDictionary(name, values));
+					} else if (dictionaryType instanceof CustomElementType) {
+						Dictionary customDictionary = createCustomElement((CustomElementType) dictionaryType,
+								Dictionary.class);
+						dictionaryList.add(customDictionary);
+					} else {
+						throw new IllegalStateException("Unsupported dictionary type: " + dictionaryType);
+					}
+				}
+			}
+
+			SynonymCatalogs synonymCatalogs = referenceDataCatalog.getSynonymCatalogs();
+			if (synonymCatalogs != null) {
+				for (Object synonymCatalogType : synonymCatalogs.getTextFileSynonymCatalogOrCustomSynonymCatalog()) {
+					if (synonymCatalogType instanceof TextFileSynonymCatalogType) {
+						TextFileSynonymCatalogType tfsct = (TextFileSynonymCatalogType) synonymCatalogType;
+						String name = tfsct.getName();
+						String filename = tfsct.getFilename();
+						String encoding = tfsct.getEncoding();
+						if (encoding == null) {
+							encoding = FileHelper.UTF_8_ENCODING;
+						}
+						Boolean caseSensitive = tfsct.isCaseSensitive();
+						if (caseSensitive == null) {
+							caseSensitive = true;
+						}
+						synonymCatalogList.add(new TextBasedSynonymCatalog(name, filename, caseSensitive.booleanValue(),
+								encoding));
+					} else if (synonymCatalogType instanceof CustomElementType) {
+						SynonymCatalog customSynonymCatalog = createCustomElement((CustomElementType) synonymCatalogType,
+								SynonymCatalog.class);
+						synonymCatalogList.add(customSynonymCatalog);
+					} else {
+						throw new IllegalStateException("Unsupported synonym catalog type: " + synonymCatalogType);
+					}
+				}
+			}
+		}
+
+		return new ReferenceDataCatalogImpl(dictionaryList, synonymCatalogList);
 	}
 
 	private DatastoreCatalog createDatastoreCatalog(DatastoreCatalogType datastoreCatalogType) {
@@ -156,7 +248,7 @@ public class JaxbConfigurationFactory {
 				assert quoteCharString.length() == 1;
 				quoteChar = quoteCharString.charAt(0);
 			}
-			
+
 			String encoding = csvDatastoreType.getEncoding();
 			if (!StringUtils.isNullOrEmpty(encoding)) {
 				encoding = FileHelper.UTF_8_ENCODING;
@@ -254,7 +346,7 @@ public class JaxbConfigurationFactory {
 	private TaskRunner createTaskRunner(Configuration configuration) {
 		SinglethreadedTaskrunnerType singlethreadedTaskrunner = configuration.getSinglethreadedTaskrunner();
 		MultithreadedTaskrunnerType multithreadedTaskrunner = configuration.getMultithreadedTaskrunner();
-		CustomTaskrunnerType customTaskrunner = configuration.getCustomTaskrunner();
+		CustomElementType customTaskrunner = configuration.getCustomTaskrunner();
 
 		TaskRunner taskRunner;
 		if (singlethreadedTaskrunner != null) {
@@ -267,20 +359,61 @@ public class JaxbConfigurationFactory {
 				taskRunner = new MultiThreadedTaskRunner();
 			}
 		} else if (customTaskrunner != null) {
-			String className = customTaskrunner.getClassName();
-			assert className != null;
-			try {
-				Class<?> taskRunnerClass = Class.forName(className);
-				assert ReflectionUtils.is(taskRunnerClass, TaskRunner.class);
-				taskRunner = (TaskRunner) taskRunnerClass.newInstance();
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
+			taskRunner = createCustomElement(customTaskrunner, TaskRunner.class);
 		} else {
 			// default task runner type is multithreaded
 			taskRunner = new MultiThreadedTaskRunner();
 		}
 
 		return taskRunner;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <E> E createCustomElement(CustomElementType customElementType, Class<E> expectedClazz) {
+		E result = null;
+		Class<?> foundClass;
+		String className = customElementType.getClassName();
+
+		assert className != null;
+		try {
+			foundClass = Class.forName(className);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		if (!ReflectionUtils.is(foundClass, expectedClazz)) {
+			throw new IllegalStateException(className + " is not a valid " + expectedClazz);
+		}
+		try {
+			result = (E) foundClass.newInstance();
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		CustomComponentDescriptor<E> descriptor = new CustomComponentDescriptor<E>((Class<E>) foundClass);
+
+		List<Property> propertyTypes = customElementType.getProperty();
+		if (propertyTypes != null) {
+			for (Property property : propertyTypes) {
+				String propertyName = property.getName();
+				String propertyValue = property.getValue();
+
+				ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty(propertyName);
+				if (configuredProperty == null) {
+					throw new IllegalStateException("No such property in " + foundClass.getName() + ": " + propertyName);
+				}
+
+				Object configuredValue = StringConversionUtils.deserialize(propertyValue, configuredProperty.getType(),
+						null, null);
+
+				configuredProperty.setValue(result, configuredValue);
+			}
+		}
+
+		List<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
+		for (InitializeMethodDescriptor initializeMethod : initializeMethods) {
+			initializeMethod.initialize(result);
+		}
+
+		return result;
 	}
 }

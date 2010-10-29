@@ -3,6 +3,7 @@ package org.eobjects.analyzer.reference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.WeakHashMap;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 
@@ -12,34 +13,43 @@ import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.query.Query;
 import dk.eobjects.metamodel.schema.Column;
 
-public class DatastoreReferenceValues implements ReferenceValues<String> {
+public final class DatastoreReferenceValues implements ReferenceValues<String> {
 
-	private DataContextProvider _dataContextProvider;
-	private Column _column;
+	private final DataContextProvider _dataContextProvider;
+	private final Column _column;
+	private final WeakHashMap<String, Boolean> _containsValueCache = new WeakHashMap<String, Boolean>();
 
 	public DatastoreReferenceValues(DataContextProvider dataContextProvider, Column column) {
 		_dataContextProvider = dataContextProvider;
 		_column = column;
 	}
 
+	public void clearCache() {
+		_containsValueCache.clear();
+	}
+
 	@Override
 	public boolean containsValue(String value) {
-		DataContext dataContext = _dataContextProvider.getDataContext();
-
-		Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).equals(value).toQuery();
-
-		DataSet dataSet = dataContext.executeQuery(q);
-
-		assert dataSet.next();
-
-		Number count = (Number) dataSet.getRow().getValue(0);
-
-		assert !dataSet.next();
-
-		if (count == null || count.intValue() == 0) {
-			return false;
+		Boolean result = _containsValueCache.get(value);
+		if (result == null) {
+			result = false;
+			DataContext dataContext = _dataContextProvider.getDataContext();
+			Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).equals(value).toQuery();
+			DataSet dataSet = dataContext.executeQuery(q);
+			if (dataSet.next()) {
+				Row row = dataSet.getRow();
+				if (row != null) {
+					Number count = (Number) row.getValue(0);
+					if (count != null && count.intValue() > 0) {
+						result = true;
+					}
+					assert !dataSet.next();
+				}
+			}
+			_containsValueCache.put(value, result);
 		}
-		return true;
+		return result;
+
 	}
 
 	@Override

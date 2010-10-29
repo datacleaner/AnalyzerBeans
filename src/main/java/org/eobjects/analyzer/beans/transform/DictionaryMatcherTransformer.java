@@ -44,7 +44,7 @@ public class DictionaryMatcherTransformer implements Transformer<Boolean> {
 		Boolean[] result = new Boolean[dictionaries.length];
 		if (value != null) {
 			for (int i = 0; i < result.length; i++) {
-				boolean containsValue = dictionaries[i].getValues().containsValue(value);
+				boolean containsValue = dictionaries[i].containsValue(value);
 				result[i] = containsValue;
 			}
 		}

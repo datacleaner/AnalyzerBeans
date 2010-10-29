@@ -1,11 +1,14 @@
 package org.eobjects.analyzer.util;
 
 import java.io.Closeable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -315,4 +318,63 @@ public class ReflectionUtils {
 		}
 		return o.getClass().isArray();
 	}
+
+	public static Method[] getMethods(Class<?> clazz, Class<? extends Annotation> withAnnotation) {
+		List<Method> result = new ArrayList<Method>();
+
+		Method[] methods = getMethods(clazz);
+		for (Method method : methods) {
+			if (method.isAnnotationPresent(withAnnotation)) {
+				result.add(method);
+			}
+		}
+
+		return result.toArray(new Method[result.size()]);
+	}
+
+	public static Field[] getFields(Class<?> clazz, Class<? extends Annotation> withAnnotation) {
+		List<Field> result = new ArrayList<Field>();
+
+		Field[] fields = getFields(clazz);
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(withAnnotation)) {
+				result.add(field);
+			}
+		}
+
+		return result.toArray(new Field[result.size()]);
+	}
+
+	/**
+	 * Gets all methods of a class, excluding those from Object
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static Method[] getMethods(Class<?> clazz) {
+		if (clazz == Object.class) {
+			return new Method[0];
+		}
+		Method[] m = clazz.getDeclaredMethods();
+		Class<?> superclass = clazz.getSuperclass();
+		m = CollectionUtils.array(m, getMethods(superclass));
+		return m;
+	}
+
+	/**
+	 * Gets all fields of a class, including private fields in super-classes.
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static Field[] getFields(Class<?> clazz) {
+		if (clazz == Object.class) {
+			return new Field[0];
+		}
+		Field[] f = clazz.getDeclaredFields();
+		Class<?> superclass = clazz.getSuperclass();
+		f = CollectionUtils.array(f, getFields(superclass));
+		return f;
+	}
+
 }

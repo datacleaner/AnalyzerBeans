@@ -1,9 +1,5 @@
 package org.eobjects.analyzer.reference;
 
-import java.io.Serializable;
-
-import javax.inject.Inject;
-
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -11,31 +7,48 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.schema.Column;
 
-public class DatastoreDictionary implements Dictionary, Serializable {
+/**
+ * A dictionary backed by a column in a datastore.
+ * 
+ * Note that even though this datastore <i>is</i> serializable it is not
+ * entirely able to gracefully deserialize. The user of the dictionary will have
+ * to inject the DatastoreCatalog using the setter method for this.
+ * 
+ * @author Kasper Sørensen
+ * 
+ */
+public class DatastoreDictionary implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
-	@Inject
-	private transient DatastoreCatalog datastoreCatalog;
+	private transient DatastoreCatalog _datastoreCatalog;
+	private transient ReferenceValues<String> _cachedRefValues;
+	private final String _datastoreName;
+	private final String _qualifiedColumnName;
+	private final String _name;
 
-	private String _datastoreName;
-	private String _qualifiedColumnName;
-	private String _name;
+	public DatastoreDictionary(String name, DatastoreCatalog datastoreCatalog, String datastoreName,
+			String qualifiedColumnName) {
+		_name = name;
+		_datastoreCatalog = datastoreCatalog;
+		_datastoreName = datastoreName;
+		_qualifiedColumnName = qualifiedColumnName;
+	}
+
+	public void setDatastoreCatalog(DatastoreCatalog datastoreCatalog) {
+		_datastoreCatalog = datastoreCatalog;
+	}
+
+	public DatastoreCatalog getDatastoreCatalog() {
+		return _datastoreCatalog;
+	}
 
 	public String getDatastoreName() {
 		return _datastoreName;
 	}
 
-	public void setDatastoreName(String datastoreName) {
-		_datastoreName = datastoreName;
-	}
-
 	public String getQualifiedColumnName() {
 		return _qualifiedColumnName;
-	}
-
-	public void setQualifiedColumnName(String qualifiedColumnName) {
-		_qualifiedColumnName = qualifiedColumnName;
 	}
 
 	@Override
@@ -44,20 +57,27 @@ public class DatastoreDictionary implements Dictionary, Serializable {
 	}
 
 	@Override
+	public boolean containsValue(String value) {
+		return getValues().containsValue(value);
+	}
+
 	public ReferenceValues<String> getValues() {
-		Datastore datastore = datastoreCatalog.getDatastore(_datastoreName);
-		if (datastore == null) {
-			throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
-		}
+		if (_cachedRefValues == null) {
+			Datastore datastore = _datastoreCatalog.getDatastore(_datastoreName);
+			if (datastore == null) {
+				throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
+			}
 
-		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
-		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
-		Column column = schemaNavigator.convertToColumns(new String[] { _qualifiedColumnName })[0];
-		if (column == null) {
-			throw new IllegalStateException("Could not resolve column " + _qualifiedColumnName);
-		}
+			DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+			SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+			Column column = schemaNavigator.convertToColumns(new String[] { _qualifiedColumnName })[0];
+			if (column == null) {
+				throw new IllegalStateException("Could not resolve column " + _qualifiedColumnName);
+			}
 
-		return new DatastoreReferenceValues(dataContextProvider, column);
+			_cachedRefValues = new DatastoreReferenceValues(dataContextProvider, column);
+		}
+		return _cachedRefValues;
 	}
 
 }

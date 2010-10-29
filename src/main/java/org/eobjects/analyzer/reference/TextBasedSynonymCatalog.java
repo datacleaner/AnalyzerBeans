@@ -18,19 +18,22 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 	private final String _name;
 	private final boolean _caseSensitive;
 	private final WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
+	private final String _encoding;
 	private File _file;
 
-	public TextBasedSynonymCatalog(String name, String filename, boolean caseSensitive) {
+	public TextBasedSynonymCatalog(String name, String filename, boolean caseSensitive, String encoding) {
 		_name = name;
 		_filename = filename;
 		_caseSensitive = caseSensitive;
+		_encoding = encoding;
 	}
 
-	public TextBasedSynonymCatalog(String name, File file, boolean caseSensitive) {
+	public TextBasedSynonymCatalog(String name, File file, boolean caseSensitive, String encoding) {
 		_name = name;
 		_filename = file.getPath();
 		_file = file;
 		_caseSensitive = caseSensitive;
+		_encoding = encoding;
 	}
 
 	private File getFile() {
@@ -47,7 +50,7 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	@Override
 	public Collection<Synonym> getSynonyms() {
-		BufferedReader reader = FileHelper.getBufferedReader(getFile());
+		BufferedReader reader = FileHelper.getBufferedReader(getFile(), _encoding);
 		try {
 			List<Synonym> synonyms = new ArrayList<Synonym>();
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
@@ -67,7 +70,7 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 			return masterTerm;
 		}
 
-		BufferedReader reader = FileHelper.getBufferedReader(getFile());
+		BufferedReader reader = FileHelper.getBufferedReader(getFile(), _encoding);
 		try {
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 				line = line.trim();
