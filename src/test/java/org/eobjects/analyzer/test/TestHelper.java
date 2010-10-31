@@ -15,8 +15,8 @@ import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
+import org.eobjects.analyzer.lifecycle.HsqldbCollectionProvider;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
@@ -39,13 +39,17 @@ public final class TestHelper {
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration() {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
+		CollectionProvider collectionProvider = createCollectionProvider();
 		return new AnalyzerBeansConfigurationImpl(createDatastoreCatalog(), createReferenceDataCatalog(),
 				descriptorProvider, taskRunner, collectionProvider);
 	}
 
+	public static CollectionProvider createCollectionProvider() {
+		return new HsqldbCollectionProvider();
+	}
+
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(TaskRunner taskRunner, Datastore datastore) {
-		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
+		CollectionProvider collectionProvider = createCollectionProvider();
 
 		List<Datastore> datastores = new LinkedList<Datastore>();
 		datastores.add(datastore);

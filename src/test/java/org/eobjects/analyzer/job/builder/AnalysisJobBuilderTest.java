@@ -24,13 +24,9 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
-import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
-import org.eobjects.analyzer.lifecycle.InMemoryCollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.test.TestHelper;
@@ -58,7 +54,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		CollectionProvider collectionProvider = new InMemoryCollectionProvider();
+		CollectionProvider collectionProvider = TestHelper.createCollectionProvider();
 		configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider,
 				taskRunner, collectionProvider);
 
@@ -156,31 +152,33 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 	public void testGetAvailableUnfilteredBeans() throws Exception {
 		Table customersTable = datastore.getDataContextProvider().getDataContext().getDefaultSchema()
 				.getTableByName("CUSTOMERS");
-		assertNotNull(customersTable );
+		assertNotNull(customersTable);
 
-		analysisJobBuilder.addSourceColumns(customersTable .getColumnByName("ADDRESSLINE1"),
-				customersTable .getColumnByName("ADDRESSLINE2"));
-		
-		RowProcessingAnalyzerJobBuilder<StringAnalyzer> saAjb = analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class);
+		analysisJobBuilder.addSourceColumns(customersTable.getColumnByName("ADDRESSLINE1"),
+				customersTable.getColumnByName("ADDRESSLINE2"));
+
+		RowProcessingAnalyzerJobBuilder<StringAnalyzer> saAjb = analysisJobBuilder
+				.addRowProcessingAnalyzer(StringAnalyzer.class);
 		saAjb.addInputColumns(analysisJobBuilder.getSourceColumns());
-		
+
 		FilterJobBuilder<NotNullFilter, ValidationCategory> fjb = analysisJobBuilder.addFilter(NotNullFilter.class);
 		fjb.addInputColumn(analysisJobBuilder.getSourceColumns().get(0));
-		
+
 		List<AbstractBeanWithInputColumnsBuilder<?, ?, ?>> result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
 		assertEquals(1, result.size());
 		assertEquals(result.get(0), saAjb);
-		
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pfAjb = analysisJobBuilder.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+
+		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pfAjb = analysisJobBuilder
+				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
 		pfAjb.addInputColumns(analysisJobBuilder.getSourceColumns());
-		
+
 		result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
 		assertEquals(2, result.size());
 		assertEquals(result.get(0), saAjb);
 		assertEquals(result.get(1), pfAjb);
-		
+
 		pfAjb.setRequirement(fjb, ValidationCategory.VALID);
-		
+
 		result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
 		assertEquals(1, result.size());
 		assertEquals(result.get(0), saAjb);

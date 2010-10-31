@@ -21,7 +21,6 @@ import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.lifecycle.InMemoryCollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.result.NumberResult;
 import org.eobjects.analyzer.test.ActivityAwareMultiThreadedTaskRunner;
@@ -72,7 +71,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
 		DescriptorProvider descriptorProvider = new LazyDescriptorProvider();
 		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl(new DatastoreCatalogImpl(datastore),
-				new ReferenceDataCatalogImpl(), descriptorProvider, taskRunner, new InMemoryCollectionProvider());
+				new ReferenceDataCatalogImpl(), descriptorProvider, taskRunner, TestHelper.createCollectionProvider());
 
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(datastore);

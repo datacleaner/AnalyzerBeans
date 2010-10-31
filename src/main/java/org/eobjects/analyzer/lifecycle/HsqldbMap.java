@@ -113,7 +113,7 @@ class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbColl
 		}
 		return null;
 	}
-
+	
 	@Override
 	public Set<java.util.Map.Entry<K, V>> entrySet() {
 		Statement st = null;
@@ -121,7 +121,7 @@ class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbColl
 		try {
 			Set<Entry<K, V>> result = new HashSet<Map.Entry<K, V>>();
 			st = _connection.createStatement();
-			rs = st.executeQuery("SELECT map_key FROM " + _tableName + ";");
+			rs = st.executeQuery("SELECT map_key FROM " + _tableName + " ORDER BY map_key ASC;");
 			while (rs.next()) {
 				@SuppressWarnings("unchecked")
 				K key = (K) rs.getObject(1);

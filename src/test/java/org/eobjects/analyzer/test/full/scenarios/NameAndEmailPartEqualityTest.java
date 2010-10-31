@@ -30,7 +30,6 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
-import org.eobjects.analyzer.lifecycle.InMemoryCollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.ValidationResult;
@@ -48,7 +47,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 	public void testScenario() throws Exception {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
-		CollectionProvider collectionProvider = new InMemoryCollectionProvider();
+		CollectionProvider collectionProvider = TestHelper.createCollectionProvider();
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();

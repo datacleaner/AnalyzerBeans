@@ -19,7 +19,6 @@ import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -45,7 +44,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 	public void testScenario() throws Exception {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
-		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
+		CollectionProvider collectionProvider = TestHelper.createCollectionProvider();
 		TaskRunner taskRunner = new MultiThreadedTaskRunner(30);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();

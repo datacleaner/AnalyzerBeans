@@ -29,11 +29,11 @@ import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType;
-import org.eobjects.analyzer.configuration.jaxb.TextFileSynonymCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.TextFileDictionaryType;
+import org.eobjects.analyzer.configuration.jaxb.TextFileSynonymCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ValueListDictionaryType;
 import org.eobjects.analyzer.connection.AccessDatastore;
 import org.eobjects.analyzer.connection.CompositeDatastore;
@@ -50,8 +50,8 @@ import org.eobjects.analyzer.job.JaxbJobFactory;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
 import org.eobjects.analyzer.lifecycle.CollectionProvider;
+import org.eobjects.analyzer.lifecycle.HsqldbCollectionProvider;
 import org.eobjects.analyzer.reference.DatastoreDictionary;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.util.FileHelper;
 
-public class JaxbConfigurationFactory {
+public final class JaxbConfigurationFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(JaxbJobFactory.class);
 
@@ -139,7 +139,7 @@ public class JaxbConfigurationFactory {
 				datastoreCatalog);
 
 		// TODO: Make this components configurable as well
-		CollectionProvider collectionProvider = new BerkeleyDbCollectionProvider();
+		CollectionProvider collectionProvider = new HsqldbCollectionProvider();
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
 				collectionProvider);
 	}

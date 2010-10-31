@@ -61,7 +61,7 @@ public class JaxbJobFactoryTest extends TestCase {
 		// unique
 		ValueDistributionResult res2 = (ValueDistributionResult) results.get(2);
 		assertEquals(18, res2.getUniqueCount());
-		assertEquals("ValueCountList[[[Gerard->2], [Leslie->2]]]", res2.getTopValues().toString());
+		assertEquals("ValueCountList[[[Leslie->2], [Gerard->2]]]", res2.getTopValues().toString());
 	}
 
 	public void testNamedInputs() throws Exception {

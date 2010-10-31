@@ -14,8 +14,9 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 
 public class HsqldbCollectionProvider implements CollectionProvider {
 
-	private final Connection _connection;
+	private static final AtomicInteger _nextDatabaseId = new AtomicInteger(1);
 	private final AtomicInteger _nextTableId = new AtomicInteger(1);
+	private final Connection _connection;
 
 	public HsqldbCollectionProvider() {
 		try {
@@ -25,14 +26,22 @@ public class HsqldbCollectionProvider implements CollectionProvider {
 		}
 
 		try {
-			_connection = DriverManager.getConnection("jdbc:hsqldb:mem:analyzerbeans");
+			_connection = DriverManager.getConnection("jdbc:hsqldb:mem:analyzerbeans" + _nextDatabaseId.getAndIncrement());
 
 			// optimize
 			_connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 		} catch (SQLException e) {
 			throw new IllegalStateException("Could not create a Hsqldb database", e);
 		}
-
+	}
+	
+	@Override
+	protected void finalize() {
+		try {
+			_connection.close();
+		} catch (SQLException e) {
+			// nothing to do
+		}
 	}
 
 	public static void performUpdate(Connection connection, String sql) {
@@ -85,7 +94,7 @@ public class HsqldbCollectionProvider implements CollectionProvider {
 	public <E> List<E> createList(Class<E> valueType) throws IllegalStateException {
 		String tableName = "ab_list_" + _nextTableId.getAndIncrement();
 		String valueTypeName = getSqlType(valueType);
-		performUpdate(_connection, "CREATE CACHED TABLE " + tableName + " (list_index INTEGER PRIMARY KEY, list_value "
+		performUpdate(_connection, "CREATE TABLE " + tableName + " (list_index INTEGER PRIMARY KEY, list_value "
 				+ valueTypeName + ");");
 		return new HsqldbList<E>(_connection, tableName);
 	}
@@ -94,7 +103,7 @@ public class HsqldbCollectionProvider implements CollectionProvider {
 	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
 		String tableName = "ab_set_" + _nextTableId.getAndIncrement();
 		String valueTypeName = getSqlType(valueType);
-		performUpdate(_connection, "CREATE CACHED TABLE " + tableName + " (set_value " + valueTypeName + " PRIMARY KEY);");
+		performUpdate(_connection, "CREATE TABLE " + tableName + " (set_value " + valueTypeName + " PRIMARY KEY);");
 		return new HsqldbSet<E>(_connection, tableName);
 	}
 
@@ -103,8 +112,8 @@ public class HsqldbCollectionProvider implements CollectionProvider {
 		String tableName = "ab_map_" + _nextTableId.getAndIncrement();
 		String keyTypeName = getSqlType(keyType);
 		String valueTypeName = getSqlType(valueType);
-		performUpdate(_connection, "CREATE CACHED TABLE " + tableName + " (map_key " + keyTypeName
-				+ " PRIMARY KEY, map_value " + valueTypeName + ");");
+		performUpdate(_connection, "CREATE TABLE " + tableName + " (map_key " + keyTypeName + " PRIMARY KEY, map_value "
+				+ valueTypeName + ");");
 		return new HsqldbMap<K, V>(_connection, tableName);
 	}
 
