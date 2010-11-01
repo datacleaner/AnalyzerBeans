@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
 import java.util.List;
 import java.util.Map;
@@ -8,19 +8,19 @@ import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
 
 import junit.framework.TestCase;
 
-public class BerkeleyDbCollectionProviderTest extends TestCase {
+public class BerkeleyDbStorageProviderTest extends TestCase {
 
-	BerkeleyDbStorageProvider handler = new BerkeleyDbStorageProvider();
+	private BerkeleyDbStorageProvider sp = new BerkeleyDbStorageProvider();
 
 	public void testCreateMap() throws Exception {
-		Map<String, Long> map = handler.createMap(String.class, Long.class);
+		Map<String, Long> map = sp.createMap(String.class, Long.class);
 		assertNotNull(map);
 		
-		handler.cleanUp(map);
+		sp.cleanUp(map);
 	}
 
 	public void testCreateList() throws Exception {
-		List<String> list = handler.createList(String.class);
+		List<String> list = sp.createList(String.class);
 		assertNotNull(list);
 		list.add("hello");
 		list.add("hello");
@@ -28,11 +28,11 @@ public class BerkeleyDbCollectionProviderTest extends TestCase {
 		list.add("hi");
 		assertEquals(3, list.size());
 		
-		handler.cleanUp(list);
+		sp.cleanUp(list);
 	}
 	
 	public void testCreateSet() throws Exception {
-		Set<String> set = handler.createSet(String.class);
+		Set<String> set = sp.createSet(String.class);
 		set.add("hello");
 		set.add("hello");
 		assertEquals(1, set.size());
@@ -46,6 +46,6 @@ public class BerkeleyDbCollectionProviderTest extends TestCase {
 		set.remove("world");
 		assertEquals(1, set.size());
 		
-		handler.cleanUp(set);
+		sp.cleanUp(set);
 	}
 }

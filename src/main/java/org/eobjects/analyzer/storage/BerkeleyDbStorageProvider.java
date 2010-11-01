@@ -2,13 +2,13 @@ package org.eobjects.analyzer.storage;
 
 import java.io.File;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptorImpl;
-import org.eobjects.analyzer.lifecycle.ProvidedList;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,19 +64,13 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	}
 
 	public void cleanUp(Object obj) {
-		if (obj instanceof StoredKeySet) {
-			((StoredKeySet) obj).clear();
-		} else {
-			StoredMap map;
-			if (obj instanceof ProvidedList<?>) {
-				ProvidedList<?> list = (ProvidedList<?>) obj;
-				map = (StoredMap) list.getWrappedMap();
-			} else if (obj instanceof StoredMap) {
-				map = (StoredMap) obj;
-			} else {
-				throw new IllegalStateException("Cannot clean up object: " + obj);
-			}
+		if (obj instanceof Collection<?>) {
+			((Collection<?>) obj).clear();
+		} else if (obj instanceof Map<?, ?>) {
+			Map<?, ?> map = (Map<?, ?>) obj;
 			map.clear();
+		} else {
+			throw new IllegalStateException("Cannot clean up object: " + obj);
 		}
 
 		try {
@@ -154,26 +148,26 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		// Berkeley StoredLists are non-functional!
 		// return new StoredList<E>(createDatabase(), valueBinding, true);
 
-		return new ProvidedList<E>(map);
+		return new BerkeleyDbList<E>(this, map);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
 		try {
-			return new StoredKeySet(createDatabase(), createBinding(valueType), true);
+			StoredKeySet set = new StoredKeySet(createDatabase(), createBinding(valueType), true);
+			return new BerkeleyDbSet<E>(this, set);
 		} catch (DatabaseException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
 		try {
 			EntryBinding keyBinding = createBinding(keyType);
 			EntryBinding valueBinding = createBinding(valueType);
-			return new StoredMap(createDatabase(), keyBinding, valueBinding, true);
+			StoredMap map = new StoredMap(createDatabase(), keyBinding, valueBinding, true);
+			return new BerkeleyDbMap<K, V>(this, map);
 		} catch (DatabaseException e) {
 			throw new IllegalStateException(e);
 		}

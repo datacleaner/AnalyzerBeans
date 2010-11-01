@@ -1,14 +1,17 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
 import java.util.HashMap;
+
+import org.eobjects.analyzer.storage.BerkeleyDbList;
 
 import junit.framework.TestCase;
 
 public class ProvidedListTest extends TestCase {
 
+	private BerkeleyDbStorageProvider sp = new BerkeleyDbStorageProvider();
+
 	public void testAdd() throws Exception {
-		ProvidedList<String> list = new ProvidedList<String>(
-				new HashMap<Integer, String>());
+		BerkeleyDbList<String> list = new BerkeleyDbList<String>(sp, new HashMap<Integer, String>());
 
 		list.add("foo1");
 		list.add("foo2");
@@ -27,8 +30,7 @@ public class ProvidedListTest extends TestCase {
 	}
 
 	public void testSet() throws Exception {
-		ProvidedList<String> list = new ProvidedList<String>(
-				new HashMap<Integer, String>());
+		BerkeleyDbList<String> list = new BerkeleyDbList<String>(sp, new HashMap<Integer, String>());
 
 		list.add("foo1");
 		list.add("foo2");
@@ -41,8 +43,7 @@ public class ProvidedListTest extends TestCase {
 	}
 
 	public void testRemove() throws Exception {
-		ProvidedList<String> list = new ProvidedList<String>(
-				new HashMap<Integer, String>());
+		BerkeleyDbList<String> list = new BerkeleyDbList<String>(sp, new HashMap<Integer, String>());
 
 		list.add("foo1");
 		list.add("foo2");
