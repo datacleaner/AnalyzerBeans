@@ -1,5 +1,8 @@
 package org.eobjects.analyzer.beans.transform;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
@@ -13,6 +16,8 @@ import org.eobjects.analyzer.util.StringUtils;
 @Description("Trims your String values either on left, right or both sides.")
 public class WhitespaceTrimmerTransformer implements Transformer<String> {
 
+	private Matcher multipleWhitespaceMatcher = Pattern.compile("[\\s\\p{Zs}\\p{javaWhitespace}]+").matcher("");
+
 	@Configured
 	InputColumn<String> column;
 
@@ -21,6 +26,9 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 
 	@Configured
 	boolean trimRight = true;
+
+	@Configured
+	boolean trimMultipleToSingleSpace = false;
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -31,6 +39,9 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 	public String[] transform(InputRow inputRow) {
 		String value = inputRow.getValue(column);
 		if (value != null) {
+			if (trimMultipleToSingleSpace) {
+				value = multipleWhitespaceMatcher.reset(value).replaceAll(" ");
+			}
 			if (trimLeft && trimRight) {
 				value = value.trim();
 			} else {
@@ -44,5 +55,4 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 		}
 		return new String[] { value };
 	}
-
 }
