@@ -149,6 +149,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-dbase</artifactId>
+			<version>${metamodel.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-csv</artifactId>
 			<version>${metamodel.version}</version>
 		</dependency>
@@ -161,6 +166,12 @@
 			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-access</artifactId>
 			<version>${metamodel.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-xml</artifactId>
+			<version>${metamodel.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>

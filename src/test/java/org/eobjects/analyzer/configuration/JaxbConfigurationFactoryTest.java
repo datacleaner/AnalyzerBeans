@@ -34,7 +34,8 @@ public class JaxbConfigurationFactoryTest extends TestCase {
 				"src/test/resources/example-configuration-all-datastore-types.xml"));
 		DatastoreCatalog datastoreCatalog = configuration.getDatastoreCatalog();
 		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
-		assertEquals("[my_jdbc_connection, my_csv, my_jdbc_datasource, my_excel_2003, my_composite, my_access]",
+		assertEquals(
+				"[my_jdbc_connection, my_dbase, my_csv, my_custom, my_odb, my_jdbc_datasource, my_excel_2003, my_composite, my_access]",
 				Arrays.toString(datastoreNames));
 
 		for (String name : datastoreNames) {

@@ -32,6 +32,20 @@
 			<filename>src/test/resources/developers.mdb</filename>
 		</access-datastore>
 
+		<dbase-datastore name="my_dbase">
+			<filename>src/test/resources/report.dbf</filename>
+		</dbase-datastore>
+
+		<odb-datastore name="my_odb">
+			<filename>src/test/resources/openoffice_db.odb</filename>
+		</odb-datastore>
+
+		<custom-datastore
+			class-name="org.eobjects.analyzer.configuration.SampleCustomDatastore">
+			<property name="Name" value="my_custom" />
+			<property name="Xml file" value="src/test/resources/log4j.xml" />
+		</custom-datastore>
+
 		<composite-datastore name="my_composite">
 			<datastore-name>my_jdbc_connection</datastore-name>
 			<datastore-name>my_csv</datastore-name>

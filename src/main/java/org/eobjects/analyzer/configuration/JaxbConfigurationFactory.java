@@ -24,10 +24,12 @@ import org.eobjects.analyzer.configuration.jaxb.CustomElementType;
 import org.eobjects.analyzer.configuration.jaxb.CustomElementType.Property;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreDictionaryType;
+import org.eobjects.analyzer.configuration.jaxb.DbaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ExcelDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
+import org.eobjects.analyzer.configuration.jaxb.OpenOfficeDatabaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
@@ -41,8 +43,10 @@ import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.connection.DbaseDatastore;
 import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
@@ -311,6 +315,51 @@ public final class JaxbConfigurationFactory {
 			}
 
 			datastores.put(name, datastore);
+		}
+
+		List<DbaseDatastoreType> dbaseDatastores = CollectionUtils.filterOnClass(datastoreTypes, DbaseDatastoreType.class);
+		for (DbaseDatastoreType dbaseDatastoreType : dbaseDatastores) {
+			String name = dbaseDatastoreType.getName();
+			if (StringUtils.isNullOrEmpty(name)) {
+				throw new IllegalStateException("Datastore name cannot be null");
+			}
+
+			if (datastores.containsKey(name)) {
+				throw new IllegalStateException("Datastore name is not unique: " + name);
+			}
+
+			String filename = dbaseDatastoreType.getFilename();
+			datastores.put(name, new DbaseDatastore(name, filename));
+		}
+
+		List<OpenOfficeDatabaseDatastoreType> odbDatastores = CollectionUtils.filterOnClass(datastoreTypes,
+				OpenOfficeDatabaseDatastoreType.class);
+		for (OpenOfficeDatabaseDatastoreType odbDatastoreType : odbDatastores) {
+			String name = odbDatastoreType.getName();
+			if (StringUtils.isNullOrEmpty(name)) {
+				throw new IllegalStateException("Datastore name cannot be null");
+			}
+
+			if (datastores.containsKey(name)) {
+				throw new IllegalStateException("Datastore name is not unique: " + name);
+			}
+
+			String filename = odbDatastoreType.getFilename();
+			datastores.put(name, new OdbDatastore(name, filename));
+		}
+
+		List<CustomElementType> customDatastores = CollectionUtils.filterOnClass(datastoreTypes, CustomElementType.class);
+		for (CustomElementType customElementType : customDatastores) {
+			Datastore ds = createCustomElement(customElementType, Datastore.class);
+			String name = ds.getName();
+			if (StringUtils.isNullOrEmpty(name)) {
+				throw new IllegalStateException("Datastore name cannot be null");
+			}
+
+			if (datastores.containsKey(name)) {
+				throw new IllegalStateException("Datastore name is not unique: " + name);
+			}
+			datastores.put(name, ds);
 		}
 
 		List<CompositeDatastoreType> compositeDatastores = CollectionUtils.filterOnClass(datastoreTypes,
