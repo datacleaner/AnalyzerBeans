@@ -98,8 +98,11 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 		// declare all the "constants" of the job as final variables
 		final DataContextProvider dataContextProvider = job.getDataContextProvider();
-		final Collection<FilterJob> filterJobs = job.getFilterJobs();
 		final Collection<TransformerJob> transformerJobs = job.getTransformerJobs();
+		validateSingleTableInput(job, transformerJobs);
+		final Collection<FilterJob> filterJobs = job.getFilterJobs();
+		validateSingleTableInput(job, filterJobs);
+
 		final Collection<AnalyzerJob> analyzerJobs = job.getAnalyzerJobs();
 
 		final List<AnalyzerJob> explorerJobs = new ArrayList<AnalyzerJob>();
@@ -115,6 +118,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 						+ descriptor);
 			}
 		}
+		validateSingleTableInput(job, rowProcessingJobs);
 
 		final TaskListener explorersDoneTaskListener = new NestedTaskListener("exploring analyzers", explorerJobs.size(),
 				finalTaskListener);
@@ -172,6 +176,48 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		}
 
 		return new AnalysisResultFutureImpl(resultQueue, finalTaskListener, errorListener);
+	}
+
+	/**
+	 * Prevents that any row processing components have input from different
+	 * tables.
+	 * 
+	 * @param beanJobs
+	 */
+	private void validateSingleTableInput(AnalysisJob analysisJob, Collection<? extends BeanJob<?>> beanJobs) {
+		for (BeanJob<?> beanJob : beanJobs) {
+			InputColumn<?>[] input = beanJob.getInput();
+			Table originatingTable = null;
+			for (InputColumn<?> inputColumn : input) {
+				if (originatingTable == null) {
+					originatingTable = findOriginatingTable(analysisJob, inputColumn);
+				} else {
+					if (!originatingTable.equals(findOriginatingTable(analysisJob, inputColumn))) {
+						throw new IllegalArgumentException("Input columns in " + beanJob
+								+ " originate from different tables");
+					}
+				}
+			}
+		}
+	}
+
+	private Table findOriginatingTable(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
+		if (inputColumn.isPhysicalColumn()) {
+			return inputColumn.getPhysicalColumn().getTable();
+		}
+
+		Collection<TransformerJob> transformerJobs = analysisJob.getTransformerJobs();
+		for (TransformerJob transformerJob : transformerJobs) {
+			MutableInputColumn<?>[] output = transformerJob.getOutput();
+			for (MutableInputColumn<?> col : output) {
+				if (col.equals(inputColumn)) {
+					InputColumn<?>[] input = transformerJob.getInput();
+					assert input.length > 0;
+					return findOriginatingTable(analysisJob, input[0]);
+				}
+			}
+		}
+		throw new IllegalArgumentException("Could not determine originating table for " + inputColumn);
 	}
 
 	private void registerRowProcessingPublishers(AnalysisJob analysisJob,
