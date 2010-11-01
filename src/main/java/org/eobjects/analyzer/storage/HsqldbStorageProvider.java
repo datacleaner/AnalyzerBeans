@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,13 +12,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public class HsqldbCollectionProvider implements CollectionProvider {
+/**
+ * Hsqldb based implementation of the StorageProvider. This is the current and
+ * recommended implementation.
+ * 
+ * @author Kasper Sørensen
+ * 
+ */
+public final class HsqldbStorageProvider implements StorageProvider {
 
 	private static final AtomicInteger _nextDatabaseId = new AtomicInteger(1);
 	private final AtomicInteger _nextTableId = new AtomicInteger(1);
 	private final Connection _connection;
 
-	public HsqldbCollectionProvider() {
+	public HsqldbStorageProvider() {
 		try {
 			Class.forName("org.hsqldb.jdbcDriver");
 		} catch (ClassNotFoundException e) {
@@ -34,7 +41,7 @@ public class HsqldbCollectionProvider implements CollectionProvider {
 			throw new IllegalStateException("Could not create a Hsqldb database", e);
 		}
 	}
-	
+
 	@Override
 	protected void finalize() {
 		try {
@@ -115,12 +122,6 @@ public class HsqldbCollectionProvider implements CollectionProvider {
 		performUpdate(_connection, "CREATE TABLE " + tableName + " (map_key " + keyTypeName + " PRIMARY KEY, map_value "
 				+ valueTypeName + ");");
 		return new HsqldbMap<K, V>(_connection, tableName);
-	}
-
-	@Override
-	public void cleanUp(Object providedObj) {
-		HsqldbCollection col = (HsqldbCollection) providedObj;
-		performUpdate(_connection, "DROP TABLE " + col.getTableName());
 	}
 
 	public static void safeClose(ResultSet rs, Statement st) {

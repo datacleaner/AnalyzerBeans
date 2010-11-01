@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbCollection {
+final class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbCollection {
 
 	private final Connection _connection;
 	private final String _tableName;
@@ -57,7 +57,7 @@ class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbColl
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbCollectionProvider.safeClose(rs, null);
+			HsqldbStorageProvider.safeClose(rs, null);
 		}
 	}
 
@@ -74,7 +74,7 @@ class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbColl
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbCollectionProvider.safeClose(rs, null);
+			HsqldbStorageProvider.safeClose(rs, null);
 		}
 	}
 
@@ -113,7 +113,7 @@ class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbColl
 		}
 		return null;
 	}
-	
+
 	@Override
 	public Set<java.util.Map.Entry<K, V>> entrySet() {
 		Statement st = null;
@@ -131,7 +131,7 @@ class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbColl
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbCollectionProvider.safeClose(rs, st);
+			HsqldbStorageProvider.safeClose(rs, st);
 		}
 	}
 
@@ -167,5 +167,11 @@ class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbColl
 		public int hashCode() {
 			return _key.hashCode();
 		}
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		HsqldbStorageProvider.performUpdate(_connection, "DROP TABLE " + getTableName());
 	}
 }

@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,8 +35,8 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 	@Override
 	public synchronized E remove(int index) {
 		E oldValue = get(index);
-		HsqldbCollectionProvider.performUpdate(_connection, "DELETE FROM " + _tableName + " WHERE list_index=" + index);
-		HsqldbCollectionProvider.performUpdate(_connection, "UPDATE " + _tableName
+		HsqldbStorageProvider.performUpdate(_connection, "DELETE FROM " + _tableName + " WHERE list_index=" + index);
+		HsqldbStorageProvider.performUpdate(_connection, "UPDATE " + _tableName
 				+ " SET list_index = list_index-1 WHERE list_index > " + index);
 		_size--;
 		return oldValue;
@@ -44,7 +44,7 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 
 	@Override
 	public synchronized void clear() {
-		HsqldbCollectionProvider.performUpdate(_connection, "DELETE FROM " + _tableName);
+		HsqldbStorageProvider.performUpdate(_connection, "DELETE FROM " + _tableName);
 		_size = 0;
 	}
 
@@ -67,7 +67,7 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbCollectionProvider.safeClose(rs, st);
+			HsqldbStorageProvider.safeClose(rs, st);
 		}
 	}
 
@@ -95,7 +95,7 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 	}
 
 	public synchronized void add(int index, E element) {
-		HsqldbCollectionProvider.performUpdate(_connection, "UPDATE " + _tableName
+		HsqldbStorageProvider.performUpdate(_connection, "UPDATE " + _tableName
 				+ " SET list_index = list_index+1 WHERE list_index > " + index);
 		try {
 			_addAtIndexStatement.setObject(1, index);
@@ -123,4 +123,10 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 	public String getTableName() {
 		return _tableName;
 	};
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		HsqldbStorageProvider.performUpdate(_connection, "DROP TABLE " + getTableName());
+	}
 }

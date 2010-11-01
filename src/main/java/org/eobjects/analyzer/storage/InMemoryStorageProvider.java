@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,7 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public final class InMemoryCollectionProvider implements CollectionProvider {
+/**
+ * StorageProvider that actually doesn't store data on disk, but only in memory.
+ * This implementation is prone to out of memory errors, but is on the other
+ * hand very quick for small jobs.
+ * 
+ * @author Kasper Sørensen
+ */
+public final class InMemoryStorageProvider implements StorageProvider {
 
 	@Override
 	public <E> List<E> createList(Class<E> valueType) throws IllegalStateException {
@@ -22,10 +29,6 @@ public final class InMemoryCollectionProvider implements CollectionProvider {
 	@Override
 	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
 		return new HashSet<E>();
-	}
-
-	@Override
-	public void cleanUp(Object providedObj) {
 	}
 
 }

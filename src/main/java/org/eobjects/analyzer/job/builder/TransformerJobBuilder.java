@@ -15,11 +15,11 @@ import org.eobjects.analyzer.job.ImmutableTransformerJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
-import org.eobjects.analyzer.lifecycle.InMemoryCollectionProvider;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleState;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
+import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 
 /**
  * @author Kasper Sørensen
@@ -54,7 +54,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		LifeCycleCallback callback = new AssignConfiguredCallback(new ImmutableBeanConfiguration(getConfiguredProperties()));
 		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, transformerBeanInstance.getBean(), getDescriptor());
 
-		callback = new AssignProvidedCallback(transformerBeanInstance, new InMemoryCollectionProvider(), null);
+		callback = new AssignProvidedCallback(new InMemoryStorageProvider(), null);
 		callback.onEvent(LifeCycleState.ASSIGN_PROVIDED, transformerBeanInstance.getBean(), getDescriptor());
 
 		callback = new InitializeCallback();

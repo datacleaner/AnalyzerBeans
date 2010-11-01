@@ -1,5 +1,7 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -8,12 +10,14 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-public class HsqldbCollectionProviderTest extends TestCase {
+import org.easymock.EasyMock;
 
-	private HsqldbCollectionProvider cp = new HsqldbCollectionProvider();
+public class HsqldbStorageProviderTest extends TestCase {
+
+	private HsqldbStorageProvider sp = new HsqldbStorageProvider();
 
 	public void testCreateList() throws Exception {
-		List<String> list = cp.createList(String.class);
+		List<String> list = sp.createList(String.class);
 		assertEquals(0, list.size());
 		assertTrue(list.isEmpty());
 
@@ -22,23 +26,21 @@ public class HsqldbCollectionProviderTest extends TestCase {
 		assertEquals(2, list.size());
 
 		assertEquals("world", list.get(1));
-		
+
 		assertEquals("[hello, world]", Arrays.toString(list.toArray()));
-		
+
 		list.remove(1);
-		
+
 		assertEquals("[hello]", Arrays.toString(list.toArray()));
-		
+
 		list.remove("foobar");
 		list.remove("hello");
-		
-		assertEquals("[]", Arrays.toString(list.toArray()));
 
-		cp.cleanUp(list);
+		assertEquals("[]", Arrays.toString(list.toArray()));
 	}
 
 	public void testCreateMap() throws Exception {
-		Map<Integer, String> map = cp.createMap(Integer.class, String.class);
+		Map<Integer, String> map = sp.createMap(Integer.class, String.class);
 
 		map.put(1, "hello");
 		map.put(2, "world");
@@ -53,12 +55,10 @@ public class HsqldbCollectionProviderTest extends TestCase {
 		map.put(5, "bar");
 
 		assertEquals(3, map.size());
-		
-		cp.cleanUp(map);
 	}
 
 	public void testCreateSet() throws Exception {
-		Set<Long> set = cp.createSet(Long.class);
+		Set<Long> set = sp.createSet(Long.class);
 
 		assertTrue(set.isEmpty());
 		assertEquals(0, set.size());
@@ -107,7 +107,28 @@ public class HsqldbCollectionProviderTest extends TestCase {
 		assertFalse(it.hasNext());
 
 		assertEquals("[2, 3]", Arrays.toString(set.toArray()));
-		
-		cp.cleanUp(set);
+	}
+
+	public void testFinalize() throws Exception {
+		Connection connectionMock = EasyMock.createMock(Connection.class);
+		Statement statementMock = EasyMock.createMock(Statement.class);
+
+		EasyMock.expect(connectionMock.prepareCall("SELECT set_value FROM MY_TABLE")).andReturn(null);
+		EasyMock.expect(connectionMock.prepareCall("SELECT COUNT(*) FROM MY_TABLE WHERE set_value=?")).andReturn(null);
+		EasyMock.expect(connectionMock.prepareCall("INSERT INTO MY_TABLE VALUES(?)")).andReturn(null);
+		EasyMock.expect(connectionMock.prepareCall("DELETE FROM MY_TABLE WHERE set_value=?")).andReturn(null);
+
+		EasyMock.expect(connectionMock.createStatement()).andReturn(statementMock);
+		EasyMock.expect(statementMock.executeUpdate("DROP TABLE MY_TABLE")).andReturn(0);
+
+		EasyMock.replay(connectionMock);
+
+		HsqldbSet<String> set = new HsqldbSet<String>(connectionMock, "MY_TABLE");
+		assertEquals(0, set.size());
+		set = null;
+		System.gc();
+		System.runFinalization();
+
+		EasyMock.verify(connectionMock);
 	}
 }

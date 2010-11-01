@@ -22,7 +22,6 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Crosstab;
@@ -32,6 +31,7 @@ import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
+import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.DataContext;
@@ -46,14 +46,14 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 	public void testScenario() throws Exception {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
-		CollectionProvider collectionProvider = TestHelper.createCollectionProvider();
+		StorageProvider storageProvider = TestHelper.createStorageProvider();
 		TaskRunner taskRunner = new MultiThreadedTaskRunner(3);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
 
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				referenceDataCatalog, descriptorProvider, taskRunner, collectionProvider);
+				referenceDataCatalog, descriptorProvider, taskRunner, storageProvider);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 

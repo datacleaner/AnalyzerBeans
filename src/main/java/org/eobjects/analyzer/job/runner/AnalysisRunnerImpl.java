@@ -139,7 +139,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 			Task runTask = new RunExplorerTask(instance);
 			TaskListener initExplorerTaskListener = new RunNextTaskCompletionListener(taskRunner, runTask,
 					runExplorerTaskListener);
-			Task initTask = new AssignCallbacksAndInitializeTask(instance, _configuration.getCollectionProvider(),
+			Task initTask = new AssignCallbacksAndInitializeTask(instance, _configuration.getStorageProvider(),
 					dataContextProvider, new AssignConfiguredCallback(explorerJob.getConfiguration()),
 					new InitializeCallback(), runExplorerCallback, returnResultsCallback, new CloseCallback());
 
@@ -194,7 +194,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		for (Table table : tables) {
 			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
-				rowPublisher = new RowProcessingPublisher(analysisJob, _configuration.getCollectionProvider(), table,
+				rowPublisher = new RowProcessingPublisher(analysisJob, _configuration.getStorageProvider(), table,
 						taskRunner, listener);
 				rowProcessingPublishers.put(table, rowPublisher);
 			}

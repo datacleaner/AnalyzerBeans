@@ -3,21 +3,21 @@ package org.eobjects.analyzer.configuration;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.storage.StorageProvider;
 
 public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfiguration {
 
 	private static final long serialVersionUID = 1L;
 
 	private final transient DescriptorProvider _descriptorProvider;
-	private final transient CollectionProvider _collectionProvider;
+	private final transient StorageProvider _storageProvider;
 	private final transient TaskRunner _taskRunner;
 	private final DatastoreCatalog _datastoreCatalog;
 	private final ReferenceDataCatalog _referenceDataCatalog;
 
 	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
-			DescriptorProvider descriptorProvider, TaskRunner taskRunner, CollectionProvider collectionProvider) {
+			DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider) {
 		if (datastoreCatalog == null) {
 			throw new IllegalArgumentException("datastoreCatalog cannot be null");
 		}
@@ -30,14 +30,14 @@ public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfig
 		if (taskRunner == null) {
 			throw new IllegalArgumentException("taskRunner cannot be null");
 		}
-		if (collectionProvider == null) {
-			throw new IllegalArgumentException("collectionProvider cannot be null");
+		if (storageProvider == null) {
+			throw new IllegalArgumentException("storageProvider cannot be null");
 		}
 		_datastoreCatalog = datastoreCatalog;
 		_referenceDataCatalog = referenceDataCatalog;
 		_descriptorProvider = descriptorProvider;
 		_taskRunner = taskRunner;
-		_collectionProvider = collectionProvider;
+		_storageProvider = storageProvider;
 	}
 
 	@Override
@@ -56,8 +56,8 @@ public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfig
 	}
 
 	@Override
-	public CollectionProvider getCollectionProvider() {
-		return _collectionProvider;
+	public StorageProvider getStorageProvider() {
+		return _storageProvider;
 	}
 
 	@Override

@@ -35,12 +35,12 @@ import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
+import org.eobjects.analyzer.storage.StorageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,17 +59,17 @@ public final class RowProcessingPublisher {
 	private final Set<Column> _physicalColumns = new HashSet<Column>();
 	private final List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
 	private final AnalysisJob _job;
-	private final CollectionProvider _collectionProvider;
+	private final StorageProvider _storageProvider;
 	private final Table _table;
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
 
-	public RowProcessingPublisher(AnalysisJob job, CollectionProvider collectionProvider, Table table,
+	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table,
 			TaskRunner taskRunner, AnalysisListener analysisListener) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
-		if (collectionProvider == null) {
+		if (storageProvider == null) {
 			throw new IllegalArgumentException("CollectionProvider cannot be null");
 		}
 		if (table == null) {
@@ -82,7 +82,7 @@ public final class RowProcessingPublisher {
 			throw new IllegalArgumentException("AnalysisListener cannot be null");
 		}
 		_job = job;
-		_collectionProvider = collectionProvider;
+		_storageProvider = storageProvider;
 		_table = table;
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
@@ -317,13 +317,13 @@ public final class RowProcessingPublisher {
 			TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
 			TransformerBeanInstance transformerBeanInstance = transformerConsumer.getBeanInstance();
 
-			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _collectionProvider, dataContextProvider,
+			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _storageProvider, dataContextProvider,
 					assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof FilterConsumer) {
 			FilterConsumer filterConsumer = (FilterConsumer) consumer;
 			FilterBeanInstance filterBeanInstance = filterConsumer.getBeanInstance();
 
-			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _collectionProvider, dataContextProvider,
+			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _storageProvider, dataContextProvider,
 					assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
@@ -331,7 +331,7 @@ public final class RowProcessingPublisher {
 			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(_job, analyzerConsumer.getBeanJob(),
 					resultQueue, _analysisListener);
 
-			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _collectionProvider, dataContextProvider,
+			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _storageProvider, dataContextProvider,
 					assignConfiguredCallback, initializeCallback, null, returnResultsCallback, closeCallback);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);

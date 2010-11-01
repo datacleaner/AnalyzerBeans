@@ -1,10 +1,10 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 
-public class HsqldbSetIterator<E> implements Iterator<E> {
+final class HsqldbSetIterator<E> implements Iterator<E> {
 
 	private final HsqldbSet<E> _set;
 	private final ResultSet _rs;

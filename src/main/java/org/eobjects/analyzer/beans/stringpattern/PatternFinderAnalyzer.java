@@ -2,7 +2,6 @@ package org.eobjects.analyzer.beans.stringpattern;
 
 import java.io.Serializable;
 import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +14,7 @@ import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -23,6 +23,7 @@ import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.ListResult;
+import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @AnalyzerBean("Pattern finder")
@@ -32,6 +33,9 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 	private Map<TokenPattern, List<String>> patterns;
 	private TokenizerConfiguration configuration;
 	private Tokenizer tokenizer;
+	
+	@Provided
+	CollectionFactory _collectionFactory;
 
 	@Configured
 	InputColumn<String> column;
@@ -152,7 +156,8 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 				} catch (RuntimeException e) {
 					throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
 				}
-				List<String> matchingValues = new ArrayList<String>(distinctCount);
+				
+				List<String> matchingValues = _collectionFactory.createList(String.class);
 				for (int i = 0; i < distinctCount; i++) {
 					matchingValues.add(value);
 				}
@@ -202,6 +207,10 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 	}
 
 	// setter methods for unittesting purposes
+	
+	public void setCollectionFactory(CollectionFactory collectionFactory) {
+		_collectionFactory = collectionFactory;
+	}
 
 	public void setColumn(InputColumn<String> column) {
 		this.column = column;

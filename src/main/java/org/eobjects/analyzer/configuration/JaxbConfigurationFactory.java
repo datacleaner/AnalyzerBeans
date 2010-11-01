@@ -50,8 +50,6 @@ import org.eobjects.analyzer.job.JaxbJobFactory;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
-import org.eobjects.analyzer.lifecycle.HsqldbCollectionProvider;
 import org.eobjects.analyzer.reference.DatastoreDictionary;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
@@ -60,6 +58,8 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.reference.TextBasedDictionary;
 import org.eobjects.analyzer.reference.TextBasedSynonymCatalog;
+import org.eobjects.analyzer.storage.StorageProvider;
+import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -139,9 +139,9 @@ public final class JaxbConfigurationFactory {
 				datastoreCatalog);
 
 		// TODO: Make this components configurable as well
-		CollectionProvider collectionProvider = new HsqldbCollectionProvider();
+		StorageProvider storageProvider = new HsqldbStorageProvider();
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
-				collectionProvider);
+				storageProvider);
 	}
 
 	private ReferenceDataCatalog createReferenceDataCatalog(ReferenceDataCatalogType referenceDataCatalog,

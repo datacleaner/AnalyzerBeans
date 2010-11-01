@@ -31,10 +31,11 @@ import javax.inject.Qualifier;
  * <li>List</li>
  * <li>Set</li>
  * <li>Map</li>
- * <li>SchemaNavigator</li>
- * <li>DataContext</li>
+ * <li>org.eobjects.analyzer.storage.CollectionFactory</li>
+ * <li>org.eobjecta.analyzer.util.SchemaNavigator</li>
+ * <li>dk.eobjects.metamodel.DataContext</li>
  * </ul>
- * Generic/parameterized types for the List or Map can be any of:
+ * Generic/parameterized types for the List, Set or Map can be any of:
  * <ul>
  * <li>Boolean</li>
  * <li>Byte</li>

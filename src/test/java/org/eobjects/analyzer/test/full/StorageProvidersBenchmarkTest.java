@@ -9,9 +9,9 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.lifecycle.BerkeleyDbCollectionProvider;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
-import org.eobjects.analyzer.lifecycle.HsqldbCollectionProvider;
+import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
+import org.eobjects.analyzer.storage.StorageProvider;
+import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.junit.Ignore;
 
 /**
@@ -23,16 +23,16 @@ import org.junit.Ignore;
  * 
  */
 @Ignore
-public class CollectionProvidersBenchmarkTest extends TestCase {
+public class StorageProvidersBenchmarkTest extends TestCase {
 
-	private Map<String, CollectionProvider> _collectionProviders;
+	private Map<String, StorageProvider> _storageProviders;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		_collectionProviders = new HashMap<String, CollectionProvider>();
-		_collectionProviders.put("hsqldb", new HsqldbCollectionProvider());
-		_collectionProviders.put("berkeley db", new BerkeleyDbCollectionProvider());
+		_storageProviders = new HashMap<String, StorageProvider>();
+		_storageProviders.put("hsqldb", new HsqldbStorageProvider());
+		_storageProviders.put("berkeley db", new BerkeleyDbStorageProvider());
 	}
 
 	public void test1bigBatch() throws Exception {
@@ -47,13 +47,13 @@ public class CollectionProvidersBenchmarkTest extends TestCase {
 		System.out.println(getName() + " beginning.");
 		System.out.println("(" + numCollections + " collections with " + numElems + " elements in them)");
 
-		for (String cpName : _collectionProviders.keySet()) {
+		for (String cpName : _storageProviders.keySet()) {
 			System.out.println(cpName + " results:");
 
 			List<Collection<?>> collections = new ArrayList<Collection<?>>(numCollections);
 
 			long timeBefore = System.currentTimeMillis();
-			CollectionProvider cp = _collectionProviders.get(cpName);
+			StorageProvider cp = _storageProviders.get(cpName);
 			for (int i = 0; i < numCollections; i++) {
 				Set<Integer> set = cp.createSet(Integer.class);
 				for (int j = 0; j < numElems; j++) {
@@ -74,13 +74,12 @@ public class CollectionProvidersBenchmarkTest extends TestCase {
 			long timeAfterIterate = System.currentTimeMillis();
 			System.out.println("- time to iterate through collection: " + (timeAfterIterate - timeAfterAdd));
 
-			for (Object col : collections) {
-				cp.cleanUp(col);
-			}
+			collections.clear();
+			System.gc();
+			System.runFinalization();
+			// TODO:check that the collections have actually been cleaned up
 
 			long timeAfterCleanup = System.currentTimeMillis();
-			System.out.println("- time to clean up: " + (timeAfterCleanup - timeAfterIterate));
-
 			System.out.println("- TOTAL time: " + (timeAfterCleanup - timeBefore));
 		}
 		System.out.println(getName() + " finished.");

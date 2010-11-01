@@ -29,11 +29,11 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.ValidationResult;
 import org.eobjects.analyzer.result.ValueDistributionResult;
+import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.DataContext;
@@ -47,12 +47,12 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 	public void testScenario() throws Exception {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
-		CollectionProvider collectionProvider = TestHelper.createCollectionProvider();
+		StorageProvider storageProvider = TestHelper.createStorageProvider();
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				referenceDataCatalog, descriptorProvider, taskRunner, collectionProvider);
+				referenceDataCatalog, descriptorProvider, taskRunner, storageProvider);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 

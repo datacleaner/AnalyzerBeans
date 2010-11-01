@@ -2,6 +2,7 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
 
+import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
@@ -36,5 +37,10 @@ public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescri
 	@Override
 	public boolean isDataContext() {
 		return getBaseType() == DataContext.class;
+	}
+
+	@Override
+	public boolean isCollectionFactory() {
+		return getBaseType() == CollectionFactory.class;
 	}
 }

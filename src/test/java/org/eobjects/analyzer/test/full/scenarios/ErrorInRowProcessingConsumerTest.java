@@ -71,7 +71,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
 		DescriptorProvider descriptorProvider = new LazyDescriptorProvider();
 		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl(new DatastoreCatalogImpl(datastore),
-				new ReferenceDataCatalogImpl(), descriptorProvider, taskRunner, TestHelper.createCollectionProvider());
+				new ReferenceDataCatalogImpl(), descriptorProvider, taskRunner, TestHelper.createStorageProvider());
 
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(datastore);

@@ -1,4 +1,4 @@
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.storage;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptorImpl;
+import org.eobjects.analyzer.lifecycle.ProvidedList;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,12 @@ import com.sleepycat.je.EnvironmentConfig;
 
 import dk.eobjects.metamodel.util.FileHelper;
 
-public final class BerkeleyDbCollectionProvider implements CollectionProvider {
+/**
+ * Berkeley DB based implementation of the StorageProvider interface.
+ * 
+ * @author Kasper Sørensen
+ */
+public final class BerkeleyDbStorageProvider implements StorageProvider {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	private Environment environment;

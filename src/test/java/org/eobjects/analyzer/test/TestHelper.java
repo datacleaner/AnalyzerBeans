@@ -15,8 +15,6 @@ import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
-import org.eobjects.analyzer.lifecycle.HsqldbCollectionProvider;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
@@ -24,6 +22,8 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleSynonym;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.eobjects.analyzer.storage.StorageProvider;
+import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.junit.Ignore;
 
 @Ignore
@@ -39,23 +39,23 @@ public final class TestHelper {
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration() {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		CollectionProvider collectionProvider = createCollectionProvider();
+		StorageProvider storageProvider = createStorageProvider();
 		return new AnalyzerBeansConfigurationImpl(createDatastoreCatalog(), createReferenceDataCatalog(),
-				descriptorProvider, taskRunner, collectionProvider);
+				descriptorProvider, taskRunner, storageProvider);
 	}
 
-	public static CollectionProvider createCollectionProvider() {
-		return new HsqldbCollectionProvider();
+	public static StorageProvider createStorageProvider() {
+		return new HsqldbStorageProvider();
 	}
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(TaskRunner taskRunner, Datastore datastore) {
-		CollectionProvider collectionProvider = createCollectionProvider();
+		StorageProvider storageProvider = createStorageProvider();
 
 		List<Datastore> datastores = new LinkedList<Datastore>();
 		datastores.add(datastore);
 
 		return new AnalyzerBeansConfigurationImpl(new DatastoreCatalogImpl(datastores), createReferenceDataCatalog(),
-				descriptorProvider, taskRunner, collectionProvider);
+				descriptorProvider, taskRunner, storageProvider);
 	}
 
 	public static ReferenceDataCatalog createReferenceDataCatalog() {

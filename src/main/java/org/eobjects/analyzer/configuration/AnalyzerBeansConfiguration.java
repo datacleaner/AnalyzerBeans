@@ -5,8 +5,8 @@ import java.io.Serializable;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.storage.StorageProvider;
 
 /**
  * Represents the configuration of the AnalyzerBeans application. The
@@ -23,7 +23,7 @@ public interface AnalyzerBeansConfiguration extends Serializable {
 
 	public DescriptorProvider getDescriptorProvider();
 
-	public CollectionProvider getCollectionProvider();
+	public StorageProvider getStorageProvider();
 
 	public TaskRunner getTaskRunner();
 }

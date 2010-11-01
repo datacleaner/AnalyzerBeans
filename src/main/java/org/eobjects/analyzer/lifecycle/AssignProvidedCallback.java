@@ -8,18 +8,17 @@ import java.util.Set;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
+import org.eobjects.analyzer.storage.CollectionFactoryImpl;
+import org.eobjects.analyzer.storage.StorageProvider;
 
 public final class AssignProvidedCallback implements LifeCycleCallback {
 
-	private final CollectionProvider collectionProvider;
-	private final DataContextProvider dataContextProvider;
-	private final AbstractBeanInstance<?> beanInstance;
+	private final StorageProvider _storageProvider;
+	private final DataContextProvider _dataContextProvider;
 
-	public AssignProvidedCallback(AbstractBeanInstance<?> beanInstance, CollectionProvider collectionProvider,
-			DataContextProvider dataContextProvider) {
-		this.beanInstance = beanInstance;
-		this.collectionProvider = collectionProvider;
-		this.dataContextProvider = dataContextProvider;
+	public AssignProvidedCallback(StorageProvider storageProvider, DataContextProvider dataContextProvider) {
+		_storageProvider = storageProvider;
+		_dataContextProvider = dataContextProvider;
 	}
 
 	@Override
@@ -29,32 +28,30 @@ public final class AssignProvidedCallback implements LifeCycleCallback {
 		List<Object> providedCollections = new LinkedList<Object>();
 		Set<ProvidedPropertyDescriptor> providedDescriptors = descriptor.getProvidedProperties();
 		for (ProvidedPropertyDescriptor providedDescriptor : providedDescriptors) {
-			Class<?> clazz1 = (Class<?>) providedDescriptor.getTypeArgument(0);
-			if (providedDescriptor.isList()) {
-				List<?> list = collectionProvider.createList(clazz1);
-				providedDescriptor.setValue(analyzerBean, list);
-				providedCollections.add(list);
-			} else if (providedDescriptor.isSet()) {
-				Set<?> set = collectionProvider.createSet(clazz1);
-				providedDescriptor.setValue(analyzerBean, set);
-				providedCollections.add(set);
-			} else if (providedDescriptor.isMap()) {
-				Class<?> clazz2 = (Class<?>) providedDescriptor.getTypeArgument(1);
-				Map<?, ?> map = collectionProvider.createMap(clazz1, clazz2);
-				providedDescriptor.setValue(analyzerBean, map);
-				providedCollections.add(map);
+			if (providedDescriptor.isCollectionFactory()) {
+				CollectionFactoryImpl factory = new CollectionFactoryImpl(_storageProvider);
+				providedDescriptor.setValue(analyzerBean, factory);
 			} else if (providedDescriptor.isDataContext()) {
-				providedDescriptor.setValue(analyzerBean, dataContextProvider.getDataContext());
+				providedDescriptor.setValue(analyzerBean, _dataContextProvider.getDataContext());
 			} else if (providedDescriptor.isSchemaNavigator()) {
-				providedDescriptor.setValue(analyzerBean, dataContextProvider.getSchemaNavigator());
+				providedDescriptor.setValue(analyzerBean, _dataContextProvider.getSchemaNavigator());
+			} else {
+				Class<?> clazz1 = (Class<?>) providedDescriptor.getTypeArgument(0);
+				if (providedDescriptor.isList()) {
+					List<?> list = _storageProvider.createList(clazz1);
+					providedDescriptor.setValue(analyzerBean, list);
+					providedCollections.add(list);
+				} else if (providedDescriptor.isSet()) {
+					Set<?> set = _storageProvider.createSet(clazz1);
+					providedDescriptor.setValue(analyzerBean, set);
+					providedCollections.add(set);
+				} else if (providedDescriptor.isMap()) {
+					Class<?> clazz2 = (Class<?>) providedDescriptor.getTypeArgument(1);
+					Map<?, ?> map = _storageProvider.createMap(clazz1, clazz2);
+					providedDescriptor.setValue(analyzerBean, map);
+					providedCollections.add(map);
+				}
 			}
 		}
-
-		if (!providedCollections.isEmpty()) {
-			// Add a callback for cleaning up the provided collections
-			beanInstance.getCloseCallbacks().add(
-					new ProvidedCollectionCloseCallback(collectionProvider, providedCollections));
-		}
 	}
-
 }

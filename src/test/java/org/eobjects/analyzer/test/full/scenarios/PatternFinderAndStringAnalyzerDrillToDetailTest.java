@@ -19,7 +19,6 @@ import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
@@ -29,6 +28,7 @@ import org.eobjects.analyzer.result.ListResult;
 import org.eobjects.analyzer.result.QueryResultProducer;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
+import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.CollectionUtils;
 
@@ -41,17 +41,17 @@ import dk.eobjects.metamodel.schema.Table;
 
 public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTestCase {
 
-	public void testScenario() throws Exception {
+	public void testScenario() throws Throwable {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
-		CollectionProvider collectionProvider = TestHelper.createCollectionProvider();
+		StorageProvider storageProvider = TestHelper.createStorageProvider();
 		TaskRunner taskRunner = new MultiThreadedTaskRunner(30);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
 
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				referenceDataCatalog, descriptorProvider, taskRunner, collectionProvider);
+				referenceDataCatalog, descriptorProvider, taskRunner, storageProvider);
 
 		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
 
@@ -82,7 +82,9 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 				emailStd1.getOutputColumnByName("Domain"));
 
 		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(ajb.toAnalysisJob());
-		assertTrue(resultFuture.isSuccessful());
+		if(!resultFuture.isSuccessful()) {
+			throw resultFuture.getErrors().iterator().next();
+		}
 
 		CrosstabResult result;
 

@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
+
 import junit.framework.TestCase;
 
 public class BerkeleyDbCollectionProviderTest extends TestCase {
 
-	BerkeleyDbCollectionProvider handler = new BerkeleyDbCollectionProvider();
+	BerkeleyDbStorageProvider handler = new BerkeleyDbStorageProvider();
 
 	public void testCreateMap() throws Exception {
 		Map<String, Long> map = handler.createMap(String.class, Long.class);

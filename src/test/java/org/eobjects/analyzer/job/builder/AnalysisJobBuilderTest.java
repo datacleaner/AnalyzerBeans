@@ -26,9 +26,9 @@ import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.lifecycle.CollectionProvider;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
+import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.MetaModelTestCase;
@@ -54,9 +54,9 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		CollectionProvider collectionProvider = TestHelper.createCollectionProvider();
+		StorageProvider storageProvider = TestHelper.createStorageProvider();
 		configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider,
-				taskRunner, collectionProvider);
+				taskRunner, storageProvider);
 
 		analysisJobBuilder = new AnalysisJobBuilder(configuration);
 		analysisJobBuilder.setDatastore("my db");
