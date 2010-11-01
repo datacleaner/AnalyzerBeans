@@ -42,6 +42,8 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		}
 	}
 
+	// this is the main "addInputColumn" method that the other similar methods
+	// delegate to
 	public B addInputColumn(InputColumn<?> inputColumn, ConfiguredPropertyDescriptor propertyDescriptor) {
 		DataTypeFamily expectedDataTypeFamily = propertyDescriptor.getInputColumnDataTypeFamily();
 		if (expectedDataTypeFamily != DataTypeFamily.UNDEFINED) {
