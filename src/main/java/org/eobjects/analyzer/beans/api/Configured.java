@@ -30,6 +30,7 @@ import javax.inject.Qualifier;
  * <li>String</li>
  * <li>java.io.File</li>
  * <li>enum types</li>
+ * <li>java.util.regex.Pattern</li>
  * <li>org.eobjects.analyzer.data.InputColumn</li>
  * <li>org.eobjects.analyzer.reference.Dictionary</li>
  * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>

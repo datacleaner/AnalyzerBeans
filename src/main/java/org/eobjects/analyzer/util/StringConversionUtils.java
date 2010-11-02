@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
@@ -24,7 +26,7 @@ import dk.eobjects.metamodel.schema.Table;
  * Helper class for converting objects to and from string representations as
  * used for example in serialized XML jobs.
  * 
- * The string converter corrently supports instances and arrays of:
+ * The string converter currently supports instances and arrays of:
  * <ul>
  * <li>Boolean</li>
  * <li>Byte</li>
@@ -39,6 +41,7 @@ import dk.eobjects.metamodel.schema.Table;
  * <li>java.util.Date</li>
  * <li>java.sql.Date</li>
  * <li>java.util.Calendar</li>
+ * <li>java.util.regex.Pattern</li>
  * <li>org.eobjects.analyzer.reference.Dictionary</li>
  * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
  * <li>dk.eobjects.metamodel.schema.Column</li>
@@ -120,6 +123,9 @@ public final class StringConversionUtils {
 		}
 		if (o instanceof Date) {
 			return new SimpleDateFormat(dateFormatString).format((Date) o);
+		}
+		if (o instanceof Pattern) {
+			return escape(o.toString());
 		}
 
 		logger.warn("Could not convert type: {}", o.getClass().getName());
@@ -224,6 +230,13 @@ public final class StringConversionUtils {
 			Calendar c = Calendar.getInstance();
 			c.setTime(date);
 			return (E) c;
+		}
+		if (ReflectionUtils.is(type, Pattern.class)) {
+			try {
+				return (E) Pattern.compile(str);
+			} catch (PatternSyntaxException e) {
+				throw new IllegalArgumentException("Invalid regular expression syntax in '" + str + "'.", e);
+			}
 		}
 		if (ReflectionUtils.is(type, java.sql.Date.class)) {
 			Date date = toDate(str);
