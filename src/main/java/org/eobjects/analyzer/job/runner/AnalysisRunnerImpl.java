@@ -13,13 +13,16 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.BeanJob;
+import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.MergeInput;
+import org.eobjects.analyzer.job.MergedOutcomeJob;
+import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.TransformerJob;
+import org.eobjects.analyzer.job.builder.SourceColumns;
 import org.eobjects.analyzer.job.concurrent.JobTaskListener;
 import org.eobjects.analyzer.job.concurrent.JobTaskListenerImpl;
 import org.eobjects.analyzer.job.concurrent.NestedTaskListener;
@@ -39,6 +42,7 @@ import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
+import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,9 +103,12 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		// declare all the "constants" of the job as final variables
 		final DataContextProvider dataContextProvider = job.getDataContextProvider();
 		final Collection<TransformerJob> transformerJobs = job.getTransformerJobs();
-		validateSingleTableInput(job, transformerJobs);
 		final Collection<FilterJob> filterJobs = job.getFilterJobs();
+		final Collection<MergedOutcomeJob> mergedOutcomeJobs = job.getMergedOutcomeJobs();
+
+		validateSingleTableInput(job, transformerJobs);
 		validateSingleTableInput(job, filterJobs);
+		validateSingleTableInputForMergedOutcomes(job, mergedOutcomeJobs);
 
 		final Collection<AnalyzerJob> analyzerJobs = job.getAnalyzerJobs();
 
@@ -152,6 +159,11 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 			registerRowProcessingPublishers(job, rowProcessingPublishers, filterJob, resultQueue, analysisListener,
 					taskRunner);
 		}
+
+		for (MergedOutcomeJob mergedOutcomeJob : mergedOutcomeJobs) {
+			registerRowProcessingPublishers(job, rowProcessingPublishers, mergedOutcomeJob);
+		}
+
 		for (TransformerJob transformerJob : transformerJobs) {
 			registerRowProcessingPublishers(job, rowProcessingPublishers, transformerJob, resultQueue, analysisListener,
 					taskRunner);
@@ -178,14 +190,34 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		return new AnalysisResultFutureImpl(resultQueue, finalTaskListener, errorListener);
 	}
 
+	private void validateSingleTableInputForMergedOutcomes(AnalysisJob job, Collection<MergedOutcomeJob> mergedOutcomeJobs) {
+		for (MergedOutcomeJob mergedOutcomeJob : mergedOutcomeJobs) {
+			Table originatingTable = null;
+			MergeInput[] input = mergedOutcomeJob.getMergeInputs();
+			for (MergeInput mergeInput : input) {
+				InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
+				for (InputColumn<?> inputColumn : inputColumns) {
+					if (originatingTable == null) {
+						originatingTable = findOriginatingTable(job, inputColumn);
+					} else {
+						if (!originatingTable.equals(findOriginatingTable(job, inputColumn))) {
+							throw new IllegalArgumentException("Input columns in " + mergeInput
+									+ " originate from different tables");
+						}
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Prevents that any row processing components have input from different
 	 * tables.
 	 * 
 	 * @param beanJobs
 	 */
-	private void validateSingleTableInput(AnalysisJob analysisJob, Collection<? extends BeanJob<?>> beanJobs) {
-		for (BeanJob<?> beanJob : beanJobs) {
+	private void validateSingleTableInput(AnalysisJob analysisJob, Collection<? extends ConfigurableBeanJob<?>> beanJobs) {
+		for (ConfigurableBeanJob<?> beanJob : beanJobs) {
 			InputColumn<?>[] input = beanJob.getInput();
 			Table originatingTable = null;
 			for (InputColumn<?> inputColumn : input) {
@@ -202,31 +234,40 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 	}
 
 	private Table findOriginatingTable(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
-		if (inputColumn.isPhysicalColumn()) {
-			return inputColumn.getPhysicalColumn().getTable();
-		}
-
-		Collection<TransformerJob> transformerJobs = analysisJob.getTransformerJobs();
-		for (TransformerJob transformerJob : transformerJobs) {
-			MutableInputColumn<?>[] output = transformerJob.getOutput();
-			for (MutableInputColumn<?> col : output) {
-				if (col.equals(inputColumn)) {
-					InputColumn<?>[] input = transformerJob.getInput();
-					assert input.length > 0;
-					return findOriginatingTable(analysisJob, input[0]);
-				}
-			}
-		}
-		throw new IllegalArgumentException("Could not determine originating table for " + inputColumn);
+		SourceColumnFinder finder = new SourceColumnFinder();
+		finder.addSources(analysisJob.getTransformerJobs());
+		finder.addSources(analysisJob.getMergedOutcomeJobs());
+		return finder.findOriginatingTable(inputColumn);
 	}
 
 	private void registerRowProcessingPublishers(AnalysisJob analysisJob,
-			Map<Table, RowProcessingPublisher> rowProcessingPublishers, BeanJob<?> beanJob,
+			Map<Table, RowProcessingPublisher> rowProcessingPublishers, MergedOutcomeJob mergedOutcomeJob) {
+
+		Collection<RowProcessingPublisher> publishers = rowProcessingPublishers.values();
+		for (RowProcessingPublisher rowProcessingPublisher : publishers) {
+			boolean prerequisiteOutcomesExist = true;
+			MergeInput[] mergeInputs = mergedOutcomeJob.getMergeInputs();
+			for (MergeInput mergeInput : mergeInputs) {
+				Outcome prerequisiteOutcome = mergeInput.getOutcome();
+				if (!rowProcessingPublisher.containsOutcome(prerequisiteOutcome)) {
+					prerequisiteOutcomesExist = false;
+					break;
+				}
+			}
+
+			if (prerequisiteOutcomesExist) {
+				rowProcessingPublisher.addMergedOutcomeJob(mergedOutcomeJob);
+			}
+		}
+	}
+
+	private void registerRowProcessingPublishers(AnalysisJob analysisJob,
+			Map<Table, RowProcessingPublisher> rowProcessingPublishers, ConfigurableBeanJob<?> beanJob,
 			Collection<AnalyzerJobResult> resultQueue, AnalysisListener listener, TaskRunner taskRunner) {
 		InputColumn<?>[] inputColumns = beanJob.getInput();
 		Set<Column> physicalColumns = new HashSet<Column>();
 		for (InputColumn<?> inputColumn : inputColumns) {
-			physicalColumns.addAll(getSourcePhysicalColumns(analysisJob, inputColumn));
+			physicalColumns.addAll(findSourcePhysicalColumns(analysisJob, inputColumn));
 		}
 
 		Column[] physicalColumnsArray = physicalColumns.toArray(new Column[physicalColumns.size()]);
@@ -272,7 +313,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		}
 		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
 		for (InputColumn<?> inputColumn : inputColumns) {
-			Set<Column> sourcePhysicalColumns = getSourcePhysicalColumns(analysisJob, inputColumn);
+			Set<Column> sourcePhysicalColumns = findSourcePhysicalColumns(analysisJob, inputColumn);
 			for (Column physicalColumn : sourcePhysicalColumns) {
 				if (table.equals(physicalColumn.getTable())) {
 					result.add(inputColumn);
@@ -285,31 +326,13 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 	// helper method for recursively finding all physical columns by traversing
 	// the transformers input and output
-	private Set<Column> getSourcePhysicalColumns(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
-		// TODO: Detect cyclic dependencies between
-		// transformers (A depends on B, B depends on A)
-		Set<Column> physicalColumns = new HashSet<Column>();
-		if (inputColumn.isPhysicalColumn()) {
-			physicalColumns.add(inputColumn.getPhysicalColumn());
-		} else {
-			Collection<TransformerJob> transformerJobs = analysisJob.getTransformerJobs();
-			boolean found = false;
-			for (TransformerJob transformerJob : transformerJobs) {
-				MutableInputColumn<?>[] output = transformerJob.getOutput();
-				for (MutableInputColumn<?> outputColumn : output) {
-					if (inputColumn.equals(outputColumn)) {
-						found = true;
-						InputColumn<?>[] input = transformerJob.getInput();
-						for (InputColumn<?> transformerInputColumn : input) {
-							physicalColumns.addAll(getSourcePhysicalColumns(analysisJob, transformerInputColumn));
-						}
-					}
-				}
-			}
-			if (!found) {
-				throw new IllegalStateException("Could not find source physical column for: " + inputColumn);
-			}
-		}
-		return physicalColumns;
+	private Set<Column> findSourcePhysicalColumns(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
+		SourceColumnFinder finder = new SourceColumnFinder();
+		
+		finder.addSources(new SourceColumns(analysisJob.getSourceColumns()));
+		finder.addSources(analysisJob.getTransformerJobs());
+		finder.addSources(analysisJob.getMergedOutcomeJobs());
+		
+		return finder.findOriginatingColumns(inputColumn);
 	}
 }

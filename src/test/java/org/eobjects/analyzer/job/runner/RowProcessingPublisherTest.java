@@ -16,13 +16,17 @@ import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
 import org.eobjects.analyzer.beans.transform.WhitespaceTrimmerTransformer;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
+import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.BeanJob;
+import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
+import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
@@ -40,6 +44,54 @@ public class RowProcessingPublisherTest extends TestCase {
 		List<RowProcessingConsumer> consumerList = RowProcessingPublisher
 				.createProcessOrderedConsumerList(new ArrayList<RowProcessingConsumer>());
 		assertTrue(consumerList.isEmpty());
+	}
+
+	public void testCreateProcessOrderedConsumerListWithMergedOutcomes() throws Exception {
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
+		ajb.setDataContextProvider(new MockDataContextProvider());
+		Column physicalColumn = new MutableColumn("foo", ColumnType.VARCHAR);
+		ajb.addSourceColumn(physicalColumn);
+		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
+
+		// 1: add a not-null filter
+		FilterJobBuilder<NotNullFilter, ValidationCategory> fjb1 = ajb.addFilter(NotNullFilter.class);
+		fjb1.addInputColumn(inputColumn);
+
+		// 2: trim (depends on not-null)
+		TransformerJobBuilder<WhitespaceTrimmerTransformer> tjb1 = ajb.addTransformer(WhitespaceTrimmerTransformer.class);
+		tjb1.addInputColumn(inputColumn);
+		tjb1.setRequirement(fjb1, ValidationCategory.VALID);
+
+		// 3: merge either the null or the trimmed value
+		MergedOutcomeJobBuilder mojb = ajb.addMergedOutcomeJobBuilder();
+		mojb.addMergedOutcome(fjb1, ValidationCategory.VALID).addInputColumn(tjb1.getOutputColumns().get(0));
+		mojb.addMergedOutcome(fjb1, ValidationCategory.INVALID).addInputColumn(inputColumn);
+		MutableInputColumn<?> mergedColumn1 = mojb.getOutputColumns().get(0);
+
+		// 4: add a single word filter (depends on merged output)
+		FilterJobBuilder<SingleWordFilter, ValidationCategory> fjb2 = ajb.addFilter(SingleWordFilter.class);
+		fjb2.addInputColumn(mergedColumn1);
+
+		// 5: add an analyzer
+		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(mergedColumn1)
+				.setRequirement(fjb2, ValidationCategory.VALID);
+
+		assertTrue(ajb.isConfigured());
+
+		List<RowProcessingConsumer> consumers = getConsumers(ajb.toAnalysisJob());
+
+		consumers = RowProcessingPublisher.createProcessOrderedConsumerList(consumers);
+
+		assertEquals(5, consumers.size());
+
+		assertEquals("ImmutableFilterJob[filter=Not null]", consumers.get(0).getComponentJob().toString());
+		assertEquals("ImmutableTransformerJob[transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
+				.toString());
+		assertEquals(
+				"ImmutableMergedOutcomeJob[mergeInputs=[ImmutableMergeInput[FilterOutcome[category=VALID]], ImmutableMergeInput[FilterOutcome[category=INVALID]]]]",
+				consumers.get(2).getComponentJob().toString());
+		assertEquals("ImmutableFilterJob[filter=Single word]", consumers.get(3).getComponentJob().toString());
+		assertEquals("ImmutableAnalyzerJob[analyzer=String analyzer]", consumers.get(4).getComponentJob().toString());
 	}
 
 	public void testCreateProcessOrderedConsumerListWithFilterDependencies() throws Exception {
@@ -82,10 +134,12 @@ public class RowProcessingPublisherTest extends TestCase {
 
 		consumers = RowProcessingPublisher.createProcessOrderedConsumerList(consumers);
 
-		assertEquals("ImmutableFilterJob[filter=Not null]", consumers.get(0).getBeanJob().toString());
-		assertEquals("ImmutableTransformerJob[transformer=Whitespace trimmer]", consumers.get(1).getBeanJob().toString());
-		assertEquals("ImmutableTransformerJob[transformer=Whitespace trimmer]", consumers.get(2).getBeanJob().toString());
-		assertEquals("ImmutableFilterJob[filter=Single word]", consumers.get(3).getBeanJob().toString());
+		assertEquals("ImmutableFilterJob[filter=Not null]", consumers.get(0).getComponentJob().toString());
+		assertEquals("ImmutableTransformerJob[transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
+				.toString());
+		assertEquals("ImmutableTransformerJob[transformer=Whitespace trimmer]", consumers.get(2).getComponentJob()
+				.toString());
+		assertEquals("ImmutableFilterJob[filter=Single word]", consumers.get(3).getComponentJob().toString());
 	}
 
 	private List<RowProcessingConsumer> getConsumers(AnalysisJob analysisJob) {
@@ -106,6 +160,10 @@ public class RowProcessingPublisherTest extends TestCase {
 		for (FilterJob filterJob : analysisJob.getFilterJobs()) {
 			FilterConsumer consumer = new FilterConsumer(analysisJob, new FilterBeanInstance(filterJob.getDescriptor()),
 					filterJob, filterJob.getInput(), listener);
+			consumers.add(consumer);
+		}
+		for (MergedOutcomeJob mergedOutcomeJob : analysisJob.getMergedOutcomeJobs()) {
+			MergedOutcomeConsumer consumer = new MergedOutcomeConsumer(mergedOutcomeJob);
 			consumers.add(consumer);
 		}
 
@@ -146,7 +204,7 @@ public class RowProcessingPublisherTest extends TestCase {
 		List<AnalyzerJob> analyzerJobs = new ArrayList<AnalyzerJob>(analysisJob.getAnalyzerJobs());
 
 		// create a list that represents the expected dependent sequence
-		Queue<BeanJob<?>> jobDependencies = new LinkedList<BeanJob<?>>();
+		Queue<ConfigurableBeanJob<?>> jobDependencies = new LinkedList<ConfigurableBeanJob<?>>();
 		jobDependencies.add(transformerJobs.get(0));
 		jobDependencies.add(transformerJobs.get(1));
 		jobDependencies.add(transformerJobs.get(2));
@@ -155,9 +213,9 @@ public class RowProcessingPublisherTest extends TestCase {
 		int jobDependenciesFound = 0;
 		boolean analyzerJob1found = false;
 
-		BeanJob<?> nextJobDependency = jobDependencies.poll();
+		ConfigurableBeanJob<?> nextJobDependency = jobDependencies.poll();
 		for (RowProcessingConsumer rowProcessingConsumer : consumers) {
-			BeanJob<?> job = rowProcessingConsumer.getBeanJob();
+			ComponentJob job = rowProcessingConsumer.getComponentJob();
 			if (job == nextJobDependency) {
 				nextJobDependency = jobDependencies.poll();
 				jobDependenciesFound++;

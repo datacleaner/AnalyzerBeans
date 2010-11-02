@@ -19,10 +19,10 @@ public final class ImmutableTransformerJob implements TransformerJob {
 	private final TransformerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
 	private final List<MutableInputColumn<?>> _output;
-	private final FilterOutcome _requirement;
+	private final Outcome _requirement;
 
 	public ImmutableTransformerJob(TransformerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
-			Collection<MutableInputColumn<?>> output, FilterOutcome requirement) {
+			Collection<MutableInputColumn<?>> output, Outcome requirement) {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
 		_output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
@@ -59,7 +59,7 @@ public final class ImmutableTransformerJob implements TransformerJob {
 	}
 
 	@Override
-	public FilterOutcome getRequirement() {
+	public Outcome getRequirement() {
 		return _requirement;
 	}
 

@@ -4,13 +4,12 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.BeanJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 
-final class FilterConsumer implements RowProcessingConsumer {
+final class FilterConsumer extends ConfigurableBeanJobRowProcessingConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final FilterBeanInstance _filterBeanInstance;
@@ -20,6 +19,7 @@ final class FilterConsumer implements RowProcessingConsumer {
 
 	public FilterConsumer(AnalysisJob job, FilterBeanInstance filterBeanInstance, FilterJob filterJob,
 			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
+		super(filterJob);
 		_filterBeanInstance = filterBeanInstance;
 		_filterJob = filterJob;
 		_inputColumns = inputColumns;
@@ -33,7 +33,7 @@ final class FilterConsumer implements RowProcessingConsumer {
 	}
 
 	@Override
-	public InputRow consume(InputRow row, int distinctCount, FilterOutcomeSink outcomes) {
+	public InputRow consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
 		Filter<?> filter = _filterBeanInstance.getBean();
 		try {
 			Enum<?> category = filter.categorize(row);
@@ -51,13 +51,8 @@ final class FilterConsumer implements RowProcessingConsumer {
 	}
 
 	@Override
-	public BeanJob<?> getBeanJob() {
+	public FilterJob getComponentJob() {
 		return _filterJob;
-	}
-
-	@Override
-	public FilterOutcome getRequiredOutcome() {
-		return _filterJob.getRequirement();
 	}
 
 	@Override

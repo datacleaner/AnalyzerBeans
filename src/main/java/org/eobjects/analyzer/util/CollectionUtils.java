@@ -9,7 +9,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eobjects.analyzer.reference.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class CollectionUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(CollectionUtils.class);
 
 	private CollectionUtils() {
 		// prevent instantiation
@@ -133,13 +139,28 @@ public final class CollectionUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <E> List<E> filterOnClass(List<?> datastoreTypes, Class<E> clazz) {
+	public static <E> List<E> filterOnClass(List<?> superTypeList, Class<E> subType) {
 		List<E> result = new ArrayList<E>();
-		for (Object object : datastoreTypes) {
+		for (Object object : superTypeList) {
 			if (object != null) {
-				if (ReflectionUtils.is(object.getClass(), clazz)) {
+				if (ReflectionUtils.is(object.getClass(), subType)) {
 					result.add((E) object);
 				}
+			}
+		}
+		return result;
+	}
+
+	public static <E> List<E> filter(List<E> list, Function<E, Boolean> predicate) {
+		List<E> result = new ArrayList<E>();
+		for (E obj : list) {
+			try {
+				if (predicate.run(obj)) {
+					result.add(obj);
+				}
+			} catch (Exception e) {
+				logger.warn("Exception thrown while executing predicate", e);
+				throw new IllegalArgumentException(e);
 			}
 		}
 		return result;

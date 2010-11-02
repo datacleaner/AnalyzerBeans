@@ -32,6 +32,8 @@ import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.ExploringAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
+import org.eobjects.analyzer.job.builder.MergeInputBuilder;
+import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.AnalysisType;
@@ -45,6 +47,8 @@ import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
+import org.eobjects.analyzer.job.jaxb.MergedOutcomeType;
+import org.eobjects.analyzer.job.jaxb.MergedOutcomeType.Outcome.Input;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
@@ -152,11 +156,12 @@ public class JaxbJobFactory {
 			}
 		}
 
-		Map<String, FilterOutcome> outcomeMapping = new HashMap<String, FilterOutcome>();
+		Map<String, Outcome> outcomeMapping = new HashMap<String, Outcome>();
 
 		TransformationType transformation = job.getTransformation();
 		if (transformation != null) {
-			List<Object> transformersAndFilters = transformation.getTransformerOrFilter();
+
+			List<Object> transformersAndFilters = transformation.getTransformerOrFilterOrMergedOutcome();
 
 			Map<TransformerType, TransformerJobBuilder<?>> transformerJobBuilders = new HashMap<TransformerType, TransformerJobBuilder<?>>();
 			Map<FilterType, FilterJobBuilder<?, ?>> filterJobBuilders = new HashMap<FilterType, FilterJobBuilder<?, ?>>();
@@ -270,12 +275,13 @@ public class JaxbJobFactory {
 				}
 			}
 
-			// iterate again to initialize all filters and collect all filter
-			// outcomes
+			// iterate again to initialize all Filters and collect all outcomes
 			for (Object o : transformersAndFilters) {
 				if (o instanceof FilterType) {
 					FilterType filter = (FilterType) o;
+
 					ref = filter.getDescriptor().getRef();
+
 					if (StringUtils.isNullOrEmpty(ref)) {
 						throw new IllegalStateException("Filter descriptor ref cannot be null");
 					}
@@ -320,7 +326,86 @@ public class JaxbJobFactory {
 							throw new IllegalStateException("No such outcome category name: " + categoryName + " (in "
 									+ filterJobBuilder.getDescriptor().getDisplayName());
 						}
-						outcomeMapping.put(outcomeType.getId(), new LazyFilterOutcome(filterJobBuilder, category));
+
+						String id = outcomeType.getId();
+						if (StringUtils.isNullOrEmpty(id)) {
+							throw new IllegalStateException("Outcome id cannot be null");
+						}
+						if (outcomeMapping.containsKey(id)) {
+							throw new IllegalStateException("Outcome id '" + id + "' is not unique");
+						}
+						outcomeMapping.put(id, new LazyFilterOutcome(filterJobBuilder, category));
+					}
+				}
+
+				if (o instanceof MergedOutcomeType) {
+					MergedOutcomeType mergedOutcomeType = (MergedOutcomeType) o;
+					String id = mergedOutcomeType.getId();
+					if (StringUtils.isNullOrEmpty(id)) {
+						throw new IllegalStateException("Outcome id cannot be null");
+					}
+					if (outcomeMapping.containsKey(id)) {
+						throw new IllegalStateException("Outcome id '" + id + "' is not unique");
+					}
+
+					MergedOutcomeJobBuilder mojb = analysisJobBuilder.addMergedOutcomeJobBuilder();
+					outcomeMapping.put(id, new LazyMergedOutcome(mojb));
+				}
+			}
+
+			// iterate again to initialize all MergedOutcomes and collect all
+			// outcomes
+			for (Object o : transformersAndFilters) {
+				if (o instanceof MergedOutcomeType) {
+					MergedOutcomeType mergedOutcomeType = (MergedOutcomeType) o;
+					String id = mergedOutcomeType.getId();
+
+					// we added this element during the previous iteration
+					LazyMergedOutcome outcome = (LazyMergedOutcome) outcomeMapping.get(id);
+					MergedOutcomeJobBuilder builder = outcome.getBuilder();
+
+					// map the input requirements and columns
+					List<MergedOutcomeType.Outcome> mergedOutcomes = ((MergedOutcomeType) o).getOutcome();
+					for (MergedOutcomeType.Outcome mergedOutcome : mergedOutcomes) {
+						ref = mergedOutcome.getRef();
+						if (StringUtils.isNullOrEmpty(ref)) {
+							throw new IllegalStateException("Merged outcome ref cannot be null");
+						}
+						Outcome outcomeToMerge = outcomeMapping.get(ref);
+						MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(outcomeToMerge);
+
+						List<Input> inputs = mergedOutcome.getInput();
+						for (Input input : inputs) {
+							ref = input.getRef();
+							if (StringUtils.isNullOrEmpty(ref)) {
+								throw new IllegalStateException("Merged outcome input ref cannot be null");
+							}
+							InputColumn<?> inputColumn = inputColumns.get(ref);
+							if (inputColumn == null) {
+								throw new IllegalStateException("No such input column: " + ref);
+							}
+							mergedOutcomeBuilder.addInputColumn(inputColumn);
+						}
+					}
+
+					// map the output columns
+					List<MutableInputColumn<?>> outputColumns = builder.getOutputColumns();
+
+					List<OutputType> output = ((MergedOutcomeType) o).getOutput();
+
+					assert output.size() == outputColumns.size();
+
+					for (int i = 0; i < output.size(); i++) {
+						OutputType outputType = output.get(i);
+						MutableInputColumn<?> outputColumn = outputColumns.get(i);
+						id = outputType.getId();
+						String name = outputType.getName();
+
+						if (!StringUtils.isNullOrEmpty(name)) {
+							outputColumn.setName(name);
+						}
+
+						registerInputColumn(inputColumns, id, outputColumn);
 					}
 				}
 			}
@@ -331,7 +416,7 @@ public class JaxbJobFactory {
 					ref = ((TransformerType) o).getRequires();
 					if (ref != null) {
 						TransformerJobBuilder<?> builder = transformerJobBuilders.get(o);
-						FilterOutcome requirement = outcomeMapping.get(ref);
+						Outcome requirement = outcomeMapping.get(ref);
 						if (requirement == null) {
 							throw new IllegalStateException("No such outcome id: " + ref);
 						}
@@ -341,7 +426,7 @@ public class JaxbJobFactory {
 					ref = ((FilterType) o).getRequires();
 					if (ref != null) {
 						FilterJobBuilder<?, ?> builder = filterJobBuilders.get(o);
-						FilterOutcome requirement = outcomeMapping.get(ref);
+						Outcome requirement = outcomeMapping.get(ref);
 						if (requirement == null) {
 							throw new IllegalStateException("No such outcome id: " + ref);
 						}
@@ -403,7 +488,7 @@ public class JaxbJobFactory {
 
 				ref = analyzerType.getRequires();
 				if (ref != null) {
-					FilterOutcome requirement = outcomeMapping.get(ref);
+					Outcome requirement = outcomeMapping.get(ref);
 					if (requirement == null) {
 						throw new IllegalStateException("No such outcome id: " + ref);
 					}
@@ -431,6 +516,9 @@ public class JaxbJobFactory {
 	}
 
 	private void registerInputColumn(Map<String, InputColumn<?>> inputColumns, String id, InputColumn<?> inputColumn) {
+		if (StringUtils.isNullOrEmpty(id)) {
+			throw new IllegalStateException("Column id cannot be null");
+		}
 		if (inputColumns.containsKey(id)) {
 			throw new IllegalStateException("Column id is not unique: " + id);
 		}

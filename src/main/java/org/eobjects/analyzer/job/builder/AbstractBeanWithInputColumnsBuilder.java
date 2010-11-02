@@ -12,13 +12,13 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
-import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @SuppressWarnings("unchecked")
 public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends AbstractBeanJobBuilder<D, E, B> {
 
-	private FilterOutcome _requirement;
+	private Outcome _requirement;
 
 	public AbstractBeanWithInputColumnsBuilder(D descriptor, Class<?> builderClass) {
 		super(descriptor, builderClass);
@@ -129,7 +129,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		return Collections.unmodifiableList(result);
 	}
 
-	public FilterOutcome getRequirement() {
+	public Outcome getRequirement() {
 		return _requirement;
 	}
 
@@ -141,7 +141,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		setRequirement(new LazyFilterOutcome(filterJobBuilder, category));
 	}
 
-	public void setRequirement(FilterOutcome requirement) {
+	public void setRequirement(Outcome requirement) {
 		_requirement = requirement;
 	}
 

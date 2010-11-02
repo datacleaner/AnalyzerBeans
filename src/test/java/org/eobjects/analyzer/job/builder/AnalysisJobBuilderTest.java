@@ -113,7 +113,9 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertTrue(analysisJobBuilder.isConfigured());
 
 		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
-		assertEquals("ImmutableAnalysisJob[sourceColumns=3,filterJobs=0,transformerJobs=1,analyzerJobs=1]",
+
+		assertEquals(
+				"ImmutableAnalysisJob[sourceColumns=3,filterJobs=0,transformerJobs=1,analyzerJobs=1,mergedOutcomeJobs=0]",
 				analysisJob.toString());
 
 		// test hashcode and equals

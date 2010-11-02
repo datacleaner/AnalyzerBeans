@@ -4,15 +4,17 @@ import org.eobjects.analyzer.job.AbstractFilterOutcome;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
+import org.eobjects.analyzer.job.Outcome;
 
 public final class LazyFilterOutcome extends AbstractFilterOutcome implements FilterOutcome {
 
 	private FilterJobBuilder<?, ?> _filterJobBuilder;
 	private Enum<?> _category;
 
-	public static FilterOutcome load(FilterOutcome outcome) {
+	public static Outcome load(Outcome outcome) {
 		if (outcome instanceof LazyFilterOutcome) {
-			return new ImmutableFilterOutcome(outcome.getFilterJob(), outcome.getCategory());
+			LazyFilterOutcome lfo = (LazyFilterOutcome) outcome;
+			return new ImmutableFilterOutcome(lfo.getFilterJob(), lfo.getCategory());
 		}
 		return outcome;
 	}
@@ -31,5 +33,4 @@ public final class LazyFilterOutcome extends AbstractFilterOutcome implements Fi
 	public Enum<?> getCategory() {
 		return _category;
 	}
-
 }

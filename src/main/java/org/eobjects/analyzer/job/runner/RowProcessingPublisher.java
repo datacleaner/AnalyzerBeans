@@ -14,11 +14,17 @@ import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.BeanConfiguration;
+import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.InputColumnSourceJob;
+import org.eobjects.analyzer.job.MergedOutcomeJob;
+import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.NestedTaskListener;
 import org.eobjects.analyzer.job.concurrent.ScheduleTasksTaskListener;
@@ -40,7 +46,9 @@ import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
+import org.eobjects.analyzer.reference.Function;
 import org.eobjects.analyzer.storage.StorageProvider;
+import org.eobjects.analyzer.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +72,8 @@ public final class RowProcessingPublisher {
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
 
-	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table,
-			TaskRunner taskRunner, AnalysisListener analysisListener) {
+	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table, TaskRunner taskRunner,
+			AnalysisListener analysisListener) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
@@ -101,7 +109,7 @@ public final class RowProcessingPublisher {
 	public void run() {
 		for (RowProcessingConsumer rowProcessingConsumer : _consumers) {
 			if (rowProcessingConsumer instanceof AnalyzerConsumer) {
-				AnalyzerJob analyzerJob = ((AnalyzerConsumer) rowProcessingConsumer).getBeanJob();
+				AnalyzerJob analyzerJob = ((AnalyzerConsumer) rowProcessingConsumer).getComponentJob();
 				_analysisListener.analyzerBegin(_job, analyzerJob);
 			}
 		}
@@ -144,7 +152,8 @@ public final class RowProcessingPublisher {
 			}
 		}
 
-		final RowConsumerTaskListener taskListener = new RowConsumerTaskListener();
+		// TODO: Needs to delegate errors downstream
+		final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(_job, _analysisListener);
 		final AtomicInteger rowNumber = new AtomicInteger(0);
 		final DataSet dataSet = dataContext.executeQuery(q);
 		int numTasks = 0;
@@ -162,7 +171,10 @@ public final class RowProcessingPublisher {
 		taskListener.awaitTasks(numTasks);
 
 		dataSet.close();
-		_analysisListener.rowProcessingSuccess(_job, _table);
+
+		if (!taskListener.isErrornous()) {
+			_analysisListener.rowProcessingSuccess(_job, _table);
+		}
 	}
 
 	private boolean useGroupByOptimization() {
@@ -188,7 +200,7 @@ public final class RowProcessingPublisher {
 
 		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(consumers);
 		Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
-		Set<FilterJob> addedFilterJobs = new HashSet<FilterJob>();
+		Set<Outcome> availableOutcomes = new HashSet<Outcome>();
 
 		while (!remainingConsumers.isEmpty()) {
 			boolean changed = false;
@@ -199,13 +211,7 @@ public final class RowProcessingPublisher {
 
 				// make sure that any dependent filter outcome is evaluated
 				// before this component
-				FilterOutcome requirement = consumer.getBeanJob().getRequirement();
-				if (requirement != null) {
-					FilterJob filterJob = requirement.getFilterJob();
-					if (!addedFilterJobs.contains(filterJob)) {
-						accepted = false;
-					}
-				}
+				accepted = consumer.satisfiedForFlowOrdering(availableOutcomes);
 
 				// make sure that all the required colums are present
 				if (accepted) {
@@ -224,15 +230,21 @@ public final class RowProcessingPublisher {
 					result.add(consumer);
 					it.remove();
 					changed = true;
-					if (consumer instanceof TransformerConsumer) {
-						TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
-						MutableInputColumn<?>[] virtualColumns = transformerConsumer.getBeanJob().getOutput();
-						for (MutableInputColumn<?> virtualColumn : virtualColumns) {
-							availableVirtualColumns.add(virtualColumn);
+
+					ComponentJob componentJob = consumer.getComponentJob();
+
+					if (componentJob instanceof InputColumnSourceJob) {
+						InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();
+						for (InputColumn<?> col : output) {
+							availableVirtualColumns.add(col);
 						}
 					}
-					if (consumer instanceof FilterConsumer) {
-						addedFilterJobs.add((FilterJob) consumer.getBeanJob());
+
+					if (componentJob instanceof OutcomeSourceJob) {
+						Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
+						for (Outcome outcome : outcomes) {
+							availableOutcomes.add(outcome);
+						}
 					}
 				}
 			}
@@ -261,19 +273,48 @@ public final class RowProcessingPublisher {
 		addConsumer(new FilterConsumer(_job, filterBeanInstance, filterJob, inputColumns, _analysisListener));
 	}
 
+	public void addMergedOutcomeJob(MergedOutcomeJob mergedOutcomeJob) {
+		addConsumer(new MergedOutcomeConsumer(mergedOutcomeJob));
+	}
+
+	public boolean containsOutcome(Outcome prerequisiteOutcome) {
+		for (RowProcessingConsumer consumer : _consumers) {
+			if (consumer instanceof FilterConsumer) {
+				FilterJob fj = (FilterJob) consumer.getComponentJob();
+				FilterOutcome[] outcomes = fj.getOutcomes();
+				for (FilterOutcome filterOutcome : outcomes) {
+					if (filterOutcome.satisfiesRequirement(prerequisiteOutcome)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	private void addConsumer(RowProcessingConsumer consumer) {
 		_consumers.add(consumer);
 	}
 
 	public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<AnalyzerJobResult> resultQueue,
 			TaskListener rowProcessorPublishersTaskListener) {
-		int numConsumers = _consumers.size();
 
-		TaskListener closeTaskListener = new NestedTaskListener("row processor consumers", numConsumers,
+		List<RowProcessingConsumer> configurableConsumers = CollectionUtils.filter(_consumers,
+				new Function<RowProcessingConsumer, Boolean>() {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Boolean run(RowProcessingConsumer input) throws Exception {
+						return input.getComponentJob() instanceof ConfigurableBeanJob<?>;
+					}
+				});
+		int numConfigurableConsumers = configurableConsumers.size();
+
+		TaskListener closeTaskListener = new NestedTaskListener("row processor consumers", numConfigurableConsumers,
 				rowProcessorPublishersTaskListener);
 
-		List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConsumers);
-		for (RowProcessingConsumer consumer : _consumers) {
+		List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
+		for (RowProcessingConsumer consumer : configurableConsumers) {
 			Task closeTask = createCloseTask(consumer, resultQueue);
 			closeTasks.add(new TaskRunnable(closeTask, closeTaskListener));
 		}
@@ -284,11 +325,11 @@ public final class RowProcessingPublisher {
 		RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this);
 		runTasks.add(new TaskRunnable(runTask, runCompletionListener));
 
-		TaskListener initTaskListener = new ScheduleTasksTaskListener("initialize row consumers", taskRunner, numConsumers,
-				runTasks);
+		TaskListener initTaskListener = new ScheduleTasksTaskListener("initialize row consumers", taskRunner,
+				numConfigurableConsumers, runTasks);
 
-		List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConsumers);
-		for (RowProcessingConsumer consumer : _consumers) {
+		List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
+		for (RowProcessingConsumer consumer : configurableConsumers) {
 			initTasks.add(createInitTask(consumer, initTaskListener, resultQueue));
 		}
 		return initTasks;
@@ -306,7 +347,10 @@ public final class RowProcessingPublisher {
 
 	private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener,
 			Queue<AnalyzerJobResult> resultQueue) {
-		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredCallback(consumer.getBeanJob().getConfiguration());
+		ComponentJob componentJob = consumer.getComponentJob();
+		BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
+
+		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredCallback(configuration);
 		LifeCycleCallback initializeCallback = new InitializeCallback();
 		LifeCycleCallback closeCallback = new CloseCallback();
 
@@ -328,8 +372,8 @@ public final class RowProcessingPublisher {
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
 			AnalyzerBeanInstance analyzerBeanInstance = analyzerConsumer.getBeanInstance();
-			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(_job, analyzerConsumer.getBeanJob(),
-					resultQueue, _analysisListener);
+			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(_job,
+					analyzerConsumer.getComponentJob(), resultQueue, _analysisListener);
 
 			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _storageProvider, dataContextProvider,
 					assignConfiguredCallback, initializeCallback, null, returnResultsCallback, closeCallback);

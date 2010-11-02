@@ -14,6 +14,8 @@ public interface AnalysisJob {
 	public Collection<TransformerJob> getTransformerJobs();
 
 	public Collection<FilterJob> getFilterJobs();
+	
+	public Collection<MergedOutcomeJob> getMergedOutcomeJobs();
 
 	public Collection<AnalyzerJob> getAnalyzerJobs();
 }

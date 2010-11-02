@@ -5,10 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
-import org.eobjects.analyzer.job.runner.FilterOutcomeSink;
-import org.eobjects.analyzer.job.runner.FilterOutcomeSinkImpl;
+import org.eobjects.analyzer.job.runner.OutcomeSink;
+import org.eobjects.analyzer.job.runner.OutcomeSinkImpl;
 import org.eobjects.analyzer.job.runner.RowProcessingConsumer;
 
 import dk.eobjects.metamodel.data.Row;
@@ -38,7 +37,7 @@ public final class ConsumeRowTask implements Task {
 
 	@Override
 	public void execute() {
-		FilterOutcomeSink outcomes = new FilterOutcomeSinkImpl();
+		OutcomeSink outcomeSink = new OutcomeSinkImpl();
 		InputRow inputRow = new MetaModelInputRow(_row);
 
 		int distinctCount = 1;
@@ -48,18 +47,12 @@ public final class ConsumeRowTask implements Task {
 
 		int rowNumber = _rowCounter.addAndGet(distinctCount);
 
-		for (RowProcessingConsumer rowProcessingConsumer : _consumers) {
-			FilterOutcome requiredOutcome = rowProcessingConsumer.getRequiredOutcome();
-			boolean process;
-			if (requiredOutcome == null) {
-				process = true;
-			} else {
-				process = outcomes.contains(requiredOutcome);
-			}
+		for (RowProcessingConsumer consumer : _consumers) {
+			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes());
 
 			if (process) {
-				synchronized (rowProcessingConsumer) {
-					inputRow = rowProcessingConsumer.consume(inputRow, distinctCount, outcomes);
+				synchronized (consumer) {
+					inputRow = consumer.consume(inputRow, distinctCount, outcomeSink);
 				}
 			}
 		}

@@ -25,9 +25,11 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
+import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.analyzer.util.SourceColumnFinder;
 
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
@@ -54,6 +56,7 @@ public final class AnalysisJobBuilder {
 	private final List<FilterJobBuilder<?, ?>> _filterJobBuilders = new ArrayList<FilterJobBuilder<?, ?>>();
 	private final List<TransformerJobBuilder<?>> _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
 	private final List<AnalyzerJobBuilder<?>> _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder<?>>();
+	private final List<MergedOutcomeJobBuilder> _mergedOutcomeJobBuilders = new ArrayList<MergedOutcomeJobBuilder>();
 
 	// listeners, typically for UI that uses the builders
 	private final List<SourceColumnChangeListener> _sourceColumnListeners = new LinkedList<SourceColumnChangeListener>();
@@ -167,6 +170,23 @@ public final class AnalysisJobBuilder {
 
 	public List<MetaModelInputColumn> getSourceColumns() {
 		return Collections.unmodifiableList(_sourceColumns);
+	}
+
+	public MergedOutcomeJobBuilder addMergedOutcomeJobBuilder() {
+		MergedOutcomeJobBuilder mojb = new MergedOutcomeJobBuilder(_transformedColumnIdGenerator);
+		_mergedOutcomeJobBuilders.add(mojb);
+		// TODO: Notify listeners
+		return mojb;
+	}
+
+	public AnalysisJobBuilder removeMergedOutcomeJobBuilder(MergedOutcomeJobBuilder mergedOutcomeJobBuilder) {
+		_mergedOutcomeJobBuilders.remove(mergedOutcomeJobBuilder);
+		// TODO: Notify listeners
+		return this;
+	}
+
+	public List<MergedOutcomeJobBuilder> getMergedOutcomeJobBuilders() {
+		return Collections.unmodifiableList(_mergedOutcomeJobBuilders);
 	}
 
 	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(Class<T> transformerClass) {
@@ -292,29 +312,12 @@ public final class AnalysisJobBuilder {
 		return this;
 	}
 
-	public Collection<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily) {
-		if (dataTypeFamily == null) {
-			dataTypeFamily = DataTypeFamily.UNDEFINED;
-		}
-
-		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
-		List<MetaModelInputColumn> sourceColumns = getSourceColumns();
-		for (MetaModelInputColumn sourceColumn : sourceColumns) {
-			if (dataTypeFamily == DataTypeFamily.UNDEFINED || sourceColumn.getDataTypeFamily() == dataTypeFamily) {
-				result.add(sourceColumn);
-			}
-		}
-
-		for (TransformerJobBuilder<?> transformerJobBuilder : _transformerJobBuilders) {
-			List<MutableInputColumn<?>> outputColumns = transformerJobBuilder.getOutputColumns();
-			for (MutableInputColumn<?> outputColumn : outputColumns) {
-				if (dataTypeFamily == DataTypeFamily.UNDEFINED || outputColumn.getDataTypeFamily() == dataTypeFamily) {
-					result.add(outputColumn);
-				}
-			}
-		}
-
-		return result;
+	public List<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily) {
+		SourceColumnFinder finder = new SourceColumnFinder();
+		finder.addSources(new SourceColumns(_sourceColumns));
+		finder.addSources(_transformerJobBuilders);
+		finder.addSources(_mergedOutcomeJobBuilders);
+		return finder.findInputColumns(dataTypeFamily);
 	}
 
 	/**
@@ -391,6 +394,17 @@ public final class AnalysisJobBuilder {
 			}
 		}
 
+		Collection<MergedOutcomeJob> mergedOutcomeJobs = new LinkedList<MergedOutcomeJob>();
+		for (MergedOutcomeJobBuilder mojb : _mergedOutcomeJobBuilders) {
+			try {
+				MergedOutcomeJob mergedOutcomeJob = mojb.toMergedOutcomeJob();
+				mergedOutcomeJobs.add(mergedOutcomeJob);
+			} catch (IllegalStateException e) {
+				throw new IllegalStateException("Could not create merged outcome job from builder: " + mojb + ", ("
+						+ e.getMessage() + ")", e);
+			}
+		}
+
 		Collection<TransformerJob> transformerJobs = new LinkedList<TransformerJob>();
 		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
 			try {
@@ -415,7 +429,8 @@ public final class AnalysisJobBuilder {
 			}
 		}
 
-		return new ImmutableAnalysisJob(_dataContextProvider, _sourceColumns, filterJobs, transformerJobs, analyzerJobs);
+		return new ImmutableAnalysisJob(_dataContextProvider, _sourceColumns, filterJobs, transformerJobs, analyzerJobs,
+				mergedOutcomeJobs);
 	}
 
 	public InputColumn<?> getSourceColumnByName(String name) {
@@ -429,61 +444,23 @@ public final class AnalysisJobBuilder {
 		return null;
 	}
 
-	/**
-	 * Convenience method to get all input columns (both source or from
-	 * transformers) that comply to a given data type family.
-	 * 
-	 * @param dataTypeFamily
-	 * @return
-	 */
-	public List<InputColumn<?>> getInputColumns(DataTypeFamily dataTypeFamily) {
-		if (dataTypeFamily == null) {
-			throw new IllegalArgumentException("dataTypeFamily cannot be null. Use " + DataTypeFamily.UNDEFINED
-					+ " for all input columns");
-		}
-		List<InputColumn<?>> inputColumns = new ArrayList<InputColumn<?>>();
-		List<MetaModelInputColumn> sourceColumns = getSourceColumns();
-		for (MetaModelInputColumn col : sourceColumns) {
-			if (dataTypeFamily == DataTypeFamily.UNDEFINED || col.getDataTypeFamily() == dataTypeFamily) {
-				inputColumns.add(col);
-			}
-		}
-
-		List<TransformerJobBuilder<?>> transformerJobBuilders = getTransformerJobBuilders();
-		for (TransformerJobBuilder<?> transformerJobBuilder : transformerJobBuilders) {
-			List<MutableInputColumn<?>> outputColumns = transformerJobBuilder.getOutputColumns();
-			for (MutableInputColumn<?> col : outputColumns) {
-				if (dataTypeFamily == DataTypeFamily.UNDEFINED || col.getDataTypeFamily() == dataTypeFamily) {
-					inputColumns.add(col);
-				}
-			}
-		}
-
-		return inputColumns;
+	public TransformerJobBuilder<?> getOriginatingTransformer(InputColumn<?> outputColumn) {
+		SourceColumnFinder finder = new SourceColumnFinder();
+		finder.addSources(_transformerJobBuilders);
+		return (TransformerJobBuilder<?>) finder.findInputColumnSource(outputColumn);
 	}
 
-	public TransformerJobBuilder<?> getOriginatingTransformer(InputColumn<?> outputColumn) {
-		for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
-			if (tjb.getOutputColumns().contains(outputColumn)) {
-				return tjb;
-			}
-		}
-		return null;
+	public MergedOutcomeJobBuilder getOriginatingMergedOutcome(InputColumn<?> outputColumn) {
+		SourceColumnFinder finder = new SourceColumnFinder();
+		finder.addSources(_mergedOutcomeJobBuilders);
+		return (MergedOutcomeJobBuilder) finder.findInputColumnSource(outputColumn);
 	}
 
 	public Table getOriginatingTable(InputColumn<?> inputColumn) {
-		if (inputColumn.isPhysicalColumn()) {
-			return inputColumn.getPhysicalColumn().getTable();
-		}
-
-		TransformerJobBuilder<?> tjb = getOriginatingTransformer(inputColumn);
-		if (tjb != null) {
-			List<InputColumn<?>> inputColumns = tjb.getInputColumns();
-			assert !inputColumns.isEmpty();
-			return getOriginatingTable(inputColumns.get(0));
-		}
-
-		throw new IllegalStateException("Could not find originating table for column: " + inputColumn);
+		SourceColumnFinder finder = new SourceColumnFinder();
+		finder.addSources(_transformerJobBuilders);
+		finder.addSources(_mergedOutcomeJobBuilders);
+		return finder.findOriginatingTable(inputColumn);
 	}
 
 	public Table getOriginatingTable(AbstractBeanWithInputColumnsBuilder<?, ?, ?> beanJobBuilder) {

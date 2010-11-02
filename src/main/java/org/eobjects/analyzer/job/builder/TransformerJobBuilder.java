@@ -6,12 +6,14 @@ import java.util.List;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableTransformerJob;
+import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
@@ -28,7 +30,8 @@ import org.eobjects.analyzer.storage.InMemoryStorageProvider;
  *            the transformer type being configured
  */
 public final class TransformerJobBuilder<T extends Transformer<?>> extends
-		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> {
+		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> implements
+		InputColumnSourceJob {
 
 	private final LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
 	private final IdGenerator _idGenerator;
@@ -129,5 +132,15 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		if (isConfigured()) {
 			getOutputColumns();
 		}
+	}
+
+	@Override
+	public InputColumn<?>[] getInput() {
+		return getInputColumns().toArray(new InputColumn<?>[0]);
+	}
+
+	@Override
+	public MutableInputColumn<?>[] getOutput() {
+		return getOutputColumns().toArray(new MutableInputColumn<?>[0]);
 	}
 }

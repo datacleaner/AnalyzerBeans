@@ -15,10 +15,9 @@ public final class ImmutableFilterJob implements FilterJob {
 
 	private final FilterBeanDescriptor<?, ?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
-	private final FilterOutcome _requirement;
+	private final Outcome _requirement;
 
-	public ImmutableFilterJob(FilterBeanDescriptor<?, ?> descriptor, BeanConfiguration beanConfiguration,
-			FilterOutcome requirement) {
+	public ImmutableFilterJob(FilterBeanDescriptor<?, ?> descriptor, BeanConfiguration beanConfiguration, Outcome requirement) {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
 		_requirement = LazyFilterOutcome.load(requirement);
@@ -51,7 +50,7 @@ public final class ImmutableFilterJob implements FilterJob {
 	}
 
 	@Override
-	public FilterOutcome getRequirement() {
+	public Outcome getRequirement() {
 		return _requirement;
 	}
 

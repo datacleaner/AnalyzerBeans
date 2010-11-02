@@ -3,14 +3,12 @@ package org.eobjects.analyzer.job.runner;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
-final class TransformerConsumer implements RowProcessingConsumer {
+final class TransformerConsumer extends ConfigurableBeanJobRowProcessingConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final TransformerBeanInstance _transformerBeanInstance;
@@ -20,6 +18,7 @@ final class TransformerConsumer implements RowProcessingConsumer {
 
 	public TransformerConsumer(AnalysisJob job, TransformerBeanInstance transformerBeanInstance,
 			TransformerJob transformerJob, InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
+		super(transformerJob);
 		_job = job;
 		_transformerBeanInstance = transformerBeanInstance;
 		_transformerJob = transformerJob;
@@ -33,8 +32,8 @@ final class TransformerConsumer implements RowProcessingConsumer {
 	}
 
 	@Override
-	public InputRow consume(InputRow row, int distinctCount, FilterOutcomeSink outcomes) {
-		MutableInputColumn<?>[] outputColumns = _transformerJob.getOutput();
+	public InputRow consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
+		InputColumn<?>[] outputColumns = _transformerJob.getOutput();
 
 		Transformer<?> transformer = _transformerBeanInstance.getBean();
 
@@ -62,13 +61,8 @@ final class TransformerConsumer implements RowProcessingConsumer {
 	}
 
 	@Override
-	public TransformerJob getBeanJob() {
+	public TransformerJob getComponentJob() {
 		return _transformerJob;
-	}
-
-	@Override
-	public FilterOutcome getRequiredOutcome() {
-		return _transformerJob.getRequirement();
 	}
 
 	@Override

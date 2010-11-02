@@ -20,13 +20,13 @@ public class ImmutableFilterJobTest extends TestCase {
 
 		FilterOutcome[] outcomes1 = job.getOutcomes();
 		assertEquals(2, outcomes1.length);
-		assertEquals("Outcome[category=VALID]", outcomes1[0].toString());
-		assertEquals("Outcome[category=INVALID]", outcomes1[1].toString());
+		assertEquals("FilterOutcome[category=VALID]", outcomes1[0].toString());
+		assertEquals("FilterOutcome[category=INVALID]", outcomes1[1].toString());
 
 		FilterOutcome[] outcomes2 = job.getOutcomes();
 		assertEquals(2, outcomes2.length);
-		assertEquals("Outcome[category=VALID]", outcomes2[0].toString());
-		assertEquals("Outcome[category=INVALID]", outcomes2[1].toString());
+		assertEquals("FilterOutcome[category=VALID]", outcomes2[0].toString());
+		assertEquals("FilterOutcome[category=INVALID]", outcomes2[1].toString());
 
 		// the arrays are not the same, but their contents are equal
 		assertNotSame(outcomes1, outcomes2);

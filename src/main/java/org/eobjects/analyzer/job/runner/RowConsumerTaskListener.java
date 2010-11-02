@@ -4,6 +4,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.tasks.Task;
 
@@ -11,6 +12,13 @@ public final class RowConsumerTaskListener implements TaskListener {
 
 	private final BlockingQueue<Integer> countingQueue = new LinkedBlockingQueue<Integer>();
 	private final AtomicBoolean errorsReported = new AtomicBoolean(false);
+	private final AnalysisListener _analysisListener;
+	private final AnalysisJob _analysisJob;
+
+	public RowConsumerTaskListener(AnalysisJob analysisJob, AnalysisListener analysisListener) {
+		_analysisListener = analysisListener;
+		_analysisJob = analysisJob;
+	}
 
 	@Override
 	public void onBegin(Task task) {
@@ -31,7 +39,10 @@ public final class RowConsumerTaskListener implements TaskListener {
 
 	@Override
 	public void onError(Task task, Throwable throwable) {
-		errorsReported.set(true);
+		boolean alreadyRegisteredError = errorsReported.getAndSet(true);
+		if (!alreadyRegisteredError) {
+			_analysisListener.errorUknown(_analysisJob, throwable);
+		}
 
 		boolean submitted = false;
 		while (!submitted) {
