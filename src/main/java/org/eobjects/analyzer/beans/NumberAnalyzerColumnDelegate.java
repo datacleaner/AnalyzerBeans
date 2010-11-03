@@ -33,7 +33,7 @@ final class NumberAnalyzerColumnDelegate {
 
 	public void run(InputRow row, Number value, int distinctCount) {
 		if (value != null) {
-			_annotationFactory.annotate(row, _nonNullAnnotation);
+			_annotationFactory.annotate(row, distinctCount, _nonNullAnnotation);
 			double doubleValue = value.doubleValue();
 			double max = _statistics.getMax();
 			double min = _statistics.getMin();
@@ -53,14 +53,14 @@ final class NumberAnalyzerColumnDelegate {
 			min = _statistics.getMin();
 
 			if (max == doubleValue) {
-				_annotationFactory.annotate(row, _maxAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _maxAnnotation);
 			}
 			if (min == doubleValue) {
-				_annotationFactory.annotate(row, _minAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _minAnnotation);
 			}
 		} else {
 			_nullCount += distinctCount;
-			_annotationFactory.annotate(row, _nullAnnotation);
+			_annotationFactory.annotate(row, distinctCount, _nullAnnotation);
 		}
 	}
 

@@ -17,7 +17,7 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 	}
 
 	@Override
-	public void annotate(InputRow row, RowAnnotation annotation) {
+	public void annotate(InputRow row, int distinctRowCount, RowAnnotation annotation) {
 		List<InputRow> rows = annotatedRows.get(annotation);
 		if (rows == null) {
 			synchronized (this) {
@@ -29,6 +29,7 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 			}
 		}
 		rows.add(row);
+		((RowAnnotationImpl) annotation).incrementRowCount(distinctRowCount);
 	}
 
 	@Override
@@ -42,6 +43,7 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 		synchronized (this) {
 			annotatedRows.remove(annotation);
 		}
+		((RowAnnotationImpl) annotation).resetRowCount();
 	}
 
 }

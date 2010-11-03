@@ -5,14 +5,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class TokenPatternImpl implements TokenPattern {
+public final class TokenPatternImpl implements TokenPattern {
 
 	private static final long serialVersionUID = 1L;
 
-	private TokenizerConfiguration _configuration;
-	private List<TokenPatternSymbol> _symbols;
+	private final TokenizerConfiguration _configuration;
+	private final List<TokenPatternSymbol> _symbols;
+	private final String _sampleString;
 
-	public TokenPatternImpl(List<Token> tokens, TokenizerConfiguration configuration) {
+	public TokenPatternImpl(String sampleString, List<Token> tokens, TokenizerConfiguration configuration) {
 		if (tokens == null) {
 			throw new IllegalArgumentException("tokens cannot be null");
 		}
@@ -21,6 +22,7 @@ public class TokenPatternImpl implements TokenPattern {
 			_symbols.add(new TokenPatternSymbolImpl(token, configuration));
 		}
 		_configuration = configuration;
+		_sampleString = sampleString;
 	}
 
 	@Override
@@ -70,5 +72,10 @@ public class TokenPatternImpl implements TokenPattern {
 			sb.append(symbol.toSymbolicString());
 		}
 		return sb.toString();
+	}
+
+	@Override
+	public String getSampleString() {
+		return _sampleString;
 	}
 }

@@ -6,8 +6,7 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
-import org.eobjects.analyzer.storage.CollectionFactoryImpl;
-import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 
 public class PatternFinderAnalyzerTest extends TestCase {
 
@@ -22,7 +21,7 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		PatternFinderAnalyzer pf = new PatternFinderAnalyzer();
 		MockInputColumn<String> column = new MockInputColumn<String>("title", String.class);
 
-		pf.setCollectionFactory(new CollectionFactoryImpl(TestHelper.createStorageProvider()));
+		pf.setRowAnnotationFactory(new InMemoryRowAnnotationFactory());
 		pf.setColumn(column);
 
 		pf.init();
@@ -36,7 +35,7 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		PatternFinderAnalyzer pf = new PatternFinderAnalyzer();
 		MockInputColumn<String> column = new MockInputColumn<String>("title", String.class);
 
-		pf.setCollectionFactory(new CollectionFactoryImpl(TestHelper.createStorageProvider()));
+		pf.setRowAnnotationFactory(new InMemoryRowAnnotationFactory());
 		pf.setColumn(column);
 		pf.setDiscriminateTextCase(true);
 
@@ -80,7 +79,7 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		PatternFinderAnalyzer pf = new PatternFinderAnalyzer();
 		MockInputColumn<String> column = new MockInputColumn<String>("title", String.class);
 
-		pf.setCollectionFactory(new CollectionFactoryImpl(TestHelper.createStorageProvider()));
+		pf.setRowAnnotationFactory(new InMemoryRowAnnotationFactory());
 		pf.setColumn(column);
 		pf.setDiscriminateTextCase(true);
 

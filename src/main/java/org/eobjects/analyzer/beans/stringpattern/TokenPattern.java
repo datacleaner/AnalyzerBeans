@@ -23,4 +23,6 @@ public interface TokenPattern extends Serializable {
 	public List<TokenPatternSymbol> getSymbols();
 
 	public String toSymbolicString();
+	
+	public String getSampleString();
 }

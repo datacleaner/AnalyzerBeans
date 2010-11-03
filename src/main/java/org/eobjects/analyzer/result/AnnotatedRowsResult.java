@@ -151,4 +151,8 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 		}
 		return -1;
 	}
+	
+	public int getRowCount() {
+		return _annotation.getRowCount();
+	}
 }

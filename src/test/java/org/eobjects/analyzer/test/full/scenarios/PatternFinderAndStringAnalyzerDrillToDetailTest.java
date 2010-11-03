@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.test.full.scenarios;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
@@ -26,12 +26,10 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DefaultResultProducer;
-import org.eobjects.analyzer.result.ListResult;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.analyzer.util.CollectionUtils;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
@@ -75,7 +73,8 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 
 		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pf = ajb
 				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
-		pf.addInputColumn(ajb.getSourceColumnByName("JOBTITLE"));
+		InputColumn<?> jobtitleInputColumn = ajb.getSourceColumnByName("JOBTITLE");
+		pf.addInputColumn(jobtitleInputColumn);
 		pf.getConfigurableBean().setDiscriminateTextCase(false);
 
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> sa = ajb.addRowProcessingAnalyzer(StringAnalyzer.class);
@@ -103,15 +102,23 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 					.where("Measures", "Match count").explore();
 			assertEquals(DefaultResultProducer.class, resultProducer.getClass());
 			AnalyzerResult result2 = resultProducer.getResult();
-			assertEquals(ListResult.class, result2.getClass());
+			assertEquals(AnnotatedRowsResult.class, result2.getClass());
 
-			@SuppressWarnings("unchecked")
-			List<String> values = ((ListResult<String>) result2).getValues();
-			assertEquals(19, values.size());
-			values = CollectionUtils.sorted(values);
+			AnnotatedRowsResult annotatedRowsResult = (AnnotatedRowsResult) result2;
+			assertEquals(19, annotatedRowsResult.getRowCount());
+			InputRow[] rows = annotatedRowsResult.getRows();
+			assertEquals(19, rows.length);
+
+			String[] values = new String[19];
+			for (int i = 0; i < values.length; i++) {
+				values[i] = (String) rows[i].getValue(jobtitleInputColumn);
+			}
+
+			Arrays.sort(values);
+
 			assertEquals(
 					"[Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, Sales Rep, VP Marketing, VP Sales]",
-					values.toString());
+					Arrays.toString(values));
 		}
 
 		// string analyzer tests

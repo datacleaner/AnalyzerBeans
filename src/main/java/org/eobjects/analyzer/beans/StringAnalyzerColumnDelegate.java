@@ -73,7 +73,7 @@ final class StringAnalyzerColumnDelegate {
 
 		if (value == null) {
 			_numNull += distinctCount;
-			_annotationFactory.annotate(row, _nullAnnotation);
+			_annotationFactory.annotate(row, distinctCount, _nullAnnotation);
 		} else {
 			int numChars = value.length();
 			int totalChars = numChars * distinctCount;
@@ -123,7 +123,7 @@ final class StringAnalyzerColumnDelegate {
 
 			_numUppercase += +numUppercase;
 			if (numUppercaseExclFirstLetter > 0) {
-				_annotationFactory.annotate(row, _uppercaseExclFirstLetterAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _uppercaseExclFirstLetterAnnotation);
 				_numUppercaseExclFirstLetter += numUppercaseExclFirstLetter;
 			}
 			_numLowercase += numLowercase;
@@ -145,12 +145,12 @@ final class StringAnalyzerColumnDelegate {
 
 			if (numDiacritics > 0) {
 				_numDiacritics += numDiacritics;
-				_annotationFactory.annotate(row, _diacriticAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _diacriticAnnotation);
 			}
 
 			if (numDigits > 0) {
 				_numDigit = numDigits;
-				_annotationFactory.annotate(row, _digitAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _digitAnnotation);
 			}
 
 			if (_maxChars < numChars) {
@@ -158,7 +158,7 @@ final class StringAnalyzerColumnDelegate {
 				_maxChars = numChars;
 			}
 			if (_maxChars == numChars) {
-				_annotationFactory.annotate(row, _maxCharsAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _maxCharsAnnotation);
 			}
 
 			if (_minChars > numChars) {
@@ -166,7 +166,7 @@ final class StringAnalyzerColumnDelegate {
 				_minChars = numChars;
 			}
 			if (_minChars == numChars) {
-				_annotationFactory.annotate(row, _minCharsAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _minCharsAnnotation);
 			}
 
 			if (_maxWords < numWords) {
@@ -174,14 +174,14 @@ final class StringAnalyzerColumnDelegate {
 				_annotationFactory.reset(_maxWordsAnnotation);
 			}
 			if (_maxWords == numWords) {
-				_annotationFactory.annotate(row, _maxWordsAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _maxWordsAnnotation);
 			}
 			if (_minWords > numWords) {
 				_minWords = numWords;
 				_annotationFactory.reset(_minWordsAnnotation);
 			}
 			if (_minWords == numWords) {
-				_annotationFactory.annotate(row, _minWordsAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _minWordsAnnotation);
 			}
 
 			if (_maxWhitespace < numWhitespace) {
@@ -189,7 +189,7 @@ final class StringAnalyzerColumnDelegate {
 				_annotationFactory.reset(_maxWhitespaceAnnotation);
 			}
 			if (_maxWhitespace == numWhitespace) {
-				_annotationFactory.annotate(row, _maxWhitespaceAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _maxWhitespaceAnnotation);
 			}
 
 			if (_minWhitespace > numWhitespace) {
@@ -197,18 +197,18 @@ final class StringAnalyzerColumnDelegate {
 				_annotationFactory.reset(_minWhitespaceAnnotation);
 			}
 			if (_minWhitespace == numWhitespace) {
-				_annotationFactory.annotate(row, _minWhitespaceAnnotation);
+				_annotationFactory.annotate(row, distinctCount, _minWhitespaceAnnotation);
 			}
 
 			if (numLetters > 0) {
 				if (value.equals(value.toUpperCase())) {
 					_numEntirelyUppercase += distinctCount;
-					_annotationFactory.annotate(row, _entirelyUppercaseAnnotation);
+					_annotationFactory.annotate(row, distinctCount, _entirelyUppercaseAnnotation);
 				}
 
 				if (value.equals(value.toLowerCase())) {
 					_numEntirelyLowercase += distinctCount;
-					_annotationFactory.annotate(row, _entirelyLowercaseAnnotation);
+					_annotationFactory.annotate(row, distinctCount, _entirelyLowercaseAnnotation);
 				}
 			}
 

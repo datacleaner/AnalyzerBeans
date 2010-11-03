@@ -18,24 +18,25 @@ import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.ListResult;
-import org.eobjects.analyzer.storage.CollectionFactory;
+import org.eobjects.analyzer.storage.RowAnnotation;
+import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @AnalyzerBean("Pattern finder")
 @Description("The Pattern Finder will inspect your String values and generate and match string patterns that suit your data.\nIt can be used for a lot of purposes but is excellent for verifying or getting ideas about the format of the string-values in a column.")
 public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
-	private Map<TokenPattern, List<String>> patterns;
+	private Map<TokenPattern, RowAnnotation> patterns;
 	private TokenizerConfiguration configuration;
 	private Tokenizer tokenizer;
 	
 	@Provided
-	CollectionFactory _collectionFactory;
+	RowAnnotationFactory _rowAnnotationFactory;
 
 	@Configured
 	InputColumn<String> column;
@@ -78,7 +79,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 
 	@Initialize
 	public void init() {
-		patterns = new HashMap<TokenPattern, List<String>>();
+		patterns = new HashMap<TokenPattern, RowAnnotation>();
 
 		if (enableMixedTokens != null) {
 			configuration = new TokenizerConfiguration(enableMixedTokens);
@@ -137,13 +138,13 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 			} catch (RuntimeException e) {
 				throw new IllegalStateException("Error occurred while tokenizing value: " + value, e);
 			}
-			Set<Entry<TokenPattern, List<String>>> entries = patterns.entrySet();
-			for (Entry<TokenPattern, List<String>> entry : entries) {
+			Set<Entry<TokenPattern, RowAnnotation>> entries = patterns.entrySet();
+			for (Entry<TokenPattern, RowAnnotation> entry : entries) {
 				TokenPattern pattern = entry.getKey();
-				List<String> matchingValues = entry.getValue();
+				RowAnnotation annotation = entry.getValue();
 				if (pattern.match(tokens)) {
 					for (int i = 0; i < distinctCount; i++) {
-						matchingValues.add(value);
+						_rowAnnotationFactory.annotate(row, distinctCount, annotation);
 					}
 					match = true;
 				}
@@ -152,16 +153,16 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 			if (!match) {
 				final TokenPattern pattern;
 				try {
-					pattern = new TokenPatternImpl(tokens, configuration);
+					pattern = new TokenPatternImpl(value, tokens, configuration);
 				} catch (RuntimeException e) {
 					throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
 				}
 				
-				List<String> matchingValues = _collectionFactory.createList(String.class);
+				RowAnnotation annotation = _rowAnnotationFactory.createAnnotation();
 				for (int i = 0; i < distinctCount; i++) {
-					matchingValues.add(value);
+					_rowAnnotationFactory.annotate(row, distinctCount, annotation);
 				}
-				patterns.put(pattern, matchingValues);
+				patterns.put(pattern, annotation);
 			}
 		}
 	}
@@ -173,14 +174,14 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 		CrosstabDimension patternDimension = new CrosstabDimension("Pattern");
 		Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, measuresDimension, patternDimension);
 
-		Set<Entry<TokenPattern, List<String>>> entrySet = patterns.entrySet();
+		Set<Entry<TokenPattern, RowAnnotation>> entrySet = patterns.entrySet();
 
 		// sort the entries so that the ones with the highest amount of matches
 		// are at the top
-		Set<Entry<TokenPattern, List<String>>> sortedEntrySet = new TreeSet<Entry<TokenPattern, List<String>>>(
-				new Comparator<Entry<TokenPattern, List<String>>>() {
-					public int compare(Entry<TokenPattern, List<String>> o1, Entry<TokenPattern, List<String>> o2) {
-						int result = o2.getValue().size() - o1.getValue().size();
+		Set<Entry<TokenPattern, RowAnnotation>> sortedEntrySet = new TreeSet<Entry<TokenPattern, RowAnnotation>>(
+				new Comparator<Entry<TokenPattern, RowAnnotation>>() {
+					public int compare(Entry<TokenPattern, RowAnnotation> o1, Entry<TokenPattern, RowAnnotation> o2) {
+						int result = o2.getValue().getRowCount() - o1.getValue().getRowCount();
 						if (result == 0) {
 							result = o1.getKey().toSymbolicString().compareTo(o2.getKey().toSymbolicString());
 						}
@@ -189,29 +190,28 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 				});
 		sortedEntrySet.addAll(entrySet);
 
-		for (Entry<TokenPattern, List<String>> entry : sortedEntrySet) {
+		for (Entry<TokenPattern, RowAnnotation> entry : sortedEntrySet) {
 			CrosstabNavigator<Serializable> nav = crosstab.where(patternDimension, entry.getKey().toSymbolicString());
 
 			nav.where(measuresDimension, "Match count");
 			nav.where(patternDimension, entry.getKey().toSymbolicString());
-			List<String> matches = entry.getValue();
-			int size = matches.size();
+			RowAnnotation annotation = entry.getValue();
+			int size = annotation.getRowCount();
 			nav.put(size, true);
-			nav.attach(new ListResult<String>(matches));
+			nav.attach(new AnnotatedRowsResult(annotation, _rowAnnotationFactory, column));
 
 			nav.where(measuresDimension, "Sample");
-			nav.put(matches.get(0), true);
+			nav.put(entry.getKey().getSampleString(), true);
 		}
 
 		return new CrosstabResult(crosstab);
 	}
 
 	// setter methods for unittesting purposes
-	
-	public void setCollectionFactory(CollectionFactory collectionFactory) {
-		_collectionFactory = collectionFactory;
+	public void setRowAnnotationFactory(RowAnnotationFactory rowAnnotationFactory) {
+		_rowAnnotationFactory = rowAnnotationFactory;
 	}
-
+	
 	public void setColumn(InputColumn<String> column) {
 		this.column = column;
 	}

@@ -30,9 +30,10 @@ public interface RowAnnotationFactory {
 	 * using the getRows(...) method later in the process.
 	 * 
 	 * @param row
+	 * @param distinctCount
 	 * @param annotation
 	 */
-	public void annotate(InputRow row, RowAnnotation annotation);
+	public void annotate(InputRow row, int distinctCount, RowAnnotation annotation);
 
 	/**
 	 * Removes/resets all annotations of a specific kind. This method can be
