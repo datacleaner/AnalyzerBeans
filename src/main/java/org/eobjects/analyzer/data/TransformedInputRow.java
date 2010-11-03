@@ -41,4 +41,9 @@ public final class TransformedInputRow implements InputRow {
 	public Set<InputColumn<?>> getTransformedInputColumns() {
 		return _values.keySet();
 	}
+
+	@Override
+	public String toString() {
+		return "TransformedInputRow[values=" + _values + ",delegate=" + _delegate + "]";
+	}
 }

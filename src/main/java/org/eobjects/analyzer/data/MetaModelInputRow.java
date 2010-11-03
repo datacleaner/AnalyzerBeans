@@ -47,4 +47,9 @@ public final class MetaModelInputRow implements InputRow {
 
 		return (E) value;
 	}
+
+	@Override
+	public String toString() {
+		return "MetaModelInputRow[" + _row + "]";
+	}
 }

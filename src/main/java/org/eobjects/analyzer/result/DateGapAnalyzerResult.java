@@ -10,8 +10,8 @@ public class DateGapAnalyzerResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private Map<String, SortedSet<TimeInterval>> _gaps;
-	private Map<String, SortedSet<TimeInterval>> _overlaps;
+	private final Map<String, SortedSet<TimeInterval>> _gaps;
+	private final Map<String, SortedSet<TimeInterval>> _overlaps;
 
 	public DateGapAnalyzerResult(Map<String, SortedSet<TimeInterval>> gaps, Map<String, SortedSet<TimeInterval>> overlaps) {
 		_gaps = gaps;

@@ -12,6 +12,7 @@ import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -24,10 +25,10 @@ import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
@@ -37,7 +38,6 @@ import org.eobjects.analyzer.test.TestHelper;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 import dk.eobjects.metamodel.MetaModelTestCase;
-import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
@@ -169,10 +169,10 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 				.where("Measures", "Uppercase chars (excl. first letters)").explore();
 		assertNotNull(resultProducer);
 
-		DataSetResult dsr = (DataSetResult) resultProducer.getResult();
-		List<Row> rows = dsr.getRows();
-		assertEquals(1, rows.size());
-		assertEquals("Row[values=[Foon Yue, 1]]", rows.get(0).toString());
+		AnnotatedRowsResult arr = (AnnotatedRowsResult) resultProducer.getResult();
+		InputRow[] rows = arr.getRows();
+		assertEquals(1, rows.length);
+		assertEquals("Foon Yue", rows[0].getValue(analysisJobBuilder.getSourceColumnByName("FIRSTNAME")).toString());
 
 		resultProducer = crosstab.where("Column", "FIRSTNAME").where("Measures", "Diacritic chars").explore();
 		assertNull(resultProducer);

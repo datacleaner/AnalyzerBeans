@@ -10,6 +10,8 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -21,12 +23,11 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.DefaultResultProducer;
 import org.eobjects.analyzer.result.ListResult;
 import org.eobjects.analyzer.result.ResultProducer;
-import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
@@ -35,7 +36,6 @@ import org.eobjects.analyzer.util.CollectionUtils;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 import dk.eobjects.metamodel.MetaModelTestCase;
-import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
 
@@ -69,8 +69,9 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 
 		ajb.addSourceColumns(jobTitleColumn, emailColumn);
 
+		InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("EMAIL");
 		TransformerJobBuilder<EmailStandardizerTransformer> emailStd1 = ajb.addTransformer(
-				EmailStandardizerTransformer.class).addInputColumn(ajb.getSourceColumnByName("EMAIL"));
+				EmailStandardizerTransformer.class).addInputColumn(emailInputColumn);
 
 		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pf = ajb
 				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
@@ -78,7 +79,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 		pf.getConfigurableBean().setDiscriminateTextCase(false);
 
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> sa = ajb.addRowProcessingAnalyzer(StringAnalyzer.class);
-		sa.addInputColumns(ajb.getSourceColumnByName("EMAIL"), emailStd1.getOutputColumnByName("Username"),
+		sa.addInputColumns(emailInputColumn, emailStd1.getOutputColumnByName("Username"),
 				emailStd1.getOutputColumnByName("Domain"));
 
 		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(ajb.toAnalysisJob());
@@ -123,23 +124,24 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 			assertEquals("Max chars                                   31       10       20 ", resultLines[6]);
 			assertEquals("Min chars                                   26        5       20 ", resultLines[7]);
 
-			// username is a virtual columns so it is not queryable
+			// username is a virtual columns, but because of the row-annotation
+			// system it is still possible to drill to detail on it.
 			ResultProducer resultProducer = result.getCrosstab().where("Column", "Username").where("Measures", "Max chars")
 					.explore();
-			assertNull(resultProducer);
+			assertNotNull(resultProducer);
+			assertEquals(AnnotatedRowsResult.class, resultProducer.getResult().getClass());
 
 			// email is a physical column so it IS queryable
 			resultProducer = result.getCrosstab().where("Column", "EMAIL").where("Measures", "Max chars").explore();
 			assertNotNull(resultProducer);
-			assertEquals(AnnotatedRowsResult.class, resultProducer.getClass());
 
 			AnalyzerResult result2 = resultProducer.getResult();
-			assertEquals(DataSetResult.class, result2.getClass());
+			assertEquals(AnnotatedRowsResult.class, result2.getClass());
 
-			DataSetResult dsr = (DataSetResult) result2;
-			List<Row> rows = dsr.getRows();
-			assertEquals(1, rows.size());
-			assertEquals("Row[values=[wpatterson@classicmodelcars.com, 1]]", rows.get(0).toString());
+			AnnotatedRowsResult arr = (AnnotatedRowsResult) result2;
+			InputRow[] rows = arr.getRows();
+			assertEquals(1, rows.length);
+			assertEquals("wpatterson@classicmodelcars.com", rows[0].getValue(emailInputColumn).toString());
 		}
 	}
 }
