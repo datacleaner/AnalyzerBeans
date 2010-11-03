@@ -21,6 +21,12 @@ import org.slf4j.LoggerFactory;
 import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.query.SelectItem;
 
+/**
+ * Represents a typical "drill to detail" result consisting of a set of
+ * annotated rows
+ * 
+ * @author Kasper Sørensen
+ */
 public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 
 	private static final long serialVersionUID = 1L;
