@@ -25,8 +25,8 @@ import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.DefaultResultProducer;
 import org.eobjects.analyzer.result.ListResult;
-import org.eobjects.analyzer.result.QueryResultProducer;
 import org.eobjects.analyzer.result.ResultProducer;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
@@ -82,7 +82,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 				emailStd1.getOutputColumnByName("Domain"));
 
 		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(ajb.toAnalysisJob());
-		if(!resultFuture.isSuccessful()) {
+		if (!resultFuture.isSuccessful()) {
 			throw resultFuture.getErrors().iterator().next();
 		}
 
@@ -131,7 +131,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 			// email is a physical column so it IS queryable
 			resultProducer = result.getCrosstab().where("Column", "EMAIL").where("Measures", "Max chars").explore();
 			assertNotNull(resultProducer);
-			assertEquals(QueryResultProducer.class, resultProducer.getClass());
+			assertEquals(AnnotatedRowsResult.class, resultProducer.getClass());
 
 			AnalyzerResult result2 = resultProducer.getResult();
 			assertEquals(DataSetResult.class, result2.getClass());
@@ -141,6 +141,5 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 			assertEquals(1, rows.size());
 			assertEquals("Row[values=[wpatterson@classicmodelcars.com, 1]]", rows.get(0).toString());
 		}
-
 	}
 }

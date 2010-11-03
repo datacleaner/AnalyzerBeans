@@ -142,4 +142,10 @@ public final class HsqldbStorageProvider implements StorageProvider {
 		}
 	}
 
+	@Override
+	public RowAnnotationFactory createRowAnnotationFactory() {
+		// TODO: Create a persistent RowAnnotationFactory
+		return new InMemoryRowAnnotationFactory();
+	}
+
 }

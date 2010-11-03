@@ -24,7 +24,6 @@ public class NumberAnalyzerTest extends TestCase {
 		col3 = new MockInputColumn<Byte>("w00p", Byte.class);
 
 		numberAnalyzer = new NumberAnalyzer(col1, col2, col3);
-		numberAnalyzer.init();
 	}
 
 	public void testNoRows() throws Exception {

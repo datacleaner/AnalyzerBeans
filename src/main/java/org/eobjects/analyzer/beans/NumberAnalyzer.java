@@ -8,6 +8,7 @@ import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -15,12 +16,10 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.QueryResultProducer;
-
-import dk.eobjects.metamodel.query.OperatorType;
-import dk.eobjects.metamodel.query.Query;
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
+import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
+import org.eobjects.analyzer.storage.RowAnnotation;
+import org.eobjects.analyzer.storage.RowAnnotationFactory;
 
 /**
  * Number analyzer, which provides statistical information for number values:
@@ -39,49 +38,38 @@ import dk.eobjects.metamodel.schema.Table;
 @Description("Provides insight into number-column values.")
 public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
-	private Map<InputColumn<? extends Number>, SummaryStatistics> _statistics;
-	private Map<InputColumn<? extends Number>, Long> _nullValues;
+	private Map<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate>();
 
 	@Configured
-	InputColumn<? extends Number>[] columns;
+	InputColumn<? extends Number>[] _columns;
+
+	@Provided
+	RowAnnotationFactory _annotationFactory;
 
 	public NumberAnalyzer() {
 	}
 
 	public NumberAnalyzer(InputColumn<? extends Number>... columns) {
 		this();
-		this.columns = columns;
+		_columns = columns;
+		_annotationFactory = new InMemoryRowAnnotationFactory();
+		init();
 	}
 
 	@Initialize
 	public void init() {
-		_statistics = new HashMap<InputColumn<? extends Number>, SummaryStatistics>();
-		_nullValues = new HashMap<InputColumn<? extends Number>, Long>();
-		for (InputColumn<? extends Number> column : columns) {
-			SummaryStatistics statistics = _statistics.get(column);
-			if (statistics == null) {
-				statistics = new SummaryStatistics();
-				_statistics.put(column, statistics);
-			}
-			_nullValues.put(column, 0l);
+		for (InputColumn<? extends Number> column : _columns) {
+			_columnDelegates.put(column, new NumberAnalyzerColumnDelegate(_annotationFactory));
 		}
 	}
 
 	@Override
 	public void run(InputRow row, int distinctCount) {
-		for (InputColumn<? extends Number> column : columns) {
+		for (InputColumn<? extends Number> column : _columns) {
+			NumberAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 			Number value = row.getValue(column);
-			if (value != null) {
-				SummaryStatistics statistics = _statistics.get(column);
-				double doubleValue = value.doubleValue();
-				for (int i = 0; i < distinctCount; i++) {
-					statistics.addValue(doubleValue);
-				}
-			} else {
-				Long count = _nullValues.get(column);
-				count += distinctCount;
-				_nullValues.put(column, count);
-			}
+
+			delegate.run(row, value, distinctCount);
 		}
 	}
 
@@ -99,21 +87,19 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 		measureDimension.addCategory("Non-null values");
 
 		CrosstabDimension columnDimension = new CrosstabDimension("Column");
-		for (InputColumn<? extends Number> column : columns) {
+		for (InputColumn<? extends Number> column : _columns) {
 			columnDimension.addCategory(column.getName());
 		}
 
 		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
-		for (InputColumn<? extends Number> column : columns) {
-			SummaryStatistics s = _statistics.get(column);
-			Long nullCount = _nullValues.get(column);
-			if (nullCount == null) {
-				nullCount = 0l;
-			}
+		for (InputColumn<? extends Number> column : _columns) {
+			NumberAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
+
+			SummaryStatistics s = delegate.getStatistics();
+			int nullCount = delegate.getNullCount();
 
 			CrosstabNavigator<Number> navigator = crosstab.navigate().where(columnDimension, column.getName());
 			long nonNullCount = s.getN();
-			boolean queryable = column.isPhysicalColumn();
 
 			if (nonNullCount > 0) {
 				double highestValue = s.getMax();
@@ -125,22 +111,10 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				double variance = s.getVariance();
 
 				navigator.where(measureDimension, "Highest value").put(highestValue);
-				if (queryable) {
-					Column physicalColumn = column.getPhysicalColumn();
-					Table table = physicalColumn.getTable();
-					Query q = new Query().select(table.getColumns()).from(table)
-							.where(physicalColumn, OperatorType.EQUALS_TO, highestValue);
-					navigator.attach(new QueryResultProducer(q));
-				}
+				addAttachment(navigator, delegate.getMaxAnnotation());
 
 				navigator.where(measureDimension, "Lowest value").put(lowestValue);
-				if (queryable) {
-					Column physicalColumn = column.getPhysicalColumn();
-					Table table = physicalColumn.getTable();
-					Query q = new Query().select(table.getColumns()).from(table)
-							.where(physicalColumn, OperatorType.EQUALS_TO, lowestValue);
-					navigator.attach(new QueryResultProducer(q));
-				}
+				addAttachment(navigator, delegate.getMinAnnotation());
 
 				navigator.where(measureDimension, "Sum").put(sum);
 				navigator.where(measureDimension, "Mean").put(mean);
@@ -149,23 +123,20 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				navigator.where(measureDimension, "Variance").put(variance);
 			}
 			navigator.where(measureDimension, "Null values").put(nullCount);
-			if (queryable) {
-				Column physicalColumn = column.getPhysicalColumn();
-				Table table = physicalColumn.getTable();
-				Query q = new Query().select(table.getColumns()).from(table)
-						.where(physicalColumn, OperatorType.EQUALS_TO, null);
-				navigator.attach(new QueryResultProducer(q));
+
+			if (nullCount > 0) {
+				addAttachment(navigator, delegate.getNullAnnotation());
 			}
 
 			navigator.where(measureDimension, "Non-null values").put(nonNullCount);
-			if (queryable) {
-				Column physicalColumn = column.getPhysicalColumn();
-				Table table = physicalColumn.getTable();
-				Query q = new Query().select(table.getColumns()).from(table)
-						.where(physicalColumn, OperatorType.DIFFERENT_FROM, null);
-				navigator.attach(new QueryResultProducer(q));
+			if (nonNullCount > 0) {
+				addAttachment(navigator, delegate.getNonNullAnnotation());
 			}
 		}
 		return new CrosstabResult(crosstab);
+	}
+
+	private void addAttachment(CrosstabNavigator<Number> nav, RowAnnotation annotation) {
+		nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory));
 	}
 }

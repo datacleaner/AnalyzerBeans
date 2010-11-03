@@ -3,6 +3,7 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.reflect.Field;
 
 import org.eobjects.analyzer.storage.CollectionFactory;
+import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
@@ -32,6 +33,11 @@ public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescri
 	@Override
 	public boolean isSchemaNavigator() {
 		return getBaseType() == SchemaNavigator.class;
+	}
+	
+	@Override
+	public boolean isRowAnnotationFactory() {
+		return getBaseType() == RowAnnotationFactory.class;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package org.eobjects.analyzer.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public final class TransformedInputRow implements InputRow {
 
@@ -31,5 +32,13 @@ public final class TransformedInputRow implements InputRow {
 			return null;
 		}
 		return _delegate.getValue(column);
+	}
+
+	public InputRow getDelegate() {
+		return _delegate;
+	}
+
+	public Set<InputColumn<?>> getTransformedInputColumns() {
+		return _values.keySet();
 	}
 }

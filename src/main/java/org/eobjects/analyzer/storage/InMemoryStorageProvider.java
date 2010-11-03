@@ -31,4 +31,9 @@ public final class InMemoryStorageProvider implements StorageProvider {
 		return new HashSet<E>();
 	}
 
+	@Override
+	public RowAnnotationFactory createRowAnnotationFactory() {
+		// TODO: Create a persistent RowAnnotationFactory
+		return new InMemoryRowAnnotationFactory();
+	}
 }

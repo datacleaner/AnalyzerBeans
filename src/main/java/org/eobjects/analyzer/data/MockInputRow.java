@@ -2,6 +2,7 @@ package org.eobjects.analyzer.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A mock implementation of the InputRow interface. Allows for adhoc generation
@@ -21,6 +22,10 @@ public class MockInputRow implements InputRow {
 		for (int i = 0; i < values.length; i++) {
 			put(columns[i], values[i]);
 		}
+	}
+
+	public Set<InputColumn<?>> getInputColumns() {
+		return map.keySet();
 	}
 
 	@SuppressWarnings("unchecked")

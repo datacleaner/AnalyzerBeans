@@ -1,6 +1,5 @@
 package org.eobjects.analyzer.result;
 
-import dk.eobjects.metamodel.DataContext;
 
 /**
  * Result producers produce AnalyzerResults. Typically they are used to
@@ -14,6 +13,4 @@ import dk.eobjects.metamodel.DataContext;
 public interface ResultProducer {
 
 	public AnalyzerResult getResult();
-
-	public void setDataContext(DataContext dataContext);
 }

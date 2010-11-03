@@ -206,4 +206,10 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		}
 		throw new UnsupportedOperationException("Cannot provide collection of type " + type);
 	}
+	
+	@Override
+	public RowAnnotationFactory createRowAnnotationFactory() {
+		// TODO: Create a persistent RowAnnotationFactory
+		return new InMemoryRowAnnotationFactory();
+	}
 }

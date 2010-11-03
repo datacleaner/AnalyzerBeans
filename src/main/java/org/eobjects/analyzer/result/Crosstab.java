@@ -13,8 +13,6 @@ import java.util.TreeSet;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-import dk.eobjects.metamodel.DataContext;
-
 public final class Crosstab<E extends Serializable> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -24,7 +22,6 @@ public final class Crosstab<E extends Serializable> implements Serializable {
 	private final Class<E> valueClass;
 	private final Map<String, ResultProducer> serializableResultProducers = new HashMap<String, ResultProducer>();
 	private transient Map<String, ResultProducer> transientResultProducers;
-	private transient DataContext _dataContext;
 
 	public Crosstab(Class<E> valueClass, CrosstabDimension... dimensions) {
 		this.valueClass = valueClass;
@@ -189,9 +186,6 @@ public final class Crosstab<E extends Serializable> implements Serializable {
 			}
 			resultProducer = transientResultProducers.get(key);
 		}
-		if (resultProducer != null) {
-			resultProducer.setDataContext(_dataContext);
-		}
 		return resultProducer;
 	}
 
@@ -209,9 +203,5 @@ public final class Crosstab<E extends Serializable> implements Serializable {
 		}
 
 		return sb.toString();
-	}
-
-	public void setDataContext(DataContext dataContext) {
-		_dataContext = dataContext;
 	}
 }

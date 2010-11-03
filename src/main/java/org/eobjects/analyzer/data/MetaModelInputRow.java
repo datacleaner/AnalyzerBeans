@@ -15,7 +15,11 @@ public final class MetaModelInputRow implements InputRow {
 	public MetaModelInputRow(Row row) {
 		_row = row;
 	}
-
+	
+	public Row getRow() {
+		return _row;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E> E getValue(InputColumn<E> column) {

@@ -32,6 +32,7 @@ import javax.inject.Qualifier;
  * <li>Set</li>
  * <li>Map</li>
  * <li>org.eobjects.analyzer.storage.CollectionFactory</li>
+ * <li>org.eobjects.analyzer.storage.RowAnnotationFactory</li>
  * <li>org.eobjecta.analyzer.util.SchemaNavigator</li>
  * <li>dk.eobjects.metamodel.DataContext</li>
  * </ul>

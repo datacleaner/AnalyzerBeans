@@ -35,9 +35,10 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 
 		List<Token> tokens;
 
-		if (_configuration.isTokenTypeEnabled(TokenType.PREDEFINED)) {
+		List<PredefinedTokenDefinition> predefinedTokens = _configuration.getPredefinedTokens();
+		if (!predefinedTokens.isEmpty() && _configuration.isTokenTypeEnabled(TokenType.PREDEFINED)) {
 			logger.info("Predefined tokens are turned ON, using PredefinedTokenTokenizer");
-			PredefinedTokenTokenizer tokenizer = new PredefinedTokenTokenizer(_configuration.getPredefinedTokens());
+			PredefinedTokenTokenizer tokenizer = new PredefinedTokenTokenizer(predefinedTokens);
 			tokens = tokenizer.tokenize(string);
 			for (ListIterator<Token> it = tokens.listIterator(); it.hasNext();) {
 				Token token = it.next();

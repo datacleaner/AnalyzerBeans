@@ -9,6 +9,8 @@ public interface ProvidedPropertyDescriptor extends PropertyDescriptor {
 	public boolean isSet();
 	
 	public boolean isCollectionFactory();
+	
+	public boolean isRowAnnotationFactory();
 
 	public boolean isDataContext();
 

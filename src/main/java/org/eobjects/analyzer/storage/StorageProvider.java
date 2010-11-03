@@ -17,4 +17,6 @@ public interface StorageProvider {
 	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException;
 
 	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException;
+
+	public RowAnnotationFactory createRowAnnotationFactory();
 }
