@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.storage;
 
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * H2 based implementation of the StorageProvider.
@@ -9,7 +10,9 @@ package org.eobjects.analyzer.storage;
  */
 public final class H2StorageProvider extends SqlDatabaseStorageProvider implements StorageProvider {
 
+	private static final AtomicInteger databaseIndex = new AtomicInteger(0);
+
 	public H2StorageProvider() {
-		super("org.h2.Driver", "jdbc:h2:mem:");
+		super("org.h2.Driver", "jdbc:h2:mem:ab" + databaseIndex.getAndIncrement());
 	}
 }
