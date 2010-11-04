@@ -23,7 +23,7 @@ final class SqlDatabaseSet<E> extends AbstractSet<E> implements Set<E>, SqlDatab
 		_tableName = tableName;
 
 		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName + " (set_value " + valueTypeName
-				+ " PRIMARY KEY);");
+				+ " PRIMARY KEY)");
 
 		try {
 			_iteratorStatement = _connection.prepareCall("SELECT set_value FROM " + _tableName);

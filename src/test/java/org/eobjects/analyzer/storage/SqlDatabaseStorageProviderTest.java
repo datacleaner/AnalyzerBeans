@@ -12,7 +12,7 @@ import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
 
-public class HsqldbStorageProviderTest extends TestCase {
+public class SqlDatabaseStorageProviderTest extends TestCase {
 
 	private HsqldbStorageProvider sp = new HsqldbStorageProvider();
 
@@ -113,6 +113,9 @@ public class HsqldbStorageProviderTest extends TestCase {
 		Connection connectionMock = EasyMock.createMock(Connection.class);
 		Statement statementMock = EasyMock.createMock(Statement.class);
 
+		EasyMock.expect(connectionMock.createStatement()).andReturn(statementMock);
+		EasyMock.expect(statementMock.executeUpdate("CREATE TABLE MY_TABLE (set_value VARCHAR PRIMARY KEY)")).andReturn(0);
+		statementMock.close();
 		EasyMock.expect(connectionMock.prepareCall("SELECT set_value FROM MY_TABLE")).andReturn(null);
 		EasyMock.expect(connectionMock.prepareCall("SELECT COUNT(*) FROM MY_TABLE WHERE set_value=?")).andReturn(null);
 		EasyMock.expect(connectionMock.prepareCall("INSERT INTO MY_TABLE VALUES(?)")).andReturn(null);
@@ -120,8 +123,9 @@ public class HsqldbStorageProviderTest extends TestCase {
 
 		EasyMock.expect(connectionMock.createStatement()).andReturn(statementMock);
 		EasyMock.expect(statementMock.executeUpdate("DROP TABLE MY_TABLE")).andReturn(0);
+		statementMock.close();
 
-		EasyMock.replay(connectionMock);
+		EasyMock.replay(statementMock, connectionMock);
 
 		SqlDatabaseSet<String> set = new SqlDatabaseSet<String>(connectionMock, "MY_TABLE", "VARCHAR");
 		assertEquals(0, set.size());
@@ -129,6 +133,6 @@ public class HsqldbStorageProviderTest extends TestCase {
 		System.gc();
 		System.runFinalization();
 
-		EasyMock.verify(connectionMock);
+		EasyMock.verify(statementMock, connectionMock);
 	}
 }

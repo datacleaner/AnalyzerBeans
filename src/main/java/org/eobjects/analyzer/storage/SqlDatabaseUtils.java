@@ -15,7 +15,7 @@ final class SqlDatabaseUtils {
 		Statement st = null;
 		try {
 			st = connection.createStatement();
-			st.execute(sql);
+			st.executeUpdate(sql);
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
