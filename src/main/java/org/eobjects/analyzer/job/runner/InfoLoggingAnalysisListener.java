@@ -46,7 +46,7 @@ public class InfoLoggingAnalysisListener implements AnalysisListener {
 	@Override
 	public void rowProcessingProgress(AnalysisJob job, Table table, int currentRow) {
 		if (currentRow > 0 && currentRow % 1000 == 0) {
-			logger.info("Reading row no. {} in {}", new Object[] { currentRow, table });
+			logger.info("Reading row no. {} in {}", new Object[] { currentRow, table.getName() });
 		}
 	}
 

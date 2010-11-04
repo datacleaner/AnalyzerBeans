@@ -9,11 +9,11 @@
 		</layout>
 	</appender>
 	
-	<logger name="dk.eobjects.metamodel">
+	<logger name="org.eobjects">
 		<level value="info" />
 	</logger>
 	
-	<logger name="org.eobjects">
+	<logger name="org.eobjects.analyzer.test">
 		<level value="debug" />
 	</logger>
 	

@@ -96,9 +96,10 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		assertTrue(resultFuture.isDone());
 
 		List<Throwable> errors = resultFuture.getErrors();
-		
+
 		// the amount of errors may vary depending on the thread scheduling
-		assertTrue(errors.size() == 2 || errors.size() == 3);
+		int numErrors = errors.size();
+		assertTrue(numErrors == 2 || numErrors == 3);
 
 		// sort the errors to make the order deterministic
 		errors = CollectionUtils.sorted(errors, new Comparator<Throwable>() {
@@ -110,8 +111,12 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 
 		assertEquals(IllegalStateException.class, errors.get(0).getClass());
 		assertEquals("This analyzer can only analyze two rows!", errors.get(0).getMessage());
-		if (errors.size() == 3) {
-			// this is caused by the assertion ("assertEquals(1, distinctCount);")
+
+		assertTrue(numErrors + " errors found, 2 or 3 expected!", numErrors == 2 || numErrors == 3);
+
+		if (numErrors == 3) {
+			// this is caused by the assertion
+			// ("assertEquals(1, distinctCount);")
 			// above
 			assertEquals(AssertionFailedError.class, errors.get(1).getClass());
 			assertEquals("expected:<1> but was:<2>", errors.get(1).getMessage());

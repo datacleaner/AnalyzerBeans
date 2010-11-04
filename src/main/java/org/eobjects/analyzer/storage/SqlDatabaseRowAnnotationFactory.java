@@ -81,7 +81,7 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 	}
 
 	@Override
-	public void annotate(InputRow row, int distinctCount, RowAnnotation annotation) {
+	public synchronized void annotate(InputRow row, int distinctCount, RowAnnotation annotation) {
 		RowAnnotationImpl a = (RowAnnotationImpl) annotation;
 
 		List<InputColumn<?>> inputColumns = row.getInputColumns();
@@ -198,7 +198,7 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 	}
 
 	@Override
-	public void reset(RowAnnotation annotation) {
+	public synchronized void reset(RowAnnotation annotation) {
 		String columnName = getColumnName(annotation, false);
 		if (columnName != null) {
 			performUpdate("UPDATE " + _tableName + " SET " + columnName + " = FALSE");
