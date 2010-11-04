@@ -1,5 +1,8 @@
 package org.eobjects.analyzer.job.runner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
@@ -10,17 +13,18 @@ import dk.eobjects.metamodel.schema.Table;
 
 public final class CompositeAnalysisListener implements AnalysisListener {
 
-	private final AnalysisListener[] _delegates;
+	private final List<AnalysisListener> _delegates;
 
 	public CompositeAnalysisListener(AnalysisListener firstDelegate, AnalysisListener... delegates) {
-		if (delegates == null || delegates.length == 0) {
-			delegates = new AnalysisListener[0];
+		_delegates = new ArrayList<AnalysisListener>(1 + delegates.length);
+		_delegates.add(firstDelegate);
+		for (AnalysisListener analysisListener : delegates) {
+			addDelegate(analysisListener);
 		}
-		_delegates = new AnalysisListener[1 + delegates.length];
-		_delegates[0] = firstDelegate;
-		for (int i = 0; i < delegates.length; i++) {
-			_delegates[i + 1] = delegates[i];
-		}
+	}
+
+	public void addDelegate(AnalysisListener analysisListener) {
+		_delegates.add(analysisListener);
 	}
 
 	@Override

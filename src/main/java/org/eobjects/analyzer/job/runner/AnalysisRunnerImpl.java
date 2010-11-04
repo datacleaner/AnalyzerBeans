@@ -89,7 +89,15 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		final ErrorAwareAnalysisListener errorListener = new ErrorAwareAnalysisListener();
 
 		// This analysis listener is a composite for all other listeners
-		final AnalysisListener analysisListener = new CompositeAnalysisListener(errorListener, _sharedAnalysisListeners);
+		final CompositeAnalysisListener analysisListener = new CompositeAnalysisListener(errorListener,
+				_sharedAnalysisListeners);
+
+		if (DebugLoggingAnalysisListener.isEnabled()) {
+			// enable debug logging?
+			analysisListener.addDelegate(new DebugLoggingAnalysisListener());
+		} else if (InfoLoggingAnalysisListener.isEnabled()) {
+			analysisListener.addDelegate(new InfoLoggingAnalysisListener());
+		}
 
 		// A task listener that will register either succesfull executions or
 		// unexpected errors (which will be delegated to the errorListener)
@@ -328,11 +336,11 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 	// the transformers input and output
 	private Set<Column> findSourcePhysicalColumns(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
 		SourceColumnFinder finder = new SourceColumnFinder();
-		
+
 		finder.addSources(new SourceColumns(analysisJob.getSourceColumns()));
 		finder.addSources(analysisJob.getTransformerJobs());
 		finder.addSources(analysisJob.getMergedOutcomeJobs());
-		
+
 		return finder.findOriginatingColumns(inputColumn);
 	}
 }
