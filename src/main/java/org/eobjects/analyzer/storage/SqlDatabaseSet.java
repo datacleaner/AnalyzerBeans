@@ -1,7 +1,7 @@
 package org.eobjects.analyzer.storage;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.AbstractSet;
@@ -12,10 +12,6 @@ final class SqlDatabaseSet<E> extends AbstractSet<E> implements Set<E>, SqlDatab
 
 	private final Connection _connection;
 	private final String _tableName;
-	private final CallableStatement _iteratorStatement;
-	private final CallableStatement _addStatement;
-	private final CallableStatement _containsStatement;
-	private final CallableStatement _deleteStatement;
 	private volatile int _size;
 
 	public SqlDatabaseSet(Connection connection, String tableName, String valueTypeName) {
@@ -24,28 +20,23 @@ final class SqlDatabaseSet<E> extends AbstractSet<E> implements Set<E>, SqlDatab
 
 		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName + " (set_value " + valueTypeName
 				+ " PRIMARY KEY)");
-
-		try {
-			_iteratorStatement = _connection.prepareCall("SELECT set_value FROM " + _tableName);
-			_containsStatement = _connection.prepareCall("SELECT COUNT(*) FROM " + _tableName + " WHERE set_value=?");
-			_addStatement = _connection.prepareCall("INSERT INTO " + _tableName + " VALUES(?)");
-			_deleteStatement = _connection.prepareCall("DELETE FROM " + _tableName + " WHERE set_value=?");
-		} catch (SQLException e) {
-			throw new IllegalStateException(e);
-		}
 	}
 
 	public synchronized boolean add(E elem) {
 		if (contains(elem)) {
 			return false;
 		}
+		PreparedStatement st = null;
 		try {
-			_addStatement.setObject(1, elem);
-			_addStatement.executeUpdate();
+			st = _connection.prepareStatement("INSERT INTO " + _tableName + " VALUES(?)");
+			st.setObject(1, elem);
+			st.executeUpdate();
 			_size++;
 			return true;
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			SqlDatabaseUtils.safeClose(null, st);
 		}
 	};
 
@@ -55,22 +46,28 @@ final class SqlDatabaseSet<E> extends AbstractSet<E> implements Set<E>, SqlDatab
 			return false;
 		}
 
+		PreparedStatement st = null;
 		try {
-			_deleteStatement.setObject(1, o);
-			_deleteStatement.executeUpdate();
+			st = _connection.prepareStatement("DELETE FROM " + _tableName + " WHERE set_value=?");
+			st.setObject(1, o);
+			st.executeUpdate();
 			_size--;
 			return true;
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			SqlDatabaseUtils.safeClose(null, st);
 		}
 	}
 
 	@Override
 	public boolean contains(Object o) {
 		ResultSet rs = null;
+		PreparedStatement st = null;
 		try {
-			_containsStatement.setObject(1, o);
-			rs = _containsStatement.executeQuery();
+			st = _connection.prepareStatement("SELECT COUNT(*) FROM " + _tableName + " WHERE set_value=?");
+			st.setObject(1, o);
+			rs = st.executeQuery();
 			if (rs.next()) {
 				return rs.getInt(1) > 0;
 			}
@@ -78,16 +75,20 @@ final class SqlDatabaseSet<E> extends AbstractSet<E> implements Set<E>, SqlDatab
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			SqlDatabaseUtils.safeClose(rs, null);
+			SqlDatabaseUtils.safeClose(rs, st);
 		}
 	}
 
 	@Override
 	public Iterator<E> iterator() {
+		PreparedStatement st = null;
+		ResultSet rs = null;
 		try {
-			ResultSet rs = _iteratorStatement.executeQuery();
-			return new SqlDatabaseSetIterator<E>(this, rs);
+			st = _connection.prepareCall("SELECT set_value FROM " + _tableName);
+			rs = st.executeQuery();
+			return new SqlDatabaseSetIterator<E>(this, rs, st);
 		} catch (SQLException e) {
+			SqlDatabaseUtils.safeClose(rs, st);
 			throw new IllegalStateException(e);
 		}
 	}

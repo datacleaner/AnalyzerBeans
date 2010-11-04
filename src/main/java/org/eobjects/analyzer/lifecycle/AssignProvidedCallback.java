@@ -16,9 +16,12 @@ public final class AssignProvidedCallback implements LifeCycleCallback {
 
 	private final StorageProvider _storageProvider;
 	private final DataContextProvider _dataContextProvider;
+	private final RowAnnotationFactory _rowAnnotationFactory;
 
-	public AssignProvidedCallback(StorageProvider storageProvider, DataContextProvider dataContextProvider) {
+	public AssignProvidedCallback(StorageProvider storageProvider, RowAnnotationFactory rowAnnotationFactory,
+			DataContextProvider dataContextProvider) {
 		_storageProvider = storageProvider;
+		_rowAnnotationFactory = rowAnnotationFactory;
 		_dataContextProvider = dataContextProvider;
 	}
 
@@ -33,8 +36,7 @@ public final class AssignProvidedCallback implements LifeCycleCallback {
 				CollectionFactoryImpl factory = new CollectionFactoryImpl(_storageProvider);
 				providedDescriptor.setValue(bean, factory);
 			} else if (providedDescriptor.isRowAnnotationFactory()) {
-				RowAnnotationFactory factory = _storageProvider.createRowAnnotationFactory();
-				providedDescriptor.setValue(bean, factory);
+				providedDescriptor.setValue(bean, _rowAnnotationFactory);
 			} else if (providedDescriptor.isDataContext()) {
 				providedDescriptor.setValue(bean, _dataContextProvider.getDataContext());
 			} else if (providedDescriptor.isSchemaNavigator()) {

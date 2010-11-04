@@ -119,14 +119,12 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 
 		EasyMock.expect(connectionMock.createStatement()).andReturn(statementMock);
 		EasyMock.expect(statementMock.executeUpdate("CREATE TABLE MY_TABLE (set_value VARCHAR PRIMARY KEY)")).andReturn(0);
+		EasyMock.expect(statementMock.isClosed()).andReturn(false);
 		statementMock.close();
-		EasyMock.expect(connectionMock.prepareCall("SELECT set_value FROM MY_TABLE")).andReturn(null);
-		EasyMock.expect(connectionMock.prepareCall("SELECT COUNT(*) FROM MY_TABLE WHERE set_value=?")).andReturn(null);
-		EasyMock.expect(connectionMock.prepareCall("INSERT INTO MY_TABLE VALUES(?)")).andReturn(null);
-		EasyMock.expect(connectionMock.prepareCall("DELETE FROM MY_TABLE WHERE set_value=?")).andReturn(null);
 
 		EasyMock.expect(connectionMock.createStatement()).andReturn(statementMock);
 		EasyMock.expect(statementMock.executeUpdate("DROP TABLE MY_TABLE")).andReturn(0);
+		EasyMock.expect(statementMock.isClosed()).andReturn(false);
 		statementMock.close();
 
 		EasyMock.replay(statementMock, connectionMock);
@@ -204,7 +202,7 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 
 		rows = f.getRows(a1);
 		assertEquals(2, rows.length);
-		
+
 		rows = f.getRows(a2);
 		assertEquals(3, rows.length);
 	}

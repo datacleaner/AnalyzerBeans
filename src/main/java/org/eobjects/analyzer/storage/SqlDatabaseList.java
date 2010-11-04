@@ -12,9 +12,6 @@ class SqlDatabaseList<E> extends AbstractList<E> implements List<E>, SqlDatabase
 
 	private final Connection _connection;
 	private final String _tableName;
-	private final PreparedStatement _addStatement;
-	private final PreparedStatement _addAtIndexStatement;
-	private final PreparedStatement _updateStatement;
 	private volatile int _size;
 
 	public SqlDatabaseList(Connection connection, String tableName, String valueTypeName) {
@@ -24,15 +21,6 @@ class SqlDatabaseList<E> extends AbstractList<E> implements List<E>, SqlDatabase
 
 		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName
 				+ " (list_index INTEGER PRIMARY KEY, list_value " + valueTypeName + ")");
-
-		try {
-			_addStatement = _connection.prepareStatement("INSERT INTO " + tableName
-					+ " VALUES((SELECT MAX(list_index)+1 FROM " + tableName + "), ?)");
-			_addAtIndexStatement = _connection.prepareStatement("INSERT INTO " + tableName + " VALUES(?, ?)");
-			_updateStatement = _connection.prepareStatement("UPDATE " + tableName + " SET list_value=? WHERE list_index=?");
-		} catch (SQLException e) {
-			throw new IllegalStateException(e);
-		}
 	}
 
 	@Override
@@ -86,7 +74,8 @@ class SqlDatabaseList<E> extends AbstractList<E> implements List<E>, SqlDatabase
 				// first time is different
 				st = _connection.prepareStatement("INSERT INTO " + _tableName + " VALUES(0, ?)");
 			} else {
-				st = _addStatement;
+				st = _connection.prepareStatement("INSERT INTO " + _tableName + " VALUES((SELECT MAX(list_index)+1 FROM "
+						+ _tableName + "), ?)");
 			}
 			st.setObject(1, elem);
 			st.execute();
@@ -100,24 +89,32 @@ class SqlDatabaseList<E> extends AbstractList<E> implements List<E>, SqlDatabase
 	public synchronized void add(int index, E element) {
 		SqlDatabaseUtils.performUpdate(_connection, "UPDATE " + _tableName
 				+ " SET list_index = list_index+1 WHERE list_index > " + index);
+		PreparedStatement st = null;
 		try {
-			_addAtIndexStatement.setObject(1, index);
-			_addAtIndexStatement.setObject(2, element);
-			_addAtIndexStatement.executeUpdate();
+			st = _connection.prepareStatement("INSERT INTO " + _tableName + " VALUES(?, ?)");
+			st.setObject(1, index);
+			st.setObject(2, element);
+			st.executeUpdate();
 			_size++;
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			SqlDatabaseUtils.safeClose(null, st);
 		}
 	};
 
 	public synchronized E set(int index, E element) {
 		E oldValue = get(index);
+		PreparedStatement st = null;
 		try {
-			_updateStatement.setObject(1, element);
-			_updateStatement.setObject(2, index);
-			_updateStatement.executeUpdate();
+			st = _connection.prepareStatement("UPDATE " + _tableName + " SET list_value=? WHERE list_index=?");
+			st.setObject(1, element);
+			st.setObject(2, index);
+			st.executeUpdate();
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			SqlDatabaseUtils.safeClose(null, st);
 		}
 		return oldValue;
 	};

@@ -155,8 +155,9 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 			TaskListener initExplorerTaskListener = new RunNextTaskCompletionListener(taskRunner, runTask,
 					runExplorerTaskListener);
 			Task initTask = new AssignCallbacksAndInitializeTask(instance, _configuration.getStorageProvider(),
-					dataContextProvider, new AssignConfiguredCallback(explorerJob.getConfiguration()),
-					new InitializeCallback(), runExplorerCallback, returnResultsCallback, new CloseCallback());
+					_configuration.getStorageProvider().createRowAnnotationFactory(), dataContextProvider,
+					new AssignConfiguredCallback(explorerJob.getConfiguration()), new InitializeCallback(),
+					runExplorerCallback, returnResultsCallback, new CloseCallback());
 
 			// begin the explorers
 			taskRunner.run(initTask, initExplorerTaskListener);

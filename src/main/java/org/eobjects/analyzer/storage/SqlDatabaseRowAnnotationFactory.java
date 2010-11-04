@@ -15,16 +15,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MockInputRow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 
+	private final static Logger logger = LoggerFactory.getLogger(SqlDatabaseRowAnnotationFactory.class);
 	private final Map<InputColumn<?>, String> _inputColumnNames = new LinkedHashMap<InputColumn<?>, String>();
 	private final Map<RowAnnotation, String> _annotationColumnNames = new HashMap<RowAnnotation, String>();
 	private final Connection _connection;
 	private final SqlDatabaseStorageProvider _storageProvider;
 	private final String _tableName;
 	private final AtomicInteger _nextColumnIndex = new AtomicInteger(1);
-	private final PreparedStatement _containsRowStatement;
 
 	public SqlDatabaseRowAnnotationFactory(Connection connection, String tableName,
 			SqlDatabaseStorageProvider storageProvider) {
@@ -33,12 +35,6 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 		_tableName = tableName;
 		String intType = _storageProvider.getSqlType(Integer.class);
 		performUpdate("CREATE TABLE " + tableName + " (id " + intType + " PRIMARY KEY, distinct_count " + intType + ")");
-
-		try {
-			_containsRowStatement = _connection.prepareStatement("SELECT COUNT(*) FROM " + _tableName + " WHERE id = ?");
-		} catch (SQLException e) {
-			throw new IllegalStateException(e);
-		}
 	}
 
 	@Override
@@ -58,10 +54,12 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 
 	private boolean containsRow(InputRow row) {
 		ResultSet rs = null;
+		PreparedStatement st = null;
 		try {
+			st = _connection.prepareStatement("SELECT COUNT(*) FROM " + _tableName + " WHERE id = ?");
 			boolean contains;
-			_containsRowStatement.setInt(1, row.getId());
-			rs = _containsRowStatement.executeQuery();
+			st.setInt(1, row.getId());
+			rs = st.executeQuery();
 			if (rs.next()) {
 				int count = rs.getInt(1);
 				if (count == 0) {
@@ -74,12 +72,11 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 			} else {
 				contains = false;
 			}
-
 			return contains;
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			SqlDatabaseUtils.safeClose(rs, null);
+			SqlDatabaseUtils.safeClose(rs, st);
 		}
 	}
 
@@ -108,10 +105,12 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 				st = _connection.prepareStatement("SELECT " + annotationColumnName + " FROM " + _tableName + " WHERE id=?");
 				st.setInt(1, row.getId());
 				rs = st.executeQuery();
-				if (!rs.next()) {
-					throw new IllegalStateException("No rows in annotation status ResultSet");
+				if (rs.next()) {
+					annotated = rs.getBoolean(1);
+				} else {
+					logger.error("No rows returned on annotation status for id={}", row.getId());
+					annotated = false;
 				}
-				annotated = rs.getBoolean(1);
 			} catch (SQLException e) {
 				throw new IllegalStateException(e);
 			} finally {
@@ -120,8 +119,8 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 
 			if (!annotated) {
 				try {
-					st = _connection
-							.prepareStatement("UPDATE " + _tableName + " SET " + annotationColumnName + "=TRUE WHERE id=?");
+					st = _connection.prepareStatement("UPDATE " + _tableName + " SET " + annotationColumnName
+							+ "=TRUE WHERE id=?");
 					st.setInt(1, row.getId());
 					st.executeUpdate();
 					a.incrementRowCount(distinctCount);

@@ -48,6 +48,7 @@ import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.reference.Function;
+import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.slf4j.Logger;
@@ -334,9 +335,13 @@ public final class RowProcessingPublisher {
 		TaskListener initTaskListener = new ScheduleTasksTaskListener("initialize row consumers", taskRunner,
 				numConfigurableConsumers, runTasks);
 
+		// Ticket #459: The RowAnnotationFactory should be shared by all
+		// components within the same RowProcessingPublisher
+		RowAnnotationFactory rowAnnotationFactory = _storageProvider.createRowAnnotationFactory();
+
 		List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
 		for (RowProcessingConsumer consumer : configurableConsumers) {
-			initTasks.add(createInitTask(consumer, initTaskListener, resultQueue));
+			initTasks.add(createInitTask(consumer, rowAnnotationFactory, initTaskListener, resultQueue));
 		}
 		return initTasks;
 	}
@@ -351,8 +356,8 @@ public final class RowProcessingPublisher {
 		}
 	}
 
-	private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener,
-			Queue<AnalyzerJobResult> resultQueue) {
+	private TaskRunnable createInitTask(RowProcessingConsumer consumer, RowAnnotationFactory rowAnnotationFactory,
+			TaskListener listener, Queue<AnalyzerJobResult> resultQueue) {
 		ComponentJob componentJob = consumer.getComponentJob();
 		BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
 
@@ -367,22 +372,23 @@ public final class RowProcessingPublisher {
 			TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
 			TransformerBeanInstance transformerBeanInstance = transformerConsumer.getBeanInstance();
 
-			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _storageProvider, dataContextProvider,
-					assignConfiguredCallback, initializeCallback, closeCallback);
+			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _storageProvider, rowAnnotationFactory,
+					dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof FilterConsumer) {
 			FilterConsumer filterConsumer = (FilterConsumer) consumer;
 			FilterBeanInstance filterBeanInstance = filterConsumer.getBeanInstance();
 
-			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _storageProvider, dataContextProvider,
-					assignConfiguredCallback, initializeCallback, closeCallback);
+			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _storageProvider, rowAnnotationFactory,
+					dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
 			AnalyzerBeanInstance analyzerBeanInstance = analyzerConsumer.getBeanInstance();
 			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(_job,
 					analyzerConsumer.getComponentJob(), resultQueue, _analysisListener);
 
-			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _storageProvider, dataContextProvider,
-					assignConfiguredCallback, initializeCallback, null, returnResultsCallback, closeCallback);
+			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _storageProvider, rowAnnotationFactory,
+					dataContextProvider, assignConfiguredCallback, initializeCallback, null, returnResultsCallback,
+					closeCallback);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}

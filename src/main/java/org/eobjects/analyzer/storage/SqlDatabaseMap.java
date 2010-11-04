@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,11 +13,6 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 
 	private final Connection _connection;
 	private final String _tableName;
-	private final PreparedStatement _getStatement;
-	private final PreparedStatement _addStatement;
-	private final PreparedStatement _containsKeyStatement;
-	private final PreparedStatement _updateStatement;
-	private final PreparedStatement _deleteStatement;
 	private volatile int _size;
 
 	public SqlDatabaseMap(Connection connection, String tableName, String keyTypeName, String valueTypeName) {
@@ -27,18 +21,6 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 
 		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName + " (map_key " + keyTypeName
 				+ " PRIMARY KEY, map_value " + valueTypeName + ")");
-
-		try {
-			_getStatement = _connection.prepareStatement("SELECT map_value FROM " + _tableName + " WHERE map_key = ?;");
-			_addStatement = _connection.prepareStatement("INSERT INTO  " + _tableName + " VALUES (?,?);");
-			_updateStatement = _connection
-					.prepareStatement("UPDATE " + _tableName + " SET map_value = ? WHERE map_key = ?;");
-			_containsKeyStatement = _connection.prepareStatement("SELECT COUNT(*) FROM  " + _tableName
-					+ " WHERE map_key = ?;");
-			_deleteStatement = _connection.prepareStatement("DELETE FROM " + _tableName + " WHERE map_key = ?;");
-		} catch (SQLException e) {
-			throw new IllegalStateException(e);
-		}
 	}
 
 	@Override
@@ -50,9 +32,11 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 	@Override
 	public V get(Object key) {
 		ResultSet rs = null;
+		PreparedStatement st = null;
 		try {
-			_getStatement.setObject(1, key);
-			rs = _getStatement.executeQuery();
+			st = _connection.prepareStatement("SELECT map_value FROM " + _tableName + " WHERE map_key = ?;");
+			st.setObject(1, key);
+			rs = st.executeQuery();
 			if (rs.next()) {
 				return (V) rs.getObject(1);
 			}
@@ -60,16 +44,18 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			SqlDatabaseUtils.safeClose(rs, null);
+			SqlDatabaseUtils.safeClose(rs, st);
 		}
 	}
 
 	@Override
 	public boolean containsKey(Object key) {
 		ResultSet rs = null;
+		PreparedStatement st = null;
 		try {
-			_containsKeyStatement.setObject(1, key);
-			rs = _containsKeyStatement.executeQuery();
+			st = _connection.prepareStatement("SELECT COUNT(*) FROM  " + _tableName + " WHERE map_key = ?");
+			st.setObject(1, key);
+			rs = st.executeQuery();
 			if (rs.next()) {
 				return rs.getInt(1) > 0;
 			}
@@ -77,27 +63,32 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			SqlDatabaseUtils.safeClose(rs, null);
+			SqlDatabaseUtils.safeClose(rs, st);
 		}
 	}
 
 	public synchronized V put(K key, V value) {
+		PreparedStatement st = null;
 		try {
 			if (containsKey(key)) {
 				V v = get(key);
-				_updateStatement.setObject(1, value);
-				_updateStatement.setObject(2, key);
-				_updateStatement.executeUpdate();
+				st = _connection.prepareStatement("UPDATE " + _tableName + " SET map_value = ? WHERE map_key = ?;");
+				st.setObject(1, value);
+				st.setObject(2, key);
+				st.executeUpdate();
 				return v;
 			} else {
-				_addStatement.setObject(1, key);
-				_addStatement.setObject(2, value);
-				_addStatement.executeUpdate();
+				st = _connection.prepareStatement("INSERT INTO  " + _tableName + " VALUES (?,?);");
+				st.setObject(1, key);
+				st.setObject(2, value);
+				st.executeUpdate();
 				_size++;
 				return null;
 			}
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			SqlDatabaseUtils.safeClose(null, st);
 		}
 	};
 
@@ -105,12 +96,16 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 	public synchronized V remove(Object key) {
 		if (containsKey(key)) {
 			V result = get(key);
+			PreparedStatement st = null;
 			try {
-				_deleteStatement.setObject(1, key);
-				_deleteStatement.executeUpdate();
+				st = _connection.prepareStatement("DELETE FROM " + _tableName + " WHERE map_key = ?");
+				st.setObject(1, key);
+				st.executeUpdate();
 				_size--;
 			} catch (SQLException e) {
 				throw new IllegalStateException(e);
+			} finally {
+				SqlDatabaseUtils.safeClose(null, st);
 			}
 			return result;
 		}
@@ -119,12 +114,12 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 
 	@Override
 	public Set<java.util.Map.Entry<K, V>> entrySet() {
-		Statement st = null;
+		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
 			Set<Entry<K, V>> result = new HashSet<Map.Entry<K, V>>();
-			st = _connection.createStatement();
-			rs = st.executeQuery("SELECT map_key FROM " + _tableName + " ORDER BY map_key ASC;");
+			st = _connection.prepareStatement("SELECT map_key FROM " + _tableName + " ORDER BY map_key ASC;");
+			rs = st.executeQuery();
 			while (rs.next()) {
 				@SuppressWarnings("unchecked")
 				K key = (K) rs.getObject(1);
