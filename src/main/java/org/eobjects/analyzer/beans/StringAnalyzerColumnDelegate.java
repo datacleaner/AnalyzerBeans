@@ -149,7 +149,7 @@ final class StringAnalyzerColumnDelegate {
 			}
 
 			if (numDigits > 0) {
-				_numDigit = numDigits;
+				_numDigit += numDigits;
 				_annotationFactory.annotate(row, distinctCount, _digitAnnotation);
 			}
 

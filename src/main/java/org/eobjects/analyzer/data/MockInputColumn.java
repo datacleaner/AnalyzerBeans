@@ -19,6 +19,11 @@ public class MockInputColumn<E> extends AbstractInputColumn<E> implements InputC
 		_name = name;
 		_clazz = clazz;
 	}
+	
+	@Override
+	public Class<? extends E> getDataType() {
+		return _clazz;
+	}
 
 	@Override
 	public String getName() {

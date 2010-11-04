@@ -13,8 +13,8 @@ import dk.eobjects.metamodel.schema.Column;
  * @author Kasper Sørensen
  * 
  * @param <E>
- *            the data type family of the column. See
- *            <code>DataTypeFamily</code> for available values.
+ *            the data type of the column. See <code>DataTypeFamily</code> for
+ *            available values.
  */
 public interface InputColumn<E> extends Comparable<InputColumn<E>> {
 
@@ -41,6 +41,16 @@ public interface InputColumn<E> extends Comparable<InputColumn<E>> {
 	 *             if isPhysicalColumn() is false
 	 */
 	public Column getPhysicalColumn() throws IllegalStateException;
+
+	/**
+	 * The Data type stored in this column represented as a Java type. Notice
+	 * that for most purposes you should ud getDataTypeFamily as it is limited
+	 * to the actual supported families of data types (eg. File is not a
+	 * supported data type, but Integer, Float, String etc. are).
+	 * 
+	 * @return the data type of this column.
+	 */
+	public Class<? extends E> getDataType();
 
 	/**
 	 * @return the family of datatypes that matches column's data type. This

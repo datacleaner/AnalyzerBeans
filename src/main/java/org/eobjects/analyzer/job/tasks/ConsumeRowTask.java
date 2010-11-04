@@ -38,7 +38,6 @@ public final class ConsumeRowTask implements Task {
 	@Override
 	public void execute() {
 		OutcomeSink outcomeSink = new OutcomeSinkImpl();
-		InputRow inputRow = new MetaModelInputRow(_row);
 
 		int distinctCount = 1;
 		if (_countAllItem != null) {
@@ -46,6 +45,7 @@ public final class ConsumeRowTask implements Task {
 		}
 
 		int rowNumber = _rowCounter.addAndGet(distinctCount);
+		InputRow inputRow = new MetaModelInputRow(rowNumber, _row);
 
 		for (RowProcessingConsumer consumer : _consumers) {
 			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes());

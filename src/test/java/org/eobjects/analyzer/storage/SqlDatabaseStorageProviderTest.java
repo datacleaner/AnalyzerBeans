@@ -11,10 +11,14 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 
 public class SqlDatabaseStorageProviderTest extends TestCase {
 
-	private HsqldbStorageProvider sp = new HsqldbStorageProvider();
+	private H2StorageProvider sp = new H2StorageProvider();
 
 	public void testCreateList() throws Exception {
 		List<String> list = sp.createList(String.class);
@@ -134,5 +138,74 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 		System.runFinalization();
 
 		EasyMock.verify(statementMock, connectionMock);
+	}
+
+	public void testCreateRowAnnotationFactory() throws Exception {
+		RowAnnotationFactory f = sp.createRowAnnotationFactory();
+
+		RowAnnotation a1 = f.createAnnotation();
+		RowAnnotation a2 = f.createAnnotation();
+
+		InputColumn<String> col1 = new MockInputColumn<String>("foo", String.class);
+		InputColumn<Integer> col2 = new MockInputColumn<Integer>("bar", Integer.class);
+		InputColumn<Boolean> col3 = new MockInputColumn<Boolean>("w00p", Boolean.class);
+
+		MockInputRow row1 = new MockInputRow(1).put(col1, "1").put(col2, 1).put(col3, true);
+		MockInputRow row2 = new MockInputRow(2).put(col1, "2");
+		MockInputRow row3 = new MockInputRow(3).put(col1, "3").put(col2, 3).put(col3, true);
+		MockInputRow row4 = new MockInputRow(4).put(col1, "4").put(col2, 4).put(col3, false);
+
+		InputRow[] rows = f.getRows(a1);
+		assertEquals(0, rows.length);
+
+		f.annotate(row1, 3, a1);
+		assertEquals(3, a1.getRowCount());
+
+		rows = f.getRows(a1);
+		assertEquals(1, rows.length);
+		assertEquals("1", rows[0].getValue(col1));
+		assertEquals(Integer.valueOf(1), rows[0].getValue(col2));
+		assertEquals(Boolean.TRUE, rows[0].getValue(col3));
+
+		// repeat the same annotate call - should do nothing
+		f.annotate(row1, 3, a1);
+		assertEquals(3, a1.getRowCount());
+
+		assertEquals(1, rows.length);
+		assertEquals("1", rows[0].getValue(col1));
+
+		f.annotate(row2, 2, a1);
+		f.annotate(row2, 2, a1);
+		f.annotate(row2, 2, a1);
+		f.annotate(row2, 2, a1);
+		assertEquals(5, a1.getRowCount());
+
+		rows = f.getRows(a1);
+		assertEquals(2, rows.length);
+		assertEquals("1", rows[0].getValue(col1));
+		assertEquals(Integer.valueOf(1), rows[0].getValue(col2));
+		assertEquals(Boolean.TRUE, rows[0].getValue(col3));
+		assertEquals("2", rows[1].getValue(col1));
+		assertEquals(null, rows[1].getValue(col2));
+		assertEquals(null, rows[1].getValue(col3));
+
+		assertEquals(0, a2.getRowCount());
+
+		f.annotate(row1, 3, a2);
+
+		assertEquals(5, a1.getRowCount());
+		assertEquals(3, a2.getRowCount());
+
+		f.annotate(row3, 6, a2);
+		f.annotate(row4, 7, a2);
+
+		assertEquals(5, a1.getRowCount());
+		assertEquals(16, a2.getRowCount());
+
+		rows = f.getRows(a1);
+		assertEquals(2, rows.length);
+		
+		rows = f.getRows(a2);
+		assertEquals(3, rows.length);
 	}
 }

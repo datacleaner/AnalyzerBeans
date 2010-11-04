@@ -1,6 +1,7 @@
 package org.eobjects.analyzer.data;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,6 +17,11 @@ public final class TransformedInputRow implements InputRow {
 	public TransformedInputRow(InputRow delegateInputRow, Map<InputColumn<?>, Object> values) {
 		_delegate = delegateInputRow;
 		_values = values;
+	}
+
+	@Override
+	public int getId() {
+		return _delegate.getId();
 	}
 
 	public void addValue(InputColumn<?> inputColumn, Object value) {
@@ -36,6 +42,13 @@ public final class TransformedInputRow implements InputRow {
 
 	public InputRow getDelegate() {
 		return _delegate;
+	}
+
+	@Override
+	public List<InputColumn<?>> getInputColumns() {
+		List<InputColumn<?>> inputColumns = _delegate.getInputColumns();
+		inputColumns.addAll(_values.keySet());
+		return inputColumns;
 	}
 
 	public Set<InputColumn<?>> getTransformedInputColumns() {

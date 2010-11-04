@@ -157,7 +157,11 @@ public final class RowProcessingPublisher {
 		final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(_job, _analysisListener);
 		final AtomicInteger rowNumber = new AtomicInteger(0);
 		final DataSet dataSet = dataContext.executeQuery(q);
+
+		// represents the distinct count of rows as well as the number of tasks
+		// to execute
 		int numTasks = 0;
+
 		while (dataSet.next()) {
 			if (taskListener.isErrornous()) {
 				break;

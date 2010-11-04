@@ -1,5 +1,7 @@
 package org.eobjects.analyzer.data;
 
+import java.util.List;
+
 /**
  * Represents a row of data where each value pertain to a column.
  * 
@@ -17,5 +19,26 @@ package org.eobjects.analyzer.data;
  */
 public interface InputRow {
 
+	/**
+	 * Gets a value from the row on a given column position, or null if no value
+	 * exists at this column position.
+	 * 
+	 * @param <E>
+	 * @param column
+	 * @return
+	 */
 	public <E> E getValue(InputColumn<E> column);
+
+	/**
+	 * An id identifying this row. The id is guaranteed to be unique (and
+	 * typically sequential) within a single dataset only.
+	 * 
+	 * @return an identifier for this row
+	 */
+	public int getId();
+
+	/**
+	 * @return the input columns represented in this row
+	 */
+	public List<InputColumn<?>> getInputColumns();
 }

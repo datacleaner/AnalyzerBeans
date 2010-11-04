@@ -1,8 +1,10 @@
 package org.eobjects.analyzer.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A mock implementation of the InputRow interface. Allows for adhoc generation
@@ -13,19 +15,37 @@ import java.util.Set;
  */
 public class MockInputRow implements InputRow {
 
-	Map<InputColumn<?>, Object> map = new HashMap<InputColumn<?>, Object>();
+	private static final AtomicInteger _idGenerator = new AtomicInteger(Integer.MIN_VALUE);
+
+	private final Map<InputColumn<?>, Object> map = new HashMap<InputColumn<?>, Object>();
+	private final int _id;
 
 	public MockInputRow() {
+		this(_idGenerator.getAndIncrement());
+	}
+
+	public MockInputRow(int id) {
+		_id = id;
 	}
 
 	public MockInputRow(InputColumn<?>[] columns, Object[] values) {
+		this(_idGenerator.getAndIncrement(), columns, values);
+	}
+
+	public MockInputRow(int id, InputColumn<?>[] columns, Object[] values) {
+		this(id);
 		for (int i = 0; i < values.length; i++) {
 			put(columns[i], values[i]);
 		}
 	}
 
-	public Set<InputColumn<?>> getInputColumns() {
-		return map.keySet();
+	@Override
+	public int getId() {
+		return _id;
+	}
+
+	public List<InputColumn<?>> getInputColumns() {
+		return new ArrayList<InputColumn<?>>(map.keySet());
 	}
 
 	@SuppressWarnings("unchecked")
