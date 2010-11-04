@@ -57,6 +57,8 @@ final class SqlDatabaseSetIterator<E> implements Iterator<E> {
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
-		SqlDatabaseUtils.safeClose(_rs, _st);
+		if (_hasNext) {
+			SqlDatabaseUtils.safeClose(_rs, _st);
+		}
 	}
 }

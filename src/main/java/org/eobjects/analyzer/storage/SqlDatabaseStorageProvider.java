@@ -29,6 +29,7 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 	}
 
 	public SqlDatabaseStorageProvider(String driverClassName, String connectionUrl, String username, String password) {
+		logger.info("Creating new storage provider, driver={}, url={}", driverClassName, connectionUrl);
 		try {
 			Class.forName(driverClassName);
 		} catch (ClassNotFoundException e) {

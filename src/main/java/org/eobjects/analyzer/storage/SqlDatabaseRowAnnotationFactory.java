@@ -127,7 +127,7 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 				} catch (SQLException e) {
 					throw new IllegalStateException(e);
 				} finally {
-					SqlDatabaseUtils.safeClose(rs, st);
+					SqlDatabaseUtils.safeClose(null, st);
 				}
 			}
 

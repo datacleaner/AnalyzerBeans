@@ -18,9 +18,15 @@ import org.eobjects.analyzer.data.MockInputRow;
 
 public class SqlDatabaseStorageProviderTest extends TestCase {
 
-	private H2StorageProvider sp = new H2StorageProvider();
+	private StorageProvider h2sp = new H2StorageProvider();
+	private StorageProvider hsqlsp = new HsqldbStorageProvider();
 
 	public void testCreateList() throws Exception {
+		testCreateList(h2sp);
+		testCreateList(hsqlsp);
+	}
+
+	private void testCreateList(StorageProvider sp) throws Exception {
 		List<String> list = sp.createList(String.class);
 		assertEquals(0, list.size());
 		assertTrue(list.isEmpty());
@@ -44,6 +50,11 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 	}
 
 	public void testCreateMap() throws Exception {
+		testCreateMap(h2sp);
+		testCreateMap(hsqlsp);
+	}
+
+	private void testCreateMap(StorageProvider sp) throws Exception {
 		Map<Integer, String> map = sp.createMap(Integer.class, String.class);
 
 		map.put(1, "hello");
@@ -62,6 +73,11 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 	}
 
 	public void testCreateSet() throws Exception {
+		testCreateSet(h2sp);
+		testCreateSet(hsqlsp);
+	}
+
+	private void testCreateSet(StorageProvider sp) throws Exception {
 		Set<Long> set = sp.createSet(Long.class);
 
 		assertTrue(set.isEmpty());
@@ -114,6 +130,11 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 	}
 
 	public void testFinalize() throws Exception {
+		testFinalize(h2sp);
+		testFinalize(hsqlsp);
+	}
+
+	private void testFinalize(StorageProvider sp) throws Exception {
 		Connection connectionMock = EasyMock.createMock(Connection.class);
 		Statement statementMock = EasyMock.createMock(Statement.class);
 
@@ -139,6 +160,11 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 	}
 
 	public void testCreateRowAnnotationFactory() throws Exception {
+		testCreateRowAnnotationFactory(h2sp);
+		testCreateRowAnnotationFactory(hsqlsp);
+	}
+
+	private void testCreateRowAnnotationFactory(StorageProvider sp) throws Exception {
 		RowAnnotationFactory f = sp.createRowAnnotationFactory();
 
 		RowAnnotation a1 = f.createAnnotation();

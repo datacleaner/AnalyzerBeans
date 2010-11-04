@@ -30,28 +30,58 @@ final class SqlDatabaseUtils {
 
 	public static void safeClose(ResultSet rs, Statement st) {
 		if (rs != null) {
+			boolean close = true;
+
 			try {
 				if (rs.isClosed()) {
-					logger.info("result set is already closed: {}", rs);
-				} else {
-					logger.debug("closing result set: {}", rs);
-					rs.close();
+					close = false;
+					if (logger.isInfoEnabled()) {
+						logger.info("result set is already closed: {}", rs);
+						StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+						for (int i = 0; i < stackTrace.length && i < 5; i++) {
+							logger.info(" - stack frame {}: {}", i, stackTrace[i]);
+						}
+					}
 				}
-			} catch (SQLException e) {
-				logger.warn("could not close result set", e);
+			} catch (Throwable e) {
+				logger.debug("could not determine if result set is already closed", e);
+			}
+
+			if (close) {
+				logger.debug("closing result set: {}", rs);
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					logger.warn("could not close result set", e);
+				}
 			}
 		}
 
 		if (st != null) {
+			boolean close = true;
+
 			try {
 				if (st.isClosed()) {
-					logger.info("statement is already closed: {}", st);
-				} else {
-					logger.debug("closing statement: {}", st);
-					st.close();
+					close = false;
+					if (logger.isInfoEnabled()) {
+						logger.info("statement is already closed: {}", st);
+						StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+						for (int i = 0; i < stackTrace.length && i < 5; i++) {
+							logger.info(" - stack frame {}: {}", i, stackTrace[i]);
+						}
+					}
 				}
-			} catch (SQLException e) {
-				logger.warn("could not close statement", e);
+			} catch (Throwable e) {
+				logger.debug("could not determine if statement is already closed", e);
+			}
+
+			if (close) {
+				logger.debug("closing statement: {}", st);
+				try {
+					st.close();
+				} catch (SQLException e) {
+					logger.warn("could not close statement", e);
+				}
 			}
 		}
 	}
