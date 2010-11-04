@@ -8,7 +8,7 @@ import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Set;
 
-final class HsqldbSet<E> extends AbstractSet<E> implements Set<E>, HsqldbCollection {
+final class SqlDatabaseSet<E> extends AbstractSet<E> implements Set<E>, SqlDatabaseCollection {
 
 	private final Connection _connection;
 	private final String _tableName;
@@ -18,9 +18,12 @@ final class HsqldbSet<E> extends AbstractSet<E> implements Set<E>, HsqldbCollect
 	private final CallableStatement _deleteStatement;
 	private volatile int _size;
 
-	public HsqldbSet(Connection connection, String tableName) {
+	public SqlDatabaseSet(Connection connection, String tableName, String valueTypeName) {
 		_connection = connection;
 		_tableName = tableName;
+
+		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName + " (set_value " + valueTypeName
+				+ " PRIMARY KEY);");
 
 		try {
 			_iteratorStatement = _connection.prepareCall("SELECT set_value FROM " + _tableName);
@@ -75,7 +78,7 @@ final class HsqldbSet<E> extends AbstractSet<E> implements Set<E>, HsqldbCollect
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbStorageProvider.safeClose(rs, null);
+			SqlDatabaseUtils.safeClose(rs, null);
 		}
 	}
 
@@ -83,7 +86,7 @@ final class HsqldbSet<E> extends AbstractSet<E> implements Set<E>, HsqldbCollect
 	public Iterator<E> iterator() {
 		try {
 			ResultSet rs = _iteratorStatement.executeQuery();
-			return new HsqldbSetIterator<E>(this, rs);
+			return new SqlDatabaseSetIterator<E>(this, rs);
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		}
@@ -102,6 +105,6 @@ final class HsqldbSet<E> extends AbstractSet<E> implements Set<E>, HsqldbCollect
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
-		HsqldbStorageProvider.performUpdate(_connection, "DROP TABLE " + getTableName());
+		SqlDatabaseUtils.performUpdate(_connection, "DROP TABLE " + getTableName());
 	}
 }

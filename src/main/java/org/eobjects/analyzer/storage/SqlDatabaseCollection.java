@@ -1,6 +1,6 @@
 package org.eobjects.analyzer.storage;
 
-interface HsqldbCollection {
+interface SqlDatabaseCollection {
 
 	public String getTableName();
 }

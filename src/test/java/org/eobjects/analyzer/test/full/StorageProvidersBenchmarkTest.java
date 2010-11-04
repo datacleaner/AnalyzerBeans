@@ -10,8 +10,10 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
-import org.eobjects.analyzer.storage.StorageProvider;
+import org.eobjects.analyzer.storage.H2StorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
+import org.eobjects.analyzer.storage.InMemoryStorageProvider;
+import org.eobjects.analyzer.storage.StorageProvider;
 import org.junit.Ignore;
 
 /**
@@ -20,7 +22,6 @@ import org.junit.Ignore;
  * implementations.
  * 
  * @author Kasper Sørensen
- * 
  */
 @Ignore
 public class StorageProvidersBenchmarkTest extends TestCase {
@@ -31,8 +32,10 @@ public class StorageProvidersBenchmarkTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		_storageProviders = new HashMap<String, StorageProvider>();
-		_storageProviders.put("hsqldb", new HsqldbStorageProvider());
-		_storageProviders.put("berkeley db", new BerkeleyDbStorageProvider());
+		_storageProviders.put("1) In-Memory", new InMemoryStorageProvider());
+		_storageProviders.put("2) H2", new H2StorageProvider());
+		_storageProviders.put("3) Hsqldb", new HsqldbStorageProvider());
+		_storageProviders.put("4) Berkeley DB", new BerkeleyDbStorageProvider());
 	}
 
 	public void test1bigBatch() throws Exception {

@@ -4,16 +4,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 
-final class HsqldbSetIterator<E> implements Iterator<E> {
+final class SqlDatabaseSetIterator<E> implements Iterator<E> {
 
-	private final HsqldbSet<E> _set;
+	private final SqlDatabaseSet<E> _set;
 	private final ResultSet _rs;
 	
 	private volatile boolean _hasNext;
 	private volatile E _currentValue;
 	private volatile E _nextValue;
 
-	public HsqldbSetIterator(HsqldbSet<E> set, ResultSet rs) {
+	public SqlDatabaseSetIterator(SqlDatabaseSet<E> set, ResultSet rs) {
 		_set = set;
 		_rs = rs;
 		moveNext();

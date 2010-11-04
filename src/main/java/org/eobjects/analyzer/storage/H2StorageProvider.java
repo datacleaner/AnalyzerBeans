@@ -3,15 +3,15 @@ package org.eobjects.analyzer.storage;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 /**
- * Hsqldb based implementation of the StorageProvider.
+ * H2 based implementation of the StorageProvider.
  * 
  * @author Kasper Sørensen
  * 
  */
-public final class HsqldbStorageProvider extends SqlDatabaseStorageProvider implements StorageProvider {
+public final class H2StorageProvider extends SqlDatabaseStorageProvider implements StorageProvider {
 
-	public HsqldbStorageProvider() {
-		super("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:analyzerbeans", "SA", "");
+	public H2StorageProvider() {
+		super("org.h2.Driver", "jdbc:h2:mem:");
 	}
 
 	@Override

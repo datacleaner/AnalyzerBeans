@@ -203,7 +203,14 @@
 			<version>3.2</version>
 		</dependency>
 
-		<!-- Needed if BerkeleyDbCollectionProvider is used -->
+		<!-- Needed if H2 StorageProvider is used -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.2.145</version>
+		</dependency>
+
+		<!-- Needed if BerkeleyDb StorageProvider is used -->
 		<dependency>
 			<groupId>berkeleydb</groupId>
 			<artifactId>je</artifactId>

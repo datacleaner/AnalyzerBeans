@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.AbstractList;
 import java.util.List;
 
-class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection {
+class SqlDatabaseList<E> extends AbstractList<E> implements List<E>, SqlDatabaseCollection {
 
 	private final Connection _connection;
 	private final String _tableName;
@@ -17,10 +17,13 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 	private final PreparedStatement _updateStatement;
 	private volatile int _size;
 
-	public HsqldbList(Connection connection, String tableName) {
+	public SqlDatabaseList(Connection connection, String tableName, String valueTypeName) {
 		_connection = connection;
 		_tableName = tableName;
 		_size = 0;
+
+		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName
+				+ " (list_index INTEGER PRIMARY KEY, list_value " + valueTypeName + ");");
 
 		try {
 			_addStatement = _connection.prepareStatement("INSERT INTO " + tableName
@@ -35,8 +38,8 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 	@Override
 	public synchronized E remove(int index) {
 		E oldValue = get(index);
-		HsqldbStorageProvider.performUpdate(_connection, "DELETE FROM " + _tableName + " WHERE list_index=" + index);
-		HsqldbStorageProvider.performUpdate(_connection, "UPDATE " + _tableName
+		SqlDatabaseUtils.performUpdate(_connection, "DELETE FROM " + _tableName + " WHERE list_index=" + index);
+		SqlDatabaseUtils.performUpdate(_connection, "UPDATE " + _tableName
 				+ " SET list_index = list_index-1 WHERE list_index > " + index);
 		_size--;
 		return oldValue;
@@ -44,7 +47,7 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 
 	@Override
 	public synchronized void clear() {
-		HsqldbStorageProvider.performUpdate(_connection, "DELETE FROM " + _tableName);
+		SqlDatabaseUtils.performUpdate(_connection, "DELETE FROM " + _tableName);
 		_size = 0;
 	}
 
@@ -67,7 +70,7 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbStorageProvider.safeClose(rs, st);
+			SqlDatabaseUtils.safeClose(rs, st);
 		}
 	}
 
@@ -95,7 +98,7 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 	}
 
 	public synchronized void add(int index, E element) {
-		HsqldbStorageProvider.performUpdate(_connection, "UPDATE " + _tableName
+		SqlDatabaseUtils.performUpdate(_connection, "UPDATE " + _tableName
 				+ " SET list_index = list_index+1 WHERE list_index > " + index);
 		try {
 			_addAtIndexStatement.setObject(1, index);
@@ -127,6 +130,6 @@ class HsqldbList<E> extends AbstractList<E> implements List<E>, HsqldbCollection
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
-		HsqldbStorageProvider.performUpdate(_connection, "DROP TABLE " + getTableName());
+		SqlDatabaseUtils.performUpdate(_connection, "DROP TABLE " + getTableName());
 	}
 }

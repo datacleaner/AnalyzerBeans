@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-final class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, HsqldbCollection {
+final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, SqlDatabaseCollection {
 
 	private final Connection _connection;
 	private final String _tableName;
@@ -21,9 +21,12 @@ final class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Hsql
 	private final PreparedStatement _deleteStatement;
 	private volatile int _size;
 
-	public HsqldbMap(Connection connection, String tableName) {
+	public SqlDatabaseMap(Connection connection, String tableName, String keyTypeName, String valueTypeName) {
 		_connection = connection;
 		_tableName = tableName;
+
+		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName + " (map_key " + keyTypeName
+				+ " PRIMARY KEY, map_value " + valueTypeName + ");");
 
 		try {
 			_getStatement = _connection.prepareStatement("SELECT map_value FROM " + _tableName + " WHERE map_key = ?;");
@@ -57,7 +60,7 @@ final class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Hsql
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbStorageProvider.safeClose(rs, null);
+			SqlDatabaseUtils.safeClose(rs, null);
 		}
 	}
 
@@ -74,7 +77,7 @@ final class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Hsql
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbStorageProvider.safeClose(rs, null);
+			SqlDatabaseUtils.safeClose(rs, null);
 		}
 	}
 
@@ -131,7 +134,7 @@ final class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Hsql
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			HsqldbStorageProvider.safeClose(rs, st);
+			SqlDatabaseUtils.safeClose(rs, st);
 		}
 	}
 
@@ -172,6 +175,6 @@ final class HsqldbMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Hsql
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
-		HsqldbStorageProvider.performUpdate(_connection, "DROP TABLE " + getTableName());
+		SqlDatabaseUtils.performUpdate(_connection, "DROP TABLE " + getTableName());
 	}
 }

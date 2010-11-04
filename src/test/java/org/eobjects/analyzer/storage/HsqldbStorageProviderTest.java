@@ -123,7 +123,7 @@ public class HsqldbStorageProviderTest extends TestCase {
 
 		EasyMock.replay(connectionMock);
 
-		HsqldbSet<String> set = new HsqldbSet<String>(connectionMock, "MY_TABLE");
+		SqlDatabaseSet<String> set = new SqlDatabaseSet<String>(connectionMock, "MY_TABLE", "VARCHAR");
 		assertEquals(0, set.size());
 		set = null;
 		System.gc();

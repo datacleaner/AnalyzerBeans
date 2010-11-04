@@ -62,8 +62,8 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.reference.TextBasedDictionary;
 import org.eobjects.analyzer.reference.TextBasedSynonymCatalog;
+import org.eobjects.analyzer.storage.H2StorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
-import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -143,7 +143,7 @@ public final class JaxbConfigurationFactory {
 				datastoreCatalog);
 
 		// TODO: Make this components configurable as well
-		StorageProvider storageProvider = new HsqldbStorageProvider();
+		StorageProvider storageProvider = new H2StorageProvider();
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
 				storageProvider);
 	}
