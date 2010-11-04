@@ -10,9 +10,10 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -187,11 +188,12 @@ public final class RowProcessingPublisher {
 			logger.info("Skipping GROUP BY optimization because no datastore is attached to the DataContextProvider");
 			return false;
 		}
-		if (datastore instanceof CsvDatastore) {
-			logger.info("Skipping GROUP BY optimization because the Datastore is based on a CSV file");
-			return false;
+
+		if (datastore instanceof JdbcDatastore || datastore instanceof OdbDatastore) {
+			return true;
 		}
-		return true;
+
+		return false;
 	}
 
 	protected static List<RowProcessingConsumer> createProcessOrderedConsumerList(
