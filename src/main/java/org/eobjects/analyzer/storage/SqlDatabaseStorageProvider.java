@@ -132,6 +132,7 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 	public final RowAnnotationFactory createRowAnnotationFactory() {
 		String tableName = "ab_row_annotations_" + _nextTableId.getAndIncrement();
 		logger.info("Creating table {} for RowAnnotationFactory", tableName);
-		return new SqlDatabaseRowAnnotationFactory(_connection, tableName, this);
+		SqlDatabaseRowAnnotationFactory persistentFactory = new SqlDatabaseRowAnnotationFactory(_connection, tableName, this);
+		return new ThresholdRowAnnotationFactory(2000, persistentFactory);
 	}
 }

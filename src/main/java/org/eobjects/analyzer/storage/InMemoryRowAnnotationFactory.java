@@ -16,6 +16,14 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 		return new RowAnnotationImpl();
 	}
 
+	protected int getRowCount(RowAnnotation annotation) {
+		List<InputRow> rows = annotatedRows.get(annotation);
+		if (rows == null) {
+			return 0;
+		}
+		return rows.size();
+	}
+
 	@Override
 	public void annotate(InputRow row, int distinctRowCount, RowAnnotation annotation) {
 		List<InputRow> rows = annotatedRows.get(annotation);
@@ -28,13 +36,18 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 				}
 			}
 		}
-		rows.add(row);
-		((RowAnnotationImpl) annotation).incrementRowCount(distinctRowCount);
+		if (!rows.contains(row)) {
+			rows.add(row);
+			((RowAnnotationImpl) annotation).incrementRowCount(distinctRowCount);
+		}
 	}
 
 	@Override
 	public InputRow[] getRows(RowAnnotation annotation) {
 		List<InputRow> rows = annotatedRows.get(annotation);
+		if (rows == null) {
+			return new InputRow[0];
+		}
 		return rows.toArray(new InputRow[rows.size()]);
 	}
 

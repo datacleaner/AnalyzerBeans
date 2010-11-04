@@ -38,12 +38,12 @@ public class StorageProvidersBenchmarkTest extends TestCase {
 		_storageProviders.put("4) Berkeley DB", new BerkeleyDbStorageProvider());
 	}
 
-	public void test1bigBatch() throws Exception {
-		runBenchmarkTests(1, 1000000);
+	public void testOneBigBatch() throws Exception {
+		runBenchmarkTests(1, 100000);
 	}
 
-	public void test100collectionsWith100items() throws Exception {
-		runBenchmarkTests(100, 100);
+	public void testManyMinorBatches() throws Exception {
+		runBenchmarkTests(50, 50);
 	}
 
 	private void runBenchmarkTests(int numCollections, int numElems) {
