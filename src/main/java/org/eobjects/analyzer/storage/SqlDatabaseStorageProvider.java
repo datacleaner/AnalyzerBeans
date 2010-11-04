@@ -93,6 +93,9 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 		if (Byte.class == valueType) {
 			return "BINARY";
 		}
+		if (ReflectionUtils.isDate(valueType)) {
+			return "DATE";
+		}
 		if (ReflectionUtils.isByteArray(valueType)) {
 			return "BLOB";
 		}
