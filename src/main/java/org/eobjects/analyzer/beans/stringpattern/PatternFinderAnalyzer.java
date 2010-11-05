@@ -22,14 +22,14 @@ import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
-import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @AnalyzerBean("Pattern finder")
 @Description("The Pattern Finder will inspect your String values and generate and match string patterns that suit your data.\nIt can be used for a lot of purposes but is excellent for verifying or getting ideas about the format of the string-values in a column.")
-public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
+public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinderResult> {
 
 	private Map<TokenPattern, RowAnnotation> patterns;
 	private TokenizerConfiguration configuration;
@@ -168,7 +168,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 	}
 
 	@Override
-	public CrosstabResult getResult() {
+	public PatternFinderResult getResult() {
 		CrosstabDimension measuresDimension = new CrosstabDimension("Measures");
 		measuresDimension.addCategory("Match count");
 		CrosstabDimension patternDimension = new CrosstabDimension("Pattern");
@@ -204,7 +204,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<CrosstabResu
 			nav.put(entry.getKey().getSampleString(), true);
 		}
 
-		return new CrosstabResult(crosstab);
+		return new PatternFinderResult(column, crosstab);
 	}
 
 	// setter methods for unittesting purposes

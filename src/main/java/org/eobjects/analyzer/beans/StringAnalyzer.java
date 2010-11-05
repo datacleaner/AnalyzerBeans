@@ -11,11 +11,11 @@ import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
-import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.AnnotatedRowsResult;
+import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 @AnalyzerBean("String analyzer")
 @Description("The String analyzer is used to collect a variety of typical metrics on string values.\nMetrics include statistics on character case, words, diacritics, white-spaces and more...")
-public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
+public class StringAnalyzer implements RowProcessingAnalyzer<StringAnalyzerResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(StringAnalyzer.class);
 
@@ -69,7 +69,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 	}
 
 	@Override
-	public CrosstabResult getResult() {
+	public StringAnalyzerResult getResult() {
 		logger.info("getResult()");
 		CrosstabDimension measureDimension = new CrosstabDimension("Measures");
 		measureDimension.addCategory("Row count");
@@ -209,7 +209,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 			}
 		}
 
-		return new CrosstabResult(crosstab);
+		return new StringAnalyzerResult(_columns, crosstab);
 	}
 
 	private void addAttachment(CrosstabNavigator<Number> nav, RowAnnotation annotation, InputColumn<?> column) {

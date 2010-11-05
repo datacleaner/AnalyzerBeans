@@ -1,5 +1,7 @@
 package org.eobjects.analyzer.beans;
 
+import javax.swing.table.TableModel;
+
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.data.DataTypeFamily;
@@ -8,7 +10,9 @@ import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 
 public class StringAnalyzerTest extends TestCase {
@@ -70,7 +74,7 @@ public class StringAnalyzerTest extends TestCase {
 		stringAnalyzer.run(new MockInputRow().put(c1, " HËJSÄN").put(c2, "eobjects.org"), 1);
 		stringAnalyzer.run(new MockInputRow().put(c1, "SØREN SEN").put(c2, "- hi"), 4);
 
-		CrosstabResult result = stringAnalyzer.getResult();
+		StringAnalyzerResult result = stringAnalyzer.getResult();
 
 		assertEquals(Number.class, result.getCrosstab().getValueClass());
 
@@ -99,6 +103,33 @@ public class StringAnalyzerTest extends TestCase {
 		assertEquals("Word count                                   13         9 ", resultLines[18]);
 		assertEquals("Max words                                     2         2 ", resultLines[19]);
 		assertEquals("Min words                                     1         0 ", resultLines[20]);
+
+		AnnotatedRowsResult drillResult = (AnnotatedRowsResult) result.getCrosstab().where("Measures", "Max white spaces")
+				.where("Column", "greetings").explore().getResult();
+		assertEquals(5, drillResult.getAnnotation().getRowCount());
+		
+		TableModel tableModel = drillResult.toTableModel();
+		
+		// assert the default table model consists of the detailed rows
+		assertEquals(2, tableModel.getColumnCount());
+		assertEquals(2, tableModel.getRowCount());
+		assertEquals("greeters", tableModel.getColumnName(0));
+		assertEquals("greetings", tableModel.getColumnName(1));
+		assertEquals("eobjects.org", tableModel.getValueAt(0, 0).toString());
+		assertEquals(" HËJSÄN", tableModel.getValueAt(0, 1).toString());
+		assertEquals("- hi", tableModel.getValueAt(1, 0).toString());
+		assertEquals("SØREN SEN", tableModel.getValueAt(1, 1).toString());
+		
+		tableModel = drillResult.toDistinctValuesTableModel(c1);
+		// assert the distinct values table model contains the greeings with whitespaces and their counts
+		assertEquals(2, tableModel.getColumnCount());
+		assertEquals(2, tableModel.getColumnCount());
+		assertEquals("greetings", tableModel.getColumnName(0));
+		assertEquals("COUNT(*)", tableModel.getColumnName(1));
+		assertEquals("SØREN SEN", tableModel.getValueAt(0, 0));
+		assertEquals(4, tableModel.getValueAt(0, 1));
+		assertEquals(" HËJSÄN", tableModel.getValueAt(1, 0));
+		assertEquals(1, tableModel.getValueAt(1, 1));
 	}
 
 	public void testNoRows() throws Exception {

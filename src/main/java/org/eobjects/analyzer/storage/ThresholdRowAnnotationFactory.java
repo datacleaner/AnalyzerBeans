@@ -1,8 +1,10 @@
 package org.eobjects.analyzer.storage;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +51,7 @@ public class ThresholdRowAnnotationFactory implements RowAnnotationFactory {
 		} else {
 			_inMemoryDelegate.annotate(row, distinctCount, annotation);
 
-			if (_inMemoryDelegate.getRowCount(annotation) >= _rowCountThreshold) {
+			if (_inMemoryDelegate.getInMemoryRowCount(annotation) >= _rowCountThreshold) {
 				makePersistent(annotation);
 			}
 		}
@@ -84,6 +86,15 @@ public class ThresholdRowAnnotationFactory implements RowAnnotationFactory {
 			return _persistentDelegate.getRows(annotation);
 		} else {
 			return _inMemoryDelegate.getRows(annotation);
+		}
+	}
+	
+	@Override
+	public Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn) {
+		if (_persistentAnnotations.contains(annotation)) {
+			return _persistentDelegate.getValueCounts(annotation, inputColumn);
+		} else {
+			return _inMemoryDelegate.getValueCounts(annotation, inputColumn);
 		}
 	}
 }

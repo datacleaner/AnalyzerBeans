@@ -12,11 +12,11 @@ import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
-import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.AnnotatedRowsResult;
+import org.eobjects.analyzer.result.NumberAnalyzerResult;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
@@ -36,7 +36,7 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
  */
 @AnalyzerBean("Number analyzer")
 @Description("Provides insight into number-column values.")
-public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
+public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResult> {
 
 	private Map<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate>();
 
@@ -74,7 +74,7 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 	}
 
 	@Override
-	public CrosstabResult getResult() {
+	public NumberAnalyzerResult getResult() {
 		CrosstabDimension measureDimension = new CrosstabDimension("Measure");
 		measureDimension.addCategory("Highest value");
 		measureDimension.addCategory("Lowest value");
@@ -133,7 +133,7 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 				addAttachment(navigator, delegate.getNonNullAnnotation());
 			}
 		}
-		return new CrosstabResult(crosstab);
+		return new NumberAnalyzerResult(_columns, crosstab);
 	}
 
 	private void addAttachment(CrosstabNavigator<Number> nav, RowAnnotation annotation) {

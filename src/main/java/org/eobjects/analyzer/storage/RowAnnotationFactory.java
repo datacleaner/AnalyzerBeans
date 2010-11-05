@@ -1,5 +1,8 @@
 package org.eobjects.analyzer.storage;
 
+import java.util.Map;
+
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 /**
@@ -52,4 +55,14 @@ public interface RowAnnotationFactory {
 	 * @return
 	 */
 	public InputRow[] getRows(RowAnnotation annotation);
+
+	/**
+	 * Gets a summarized view of the distinct values and their counts for a
+	 * single column and annotation.
+	 * 
+	 * @param annotation
+	 * @param inputColumn
+	 * @return
+	 */
+	public Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn);
 }

@@ -1,7 +1,11 @@
 package org.eobjects.analyzer.result;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -60,6 +64,35 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 		return _rows;
 	}
 
+	public TableModel toDistinctValuesTableModel(InputColumn<?> inputColumnOfInterest) {
+		Map<Object, Integer> valueCounts = _annotationFactory.getValueCounts(_annotation, inputColumnOfInterest);
+		DefaultTableModel tableModel = new DefaultTableModel(new String[] { inputColumnOfInterest.getName(), "COUNT(*)" },
+				valueCounts.size());
+
+		// sort the set
+		TreeSet<Entry<Object, Integer>> set = new TreeSet<Entry<Object, Integer>>(new Comparator<Entry<Object, Integer>>() {
+			@Override
+			public int compare(Entry<Object, Integer> o1, Entry<Object, Integer> o2) {
+				int countDiff = o2.getValue().intValue() - o1.getValue().intValue();
+				if (countDiff == 0) {
+					return -1;
+				}
+				return countDiff;
+			}
+		});
+		set.addAll(valueCounts.entrySet());
+		valueCounts = null;
+
+		int i = 0;
+		for (Entry<Object, Integer> entry : set) {
+			tableModel.setValueAt(entry.getKey(), i, 0);
+			tableModel.setValueAt(entry.getValue(), i, 1);
+			i++;
+		}
+
+		return tableModel;
+	}
+
 	@Override
 	public TableModel toTableModel() {
 		if (_tableModel == null) {
@@ -99,11 +132,11 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 		}
 		return -1;
 	}
-	
+
 	public RowAnnotation getAnnotation() {
 		return _annotation;
 	}
-	
+
 	public int getRowCount() {
 		return _annotation.getRowCount();
 	}

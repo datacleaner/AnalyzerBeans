@@ -252,4 +252,36 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 		}
 	}
 
+	@Override
+	public Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn) {
+		HashMap<Object, Integer> map = new HashMap<Object, Integer>();
+
+		String inputColumnName = getColumnName(inputColumn, false);
+		if (inputColumnName == null) {
+			return map;
+		}
+
+		String annotationColumnName = getColumnName(annotation, false);
+		if (annotationColumnName == null) {
+			return map;
+		}
+		ResultSet rs = null;
+		PreparedStatement st = null;
+		try {
+			st = _connection.prepareStatement("SELECT " + inputColumnName + ", SUM(distinct_count) FROM " + _tableName
+					+ " WHERE " + annotationColumnName + " = TRUE");
+			rs = st.executeQuery();
+			while (rs.next()) {
+				Object value = rs.getObject(1);
+				int count = rs.getInt(2);
+				map.put(value, count);
+			}
+			return map;
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
+		} finally {
+			SqlDatabaseUtils.safeClose(rs, st);
+		}
+	}
+
 }
