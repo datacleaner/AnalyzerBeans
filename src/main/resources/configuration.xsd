@@ -10,10 +10,25 @@
 				<element name="configuration-metadata" type="ab:configurationMetadataType"
 					minOccurs="0" maxOccurs="1" />
 				<element name="datastore-catalog" type="ab:datastoreCatalogType"
-					minOccurs="1" maxOccurs="1" />
+					minOccurs="1" maxOccurs="1">
+					<annotation>
+						<documentation>
+							Defines the catalog of datastores that are usable
+							as input sources for the analysis jobs.
+						</documentation>
+					</annotation>
+				</element>
 				<element name="reference-data-catalog" type="ab:referenceDataCatalogType"
-					minOccurs="0" maxOccurs="1" />
-				<choice minOccurs="1" maxOccurs="1">
+					minOccurs="0" maxOccurs="1">
+					<annotation>
+						<documentation>
+							Defines the catalog of reference data, containing
+							Dictionaries, Synonyms
+							etc.
+						</documentation>
+					</annotation>
+				</element>
+				<choice minOccurs="0" maxOccurs="1">
 					<element name="multithreaded-taskrunner" type="ab:multithreadedTaskrunnerType"
 						minOccurs="1" maxOccurs="1" />
 					<element name="singlethreaded-taskrunner" type="ab:singlethreadedTaskrunnerType"
@@ -21,8 +36,36 @@
 					<element name="custom-taskrunner" type="ab:customElementType"
 						minOccurs="1" maxOccurs="1" />
 				</choice>
+				<choice minOccurs="0" maxOccurs="1">
+					<element name="in-memory-storage-provider" type="ab:inMemoryStorageProviderType"
+						minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>
+								Select this storage provider to store staging data
+								and intermediary results in memory. This is by far the best
+								performing storage provider but it also brings in the risk of
+								running out of memory for very large jobs.  
+							</documentation>
+						</annotation>
+					</element>
+					<element name="hsqldb-storage-provider" type="ab:hsqldbStorageProviderType"
+						minOccurs="1" maxOccurs="1" />
+					<element name="h2-database-storage-provider" type="ab:h2StorageProviderType"
+						minOccurs="1" maxOccurs="1" />
+					<element name="berkeley-db-storage-provider" type="ab:berkeleyDbStorageProviderType"
+						minOccurs="1" maxOccurs="1" />
+					<element name="custom-storage-provider" type="ab:customElementType"
+						minOccurs="1" maxOccurs="1" />
+				</choice>
 				<element name="classpath-scanner" minOccurs="0" maxOccurs="1"
-					type="ab:classpathScannerType" />
+					type="ab:classpathScannerType">
+					<annotation>
+						<documentation>
+							Defines which java packages should be scanned for
+							components to use in AnalyzerBeans.
+						</documentation>
+					</annotation>
+				</element>
 			</sequence>
 		</complexType>
 	</element>
@@ -205,8 +248,73 @@
 		<attribute name="name" type="string" use="required" />
 	</complexType>
 
+	<complexType name="inMemoryStorageProviderType" />
+
+	<complexType name="hsqldbStorageProviderType">
+		<sequence>
+			<element name="temp-directory" minOccurs="0" maxOccurs="1"
+				type="string">
+				<annotation>
+					<documentation>
+						Sets the path for the directory to use for on-disk
+						storage. This is optional as Hsqldb will otherwise automatically
+						assign a temporary directory for the purpose.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+		<attribute name="in-memory-threshold" type="int" use="optional">
+			<annotation>
+				<documentation>
+					Sets a threshold upon the number of rows to store in
+					memory before on-disk storage will be used. Setting a high
+					threshold will typically increase performance but also memory
+					consumption.
+				</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+
+	<complexType name="h2StorageProviderType">
+		<sequence>
+			<element name="temp-directory" minOccurs="0" maxOccurs="1"
+				type="string">
+				<annotation>
+					<documentation>
+						Sets the path for the directory to use for on-disk
+						storage. This is
+						optional as H2 will otherwise automatically assign
+						a temporary
+						directory for the purpose.
+				</documentation>
+				</annotation>
+			</element>
+		</sequence>
+		<attribute name="in-memory-threshold" type="int" use="optional">
+			<annotation>
+				<documentation>
+					Sets a threshold upon the number of rows to store in
+					memory before on-disk storage will be used. Setting a high
+					threshold will typically increase performance but also memory
+					consumption.
+				</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+
+	<complexType name="berkeleyDbStorageProviderType" />
+
 	<complexType name="multithreadedTaskrunnerType">
-		<attribute name="max-threads" type="short" use="optional" />
+		<attribute name="max-threads" type="short" use="optional">
+			<annotation>
+				<documentation>
+					Sets the maximum available number of threads that the
+					thread pool may assign. Don't set this value lower than 5 as it may
+					cause serious performance penalties from threads waiting on each
+					other.
+				</documentation>
+			</annotation>
+		</attribute>
 	</complexType>
 
 	<complexType name="singlethreadedTaskrunnerType">
@@ -215,13 +323,26 @@
 	<complexType name="customElementType">
 		<sequence>
 			<element name="property" minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Adds a property to this custom type. Properties are
+						mapped to fields in the corresponding class that are annotated
+						with the @Configured annotation.
+				</documentation>
+				</annotation>
 				<complexType>
 					<attribute name="name" use="required" type="string" />
 					<attribute name="value" use="required" type="string" />
 				</complexType>
 			</element>
 		</sequence>
-		<attribute name="class-name" type="string" use="required" />
+		<attribute name="class-name" type="string" use="required">
+			<annotation>
+				<documentation>
+					The java class name of this custom type.
+				</documentation>
+			</annotation>
+		</attribute>
 	</complexType>
 
 </schema>
