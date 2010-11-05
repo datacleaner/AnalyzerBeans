@@ -113,12 +113,12 @@ public class StringAnalyzerTest extends TestCase {
 		// assert the default table model consists of the detailed rows
 		assertEquals(2, tableModel.getColumnCount());
 		assertEquals(2, tableModel.getRowCount());
-		assertEquals("greeters", tableModel.getColumnName(0));
-		assertEquals("greetings", tableModel.getColumnName(1));
-		assertEquals("eobjects.org", tableModel.getValueAt(0, 0).toString());
-		assertEquals(" HËJSÄN", tableModel.getValueAt(0, 1).toString());
-		assertEquals("- hi", tableModel.getValueAt(1, 0).toString());
-		assertEquals("SØREN SEN", tableModel.getValueAt(1, 1).toString());
+		assertEquals("greetings", tableModel.getColumnName(0));
+		assertEquals("greeters", tableModel.getColumnName(1));
+		assertEquals(" HËJSÄN", tableModel.getValueAt(0, 0).toString());
+		assertEquals("eobjects.org", tableModel.getValueAt(0, 1).toString());
+		assertEquals("SØREN SEN", tableModel.getValueAt(1, 0).toString());
+		assertEquals("- hi", tableModel.getValueAt(1, 1).toString());
 		
 		tableModel = drillResult.toDistinctValuesTableModel(c1);
 		// assert the distinct values table model contains the greeings with whitespaces and their counts

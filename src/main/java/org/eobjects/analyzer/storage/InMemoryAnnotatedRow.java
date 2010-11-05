@@ -44,4 +44,8 @@ final class InMemoryAnnotatedRow implements InputRow {
 	public String toString() {
 		return _delegate.toString();
 	}
+	
+	public InputRow getDelegate() {
+		return _delegate;
+	}
 }

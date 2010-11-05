@@ -2,6 +2,7 @@ package org.eobjects.analyzer.storage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ import org.eobjects.analyzer.data.InputRow;
 
 public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 
-	private final Map<RowAnnotation, List<InMemoryAnnotatedRow>> _annotatedRows = new HashMap<RowAnnotation, List<InMemoryAnnotatedRow>>();
+	private final Map<RowAnnotation, List<InMemoryAnnotatedRow>> _annotatedRows = new LinkedHashMap<RowAnnotation, List<InMemoryAnnotatedRow>>();
 
 	@Override
 	public RowAnnotation createAnnotation() {
@@ -27,7 +28,6 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 
 	@Override
 	public void annotate(InputRow row, int distinctRowCount, RowAnnotation annotation) {
-		InMemoryAnnotatedRow inMemoryAnnotatedRow = new InMemoryAnnotatedRow(row, distinctRowCount);
 		List<InMemoryAnnotatedRow> rows = _annotatedRows.get(annotation);
 		if (rows == null) {
 			synchronized (this) {
@@ -38,7 +38,17 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 				}
 			}
 		}
-		if (!rows.contains(inMemoryAnnotatedRow)) {
+
+		boolean found = false;
+		for (InMemoryAnnotatedRow inMemoryAnnotatedRow : rows) {
+			if (inMemoryAnnotatedRow.getDelegate().equals(row)) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			InMemoryAnnotatedRow inMemoryAnnotatedRow = new InMemoryAnnotatedRow(row, distinctRowCount);
 			rows.add(inMemoryAnnotatedRow);
 			((RowAnnotationImpl) annotation).incrementRowCount(distinctRowCount);
 		}

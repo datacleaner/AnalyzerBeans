@@ -1,7 +1,7 @@
 package org.eobjects.analyzer.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +17,7 @@ public class MockInputRow implements InputRow {
 
 	private static final AtomicInteger _idGenerator = new AtomicInteger(Integer.MIN_VALUE);
 
-	private final Map<InputColumn<?>, Object> map = new HashMap<InputColumn<?>, Object>();
+	private final Map<InputColumn<?>, Object> map = new LinkedHashMap<InputColumn<?>, Object>();
 	private final int _id;
 
 	public MockInputRow() {

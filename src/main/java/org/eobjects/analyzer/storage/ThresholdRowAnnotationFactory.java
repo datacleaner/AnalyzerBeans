@@ -64,7 +64,12 @@ public class ThresholdRowAnnotationFactory implements RowAnnotationFactory {
 		_inMemoryDelegate.reset(annotation);
 
 		for (InputRow row : rows) {
-			_persistentDelegate.annotate(row, 1, annotation);
+			int distinctCount = 1;
+			if (row instanceof InMemoryAnnotatedRow) {
+				distinctCount = ((InMemoryAnnotatedRow) row).getDistinctCount();
+				row = ((InMemoryAnnotatedRow) row).getDelegate();
+			}
+			_persistentDelegate.annotate(row, distinctCount, annotation);
 		}
 
 		int remainingRowCount = correctRowCount - annotation.getRowCount();
@@ -88,7 +93,7 @@ public class ThresholdRowAnnotationFactory implements RowAnnotationFactory {
 			return _inMemoryDelegate.getRows(annotation);
 		}
 	}
-	
+
 	@Override
 	public Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn) {
 		if (_persistentAnnotations.contains(annotation)) {

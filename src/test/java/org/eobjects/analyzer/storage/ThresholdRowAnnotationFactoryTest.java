@@ -41,7 +41,8 @@ public class ThresholdRowAnnotationFactoryTest extends TestCase {
 		
 		InputRow[] rows = thresholdFactory.getRows(a1);
 		for (InputRow row : rows) {
-			mockFactory.annotate(row, 1, a1);
+			row = ((InMemoryAnnotatedRow)row).getDelegate();
+			mockFactory.annotate(row, 2, a1);
 		}
 		mockFactory.annotate(rowNo100, 1, a1);
 		
