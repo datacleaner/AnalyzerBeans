@@ -34,7 +34,8 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 		_storageProvider = storageProvider;
 		_tableName = tableName;
 		String intType = _storageProvider.getSqlType(Integer.class);
-		performUpdate("CREATE TABLE " + tableName + " (id " + intType + " PRIMARY KEY, distinct_count " + intType + ")");
+		performUpdate(SqlDatabaseUtils.CREATE_TABLE_PREFIX + tableName + " (id " + intType + " PRIMARY KEY, distinct_count "
+				+ intType + ")");
 	}
 
 	@Override

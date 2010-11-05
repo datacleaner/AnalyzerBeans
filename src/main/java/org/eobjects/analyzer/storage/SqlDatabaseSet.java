@@ -18,7 +18,7 @@ final class SqlDatabaseSet<E> extends AbstractSet<E> implements Set<E>, SqlDatab
 		_connection = connection;
 		_tableName = tableName;
 
-		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName + " (set_value " + valueTypeName
+		SqlDatabaseUtils.performUpdate(_connection, SqlDatabaseUtils.CREATE_TABLE_PREFIX + tableName + " (set_value " + valueTypeName
 				+ " PRIMARY KEY)");
 	}
 

@@ -19,7 +19,7 @@ class SqlDatabaseList<E> extends AbstractList<E> implements List<E>, SqlDatabase
 		_tableName = tableName;
 		_size = 0;
 
-		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName
+		SqlDatabaseUtils.performUpdate(_connection, SqlDatabaseUtils.CREATE_TABLE_PREFIX + tableName
 				+ " (list_index INTEGER PRIMARY KEY, list_value " + valueTypeName + ")");
 	}
 

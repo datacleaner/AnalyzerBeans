@@ -100,6 +100,10 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 		return -1;
 	}
 	
+	public RowAnnotation getAnnotation() {
+		return _annotation;
+	}
+	
 	public int getRowCount() {
 		return _annotation.getRowCount();
 	}

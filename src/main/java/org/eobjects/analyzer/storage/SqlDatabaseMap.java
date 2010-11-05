@@ -19,8 +19,8 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 		_connection = connection;
 		_tableName = tableName;
 
-		SqlDatabaseUtils.performUpdate(_connection, "CREATE TABLE " + tableName + " (map_key " + keyTypeName
-				+ " PRIMARY KEY, map_value " + valueTypeName + ")");
+		SqlDatabaseUtils.performUpdate(_connection, SqlDatabaseUtils.CREATE_TABLE_PREFIX + tableName + " (map_key "
+				+ keyTypeName + " PRIMARY KEY, map_value " + valueTypeName + ")");
 	}
 
 	@Override

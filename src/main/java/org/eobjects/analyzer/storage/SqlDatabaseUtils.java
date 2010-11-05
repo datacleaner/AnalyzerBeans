@@ -12,6 +12,8 @@ final class SqlDatabaseUtils {
 
 	private final static Logger logger = LoggerFactory.getLogger(SqlDatabaseUtils.class);
 
+	public final static String CREATE_TABLE_PREFIX = "CREATE CACHED TABLE ";
+
 	private SqlDatabaseUtils() {
 		// prevent instantiation
 	}

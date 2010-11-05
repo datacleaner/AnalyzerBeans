@@ -117,9 +117,18 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 		throw new UnsupportedOperationException("Unsupported value type: " + valueType);
 	}
 
+	/**
+	 * Subclasses can override this method to control table name generation
+	 * 
+	 * @return the name of the next table to create
+	 */
+	protected String getNextTableName() {
+		return "ab_" + _nextTableId.getAndIncrement();
+	}
+
 	@Override
 	public <E> List<E> createList(Class<E> valueType) throws IllegalStateException {
-		String tableName = "ab_list_" + _nextTableId.getAndIncrement();
+		String tableName = getNextTableName();
 		String valueTypeName = getSqlType(valueType);
 		logger.info("Creating table {} for List", tableName);
 		return new SqlDatabaseList<E>(_connection, tableName, valueTypeName);
@@ -127,7 +136,7 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 
 	@Override
 	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
-		String tableName = "ab_set_" + _nextTableId.getAndIncrement();
+		String tableName = getNextTableName();
 		String valueTypeName = getSqlType(valueType);
 		logger.info("Creating table {} for Set", tableName);
 		return new SqlDatabaseSet<E>(_connection, tableName, valueTypeName);
@@ -135,7 +144,7 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 
 	@Override
 	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
-		String tableName = "ab_map_" + _nextTableId.getAndIncrement();
+		String tableName = getNextTableName();
 		String keyTypeName = getSqlType(keyType);
 		String valueTypeName = getSqlType(valueType);
 		logger.info("Creating table {} for Map", tableName);
@@ -144,7 +153,7 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 
 	@Override
 	public final RowAnnotationFactory createRowAnnotationFactory() {
-		String tableName = "ab_row_annotations_" + _nextTableId.getAndIncrement();
+		String tableName = getNextTableName();
 		logger.info("Creating table {} for RowAnnotationFactory", tableName);
 		SqlDatabaseRowAnnotationFactory persistentFactory = new SqlDatabaseRowAnnotationFactory(_connection, tableName, this);
 		return new ThresholdRowAnnotationFactory(_inMemoryThreshold, persistentFactory);
