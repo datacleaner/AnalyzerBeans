@@ -21,15 +21,28 @@ import org.slf4j.LoggerFactory;
 public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(SqlDatabaseStorageProvider.class);
-	private static final int IN_MEMORY_THRESHOLD_SIZE = 3000;
+
+	public static final int DEFAULT_IN_MEMORY_THRESHOLD_SIZE = 3000;
+
 	private final AtomicInteger _nextTableId = new AtomicInteger(1);
 	private final Connection _connection;
+	private int _inMemoryThreshold;
 
 	public SqlDatabaseStorageProvider(String driverClassName, String connectionUrl) {
-		this(driverClassName, connectionUrl, null, null);
+		this(DEFAULT_IN_MEMORY_THRESHOLD_SIZE, driverClassName, connectionUrl);
+	}
+
+	public SqlDatabaseStorageProvider(int inMemoryThreshold, String driverClassName, String connectionUrl) {
+		this(inMemoryThreshold, driverClassName, connectionUrl, null, null);
 	}
 
 	public SqlDatabaseStorageProvider(String driverClassName, String connectionUrl, String username, String password) {
+		this(DEFAULT_IN_MEMORY_THRESHOLD_SIZE, driverClassName, connectionUrl, username, password);
+	}
+
+	public SqlDatabaseStorageProvider(int inMemoryThreshold, String driverClassName, String connectionUrl, String username,
+			String password) {
+		_inMemoryThreshold = inMemoryThreshold;
 		logger.info("Creating new storage provider, driver={}, url={}", driverClassName, connectionUrl);
 		try {
 			Class.forName(driverClassName);
@@ -134,6 +147,6 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 		String tableName = "ab_row_annotations_" + _nextTableId.getAndIncrement();
 		logger.info("Creating table {} for RowAnnotationFactory", tableName);
 		SqlDatabaseRowAnnotationFactory persistentFactory = new SqlDatabaseRowAnnotationFactory(_connection, tableName, this);
-		return new ThresholdRowAnnotationFactory(IN_MEMORY_THRESHOLD_SIZE, persistentFactory);
+		return new ThresholdRowAnnotationFactory(_inMemoryThreshold, persistentFactory);
 	}
 }

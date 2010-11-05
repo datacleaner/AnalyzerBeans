@@ -14,6 +14,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.BerkeleyDbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType.Package;
 import org.eobjects.analyzer.configuration.jaxb.CompositeDatastoreType;
@@ -26,6 +27,8 @@ import org.eobjects.analyzer.configuration.jaxb.DatastoreCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.DbaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ExcelDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.H2StorageProviderType;
+import org.eobjects.analyzer.configuration.jaxb.HsqldbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
@@ -62,7 +65,10 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.reference.TextBasedDictionary;
 import org.eobjects.analyzer.reference.TextBasedSynonymCatalog;
+import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
 import org.eobjects.analyzer.storage.H2StorageProvider;
+import org.eobjects.analyzer.storage.HsqldbStorageProvider;
+import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
@@ -121,6 +127,7 @@ public final class JaxbConfigurationFactory {
 
 		TaskRunner taskRunner = createTaskRunner(configuration);
 		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog());
+		StorageProvider storageProvider = createStorageProvider(configuration);
 
 		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
 		ClasspathScannerType classpathScanner = configuration.getClasspathScanner();
@@ -142,10 +149,56 @@ public final class JaxbConfigurationFactory {
 		ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(configuration.getReferenceDataCatalog(),
 				datastoreCatalog);
 
-		// TODO: Make this components configurable as well
-		StorageProvider storageProvider = new H2StorageProvider();
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
 				storageProvider);
+	}
+
+	private StorageProvider createStorageProvider(Configuration configuration) {
+		if (configuration.getInMemoryStorageProvider() != null) {
+			return new InMemoryStorageProvider();
+		}
+
+		if (configuration.getCustomStorageProvider() != null) {
+			return createCustomElement(configuration.getCustomStorageProvider(), StorageProvider.class);
+		}
+
+		BerkeleyDbStorageProviderType berkeleyDbStorageProvider = configuration.getBerkeleyDbStorageProvider();
+		if (berkeleyDbStorageProvider != null) {
+			return new BerkeleyDbStorageProvider();
+		}
+
+		HsqldbStorageProviderType hsqldbType = configuration.getHsqldbStorageProvider();
+		if (hsqldbType != null) {
+			String directoryPath = hsqldbType.getTempDirectory();
+			Integer inMemoryThreshold = hsqldbType.getInMemoryThreshold();
+			if (inMemoryThreshold == null && directoryPath == null) {
+				return new HsqldbStorageProvider();
+			} else if (inMemoryThreshold != null && directoryPath != null) {
+				return new HsqldbStorageProvider(inMemoryThreshold, directoryPath);
+			} else if (inMemoryThreshold != null) {
+				return new HsqldbStorageProvider(inMemoryThreshold);
+			} else {
+				return new HsqldbStorageProvider(directoryPath);
+			}
+		}
+
+		H2StorageProviderType h2Type = configuration.getH2DatabaseStorageProvider();
+		if (h2Type != null) {
+			String directoryPath = h2Type.getTempDirectory();
+			Integer inMemoryThreshold = h2Type.getInMemoryThreshold();
+			if (inMemoryThreshold == null && directoryPath == null) {
+				return new H2StorageProvider();
+			} else if (inMemoryThreshold != null && directoryPath != null) {
+				return new H2StorageProvider(inMemoryThreshold, directoryPath);
+			} else if (inMemoryThreshold != null) {
+				return new H2StorageProvider(inMemoryThreshold);
+			} else {
+				return new H2StorageProvider(directoryPath);
+			}
+		}
+
+		// In-memory is the default storage provider
+		return new InMemoryStorageProvider();
 	}
 
 	private ReferenceDataCatalog createReferenceDataCatalog(ReferenceDataCatalogType referenceDataCatalog,

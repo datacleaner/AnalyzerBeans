@@ -44,8 +44,8 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	private Environment environment;
 	private Boolean deleteOnExit;
-	private File targetDir;
-
+	private File _targetDir;
+	
 	public Object createProvidedCollection(ProvidedPropertyDescriptorImpl providedDescriptor) {
 		Type typeArgument = providedDescriptor.getTypeArgument(0);
 		Class<?> clazz1 = (Class<?>) typeArgument;
@@ -82,7 +82,7 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		}
 
 		if (deleteOnExit) {
-			initDeleteOnExit(targetDir);
+			initDeleteOnExit(_targetDir);
 		}
 	}
 
@@ -113,24 +113,24 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	private File createTargetDir() {
 		File tempDir = FileHelper.getTempDir();
 		deleteOnExit = false;
-		while (targetDir == null) {
+		while (_targetDir == null) {
 			try {
 				File candidateDir = new File(tempDir.getAbsolutePath() + File.separatorChar + "analyzerBeans_"
 						+ UUID.randomUUID().toString());
 				if (!candidateDir.exists() && candidateDir.mkdir()) {
-					targetDir = candidateDir;
+					_targetDir = candidateDir;
 					deleteOnExit = true;
 				}
 			} catch (Exception e) {
 				log.error("Exception thrown while trying to create targetDir inside tempDir", e);
-				targetDir = tempDir;
+				_targetDir = tempDir;
 			}
 		}
 		if (log.isInfoEnabled()) {
 			log.info("Using target directory for persistent collections (deleteOnExit=" + deleteOnExit + "): "
-					+ targetDir.getAbsolutePath());
+					+ _targetDir.getAbsolutePath());
 		}
-		return targetDir;
+		return _targetDir;
 	}
 
 	private Database createDatabase() throws DatabaseException {

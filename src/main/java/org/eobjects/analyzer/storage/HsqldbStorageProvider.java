@@ -15,4 +15,16 @@ public final class HsqldbStorageProvider extends SqlDatabaseStorageProvider impl
 	public HsqldbStorageProvider() {
 		super("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:ab" + databaseIndex.getAndIncrement(), "SA", "");
 	}
+
+	public HsqldbStorageProvider(int inMemoryThreshold) {
+		super(inMemoryThreshold, "org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:ab" + databaseIndex.getAndIncrement(), "SA", "");
+	}
+
+	public HsqldbStorageProvider(String directoryPath) {
+		super("org.hsqldb.jdbcDriver", "jdbc:hsqldb:file:" + directoryPath, "SA", "");
+	}
+
+	public HsqldbStorageProvider(int inMemoryThreshold, String directoryPath) {
+		super(inMemoryThreshold, "org.hsqldb.jdbcDriver", "jdbc:hsqldb:file:" + directoryPath, "SA", "");
+	}
 }
