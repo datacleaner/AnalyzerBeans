@@ -26,14 +26,15 @@ public class RendererFactory {
 		for (RendererBeanDescriptor descriptor : descriptors) {
 			Class<? extends AnalyzerResult> analyzerResultType1 = descriptor.getAnalyzerResultType();
 			if (ReflectionUtils.is(analyzerResultType, analyzerResultType1)) {
-				int dist1 = ReflectionUtils.getHierarchyDistance(analyzerResultType, analyzerResultType1);
-				if (dist1 == 0) {
-					bestMatchingDescriptor = descriptor;
-					break;
-				}
 				if (bestMatchingDescriptor == null) {
 					bestMatchingDescriptor = descriptor;
 				} else {
+					int dist1 = ReflectionUtils.getHierarchyDistance(analyzerResultType, analyzerResultType1);
+					if (dist1 == 0) {
+						bestMatchingDescriptor = descriptor;
+						break;
+					}
+					
 					Class<? extends AnalyzerResult> analyzerResultType2 = bestMatchingDescriptor.getAnalyzerResultType();
 					int dist2 = ReflectionUtils.getHierarchyDistance(analyzerResultType, analyzerResultType2);
 					if (dist1 < dist2) {

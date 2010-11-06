@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.NumberResult;
+import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.data.Row;
@@ -22,6 +23,9 @@ public class RendererFactoryTest extends TestCase {
 		assertEquals(DefaultTextRenderer.class, r.getClass());
 
 		r = rendererFactory.getRenderer(new CrosstabResult(null), TextRenderingFormat.class);
+		assertEquals(CrosstabTextRenderer.class, r.getClass());
+
+		r = rendererFactory.getRenderer(new PatternFinderResult(null, null), TextRenderingFormat.class);
 		assertEquals(CrosstabTextRenderer.class, r.getClass());
 
 		r = rendererFactory.getRenderer(new DataSetResult(new LinkedList<Row>()), TextRenderingFormat.class);

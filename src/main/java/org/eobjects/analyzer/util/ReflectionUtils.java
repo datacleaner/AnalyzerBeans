@@ -279,10 +279,14 @@ public class ReflectionUtils {
 			throw new IllegalArgumentException("Not a valid subtype of " + supertype.getName() + ": " + subtype.getName());
 		}
 
+		Class<?> subSuperclass = subtype.getSuperclass();
+		if (subSuperclass != Object.class) {
+			return 1 + getHierarchyDistance(subSuperclass, supertype);
+		}
+		
 		if (supertype.isInterface()) {
 			return getInterfaceHierarchyDistance(subtype, supertype);
 		} else {
-			Class<?> subSuperclass = subtype.getSuperclass();
 			return 1 + getHierarchyDistance(subSuperclass, supertype);
 		}
 	}
