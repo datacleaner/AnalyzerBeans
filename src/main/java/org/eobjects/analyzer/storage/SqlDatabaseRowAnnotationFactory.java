@@ -269,7 +269,7 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 		PreparedStatement st = null;
 		try {
 			st = _connection.prepareStatement("SELECT " + inputColumnName + ", SUM(distinct_count) FROM " + _tableName
-					+ " WHERE " + annotationColumnName + " = TRUE");
+					+ " WHERE " + annotationColumnName + " = TRUE GROUP BY " + inputColumnName);
 			rs = st.executeQuery();
 			while (rs.next()) {
 				Object value = rs.getObject(1);
