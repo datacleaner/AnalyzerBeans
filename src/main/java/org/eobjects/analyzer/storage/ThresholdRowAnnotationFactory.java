@@ -61,19 +61,19 @@ public class ThresholdRowAnnotationFactory implements RowAnnotationFactory {
 		logger.info("Making persistent storage for annotation {}", annotation);
 		int correctRowCount = annotation.getRowCount();
 		InputRow[] rows = _inMemoryDelegate.getRows(annotation);
-		_inMemoryDelegate.reset(annotation);
 
 		for (InputRow row : rows) {
-			int distinctCount = 1;
-			if (row instanceof InMemoryAnnotatedRow) {
-				distinctCount = ((InMemoryAnnotatedRow) row).getDistinctCount();
-				row = ((InMemoryAnnotatedRow) row).getDelegate();
-			}
+			int distinctCount = _inMemoryDelegate.getRowCount(annotation, row);
 			_persistentDelegate.annotate(row, distinctCount, annotation);
 		}
 
+		_inMemoryDelegate.reset(annotation);
+
+		// TODO: this shouldn't be nescesary because the in memory annotation factory
+		// now also contains correct row counts
 		int remainingRowCount = correctRowCount - annotation.getRowCount();
 		if (remainingRowCount > 0) {
+			assert false;
 			((RowAnnotationImpl) annotation).incrementRowCount(remainingRowCount);
 		}
 

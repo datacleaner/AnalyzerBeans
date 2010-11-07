@@ -93,4 +93,9 @@ public class MockInputRow implements InputRow {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "MockInputRow[id=" + _id + "]";
+	}
 }

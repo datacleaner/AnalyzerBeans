@@ -22,7 +22,7 @@ public class ThresholdRowAnnotationFactoryTest extends TestCase {
 		InputColumn<String> col1 = new MockInputColumn<String>("col1", String.class);
 
 		for (int i = 0; i < 99; i++) {
-			InputRow row = new MockInputRow(1).put(col1, "v" + i);
+			InputRow row = new MockInputRow(i).put(col1, "v" + i);
 			thresholdFactory.annotate(row, 2, a1);
 			thresholdFactory.annotate(row, 1, a2);
 			thresholdFactory.annotate(row, 1, a3);
@@ -37,11 +37,10 @@ public class ThresholdRowAnnotationFactoryTest extends TestCase {
 		EasyMock.verify(mockFactory);
 		EasyMock.reset(mockFactory);
 
-		InputRow rowNo100 = new MockInputRow(1).put(col1, "v100");
+		InputRow rowNo100 = new MockInputRow(100).put(col1, "v100");
 		
 		InputRow[] rows = thresholdFactory.getRows(a1);
 		for (InputRow row : rows) {
-			row = ((InMemoryAnnotatedRow)row).getDelegate();
 			mockFactory.annotate(row, 2, a1);
 		}
 		mockFactory.annotate(rowNo100, 1, a1);

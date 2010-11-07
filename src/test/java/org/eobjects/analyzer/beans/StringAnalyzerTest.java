@@ -17,9 +17,9 @@ import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 
 public class StringAnalyzerTest extends TestCase {
 
-	private IdGenerator ig = new PrefixedIdGenerator("id");
-	private InputColumn<String> c1 = new TransformedInputColumn<String>("greetings", DataTypeFamily.STRING, ig);
-	private InputColumn<String> c2 = new TransformedInputColumn<String>("greeters", DataTypeFamily.STRING, ig);
+	private IdGenerator ig;
+	private InputColumn<String> c1;
+	private InputColumn<String> c2;
 	private StringAnalyzer stringAnalyzer;
 
 	@SuppressWarnings("unchecked")
@@ -27,6 +27,9 @@ public class StringAnalyzerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
+		ig = new PrefixedIdGenerator("id");
+		c1 = new TransformedInputColumn<String>("greetings", DataTypeFamily.STRING, ig);
+		c2 = new TransformedInputColumn<String>("greeters", DataTypeFamily.STRING, ig);
 		stringAnalyzer = new StringAnalyzer(c1, c2);
 	}
 
@@ -107,9 +110,9 @@ public class StringAnalyzerTest extends TestCase {
 		AnnotatedRowsResult drillResult = (AnnotatedRowsResult) result.getCrosstab().where("Measures", "Max white spaces")
 				.where("Column", "greetings").explore().getResult();
 		assertEquals(5, drillResult.getAnnotation().getRowCount());
-		
+
 		TableModel tableModel = drillResult.toTableModel();
-		
+
 		// assert the default table model consists of the detailed rows
 		assertEquals(2, tableModel.getColumnCount());
 		assertEquals(2, tableModel.getRowCount());
@@ -119,9 +122,10 @@ public class StringAnalyzerTest extends TestCase {
 		assertEquals("eobjects.org", tableModel.getValueAt(0, 1).toString());
 		assertEquals("SØREN SEN", tableModel.getValueAt(1, 0).toString());
 		assertEquals("- hi", tableModel.getValueAt(1, 1).toString());
-		
+
 		tableModel = drillResult.toDistinctValuesTableModel(c1);
-		// assert the distinct values table model contains the greeings with whitespaces and their counts
+		// assert the distinct values table model contains the greeings with
+		// whitespaces and their counts
 		assertEquals(2, tableModel.getColumnCount());
 		assertEquals(2, tableModel.getColumnCount());
 		assertEquals("greetings", tableModel.getColumnName(0));
