@@ -78,7 +78,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 					int nextIndex = _outputColumns.size();
 					String name = outputColumns.getColumnName(nextIndex);
 					if (name == null) {
-						name = getDescriptor().getDisplayName();
+						name = getDescriptor().getDisplayName() + " (" + (nextIndex+1) + ")";
 					}
 					DataTypeFamily type = getDescriptor().getOutputDataTypeFamily();
 					_outputColumns.add(new TransformedInputColumn<Object>(name, type, _idGenerator));

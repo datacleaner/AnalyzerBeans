@@ -35,7 +35,11 @@ public class TokenizerTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(numTokens);
+		String[] names = new String[numTokens];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = column.getName() + " (token " + (i + 1) + ")";
+		}
+		return new OutputColumns(names);
 	}
 
 	@Override
