@@ -82,12 +82,16 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 
 		for (Entry<InputRow, Integer> rowAndCount : _annotatedRows.get(annotation).values()) {
 			Object value = rowAndCount.getKey().getValue(inputColumn);
-			Integer count = rowAndCount.getValue();
+			Integer count = map.get(value);
+			if (count == null) {
+				count = 0;
+			}
+			count = count.intValue() + rowAndCount.getValue();
 			map.put(value, count);
 		}
 		return map;
 	}
-	
+
 	public int getRowCount(RowAnnotation annotation, InputRow row) {
 		Map<Integer, Entry<InputRow, Integer>> map = _annotatedRows.get(annotation);
 		if (map == null) {

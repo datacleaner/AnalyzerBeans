@@ -24,16 +24,13 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 	private final Map<InputColumn<?>, String> _inputColumnNames = new LinkedHashMap<InputColumn<?>, String>();
 	private final Map<RowAnnotation, String> _annotationColumnNames = new HashMap<RowAnnotation, String>();
 	private final Connection _connection;
-	private final SqlDatabaseStorageProvider _storageProvider;
 	private final String _tableName;
 	private final AtomicInteger _nextColumnIndex = new AtomicInteger(1);
 
-	public SqlDatabaseRowAnnotationFactory(Connection connection, String tableName,
-			SqlDatabaseStorageProvider storageProvider) {
+	public SqlDatabaseRowAnnotationFactory(Connection connection, String tableName) {
 		_connection = connection;
-		_storageProvider = storageProvider;
 		_tableName = tableName;
-		String intType = _storageProvider.getSqlType(Integer.class);
+		String intType = SqlDatabaseUtils.getSqlType(Integer.class);
 		performUpdate(SqlDatabaseUtils.CREATE_TABLE_PREFIX + tableName + " (id " + intType + " PRIMARY KEY, distinct_count "
 				+ intType + ")");
 	}
@@ -175,7 +172,7 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 				int index = _nextColumnIndex.getAndIncrement();
 				columnName = "col" + index;
 				performUpdate("ALTER TABLE " + _tableName + " ADD COLUMN " + columnName + " "
-						+ _storageProvider.getSqlType(Boolean.class) + " DEFAULT FALSE");
+						+ SqlDatabaseUtils.getSqlType(Boolean.class) + " DEFAULT FALSE");
 				_annotationColumnNames.put(annotation, columnName);
 			}
 		}
@@ -191,7 +188,7 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
 				Class<?> javaType = inputColumn.getDataType();
 
 				performUpdate("ALTER TABLE " + _tableName + " ADD COLUMN " + columnName + " "
-						+ _storageProvider.getSqlType(javaType));
+						+ SqlDatabaseUtils.getSqlType(javaType));
 				_inputColumnNames.put(inputColumn, columnName);
 			}
 		}

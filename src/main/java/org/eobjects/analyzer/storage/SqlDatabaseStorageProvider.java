@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,46 +76,6 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 		}
 	}
 
-	protected String getSqlType(Class<?> valueType) {
-		if (String.class == valueType) {
-			return "VARCHAR";
-		}
-		if (Number.class == valueType) {
-			return "DOUBLE";
-		}
-		if (Integer.class == valueType) {
-			return "INTEGER";
-		}
-		if (Long.class == valueType) {
-			return "BIGINT";
-		}
-		if (Double.class == valueType) {
-			return "DOUBLE";
-		}
-		if (Short.class == valueType) {
-			return "SHORT";
-		}
-		if (Float.class == valueType) {
-			return "FLOAT";
-		}
-		if (Character.class == valueType) {
-			return "CHAR";
-		}
-		if (Boolean.class == valueType) {
-			return "BOOLEAN";
-		}
-		if (Byte.class == valueType) {
-			return "BINARY";
-		}
-		if (ReflectionUtils.isDate(valueType)) {
-			return "DATE";
-		}
-		if (ReflectionUtils.isByteArray(valueType)) {
-			return "BLOB";
-		}
-		throw new UnsupportedOperationException("Unsupported value type: " + valueType);
-	}
-
 	/**
 	 * Subclasses can override this method to control table name generation
 	 * 
@@ -129,7 +88,7 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 	@Override
 	public <E> List<E> createList(Class<E> valueType) throws IllegalStateException {
 		String tableName = getNextTableName();
-		String valueTypeName = getSqlType(valueType);
+		String valueTypeName = SqlDatabaseUtils.getSqlType(valueType);
 		logger.info("Creating table {} for List", tableName);
 		return new SqlDatabaseList<E>(_connection, tableName, valueTypeName);
 	}
@@ -137,7 +96,7 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 	@Override
 	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
 		String tableName = getNextTableName();
-		String valueTypeName = getSqlType(valueType);
+		String valueTypeName = SqlDatabaseUtils.getSqlType(valueType);
 		logger.info("Creating table {} for Set", tableName);
 		return new SqlDatabaseSet<E>(_connection, tableName, valueTypeName);
 	}
@@ -145,8 +104,8 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 	@Override
 	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
 		String tableName = getNextTableName();
-		String keyTypeName = getSqlType(keyType);
-		String valueTypeName = getSqlType(valueType);
+		String keyTypeName = SqlDatabaseUtils.getSqlType(keyType);
+		String valueTypeName = SqlDatabaseUtils.getSqlType(valueType);
 		logger.info("Creating table {} for Map", tableName);
 		return new SqlDatabaseMap<K, V>(_connection, tableName, keyTypeName, valueTypeName);
 	}
@@ -155,7 +114,7 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 	public final RowAnnotationFactory createRowAnnotationFactory() {
 		String tableName = getNextTableName();
 		logger.info("Creating table {} for RowAnnotationFactory", tableName);
-		SqlDatabaseRowAnnotationFactory persistentFactory = new SqlDatabaseRowAnnotationFactory(_connection, tableName, this);
+		SqlDatabaseRowAnnotationFactory persistentFactory = new SqlDatabaseRowAnnotationFactory(_connection, tableName);
 		return new ThresholdRowAnnotationFactory(_inMemoryThreshold, persistentFactory);
 	}
 }
