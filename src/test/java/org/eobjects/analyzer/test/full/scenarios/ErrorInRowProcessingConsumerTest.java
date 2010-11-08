@@ -123,8 +123,8 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 			assertEquals(PreviousErrorsExistException.class, errors.get(2).getClass());
 			assertEquals("A previous exception has occurred", errors.get(2).getMessage());
 		} else {
-			assertEquals(PreviousErrorsExistException.class, errors.get(2).getClass());
-			assertEquals("A previous exception has occurred", errors.get(2).getMessage());
+			assertEquals(PreviousErrorsExistException.class, errors.get(1).getClass());
+			assertEquals("A previous exception has occurred", errors.get(1).getMessage());
 		}
 
 		int taskCount = taskRunner.assertAllBegunTasksFinished(500);

@@ -1,7 +1,9 @@
 package org.eobjects.analyzer.storage;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
@@ -60,21 +62,22 @@ public class ThresholdRowAnnotationFactory implements RowAnnotationFactory {
 	private void makePersistent(RowAnnotation annotation) {
 		logger.info("Making persistent storage for annotation {}", annotation);
 		int correctRowCount = annotation.getRowCount();
-		InputRow[] rows = _inMemoryDelegate.getRows(annotation);
 
-		for (InputRow row : rows) {
+		Map<InputRow, Integer> rowsAndCounts = new HashMap<InputRow, Integer>();
+		for (InputRow row : _inMemoryDelegate.getRows(annotation)) {
 			int distinctCount = _inMemoryDelegate.getRowCount(annotation, row);
-			_persistentDelegate.annotate(row, distinctCount, annotation);
+			rowsAndCounts.put(row, distinctCount);
 		}
 
 		_inMemoryDelegate.reset(annotation);
 
-		// TODO: this shouldn't be nescesary because the in memory annotation factory
-		// now also contains correct row counts
-		int remainingRowCount = correctRowCount - annotation.getRowCount();
-		if (remainingRowCount > 0) {
-			assert false;
-			((RowAnnotationImpl) annotation).incrementRowCount(remainingRowCount);
+		for (Entry<InputRow, Integer> entry : rowsAndCounts.entrySet()) {
+			_persistentDelegate.annotate(entry.getKey(), entry.getValue(), annotation);
+		}
+
+		if (correctRowCount != annotation.getRowCount()) {
+			throw new IllegalStateException("Expected " + correctRowCount + " annotated rows, but found "
+					+ annotation.getRowCount());
 		}
 
 		_persistentAnnotations.add(annotation);
