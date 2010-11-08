@@ -16,7 +16,8 @@ import org.eobjects.analyzer.util.StringUtils;
 @Description("Trims your String values either on left, right or both sides.")
 public class WhitespaceTrimmerTransformer implements Transformer<String> {
 
-	private Matcher multipleWhitespaceMatcher = Pattern.compile("[\\s\\p{Zs}\\p{javaWhitespace}]+").matcher("");
+	private static final Matcher MULTIPLE_WHITESPACES_MATCHER = Pattern.compile("[\\s\\p{Zs}\\p{javaWhitespace}]+").matcher(
+			"");
 
 	@Configured
 	InputColumn<String> column;
@@ -30,6 +31,16 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 	@Configured
 	boolean trimMultipleToSingleSpace = false;
 
+	public WhitespaceTrimmerTransformer() {
+	}
+
+	public WhitespaceTrimmerTransformer(boolean trimLeft, boolean trimRight, boolean trimMultipleToSingleSpace) {
+		this();
+		this.trimLeft = trimLeft;
+		this.trimRight = trimRight;
+		this.trimMultipleToSingleSpace = trimMultipleToSingleSpace;
+	}
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		return new OutputColumns(column.getName() + " (trimmed)");
@@ -38,21 +49,27 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 	@Override
 	public String[] transform(InputRow inputRow) {
 		String value = inputRow.getValue(column);
-		if (value != null) {
-			if (trimMultipleToSingleSpace) {
-				value = multipleWhitespaceMatcher.reset(value).replaceAll(" ");
+		value = transform(value);
+		return new String[] { value };
+	}
+
+	public String transform(String value) {
+		if (value == null) {
+			return null;
+		}
+		if (trimMultipleToSingleSpace) {
+			value = MULTIPLE_WHITESPACES_MATCHER.reset(value).replaceAll(" ");
+		}
+		if (trimLeft && trimRight) {
+			value = value.trim();
+		} else {
+			if (trimLeft) {
+				value = StringUtils.leftTrim(value);
 			}
-			if (trimLeft && trimRight) {
-				value = value.trim();
-			} else {
-				if (trimLeft) {
-					value = StringUtils.leftTrim(value);
-				}
-				if (trimRight) {
-					value = StringUtils.rightTrim(value);
-				}
+			if (trimRight) {
+				value = StringUtils.rightTrim(value);
 			}
 		}
-		return new String[] { value };
+		return value;
 	}
 }
