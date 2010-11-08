@@ -14,6 +14,8 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
+import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.InputColumnComparator;
 
 /**
  * Represents a typical "drill to detail" result consisting of a set of
@@ -50,6 +52,7 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 			} else {
 				_inputColumns = new ArrayList<InputColumn<?>>(0);
 			}
+			_inputColumns = CollectionUtils.sorted(_inputColumns, new InputColumnComparator());
 		}
 		return _inputColumns;
 	}
