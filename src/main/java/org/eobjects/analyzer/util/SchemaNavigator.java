@@ -46,6 +46,11 @@ public final class SchemaNavigator {
 	}
 
 	public Column convertToColumn(String columnName) {
+		Column column = dataContext.getColumnByQualifiedLabel(columnName);
+		if (column != null) {
+			return column;
+		}
+		
 		Schema schema = null;
 		String[] schemaNames = dataContext.getSchemaNames();
 		for (String schemaName : schemaNames) {
@@ -57,7 +62,7 @@ public final class SchemaNavigator {
 
 				tableAndColumnPath = tableAndColumnPath.substring(1);
 
-				Column column = getColumn(schema, tableAndColumnPath);
+				column = getColumn(schema, tableAndColumnPath);
 				if (column != null) {
 					return column;
 				}
@@ -66,7 +71,7 @@ public final class SchemaNavigator {
 
 		schema = dataContext.getDefaultSchema();
 		if (schema != null) {
-			Column column = getColumn(schema, columnName);
+			column = getColumn(schema, columnName);
 			if (column != null) {
 				return column;
 			}

@@ -58,6 +58,8 @@ public class DatastoreDictionary implements Dictionary {
 
 	@Override
 	public boolean containsValue(String value) {
+		// note that caching IS enabled because the ReferenceValues object
+		// returned by getValues() contains a cache!
 		return getValues().containsValue(value);
 	}
 
