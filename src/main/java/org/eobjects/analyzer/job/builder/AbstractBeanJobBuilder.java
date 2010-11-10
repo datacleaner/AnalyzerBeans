@@ -150,7 +150,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 	 * method that can be used by sub-classes to add callback logic when the
 	 * configuration of the bean changes
 	 */
-	protected void onConfigurationChanged() {
+	public void onConfigurationChanged() {
 	}
 
 	public Object getConfiguredProperty(ConfiguredPropertyDescriptor propertyDescriptor) {

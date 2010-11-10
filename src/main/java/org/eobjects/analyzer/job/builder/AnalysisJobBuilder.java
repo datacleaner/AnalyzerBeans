@@ -286,12 +286,7 @@ public final class AnalysisJobBuilder {
 	}
 
 	public <A extends RowProcessingAnalyzer<?>> RowProcessingAnalyzerJobBuilder<A> addRowProcessingAnalyzer(
-			Class<A> analyzerClass) {
-		AnalyzerBeanDescriptor<A> descriptor = _configuration.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
-				analyzerClass);
-		if (descriptor == null) {
-			throw new IllegalArgumentException("No descriptor found for: " + analyzerClass);
-		}
+			AnalyzerBeanDescriptor<A> descriptor) {
 		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(this, descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 
@@ -302,6 +297,16 @@ public final class AnalysisJobBuilder {
 			listener.onAdd(analyzerJobBuilder);
 		}
 		return analyzerJobBuilder;
+	}
+
+	public <A extends RowProcessingAnalyzer<?>> RowProcessingAnalyzerJobBuilder<A> addRowProcessingAnalyzer(
+			Class<A> analyzerClass) {
+		AnalyzerBeanDescriptor<A> descriptor = _configuration.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(
+				analyzerClass);
+		if (descriptor == null) {
+			throw new IllegalArgumentException("No descriptor found for: " + analyzerClass);
+		}
+		return addRowProcessingAnalyzer(descriptor);
 	}
 
 	public AnalysisJobBuilder removeAnalyzer(RowProcessingAnalyzerJobBuilder<?> ajb) {

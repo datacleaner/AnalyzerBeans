@@ -55,7 +55,7 @@ public final class SqlDatabaseUtils {
 			return "BINARY";
 		}
 		if (ReflectionUtils.isDate(valueType)) {
-			return "DATE";
+			return "TIMESTAMP";
 		}
 		if (ReflectionUtils.isByteArray(valueType)) {
 			return "BLOB";
