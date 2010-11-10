@@ -10,6 +10,10 @@ package org.eobjects.analyzer.job.builder;
 public interface FilterChangeListener {
 
 	public void onAdd(FilterJobBuilder<?, ?> filterJobBuilder);
+	
+	public void onConfigurationChanged(FilterJobBuilder<?, ?> filterJobBuilder);
+	
+	public void onRequirementChanged(FilterJobBuilder<?, ?> filterJobBuilder);
 
 	public void onRemove(FilterJobBuilder<?, ?> filterJobBuilder);
 

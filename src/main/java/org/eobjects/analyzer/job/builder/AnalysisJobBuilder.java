@@ -203,7 +203,7 @@ public final class AnalysisJobBuilder {
 	}
 
 	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor) {
-		TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(descriptor, _transformedColumnIdGenerator,
+		TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(this, descriptor, _transformedColumnIdGenerator,
 				_transformerChangeListeners);
 		_transformerJobBuilders.add(tjb);
 
@@ -239,7 +239,7 @@ public final class AnalysisJobBuilder {
 	}
 
 	public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterBeanDescriptor<F, C> descriptor) {
-		FilterJobBuilder<F, C> fjb = new FilterJobBuilder<F, C>(descriptor);
+		FilterJobBuilder<F, C> fjb = new FilterJobBuilder<F, C>(this, descriptor);
 		_filterJobBuilders.add(fjb);
 
 		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
@@ -273,7 +273,7 @@ public final class AnalysisJobBuilder {
 		if (descriptor == null) {
 			throw new IllegalArgumentException("No descriptor found for: " + analyzerClass);
 		}
-		ExploringAnalyzerJobBuilder<A> analyzerJobBuilder = new ExploringAnalyzerJobBuilder<A>(descriptor);
+		ExploringAnalyzerJobBuilder<A> analyzerJobBuilder = new ExploringAnalyzerJobBuilder<A>(this, descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 
 		// make a copy since some of the listeners may add additional listeners

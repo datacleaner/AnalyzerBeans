@@ -143,6 +143,14 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 
 	public void setRequirement(Outcome requirement) {
 		_requirement = requirement;
+		onRequirementChanged();
+	}
+
+	/**
+	 * method that can be used by sub-classes to add callback logic when the
+	 * requirement of the bean changes
+	 */
+	public void onRequirementChanged() {
 	}
 
 	public void setRequirement(FilterJobBuilder<?, ?> filterJobBuilder, String category) {

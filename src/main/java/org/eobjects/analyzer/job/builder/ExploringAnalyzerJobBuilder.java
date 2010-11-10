@@ -1,5 +1,8 @@
 package org.eobjects.analyzer.job.builder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -10,8 +13,11 @@ public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> e
 		AbstractBeanJobBuilder<AnalyzerBeanDescriptor<A>, A, ExploringAnalyzerJobBuilder<A>> implements
 		AnalyzerJobBuilder<A> {
 
-	public ExploringAnalyzerJobBuilder(AnalyzerBeanDescriptor<A> descriptor) {
+	private final AnalysisJobBuilder _analysisJobBuilder;
+
+	public ExploringAnalyzerJobBuilder(AnalysisJobBuilder analysisJobBuilder, AnalyzerBeanDescriptor<A> descriptor) {
 		super(descriptor, ExploringAnalyzerJobBuilder.class);
+		_analysisJobBuilder = analysisJobBuilder;
 	}
 
 	@Override
@@ -31,5 +37,15 @@ public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> e
 	@Override
 	public String toString() {
 		return "ExploringAnalyzerJobBuilder[analyzer=" + getDescriptor().getDisplayName() + "]";
+	}
+
+	@Override
+	public void onConfigurationChanged() {
+		super.onConfigurationChanged();
+		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(
+				_analysisJobBuilder.getAnalyzerChangeListeners());
+		for (AnalyzerChangeListener listener : listeners) {
+			listener.onConfigurationChanged(this);
+		}
 	}
 }

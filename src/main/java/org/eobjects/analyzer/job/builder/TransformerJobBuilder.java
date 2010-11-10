@@ -1,5 +1,6 @@
 package org.eobjects.analyzer.job.builder;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,13 +35,15 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> implements
 		InputColumnSourceJob {
 
+	private final AnalysisJobBuilder _analysisJobBuilder;
 	private final LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
 	private final IdGenerator _idGenerator;
 	private final List<TransformerChangeListener> _transformerChangeListeners;
 
-	public TransformerJobBuilder(TransformerBeanDescriptor<T> descriptor, IdGenerator idGenerator,
-			List<TransformerChangeListener> transformerChangeListeners) {
+	public TransformerJobBuilder(AnalysisJobBuilder analysisJobBuilder, TransformerBeanDescriptor<T> descriptor,
+			IdGenerator idGenerator, List<TransformerChangeListener> transformerChangeListeners) {
 		super(descriptor, TransformerJobBuilder.class);
+		_analysisJobBuilder = analysisJobBuilder;
 		_idGenerator = idGenerator;
 		_transformerChangeListeners = transformerChangeListeners;
 	}
@@ -78,7 +81,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 					int nextIndex = _outputColumns.size();
 					String name = outputColumns.getColumnName(nextIndex);
 					if (name == null) {
-						name = getDescriptor().getDisplayName() + " (" + (nextIndex+1) + ")";
+						name = getDescriptor().getDisplayName() + " (" + (nextIndex + 1) + ")";
 					}
 					DataTypeFamily type = getDescriptor().getOutputDataTypeFamily();
 					_outputColumns.add(new TransformedInputColumn<Object>(name, type, _idGenerator));
@@ -128,10 +131,28 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 
 	@Override
 	public void onConfigurationChanged() {
+		super.onConfigurationChanged();
+
 		// trigger getOutputColumns which will notify consumers in the case of
 		// output changes
 		if (isConfigured()) {
 			getOutputColumns();
+		}
+
+		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(
+				_analysisJobBuilder.getTransformerChangeListeners());
+		for (TransformerChangeListener listener : listeners) {
+			listener.onConfigurationChanged(this);
+		}
+	}
+
+	@Override
+	public void onRequirementChanged() {
+		super.onRequirementChanged();
+		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(
+				_analysisJobBuilder.getTransformerChangeListeners());
+		for (TransformerChangeListener listener : listeners) {
+			listener.onRequirementChanged(this);
 		}
 	}
 

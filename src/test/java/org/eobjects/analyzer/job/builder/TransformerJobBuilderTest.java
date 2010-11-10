@@ -95,7 +95,7 @@ public class TransformerJobBuilderTest extends TestCase {
 		assertEquals(0, tjb.getOutputColumns().size());
 
 		tjb.getConfigurableBean().setInputColumn(new MockInputColumn<String>("email", String.class));
-		
+
 		assertEquals(2, tjb.getOutputColumns().size());
 	}
 
@@ -105,7 +105,7 @@ public class TransformerJobBuilderTest extends TestCase {
 		AnnotationBasedTransformerBeanDescriptor<ConvertToNumberTransformer> descriptor = AnnotationBasedTransformerBeanDescriptor
 				.create(ConvertToNumberTransformer.class);
 		TransformerJobBuilder<ConvertToNumberTransformer> builder = new TransformerJobBuilder<ConvertToNumberTransformer>(
-				descriptor, IdGenerator, new LinkedList<TransformerChangeListener>());
+				new AnalysisJobBuilder(null), descriptor, IdGenerator, new LinkedList<TransformerChangeListener>());
 		assertFalse(builder.isConfigured());
 
 		ConvertToNumberTransformer configurableBean = builder.getConfigurableBean();

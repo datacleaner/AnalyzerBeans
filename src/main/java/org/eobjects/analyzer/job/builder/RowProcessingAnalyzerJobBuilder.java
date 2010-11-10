@@ -182,7 +182,27 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 			return super.getConfiguredProperty(propertyDescriptor);
 		}
 	}
-	
+
+	@Override
+	public void onConfigurationChanged() {
+		super.onConfigurationChanged();
+		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(
+				_analysisJobBuilder.getAnalyzerChangeListeners());
+		for (AnalyzerChangeListener listener : listeners) {
+			listener.onConfigurationChanged(this);
+		}
+	}
+
+	@Override
+	public void onRequirementChanged() {
+		super.onRequirementChanged();
+		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(
+				_analysisJobBuilder.getAnalyzerChangeListeners());
+		for (AnalyzerChangeListener listener : listeners) {
+			listener.onRequirementChanged(this);
+		}
+	}
+
 	public boolean isMultipleJobsSupported() {
 		return _multipleJobsSupported;
 	}

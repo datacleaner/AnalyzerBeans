@@ -16,6 +16,10 @@ public interface TransformerChangeListener {
 
 	public void onRemove(TransformerJobBuilder<?> transformerJobBuilder);
 
+	public void onConfigurationChanged(TransformerJobBuilder<?> transformerJobBuilder);
+
+	public void onRequirementChanged(TransformerJobBuilder<?> transformerJobBuilder);
+
 	/**
 	 * This method will be invoked each time a change in a transformer's output
 	 * columns is observed.
