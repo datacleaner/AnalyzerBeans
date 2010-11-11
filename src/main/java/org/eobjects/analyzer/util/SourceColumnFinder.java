@@ -8,7 +8,9 @@ import java.util.Set;
 
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
+import org.eobjects.analyzer.job.builder.SourceColumns;
 
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Table;
@@ -31,6 +33,12 @@ public class SourceColumnFinder {
 
 	public void addSources(Collection<? extends InputColumnSourceJob> inputColumnSources) {
 		_sources.addAll(inputColumnSources);
+	}
+
+	public void addSources(AnalysisJob job) {
+		addSources(new SourceColumns(job.getSourceColumns()));
+		addSources(job.getTransformerJobs());
+		addSources(job.getMergedOutcomeJobs());
 	}
 
 	public InputColumnSourceJob findInputColumnSource(InputColumn<?> outputColumn) {
