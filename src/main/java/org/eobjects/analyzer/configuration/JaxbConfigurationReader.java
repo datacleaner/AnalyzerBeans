@@ -53,7 +53,6 @@ import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
-import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
