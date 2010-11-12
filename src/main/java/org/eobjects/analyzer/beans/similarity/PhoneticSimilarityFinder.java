@@ -1,12 +1,12 @@
 package org.eobjects.analyzer.beans.similarity;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import javax.inject.Inject;
 
-import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.language.Metaphone;
 import org.apache.commons.codec.language.RefinedSoundex;
 import org.apache.commons.codec.language.Soundex;
@@ -18,6 +18,9 @@ import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.SimilarityResult;
+import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
+import org.eobjects.analyzer.storage.RowAnnotation;
+import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,89 +28,131 @@ import org.slf4j.LoggerFactory;
 @Description("Find similar sounding values using phonetic checking.\nThis analyzer uses the Soundex, Refined Soundex and Metaphone algorithms to determine the phonetic similarity of String values.")
 public class PhoneticSimilarityFinder implements RowProcessingAnalyzer<SimilarityResult> {
 
+	public static enum MatchMode {
+		STRICT, LOOSE
+	}
+
 	private final static Logger logger = LoggerFactory.getLogger(PhoneticSimilarityFinder.class);
 
-	// everything that is ~75% similar will be included
-	private final static double SIMILARITY_THRESHOLD = 3d / 4;
+	private final static double STRICT_SIMILARITY_THRESHOLD = 1.0;
 
-	@Inject
-	@Configured
-	InputColumn<String> column;
+	// everything that is ~80% similar will be included
+	private final static double LOOSE_SIMILARITY_THRESHOLD = 8d / 10;
+
+	private List<SimilarityGroup> _similarityGroups = new ArrayList<SimilarityGroup>();
 
 	@Inject
 	@Provided
-	Map<String, Integer> values;
+	RowAnnotationFactory _rowAnnotationFactory;
+
+	@Configured
+	MatchMode matchMode = MatchMode.STRICT;
+
+	@Inject
+	@Configured
+	InputColumn<String> _column;
+
+	public PhoneticSimilarityFinder() {
+	}
+
+	// constructor for test purposes
+	public PhoneticSimilarityFinder(InputColumn<String> column) {
+		_column = column;
+		_rowAnnotationFactory = new InMemoryRowAnnotationFactory();
+	}
 
 	@Override
 	public void run(InputRow row, int distinctCount) {
-		String value = row.getValue(column);
-		run(value, distinctCount);
-	}
+		String value = row.getValue(_column);
 
-	protected void run(String value, int distinctCount) {
 		if (value != null) {
 			value = value.trim().toLowerCase();
 			if (!"".equals(value)) {
-				Integer count = values.get(value);
-				if (count == null) {
-					values.put(value, distinctCount);
-				} else {
-					values.put(value, count + distinctCount);
+				boolean foundMatch = false;
+
+				for (ListIterator<SimilarityGroup> it = _similarityGroups.listIterator(); it.hasNext();) {
+					SimilarityGroup similarityGroup = it.next();
+
+					if (matches(value, similarityGroup)) {
+						RowAnnotation annotation = similarityGroup.getAnnotation();
+						it.set(new SimilarityGroup(annotation, _rowAnnotationFactory, _column, value, similarityGroup
+								.getValues()));
+						_rowAnnotationFactory.annotate(row, distinctCount, annotation);
+						foundMatch = true;
+					}
+				}
+
+				if (!foundMatch) {
+					RowAnnotation annotation = _rowAnnotationFactory.createAnnotation();
+					_rowAnnotationFactory.annotate(row, distinctCount, annotation);
+					_similarityGroups.add(new SimilarityGroup(annotation, _rowAnnotationFactory, _column, value,
+							new String[0]));
 				}
 			}
 		}
 	}
 
-	@Override
-	public SimilarityResult getResult() {
-		Set<SimilarValues> similarValues = new TreeSet<SimilarValues>();
+	public boolean matches(String value, SimilarityGroup similarityGroup) {
+		// first do exact matching
+		for (String similarityGroupValue : similarityGroup.getValues()) {
+			if (value.equals(similarityGroupValue)) {
+				return true;
+			}
+		}
 
 		Soundex soundex = new Soundex();
 		RefinedSoundex refinedSoundex = new RefinedSoundex();
 		Metaphone metaphone = new Metaphone();
 
-		int soundexThreshold = (int) Math.round(SIMILARITY_THRESHOLD * 4);
+		double threshold;
+		if (matchMode == MatchMode.STRICT) {
+			threshold = STRICT_SIMILARITY_THRESHOLD;
+		} else {
+			threshold = LOOSE_SIMILARITY_THRESHOLD;
+		}
+		int soundexThreshold = (int) Math.round(threshold * 4);
 
-		Set<String> keys = values.keySet();
-		for (String s1 : keys) {
-			for (String s2 : keys) {
-				if (!s1.equals(s2)) {
-					Integer soundexDiff = null;
-					try {
-						soundexDiff = soundex.difference(s1, s2);
-					} catch (EncoderException e) {
-						logger.error("Could not determine soundex difference", e);
-					}
+		for (String similarityGroupValue : similarityGroup.getValues()) {
+			boolean metaphoneEquals = metaphone.isMetaphoneEqual(value, similarityGroupValue);
+			if (metaphoneEquals) {
+				return true;
+			}
 
-					Integer refinedSoundexDiff = null;
-					try {
-						refinedSoundexDiff = refinedSoundex.difference(s1, s2);
-					} catch (EncoderException e) {
-						logger.error("Could not determine refined soundex difference", e);
-					}
+			try {
+				int soundexDiff = soundex.difference(value, similarityGroupValue);
 
-					boolean metaphoneEquals = metaphone.isMetaphoneEqual(s1, s2);
-
-					int refinedSoundexThreshold = (int) Math
-							.round(SIMILARITY_THRESHOLD * Math.min(s1.length(), s2.length()));
-					if (metaphoneEquals || soundexDiff >= soundexThreshold || refinedSoundexDiff >= refinedSoundexThreshold) {
-						// we have a similarity match
-						similarValues.add(new SimilarValues(s1, s2));
-					}
+				if (soundexDiff >= soundexThreshold) {
+					return true;
 				}
+			} catch (Exception e) {
+				logger.error("Could not determine soundex difference", e);
+			}
+
+			int refinedSoundexThreshold = (int) Math.round(threshold
+					* Math.min(value.length(), similarityGroupValue.length()));
+
+			try {
+				int refinedSoundexDiff = refinedSoundex.difference(value, similarityGroupValue);
+
+				if (refinedSoundexDiff >= refinedSoundexThreshold) {
+					return true;
+				}
+			} catch (Exception e) {
+				logger.error("Could not determine refined soundex difference", e);
 			}
 		}
 
-		return new SimilarityResult(similarValues);
+		return false;
 	}
 
-	// setter for test-purposes
-	public void setValues(Map<String, Integer> values) {
-		this.values = values;
-	}
-
-	// setter for test-purposes
-	public void setColumn(InputColumn<String> column) {
-		this.column = column;
+	@Override
+	public SimilarityResult getResult() {
+		for (Iterator<SimilarityGroup> it = _similarityGroups.iterator(); it.hasNext();) {
+			SimilarityGroup similarityGroup = it.next();
+			if (similarityGroup.getValueCount() == 1) {
+				it.remove();
+			}
+		}
+		return new SimilarityResult(_similarityGroups);
 	}
 }

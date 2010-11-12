@@ -1,29 +1,30 @@
 package org.eobjects.analyzer.result;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import org.eobjects.analyzer.beans.similarity.SimilarValues;
+import org.eobjects.analyzer.beans.similarity.SimilarityGroup;
 
 public class SimilarityResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private Set<SimilarValues> _similarValues;
+	private List<SimilarityGroup> _similarityGroups;
 
-	public SimilarityResult(Set<SimilarValues> similarValues) {
-		_similarValues = similarValues;
+	public SimilarityResult(List<SimilarityGroup> similarityGroups) {
+		_similarityGroups = similarityGroups;
 
 	}
 
-	public Set<SimilarValues> getSimilarValues() {
-		return Collections.unmodifiableSet(_similarValues);
+	public List<SimilarityGroup> getSimilarityGroups() {
+		return _similarityGroups;
 	}
 
 	public Set<String> getValues() {
 		Set<String> result = new HashSet<String>();
-		for (SimilarValues sv : _similarValues) {
+		for (SimilarityGroup sv : _similarityGroups) {
 			String[] values = sv.getValues();
 			result.add(values[0]);
 			result.add(values[1]);
@@ -31,18 +32,20 @@ public class SimilarityResult implements AnalyzerResult {
 		return result;
 	}
 
-	public Set<String> getSimilarValues(String value) {
-		Set<String> result = new HashSet<String>();
-		for (SimilarValues sv : _similarValues) {
-			if (sv.contains(value)) {
-				String[] values = sv.getValues();
-				if (value.equals(values[0])) {
-					result.add(values[1]);
-				} else {
-					result.add(values[0]);
+	public List<String> getSimilarValues(String string) {
+		ArrayList<String> result = new ArrayList<String>();
+		for (SimilarityGroup similarityGroup : _similarityGroups) {
+			if (similarityGroup.contains(string)) {
+				String[] values = similarityGroup.getValues();
+				for (String value : values) {
+					if (!value.equals(string)) {
+						result.add(value);
+					}
 				}
+				break;
 			}
 		}
 		return result;
 	}
+
 }
