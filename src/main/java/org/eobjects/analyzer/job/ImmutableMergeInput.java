@@ -13,7 +13,7 @@ public final class ImmutableMergeInput implements MergeInput {
 
 	public ImmutableMergeInput(Collection<InputColumn<?>> inputColumns, Outcome outcome) {
 		_inputColumns = new ArrayList<InputColumn<?>>(inputColumns);
-		_outcome = outcome;
+		_outcome = LazyOutcomeUtils.load(outcome);
 	}
 
 	@Override

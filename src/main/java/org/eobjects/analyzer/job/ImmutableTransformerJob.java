@@ -11,7 +11,6 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
-import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class ImmutableTransformerJob implements TransformerJob {
@@ -26,7 +25,7 @@ public final class ImmutableTransformerJob implements TransformerJob {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
 		_output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
-		_requirement = LazyFilterOutcome.load(requirement);
+		_requirement = LazyOutcomeUtils.load(requirement);
 	}
 
 	@Override

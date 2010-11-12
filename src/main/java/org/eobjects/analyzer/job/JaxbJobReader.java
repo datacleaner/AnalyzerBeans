@@ -69,8 +69,8 @@ public class JaxbJobReader {
 
 	private static final Logger logger = LoggerFactory.getLogger(JaxbJobReader.class);
 
-	private JAXBContext _jaxbContext;
-	private AnalyzerBeansConfiguration _configuration;
+	private final JAXBContext _jaxbContext;
+	private final AnalyzerBeansConfiguration _configuration;
 
 	public JaxbJobReader(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;

@@ -17,6 +17,10 @@ public final class MergeInputBuilder {
 	public MergeInputBuilder(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
 		_outcome = new LazyFilterOutcome(filterJobBuilder, category);
 	}
+	
+	public Outcome getOutcome() {
+		return _outcome;
+	}
 
 	public MergeInputBuilder(Outcome outcome) {
 		_outcome = outcome;

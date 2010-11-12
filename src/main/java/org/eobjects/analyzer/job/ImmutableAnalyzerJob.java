@@ -7,7 +7,6 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
-import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class ImmutableAnalyzerJob implements AnalyzerJob {
@@ -20,7 +19,7 @@ public final class ImmutableAnalyzerJob implements AnalyzerJob {
 			Outcome requirement) {
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
-		_requirement = LazyFilterOutcome.load(requirement);
+		_requirement = LazyOutcomeUtils.load(requirement);
 	}
 
 	@Override
