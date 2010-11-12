@@ -2,13 +2,12 @@ package org.eobjects.analyzer.test.full.scenarios;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.EqualityAnalyzer;
+import org.eobjects.analyzer.beans.EqualityValidationAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.standardize.NameStandardizerTransformer;
@@ -18,6 +17,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
@@ -78,7 +78,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		assertTrue(nameTransformerJobBuilder.isConfigured());
 
-		List<MutableInputColumn<?>> nameColumns = nameTransformerJobBuilder.getOutputColumns();
+		final List<MutableInputColumn<?>> nameColumns = nameTransformerJobBuilder.getOutputColumns();
 		assertEquals(4, nameColumns.size());
 		assertEquals("Firstname", nameColumns.get(0).getName());
 		assertEquals("Lastname", nameColumns.get(1).getName());
@@ -90,7 +90,10 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		emailTransformerJobBuilder.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"));
 
 		assertTrue(emailTransformerJobBuilder.isConfigured());
-		MutableInputColumn<?> usernameColumn = emailTransformerJobBuilder.getOutputColumnByName("Username");
+
+		@SuppressWarnings("unchecked")
+		final MutableInputColumn<String> usernameColumn = (MutableInputColumn<String>) emailTransformerJobBuilder
+				.getOutputColumnByName("Username");
 		assertNotNull(usernameColumn);
 
 		assertTrue(analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumns(nameColumns)
@@ -106,10 +109,16 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 			assertTrue(analyzerJobBuilder.isConfigured());
 		}
 
-		RowProcessingAnalyzerJobBuilder<EqualityAnalyzer> equalsAnalyzerJobBuilder = analysisJobBuilder
-				.addRowProcessingAnalyzer(EqualityAnalyzer.class);
-		equalsAnalyzerJobBuilder.addInputColumns(nameTransformerJobBuilder.getOutputColumnByName("Firstname"),
-				usernameColumn);
+		RowProcessingAnalyzerJobBuilder<EqualityValidationAnalyzer> equalsAnalyzerJobBuilder = analysisJobBuilder
+				.addRowProcessingAnalyzer(EqualityValidationAnalyzer.class);
+
+		assertEquals("Input1", equalsAnalyzerJobBuilder.getDescriptor().getConfiguredPropertiesForInput().iterator().next()
+				.getName());
+
+		equalsAnalyzerJobBuilder.addInputColumn(nameTransformerJobBuilder.getOutputColumnByName("Firstname"),
+				equalsAnalyzerJobBuilder.getDescriptor().getConfiguredProperty("Input1"));
+		equalsAnalyzerJobBuilder.addInputColumn(usernameColumn, equalsAnalyzerJobBuilder.getDescriptor()
+				.getConfiguredProperty("Input2"));
 		assertTrue(equalsAnalyzerJobBuilder.isConfigured());
 
 		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
@@ -136,20 +145,23 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		assertEquals("ValueCountList[[[hussein->2]]]", vdResult.getTopValues().toString());
 
 		ValidationResult validationResult = (ValidationResult) results.get(5);
-		assertEquals("[Firstname, Username]", Arrays.toString(validationResult.getColumnNames()));
-		List<Object[]> invalidRows = validationResult.getInvalidRows();
-		assertEquals(2, invalidRows.size());
+		InputColumn<?>[] highlightedColumns = validationResult.getHighlightedColumns();
+		assertEquals(2, highlightedColumns.length);
+		assertEquals("Firstname", highlightedColumns[0].getName());
+		assertEquals("Username", highlightedColumns[1].getName());
+		InputRow[] invalidRows = validationResult.getRows();
+		assertEquals(2, invalidRows.length);
 
 		// sort the rows to make order determinable
-		Collections.sort(invalidRows, new Comparator<Object[]>() {
+		Arrays.sort(invalidRows, new Comparator<InputRow>() {
 			@Override
-			public int compare(Object[] o1, Object[] o2) {
-				String emailUsername1 = (String) o1[1];
-				String emailUsername2 = (String) o2[1];
+			public int compare(InputRow o1, InputRow o2) {
+				String emailUsername1 = o1.getValue(usernameColumn);
+				String emailUsername2 = o2.getValue(usernameColumn);
 				return emailUsername1.compareTo(emailUsername2);
 			}
 		});
-		assertEquals("[barack, barack.hussein.obama]", Arrays.toString(invalidRows.get(0)));
-		assertEquals("[barack, barack.obama]", Arrays.toString(invalidRows.get(1)));
+		assertEquals("barack.hussein.obama", invalidRows[0].getValue(usernameColumn));
+		assertEquals("barack.obama", invalidRows[1].getValue(usernameColumn));
 	}
 }

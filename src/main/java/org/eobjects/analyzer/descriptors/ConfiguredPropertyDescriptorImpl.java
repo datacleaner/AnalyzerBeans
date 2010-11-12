@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
@@ -24,6 +25,15 @@ public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDesc
 			}
 		}
 		return ReflectionUtils.explodeCamelCase(super.getName(), true);
+	}
+
+	@Override
+	public String getDescription() {
+		Description desc = getAnnotation(Description.class);
+		if (desc == null) {
+			return null;
+		}
+		return desc.value();
 	}
 
 	@Override

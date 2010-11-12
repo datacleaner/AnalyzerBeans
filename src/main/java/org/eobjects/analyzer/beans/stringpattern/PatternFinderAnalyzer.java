@@ -34,7 +34,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	private Map<TokenPattern, RowAnnotation> patterns;
 	private TokenizerConfiguration configuration;
 	private Tokenizer tokenizer;
-	
+
 	@Provided
 	RowAnnotationFactory _rowAnnotationFactory;
 
@@ -48,18 +48,23 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	String[] predefinedTokenPatterns;
 
 	@Configured(required = false)
+	@Description("Separate text tokens based on case")
 	private Boolean discriminateTextCase = true;
 
 	@Configured(required = false)
+	@Description("Separate number tokens based on negativity")
 	private Boolean discriminateNegativeNumbers = false;
 
 	@Configured(required = false)
+	@Description("Separate number tokens for decimals")
 	private Boolean discriminateDecimals = true;
 
 	@Configured(required = false)
+	@Description("Use '?'-tokens for mixed text and numbers")
 	private Boolean enableMixedTokens = true;
 
 	@Configured(required = false)
+	@Description("Ignore whitespace differences")
 	private Boolean ignoreRepeatedSpaces = false;
 
 	@Configured(required = false)
@@ -72,9 +77,11 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	private Character minusSign = DecimalFormatSymbols.getInstance().getMinusSign();
 
 	@Configured(value = "Upper case patterns expand in size", required = false)
+	@Description("Auto-adjust/expand uppercase text tokens")
 	private boolean upperCaseExpandable = false;
 
 	@Configured(value = "Lower case patterns expand in size", required = false)
+	@Description("Auto-adjust/expand lowercase text tokens")
 	private boolean lowerCaseExpandable = true;
 
 	@Initialize
@@ -86,7 +93,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 		} else {
 			configuration = new TokenizerConfiguration();
 		}
-		
+
 		configuration.setUpperCaseExpandable(upperCaseExpandable);
 		configuration.setLowerCaseExpandable(lowerCaseExpandable);
 
@@ -157,7 +164,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 				} catch (RuntimeException e) {
 					throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
 				}
-				
+
 				RowAnnotation annotation = _rowAnnotationFactory.createAnnotation();
 				for (int i = 0; i < distinctCount; i++) {
 					_rowAnnotationFactory.annotate(row, distinctCount, annotation);
@@ -211,7 +218,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	public void setRowAnnotationFactory(RowAnnotationFactory rowAnnotationFactory) {
 		_rowAnnotationFactory = rowAnnotationFactory;
 	}
-	
+
 	public void setColumn(InputColumn<String> column) {
 		this.column = column;
 	}
@@ -239,11 +246,11 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	public void setEnableMixedTokens(Boolean enableMixedTokens) {
 		this.enableMixedTokens = enableMixedTokens;
 	}
-	
+
 	public void setUpperCaseExpandable(boolean upperCaseExpandable) {
 		this.upperCaseExpandable = upperCaseExpandable;
 	}
-	
+
 	public void setLowerCaseExpandable(boolean lowerCaseExpandable) {
 		this.lowerCaseExpandable = lowerCaseExpandable;
 	}

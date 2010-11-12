@@ -1,29 +1,22 @@
 package org.eobjects.analyzer.result;
 
-import java.util.List;
-
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.storage.RowAnnotation;
+import org.eobjects.analyzer.storage.RowAnnotationFactory;
 
-public class ValidationResult implements AnalyzerResult {
+/**
+ * Represents a result with rows that has been annotated as invalid in terms of
+ * some analysis validation condition.
+ * 
+ * @author Kasper Sørensen
+ * 
+ */
+public class ValidationResult extends AnnotatedRowsResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<Object[]> invalidRows;
-	private String[] columnNames;
-
-	public ValidationResult(InputColumn<?>[] inputColumns, List<Object[]> invalidRows) {
-		this.invalidRows = invalidRows;
-		this.columnNames = new String[inputColumns.length];
-		for (int i = 0; i < inputColumns.length; i++) {
-			columnNames[i] = inputColumns[i].getName();
-		}
-	}
-
-	public String[] getColumnNames() {
-		return columnNames;
-	}
-
-	public List<Object[]> getInvalidRows() {
-		return invalidRows;
+	public ValidationResult(RowAnnotation annotation, RowAnnotationFactory annotationFactory,
+			InputColumn<?>... highlightedColumns) {
+		super(annotation, annotationFactory, highlightedColumns);
 	}
 }

@@ -8,12 +8,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation used to provide a description of a bean
+ * Annotation used to provide a description of a bean or a configured property
  * 
  * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.FIELD })
 @Documented
 @Inherited
 public @interface Description {
