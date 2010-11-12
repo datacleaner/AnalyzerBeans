@@ -26,12 +26,12 @@ import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.util.ToStringComparator;
 
-public class JaxbJobFactoryTest extends TestCase {
+public class JaxbJobReaderTest extends TestCase {
 
 	public void testSimpleFilter() throws Exception {
 		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(TestHelper
 				.createSampleDatabaseDatastore("my database"));
-		JaxbJobFactory factory = new JaxbJobFactory(conf);
+		JaxbJobReader factory = new JaxbJobReader(conf);
 		AnalysisJobBuilder jobBuilder = factory.create(new File("src/test/resources/example-job-simple-filter.xml"));
 		assertEquals(1, jobBuilder.getFilterJobBuilders().size());
 		assertEquals(3, jobBuilder.getAnalyzerJobBuilders().size());
@@ -67,7 +67,7 @@ public class JaxbJobFactoryTest extends TestCase {
 	public void testNamedInputs() throws Exception {
 		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(TestHelper
 				.createSampleDatabaseDatastore("my database"));
-		JaxbJobFactory factory = new JaxbJobFactory(conf);
+		JaxbJobReader factory = new JaxbJobReader(conf);
 		AnalysisJobBuilder jobBuilder = factory.create(new File("src/test/resources/example-job-named-inputs.xml"));
 		assertEquals(true, jobBuilder.isConfigured());
 
@@ -114,7 +114,7 @@ public class JaxbJobFactoryTest extends TestCase {
 	}
 
 	public void testInvalidRead() throws Exception {
-		JaxbJobFactory factory = new JaxbJobFactory(TestHelper.createAnalyzerBeansConfiguration());
+		JaxbJobReader factory = new JaxbJobReader(TestHelper.createAnalyzerBeansConfiguration());
 		try {
 			factory.create(new File("src/test/resources/example-job-invalid.xml"));
 			fail("Exception expected");
@@ -129,7 +129,7 @@ public class JaxbJobFactoryTest extends TestCase {
 	public void testDeserializeTableReference() throws Exception {
 		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(TestHelper
 				.createSampleDatabaseDatastore("my database"));
-		JaxbJobFactory factory = new JaxbJobFactory(configuration);
+		JaxbJobReader factory = new JaxbJobReader(configuration);
 		AnalysisJobBuilder builder = factory.create(new File("src/test/resources/example-job-compare-tables.xml"));
 		AnalysisJob analysisJob = builder.toAnalysisJob();
 
@@ -167,7 +167,7 @@ public class JaxbJobFactoryTest extends TestCase {
 
 	public void testMissingDatastore() throws Exception {
 		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration();
-		JaxbJobFactory factory = new JaxbJobFactory(configuration);
+		JaxbJobReader factory = new JaxbJobReader(configuration);
 		try {
 			factory.create(new File("src/test/resources/example-job-valid.xml"));
 			fail("Exception expected");
@@ -179,7 +179,7 @@ public class JaxbJobFactoryTest extends TestCase {
 	public void testMissingTransformerDescriptor() throws Exception {
 		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(TestHelper
 				.createSampleDatabaseDatastore("my database"));
-		JaxbJobFactory factory = new JaxbJobFactory(configuration);
+		JaxbJobReader factory = new JaxbJobReader(configuration);
 		try {
 			factory.create(new File("src/test/resources/example-job-missing-descriptor.xml"));
 			fail("Exception expected");
@@ -191,7 +191,7 @@ public class JaxbJobFactoryTest extends TestCase {
 	public void testValidJob() throws Exception {
 		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(TestHelper
 				.createSampleDatabaseDatastore("my database"));
-		JaxbJobFactory factory = new JaxbJobFactory(configuration);
+		JaxbJobReader factory = new JaxbJobReader(configuration);
 		AnalysisJobBuilder builder = factory.create(new File("src/test/resources/example-job-valid.xml"));
 		assertTrue(builder.isConfigured());
 

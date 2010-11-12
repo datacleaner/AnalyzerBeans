@@ -65,14 +65,14 @@ import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.schema.Column;
 
-public class JaxbJobFactory {
+public class JaxbJobReader {
 
-	private static final Logger logger = LoggerFactory.getLogger(JaxbJobFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(JaxbJobReader.class);
 
 	private JAXBContext _jaxbContext;
 	private AnalyzerBeansConfiguration _configuration;
 
-	public JaxbJobFactory(AnalyzerBeansConfiguration configuration) {
+	public JaxbJobReader(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());

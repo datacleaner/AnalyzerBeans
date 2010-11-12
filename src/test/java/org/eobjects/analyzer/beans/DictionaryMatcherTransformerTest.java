@@ -11,7 +11,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.JaxbJobFactory;
+import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
@@ -28,7 +28,7 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 				"src/test/resources/projects.csv");
 		AnalyzerBeansConfiguration configuration = TestHelper
 				.createAnalyzerBeansConfiguration(datastore);
-		AnalysisJobBuilder job = new JaxbJobFactory(configuration)
+		AnalysisJobBuilder job = new JaxbJobReader(configuration)
 				.create(new File(
 						"src/test/resources/example-job-dictionary.xml"));
 		assertTrue(job.isConfigured());

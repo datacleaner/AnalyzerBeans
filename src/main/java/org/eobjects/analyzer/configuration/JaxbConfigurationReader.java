@@ -53,7 +53,7 @@ import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
-import org.eobjects.analyzer.job.JaxbJobFactory;
+import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -80,13 +80,13 @@ import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.util.FileHelper;
 
-public final class JaxbConfigurationFactory {
+public final class JaxbConfigurationReader {
 
-	private static final Logger logger = LoggerFactory.getLogger(JaxbJobFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(JaxbConfigurationReader.class);
 
 	private JAXBContext _jaxbContext;
 
-	public JaxbConfigurationFactory() {
+	public JaxbConfigurationReader() {
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
 		} catch (JAXBException e) {

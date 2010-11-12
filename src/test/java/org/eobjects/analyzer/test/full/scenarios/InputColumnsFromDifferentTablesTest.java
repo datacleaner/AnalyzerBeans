@@ -5,7 +5,7 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.job.JaxbJobFactory;
+import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
@@ -25,7 +25,7 @@ public class InputColumnsFromDifferentTablesTest extends TestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(conf);
 
-		AnalysisJobBuilder jobBuilder = new JaxbJobFactory(conf).create(new File(
+		AnalysisJobBuilder jobBuilder = new JaxbJobReader(conf).create(new File(
 				"src/test/resources/example-job-input-columns-from-different-tables.xml"));
 
 		try {

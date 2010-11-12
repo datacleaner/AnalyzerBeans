@@ -14,12 +14,12 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
 
 import dk.eobjects.metamodel.DataContext;
 
-public class JaxbConfigurationFactoryTest extends TestCase {
+public class JaxbConfigurationReaderTest extends TestCase {
 
-	private JaxbConfigurationFactory factory = new JaxbConfigurationFactory();
+	private JaxbConfigurationReader reader = new JaxbConfigurationReader();
 
 	public void testValidConfiguration() throws Exception {
-		AnalyzerBeansConfiguration configuration = factory.create(new File(
+		AnalyzerBeansConfiguration configuration = reader.create(new File(
 				"src/test/resources/example-configuration-valid.xml"));
 
 		DatastoreCatalog datastoreCatalog = configuration.getDatastoreCatalog();
@@ -30,7 +30,7 @@ public class JaxbConfigurationFactoryTest extends TestCase {
 	}
 
 	public void testAllDatastoreTypes() throws Exception {
-		AnalyzerBeansConfiguration configuration = factory.create(new File(
+		AnalyzerBeansConfiguration configuration = reader.create(new File(
 				"src/test/resources/example-configuration-all-datastore-types.xml"));
 		DatastoreCatalog datastoreCatalog = configuration.getDatastoreCatalog();
 		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
@@ -54,7 +54,7 @@ public class JaxbConfigurationFactoryTest extends TestCase {
 	}
 
 	public void testReferenceDataCatalog() throws Exception {
-		AnalyzerBeansConfiguration configuration = factory.create(new File(
+		AnalyzerBeansConfiguration configuration = reader.create(new File(
 				"src/test/resources/example-configuration-all-reference-data-types.xml"));
 		ReferenceDataCatalog referenceDataCatalog = configuration.getReferenceDataCatalog();
 		String[] dictionaryNames = referenceDataCatalog.getDictionaryNames();

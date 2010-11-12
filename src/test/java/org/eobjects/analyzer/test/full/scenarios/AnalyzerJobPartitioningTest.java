@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.JaxbJobFactory;
+import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
@@ -29,7 +29,7 @@ public class AnalyzerJobPartitioningTest extends TestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(conf);
 
-		AnalysisJobBuilder jobBuilder = new JaxbJobFactory(conf).create(new File(
+		AnalysisJobBuilder jobBuilder = new JaxbJobReader(conf).create(new File(
 				"src/test/resources/example-job-partitioning.xml"));
 
 		AnalysisJob analysisJob = jobBuilder.toAnalysisJob();

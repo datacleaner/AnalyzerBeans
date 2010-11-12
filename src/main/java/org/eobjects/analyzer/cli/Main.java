@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.configuration.JaxbConfigurationFactory;
+import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
@@ -14,7 +14,7 @@ import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
-import org.eobjects.analyzer.job.JaxbJobFactory;
+import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
@@ -72,7 +72,7 @@ public final class Main {
 	}
 
 	public void run() {
-		AnalyzerBeansConfiguration configuration = new JaxbConfigurationFactory().create(configurationFile);
+		AnalyzerBeansConfiguration configuration = new JaxbConfigurationReader().create(configurationFile);
 		try {
 			if (jobFile != null) {
 				runJob(configuration);
@@ -220,7 +220,7 @@ public final class Main {
 	}
 
 	protected void runJob(AnalyzerBeansConfiguration configuration) {
-		AnalysisJobBuilder analysisJobBuilder = new JaxbJobFactory(configuration).create(jobFile);
+		AnalysisJobBuilder analysisJobBuilder = new JaxbJobReader(configuration).create(jobFile);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration, new CliProgressAnalysisListener());
 		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
