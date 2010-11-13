@@ -40,32 +40,32 @@
         <analyzer>
             <descriptor ref="Pattern finder"/>
             <properties>
-                <property value="false" name="Ignore repeated spaces"/>
-                <property value="true" name="Lower case patterns expand in size"/>
-                <property value="." name="Thousands separator"/>
+                <property value="." name="Decimal separator"/>
+                <property value="true" name="Discriminate decimals"/>
+                <property value="false" name="Discriminate negative numbers"/>
                 <property value="true" name="Discriminate text case"/>
                 <property value="false" name="Enable mixed tokens"/>
-                <property value="&amp;#44;" name="Decimal separator"/>
-                <property value="false" name="Upper case patterns expand in size"/>
-                <property value="false" name="Discriminate negative numbers"/>
+                <property value="false" name="Ignore repeated spaces"/>
+                <property value="true" name="Lower case patterns expand in size"/>
                 <property value="-" name="Minus sign"/>
-                <property value="true" name="Discriminate decimals"/>
+                <property value="&amp;#44;" name="Thousands separator"/>
+                <property value="false" name="Upper case patterns expand in size"/>
             </properties>
             <input ref="col_0"/>
         </analyzer>
         <analyzer>
             <descriptor ref="Pattern finder"/>
             <properties>
-                <property value="false" name="Ignore repeated spaces"/>
-                <property value="true" name="Lower case patterns expand in size"/>
-                <property value="." name="Thousands separator"/>
+                <property value="." name="Decimal separator"/>
+                <property value="true" name="Discriminate decimals"/>
+                <property value="false" name="Discriminate negative numbers"/>
                 <property value="true" name="Discriminate text case"/>
                 <property value="false" name="Enable mixed tokens"/>
-                <property value="&amp;#44;" name="Decimal separator"/>
-                <property value="false" name="Upper case patterns expand in size"/>
-                <property value="false" name="Discriminate negative numbers"/>
+                <property value="false" name="Ignore repeated spaces"/>
+                <property value="true" name="Lower case patterns expand in size"/>
                 <property value="-" name="Minus sign"/>
-                <property value="true" name="Discriminate decimals"/>
+                <property value="&amp;#44;" name="Thousands separator"/>
+                <property value="false" name="Upper case patterns expand in size"/>
             </properties>
             <input ref="col_3"/>
         </analyzer>

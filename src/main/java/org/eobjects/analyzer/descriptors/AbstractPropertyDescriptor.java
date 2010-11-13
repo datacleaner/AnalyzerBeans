@@ -136,15 +136,14 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 		if (o == this) {
 			return 0;
 		}
-		if (o instanceof AbstractPropertyDescriptor) {
-			Field otherField = ((AbstractPropertyDescriptor) o)._field;
-			if (_field == otherField) {
-				return 0;
-			}
-
-			return _field.toString().compareTo(otherField.toString());
+		int result = getName().compareTo(o.getName());
+		if (result == 0) {
+			result = getBeanDescriptor().compareTo(o.getBeanDescriptor());
 		}
-		return getName().compareTo(o.getName());
+		if (result == 0) {
+			result = getType().hashCode() - o.getType().hashCode();
+		}
+		return result;
 	}
 
 	@Override

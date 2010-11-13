@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -173,7 +174,11 @@ public class JaxbJobWriter {
 	}
 
 	private List<InputType> createInputConfiguration(final BeanConfiguration configuration,
-			final Set<ConfiguredPropertyDescriptor> configuredProperties, final Map<InputColumn<?>, String> columnMappings) {
+			Set<ConfiguredPropertyDescriptor> configuredProperties, final Map<InputColumn<?>, String> columnMappings) {
+		
+		// sort the properties in order to make the result deterministic
+		configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>(configuredProperties);
+		
 		int numInputProperties = configuredProperties.size();
 		List<InputType> result = new ArrayList<InputType>();
 		for (ConfiguredPropertyDescriptor property : configuredProperties) {
@@ -201,7 +206,11 @@ public class JaxbJobWriter {
 	}
 
 	private ConfiguredPropertiesType createPropertyConfiguration(final BeanConfiguration configuration,
-			final Set<ConfiguredPropertyDescriptor> configuredProperties) {
+			Set<ConfiguredPropertyDescriptor> configuredProperties) {
+		
+		// sort the properties in order to make the result deterministic
+		configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>(configuredProperties);
+		
 		List<Property> result = new ArrayList<Property>();
 		for (ConfiguredPropertyDescriptor property : configuredProperties) {
 			if (!property.isInputColumn()) {
