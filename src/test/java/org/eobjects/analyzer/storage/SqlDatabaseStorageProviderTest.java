@@ -185,6 +185,9 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 
 	private void testCreateRowAnnotationFactory(StorageProvider sp) throws Exception {
 		RowAnnotationFactory f = sp.createRowAnnotationFactory();
+		if (f instanceof ThresholdRowAnnotationFactory) {
+			f = ((ThresholdRowAnnotationFactory) f).getPersistentDelegate();
+		}
 
 		RowAnnotation a1 = f.createAnnotation();
 		RowAnnotation a2 = f.createAnnotation();

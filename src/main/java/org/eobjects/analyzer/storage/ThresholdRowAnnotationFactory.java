@@ -107,6 +107,14 @@ public class ThresholdRowAnnotationFactory implements RowAnnotationFactory {
 		return new RowAnnotationImpl();
 	}
 
+	public InMemoryRowAnnotationFactory getInMemoryDelegate() {
+		return _inMemoryDelegate;
+	}
+
+	public RowAnnotationFactory getPersistentDelegate() {
+		return _persistentDelegate;
+	}
+
 	@Override
 	public InputRow[] getRows(RowAnnotation annotation) {
 		if (_persistentAnnotations.contains(annotation)) {
