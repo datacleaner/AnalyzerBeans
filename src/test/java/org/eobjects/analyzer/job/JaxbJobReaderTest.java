@@ -50,8 +50,8 @@ public class JaxbJobReaderTest extends TestCase {
 	public void testSimpleFilter() throws Exception {
 		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(TestHelper
 				.createSampleDatabaseDatastore("my database"));
-		JaxbJobReader factory = new JaxbJobReader(conf);
-		AnalysisJobBuilder jobBuilder = factory.create(new File("src/test/resources/example-job-simple-filter.xml"));
+		JaxbJobReader reader = new JaxbJobReader(conf);
+		AnalysisJobBuilder jobBuilder = reader.create(new File("src/test/resources/example-job-simple-filter.xml"));
 		assertEquals(1, jobBuilder.getFilterJobBuilders().size());
 		assertEquals(3, jobBuilder.getAnalyzerJobBuilders().size());
 

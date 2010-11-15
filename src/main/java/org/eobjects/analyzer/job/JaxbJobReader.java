@@ -84,7 +84,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.schema.Column;
 
-public class JaxbJobReader {
+public class JaxbJobReader implements JobReader<InputStream> {
 
 	private static final Logger logger = LoggerFactory.getLogger(JaxbJobReader.class);
 
@@ -98,6 +98,12 @@ public class JaxbJobReader {
 		} catch (JAXBException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+	
+	@Override
+	public AnalysisJob read(InputStream inputStream) {
+		AnalysisJobBuilder ajb = create(inputStream);
+		return ajb.toAnalysisJob();
 	}
 
 	public AnalysisJobBuilder create(File file) {

@@ -62,7 +62,7 @@ import org.eobjects.analyzer.util.StringConversionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JaxbJobWriter {
+public class JaxbJobWriter implements JobWriter<OutputStream> {
 
 	private static final Logger logger = LoggerFactory.getLogger(JaxbJobWriter.class);
 
@@ -82,6 +82,7 @@ public class JaxbJobWriter {
 		}
 	}
 
+	@Override
 	public void write(final AnalysisJob analysisJob, final OutputStream outputStream) {
 		logger.debug("write({},{}}", analysisJob, outputStream);
 		final Job jobType = new Job();
