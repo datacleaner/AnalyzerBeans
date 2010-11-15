@@ -21,11 +21,33 @@ package org.eobjects.analyzer.reference;
 
 import java.io.Serializable;
 
+/**
+ * A dictionary represents a set of values grouped together with a label.
+ * 
+ * Examples of meaningful dictionaries:
+ * <ul>
+ * <li>Lastnames</li>
+ * <li>Female given names</li>
+ * <li>Product codes</li>
+ * </ul>
+ * 
+ * Often times a dictionary will implement a caching mechanism to prevent having
+ * to hold all values of the dictionary in memory.
+ * 
+ * @author Kasper Sørensen
+ */
 public interface Dictionary extends Serializable {
 
 	public String getName();
-	
+
 	public boolean containsValue(String value);
-	
+
+	/**
+	 * Gets the dictionaries contents as a ReferenceValues object. Use with
+	 * caution because this might require the dictionary to do eager
+	 * initialization of all values.
+	 * 
+	 * @return
+	 */
 	public ReferenceValues<String> getValues();
 }

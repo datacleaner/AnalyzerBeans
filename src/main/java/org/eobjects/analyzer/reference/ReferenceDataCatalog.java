@@ -21,6 +21,27 @@ package org.eobjects.analyzer.reference;
 
 import java.io.Serializable;
 
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+
+/**
+ * Represents a catalog of items that are considered as reference data that a
+ * user can choose to utilize in various analyzers, transformers etc.
+ * 
+ * Reference data is typically reusable between jobs which is why it is
+ * contained within the configuration of AnalyzerBeans. For example you could
+ * have a dictionary of valid values for a particular entity type. This
+ * dictionary is then resuable both as input to a Dictionary validation filter
+ * and an analyzer that will match values against different dictionaries.
+ * 
+ * All reference data types (Dictionary, SynonymCatalog etc.) is injectable into
+ * components using the @Configured annotation.
+ * 
+ * @see AnalyzerBeansConfiguration
+ * @see Configured
+ * 
+ * @author Kasper Sørensen
+ */
 public interface ReferenceDataCatalog extends Serializable {
 
 	public String[] getDictionaryNames();

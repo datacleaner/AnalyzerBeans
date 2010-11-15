@@ -22,6 +22,17 @@ package org.eobjects.analyzer.reference;
 import java.io.Serializable;
 import java.util.Collection;
 
+/**
+ * A synonym catalog represents a set of synonyms which are related.
+ * 
+ * Meaningful examples of synonym catalogs:
+ * <ul>
+ * <li>Country names (with ISO code as master term)</li>
+ * <li>Given name synonyms (eg. 'William' is the master term for 'Billy')</li>
+ * </ul>
+ * 
+ * @author Kasper Sørensen
+ */
 public interface SynonymCatalog extends Serializable {
 
 	/**
