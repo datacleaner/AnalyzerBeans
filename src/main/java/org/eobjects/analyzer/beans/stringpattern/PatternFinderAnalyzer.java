@@ -273,4 +273,20 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	public void setLowerCaseExpandable(boolean lowerCaseExpandable) {
 		this.lowerCaseExpandable = lowerCaseExpandable;
 	}
+	
+	public void setDecimalSeparator(Character decimalSeparator) {
+		this.decimalSeparator = decimalSeparator;
+	}
+	
+	public void setIgnoreRepeatedSpaces(Boolean ignoreRepeatedSpaces) {
+		this.ignoreRepeatedSpaces = ignoreRepeatedSpaces;
+	}
+	
+	public void setMinusSign(Character minusSign) {
+		this.minusSign = minusSign;
+	}
+	
+	public void setThousandsSeparator(Character thousandsSeparator) {
+		this.thousandsSeparator = thousandsSeparator;
+	}
 }
