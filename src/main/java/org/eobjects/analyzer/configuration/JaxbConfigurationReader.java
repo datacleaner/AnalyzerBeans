@@ -98,7 +98,7 @@ import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.util.FileHelper;
 
-public final class JaxbConfigurationReader {
+public final class JaxbConfigurationReader implements ConfigurationReader<InputStream> {
 
 	private static final Logger logger = LoggerFactory.getLogger(JaxbConfigurationReader.class);
 
@@ -112,6 +112,11 @@ public final class JaxbConfigurationReader {
 		}
 	}
 
+	@Override
+	public AnalyzerBeansConfiguration read(InputStream input) {
+		return create(input);
+	}
+
 	public AnalyzerBeansConfiguration create(File file) {
 		try {
 			return create(new FileInputStream(file));
@@ -121,12 +126,17 @@ public final class JaxbConfigurationReader {
 	}
 
 	public AnalyzerBeansConfiguration create(InputStream inputStream) {
+		Configuration configuration = unmarshall(inputStream);
+		return create(configuration);
+	}
+
+	public Configuration unmarshall(InputStream inputStream) {
 		try {
 			Unmarshaller unmarshaller = _jaxbContext.createUnmarshaller();
 
 			unmarshaller.setEventHandler(new JaxbValidationEventHandler());
 			Configuration configuration = (Configuration) unmarshaller.unmarshal(inputStream);
-			return create(configuration);
+			return configuration;
 		} catch (JAXBException e) {
 			throw new IllegalArgumentException(e);
 		}
