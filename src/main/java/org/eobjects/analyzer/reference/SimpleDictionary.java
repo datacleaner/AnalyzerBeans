@@ -22,12 +22,12 @@ package org.eobjects.analyzer.reference;
 import java.io.Serializable;
 import java.util.Collection;
 
-public class SimpleDictionary implements Dictionary, Serializable {
+public final class SimpleDictionary implements Dictionary, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String _name;
-	private ReferenceValues<String> _values;
+	private final String _name;
+	private final ReferenceValues<String> _values;
 
 	public SimpleDictionary(String name, String... values) {
 		_name = name;

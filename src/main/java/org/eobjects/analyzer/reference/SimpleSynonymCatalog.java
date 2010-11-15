@@ -25,12 +25,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class SimpleSynonymCatalog implements SynonymCatalog, Serializable {
+public final class SimpleSynonymCatalog implements SynonymCatalog, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String _name;
-	private List<Synonym> _synonyms;
+	private final String _name;
+	private final List<Synonym> _synonyms;
 
 	public SimpleSynonymCatalog(String name) {
 		_name = name;

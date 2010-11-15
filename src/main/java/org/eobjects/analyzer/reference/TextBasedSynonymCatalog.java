@@ -33,12 +33,13 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
+	private final transient WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
+	private transient File _file;
+
 	private final String _filename;
 	private final String _name;
 	private final boolean _caseSensitive;
-	private final WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
 	private final String _encoding;
-	private File _file;
 
 	public TextBasedSynonymCatalog(String name, String filename, boolean caseSensitive, String encoding) {
 		_name = name;
