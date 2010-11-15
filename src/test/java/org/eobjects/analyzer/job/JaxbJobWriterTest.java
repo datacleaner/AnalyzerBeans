@@ -143,6 +143,7 @@ public class JaxbJobWriterTest extends TestCase {
 
 		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder1 = ajb
 				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		makeCrossPlatformCompatible(patternFinder1);
 		MutableInputColumn<?> usernameColumn = tjb.getOutputColumnByName("Username");
 		patternFinder1.addInputColumn(fnCol).addInputColumn(usernameColumn).getConfigurableBean()
 				.setEnableMixedTokens(false);
@@ -160,9 +161,24 @@ public class JaxbJobWriterTest extends TestCase {
 
 		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder2 = ajb
 				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		makeCrossPlatformCompatible(patternFinder2);
 		patternFinder2.addInputColumn(mergedColumn);
 
 		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file5.xml");
+	}
+
+	/**
+	 * Helper method to make sure that some of the locale-dependent settings of
+	 * the pattern finder are standardized in order to make the test
+	 * cross-platform compatible.
+	 * 
+	 * @param pfb
+	 */
+	private void makeCrossPlatformCompatible(RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pfb) {
+		PatternFinderAnalyzer pf = pfb.getConfigurableBean();
+		pf.setDecimalSeparator('.');
+		pf.setMinusSign('-');
+		pf.setThousandsSeparator(',');
 	}
 
 	private void assertMatchesBenchmark(AnalysisJob analysisJob, String filename) throws Exception {
