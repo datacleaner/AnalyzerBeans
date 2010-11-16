@@ -42,4 +42,8 @@ public final class LazyFilterOutcome extends AbstractFilterOutcome implements Fi
 	public Enum<?> getCategory() {
 		return _category;
 	}
+	
+	public FilterJobBuilder<?, ?> getFilterJobBuilder() {
+		return _filterJobBuilder;
+	}
 }

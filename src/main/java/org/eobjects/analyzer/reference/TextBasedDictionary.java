@@ -52,6 +52,14 @@ public class TextBasedDictionary implements Dictionary {
 		return _name;
 	}
 
+	public String getFilename() {
+		return _filename;
+	}
+
+	public String getEncoding() {
+		return _encoding;
+	}
+
 	@Override
 	public boolean containsValue(String value) {
 		if (value == null) {
