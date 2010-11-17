@@ -38,12 +38,23 @@ import org.eobjects.analyzer.data.InputRow;
 @Description("Converts anything to a boolean (or null).")
 public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 
+	public static final String[] DEFAULT_TRUE_TOKENS = new String[] { "true", "yes", "1", "x" };
+	public static final String[] DEFAULT_FALSE_TOKENS = new String[] { "false", "no", "0", "-" };
+
 	@Inject
 	@Configured
 	InputColumn<?> input;
 
 	@Configured(required = false)
 	Boolean nullReplacement;
+
+	@Configured
+	@Description("Text tokens that will translate to 'true'")
+	String[] _trueTokens = DEFAULT_TRUE_TOKENS;
+
+	@Configured
+	@Description("Text tokens that will translate to 'false'")
+	String[] _falseTokens = DEFAULT_FALSE_TOKENS;
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -53,25 +64,33 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 	@Override
 	public Boolean[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
-		Boolean b = transformValue(value);
+		Boolean b = transformValue(value, _trueTokens, _falseTokens);
 		if (b == null) {
 			b = nullReplacement;
 		}
 		return new Boolean[] { b };
 	}
 
-	public static Boolean transformValue(Object value) {
+	public static Boolean transformValue(final Object value, final String[] trueTokens, final String[] falseTokens) {
 		Boolean b = null;
 		if (value != null) {
 			if (value instanceof String) {
 				String stringValue = (String) value;
 				stringValue = stringValue.trim();
-				if ("true".equalsIgnoreCase(stringValue) || "yes".equalsIgnoreCase(stringValue)
-						|| "1".equalsIgnoreCase(stringValue)) {
-					b = true;
-				} else if ("false".equalsIgnoreCase(stringValue) || "no".equalsIgnoreCase(stringValue)
-						|| "0".equalsIgnoreCase(stringValue)) {
-					b = false;
+
+				for (String token : trueTokens) {
+					if (token.equalsIgnoreCase(stringValue)) {
+						b = true;
+						break;
+					}
+				}
+				if (b == null) {
+					for (String token : falseTokens) {
+						if (token.equalsIgnoreCase(stringValue)) {
+							b = false;
+							break;
+						}
+					}
 				}
 			} else if (value instanceof Number) {
 				Number numberValue = (Number) value;

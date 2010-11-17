@@ -76,12 +76,20 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 			} else if (value instanceof Date) {
 				Date d = (Date) value;
 				n = d.getTime();
+			} else if (value instanceof Character) {
+				Character c = (Character) value;
+				if (!Character.isDigit(c)) {
+					// return the integer value of the character
+					n = (int) c;
+				}
 			} else {
 				String stringValue = value.toString();
-				try {
-					n = Double.parseDouble(stringValue);
-				} catch (NumberFormatException e) {
-					// ignore
+				if (n == null) {
+					try {
+						n = Double.parseDouble(stringValue);
+					} catch (NumberFormatException e) {
+						// ignore
+					}
 				}
 			}
 		}

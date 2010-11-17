@@ -65,7 +65,8 @@ public final class MetaModelInputRow implements InputRow {
 			value = ConvertToDateTransformer.transformValue(value);
 			break;
 		case BOOLEAN:
-			value = ConvertToBooleanTransformer.transformValue(value);
+			value = ConvertToBooleanTransformer.transformValue(value, ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS,
+					ConvertToBooleanTransformer.DEFAULT_FALSE_TOKENS);
 			break;
 		case NUMBER:
 			value = ConvertToNumberTransformer.transformValue(value);
