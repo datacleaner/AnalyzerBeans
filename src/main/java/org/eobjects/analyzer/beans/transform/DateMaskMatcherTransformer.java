@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -17,7 +18,7 @@ import org.joda.time.format.DateTimeFormatter;
 public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 
 	public static final String[] DEFAULT_DATE_MASKS = new String[] { "yyyy-MM-dd", "yyyy/MM/dd", "dd.MM.yyyy", "dd/MM/yyyy",
-			"MM/dd/yy", "d MMM yyyy HH:mm:ss" };
+			"MM/dd/yy", "d MMM yyyy HH:mm:ss", "yyyy-MM-dd HH:mm:ss.S" };
 
 	@Configured
 	InputColumn<String> _column;
@@ -25,7 +26,7 @@ public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 	@Configured
 	String[] _dateMasks = DEFAULT_DATE_MASKS;
 
-	private DateTimeFormatter[] _dateFormats;
+	private DateTimeFormatter[] _dateTimeFormatters;
 
 	public DateMaskMatcherTransformer(InputColumn<String> column) {
 		_column = column;
@@ -34,10 +35,16 @@ public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 	public DateMaskMatcherTransformer() {
 	}
 
+	@Initialize
 	public void init() {
-		_dateFormats = new DateTimeFormatter[_dateMasks.length];
-		for (int i = 0; i < _dateFormats.length; i++) {
-			_dateFormats[i] = DateTimeFormat.forPattern(_dateMasks[i]);
+		_dateTimeFormatters = new DateTimeFormatter[_dateMasks.length];
+		for (int i = 0; i < _dateTimeFormatters.length; i++) {
+			try {
+				_dateTimeFormatters[i] = DateTimeFormat.forPattern(_dateMasks[i]);
+			} catch (Exception e) {
+				// not a valid pattern!
+				_dateTimeFormatters[i] = null;
+			}
 		}
 	}
 
@@ -58,14 +65,17 @@ public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 
 		String value = inputRow.getValue(_column);
 		if (value != null) {
-			for (int i = 0; i < _dateFormats.length; i++) {
-				try {
-					// this will throw an exception if the value is not
-					// complying to the pattern
-					_dateFormats[i].parseDateTime(value);
-					result[i] = true;
-				} catch (Exception e) {
-					result[i] = false;
+			for (int i = 0; i < _dateTimeFormatters.length; i++) {
+				DateTimeFormatter dateTimeFormatter = _dateTimeFormatters[i];
+				if (dateTimeFormatter != null) {
+					try {
+						// this will throw an exception if the value is not
+						// complying to the pattern
+						dateTimeFormatter.parseDateTime(value);
+						result[i] = true;
+					} catch (Exception e) {
+						result[i] = false;
+					}
 				}
 			}
 		}
