@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.transform;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -28,42 +29,44 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.reference.Dictionary;
 
 @TransformerBean("Dictionary matcher")
+@Description("Matches string values against a set of dictionaries, producing a corresponding set of output columns specifying whether or not the values exist in those dictionaries")
 public class DictionaryMatcherTransformer implements Transformer<Boolean> {
 
 	@Configured
-	Dictionary[] dictionaries;
+	Dictionary[] _dictionaries;
 
 	@Configured
-	InputColumn<String> inputColumn;
+	InputColumn<String> _column;
 
 	public DictionaryMatcherTransformer() {
 	}
 
 	public DictionaryMatcherTransformer(Dictionary[] dictionaries) {
 		this();
-		this.dictionaries = dictionaries;
+		_dictionaries = dictionaries;
 	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		String[] columnNames = new String[dictionaries.length];
-		for (int i = 0; i < columnNames.length; i++) {
-			columnNames[i] = dictionaries[i].getName();
+		String columnName = _column.getName();
+		String[] names = new String[_dictionaries.length];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = columnName + " in '" + _dictionaries[i].getName() + "'";
 		}
-		return new OutputColumns(columnNames);
+		return new OutputColumns(names);
 	}
 
 	@Override
 	public Boolean[] transform(InputRow inputRow) {
-		String value = inputRow.getValue(inputColumn);
+		String value = inputRow.getValue(_column);
 		return transform(value);
 	}
 
 	public Boolean[] transform(String value) {
-		Boolean[] result = new Boolean[dictionaries.length];
+		Boolean[] result = new Boolean[_dictionaries.length];
 		if (value != null) {
 			for (int i = 0; i < result.length; i++) {
-				boolean containsValue = dictionaries[i].containsValue(value);
+				boolean containsValue = _dictionaries[i].containsValue(value);
 				result[i] = containsValue;
 			}
 		}
