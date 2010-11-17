@@ -32,6 +32,21 @@ public class BooleanAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerRes
 	@Provided
 	RowAnnotationFactory _annotationFactory;
 
+	/**
+	 * An annotation for multiple true values (in all columns analyzed)
+	 */
+	private RowAnnotation _multipleTrueAnnotation;
+
+	/**
+	 * An annotation for only false values (in all columns analyzed)
+	 */
+	private RowAnnotation _onlyFalseAnnotation;
+
+	/**
+	 * An annotation for only true values (in all columns analyzed)
+	 */
+	private RowAnnotation _onlyTrueAnnotation;
+
 	public BooleanAnalyzer(InputColumn<Boolean>[] columns) {
 		_columns = columns;
 		_annotationFactory = new InMemoryRowAnnotationFactory();
@@ -45,14 +60,35 @@ public class BooleanAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerRes
 		for (InputColumn<Boolean> col : _columns) {
 			_columnDelegates.put(col, new BooleanAnalyzerColumnDelegate(_annotationFactory));
 		}
+		if (_columns.length > 1) {
+			_multipleTrueAnnotation = _annotationFactory.createAnnotation();
+			_onlyFalseAnnotation = _annotationFactory.createAnnotation();
+			_onlyTrueAnnotation = _annotationFactory.createAnnotation();
+		}
 	}
 
 	@Override
 	public void run(InputRow row, int distinctCount) {
+		int numTrue = 0;
 		for (InputColumn<Boolean> col : _columns) {
 			BooleanAnalyzerColumnDelegate delegate = _columnDelegates.get(col);
 			Boolean value = row.getValue(col);
 			delegate.run(value, row, distinctCount);
+			if (value != null && value.booleanValue()) {
+				numTrue++;
+			}
+		}
+
+		if (_columns.length > 1) {
+			if (numTrue == 0) {
+				_annotationFactory.annotate(row, distinctCount, _onlyFalseAnnotation);
+			}
+			if (numTrue == _columns.length) {
+				_annotationFactory.annotate(row, distinctCount, _onlyTrueAnnotation);
+			}
+			if (numTrue > 1) {
+				_annotationFactory.annotate(row, distinctCount, _multipleTrueAnnotation);
+			}
 		}
 	}
 
@@ -94,8 +130,12 @@ public class BooleanAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerRes
 				nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
 			}
 		}
-
-		return new BooleanAnalyzerResult(crosstab);
+		if (_columns.length > 1) {
+			return new BooleanAnalyzerResult(crosstab, _annotationFactory, _onlyTrueAnnotation, _onlyFalseAnnotation,
+					_columns, _multipleTrueAnnotation);
+		} else {
+			return new BooleanAnalyzerResult(crosstab);
+		}
 	}
 
 }
