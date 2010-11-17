@@ -112,20 +112,20 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 
 		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
 		for (InputColumn<? extends Number> column : _columns) {
-			CrosstabNavigator<Number> navigator = crosstab.navigate().where(columnDimension, column.getName());
+			CrosstabNavigator<Number> nav = crosstab.navigate().where(columnDimension, column.getName());
 			NumberAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 
 			SummaryStatistics s = delegate.getStatistics();
 			int nullCount = delegate.getNullCount();
 
-			navigator.where(measureDimension, "Null count").put(nullCount);
+			nav.where(measureDimension, "Null count").put(nullCount);
 
 			if (nullCount > 0) {
-				addAttachment(navigator, delegate.getNullAnnotation(), column);
+				addAttachment(nav, delegate.getNullAnnotation(), column);
 			}
 
 			int numRows = delegate.getNumRows();
-			navigator.where(measureDimension, "Row count").put(numRows);
+			nav.where(measureDimension, "Row count").put(numRows);
 
 			long nonNullCount = s.getN();
 
@@ -138,17 +138,17 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 				double standardDeviation = s.getStandardDeviation();
 				double variance = s.getVariance();
 
-				navigator.where(measureDimension, "Highest value").put(highestValue);
-				addAttachment(navigator, delegate.getMaxAnnotation(), column);
+				nav.where(measureDimension, "Highest value").put(highestValue);
+				addAttachment(nav, delegate.getMaxAnnotation(), column);
 
-				navigator.where(measureDimension, "Lowest value").put(lowestValue);
-				addAttachment(navigator, delegate.getMinAnnotation(), column);
+				nav.where(measureDimension, "Lowest value").put(lowestValue);
+				addAttachment(nav, delegate.getMinAnnotation(), column);
 
-				navigator.where(measureDimension, "Sum").put(sum);
-				navigator.where(measureDimension, "Mean").put(mean);
-				navigator.where(measureDimension, "Geometric mean").put(geometricMean);
-				navigator.where(measureDimension, "Standard deviation").put(standardDeviation);
-				navigator.where(measureDimension, "Variance").put(variance);
+				nav.where(measureDimension, "Sum").put(sum);
+				nav.where(measureDimension, "Mean").put(mean);
+				nav.where(measureDimension, "Geometric mean").put(geometricMean);
+				nav.where(measureDimension, "Standard deviation").put(standardDeviation);
+				nav.where(measureDimension, "Variance").put(variance);
 			}
 		}
 		return new NumberAnalyzerResult(_columns, crosstab);
