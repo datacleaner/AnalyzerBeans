@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Date gap analyzer")
-@Description("Analyze the periodic gaps between TO and FROM dates.")
+@Description("Analyze the periodic gaps between FROM and TO dates.")
 public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DateGapAnalyzer.class);
