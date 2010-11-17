@@ -529,6 +529,14 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 				ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty(propertyName);
 				if (configuredProperty == null) {
+					logger.warn("Missing configured property name: {}", propertyName);
+					if (logger.isInfoEnabled()) {
+						List<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
+						for (ConfiguredPropertyDescriptor configuredPropertyDescriptor : configuredProperties) {
+							logger.info("Available configured property name: {}, {}",
+									configuredPropertyDescriptor.getName(), configuredPropertyDescriptor.getType());
+						}
+					}
 					throw new IllegalStateException("No such property in " + foundClass.getName() + ": " + propertyName);
 				}
 

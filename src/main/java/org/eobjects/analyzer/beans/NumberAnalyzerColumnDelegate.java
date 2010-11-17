@@ -34,25 +34,22 @@ final class NumberAnalyzerColumnDelegate {
 
 	private final RowAnnotationFactory _annotationFactory;
 	private final SummaryStatistics _statistics;
-	private int _nullCount;
+	private volatile int _numRows;
 	private final RowAnnotation _nullAnnotation;
 	private final RowAnnotation _maxAnnotation;
 	private final RowAnnotation _minAnnotation;
-	private final RowAnnotation _nonNullAnnotation;
 
 	public NumberAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory) {
 		_annotationFactory = annotationFactory;
 		_nullAnnotation = _annotationFactory.createAnnotation();
 		_maxAnnotation = _annotationFactory.createAnnotation();
 		_minAnnotation = _annotationFactory.createAnnotation();
-		_nonNullAnnotation = _annotationFactory.createAnnotation();
 		_statistics = new SummaryStatistics();
-		_nullCount = 0;
 	}
 
 	public void run(InputRow row, Number value, int distinctCount) {
+		_numRows += distinctCount;
 		if (value != null) {
-			_annotationFactory.annotate(row, distinctCount, _nonNullAnnotation);
 			double doubleValue = value.doubleValue();
 			double max = _statistics.getMax();
 			double min = _statistics.getMin();
@@ -78,7 +75,6 @@ final class NumberAnalyzerColumnDelegate {
 				_annotationFactory.annotate(row, distinctCount, _minAnnotation);
 			}
 		} else {
-			_nullCount += distinctCount;
 			_annotationFactory.annotate(row, distinctCount, _nullAnnotation);
 		}
 	}
@@ -92,7 +88,7 @@ final class NumberAnalyzerColumnDelegate {
 	}
 
 	public int getNullCount() {
-		return _nullCount;
+		return _nullAnnotation.getRowCount();
 	}
 
 	public RowAnnotation getMaxAnnotation() {
@@ -103,7 +99,7 @@ final class NumberAnalyzerColumnDelegate {
 		return _minAnnotation;
 	}
 
-	public RowAnnotation getNonNullAnnotation() {
-		return _nonNullAnnotation;
+	public int getNumRows() {
+		return _numRows;
 	}
 }

@@ -33,7 +33,6 @@ import org.eobjects.analyzer.util.CharIterator;
  * delegates.
  * 
  * @author Kasper Sørensen
- * 
  */
 final class StringAnalyzerColumnDelegate {
 
@@ -52,24 +51,23 @@ final class StringAnalyzerColumnDelegate {
 	private final RowAnnotation _diacriticAnnotation;
 	private final RowAnnotation _maxWordsAnnotation;
 	private final RowAnnotation _minWordsAnnotation;
-	private int _numRows;
-	private int _numNull;
-	private int _numEntirelyUppercase;
-	private int _numEntirelyLowercase;
-	private int _numChars;
-	private Integer _minChars;
-	private Integer _maxChars;
-	private Integer _minWhitespace;
-	private Integer _maxWhitespace;
-	private int _numUppercase;
-	private int _numUppercaseExclFirstLetter;
-	private int _numLowercase;
-	private int _numDigit;
-	private int _numDiacritics;
-	private int _numNonLetter;
-	private int _numWords;
-	private Integer _maxWords;
-	private Integer _minWords;
+	private volatile int _numRows;
+	private volatile int _numEntirelyUppercase;
+	private volatile int _numEntirelyLowercase;
+	private volatile int _numChars;
+	private volatile Integer _minChars;
+	private volatile Integer _maxChars;
+	private volatile Integer _minWhitespace;
+	private volatile Integer _maxWhitespace;
+	private volatile int _numUppercase;
+	private volatile int _numUppercaseExclFirstLetter;
+	private volatile int _numLowercase;
+	private volatile int _numDigit;
+	private volatile int _numDiacritics;
+	private volatile int _numNonLetter;
+	private volatile int _numWords;
+	private volatile Integer _maxWords;
+	private volatile Integer _minWords;
 
 	public StringAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory) {
 		_annotationFactory = annotationFactory;
@@ -91,7 +89,6 @@ final class StringAnalyzerColumnDelegate {
 		_numRows += distinctCount;
 
 		if (value == null) {
-			_numNull += distinctCount;
 			_annotationFactory.annotate(row, distinctCount, _nullAnnotation);
 		} else {
 			int numChars = value.length();
@@ -241,7 +238,7 @@ final class StringAnalyzerColumnDelegate {
 	}
 
 	public int getNumNull() {
-		return _numNull;
+		return _nullAnnotation.getRowCount();
 	}
 
 	public int getNumEntirelyUppercase() {

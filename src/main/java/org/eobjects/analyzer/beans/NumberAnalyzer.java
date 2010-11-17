@@ -95,6 +95,8 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 	@Override
 	public NumberAnalyzerResult getResult() {
 		CrosstabDimension measureDimension = new CrosstabDimension("Measure");
+		measureDimension.addCategory("Row count");
+		measureDimension.addCategory("Null count");
 		measureDimension.addCategory("Highest value");
 		measureDimension.addCategory("Lowest value");
 		measureDimension.addCategory("Sum");
@@ -102,8 +104,6 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 		measureDimension.addCategory("Geometric mean");
 		measureDimension.addCategory("Standard deviation");
 		measureDimension.addCategory("Variance");
-		measureDimension.addCategory("Null values");
-		measureDimension.addCategory("Non-null values");
 
 		CrosstabDimension columnDimension = new CrosstabDimension("Column");
 		for (InputColumn<? extends Number> column : _columns) {
@@ -112,12 +112,21 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 
 		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
 		for (InputColumn<? extends Number> column : _columns) {
+			CrosstabNavigator<Number> navigator = crosstab.navigate().where(columnDimension, column.getName());
 			NumberAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 
 			SummaryStatistics s = delegate.getStatistics();
 			int nullCount = delegate.getNullCount();
 
-			CrosstabNavigator<Number> navigator = crosstab.navigate().where(columnDimension, column.getName());
+			navigator.where(measureDimension, "Null count").put(nullCount);
+
+			if (nullCount > 0) {
+				addAttachment(navigator, delegate.getNullAnnotation(), column);
+			}
+
+			int numRows = delegate.getNumRows();
+			navigator.where(measureDimension, "Row count").put(numRows);
+
 			long nonNullCount = s.getN();
 
 			if (nonNullCount > 0) {
@@ -130,10 +139,10 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 				double variance = s.getVariance();
 
 				navigator.where(measureDimension, "Highest value").put(highestValue);
-				addAttachment(navigator, delegate.getMaxAnnotation());
+				addAttachment(navigator, delegate.getMaxAnnotation(), column);
 
 				navigator.where(measureDimension, "Lowest value").put(lowestValue);
-				addAttachment(navigator, delegate.getMinAnnotation());
+				addAttachment(navigator, delegate.getMinAnnotation(), column);
 
 				navigator.where(measureDimension, "Sum").put(sum);
 				navigator.where(measureDimension, "Mean").put(mean);
@@ -141,21 +150,11 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 				navigator.where(measureDimension, "Standard deviation").put(standardDeviation);
 				navigator.where(measureDimension, "Variance").put(variance);
 			}
-			navigator.where(measureDimension, "Null values").put(nullCount);
-
-			if (nullCount > 0) {
-				addAttachment(navigator, delegate.getNullAnnotation());
-			}
-
-			navigator.where(measureDimension, "Non-null values").put(nonNullCount);
-			if (nonNullCount > 0) {
-				addAttachment(navigator, delegate.getNonNullAnnotation());
-			}
 		}
 		return new NumberAnalyzerResult(_columns, crosstab);
 	}
 
-	private void addAttachment(CrosstabNavigator<Number> nav, RowAnnotation annotation) {
-		nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory));
+	private void addAttachment(CrosstabNavigator<Number> nav, RowAnnotation annotation, InputColumn<?> column) {
+		nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
 	}
 }
