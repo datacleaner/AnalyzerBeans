@@ -113,12 +113,18 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			}
 
 			// notify listeners
-			for (TransformerChangeListener listener : _transformerChangeListeners) {
-				listener.onOutputChanged(this, _outputColumns);
-			}
+			onOutputChanged();
 		}
 
 		return _outputColumns;
+	}
+
+	public void onOutputChanged() {
+
+		// notify listeners
+		for (TransformerChangeListener listener : _transformerChangeListeners) {
+			listener.onOutputChanged(this, _outputColumns);
+		}
 	}
 
 	public TransformerJob toTransformerJob() throws IllegalStateException {
