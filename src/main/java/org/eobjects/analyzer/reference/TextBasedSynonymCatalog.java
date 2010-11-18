@@ -67,6 +67,18 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 	public String getName() {
 		return _name;
 	}
+	
+	public String getEncoding() {
+		return _encoding;
+	}
+	
+	public String getFilename() {
+		return _filename;
+	}
+	
+	public boolean isCaseSensitive() {
+		return _caseSensitive;
+	}
 
 	@Override
 	public Collection<Synonym> getSynonyms() {
