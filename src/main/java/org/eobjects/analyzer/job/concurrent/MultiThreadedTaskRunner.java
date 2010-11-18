@@ -30,32 +30,43 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private ExecutorService executorService;
+	private final ExecutorService _executorService;
+	private final int _numThreads;
 
 	public MultiThreadedTaskRunner() {
-		executorService = Executors.newCachedThreadPool();
+		_numThreads = -1;
+		_executorService = Executors.newCachedThreadPool();
 	}
 
 	public MultiThreadedTaskRunner(int numThreads) {
-		executorService = Executors.newFixedThreadPool(numThreads);
+		_numThreads = numThreads;
+		_executorService = Executors.newFixedThreadPool(numThreads);
+	}
+
+	/**
+	 * @return the amount of threads in the thread pool, or -1 if this
+	 *         information is not available
+	 */
+	public int getNumThreads() {
+		return _numThreads;
 	}
 
 	@Override
 	public void run(final Task task, final TaskListener listener) {
 		logger.debug("run({},{})", task, listener);
-		executorService.submit(new TaskRunnable(task, listener));
+		_executorService.submit(new TaskRunnable(task, listener));
 	}
 
 	@Override
 	public void run(TaskRunnable taskRunnable) {
 		logger.debug("run({})", taskRunnable);
-		executorService.submit(taskRunnable);
+		_executorService.submit(taskRunnable);
 	}
 
 	@Override
 	public void shutdown() {
 		logger.info("shutdown() called, shutting down executor service");
-		executorService.shutdown();
+		_executorService.shutdown();
 	}
 
 	@Override

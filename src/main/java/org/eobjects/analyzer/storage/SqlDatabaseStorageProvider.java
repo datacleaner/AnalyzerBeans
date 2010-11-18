@@ -136,4 +136,8 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 		SqlDatabaseRowAnnotationFactory persistentFactory = new SqlDatabaseRowAnnotationFactory(_connection, tableName);
 		return new ThresholdRowAnnotationFactory(_inMemoryThreshold, persistentFactory);
 	}
+	
+	public int getInMemoryThreshold() {
+		return _inMemoryThreshold;
+	}
 }
