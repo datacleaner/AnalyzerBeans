@@ -1,7 +1,11 @@
 package org.eobjects.analyzer.beans;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
@@ -19,33 +23,34 @@ import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
+import org.eobjects.analyzer.util.ValueCombination;
 
 @AnalyzerBean("Boolean analyzer")
 @Description("Inspect your boolean values. How is the distribution of true/false? Are there null values?")
 public class BooleanAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerResult> {
 
-	private Map<InputColumn<Boolean>, BooleanAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<Boolean>, BooleanAnalyzerColumnDelegate>();
+	// comparator used to sort entries, getting the most frequent value
+	// combinations to the top
+	private static final Comparator<Map.Entry<ValueCombination<Boolean>, RowAnnotation>> frequentValueCombinationComparator = new Comparator<Map.Entry<ValueCombination<Boolean>, RowAnnotation>>() {
+		@Override
+		public int compare(Entry<ValueCombination<Boolean>, RowAnnotation> o1,
+				Entry<ValueCombination<Boolean>, RowAnnotation> o2) {
+			int result = o2.getValue().getRowCount() - o1.getValue().getRowCount();
+			if (result == 0) {
+				result = o2.getKey().compareTo(o1.getKey());
+			}
+			return result;
+		}
+	};
+
+	private final Map<InputColumn<Boolean>, BooleanAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<Boolean>, BooleanAnalyzerColumnDelegate>();
+	private final Map<ValueCombination<Boolean>, RowAnnotation> _valueCombinations = new HashMap<ValueCombination<Boolean>, RowAnnotation>();
 
 	@Configured
 	InputColumn<Boolean>[] _columns;
 
 	@Provided
 	RowAnnotationFactory _annotationFactory;
-
-	/**
-	 * An annotation for multiple true values (in all columns analyzed)
-	 */
-	private RowAnnotation _multipleTrueAnnotation;
-
-	/**
-	 * An annotation for only false values (in all columns analyzed)
-	 */
-	private RowAnnotation _onlyFalseAnnotation;
-
-	/**
-	 * An annotation for only true values (in all columns analyzed)
-	 */
-	private RowAnnotation _onlyTrueAnnotation;
 
 	public BooleanAnalyzer(InputColumn<Boolean>[] columns) {
 		_columns = columns;
@@ -60,35 +65,32 @@ public class BooleanAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerRes
 		for (InputColumn<Boolean> col : _columns) {
 			_columnDelegates.put(col, new BooleanAnalyzerColumnDelegate(_annotationFactory));
 		}
-		if (_columns.length > 1) {
-			_multipleTrueAnnotation = _annotationFactory.createAnnotation();
-			_onlyFalseAnnotation = _annotationFactory.createAnnotation();
-			_onlyTrueAnnotation = _annotationFactory.createAnnotation();
-		}
 	}
 
 	@Override
 	public void run(InputRow row, int distinctCount) {
+		Boolean[] values = new Boolean[_columns.length];
 		int numTrue = 0;
-		for (InputColumn<Boolean> col : _columns) {
-			BooleanAnalyzerColumnDelegate delegate = _columnDelegates.get(col);
+		for (int i = 0; i < values.length; i++) {
+			InputColumn<Boolean> col = _columns[i];
 			Boolean value = row.getValue(col);
+			BooleanAnalyzerColumnDelegate delegate = _columnDelegates.get(col);
+			values[i] = value;
 			delegate.run(value, row, distinctCount);
 			if (value != null && value.booleanValue()) {
 				numTrue++;
 			}
 		}
 
+		// collect all combinations of booleans
 		if (_columns.length > 1) {
-			if (numTrue == 0) {
-				_annotationFactory.annotate(row, distinctCount, _onlyFalseAnnotation);
+			ValueCombination<Boolean> valueCombination = new ValueCombination<Boolean>(values);
+			RowAnnotation annotation = _valueCombinations.get(valueCombination);
+			if (annotation == null) {
+				annotation = _annotationFactory.createAnnotation();
+				_valueCombinations.put(valueCombination, annotation);
 			}
-			if (numTrue == _columns.length) {
-				_annotationFactory.annotate(row, distinctCount, _onlyTrueAnnotation);
-			}
-			if (numTrue > 1) {
-				_annotationFactory.annotate(row, distinctCount, _multipleTrueAnnotation);
-			}
+			_annotationFactory.annotate(row, distinctCount, annotation);
 		}
 	}
 
@@ -130,12 +132,70 @@ public class BooleanAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerRes
 				nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
 			}
 		}
+
+		Crosstab<Number> valueCombinationCrosstab;
+
 		if (_columns.length > 1) {
-			return new BooleanAnalyzerResult(crosstab, _annotationFactory, _onlyTrueAnnotation, _onlyFalseAnnotation,
-					_columns, _multipleTrueAnnotation);
+			measureDimension = new CrosstabDimension("Measure");
+
+			columnDimension = new CrosstabDimension("Column");
+			for (InputColumn<Boolean> column : _columns) {
+				columnDimension.addCategory(column.getName());
+			}
+			columnDimension.addCategory("Frequency");
+
+			valueCombinationCrosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
+
+			SortedSet<Entry<ValueCombination<Boolean>, RowAnnotation>> entries = new TreeSet<Map.Entry<ValueCombination<Boolean>, RowAnnotation>>(
+					frequentValueCombinationComparator);
+			entries.addAll(_valueCombinations.entrySet());
+
+			int row = 0;
+			for (Entry<ValueCombination<Boolean>, RowAnnotation> entry : entries) {
+
+				String measureName;
+				if (row == 0) {
+					measureName = "Most frequent";
+				} else if (row + 1 == entries.size()) {
+					measureName = "Least frequent";
+				} else {
+					measureName = "Combination " + row;
+				}
+				measureDimension.addCategory(measureName);
+
+				CrosstabNavigator<Number> nav = valueCombinationCrosstab.where(measureDimension, measureName);
+
+				ValueCombination<Boolean> valueCombination = entry.getKey();
+				RowAnnotation annotation = entry.getValue();
+
+				nav.where(columnDimension, "Frequency");
+				nav.put(annotation.getRowCount());
+				nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, _columns));
+
+				for (int i = 0; i < valueCombination.getValueCount(); i++) {
+					InputColumn<Boolean> column = _columns[i];
+					Boolean value = valueCombination.getValueAt(i);
+					Byte numberValue = null;
+					if (value != null) {
+						if (value.booleanValue()) {
+							numberValue = 1;
+						} else {
+							numberValue = 0;
+						}
+					}
+
+					nav.where(columnDimension, column.getName());
+					nav.put(numberValue);
+				}
+
+				row++;
+			}
+
 		} else {
-			return new BooleanAnalyzerResult(crosstab);
+			valueCombinationCrosstab = null;
 		}
+
+		return new BooleanAnalyzerResult(crosstab, valueCombinationCrosstab);
 	}
 
 }

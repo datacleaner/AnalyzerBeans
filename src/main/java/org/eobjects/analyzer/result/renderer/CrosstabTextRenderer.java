@@ -174,7 +174,11 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 
 	@Override
 	public String render(CrosstabResult result) {
-		return new CrosstabRenderer(result.getCrosstab()).render(new TextCrosstabRendererCallback());
+		return render(result.getCrosstab());
+	}
+
+	public String render(Crosstab<?> crosstab) {
+		return new CrosstabRenderer(crosstab).render(new TextCrosstabRendererCallback());
 	}
 
 }
