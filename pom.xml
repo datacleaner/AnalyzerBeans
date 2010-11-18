@@ -102,6 +102,16 @@
 						<include>src/**/java/**</include>
 					</includes>
 				</configuration>
+				<executions>
+					<execution>
+						<id>verify-license-headers</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<inherited>false</inherited>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
