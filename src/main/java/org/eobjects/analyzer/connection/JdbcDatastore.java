@@ -20,19 +20,24 @@
 package org.eobjects.analyzer.connection;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Enumeration;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import org.eobjects.analyzer.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
 public final class JdbcDatastore implements Datastore {
 
+	private static final Logger logger = LoggerFactory.getLogger(JdbcDatastore.class);
 	private static final long serialVersionUID = 1L;
 
 	private String _name;
@@ -98,20 +103,8 @@ public final class JdbcDatastore implements Datastore {
 			synchronized (this) {
 				if (_dataContextProvider == null) {
 					if (StringUtils.isNullOrEmpty(_datasourceJndiUrl)) {
-						try {
-							Class.forName(_driverClass);
-						} catch (ClassNotFoundException e) {
-							throw new IllegalStateException("Could not initialize JDBC driver", e);
-						}
-						try {
-							if (_username == null && _password == null) {
-								_connection = DriverManager.getConnection(_jdbcUrl);
-							} else {
-								_connection = DriverManager.getConnection(_jdbcUrl, _username, _password);
-							}
-						} catch (SQLException e) {
-							throw new IllegalStateException("Could not establish JDBC connection", e);
-						}
+
+						_connection = getConnection();
 
 						DataContext dataContext = DataContextFactory.createJdbcDataContext(_connection);
 						_dataContextProvider = new SingleDataContextProvider(dataContext, this);
@@ -130,6 +123,50 @@ public final class JdbcDatastore implements Datastore {
 		return _dataContextProvider;
 	}
 
+	public Connection getConnection() {
+		if (_connection == null) {
+
+			logger.debug("Determining if driver initialization is nescesary");
+
+			// it's best to avoid initializing the driver, so we do this check.
+			// It may already have been initialized and Class.forName(...) does
+			// not always work if the driver is in a different classloader
+			boolean installDriver = true;
+
+			Enumeration<Driver> drivers = DriverManager.getDrivers();
+			while (drivers.hasMoreElements()) {
+				Driver driver = drivers.nextElement();
+				try {
+					if (driver.acceptsURL(_jdbcUrl)) {
+						installDriver = false;
+						break;
+					}
+				} catch (SQLException e) {
+					logger.warn("Driver threw exception when acceptURL(...) was invoked", e);
+				}
+			}
+
+			if (installDriver) {
+				try {
+					Class.forName(_driverClass);
+				} catch (ClassNotFoundException e) {
+					throw new IllegalStateException("Could not initialize JDBC driver", e);
+				}
+			}
+
+			try {
+				if (_username == null && _password == null) {
+					_connection = DriverManager.getConnection(_jdbcUrl);
+				} else {
+					_connection = DriverManager.getConnection(_jdbcUrl, _username, _password);
+				}
+			} catch (SQLException e) {
+				throw new IllegalStateException("Could not establish JDBC connection", e);
+			}
+		}
+		return _connection;
+	}
+
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
@@ -144,6 +181,7 @@ public final class JdbcDatastore implements Datastore {
 			} catch (SQLException e) {
 				// do nothing
 			}
+			_connection = null;
 		}
 	}
 }
