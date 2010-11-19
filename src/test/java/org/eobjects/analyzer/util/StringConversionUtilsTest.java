@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -54,46 +55,50 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests((byte) 12, "12");
 		runTests(1337.0, "1337.0");
 		runTests(1337.0f, "1337.0");
-		runTests(new Date(1234), "1970-01-01T01:00:01 234");
+
+		// this is needed to make sure the unittest is runnable in all locales.
+		TimeZone timeZone = TimeZone.getDefault();
+		int localeOffset = timeZone.getRawOffset();
+
+		runTests(new Date(1234 - localeOffset), "1970-01-01T00:00:01 234");
 		runTests(Calendar.getInstance(), null);
-		runTests(new java.sql.Date(1234), "1970-01-01T01:00:01 234");
+		runTests(new java.sql.Date(1234 - localeOffset), "1970-01-01T00:00:01 234");
 	}
 
 	public void testEnum() throws Exception {
 		String serialized = StringConversionUtils.serialize(ValidationCategory.VALID);
 		assertEquals("VALID", serialized);
-		
+
 		Object deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory.class, null, null);
 		assertEquals(ValidationCategory.VALID, deserialized);
 
-		ValidationCategory[] array = new ValidationCategory[] { ValidationCategory.VALID,
-				ValidationCategory.INVALID };
+		ValidationCategory[] array = new ValidationCategory[] { ValidationCategory.VALID, ValidationCategory.INVALID };
 		serialized = StringConversionUtils.serialize(array);
 		assertEquals("[VALID,INVALID]", serialized);
-		
+
 		deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory[].class, null, null);
 		assertTrue(CompareUtils.equals(array, deserialized));
 	}
-	
+
 	public void testFile() throws Exception {
 		File file1 = new File("pom.xml");
 		File fileAbs = file1.getAbsoluteFile();
 		File dir1 = new File("src");
-		
+
 		String serialized = StringConversionUtils.serialize(file1);
 		assertEquals("pom.xml", serialized);
-		
+
 		Object deserialized = StringConversionUtils.deserialize(serialized, File.class, null, null);
 		assertTrue(CompareUtils.equals(file1, deserialized));
-		
+
 		serialized = StringConversionUtils.serialize(fileAbs);
 		assertEquals(fileAbs.getAbsolutePath(), serialized);
-		
-		File[] arr = new File[] {file1, dir1};
-		
+
+		File[] arr = new File[] { file1, dir1 };
+
 		serialized = StringConversionUtils.serialize(arr);
 		assertEquals("[pom.xml,src]", serialized);
-		
+
 		deserialized = StringConversionUtils.deserialize(serialized, File[].class, null, null);
 		assertTrue(CompareUtils.equals(arr, deserialized));
 	}
