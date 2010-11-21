@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/DECORATION/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd"
+	name="AnalyzerBeans">
+
+	<body>
+		<head>
+			<link rel="stylesheet" href="styles.css" type="text/css" />
+		</head>
+
+		<menu name="About AnalyzerBeans">
+			<item name="FAQ" href="faq.html" />
+			<item name="Projects that use AnalyzerBeans" href="javascript:alert('todo');" />
+		</menu>
+
+		<menu name="Examples">
+			<item name="Configuration reference" href="javascript:alert('todo');" />
+			<item name="Job examples"
+				href="http://eobjects.org/svn/AnalyzerBeans/trunk/examples/" />
+			<item name="Job authoring tutorial"
+				href="http://kasper.eobjects.org/2010/09/more-instructions-for-authoring.html" />
+		</menu>
+
+		<menu name="Developer guide">
+			<item name="Architecture" href="architecture.html" />
+			<item name="Analyzer tutorial"
+				href="http://kasper.eobjects.org/2010/09/developing-analyzer-using-analyzerbeans.html" />
+			<item name="Transformer tutorial"
+				href="http://kasper.eobjects.org/2010/09/developing-value-transformer-using.html" />
+			<item name="Filter tutorial" href="javascript:alert('todo');" />
+		</menu>
+
+		<menu ref="reports" />
+	</body>
+</project>

@@ -1,0 +1,27 @@
+AnalyzerBeans architecture
+
+ There are several issues to cover when you want to understand the architecture of AnalyzerBeans. On this page we will collect the high-level concepts that make up the framework in AnalyzerBeans.
+
+Analyzers, Transformers and Filters
+
+ TODO: Component types
+
+Configuration and jobs
+
+ TODO
+
+Dictionaries, synonyms and other reference data
+
+ TODO
+ 
+Row processing framework
+
+ TODO hello
+ 
+Exploring analyzers
+
+ TODO
+
+Row annotations
+
+ TODO

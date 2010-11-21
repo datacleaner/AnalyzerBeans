@@ -5,6 +5,9 @@
 	<artifactId>AnalyzerBeans</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>AnalyzerBeans</name>
+	<description>
+		A framework for processing and analyzing data in a database, spreadsheet or other data source.
+	</description>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
 		<metamodel.version>1.5-RC3</metamodel.version>
