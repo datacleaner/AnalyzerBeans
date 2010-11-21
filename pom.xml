@@ -6,13 +6,35 @@
 	<version>1.0-SNAPSHOT</version>
 	<name>AnalyzerBeans</name>
 	<description>
-		A framework for processing and analyzing data in a database, spreadsheet or other data source.
+		A framework for processing and analyzing data in a database, spreadsheet or other
+		data source. AnalyzerBeans is widely based on a simple annotation-based development
+		model where plugin/component development is very easy while it still supports reuse
+		of business logic, configurability and super-fast execution.
 	</description>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
 		<metamodel.version>1.5-RC3</metamodel.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	<developers>
+		<developer>
+			<name>Kasper Sørensen</name>
+			<email>kasper@eobjects.dk</email>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Stefan Janssen</name>
+			<email>stefan.janssen@humaninference.com</email>
+		</contributor>
+	</contributors>
+	<parent>
+		<!-- Uses the OSS sonatype nexus repository for distribution -->
+		<!-- See https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide -->
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>5</version>
+	</parent>
 	<scm>
 		<connection>
 			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
@@ -25,23 +47,12 @@
 		</url>
 	</scm>
 	<distributionManagement>
-		<repository>
-			<id>datacleaner-sf-repo</id>
-			<url>sftp://web.sourceforge.net/home/groups/d/da/datacleaner/htdocs/m2-repo</url>
-		</repository>
+		<site>
+			<id>analyzerbeans.eobjects.org</id>
+			<name>AnalyzerBeans website</name>
+			<url>scp://eobjects.org/var/www/analyzerbeans</url>
+		</site>
 	</distributionManagement>
-	<ciManagement>
-		<system>hudson</system>
-		<url>http://eobjects.org/hudson/</url>
-		<notifiers>
-			<notifier>
-				<address>datacleaner-notify@googlegroups.com</address>
-				<sendOnWarning>true</sendOnWarning>
-				<sendOnError>true</sendOnError>
-				<sendOnFailure>true</sendOnFailure>
-			</notifier>
-		</notifiers>
-	</ciManagement>
 	<issueManagement>
 		<system>trac</system>
 		<url>http://eobjects.org/trac</url>
@@ -56,6 +67,8 @@
 		<finalName>AnalyzerBeans</finalName>
 		<plugins>
 			<plugin>
+				<!-- Ensures java 6 compatibility -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<source>1.6</source>
@@ -64,6 +77,8 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<!-- make the jar file executable when dependencies are available in 
+					lib/ folder -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
@@ -79,6 +94,22 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<!-- Makes source jar's available also (for repo deployment) -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Copy dependencies to lib/ folder -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -96,6 +127,13 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<!-- Releases new versions of MetaModel using release:prepare and release:perform -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.1</version>
+			</plugin>
+			<plugin>
+				<!-- Ensure inclusion of license header in all main java files -->
 				<groupId>com.google.code.maven-license-plugin</groupId>
 				<artifactId>maven-license-plugin</artifactId>
 				<version>1.4.0</version>
@@ -146,8 +184,33 @@
 					<useStandardDocletOptions>true</useStandardDocletOptions>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<sourceEncoding>utf-8</sourceEncoding>
+					<minimumTokens>100</minimumTokens>
+					<targetJdk>1.6</targetJdk>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<xmlOutput>true</xmlOutput>
+					<effort>Max</effort>
+				</configuration>
+			</plugin>
 		</plugins>
 	</reporting>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>Codehaus repository</id>
+			<url>http://repository.codehaus.org/</url>
+		</pluginRepository>
+	</pluginRepositories>
 	<repositories>
 		<repository>
 			<id>repository.jboss.org</id>
