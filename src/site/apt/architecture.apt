@@ -17,7 +17,9 @@ Configuration and jobs
  Some points about analysis jobs:
  
   * The java-class AnalysisJob is the main entry-point for a job. The job has a set of children job-types for each component added: AnalyzerJob, TransformerJob, FilterJob etc.
+
   * Both the configuration and the analysis job are immutable. This means that they cannot change state. If you want to change your job, then you actually create a new job. This is useful since AnalyzerBeans is a highly concurrent application and when objects are immutable there's no risk of race-conditions even if several threads access these objects.
+
   * If you want to programmatically build or modify an analysis job, then you should use the AnalysisJobBuilder class. It contains a lot of helper methods and extra utilities to observe, traverse and quickly build a job.
 
 Dictionaries, synonyms and other reference data
