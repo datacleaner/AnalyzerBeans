@@ -8,7 +8,17 @@ Analyzers, Transformers and Filters
 
 Configuration and jobs
 
- TODO
+ The user of AnalyzerBeans needs to supply two things to make the framework execute: A configuration and an analysis job.
+ 
+ The configuration is an object containing information about the environment of the system. This includes a catalog of datastores, a catalog of reference data and so on.
+ 
+ An analysis job contain instructions for processing and analyzing data in a specified environment (ie. using a configuration). The job consists of a flow of source columns, transformers, filters, analyzers and so on. Each of these are used to compute the optimal execution flow.
+ 
+ Some points about analysis jobs:
+ 
+  * The java-class AnalysisJob is the main entry-point for a job. The job has a set of children job-types for each component added: AnalyzerJob, TransformerJob, FilterJob etc.
+  * Both the configuration and the analysis job are immutable. This means that they cannot change state. If you want to change your job, then you actually create a new job. This is useful since AnalyzerBeans is a highly concurrent application and when objects are immutable there's no risk of race-conditions even if several threads access these objects.
+  * If you want to programmatically build or modify an analysis job, then you should use the AnalysisJobBuilder class. It contains a lot of helper methods and extra utilities to observe, traverse and quickly build a job.
 
 Dictionaries, synonyms and other reference data
 
