@@ -1,11 +1,17 @@
 body {
-	font-family: sans-serif;
 	background-color: white;
 	background-repeat: repeat-x;
 }
 
-#banner {
+body,p,div,span,table,dl,ul,li,td,th {
+	font-family: Verdana, sans-serif;
+}
+
+#banner,#bannerLeft,#bannerRight,h1,h2,h3,h4,h5 {
 	font-family: "Trebuchet MS", sans-serif;
+}
+
+#banner {
 	color: #39557c;
 	font-size: 30px;
 	padding-top: 25px;
@@ -17,11 +23,17 @@ body {
 	background-position: 10px 10px;
 }
 
+#navcolumn li {
+	margin-top: 2px;
+	margin-bottom: 4px;
+}
+
 h1,h2,h3,h4,h5 {
-	font-family: "Trebuchet MS", sans-serif;
 	color: #875404;
 	border: none;
 	background-color: transparent;
+	padding-left: 0px;
+	margin-left: 0px;
 }
 
 a, a.externalLink {
@@ -34,5 +46,5 @@ a, a.externalLink {
 }
 
 dl {
-	background-color: #e5d7c2;
+	background-color: #f1eadf;
 }
