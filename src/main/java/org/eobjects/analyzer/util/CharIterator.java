@@ -61,7 +61,7 @@ public class CharIterator implements ListIterator<Character> {
 	}
 
 	public Character last() {
-		_index = _chars.length - 1;
+		_index = _length - 1;
 		return current();
 	}
 
@@ -108,7 +108,7 @@ public class CharIterator implements ListIterator<Character> {
 
 	@Override
 	public boolean hasNext() {
-		return _index + 1 < _chars.length;
+		return _index + 1 < _length;
 	}
 
 	@Override

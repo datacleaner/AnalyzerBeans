@@ -35,5 +35,6 @@ public class WhitespaceTrimmerTransformerTest extends TestCase {
 		assertEquals("hello world", t.transform(" hello  world "));
 		assertEquals("hello world", t.transform(" hello\t\tworld "));
 		assertEquals("hello world", t.transform(" hello\tworld "));
+		assertEquals("hello world", t.transform(" hello\tworld  "));
 	}
 }

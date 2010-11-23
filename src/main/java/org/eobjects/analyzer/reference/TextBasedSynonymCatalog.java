@@ -97,6 +97,9 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	@Override
 	public String getMasterTerm(String term) {
+		if (term == null) {
+			return null;
+		}
 		String masterTerm = _masterTermCache.get(term);
 		if (masterTerm != null) {
 			return masterTerm;

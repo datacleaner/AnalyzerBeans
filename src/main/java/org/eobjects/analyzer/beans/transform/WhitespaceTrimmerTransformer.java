@@ -19,9 +19,6 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
@@ -29,14 +26,12 @@ import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.CharIterator;
 import org.eobjects.analyzer.util.StringUtils;
 
 @TransformerBean("Whitespace trimmer")
 @Description("Trims your String values either on left, right or both sides.")
 public class WhitespaceTrimmerTransformer implements Transformer<String> {
-
-	private static final Matcher MULTIPLE_WHITESPACES_MATCHER = Pattern.compile("[\\s\\p{Zs}\\p{javaWhitespace}]+").matcher(
-			"");
 
 	@Configured
 	InputColumn<String> column;
@@ -76,9 +71,6 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 		if (value == null) {
 			return null;
 		}
-		if (trimMultipleToSingleSpace) {
-			value = MULTIPLE_WHITESPACES_MATCHER.reset(value).replaceAll(" ");
-		}
 		if (trimLeft && trimRight) {
 			value = value.trim();
 		} else {
@@ -88,6 +80,24 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 			if (trimRight) {
 				value = StringUtils.rightTrim(value);
 			}
+		}
+		if (trimMultipleToSingleSpace) {
+			CharIterator ci = new CharIterator(value);
+
+			boolean previousWhiteSpace = false;
+			while (ci.hasNext()) {
+				ci.next();
+				boolean currentWhiteSpace = ci.isWhitespace();
+				if (currentWhiteSpace) {
+					ci.set(' ');
+					if (previousWhiteSpace) {
+						ci.remove();
+					}
+				}
+				previousWhiteSpace = currentWhiteSpace;
+			}
+
+			value = ci.toString();
 		}
 		return value;
 	}
