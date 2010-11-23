@@ -35,6 +35,14 @@ public final class SchemaNavigator {
 	public Schema convertToSchema(String schemaName) {
 		return dataContext.getSchemaByName(schemaName);
 	}
+	
+	public Schema[] getSchemas() {
+		return dataContext.getSchemas();
+	}
+	
+	public Schema getDefaultSchema() {
+		return dataContext.getDefaultSchema();
+	}
 
 	public Schema[] convertToSchemas(String[] schemaNames) {
 		Schema[] result = new Schema[schemaNames.length];
