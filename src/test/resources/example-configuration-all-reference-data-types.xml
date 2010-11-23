@@ -35,6 +35,7 @@
 				class-name="org.eobjects.analyzer.configuration.SampleCustomDictionary">
 				<property name="Name" value="custom_dict" />
 				<property name="Values" value="5" />
+				<property name="Datastore" value="my_jdbc_connection" />
 			</custom-dictionary>
 		</dictionaries>
 

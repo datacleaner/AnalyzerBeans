@@ -30,18 +30,20 @@ import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.junit.Assert;
 
 import dk.eobjects.metamodel.DataContext;
 
 public class JaxbConfigurationReaderTest extends TestCase {
 
-	private JaxbConfigurationReader reader = new JaxbConfigurationReader();
+	private final JaxbConfigurationReader reader = new JaxbConfigurationReader();
+	private DatastoreCatalog _datastoreCatalog;
 
 	public void testValidConfiguration() throws Exception {
 		AnalyzerBeansConfiguration configuration = reader.create(new File(
 				"src/test/resources/example-configuration-valid.xml"));
 
-		DatastoreCatalog datastoreCatalog = configuration.getDatastoreCatalog();
+		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(configuration);
 		assertEquals("[mydb_jndi, persons_csv, composite_datastore, my database]",
 				Arrays.toString(datastoreCatalog.getDatastoreNames()));
 
@@ -49,9 +51,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 	}
 
 	public void testAllDatastoreTypes() throws Exception {
-		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-all-datastore-types.xml"));
-		DatastoreCatalog datastoreCatalog = configuration.getDatastoreCatalog();
+		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
 		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
 		assertEquals(
 				"[my_jdbc_connection, my_dbase, my_csv, my_custom, my_odb, my_jdbc_datasource, my_excel_2003, my_composite, my_access]",
@@ -72,10 +72,19 @@ public class JaxbConfigurationReaderTest extends TestCase {
 				Arrays.toString(dataContext.getSchemaNames()));
 	}
 
-	public void testReferenceDataCatalog() throws Exception {
+	private AnalyzerBeansConfiguration getConfiguration() {
 		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-all-reference-data-types.xml"));
-		ReferenceDataCatalog referenceDataCatalog = configuration.getReferenceDataCatalog();
+				"src/test/resources/example-configuration-all-datastore-types.xml"));
+		return configuration;
+	}
+
+	private DatastoreCatalog getDataStoreCatalog(AnalyzerBeansConfiguration configuration) {
+		_datastoreCatalog = configuration.getDatastoreCatalog();
+		return _datastoreCatalog;
+	}
+
+	public void testReferenceDataCatalog() throws Exception {
+		ReferenceDataCatalog referenceDataCatalog = getConfigurationFromXMLFile().getReferenceDataCatalog();
 		String[] dictionaryNames = referenceDataCatalog.getDictionaryNames();
 		assertEquals("[datastore_dict, textfile_dict, valuelist_dict, custom_dict]", Arrays.toString(dictionaryNames));
 
@@ -121,5 +130,19 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals(null, s.getMasterTerm("DK"));
 		assertEquals(null, s.getMasterTerm("Albania"));
 		assertEquals("NLD", s.getMasterTerm("Netherlands"));
+	}
+
+	public void testCustomDictionaryWithInjectedDatastore() {
+		AnalyzerBeansConfiguration configuration = getConfigurationFromXMLFile();
+		ReferenceDataCatalog referenceDataCatalog = configuration.getReferenceDataCatalog();
+		SampleCustomDictionary sampleCustomDictionary = (SampleCustomDictionary) referenceDataCatalog
+				.getDictionary("custom_dict");
+		Assert.assertEquals("my_jdbc_connection", sampleCustomDictionary.datastore.getName());
+	}
+
+	private AnalyzerBeansConfiguration getConfigurationFromXMLFile() {
+		AnalyzerBeansConfiguration configuration = reader.create(new File(
+				"src/test/resources/example-configuration-all-reference-data-types.xml"));
+		return configuration;
 	}
 }

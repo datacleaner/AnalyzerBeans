@@ -99,7 +99,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	@Override
 	public AnalysisJob read(InputStream inputStream) {
 		AnalysisJobBuilder ajb = create(inputStream);
@@ -566,7 +566,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				}
 
 				Object value = StringConversionUtils.deserialize(stringValue, configuredProperty.getType(), schemaNavigator,
-						_configuration.getReferenceDataCatalog());
+						_configuration.getReferenceDataCatalog(), _configuration.getDatastoreCatalog());
 
 				logger.debug("Setting property '{}' to {}", name, value);
 				builder.setConfiguredProperty(configuredProperty, value);

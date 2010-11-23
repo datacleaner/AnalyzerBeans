@@ -69,14 +69,14 @@ public class StringConversionUtilsTest extends TestCase {
 		String serialized = StringConversionUtils.serialize(ValidationCategory.VALID);
 		assertEquals("VALID", serialized);
 
-		Object deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory.class, null, null);
+		Object deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory.class, null, null, null);
 		assertEquals(ValidationCategory.VALID, deserialized);
 
 		ValidationCategory[] array = new ValidationCategory[] { ValidationCategory.VALID, ValidationCategory.INVALID };
 		serialized = StringConversionUtils.serialize(array);
 		assertEquals("[VALID,INVALID]", serialized);
 
-		deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory[].class, null, null);
+		deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory[].class, null, null, null);
 		assertTrue(CompareUtils.equals(array, deserialized));
 	}
 
@@ -88,7 +88,7 @@ public class StringConversionUtilsTest extends TestCase {
 		String serialized = StringConversionUtils.serialize(file1);
 		assertEquals("pom.xml", serialized);
 
-		Object deserialized = StringConversionUtils.deserialize(serialized, File.class, null, null);
+		Object deserialized = StringConversionUtils.deserialize(serialized, File.class, null, null, null);
 		assertTrue(CompareUtils.equals(file1, deserialized));
 
 		serialized = StringConversionUtils.serialize(fileAbs);
@@ -99,7 +99,7 @@ public class StringConversionUtilsTest extends TestCase {
 		serialized = StringConversionUtils.serialize(arr);
 		assertEquals("[pom.xml,src]", serialized);
 
-		deserialized = StringConversionUtils.deserialize(serialized, File[].class, null, null);
+		deserialized = StringConversionUtils.deserialize(serialized, File[].class, null, null, null);
 		assertTrue(CompareUtils.equals(arr, deserialized));
 	}
 
@@ -119,16 +119,17 @@ public class StringConversionUtilsTest extends TestCase {
 		ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs);
 
 		Dictionary dictionaryResult = StringConversionUtils.deserialize("my dict", Dictionary.class, null,
-				referenceDataCatalog);
+				referenceDataCatalog, null);
 		assertSame(dictionaryResult, dictionary);
 
-		dictionaryResult = StringConversionUtils.deserialize("foo", Dictionary.class, null, referenceDataCatalog);
+		dictionaryResult = StringConversionUtils.deserialize("foo", Dictionary.class, null, referenceDataCatalog, null);
 		assertNull(dictionaryResult);
 
 		SynonymCatalog synonymCatalogResult = StringConversionUtils.deserialize("my synonyms", SynonymCatalog.class, null,
-				referenceDataCatalog);
+				referenceDataCatalog, null);
 		assertSame(synonymCatalogResult, synonymCatalog);
-		synonymCatalogResult = StringConversionUtils.deserialize("bar", SynonymCatalog.class, null, referenceDataCatalog);
+		synonymCatalogResult = StringConversionUtils.deserialize("bar", SynonymCatalog.class, null, referenceDataCatalog,
+				null);
 		assertNull(synonymCatalogResult);
 	}
 
@@ -153,9 +154,9 @@ public class StringConversionUtilsTest extends TestCase {
 	public void testNullArgument() throws Exception {
 		String s = StringConversionUtils.serialize(null);
 		assertEquals("<null>", s);
-		assertNull(StringConversionUtils.deserialize(s, String.class, null, null));
-		assertNull(StringConversionUtils.deserialize(s, Integer.class, null, null));
-		assertNull(StringConversionUtils.deserialize(s, Date.class, null, null));
+		assertNull(StringConversionUtils.deserialize(s, String.class, null, null, null));
+		assertNull(StringConversionUtils.deserialize(s, Integer.class, null, null, null));
+		assertNull(StringConversionUtils.deserialize(s, Date.class, null, null, null));
 	}
 
 	public void testArrays() throws Exception {
@@ -168,7 +169,7 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests(new String[0], "[]");
 		runTests(new String[3], "[<null>,<null>,<null>]");
 
-		Long[] result = StringConversionUtils.deserialize("123", Long[].class, null, null);
+		Long[] result = StringConversionUtils.deserialize("123", Long[].class, null, null, null);
 		assertEquals(1, result.length);
 		assertEquals(123l, result[0].longValue());
 	}
@@ -190,7 +191,7 @@ public class StringConversionUtilsTest extends TestCase {
 		if (expectedStringRepresentation != null) {
 			assertEquals(expectedStringRepresentation, s);
 		}
-		Object o2 = StringConversionUtils.deserialize(s, o.getClass(), null, null);
+		Object o2 = StringConversionUtils.deserialize(s, o.getClass(), null, null, null);
 		if (ReflectionUtils.isArray(o)) {
 			boolean equals = CompareUtils.equals(o, o2);
 			if (!equals) {

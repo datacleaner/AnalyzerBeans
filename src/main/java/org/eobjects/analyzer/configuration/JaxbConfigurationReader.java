@@ -98,11 +98,18 @@ import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.util.FileHelper;
 
+/**
+ * Configuration reader that uses the JAXB model to read XML file based
+ * configurations for AnalyzerBeans.
+ * 
+ * @author Kasper Sørensen
+ * @author Nancy Sharma
+ */
 public final class JaxbConfigurationReader implements ConfigurationReader<InputStream> {
 
 	private static final Logger logger = LoggerFactory.getLogger(JaxbConfigurationReader.class);
 
-	private JAXBContext _jaxbContext;
+	private final JAXBContext _jaxbContext;
 
 	public JaxbConfigurationReader() {
 		try {
@@ -155,7 +162,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		TaskRunner taskRunner = createTaskRunner(configuration);
 		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog());
-		StorageProvider storageProvider = createStorageProvider(configuration);
+		StorageProvider storageProvider = createStorageProvider(configuration, datastoreCatalog);
 
 		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
 		ClasspathScannerType classpathScanner = configuration.getClasspathScanner();
@@ -181,13 +188,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				storageProvider);
 	}
 
-	private StorageProvider createStorageProvider(Configuration configuration) {
+	private StorageProvider createStorageProvider(Configuration configuration, DatastoreCatalog datastoreCatalog) {
 		if (configuration.getInMemoryStorageProvider() != null) {
 			return new InMemoryStorageProvider();
 		}
 
 		if (configuration.getCustomStorageProvider() != null) {
-			return createCustomElement(configuration.getCustomStorageProvider(), StorageProvider.class);
+			return createCustomElement(configuration.getCustomStorageProvider(), StorageProvider.class, datastoreCatalog);
 		}
 
 		BerkeleyDbStorageProviderType berkeleyDbStorageProvider = configuration.getBerkeleyDbStorageProvider();
@@ -263,7 +270,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						dictionaryList.add(new SimpleDictionary(name, values));
 					} else if (dictionaryType instanceof CustomElementType) {
 						Dictionary customDictionary = createCustomElement((CustomElementType) dictionaryType,
-								Dictionary.class);
+								Dictionary.class, datastoreCatalog);
 						dictionaryList.add(customDictionary);
 					} else {
 						throw new IllegalStateException("Unsupported dictionary type: " + dictionaryType);
@@ -290,7 +297,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 								encoding));
 					} else if (synonymCatalogType instanceof CustomElementType) {
 						SynonymCatalog customSynonymCatalog = createCustomElement((CustomElementType) synonymCatalogType,
-								SynonymCatalog.class);
+								SynonymCatalog.class, datastoreCatalog);
 						synonymCatalogList.add(customSynonymCatalog);
 					} else {
 						throw new IllegalStateException("Unsupported synonym catalog type: " + synonymCatalogType);
@@ -431,7 +438,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		List<CustomElementType> customDatastores = CollectionUtils.filterOnClass(datastoreTypes, CustomElementType.class);
 		for (CustomElementType customElementType : customDatastores) {
-			Datastore ds = createCustomElement(customElementType, Datastore.class);
+			Datastore ds = createCustomElement(customElementType, Datastore.class, null);
 			String name = ds.getName();
 			if (StringUtils.isNullOrEmpty(name)) {
 				throw new IllegalStateException("Datastore name cannot be null");
@@ -489,7 +496,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				taskRunner = new MultiThreadedTaskRunner();
 			}
 		} else if (customTaskrunner != null) {
-			taskRunner = createCustomElement(customTaskrunner, TaskRunner.class);
+			taskRunner = createCustomElement(customTaskrunner, TaskRunner.class, null);
 		} else {
 			// default task runner type is multithreaded
 			taskRunner = new MultiThreadedTaskRunner();
@@ -499,7 +506,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 	}
 
 	@SuppressWarnings("unchecked")
-	private <E> E createCustomElement(CustomElementType customElementType, Class<E> expectedClazz) {
+	private <E> E createCustomElement(CustomElementType customElementType, Class<E> expectedClazz,
+			DatastoreCatalog datastoreCatalog) {
 		E result = null;
 		Class<?> foundClass;
 		String className = customElementType.getClassName();
@@ -541,7 +549,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				}
 
 				Object configuredValue = StringConversionUtils.deserialize(propertyValue, configuredProperty.getType(),
-						null, null);
+						null, null, datastoreCatalog);
 
 				configuredProperty.setValue(result, configuredValue);
 			}

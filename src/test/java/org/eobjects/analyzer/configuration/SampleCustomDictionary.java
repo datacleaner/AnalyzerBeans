@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceValues;
 import org.eobjects.analyzer.reference.SimpleStringReferenceValues;
@@ -38,6 +39,9 @@ public class SampleCustomDictionary implements Dictionary {
 
 	@Configured
 	int values;
+
+	@Configured
+	Datastore datastore;
 
 	@Override
 	public String getName() {
@@ -58,5 +62,4 @@ public class SampleCustomDictionary implements Dictionary {
 		SimpleStringReferenceValues refValues = new SimpleStringReferenceValues(values, true);
 		return refValues;
 	}
-
 }
