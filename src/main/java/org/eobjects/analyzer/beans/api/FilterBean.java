@@ -21,7 +21,6 @@ package org.eobjects.analyzer.beans.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -33,14 +32,17 @@ import java.lang.annotation.Target;
  * 
  * A @FilterBean annotated class should implement the Filter interface.
  * 
+ * FilterBeans are by default assumed to be concurrent and thread-safe. This
+ * behaviour can be overridden by using the @Concurrent annotation.
+ * 
  * @see Filter
+ * @see Concurrent
  * 
  * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Inherited
 public @interface FilterBean {
 
 	/**

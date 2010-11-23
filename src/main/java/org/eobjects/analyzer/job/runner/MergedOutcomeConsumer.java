@@ -45,6 +45,11 @@ final class MergedOutcomeConsumer implements RowProcessingConsumer {
 	public MergedOutcomeJob getMergedOutcomeJob() {
 		return _mergedOutcomeJob;
 	}
+	
+	@Override
+	public boolean isConcurrent() {
+		return true;
+	}
 
 	@Override
 	public InputColumn<?>[] getRequiredInput() {

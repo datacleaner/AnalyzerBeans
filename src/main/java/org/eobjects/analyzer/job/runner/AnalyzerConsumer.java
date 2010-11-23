@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -33,6 +34,7 @@ final class AnalyzerConsumer extends ConfigurableBeanJobRowProcessingConsumer im
 	private final AnalyzerBeanInstance _analyzerBeanInstance;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
+	private final boolean _concurrent;
 
 	public AnalyzerConsumer(AnalysisJob job, AnalyzerBeanInstance analyzerBeanInstance, AnalyzerJob analyzerJob,
 			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
@@ -42,6 +44,19 @@ final class AnalyzerConsumer extends ConfigurableBeanJobRowProcessingConsumer im
 		_analyzerJob = analyzerJob;
 		_inputColumns = inputColumns;
 		_analysisListener = analysisListener;
+		
+		Concurrent concurrent = analyzerJob.getDescriptor().getAnnotation(Concurrent.class);
+		if (concurrent == null) {
+			// analyzers are by default not concurrent
+			_concurrent = false;
+		} else {
+			_concurrent = concurrent.value();
+		}
+	}
+	
+	@Override
+	public boolean isConcurrent() {
+		return _concurrent;
 	}
 
 	@Override

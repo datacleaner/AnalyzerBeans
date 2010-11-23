@@ -38,6 +38,10 @@ public class ConcatenatorTransformer implements Transformer<String> {
 
 	@Configured
 	InputColumn<?>[] columns;
+	
+	@Configured(required = false)
+	@Description("A string to separate the concatenated values")
+	String separator;
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -47,8 +51,12 @@ public class ConcatenatorTransformer implements Transformer<String> {
 	@Override
 	public String[] transform(InputRow inputRow) {
 		StringBuilder sb = new StringBuilder();
-		for (InputColumn<?> inputColumn : columns) {
-			Object value = inputRow.getValue(inputColumn);
+		for (int i = 0; i < columns.length; i++) {
+			InputColumn<?> column = columns[i];
+			if (i != 0 && separator != null) {
+				sb.append(separator);
+			}
+			Object value = inputRow.getValue(column);
 			if (value != null) {
 				sb.append(value);
 			}

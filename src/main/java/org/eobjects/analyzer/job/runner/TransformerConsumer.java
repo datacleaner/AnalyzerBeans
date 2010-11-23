@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -34,6 +35,7 @@ final class TransformerConsumer extends ConfigurableBeanJobRowProcessingConsumer
 	private final TransformerJob _transformerJob;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
+	private final boolean _concurrent;
 
 	public TransformerConsumer(AnalysisJob job, TransformerBeanInstance transformerBeanInstance,
 			TransformerJob transformerJob, InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
@@ -43,6 +45,19 @@ final class TransformerConsumer extends ConfigurableBeanJobRowProcessingConsumer
 		_transformerJob = transformerJob;
 		_inputColumns = inputColumns;
 		_analysisListener = analysisListener;
+
+		Concurrent concurrent = _transformerJob.getDescriptor().getAnnotation(Concurrent.class);
+		if (concurrent == null) {
+			// transformers are by default concurrent
+			_concurrent = true;
+		} else {
+			_concurrent = concurrent.value();
+		}
+	}
+
+	@Override
+	public boolean isConcurrent() {
+		return _concurrent;
 	}
 
 	@Override

@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -35,6 +36,7 @@ final class FilterConsumer extends ConfigurableBeanJobRowProcessingConsumer impl
 	private final FilterJob _filterJob;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
+	private final boolean _concurrent;
 
 	public FilterConsumer(AnalysisJob job, FilterBeanInstance filterBeanInstance, FilterJob filterJob,
 			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
@@ -44,6 +46,19 @@ final class FilterConsumer extends ConfigurableBeanJobRowProcessingConsumer impl
 		_inputColumns = inputColumns;
 		_job = job;
 		_analysisListener = analysisListener;
+		
+		Concurrent concurrent = _filterJob.getDescriptor().getAnnotation(Concurrent.class);
+		if (concurrent == null) {
+			// filter are by default concurrent
+			_concurrent = true;
+		} else {
+			_concurrent = concurrent.value();
+		}
+	}
+	
+	@Override
+	public boolean isConcurrent() {
+		return _concurrent;
 	}
 
 	@Override

@@ -21,20 +21,27 @@ package org.eobjects.analyzer.beans.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
  * Classes that are annotated with the @TransformerBean annotation are
- * components for data transformation. All @TransformerBean classes must
- * implement the <code>org.eobjects.analyzer.beans.Transformer</code> interface.
+ * components for data transformation. 
+ * 
+ * A @TransformerBean annotated class should implement the Transformer interface.
+ * 
+ * TransformerBeans are by default assumed to be concurrent and thread-safe. This
+ * behaviour can be overridden by using the @Concurrent annotation.
+ * 
+ * @see Transformer
+ * @see Concurrent
+ * 
+ * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Inherited
 public @interface TransformerBean {
 
 	/**

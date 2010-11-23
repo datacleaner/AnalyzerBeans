@@ -70,8 +70,12 @@ public final class ConsumeRowTask implements Task {
 			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes());
 
 			if (process) {
-				synchronized (consumer) {
+				if (consumer.isConcurrent()) {
 					inputRow = consumer.consume(inputRow, distinctCount, outcomeSink);
+				} else {
+					synchronized (consumer) {
+						inputRow = consumer.consume(inputRow, distinctCount, outcomeSink);
+					}
 				}
 			}
 		}

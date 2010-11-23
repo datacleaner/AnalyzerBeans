@@ -21,6 +21,7 @@ package org.eobjects.analyzer.job.runner;
 
 import java.util.Collection;
 
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.ComponentJob;
@@ -33,6 +34,14 @@ import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
  * @author Kasper Sørensen
  */
 public interface RowProcessingConsumer {
+
+	/**
+	 * @return true if this consumer is thread-safe and can thusly be invoked by
+	 *         several threads at the same time.
+	 * 
+	 * @see Concurrent
+	 */
+	public boolean isConcurrent();
 
 	/**
 	 * @return the required input columns for this consumer

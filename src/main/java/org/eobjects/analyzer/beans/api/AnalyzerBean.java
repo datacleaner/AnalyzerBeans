@@ -21,7 +21,6 @@ package org.eobjects.analyzer.beans.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -51,12 +50,17 @@ import java.lang.annotation.Target;
  * <li>The AnalyzerBean object is dereferenced and garbage collected</li>
  * </ul>
  * 
+ * AnalyzerBeans are by default only invoked by a single thread at a time. This
+ * behaviour can be overridden by using the @Concurrent annotation.
+ * 
  * @see org.eobjects.analyzer.lifecycle.LifeCycleState
+ * @see Concurrent
+ * 
+ * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Inherited
 public @interface AnalyzerBean {
 
 	/**
