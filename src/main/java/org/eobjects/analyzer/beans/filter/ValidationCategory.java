@@ -19,6 +19,11 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+/**
+ * A simple category for filters that categorize rows as either valid or invalid
+ * 
+ * @author Kasper Sørensen
+ */
 public enum ValidationCategory {
 
 	VALID, INVALID
