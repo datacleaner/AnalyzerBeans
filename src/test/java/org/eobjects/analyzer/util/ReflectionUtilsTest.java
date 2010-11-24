@@ -89,6 +89,13 @@ public class ReflectionUtilsTest extends TestCase {
 		assertTrue(ReflectionUtils.isNumber(Float.class));
 		assertFalse(ReflectionUtils.isNumber(String.class));
 		assertFalse(ReflectionUtils.isNumber(Object.class));
+		
+		assertTrue(ReflectionUtils.isNumber(byte.class));
+		assertTrue(ReflectionUtils.isNumber(short.class));
+		assertTrue(ReflectionUtils.isNumber(int.class));
+		assertTrue(ReflectionUtils.isNumber(long.class));
+		assertTrue(ReflectionUtils.isNumber(float.class));
+		assertTrue(ReflectionUtils.isNumber(double.class));
 	}
 
 	public void testGetHierarchyDistance() throws Exception {
@@ -118,4 +125,5 @@ public class ReflectionUtilsTest extends TestCase {
 		assertEquals(ClassA.class, fields[1].getDeclaringClass());
 		assertEquals("a", fields[1].getName());
 	}
+	
 }

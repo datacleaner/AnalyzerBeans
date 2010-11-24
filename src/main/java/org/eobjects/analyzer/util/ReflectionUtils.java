@@ -158,7 +158,12 @@ public class ReflectionUtils {
 	public static boolean isNumber(Type type) {
 		if (type instanceof Class<?>) {
 			Class<?> clazz = (Class<?>) type;
-			return Number.class.isAssignableFrom(clazz);
+			boolean numberClass = is(clazz, Number.class);
+			if (numberClass) {
+				return true;
+			}
+			return type == byte.class || type == int.class || type == short.class || type == long.class
+					|| type == float.class || type == double.class;
 		}
 		return false;
 	}
@@ -302,7 +307,7 @@ public class ReflectionUtils {
 		if (subSuperclass != Object.class) {
 			return 1 + getHierarchyDistance(subSuperclass, supertype);
 		}
-		
+
 		if (supertype.isInterface()) {
 			return getInterfaceHierarchyDistance(subtype, supertype);
 		} else {
