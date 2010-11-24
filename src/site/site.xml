@@ -8,6 +8,8 @@
 		<name>AnalyzerBeans</name>
 		<href>index.html</href>
 	</bannerLeft>
+	
+	<version position="none" />
 
 	<body>
 		<head>

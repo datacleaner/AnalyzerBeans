@@ -37,3 +37,21 @@ Exploring analyzers
 Row annotations
 
  TODO
+ 
+Concurrency model
+
+ AnalyzerBeans is designed to be executable in a highly concurrent environement, while retaining the option to run it in as a regular single threaded application. This is archieved by a pluggable execution layer called the TaskRunner. There are three built-in task runner implementations (and new implementations are quite easy to add): Single threaded task runner, Multithreaded task runner (uses the java.util.concurrent stack) and EJB Timer task runner (for deployment in an EJB 3.0+ container).
+ 
+ The concurrency model is based on a strategy where a rather fine level of granularity of tasks is archieved in order to fully utilize multithreading (ie. finer granularity means better distribution of tasks to threads). Here are the main tasks that make up the execution flow:
+
+  * All components in an analysis job is being initialized and closed down in separate tasks.
+
+  * When running an analysis job in AnalyzerBeans each processed table will be queried in it's own task.
+
+  * Most importantly each row of a datastore will be processed in it's own task. This means that components usually don't block each other (as they would in the opposite case where each component had it's own thread) and that the amount of rows being processed concurrently will often time be equal to the amount of available threads. In other words: We utilize the threads as much as possible. It also prevents the system from running out of memory because we will never get into a case where one component is consuming rows faster than another component, which would require a "blocking buffer" strategy to keep down memory consumption.
+ 
+ A few rules pertain to the concurrent processing:
+ 
+  * Transformers and Filters are assumed to run without race conditions in a concurrent manner. If you need to change this behaviour for a particular Transformer or Filter there are two ways: Either use Java's synchronized keyword or annotate your class with AnalyzerBeans' annotation for this purpose: @Concurrent(false).
+  
+  * Analyzers are assumed to have race conditions because normally they will be used to build up results from the stream of rows that it consumes. Therefore the default concurrent behaviour of an analyzer is that only a single thread at a time is allowed to invoke it's run(...) method. To override this behaviour use AnalyzerBeans' annotation for this purpose: @Concurrent(true).
