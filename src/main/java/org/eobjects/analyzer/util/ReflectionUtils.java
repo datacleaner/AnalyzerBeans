@@ -45,11 +45,19 @@ public class ReflectionUtils {
 		// Prevent instantiation
 	}
 
+	/**
+	 * @return true if thisType is a valid type ofThatType, either as a single
+	 *         instance or as an array of ofThatType
+	 */
 	public static boolean is(Type thisType, Class<?> ofThatType) {
+		return is(thisType, ofThatType, true);
+	}
+
+	public static boolean is(Type thisType, Class<?> ofThatType, boolean includeArray) {
 		Class<?> thisClass = null;
 		if (thisType instanceof Class<?>) {
 			thisClass = (Class<?>) thisType;
-			if (thisClass.isArray()) {
+			if (includeArray && thisClass.isArray()) {
 				thisClass = thisClass.getComponentType();
 			}
 		}
@@ -158,7 +166,7 @@ public class ReflectionUtils {
 	public static boolean isNumber(Type type) {
 		if (type instanceof Class<?>) {
 			Class<?> clazz = (Class<?>) type;
-			boolean numberClass = is(clazz, Number.class);
+			boolean numberClass = is(clazz, Number.class, false);
 			if (numberClass) {
 				return true;
 			}

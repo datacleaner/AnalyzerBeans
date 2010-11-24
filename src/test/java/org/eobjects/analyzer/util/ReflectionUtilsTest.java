@@ -96,6 +96,8 @@ public class ReflectionUtilsTest extends TestCase {
 		assertTrue(ReflectionUtils.isNumber(long.class));
 		assertTrue(ReflectionUtils.isNumber(float.class));
 		assertTrue(ReflectionUtils.isNumber(double.class));
+		assertFalse(ReflectionUtils.isNumber(double[].class));
+		assertFalse(ReflectionUtils.isNumber(Double[].class));
 	}
 
 	public void testGetHierarchyDistance() throws Exception {
