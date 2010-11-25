@@ -51,21 +51,27 @@ public final class DatastoreReferenceValues implements ReferenceValues<String> {
 	public boolean containsValue(String value) {
 		Boolean result = _containsValueCache.get(value);
 		if (result == null) {
-			result = false;
-			DataContext dataContext = _dataContextProvider.getDataContext();
-			Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).equals(value).toQuery();
-			DataSet dataSet = dataContext.executeQuery(q);
-			if (dataSet.next()) {
-				Row row = dataSet.getRow();
-				if (row != null) {
-					Number count = (Number) row.getValue(0);
-					if (count != null && count.intValue() > 0) {
-						result = true;
+			synchronized (_containsValueCache) {
+				result = _containsValueCache.get(value);
+				if (result == null) {
+					result = false;
+					DataContext dataContext = _dataContextProvider.getDataContext();
+					Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).equals(value)
+							.toQuery();
+					DataSet dataSet = dataContext.executeQuery(q);
+					if (dataSet.next()) {
+						Row row = dataSet.getRow();
+						if (row != null) {
+							Number count = (Number) row.getValue(0);
+							if (count != null && count.intValue() > 0) {
+								result = true;
+							}
+							assert !dataSet.next();
+						}
 					}
-					assert !dataSet.next();
+					_containsValueCache.put(value, result);
 				}
 			}
-			_containsValueCache.put(value, result);
 		}
 		return result;
 

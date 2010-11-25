@@ -34,6 +34,10 @@ import java.io.Serializable;
  * Often times a dictionary will implement a caching mechanism to prevent having
  * to hold all values of the dictionary in memory.
  * 
+ * Note: Dictionaries should be thread-safe!! Make sure to make sensible use of
+ * synchronized blocks if there are race conditions in the dictionary
+ * implementation.
+ * 
  * @author Kasper Sørensen
  */
 public interface Dictionary extends Serializable {

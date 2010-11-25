@@ -84,19 +84,23 @@ public class DatastoreDictionary implements Dictionary {
 
 	public ReferenceValues<String> getValues() {
 		if (_cachedRefValues == null) {
-			Datastore datastore = _datastoreCatalog.getDatastore(_datastoreName);
-			if (datastore == null) {
-				throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
-			}
+			synchronized (this) {
+				if (_cachedRefValues == null) {
+					Datastore datastore = _datastoreCatalog.getDatastore(_datastoreName);
+					if (datastore == null) {
+						throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
+					}
 
-			DataContextProvider dataContextProvider = datastore.getDataContextProvider();
-			SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
-			Column column = schemaNavigator.convertToColumns(new String[] { _qualifiedColumnName })[0];
-			if (column == null) {
-				throw new IllegalStateException("Could not resolve column " + _qualifiedColumnName);
-			}
+					DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+					SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+					Column column = schemaNavigator.convertToColumns(new String[] { _qualifiedColumnName })[0];
+					if (column == null) {
+						throw new IllegalStateException("Could not resolve column " + _qualifiedColumnName);
+					}
 
-			_cachedRefValues = new DatastoreReferenceValues(dataContextProvider, column);
+					_cachedRefValues = new DatastoreReferenceValues(dataContextProvider, column);
+				}
+			}
 		}
 		return _cachedRefValues;
 	}

@@ -31,6 +31,10 @@ import java.util.Collection;
  * <li>Given name synonyms (eg. 'William' is the master term for 'Billy')</li>
  * </ul>
  * 
+ * Note: Synonym catalogs should be thread-safe!! Make sure to make sensible use
+ * of synchronized blocks if there are race conditions in the SynonymCatalog
+ * implementation.
+ * 
  * @author Kasper Sørensen
  */
 public interface SynonymCatalog extends Serializable {
