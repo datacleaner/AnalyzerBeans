@@ -5,6 +5,7 @@
 	<artifactId>AnalyzerBeans</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>AnalyzerBeans</name>
+	<url>http.analyzerbeans.eobjects.org</url>
 	<description>
 		A framework for processing and analyzing data in a database, spreadsheet or other
 		data source. AnalyzerBeans is widely based on a simple annotation-based development
