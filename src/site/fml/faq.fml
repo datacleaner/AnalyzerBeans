@@ -18,7 +18,13 @@
 		<faq id="why">
 			<question>Why should I care about AnalyzerBeans?</question>
 			<answer>
-				<p>AnalyzerBeans is an interesting project because of it's focus on reusability of generic analysis components while still making it easy to develop new plug-in components that fit in to the same data flow as the built-in components. In fact all built-in components use the same API as any plugin would use. This hopefully prooves our concept: We want to provide a framework for data analysis that is flexible, intuitive and extensible.</p>
+				<p>AnalyzerBeans is an interesting project because of it's focus on
+				reusability of generic analysis components while still making it easy
+				to develop new plug-in components that fit in to the same data flow as
+				the built-in components. In fact all built-in components use the same
+				API as any plugin would use. This hopefully prooves our concept:
+				We want to provide a framework for data analysis that is high performing,
+				flexible, intuitive and extensible.</p>
 			</answer>
 		</faq>
 
@@ -88,7 +94,30 @@
 					<li>AnalyzerBeans is tuned towards developer effeciency. It should
 						be easy and unintrusive to your analysis logic to use the
 						framework.</li>
+					<li>By trimming down the list of requirements for the data flow
+						mechanism it is possible to substantially boost performance.
+						Because AnalyzerBeans is not a full-fledged ETL framework we're
+						able to apply concurrency tricks that are otherwise impossible.</li>
 				</ul>
+			</answer>
+		</faq>
+		
+		<faq id="datacleaner_comparison">
+			<question>What is the relationship between AnalyzerBeans and DataCleaner?</question>
+			<answer>
+				<p>As of the upcoming version 2.0, <a href="http://datacleaner.eobjects.org">DataCleaner</a>
+				will act as probably the typical user interface for AnalyzerBeans. It is however
+				very important for both projects to avoid being inter-dependent, so that it's only
+				DataCleaner using AnalyzerBeans as it's underlying engine and not the other way around.
+				We are open for ideas on alternative user interfaces for AnalyzerBeans and included
+				is actually also a simple command line interface to proof this concept.</p>
+				
+				<p>The nice thing about having DataCleaner as a project which uses AnalyzerBeans
+				already from the beginning is that it makes a very effecient quality control which
+				ensures that all needed functionality is actually included, because otherwise
+				DataCleaner would not be functional from a user perspective. Therefore it is also
+				typical that if you're a DataCleaner developer, then you're most likely also an 
+				AnalyzerBeans developer.</p>
 			</answer>
 		</faq>
 	</part>
