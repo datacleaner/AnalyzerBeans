@@ -4,11 +4,13 @@ AnalyzerBeans architecture
 
 Analyzers, Transformers and Filters
 
- The figure below is used to demonstrate the objective of a few archetypical component types in AnalyzerBeans:
+ There are a few archetypical component types in AnalyzerBeans:
  
   * Transformers: These components are used to take some input from a row and create new content for that same row (in the form of a new set of columns). The original values will always be retained but they can be ignored if only the generated values are of interest. Examples of transformers include components that convert data types, extract certain information, tokenize, combine and standardize values.
   * Filters: Filters are used to categorize rows with the intention of splitting the processing flow so that the user can choose to only process a subset of rows or apply different subflows for different types of rows.
   * Analyzers: Analyzers are the endpoints in a data processing flow. Analyzers consume all rows in a (sub)flow and once all rows have been consumed, they generate a result. An analyzer's result will typically be rendered to the format that is appropriate for the current session (ie. as text if you're running a command line application, as a Swing component if you're running in a Swing environment or as HTML if you're running in a web environment).
+
+ The component types are displayed in the figure below:
 
 [component-types.png]
 
