@@ -19,8 +19,10 @@
  */
 package org.eobjects.analyzer.job.concurrent;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
@@ -34,13 +36,13 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 	private final int _numThreads;
 
 	public MultiThreadedTaskRunner() {
-		_numThreads = -1;
-		_executorService = Executors.newCachedThreadPool();
+		this(30);
 	}
 
 	public MultiThreadedTaskRunner(int numThreads) {
 		_numThreads = numThreads;
-		_executorService = Executors.newFixedThreadPool(numThreads);
+		BlockingQueue<Runnable> workQueue = new DoubleBlockingQueue<Runnable>(numThreads * 2);
+		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS, workQueue);
 	}
 
 	/**
@@ -54,13 +56,13 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 	@Override
 	public void run(final Task task, final TaskListener listener) {
 		logger.debug("run({},{})", task, listener);
-		_executorService.submit(new TaskRunnable(task, listener));
+		_executorService.execute(new TaskRunnable(task, listener));
 	}
 
 	@Override
 	public void run(TaskRunnable taskRunnable) {
 		logger.debug("run({})", taskRunnable);
-		_executorService.submit(taskRunnable);
+		_executorService.execute(taskRunnable);
 	}
 
 	@Override

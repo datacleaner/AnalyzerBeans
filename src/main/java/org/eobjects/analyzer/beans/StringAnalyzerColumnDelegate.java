@@ -85,7 +85,7 @@ final class StringAnalyzerColumnDelegate {
 		_minWordsAnnotation = annotationFactory.createAnnotation();
 	}
 
-	public void run(InputRow row, String value, int distinctCount) {
+	public synchronized void run(InputRow row, String value, int distinctCount) {
 		_numRows += distinctCount;
 
 		if (value == null) {

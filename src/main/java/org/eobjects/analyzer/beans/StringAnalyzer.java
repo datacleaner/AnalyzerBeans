@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 @AnalyzerBean("String analyzer")
 @Description("The String analyzer is used to collect a variety of typical metrics on string values.\nMetrics include statistics on character case, words, diacritics, white-spaces and more...")
+@Concurrent(true)
 public class StringAnalyzer implements RowProcessingAnalyzer<StringAnalyzerResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(StringAnalyzer.class);
