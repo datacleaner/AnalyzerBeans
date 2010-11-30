@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,18 +39,20 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-public class MongoDbRowAnnotationFactory implements RowAnnotationFactory {
+public class MongoDbRowAnnotationFactory extends AbstractRowAnnotationFactory implements RowAnnotationFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(MongoDbRowAnnotationFactory.class);
 	private static final String ROW_ID_KEY = "row_id";
+	private static final String DISTINCT_COUNT_KEY = "count";
 
 	private final Map<InputColumn<?>, String> _inputColumnNames = new LinkedHashMap<InputColumn<?>, String>();
 	private final Map<RowAnnotation, String> _annotationColumnNames = new HashMap<RowAnnotation, String>();
-	private final WeakHashMap<Integer, Boolean> _cachedRows = new WeakHashMap<Integer, Boolean>();
+	private final InputColumn<Integer> distinctCountColumn = new MockInputColumn<Integer>("COUNT(*)", Integer.class);
 	private final AtomicInteger _nextColumnIndex = new AtomicInteger(1);
 	private final DBCollection _dbCollection;
 
 	public MongoDbRowAnnotationFactory(DBCollection dbCollection) {
+		super(1000);
 		logger.info("Creating new MongoDB RowAnnotationFactory collection: {}", dbCollection.getName());
 		_dbCollection = dbCollection;
 		_dbCollection.createIndex(new BasicDBObject(ROW_ID_KEY, 1));
@@ -61,44 +63,6 @@ public class MongoDbRowAnnotationFactory implements RowAnnotationFactory {
 		super.finalize();
 		logger.info("Dropping unused MongoDB collection: {}", _dbCollection.getName());
 		_dbCollection.drop();
-	}
-
-	@Override
-	public RowAnnotation createAnnotation() {
-		return new RowAnnotationImpl();
-	}
-
-	@Override
-	public void annotate(InputRow row, int distinctCount, RowAnnotation annotation) {
-		if (annotation instanceof RowAnnotationImpl) {
-			((RowAnnotationImpl) annotation).incrementRowCount(distinctCount);
-		}
-
-		final Integer rowId = row.getId();
-		final String annotationColumnName = getColumnName(annotation);
-
-		final BasicDBObject query = new BasicDBObject().append(ROW_ID_KEY, rowId);
-
-		if (!_cachedRows.containsKey(rowId)) {
-			synchronized (_cachedRows) {
-				if (!_cachedRows.containsKey(rowId)) {
-					DBObject dbRow = _dbCollection.findOne(query);
-					if (dbRow == null) {
-						dbRow = new BasicDBObject();
-						dbRow.put(ROW_ID_KEY, rowId);
-						List<InputColumn<?>> inputColumns = row.getInputColumns();
-						for (InputColumn<?> inputColumn : inputColumns) {
-							dbRow.put(getColumnName(inputColumn), row.getValue(inputColumn));
-						}
-						_dbCollection.insert(dbRow);
-					}
-					_dbCollection.insert(dbRow);
-					_cachedRows.put(rowId, Boolean.TRUE);
-				}
-			}
-		}
-
-		_dbCollection.update(query, new BasicDBObject("$set", new BasicDBObject(annotationColumnName, true)));
 	}
 
 	private String getColumnName(InputColumn<?> inputColumn) {
@@ -126,19 +90,6 @@ public class MongoDbRowAnnotationFactory implements RowAnnotationFactory {
 	}
 
 	@Override
-	public void reset(RowAnnotation annotation) {
-		if (annotation instanceof RowAnnotationImpl) {
-			((RowAnnotationImpl) annotation).resetRowCount();
-		}
-		final String annotationColumnName = getColumnName(annotation);
-		logger.info("Resetting rows with annotation column: " + annotationColumnName);
-
-		final BasicDBObject query = new BasicDBObject().append(annotationColumnName, true);
-		_dbCollection.update(query, new BasicDBObject("$unset", new BasicDBObject().append(annotationColumnName, 1)), false,
-				true);
-	}
-
-	@Override
 	public InputRow[] getRows(RowAnnotation annotation) {
 		final String annotationColumnName = getColumnName(annotation);
 
@@ -153,6 +104,7 @@ public class MongoDbRowAnnotationFactory implements RowAnnotationFactory {
 		while (cursor.hasNext()) {
 			DBObject dbRow = cursor.next();
 			Object rowId = dbRow.get(ROW_ID_KEY);
+			Object distinctCount = dbRow.get(DISTINCT_COUNT_KEY);
 			MockInputRow row;
 
 			if (rowId != null) {
@@ -160,6 +112,7 @@ public class MongoDbRowAnnotationFactory implements RowAnnotationFactory {
 			} else {
 				row = new MockInputRow();
 			}
+			row.put(distinctCountColumn, distinctCount);
 
 			Set<Entry<InputColumn<?>, String>> columnEntries = _inputColumnNames.entrySet();
 			for (Entry<InputColumn<?>, String> entry : columnEntries) {
@@ -181,9 +134,37 @@ public class MongoDbRowAnnotationFactory implements RowAnnotationFactory {
 	}
 
 	@Override
-	public Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+	protected void resetRows(RowAnnotation annotation) {
+		final String annotationColumnName = getColumnName(annotation);
+		logger.info("Resetting rows with annotation column: " + annotationColumnName);
+
+		final BasicDBObject query = new BasicDBObject().append(annotationColumnName, true);
+		_dbCollection.update(query, new BasicDBObject("$unset", new BasicDBObject().append(annotationColumnName, 1)), false,
+				true);
+	}
+
+	@Override
+	protected int getDistinctCount(InputRow row) {
+		return row.getValue(distinctCountColumn);
+	}
+
+	@Override
+	protected void storeRowAnnotation(int rowId, RowAnnotation annotation) {
+		final String annotationColumnName = getColumnName(annotation);
+		final BasicDBObject query = new BasicDBObject().append(ROW_ID_KEY, rowId);
+		_dbCollection.update(query, new BasicDBObject("$set", new BasicDBObject(annotationColumnName, true)));
+	}
+
+	@Override
+	protected void storeRowValues(int rowId, InputRow row, int distinctCount) {
+		BasicDBObject dbRow = new BasicDBObject();
+		dbRow.put(ROW_ID_KEY, rowId);
+		List<InputColumn<?>> inputColumns = row.getInputColumns();
+		for (InputColumn<?> inputColumn : inputColumns) {
+			dbRow.put(getColumnName(inputColumn), row.getValue(inputColumn));
+		}
+		dbRow.put(DISTINCT_COUNT_KEY, distinctCount);
+		_dbCollection.insert(dbRow);
 	}
 
 }
