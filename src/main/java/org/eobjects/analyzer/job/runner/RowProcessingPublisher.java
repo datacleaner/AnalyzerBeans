@@ -203,7 +203,7 @@ public final class RowProcessingPublisher {
 	}
 
 	private boolean useGroupByOptimization() {
-		if (_physicalColumns.size() > 10) {
+		if (_physicalColumns.size() > 3) {
 			logger.info("Skipping GROUP BY optimization because of the high column amount");
 			return false;
 		}

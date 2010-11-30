@@ -302,7 +302,15 @@
 			<version>1.2.145</version>
 		</dependency>
 
-		<!-- Needed if BerkeleyDb StorageProvider is used -->
+		<!-- Needed if MongoDB StorageProvider is used -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>2.3</version>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Needed if BerkeleyDB StorageProvider is used -->
 		<dependency>
 			<groupId>berkeleydb</groupId>
 			<artifactId>je</artifactId>

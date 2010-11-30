@@ -94,6 +94,7 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 	@Override
 	public void errorUknown(AnalysisJob job, Throwable throwable) {
 		logger.warn("errorUnknown({},{})", new Object[] { job, throwable });
+		logger.warn("Exception stack trace:", throwable);
 		storeError(job, throwable);
 	}
 
