@@ -21,13 +21,19 @@ package org.eobjects.analyzer.beans.filter;
 
 import junit.framework.TestCase;
 
-public class CompareNumberFilterTest extends TestCase {
+public class NumberRangeFilterTest extends TestCase {
 
 	public void testFilter() throws Exception {
-		CompareNumberFilter filter = new CompareNumberFilter(18);
-		assertEquals(CompareCategory.LOWER, filter.filter(17));
-		assertEquals(CompareCategory.HIGHER, filter.filter(19));
-		assertEquals(CompareCategory.LOWER, filter.filter(-17));
-		assertEquals(CompareCategory.EQUAL, filter.filter(18));
+		NumberRangeFilter filter = new NumberRangeFilter(5d, 10d);
+		assertEquals(RangeFilterCategory.LOWER, filter.categorize((Number) null));
+		assertEquals(RangeFilterCategory.LOWER, filter.categorize(0));
+		assertEquals(RangeFilterCategory.LOWER, filter.categorize(-200));
+		assertEquals(RangeFilterCategory.VALID, filter.categorize(5));
+		assertEquals(RangeFilterCategory.VALID, filter.categorize(5.0));
+		assertEquals(RangeFilterCategory.VALID, filter.categorize(5.0f));
+		assertEquals(RangeFilterCategory.VALID, filter.categorize(10));
+		assertEquals(RangeFilterCategory.VALID, filter.categorize(10.0));
+		assertEquals(RangeFilterCategory.VALID, filter.categorize(10.0f));
+		assertEquals(RangeFilterCategory.HIGHER, filter.categorize(11));
 	}
 }
