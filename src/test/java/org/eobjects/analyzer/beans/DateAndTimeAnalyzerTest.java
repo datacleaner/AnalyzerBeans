@@ -40,7 +40,7 @@ import org.eobjects.analyzer.test.TestHelper;
 
 public class DateAndTimeAnalyzerTest extends TestCase {
 
-	public void testOrderFactTable() throws Exception {
+	public void testOrderFactTable() throws Throwable {
 		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(TestHelper
 				.createSampleDatabaseDatastore("orderdb"));
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
@@ -58,6 +58,9 @@ public class DateAndTimeAnalyzerTest extends TestCase {
 		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(job);
 		resultFuture.await();
 
+		if (!resultFuture.isSuccessful()) {
+			throw resultFuture.getErrors().get(0);
+		}
 		assertTrue(resultFuture.isSuccessful());
 
 		List<AnalyzerResult> results = resultFuture.getResults();

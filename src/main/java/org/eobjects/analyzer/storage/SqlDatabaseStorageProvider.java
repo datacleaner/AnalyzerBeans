@@ -133,8 +133,8 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 	public final RowAnnotationFactory createRowAnnotationFactory() {
 		String tableName = getNextTableName();
 		logger.info("Creating table {} for RowAnnotationFactory", tableName);
-		SqlDatabaseRowAnnotationFactory persistentFactory = new SqlDatabaseRowAnnotationFactory(_connection, tableName);
-		return new ThresholdRowAnnotationFactory(_inMemoryThreshold, persistentFactory);
+		SqlDatabaseRowAnnotationFactory factory = new SqlDatabaseRowAnnotationFactory(_connection, tableName);
+		return factory;
 	}
 	
 	public int getInMemoryThreshold() {

@@ -19,29 +19,28 @@
  */
 package org.eobjects.analyzer.storage;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
-import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.ImmutableEntry;
 
-public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
+public class InMemoryRowAnnotationFactory extends AbstractRowAnnotationFactory implements RowAnnotationFactory {
 
-	// contains annotations, mapped to row-id's, mapped to rows, mapped to
-	// distinct counts (the nested maps are used to improve search speed)
-	private final Map<RowAnnotation, Map<Integer, Entry<InputRow, Integer>>> _annotatedRows = new LinkedHashMap<RowAnnotation, Map<Integer, Entry<InputRow, Integer>>>();
+	// contains annotations, mapped to row-ids
+	private final Map<RowAnnotation, Set<Integer>> _annotatedRows = new LinkedHashMap<RowAnnotation, Set<Integer>>();
 
-	@Override
-	public RowAnnotation createAnnotation() {
-		return new RowAnnotationImpl();
+	// contains row id's mapped to rows mapped to distinct counts
+	private final Map<Integer, Map.Entry<InputRow, Integer>> _distinctCounts = new LinkedHashMap<Integer, Map.Entry<InputRow, Integer>>();
+
+	public InMemoryRowAnnotationFactory() {
+		super(1000);
 	}
 
 	protected int getInMemoryRowCount(RowAnnotation annotation) {
-		Map<Integer, Entry<InputRow, Integer>> rows = _annotatedRows.get(annotation);
+		Set<Integer> rows = _annotatedRows.get(annotation);
 		if (rows == null) {
 			return 0;
 		}
@@ -49,77 +48,42 @@ public class InMemoryRowAnnotationFactory implements RowAnnotationFactory {
 	}
 
 	@Override
-	public void annotate(InputRow row, int distinctRowCount, RowAnnotation annotation) {
-		Map<Integer, Entry<InputRow, Integer>> rows = _annotatedRows.get(annotation);
-		if (rows == null) {
-			synchronized (this) {
-				rows = _annotatedRows.get(annotation);
-				if (rows == null) {
-					rows = new LinkedHashMap<Integer, Entry<InputRow, Integer>>();
-					_annotatedRows.put(annotation, rows);
-				}
-			}
-		}
+	protected void resetRows(RowAnnotation annotation) {
+		_annotatedRows.remove(annotation);
+	}
 
-		boolean found = rows.containsKey(row.getId());
+	@Override
+	protected int getDistinctCount(InputRow row) {
+		return _distinctCounts.get(row.getId()).getValue();
+	}
 
-		if (!found) {
-			rows.put(row.getId(), new ImmutableEntry<InputRow, Integer>(row, distinctRowCount));
-			((RowAnnotationImpl) annotation).incrementRowCount(distinctRowCount);
+	@Override
+	protected void storeRowAnnotation(int rowId, RowAnnotation annotation) {
+		Set<Integer> rowIds = _annotatedRows.get(annotation);
+		if (rowIds == null) {
+			rowIds = new LinkedHashSet<Integer>();
+			_annotatedRows.put(annotation, rowIds);
 		}
+		rowIds.add(rowId);
+	}
+
+	@Override
+	protected void storeRowValues(int rowId, InputRow row, int distinctCount) {
+		_distinctCounts.put(rowId, new ImmutableEntry<InputRow, Integer>(row, distinctCount));
 	}
 
 	@Override
 	public InputRow[] getRows(RowAnnotation annotation) {
-		if (!_annotatedRows.containsKey(annotation)) {
+		Set<Integer> rowIds = _annotatedRows.get(annotation);
+		if (rowIds == null) {
 			return new InputRow[0];
 		}
-		Collection<Entry<InputRow, Integer>> rows = _annotatedRows.get(annotation).values();
-		InputRow[] result = new InputRow[rows.size()];
+		InputRow[] rows = new InputRow[rowIds.size()];
 		int i = 0;
-		for (Entry<InputRow, Integer> entry : rows) {
-			result[i] = entry.getKey();
+		for (Integer rowId : rowIds) {
+			rows[i] = _distinctCounts.get(rowId).getKey();
 			i++;
 		}
-		return result;
-	}
-
-	@Override
-	public void reset(RowAnnotation annotation) {
-		synchronized (this) {
-			_annotatedRows.remove(annotation);
-		}
-		((RowAnnotationImpl) annotation).resetRowCount();
-	}
-
-	@Override
-	public Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn) {
-		HashMap<Object, Integer> map = new HashMap<Object, Integer>();
-		if (!_annotatedRows.containsKey(annotation)) {
-			return map;
-		}
-
-		for (Entry<InputRow, Integer> rowAndCount : _annotatedRows.get(annotation).values()) {
-			Object value = rowAndCount.getKey().getValue(inputColumn);
-			Integer count = map.get(value);
-			if (count == null) {
-				count = 0;
-			}
-			count = count.intValue() + rowAndCount.getValue();
-			map.put(value, count);
-		}
-		return map;
-	}
-
-	public int getRowCount(RowAnnotation annotation, InputRow row) {
-		Map<Integer, Entry<InputRow, Integer>> map = _annotatedRows.get(annotation);
-		if (map == null) {
-			return 0;
-		}
-		Entry<InputRow, Integer> entry = map.get(row.getId());
-		if (entry == null) {
-			return 0;
-		}
-		return entry.getValue();
+		return rows;
 	}
 }

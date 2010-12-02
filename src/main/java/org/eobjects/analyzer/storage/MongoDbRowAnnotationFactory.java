@@ -39,7 +39,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-public class MongoDbRowAnnotationFactory extends AbstractRowAnnotationFactory implements RowAnnotationFactory {
+public class MongoDbRowAnnotationFactory extends AbstractRowAnnotationFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(MongoDbRowAnnotationFactory.class);
 	private static final String ROW_ID_KEY = "row_id";

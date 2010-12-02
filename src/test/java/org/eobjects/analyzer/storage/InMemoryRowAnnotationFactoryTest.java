@@ -43,5 +43,10 @@ public class InMemoryRowAnnotationFactoryTest extends TestCase {
 		assertEquals(3, f.getValueCounts(a, col1).get("hello").intValue());
 		assertEquals(2, f.getValueCounts(a, col1).get("hi").intValue());
 		assertEquals(5, f.getValueCounts(a, col2).get("world").intValue());
+		
+		f.reset(a);
+		
+		assertEquals(0, f.getRows(a).length);
+		assertEquals(0, f.getValueCounts(a, col1).size());
 	}
 }

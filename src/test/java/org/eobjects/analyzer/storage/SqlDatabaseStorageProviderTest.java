@@ -158,7 +158,8 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 		Statement statementMock = EasyMock.createMock(Statement.class);
 
 		EasyMock.expect(connectionMock.createStatement()).andReturn(statementMock);
-		EasyMock.expect(statementMock.executeUpdate("CREATE CACHED TABLE MY_TABLE (set_value VARCHAR PRIMARY KEY)")).andReturn(0);
+		EasyMock.expect(statementMock.executeUpdate("CREATE CACHED TABLE MY_TABLE (set_value VARCHAR PRIMARY KEY)"))
+				.andReturn(0);
 		EasyMock.expect(statementMock.isClosed()).andReturn(false);
 		statementMock.close();
 
@@ -185,9 +186,6 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 
 	private void testCreateRowAnnotationFactory(StorageProvider sp) throws Exception {
 		RowAnnotationFactory f = sp.createRowAnnotationFactory();
-		if (f instanceof ThresholdRowAnnotationFactory) {
-			f = ((ThresholdRowAnnotationFactory) f).getPersistentDelegate();
-		}
 
 		RowAnnotation a1 = f.createAnnotation();
 		RowAnnotation a2 = f.createAnnotation();

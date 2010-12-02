@@ -41,7 +41,7 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleSynonym;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.SynonymCatalog;
-import org.eobjects.analyzer.storage.H2StorageProvider;
+import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.junit.Ignore;
 
@@ -64,7 +64,7 @@ public final class TestHelper {
 	}
 
 	public static StorageProvider createStorageProvider() {
-		return new H2StorageProvider();
+		return new InMemoryStorageProvider();
 	}
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(TaskRunner taskRunner, Datastore datastore) {
