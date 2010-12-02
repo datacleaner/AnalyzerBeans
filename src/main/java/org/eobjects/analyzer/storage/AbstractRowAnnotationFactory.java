@@ -36,19 +36,32 @@ import org.eobjects.analyzer.data.InputRow;
  */
 public abstract class AbstractRowAnnotationFactory implements RowAnnotationFactory {
 
-	private Map<RowAnnotationImpl, AtomicInteger> _storedRows = new IdentityHashMap<RowAnnotationImpl, AtomicInteger>();
-	private WeakHashMap<Integer, Boolean> _cachedRows = new WeakHashMap<Integer, Boolean>();
-	private Integer _storedRowsThreshold;
+	private final Map<RowAnnotationImpl, AtomicInteger> _rowCounts = new IdentityHashMap<RowAnnotationImpl, AtomicInteger>();
+	private final WeakHashMap<Integer, Boolean> _cachedRows = new WeakHashMap<Integer, Boolean>();
+	private final Integer _storedRowsThreshold;
 
 	public AbstractRowAnnotationFactory(Integer storedRowsThreshold) {
-		_storedRowsThreshold = storedRowsThreshold;
+		if (storedRowsThreshold == null) {
+			_storedRowsThreshold = Integer.MAX_VALUE;
+		} else {
+			_storedRowsThreshold = storedRowsThreshold;
+		}
 	}
 
 	@Override
 	public final void annotate(InputRow row, int distinctCount, RowAnnotation annotation) {
 		final RowAnnotationImpl ann = (RowAnnotationImpl) annotation;
 
-		final AtomicInteger count = _storedRows.get(ann);
+		AtomicInteger count = _rowCounts.get(ann);
+		if (count == null) {
+			synchronized (_rowCounts) {
+				count = _rowCounts.get(ann);
+				if (count == null) {
+					count = new AtomicInteger();
+					_rowCounts.put(ann, count);
+				}
+			}
+		}
 
 		boolean storeRow = true;
 		if (_storedRowsThreshold != null) {
@@ -84,7 +97,6 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 	@Override
 	public final RowAnnotation createAnnotation() {
 		RowAnnotationImpl ann = new RowAnnotationImpl();
-		_storedRows.put(ann, new AtomicInteger());
 		return ann;
 	}
 
@@ -132,9 +144,5 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 
 	public final Integer getStoredRowsThreshold() {
 		return _storedRowsThreshold;
-	}
-
-	public final void setStoredRowsThreshold(Integer storedRowsThreshold) {
-		this._storedRowsThreshold = storedRowsThreshold;
 	}
 }
