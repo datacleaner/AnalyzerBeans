@@ -35,6 +35,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,7 @@ import dk.eobjects.metamodel.schema.Table;
  * <li>java.util.regex.Pattern</li>
  * <li>org.eobjects.analyzer.reference.Dictionary</li>
  * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
+ * <li>org.eobjects.analyzer.reference.StringPattern</li>
  * <li>org.eobjects.analyzer.connection.Datastore</li>
  * <li>dk.eobjects.metamodel.schema.Column</li>
  * <li>dk.eobjects.metamodel.schema.Table</li>
@@ -120,6 +122,9 @@ public final class StringConversionUtils {
 		}
 		if (o instanceof SynonymCatalog) {
 			return escape(((SynonymCatalog) o).getName());
+		}
+		if (o instanceof StringPattern) {
+			return escape(((StringPattern) o).getName());
 		}
 		if (o instanceof Datastore) {
 			return escape(((Datastore) o).getName());
@@ -302,6 +307,13 @@ public final class StringConversionUtils {
 				logger.warn("SynonymCatalog not found: {}", str);
 			}
 			return (E) synonymCatalog;
+		}
+		if (ReflectionUtils.is(type, StringPattern.class)) {
+			StringPattern stringPattern = referenceDataCatalog.getStringPattern(str);
+			if (stringPattern == null) {
+				logger.warn("StringPattern not found: {}", str);
+			}
+			return (E) stringPattern;
 		}
 		if (ReflectionUtils.is(type, Datastore.class)) {
 			if (null != datastoreCatalog) {

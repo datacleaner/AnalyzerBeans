@@ -53,6 +53,7 @@ import javax.inject.Qualifier;
  * <li>org.eobjects.analyzer.data.InputColumn</li>
  * <li>org.eobjects.analyzer.reference.Dictionary</li>
  * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
+ * <li>org.eobjects.analyzer.reference.StringPattern</li>
  * </ul>
  * 
  * Additionally exploring analyzers are allowed to inject these @Configured
