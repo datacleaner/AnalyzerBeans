@@ -27,14 +27,16 @@ import java.util.Set;
 public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 
 	private static final long serialVersionUID = 1L;
-	private Collection<Dictionary> _dictionaries;
-	private Collection<SynonymCatalog> _synonymCatalogs;
+	private final Collection<Dictionary> _dictionaries;
+	private final Collection<SynonymCatalog> _synonymCatalogs;
+	private final Collection<StringPattern> _stringPatterns;
 
 	public ReferenceDataCatalogImpl() {
-		this(new ArrayList<Dictionary>(), new ArrayList<SynonymCatalog>());
+		this(new ArrayList<Dictionary>(), new ArrayList<SynonymCatalog>(), new ArrayList<StringPattern>());
 	}
 
-	public ReferenceDataCatalogImpl(Collection<Dictionary> dictionaries, Collection<SynonymCatalog> synonymCatalogs) {
+	public ReferenceDataCatalogImpl(Collection<Dictionary> dictionaries, Collection<SynonymCatalog> synonymCatalogs,
+			Collection<StringPattern> stringPatterns) {
 		if (dictionaries == null) {
 			throw new IllegalArgumentException("dictionaries cannot be null");
 		}
@@ -47,6 +49,7 @@ public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 				uniqueNames.add(name);
 			}
 		}
+
 		if (synonymCatalogs == null) {
 			throw new IllegalArgumentException("synonymCatalogs cannot be null");
 		}
@@ -59,8 +62,22 @@ public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 				uniqueNames.add(name);
 			}
 		}
+
+		if (stringPatterns == null) {
+			throw new IllegalArgumentException("stringPatterns cannot be null");
+		}
+		uniqueNames.clear();
+		for (StringPattern stringPattern : stringPatterns) {
+			String name = stringPattern.getName();
+			if (uniqueNames.contains(name)) {
+				throw new IllegalStateException("Duplicate string pattern names: " + name);
+			} else {
+				uniqueNames.add(name);
+			}
+		}
 		_dictionaries = dictionaries;
 		_synonymCatalogs = synonymCatalogs;
+		_stringPatterns = stringPatterns;
 	}
 
 	@Override
@@ -109,4 +126,26 @@ public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 		return null;
 	}
 
+	@Override
+	public StringPattern getStringPattern(String name) {
+		if (name != null) {
+			for (StringPattern sp : _stringPatterns) {
+				if (name.equals(sp.getName())) {
+					return sp;
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String[] getStringPatternNames() {
+		String[] names = new String[_stringPatterns.size()];
+		int i = 0;
+		for (StringPattern sp : _stringPatterns) {
+			names[i] = sp.getName();
+			i++;
+		}
+		return names;
+	}
 }

@@ -53,7 +53,10 @@ import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.OpenOfficeDatabaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType;
+import org.eobjects.analyzer.configuration.jaxb.RegexPatternType;
+import org.eobjects.analyzer.configuration.jaxb.SimplePatternType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
+import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.StringPatterns;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.TextFileDictionaryType;
@@ -79,7 +82,10 @@ import org.eobjects.analyzer.reference.DatastoreDictionary;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
+import org.eobjects.analyzer.reference.RegexStringPattern;
 import org.eobjects.analyzer.reference.SimpleDictionary;
+import org.eobjects.analyzer.reference.SimpleStringPattern;
+import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.reference.TextBasedDictionary;
 import org.eobjects.analyzer.reference.TextBasedSynonymCatalog;
@@ -190,7 +196,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 	private StorageProvider createStorageProvider(Configuration configuration, DatastoreCatalog datastoreCatalog) {
 		if (configuration.getInMemoryStorageProvider() != null) {
-			return new InMemoryStorageProvider();
+			int maxRowsThreshold = configuration.getInMemoryStorageProvider().getMaxRowsThreshold();
+			return new InMemoryStorageProvider(maxRowsThreshold);
 		}
 
 		if (configuration.getCustomStorageProvider() != null) {
@@ -205,13 +212,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		HsqldbStorageProviderType hsqldbType = configuration.getHsqldbStorageProvider();
 		if (hsqldbType != null) {
 			String directoryPath = hsqldbType.getTempDirectory();
-			Integer inMemoryThreshold = hsqldbType.getInMemoryThreshold();
-			if (inMemoryThreshold == null && directoryPath == null) {
+			if (directoryPath == null) {
 				return new HsqldbStorageProvider();
-			} else if (inMemoryThreshold != null && directoryPath != null) {
-				return new HsqldbStorageProvider(inMemoryThreshold, directoryPath);
-			} else if (inMemoryThreshold != null) {
-				return new HsqldbStorageProvider(inMemoryThreshold);
 			} else {
 				return new HsqldbStorageProvider(directoryPath);
 			}
@@ -220,13 +222,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		H2StorageProviderType h2Type = configuration.getH2DatabaseStorageProvider();
 		if (h2Type != null) {
 			String directoryPath = h2Type.getTempDirectory();
-			Integer inMemoryThreshold = h2Type.getInMemoryThreshold();
-			if (inMemoryThreshold == null && directoryPath == null) {
+			if (directoryPath == null) {
 				return new H2StorageProvider();
-			} else if (inMemoryThreshold != null && directoryPath != null) {
-				return new H2StorageProvider(inMemoryThreshold, directoryPath);
-			} else if (inMemoryThreshold != null) {
-				return new H2StorageProvider(inMemoryThreshold);
 			} else {
 				return new H2StorageProvider(directoryPath);
 			}
@@ -240,6 +237,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			DatastoreCatalog datastoreCatalog) {
 		List<Dictionary> dictionaryList = new ArrayList<Dictionary>();
 		List<SynonymCatalog> synonymCatalogList = new ArrayList<SynonymCatalog>();
+
+		List<StringPattern> stringPatterns = new ArrayList<StringPattern>();
 
 		if (referenceDataCatalog != null) {
 
@@ -304,9 +303,29 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 					}
 				}
 			}
+
+			StringPatterns stringPatternTypes = referenceDataCatalog.getStringPatterns();
+			if (stringPatternTypes != null) {
+				for (Object obj : stringPatternTypes.getRegexPatternOrSimplePattern()) {
+					if (obj instanceof RegexPatternType) {
+						RegexPatternType regexPatternType = (RegexPatternType) obj;
+						String name = regexPatternType.getName();
+						String expression = regexPatternType.getExpression();
+						boolean matchEntireString = regexPatternType.isMatchEntireString();
+						stringPatterns.add(new RegexStringPattern(name, expression, matchEntireString));
+					} else if (obj instanceof SimplePatternType) {
+						SimplePatternType simplePatternType = (SimplePatternType) obj;
+						String name = simplePatternType.getName();
+						String expression = simplePatternType.getExpression();
+						stringPatterns.add(new SimpleStringPattern(name, expression));
+					} else {
+						throw new IllegalStateException("Unsupported string pattern type: " + obj);
+					}
+				}
+			}
 		}
 
-		return new ReferenceDataCatalogImpl(dictionaryList, synonymCatalogList);
+		return new ReferenceDataCatalogImpl(dictionaryList, synonymCatalogList, stringPatterns);
 	}
 
 	private DatastoreCatalog createDatastoreCatalog(DatastoreCatalogType datastoreCatalogType) {

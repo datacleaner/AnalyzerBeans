@@ -35,6 +35,16 @@ import java.util.Set;
  */
 public final class InMemoryStorageProvider implements StorageProvider {
 
+	private final int _storedRowsThreshold;
+	
+	public InMemoryStorageProvider() {
+		this(1000);
+	}
+
+	public InMemoryStorageProvider(int storedRowsThreshold) {
+		_storedRowsThreshold = storedRowsThreshold;
+	}
+
 	@Override
 	public <E> List<E> createList(Class<E> valueType) throws IllegalStateException {
 		return new ArrayList<E>();
@@ -52,7 +62,6 @@ public final class InMemoryStorageProvider implements StorageProvider {
 
 	@Override
 	public RowAnnotationFactory createRowAnnotationFactory() {
-		// TODO: Create a persistent RowAnnotationFactory
-		return new InMemoryRowAnnotationFactory();
+		return new InMemoryRowAnnotationFactory(_storedRowsThreshold);
 	}
 }

@@ -29,6 +29,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.junit.Assert;
 
@@ -130,6 +131,21 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals(null, s.getMasterTerm("DK"));
 		assertEquals(null, s.getMasterTerm("Albania"));
 		assertEquals("NLD", s.getMasterTerm("Netherlands"));
+
+		String[] stringPatternNames = referenceDataCatalog.getStringPatternNames();
+		assertEquals("[regex danish email, simple email]", Arrays.toString(stringPatternNames));
+
+		StringPattern pattern = referenceDataCatalog.getStringPattern("regex danish email");
+		assertEquals("RegexStringPattern[name=regex danish email,expression=[a-z]+@[a-z]+\\.dk]", pattern.toString());
+		assertTrue(pattern.matches("kasper@eobjects.dk"));
+		assertFalse(pattern.matches("kasper@eobjects.org"));
+		assertFalse(pattern.matches(" kasper@eobjects.dk"));
+
+		pattern = referenceDataCatalog.getStringPattern("simple email");
+		assertEquals("SimpleStringPattern[name=simple email,expression=aaaa@aaaaa.aa]", pattern.toString());
+		assertTrue(pattern.matches("kasper@eobjects.dk"));
+		assertTrue(pattern.matches("kasper@eobjects.org"));
+		assertFalse(pattern.matches(" kasper@eobjects.dk"));
 	}
 
 	public void testCustomDictionaryWithInjectedDatastore() {

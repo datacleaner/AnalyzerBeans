@@ -38,17 +38,8 @@ public final class H2StorageProvider extends SqlDatabaseStorageProvider implemen
 		super("org.h2.Driver", "jdbc:h2:mem:ab" + databaseIndex.getAndIncrement());
 	}
 
-	public H2StorageProvider(int inMemoryThreshold) {
-		super(inMemoryThreshold, "org.h2.Driver", "jdbc:h2:mem:ab" + databaseIndex.getAndIncrement());
-	}
-
 	public H2StorageProvider(String directoryPath) {
 		super("org.h2.Driver", "jdbc:h2:" + cleanDirectory(directoryPath) + File.separatorChar + DATABASE_FILENAME);
-	}
-
-	public H2StorageProvider(int inMemoryThreshold, String directoryPath) {
-		super(inMemoryThreshold, "org.h2.Driver", "jdbc:h2:" + cleanDirectory(directoryPath) + File.separatorChar
-				+ DATABASE_FILENAME);
 	}
 
 	private static String cleanDirectory(String directoryPath) {

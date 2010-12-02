@@ -34,6 +34,7 @@ import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
+import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 
 import dk.eobjects.metamodel.schema.MutableColumn;
@@ -116,7 +117,9 @@ public class StringConversionUtilsTest extends TestCase {
 		Collection<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
 		synonymCatalogs.add(synonymCatalog);
 
-		ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs);
+		Collection<StringPattern> stringPatterns = new ArrayList<StringPattern>();
+		
+		ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs, stringPatterns);
 
 		Dictionary dictionaryResult = StringConversionUtils.deserialize("my dict", Dictionary.class, null,
 				referenceDataCatalog, null);

@@ -40,27 +40,14 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(SqlDatabaseStorageProvider.class);
 
-	public static final int DEFAULT_IN_MEMORY_THRESHOLD_SIZE = 3000;
-
 	private final AtomicInteger _nextTableId = new AtomicInteger(1);
 	private final Connection _connection;
-	private int _inMemoryThreshold;
 
 	public SqlDatabaseStorageProvider(String driverClassName, String connectionUrl) {
-		this(DEFAULT_IN_MEMORY_THRESHOLD_SIZE, driverClassName, connectionUrl);
-	}
-
-	public SqlDatabaseStorageProvider(int inMemoryThreshold, String driverClassName, String connectionUrl) {
-		this(inMemoryThreshold, driverClassName, connectionUrl, null, null);
+		this(driverClassName, connectionUrl, null, null);
 	}
 
 	public SqlDatabaseStorageProvider(String driverClassName, String connectionUrl, String username, String password) {
-		this(DEFAULT_IN_MEMORY_THRESHOLD_SIZE, driverClassName, connectionUrl, username, password);
-	}
-
-	public SqlDatabaseStorageProvider(int inMemoryThreshold, String driverClassName, String connectionUrl, String username,
-			String password) {
-		_inMemoryThreshold = inMemoryThreshold;
 		logger.info("Creating new storage provider, driver={}, url={}", driverClassName, connectionUrl);
 		try {
 			Class.forName(driverClassName);
@@ -135,9 +122,5 @@ public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 		logger.info("Creating table {} for RowAnnotationFactory", tableName);
 		SqlDatabaseRowAnnotationFactory factory = new SqlDatabaseRowAnnotationFactory(_connection, tableName);
 		return factory;
-	}
-	
-	public int getInMemoryThreshold() {
-		return _inMemoryThreshold;
 	}
 }

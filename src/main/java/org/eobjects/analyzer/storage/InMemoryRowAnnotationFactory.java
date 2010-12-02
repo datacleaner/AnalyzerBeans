@@ -36,7 +36,11 @@ public class InMemoryRowAnnotationFactory extends AbstractRowAnnotationFactory i
 	private final Map<Integer, Map.Entry<InputRow, Integer>> _distinctCounts = new LinkedHashMap<Integer, Map.Entry<InputRow, Integer>>();
 
 	public InMemoryRowAnnotationFactory() {
-		super(1000);
+		this(1000);
+	}
+	
+	public InMemoryRowAnnotationFactory(int storedRowsThreshold) {
+		super(storedRowsThreshold);
 	}
 
 	protected int getInMemoryRowCount(RowAnnotation annotation) {

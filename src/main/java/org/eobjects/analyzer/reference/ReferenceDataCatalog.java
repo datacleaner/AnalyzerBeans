@@ -51,4 +51,8 @@ public interface ReferenceDataCatalog extends Serializable {
 	public String[] getSynonymCatalogNames();
 
 	public SynonymCatalog getSynonymCatalog(String name);
+
+	public String[] getStringPatternNames();
+
+	public StringPattern getStringPattern(String name);
 }

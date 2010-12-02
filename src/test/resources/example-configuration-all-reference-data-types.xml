@@ -52,6 +52,16 @@
 					value="[[DNK,Denmark,Danmark],[GBR,Great Britain,UK,United Kingdom],[NLD,Netherlands]]" />
 			</custom-synonym-catalog>
 		</synonym-catalogs>
+
+		<string-patterns>
+			<regex-pattern name="regex danish email">
+				<expression>[a-z]+@[a-z]+\.dk</expression>
+				<match-entire-string>true</match-entire-string>
+			</regex-pattern>
+			<simple-pattern name="simple email">
+				<expression>aaaa@aaaaa.aa</expression>
+			</simple-pattern>
+		</string-patterns>
 	</reference-data-catalog>
 
 	<multithreaded-taskrunner />

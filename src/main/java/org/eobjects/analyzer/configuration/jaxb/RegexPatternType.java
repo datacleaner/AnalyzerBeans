@@ -29,22 +29,25 @@ package org.eobjects.analyzer.configuration.jaxb;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for h2StorageProviderType complex type.
+ * <p>Java class for regexPatternType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="h2StorageProviderType">
+ * &lt;complexType name="regexPatternType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="temp-directory" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="expression" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="match-entire-string" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *       &lt;/sequence>
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -53,36 +56,81 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "h2StorageProviderType", propOrder = {
-    "tempDirectory"
+@XmlType(name = "regexPatternType", propOrder = {
+    "expression",
+    "matchEntireString"
 })
-public class H2StorageProviderType {
+public class RegexPatternType {
 
-    @XmlElement(name = "temp-directory")
-    protected String tempDirectory;
+    @XmlElement(required = true)
+    protected String expression;
+    @XmlElement(name = "match-entire-string")
+    protected boolean matchEntireString;
+    @XmlAttribute(required = true)
+    protected String name;
 
     /**
-     * Gets the value of the tempDirectory property.
+     * Gets the value of the expression property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getTempDirectory() {
-        return tempDirectory;
+    public String getExpression() {
+        return expression;
     }
 
     /**
-     * Sets the value of the tempDirectory property.
+     * Sets the value of the expression property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setTempDirectory(String value) {
-        this.tempDirectory = value;
+    public void setExpression(String value) {
+        this.expression = value;
+    }
+
+    /**
+     * Gets the value of the matchEntireString property.
+     * 
+     */
+    public boolean isMatchEntireString() {
+        return matchEntireString;
+    }
+
+    /**
+     * Sets the value of the matchEntireString property.
+     * 
+     */
+    public void setMatchEntireString(boolean value) {
+        this.matchEntireString = value;
+    }
+
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
     }
 
 }

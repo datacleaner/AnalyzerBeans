@@ -40,6 +40,7 @@ import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleSynonym;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
+import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
@@ -83,12 +84,14 @@ public final class TestHelper {
 		dictionaries.add(new SimpleDictionary("apache products", "commons-lang", "commons-math", "commons-codec",
 				"commons-logging"));
 		dictionaries.add(new SimpleDictionary("logging products", "commons-logging", "log4j", "slf4j", "java.util.Logging"));
-		Collection<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
 
+		Collection<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
 		synonymCatalogs.add(new SimpleSynonymCatalog("translated terms", new SimpleSynonym("hello", "howdy", "hi", "yo",
 				"hey"), new SimpleSynonym("goodbye", "bye", "see you", "hey")));
 
-		return new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs);
+		Collection<StringPattern> stringPatterns = new ArrayList<StringPattern>();
+
+		return new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs, stringPatterns);
 	}
 
 	public static DatastoreCatalog createDatastoreCatalog() {
