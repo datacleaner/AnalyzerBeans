@@ -39,8 +39,8 @@ public final class SimilarityGroup implements Serializable, Comparable<Similarit
 
 	private static final long serialVersionUID = 1L;
 
-	private final RowAnnotationFactory _annotationFactory;
-	private final RowAnnotation _annotation;
+	private final transient RowAnnotationFactory _annotationFactory;
+	private final transient RowAnnotation _annotation;
 	private final InputColumn<?> _column;
 	private final String[] _values;
 

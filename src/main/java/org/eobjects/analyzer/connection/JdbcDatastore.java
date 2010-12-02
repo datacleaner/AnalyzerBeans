@@ -46,7 +46,7 @@ public final class JdbcDatastore implements Datastore {
 	private String _password;
 	private String _driverClass;
 	private String _datasourceJndiUrl;
-	private transient DataContextProvider _dataContextProvider;
+	private transient volatile DataContextProvider _dataContextProvider;
 	private transient Connection _connection;
 
 	public JdbcDatastore(String name, String jdbcUrl, String driverClass) {

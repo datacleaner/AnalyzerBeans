@@ -46,14 +46,13 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private final RowAnnotationFactory _annotationFactory;
-	private final RowAnnotation _annotation;
-	private final InputColumn<?>[] _highlightedColumns;
+	private final transient RowAnnotationFactory _annotationFactory;
+	private final transient RowAnnotation _annotation;
+	private final transient InputColumn<?>[] _highlightedColumns;
+	private transient InputRow[] _rows;;
 
 	private TableModel _tableModel;
 	private List<InputColumn<?>> _inputColumns;
-
-	private InputRow[] _rows;;
 
 	public AnnotatedRowsResult(RowAnnotation annotation, RowAnnotationFactory annotationFactory,
 			InputColumn<?>... highlightedColumns) {

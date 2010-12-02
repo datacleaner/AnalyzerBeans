@@ -25,7 +25,9 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessController;
 import java.util.Collection;
+import java.security.PrivilegedAction;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -52,7 +54,7 @@ public class JavaClassHandlerImpl implements JavaClassHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(JavaClassHandlerImpl.class);
 
-	public JavaClassHandlerImpl(File classDirectory) throws IllegalArgumentException {
+	public JavaClassHandlerImpl(final File classDirectory) throws IllegalArgumentException {
 		if (classDirectory == null) {
 			throw new IllegalArgumentException("class directory cannot be null");
 		}
@@ -61,11 +63,17 @@ public class JavaClassHandlerImpl implements JavaClassHandler {
 		}
 
 		_classDirectory = classDirectory;
+		final URL url;
 		try {
-			_classLoader = new URLClassLoader(new URL[] { classDirectory.toURI().toURL() }, getClass().getClassLoader());
+			url = classDirectory.toURI().toURL();
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException(e);
 		}
+		_classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+			public URLClassLoader run() {
+				return new URLClassLoader(new URL[] { url }, getClass().getClassLoader());
+			}
+		});
 	}
 
 	@Override

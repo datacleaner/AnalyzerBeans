@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import org.eobjects.analyzer.data.InputColumn;
@@ -32,7 +33,9 @@ import dk.eobjects.metamodel.schema.Column;
  * 
  * @author Kasper Sørensen
  */
-public class InputColumnComparator implements Comparator<InputColumn<?>> {
+public class InputColumnComparator implements Comparator<InputColumn<?>>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public int compare(InputColumn<?> o1, InputColumn<?> o2) {

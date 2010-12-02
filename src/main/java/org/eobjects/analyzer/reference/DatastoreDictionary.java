@@ -40,8 +40,8 @@ public class DatastoreDictionary implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
-	private transient DatastoreCatalog _datastoreCatalog;
-	private transient ReferenceValues<String> _cachedRefValues;
+	private final transient DatastoreCatalog _datastoreCatalog;
+	private transient volatile ReferenceValues<String> _cachedRefValues;
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
 	private final String _name;
@@ -52,10 +52,6 @@ public class DatastoreDictionary implements Dictionary {
 		_datastoreCatalog = datastoreCatalog;
 		_datastoreName = datastoreName;
 		_qualifiedColumnName = qualifiedColumnName;
-	}
-
-	public void setDatastoreCatalog(DatastoreCatalog datastoreCatalog) {
-		_datastoreCatalog = datastoreCatalog;
 	}
 
 	public DatastoreCatalog getDatastoreCatalog() {

@@ -95,7 +95,7 @@ public class ConvertToStringTransformer implements Transformer<String> {
 						// do nothing
 					}
 				}
-				value = sb.toString();
+				stringValue = sb.toString();
 			} else {
 				stringValue = value.toString();
 			}

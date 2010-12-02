@@ -36,7 +36,7 @@ public final class MultiConnectionDataContextProvider implements DataContextProv
 	private final String password;
 	private final String catalog;
 	private final Datastore datastore;
-	private SchemaNavigator schemaNavigator;
+	private volatile SchemaNavigator schemaNavigator;
 	private int nextDataContext;
 
 	public MultiConnectionDataContextProvider(int maxConnections, String url, Datastore datastore) {

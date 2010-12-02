@@ -87,8 +87,8 @@ class SqlDatabaseList<E> extends AbstractList<E> implements List<E>, SqlDatabase
 	}
 
 	public synchronized boolean add(E elem) {
+		PreparedStatement st = null;
 		try {
-			PreparedStatement st = null;
 			if (_size == 0) {
 				// first time is different
 				st = _connection.prepareStatement("INSERT INTO " + _tableName + " VALUES(0, ?)");
@@ -101,6 +101,8 @@ class SqlDatabaseList<E> extends AbstractList<E> implements List<E>, SqlDatabase
 			_size++;
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			SqlDatabaseUtils.safeClose(null, st);
 		}
 		return true;
 	}
