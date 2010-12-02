@@ -32,9 +32,10 @@
 		</transformer>
 
 		<filter>
-			<descriptor ref="Compare number" />
+			<descriptor ref="Number range" />
 			<properties>
-				<property name="Threshold" value="18" />
+				<property name="Lowest value" value="18" />
+				<property name="Highest value" value="18" />
 			</properties>
 			<input ref="age_years" />
 			<outcome category="LOWER" id="is_child" />
