@@ -65,7 +65,7 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 
 		boolean storeRow = true;
 		if (_storedRowsThreshold != null) {
-			if (count.get() >= _storedRowsThreshold.intValue()) {
+			if (count.getAndIncrement() >= _storedRowsThreshold.intValue()) {
 				storeRow = false;
 			}
 		}
@@ -77,7 +77,6 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 					if (!_cachedRows.containsKey(rowId)) {
 						storeRowValues(rowId, row, distinctCount);
 						_cachedRows.put(rowId, true);
-						count.incrementAndGet();
 					}
 				}
 			}
