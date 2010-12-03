@@ -52,6 +52,12 @@ public class CompositeDatastore implements Datastore {
 			}
 		}
 	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		close();
+	}
 
 	@Override
 	public String getName() {
