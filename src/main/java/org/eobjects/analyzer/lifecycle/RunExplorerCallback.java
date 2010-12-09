@@ -22,23 +22,26 @@ package org.eobjects.analyzer.lifecycle;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 
+import dk.eobjects.metamodel.DataContext;
+
 public final class RunExplorerCallback implements AnalyzerLifeCycleCallback {
 
 	private final AnalysisJob _job;
 	private final AnalyzerJob _analyzerJob;
-	private final DataContextProvider _dataContextProvider;
 	private final AnalysisListener _analysisListener;
+	private final Datastore _datastore;
 
-	public RunExplorerCallback(AnalysisJob job, AnalyzerJob analyzerJob, DataContextProvider dataContextProvider,
+	public RunExplorerCallback(AnalysisJob job, AnalyzerJob analyzerJob, Datastore datastore,
 			AnalysisListener analysisListener) {
 		_job = job;
 		_analyzerJob = analyzerJob;
-		_dataContextProvider = dataContextProvider;
+		_datastore = datastore;
 		_analysisListener = analysisListener;
 	}
 
@@ -51,7 +54,13 @@ public final class RunExplorerCallback implements AnalyzerLifeCycleCallback {
 		if (_analysisListener != null) {
 			_analysisListener.analyzerBegin(_job, _analyzerJob);
 		}
-		exploringAnalyzer.run(_dataContextProvider.getDataContext());
+		DataContextProvider dcp = _datastore.getDataContextProvider();
+		DataContext dc = dcp.getDataContext();
+		try {
+			exploringAnalyzer.run(dc);
+		} finally {
+			dcp.close();
+		}
 	}
 
 }

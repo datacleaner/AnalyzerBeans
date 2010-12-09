@@ -29,13 +29,12 @@ import dk.eobjects.metamodel.DataContextFactory;
  * 
  * @author Kasper Sørensen
  */
-public class OdbDatastore implements Datastore {
+public final class OdbDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String _name;
 	private final String _filename;
-	private transient DataContextProvider _dataContextProvider;
 
 	public OdbDatastore(String name, String filename) {
 		_name = name;
@@ -48,17 +47,8 @@ public class OdbDatastore implements Datastore {
 	}
 
 	@Override
-	public DataContextProvider getDataContextProvider() {
-		if (_dataContextProvider == null) {
-			DataContext dc = DataContextFactory.createOpenOfficeDataContext(new File(_filename));
-			_dataContextProvider = new SingleDataContextProvider(dc, this);
-		}
-		return _dataContextProvider;
+	protected UsageAwareDataContextProvider createDataContextProvider() {
+		DataContext dc = DataContextFactory.createOpenOfficeDataContext(new File(_filename));
+		return new SingleDataContextProvider(dc, this);
 	}
-
-	@Override
-	public void close() {
-		_dataContextProvider = null;
-	}
-
 }

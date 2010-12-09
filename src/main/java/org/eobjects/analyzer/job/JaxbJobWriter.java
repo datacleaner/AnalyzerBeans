@@ -33,7 +33,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -98,8 +97,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		sourceType.setColumns(new ColumnsType());
 		jobType.setSource(sourceType);
 
-		final DataContextProvider dataContextProvider = analysisJob.getDataContextProvider();
-		final Datastore datastore = dataContextProvider.getDatastore();
+		final Datastore datastore = analysisJob.getDatastore();
 		if (datastore != null) {
 			DataContextType dcType = new DataContextType();
 			dcType.setRef(datastore.getName());

@@ -24,20 +24,25 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
-public final class MultiConnectionDataContextProvider implements DataContextProvider {
+public final class MultiConnectionDataContextProvider extends UsageAwareDataContextProvider {
 
-	private final DataContext[] dataContexts;
-	private final String url;
-	private final String user;
-	private final String password;
-	private final String catalog;
-	private final Datastore datastore;
-	private volatile SchemaNavigator schemaNavigator;
-	private int nextDataContext;
+	private static final Logger logger = LoggerFactory.getLogger(MultiConnectionDataContextProvider.class);
+
+	private final DataContext[] _dataContexts;
+	private final Connection[] _connections;
+	private final String _url;
+	private final String _user;
+	private final String _password;
+	private final String _catalog;
+	private final Datastore _datastore;
+	private volatile SchemaNavigator _schemaNavigator;
+	private int _nextDataContext;
 
 	public MultiConnectionDataContextProvider(int maxConnections, String url, Datastore datastore) {
 		this(maxConnections, url, null, null, datastore);
@@ -50,13 +55,14 @@ public final class MultiConnectionDataContextProvider implements DataContextProv
 
 	public MultiConnectionDataContextProvider(int maxConnections, String url, String user, String password, String catalog,
 			Datastore datastore) {
-		this.dataContexts = new DataContext[maxConnections];
-		this.url = url;
-		this.user = user;
-		this.password = password;
-		this.catalog = catalog;
-		this.nextDataContext = 0;
-		this.datastore = datastore;
+		_dataContexts = new DataContext[maxConnections];
+		_connections = new Connection[maxConnections];
+		_url = url;
+		_user = user;
+		_password = password;
+		_catalog = catalog;
+		_nextDataContext = 0;
+		_datastore = datastore;
 	}
 
 	@Override
@@ -65,29 +71,30 @@ public final class MultiConnectionDataContextProvider implements DataContextProv
 	}
 
 	private DataContext getNextDataContext() {
-		if (nextDataContext == dataContexts.length) {
-			nextDataContext = 0;
+		if (_nextDataContext == _dataContexts.length) {
+			_nextDataContext = 0;
 		}
-		DataContext dc = getDataContext(nextDataContext);
-		nextDataContext++;
+		DataContext dc = getDataContext(_nextDataContext);
+		_nextDataContext++;
 		return dc;
 	}
 
 	private DataContext getDataContext(int index) {
-		DataContext dataContext = dataContexts[index];
+		DataContext dataContext = _dataContexts[index];
 		if (dataContext == null) {
 			try {
 				Connection con;
-				if (user == null && password == null) {
-					con = DriverManager.getConnection(url);
+				if (_user == null && _password == null) {
+					con = DriverManager.getConnection(_url);
 				} else {
-					con = DriverManager.getConnection(url, user, password);
+					con = DriverManager.getConnection(_url, _user, _password);
 				}
-				if (catalog != null) {
-					con.setCatalog(catalog);
+				if (_catalog != null) {
+					con.setCatalog(_catalog);
 				}
 				dataContext = DataContextFactory.createJdbcDataContext(con);
-				dataContexts[index] = dataContext;
+				_connections[index] = con;
+				_dataContexts[index] = dataContext;
 			} catch (SQLException e) {
 				throw new IllegalStateException(e);
 			}
@@ -97,21 +104,35 @@ public final class MultiConnectionDataContextProvider implements DataContextProv
 
 	@Override
 	public SchemaNavigator getSchemaNavigator() {
-		if (schemaNavigator == null) {
+		if (_schemaNavigator == null) {
 			synchronized (this) {
-				if (schemaNavigator == null) {
+				if (_schemaNavigator == null) {
 					// Always use the same datacontext for schema navigation
 					// purposes
-					schemaNavigator = new SchemaNavigator(getDataContext(0));
+					_schemaNavigator = new SchemaNavigator(getDataContext(0));
 				}
 			}
 		}
-		return schemaNavigator;
+		return _schemaNavigator;
 	}
 
 	@Override
 	public Datastore getDatastore() {
-		return datastore;
+		return _datastore;
+	}
+
+	@Override
+	protected void closeInternal() {
+		for (int i = 0; i < _connections.length; i++) {
+			Connection con = _connections[i];
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException e) {
+					logger.error("Could not close _connections[" + i + "]", e);
+				}
+			}
+		}
 	}
 
 }

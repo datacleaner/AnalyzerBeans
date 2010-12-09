@@ -24,7 +24,7 @@ import java.io.File;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
-public final class ExcelDatastore implements Datastore {
+public final class ExcelDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,12 +42,8 @@ public final class ExcelDatastore implements Datastore {
 	}
 
 	@Override
-	public DataContextProvider getDataContextProvider() {
+	protected UsageAwareDataContextProvider createDataContextProvider() {
 		DataContext dc = DataContextFactory.createExcelDataContext(new File(_filename));
 		return new SingleDataContextProvider(dc, this);
-	}
-
-	@Override
-	public void close() {
 	}
 }

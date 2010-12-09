@@ -27,7 +27,7 @@ import dk.eobjects.metamodel.DataContextFactory;
 import dk.eobjects.metamodel.DefaultDataContext;
 import dk.eobjects.metamodel.util.FileHelper;
 
-public final class CsvDatastore implements Datastore {
+public final class CsvDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -50,16 +50,12 @@ public final class CsvDatastore implements Datastore {
 	}
 
 	@Override
-	public void close() {
-	}
-
-	@Override
 	public String getName() {
 		return _name;
 	}
 
 	@Override
-	public DataContextProvider getDataContextProvider() {
+	protected UsageAwareDataContextProvider createDataContextProvider() {
 		DataContext dataContext;
 		if (_quoteChar == null && _separatorChar == null) {
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename));

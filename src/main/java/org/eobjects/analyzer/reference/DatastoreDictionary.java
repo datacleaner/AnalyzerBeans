@@ -93,8 +93,8 @@ public class DatastoreDictionary implements Dictionary {
 					if (column == null) {
 						throw new IllegalStateException("Could not resolve column " + _qualifiedColumnName);
 					}
-
-					_cachedRefValues = new DatastoreReferenceValues(dataContextProvider, column);
+					_cachedRefValues = new DatastoreReferenceValues(datastore, column);
+					dataContextProvider.close();
 				}
 			}
 		}

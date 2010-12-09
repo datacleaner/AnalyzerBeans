@@ -31,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -128,7 +129,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		analysisListener.jobBegin(job);
 
 		// declare all the "constants" of the job as final variables
-		final DataContextProvider dataContextProvider = job.getDataContextProvider();
+		final Datastore datastore = job.getDatastore();
 		final Collection<TransformerJob> transformerJobs = job.getTransformerJobs();
 		final Collection<FilterJob> filterJobs = job.getFilterJobs();
 		final Collection<MergedOutcomeJob> mergedOutcomeJobs = job.getMergedOutcomeJobs();
@@ -159,15 +160,16 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 		// begin explorer jobs first because they can run independently (
 		for (AnalyzerJob explorerJob : explorerJobs) {
+			final DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+
 			AnalyzerBeanInstance instance = new AnalyzerBeanInstance(explorerJob.getDescriptor());
 
-			RunExplorerCallback runExplorerCallback = new RunExplorerCallback(job, explorerJob, dataContextProvider,
-					analysisListener);
+			RunExplorerCallback runExplorerCallback = new RunExplorerCallback(job, explorerJob, datastore, analysisListener);
 			ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(job, explorerJob, resultQueue,
 					analysisListener);
 
 			// set up scheduling for the explorers
-			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(instance);
+			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(instance, dataContextProvider);
 			TaskListener runExplorerTaskListener = new RunNextTaskCompletionListener(taskRunner, closeTask,
 					explorersDoneTaskListener);
 			Task runTask = new RunExplorerTask(instance);
@@ -208,7 +210,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 		for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers.values()) {
 			List<TaskRunnable> initTasks = rowProcessingPublisher.createInitialTasks(taskRunner, resultQueue,
-					rowProcessorPublishersDoneCompletionListener);
+					rowProcessorPublishersDoneCompletionListener, datastore);
 			logger.debug("Scheduling {} tasks for row processing publisher: {}", initTasks.size(), rowProcessingPublisher);
 			for (TaskRunnable taskRunnable : initTasks) {
 				taskRunner.run(taskRunnable);

@@ -36,7 +36,7 @@ import org.eobjects.analyzer.beans.filter.SingleWordFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -75,9 +75,9 @@ public class JaxbJobWriterTest extends TestCase {
 
 	public void testEmptyJobEnvelope() throws Exception {
 		AnalysisJob job = EasyMock.createMock(AnalysisJob.class);
-		DataContextProvider dcp = EasyMock.createMock(DataContextProvider.class);
+		Datastore ds = EasyMock.createMock(Datastore.class);
 
-		EasyMock.expect(job.getDataContextProvider()).andReturn(dcp);
+		EasyMock.expect(job.getDatastore()).andReturn(ds);
 		EasyMock.expect(job.getSourceColumns()).andReturn(new ArrayList<InputColumn<?>>());
 		EasyMock.expect(job.getTransformerJobs()).andReturn(new ArrayList<TransformerJob>());
 		EasyMock.expect(job.getFilterJobs()).andReturn(new ArrayList<FilterJob>());
@@ -93,7 +93,7 @@ public class JaxbJobWriterTest extends TestCase {
 		String str = new String(baos.toByteArray());
 		str = str.replaceAll("\"", "_");
 		String[] lines = str.split("\n");
-		assertEquals(13, lines.length);
+		assertEquals(14, lines.length);
 
 		assertEquals("<?xml version=_1.0_ encoding=_UTF-8_ standalone=_yes_?>", lines[0]);
 		assertEquals("<job xmlns=_http://eobjects.org/analyzerbeans/job/1.0_>", lines[1]);
@@ -103,11 +103,12 @@ public class JaxbJobWriterTest extends TestCase {
 		assertEquals("        <created-date>2010-11-12Z</created-date>", lines[5]);
 		assertEquals("    </job-metadata>", lines[6]);
 		assertEquals("    <source>", lines[7]);
-		assertEquals("        <columns/>", lines[8]);
-		assertEquals("    </source>", lines[9]);
-		assertEquals("    <transformation/>", lines[10]);
-		assertEquals("    <analysis/>", lines[11]);
-		assertEquals("</job>", lines[12]);
+		assertEquals("        <data-context/>", lines[8]);
+		assertEquals("        <columns/>", lines[9]);
+		assertEquals("    </source>", lines[10]);
+		assertEquals("    <transformation/>", lines[11]);
+		assertEquals("    <analysis/>", lines[12]);
+		assertEquals("</job>", lines[13]);
 
 		EasyMock.verify(job);
 	}

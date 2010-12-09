@@ -24,6 +24,7 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -68,9 +69,12 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		}
 
 		Datastore compositeDatastore = datastoreCatalog.getDatastore("my_composite");
-		DataContext dataContext = compositeDatastore.getDataContextProvider().getDataContext();
+		DataContextProvider dcp = compositeDatastore.getDataContextProvider();
+		DataContext dataContext = dcp.getDataContext();
+		String[] schemaNames = dataContext.getSchemaNames();
 		assertEquals("[INFORMATION_SCHEMA, PUBLIC, Spreadsheet2003.xls, developers.mdb, employees.csv, information_schema]",
-				Arrays.toString(dataContext.getSchemaNames()));
+				Arrays.toString(schemaNames));
+		dcp.close();
 	}
 
 	private AnalyzerBeansConfiguration getConfiguration() {

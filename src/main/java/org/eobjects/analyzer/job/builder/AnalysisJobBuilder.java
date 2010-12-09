@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.builder;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,7 +65,7 @@ import dk.eobjects.metamodel.schema.Table;
  * 
  * @author Kasper Sørensen
  */
-public final class AnalysisJobBuilder {
+public final class AnalysisJobBuilder implements Closeable {
 
 	private final AnalyzerBeansConfiguration _configuration;
 	private final IdGenerator _transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
@@ -453,7 +454,9 @@ public final class AnalysisJobBuilder {
 			}
 		}
 
-		return new ImmutableAnalysisJob(_dataContextProvider, _sourceColumns, filterJobs, transformerJobs, analyzerJobs,
+		DataContextProvider dcp = _dataContextProvider;
+		Datastore datastore = dcp.getDatastore();
+		return new ImmutableAnalysisJob(datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs,
 				mergedOutcomeJobs);
 	}
 
@@ -551,6 +554,11 @@ public final class AnalysisJobBuilder {
 
 	public List<FilterChangeListener> getFilterChangeListeners() {
 		return _filterChangeListeners;
+	}
+
+	@Override
+	public void close() {
+		_dataContextProvider.close();
 	}
 
 }

@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.lifecycle;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +36,19 @@ public final class AssignProvidedCallback implements LifeCycleCallback {
 	private final DataContextProvider _dataContextProvider;
 	private final RowAnnotationFactory _rowAnnotationFactory;
 
+	public AssignProvidedCallback(StorageProvider storageProvider, RowAnnotationFactory rowAnnotationFactory) {
+		this(storageProvider, rowAnnotationFactory, null);
+	}
+
+	/**
+	 * 
+	 * @param storageProvider
+	 * @param rowAnnotationFactory
+	 * @param dataContextProvider
+	 *            the DataContextProvider used throughout the execution of the
+	 *            job. This parameter should only be provided if the bean being
+	 *            configured is an exploring analyzer.
+	 */
 	public AssignProvidedCallback(StorageProvider storageProvider, RowAnnotationFactory rowAnnotationFactory,
 			DataContextProvider dataContextProvider) {
 		_storageProvider = storageProvider;
@@ -48,7 +60,6 @@ public final class AssignProvidedCallback implements LifeCycleCallback {
 	public void onEvent(LifeCycleState state, Object bean, BeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.ASSIGN_PROVIDED;
 
-		List<Object> providedCollections = new LinkedList<Object>();
 		Set<ProvidedPropertyDescriptor> providedDescriptors = descriptor.getProvidedProperties();
 		for (ProvidedPropertyDescriptor providedDescriptor : providedDescriptors) {
 			if (providedDescriptor.isCollectionFactory()) {
@@ -65,16 +76,13 @@ public final class AssignProvidedCallback implements LifeCycleCallback {
 				if (providedDescriptor.isList()) {
 					List<?> list = _storageProvider.createList(clazz1);
 					providedDescriptor.setValue(bean, list);
-					providedCollections.add(list);
 				} else if (providedDescriptor.isSet()) {
 					Set<?> set = _storageProvider.createSet(clazz1);
 					providedDescriptor.setValue(bean, set);
-					providedCollections.add(set);
 				} else if (providedDescriptor.isMap()) {
 					Class<?> clazz2 = (Class<?>) providedDescriptor.getTypeArgument(1);
 					Map<?, ?> map = _storageProvider.createMap(clazz1, clazz2);
 					providedDescriptor.setValue(bean, map);
-					providedCollections.add(map);
 				}
 			}
 		}

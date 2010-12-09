@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
@@ -144,7 +145,8 @@ public final class Main {
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
-				DataContext dc = ds.getDataContextProvider().getDataContext();
+				DataContextProvider dcp = ds.getDataContextProvider();
+				DataContext dc = dcp.getDataContext();
 				Schema schema;
 				if (schemaName == null) {
 					schema = dc.getDefaultSchema();
@@ -166,6 +168,7 @@ public final class Main {
 						}
 					}
 				}
+				dcp.close();
 			}
 		}
 	}
@@ -178,7 +181,8 @@ public final class Main {
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
-				DataContext dc = ds.getDataContextProvider().getDataContext();
+				DataContextProvider dcp = ds.getDataContextProvider();
+				DataContext dc = dcp.getDataContext();
 				Schema schema;
 				if (schemaName == null) {
 					schema = dc.getDefaultSchema();
@@ -199,6 +203,7 @@ public final class Main {
 						}
 					}
 				}
+				dcp.close();
 			}
 		}
 	}
@@ -211,7 +216,8 @@ public final class Main {
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
-				String[] schemaNames = ds.getDataContextProvider().getDataContext().getSchemaNames();
+				DataContextProvider dcp = ds.getDataContextProvider();
+				String[] schemaNames = dcp.getDataContext().getSchemaNames();
 				if (schemaNames == null || schemaNames.length == 0) {
 					System.out.println("No schemas in datastore!");
 				} else {
@@ -221,6 +227,7 @@ public final class Main {
 						System.out.println(schemaName);
 					}
 				}
+				dcp.close();
 			}
 		}
 	}

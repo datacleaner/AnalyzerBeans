@@ -26,7 +26,7 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
-public class DataSourceDataContextProvider implements DataContextProvider {
+public class DataSourceDataContextProvider extends UsageAwareDataContextProvider {
 
 	private final DataContext _dataContext;
 	private final SchemaNavigator _schemaNavigator;
@@ -53,4 +53,9 @@ public class DataSourceDataContextProvider implements DataContextProvider {
 		return _datastore;
 	}
 
+	@Override
+	protected void closeInternal() {
+		// do nothing, the JdbcDataContext will automatically close pooled
+		// connections in the datasource
+	}
 }

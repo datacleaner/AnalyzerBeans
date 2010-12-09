@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
 import dk.eobjects.metamodel.DataContext;
@@ -40,6 +41,7 @@ public class RunExplorerCallbackTest extends TestCase {
 	}
 
 	public void testOnEvent() throws Exception {
+		Datastore datastore = EasyMock.createMock(Datastore.class);
 		DataContextProvider dataContextProvider = EasyMock.createMock(DataContextProvider.class);
 		ExploringAnalyzer<?> analyzer = EasyMock.createMock(ExploringAnalyzer.class);
 		AnalyzerBeanDescriptor<?> descriptor = EasyMock.createMock(AnalyzerBeanDescriptor.class);
@@ -51,14 +53,17 @@ public class RunExplorerCallbackTest extends TestCase {
 			EasyMock.expect(descriptor.isExploringAnalyzer()).andReturn(true);
 		}
 
+		EasyMock.expect(datastore.getDataContextProvider()).andReturn(dataContextProvider);
 		EasyMock.expect(dataContextProvider.getDataContext()).andReturn(dataContext);
+		dataContextProvider.close();
+
 		analyzer.run(dataContext);
 
-		EasyMock.replay(dataContextProvider, analyzer, descriptor);
+		EasyMock.replay(datastore, dataContextProvider, analyzer, descriptor);
 
-		RunExplorerCallback callback = new RunExplorerCallback(null, null, dataContextProvider, null);
+		RunExplorerCallback callback = new RunExplorerCallback(null, null, datastore, null);
 		callback.onEvent(LifeCycleState.RUN, analyzer, descriptor);
 
-		EasyMock.verify(dataContextProvider, analyzer, descriptor);
+		EasyMock.verify(datastore, dataContextProvider, analyzer, descriptor);
 	}
 }

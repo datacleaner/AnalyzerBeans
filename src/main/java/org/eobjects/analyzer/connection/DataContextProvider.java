@@ -19,15 +19,19 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.io.Closeable;
+
 import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.DataContext;
 
-public interface DataContextProvider {
+public interface DataContextProvider extends Closeable {
 
 	public DataContext getDataContext();
 
 	public SchemaNavigator getSchemaNavigator();
 
 	public Datastore getDatastore();
+
+	public void close();
 }

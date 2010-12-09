@@ -22,13 +22,12 @@ package org.eobjects.analyzer.connection;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
-public class DbaseDatastore implements Datastore {
+public final class DbaseDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String _name;
 	private final String _filename;
-	private transient DataContextProvider _dataContextProvider;
 
 	public DbaseDatastore(String name, String filename) {
 		_name = name;
@@ -41,17 +40,8 @@ public class DbaseDatastore implements Datastore {
 	}
 
 	@Override
-	public DataContextProvider getDataContextProvider() {
-		if (_dataContextProvider == null) {
-			DataContext dc = DataContextFactory.createDbaseDataContext(_filename);
-			_dataContextProvider = new SingleDataContextProvider(dc, this);
-		}
-		return _dataContextProvider;
+	protected UsageAwareDataContextProvider createDataContextProvider() {
+		DataContext dc = DataContextFactory.createDbaseDataContext(_filename);
+		return new SingleDataContextProvider(dc, this);
 	}
-
-	@Override
-	public void close() {
-		_dataContextProvider = null;
-	}
-
 }

@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -35,41 +36,45 @@ import org.slf4j.LoggerFactory;
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.DataContextFactory;
 
-public final class JdbcDatastore implements Datastore {
+public final class JdbcDatastore extends UsageAwareDatastore {
 
-	private static final Logger logger = LoggerFactory.getLogger(JdbcDatastore.class);
 	private static final long serialVersionUID = 1L;
 
-	private String _name;
-	private String _jdbcUrl;
-	private String _username;
-	private String _password;
-	private String _driverClass;
-	private String _datasourceJndiUrl;
-	private transient volatile DataContextProvider _dataContextProvider;
-	private transient Connection _connection;
+	private static final Logger logger = LoggerFactory.getLogger(JdbcDatastore.class);
 
-	public JdbcDatastore(String name, String jdbcUrl, String driverClass) {
+	private final String _name;
+	private final String _jdbcUrl;
+	private final String _username;
+	private final String _password;
+	private final String _driverClass;
+	private final String _datasourceJndiUrl;
+
+	private JdbcDatastore(String name, String jdbcUrl, String driverClass, String username, String password,
+			String datasourceJndiUrl) {
+		super();
 		_name = name;
 		_jdbcUrl = jdbcUrl;
 		_driverClass = driverClass;
-	}
-
-	public JdbcDatastore(String name, String url, String driverClass, String username, String password) {
-		this(name, url, driverClass);
 		_username = username;
 		_password = password;
+		_datasourceJndiUrl = datasourceJndiUrl;
+	}
+
+	public JdbcDatastore(String name, String jdbcUrl, String driverClass) {
+		this(name, jdbcUrl, driverClass, null, null, null);
+	}
+
+	public JdbcDatastore(String name, String jdbcUrl, String driverClass, String username, String password) {
+		this(name, jdbcUrl, driverClass, username, password, null);
 	}
 
 	public JdbcDatastore(String name, String datasourceJndiUrl) {
-		_name = name;
-		_datasourceJndiUrl = datasourceJndiUrl;
-
+		this(name, null, null, null, null, datasourceJndiUrl);
 	}
 
 	public JdbcDatastore(String name, DataContext dc) {
-		_name = name;
-		_dataContextProvider = new SingleDataContextProvider(dc, this);
+		this(name, null, null, null, null, null);
+		setDataContextProviderRef(new WeakReference<UsageAwareDataContextProvider>(new SingleDataContextProvider(dc, this)));
 	}
 
 	public String getJdbcUrl() {
@@ -97,91 +102,62 @@ public final class JdbcDatastore implements Datastore {
 		return _datasourceJndiUrl;
 	}
 
-	@Override
-	public DataContextProvider getDataContextProvider() {
-		if (_dataContextProvider == null) {
-			synchronized (this) {
-				if (_dataContextProvider == null) {
-					if (StringUtils.isNullOrEmpty(_datasourceJndiUrl)) {
+	private Connection createConnection() {
+		logger.debug("Determining if driver initialization is nescesary");
 
-						_connection = getConnection();
+		// it's best to avoid initializing the driver, so we do this check.
+		// It may already have been initialized and Class.forName(...) does
+		// not always work if the driver is in a different classloader
+		boolean installDriver = true;
 
-						DataContext dataContext = DataContextFactory.createJdbcDataContext(_connection);
-						_dataContextProvider = new SingleDataContextProvider(dataContext, this);
-					} else {
-						try {
-							InitialContext initialContext = new InitialContext();
-							DataSource dataSource = (DataSource) initialContext.lookup(_datasourceJndiUrl);
-							_dataContextProvider = new DataSourceDataContextProvider(dataSource, this);
-						} catch (Exception e) {
-							throw new IllegalStateException(e);
-						}
-					}
-				}
-			}
-		}
-		return _dataContextProvider;
-	}
-
-	public Connection getConnection() {
-		if (_connection == null) {
-
-			logger.debug("Determining if driver initialization is nescesary");
-
-			// it's best to avoid initializing the driver, so we do this check.
-			// It may already have been initialized and Class.forName(...) does
-			// not always work if the driver is in a different classloader
-			boolean installDriver = true;
-
-			Enumeration<Driver> drivers = DriverManager.getDrivers();
-			while (drivers.hasMoreElements()) {
-				Driver driver = drivers.nextElement();
-				try {
-					if (driver.acceptsURL(_jdbcUrl)) {
-						installDriver = false;
-						break;
-					}
-				} catch (SQLException e) {
-					logger.warn("Driver threw exception when acceptURL(...) was invoked", e);
-				}
-			}
-
-			if (installDriver) {
-				try {
-					Class.forName(_driverClass);
-				} catch (ClassNotFoundException e) {
-					throw new IllegalStateException("Could not initialize JDBC driver", e);
-				}
-			}
-
+		Enumeration<Driver> drivers = DriverManager.getDrivers();
+		while (drivers.hasMoreElements()) {
+			Driver driver = drivers.nextElement();
 			try {
-				if (_username == null && _password == null) {
-					_connection = DriverManager.getConnection(_jdbcUrl);
-				} else {
-					_connection = DriverManager.getConnection(_jdbcUrl, _username, _password);
+				if (driver.acceptsURL(_jdbcUrl)) {
+					installDriver = false;
+					break;
 				}
 			} catch (SQLException e) {
-				throw new IllegalStateException("Could not establish JDBC connection", e);
+				logger.warn("Driver threw exception when acceptURL(...) was invoked", e);
 			}
 		}
-		return _connection;
-	}
 
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		close();
-	}
-
-	@Override
-	public void close() {
-		if (_connection != null) {
+		if (installDriver) {
 			try {
-				_connection.close();
-			} catch (SQLException e) {
-				// do nothing
+				Class.forName(_driverClass);
+			} catch (ClassNotFoundException e) {
+				throw new IllegalStateException("Could not initialize JDBC driver", e);
 			}
-			_connection = null;
+		}
+
+		try {
+			if (_username == null && _password == null) {
+				return DriverManager.getConnection(_jdbcUrl);
+			} else {
+				return DriverManager.getConnection(_jdbcUrl, _username, _password);
+			}
+		} catch (SQLException e) {
+			throw new IllegalStateException("Could not establish JDBC connection", e);
+		}
+	}
+
+	@Override
+	protected UsageAwareDataContextProvider createDataContextProvider() {
+		if (StringUtils.isNullOrEmpty(_datasourceJndiUrl)) {
+			Connection connection = createConnection();
+
+			DataContext dataContext = DataContextFactory.createJdbcDataContext(connection);
+			return new SingleDataContextProvider(dataContext, this, new CloseableJdbcConnection(connection));
+		} else {
+			try {
+				InitialContext initialContext = new InitialContext();
+				DataSource dataSource = (DataSource) initialContext.lookup(_datasourceJndiUrl);
+				return new DataSourceDataContextProvider(dataSource, this);
+			} catch (Exception e) {
+				logger.error("Could not retrieve DataSource '{}'", _datasourceJndiUrl);
+				throw new IllegalStateException(e);
+			}
 		}
 	}
 }

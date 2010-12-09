@@ -38,7 +38,7 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 
 	private final Queue<AnalyzerJobResult> _resultQueue;
 	private final ErrorAware _errorAware;
-	private volatile JobTaskListener _jobTaskListener;
+	private final JobTaskListener _jobTaskListener;
 	private volatile boolean _done;
 
 	public AnalysisResultFutureImpl(Queue<AnalyzerJobResult> resultQueue, JobTaskListener jobCompletionListener,

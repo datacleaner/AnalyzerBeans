@@ -51,9 +51,4 @@ public class SampleCustomDatastore implements Datastore {
 		DataContext dc = DataContextFactory.createXmlDataContext(xmlFile, false, false);
 		return new SingleDataContextProvider(dc, this);
 	}
-
-	@Override
-	public void close() {
-	}
-
 }

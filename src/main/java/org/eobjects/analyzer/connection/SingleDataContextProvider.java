@@ -19,34 +19,55 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.DataContext;
 
-public final class SingleDataContextProvider implements DataContextProvider {
+public final class SingleDataContextProvider extends UsageAwareDataContextProvider {
 
-	private final DataContext dataContext;
-	private final SchemaNavigator schemaNavigator;
-	private final Datastore datastore;
+	private static final Logger logger = LoggerFactory.getLogger(SingleDataContextProvider.class);
 
-	public SingleDataContextProvider(DataContext dataContext, Datastore datastore) {
-		this.dataContext = dataContext;
-		this.schemaNavigator = new SchemaNavigator(dataContext);
-		this.datastore = datastore;
+	private final DataContext _dataContext;
+	private final SchemaNavigator _schemaNavigator;
+	private final Datastore _datastore;
+	private final Closeable[] _closeables;
+
+	public SingleDataContextProvider(DataContext dataContext, Datastore datastore, Closeable... closeables) {
+		_dataContext = dataContext;
+		_schemaNavigator = new SchemaNavigator(dataContext);
+		_datastore = datastore;
+		_closeables = closeables;
 	}
 
 	@Override
 	public DataContext getDataContext() {
-		return this.dataContext;
+		return _dataContext;
 	}
 
 	@Override
 	public SchemaNavigator getSchemaNavigator() {
-		return this.schemaNavigator;
+		return _schemaNavigator;
 	}
 
 	@Override
 	public Datastore getDatastore() {
-		return datastore;
+		return _datastore;
+	}
+
+	@Override
+	protected void closeInternal() {
+		for (int i = 0; i < _closeables.length; i++) {
+			Closeable closeable = _closeables[i];
+			try {
+				closeable.close();
+			} catch (IOException e) {
+				logger.error("Could not close _closeables[" + i + "]", e);
+			}
+		}
 	}
 }

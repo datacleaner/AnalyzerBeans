@@ -34,11 +34,11 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private StorageProvider _storageProvider;
-	private DataContextProvider _dataContextProvider;
-	private RowAnnotationFactory _rowAnnotationFactory;
-	private AbstractBeanInstance<?> _beanInstance;
-	private AnalyzerBeanInstance _analyzerBeanInstance;
+	private final StorageProvider _storageProvider;
+	private final DataContextProvider _dataContextProvider;
+	private final RowAnnotationFactory _rowAnnotationFactory;
+	private final AbstractBeanInstance<?> _beanInstance;
+	private final AnalyzerBeanInstance _analyzerBeanInstance;
 
 	// represents the default lifecycle callbacks ...
 	private LifeCycleCallback _assignConfiguredCallback;
@@ -47,9 +47,26 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 	private AnalyzerLifeCycleCallback _returnResultsCallback;
 	private LifeCycleCallback _closeCallback;
 
-	private void init(AbstractBeanInstance<?> beanInstance, StorageProvider storageProvider,
+	public AssignCallbacksAndInitializeTask(AbstractBeanInstance<?> beanInstance, StorageProvider storageProvider,
+			RowAnnotationFactory rowAnnotationFactory, LifeCycleCallback assignConfiguredCallback,
+			LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
+		_beanInstance = beanInstance;
+		_storageProvider = storageProvider;
+		_rowAnnotationFactory = rowAnnotationFactory;
+		_dataContextProvider = null;
+		_assignConfiguredCallback = assignConfiguredCallback;
+		_initializeCallback = initializeCallback;
+		_closeCallback = closeCallback;
+		_analyzerBeanInstance = null;
+		_runCallback = null;
+		_returnResultsCallback = null;
+	}
+
+	public AssignCallbacksAndInitializeTask(AnalyzerBeanInstance beanInstance, StorageProvider storageProvider,
 			RowAnnotationFactory rowAnnotationFactory, DataContextProvider dataContextProvider,
-			LifeCycleCallback assignConfiguredCallback, LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
+			LifeCycleCallback assignConfiguredCallback, LifeCycleCallback initializeCallback,
+			AnalyzerLifeCycleCallback runCallback, AnalyzerLifeCycleCallback returnResultsCallback,
+			LifeCycleCallback closeCallback) {
 		_beanInstance = beanInstance;
 		_storageProvider = storageProvider;
 		_rowAnnotationFactory = rowAnnotationFactory;
@@ -57,24 +74,7 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 		_assignConfiguredCallback = assignConfiguredCallback;
 		_initializeCallback = initializeCallback;
 		_closeCallback = closeCallback;
-	}
-
-	public AssignCallbacksAndInitializeTask(AbstractBeanInstance<?> transformerBeanInstance,
-			StorageProvider storageProvider, RowAnnotationFactory rowAnnotationFactory,
-			DataContextProvider dataContextProvider, LifeCycleCallback assignConfiguredCallback,
-			LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
-		init(transformerBeanInstance, storageProvider, rowAnnotationFactory, dataContextProvider, assignConfiguredCallback,
-				initializeCallback, closeCallback);
-	}
-
-	public AssignCallbacksAndInitializeTask(AnalyzerBeanInstance analyzerBeanInstance, StorageProvider storageProvider,
-			RowAnnotationFactory rowAnnotationFactory, DataContextProvider dataContextProvider,
-			LifeCycleCallback assignConfiguredCallback, LifeCycleCallback initializeCallback,
-			AnalyzerLifeCycleCallback runCallback, AnalyzerLifeCycleCallback returnResultsCallback,
-			LifeCycleCallback closeCallback) {
-		init(analyzerBeanInstance, storageProvider, rowAnnotationFactory, dataContextProvider, assignConfiguredCallback,
-				initializeCallback, closeCallback);
-		_analyzerBeanInstance = analyzerBeanInstance;
+		_analyzerBeanInstance = beanInstance;
 		_runCallback = runCallback;
 		_returnResultsCallback = returnResultsCallback;
 	}

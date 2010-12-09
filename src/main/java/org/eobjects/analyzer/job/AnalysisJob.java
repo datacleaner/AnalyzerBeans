@@ -21,12 +21,12 @@ package org.eobjects.analyzer.job;
 
 import java.util.Collection;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 
 public interface AnalysisJob {
 
-	public DataContextProvider getDataContextProvider();
+	public Datastore getDatastore();
 
 	public Collection<InputColumn<?>> getSourceColumns();
 

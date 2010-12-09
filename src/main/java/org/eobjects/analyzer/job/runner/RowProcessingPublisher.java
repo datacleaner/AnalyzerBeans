@@ -135,11 +135,13 @@ public final class RowProcessingPublisher {
 			}
 		}
 
-		final DataContext dataContext = _job.getDataContextProvider().getDataContext();
+		final Datastore datastore = _job.getDatastore();
+		final DataContextProvider dcp = datastore.getDataContextProvider();
+		final DataContext dataContext = dcp.getDataContext();
 
 		int expectedRows = -1;
-		Query countQuery = dataContext.query().from(_table).selectCount().toQuery();
-		DataSet countDataSet = dataContext.executeQuery(countQuery);
+		final Query countQuery = dataContext.query().from(_table).selectCount().toQuery();
+		final DataSet countDataSet = dataContext.executeQuery(countQuery);
 		if (countDataSet.next()) {
 			Number count = (Number) countDataSet.getRow().getValue(0);
 			if (count != null) {
@@ -150,7 +152,6 @@ public final class RowProcessingPublisher {
 		_analysisListener.rowProcessingBegin(_job, _table, expectedRows);
 
 		final Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
-
 		final Query q = dataContext.query().from(_table).select(columnArray).toQuery();
 
 		SelectItem countAllItem = null;
@@ -196,6 +197,7 @@ public final class RowProcessingPublisher {
 		taskListener.awaitTasks(numTasks);
 
 		dataSet.close();
+		dcp.close();
 
 		if (!taskListener.isErrornous()) {
 			_analysisListener.rowProcessingSuccess(_job, _table);
@@ -207,7 +209,8 @@ public final class RowProcessingPublisher {
 			logger.info("Skipping GROUP BY optimization because of the high column amount");
 			return false;
 		}
-		Datastore datastore = _job.getDataContextProvider().getDatastore();
+
+		Datastore datastore = _job.getDatastore();
 		if (datastore == null) {
 			logger.info("Skipping GROUP BY optimization because no datastore is attached to the DataContextProvider");
 			return false;
@@ -323,7 +326,7 @@ public final class RowProcessingPublisher {
 	}
 
 	public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<AnalyzerJobResult> resultQueue,
-			TaskListener rowProcessorPublishersTaskListener) {
+			TaskListener rowProcessorPublishersTaskListener, Datastore datastore) {
 
 		List<RowProcessingConsumer> configurableConsumers = CollectionUtils.filter(_consumers,
 				new Function<RowProcessingConsumer, Boolean>() {
@@ -360,7 +363,7 @@ public final class RowProcessingPublisher {
 
 		List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
 		for (RowProcessingConsumer consumer : configurableConsumers) {
-			initTasks.add(createInitTask(consumer, rowAnnotationFactory, initTaskListener, resultQueue));
+			initTasks.add(createInitTask(consumer, rowAnnotationFactory, initTaskListener, resultQueue, datastore));
 		}
 		return initTasks;
 	}
@@ -376,7 +379,7 @@ public final class RowProcessingPublisher {
 	}
 
 	private TaskRunnable createInitTask(RowProcessingConsumer consumer, RowAnnotationFactory rowAnnotationFactory,
-			TaskListener listener, Queue<AnalyzerJobResult> resultQueue) {
+			TaskListener listener, Queue<AnalyzerJobResult> resultQueue, Datastore datastore) {
 		ComponentJob componentJob = consumer.getComponentJob();
 		BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
 
@@ -384,21 +387,19 @@ public final class RowProcessingPublisher {
 		LifeCycleCallback initializeCallback = new InitializeCallback();
 		LifeCycleCallback closeCallback = new CloseCallback();
 
-		DataContextProvider dataContextProvider = _job.getDataContextProvider();
-
 		Task task;
 		if (consumer instanceof TransformerConsumer) {
 			TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
 			TransformerBeanInstance transformerBeanInstance = transformerConsumer.getBeanInstance();
 
 			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _storageProvider, rowAnnotationFactory,
-					dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
+					assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof FilterConsumer) {
 			FilterConsumer filterConsumer = (FilterConsumer) consumer;
 			FilterBeanInstance filterBeanInstance = filterConsumer.getBeanInstance();
 
 			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _storageProvider, rowAnnotationFactory,
-					dataContextProvider, assignConfiguredCallback, initializeCallback, closeCallback);
+					assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
 			AnalyzerBeanInstance analyzerBeanInstance = analyzerConsumer.getBeanInstance();
@@ -406,8 +407,7 @@ public final class RowProcessingPublisher {
 					analyzerConsumer.getComponentJob(), resultQueue, _analysisListener);
 
 			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _storageProvider, rowAnnotationFactory,
-					dataContextProvider, assignConfiguredCallback, initializeCallback, null, returnResultsCallback,
-					closeCallback);
+					null, assignConfiguredCallback, initializeCallback, null, returnResultsCallback, closeCallback);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}

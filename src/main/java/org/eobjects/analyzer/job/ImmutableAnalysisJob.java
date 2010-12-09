@@ -23,22 +23,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 
 public final class ImmutableAnalysisJob implements AnalysisJob {
 
-	private final DataContextProvider _dataContextProvider;
+	private final Datastore _datastore;
 	private final Collection<InputColumn<?>> _sourceColumns;
 	private final Collection<TransformerJob> _transformerJobs;
 	private final Collection<AnalyzerJob> _analyzerJobs;
 	private final Collection<FilterJob> _filterJobs;
 	private final Collection<MergedOutcomeJob> _mergedOutcomeJobs;
 
-	public ImmutableAnalysisJob(DataContextProvider dataContextProvider, Collection<? extends InputColumn<?>> sourceColumns,
+	public ImmutableAnalysisJob(Datastore datastore, Collection<? extends InputColumn<?>> sourceColumns,
 			Collection<FilterJob> filterJobs, Collection<TransformerJob> transformerJobs,
 			Collection<AnalyzerJob> analyzerJobs, Collection<MergedOutcomeJob> mergedOutcomeJobs) {
-		_dataContextProvider = dataContextProvider;
+		_datastore = datastore;
 		_sourceColumns = Collections.unmodifiableList(new ArrayList<InputColumn<?>>(sourceColumns));
 		_transformerJobs = Collections.unmodifiableList(new ArrayList<TransformerJob>(transformerJobs));
 		_analyzerJobs = Collections.unmodifiableList(new ArrayList<AnalyzerJob>(analyzerJobs));
@@ -47,8 +47,8 @@ public final class ImmutableAnalysisJob implements AnalysisJob {
 	}
 
 	@Override
-	public DataContextProvider getDataContextProvider() {
-		return _dataContextProvider;
+	public Datastore getDatastore() {
+		return _datastore;
 	}
 
 	@Override

@@ -39,7 +39,11 @@ public final class MockDataContextProvider implements DataContextProvider {
 
 	@Override
 	public Datastore getDatastore() {
-		throw new UnsupportedOperationException();
+		return new MockDatastore();
+	}
+
+	@Override
+	public void close() {
 	}
 
 }

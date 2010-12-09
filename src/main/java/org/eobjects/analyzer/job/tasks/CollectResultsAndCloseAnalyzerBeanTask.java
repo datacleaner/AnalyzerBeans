@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import java.io.Closeable;
+
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,19 +29,25 @@ public final class CollectResultsAndCloseAnalyzerBeanTask extends CloseBeanTask 
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final AnalyzerBeanInstance analyzerBeanInstance;
+	private final AnalyzerBeanInstance _analyzerBeanInstance;
+	private Closeable[] _closeables;
 
-	public CollectResultsAndCloseAnalyzerBeanTask(AnalyzerBeanInstance analyzerBeanInstance) {
+	public CollectResultsAndCloseAnalyzerBeanTask(AnalyzerBeanInstance analyzerBeanInstance, Closeable... closeables) {
 		super(analyzerBeanInstance);
-		this.analyzerBeanInstance = analyzerBeanInstance;
+		_analyzerBeanInstance = analyzerBeanInstance;
+		_closeables = closeables;
 	}
 
 	@Override
 	public void execute() throws Exception {
 		logger.debug("execute()");
-		analyzerBeanInstance.returnResults();
+		_analyzerBeanInstance.returnResults();
 
 		super.execute();
+
+		for (int i = 0; i < _closeables.length; i++) {
+			_closeables[i].close();
+		}
 	}
 
 }

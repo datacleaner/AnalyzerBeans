@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.WeakHashMap;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 
 import dk.eobjects.metamodel.DataContext;
 import dk.eobjects.metamodel.data.DataSet;
@@ -34,12 +35,12 @@ import dk.eobjects.metamodel.schema.Column;
 
 public final class DatastoreReferenceValues implements ReferenceValues<String> {
 
-	private final DataContextProvider _dataContextProvider;
+	private final Datastore _datastore;
 	private final Column _column;
 	private final WeakHashMap<String, Boolean> _containsValueCache = new WeakHashMap<String, Boolean>();
 
-	public DatastoreReferenceValues(DataContextProvider dataContextProvider, Column column) {
-		_dataContextProvider = dataContextProvider;
+	public DatastoreReferenceValues(Datastore datastore, Column column) {
+		_datastore = datastore;
 		_column = column;
 	}
 
@@ -55,7 +56,8 @@ public final class DatastoreReferenceValues implements ReferenceValues<String> {
 				result = _containsValueCache.get(value);
 				if (result == null) {
 					result = false;
-					DataContext dataContext = _dataContextProvider.getDataContext();
+					DataContextProvider dcp = _datastore.getDataContextProvider();
+					DataContext dataContext = dcp.getDataContext();
 					Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).equals(value)
 							.toQuery();
 					DataSet dataSet = dataContext.executeQuery(q);
@@ -69,6 +71,8 @@ public final class DatastoreReferenceValues implements ReferenceValues<String> {
 							assert !dataSet.next();
 						}
 					}
+					dataSet.close();
+					dcp.close();
 					_containsValueCache.put(value, result);
 				}
 			}
@@ -79,7 +83,8 @@ public final class DatastoreReferenceValues implements ReferenceValues<String> {
 
 	@Override
 	public Collection<String> getValues() {
-		DataContext dataContext = _dataContextProvider.getDataContext();
+		DataContextProvider dcp = _datastore.getDataContextProvider();
+		DataContext dataContext = dcp.getDataContext();
 
 		Query q = dataContext.query().from(_column.getTable()).select(_column).toQuery();
 		q.selectDistinct();
@@ -94,6 +99,8 @@ public final class DatastoreReferenceValues implements ReferenceValues<String> {
 			}
 			values.add((String) value);
 		}
+		dataSet.close();
+		dcp.close();
 		return values;
 	}
 }

@@ -19,28 +19,31 @@
  */
 package org.eobjects.analyzer.connection;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
+import java.io.Closeable;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-public final class AccessDatastore extends UsageAwareDatastore {
+/**
+ * A wrapper for a JDBC connection that will allow using the closeable interface
+ * for closing it.
+ * 
+ * @author Kasper Sørensen
+ */
+class CloseableJdbcConnection implements Closeable {
 
-	private static final long serialVersionUID = 1L;
-	private final String _name;
-	private final String _filename;
+	private Connection _connection;
 
-	public AccessDatastore(String name, String filename) {
-		_name = name;
-		_filename = filename;
+	public CloseableJdbcConnection(Connection connection) {
+		_connection = connection;
 	}
 
 	@Override
-	public String getName() {
-		return _name;
-	}
-
-	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
-		DataContext dc = DataContextFactory.createAccessDataContext(_filename);
-		return new SingleDataContextProvider(dc, this);
+	public void close() throws IOException {
+		try {
+			_connection.close();
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 }

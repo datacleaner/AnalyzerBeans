@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.test.full.scenarios;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -33,8 +32,9 @@ import org.eobjects.analyzer.beans.standardize.NameStandardizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.CsvDatastore;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
-import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -55,15 +55,13 @@ import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
 import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.Schema;
 import dk.eobjects.metamodel.schema.Table;
 
 public class NameAndEmailPartEqualityTest extends TestCase {
 
-	public void testScenario() throws Exception {
+	public void testScenario() throws Throwable {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		StorageProvider storageProvider = TestHelper.createStorageProvider();
@@ -75,13 +73,13 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		DataContext dc = DataContextFactory.createCsvDataContext(new File(
-				"src/test/resources/NameAndEmailPartEqualityTest-data.csv"));
+		CsvDatastore ds = new CsvDatastore("data.csv", "src/test/resources/NameAndEmailPartEqualityTest-data.csv");
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
-		analysisJobBuilder.setDataContextProvider(new SingleDataContextProvider(dc, null));
+		analysisJobBuilder.setDatastore(ds);
 
-		Schema schema = dc.getDefaultSchema();
+		DataContextProvider dcp = ds.getDataContextProvider();
+		Schema schema = dcp.getDataContext().getDefaultSchema();
 		Table table = schema.getTables()[0];
 		assertNotNull(table);
 
@@ -141,6 +139,14 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		assertTrue(equalsAnalyzerJobBuilder.isConfigured());
 
 		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
+
+		dcp.close();
+		
+		if (!resultFuture.isSuccessful()) {
+			List<Throwable> errors = resultFuture.getErrors();
+			throw errors.get(0);
+		}
+
 		List<AnalyzerResult> results = resultFuture.getResults();
 
 		assertEquals(6, results.size());
