@@ -118,7 +118,7 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 					installDriver = false;
 					break;
 				}
-			} catch (SQLException e) {
+			} catch (Exception e) {
 				logger.warn("Driver threw exception when acceptURL(...) was invoked", e);
 			}
 		}

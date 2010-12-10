@@ -37,6 +37,10 @@ public class ValueCountListImpl implements Serializable, ValueCountList {
 		return new ValueCountListImpl(-1, true);
 	}
 
+	public static ValueCountList emptyList() {
+		return new ValueCountListImpl(0, true);
+	}
+
 	public static ValueCountListImpl createTopList(int topFrequentValues) {
 		return new ValueCountListImpl(topFrequentValues, true);
 	}

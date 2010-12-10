@@ -46,23 +46,29 @@ public class ValueDistributionResult implements AnalyzerResult {
 		_nullCount = nullCount;
 	}
 
-	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountListImpl bottomValues,
+	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
 			int nullCount, Collection<String> uniqueValues) {
 		this(column, topValues, bottomValues, nullCount);
 		_uniqueValues = uniqueValues;
 	}
 
-	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountListImpl bottomValues,
+	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
 			int nullCount, int uniqueValueCount) {
 		this(column, topValues, bottomValues, nullCount);
 		_uniqueValueCount = uniqueValueCount;
 	}
 
 	public ValueCountList getTopValues() {
+		if (_topValues == null) {
+			return ValueCountListImpl.emptyList();
+		}
 		return _topValues;
 	}
 
 	public ValueCountList getBottomValues() {
+		if (_bottomValues == null) {
+			return ValueCountListImpl.emptyList();
+		}
 		return _bottomValues;
 	}
 
