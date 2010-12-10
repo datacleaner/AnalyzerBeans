@@ -41,7 +41,7 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 
 	public MultiThreadedTaskRunner(int numThreads) {
 		_numThreads = numThreads;
-		BlockingQueue<Runnable> workQueue = new DoubleBlockingQueue<Runnable>(numThreads * 2);
+		BlockingQueue<Runnable> workQueue = new DoubleBlockingQueue<Runnable>(numThreads * 3);
 		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS, workQueue);
 	}
 

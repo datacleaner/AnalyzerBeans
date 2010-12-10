@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.beans.valuedist;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -29,9 +28,9 @@ public class ValueCountListImpl implements Serializable, ValueCountList {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean _retainHighest;
-	private int _maxSize;
-	private LinkedList<ValueCount> _values = new LinkedList<ValueCount>();
+	private final boolean _retainHighest;
+	private final int _maxSize;
+	private final LinkedList<ValueCount> _values = new LinkedList<ValueCount>();
 
 	public static ValueCountListImpl createFullList() {
 		return new ValueCountListImpl(-1, true);
@@ -96,7 +95,7 @@ public class ValueCountListImpl implements Serializable, ValueCountList {
 	}
 
 	public List<ValueCount> getValueCounts() {
-		return Collections.unmodifiableList(_values);
+		return _values;
 	}
 
 	public int getMaxSize() {

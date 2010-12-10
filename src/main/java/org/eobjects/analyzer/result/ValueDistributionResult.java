@@ -31,31 +31,31 @@ import org.eobjects.analyzer.data.InputColumn;
 public class ValueDistributionResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
-	private ValueCountList _topValues;
-	private ValueCountList _bottomValues;
-	private int _nullCount;
-	private Collection<String> _uniqueValues;
-	private int _uniqueValueCount;
-	private String _columnName;
+	private final ValueCountList _topValues;
+	private final ValueCountList _bottomValues;
+	private final int _nullCount;
+	private final Collection<String> _uniqueValues;
+	private final int _uniqueValueCount;
+	private final String _columnName;
 
 	private ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount) {
+			int nullCount, Collection<String> uniqueValues, int uniqueValueCount) {
 		_columnName = column.getName();
 		_topValues = topValues;
 		_bottomValues = bottomValues;
 		_nullCount = nullCount;
+		_uniqueValues = uniqueValues;
+		_uniqueValueCount = uniqueValueCount;
 	}
 
 	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
 			int nullCount, Collection<String> uniqueValues) {
-		this(column, topValues, bottomValues, nullCount);
-		_uniqueValues = uniqueValues;
+		this(column, topValues, bottomValues, nullCount, uniqueValues, -1);
 	}
 
 	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
 			int nullCount, int uniqueValueCount) {
-		this(column, topValues, bottomValues, nullCount);
-		_uniqueValueCount = uniqueValueCount;
+		this(column, topValues, bottomValues, nullCount, null, uniqueValueCount);
 	}
 
 	public ValueCountList getTopValues() {
@@ -84,6 +84,9 @@ public class ValueDistributionResult implements AnalyzerResult {
 	}
 
 	public Collection<String> getUniqueValues() {
+		if (_uniqueValues == null) {
+			return Collections.emptyList();
+		}
 		return Collections.unmodifiableCollection(_uniqueValues);
 	}
 

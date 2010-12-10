@@ -112,7 +112,7 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 		List<AnalyzerResult> results = resultFuture.getResults();
 
 		assertTrue(resultFuture.isDone());
-		
+
 		if (!resultFuture.isSuccessful()) {
 			List<Throwable> errors = resultFuture.getErrors();
 			throw errors.get(0);
@@ -125,24 +125,24 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 			ValueDistributionResult result = (ValueDistributionResult) analyzerResult;
 			if ("first word".equals(result.getColumnName())) {
 				assertEquals("ValueCountList[[[Sales->19], [VP->2]]]", result.getTopValues().toString());
-				assertNull(result.getBottomValues());
+				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(0, result.getNullCount());
 				assertEquals(2, result.getUniqueCount());
 			} else if ("second word".equals(result.getColumnName())) {
 				assertEquals("ValueCountList[[[Rep->17], [Manager->3]]]", result.getTopValues().toString());
-				assertNull(result.getBottomValues());
+				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(1, result.getNullCount());
 				assertEquals(2, result.getUniqueCount());
 			} else if ("third words".equals(result.getColumnName())) {
 				assertEquals("ValueCountList[[]]", result.getTopValues().toString());
-				assertNull(result.getBottomValues());
+				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(20, result.getNullCount());
 
 				assertEquals(3, result.getUniqueCount());
 				assertEquals("[(NA), (JAPAN,, (EMEA)]", result.getUniqueValues().toString());
 			} else if ("fourth words".equals(result.getColumnName())) {
 				assertEquals("ValueCountList[[]]", result.getTopValues().toString());
-				assertNull(result.getBottomValues());
+				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(22, result.getNullCount());
 
 				assertEquals(1, result.getUniqueCount());

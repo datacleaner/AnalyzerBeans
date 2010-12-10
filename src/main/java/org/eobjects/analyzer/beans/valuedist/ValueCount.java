@@ -20,13 +20,16 @@
 package org.eobjects.analyzer.beans.valuedist;
 
 import java.io.Serializable;
+import java.util.List;
 
-public class ValueCount implements Serializable {
+import dk.eobjects.metamodel.util.BaseObject;
+
+public final class ValueCount extends BaseObject implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String _value;
-	private int _count;
+	private final String _value;
+	private final int _count;
 
 	public ValueCount(String value, int count) {
 		_value = value;
@@ -44,5 +47,11 @@ public class ValueCount implements Serializable {
 	@Override
 	public String toString() {
 		return "[" + _value + "->" + _count + "]";
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		identifiers.add(_value);
+		identifiers.add(_count);
 	}
 }
