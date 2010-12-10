@@ -55,7 +55,7 @@ import dk.eobjects.metamodel.schema.Table;
 
 public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 
-	public void testScenario() throws Exception {
+	public void testScenario() throws Throwable {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		StorageProvider storageProvider = TestHelper.createStorageProvider();
@@ -112,6 +112,11 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 		List<AnalyzerResult> results = resultFuture.getResults();
 
 		assertTrue(resultFuture.isDone());
+		
+		if (!resultFuture.isSuccessful()) {
+			List<Throwable> errors = resultFuture.getErrors();
+			throw errors.get(0);
+		}
 
 		// expect 1 result for each token
 		assertEquals(4, results.size());
