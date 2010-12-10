@@ -172,12 +172,6 @@
 					</instrumentation>
 				</configuration>
 			</plugin>
-			<!-- Used for a lot of CI environments, version is needed -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>sonar-maven-plugin</artifactId>
-				<version>2.0-beta-1</version>
-			</plugin>
 		</plugins>
 	</build>
 	<reporting>
