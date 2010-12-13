@@ -26,5 +26,12 @@ package org.eobjects.analyzer.beans.filter;
  */
 public enum ValidationCategory {
 
-	VALID, INVALID
+	VALID, INVALID;
+	
+	public static ValidationCategory valueOf(boolean b) {
+		if (b) {
+			return VALID;
+		}
+		return INVALID;
+	}
 }

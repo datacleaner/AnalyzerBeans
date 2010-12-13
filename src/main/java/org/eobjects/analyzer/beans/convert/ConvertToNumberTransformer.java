@@ -84,12 +84,10 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 				}
 			} else {
 				String stringValue = value.toString();
-				if (n == null) {
-					try {
-						n = Double.parseDouble(stringValue);
-					} catch (NumberFormatException e) {
-						// ignore
-					}
+				try {
+					n = Double.parseDouble(stringValue);
+				} catch (NumberFormatException e) {
+					// ignore
 				}
 			}
 		}

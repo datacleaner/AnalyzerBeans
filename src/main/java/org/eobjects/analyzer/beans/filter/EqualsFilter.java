@@ -1,0 +1,106 @@
+/**
+ * eobjects.org AnalyzerBeans
+ * Copyright (C) 2010 eobjects.org
+ *
+ * This copyrighted material is made available to anyone wishing to use, modify,
+ * copy, or redistribute it subject to the terms and conditions of the GNU
+ * Lesser General Public License, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this distribution; if not, write to:
+ * Free Software Foundation, Inc.
+ * 51 Franklin Street, Fifth Floor
+ * Boston, MA  02110-1301  USA
+ */
+package org.eobjects.analyzer.beans.filter;
+
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
+import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
+
+@FilterBean("Equals")
+@Description("A filter that checks for values equal (=) to a given parameter")
+public class EqualsFilter implements Filter<ValidationCategory> {
+
+	@Configured
+	InputColumn<?> column;
+
+	@Configured
+	String value;
+
+	private Object operand;
+	private boolean number = false;
+
+	public EqualsFilter() {
+	}
+
+	public EqualsFilter(String value, InputColumn<?> column) {
+		this();
+		this.value = value;
+		this.column = column;
+		init();
+	}
+
+	@Initialize
+	public void init() {
+		DataTypeFamily dataTypeFamily = column.getDataTypeFamily();
+		if (dataTypeFamily == DataTypeFamily.BOOLEAN) {
+			operand = ConvertToBooleanTransformer.transformValue(value, ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS,
+					ConvertToBooleanTransformer.DEFAULT_FALSE_TOKENS);
+		} else if (dataTypeFamily == DataTypeFamily.DATE) {
+			operand = ConvertToDateTransformer.transformValue(value);
+		} else if (dataTypeFamily == DataTypeFamily.NUMBER) {
+			operand = ConvertToNumberTransformer.transformValue(value);
+			number = true;
+		} else {
+			operand = ConvertToStringTransformer.transformValue(value);
+		}
+	}
+
+	@Override
+	public ValidationCategory categorize(InputRow inputRow) {
+		Object v = inputRow.getValue(column);
+		return filter(v);
+	}
+
+	public ValidationCategory filter(Object v) {
+		if (v == null) {
+			return ValidationCategory.valueOf(value == null);
+		}
+
+		if (number) {
+			Number n1 = (Number) operand;
+			Number n2 = (Number) v;
+			boolean equals = equals(n1, n2);
+			return ValidationCategory.valueOf(equals);
+		}
+		if (operand.equals(v)) {
+			return ValidationCategory.VALID;
+		}
+
+		return ValidationCategory.INVALID;
+	}
+
+	private boolean equals(Number n1, Number n2) {
+		if (n1 instanceof Short || n1 instanceof Integer || n1 instanceof Long || n2 instanceof Short
+				|| n2 instanceof Integer || n2 instanceof Long) {
+			// use long comparision
+			return n1.longValue() == n2.longValue();
+		}
+		return n1.doubleValue() == n2.doubleValue();
+	}
+}
