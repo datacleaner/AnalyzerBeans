@@ -141,4 +141,8 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 	public void setValueDistribution(Map<String, Integer> valueDistribution) {
 		_valueDistribution = valueDistribution;
 	}
+	
+	public void setRecordUniqueValues(boolean recordUniqueValues) {
+		_recordUniqueValues = recordUniqueValues;
+	}
 }
