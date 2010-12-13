@@ -21,8 +21,8 @@ package org.eobjects.analyzer.reference;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.slf4j.Logger;
@@ -97,7 +97,7 @@ public class TextBasedDictionary implements Dictionary {
 	public ReferenceValues<String> getValues() {
 		BufferedReader reader = null;
 		try {
-			List<String> values = new ArrayList<String>();
+			Set<String> values = new HashSet<String>();
 			reader = FileHelper.getBufferedReader(new File(_filename), _encoding);
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 				values.add(line);

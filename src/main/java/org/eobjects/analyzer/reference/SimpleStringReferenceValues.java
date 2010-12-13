@@ -19,28 +19,35 @@
  */
 package org.eobjects.analyzer.reference;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class SimpleStringReferenceValues implements ReferenceValues<String> {
 
-	private final String[] _values;
+	private final Set<String> _values;
 	private final boolean _caseSensitive;
 
 	public SimpleStringReferenceValues(String[] values, boolean caseSensitive) {
-		_values = values;
+		_values = CollectionUtils.set(values);
 		_caseSensitive = caseSensitive;
 	}
 
-	public SimpleStringReferenceValues(List<String> values, boolean caseSensitive) {
-		_values = values.toArray(new String[values.size()]);
+	public SimpleStringReferenceValues(Collection<String> values, boolean caseSensitive) {
+		if (values instanceof Set<?>) {
+			_values =(Set<String>) values;
+		} else {
+			_values = new HashSet<String>(values);
+		}
 		_caseSensitive = caseSensitive;
 	}
 
 	@Override
 	public Collection<String> getValues() {
-		return Arrays.asList(_values);
+		return Collections.unmodifiableSet(_values);
 	}
 
 	@Override
