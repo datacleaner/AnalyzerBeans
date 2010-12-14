@@ -32,9 +32,9 @@ import dk.eobjects.metamodel.schema.Column;
 public class MockInputColumn<E> extends AbstractInputColumn<E> implements InputColumn<E> {
 
 	private String _name;
-	private Class<E> _clazz;
+	private Class<? extends E> _clazz;
 
-	public MockInputColumn(String name, Class<E> clazz) {
+	public MockInputColumn(String name, Class<? extends E> clazz) {
 		_name = name;
 		_clazz = clazz;
 	}
