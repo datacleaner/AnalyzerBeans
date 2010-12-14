@@ -36,12 +36,14 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDataContextProvider.class);
 
 	private final AtomicInteger usageCount = new AtomicInteger(1);
+	private final Datastore _datastore;
 	private boolean _closed = false;
 
-	public UsageAwareDataContextProvider() {
+	public UsageAwareDataContextProvider(Datastore datastore) {
+		_datastore = datastore;
 		if (logger.isDebugEnabled()) {
 			StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-			logger.debug("Instantiated by:");
+			logger.debug("{} instantiated by:", this);
 			for (int i = 0; i < stackTrace.length && i < 7; i++) {
 				StackTraceElement ste = stackTrace[i];
 				logger.debug(" - {} @ line {}", ste.getClassName(), ste.getLineNumber());
@@ -52,7 +54,7 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 	public final void incrementUsageCount() {
 		int count = usageCount.incrementAndGet();
 		logger.info("Usage incremented to {} for {}", count, this);
-		
+
 		if (logger.isDebugEnabled()) {
 			StackTraceElement[] stackTrace = new Throwable().getStackTrace();
 			logger.debug("Incremented usage by:");
@@ -88,10 +90,31 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 	protected void finalize() throws Throwable {
 		super.finalize();
 		if (!isClosed()) {
-			logger.warn("Method finalize() invoked but not all usages closed ({} remaining). Closing DataContextProvider.",
-					usageCount.get());
+			if (logger.isWarnEnabled()) {
+
+				logger.warn(
+						"Method finalize() invoked but not all usages closed ({} remaining) (for {}). Closing DataContextProvider.",
+						usageCount.get(), this);
+			}
 			// in case of gc, also do the closing
 			closeInternal();
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "UsageAwareDataContextProvider[datastore=" + getDatastoreName() + "]";
+	}
+
+	@Override
+	public final Datastore getDatastore() {
+		return _datastore;
+	}
+
+	private String getDatastoreName() {
+		if (_datastore != null) {
+			return _datastore.getName();
+		}
+		return "<null>";
 	}
 }

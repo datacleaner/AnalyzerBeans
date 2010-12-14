@@ -40,7 +40,6 @@ public final class MultiConnectionDataContextProvider extends UsageAwareDataCont
 	private final String _user;
 	private final String _password;
 	private final String _catalog;
-	private final Datastore _datastore;
 	private volatile SchemaNavigator _schemaNavigator;
 	private int _nextDataContext;
 
@@ -55,6 +54,7 @@ public final class MultiConnectionDataContextProvider extends UsageAwareDataCont
 
 	public MultiConnectionDataContextProvider(int maxConnections, String url, String user, String password, String catalog,
 			Datastore datastore) {
+		super(datastore);
 		_dataContexts = new DataContext[maxConnections];
 		_connections = new Connection[maxConnections];
 		_url = url;
@@ -62,7 +62,6 @@ public final class MultiConnectionDataContextProvider extends UsageAwareDataCont
 		_password = password;
 		_catalog = catalog;
 		_nextDataContext = 0;
-		_datastore = datastore;
 	}
 
 	@Override
@@ -114,11 +113,6 @@ public final class MultiConnectionDataContextProvider extends UsageAwareDataCont
 			}
 		}
 		return _schemaNavigator;
-	}
-
-	@Override
-	public Datastore getDatastore() {
-		return _datastore;
 	}
 
 	@Override

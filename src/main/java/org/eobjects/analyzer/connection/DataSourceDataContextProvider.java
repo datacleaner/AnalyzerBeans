@@ -30,12 +30,11 @@ public class DataSourceDataContextProvider extends UsageAwareDataContextProvider
 
 	private final DataContext _dataContext;
 	private final SchemaNavigator _schemaNavigator;
-	private final Datastore _datastore;
 
 	public DataSourceDataContextProvider(DataSource ds, Datastore datastore) {
-		this._dataContext = DataContextFactory.createJdbcDataContext(ds);
-		this._schemaNavigator = new SchemaNavigator(_dataContext);
-		this._datastore = datastore;
+		super(datastore);
+		_dataContext = DataContextFactory.createJdbcDataContext(ds);
+		_schemaNavigator = new SchemaNavigator(_dataContext);
 	}
 
 	@Override
@@ -46,11 +45,6 @@ public class DataSourceDataContextProvider extends UsageAwareDataContextProvider
 	@Override
 	public SchemaNavigator getSchemaNavigator() {
 		return _schemaNavigator;
-	}
-
-	@Override
-	public Datastore getDatastore() {
-		return _datastore;
 	}
 
 	@Override

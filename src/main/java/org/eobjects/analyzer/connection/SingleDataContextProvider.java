@@ -34,13 +34,12 @@ public final class SingleDataContextProvider extends UsageAwareDataContextProvid
 
 	private final DataContext _dataContext;
 	private final SchemaNavigator _schemaNavigator;
-	private final Datastore _datastore;
 	private final Closeable[] _closeables;
 
 	public SingleDataContextProvider(DataContext dataContext, Datastore datastore, Closeable... closeables) {
+		super(datastore);
 		_dataContext = dataContext;
 		_schemaNavigator = new SchemaNavigator(dataContext);
-		_datastore = datastore;
 		_closeables = closeables;
 	}
 
@@ -52,11 +51,6 @@ public final class SingleDataContextProvider extends UsageAwareDataContextProvid
 	@Override
 	public SchemaNavigator getSchemaNavigator() {
 		return _schemaNavigator;
-	}
-
-	@Override
-	public Datastore getDatastore() {
-		return _datastore;
 	}
 
 	@Override
