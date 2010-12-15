@@ -57,51 +57,51 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	@Provided
 	RowAnnotationFactory _rowAnnotationFactory;
 
-	@Configured
+	@Configured(order = 1)
 	InputColumn<String> column;
 
-	@Configured(value = "Predefined token name", required = false)
+	@Configured(required = false, order = 2)
+	@Description("Separate text tokens based on case")
+	Boolean discriminateTextCase = true;
+
+	@Configured(required = false, order = 3)
+	@Description("Separate number tokens based on negativity")
+	Boolean discriminateNegativeNumbers = false;
+
+	@Configured(required = false, order = 4)
+	@Description("Separate number tokens for decimals")
+	Boolean discriminateDecimals = true;
+
+	@Configured(required = false, order = 5)
+	@Description("Use '?'-tokens for mixed text and numbers")
+	Boolean enableMixedTokens = true;
+
+	@Configured(required = false, order = 6)
+	@Description("Ignore whitespace differences")
+	Boolean ignoreRepeatedSpaces = false;
+
+	@Configured(value = "Upper case patterns expand in size", required = false, order = 7)
+	@Description("Auto-adjust/expand uppercase text tokens")
+	boolean upperCaseExpandable = false;
+
+	@Configured(value = "Lower case patterns expand in size", required = false, order = 8)
+	@Description("Auto-adjust/expand lowercase text tokens")
+	boolean lowerCaseExpandable = true;
+
+	@Configured(value = "Predefined token name", required = false, order = 9)
 	String predefinedTokenName;
 
-	@Configured(value = "Predefined token regexes", required = false)
+	@Configured(value = "Predefined token regexes", required = false, order = 10)
 	String[] predefinedTokenPatterns;
 
-	@Configured(required = false)
-	@Description("Separate text tokens based on case")
-	private Boolean discriminateTextCase = true;
+	@Configured(required = false, order = 11)
+	Character decimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
 
-	@Configured(required = false)
-	@Description("Separate number tokens based on negativity")
-	private Boolean discriminateNegativeNumbers = false;
+	@Configured(required = false, order = 12)
+	Character thousandsSeparator = DecimalFormatSymbols.getInstance().getGroupingSeparator();
 
-	@Configured(required = false)
-	@Description("Separate number tokens for decimals")
-	private Boolean discriminateDecimals = true;
-
-	@Configured(required = false)
-	@Description("Use '?'-tokens for mixed text and numbers")
-	private Boolean enableMixedTokens = true;
-
-	@Configured(required = false)
-	@Description("Ignore whitespace differences")
-	private Boolean ignoreRepeatedSpaces = false;
-
-	@Configured(required = false)
-	private Character decimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
-
-	@Configured(required = false)
-	private Character thousandsSeparator = DecimalFormatSymbols.getInstance().getGroupingSeparator();
-
-	@Configured(required = false)
-	private Character minusSign = DecimalFormatSymbols.getInstance().getMinusSign();
-
-	@Configured(value = "Upper case patterns expand in size", required = false)
-	@Description("Auto-adjust/expand uppercase text tokens")
-	private boolean upperCaseExpandable = false;
-
-	@Configured(value = "Lower case patterns expand in size", required = false)
-	@Description("Auto-adjust/expand lowercase text tokens")
-	private boolean lowerCaseExpandable = true;
+	@Configured(required = false, order = 13)
+	Character minusSign = DecimalFormatSymbols.getInstance().getMinusSign();
 
 	@Initialize
 	public void init() {
@@ -273,19 +273,19 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	public void setLowerCaseExpandable(boolean lowerCaseExpandable) {
 		this.lowerCaseExpandable = lowerCaseExpandable;
 	}
-	
+
 	public void setDecimalSeparator(Character decimalSeparator) {
 		this.decimalSeparator = decimalSeparator;
 	}
-	
+
 	public void setIgnoreRepeatedSpaces(Boolean ignoreRepeatedSpaces) {
 		this.ignoreRepeatedSpaces = ignoreRepeatedSpaces;
 	}
-	
+
 	public void setMinusSign(Character minusSign) {
 		this.minusSign = minusSign;
 	}
-	
+
 	public void setThousandsSeparator(Character thousandsSeparator) {
 		this.thousandsSeparator = thousandsSeparator;
 	}

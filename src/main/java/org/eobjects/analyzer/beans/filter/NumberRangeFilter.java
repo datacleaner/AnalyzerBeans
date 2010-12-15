@@ -33,10 +33,10 @@ public class NumberRangeFilter implements Filter<RangeFilterCategory> {
 	@Configured
 	InputColumn<Number> column;
 
-	@Configured
+	@Configured(order = 1)
 	Double lowestValue = 0d;
 
-	@Configured
+	@Configured(order = 2)
 	Double highestValue = 10d;
 
 	public NumberRangeFilter(double lowestValue, double highestValue) {

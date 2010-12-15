@@ -36,13 +36,13 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 	@Configured
 	InputColumn<String> column;
 
-	@Configured
+	@Configured(order = 1)
 	boolean trimLeft = true;
 
-	@Configured
+	@Configured(order = 2)
 	boolean trimRight = true;
 
-	@Configured
+	@Configured(order = 3)
 	boolean trimMultipleToSingleSpace = false;
 
 	public WhitespaceTrimmerTransformer() {
