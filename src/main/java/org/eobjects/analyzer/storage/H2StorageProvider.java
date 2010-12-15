@@ -31,15 +31,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class H2StorageProvider extends SqlDatabaseStorageProvider implements StorageProvider {
 
-	private static final AtomicInteger databaseIndex = new AtomicInteger(0);
+	public static final String DRIVER_CLASS_NAME = "org.h2.Driver";
+
 	private static final String DATABASE_FILENAME = "h2-storage";
+	private static final AtomicInteger databaseIndex = new AtomicInteger(0);
 
 	public H2StorageProvider() {
-		super("org.h2.Driver", "jdbc:h2:mem:ab" + databaseIndex.getAndIncrement());
+		super(DRIVER_CLASS_NAME, "jdbc:h2:mem:ab" + databaseIndex.getAndIncrement());
 	}
 
 	public H2StorageProvider(String directoryPath) {
-		super("org.h2.Driver", "jdbc:h2:" + cleanDirectory(directoryPath) + File.separatorChar + DATABASE_FILENAME);
+		super(DRIVER_CLASS_NAME, "jdbc:h2:" + cleanDirectory(directoryPath) + File.separatorChar + DATABASE_FILENAME);
 	}
 
 	private static String cleanDirectory(String directoryPath) {
