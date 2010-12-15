@@ -31,17 +31,17 @@ import org.eobjects.analyzer.data.InputRow;
 @Description("A filter that filters out values outside a specified value range")
 public class StringValueRangeFilter implements Filter<RangeFilterCategory> {
 
-	@Configured
+	@Configured(order = 1)
+	InputColumn<String> column;
+
+	@Configured(order = 2)
 	@Description("The lowest valid string value, eg. AAA")
 	String lowestValue;
-	
-	@Configured
+
+	@Configured(order = 3)
 	@Description("The highest valid string value, eg. xxx")
 	String highestValue;
-	
-	@Configured
-	InputColumn<String> column;
-	
+
 	public StringValueRangeFilter() {
 	}
 
@@ -49,7 +49,7 @@ public class StringValueRangeFilter implements Filter<RangeFilterCategory> {
 		this.lowestValue = lowestValue;
 		this.highestValue = highestValue;
 	}
-	
+
 	@Initialize
 	public void init() {
 		if (lowestValue.compareTo(highestValue) > 0) {

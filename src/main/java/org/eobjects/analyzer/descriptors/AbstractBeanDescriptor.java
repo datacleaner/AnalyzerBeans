@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -46,7 +47,7 @@ public abstract class AbstractBeanDescriptor<B> extends AbstractDescriptor<B> im
 	private static final Logger logger = LoggerFactory.getLogger(AbstractBeanDescriptor.class);
 
 	protected final Set<InitializeMethodDescriptor> _initializeMethods = new HashSet<InitializeMethodDescriptor>();
-	protected final Set<ConfiguredPropertyDescriptor> _configuredProperties = new HashSet<ConfiguredPropertyDescriptor>();
+	protected final Set<ConfiguredPropertyDescriptor> _configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>();
 	protected final Set<ProvidedPropertyDescriptor> _providedProperties = new HashSet<ProvidedPropertyDescriptor>();
 	protected final Set<CloseMethodDescriptor> _closeMethods = new HashSet<CloseMethodDescriptor>();
 	private final boolean _requireInputColumns;
@@ -149,7 +150,7 @@ public abstract class AbstractBeanDescriptor<B> extends AbstractDescriptor<B> im
 
 	@Override
 	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
-		Set<ConfiguredPropertyDescriptor> descriptors = new HashSet<ConfiguredPropertyDescriptor>(_configuredProperties);
+		Set<ConfiguredPropertyDescriptor> descriptors = new TreeSet<ConfiguredPropertyDescriptor>(_configuredProperties);
 		for (Iterator<ConfiguredPropertyDescriptor> it = descriptors.iterator(); it.hasNext();) {
 			ConfiguredPropertyDescriptor propertyDescriptor = it.next();
 			if (!propertyDescriptor.isInputColumn()) {

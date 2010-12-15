@@ -51,13 +51,13 @@ public class ReferentialIntegrityValidator implements ExploringAnalyzer<DataSetR
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private List<Row> invalidRows;
 
-	@Configured("Primary key column")
+	@Configured(value = "Primary key column", order = 1)
 	Column primaryKeyColumn;
 
-	@Configured("Foreign key column")
+	@Configured(value = "Foreign key column", order = 2)
 	Column foreignKeyColumn;
 
-	@Configured("Accept NULL foreign keys?")
+	@Configured(value = "Accept NULL foreign keys?", order = 3)
 	boolean acceptNullForeignKey;
 
 	/**

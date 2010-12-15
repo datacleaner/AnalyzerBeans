@@ -30,13 +30,13 @@ import org.eobjects.analyzer.data.InputRow;
 @Description("Filter rows based on the length of strings.")
 public class StringLengthRangeFilter implements Filter<RangeFilterCategory> {
 
-	@Configured
+	@Configured(order = 1)
 	InputColumn<String> column;
 
-	@Configured
+	@Configured(order = 2)
 	int minimumLength = 0;
 
-	@Configured
+	@Configured(order = 3)
 	int maximumLength = 10;
 
 	@Override

@@ -36,24 +36,20 @@ import dk.eobjects.metamodel.schema.Relationship;
 public class JoinMatcherTest extends MetaModelTestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor<JoinMatcher> descriptor = AnnotationBasedAnalyzerBeanDescriptor
-				.create(JoinMatcher.class);
+		AnalyzerBeanDescriptor<JoinMatcher> descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(JoinMatcher.class);
 
 		List<ConfiguredPropertyDescriptor> configuredProperties = new ArrayList<ConfiguredPropertyDescriptor>(
 				descriptor.getConfiguredProperties());
 		assertEquals(4, configuredProperties.size());
 
-		assertEquals("Right table", configuredProperties.get(0).getName());
-		assertEquals("Left table join column", configuredProperties.get(1)
-				.getName());
-		assertEquals("Right table join column", configuredProperties.get(2)
-				.getName());
-		assertEquals("Left table", configuredProperties.get(3).getName());
+		assertEquals("Left table", configuredProperties.get(0).getName());
+		assertEquals("Right table", configuredProperties.get(1).getName());
+		assertEquals("Left table join column", configuredProperties.get(2).getName());
+		assertEquals("Right table join column", configuredProperties.get(3).getName());
 	}
 
 	public void testNoMismatch() throws Exception {
-		DataContext dc = DataContextFactory
-				.createJdbcDataContext(getTestDbConnection());
+		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
 		Relationship r = dc.getDefaultSchema().getRelationships()[0];
 		assertEquals(
 				"Relationship[primaryTable=PRODUCTS,primaryColumns=[PRODUCTCODE],foreignTable=ORDERFACT,foreignColumns=[PRODUCTCODE]]",

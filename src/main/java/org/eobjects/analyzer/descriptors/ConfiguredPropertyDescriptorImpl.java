@@ -83,4 +83,22 @@ public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDesc
 		}
 		return null;
 	}
+
+	@Override
+	public int compareTo(PropertyDescriptor o) {
+		Configured conf1 = getAnnotation(Configured.class);
+		final int order1 = conf1.order();
+		Configured conf2 = o.getAnnotation(Configured.class);
+		final int order2;
+		if (conf2 == null) {
+			order2 = Integer.MAX_VALUE;
+		} else {
+			order2 = conf2.order();
+		}
+		int diff = order1 - order2;
+		if (diff == 0) {
+			return super.compareTo(o);
+		}
+		return diff;
+	}
 }

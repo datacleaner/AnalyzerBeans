@@ -21,11 +21,14 @@ package org.eobjects.analyzer.beans;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.test.QueryMatcher;
 
@@ -71,11 +74,15 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 				"AnnotationBasedAnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
 				descriptor.toString());
 
-		assertEquals(
-				"[ConfiguredPropertyDescriptorImpl[field=primaryKeyColumn,baseType=interface dk.eobjects.metamodel.schema.Column], "
-						+ "ConfiguredPropertyDescriptorImpl[field=acceptNullForeignKey,baseType=boolean], "
-						+ "ConfiguredPropertyDescriptorImpl[field=foreignKeyColumn,baseType=interface dk.eobjects.metamodel.schema.Column]]",
-				descriptor.getConfiguredProperties().toString());
+		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
+		Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
+		assertTrue(it.hasNext());
+		assertEquals("Primary key column", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Foreign key column", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Accept NULL foreign keys?", it.next().getName());
+		assertFalse(it.hasNext());
 
 		assertEquals("[]", descriptor.getProvidedProperties().toString());
 

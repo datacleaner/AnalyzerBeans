@@ -50,28 +50,28 @@ import dk.eobjects.metamodel.schema.Table;
 @AnalyzerBean("Join matcher")
 public class JoinMatcher implements ExploringAnalyzer<DataSetResult> {
 
-	@Configured
+	@Configured(order = 1)
 	private Table leftTable;
 
 	public void setLeftTable(Table leftTable) {
 		this.leftTable = leftTable;
 	}
 
-	@Configured
+	@Configured(order = 2)
 	private Table rightTable;
 
 	public void setRightTable(Table rightTable) {
 		this.rightTable = rightTable;
 	}
 
-	@Configured
+	@Configured(order = 3)
 	private Column leftTableJoinColumn;
 
 	public void setLeftTableJoinColumn(Column leftTableJoinColumn) {
 		this.leftTableJoinColumn = leftTableJoinColumn;
 	}
 
-	@Configured
+	@Configured(order = 4)
 	private Column rightTableJoinColumn;
 
 	public void setRightTableJoinColumn(Column rightTableJoinColumn) {

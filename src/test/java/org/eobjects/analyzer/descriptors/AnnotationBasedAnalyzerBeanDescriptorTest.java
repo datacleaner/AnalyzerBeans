@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -43,14 +43,17 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testExploringType() throws Exception {
-		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor
-				.create(ExploringAnalyzerMock.class);
+		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(ExploringAnalyzerMock.class);
 		assertEquals(true, descriptor.isExploringAnalyzer());
 		assertEquals(false, descriptor.isRowProcessingAnalyzer());
 
-		assertEquals(
-				"[ConfiguredPropertyDescriptorImpl[field=configured2,baseType=class java.lang.Integer], ConfiguredPropertyDescriptorImpl[field=configured1,baseType=class java.lang.String]]",
-				Arrays.toString(descriptor.getConfiguredProperties().toArray()));
+		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
+		Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
+		assertTrue(it.hasNext());
+		assertEquals("Configured1", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Configured2", it.next().getName());
+		assertFalse(it.hasNext());
 	}
 
 	public void testRowProcessingType() throws Exception {
@@ -59,38 +62,35 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		assertEquals(false, descriptor.isExploringAnalyzer());
 		assertEquals(true, descriptor.isRowProcessingAnalyzer());
 
-		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
-				.getConfiguredProperties();
-		assertEquals(
-				"[ConfiguredPropertyDescriptorImpl[field=configured1,baseType=class java.lang.String], ConfiguredPropertyDescriptorImpl[field=configured2,baseType=class java.lang.Integer], ConfiguredPropertyDescriptorImpl[field=columns,baseType=class [Lorg.eobjects.analyzer.data.InputColumn;]]",
-				Arrays.toString(configuredProperties.toArray()));
+		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
+		Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
+		assertTrue(it.hasNext());
+		assertEquals("Columns", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Configured1", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Configured2", it.next().getName());
+		assertFalse(it.hasNext());
 
 		RowProcessingAnalyzerMock analyzerBean = new RowProcessingAnalyzerMock();
-		ConfiguredPropertyDescriptor configuredProperty = configuredProperties
-				.iterator().next();
+		ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty("Configured1");
 		configuredProperty.setValue(analyzerBean, "foobar");
 		assertEquals("foobar", analyzerBean.getConfigured1());
 	}
 
 	public void testGetInputDataTypeFamily() throws Exception {
-		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor
-				.create(StringAnalyzer.class);
-		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
-				.getConfiguredPropertiesForInput();
+		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(StringAnalyzer.class);
+		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
 		assertEquals(1, configuredProperties.size());
-		ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties
-				.iterator().next();
+		ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
 
-		assertEquals(DataTypeFamily.STRING,
-				propertyDescriptor.getInputColumnDataTypeFamily());
+		assertEquals(DataTypeFamily.STRING, propertyDescriptor.getInputColumnDataTypeFamily());
 
-		descriptor = AnnotationBasedAnalyzerBeanDescriptor
-				.create(ValueDistributionAnalyzer.class);
+		descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(ValueDistributionAnalyzer.class);
 		configuredProperties = descriptor.getConfiguredPropertiesForInput();
 		assertEquals(1, configuredProperties.size());
 		propertyDescriptor = configuredProperties.iterator().next();
-		assertEquals(DataTypeFamily.UNDEFINED,
-				propertyDescriptor.getInputColumnDataTypeFamily());
+		assertEquals(DataTypeFamily.UNDEFINED, propertyDescriptor.getInputColumnDataTypeFamily());
 	}
 
 	public void testAbstractBeanClass() throws Exception {
@@ -105,7 +105,6 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	@AnalyzerBean("invalid analyzer")
-	public abstract class InvalidAnalyzer implements
-			RowProcessingAnalyzer<AnalyzerResult> {
+	public abstract class InvalidAnalyzer implements RowProcessingAnalyzer<AnalyzerResult> {
 	}
 }

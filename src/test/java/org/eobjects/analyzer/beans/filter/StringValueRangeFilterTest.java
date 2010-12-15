@@ -19,6 +19,13 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import java.util.Iterator;
+import java.util.Set;
+
+import org.eobjects.analyzer.descriptors.AnnotationBasedFilterBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
+
 import junit.framework.TestCase;
 
 public class StringValueRangeFilterTest extends TestCase {
@@ -38,5 +45,20 @@ public class StringValueRangeFilterTest extends TestCase {
 		assertEquals(RangeFilterCategory.VALID, f.categorize("CCC"));
 		assertEquals(RangeFilterCategory.HIGHER, f.categorize("ccd"));
 		assertEquals(RangeFilterCategory.HIGHER, f.categorize("xxx"));
+	}
+
+	public void testOrderingOfProperties() throws Exception {
+		FilterBeanDescriptor<StringValueRangeFilter, RangeFilterCategory> d = AnnotationBasedFilterBeanDescriptor
+				.create(StringValueRangeFilter.class);
+		Set<ConfiguredPropertyDescriptor> configuredProperties = d.getConfiguredProperties();
+		
+		Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
+		assertTrue(it.hasNext());
+		assertEquals("Column", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Lowest value", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Highest value", it.next().getName());
+		assertFalse(it.hasNext());
 	}
 }
