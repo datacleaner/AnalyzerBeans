@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.connection;
 
-import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -74,7 +73,7 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 
 	public JdbcDatastore(String name, DataContext dc) {
 		this(name, null, null, null, null, null);
-		setDataContextProviderRef(new WeakReference<UsageAwareDataContextProvider>(new SingleDataContextProvider(dc, this)));
+		setDataContextProvider(new SingleDataContextProvider(dc, this));
 	}
 
 	public String getJdbcUrl() {
@@ -103,6 +102,10 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 	}
 
 	private Connection createConnection() {
+		if (_jdbcUrl == null) {
+			throw new IllegalStateException("JDBC URL is null, cannot create connection!");
+		}
+
 		logger.debug("Determining if driver initialization is nescesary");
 
 		// it's best to avoid initializing the driver, so we do this check.

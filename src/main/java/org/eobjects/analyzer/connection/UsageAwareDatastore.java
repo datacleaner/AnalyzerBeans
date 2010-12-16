@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -41,18 +42,27 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 
 	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDatastore.class);
 
-	private transient volatile WeakReference<UsageAwareDataContextProvider> _dataContextProviderRef;
+	private transient volatile Reference<UsageAwareDataContextProvider> _dataContextProviderRef;
+	private transient volatile DataContextProvider _dataContextProvider = null;
 
-	protected WeakReference<UsageAwareDataContextProvider> getDataContextProviderRef() {
+	protected Reference<UsageAwareDataContextProvider> getDataContextProviderRef() {
 		return _dataContextProviderRef;
 	}
-	
-	protected void setDataContextProviderRef(WeakReference<UsageAwareDataContextProvider> dataContextProviderRef) {
+
+	protected void setDataContextProviderRef(Reference<UsageAwareDataContextProvider> dataContextProviderRef) {
 		_dataContextProviderRef = dataContextProviderRef;
+	}
+	
+	protected void setDataContextProvider(DataContextProvider dataContextProvider) {
+		_dataContextProvider = dataContextProvider;
 	}
 
 	@Override
 	public synchronized final DataContextProvider getDataContextProvider() {
+		if (_dataContextProvider != null) {
+			return _dataContextProvider;
+		}
+
 		UsageAwareDataContextProvider dataContextProvider;
 		if (_dataContextProviderRef != null) {
 			dataContextProvider = _dataContextProviderRef.get();
