@@ -36,6 +36,7 @@ import javax.xml.bind.Unmarshaller;
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
@@ -106,6 +107,35 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		return ajb.toAnalysisJob();
 	}
 
+	@Override
+	public AnalysisJob read(InputStream source, SourceColumnMapping sourceColumnMapping) {
+		AnalysisJobBuilder ajb = create(source, sourceColumnMapping);
+		return ajb.toAnalysisJob();
+	}
+
+	@Override
+	public SourceColumnMapping readSourceColumns(InputStream source) {
+		Job job = unmarshallJob(source);
+		return readSourceColumns(job);
+	}
+
+	public SourceColumnMapping readSourceColumns(Job job) {
+		final String[] paths;
+
+		final ColumnsType columnsType = job.getSource().getColumns();
+		if (columnsType != null) {
+			final List<ColumnType> columns = columnsType.getColumn();
+			paths = new String[columns.size()];
+			for (int i = 0; i < paths.length; i++) {
+				final String path = columns.get(i).getPath();
+				paths[i] = path;
+			}
+		} else {
+			paths = new String[0];
+		}
+		return new SourceColumnMapping(paths);
+	}
+
 	public AnalysisJobBuilder create(File file) {
 		try {
 			return create(new FileInputStream(file));
@@ -115,19 +145,38 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	}
 
 	public AnalysisJobBuilder create(InputStream inputStream) {
+		return create(inputStream, null);
+	}
+
+	public AnalysisJobBuilder create(InputStream inputStream, SourceColumnMapping sourceColumnMapping) {
+		return create(unmarshallJob(inputStream), sourceColumnMapping);
+	}
+
+	private Job unmarshallJob(InputStream inputStream) {
 		try {
 			Unmarshaller unmarshaller = _jaxbContext.createUnmarshaller();
 
 			unmarshaller.setEventHandler(new JaxbValidationEventHandler());
 			Job job = (Job) unmarshaller.unmarshal(inputStream);
-			return create(job);
+			return job;
 		} catch (JAXBException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
 	public AnalysisJobBuilder create(Job job) {
-		JobMetadataType metadata = job.getJobMetadata();
+		return create(job, null);
+	}
+
+	public AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping) {
+		if (job == null) {
+			throw new IllegalArgumentException("Job cannot be null");
+		}
+		if (sourceColumnMapping != null && !sourceColumnMapping.isSatisfied()) {
+			throw new IllegalArgumentException("Source column mapping is not satisfied!");
+		}
+
+		final JobMetadataType metadata = job.getJobMetadata();
 		if (metadata != null) {
 			logger.info("Job name: {}", metadata.getJobName());
 			logger.info("Job version: {}", metadata.getJobVersion());
@@ -137,28 +186,40 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			logger.info("Updated date: {}", metadata.getUpdatedDate());
 		}
 
-		SourceType source = job.getSource();
+		final AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(_configuration);
 
-		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(_configuration);
+		String ref;
+		final Datastore datastore;
 
-		DataContextType dataContext = source.getDataContext();
-		String ref = dataContext.getRef();
-		if (StringUtils.isNullOrEmpty(ref)) {
-			throw new IllegalStateException("Datastore ref cannot be null");
+		final SourceType source = job.getSource();
+
+		if (sourceColumnMapping == null) {
+			// use automatic mapping if no explicit mapping is supplied
+			DataContextType dataContext = source.getDataContext();
+			ref = dataContext.getRef();
+			if (StringUtils.isNullOrEmpty(ref)) {
+				throw new IllegalStateException("Datastore ref cannot be null");
+			}
+
+			datastore = _configuration.getDatastoreCatalog().getDatastore(ref);
+			if (datastore == null) {
+				throw new IllegalStateException("No such datastore: " + ref);
+			}
+
+			sourceColumnMapping = readSourceColumns(job);
+			sourceColumnMapping.autoMap(datastore);
+		} else {
+			datastore = sourceColumnMapping.getDatastore();
 		}
 
-		Datastore datastore = _configuration.getDatastoreCatalog().getDatastore(ref);
-		if (datastore == null) {
-			throw new IllegalStateException("No such datastore: " + ref);
-		}
-		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
-		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+		// map column id's to input columns
 
-		analysisJobBuilder.setDataContextProvider(dataContextProvider);
+		analysisJobBuilder.setDatastore(datastore);
+		final DataContextProvider dataContextProvider = datastore.getDataContextProvider();
 
-		Map<String, InputColumn<?>> inputColumns = new HashMap<String, InputColumn<?>>();
+		final Map<String, InputColumn<?>> inputColumns = new HashMap<String, InputColumn<?>>();
 
-		ColumnsType columnsType = source.getColumns();
+		final ColumnsType columnsType = source.getColumns();
 		if (columnsType != null) {
 			List<ColumnType> columns = columnsType.getColumn();
 			for (ColumnType column : columns) {
@@ -166,7 +227,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				if (StringUtils.isNullOrEmpty(path)) {
 					throw new IllegalStateException("Column path cannot be null");
 				}
-				Column physicalColumn = schemaNavigator.convertToColumn(path);
+				Column physicalColumn = sourceColumnMapping.getColumn(path);
 				if (physicalColumn == null) {
 					throw new IllegalStateException("No such column: " + path);
 				}
@@ -181,15 +242,16 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			}
 		}
 
-		Map<String, Outcome> outcomeMapping = new HashMap<String, Outcome>();
+		final SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+		final Map<String, Outcome> outcomeMapping = new HashMap<String, Outcome>();
 
-		TransformationType transformation = job.getTransformation();
+		final TransformationType transformation = job.getTransformation();
 		if (transformation != null) {
 
-			List<Object> transformersAndFilters = transformation.getTransformerOrFilterOrMergedOutcome();
+			final List<Object> transformersAndFilters = transformation.getTransformerOrFilterOrMergedOutcome();
 
-			Map<TransformerType, TransformerJobBuilder<?>> transformerJobBuilders = new HashMap<TransformerType, TransformerJobBuilder<?>>();
-			Map<FilterType, FilterJobBuilder<?, ?>> filterJobBuilders = new HashMap<FilterType, FilterJobBuilder<?, ?>>();
+			final Map<TransformerType, TransformerJobBuilder<?>> transformerJobBuilders = new HashMap<TransformerType, TransformerJobBuilder<?>>();
+			final Map<FilterType, FilterJobBuilder<?, ?>> filterJobBuilders = new HashMap<FilterType, FilterJobBuilder<?, ?>>();
 
 			// iterate to initialize transformers
 			for (Object o : transformersAndFilters) {
@@ -536,6 +598,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						+ descriptor);
 			}
 		}
+
+		dataContextProvider.close();
 
 		return analysisJobBuilder;
 	}

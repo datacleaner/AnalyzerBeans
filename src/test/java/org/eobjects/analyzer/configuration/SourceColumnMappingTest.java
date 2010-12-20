@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.configuration;
 
 import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.test.MockDatastore;
 import org.eobjects.analyzer.test.TestHelper;
 
 import dk.eobjects.metamodel.schema.MutableColumn;
@@ -31,11 +32,16 @@ public class SourceColumnMappingTest extends TestCase {
 		SourceColumnMapping columnMapping = new SourceColumnMapping("foo.bar.col1", "foo.bar.col2");
 		assertFalse(columnMapping.isSatisfied());
 
+		columnMapping.setDatastore(new MockDatastore());
+		assertFalse(columnMapping.isSatisfied());
+		
 		columnMapping.setColumn("foo.bar.col1", new MutableColumn("col1"));
 		assertFalse(columnMapping.isSatisfied());
 
 		columnMapping.setColumn("foo.bar.col2", new MutableColumn("col2"));
 		assertTrue(columnMapping.isSatisfied());
+		
+		
 	}
 
 	public void testAutoMapAllMatches() throws Exception {

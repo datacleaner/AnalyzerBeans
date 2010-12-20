@@ -20,6 +20,8 @@
 package org.eobjects.analyzer.job;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,21 +29,28 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.SourceColumnMapping;
+import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
+import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DateGapAnalyzerResult;
+import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.result.TableComparisonResult;
 import org.eobjects.analyzer.result.TableDifference;
 import org.eobjects.analyzer.result.ValueDistributionResult;
+import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.result.renderer.DateGapTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.analyzer.util.SchemaNavigator;
 
 import dk.eobjects.metamodel.util.ToStringComparator;
 
@@ -248,5 +257,57 @@ public class JaxbJobReaderTest extends TestCase {
 		assertEquals("FIRSTNAME,Avg white spaces: 0.043478260869565216", resultLines[2]);
 		assertEquals("FIRSTNAME,Diacritic chars: 0", resultLines[3]);
 		assertEquals("FIRSTNAME,Digit chars: 0", resultLines[4]);
+	}
+
+	public void testUsingSourceColumnMapping() throws Throwable {
+		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("another datastore name");
+		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(datastore);
+		JobReader<InputStream> reader = new JaxbJobReader(configuration);
+
+		SourceColumnMapping sourceColumnMapping = reader.readSourceColumns(new FileInputStream(new File(
+				"src/test/resources/example-job-valid.xml")));
+		assertFalse(sourceColumnMapping.isSatisfied());
+		assertEquals("[PUBLIC.EMPLOYEES.EMAIL, PUBLIC.EMPLOYEES.FIRSTNAME, PUBLIC.EMPLOYEES.LASTNAME]", sourceColumnMapping
+				.getPaths().toString());
+
+		sourceColumnMapping.setDatastore(datastore);
+		DataContextProvider dcp = datastore.getDataContextProvider();
+		SchemaNavigator sn = dcp.getSchemaNavigator();
+		sourceColumnMapping.setColumn("PUBLIC.EMPLOYEES.EMAIL", sn.convertToColumn("PUBLIC.CUSTOMERS.PHONE"));
+		sourceColumnMapping.setColumn("PUBLIC.EMPLOYEES.FIRSTNAME", sn.convertToColumn("PUBLIC.CUSTOMERS.CONTACTFIRSTNAME"));
+		sourceColumnMapping.setColumn("PUBLIC.EMPLOYEES.LASTNAME", sn.convertToColumn("PUBLIC.CUSTOMERS.CONTACTLASTNAME"));
+
+		assertEquals("[]", sourceColumnMapping.getUnmappedPaths().toString());
+		assertTrue(sourceColumnMapping.isSatisfied());
+
+		AnalysisJob job = reader.read(new FileInputStream(new File("src/test/resources/example-job-valid.xml")),
+				sourceColumnMapping);
+
+		assertEquals("another datastore name", job.getDatastore().getName());
+		assertEquals(
+				"[MetaModelInputColumn[Column[name=CONTACTFIRSTNAME,columnNumber=3,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
+						+ "MetaModelInputColumn[Column[name=CONTACTLASTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
+						+ "MetaModelInputColumn[Column[name=PHONE,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]]",
+				job.getSourceColumns().toString());
+
+		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+		AnalysisResultFuture resultFuture = runner.run(job);
+		if (!resultFuture.isSuccessful()) {
+			throw resultFuture.getErrors().get(0);
+		}
+
+		AnalyzerResult res = resultFuture.getResults().get(0);
+		assertTrue(res instanceof StringAnalyzerResult);
+
+		String[] resultLines = new CrosstabTextRenderer().render((CrosstabResult) res).split("\n");
+		assertEquals(
+				"                                              username           domain CONTACTFIRSTNAME  CONTACTLASTNAME ",
+				resultLines[0]);
+		assertEquals(
+				"Row count                                          122              122              122              122 ",
+				resultLines[1]);
+		assertEquals(
+				"Null count                                         122              122                0                0 ",
+				resultLines[2]);
 	}
 }

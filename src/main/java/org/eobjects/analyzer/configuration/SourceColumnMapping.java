@@ -41,12 +41,21 @@ import dk.eobjects.metamodel.schema.Column;
 public final class SourceColumnMapping {
 
 	private final Map<String, Column> _map;
+	private Datastore _datastore;
 
 	public SourceColumnMapping(String... originalColumnPaths) {
 		_map = new TreeMap<String, Column>();
 		for (String path : originalColumnPaths) {
 			_map.put(path, null);
 		}
+	}
+	
+	public void setDatastore(Datastore datastore) {
+		_datastore = datastore;
+	}
+	
+	public Datastore getDatastore() {
+		return _datastore;
 	}
 
 	/**
@@ -55,6 +64,7 @@ public final class SourceColumnMapping {
 	 * @param schemaNavigator
 	 */
 	public void autoMap(Datastore datastore) {
+		setDatastore(datastore);
 		DataContextProvider dcp = datastore.getDataContextProvider();
 		for (Entry<String, Column> entry : _map.entrySet()) {
 			if (entry.getValue() == null) {
@@ -66,12 +76,19 @@ public final class SourceColumnMapping {
 	}
 
 	public boolean isSatisfied() {
+		if (_datastore == null) {
+			return false;
+		}
 		for (Entry<String, Column> entry : _map.entrySet()) {
 			if (entry.getValue() == null) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	public Column getColumn(String path) {
+		return _map.get(path);
 	}
 
 	public void setColumn(String path, Column column) {

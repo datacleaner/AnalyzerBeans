@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.configuration.SourceColumnMapping;
+
 /**
  * An object that is capable of reading an AnalysisJob from a source.
  * 
@@ -30,5 +32,9 @@ package org.eobjects.analyzer.job;
  */
 public interface JobReader<E> {
 
-	public AnalysisJob read(E inputStream);
+	public AnalysisJob read(E source);
+
+	public AnalysisJob read(E source, SourceColumnMapping sourceColumnMapping);
+
+	public SourceColumnMapping readSourceColumns(E source);
 }
