@@ -30,8 +30,8 @@ import dk.eobjects.metamodel.DataContext;
 
 public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescriptor implements ProvidedPropertyDescriptor {
 
-	public ProvidedPropertyDescriptorImpl(Field field, BeanDescriptor<?> beanDescriptor) throws DescriptorException {
-		super(field, beanDescriptor);
+	public ProvidedPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor) throws DescriptorException {
+		super(field, componentDescriptor);
 	}
 
 	@Override

@@ -27,26 +27,26 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 
 public abstract class AbstractDescriptor<B> {
 
-	private final Class<B> _beanClass;
+	private final Class<B> _componentClass;
 
-	public AbstractDescriptor(Class<B> beanClass) {
-		if (beanClass == null) {
+	public AbstractDescriptor(Class<B> componentClass) {
+		if (componentClass == null) {
 			throw new IllegalArgumentException("beanClass cannot be null");
 		}
-		if (beanClass.isInterface() || Modifier.isAbstract(beanClass.getModifiers())) {
-			throw new DescriptorException("Bean (" + beanClass + ") is not a non-abstract class");
+		if (componentClass.isInterface() || Modifier.isAbstract(componentClass.getModifiers())) {
+			throw new DescriptorException("Bean (" + componentClass + ") is not a non-abstract class");
 		}
 
-		_beanClass = beanClass;
+		_componentClass = componentClass;
 	}
 	
 	protected void visitClass() {
-		Field[] fields = ReflectionUtils.getFields(_beanClass);
+		Field[] fields = ReflectionUtils.getFields(_componentClass);
 		for (Field field : fields) {
 			visitField(field);
 		}
 		
-		Method[] methods = ReflectionUtils.getMethods(_beanClass);
+		Method[] methods = ReflectionUtils.getMethods(_componentClass);
 		for (Method method : methods) {
 			visitMethod(method);
 		}
@@ -56,13 +56,13 @@ public abstract class AbstractDescriptor<B> {
 
 	protected abstract void visitMethod(Method method);
 
-	public Class<B> getBeanClass() {
-		return _beanClass;
+	public Class<B> getComponentClass() {
+		return _componentClass;
 	}
 
 	@Override
 	public int hashCode() {
-		return _beanClass.hashCode();
+		return _componentClass.hashCode();
 	}
 
 	@Override
@@ -75,13 +75,13 @@ public abstract class AbstractDescriptor<B> {
 		}
 		if (obj.getClass() == this.getClass()) {
 			AbstractDescriptor<?> that = (AbstractDescriptor<?>) obj;
-			return this._beanClass == that._beanClass;
+			return this._componentClass == that._componentClass;
 		}
 		return false;
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[beanClass=" + _beanClass.getName() + "]";
+		return getClass().getSimpleName() + "[" + _componentClass.getName() + "]";
 	}
 }

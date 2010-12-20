@@ -28,7 +28,7 @@ import org.eobjects.analyzer.result.renderer.RenderingFormat;
 
 public interface RendererBeanDescriptor extends Comparable<RendererBeanDescriptor> {
 
-	public Class<? extends Renderer<?, ?>> getBeanClass();
+	public Class<? extends Renderer<?, ?>> getComponentClass();
 
 	public Class<? extends RenderingFormat<?>> getRenderingFormat();
 

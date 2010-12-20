@@ -29,8 +29,14 @@ import java.lang.annotation.Target;
 /**
  * Annotation that marks a method as a closing method. The method is invoked to
  * release resources that the object is holding (such as open files).
- * AnalyzerBeans can either annotation methods with this annotation or implement
- * the java.io.Closeable interface to ensure that resources are released.
+ * 
+ * Components can either annotate methods with this annotation or implement the
+ * java.io.Closeable interface to ensure that resources are released.
+ * 
+ * This annotation is to be understood as the opposite of the @Initialize
+ * method.
+ * 
+ * @see Initialize
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

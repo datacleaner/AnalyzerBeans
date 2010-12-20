@@ -84,7 +84,7 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<C> getCategoryEnum() {
-		Type[] interfaces = getBeanClass().getGenericInterfaces();
+		Type[] interfaces = getComponentClass().getGenericInterfaces();
 		for (Type type : interfaces) {
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;

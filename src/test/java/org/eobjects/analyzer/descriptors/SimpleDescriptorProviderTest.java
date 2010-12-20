@@ -51,11 +51,11 @@ public class SimpleDescriptorProviderTest extends TestCase {
 		assertEquals(2, descriptorProvider.getTransformerBeanDescriptors().size());
 
 		assertEquals(
-				"AnnotationBasedAnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer]",
+				"AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer]",
 				descriptorProvider.getAnalyzerBeanDescriptorForClass(ValueDistributionAnalyzer.class).toString());
 
 		assertEquals(
-				"AnnotationBasedTransformerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer]",
+				"AnnotationBasedTransformerBeanDescriptor[org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer]",
 				descriptorProvider.getTransformerBeanDescriptorForClass(ConvertToBooleanTransformer.class).toString());
 	}
 }

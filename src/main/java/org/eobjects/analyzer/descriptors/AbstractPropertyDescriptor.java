@@ -33,9 +33,9 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 	private final Field _field;
 	private final Class<?> _baseType;
 	private final Type _genericType;
-	private final BeanDescriptor<?> _beanDescriptor;
+	private final ComponentDescriptor<?> _componentDescriptor;
 
-	public AbstractPropertyDescriptor(Field field, BeanDescriptor<?> beanDescriptor) {
+	public AbstractPropertyDescriptor(Field field, ComponentDescriptor<?> componentDescriptor) {
 		if (field == null) {
 			throw new IllegalArgumentException("field cannot be null");
 		}
@@ -43,7 +43,7 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 		_field.setAccessible(true);
 		_baseType = _field.getType();
 		_genericType = _field.getGenericType();
-		_beanDescriptor = beanDescriptor;
+		_componentDescriptor = componentDescriptor;
 		init();
 	}
 
@@ -157,7 +157,7 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 		}
 		int result = getName().compareTo(o.getName());
 		if (result == 0) {
-			result = getBeanDescriptor().compareTo(o.getBeanDescriptor());
+			result = getComponentDescriptor().compareTo(o.getComponentDescriptor());
 		}
 		if (result == 0) {
 			result = getType().hashCode() - o.getType().hashCode();
@@ -166,7 +166,7 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 	}
 
 	@Override
-	public BeanDescriptor<?> getBeanDescriptor() {
-		return _beanDescriptor;
+	public ComponentDescriptor<?> getComponentDescriptor() {
+		return _componentDescriptor;
 	}
 }

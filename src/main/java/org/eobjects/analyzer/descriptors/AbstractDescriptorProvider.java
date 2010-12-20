@@ -47,7 +47,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	@Override
 	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(Class<A> analyzerBeanClass) {
 		for (AnalyzerBeanDescriptor<?> descriptor : getAnalyzerBeanDescriptors()) {
-			if (descriptor.getBeanClass() == analyzerBeanClass) {
+			if (descriptor.getComponentClass() == analyzerBeanClass) {
 				return (AnalyzerBeanDescriptor<A>) descriptor;
 			}
 		}
@@ -87,7 +87,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	 */
 	protected FilterBeanDescriptor<?, ?> getFilterBeanDescriptorForClassUnbounded(Class<?> filterClass) {
 		for (FilterBeanDescriptor<?, ?> descriptor : getFilterBeanDescriptors()) {
-			if (filterClass == descriptor.getBeanClass()) {
+			if (filterClass == descriptor.getComponentClass()) {
 				return descriptor;
 			}
 		}
@@ -97,7 +97,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	@Override
 	public RendererBeanDescriptor getRendererBeanDescriptorForClass(Class<? extends Renderer<?, ?>> rendererBeanClass) {
 		for (RendererBeanDescriptor descriptor : getRendererBeanDescriptors()) {
-			if (descriptor.getBeanClass() == rendererBeanClass) {
+			if (descriptor.getComponentClass() == rendererBeanClass) {
 				return descriptor;
 			}
 		}
@@ -121,7 +121,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
 			Class<T> transformerBeanClass) {
 		for (TransformerBeanDescriptor<?> descriptor : getTransformerBeanDescriptors()) {
-			if (descriptor.getBeanClass() == transformerBeanClass) {
+			if (descriptor.getComponentClass() == transformerBeanClass) {
 				return (TransformerBeanDescriptor<T>) descriptor;
 			}
 		}

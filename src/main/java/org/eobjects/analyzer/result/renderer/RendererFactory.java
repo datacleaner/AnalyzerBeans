@@ -73,7 +73,7 @@ public class RendererFactory {
 	@SuppressWarnings("unchecked")
 	private <I extends AnalyzerResult, O> Renderer<I, O> instantiate(RendererBeanDescriptor descriptor) {
 		try {
-			Renderer<?, ?> renderer = descriptor.getBeanClass().newInstance();
+			Renderer<?, ?> renderer = descriptor.getComponentClass().newInstance();
 			return (Renderer<I, O>) renderer;
 		} catch (Exception e) {
 			throw new IllegalStateException(e);

@@ -71,6 +71,14 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 		this(name, null, null, null, null, datasourceJndiUrl);
 	}
 
+	/**
+	 * Alternative constructor usable only for in-memory (ie. non-persistent)
+	 * datastores, because the datastore will not be able to create new
+	 * connections.
+	 * 
+	 * @param name
+	 * @param dc
+	 */
 	public JdbcDatastore(String name, DataContext dc) {
 		this(name, null, null, null, null, null);
 		setDataContextProvider(new SingleDataContextProvider(dc, this));

@@ -71,7 +71,7 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 		AnalyzerBeanDescriptor<ReferentialIntegrityValidator> descriptor = AnnotationBasedAnalyzerBeanDescriptor
 				.create(ReferentialIntegrityValidator.class);
 		assertEquals(
-				"AnnotationBasedAnalyzerBeanDescriptor[beanClass=org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
+				"AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
 				descriptor.toString());
 
 		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();

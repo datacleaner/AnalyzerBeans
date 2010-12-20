@@ -27,11 +27,28 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation that marks a method as an initializing method. Use this annotation
- * if you need to initialize the state of a bean before it starts executing.
+ * Annotation that marks a no-arg method as an initializing method. Use this
+ * annotation if you need to initialize the state of a bean before it starts
+ * executing.
+ * 
+ * The @Initialize annotation can be used on methods in the following component
+ * types:
+ * 
+ * <ul>
+ * <li>AnalyzerBeans</li>
+ * <li>TransformerBeans</li>
+ * <li>FilterBeans</li>
+ * <li>Dictionaries</li>
+ * <li>SynonymCatalog</li>
+ * <li>StringPattern</li>
+ * <li>... and custom configuration elements, such as custom datastores, task
+ * runners etc. (in which case the semantics are a bit different - they will
+ * only be initialized once, just after loading the configuration.</li>
+ * </ul>
  * 
  * The method is invoked after any @Configured and @Provided methods/fields are
- * invoked/assigned but before any run(...) methods are invoked.
+ * invoked/assigned but before any business methods (such as run(...) on an
+ * analyzer) are invoked.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

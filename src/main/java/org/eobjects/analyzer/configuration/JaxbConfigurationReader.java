@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -75,6 +76,7 @@ import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
+import org.eobjects.analyzer.descriptors.SimpleComponentDescriptor;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -546,7 +548,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			throw new IllegalStateException(e);
 		}
 
-		CustomComponentDescriptor<E> descriptor = new CustomComponentDescriptor<E>((Class<E>) foundClass);
+		SimpleComponentDescriptor<?> descriptor = SimpleComponentDescriptor.create(foundClass);
 
 		List<Property> propertyTypes = customElementType.getProperty();
 		if (propertyTypes != null) {
@@ -558,7 +560,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				if (configuredProperty == null) {
 					logger.warn("Missing configured property name: {}", propertyName);
 					if (logger.isInfoEnabled()) {
-						List<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
+						Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
 						for (ConfiguredPropertyDescriptor configuredPropertyDescriptor : configuredProperties) {
 							logger.info("Available configured property name: {}, {}",
 									configuredPropertyDescriptor.getName(), configuredPropertyDescriptor.getType());
@@ -574,7 +576,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			}
 		}
 
-		List<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
+		Set<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
 		for (InitializeMethodDescriptor initializeMethod : initializeMethods) {
 			initializeMethod.initialize(result);
 		}

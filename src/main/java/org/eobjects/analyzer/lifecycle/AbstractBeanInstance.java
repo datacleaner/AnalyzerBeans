@@ -52,9 +52,9 @@ public abstract class AbstractBeanInstance<E> {
 			throw new IllegalArgumentException("Descriptor cannot be null");
 		}
 		try {
-			this._bean = (E) descriptor.getBeanClass().newInstance();
+			this._bean = (E) descriptor.getComponentClass().newInstance();
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not instantiate analyzer bean type: " + descriptor.getBeanClass(), e);
+			throw new IllegalArgumentException("Could not instantiate analyzer bean type: " + descriptor.getComponentClass(), e);
 		}
 		this._descriptor = descriptor;
 	}

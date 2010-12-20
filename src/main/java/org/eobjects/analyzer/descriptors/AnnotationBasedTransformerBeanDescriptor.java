@@ -64,7 +64,7 @@ public final class AnnotationBasedTransformerBeanDescriptor<T extends Transforme
 
 	@Override
 	public DataTypeFamily getOutputDataTypeFamily() {
-		Type[] interfaces = getBeanClass().getGenericInterfaces();
+		Type[] interfaces = getComponentClass().getGenericInterfaces();
 		for (Type type : interfaces) {
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;

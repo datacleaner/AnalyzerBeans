@@ -38,7 +38,7 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 
 	private static final Logger logger = LoggerFactory.getLogger(AnnotationBasedRendererBeanDescriptor.class);
 
-	private Class<? extends Renderer<?, ?>> _beanClass;
+	private Class<? extends Renderer<?, ?>> _componentClass;
 	private RendererBean _rendererBeanAnnotation;
 	private Class<? extends RenderingFormat<?>> _renderingFormat;
 	private Class<?> _formatOutputType = null;
@@ -50,14 +50,14 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 		if (beanClass == null) {
 			throw new IllegalArgumentException("beanClass cannot be null");
 		}
-		_beanClass = beanClass;
-		_rendererBeanAnnotation = _beanClass.getAnnotation(RendererBean.class);
+		_componentClass = beanClass;
+		_rendererBeanAnnotation = _componentClass.getAnnotation(RendererBean.class);
 		if (_rendererBeanAnnotation == null) {
 			throw new DescriptorException(beanClass + " doesn't implement the RendererBean annotation");
 		}
 
-		if (_beanClass.isInterface() || Modifier.isAbstract(_beanClass.getModifiers())) {
-			throw new DescriptorException("Renderer (" + _beanClass + ") is not a non-abstract class");
+		if (_componentClass.isInterface() || Modifier.isAbstract(_componentClass.getModifiers())) {
+			throw new DescriptorException("Renderer (" + _componentClass + ") is not a non-abstract class");
 		}
 
 		_renderingFormat = _rendererBeanAnnotation.value();
@@ -82,7 +82,7 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 			throw new DescriptorException("Could not determine output type of rendering format: " + _renderingFormat);
 		}
 
-		genericInterfaces = _beanClass.getGenericInterfaces();
+		genericInterfaces = _componentClass.getGenericInterfaces();
 		for (Type type : genericInterfaces) {
 			if (type instanceof ParameterizedType) {
 				ParameterizedType pType = (ParameterizedType) type;
@@ -97,7 +97,7 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 		}
 
 		if (_rendererOutputType == null) {
-			throw new DescriptorException("Could not determine output type of renderer: " + _beanClass);
+			throw new DescriptorException("Could not determine output type of renderer: " + _componentClass);
 		}
 
 		if (!ReflectionUtils.is(_rendererOutputType, _formatOutputType)) {
@@ -107,8 +107,8 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 	}
 
 	@Override
-	public Class<? extends Renderer<?, ?>> getBeanClass() {
-		return _beanClass;
+	public Class<? extends Renderer<?, ?>> getComponentClass() {
+		return _componentClass;
 	}
 
 	@Override
@@ -118,12 +118,12 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return CollectionUtils.set(_beanClass.getAnnotations());
+		return CollectionUtils.set(_componentClass.getAnnotations());
 	}
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return _beanClass.getAnnotation(annotationClass);
+		return _componentClass.getAnnotation(annotationClass);
 	}
 
 	@Override
@@ -131,23 +131,23 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 		if (o == null) {
 			return 1;
 		}
-		Class<?> otherBeanClass = o.getBeanClass();
+		Class<?> otherBeanClass = o.getComponentClass();
 		if (otherBeanClass == null) {
 			return 1;
 		}
-		String thisBeanClassName = this.getBeanClass().toString();
+		String thisBeanClassName = this.getComponentClass().toString();
 		String thatBeanClassName = otherBeanClass.toString();
 		return thisBeanClassName.compareTo(thatBeanClassName);
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[beanClass=" + _beanClass.getName() + "]";
+		return getClass().getSimpleName() + "[" + _componentClass.getName() + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return _beanClass.hashCode();
+		return _componentClass.hashCode();
 	}
 
 	@Override
@@ -160,7 +160,7 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 		}
 		if (obj.getClass() == AnnotationBasedRendererBeanDescriptor.class) {
 			AnnotationBasedRendererBeanDescriptor that = (AnnotationBasedRendererBeanDescriptor) obj;
-			return this._beanClass.equals(that._beanClass);
+			return this._componentClass.equals(that._componentClass);
 		}
 		return false;
 	}

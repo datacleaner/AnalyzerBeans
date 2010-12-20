@@ -54,7 +54,7 @@ public interface PropertyDescriptor extends Comparable<PropertyDescriptor> {
 	 */
 	public Class<?> getBaseType();
 
-	public BeanDescriptor<?> getBeanDescriptor();
+	public ComponentDescriptor<?> getComponentDescriptor();
 
 	public int getTypeArgumentCount();
 

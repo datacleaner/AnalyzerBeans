@@ -481,7 +481,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			if (descriptor.isRowProcessingAnalyzer()) {
 				@SuppressWarnings("unchecked")
 				Class<? extends RowProcessingAnalyzer<?>> beanClass = (Class<? extends RowProcessingAnalyzer<?>>) descriptor
-						.getBeanClass();
+						.getComponentClass();
 				RowProcessingAnalyzerJobBuilder<? extends RowProcessingAnalyzer<?>> analyzerJobBuilder = analysisJobBuilder
 						.addRowProcessingAnalyzer(beanClass);
 
@@ -522,7 +522,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			} else if (descriptor.isExploringAnalyzer()) {
 				@SuppressWarnings("unchecked")
 				Class<? extends ExploringAnalyzer<?>> beanClass = (Class<? extends ExploringAnalyzer<?>>) descriptor
-						.getBeanClass();
+						.getComponentClass();
 				ExploringAnalyzerJobBuilder<? extends ExploringAnalyzer<?>> analyzerJobBuilder = analysisJobBuilder
 						.addExploringAnalyzer(beanClass);
 				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator);
