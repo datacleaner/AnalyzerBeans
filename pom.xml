@@ -32,6 +32,10 @@
 			<name>Nancy Sharma</name>
 			<email>nsharma@xebia.com</email>
 		</contributor>
+		<contributor>
+			<name>Paritosh Ranjan</name>
+			<email>pranjan@xebia.com</email>
+		</contributor>
 	</contributors>
 	<parent>
 		<!-- Uses the OSS sonatype nexus repository for distribution -->
