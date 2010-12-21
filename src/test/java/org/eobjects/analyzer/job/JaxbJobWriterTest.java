@@ -56,7 +56,7 @@ public class JaxbJobWriterTest extends TestCase {
 	// have time-dependent dates in the metadata which will make it difficult to
 	// compare results
 	private JaxbJobMetadataFactory _metadataFactory;
-	private JaxbJobWriter _writer = new JaxbJobWriter();
+	private JaxbJobWriter _writer;
 
 	protected void setUp() throws Exception {
 		_metadataFactory = new JaxbJobMetadataFactory() {
@@ -70,7 +70,7 @@ public class JaxbJobWriterTest extends TestCase {
 				return jobMetadata;
 			}
 		};
-		_writer.setJobMetadataFactory(_metadataFactory);
+		_writer = new JaxbJobWriter(_metadataFactory);
 	};
 
 	public void testEmptyJobEnvelope() throws Exception {

@@ -21,7 +21,6 @@ package org.eobjects.analyzer.job;
 
 import java.util.GregorianCalendar;
 
-import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
@@ -30,8 +29,12 @@ public class JaxbJobMetadataFactoryImpl implements JaxbJobMetadataFactory {
 
 	private final DatatypeFactory _datatypeFactory;
 
-	public JaxbJobMetadataFactoryImpl() throws DatatypeConfigurationException {
-		_datatypeFactory = DatatypeFactory.newInstance();
+	public JaxbJobMetadataFactoryImpl() {
+		try {
+			_datatypeFactory = DatatypeFactory.newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

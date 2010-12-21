@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -27,6 +28,7 @@ import java.util.TreeSet;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.job.AnalysisJobMetadata;
 
 import dk.eobjects.metamodel.schema.Column;
 
@@ -42,6 +44,10 @@ public final class SourceColumnMapping {
 
 	private final Map<String, Column> _map;
 	private Datastore _datastore;
+	
+	public SourceColumnMapping(AnalysisJobMetadata metadata) {
+		this(metadata.getSourceColumnPaths());
+	}
 
 	public SourceColumnMapping(String... originalColumnPaths) {
 		_map = new TreeMap<String, Column>();
@@ -49,11 +55,15 @@ public final class SourceColumnMapping {
 			_map.put(path, null);
 		}
 	}
-	
+
+	public SourceColumnMapping(List<String> sourceColumnPaths) {
+		this(sourceColumnPaths.toArray(new String[sourceColumnPaths.size()]));
+	}
+
 	public void setDatastore(Datastore datastore) {
 		_datastore = datastore;
 	}
-	
+
 	public Datastore getDatastore() {
 		return _datastore;
 	}

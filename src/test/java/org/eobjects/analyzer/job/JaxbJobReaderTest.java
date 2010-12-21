@@ -56,6 +56,39 @@ import dk.eobjects.metamodel.util.ToStringComparator;
 
 public class JaxbJobReaderTest extends TestCase {
 
+	public void testReadMetadataFull() throws Exception {
+		JobReader<InputStream> reader = new JaxbJobReader(TestHelper.createAnalyzerBeansConfiguration());
+		AnalysisJobMetadata metadata = reader.readMetadata(new FileInputStream(new File(
+				"src/test/resources/example-job-metadata.xml")));
+
+		assertEquals("Kasper Sørensen", metadata.getAuthor());
+		assertEquals("my database", metadata.getDatastoreName());
+		assertEquals("Job metadata", metadata.getJobName());
+		assertEquals("An example job with complete metadata", metadata.getJobDescription());
+		assertEquals("1.1", metadata.getJobVersion());
+		assertEquals("[PUBLIC.PERSONS.FIRSTNAME, PUBLIC.PERSONS.LASTNAME]", metadata.getSourceColumnPaths().toString());
+
+		assertNotNull(metadata.getCreatedDate());
+		assertNotNull(metadata.getUpdatedDate());
+	}
+
+	public void testReadMetadataNone() throws Exception {
+		JobReader<InputStream> reader = new JaxbJobReader(TestHelper.createAnalyzerBeansConfiguration());
+		AnalysisJobMetadata metadata = reader.readMetadata(new FileInputStream(new File(
+				"src/test/resources/example-job-valid.xml")));
+
+		assertNull(metadata.getAuthor());
+		assertNull(metadata.getJobName());
+		assertNull(metadata.getJobDescription());
+		assertNull(metadata.getJobVersion());
+		assertEquals("my database", metadata.getDatastoreName());
+		assertEquals("[PUBLIC.EMPLOYEES.FIRSTNAME, PUBLIC.EMPLOYEES.LASTNAME, PUBLIC.EMPLOYEES.EMAIL]", metadata
+				.getSourceColumnPaths().toString());
+
+		assertNull(metadata.getCreatedDate());
+		assertNull(metadata.getUpdatedDate());
+	}
+
 	public void testSimpleFilter() throws Exception {
 		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(TestHelper
 				.createSampleDatabaseDatastore("my database"));
@@ -264,8 +297,9 @@ public class JaxbJobReaderTest extends TestCase {
 		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(datastore);
 		JobReader<InputStream> reader = new JaxbJobReader(configuration);
 
-		SourceColumnMapping sourceColumnMapping = reader.readSourceColumns(new FileInputStream(new File(
+		AnalysisJobMetadata metadata = reader.readMetadata(new FileInputStream(new File(
 				"src/test/resources/example-job-valid.xml")));
+		SourceColumnMapping sourceColumnMapping = new SourceColumnMapping(metadata.getSourceColumnPaths());
 		assertFalse(sourceColumnMapping.isSatisfied());
 		assertEquals("[PUBLIC.EMPLOYEES.EMAIL, PUBLIC.EMPLOYEES.FIRSTNAME, PUBLIC.EMPLOYEES.LASTNAME]", sourceColumnMapping
 				.getPaths().toString());

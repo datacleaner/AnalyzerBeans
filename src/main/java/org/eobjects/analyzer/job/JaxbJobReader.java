@@ -19,10 +19,14 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,6 +36,7 @@ import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
@@ -114,31 +119,77 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	}
 
 	@Override
-	public SourceColumnMapping readSourceColumns(InputStream source) {
+	public AnalysisJobMetadata readMetadata(InputStream source) {
 		Job job = unmarshallJob(source);
-		return readSourceColumns(job);
+		return readMetadata(job);
 	}
 
-	public SourceColumnMapping readSourceColumns(Job job) {
-		final String[] paths;
+	public AnalysisJobMetadata readMetadata(Job job) {
+		final String datastoreName = job.getSource().getDataContext().getRef();
+		final List<String> sourceColumnPaths = getSourceColumnPaths(job);
+
+		final String jobName;
+		final String jobVersion;
+		final String jobDescription;
+		final String author;
+		final Date createdDate;
+		final Date updatedDate;
+
+		JobMetadataType metadata = job.getJobMetadata();
+		if (metadata == null) {
+			jobName = null;
+			jobVersion = null;
+			jobDescription = null;
+			author = null;
+			createdDate = null;
+			updatedDate = null;
+		} else {
+			jobName = metadata.getJobName();
+			jobVersion = metadata.getJobVersion();
+			jobDescription = metadata.getJobDescription();
+			author = metadata.getAuthor();
+
+			final XMLGregorianCalendar createdDateCal = metadata.getCreatedDate();
+
+			if (createdDateCal == null) {
+				createdDate = null;
+			} else {
+				createdDate = createdDateCal.toGregorianCalendar().getTime();
+			}
+
+			final XMLGregorianCalendar updatedDateCal = metadata.getUpdatedDate();
+
+			if (updatedDateCal == null) {
+				updatedDate = null;
+			} else {
+				updatedDate = updatedDateCal.toGregorianCalendar().getTime();
+			}
+		}
+
+		return new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author, createdDate, updatedDate,
+				datastoreName, sourceColumnPaths);
+	}
+
+	public List<String> getSourceColumnPaths(Job job) {
+		final List<String> paths;
 
 		final ColumnsType columnsType = job.getSource().getColumns();
 		if (columnsType != null) {
 			final List<ColumnType> columns = columnsType.getColumn();
-			paths = new String[columns.size()];
-			for (int i = 0; i < paths.length; i++) {
-				final String path = columns.get(i).getPath();
-				paths[i] = path;
+			paths = new ArrayList<String>(columns.size());
+			for (ColumnType columnType : columns) {
+				final String path = columnType.getPath();
+				paths.add(path);
 			}
 		} else {
-			paths = new String[0];
+			paths = Collections.emptyList();
 		}
-		return new SourceColumnMapping(paths);
+		return paths;
 	}
 
 	public AnalysisJobBuilder create(File file) {
 		try {
-			return create(new FileInputStream(file));
+			return create(new BufferedInputStream(new FileInputStream(file)));
 		} catch (FileNotFoundException e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -206,7 +257,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				throw new IllegalStateException("No such datastore: " + ref);
 			}
 
-			sourceColumnMapping = readSourceColumns(job);
+			List<String> sourceColumnPaths = getSourceColumnPaths(job);
+			sourceColumnMapping = new SourceColumnMapping(sourceColumnPaths);
 			sourceColumnMapping.autoMap(datastore);
 		} else {
 			datastore = sourceColumnMapping.getDatastore();

@@ -36,5 +36,5 @@ public interface JobReader<E> {
 
 	public AnalysisJob read(E source, SourceColumnMapping sourceColumnMapping);
 
-	public SourceColumnMapping readSourceColumns(E source);
+	public AnalysisJobMetadata readMetadata(E source);
 }

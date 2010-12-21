@@ -66,19 +66,19 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 	private static final Logger logger = LoggerFactory.getLogger(JaxbJobWriter.class);
 
 	private final JAXBContext _jaxbContext;
-	private JaxbJobMetadataFactory _jobMetadataFactory;
+	private final JaxbJobMetadataFactory _jobMetadataFactory;
 
-	public void setJobMetadataFactory(JaxbJobMetadataFactory jobMetadataFactory) {
-		_jobMetadataFactory = jobMetadataFactory;
-	}
-
-	public JaxbJobWriter() {
+	public JaxbJobWriter(JaxbJobMetadataFactory jobMetadataFactory) {
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
-			_jobMetadataFactory = new JaxbJobMetadataFactoryImpl();
+			_jobMetadataFactory = jobMetadataFactory;
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	public JaxbJobWriter() {
+		this(new JaxbJobMetadataFactoryImpl());
 	}
 
 	@Override
@@ -193,10 +193,10 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 
 	private List<InputType> createInputConfiguration(final BeanConfiguration configuration,
 			Set<ConfiguredPropertyDescriptor> configuredProperties, final Map<InputColumn<?>, String> columnMappings) {
-		
+
 		// sort the properties in order to make the result deterministic
 		configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>(configuredProperties);
-		
+
 		int numInputProperties = configuredProperties.size();
 		List<InputType> result = new ArrayList<InputType>();
 		for (ConfiguredPropertyDescriptor property : configuredProperties) {
@@ -225,10 +225,10 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 
 	private ConfiguredPropertiesType createPropertyConfiguration(final BeanConfiguration configuration,
 			Set<ConfiguredPropertyDescriptor> configuredProperties) {
-		
+
 		// sort the properties in order to make the result deterministic
 		configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>(configuredProperties);
-		
+
 		List<Property> result = new ArrayList<Property>();
 		for (ConfiguredPropertyDescriptor property : configuredProperties) {
 			if (!property.isInputColumn()) {
