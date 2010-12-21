@@ -22,9 +22,6 @@ package org.eobjects.analyzer.beans.stringpattern;
 import java.io.Serializable;
 import java.text.DecimalFormatSymbols;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -50,9 +47,7 @@ import org.eobjects.analyzer.util.CollectionUtils;
 @Description("The Pattern Finder will inspect your String values and generate and match string patterns that suit your data.\nIt can be used for a lot of purposes but is excellent for verifying or getting ideas about the format of the string-values in a column.")
 public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinderResult> {
 
-	private Map<TokenPattern, RowAnnotation> patterns;
-	private TokenizerConfiguration configuration;
-	private Tokenizer tokenizer;
+	private DefaultPatternFinder _patternFinder;
 
 	@Provided
 	RowAnnotationFactory _rowAnnotationFactory;
@@ -105,8 +100,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 
 	@Initialize
 	public void init() {
-		patterns = new HashMap<TokenPattern, RowAnnotation>();
-
+		TokenizerConfiguration configuration;
 		if (enableMixedTokens != null) {
 			configuration = new TokenizerConfiguration(enableMixedTokens);
 		} else {
@@ -150,47 +144,13 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 			configuration.getPredefinedTokens().add(new PredefinedTokenDefinition(predefinedTokenName, tokenRegexes));
 		}
 
-		tokenizer = new DefaultTokenizer(configuration);
+		_patternFinder = new DefaultPatternFinder(configuration, _rowAnnotationFactory);
 	}
 
 	@Override
 	public void run(InputRow row, int distinctCount) {
 		String value = row.getValue(column);
-		if (value != null) {
-			final List<Token> tokens;
-			boolean match = false;
-			try {
-				tokens = tokenizer.tokenize(value);
-			} catch (RuntimeException e) {
-				throw new IllegalStateException("Error occurred while tokenizing value: " + value, e);
-			}
-			Set<Entry<TokenPattern, RowAnnotation>> entries = patterns.entrySet();
-			for (Entry<TokenPattern, RowAnnotation> entry : entries) {
-				TokenPattern pattern = entry.getKey();
-				RowAnnotation annotation = entry.getValue();
-				if (pattern.match(tokens)) {
-					for (int i = 0; i < distinctCount; i++) {
-						_rowAnnotationFactory.annotate(row, distinctCount, annotation);
-					}
-					match = true;
-				}
-			}
-
-			if (!match) {
-				final TokenPattern pattern;
-				try {
-					pattern = new TokenPatternImpl(value, tokens, configuration);
-				} catch (RuntimeException e) {
-					throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
-				}
-
-				RowAnnotation annotation = _rowAnnotationFactory.createAnnotation();
-				for (int i = 0; i < distinctCount; i++) {
-					_rowAnnotationFactory.annotate(row, distinctCount, annotation);
-				}
-				patterns.put(pattern, annotation);
-			}
-		}
+		_patternFinder.run(row, value, distinctCount);
 	}
 
 	@Override
@@ -200,7 +160,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 		CrosstabDimension patternDimension = new CrosstabDimension("Pattern");
 		Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, measuresDimension, patternDimension);
 
-		Set<Entry<TokenPattern, RowAnnotation>> entrySet = patterns.entrySet();
+		Set<Entry<TokenPattern, RowAnnotation>> entrySet = _patternFinder.getAnnotations().entrySet();
 
 		// sort the entries so that the ones with the highest amount of matches
 		// are at the top
