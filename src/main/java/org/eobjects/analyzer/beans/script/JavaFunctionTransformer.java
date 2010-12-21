@@ -23,6 +23,7 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.StringProperty;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
@@ -43,6 +44,7 @@ public class JavaFunctionTransformer implements Transformer<String> {
 	InputColumn<String> column;
 
 	@Configured
+	@StringProperty(multiline = true)
 	String javaCode = "package org.eobjects.analyzer.user.scripts;\n\n" + "import org.eobjects.analyzer.util.*;\n"
 			+ "import org.eobjects.analyzer.reference.*;\n\n"
 			+ "public class MyFunction implements Function<String,String> {\n"
