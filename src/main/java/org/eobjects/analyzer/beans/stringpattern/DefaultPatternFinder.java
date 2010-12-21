@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 
@@ -35,11 +36,31 @@ public final class DefaultPatternFinder extends PatternFinder<InputRow> {
 
 	private final Map<TokenPattern, RowAnnotation> _annotations;
 	private final RowAnnotationFactory _annotationFactory;
-	
+
+	/**
+	 * Default constructor, which requires a configuration and a row annotation
+	 * factory for storage of rows.
+	 * 
+	 * @param configuration
+	 * @param annotationFactory
+	 */
 	public DefaultPatternFinder(TokenizerConfiguration configuration, RowAnnotationFactory annotationFactory) {
 		super(configuration);
 		_annotations = new HashMap<TokenPattern, RowAnnotation>();
 		_annotationFactory = annotationFactory;
+	}
+
+	/**
+	 * Alternative constructor for more ad-hoc usage. Uses an in memory storage
+	 * mechanism with a threshold on how many rows to store.
+	 * 
+	 * @param configuration
+	 * @param inMemoryRowThreshold
+	 */
+	public DefaultPatternFinder(TokenizerConfiguration configuration, int inMemoryRowThreshold) {
+		super(configuration);
+		_annotations = new HashMap<TokenPattern, RowAnnotation>();
+		_annotationFactory = new InMemoryRowAnnotationFactory(inMemoryRowThreshold);
 	}
 
 	@Override
@@ -57,7 +78,7 @@ public final class DefaultPatternFinder extends PatternFinder<InputRow> {
 		}
 		_annotationFactory.annotate(row, distinctCount, annotation);
 	}
-	
+
 	public Map<TokenPattern, RowAnnotation> getAnnotations() {
 		return _annotations;
 	}
