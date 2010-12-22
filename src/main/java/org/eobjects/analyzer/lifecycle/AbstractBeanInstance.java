@@ -41,10 +41,10 @@ public abstract class AbstractBeanInstance<E> {
 
 	private final BeanDescriptor<?> _descriptor;
 	private final E _bean;
-	private final List<LifeCycleCallback> assignConfiguredCallbacks = new LinkedList<LifeCycleCallback>();
-	private final List<LifeCycleCallback> assignProvidedCallbacks = new LinkedList<LifeCycleCallback>();
-	private final List<LifeCycleCallback> initializeCallbacks = new LinkedList<LifeCycleCallback>();
-	private final List<LifeCycleCallback> closeCallbacks = new LinkedList<LifeCycleCallback>();
+	private final List<AssignConfiguredCallback> assignConfiguredCallbacks = new LinkedList<AssignConfiguredCallback>();
+	private final List<AssignProvidedCallback> assignProvidedCallbacks = new LinkedList<AssignProvidedCallback>();
+	private final List<InitializeCallback> initializeCallbacks = new LinkedList<InitializeCallback>();
+	private final List<CloseCallback> closeCallbacks = new LinkedList<CloseCallback>();
 
 	@SuppressWarnings("unchecked")
 	public AbstractBeanInstance(BeanDescriptor<?> descriptor) {
@@ -54,7 +54,8 @@ public abstract class AbstractBeanInstance<E> {
 		try {
 			this._bean = (E) descriptor.getComponentClass().newInstance();
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not instantiate analyzer bean type: " + descriptor.getComponentClass(), e);
+			throw new IllegalArgumentException(
+					"Could not instantiate analyzer bean type: " + descriptor.getComponentClass(), e);
 		}
 		this._descriptor = descriptor;
 	}
@@ -74,7 +75,7 @@ public abstract class AbstractBeanInstance<E> {
 		runCallbacks(assignConfiguredCallbacks, LifeCycleState.ASSIGN_CONFIGURED);
 	}
 
-	public List<LifeCycleCallback> getAssignConfiguredCallbacks() {
+	public List<AssignConfiguredCallback> getAssignConfiguredCallbacks() {
 		return assignConfiguredCallbacks;
 	}
 
@@ -85,7 +86,7 @@ public abstract class AbstractBeanInstance<E> {
 		runCallbacks(assignProvidedCallbacks, LifeCycleState.ASSIGN_PROVIDED);
 	}
 
-	public List<LifeCycleCallback> getAssignProvidedCallbacks() {
+	public List<AssignProvidedCallback> getAssignProvidedCallbacks() {
 		return assignProvidedCallbacks;
 	}
 
@@ -96,7 +97,7 @@ public abstract class AbstractBeanInstance<E> {
 		runCallbacks(initializeCallbacks, LifeCycleState.INITIALIZE);
 	}
 
-	public List<LifeCycleCallback> getInitializeCallbacks() {
+	public List<InitializeCallback> getInitializeCallbacks() {
 		return initializeCallbacks;
 	}
 
@@ -107,13 +108,14 @@ public abstract class AbstractBeanInstance<E> {
 		runCallbacks(closeCallbacks, LifeCycleState.CLOSE);
 	}
 
-	public List<LifeCycleCallback> getCloseCallbacks() {
+	public List<CloseCallback> getCloseCallbacks() {
 		return closeCallbacks;
 	}
 
-	private void runCallbacks(List<LifeCycleCallback> callbacks, LifeCycleState state) {
+	private void runCallbacks(List<? extends LifeCycleCallback<Object, ? super BeanDescriptor<?>>> callbacks,
+			LifeCycleState state) {
 		logger.debug("running {} callbacks: {}", callbacks.size(), callbacks);
-		for (LifeCycleCallback lifeCycleCallback : callbacks) {
+		for (LifeCycleCallback<Object, ? super BeanDescriptor<?>> lifeCycleCallback : callbacks) {
 			lifeCycleCallback.onEvent(state, _bean, _descriptor);
 		}
 	}

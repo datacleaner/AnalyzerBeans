@@ -63,7 +63,6 @@ import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
-import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.reference.Function;
@@ -383,9 +382,9 @@ public final class RowProcessingPublisher {
 		ComponentJob componentJob = consumer.getComponentJob();
 		BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
 
-		LifeCycleCallback assignConfiguredCallback = new AssignConfiguredCallback(configuration);
-		LifeCycleCallback initializeCallback = new InitializeCallback();
-		LifeCycleCallback closeCallback = new CloseCallback();
+		AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(configuration);
+		InitializeCallback initializeCallback = new InitializeCallback();
+		CloseCallback closeCallback = new CloseCallback();
 
 		Task task;
 		if (consumer instanceof TransformerConsumer) {
@@ -406,8 +405,8 @@ public final class RowProcessingPublisher {
 			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(_job,
 					analyzerConsumer.getComponentJob(), resultQueue, _analysisListener);
 
-			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _storageProvider, rowAnnotationFactory,
-					null, assignConfiguredCallback, initializeCallback, null, returnResultsCallback, closeCallback);
+			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _storageProvider, rowAnnotationFactory, null,
+					assignConfiguredCallback, initializeCallback, null, returnResultsCallback, closeCallback);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}

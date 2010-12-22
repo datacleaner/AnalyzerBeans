@@ -19,9 +19,21 @@
  */
 package org.eobjects.analyzer.lifecycle;
 
-import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 
-public interface LifeCycleCallback {
+/**
+ * Represents a callback method that will execute a step in the lifecycle of a
+ * component. A step might be to call any initializing methods, inject
+ * properties or to close the component.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <C>
+ *            the component type
+ * @param <D>
+ *            the descriptor type
+ */
+public interface LifeCycleCallback<C, D extends ComponentDescriptor<?>> {
 
-	public void onEvent(LifeCycleState state, Object bean, BeanDescriptor<?> descriptor);
+	public void onEvent(LifeCycleState state, C component, D descriptor);
 }

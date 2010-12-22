@@ -30,7 +30,7 @@ import org.eobjects.analyzer.storage.CollectionFactoryImpl;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.storage.StorageProvider;
 
-public final class AssignProvidedCallback implements LifeCycleCallback {
+public final class AssignProvidedCallback implements LifeCycleCallback<Object, BeanDescriptor<?>> {
 
 	private final StorageProvider _storageProvider;
 	private final DataContextProvider _dataContextProvider;

@@ -27,7 +27,7 @@ public interface PropertyDescriptor extends Comparable<PropertyDescriptor> {
 
 	public String getName();
 
-	public void setValue(Object bean, Object value) throws IllegalArgumentException;
+	public void setValue(Object component, Object value) throws IllegalArgumentException;
 
 	public Object getValue(Object bean) throws IllegalArgumentException;
 

@@ -38,7 +38,6 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
-import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleState;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
@@ -77,14 +76,17 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(getDescriptor());
 
 		// mimic the configuration of a real transformer bean instance
-		LifeCycleCallback callback = new AssignConfiguredCallback(new ImmutableBeanConfiguration(getConfiguredProperties()));
-		callback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, transformerBeanInstance.getBean(), getDescriptor());
+		AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(new ImmutableBeanConfiguration(
+				getConfiguredProperties()));
+		assignConfiguredCallback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, transformerBeanInstance.getBean(),
+				getDescriptor());
 
-		callback = new AssignProvidedCallback(new InMemoryStorageProvider(), new InMemoryRowAnnotationFactory(), null);
-		callback.onEvent(LifeCycleState.ASSIGN_PROVIDED, transformerBeanInstance.getBean(), getDescriptor());
+		AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(new InMemoryStorageProvider(),
+				new InMemoryRowAnnotationFactory(), null);
+		assignProvidedCallback.onEvent(LifeCycleState.ASSIGN_PROVIDED, transformerBeanInstance.getBean(), getDescriptor());
 
-		callback = new InitializeCallback();
-		callback.onEvent(LifeCycleState.INITIALIZE, transformerBeanInstance.getBean(), getDescriptor());
+		InitializeCallback initializeCallback = new InitializeCallback();
+		initializeCallback.onEvent(LifeCycleState.INITIALIZE, transformerBeanInstance.getBean(), getDescriptor());
 
 		OutputColumns outputColumns = transformerBeanInstance.getBean().getOutputColumns();
 		if (outputColumns == null) {

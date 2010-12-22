@@ -59,9 +59,9 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 	}
 
 	@Override
-	public void setValue(Object bean, Object value) throws IllegalArgumentException {
+	public void setValue(Object component, Object value) throws IllegalArgumentException {
 		try {
-			_field.set(bean, value);
+			_field.set(component, value);
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not assign value '" + value + "' to " + _field, e);
 		}

@@ -23,8 +23,10 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
+import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
-import org.eobjects.analyzer.lifecycle.LifeCycleCallback;
+import org.eobjects.analyzer.lifecycle.CloseCallback;
+import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.slf4j.Logger;
@@ -41,15 +43,15 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 	private final AnalyzerBeanInstance _analyzerBeanInstance;
 
 	// represents the default lifecycle callbacks ...
-	private LifeCycleCallback _assignConfiguredCallback;
-	private LifeCycleCallback _initializeCallback;
+	private AssignConfiguredCallback _assignConfiguredCallback;
+	private InitializeCallback _initializeCallback;
 	private AnalyzerLifeCycleCallback _runCallback;
 	private AnalyzerLifeCycleCallback _returnResultsCallback;
-	private LifeCycleCallback _closeCallback;
+	private CloseCallback _closeCallback;
 
 	public AssignCallbacksAndInitializeTask(AbstractBeanInstance<?> beanInstance, StorageProvider storageProvider,
-			RowAnnotationFactory rowAnnotationFactory, LifeCycleCallback assignConfiguredCallback,
-			LifeCycleCallback initializeCallback, LifeCycleCallback closeCallback) {
+			RowAnnotationFactory rowAnnotationFactory, AssignConfiguredCallback assignConfiguredCallback,
+			InitializeCallback initializeCallback, CloseCallback closeCallback) {
 		_beanInstance = beanInstance;
 		_storageProvider = storageProvider;
 		_rowAnnotationFactory = rowAnnotationFactory;
@@ -64,9 +66,9 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 
 	public AssignCallbacksAndInitializeTask(AnalyzerBeanInstance beanInstance, StorageProvider storageProvider,
 			RowAnnotationFactory rowAnnotationFactory, DataContextProvider dataContextProvider,
-			LifeCycleCallback assignConfiguredCallback, LifeCycleCallback initializeCallback,
+			AssignConfiguredCallback assignConfiguredCallback, InitializeCallback initializeCallback,
 			AnalyzerLifeCycleCallback runCallback, AnalyzerLifeCycleCallback returnResultsCallback,
-			LifeCycleCallback closeCallback) {
+			CloseCallback closeCallback) {
 		_beanInstance = beanInstance;
 		_storageProvider = storageProvider;
 		_rowAnnotationFactory = rowAnnotationFactory;
