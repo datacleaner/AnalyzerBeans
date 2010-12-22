@@ -25,7 +25,9 @@ import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceValues;
+import org.junit.Ignore;
 
+@Ignore
 public class MockMonitoredDictionary implements Dictionary {
 
 	private static final long serialVersionUID = 1L;

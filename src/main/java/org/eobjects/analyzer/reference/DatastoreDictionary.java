@@ -19,10 +19,17 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.eobjects.metamodel.schema.Column;
 
@@ -40,8 +47,11 @@ public class DatastoreDictionary implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final Logger logger = LoggerFactory.getLogger(DatastoreDictionary.class);
+
 	private final transient DatastoreCatalog _datastoreCatalog;
 	private transient volatile ReferenceValues<String> _cachedRefValues;
+	private transient Queue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
 	private final String _name;
@@ -52,6 +62,34 @@ public class DatastoreDictionary implements Dictionary {
 		_datastoreCatalog = datastoreCatalog;
 		_datastoreName = datastoreName;
 		_qualifiedColumnName = qualifiedColumnName;
+	}
+
+	@Initialize
+	public void init() {
+		logger.info("Initializing dictionary: {}", this);
+		Datastore datastore = getDatastore();
+		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+		boolean added = false;
+		while (!added) {
+			added = _dataContextProviders.offer(dataContextProvider);
+		}
+	}
+
+	@Close
+	public void close() {
+		DataContextProvider dcp = _dataContextProviders.poll();
+		if (dcp != null) {
+			logger.info("Closing dictionary: {}", this);
+			dcp.close();
+		}
+	}
+
+	private Datastore getDatastore() {
+		Datastore datastore = _datastoreCatalog.getDatastore(_datastoreName);
+		if (datastore == null) {
+			throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
+		}
+		return datastore;
 	}
 
 	public DatastoreCatalog getDatastoreCatalog() {
@@ -82,10 +120,7 @@ public class DatastoreDictionary implements Dictionary {
 		if (_cachedRefValues == null) {
 			synchronized (this) {
 				if (_cachedRefValues == null) {
-					Datastore datastore = _datastoreCatalog.getDatastore(_datastoreName);
-					if (datastore == null) {
-						throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
-					}
+					Datastore datastore = getDatastore();
 
 					DataContextProvider dataContextProvider = datastore.getDataContextProvider();
 					SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
