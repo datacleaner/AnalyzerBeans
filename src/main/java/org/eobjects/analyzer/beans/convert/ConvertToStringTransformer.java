@@ -31,6 +31,7 @@ import javax.inject.Inject;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.StringProperty;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
@@ -49,6 +50,7 @@ public class ConvertToStringTransformer implements Transformer<String> {
 	@Configured
 	InputColumn<?> input;
 
+	@StringProperty(multiline = true)
 	@Configured(required = false)
 	String nullReplacement;
 
