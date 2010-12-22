@@ -45,6 +45,10 @@ public class DictionaryMatcherTransformer implements Transformer<Boolean> {
 		this();
 		_dictionaries = dictionaries;
 	}
+	
+	public void setDictionaries(Dictionary[] dictionaries) {
+		_dictionaries = dictionaries;
+	}
 
 	@Override
 	public OutputColumns getOutputColumns() {

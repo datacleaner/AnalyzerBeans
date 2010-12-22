@@ -19,7 +19,12 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import java.util.Collection;
+
+import org.eobjects.analyzer.descriptors.SimpleComponentDescriptor;
 import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
+import org.eobjects.analyzer.lifecycle.InitializeCallback;
+import org.eobjects.analyzer.lifecycle.LifeCycleState;
 
 /**
  * Task that invokes initializing methods for reference data where this is
@@ -37,7 +42,11 @@ public class InitializeReferenceDataTask implements Task {
 
 	@Override
 	public void execute() throws Exception {
-		// TODO: initialize reference data collected by manager
+		Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
+		for (Object object : referenceData) {
+			SimpleComponentDescriptor<? extends Object> descriptor = SimpleComponentDescriptor.create(object.getClass());
+			new InitializeCallback().onEvent(LifeCycleState.INITIALIZE, object, descriptor);
+		}
 	}
 
 }

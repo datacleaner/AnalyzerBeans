@@ -467,6 +467,12 @@ public final class AnalysisJobBuilder implements Closeable {
 					return inputColumn;
 				}
 			}
+			
+			for (MetaModelInputColumn inputColumn : _sourceColumns) {
+				if (name.equalsIgnoreCase(inputColumn.getName())) {
+					return inputColumn;
+				}
+			}
 		}
 		return null;
 	}

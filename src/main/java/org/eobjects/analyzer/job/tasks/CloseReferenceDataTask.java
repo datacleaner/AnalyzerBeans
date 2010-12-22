@@ -19,7 +19,12 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import java.util.Collection;
+
+import org.eobjects.analyzer.descriptors.SimpleComponentDescriptor;
 import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
+import org.eobjects.analyzer.lifecycle.CloseCallback;
+import org.eobjects.analyzer.lifecycle.LifeCycleState;
 
 /**
  * Task that calls closing methods for reference data where this is nescesary.
@@ -36,7 +41,11 @@ public final class CloseReferenceDataTask implements Task {
 
 	@Override
 	public void execute() throws Exception {
-		// TODO: close reference data collected by manager
+		Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
+		for (Object object : referenceData) {
+			SimpleComponentDescriptor<? extends Object> descriptor = SimpleComponentDescriptor.create(object.getClass());
+			new CloseCallback().onEvent(LifeCycleState.CLOSE, object, descriptor);
+		}
 	}
 
 }
