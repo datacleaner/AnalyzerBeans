@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.concurrent.JobTaskListener;
+import org.eobjects.analyzer.job.concurrent.StatusAwareTaskListener;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.NumberResult;
 
@@ -35,7 +35,7 @@ public class AnalysisResultFutureImplTest extends TestCase {
 
 	public void testIsSuccessful() throws Exception {
 		Queue<AnalyzerJobResult> resultQueue = new LinkedList<AnalyzerJobResult>();
-		JobTaskListener jobCompletionListener = EasyMock.createMock(JobTaskListener.class);
+		StatusAwareTaskListener jobCompletionListener = EasyMock.createMock(StatusAwareTaskListener.class);
 		ErrorAware errorAware = EasyMock.createMock(ErrorAware.class);
 
 		EasyMock.expect(jobCompletionListener.isDone()).andReturn(true);
@@ -62,7 +62,7 @@ public class AnalysisResultFutureImplTest extends TestCase {
 		resultQueue.add(new AnalyzerJobResult(new NumberResult(1), analyzerJob1));
 		resultQueue.add(new AnalyzerJobResult(new NumberResult(2), analyzerJob2));
 
-		JobTaskListener jobCompletionListener = EasyMock.createMock(JobTaskListener.class);
+		StatusAwareTaskListener jobCompletionListener = EasyMock.createMock(StatusAwareTaskListener.class);
 		ErrorAware errorAware = EasyMock.createMock(ErrorAware.class);
 		EasyMock.expect(jobCompletionListener.isDone()).andReturn(true);
 		EasyMock.expect(errorAware.isErrornous()).andReturn(false).times(4);

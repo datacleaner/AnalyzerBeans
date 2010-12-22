@@ -21,13 +21,13 @@ package org.eobjects.analyzer.job.concurrent;
 
 import org.eobjects.analyzer.job.tasks.Task;
 
-public final class RunNextTaskCompletionListener implements TaskListener {
+public final class RunNextTaskTaskListener implements TaskListener {
 
 	private final Task _nextTask;
 	private final TaskListener _nextListener;
 	private final TaskRunner _taskRunner;
 
-	public RunNextTaskCompletionListener(TaskRunner taskRunner, Task nextTask, TaskListener nextListener) {
+	public RunNextTaskTaskListener(TaskRunner taskRunner, Task nextTask, TaskListener nextListener) {
 		_taskRunner = taskRunner;
 		_nextTask = nextTask;
 		_nextListener = nextListener;

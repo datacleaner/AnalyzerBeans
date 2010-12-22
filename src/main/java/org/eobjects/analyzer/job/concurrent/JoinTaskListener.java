@@ -25,20 +25,25 @@ import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class NestedTaskListener implements TaskListener {
+/**
+ * Task listener that will wait (join) for a set of tasks to complete before
+ * invoking onComplete(...) on a nested task listener.
+ * 
+ * @author Kasper Sørensen
+ */
+public final class JoinTaskListener implements TaskListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(ScheduleTasksTaskListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ForkTaskListener.class);
 
-	private final String _name;
 	private final AtomicInteger _countDown;
 	private final TaskListener _nestedTaskListener;
 	private volatile Throwable _error;
 
-	public NestedTaskListener(String name, int tasksToWaitFor, TaskListener nestedTaskListener) {
-		_name = name;
+	public JoinTaskListener(int tasksToWaitFor, TaskListener nestedTaskListener) {
 		_nestedTaskListener = nestedTaskListener;
 
 		if (tasksToWaitFor == 0) {
+			logger.warn("Was asked to join execution after 0 tasks, this might be a bug. Continuing with immediate completion.");
 			// immediate completion
 			_countDown = new AtomicInteger(1);
 			onComplete(null);
@@ -69,10 +74,10 @@ public final class NestedTaskListener implements TaskListener {
 	private void invokeNested(final int count, Task task) {
 		if (count == 0) {
 			if (_error == null) {
-				logger.info("Calling onComplete(...) on nested TaskListener ({})", _name);
+				logger.info("Calling onComplete(...) on nested TaskListener ()");
 				_nestedTaskListener.onComplete(task);
 			} else {
-				logger.info("Calling onError(...) on nested TaskListener ({})", _name);
+				logger.info("Calling onError(...) on nested TaskListener ()");
 				_nestedTaskListener.onError(task, _error);
 			}
 		}

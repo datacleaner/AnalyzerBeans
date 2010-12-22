@@ -17,15 +17,27 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.job.concurrent;
+package org.eobjects.analyzer.job.tasks;
 
-import java.util.concurrent.TimeUnit;
+import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
 
-public interface JobTaskListener extends TaskListener {
+/**
+ * Task that invokes initializing methods for reference data where this is
+ * nescesary.
+ * 
+ * @author Kasper Sørensen
+ */
+public class InitializeReferenceDataTask implements Task {
 
-	public boolean isDone();
+	private final ReferenceDataActivationManager _referenceDataActivationManager;
 
-	public void await() throws InterruptedException;
+	public InitializeReferenceDataTask(ReferenceDataActivationManager referenceDataActivationManager) {
+		_referenceDataActivationManager = referenceDataActivationManager;
+	}
 
-	public void await(long timeout, TimeUnit timeUnit) throws InterruptedException;
+	@Override
+	public void execute() throws Exception {
+		// TODO: initialize reference data collected by manager
+	}
+
 }

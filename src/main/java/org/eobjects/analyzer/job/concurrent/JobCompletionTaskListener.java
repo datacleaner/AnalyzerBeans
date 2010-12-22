@@ -34,15 +34,15 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Kasper Sørensen
  */
-public final class JobTaskListenerImpl implements JobTaskListener {
+public final class JobCompletionTaskListener implements StatusAwareTaskListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(ScheduleTasksTaskListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(ForkTaskListener.class);
 
 	private final CountDownLatch _countDownLatch;
 	private final AnalysisJob _job;
 	private final AnalysisListener _analysisListener;
 
-	public JobTaskListenerImpl(AnalysisJob job, AnalysisListener analysisListener, int callablesToWaitFor) {
+	public JobCompletionTaskListener(AnalysisJob job, AnalysisListener analysisListener, int callablesToWaitFor) {
 		_job = job;
 		_analysisListener = analysisListener;
 		_countDownLatch = new CountDownLatch(callablesToWaitFor);

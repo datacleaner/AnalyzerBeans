@@ -30,8 +30,8 @@ public final class TaskRunnable implements Runnable {
 	private final TaskListener _listener;
 
 	public TaskRunnable(Task task, TaskListener listener) {
-		if (task == null) {
-			throw new IllegalArgumentException("task cannot be null");
+		if (task == null && listener == null) {
+			throw new IllegalArgumentException("both task and listener cannot be null");
 		}
 		_task = task;
 		_listener = listener;
@@ -53,7 +53,9 @@ public final class TaskRunnable implements Runnable {
 			// execute with listener
 			_listener.onBegin(_task);
 			try {
-				_task.execute();
+				if (_task != null) {
+					_task.execute();
+				}
 				_listener.onComplete(_task);
 			} catch (Throwable t) {
 				_listener.onError(_task, t);

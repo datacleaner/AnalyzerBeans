@@ -46,8 +46,9 @@ import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.job.concurrent.NestedTaskListener;
-import org.eobjects.analyzer.job.concurrent.ScheduleTasksTaskListener;
+import org.eobjects.analyzer.job.concurrent.JoinTaskListener;
+import org.eobjects.analyzer.job.concurrent.ForkTaskListener;
+import org.eobjects.analyzer.job.concurrent.RunNextTaskTaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -55,6 +56,7 @@ import org.eobjects.analyzer.job.tasks.AssignCallbacksAndInitializeTask;
 import org.eobjects.analyzer.job.tasks.CloseBeanTask;
 import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
 import org.eobjects.analyzer.job.tasks.ConsumeRowTask;
+import org.eobjects.analyzer.job.tasks.InitializeReferenceDataTask;
 import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
@@ -91,9 +93,10 @@ public final class RowProcessingPublisher {
 	private final Table _table;
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
+	private final ReferenceDataActivationManager _referenceDataActivationManager;
 
 	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table, TaskRunner taskRunner,
-			AnalysisListener analysisListener) {
+			AnalysisListener analysisListener, ReferenceDataActivationManager referenceDataActivationManager) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
@@ -114,6 +117,7 @@ public final class RowProcessingPublisher {
 		_table = table;
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
+		_referenceDataActivationManager = referenceDataActivationManager;
 	}
 
 	public void addPhysicalColumns(Column... columns) {
@@ -327,7 +331,7 @@ public final class RowProcessingPublisher {
 	public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<AnalyzerJobResult> resultQueue,
 			TaskListener rowProcessorPublishersTaskListener, Datastore datastore) {
 
-		List<RowProcessingConsumer> configurableConsumers = CollectionUtils.filter(_consumers,
+		final List<RowProcessingConsumer> configurableConsumers = CollectionUtils.filter(_consumers,
 				new Function<RowProcessingConsumer, Boolean>() {
 					private static final long serialVersionUID = 1L;
 
@@ -338,31 +342,33 @@ public final class RowProcessingPublisher {
 				});
 		int numConfigurableConsumers = configurableConsumers.size();
 
-		TaskListener closeTaskListener = new NestedTaskListener("row processor consumers", numConfigurableConsumers,
+		final TaskListener closeTaskListener = new JoinTaskListener(numConfigurableConsumers,
 				rowProcessorPublishersTaskListener);
 
-		List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
+		final List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
 		for (RowProcessingConsumer consumer : configurableConsumers) {
 			Task closeTask = createCloseTask(consumer, resultQueue);
 			closeTasks.add(new TaskRunnable(closeTask, closeTaskListener));
 		}
 
-		TaskListener runCompletionListener = new ScheduleTasksTaskListener("run row processing", taskRunner, 1, closeTasks);
+		final TaskListener runCompletionListener = new ForkTaskListener("run row processing", taskRunner, closeTasks);
 
-		Collection<TaskRunnable> runTasks = new ArrayList<TaskRunnable>(1);
-		RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this);
-		runTasks.add(new TaskRunnable(runTask, runCompletionListener));
+		final RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this);
 
-		TaskListener initTaskListener = new ScheduleTasksTaskListener("initialize row consumers", taskRunner,
-				numConfigurableConsumers, runTasks);
+		final TaskListener referenceDataInitFinishedListener = new ForkTaskListener("Initialize row consumers", taskRunner,
+				new TaskRunnable(runTask, runCompletionListener));
+
+		final RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner,
+				new InitializeReferenceDataTask(_referenceDataActivationManager), referenceDataInitFinishedListener);
+		final TaskListener initFinishedListener = new JoinTaskListener(numConfigurableConsumers, joinFinishedListener);
 
 		// Ticket #459: The RowAnnotationFactory should be shared by all
 		// components within the same RowProcessingPublisher
-		RowAnnotationFactory rowAnnotationFactory = _storageProvider.createRowAnnotationFactory();
+		final RowAnnotationFactory rowAnnotationFactory = _storageProvider.createRowAnnotationFactory();
 
-		List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
+		final List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
 		for (RowProcessingConsumer consumer : configurableConsumers) {
-			initTasks.add(createInitTask(consumer, rowAnnotationFactory, initTaskListener, resultQueue, datastore));
+			initTasks.add(createInitTask(consumer, rowAnnotationFactory, initFinishedListener, resultQueue, datastore));
 		}
 		return initTasks;
 	}
@@ -382,7 +388,8 @@ public final class RowProcessingPublisher {
 		ComponentJob componentJob = consumer.getComponentJob();
 		BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
 
-		AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(configuration);
+		AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(configuration,
+				_referenceDataActivationManager);
 		InitializeCallback initializeCallback = new InitializeCallback();
 		CloseCallback closeCallback = new CloseCallback();
 

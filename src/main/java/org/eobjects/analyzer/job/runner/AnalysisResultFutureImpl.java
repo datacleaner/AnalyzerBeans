@@ -27,7 +27,7 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.concurrent.JobTaskListener;
+import org.eobjects.analyzer.job.concurrent.StatusAwareTaskListener;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +38,10 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 
 	private final Queue<AnalyzerJobResult> _resultQueue;
 	private final ErrorAware _errorAware;
-	private final JobTaskListener _jobTaskListener;
+	private final StatusAwareTaskListener _jobTaskListener;
 	private volatile boolean _done;
 
-	public AnalysisResultFutureImpl(Queue<AnalyzerJobResult> resultQueue, JobTaskListener jobCompletionListener,
+	public AnalysisResultFutureImpl(Queue<AnalyzerJobResult> resultQueue, StatusAwareTaskListener jobCompletionListener,
 			ErrorAware errorAware) {
 		_resultQueue = resultQueue;
 		_jobTaskListener = jobCompletionListener;

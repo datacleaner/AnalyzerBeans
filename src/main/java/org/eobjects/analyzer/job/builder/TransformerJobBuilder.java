@@ -73,22 +73,22 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			return new LinkedList<MutableInputColumn<?>>();
 		}
 
-		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(getDescriptor());
+		final TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(getDescriptor());
 
 		// mimic the configuration of a real transformer bean instance
-		AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(new ImmutableBeanConfiguration(
-				getConfiguredProperties()));
+		final AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(
+				new ImmutableBeanConfiguration(getConfiguredProperties()), null);
 		assignConfiguredCallback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, transformerBeanInstance.getBean(),
 				getDescriptor());
 
-		AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(new InMemoryStorageProvider(),
+		final AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(new InMemoryStorageProvider(),
 				new InMemoryRowAnnotationFactory(), null);
 		assignProvidedCallback.onEvent(LifeCycleState.ASSIGN_PROVIDED, transformerBeanInstance.getBean(), getDescriptor());
 
-		InitializeCallback initializeCallback = new InitializeCallback();
+		final InitializeCallback initializeCallback = new InitializeCallback();
 		initializeCallback.onEvent(LifeCycleState.INITIALIZE, transformerBeanInstance.getBean(), getDescriptor());
 
-		OutputColumns outputColumns = transformerBeanInstance.getBean().getOutputColumns();
+		final OutputColumns outputColumns = transformerBeanInstance.getBean().getOutputColumns();
 		if (outputColumns == null) {
 			throw new IllegalStateException("getOutputColumns() returned null on transformer: "
 					+ transformerBeanInstance.getBean());

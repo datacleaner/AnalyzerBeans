@@ -25,6 +25,7 @@ import java.util.Set;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.BeanConfiguration;
+import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +34,12 @@ public final class AssignConfiguredCallback implements LifeCycleCallback<Object,
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final BeanConfiguration _beanConfiguration;
+	private final ReferenceDataActivationManager _referenceDataActivationManager;
 
-	public AssignConfiguredCallback(BeanConfiguration beanConfiguration) {
+	public AssignConfiguredCallback(BeanConfiguration beanConfiguration,
+			ReferenceDataActivationManager referenceDataActivationManager) {
 		_beanConfiguration = beanConfiguration;
+		_referenceDataActivationManager = referenceDataActivationManager;
 	}
 
 	@Override
@@ -46,10 +50,10 @@ public final class AssignConfiguredCallback implements LifeCycleCallback<Object,
 		for (ConfiguredPropertyDescriptor property : configuredProperties) {
 			Object configuredValue = getValue(property);
 			if (configuredValue == null) {
-				property.setValue(component, null);
+				setValue(property, component, null);
 			} else {
 				if (property.isArray()) {
-					property.setValue(component, configuredValue);
+					setValue(property, component, configuredValue);
 				} else {
 					if (configuredValue.getClass().isArray()) {
 						if (Array.getLength(configuredValue) == 1) {
@@ -61,10 +65,19 @@ public final class AssignConfiguredCallback implements LifeCycleCallback<Object,
 							configuredValue = null;
 						}
 					}
-					property.setValue(component, configuredValue);
+					setValue(property, component, configuredValue);
 				}
 			}
 		}
+	}
+
+	protected void setValue(ConfiguredPropertyDescriptor property, Object component, Object value) {
+		if (_referenceDataActivationManager != null) {
+			if (_referenceDataActivationManager.accepts(value)) {
+				_referenceDataActivationManager.register(value);
+			}
+		}
+		property.setValue(component, value);
 	}
 
 	protected Object getValue(ConfiguredPropertyDescriptor propertyDescriptor) {
