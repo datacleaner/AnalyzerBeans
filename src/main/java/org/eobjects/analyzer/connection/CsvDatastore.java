@@ -54,6 +54,22 @@ public final class CsvDatastore extends UsageAwareDatastore {
 		return _name;
 	}
 
+	public String getEncoding() {
+		return _encoding;
+	}
+
+	public String getFilename() {
+		return _filename;
+	}
+
+	public Character getQuoteChar() {
+		return _quoteChar;
+	}
+
+	public Character getSeparatorChar() {
+		return _separatorChar;
+	}
+
 	@Override
 	protected UsageAwareDataContextProvider createDataContextProvider() {
 		DataContext dataContext;
