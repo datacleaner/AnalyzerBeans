@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.reference;
 
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.beans.api.Close;
@@ -51,7 +51,7 @@ public class DatastoreDictionary implements Dictionary {
 
 	private final transient DatastoreCatalog _datastoreCatalog;
 	private transient volatile ReferenceValues<String> _cachedRefValues;
-	private transient Queue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
+	private transient final BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
 	private final String _name;
@@ -64,17 +64,21 @@ public class DatastoreDictionary implements Dictionary {
 		_qualifiedColumnName = qualifiedColumnName;
 	}
 
+	/**
+	 * Initializes a DataContextProvider, which will keep the connection open
+	 */
 	@Initialize
 	public void init() {
 		logger.info("Initializing dictionary: {}", this);
 		Datastore datastore = getDatastore();
-		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
-		boolean added = false;
-		while (!added) {
-			added = _dataContextProviders.offer(dataContextProvider);
-		}
+		DataContextProvider dcp = datastore.getDataContextProvider();
+		_dataContextProviders.add(dcp);
 	}
 
+	/**
+	 * Closes a DataContextProvider, potentially closing the connection (if no
+	 * other DataContextProviders are open).
+	 */
 	@Close
 	public void close() {
 		DataContextProvider dcp = _dataContextProviders.poll();
