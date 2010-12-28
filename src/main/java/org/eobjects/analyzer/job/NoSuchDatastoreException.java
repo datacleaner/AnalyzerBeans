@@ -19,22 +19,28 @@
  */
 package org.eobjects.analyzer.job;
 
-import org.eobjects.analyzer.configuration.SourceColumnMapping;
-
 /**
- * An object that is capable of reading an AnalysisJob from a source.
+ * Exception thrown in case a job is being opened and it references an
+ * unexisting datastore.
  * 
  * @author Kasper Sørensen
- * 
- * @param <E>
- *            The source type, typically an InputStream, but could be another
- *            type of source as well.
  */
-public interface JobReader<E> {
+public class NoSuchDatastoreException extends RuntimeException {
 
-	public AnalysisJob read(E source) throws NoSuchDatastoreException;
+	private static final long serialVersionUID = 1L;
+	private final String _datastoreName;
 
-	public AnalysisJob read(E source, SourceColumnMapping sourceColumnMapping);
+	public NoSuchDatastoreException(String datastoreName) {
+		super();
+		_datastoreName = datastoreName;
+	}
 
-	public AnalysisJobMetadata readMetadata(E source);
+	public String getDatastoreName() {
+		return _datastoreName;
+	}
+
+	@Override
+	public String getMessage() {
+		return "No such datastore: " + _datastoreName;
+	}
 }

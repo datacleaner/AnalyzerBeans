@@ -107,20 +107,29 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	}
 
 	@Override
-	public AnalysisJob read(InputStream inputStream) {
+	public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException {
 		AnalysisJobBuilder ajb = create(inputStream);
 		return ajb.toAnalysisJob();
 	}
 
 	@Override
-	public AnalysisJob read(InputStream source, SourceColumnMapping sourceColumnMapping) {
-		AnalysisJobBuilder ajb = create(source, sourceColumnMapping);
+	public AnalysisJob read(InputStream inputStream, SourceColumnMapping sourceColumnMapping) {
+		AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping);
 		return ajb.toAnalysisJob();
 	}
 
+	public AnalysisJobMetadata readMetadata(File file) {
+		try {
+			BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+			return readMetadata(inputStream);
+		} catch (FileNotFoundException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
 	@Override
-	public AnalysisJobMetadata readMetadata(InputStream source) {
-		Job job = unmarshallJob(source);
+	public AnalysisJobMetadata readMetadata(InputStream inputStream) {
+		Job job = unmarshallJob(inputStream);
 		return readMetadata(job);
 	}
 
@@ -189,17 +198,19 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 	public AnalysisJobBuilder create(File file) {
 		try {
-			return create(new BufferedInputStream(new FileInputStream(file)));
+			BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+			return create(inputStream);
 		} catch (FileNotFoundException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	public AnalysisJobBuilder create(InputStream inputStream) {
+	public AnalysisJobBuilder create(InputStream inputStream) throws NoSuchDatastoreException {
 		return create(inputStream, null);
 	}
 
-	public AnalysisJobBuilder create(InputStream inputStream, SourceColumnMapping sourceColumnMapping) {
+	public AnalysisJobBuilder create(InputStream inputStream, SourceColumnMapping sourceColumnMapping)
+			throws NoSuchDatastoreException {
 		return create(unmarshallJob(inputStream), sourceColumnMapping);
 	}
 
@@ -219,7 +230,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		return create(job, null);
 	}
 
-	public AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping) {
+	public AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping) throws NoSuchDatastoreException {
 		if (job == null) {
 			throw new IllegalArgumentException("Job cannot be null");
 		}
@@ -254,7 +265,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 			datastore = _configuration.getDatastoreCatalog().getDatastore(ref);
 			if (datastore == null) {
-				throw new IllegalStateException("No such datastore: " + ref);
+				throw new NoSuchDatastoreException(ref);
 			}
 
 			List<String> sourceColumnPaths = getSourceColumnPaths(job);
