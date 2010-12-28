@@ -30,16 +30,26 @@ import java.lang.annotation.Target;
 
 import javax.inject.Qualifier;
 
+/**
+ * Annotation containing supplementary metadata about a string property. This
+ * metadata can be used as a way to give hints to the UI as to how the content
+ * should be presented.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })
 @Documented
 @Inherited
 @Qualifier
 public @interface StringProperty {
-    
-	/**
-	 * If the input field is multiline 
-	 */
-    boolean multiline() default false;
 
+	/**
+	 * @return true if the input field is multiline
+	 */
+	public boolean multiline() default false;
+
+	/**
+	 * @return the mime type (and optionally aliases/alternative mime types) of
+	 *         the property
+	 */
+	public String[] mimeType() default {};
 }

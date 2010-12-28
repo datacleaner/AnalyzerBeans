@@ -44,7 +44,7 @@ public class JavaFunctionTransformer implements Transformer<String> {
 	InputColumn<String> column;
 
 	@Configured
-	@StringProperty(multiline = true)
+	@StringProperty(multiline = true, mimeType = "text/x-java-source")
 	String javaCode = "package org.eobjects.analyzer.user.scripts;\n\n" + "import org.eobjects.analyzer.util.*;\n"
 			+ "import org.eobjects.analyzer.reference.*;\n\n"
 			+ "public class MyFunction implements Function<String,String> {\n"
