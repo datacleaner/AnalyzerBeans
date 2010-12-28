@@ -19,6 +19,10 @@
  */
 package org.eobjects.analyzer.storage;
 
+import java.util.Random;
+
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
@@ -27,8 +31,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.Mongo;
 import com.mongodb.MongoInternalException;
-
-import junit.framework.TestCase;
 
 public class MongoDbRowAnnotationFactoryTest extends TestCase {
 
@@ -99,9 +101,9 @@ public class MongoDbRowAnnotationFactoryTest extends TestCase {
 
 		annotationFactory.reset(ann1);
 		annotationFactory.reset(ann2);
-
+		Random r = new Random(); 
 		for (int i = 0; i < 1000; i++) {
-			int rand = (int) (Math.random() * 2);
+			int rand = r.nextInt(2);
 			if (rand == 0) {
 				annotationFactory.annotate(new MockInputRow().put(column, "mrrrh1"), 1, ann1);
 			} else {

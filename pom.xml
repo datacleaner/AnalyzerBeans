@@ -36,6 +36,10 @@
 			<name>Paritosh Ranjan</name>
 			<email>pranjan@xebia.com</email>
 		</contributor>
+		<contributor>
+			<name>Ankit Kumar</name>
+			<email>ankitk@xebia.com</email>
+		</contributor>
 	</contributors>
 	<parent>
 		<!-- Uses the OSS sonatype nexus repository for distribution -->

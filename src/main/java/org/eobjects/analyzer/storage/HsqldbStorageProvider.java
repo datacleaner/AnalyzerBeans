@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Hsqldb based implementation of the StorageProvider.
  * 
@@ -33,7 +36,7 @@ public final class HsqldbStorageProvider extends SqlDatabaseStorageProvider impl
 
 	private static final AtomicInteger databaseIndex = new AtomicInteger(0);
 	private static final String DATABASE_FILENAME = "hsqldb-storage";
-
+	private static final Logger logger = LoggerFactory.getLogger(HsqldbStorageProvider.class);
 	public HsqldbStorageProvider() {
 		super("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:ab" + databaseIndex.getAndIncrement(), "SA", "");
 	}
@@ -55,7 +58,10 @@ public final class HsqldbStorageProvider extends SqlDatabaseStorageProvider impl
 				}
 			});
 			for (File f : dbFiles) {
-				f.delete();
+				boolean isDeleted = f.delete();
+				if(!isDeleted){
+					logger.error("Directory cleaning not successful.");
+				}
 			}
 		}
 		return directoryPath;

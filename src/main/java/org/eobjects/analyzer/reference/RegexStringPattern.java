@@ -77,11 +77,9 @@ public final class RegexStringPattern extends BaseObject implements StringPatter
 	}
 
 	public Pattern getPattern() {
-		if (_pattern == null) {
-			synchronized (this) {
-				if (_pattern == null) {
-					_pattern = Pattern.compile(_expression);
-				}
+		synchronized (this) {
+			if (_pattern == null) {
+				_pattern = Pattern.compile(_expression);
 			}
 		}
 		return _pattern;

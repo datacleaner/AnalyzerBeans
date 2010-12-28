@@ -22,11 +22,13 @@ package org.eobjects.analyzer.job.builder;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
@@ -111,10 +113,10 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 		}
 
 		List<AnalyzerJob> jobs = new ArrayList<AnalyzerJob>();
-		Set<Table> tables = originatingTables.keySet();
-
-		for (Table table : tables) {
-			List<InputColumn<?>> columns = originatingTables.get(table);
+		Set<Entry<Table, List<InputColumn<?>>>> entrySet = originatingTables.entrySet();
+		for (Iterator<Entry<Table, List<InputColumn<?>>>> iterator = entrySet.iterator(); iterator.hasNext();) {
+			Entry<Table, List<InputColumn<?>>> entry = (Entry<Table, List<InputColumn<?>>>) iterator.next();
+			List<InputColumn<?>> columns = entry.getValue();
 			if (_inputProperty.isArray()) {
 				jobs.add(createPartitionedJob(columns.toArray(new InputColumn[columns.size()]), configuredProperties));
 			} else {
@@ -123,7 +125,6 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 				}
 			}
 		}
-
 		if (!isConfigured()) {
 			throw new IllegalStateException("Row processing Analyzer job is not correctly configured");
 		}
