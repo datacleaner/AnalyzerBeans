@@ -119,4 +119,19 @@ public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerRes
 		return new DateGapAnalyzerResult(gaps, overlaps);
 	}
 
+	public void setFromColumn(InputColumn<Date> fromColumn) {
+		this.fromColumn = fromColumn;
+	}
+	
+	public void setGroupColumn(InputColumn<String> groupColumn) {
+		this.groupColumn = groupColumn;
+	}
+	
+	public void setSingleDateOverlaps(Boolean singleDateOverlaps) {
+		this.singleDateOverlaps = singleDateOverlaps;
+	}
+	
+	public void setToColumn(InputColumn<Date> toColumn) {
+		this.toColumn = toColumn;
+	}
 }

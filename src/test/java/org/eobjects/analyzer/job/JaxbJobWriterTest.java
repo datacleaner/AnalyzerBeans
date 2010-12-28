@@ -24,18 +24,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.xml.datatype.DatatypeFactory;
 
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
+import org.eobjects.analyzer.beans.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.filter.NotNullFilter;
 import org.eobjects.analyzer.beans.filter.SingleWordFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
@@ -48,6 +51,7 @@ import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.test.TestHelper;
 
+import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.util.FileHelper;
 
 public class JaxbJobWriterTest extends TestCase {
@@ -72,6 +76,63 @@ public class JaxbJobWriterTest extends TestCase {
 		};
 		_writer = new JaxbJobWriter(_metadataFactory);
 	};
+
+	@SuppressWarnings("unchecked")
+	public void testNullColumnProperty() throws Exception {
+		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("db");
+		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(ds);
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
+		ajb.setDatastore(ds);
+
+		DateGapAnalyzer dga = ajb.addRowProcessingAnalyzer(DateGapAnalyzer.class).getConfigurableBean();
+		Column orderDateColumn = ds.getDataContextProvider().getSchemaNavigator().convertToColumn("PUBLIC.ORDERS.ORDERDATE");
+		Column shippedDateColumn = ds.getDataContextProvider().getSchemaNavigator()
+				.convertToColumn("PUBLIC.ORDERS.SHIPPEDDATE");
+
+		ajb.addSourceColumns(orderDateColumn, shippedDateColumn);
+
+		dga.setFromColumn((InputColumn<Date>) ajb.getSourceColumnByName("ORDERDATE"));
+		dga.setToColumn((InputColumn<Date>) ajb.getSourceColumnByName("SHIPPEDDATE"));
+		dga.setSingleDateOverlaps(true);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		_writer.write(ajb.toAnalysisJob(), baos);
+
+		String str = new String(baos.toByteArray());
+		str = str.replaceAll("\"", "_");
+
+		String[] lines = str.split("\n");
+		assertEquals(26, lines.length);
+
+		assertEquals("<?xml version=_1.0_ encoding=_UTF-8_ standalone=_yes_?>", lines[0]);
+		assertEquals("<job xmlns=_http://eobjects.org/analyzerbeans/job/1.0_>", lines[1]);
+		assertEquals("    <job-metadata>", lines[2]);
+		assertEquals("        <job-version>2.0</job-version>", lines[3]);
+		assertEquals("        <author>John Doe</author>", lines[4]);
+		assertEquals("        <created-date>2010-11-12Z</created-date>", lines[5]);
+		assertEquals("    </job-metadata>", lines[6]);
+		assertEquals("    <source>", lines[7]);
+		assertEquals("        <data-context ref=_db_/>", lines[8]);
+		assertEquals("        <columns>", lines[9]);
+		assertEquals("            <column path=_PUBLIC.ORDERS.ORDERDATE_ id=_col_0_/>", lines[10]);
+		assertEquals("            <column path=_PUBLIC.ORDERS.SHIPPEDDATE_ id=_col_1_/>", lines[11]);
+		assertEquals("        </columns>", lines[12]);
+		assertEquals("    </source>", lines[13]);
+		assertEquals("    <transformation/>", lines[14]);
+		assertEquals("    <analysis>", lines[15]);
+		assertEquals("        <analyzer>", lines[16]);
+		assertEquals("            <descriptor ref=_Date gap analyzer_/>", lines[17]);
+		assertEquals("            <properties>", lines[18]);
+		assertEquals("                <property value=_true_ name=_Count intersecting from and to dates as overlaps_/>",
+				lines[19]);
+		assertEquals("            </properties>", lines[20]);
+		assertEquals("            <input name=_From column_ ref=_col_0_/>", lines[21]);
+		assertEquals("            <input name=_To column_ ref=_col_1_/>", lines[22]);
+		assertEquals("        </analyzer>", lines[23]);
+		assertEquals("    </analysis>", lines[24]);
+		assertEquals("</job>", lines[25]);
+	}
 
 	public void testEmptyJobEnvelope() throws Exception {
 		AnalysisJob job = EasyMock.createMock(AnalysisJob.class);

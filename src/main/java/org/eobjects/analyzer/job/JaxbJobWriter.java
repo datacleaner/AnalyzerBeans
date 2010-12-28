@@ -211,12 +211,14 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 				}
 
 				for (InputColumn<?> inputColumn : columns) {
-					InputType inputType = new InputType();
-					inputType.setRef(getId(inputColumn, columnMappings));
-					if (numInputProperties != 1) {
-						inputType.setName(property.getName());
+					if (inputColumn != null) {
+						InputType inputType = new InputType();
+						inputType.setRef(getId(inputColumn, columnMappings));
+						if (numInputProperties != 1) {
+							inputType.setName(property.getName());
+						}
+						result.add(inputType);
 					}
-					result.add(inputType);
 				}
 			}
 		}
@@ -424,7 +426,10 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		}
 	}
 
-	private String getId(InputColumn<?> inputColumn, Map<InputColumn<?>, String> columnMappings) {
+	private static String getId(InputColumn<?> inputColumn, Map<InputColumn<?>, String> columnMappings) {
+		if (inputColumn == null) {
+			throw new IllegalArgumentException("InputColumn cannot be null");
+		}
 		String id = columnMappings.get(inputColumn);
 		if (id == null) {
 			id = "col_" + columnMappings.size();
