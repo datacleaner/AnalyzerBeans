@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * H2 based implementation of the StorageProvider.
  * 
@@ -32,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class H2StorageProvider extends SqlDatabaseStorageProvider implements StorageProvider {
 
 	public static final String DRIVER_CLASS_NAME = "org.h2.Driver";
-
+	private static final Logger logger = LoggerFactory.getLogger(H2StorageProvider.class);
 	private static final String DATABASE_FILENAME = "h2-storage";
 	private static final AtomicInteger databaseIndex = new AtomicInteger(0);
 
@@ -55,7 +58,10 @@ public final class H2StorageProvider extends SqlDatabaseStorageProvider implemen
 				}
 			});
 			for (File f : dbFiles) {
-				f.delete();
+				boolean isDeleted = f.delete();
+				if(!isDeleted){
+					logger.error("Directory cleaning not successful.");
+				}
 			}
 		}
 		return directoryPath;
