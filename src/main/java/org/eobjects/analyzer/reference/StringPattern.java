@@ -21,6 +21,33 @@ package org.eobjects.analyzer.reference;
 
 import java.io.Serializable;
 
+import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.Initialize;
+
+/**
+ * A string pattern defines a pattern to which you can match strings to see if
+ * they share a similar pattern. Examples of string patterns are:
+ * 
+ * <ul>
+ * <li>The pattern "Aaaaaa Aaaaaaaaaa" which is a typical firstname and lastname
+ * pattern.</li>
+ * <li>The pattern ".*@.*" which is a simple way to identify strings with an
+ * @-sign in them (potential email).</li>
+ * </ul>
+ * 
+ * A string pattern can have methods annotated with @Initialize and @Close.
+ * These will be called before and after a job is executed where the given
+ * string pattern is used.
+ * 
+ * Note: String patterns should be thread-safe!! Make sure to make sensible use
+ * of synchronized blocks if there are race conditions in the string pattern
+ * implementation.
+ * 
+ * @see Initialize
+ * @see Close
+ * 
+ * @author Kasper Sørensen
+ */
 public interface StringPattern extends Serializable {
 
 	public String getName();

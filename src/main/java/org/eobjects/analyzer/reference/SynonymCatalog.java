@@ -22,6 +22,9 @@ package org.eobjects.analyzer.reference;
 import java.io.Serializable;
 import java.util.Collection;
 
+import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.Initialize;
+
 /**
  * A synonym catalog represents a set of synonyms which are related.
  * 
@@ -31,9 +34,16 @@ import java.util.Collection;
  * <li>Given name synonyms (eg. 'William' is the master term for 'Billy')</li>
  * </ul>
  * 
+ * A synonym catalog can have methods annotated with @Initialize and @Close.
+ * These will be called before and after a job is executed where the given
+ * synonym catalog is used.
+ * 
  * Note: Synonym catalogs should be thread-safe!! Make sure to make sensible use
  * of synchronized blocks if there are race conditions in the SynonymCatalog
  * implementation.
+ * 
+ * @see Initialize
+ * @see Close
  * 
  * @author Kasper Sørensen
  */

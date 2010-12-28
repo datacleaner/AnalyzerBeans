@@ -21,6 +21,9 @@ package org.eobjects.analyzer.reference;
 
 import java.io.Serializable;
 
+import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.Initialize;
+
 /**
  * A dictionary represents a set of values grouped together with a label.
  * 
@@ -34,9 +37,16 @@ import java.io.Serializable;
  * Often times a dictionary will implement a caching mechanism to prevent having
  * to hold all values of the dictionary in memory.
  * 
+ * A dictionary can have methods annotated with @Initialize and @Close. These
+ * will be called before and after a job is executed where the given dictionary
+ * is used.
+ * 
  * Note: Dictionaries should be thread-safe!! Make sure to make sensible use of
  * synchronized blocks if there are race conditions in the dictionary
  * implementation.
+ * 
+ * @see Initialize
+ * @see Close
  * 
  * @author Kasper Sørensen
  */
