@@ -21,11 +21,11 @@ package org.eobjects.analyzer.beans.script;
 
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Initialize;
-import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.StringProperty;
-import org.eobjects.analyzer.beans.api.Transformer;
-import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.mozilla.javascript.Context;
@@ -36,16 +36,10 @@ import org.mozilla.javascript.ScriptableObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A transformer that uses userwritten JavaScript to generate a value
- * 
- * @author Kasper Sørensen
- */
-@TransformerBean("JavaScript transformer")
-@Description("Supply your own piece of JavaScript to do a custom transformation")
-public class JavaScriptTransformer implements Transformer<String> {
+@FilterBean("JavaScript filter")
+public class JavaScriptFilter implements Filter<ValidationCategory> {
 
-	private static final Logger logger = LoggerFactory.getLogger(JavaScriptTransformer.class);
+	private static final Logger logger = LoggerFactory.getLogger(JavaScriptFilter.class);
 
 	@Configured
 	InputColumn<?>[] columns;
@@ -53,7 +47,7 @@ public class JavaScriptTransformer implements Transformer<String> {
 	@Configured
 	@Description("Available variables:\nvalues[0..]: Array of values\nvalues[\"my_col\"]: Map of values\nmy_col: Each column value has it's own variable\nout: Print to console using out.println('hello')\nlogger: Print to log using log.info(...), log.warn(...), log.error(...)")
 	@StringProperty(multiline = true, mimeType = { "text/javascript", "application/x-javascript" })
-	String sourceCode = "function eval() {\n  return \"hello \" + values[0];\n}\n\neval();";
+	String sourceCode = "function eval() {\n  return values[0] != null;\n}\n\neval();";
 
 	private ContextFactory _contextFactory;
 	private Script _script;
@@ -78,12 +72,7 @@ public class JavaScriptTransformer implements Transformer<String> {
 	}
 
 	@Override
-	public OutputColumns getOutputColumns() {
-		return new OutputColumns("JavaScript output");
-	}
-
-	@Override
-	public String[] transform(InputRow inputRow) {
+	public ValidationCategory categorize(InputRow inputRow) {
 		Context context = _contextFactory.enterContext();
 
 		try {
@@ -96,9 +85,9 @@ public class JavaScriptTransformer implements Transformer<String> {
 			JavaScriptUtils.addToScope(scope, inputRow, columns, "values");
 
 			Object result = _script.exec(context, scope);
-			String stringResult = Context.toString(result);
+			boolean booleanResult = Context.toBoolean(result);
 
-			return new String[] { stringResult };
+			return ValidationCategory.valueOf(booleanResult);
 		} finally {
 			Context.exit();
 		}
