@@ -232,7 +232,7 @@ public class JaxbJobReaderTest extends TestCase {
 		try {
 			factory.create(new File("src/test/resources/example-job-valid.xml"));
 			fail("Exception expected");
-		} catch (IllegalStateException e) {
+		} catch (NoSuchDatastoreException e) {
 			assertEquals("No such datastore: my database", e.getMessage());
 		}
 	}
