@@ -337,15 +337,17 @@ public class ReferenceDataCatalogType {
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "textFileSynonymCatalogOrCustomSynonymCatalog"
+        "allTypesOfSynonymCatalogs"
     })
     public static class SynonymCatalogs {
 
         @XmlElements({
             @XmlElement(name = "custom-synonym-catalog", type = CustomElementType.class),
-            @XmlElement(name = "text-file-synonym-catalog", type = TextFileSynonymCatalogType.class)
+            @XmlElement(name = "text-file-synonym-catalog", type = TextFileSynonymCatalogType.class),
+            @XmlElement(name = "dataStore-synonym-catalog", type = DataStoreSynonymCatalogType.class)
         })
-        protected List<Object> textFileSynonymCatalogOrCustomSynonymCatalog;
+        // TODO change name
+        protected List<Object> allTypesOfSynonymCatalogs;
 
         /**
          * Gets the value of the textFileSynonymCatalogOrCustomSynonymCatalog property.
@@ -370,13 +372,13 @@ public class ReferenceDataCatalogType {
          * 
          * 
          */
-        public List<Object> getTextFileSynonymCatalogOrCustomSynonymCatalog() {
-            if (textFileSynonymCatalogOrCustomSynonymCatalog == null) {
-                textFileSynonymCatalogOrCustomSynonymCatalog = new ArrayList<Object>();
+        public List<Object> getAllTypesOfSynonymCatalogs() {
+            if (allTypesOfSynonymCatalogs == null) {
+                allTypesOfSynonymCatalogs = new ArrayList<Object>();
             }
-            return this.textFileSynonymCatalogOrCustomSynonymCatalog;
+            return this.allTypesOfSynonymCatalogs;
         }
-
+        
+        
     }
-
 }
