@@ -31,6 +31,12 @@ public final class CsvDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * The value is '\\uFFFF', the "not a character" value which should not
+	 * occur in any valid Unicode string.
+	 */
+	public static final char NOT_A_CHAR = '\uFFFF';
+
 	private final String _name;
 	private final String _filename;
 	private final Character _quoteChar;
