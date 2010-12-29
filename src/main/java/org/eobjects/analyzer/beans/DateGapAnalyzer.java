@@ -28,7 +28,6 @@ import java.util.SortedSet;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -51,12 +50,13 @@ public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerRes
 	InputColumn<Date> toColumn;
 
 	@Configured(required = false)
+	@Description("Optional column to group timelines by, if the table contains multiple timelines")
 	InputColumn<String> groupColumn;
 
 	@Configured(required = false, value = "Count intersecting from and to dates as overlaps")
 	Boolean singleDateOverlaps = false;
 
-	Map<String, TimeLine> timelines;
+	private final Map<String, TimeLine> timelines = new HashMap<String, TimeLine>();
 
 	public DateGapAnalyzer() {
 	}
@@ -65,12 +65,6 @@ public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerRes
 		this.fromColumn = fromColumn;
 		this.toColumn = toColumn;
 		this.groupColumn = groupColumn;
-		init();
-	}
-
-	@Initialize
-	public void init() {
-		timelines = new HashMap<String, TimeLine>();
 	}
 
 	@Override
