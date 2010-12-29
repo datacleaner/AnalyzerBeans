@@ -50,8 +50,8 @@ public class DatastoreDictionary implements Dictionary {
 	private static final Logger logger = LoggerFactory.getLogger(DatastoreDictionary.class);
 
 	private final transient DatastoreCatalog _datastoreCatalog;
-	private transient volatile ReferenceValues<String> _cachedRefValues;
-	private transient final BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
+	private volatile transient ReferenceValues<String> _cachedRefValues;
+	private final transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
 	private final String _name;
