@@ -36,6 +36,9 @@ public final class CsvDatastore extends UsageAwareDatastore {
 	 * occur in any valid Unicode string.
 	 */
 	public static final char NOT_A_CHAR = '\uFFFF';
+	
+	public static final char DEFAULT_QUOTE_CHAR = NOT_A_CHAR;
+	public static final char DEFAULT_SEPARATOR_CHAR = DataContextFactory.DEFAULT_CSV_SEPARATOR_CHAR;
 
 	private final String _name;
 	private final String _filename;
@@ -82,8 +85,8 @@ public final class CsvDatastore extends UsageAwareDatastore {
 		if (_quoteChar == null && _separatorChar == null) {
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename));
 		} else {
-			char separatorChar = _separatorChar == null ? DataContextFactory.DEFAULT_CSV_SEPARATOR_CHAR : _separatorChar;
-			char quoteChar = _quoteChar == null ? DataContextFactory.DEFAULT_CSV_QUOTE_CHAR : _quoteChar;
+			char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
+			char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
 			dataContext = new DefaultDataContext(new CsvDataContextStrategy(new File(_filename), separatorChar, quoteChar,
 					(_encoding == null ? FileHelper.UTF_8_ENCODING : _encoding)));
 		}
