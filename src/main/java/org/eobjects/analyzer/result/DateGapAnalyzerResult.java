@@ -29,23 +29,70 @@ public class DateGapAnalyzerResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 
+	private final String _fromColumnName;
+	private final String _toColumnName;
+	private final String _groupColumnName;
 	private final Map<String, SortedSet<TimeInterval>> _gaps;
 	private final Map<String, SortedSet<TimeInterval>> _overlaps;
+	private final Map<String, TimeInterval> _completeDurations;
 
-	public DateGapAnalyzerResult(Map<String, SortedSet<TimeInterval>> gaps, Map<String, SortedSet<TimeInterval>> overlaps) {
+	public DateGapAnalyzerResult(String fromColumnName, String toColumnName, String groupColumnName,
+			Map<String, TimeInterval> completeIntervals, Map<String, SortedSet<TimeInterval>> gaps,
+			Map<String, SortedSet<TimeInterval>> overlaps) {
+		_fromColumnName = fromColumnName;
+		_toColumnName = toColumnName;
+		_groupColumnName = groupColumnName;
+		_completeDurations = completeIntervals;
 		_gaps = gaps;
 		_overlaps = overlaps;
 	}
 
+	/**
+	 * @return the names of the recorded groups of records that have gaps and/or
+	 *         overlaps
+	 */
 	public Set<String> getGroupNames() {
 		return _gaps.keySet();
 	}
 
-	public Map<String, SortedSet<TimeInterval>> getGaps() {
-		return _gaps;
+	/**
+	 * Gets the complete duration/interval over which a group has been recorded.
+	 * This duration will always include both gaps and overlaps.
+	 * 
+	 * @param groupName
+	 * @return the complete duration (ie. first and last recorded date) of a
+	 *         group as a single interval.
+	 */
+	public TimeInterval getCompleteDuration(String groupName) {
+		return _completeDurations.get(groupName);
 	}
 
-	public Map<String, SortedSet<TimeInterval>> getOverlaps() {
-		return _overlaps;
+	/**
+	 * @param groupName
+	 * @return the intervals that represents gaps in the complete duration
+	 */
+	public SortedSet<TimeInterval> getGaps(String groupName) {
+		return _gaps.get(groupName);
+	}
+
+	/**
+	 * @param groupName
+	 * @return the intervals where there are overlapping entries in the complete
+	 *         duration
+	 */
+	public SortedSet<TimeInterval> getOverlaps(String groupName) {
+		return _overlaps.get(groupName);
+	}
+
+	public String getFromColumnName() {
+		return _fromColumnName;
+	}
+
+	public String getToColumnName() {
+		return _toColumnName;
+	}
+
+	public String getGroupColumnName() {
+		return _groupColumnName;
 	}
 }

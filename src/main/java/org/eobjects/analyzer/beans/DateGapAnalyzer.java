@@ -79,7 +79,7 @@ public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerRes
 		Date to = row.getValue(toColumn);
 
 		if (from != null && to != null) {
-			String groupName = "";
+			String groupName = null;
 			if (groupColumn != null) {
 				groupName = row.getValue(groupColumn);
 			}
@@ -105,32 +105,37 @@ public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerRes
 		if (singleDateOverlaps != null) {
 			includeSingleTimeInstanceIntervals = singleDateOverlaps.booleanValue();
 		}
-		Map<String, SortedSet<TimeInterval>> gaps = new HashMap<String, SortedSet<TimeInterval>>();
-		Map<String, SortedSet<TimeInterval>> overlaps = new HashMap<String, SortedSet<TimeInterval>>();
-		Set<String> keySet = timelines.keySet();
-		for (String name : keySet) {
+		final Map<String, TimeInterval> completeIntervals = new HashMap<String, TimeInterval>();
+		final Map<String, SortedSet<TimeInterval>> gaps = new HashMap<String, SortedSet<TimeInterval>>();
+		final Map<String, SortedSet<TimeInterval>> overlaps = new HashMap<String, SortedSet<TimeInterval>>();
+		final Set<String> groupNames = timelines.keySet();
+		for (String name : groupNames) {
 			TimeLine timeline = timelines.get(name);
 			SortedSet<TimeInterval> timelineGaps = timeline.getTimeGapIntervals();
 			SortedSet<TimeInterval> timelineOverlaps = timeline.getOverlappingIntervals(includeSingleTimeInstanceIntervals);
+
+			completeIntervals.put(name, new TimeInterval(timeline.getFrom(), timeline.getTo()));
 			gaps.put(name, timelineGaps);
 			overlaps.put(name, timelineOverlaps);
 		}
 
-		return new DateGapAnalyzerResult(gaps, overlaps);
+		final String groupColumnName = groupColumn == null ? null : groupColumn.getName();
+		return new DateGapAnalyzerResult(fromColumn.getName(), toColumn.getName(), groupColumnName, completeIntervals, gaps,
+				overlaps);
 	}
 
 	public void setFromColumn(InputColumn<Date> fromColumn) {
 		this.fromColumn = fromColumn;
 	}
-	
+
 	public void setGroupColumn(InputColumn<String> groupColumn) {
 		this.groupColumn = groupColumn;
 	}
-	
+
 	public void setSingleDateOverlaps(Boolean singleDateOverlaps) {
 		this.singleDateOverlaps = singleDateOverlaps;
 	}
-	
+
 	public void setToColumn(InputColumn<Date> toColumn) {
 		this.toColumn = toColumn;
 	}

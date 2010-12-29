@@ -50,7 +50,7 @@ public class DateGapTextRenderer implements Renderer<DateGapAnalyzerResult, Stri
 				sb.append('\n');
 			}
 
-			SortedSet<TimeInterval> gaps = result.getGaps().get(name);
+			SortedSet<TimeInterval> gaps = result.getGaps(name);
 			if (gaps.isEmpty()) {
 				sb.append(" - no time gaps!\n");
 			} else {
@@ -61,7 +61,7 @@ public class DateGapTextRenderer implements Renderer<DateGapAnalyzerResult, Stri
 				}
 			}
 
-			SortedSet<TimeInterval> overlaps = result.getOverlaps().get(name);
+			SortedSet<TimeInterval> overlaps = result.getOverlaps(name);
 			if (overlaps.isEmpty()) {
 				sb.append(" - no time overlaps!\n");
 			} else {
