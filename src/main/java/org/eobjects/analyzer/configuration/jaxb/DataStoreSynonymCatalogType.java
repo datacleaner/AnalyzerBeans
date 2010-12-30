@@ -57,13 +57,11 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "dataStoreSynonymCatalogType", propOrder = { "dataStoreName", "caseSensitive", "columnName" })
+@XmlType(name = "dataStoreSynonymCatalogType", propOrder = { "dataStoreName", "columnName" })
 public class DataStoreSynonymCatalogType {
 
     @XmlElement(required = true)
     protected String columnName;
-    @XmlElement(name = "case-sensitive")
-    protected Boolean caseSensitive;
     @XmlAttribute(required = true)
     protected String name;
     @XmlElement(required = true)
@@ -96,27 +94,6 @@ public class DataStoreSynonymCatalogType {
      */
     public void setColumnName(String columnName) {
         this.columnName = columnName;
-    }
-
-    /**
-     * Gets the value of the caseSensitive property.
-     * 
-     * @return possible object is {@link Boolean }
-     * 
-     */
-    public Boolean isCaseSensitive() {
-        return caseSensitive;
-    }
-
-    /**
-     * Sets the value of the caseSensitive property.
-     * 
-     * @param value
-     *            allowed object is {@link Boolean }
-     * 
-     */
-    public void setCaseSensitive(Boolean value) {
-        this.caseSensitive = value;
     }
 
     /**

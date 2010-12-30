@@ -40,13 +40,11 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
     
     private final transient WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
     private final String _nameOfSynonymCatalog;
-    private final boolean _caseSensitive;
     private final Column _masterTerm;
     private Datastore _dataStore;
 
-    public DataStoreBasedSynonymCatalog(String name,Column masterTerm, boolean caseSensitive, Datastore dataStore) {
+    public DataStoreBasedSynonymCatalog(String name,Column masterTerm, Datastore dataStore) {
         _nameOfSynonymCatalog = name;
-        _caseSensitive = caseSensitive;
         _masterTerm = masterTerm;
         _dataStore = dataStore;
     }
@@ -56,10 +54,6 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
         return _nameOfSynonymCatalog;
     }
 
-    public boolean isCaseSensitive() {
-        return _caseSensitive;
-    }
-    
     @Override
     public Collection<Synonym> getSynonyms() {
         
@@ -74,7 +68,7 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
         List<Synonym> synonyms = new ArrayList<Synonym>();
         
         while(results.next()){
-            synonyms.add(new DataStoreBasedSynonym(results.getRow(), _caseSensitive, _masterTerm));
+            synonyms.add(new DataStoreBasedSynonym(results.getRow(), _masterTerm));
         }
         dataContextProvider.close();
         return synonyms;
@@ -101,7 +95,7 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
 
             while (results.next()) {
             	Row row = results.getRow();
-                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(row, _caseSensitive, _masterTerm);
+                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(row, _masterTerm);
                 masterTerm = synonym.getMasterTerm();
                 if (term.equals(masterTerm) || synonym.getSynonyms().containsValue(term)) {
                     _masterTermCache.put(term, masterTerm);

@@ -31,14 +31,12 @@ final class DataStoreBasedSynonym implements Synonym, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private final Column _selectedColumn;
-	private final boolean _caseSensitive;
 	private final Row _row;
 	private final String[] _synonyms;
 
-	public DataStoreBasedSynonym(Row row, boolean caseSensitive, Column selectedColumn) {
+	public DataStoreBasedSynonym(Row row, Column selectedColumn) {
 		_synonyms = populateSynonyms(row);
 		_row = row;
-		_caseSensitive = caseSensitive;
 		_selectedColumn = selectedColumn;
 	}
 
@@ -57,7 +55,7 @@ final class DataStoreBasedSynonym implements Synonym, Serializable {
 
 	@Override
 	public ReferenceValues<String> getSynonyms() {
-		return new SimpleStringReferenceValues(_synonyms, _caseSensitive);
+		return new SimpleStringReferenceValues(_synonyms, true);
 	}
 
 }
