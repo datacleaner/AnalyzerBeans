@@ -24,32 +24,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dk.eobjects.metamodel.data.Row;
+import dk.eobjects.metamodel.schema.Column;
 
 final class DataStoreBasedSynonym implements Synonym, Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private final String _masterTerm;
-	private final String[] _synonyms;
-	private final boolean _caseSensitive;
 
-	public DataStoreBasedSynonym(Row row, boolean caseSensitive, String masterTerm) {
-                _synonyms = populateSynonyms(row);
+	private final Column _selectedColumn;
+	private final boolean _caseSensitive;
+	private final Row _row;
+	private final String[] _synonyms;
+
+	public DataStoreBasedSynonym(Row row, boolean caseSensitive, Column selectedColumn) {
+		_synonyms = populateSynonyms(row);
+		_row = row;
 		_caseSensitive = caseSensitive;
-		_masterTerm = masterTerm;
+		_selectedColumn = selectedColumn;
 	}
 
 	private String[] populateSynonyms(Row row) {
-	    List<String> values = new ArrayList<String>();
-	    for(Object cell:row.getValues()){
-	        values.add((String)cell);
-	    }
-            return values.toArray(new String[0]);
-        }
+		List<String> values = new ArrayList<String>();
+		for (Object cell : row.getValues()) {
+			values.add((String) cell);
+		}
+		return values.toArray(new String[0]);
+	}
 
-        @Override
+	@Override
 	public String getMasterTerm() {
-		return _masterTerm;
+		return (String) _row.getValue(_selectedColumn);
 	}
 
 	@Override

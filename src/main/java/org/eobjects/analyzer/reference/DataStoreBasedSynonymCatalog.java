@@ -74,7 +74,7 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
         List<Synonym> synonyms = new ArrayList<Synonym>();
         
         while(results.next()){
-            synonyms.add(new DataStoreBasedSynonym(results.getRow(), _caseSensitive, _masterTerm.getName()));
+            synonyms.add(new DataStoreBasedSynonym(results.getRow(), _caseSensitive, _masterTerm));
         }
         dataContextProvider.close();
         return synonyms;
@@ -101,7 +101,7 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
 
             while (results.next()) {
             	Row row = results.getRow();
-                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(row, _caseSensitive, _masterTerm.getName());
+                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(row, _caseSensitive, _masterTerm);
                 masterTerm = synonym.getMasterTerm();
                 if (term.equals(masterTerm) || synonym.getSynonyms().containsValue(term)) {
                     _masterTermCache.put(term, masterTerm);
