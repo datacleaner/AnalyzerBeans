@@ -44,8 +44,6 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
     private final Column _masterTerm;
     private Datastore _dataStore;
 
-    private Row _row;
-
     public DataStoreBasedSynonymCatalog(String name,Column masterTerm, boolean caseSensitive, Datastore dataStore) {
         _nameOfSynonymCatalog = name;
         _caseSensitive = caseSensitive;
@@ -102,8 +100,8 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
         DataSet results = dataContext.executeQuery(query);
 
             while (results.next()) {
-                _row = results.getRow();
-                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(_row, _caseSensitive, _masterTerm.getName());
+            	Row row = results.getRow();
+                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(row, _caseSensitive, _masterTerm.getName());
                 masterTerm = synonym.getMasterTerm();
                 if (term.equals(masterTerm) || synonym.getSynonyms().containsValue(term)) {
                     _masterTermCache.put(term, masterTerm);
