@@ -40,12 +40,12 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
     
     private final transient WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
     private final String _nameOfSynonymCatalog;
-    private final Column _masterTerm;
+    private final Column _selectedColumn;
     private Datastore _dataStore;
 
     public DataStoreBasedSynonymCatalog(String name,Column masterTerm, Datastore dataStore) {
         _nameOfSynonymCatalog = name;
-        _masterTerm = masterTerm;
+        _selectedColumn = masterTerm;
         _dataStore = dataStore;
     }
 
@@ -59,7 +59,7 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
         
         DataContextProvider dataContextProvider = _dataStore.getDataContextProvider();
         DataContext dataContext = dataContextProvider.getDataContext();
-        Table table = _masterTerm.getTable();
+        Table table = _selectedColumn.getTable();
         Column[] columns = table.getColumns();
         
         Query query = dataContext.query().from(table.getName()).select(columns).toQuery();
@@ -68,7 +68,7 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
         List<Synonym> synonyms = new ArrayList<Synonym>();
         
         while(results.next()){
-            synonyms.add(new DataStoreBasedSynonym(results.getRow(), _masterTerm));
+            synonyms.add(new DataStoreBasedSynonym(results.getRow(), _selectedColumn));
         }
         dataContextProvider.close();
         return synonyms;
@@ -87,7 +87,7 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
         
         DataContextProvider dataContextProvider = _dataStore.getDataContextProvider();
         DataContext dataContext = dataContextProvider.getDataContext();
-        Table table = _masterTerm.getTable();
+        Table table = _selectedColumn.getTable();
         Column[] columns = table.getColumns();
         
         Query query = dataContext.query().from(table.getName()).select(columns).toQuery();
@@ -95,7 +95,7 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
 
             while (results.next()) {
             	Row row = results.getRow();
-                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(row, _masterTerm);
+                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(row, _selectedColumn);
                 masterTerm = synonym.getMasterTerm();
                 if (term.equals(masterTerm) || synonym.getSynonyms().containsValue(term)) {
                     _masterTermCache.put(term, masterTerm);
@@ -104,5 +104,5 @@ public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
             }
             return null;
     }
-
+    
 }
