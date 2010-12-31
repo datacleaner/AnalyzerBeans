@@ -36,73 +36,89 @@ import dk.eobjects.metamodel.schema.Table;
 
 public final class DataStoreBasedSynonymCatalog implements SynonymCatalog {
 
-    private static final long serialVersionUID = 1L;
-    
-    private final transient WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
-    private final String _nameOfSynonymCatalog;
-    private final Column _selectedColumn;
-    private Datastore _dataStore;
+	private static final long serialVersionUID = 1L;
 
-    public DataStoreBasedSynonymCatalog(String name,Column masterTerm, Datastore dataStore) {
-        _nameOfSynonymCatalog = name;
-        _selectedColumn = masterTerm;
-        _dataStore = dataStore;
-    }
+	private final transient WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
+	private final String _nameOfSynonymCatalog;
+	private final Column _selectedColumn;
+	private Datastore _dataStore;
 
-    @Override
-    public String getName() {
-        return _nameOfSynonymCatalog;
-    }
+	public DataStoreBasedSynonymCatalog(String name, Column masterTerm, Datastore dataStore) {
+		_nameOfSynonymCatalog = name;
+		_selectedColumn = masterTerm;
+		_dataStore = dataStore;
+	}
 
-    @Override
-    public Collection<Synonym> getSynonyms() {
-        
-        DataContextProvider dataContextProvider = _dataStore.getDataContextProvider();
-        DataContext dataContext = dataContextProvider.getDataContext();
-        Table table = _selectedColumn.getTable();
-        Column[] columns = table.getColumns();
-        
-        Query query = dataContext.query().from(table.getName()).select(columns).toQuery();
-        DataSet results = dataContext.executeQuery(query);
-                
-        List<Synonym> synonyms = new ArrayList<Synonym>();
-        
-        while(results.next()){
-            synonyms.add(new DataStoreBasedSynonym(results.getRow(), _selectedColumn));
-        }
-        dataContextProvider.close();
-        return synonyms;
-   }
+	@Override
+	public String getName() {
+		return _nameOfSynonymCatalog;
+	}
 
+	@Override
+	public Collection<Synonym> getSynonyms() {
 
-    @Override
-    public String getMasterTerm(String term) {
-        if (term == null) {
-            return null;
-        }
-        String masterTerm = _masterTermCache.get(term);
-        if (masterTerm != null) {
-            return masterTerm;
-        }
-        
-        DataContextProvider dataContextProvider = _dataStore.getDataContextProvider();
-        DataContext dataContext = dataContextProvider.getDataContext();
-        Table table = _selectedColumn.getTable();
-        Column[] columns = table.getColumns();
-        
-        Query query = dataContext.query().from(table.getName()).select(columns).toQuery();
-        DataSet results = dataContext.executeQuery(query);
+		DataContextProvider dataContextProvider = _dataStore.getDataContextProvider();
+		DataContext dataContext = dataContextProvider.getDataContext();
+		Table table = _selectedColumn.getTable();
+		Column[] columns = table.getColumns();
 
-            while (results.next()) {
-            	Row row = results.getRow();
-                DataStoreBasedSynonym synonym = new DataStoreBasedSynonym(row, _selectedColumn);
-                masterTerm = synonym.getMasterTerm();
-                if (term.equals(masterTerm) || synonym.getSynonyms().containsValue(term)) {
-                    _masterTermCache.put(term, masterTerm);
-                    return masterTerm;
-                }
-            }
-            return null;
-    }
-    
+		Query query = dataContext.query().from(table.getName()).select(columns).toQuery();
+		DataSet results = dataContext.executeQuery(query);
+
+		List<Synonym> synonyms = new ArrayList<Synonym>();
+
+		while (results.next()) {
+			Row row = results.getRow();
+			synonyms.add(new SimpleSynonym(getMasterTerm(row, _selectedColumn), getSynonyms(row, table.getColumns(), _selectedColumn)));
+		}
+		dataContextProvider.close();
+		return synonyms;
+	}
+
+	@Override
+	public String getMasterTerm(String term) {
+		if (term == null) {
+			return null;
+		}
+		String masterTerm = _masterTermCache.get(term);
+		if (masterTerm != null) {
+			return masterTerm;
+		}
+
+		DataContextProvider dataContextProvider = _dataStore.getDataContextProvider();
+		DataContext dataContext = dataContextProvider.getDataContext();
+		Table table = _selectedColumn.getTable();
+		Column[] columns = table.getColumns();
+
+		Query query = dataContext.query().from(table.getName()).select(columns).toQuery();
+		DataSet results = dataContext.executeQuery(query);
+
+		while (results.next()) {
+			Row row = results.getRow();
+			SimpleSynonym synonym = new SimpleSynonym(getMasterTerm(row, _selectedColumn), getSynonyms(row, columns,
+					_selectedColumn));
+			masterTerm = synonym.getMasterTerm();
+			if (term.equals(masterTerm) || synonym.getSynonyms().containsValue(term)) {
+				_masterTermCache.put(term, masterTerm);
+				return masterTerm;
+			}
+		}
+		return null;
+	}
+
+	private String getMasterTerm(Row row, Column column) {
+		return (String) row.getValue(column);
+	}
+
+	private String[] getSynonyms(Row row, Column[] columns, Column column) {
+		List<String> synonyms = new ArrayList<String>();
+		for (Column synonymColumn : columns) {
+			if (synonymColumn != column) {
+				String value = (String) row.getValue(synonymColumn);
+				synonyms.add(value);
+			}
+		}
+		return synonyms.toArray(new String[0]);
+	}
+
 }
