@@ -23,7 +23,9 @@
         </transformer>
         <filter>
             <descriptor ref="Not null"/>
-            <properties/>
+            <properties>
+                <property value="false" name="Consider empty string as null"/>
+            </properties>
             <input ref="col_0"/>
             <outcome id="outcome_0" category="VALID"/>
         </filter>
