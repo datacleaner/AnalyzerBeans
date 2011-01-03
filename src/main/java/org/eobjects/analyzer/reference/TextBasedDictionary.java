@@ -36,7 +36,7 @@ public class TextBasedDictionary implements Dictionary {
 
 	private static final Logger logger = LoggerFactory.getLogger(TextBasedDictionary.class);
 
-	private final transient WeakHashMap<String, Boolean> _containsValueCache = new WeakHashMap<String, Boolean>();
+	private transient WeakHashMap<String, Boolean> _containsValueCache;
 	private final String _name;
 	private final String _filename;
 	private final String _encoding;
@@ -45,6 +45,17 @@ public class TextBasedDictionary implements Dictionary {
 		_name = name;
 		_filename = filename;
 		_encoding = encoding;
+	}
+
+	private WeakHashMap<String, Boolean> getContainsValueCache() {
+		if (_containsValueCache == null) {
+			synchronized (this) {
+				if (_containsValueCache == null) {
+					_containsValueCache = new WeakHashMap<String, Boolean>();
+				}
+			}
+		}
+		return _containsValueCache;
 	}
 
 	@Override
@@ -65,7 +76,7 @@ public class TextBasedDictionary implements Dictionary {
 		if (value == null) {
 			return false;
 		}
-		Boolean result = _containsValueCache.get(value);
+		Boolean result = getContainsValueCache().get(value);
 		if (result == null) {
 			BufferedReader reader = null;
 			try {
@@ -77,7 +88,7 @@ public class TextBasedDictionary implements Dictionary {
 						break;
 					}
 				}
-				_containsValueCache.put(value, result);
+				getContainsValueCache().put(value, result);
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			} finally {

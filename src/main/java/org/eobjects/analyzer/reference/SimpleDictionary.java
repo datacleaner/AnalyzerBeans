@@ -19,10 +19,9 @@
  */
 package org.eobjects.analyzer.reference;
 
-import java.io.Serializable;
 import java.util.Collection;
 
-public final class SimpleDictionary implements Dictionary, Serializable {
+public final class SimpleDictionary implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 

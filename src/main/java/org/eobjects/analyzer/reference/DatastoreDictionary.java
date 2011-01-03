@@ -41,7 +41,6 @@ import dk.eobjects.metamodel.schema.Column;
  * to inject the DatastoreCatalog using the setter method for this.
  * 
  * @author Kasper Sørensen
- * 
  */
 public class DatastoreDictionary implements Dictionary {
 
@@ -49,9 +48,9 @@ public class DatastoreDictionary implements Dictionary {
 
 	private static final Logger logger = LoggerFactory.getLogger(DatastoreDictionary.class);
 
-	private final transient DatastoreCatalog _datastoreCatalog;
 	private volatile transient ReferenceValues<String> _cachedRefValues;
-	private final transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
+	private transient DatastoreCatalog _datastoreCatalog;
+	private transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
 	private final String _name;
@@ -64,6 +63,17 @@ public class DatastoreDictionary implements Dictionary {
 		_qualifiedColumnName = qualifiedColumnName;
 	}
 
+	private BlockingQueue<DataContextProvider> getDataContextProviders() {
+		if (_dataContextProviders == null) {
+			synchronized (this) {
+				if (_dataContextProviders == null) {
+					_dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
+				}
+			}
+		}
+		return _dataContextProviders;
+	}
+
 	/**
 	 * Initializes a DataContextProvider, which will keep the connection open
 	 */
@@ -72,7 +82,7 @@ public class DatastoreDictionary implements Dictionary {
 		logger.info("Initializing dictionary: {}", this);
 		Datastore datastore = getDatastore();
 		DataContextProvider dcp = datastore.getDataContextProvider();
-		_dataContextProviders.add(dcp);
+		getDataContextProviders().add(dcp);
 	}
 
 	/**
@@ -81,7 +91,7 @@ public class DatastoreDictionary implements Dictionary {
 	 */
 	@Close
 	public void close() {
-		DataContextProvider dcp = _dataContextProviders.poll();
+		DataContextProvider dcp = getDataContextProviders().poll();
 		if (dcp != null) {
 			logger.info("Closing dictionary: {}", this);
 			dcp.close();
@@ -98,6 +108,10 @@ public class DatastoreDictionary implements Dictionary {
 
 	public DatastoreCatalog getDatastoreCatalog() {
 		return _datastoreCatalog;
+	}
+
+	public void setDatastoreCatalog(DatastoreCatalog datastoreCatalog) {
+		_datastoreCatalog = datastoreCatalog;
 	}
 
 	public String getDatastoreName() {
