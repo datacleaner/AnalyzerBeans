@@ -31,13 +31,32 @@ import org.eobjects.analyzer.data.InputRow;
 public class NotNullFilter implements Filter<ValidationCategory> {
 
 	@Configured
-	InputColumn<?> input;
+	InputColumn<?>[] columns;
+
+	@Configured
+	@Description("Consider empty strings (\"\") as null also?")
+	boolean considerEmptyStringAsNull = false;
+
+	public NotNullFilter() {
+	}
+
+	public NotNullFilter(InputColumn<?>[] columns, boolean considerEmptyStringAsNull) {
+		this();
+		this.columns = columns;
+		this.considerEmptyStringAsNull = considerEmptyStringAsNull;
+	}
 
 	@Override
 	public ValidationCategory categorize(InputRow inputRow) {
-		Object value = inputRow.getValue(input);
-		if (value == null) {
-			return ValidationCategory.INVALID;
+		for (InputColumn<?> col : columns) {
+			Object value = inputRow.getValue(col);
+			if (value == null) {
+				return ValidationCategory.INVALID;
+			}
+
+			if (considerEmptyStringAsNull && "".equals(value)) {
+				return ValidationCategory.INVALID;
+			}
 		}
 		return ValidationCategory.VALID;
 	}
