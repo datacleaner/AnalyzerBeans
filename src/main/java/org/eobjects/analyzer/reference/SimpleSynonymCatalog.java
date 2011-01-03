@@ -19,13 +19,12 @@
  */
 package org.eobjects.analyzer.reference;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public final class SimpleSynonymCatalog implements SynonymCatalog, Serializable {
+public final class SimpleSynonymCatalog implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 

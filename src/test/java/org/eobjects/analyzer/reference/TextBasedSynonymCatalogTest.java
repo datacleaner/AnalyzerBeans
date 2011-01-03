@@ -19,6 +19,11 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import junit.framework.TestCase;
 
 public class TextBasedSynonymCatalogTest extends TestCase {
@@ -31,5 +36,26 @@ public class TextBasedSynonymCatalogTest extends TestCase {
 
 		assertEquals("GBR", cat.getMasterTerm("GBR"));
 		assertEquals("DNK", cat.getMasterTerm("DNK"));
+	}
+
+	public void testSerializationAndDeserialization() throws Exception {
+		SynonymCatalog cat = new TextBasedSynonymCatalog("foobar", "src/test/resources/synonym-countries.txt", true, "UTF-8");
+		assertEquals("DNK", cat.getMasterTerm("Denmark"));
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream os = new ObjectOutputStream(baos);
+		os.writeObject(cat);
+		os.flush();
+		os.close();
+		baos.close();
+
+		assertEquals("DNK", cat.getMasterTerm("Denmark"));
+		cat = null;
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		ObjectInputStream is = new ObjectInputStream(bais);
+		cat = (SynonymCatalog) is.readObject();
+
+		assertEquals("DNK", cat.getMasterTerm("Denmark"));
 	}
 }

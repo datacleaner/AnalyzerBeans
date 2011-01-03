@@ -33,7 +33,7 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
-	private final transient WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
+	private transient WeakHashMap<String, String> _masterTermCache;
 	private transient File _file;
 
 	private final String _filename;
@@ -67,15 +67,15 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 	public String getName() {
 		return _name;
 	}
-	
+
 	public String getEncoding() {
 		return _encoding;
 	}
-	
+
 	public String getFilename() {
 		return _filename;
 	}
-	
+
 	public boolean isCaseSensitive() {
 		return _caseSensitive;
 	}
@@ -95,12 +95,23 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 		}
 	}
 
+	private WeakHashMap<String, String> getMasterTermCache() {
+		if (_masterTermCache == null) {
+			synchronized (this) {
+				if (_masterTermCache == null) {
+					_masterTermCache = new WeakHashMap<String, String>();
+				}
+			}
+		}
+		return _masterTermCache;
+	}
+
 	@Override
 	public String getMasterTerm(String term) {
 		if (term == null) {
 			return null;
 		}
-		String masterTerm = _masterTermCache.get(term);
+		String masterTerm = getMasterTermCache().get(term);
 		if (masterTerm != null) {
 			return masterTerm;
 		}
@@ -112,7 +123,7 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 				TextBasedSynonym synonym = new TextBasedSynonym(line, _caseSensitive);
 				masterTerm = synonym.getMasterTerm();
 				if (term.equals(masterTerm) || synonym.getSynonyms().containsValue(term)) {
-					_masterTermCache.put(term, masterTerm);
+					getMasterTermCache().put(term, masterTerm);
 					return masterTerm;
 				}
 			}
