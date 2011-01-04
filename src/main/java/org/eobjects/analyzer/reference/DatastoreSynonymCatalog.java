@@ -77,8 +77,8 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 	public void init() {
 		logger.info("Initializing dictionary: {}", this);
 		Datastore datastore = getDatastore();
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		getDataContextProviders().add(dcp);
+		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+		getDataContextProviders().add(dataContextProvider);
 	}
 
 	/**
@@ -87,10 +87,10 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 	 */
 	@Close
 	public void close() {
-		DataContextProvider dcp = getDataContextProviders().poll();
-		if (dcp != null) {
+		DataContextProvider dataContextProvider = getDataContextProviders().poll();
+		if (dataContextProvider != null) {
 			logger.info("Closing dictionary: {}", this);
-			dcp.close();
+			dataContextProvider.close();
 		}
 	}
 
@@ -137,10 +137,10 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
 		DataContext dataContext = dataContextProvider.getDataContext();
 
-		SchemaNavigator sn = dataContextProvider.getSchemaNavigator();
+		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
 
-		Column masterTermColumn = sn.convertToColumn(_masterTermQualifiedColumnName);
-		Column[] columns = sn.convertToColumns(_synonymQualifiedColumnNames);
+		Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermQualifiedColumnName);
+		Column[] columns = schemaNavigator.convertToColumns(_synonymQualifiedColumnNames);
 
 		Table table = masterTermColumn.getTable();
 
@@ -172,22 +172,22 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 
 		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
 
-		SchemaNavigator sn = dataContextProvider.getSchemaNavigator();
+		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
 
-		Column masterTermColumn = sn.convertToColumn(_masterTermQualifiedColumnName);
-		Column[] columns = sn.convertToColumns(_synonymQualifiedColumnNames);
+		Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermQualifiedColumnName);
+		Column[] columns = schemaNavigator.convertToColumns(_synonymQualifiedColumnNames);
 
 		DataContext dataContext = dataContextProvider.getDataContext();
 		Table table = masterTermColumn.getTable();
 
 		// create a query that gets the master term where any of the synonym
 		// columns are equal to the synonym
-		SatisfiedWhereBuilder<?> qb = dataContext.query().from(table.getName()).select(masterTermColumn).where(columns[0])
+		SatisfiedWhereBuilder<?> queryBuilder = dataContext.query().from(table.getName()).select(masterTermColumn).where(columns[0])
 				.equals(term);
 		for (int i = 1; i < columns.length; i++) {
-			qb = qb.or(columns[i]).equals(term);
+			queryBuilder = queryBuilder.or(columns[i]).equals(term);
 		}
-		Query query = qb.toQuery();
+		Query query = queryBuilder.toQuery();
 		DataSet dataSet = dataContext.executeQuery(query);
 		String result = null;
 
