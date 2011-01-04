@@ -43,17 +43,17 @@ public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerRes
 
 	private static final Logger logger = LoggerFactory.getLogger(DateGapAnalyzer.class);
 
-	@Configured
+	@Configured(order = 1)
 	InputColumn<Date> fromColumn;
 
-	@Configured
+	@Configured(order = 2)
 	InputColumn<Date> toColumn;
 
-	@Configured(required = false)
+	@Configured(order = 3, required = false)
 	@Description("Optional column to group timelines by, if the table contains multiple timelines")
 	InputColumn<String> groupColumn;
 
-	@Configured(required = false, value = "Count intersecting from and to dates as overlaps")
+	@Configured(order = 4, required = false, value = "Count intersecting from and to dates as overlaps")
 	Boolean singleDateOverlaps = false;
 
 	private final Map<String, TimeLine> timelines = new HashMap<String, TimeLine>();

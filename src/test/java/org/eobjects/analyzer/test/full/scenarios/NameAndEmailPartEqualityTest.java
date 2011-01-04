@@ -19,14 +19,13 @@
  */
 package org.eobjects.analyzer.test.full.scenarios;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.EqualityValidationAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
+import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import org.eobjects.analyzer.beans.script.JavaScriptFilter;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.standardize.NameStandardizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
@@ -36,11 +35,11 @@ import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -50,7 +49,7 @@ import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.ValidationResult;
+import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
@@ -126,22 +125,24 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 			assertTrue(analyzerJobBuilder.isConfigured());
 		}
 
-		RowProcessingAnalyzerJobBuilder<EqualityValidationAnalyzer> equalsAnalyzerJobBuilder = analysisJobBuilder
-				.addRowProcessingAnalyzer(EqualityValidationAnalyzer.class);
+		FilterJobBuilder<JavaScriptFilter, ValidationCategory> fjb = analysisJobBuilder.addFilter(JavaScriptFilter.class);
+		fjb.addInputColumn(nameTransformerJobBuilder.getOutputColumnByName("Firstname"));
+		fjb.addInputColumn(usernameColumn);
+		fjb.setConfiguredProperty("Source code", "values[0] == values[1];");
 
-		assertEquals("Input1", equalsAnalyzerJobBuilder.getDescriptor().getConfiguredPropertiesForInput().iterator().next()
-				.getName());
+		assertTrue(fjb.isConfigured());
 
-		equalsAnalyzerJobBuilder.addInputColumn(nameTransformerJobBuilder.getOutputColumnByName("Firstname"),
-				equalsAnalyzerJobBuilder.getDescriptor().getConfiguredProperty("Input1"));
-		equalsAnalyzerJobBuilder.addInputColumn(usernameColumn, equalsAnalyzerJobBuilder.getDescriptor()
-				.getConfiguredProperty("Input2"));
-		assertTrue(equalsAnalyzerJobBuilder.isConfigured());
+		analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class)
+				.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"))
+				.setRequirement(fjb, ValidationCategory.VALID);
+		analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class)
+				.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"))
+				.setRequirement(fjb, ValidationCategory.INVALID);
 
 		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
 
 		dcp.close();
-		
+
 		if (!resultFuture.isSuccessful()) {
 			List<Throwable> errors = resultFuture.getErrors();
 			throw errors.get(0);
@@ -149,7 +150,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		List<AnalyzerResult> results = resultFuture.getResults();
 
-		assertEquals(6, results.size());
+		assertEquals(7, results.size());
 
 		ValueDistributionResult vdResult = (ValueDistributionResult) results.get(1);
 		assertEquals("Firstname", vdResult.getColumnName());
@@ -168,25 +169,19 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		assertEquals(4, vdResult.getNullCount());
 		assertEquals(0, vdResult.getUniqueCount());
 		assertEquals("ValueCountList[[[hussein->2]]]", vdResult.getTopValues().toString());
+		
+		vdResult = (ValueDistributionResult) results.get(4);
+		assertEquals("Titulation", vdResult.getColumnName());
+		assertEquals(6, vdResult.getNullCount());
+		assertEquals(0, vdResult.getUniqueCount());
+		assertEquals("ValueCountList[[]]", vdResult.getTopValues().toString());
 
-		ValidationResult validationResult = (ValidationResult) results.get(5);
-		InputColumn<?>[] highlightedColumns = validationResult.getHighlightedColumns();
-		assertEquals(2, highlightedColumns.length);
-		assertEquals("Firstname", highlightedColumns[0].getName());
-		assertEquals("Username", highlightedColumns[1].getName());
-		InputRow[] invalidRows = validationResult.getRows();
-		assertEquals(2, invalidRows.length);
-
-		// sort the rows to make order determinable
-		Arrays.sort(invalidRows, new Comparator<InputRow>() {
-			@Override
-			public int compare(InputRow o1, InputRow o2) {
-				String emailUsername1 = o1.getValue(usernameColumn);
-				String emailUsername2 = o2.getValue(usernameColumn);
-				return emailUsername1.compareTo(emailUsername2);
-			}
-		});
-		assertEquals("barack.hussein.obama", invalidRows[0].getValue(usernameColumn));
-		assertEquals("barack.obama", invalidRows[1].getValue(usernameColumn));
+		StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) results.get(5);
+		assertEquals(1, stringAnalyzerResult.getColumns().length);
+		assertEquals("4", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count").get().toString());
+		
+		stringAnalyzerResult = (StringAnalyzerResult) results.get(6);
+		assertEquals(1, stringAnalyzerResult.getColumns().length);
+		assertEquals("2", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count").get().toString());
 	}
 }

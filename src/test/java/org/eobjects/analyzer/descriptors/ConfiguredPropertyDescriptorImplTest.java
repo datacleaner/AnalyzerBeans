@@ -26,7 +26,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.EqualityValidationAnalyzer;
+import org.eobjects.analyzer.beans.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
@@ -51,15 +51,20 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 	}
 
 	public void testCompareTo() throws Exception {
-		Set<ConfiguredPropertyDescriptor> properties = AnnotationBasedAnalyzerBeanDescriptor.create(EqualityValidationAnalyzer.class).getConfiguredProperties();
-		assertEquals(2, properties.size());
+		Set<ConfiguredPropertyDescriptor> properties = AnnotationBasedAnalyzerBeanDescriptor.create(DateGapAnalyzer.class)
+				.getConfiguredProperties();
+		assertEquals(4, properties.size());
 		Iterator<ConfiguredPropertyDescriptor> it = properties.iterator();
 		assertTrue(it.hasNext());
-		assertEquals("Input1", it.next().getName());
+		assertEquals("From column", it.next().getName());
 		assertTrue(it.hasNext());
-		assertEquals("Input2", it.next().getName());
+		assertEquals("To column", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Group column", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Count intersecting from and to dates as overlaps", it.next().getName());
 		assertFalse(it.hasNext());
-		
+
 		Field f1 = getClass().getDeclaredField("str1");
 		Field f2 = getClass().getDeclaredField("str2");
 
