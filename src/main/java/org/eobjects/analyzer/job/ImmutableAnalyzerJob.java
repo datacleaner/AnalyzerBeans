@@ -30,15 +30,22 @@ import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class ImmutableAnalyzerJob implements AnalyzerJob {
 
+	private final String _name;
 	private final AnalyzerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
 	private final Outcome _requirement;
 
-	public ImmutableAnalyzerJob(AnalyzerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
+	public ImmutableAnalyzerJob(String name, AnalyzerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
 			Outcome requirement) {
+		_name = name;
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
 		_requirement = LazyOutcomeUtils.load(requirement);
+	}
+
+	@Override
+	public String getName() {
+		return _name;
 	}
 
 	@Override

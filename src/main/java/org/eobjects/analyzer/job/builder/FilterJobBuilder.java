@@ -48,11 +48,11 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 		}
 
 		if (_cachedFilterJob == null) {
-			_cachedFilterJob = new ImmutableFilterJob(getDescriptor(), new ImmutableBeanConfiguration(
+			_cachedFilterJob = new ImmutableFilterJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
 					getConfiguredProperties()), getRequirement());
 		} else {
-			ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getDescriptor(), new ImmutableBeanConfiguration(
-					getConfiguredProperties()), getRequirement());
+			ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getName(), getDescriptor(),
+					new ImmutableBeanConfiguration(getConfiguredProperties()), getRequirement());
 			if (!newFilterJob.equals(_cachedFilterJob)) {
 				_cachedFilterJob = newFilterJob;
 			}

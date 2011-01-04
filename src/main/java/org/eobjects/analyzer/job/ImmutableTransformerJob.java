@@ -34,17 +34,24 @@ import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class ImmutableTransformerJob implements TransformerJob {
 
+	private final String _name;
 	private final TransformerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
 	private final List<MutableInputColumn<?>> _output;
 	private final Outcome _requirement;
 
-	public ImmutableTransformerJob(TransformerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
-			Collection<MutableInputColumn<?>> output, Outcome requirement) {
+	public ImmutableTransformerJob(String name, TransformerBeanDescriptor<?> descriptor,
+			BeanConfiguration beanConfiguration, Collection<MutableInputColumn<?>> output, Outcome requirement) {
+		_name = name;
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
 		_output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
 		_requirement = LazyOutcomeUtils.load(requirement);
+	}
+	
+	@Override
+	public String getName() {
+		return _name;
 	}
 
 	@Override

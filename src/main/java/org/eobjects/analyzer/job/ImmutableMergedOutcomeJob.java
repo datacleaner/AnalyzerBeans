@@ -28,14 +28,21 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 
 public final class ImmutableMergedOutcomeJob implements MergedOutcomeJob {
 
+	private final String _name;
 	private final List<MergeInput> _mergeInputs;
 	private final MergedOutcome _outcome;
 	private final List<MutableInputColumn<?>> _output;
 
-	public ImmutableMergedOutcomeJob(Collection<MergeInput> input, Collection<MutableInputColumn<?>> output) {
+	public ImmutableMergedOutcomeJob(String name, Collection<MergeInput> input, Collection<MutableInputColumn<?>> output) {
+		_name = name;
 		_mergeInputs = new ArrayList<MergeInput>(input);
 		_output = new ArrayList<MutableInputColumn<?>>(output);
 		_outcome = new ImmutableMergedOutcome(this);
+	}
+
+	@Override
+	public String getName() {
+		return _name;
 	}
 
 	@Override

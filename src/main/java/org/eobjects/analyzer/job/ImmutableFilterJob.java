@@ -31,14 +31,22 @@ import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class ImmutableFilterJob implements FilterJob {
 
+	private final String _name;
 	private final FilterBeanDescriptor<?, ?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
 	private final Outcome _requirement;
 
-	public ImmutableFilterJob(FilterBeanDescriptor<?, ?> descriptor, BeanConfiguration beanConfiguration, Outcome requirement) {
+	public ImmutableFilterJob(String name, FilterBeanDescriptor<?, ?> descriptor, BeanConfiguration beanConfiguration,
+			Outcome requirement) {
+		_name = name;
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
 		_requirement = LazyOutcomeUtils.load(requirement);
+	}
+
+	@Override
+	public String getName() {
+		return _name;
 	}
 
 	@Override

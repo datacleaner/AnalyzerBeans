@@ -96,6 +96,7 @@
 				type="ab:outputType" />
 		</sequence>
 		<attribute name="id" use="required" type="token" />
+		<attribute name="name" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="transformerType">
@@ -110,6 +111,7 @@
 				maxOccurs="unbounded" />
 		</sequence>
 		<attribute name="requires" type="token" use="optional" />
+		<attribute name="name" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="transformerDescriptorType">
@@ -128,6 +130,7 @@
 				maxOccurs="unbounded" />
 		</sequence>
 		<attribute name="requires" type="token" use="optional" />
+		<attribute name="name" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="inputType">
@@ -150,6 +153,7 @@
 				maxOccurs="unbounded" />
 		</sequence>
 		<attribute name="requires" type="token" use="optional" />
+		<attribute name="name" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="analyzerDescriptorType">

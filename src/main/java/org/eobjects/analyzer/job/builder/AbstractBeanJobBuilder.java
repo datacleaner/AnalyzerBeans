@@ -49,6 +49,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 
 	private final D _descriptor;
 	private final E _configurableBean;
+	private volatile String _name;
 
 	public AbstractBeanJobBuilder(D descriptor, Class<?> builderClass) {
 		if (descriptor == null) {
@@ -87,6 +88,14 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 			}
 		}
 		return true;
+	}
+
+	public String getName() {
+		return _name;
+	}
+
+	public void setName(String name) {
+		_name = name;
 	}
 
 	public boolean isConfigured() {

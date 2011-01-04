@@ -332,6 +332,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					TransformerJobBuilder<?> transformerJobBuilder = analysisJobBuilder
 							.addTransformer(transformerBeanDescriptor);
 
+					transformerJobBuilder.setName(transformer.getName());
+
 					applyProperties(transformerJobBuilder, transformer.getProperties(), schemaNavigator);
 
 					transformerJobBuilders.put(transformer, transformerJobBuilder);
@@ -442,6 +444,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					}
 					FilterJobBuilder<?, ?> filterJobBuilder = analysisJobBuilder.addFilter(filterBeanDescriptor);
 
+					filterJobBuilder.setName(filter.getName());
+
 					List<InputType> input = filter.getInput();
 					for (InputType inputType : input) {
 						ref = inputType.getRef();
@@ -499,6 +503,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					}
 
 					MergedOutcomeJobBuilder mojb = analysisJobBuilder.addMergedOutcomeJobBuilder();
+					mojb.setName(mergedOutcomeType.getName());
 					outcomeMapping.put(id, new LazyMergedOutcome(mojb));
 				}
 			}
@@ -582,6 +587,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						}
 						builder.setRequirement(requirement);
 					}
+				} else if (o instanceof MergedOutcomeType) {
+					// do nothing
 				} else {
 					throw new IllegalStateException("Unexpected transformation child element: " + o);
 				}
@@ -609,6 +616,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						.getComponentClass();
 				RowProcessingAnalyzerJobBuilder<? extends RowProcessingAnalyzer<?>> analyzerJobBuilder = analysisJobBuilder
 						.addRowProcessingAnalyzer(beanClass);
+				analyzerJobBuilder.setName(analyzerType.getName());
 
 				List<InputType> input = analyzerType.getInput();
 				for (InputType inputType : input) {
@@ -650,6 +658,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						.getComponentClass();
 				ExploringAnalyzerJobBuilder<? extends ExploringAnalyzer<?>> analyzerJobBuilder = analysisJobBuilder
 						.addExploringAnalyzer(beanClass);
+				analyzerJobBuilder.setName(analyzerType.getName());
 				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator);
 
 				if (analyzerType.getRequires() != null) {

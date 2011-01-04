@@ -56,6 +56,24 @@ import dk.eobjects.metamodel.util.ToStringComparator;
 
 public class JaxbJobReaderTest extends TestCase {
 
+	public void testReadComponentNames() throws Exception {
+		JobReader<InputStream> reader = new JaxbJobReader(TestHelper.createAnalyzerBeansConfiguration(TestHelper
+				.createSampleDatabaseDatastore("my database")));
+		AnalysisJob job = reader.read(new FileInputStream(new File("src/test/resources/example-job-merged-outcome.xml")));
+
+		assertEquals(1, job.getAnalyzerJobs().size());
+		assertEquals("analyzer_1", job.getAnalyzerJobs().iterator().next().getName());
+
+		assertEquals(2, job.getFilterJobs().size());
+		assertEquals("single_word_1", job.getFilterJobs().iterator().next().getName());
+
+		assertEquals(1, job.getTransformerJobs().size());
+		assertEquals("email_std_1", job.getTransformerJobs().iterator().next().getName());
+
+		assertEquals(2, job.getMergedOutcomeJobs().size());
+		assertEquals("merge_1", job.getMergedOutcomeJobs().iterator().next().getName());
+	}
+
 	public void testReadMetadataFull() throws Exception {
 		JobReader<InputStream> reader = new JaxbJobReader(TestHelper.createAnalyzerBeansConfiguration());
 		AnalysisJobMetadata metadata = reader.readMetadata(new FileInputStream(new File(

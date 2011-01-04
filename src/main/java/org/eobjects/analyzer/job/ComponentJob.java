@@ -26,4 +26,9 @@ package org.eobjects.analyzer.job;
  */
 public interface ComponentJob {
 
+	/**
+	 * @return an optional name given by the user to identify this component in
+	 *         a job (can be null if no name is assigned).
+	 */
+	public String getName();
 }

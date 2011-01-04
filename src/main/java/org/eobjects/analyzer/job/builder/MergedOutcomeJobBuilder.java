@@ -38,6 +38,7 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob {
 	private final List<MergeInputBuilder> _mergeInputs = new ArrayList<MergeInputBuilder>();
 	private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
 	private final IdGenerator _idGenerator;
+	private volatile String _name;
 
 	public MergedOutcomeJobBuilder(IdGenerator idGenerator) {
 		_idGenerator = idGenerator;
@@ -47,6 +48,14 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob {
 		MergeInputBuilder mib = new MergeInputBuilder(fjb, category);
 		_mergeInputs.add(mib);
 		return mib;
+	}
+
+	public String getName() {
+		return _name;
+	}
+
+	public void setName(String name) {
+		_name = name;
 	}
 
 	public MergeInputBuilder addMergedOutcome(Outcome outcome) {
@@ -79,7 +88,7 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob {
 			mergeInputs.add(mergeInput);
 		}
 
-		return new ImmutableMergedOutcomeJob(mergeInputs, getOutputColumns());
+		return new ImmutableMergedOutcomeJob(getName(), mergeInputs, getOutputColumns());
 	}
 
 	public List<MutableInputColumn<?>> getOutputColumns() {

@@ -34,7 +34,8 @@ public class ImmutableFilterJobTest extends TestCase {
 		FilterBeanDescriptor<?, ?> descriptor = AnnotationBasedFilterBeanDescriptor.create(SingleWordFilter.class);
 		BeanConfiguration configuration = new ImmutableBeanConfiguration(new HashMap<ConfiguredPropertyDescriptor, Object>());
 
-		ImmutableFilterJob job = new ImmutableFilterJob(descriptor, configuration, null);
+		ImmutableFilterJob job = new ImmutableFilterJob("foo", descriptor, configuration, null);
+		assertEquals("foo", job.getName());
 		assertNull(job.getRequirement());
 
 		FilterOutcome[] outcomes1 = job.getOutcomes();

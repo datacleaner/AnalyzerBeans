@@ -92,7 +92,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	public AnalyzerJob[] toAnalyzerJobs() throws IllegalStateException {
 		Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
 		if (!_multipleJobsSupported) {
-			ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getDescriptor(), new ImmutableBeanConfiguration(
+			ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
 					configuredProperties), getRequirement());
 			return new AnalyzerJob[] { job };
 		}
@@ -163,8 +163,8 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 		Map<ConfiguredPropertyDescriptor, Object> jobProperties = new HashMap<ConfiguredPropertyDescriptor, Object>(
 				configuredProperties);
 		jobProperties.put(_inputProperty, columnValue);
-		ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getDescriptor(), new ImmutableBeanConfiguration(jobProperties),
-				getRequirement());
+		ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
+				jobProperties), getRequirement());
 		return job;
 	}
 

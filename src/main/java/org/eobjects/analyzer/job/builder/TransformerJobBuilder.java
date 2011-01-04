@@ -134,8 +134,8 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			throw new IllegalStateException("Transformer job is not correctly configured");
 		}
 
-		return new ImmutableTransformerJob(getDescriptor(), new ImmutableBeanConfiguration(getConfiguredProperties()),
-				getOutputColumns(), getRequirement());
+		return new ImmutableTransformerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
+				getConfiguredProperties()), getOutputColumns(), getRequirement());
 	}
 
 	@Override
