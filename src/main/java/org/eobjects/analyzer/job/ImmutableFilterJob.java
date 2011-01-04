@@ -96,6 +96,7 @@ public final class ImmutableFilterJob implements FilterJob {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((_name == null) ? 0 : _name.hashCode());
 		result = prime * result + ((_beanConfiguration == null) ? 0 : _beanConfiguration.hashCode());
 		result = prime * result + ((_descriptor == null) ? 0 : _descriptor.hashCode());
 		result = prime * result + ((_requirement == null) ? 0 : _requirement.hashCode());
@@ -111,6 +112,11 @@ public final class ImmutableFilterJob implements FilterJob {
 		if (getClass() != obj.getClass())
 			return false;
 		ImmutableFilterJob other = (ImmutableFilterJob) obj;
+		if (_name == null) {
+			if (other._name != null)
+				return false;
+		} else if (!_name.equals(other._name))
+			return false;
 		if (_beanConfiguration == null) {
 			if (other._beanConfiguration != null)
 				return false;

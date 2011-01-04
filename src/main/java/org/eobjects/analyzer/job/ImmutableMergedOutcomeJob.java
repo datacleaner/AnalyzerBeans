@@ -85,6 +85,7 @@ public final class ImmutableMergedOutcomeJob implements MergedOutcomeJob {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((_name == null) ? 0 : _name.hashCode());
 		result = prime * result + ((_mergeInputs == null) ? 0 : _mergeInputs.hashCode());
 		result = prime * result + ((_output == null) ? 0 : _output.hashCode());
 		return result;
@@ -99,6 +100,11 @@ public final class ImmutableMergedOutcomeJob implements MergedOutcomeJob {
 		if (getClass() != obj.getClass())
 			return false;
 		ImmutableMergedOutcomeJob other = (ImmutableMergedOutcomeJob) obj;
+		if (_name == null) {
+			if (other._name != null)
+				return false;
+		} else if (!_name.equals(other._name))
+			return false;
 		if (_mergeInputs == null) {
 			if (other._mergeInputs != null)
 				return false;

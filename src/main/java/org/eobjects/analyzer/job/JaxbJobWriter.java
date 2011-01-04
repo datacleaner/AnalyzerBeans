@@ -388,6 +388,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		final Collection<TransformerJob> transformerJobs = analysisJob.getTransformerJobs();
 		for (TransformerJob transformerJob : transformerJobs) {
 			TransformerType transformerType = new TransformerType();
+			transformerType.setName(transformerJob.getName());
 			TransformerDescriptorType descriptorType = new TransformerDescriptorType();
 			descriptorType.setRef(transformerJob.getDescriptor().getDisplayName());
 			transformerType.setDescriptor(descriptorType);
@@ -399,6 +400,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		Collection<FilterJob> filterJobs = analysisJob.getFilterJobs();
 		for (FilterJob filterJob : filterJobs) {
 			FilterType filterType = new FilterType();
+			filterType.setName(filterJob.getName());
 			FilterDescriptorType descriptorType = new FilterDescriptorType();
 			descriptorType.setRef(filterJob.getDescriptor().getDisplayName());
 			filterType.setDescriptor(descriptorType);
@@ -410,6 +412,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		Collection<MergedOutcomeJob> mergedOutcomeJobs = analysisJob.getMergedOutcomeJobs();
 		for (MergedOutcomeJob mergedOutcomeJob : mergedOutcomeJobs) {
 			MergedOutcomeType mergedOutcomeType = new MergedOutcomeType();
+			mergedOutcomeType.setName(mergedOutcomeJob.getName());
 			transformationType.getTransformerOrFilterOrMergedOutcome().add(mergedOutcomeType);
 			mergedOutcomeMappings.put(mergedOutcomeJob, mergedOutcomeType);
 		}
@@ -418,6 +421,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		Collection<AnalyzerJob> analyzerJobs = analysisJob.getAnalyzerJobs();
 		for (AnalyzerJob analyzerJob : analyzerJobs) {
 			AnalyzerType analyzerType = new AnalyzerType();
+			analyzerType.setName(analyzerJob.getName());
 			AnalyzerDescriptorType descriptorType = new AnalyzerDescriptorType();
 			descriptorType.setRef(analyzerJob.getDescriptor().getDisplayName());
 			analyzerType.setDescriptor(descriptorType);

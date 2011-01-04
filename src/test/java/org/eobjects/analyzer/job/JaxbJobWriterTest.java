@@ -227,6 +227,15 @@ public class JaxbJobWriterTest extends TestCase {
 		patternFinder2.addInputColumn(mergedColumn);
 
 		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file5.xml");
+
+		mergedOutcome.setName("merge1");
+		tjb.setName("trans1");
+		fjb1.setName("fjb1");
+		fjb2.setName("fjb2");
+		patternFinder1.setName("pf 1");
+		patternFinder2.setName("pf 2");
+
+		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file6.xml");
 	}
 
 	/**

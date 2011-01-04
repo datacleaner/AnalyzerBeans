@@ -48,7 +48,7 @@ public final class ImmutableTransformerJob implements TransformerJob {
 		_output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
 		_requirement = LazyOutcomeUtils.load(requirement);
 	}
-	
+
 	@Override
 	public String getName() {
 		return _name;
@@ -92,6 +92,7 @@ public final class ImmutableTransformerJob implements TransformerJob {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((_name == null) ? 0 : _name.hashCode());
 		result = prime * result + ((_beanConfiguration == null) ? 0 : _beanConfiguration.hashCode());
 		result = prime * result + ((_descriptor == null) ? 0 : _descriptor.hashCode());
 		result = prime * result + ((_output == null) ? 0 : _output.hashCode());
@@ -108,6 +109,11 @@ public final class ImmutableTransformerJob implements TransformerJob {
 		if (getClass() != obj.getClass())
 			return false;
 		ImmutableTransformerJob other = (ImmutableTransformerJob) obj;
+		if (_name == null) {
+			if (other._name != null)
+				return false;
+		} else if (!_name.equals(other._name))
+			return false;
 		if (_beanConfiguration == null) {
 			if (other._beanConfiguration != null)
 				return false;
