@@ -263,7 +263,7 @@
 		<sequence>
 			<element name="columnName" minOccurs="1" maxOccurs="1" type="string" />
 			<element name="dataStoreName" minOccurs="1" maxOccurs="1" type="string" />
-			<element name="synonymColumnName" minOccurs="1" maxOccurs="unbounded" type="string" />
+			<element name="synonymColumnNames" minOccurs="1" maxOccurs="unbounded" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 	</complexType>
