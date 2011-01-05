@@ -79,10 +79,11 @@ public final class AnalysisJobBuilder implements Closeable {
 	private final List<MergedOutcomeJobBuilder> _mergedOutcomeJobBuilders = new ArrayList<MergedOutcomeJobBuilder>();
 
 	// listeners, typically for UI that uses the builders
-	private final List<SourceColumnChangeListener> _sourceColumnListeners = new LinkedList<SourceColumnChangeListener>();
-	private final List<AnalyzerChangeListener> _analyzerChangeListeners = new LinkedList<AnalyzerChangeListener>();
-	private final List<TransformerChangeListener> _transformerChangeListeners = new LinkedList<TransformerChangeListener>();
-	private final List<FilterChangeListener> _filterChangeListeners = new LinkedList<FilterChangeListener>();
+	private final List<SourceColumnChangeListener> _sourceColumnListeners = new ArrayList<SourceColumnChangeListener>();
+	private final List<AnalyzerChangeListener> _analyzerChangeListeners = new ArrayList<AnalyzerChangeListener>();
+	private final List<TransformerChangeListener> _transformerChangeListeners = new ArrayList<TransformerChangeListener>();
+	private final List<FilterChangeListener> _filterChangeListeners = new ArrayList<FilterChangeListener>();
+	private final List<MergedOutcomeChangeListener> _mergedOutcomeChangeListener = new ArrayList<MergedOutcomeChangeListener>();
 
 	public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;
@@ -171,10 +172,12 @@ public final class AnalysisJobBuilder implements Closeable {
 	}
 
 	public AnalysisJobBuilder removeSourceColumn(MetaModelInputColumn inputColumn) {
-		_sourceColumns.remove(inputColumn);
-		List<SourceColumnChangeListener> listeners = new ArrayList<SourceColumnChangeListener>(_sourceColumnListeners);
-		for (SourceColumnChangeListener listener : listeners) {
-			listener.onRemove(inputColumn);
+		boolean removed = _sourceColumns.remove(inputColumn);
+		if (removed) {
+			List<SourceColumnChangeListener> listeners = new ArrayList<SourceColumnChangeListener>(_sourceColumnListeners);
+			for (SourceColumnChangeListener listener : listeners) {
+				listener.onRemove(inputColumn);
+			}
 		}
 		return this;
 	}
@@ -195,13 +198,24 @@ public final class AnalysisJobBuilder implements Closeable {
 	public MergedOutcomeJobBuilder addMergedOutcomeJobBuilder() {
 		MergedOutcomeJobBuilder mojb = new MergedOutcomeJobBuilder(_transformedColumnIdGenerator);
 		_mergedOutcomeJobBuilders.add(mojb);
-		// TODO: Notify listeners
+
+		List<MergedOutcomeChangeListener> listeners = new ArrayList<MergedOutcomeChangeListener>(
+				_mergedOutcomeChangeListener);
+		for (MergedOutcomeChangeListener listener : listeners) {
+			listener.onAdd(mojb);
+		}
 		return mojb;
 	}
 
-	public AnalysisJobBuilder removeMergedOutcomeJobBuilder(MergedOutcomeJobBuilder mergedOutcomeJobBuilder) {
-		_mergedOutcomeJobBuilders.remove(mergedOutcomeJobBuilder);
-		// TODO: Notify listeners
+	public AnalysisJobBuilder removeMergedOutcomeJobBuilder(MergedOutcomeJobBuilder mojb) {
+		boolean removed = _mergedOutcomeJobBuilders.remove(mojb);
+		if (removed) {
+			List<MergedOutcomeChangeListener> listeners = new ArrayList<MergedOutcomeChangeListener>(
+					_mergedOutcomeChangeListener);
+			for (MergedOutcomeChangeListener listener : listeners) {
+				listener.onRemove(mojb);
+			}
+		}
 		return this;
 	}
 
@@ -237,14 +251,16 @@ public final class AnalysisJobBuilder implements Closeable {
 	}
 
 	public AnalysisJobBuilder removeTransformer(TransformerJobBuilder<?> tjb) {
-		_transformerJobBuilders.remove(tjb);
-
-		// make a copy since some of the listeners may add additional listeners
-		// which will otherwise cause ConcurrentModificationExceptions
-		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(_transformerChangeListeners);
-		for (TransformerChangeListener listener : listeners) {
-			listener.onOutputChanged(tjb, new LinkedList<MutableInputColumn<?>>());
-			listener.onRemove(tjb);
+		boolean removed = _transformerJobBuilders.remove(tjb);
+		if (removed) {
+			// make a copy since some of the listeners may add additional
+			// listeners
+			// which will otherwise cause ConcurrentModificationExceptions
+			List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(_transformerChangeListeners);
+			for (TransformerChangeListener listener : listeners) {
+				listener.onOutputChanged(tjb, new LinkedList<MutableInputColumn<?>>());
+				listener.onRemove(tjb);
+			}
 		}
 		return this;
 	}
@@ -270,11 +286,12 @@ public final class AnalysisJobBuilder implements Closeable {
 	}
 
 	public AnalysisJobBuilder removeFilter(FilterJobBuilder<?, ?> fjb) {
-		_filterJobBuilders.remove(fjb);
-
-		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
-		for (FilterChangeListener listener : listeners) {
-			listener.onRemove(fjb);
+		boolean removed = _filterJobBuilders.remove(fjb);
+		if (removed) {
+			List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
+			for (FilterChangeListener listener : listeners) {
+				listener.onRemove(fjb);
+			}
 		}
 		return this;
 	}
@@ -330,9 +347,21 @@ public final class AnalysisJobBuilder implements Closeable {
 	}
 
 	public AnalysisJobBuilder removeAnalyzer(RowProcessingAnalyzerJobBuilder<?> ajb) {
-		_analyzerJobBuilders.remove(ajb);
-		for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
-			listener.onRemove(ajb);
+		boolean removed = _analyzerJobBuilders.remove(ajb);
+		if (removed) {
+			for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
+				listener.onRemove(ajb);
+			}
+		}
+		return this;
+	}
+
+	public AnalysisJobBuilder removeAnalyzer(ExploringAnalyzerJobBuilder<?> ajb) {
+		boolean removed = _analyzerJobBuilders.remove(ajb);
+		if (removed) {
+			for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
+				listener.onRemove(ajb);
+			}
 		}
 		return this;
 	}
@@ -467,7 +496,7 @@ public final class AnalysisJobBuilder implements Closeable {
 					return inputColumn;
 				}
 			}
-			
+
 			for (MetaModelInputColumn inputColumn : _sourceColumns) {
 				if (name.equalsIgnoreCase(inputColumn.getName())) {
 					return inputColumn;
