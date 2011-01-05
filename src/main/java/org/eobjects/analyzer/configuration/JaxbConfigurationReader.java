@@ -308,8 +308,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						String dataStoreName = datastoreSynonymCatalogType.getDataStoreName();
 						String columnName = datastoreSynonymCatalogType.getColumnName();
 
-						// TODO: Load synonym columns
-						String[] synonymColumnNames = new String[0];
+						String[] synonymColumnNames = datastoreSynonymCatalogType.getSynonymColumnNames().toArray(new String[0]);
 						synonymCatalogList.add(new DatastoreSynonymCatalog(name, datastoreCatalog, dataStoreName,
 								columnName, synonymColumnNames));
 					} else {
