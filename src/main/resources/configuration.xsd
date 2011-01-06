@@ -205,8 +205,8 @@
 					<choice minOccurs="0" maxOccurs="unbounded">
 						<element name="text-file-synonym-catalog" minOccurs="0"
 							maxOccurs="unbounded" type="ab:textFileSynonymCatalogType" />
-						<element name="dataStore-synonym-catalog" minOccurs="0"
-							maxOccurs="unbounded" type="ab:dataStoreSynonymCatalogType" />
+						<element name="datastore-synonym-catalog" minOccurs="0"
+							maxOccurs="unbounded" type="ab:datastoreSynonymCatalogType" />
 						<element name="custom-synonym-catalog" minOccurs="0"
 							maxOccurs="unbounded" type="ab:customElementType" />
 					</choice>
@@ -259,11 +259,11 @@
 		<attribute name="name" type="string" use="required" />
 	</complexType>
 	
-	<complexType name="dataStoreSynonymCatalogType">
+	<complexType name="datastoreSynonymCatalogType">
 		<sequence>
-			<element name="columnName" minOccurs="1" maxOccurs="1" type="string" />
-			<element name="dataStoreName" minOccurs="1" maxOccurs="1" type="string" />
-			<element name="synonymColumnNames" minOccurs="1" maxOccurs="unbounded" type="string" />
+			<element name="column-name" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="datastore-name" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="synonym-column-names" minOccurs="1" maxOccurs="unbounded" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 	</complexType>
