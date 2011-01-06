@@ -24,7 +24,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class ImmutableAnalysisJobMetadata implements AnalysisJobMetadata {
+import dk.eobjects.metamodel.util.BaseObject;
+
+public class ImmutableAnalysisJobMetadata extends BaseObject implements AnalysisJobMetadata {
 
 	private final String _jobName;
 	private final String _jobVersion;
@@ -50,6 +52,18 @@ public class ImmutableAnalysisJobMetadata implements AnalysisJobMetadata {
 			sourceColumnPaths = new ArrayList<String>(sourceColumnPaths);
 		}
 		_sourceColumnPaths = Collections.unmodifiableList(sourceColumnPaths);
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		identifiers.add(_jobName);
+		identifiers.add(_jobVersion);
+		identifiers.add(_jobDescription);
+		identifiers.add(_author);
+		identifiers.add(_createdDate);
+		identifiers.add(_updatedDate);
+		identifiers.add(_datastoreName);
+		identifiers.add(_sourceColumnPaths);
 	}
 
 	@Override
@@ -90,72 +104,5 @@ public class ImmutableAnalysisJobMetadata implements AnalysisJobMetadata {
 	@Override
 	public List<String> getSourceColumnPaths() {
 		return _sourceColumnPaths;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((_author == null) ? 0 : _author.hashCode());
-		result = prime * result + ((_createdDate == null) ? 0 : _createdDate.hashCode());
-		result = prime * result + ((_datastoreName == null) ? 0 : _datastoreName.hashCode());
-		result = prime * result + ((_jobDescription == null) ? 0 : _jobDescription.hashCode());
-		result = prime * result + ((_jobName == null) ? 0 : _jobName.hashCode());
-		result = prime * result + ((_jobVersion == null) ? 0 : _jobVersion.hashCode());
-		result = prime * result + ((_sourceColumnPaths == null) ? 0 : _sourceColumnPaths.hashCode());
-		result = prime * result + ((_updatedDate == null) ? 0 : _updatedDate.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ImmutableAnalysisJobMetadata other = (ImmutableAnalysisJobMetadata) obj;
-		if (_author == null) {
-			if (other._author != null)
-				return false;
-		} else if (!_author.equals(other._author))
-			return false;
-		if (_createdDate == null) {
-			if (other._createdDate != null)
-				return false;
-		} else if (!_createdDate.equals(other._createdDate))
-			return false;
-		if (_datastoreName == null) {
-			if (other._datastoreName != null)
-				return false;
-		} else if (!_datastoreName.equals(other._datastoreName))
-			return false;
-		if (_jobDescription == null) {
-			if (other._jobDescription != null)
-				return false;
-		} else if (!_jobDescription.equals(other._jobDescription))
-			return false;
-		if (_jobName == null) {
-			if (other._jobName != null)
-				return false;
-		} else if (!_jobName.equals(other._jobName))
-			return false;
-		if (_jobVersion == null) {
-			if (other._jobVersion != null)
-				return false;
-		} else if (!_jobVersion.equals(other._jobVersion))
-			return false;
-		if (_sourceColumnPaths == null) {
-			if (other._sourceColumnPaths != null)
-				return false;
-		} else if (!_sourceColumnPaths.equals(other._sourceColumnPaths))
-			return false;
-		if (_updatedDate == null) {
-			if (other._updatedDate != null)
-				return false;
-		} else if (!_updatedDate.equals(other._updatedDate))
-			return false;
-		return true;
 	}
 }

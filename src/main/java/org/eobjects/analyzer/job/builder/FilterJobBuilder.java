@@ -35,7 +35,7 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 
 	// We keep a cached version of the resulting filter job because of
 	// references coming from other objects, particular LazyFilterOutcome.
-	private FilterJob _cachedFilterJob;
+	private FilterJob _cachedJob;
 
 	public FilterJobBuilder(AnalysisJobBuilder analysisJobBuilder, FilterBeanDescriptor<F, C> descriptor) {
 		super(descriptor, FilterJobBuilder.class);
@@ -47,17 +47,17 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 			throw new IllegalStateException("Filter job is not correctly configured");
 		}
 
-		if (_cachedFilterJob == null) {
-			_cachedFilterJob = new ImmutableFilterJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
+		if (_cachedJob == null) {
+			_cachedJob = new ImmutableFilterJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
 					getConfiguredProperties()), getRequirement());
 		} else {
 			ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getName(), getDescriptor(),
 					new ImmutableBeanConfiguration(getConfiguredProperties()), getRequirement());
-			if (!newFilterJob.equals(_cachedFilterJob)) {
-				_cachedFilterJob = newFilterJob;
+			if (!newFilterJob.equals(_cachedJob)) {
+				_cachedJob = newFilterJob;
 			}
 		}
-		return _cachedFilterJob;
+		return _cachedJob;
 	}
 
 	@Override

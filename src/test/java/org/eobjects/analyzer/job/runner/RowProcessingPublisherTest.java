@@ -103,14 +103,15 @@ public class RowProcessingPublisherTest extends TestCase {
 
 		assertEquals(5, consumers.size());
 
-		assertEquals("ImmutableFilterJob[filter=Not null]", consumers.get(0).getComponentJob().toString());
-		assertEquals("ImmutableTransformerJob[transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
+		assertEquals("ImmutableFilterJob[name=null,filter=Not null]", consumers.get(0).getComponentJob().toString());
+		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
 				.toString());
 		assertEquals(
-				"ImmutableMergedOutcomeJob[mergeInputs=[ImmutableMergeInput[FilterOutcome[category=VALID]], ImmutableMergeInput[FilterOutcome[category=INVALID]]]]",
+				"ImmutableMergedOutcomeJob[name=null,mergeInputs=[ImmutableMergeInput[FilterOutcome[category=VALID]], ImmutableMergeInput[FilterOutcome[category=INVALID]]]]",
 				consumers.get(2).getComponentJob().toString());
-		assertEquals("ImmutableFilterJob[filter=Single word]", consumers.get(3).getComponentJob().toString());
-		assertEquals("ImmutableAnalyzerJob[analyzer=String analyzer]", consumers.get(4).getComponentJob().toString());
+		assertEquals("ImmutableFilterJob[name=null,filter=Single word]", consumers.get(3).getComponentJob().toString());
+		assertEquals("ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", consumers.get(4).getComponentJob()
+				.toString());
 	}
 
 	public void testCreateProcessOrderedConsumerListWithFilterDependencies() throws Exception {
@@ -153,12 +154,12 @@ public class RowProcessingPublisherTest extends TestCase {
 
 		consumers = RowProcessingPublisher.createProcessOrderedConsumerList(consumers);
 
-		assertEquals("ImmutableFilterJob[filter=Not null]", consumers.get(0).getComponentJob().toString());
-		assertEquals("ImmutableTransformerJob[transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
+		assertEquals("ImmutableFilterJob[name=null,filter=Not null]", consumers.get(0).getComponentJob().toString());
+		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
 				.toString());
-		assertEquals("ImmutableTransformerJob[transformer=Whitespace trimmer]", consumers.get(2).getComponentJob()
+		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(2).getComponentJob()
 				.toString());
-		assertEquals("ImmutableFilterJob[filter=Single word]", consumers.get(3).getComponentJob().toString());
+		assertEquals("ImmutableFilterJob[name=null,filter=Single word]", consumers.get(3).getComponentJob().toString());
 	}
 
 	private List<RowProcessingConsumer> getConsumers(AnalysisJob analysisJob) {

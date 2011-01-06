@@ -28,7 +28,9 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.util.CollectionUtils;
 
-public final class ImmutableAnalyzerJob implements AnalyzerJob {
+import dk.eobjects.metamodel.util.BaseObject;
+
+public final class ImmutableAnalyzerJob extends BaseObject implements AnalyzerJob {
 
 	private final String _name;
 	private final AnalyzerBeanDescriptor<?> _descriptor;
@@ -80,50 +82,15 @@ public final class ImmutableAnalyzerJob implements AnalyzerJob {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((_name == null) ? 0 : _name.hashCode());
-		result = prime * result + ((_beanConfiguration == null) ? 0 : _beanConfiguration.hashCode());
-		result = prime * result + ((_descriptor == null) ? 0 : _descriptor.hashCode());
-		result = prime * result + ((_requirement == null) ? 0 : _requirement.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ImmutableAnalyzerJob other = (ImmutableAnalyzerJob) obj;
-		if (_name == null) {
-			if (other._name != null)
-				return false;
-		} else if (!_name.equals(other._name))
-			return false;
-		if (_beanConfiguration == null) {
-			if (other._beanConfiguration != null)
-				return false;
-		} else if (!_beanConfiguration.equals(other._beanConfiguration))
-			return false;
-		if (_descriptor == null) {
-			if (other._descriptor != null)
-				return false;
-		} else if (!_descriptor.equals(other._descriptor))
-			return false;
-		if (_requirement == null) {
-			if (other._requirement != null)
-				return false;
-		} else if (!_requirement.equals(other._requirement))
-			return false;
-		return true;
+	protected void decorateIdentity(List<Object> identifiers) {
+		identifiers.add(_name);
+		identifiers.add(_beanConfiguration);
+		identifiers.add(_descriptor);
+		identifiers.add(_requirement);
 	}
 
 	@Override
 	public String toString() {
-		return "ImmutableAnalyzerJob[analyzer=" + _descriptor.getDisplayName() + "]";
+		return "ImmutableAnalyzerJob[name=" + _name + ",analyzer=" + _descriptor.getDisplayName() + "]";
 	}
 }

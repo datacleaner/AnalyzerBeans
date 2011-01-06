@@ -21,12 +21,11 @@ package org.eobjects.analyzer.job.builder;
 
 import org.eobjects.analyzer.job.AbstractFilterOutcome;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.FilterOutcome;
 
-public final class LazyFilterOutcome extends AbstractFilterOutcome implements FilterOutcome {
+public final class LazyFilterOutcome extends AbstractFilterOutcome {
 
-	private FilterJobBuilder<?, ?> _filterJobBuilder;
-	private Enum<?> _category;
+	private final FilterJobBuilder<?, ?> _filterJobBuilder;
+	private final Enum<?> _category;
 
 	public LazyFilterOutcome(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
 		_filterJobBuilder = filterJobBuilder;
@@ -42,7 +41,7 @@ public final class LazyFilterOutcome extends AbstractFilterOutcome implements Fi
 	public Enum<?> getCategory() {
 		return _category;
 	}
-	
+
 	public FilterJobBuilder<?, ?> getFilterJobBuilder() {
 		return _filterJobBuilder;
 	}

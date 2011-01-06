@@ -157,7 +157,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertEquals(1, transformerJobs.size());
 
 		TransformerJob transformerJob = transformerJobs.iterator().next();
-		assertEquals("ImmutableTransformerJob[transformer=Convert to string]", transformerJob.toString());
+		assertEquals("ImmutableTransformerJob[name=null,transformer=Convert to string]", transformerJob.toString());
 
 		assertEquals(
 				"[MetaModelInputColumn[Column[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
@@ -167,7 +167,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertEquals(1, analyzerJobs.size());
 
 		AnalyzerJob analyzerJob = analyzerJobs.iterator().next();
-		assertEquals("ImmutableAnalyzerJob[analyzer=String analyzer]", analyzerJob.toString());
+		assertEquals("ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", analyzerJob.toString());
 	}
 
 	public void testGetAvailableUnfilteredBeans() throws Exception {

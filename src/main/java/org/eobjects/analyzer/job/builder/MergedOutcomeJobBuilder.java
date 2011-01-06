@@ -40,6 +40,10 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob {
 	private final IdGenerator _idGenerator;
 	private volatile String _name;
 
+	// We keep a cached version of the resulting filter job because of
+	// references coming from other objects, particular LazyFilterOutcome.
+	private volatile MergedOutcomeJob _cachedJob;
+
 	public MergedOutcomeJobBuilder(IdGenerator idGenerator) {
 		_idGenerator = idGenerator;
 	}
@@ -88,7 +92,15 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob {
 			mergeInputs.add(mergeInput);
 		}
 
-		return new ImmutableMergedOutcomeJob(getName(), mergeInputs, getOutputColumns());
+		ImmutableMergedOutcomeJob job = new ImmutableMergedOutcomeJob(getName(), mergeInputs, getOutputColumns());
+		if (_cachedJob == null) {
+			_cachedJob = job;
+		} else {
+			if (!_cachedJob.equals(job)) {
+				_cachedJob = job;
+			}
+		}
+		return _cachedJob;
 	}
 
 	public List<MutableInputColumn<?>> getOutputColumns() {

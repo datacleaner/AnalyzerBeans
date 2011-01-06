@@ -52,7 +52,7 @@ public class InputColumnsFromDifferentTablesTest extends TestCase {
 			fail("exception expected");
 		} catch (IllegalArgumentException e) {
 			assertEquals(
-					"Input columns in ImmutableTransformerJob[transformer=Concatenator] originate from different tables",
+					"Input columns in ImmutableTransformerJob[name=null,transformer=Concatenator] originate from different tables",
 					e.getMessage());
 		}
 

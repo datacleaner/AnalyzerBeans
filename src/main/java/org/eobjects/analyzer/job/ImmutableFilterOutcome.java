@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.job;
 
-public final class ImmutableFilterOutcome extends AbstractFilterOutcome implements FilterOutcome {
+public final class ImmutableFilterOutcome extends AbstractFilterOutcome {
 
 	private final FilterJob _filterJob;
 	private final Enum<?> _category;
