@@ -205,7 +205,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		}
 
 		if (configuration.getCustomStorageProvider() != null) {
-			return createCustomElement(configuration.getCustomStorageProvider(), StorageProvider.class, datastoreCatalog);
+			return createCustomElement(configuration.getCustomStorageProvider(), StorageProvider.class, datastoreCatalog,
+					true);
 		}
 
 		BerkeleyDbStorageProviderType berkeleyDbStorageProvider = configuration.getBerkeleyDbStorageProvider();
@@ -273,7 +274,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						dictionaryList.add(new SimpleDictionary(name, values));
 					} else if (dictionaryType instanceof CustomElementType) {
 						Dictionary customDictionary = createCustomElement((CustomElementType) dictionaryType,
-								Dictionary.class, datastoreCatalog);
+								Dictionary.class, datastoreCatalog, false);
 						dictionaryList.add(customDictionary);
 					} else {
 						throw new IllegalStateException("Unsupported dictionary type: " + dictionaryType);
@@ -300,7 +301,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 								encoding));
 					} else if (synonymCatalogType instanceof CustomElementType) {
 						SynonymCatalog customSynonymCatalog = createCustomElement((CustomElementType) synonymCatalogType,
-								SynonymCatalog.class, datastoreCatalog);
+								SynonymCatalog.class, datastoreCatalog, false);
 						synonymCatalogList.add(customSynonymCatalog);
 					} else if (synonymCatalogType instanceof DatastoreSynonymCatalogType) {
 						DatastoreSynonymCatalogType datastoreSynonymCatalogType = (DatastoreSynonymCatalogType) synonymCatalogType;
@@ -308,7 +309,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						String dataStoreName = datastoreSynonymCatalogType.getDatastoreName();
 						String columnName = datastoreSynonymCatalogType.getColumnName();
 
-						String[] synonymColumnNames = datastoreSynonymCatalogType.getSynonymColumnNames().toArray(new String[0]);
+						String[] synonymColumnNames = datastoreSynonymCatalogType.getSynonymColumnNames().toArray(
+								new String[0]);
 						synonymCatalogList.add(new DatastoreSynonymCatalog(name, datastoreCatalog, dataStoreName,
 								columnName, synonymColumnNames));
 					} else {
@@ -470,7 +472,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		List<CustomElementType> customDatastores = CollectionUtils.filterOnClass(datastoreTypes, CustomElementType.class);
 		for (CustomElementType customElementType : customDatastores) {
-			Datastore ds = createCustomElement(customElementType, Datastore.class, null);
+			Datastore ds = createCustomElement(customElementType, Datastore.class, null, true);
 			String name = ds.getName();
 			if (StringUtils.isNullOrEmpty(name)) {
 				throw new IllegalStateException("Datastore name cannot be null");
@@ -528,7 +530,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				taskRunner = new MultiThreadedTaskRunner();
 			}
 		} else if (customTaskrunner != null) {
-			taskRunner = createCustomElement(customTaskrunner, TaskRunner.class, null);
+			taskRunner = createCustomElement(customTaskrunner, TaskRunner.class, null, true);
 		} else {
 			// default task runner type is multithreaded
 			taskRunner = new MultiThreadedTaskRunner();
@@ -537,9 +539,26 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		return taskRunner;
 	}
 
+	/**
+	 * Creates a custom component based on an element which specified just a
+	 * class name and an optional set of properties.
+	 * 
+	 * @param <E>
+	 * @param customElementType
+	 *            the JAXB custom element type
+	 * @param expectedClazz
+	 *            an expected class or interface that the component should honor
+	 * @param datastoreCatalog
+	 *            the datastore catalog (for lookups/injections)
+	 * @param initialize
+	 *            whether or not to call any initialize methods on the component
+	 *            (reference data should not be initialized, while eg. custom
+	 *            task runners support this.
+	 * @return the custom component
+	 */
 	@SuppressWarnings("unchecked")
 	private <E> E createCustomElement(CustomElementType customElementType, Class<E> expectedClazz,
-			DatastoreCatalog datastoreCatalog) {
+			DatastoreCatalog datastoreCatalog, boolean initialize) {
 		E result = null;
 		Class<?> foundClass;
 		String className = customElementType.getClassName();
@@ -587,9 +606,11 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			}
 		}
 
-		Set<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
-		for (InitializeMethodDescriptor initializeMethod : initializeMethods) {
-			initializeMethod.initialize(result);
+		if (initialize) {
+			Set<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
+			for (InitializeMethodDescriptor initializeMethod : initializeMethods) {
+				initializeMethod.initialize(result);
+			}
 		}
 
 		return result;

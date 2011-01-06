@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation that marks a no-arg method as an initializing method. Use this
  * annotation if you need to initialize the state of a bean before it starts
- * executing.
+ * executing a job.
  * 
  * The @Initialize annotation can be used on methods in the following component
  * types:
@@ -41,14 +41,18 @@ import java.lang.annotation.Target;
  * <li>Dictionaries</li>
  * <li>SynonymCatalog</li>
  * <li>StringPattern</li>
- * <li>... and custom configuration elements, such as custom datastores, task
- * runners etc. (in which case the semantics are a bit different - they will
- * only be initialized once, just after loading the configuration.</li>
+ * <li>... and custom configuration elements, such as custom datastores and
+ * custom task runners (in which case the semantics are a bit different - they
+ * will only be initialized once, just after loading the configuration).</li>
  * </ul>
  * 
  * The method is invoked after any @Configured and @Provided methods/fields are
  * invoked/assigned but before any business methods (such as run(...) on an
  * analyzer) are invoked.
+ * 
+ * @Initialize is often used in conjunction with the @Close annotation.
+ * 
+ * @see Close
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
