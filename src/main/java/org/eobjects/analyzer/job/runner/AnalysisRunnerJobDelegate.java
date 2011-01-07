@@ -96,6 +96,7 @@ final class AnalysisRunnerJobDelegate {
 	private final Collection<FilterJob> _filterJobs;
 	private final Collection<MergedOutcomeJob> _mergedOutcomeJobs;
 	private final ReferenceDataActivationManager _rowProcessingReferenceDataActivationManager;
+	private final SourceColumnFinder finder;
 
 	private ReferenceDataActivationManager _explorerReferenceDataActivationManager;
 
@@ -106,6 +107,9 @@ final class AnalysisRunnerJobDelegate {
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
 		_resultQueue = resultQueue;
+
+		finder = new SourceColumnFinder();
+		finder.addSources(_job);
 
 		// A task listener that will register either succesfull executions or
 		// unexpected errors (which will be delegated to the errorListener)
@@ -251,9 +255,9 @@ final class AnalysisRunnerJobDelegate {
 				InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
 				for (InputColumn<?> inputColumn : inputColumns) {
 					if (originatingTable == null) {
-						originatingTable = findOriginatingTable(inputColumn);
+						originatingTable = finder.findOriginatingTable(inputColumn);
 					} else {
-						if (!originatingTable.equals(findOriginatingTable(inputColumn))) {
+						if (!originatingTable.equals(finder.findOriginatingTable(inputColumn))) {
 							throw new IllegalArgumentException("Input columns in " + mergeInput
 									+ " originate from different tables");
 						}
@@ -272,24 +276,25 @@ final class AnalysisRunnerJobDelegate {
 	private void validateSingleTableInput(Collection<? extends ConfigurableBeanJob<?>> beanJobs) {
 		for (ConfigurableBeanJob<?> beanJob : beanJobs) {
 			InputColumn<?>[] input = beanJob.getInput();
+
 			Table originatingTable = null;
 			for (InputColumn<?> inputColumn : input) {
-				if (originatingTable == null) {
-					originatingTable = findOriginatingTable(inputColumn);
-				} else {
-					if (!originatingTable.equals(findOriginatingTable(inputColumn))) {
-						throw new IllegalArgumentException("Input columns in " + beanJob
-								+ " originate from different tables");
+				Table table = finder.findOriginatingTable(inputColumn);
+				if (table != null) {
+					if (originatingTable == null) {
+						originatingTable = table;
+					} else {
+						if (!originatingTable.equals(table)) {
+							throw new IllegalArgumentException("Input columns in " + beanJob
+									+ " originate from different tables");
+						}
 					}
 				}
 			}
+			if (originatingTable == null) {
+				throw new IllegalArgumentException("Could not determine source table for " + beanJob);
+			}
 		}
-	}
-
-	private Table findOriginatingTable(InputColumn<?> inputColumn) {
-		SourceColumnFinder finder = new SourceColumnFinder();
-		finder.addSources(_job);
-		return finder.findOriginatingTable(inputColumn);
 	}
 
 	private void registerRowProcessingPublishers(Map<Table, RowProcessingPublisher> rowProcessingPublishers,
