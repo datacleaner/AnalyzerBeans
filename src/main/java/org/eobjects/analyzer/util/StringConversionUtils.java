@@ -78,10 +78,34 @@ import dk.eobjects.metamodel.schema.Table;
  */
 public final class StringConversionUtils {
 
+	private static final String[][] ESCAPE_MAPPING = { { "&amp;", "&" }, { "&#91;", "[" }, { "&#93;", "]" },
+			{ "&#44;", "," }, { "&lt;", "<" }, { "&gt;", ">" }, { "&quot;", "\"" }, { "&copy;", "\u00a9" },
+			{ "&reg;", "\u00ae" }, { "&euro;", "\u20a0" } };
+
 	private static final Logger logger = LoggerFactory.getLogger(StringConversionUtils.class);
 
 	// ISO 8601
 	private static final String dateFormatString = "yyyy-MM-dd'T'HH:mm:ss S";
+
+	private static final String escape(String str) {
+		for (String[] mapping : ESCAPE_MAPPING) {
+			String escapedValue = mapping[1];
+			if (str.contains(escapedValue)) {
+				str = str.replace(escapedValue, mapping[0]);
+			}
+		}
+		return str;
+	}
+
+	private static final String unescape(String str) {
+		for (String[] mapping : ESCAPE_MAPPING) {
+			String unescapedValue = mapping[0];
+			if (str.contains(unescapedValue)) {
+				str = str.replaceAll(unescapedValue, mapping[1]);
+			}
+		}
+		return str;
+	}
 
 	public static final String serialize(Object o) {
 		if (o == null) {
@@ -104,59 +128,48 @@ public final class StringConversionUtils {
 			return sb.toString();
 		}
 
-		if (o instanceof Boolean || o instanceof Number || o instanceof String || o instanceof Character) {
-			return o.toString();
-		}
-		if (o instanceof Schema) {
-			return ((Schema) o).getName();
-		}
-		if (o instanceof Table) {
-			return ((Table) o).getQualifiedLabel();
-		}
-		if (o instanceof Column) {
-			return ((Column) o).getQualifiedLabel();
-		}
-		if (o instanceof Dictionary) {
-			return ((Dictionary) o).getName();
-		}
-		if (o instanceof SynonymCatalog) {
-			return ((SynonymCatalog) o).getName();
-		}
-		if (o instanceof StringPattern) {
-			return ((StringPattern) o).getName();
-		}
-		if (o instanceof Datastore) {
-			return ((Datastore) o).getName();
-		}
-		if (o instanceof Enum<?>) {
-			Enum<?> e = (Enum<?>) o;
-			return e.name();
-		}
-		if (o instanceof java.sql.Date) {
-			// will now be picked up by the date conversion
-			o = new Date(((java.sql.Date) o).getTime());
-		}
-		if (o instanceof File) {
-			File file = (File) o;
-			if (file.isAbsolute()) {
-				return file.getAbsolutePath();
-			} else {
-				return file.getPath();
-			}
-		}
 		if (o instanceof Calendar) {
 			// will now be picked up by the date conversion
 			o = ((Calendar) o).getTime();
 		}
-		if (o instanceof Date) {
-			return new SimpleDateFormat(dateFormatString).format((Date) o);
-		}
-		if (o instanceof Pattern) {
-			return o.toString();
+
+		final String result;
+		if (o instanceof Boolean || o instanceof Number || o instanceof String || o instanceof Character) {
+			result = o.toString();
+		} else if (o instanceof Schema) {
+			result = ((Schema) o).getName();
+		} else if (o instanceof Table) {
+			result = ((Table) o).getQualifiedLabel();
+		} else if (o instanceof Column) {
+			result = ((Column) o).getQualifiedLabel();
+		} else if (o instanceof Dictionary) {
+			result = ((Dictionary) o).getName();
+		} else if (o instanceof SynonymCatalog) {
+			result = ((SynonymCatalog) o).getName();
+		} else if (o instanceof StringPattern) {
+			result = ((StringPattern) o).getName();
+		} else if (o instanceof Datastore) {
+			result = ((Datastore) o).getName();
+		} else if (o instanceof Enum<?>) {
+			Enum<?> e = (Enum<?>) o;
+			result = e.name();
+		} else if (o instanceof File) {
+			File file = (File) o;
+			if (file.isAbsolute()) {
+				result = file.getAbsolutePath();
+			} else {
+				result = file.getPath();
+			}
+		} else if (o instanceof Date) {
+			result = new SimpleDateFormat(dateFormatString).format((Date) o);
+		} else if (o instanceof Pattern) {
+			result = o.toString();
+		} else {
+			logger.warn("Could not convert type: {}", o.getClass().getName());
+			result = o.toString();
 		}
 
-		logger.warn("Could not convert type: {}", o.getClass().getName());
-		return o.toString();
+		return escape(result);
 	}
 
 	/**
@@ -184,6 +197,8 @@ public final class StringConversionUtils {
 		if (type.isArray()) {
 			return (E) deserializeArray(str, type, schemaNavigator, referenceDataCatalog, datastoreCatalog);
 		}
+
+		str = unescape(str);
 		if (ReflectionUtils.isString(type)) {
 			return (E) str;
 		}
