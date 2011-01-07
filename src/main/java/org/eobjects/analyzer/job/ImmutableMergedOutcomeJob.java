@@ -94,4 +94,13 @@ public final class ImmutableMergedOutcomeJob extends BaseObject implements Merge
 		identifiers.add(_mergeInputs);
 		identifiers.add(_output);
 	}
+
+	@Override
+	public Outcome[] getRequirements() {
+		Outcome[] result = new Outcome[_mergeInputs.size()];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = _mergeInputs.get(i).getOutcome();
+		}
+		return result;
+	}
 }

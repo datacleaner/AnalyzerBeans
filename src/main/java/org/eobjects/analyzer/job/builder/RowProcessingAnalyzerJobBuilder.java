@@ -24,11 +24,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
@@ -101,15 +100,30 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 			throw new IllegalStateException("No input column configured");
 		}
 
+		List<InputColumn<?>> tableLessColumns = new ArrayList<InputColumn<?>>();
 		Map<Table, List<InputColumn<?>>> originatingTables = new LinkedHashMap<Table, List<InputColumn<?>>>();
 		for (InputColumn<?> inputColumn : _inputColumns) {
 			Table table = _analysisJobBuilder.getOriginatingTable(inputColumn);
-			List<InputColumn<?>> list = originatingTables.get(table);
-			if (list == null) {
-				list = new LinkedList<InputColumn<?>>();
+			if (table == null) {
+				// some columns (such as those based on an expression) don't
+				// originate from a table. They should be applied to all jobs.
+				tableLessColumns.add(inputColumn);
+			} else {
+				List<InputColumn<?>> list = originatingTables.get(table);
+				if (list == null) {
+					list = new ArrayList<InputColumn<?>>();
+				}
+				list.add(inputColumn);
+				originatingTables.put(table, list);
 			}
-			list.add(inputColumn);
-			originatingTables.put(table, list);
+		}
+
+		if (originatingTables.isEmpty()) {
+			throw new IllegalStateException("Could not determine source for analyzer '" + this + "'");
+		}
+
+		for (Entry<Table, List<InputColumn<?>>> entry : originatingTables.entrySet()) {
+			entry.getValue().addAll(tableLessColumns);
 		}
 
 		List<AnalyzerJob> jobs = new ArrayList<AnalyzerJob>();

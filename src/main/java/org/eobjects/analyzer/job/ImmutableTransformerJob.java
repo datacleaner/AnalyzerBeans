@@ -86,11 +86,6 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
 	}
 
 	@Override
-	public Outcome getRequirement() {
-		return _requirement;
-	}
-
-	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
 		identifiers.add(_name);
 		identifiers.add(_beanConfiguration);
@@ -102,6 +97,14 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
 	@Override
 	public String toString() {
 		return "ImmutableTransformerJob[name=" + _name + ",transformer=" + _descriptor.getDisplayName() + "]";
+	}
+
+	@Override
+	public Outcome[] getRequirements() {
+		if (_requirement == null) {
+			return new Outcome[0];
+		}
+		return new Outcome[] { _requirement };
 	}
 
 }

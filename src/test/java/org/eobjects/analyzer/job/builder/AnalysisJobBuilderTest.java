@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
@@ -117,12 +119,12 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> analyzerJobBuilder = analysisJobBuilder
 				.addRowProcessingAnalyzer(StringAnalyzer.class);
 
-		Collection<InputColumn<?>> stringInputColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING);
-		assertEquals(
-				"[MetaModelInputColumn[Column[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
-						+ "MetaModelInputColumn[Column[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]], "
-						+ "TransformedInputColumn[id=trans-1,name=EMPLOYEENUMBER (as string),type=STRING]]",
-				Arrays.toString(stringInputColumns.toArray()));
+		List<InputColumn<?>> stringInputColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING);
+		Set<String> columnNames = new TreeSet<String>();
+		for (InputColumn<?> inputColumn : stringInputColumns) {
+			columnNames.add(inputColumn.getName());
+		}
+		assertEquals("[EMAIL, EMPLOYEENUMBER (as string), FIRSTNAME]", columnNames.toString());
 
 		analyzerJobBuilder.addInputColumns(stringInputColumns);
 		assertTrue(analyzerJobBuilder.isConfigured());

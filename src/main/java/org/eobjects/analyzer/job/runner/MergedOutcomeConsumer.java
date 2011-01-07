@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,24 +27,24 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.TransformedInputRow;
 import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
-import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class MergedOutcomeConsumer implements RowProcessingConsumer {
+final class MergedOutcomeConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
 
 	private static final Logger logger = LoggerFactory.getLogger(MergedOutcomeConsumer.class);
 	private final MergedOutcomeJob _mergedOutcomeJob;
 
 	public MergedOutcomeConsumer(MergedOutcomeJob mergedOutcomeJob) {
+		super(mergedOutcomeJob);
 		_mergedOutcomeJob = mergedOutcomeJob;
 	}
 
 	public MergedOutcomeJob getMergedOutcomeJob() {
 		return _mergedOutcomeJob;
 	}
-	
+
 	@Override
 	public boolean isConcurrent() {
 		return true;
@@ -62,49 +61,6 @@ final class MergedOutcomeConsumer implements RowProcessingConsumer {
 			}
 		}
 		return columns.toArray(new InputColumn[columns.size()]);
-	}
-
-	/**
-	 * Ensures that just a single merge input is satisfied
-	 */
-	@Override
-	public boolean satisfiedForConsume(Outcome[] outcomes) {
-		MergeInput[] mergeInputs = _mergedOutcomeJob.getMergeInputs();
-
-		// each merge input has to be satisfied
-		for (MergeInput mergeInput : mergeInputs) {
-			Outcome requiredOutcome = mergeInput.getOutcome();
-			for (Outcome availableOutcome : outcomes) {
-				if (availableOutcome.satisfiesRequirement(requiredOutcome)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Ensures that ALL merge inputs are satisfied
-	 */
-	@Override
-	public boolean satisfiedForFlowOrdering(Collection<Outcome> outcomes) {
-		MergeInput[] mergeInputs = _mergedOutcomeJob.getMergeInputs();
-
-		// each merge input has to be satisfied
-		for (MergeInput mergeInput : mergeInputs) {
-			Outcome requiredOutcome = mergeInput.getOutcome();
-			boolean found = false;
-			for (Outcome availableOutcome : outcomes) {
-				if (availableOutcome.satisfiesRequirement(requiredOutcome)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	@Override

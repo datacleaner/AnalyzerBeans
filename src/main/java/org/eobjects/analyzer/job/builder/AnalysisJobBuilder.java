@@ -45,6 +45,7 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
+import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.TransformerJob;
@@ -368,9 +369,7 @@ public final class AnalysisJobBuilder implements Closeable {
 
 	public List<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily) {
 		SourceColumnFinder finder = new SourceColumnFinder();
-		finder.addSources(new SourceColumns(_sourceColumns));
-		finder.addSources(_transformerJobBuilders);
-		finder.addSources(_mergedOutcomeJobBuilders);
+		finder.addSources(this);
 		return finder.findInputColumns(dataTypeFamily);
 	}
 
@@ -508,20 +507,17 @@ public final class AnalysisJobBuilder implements Closeable {
 
 	public TransformerJobBuilder<?> getOriginatingTransformer(InputColumn<?> outputColumn) {
 		SourceColumnFinder finder = new SourceColumnFinder();
-		finder.addSources(_transformerJobBuilders);
-		return (TransformerJobBuilder<?>) finder.findInputColumnSource(outputColumn);
-	}
-
-	public MergedOutcomeJobBuilder getOriginatingMergedOutcome(InputColumn<?> outputColumn) {
-		SourceColumnFinder finder = new SourceColumnFinder();
-		finder.addSources(_mergedOutcomeJobBuilders);
-		return (MergedOutcomeJobBuilder) finder.findInputColumnSource(outputColumn);
+		finder.addSources(this);
+		InputColumnSourceJob source = finder.findInputColumnSource(outputColumn);
+		if (source instanceof TransformerJobBuilder) {
+			return (TransformerJobBuilder<?>) source;
+		}
+		return null;
 	}
 
 	public Table getOriginatingTable(InputColumn<?> inputColumn) {
 		SourceColumnFinder finder = new SourceColumnFinder();
-		finder.addSources(_transformerJobBuilders);
-		finder.addSources(_mergedOutcomeJobBuilders);
+		finder.addSources(this);
 		return finder.findOriginatingTable(inputColumn);
 	}
 

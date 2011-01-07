@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public final class TransformedInputRow implements InputRow {
+public final class TransformedInputRow extends AbstractInputRow {
 
 	private final InputRow _delegate;
 	private final Map<InputColumn<?>, Object> _values;
@@ -49,7 +49,7 @@ public final class TransformedInputRow implements InputRow {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E> E getValue(InputColumn<E> column) {
+	public <E> E getValueInternal(InputColumn<E> column) {
 		if (_values.containsKey(column)) {
 			return (E) _values.get(column);
 		}

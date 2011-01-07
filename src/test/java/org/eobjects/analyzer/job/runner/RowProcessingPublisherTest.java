@@ -53,11 +53,20 @@ import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.test.MockDataContextProvider;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.schema.Column;
 import dk.eobjects.metamodel.schema.ColumnType;
 import dk.eobjects.metamodel.schema.MutableColumn;
+import dk.eobjects.metamodel.schema.MutableTable;
 
 public class RowProcessingPublisherTest extends TestCase {
+
+	private MutableColumn physicalColumn;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		physicalColumn = new MutableColumn("foo", ColumnType.VARCHAR);
+		physicalColumn.setTable(new MutableTable("bar").addColumn(physicalColumn));
+	}
 
 	public void testCreateProcessOrderedConsumerListNoConsumers() throws Exception {
 		List<RowProcessingConsumer> consumerList = RowProcessingPublisher
@@ -68,7 +77,6 @@ public class RowProcessingPublisherTest extends TestCase {
 	public void testCreateProcessOrderedConsumerListWithMergedOutcomes() throws Exception {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
 		ajb.setDataContextProvider(new MockDataContextProvider());
-		Column physicalColumn = new MutableColumn("foo", ColumnType.VARCHAR);
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
 
@@ -117,7 +125,6 @@ public class RowProcessingPublisherTest extends TestCase {
 	public void testCreateProcessOrderedConsumerListWithFilterDependencies() throws Exception {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
 		ajb.setDataContextProvider(new MockDataContextProvider());
-		Column physicalColumn = new MutableColumn("foo", ColumnType.VARCHAR);
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
 
@@ -196,7 +203,6 @@ public class RowProcessingPublisherTest extends TestCase {
 
 	public void testCreateProcessOrderedConsumerListChainedTransformers() throws Exception {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
-		Column physicalColumn = new MutableColumn("foo", ColumnType.VARCHAR);
 		ajb.addSourceColumn(physicalColumn);
 
 		TransformerJobBuilder<TransformerMock> tjb1 = ajb.addTransformer(TransformerMock.class).addInputColumn(

@@ -90,7 +90,9 @@ public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 			jobBuilder.toAnalyzerJob();
 			fail("Exception expected");
 		} catch (IllegalStateException e) {
-			assertEquals("Could not find originating table for column: MockInputColumn[name=foo]", e.getMessage());
+			assertEquals(
+					"Could not determine source for analyzer 'RowProcessingAnalyzerJobBuilder[analyzer=Pattern finder,inputColumns=[MockInputColumn[name=foo], MockInputColumn[name=bar]]]'",
+					e.getMessage());
 		}
 	}
 
@@ -105,14 +107,14 @@ public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 		jobBuilder.addInputColumn(new MetaModelInputColumn(new MutableColumn("w00p", ColumnType.VARCHAR, table2, 0, true)));
 		jobBuilder.addInputColumn(new MetaModelInputColumn(new MutableColumn("weee", ColumnType.VARCHAR, table2, 1, true)));
 		jobBuilder.addInputColumn(new MetaModelInputColumn(new MutableColumn("wohoo", ColumnType.VARCHAR, table2, 2, true)));
-		
+
 		AnalyzerJob[] analyzerJobs = jobBuilder.toAnalyzerJobs();
 		assertEquals(2, analyzerJobs.length);
-		
+
 		assertEquals(2, analyzerJobs[0].getInput().length);
 		assertEquals("foo", analyzerJobs[0].getInput()[0].getName());
 		assertEquals("bar", analyzerJobs[0].getInput()[1].getName());
-		
+
 		assertEquals(3, analyzerJobs[1].getInput().length);
 		assertEquals("w00p", analyzerJobs[1].getInput()[0].getName());
 		assertEquals("weee", analyzerJobs[1].getInput()[1].getName());

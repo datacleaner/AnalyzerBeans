@@ -36,7 +36,7 @@ public class ImmutableFilterJobTest extends TestCase {
 
 		ImmutableFilterJob job = new ImmutableFilterJob("foo", descriptor, configuration, null);
 		assertEquals("foo", job.getName());
-		assertNull(job.getRequirement());
+		assertEquals(0, job.getRequirements().length);
 
 		FilterOutcome[] outcomes1 = job.getOutcomes();
 		assertEquals(2, outcomes1.length);

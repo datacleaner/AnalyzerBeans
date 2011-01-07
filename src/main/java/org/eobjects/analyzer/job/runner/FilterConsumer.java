@@ -29,7 +29,7 @@ import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 
-final class FilterConsumer extends ConfigurableBeanJobRowProcessingConsumer implements RowProcessingConsumer {
+final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final FilterBeanInstance _filterBeanInstance;
@@ -46,7 +46,7 @@ final class FilterConsumer extends ConfigurableBeanJobRowProcessingConsumer impl
 		_inputColumns = inputColumns;
 		_job = job;
 		_analysisListener = analysisListener;
-		
+
 		Concurrent concurrent = _filterJob.getDescriptor().getAnnotation(Concurrent.class);
 		if (concurrent == null) {
 			// filter are by default concurrent
@@ -55,7 +55,7 @@ final class FilterConsumer extends ConfigurableBeanJobRowProcessingConsumer impl
 			_concurrent = concurrent.value();
 		}
 	}
-	
+
 	@Override
 	public boolean isConcurrent() {
 		return _concurrent;

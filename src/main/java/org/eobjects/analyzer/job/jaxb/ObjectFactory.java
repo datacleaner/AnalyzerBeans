@@ -176,14 +176,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link MergedOutcomeType.Outcome.Input }
-     * 
-     */
-    public MergedOutcomeType.Outcome.Input createMergedOutcomeTypeOutcomeInput() {
-        return new MergedOutcomeType.Outcome.Input();
-    }
-
-    /**
      * Create an instance of {@link SourceType }
      * 
      */

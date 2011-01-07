@@ -78,11 +78,6 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
 	}
 
 	@Override
-	public Outcome getRequirement() {
-		return _requirement;
-	}
-
-	@Override
 	public FilterOutcome[] getOutcomes() {
 		EnumSet<?> categories = _descriptor.getCategories();
 		FilterOutcome[] outcomes = new FilterOutcome[categories.size()];
@@ -105,5 +100,13 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
 	@Override
 	public String toString() {
 		return "ImmutableFilterJob[name=" + _name + ",filter=" + _descriptor.getDisplayName() + "]";
+	}
+
+	@Override
+	public Outcome[] getRequirements() {
+		if (_requirement == null) {
+			return new Outcome[0];
+		}
+		return new Outcome[] { _requirement };
 	}
 }

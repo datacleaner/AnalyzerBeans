@@ -290,9 +290,10 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		// add requirements based on all transformer requirements
 		for (Entry<TransformerJob, TransformerType> entry : transformerMappings.entrySet()) {
 			TransformerJob job = entry.getKey();
-			Outcome requirement = job.getRequirement();
-			if (requirement != null) {
-				String id = getId(requirement, outcomeMappings, true);
+			Outcome[] requirements = job.getRequirements();
+			if (requirements != null && requirements.length != 0) {
+				assert requirements.length == 1;
+				String id = getId(requirements[0], outcomeMappings, true);
 				entry.getValue().setRequires(id);
 			}
 		}
@@ -300,9 +301,10 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		// add requirements based on all filter requirements
 		for (Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
 			FilterJob job = entry.getKey();
-			Outcome requirement = job.getRequirement();
-			if (requirement != null) {
-				String id = getId(requirement, outcomeMappings, true);
+			Outcome[] requirements = job.getRequirements();
+			if (requirements != null && requirements.length != 0) {
+				assert requirements.length == 1;
+				String id = getId(requirements[0], outcomeMappings, true);
 				entry.getValue().setRequires(id);
 			}
 		}
@@ -320,7 +322,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 				InputColumn<?>[] columns = mergeInput.getInputColumns();
 
 				for (InputColumn<?> inputColumn : columns) {
-					MergedOutcomeType.Outcome.Input inputType = new MergedOutcomeType.Outcome.Input();
+					InputType inputType = new InputType();
 					inputType.setRef(getId(inputColumn, columnMappings));
 					mergeInputType.getInput().add(inputType);
 				}
@@ -336,9 +338,10 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		// add requirements based on all analyzer requirements
 		for (Entry<AnalyzerJob, AnalyzerType> entry : analyzerMappings.entrySet()) {
 			AnalyzerJob job = entry.getKey();
-			Outcome requirement = job.getRequirement();
-			if (requirement != null) {
-				String id = getId(requirement, outcomeMappings, true);
+			Outcome[] requirements = job.getRequirements();
+			if (requirements != null && requirements.length != 0) {
+				assert requirements.length == 1;
+				String id = getId(requirements[0], outcomeMappings, true);
 				entry.getValue().setRequires(id);
 			}
 		}

@@ -29,7 +29,7 @@ import dk.eobjects.metamodel.schema.Column;
  * 
  * @param <E>
  */
-public class MockInputColumn<E> extends AbstractInputColumn<E> implements InputColumn<E> {
+public class MockInputColumn<E> extends AbstractInputColumn<E> {
 
 	private String _name;
 	private Class<? extends E> _clazz;
@@ -38,7 +38,7 @@ public class MockInputColumn<E> extends AbstractInputColumn<E> implements InputC
 		_name = name;
 		_clazz = clazz;
 	}
-	
+
 	@Override
 	public Class<? extends E> getDataType() {
 		return _clazz;

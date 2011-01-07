@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Kasper Sørensen
  * 
  */
-public class MockInputRow implements InputRow {
+public class MockInputRow extends AbstractInputRow {
 
 	private static final AtomicInteger _idGenerator = new AtomicInteger(Integer.MIN_VALUE);
 
@@ -69,7 +69,7 @@ public class MockInputRow implements InputRow {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E> E getValue(InputColumn<E> column) {
+	public <E> E getValueInternal(InputColumn<E> column) {
 		return (E) map.get(column);
 	}
 

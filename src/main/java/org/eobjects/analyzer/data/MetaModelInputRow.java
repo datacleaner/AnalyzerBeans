@@ -31,7 +31,7 @@ import dk.eobjects.metamodel.data.Row;
 import dk.eobjects.metamodel.query.SelectItem;
 import dk.eobjects.metamodel.schema.Column;
 
-public final class MetaModelInputRow implements InputRow {
+public final class MetaModelInputRow extends AbstractInputRow {
 
 	private final Row _row;
 	private final int _rowNumber;
@@ -52,7 +52,7 @@ public final class MetaModelInputRow implements InputRow {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E> E getValue(InputColumn<E> column) {
+	public <E> E getValueInternal(InputColumn<E> column) {
 		if (!column.isPhysicalColumn()) {
 			return null;
 		}

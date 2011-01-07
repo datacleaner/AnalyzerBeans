@@ -50,9 +50,9 @@ public class InputColumnsFromDifferentTablesTest extends TestCase {
 		try {
 			runner.run(jobBuilder.toAnalysisJob());
 			fail("exception expected");
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalStateException e) {
 			assertEquals(
-					"Input columns in ImmutableTransformerJob[name=null,transformer=Concatenator] originate from different tables",
+					"Multiple originating tables (CUSTOMERS, EMPLOYEES) found for source: TransformerJobBuilder[transformer=Concatenator,inputColumns=[MetaModelInputColumn[Column[name=LASTNAME,columnNumber=1,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], MetaModelInputColumn[Column[name=CONTACTLASTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]]]",
 					e.getMessage());
 		}
 

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns="http://eobjects.org/analyzerbeans/job/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<source>
+		<data-context ref="my database" />
+		<columns>
+			<column id="col_fn" path="name" />
+		</columns>
+	</source>
+
+	<transformation>
+		<filter>
+			<descriptor ref="Not null" />
+			<properties>
+				<property name="Consider empty string as null" value="true" />
+			</properties>
+			<input ref="col_fn" />
+			<outcome category="VALID" id="not_null" />
+			<outcome category="INVALID" id="null" />
+		</filter>
+
+		<filter requires="not_null">
+			<descriptor ref="String length range" />
+			<properties>
+				<property name="Minimum length" value="4" />
+				<property name="Maximum length" value="10" />
+			</properties>
+			<input ref="col_fn" />
+			<outcome category="LOWER" id="lower" />
+			<outcome category="VALID" id="valid" />
+			<outcome category="HIGHER" id="higher" />
+		</filter>
+
+		<merged-outcome id="merge1">
+			<outcome ref="valid">
+				<input value="REGULAR NAME" />
+			</outcome>
+			<outcome ref="null">
+				<input value="NO NAME" />
+			</outcome>
+			<outcome ref="lower">
+				<input value="SHORT NAME" />
+			</outcome>
+			<outcome ref="higher">
+				<input value="LONG NAME" />
+			</outcome>
+			<output id="name_status" name="Name status" />
+		</merged-outcome>
+
+	</transformation>
+
+	<analysis>
+		<analyzer requires="merge1">
+			<descriptor ref="Value distribution" />
+			<input ref="name_status" />
+		</analyzer>
+	</analysis>
+
+</job>

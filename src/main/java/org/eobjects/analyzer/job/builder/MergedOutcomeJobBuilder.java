@@ -28,12 +28,17 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableMergedOutcomeJob;
+import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
+import org.eobjects.analyzer.job.LazyMergedOutcome;
 import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.OutcomeSinkJob;
+import org.eobjects.analyzer.job.OutcomeSourceJob;
 
-public final class MergedOutcomeJobBuilder implements InputColumnSourceJob {
+public final class MergedOutcomeJobBuilder implements InputColumnSourceJob, InputColumnSinkJob, OutcomeSourceJob,
+		OutcomeSinkJob {
 
 	private final List<MergeInputBuilder> _mergeInputs = new ArrayList<MergeInputBuilder>();
 	private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
@@ -141,5 +146,19 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob {
 	@Override
 	public MutableInputColumn<?>[] getOutput() {
 		return getOutputColumns().toArray(new MutableInputColumn<?>[0]);
+	}
+
+	@Override
+	public Outcome[] getRequirements() {
+		List<Outcome> result = new ArrayList<Outcome>(_mergeInputs.size());
+		for (MergeInputBuilder mergeInputBuilder : _mergeInputs) {
+			result.add(mergeInputBuilder.getOutcome());
+		}
+		return result.toArray(new Outcome[result.size()]);
+	}
+
+	@Override
+	public Outcome[] getOutcomes() {
+		return new Outcome[] { new LazyMergedOutcome(this) };
 	}
 }

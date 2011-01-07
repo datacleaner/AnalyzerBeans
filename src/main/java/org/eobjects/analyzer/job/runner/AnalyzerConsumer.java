@@ -27,7 +27,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 
-final class AnalyzerConsumer extends ConfigurableBeanJobRowProcessingConsumer implements RowProcessingConsumer {
+final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final AnalyzerJob _analyzerJob;

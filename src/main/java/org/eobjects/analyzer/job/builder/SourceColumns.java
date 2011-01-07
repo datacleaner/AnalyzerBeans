@@ -34,11 +34,6 @@ public final class SourceColumns implements InputColumnSourceJob {
 	}
 
 	@Override
-	public InputColumn<?>[] getInput() {
-		return new InputColumn<?>[0];
-	}
-
-	@Override
 	public InputColumn<?>[] getOutput() {
 		return _sourceColumns.toArray(new InputColumn<?>[_sourceColumns.size()]);
 	}

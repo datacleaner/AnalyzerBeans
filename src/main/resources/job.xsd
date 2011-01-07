@@ -83,11 +83,8 @@
 			<element name="outcome" minOccurs="2" maxOccurs="unbounded">
 				<complexType>
 					<sequence>
-						<element name="input" minOccurs="0" maxOccurs="unbounded">
-							<complexType>
-								<attribute name="ref" type="token" use="required" />
-							</complexType>
-						</element>
+						<element name="input" minOccurs="0" maxOccurs="unbounded"
+							type="ab:inputType" />
 					</sequence>
 					<attribute name="ref" type="token" use="required" />
 				</complexType>
@@ -134,7 +131,22 @@
 	</complexType>
 
 	<complexType name="inputType">
-		<attribute name="ref" type="token" use="required" />
+		<attribute name="ref" type="token" use="optional">
+			<annotation>
+				<documentation>
+					Reference for a column id defined elsewhere in the
+					job.
+				</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="value" type="token" use="optional">
+			<annotation>
+				<documentation>
+					Defines a constant value to put as a placeholder for
+					a column in the datastore.
+				</documentation>
+			</annotation>
+		</attribute>
 		<attribute name="name" type="token" use="optional" />
 	</complexType>
 

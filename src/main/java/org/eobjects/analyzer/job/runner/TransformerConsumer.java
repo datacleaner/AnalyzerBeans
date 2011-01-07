@@ -28,7 +28,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
-final class TransformerConsumer extends ConfigurableBeanJobRowProcessingConsumer implements RowProcessingConsumer {
+final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final TransformerBeanInstance _transformerBeanInstance;

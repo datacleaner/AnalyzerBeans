@@ -33,7 +33,10 @@ import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableTransformerJob;
+import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
+import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
@@ -51,7 +54,7 @@ import org.eobjects.analyzer.storage.InMemoryStorageProvider;
  */
 public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> implements
-		InputColumnSourceJob {
+		InputColumnSourceJob, InputColumnSinkJob, OutcomeSinkJob {
 
 	private final AnalysisJobBuilder _analysisJobBuilder;
 	private final LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
@@ -191,5 +194,11 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 	@Override
 	public MutableInputColumn<?>[] getOutput() {
 		return getOutputColumns().toArray(new MutableInputColumn<?>[0]);
+	}
+
+	@Override
+	public Outcome[] getRequirements() {
+		// TODO
+		return null;
 	}
 }

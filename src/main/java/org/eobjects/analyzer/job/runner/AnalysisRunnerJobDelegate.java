@@ -40,7 +40,6 @@ import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.job.builder.SourceColumns;
 import org.eobjects.analyzer.job.concurrent.ForkTaskListener;
 import org.eobjects.analyzer.job.concurrent.JobCompletionTaskListener;
 import org.eobjects.analyzer.job.concurrent.JoinTaskListener;
@@ -289,8 +288,7 @@ final class AnalysisRunnerJobDelegate {
 
 	private Table findOriginatingTable(InputColumn<?> inputColumn) {
 		SourceColumnFinder finder = new SourceColumnFinder();
-		finder.addSources(_job.getTransformerJobs());
-		finder.addSources(_job.getMergedOutcomeJobs());
+		finder.addSources(_job);
 		return finder.findOriginatingTable(inputColumn);
 	}
 
@@ -382,11 +380,7 @@ final class AnalysisRunnerJobDelegate {
 	// the transformers input and output
 	private Set<Column> findSourcePhysicalColumns(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
 		SourceColumnFinder finder = new SourceColumnFinder();
-
-		finder.addSources(new SourceColumns(analysisJob.getSourceColumns()));
-		finder.addSources(analysisJob.getTransformerJobs());
-		finder.addSources(analysisJob.getMergedOutcomeJobs());
-
+		finder.addSources(analysisJob);
 		return finder.findOriginatingColumns(inputColumn);
 	}
 }

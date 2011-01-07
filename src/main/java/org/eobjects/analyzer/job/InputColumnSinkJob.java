@@ -19,11 +19,18 @@
  */
 package org.eobjects.analyzer.job;
 
-import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.data.InputColumn;
 
-public interface ConfigurableBeanJob<E extends BeanDescriptor<?>> extends ComponentJob, InputColumnSinkJob, OutcomeSinkJob {
+/**
+ * Interface for job objects that consume input columns in a job.
+ * 
+ * @author Kasper Sørensen
+ */
+public interface InputColumnSinkJob {
 
-	public E getDescriptor();
+	/**
+	 * @return the originating (if any) columns that generated the new columns
+	 */
+	public InputColumn<?>[] getInput();
 
-	public BeanConfiguration getConfiguration();
 }

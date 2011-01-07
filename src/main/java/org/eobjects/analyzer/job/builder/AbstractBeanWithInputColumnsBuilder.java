@@ -31,11 +31,14 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 @SuppressWarnings("unchecked")
-public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends AbstractBeanJobBuilder<D, E, B> {
+public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends AbstractBeanJobBuilder<D, E, B>
+		implements InputColumnSinkJob, OutcomeSinkJob {
 
 	private Outcome _requirement;
 
@@ -181,6 +184,20 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 			}
 		}
 		throw new IllegalArgumentException("No such category found in available outcomes: " + category);
+	}
+
+	@Override
+	public Outcome[] getRequirements() {
+		if (_requirement == null) {
+			return new Outcome[0];
+		}
+		return new Outcome[] { _requirement };
+	}
+
+	@Override
+	public InputColumn<?>[] getInput() {
+		List<InputColumn<?>> inputColumns = getInputColumns();
+		return inputColumns.toArray(new InputColumn[inputColumns.size()]);
 	}
 
 }

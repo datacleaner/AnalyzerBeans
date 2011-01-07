@@ -77,11 +77,6 @@ public final class ImmutableAnalyzerJob extends BaseObject implements AnalyzerJo
 	}
 
 	@Override
-	public Outcome getRequirement() {
-		return _requirement;
-	}
-
-	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
 		identifiers.add(_name);
 		identifiers.add(_beanConfiguration);
@@ -92,5 +87,13 @@ public final class ImmutableAnalyzerJob extends BaseObject implements AnalyzerJo
 	@Override
 	public String toString() {
 		return "ImmutableAnalyzerJob[name=" + _name + ",analyzer=" + _descriptor.getDisplayName() + "]";
+	}
+
+	@Override
+	public Outcome[] getRequirements() {
+		if (_requirement == null) {
+			return new Outcome[0];
+		}
+		return new Outcome[] { _requirement };
 	}
 }

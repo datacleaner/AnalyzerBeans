@@ -33,6 +33,7 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
+import org.eobjects.analyzer.data.FixedValueInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -250,9 +251,11 @@ public final class RowProcessingPublisher {
 					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
 					for (InputColumn<?> inputColumn : requiredInput) {
 						if (!inputColumn.isPhysicalColumn()) {
-							if (!availableVirtualColumns.contains(inputColumn)) {
-								accepted = false;
-								break;
+							if (!(inputColumn instanceof FixedValueInputColumn)) {
+								if (!availableVirtualColumns.contains(inputColumn)) {
+									accepted = false;
+									break;
+								}
 							}
 						}
 					}
@@ -264,6 +267,13 @@ public final class RowProcessingPublisher {
 					changed = true;
 
 					ComponentJob componentJob = consumer.getComponentJob();
+					
+					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
+					for (InputColumn<?> inputColumn : requiredInput) {
+						if (inputColumn instanceof FixedValueInputColumn) {
+							availableVirtualColumns.add(inputColumn);
+						}
+					}
 
 					if (componentJob instanceof InputColumnSourceJob) {
 						InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();

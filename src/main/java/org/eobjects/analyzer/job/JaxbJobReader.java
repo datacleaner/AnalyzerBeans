@@ -44,6 +44,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.data.FixedValueInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -73,7 +74,6 @@ import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.job.jaxb.MergedOutcomeType;
-import org.eobjects.analyzer.job.jaxb.MergedOutcomeType.Outcome.Input;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
@@ -353,9 +353,11 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					for (InputType inputType : input) {
 						ref = inputType.getRef();
 						if (StringUtils.isNullOrEmpty(ref)) {
-							throw new IllegalStateException("Transformer input column ref cannot be null");
-						}
-						if (!inputColumns.containsKey(ref)) {
+							String value = inputType.getValue();
+							if (StringUtils.isNullOrEmpty(value)) {
+								throw new IllegalStateException("Transformer input column ref & value cannot be null");
+							}
+						} else if (!inputColumns.containsKey(ref)) {
 							configurable = false;
 							break;
 						}
@@ -367,8 +369,14 @@ public class JaxbJobReader implements JobReader<InputStream> {
 								.get(unconfiguredTransformerKey);
 
 						for (InputType inputType : input) {
-							InputColumn<?> inputColumn = inputColumns.get(inputType.getRef());
 							String name = inputType.getName();
+							ref = inputType.getRef();
+							InputColumn<?> inputColumn;
+							if (StringUtils.isNullOrEmpty(ref)) {
+								inputColumn = new FixedValueInputColumn<String>(inputType.getValue());
+							} else {
+								inputColumn = inputColumns.get(ref);
+							}
 							if (StringUtils.isNullOrEmpty(name)) {
 								transformerJobBuilder.addInputColumn(inputColumn);
 							} else {
@@ -417,7 +425,12 @@ public class JaxbJobReader implements JobReader<InputStream> {
 							if (i != 0) {
 								sb.append(", ");
 							}
-							sb.append(inputType.getRef());
+							ref = inputType.getRef();
+							if (StringUtils.isNullOrEmpty(ref)) {
+								sb.append("value=" + inputType.getValue());
+							} else {
+								sb.append("ref=" + ref);
+							}
 							i++;
 						}
 						sb.append(")");
@@ -450,14 +463,21 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					for (InputType inputType : input) {
 						ref = inputType.getRef();
 
+						InputColumn<?> inputColumn;
 						if (StringUtils.isNullOrEmpty(ref)) {
-							throw new IllegalStateException("Filter input column ref cannot be null");
+							String value = inputType.getValue();
+							if (StringUtils.isNullOrEmpty(value)) {
+								throw new IllegalStateException("Filter input column ref & value cannot be null");
+							} else {
+								inputColumn = new FixedValueInputColumn<String>(value);
+							}
+						} else {
+							inputColumn = inputColumns.get(ref);
+							if (inputColumn == null) {
+								throw new IllegalStateException("No such input column: " + ref);
+							}
 						}
 
-						InputColumn<?> inputColumn = inputColumns.get(ref);
-						if (inputColumn == null) {
-							throw new IllegalStateException("No such input column: " + ref);
-						}
 						String name = inputType.getName();
 						if (StringUtils.isNullOrEmpty(name)) {
 							filterJobBuilder.addInputColumn(inputColumn);
@@ -529,15 +549,22 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						Outcome outcomeToMerge = outcomeMapping.get(ref);
 						MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(outcomeToMerge);
 
-						List<Input> inputs = mergedOutcome.getInput();
-						for (Input input : inputs) {
+						List<InputType> inputs = mergedOutcome.getInput();
+						for (InputType input : inputs) {
 							ref = input.getRef();
+							InputColumn<?> inputColumn;
 							if (StringUtils.isNullOrEmpty(ref)) {
-								throw new IllegalStateException("Merged outcome input ref cannot be null");
-							}
-							InputColumn<?> inputColumn = inputColumns.get(ref);
-							if (inputColumn == null) {
-								throw new IllegalStateException("No such input column: " + ref);
+								String value = input.getValue();
+								if (StringUtils.isNullOrEmpty(value)) {
+									throw new IllegalStateException("Merged outcome input ref & value cannot be null");
+								} else {
+									inputColumn = new FixedValueInputColumn<String>(value);
+								}
+							} else {
+								inputColumn = inputColumns.get(ref);
+								if (inputColumn == null) {
+									throw new IllegalStateException("No such input column: " + ref);
+								}
 							}
 							mergedOutcomeBuilder.addInputColumn(inputColumn);
 						}
@@ -622,14 +649,21 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				for (InputType inputType : input) {
 					ref = inputType.getRef();
 
+					InputColumn<?> inputColumn;
 					if (StringUtils.isNullOrEmpty(ref)) {
-						throw new IllegalStateException("Analyzer input column ref cannot be null");
+						String value = inputType.getValue();
+						if (StringUtils.isNullOrEmpty(value)) {
+							throw new IllegalStateException("Analyzer input column ref & value cannot be null");
+						} else {
+							inputColumn = new FixedValueInputColumn<String>(value);
+						}
+					} else {
+						inputColumn = inputColumns.get(ref);
+						if (inputColumn == null) {
+							throw new IllegalStateException("No such input column: " + ref);
+						}
 					}
 
-					InputColumn<?> inputColumn = inputColumns.get(ref);
-					if (inputColumn == null) {
-						throw new IllegalStateException("No such input column: " + ref);
-					}
 					String name = inputType.getName();
 					if (StringUtils.isNullOrEmpty(name)) {
 						analyzerJobBuilder.addInputColumn(inputColumn);

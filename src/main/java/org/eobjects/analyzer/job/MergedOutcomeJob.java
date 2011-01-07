@@ -24,7 +24,8 @@ package org.eobjects.analyzer.job;
  * 
  * @author Kasper Sørensen
  */
-public interface MergedOutcomeJob extends ComponentJob, InputColumnSourceJob, OutcomeSourceJob {
+public interface MergedOutcomeJob extends ComponentJob, InputColumnSinkJob, InputColumnSourceJob, OutcomeSourceJob,
+		OutcomeSinkJob {
 
 	/**
 	 * @return

@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.job.builder;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Filter;
@@ -27,9 +28,12 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableFilterJob;
+import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.OutcomeSourceJob;
 
 public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> extends
-		AbstractBeanWithInputColumnsBuilder<FilterBeanDescriptor<F, C>, F, FilterJobBuilder<F, C>> {
+		AbstractBeanWithInputColumnsBuilder<FilterBeanDescriptor<F, C>, F, FilterJobBuilder<F, C>> implements
+		OutcomeSourceJob {
 
 	private final AnalysisJobBuilder _analysisJobBuilder;
 
@@ -83,5 +87,15 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 		for (FilterChangeListener listener : listeners) {
 			listener.onRequirementChanged(this);
 		}
+	}
+
+	@Override
+	public Outcome[] getOutcomes() {
+		EnumSet<C> categories = getDescriptor().getCategories();
+		List<Outcome> result = new ArrayList<Outcome>(categories.size());
+		for (Enum<?> category : categories) {
+			result.add(new LazyFilterOutcome(this, category));
+		}
+		return result.toArray(new Outcome[categories.size()]);
 	}
 }
