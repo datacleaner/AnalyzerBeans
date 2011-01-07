@@ -50,7 +50,7 @@
                 <property value="false" name="Upper case patterns expand in size"/>
                 <property value="true" name="Lower case patterns expand in size"/>
                 <property value="." name="Decimal separator"/>
-                <property value="&amp;#44;" name="Thousands separator"/>
+                <property value="," name="Thousands separator"/>
                 <property value="-" name="Minus sign"/>
             </properties>
             <input ref="col_0"/>
@@ -66,7 +66,7 @@
                 <property value="false" name="Upper case patterns expand in size"/>
                 <property value="true" name="Lower case patterns expand in size"/>
                 <property value="." name="Decimal separator"/>
-                <property value="&amp;#44;" name="Thousands separator"/>
+                <property value="," name="Thousands separator"/>
                 <property value="-" name="Minus sign"/>
             </properties>
             <input ref="col_3"/>

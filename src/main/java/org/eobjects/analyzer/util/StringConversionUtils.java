@@ -80,10 +80,6 @@ public final class StringConversionUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(StringConversionUtils.class);
 
-	private static final String[][] ESCAPE_MAPPING = { { "&amp;", "&" }, { "&#91;", "[" }, { "&#93;", "]" },
-			{ "&#44;", "," }, { "&lt;", "<" }, { "&gt;", ">" }, { "&quot;", "\"" }, { "&copy;", "\u00a9" },
-			{ "&reg;", "\u00ae" }, { "&euro;", "\u20a0" } };
-
 	// ISO 8601
 	private static final String dateFormatString = "yyyy-MM-dd'T'HH:mm:ss S";
 
@@ -108,29 +104,29 @@ public final class StringConversionUtils {
 			return sb.toString();
 		}
 
+		if (o instanceof Boolean || o instanceof Number || o instanceof String || o instanceof Character) {
+			return o.toString();
+		}
 		if (o instanceof Schema) {
-			return escape(((Schema) o).getName());
+			return ((Schema) o).getName();
 		}
 		if (o instanceof Table) {
-			return escape(((Table) o).getQualifiedLabel());
+			return ((Table) o).getQualifiedLabel();
 		}
 		if (o instanceof Column) {
-			return escape(((Column) o).getQualifiedLabel());
+			return ((Column) o).getQualifiedLabel();
 		}
 		if (o instanceof Dictionary) {
-			return escape(((Dictionary) o).getName());
+			return ((Dictionary) o).getName();
 		}
 		if (o instanceof SynonymCatalog) {
-			return escape(((SynonymCatalog) o).getName());
+			return ((SynonymCatalog) o).getName();
 		}
 		if (o instanceof StringPattern) {
-			return escape(((StringPattern) o).getName());
+			return ((StringPattern) o).getName();
 		}
 		if (o instanceof Datastore) {
-			return escape(((Datastore) o).getName());
-		}
-		if (o instanceof Boolean || o instanceof Number || o instanceof String || o instanceof Character) {
-			return escape(o.toString());
+			return ((Datastore) o).getName();
 		}
 		if (o instanceof Enum<?>) {
 			Enum<?> e = (Enum<?>) o;
@@ -156,31 +152,11 @@ public final class StringConversionUtils {
 			return new SimpleDateFormat(dateFormatString).format((Date) o);
 		}
 		if (o instanceof Pattern) {
-			return escape(o.toString());
+			return o.toString();
 		}
 
 		logger.warn("Could not convert type: {}", o.getClass().getName());
-		return escape(o.toString());
-	}
-
-	private static final String escape(String str) {
-		for (String[] mapping : ESCAPE_MAPPING) {
-			String escapedValue = mapping[1];
-			if (str.contains(escapedValue)) {
-				str = str.replace(escapedValue, mapping[0]);
-			}
-		}
-		return str;
-	}
-
-	private static final String unescape(String str) {
-		for (String[] mapping : ESCAPE_MAPPING) {
-			String unescapedValue = mapping[0];
-			if (str.contains(unescapedValue)) {
-				str = str.replaceAll(unescapedValue, mapping[1]);
-			}
-		}
-		return str;
+		return o.toString();
 	}
 
 	/**
@@ -209,7 +185,7 @@ public final class StringConversionUtils {
 			return (E) deserializeArray(str, type, schemaNavigator, referenceDataCatalog, datastoreCatalog);
 		}
 		if (ReflectionUtils.isString(type)) {
-			return (E) unescape(str);
+			return (E) str;
 		}
 		if (ReflectionUtils.isBoolean(type)) {
 			return (E) Boolean.valueOf(str);
