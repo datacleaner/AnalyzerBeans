@@ -28,7 +28,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 
-import dk.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContext;
 
 public final class RunExplorerCallback implements AnalyzerLifeCycleCallback {
 

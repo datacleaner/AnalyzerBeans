@@ -21,8 +21,8 @@ package org.eobjects.analyzer.data;
 
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.MutableColumn;
 import junit.framework.TestCase;
 
 public class TransformedInputRowTest extends TestCase {

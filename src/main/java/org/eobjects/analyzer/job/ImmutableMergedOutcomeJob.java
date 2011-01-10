@@ -26,7 +26,7 @@ import java.util.List;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 
-import dk.eobjects.metamodel.util.BaseObject;
+import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableMergedOutcomeJob extends BaseObject implements MergedOutcomeJob {
 

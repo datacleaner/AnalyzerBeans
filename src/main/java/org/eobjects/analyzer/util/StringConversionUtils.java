@@ -40,9 +40,9 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Schema;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Table;
 
 /**
  * Helper class for converting objects to and from string representations as
@@ -68,9 +68,9 @@ import dk.eobjects.metamodel.schema.Table;
  * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
  * <li>org.eobjects.analyzer.reference.StringPattern</li>
  * <li>org.eobjects.analyzer.connection.Datastore</li>
- * <li>dk.eobjects.metamodel.schema.Column</li>
- * <li>dk.eobjects.metamodel.schema.Table</li>
- * <li>dk.eobjects.metamodel.schema.Schema</li>
+ * <li>org.eobjects.metamodel.schema.Column</li>
+ * <li>org.eobjects.metamodel.schema.Table</li>
+ * <li>org.eobjects.metamodel.schema.Schema</li>
  * </ul>
  * 
  * @author Kasper Sørensen

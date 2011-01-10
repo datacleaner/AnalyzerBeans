@@ -35,9 +35,9 @@ import org.eobjects.analyzer.util.CompareUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Table;
 
 @AnalyzerBean("Compare table structures")
 public class CompareTablesAnalyzer implements ExploringAnalyzer<TableComparisonResult> {

@@ -29,7 +29,7 @@ import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-import dk.eobjects.metamodel.util.FormatHelper;
+import org.eobjects.metamodel.util.FormatHelper;
 
 @RendererBean(TextRenderingFormat.class)
 public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {

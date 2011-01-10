@@ -26,7 +26,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.util.BaseObject;
+import org.eobjects.metamodel.util.BaseObject;
 
 /**
  * Abstract datastore implementation that uses a shared

@@ -88,7 +88,7 @@ import org.eobjects.analyzer.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 
 public class JaxbJobReader implements JobReader<InputStream> {
 

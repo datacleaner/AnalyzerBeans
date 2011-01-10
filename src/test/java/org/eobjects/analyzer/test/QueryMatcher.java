@@ -21,7 +21,7 @@ package org.eobjects.analyzer.test;
 
 import org.easymock.IArgumentMatcher;
 
-import dk.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.query.Query;
 
 public class QueryMatcher implements IArgumentMatcher {
 

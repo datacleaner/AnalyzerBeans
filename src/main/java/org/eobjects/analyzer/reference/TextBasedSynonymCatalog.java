@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.WeakHashMap;
 
-import dk.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.FileHelper;
 
 public final class TextBasedSynonymCatalog implements SynonymCatalog {
 

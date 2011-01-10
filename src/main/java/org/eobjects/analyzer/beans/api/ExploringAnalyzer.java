@@ -21,7 +21,7 @@ package org.eobjects.analyzer.beans.api;
 
 import org.eobjects.analyzer.result.AnalyzerResult;
 
-import dk.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContext;
 
 /**
  * An analyzer that explores a datastore (in the form of a DataContext).

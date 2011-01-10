@@ -29,7 +29,7 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.util.CollectionUtils;
 
-import dk.eobjects.metamodel.util.BaseObject;
+import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableFilterJob extends BaseObject implements FilterJob {
 

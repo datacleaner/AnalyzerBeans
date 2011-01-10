@@ -28,7 +28,7 @@ import java.util.WeakHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.FileHelper;
 
 public class TextBasedDictionary implements Dictionary {
 

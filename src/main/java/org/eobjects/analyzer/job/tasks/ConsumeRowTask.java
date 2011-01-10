@@ -29,9 +29,9 @@ import org.eobjects.analyzer.job.runner.OutcomeSink;
 import org.eobjects.analyzer.job.runner.OutcomeSinkImpl;
 import org.eobjects.analyzer.job.runner.RowProcessingConsumer;
 
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.query.SelectItem;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.query.SelectItem;
+import org.eobjects.metamodel.schema.Table;
 
 public final class ConsumeRowTask implements Task {
 

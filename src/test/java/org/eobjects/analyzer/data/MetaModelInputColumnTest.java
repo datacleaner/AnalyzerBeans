@@ -20,8 +20,8 @@
 package org.eobjects.analyzer.data;
 
 import junit.framework.TestCase;
-import dk.eobjects.metamodel.schema.ColumnType;
-import dk.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.MutableColumn;
 
 public class MetaModelInputColumnTest extends TestCase {
 

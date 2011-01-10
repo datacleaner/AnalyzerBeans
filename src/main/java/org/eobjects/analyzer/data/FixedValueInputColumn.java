@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.data;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 
 /**
  * Defines an InputColumn which has a fixed/constant value, regardless of the

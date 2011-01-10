@@ -51,8 +51,8 @@ import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.util.FileHelper;
 
 public class JaxbJobWriterTest extends TestCase {
 

@@ -52,7 +52,7 @@ import org.eobjects.analyzer.result.renderer.DateGapTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-import dk.eobjects.metamodel.util.ToStringComparator;
+import org.eobjects.metamodel.util.ToStringComparator;
 
 public class JaxbJobReaderTest extends TestCase {
 

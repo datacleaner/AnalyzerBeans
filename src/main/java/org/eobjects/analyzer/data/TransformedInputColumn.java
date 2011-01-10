@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 import org.eobjects.analyzer.job.IdGenerator;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 
 public class TransformedInputColumn<E> extends AbstractInputColumn<E> implements MutableInputColumn<E>, Serializable {
 

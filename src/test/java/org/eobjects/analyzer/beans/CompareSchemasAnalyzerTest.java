@@ -26,14 +26,14 @@ import org.eobjects.analyzer.result.ColumnDifference;
 import org.eobjects.analyzer.result.SchemaDifference;
 import org.eobjects.analyzer.result.TableComparisonResult;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.ColumnType;
-import dk.eobjects.metamodel.schema.MutableColumn;
-import dk.eobjects.metamodel.schema.MutableSchema;
-import dk.eobjects.metamodel.schema.MutableTable;
-import dk.eobjects.metamodel.schema.Schema;
-import dk.eobjects.metamodel.schema.Table;
-import dk.eobjects.metamodel.schema.TableType;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.MutableSchema;
+import org.eobjects.metamodel.schema.MutableTable;
+import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.schema.TableType;
 import junit.framework.TestCase;
 
 public class CompareSchemasAnalyzerTest extends TestCase {

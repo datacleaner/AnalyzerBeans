@@ -23,7 +23,7 @@ import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.test.MockDatastore;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.MutableColumn;
 import junit.framework.TestCase;
 
 public class SourceColumnMappingTest extends TestCase {

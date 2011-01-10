@@ -38,8 +38,8 @@ import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.SourceColumns;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Table;
 
 /**
  * Helper class for traversing dependencies between virtual and physical

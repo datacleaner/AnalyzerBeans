@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.data;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 
 public abstract class AbstractInputColumn<E> implements InputColumn<E> {
 

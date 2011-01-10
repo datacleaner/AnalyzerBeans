@@ -22,7 +22,7 @@ package org.eobjects.analyzer.beans.valuedist;
 import java.io.Serializable;
 import java.util.List;
 
-import dk.eobjects.metamodel.util.BaseObject;
+import org.eobjects.metamodel.util.BaseObject;
 
 public final class ValueCount extends BaseObject implements Serializable {
 

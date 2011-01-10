@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.result;
 
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.schema.Table;
 
 public class TableDifference<E> implements StructuralDifference<Table, E> {
 

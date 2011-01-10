@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 import junit.framework.TestCase;
 
 public class ExcelDatastoreTest extends TestCase {

@@ -37,10 +37,10 @@ import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 
-import dk.eobjects.metamodel.schema.MutableColumn;
-import dk.eobjects.metamodel.schema.MutableSchema;
-import dk.eobjects.metamodel.schema.MutableTable;
-import dk.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.MutableSchema;
+import org.eobjects.metamodel.schema.MutableTable;
+import org.eobjects.metamodel.schema.Schema;
 
 public class StringConversionUtilsTest extends TestCase {
 

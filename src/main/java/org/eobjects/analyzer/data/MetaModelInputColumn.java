@@ -21,8 +21,8 @@ package org.eobjects.analyzer.data;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.ColumnType;
 
 public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 

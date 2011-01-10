@@ -25,7 +25,7 @@ import java.util.Comparator;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 
 /**
  * Comparator for input columns. Physical columns will be ordered first, sorted

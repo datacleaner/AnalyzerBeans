@@ -106,7 +106,7 @@ import org.eobjects.analyzer.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.FileHelper;
 
 /**
  * Configuration reader that uses the JAXB model to read XML file based

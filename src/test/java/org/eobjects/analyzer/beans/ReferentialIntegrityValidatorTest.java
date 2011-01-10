@@ -32,18 +32,18 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.test.QueryMatcher;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
-import dk.eobjects.metamodel.MetaModelTestCase;
-import dk.eobjects.metamodel.data.DefaultRow;
-import dk.eobjects.metamodel.data.InMemoryDataSet;
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.query.FromItem;
-import dk.eobjects.metamodel.query.Query;
-import dk.eobjects.metamodel.query.SelectItem;
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Schema;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.MetaModelTestCase;
+import org.eobjects.metamodel.data.DefaultRow;
+import org.eobjects.metamodel.data.InMemoryDataSet;
+import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.query.FromItem;
+import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.query.SelectItem;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Table;
 
 public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 

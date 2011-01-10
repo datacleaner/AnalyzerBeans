@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import dk.eobjects.metamodel.util.BaseObject;
+import org.eobjects.metamodel.util.BaseObject;
 
 public class ImmutableAnalysisJobMetadata extends BaseObject implements AnalysisJobMetadata {
 

@@ -27,19 +27,19 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.result.DataSetResult;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.MetaModelHelper;
-import dk.eobjects.metamodel.data.DataSet;
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.query.FilterItem;
-import dk.eobjects.metamodel.query.FromItem;
-import dk.eobjects.metamodel.query.JoinType;
-import dk.eobjects.metamodel.query.OperatorType;
-import dk.eobjects.metamodel.query.Query;
-import dk.eobjects.metamodel.query.SelectItem;
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Schema;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.MetaModelHelper;
+import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.query.FilterItem;
+import org.eobjects.metamodel.query.FromItem;
+import org.eobjects.metamodel.query.JoinType;
+import org.eobjects.metamodel.query.OperatorType;
+import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.query.SelectItem;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Table;
 
 /**
  * Matches values from separate tables and returns rows where the values does

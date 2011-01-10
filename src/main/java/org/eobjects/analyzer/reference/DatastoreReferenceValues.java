@@ -27,11 +27,11 @@ import java.util.WeakHashMap;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.data.DataSet;
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.query.Query;
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.schema.Column;
 
 public final class DatastoreReferenceValues implements ReferenceValues<String> {
 

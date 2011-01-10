@@ -24,9 +24,9 @@ import java.util.List;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.ColumnDifference;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.ColumnType;
-import dk.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.MutableColumn;
 import junit.framework.TestCase;
 
 public class CompareColumnsAnalyzerTest extends TestCase {

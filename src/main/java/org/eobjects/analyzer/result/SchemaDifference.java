@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.result;
 
-import dk.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Schema;
 
 public class SchemaDifference<E> implements StructuralDifference<Schema, E> {
 

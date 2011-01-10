@@ -27,8 +27,8 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.junit.Ignore;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
 
 @Ignore
 public class SampleCustomDatastore implements Datastore {

@@ -33,7 +33,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.result.NumberResult;
 
-import dk.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContext;
 
 @AnalyzerBean("Exploring mock")
 public class ExploringAnalyzerMock implements ExploringAnalyzer<NumberResult> {

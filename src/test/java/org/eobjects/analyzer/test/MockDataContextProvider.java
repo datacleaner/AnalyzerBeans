@@ -23,7 +23,7 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-import dk.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContext;
 
 public final class MockDataContextProvider implements DataContextProvider {
 

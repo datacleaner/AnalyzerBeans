@@ -27,8 +27,8 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
 
 public final class MultiConnectionDataContextProvider extends UsageAwareDataContextProvider {
 

@@ -21,8 +21,8 @@ package org.eobjects.analyzer.connection;
 
 import java.io.File;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
 
 /**
  * Datastore implementation for OpenOffice database files (.odb).

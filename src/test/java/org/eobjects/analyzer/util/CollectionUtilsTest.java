@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import dk.eobjects.metamodel.util.ToStringComparator;
+import org.eobjects.metamodel.util.ToStringComparator;
 
 import junit.framework.TestCase;
 

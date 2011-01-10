@@ -53,9 +53,9 @@ import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.test.MockDataContextProvider;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.schema.ColumnType;
-import dk.eobjects.metamodel.schema.MutableColumn;
-import dk.eobjects.metamodel.schema.MutableTable;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.MutableTable;
 
 public class RowProcessingPublisherTest extends TestCase {
 

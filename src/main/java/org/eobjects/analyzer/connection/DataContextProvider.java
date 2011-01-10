@@ -23,7 +23,7 @@ import java.io.Closeable;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-import dk.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContext;
 
 public interface DataContextProvider extends Closeable {
 

@@ -31,7 +31,7 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 
 /**
  * A dictionary backed by a column in a datastore.

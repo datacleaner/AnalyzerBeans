@@ -24,10 +24,10 @@ import java.io.File;
 import org.eobjects.analyzer.connection.CsvDatastore;
 
 import junit.framework.TestCase;
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Table;
 
 public class SchemaNavigatorTest extends TestCase {
 

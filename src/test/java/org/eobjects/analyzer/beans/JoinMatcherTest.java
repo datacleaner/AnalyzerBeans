@@ -28,10 +28,10 @@ import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
-import dk.eobjects.metamodel.MetaModelTestCase;
-import dk.eobjects.metamodel.schema.Relationship;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.MetaModelTestCase;
+import org.eobjects.metamodel.schema.Relationship;
 
 public class JoinMatcherTest extends MetaModelTestCase {
 

@@ -26,7 +26,7 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContext;
 
 public final class SingleDataContextProvider extends UsageAwareDataContextProvider {
 

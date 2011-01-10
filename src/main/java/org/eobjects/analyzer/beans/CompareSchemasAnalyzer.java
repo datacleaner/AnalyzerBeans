@@ -33,9 +33,9 @@ import org.eobjects.analyzer.result.TableComparisonResult;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.CompareUtils;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.schema.Schema;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Table;
 
 @AnalyzerBean("Compare schema structures")
 public class CompareSchemasAnalyzer implements ExploringAnalyzer<SchemaComparisonResult> {

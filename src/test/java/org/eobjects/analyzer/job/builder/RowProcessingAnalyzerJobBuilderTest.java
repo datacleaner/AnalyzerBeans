@@ -29,10 +29,10 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.schema.ColumnType;
-import dk.eobjects.metamodel.schema.MutableColumn;
-import dk.eobjects.metamodel.schema.MutableTable;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.MutableTable;
+import org.eobjects.metamodel.schema.Table;
 
 public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 

@@ -21,11 +21,11 @@ package org.eobjects.analyzer.connection;
 
 import java.io.File;
 
-import dk.eobjects.metamodel.CsvDataContextStrategy;
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
-import dk.eobjects.metamodel.DefaultDataContext;
-import dk.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.CsvDataContextStrategy;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.DefaultDataContext;
+import org.eobjects.metamodel.util.FileHelper;
 
 public final class CsvDatastore extends UsageAwareDatastore {
 

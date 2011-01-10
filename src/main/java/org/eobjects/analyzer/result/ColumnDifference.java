@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.result;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 
 public class ColumnDifference<E> implements StructuralDifference<Column, E> {
 

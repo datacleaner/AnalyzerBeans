@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job;
 import java.util.Arrays;
 import java.util.List;
 
-import dk.eobjects.metamodel.util.BaseObject;
+import org.eobjects.metamodel.util.BaseObject;
 
 public abstract class AbstractMergedOutcome extends BaseObject implements MergedOutcome {
 

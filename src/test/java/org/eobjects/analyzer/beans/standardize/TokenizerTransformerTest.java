@@ -27,7 +27,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.TransformedInputRow;
 
-import dk.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.MutableColumn;
 
 public class TokenizerTransformerTest extends TestCase {
 

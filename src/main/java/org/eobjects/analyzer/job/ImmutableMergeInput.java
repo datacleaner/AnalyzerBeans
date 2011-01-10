@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.data.InputColumn;
 
-import dk.eobjects.metamodel.util.BaseObject;
+import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableMergeInput extends BaseObject implements MergeInput {
 

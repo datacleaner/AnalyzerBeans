@@ -23,8 +23,8 @@ import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
 
 public final class CompositeDatastore extends UsageAwareDatastore {
 

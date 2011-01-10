@@ -26,9 +26,9 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.standardize.NameStandardizerTransformer;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.ColumnType;
-import dk.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.MutableColumn;
 
 public class NameStandardizerTransformerTest extends TestCase {
 

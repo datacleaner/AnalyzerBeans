@@ -27,9 +27,9 @@ import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.query.SelectItem;
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.query.SelectItem;
+import org.eobjects.metamodel.schema.Column;
 
 public final class MetaModelInputRow extends AbstractInputRow {
 

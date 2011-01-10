@@ -24,9 +24,9 @@ import java.util.List;
 
 import javax.swing.table.TableModel;
 
-import dk.eobjects.metamodel.data.DataSet;
-import dk.eobjects.metamodel.data.InMemoryDataSet;
-import dk.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.data.InMemoryDataSet;
+import org.eobjects.metamodel.data.Row;
 
 public class DataSetResult implements TableModelResult, AnalyzerResult {
 

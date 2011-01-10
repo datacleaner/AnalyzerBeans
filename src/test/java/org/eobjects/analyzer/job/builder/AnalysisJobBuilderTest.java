@@ -52,8 +52,8 @@ import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.MetaModelTestCase;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.MetaModelTestCase;
+import org.eobjects.metamodel.schema.Table;
 
 public class AnalysisJobBuilderTest extends MetaModelTestCase {
 

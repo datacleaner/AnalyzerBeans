@@ -60,9 +60,9 @@ import javax.inject.Qualifier;
  * types (for querying purposes):
  * 
  * <ul>
- * <li>dk.eobjects.metamodel.schema.Column</li>
- * <li>dk.eobjects.metamodel.schema.Table</li>
- * <li>dk.eobjects.metamodel.schema.Schema</li>
+ * <li>org.eobjects.metamodel.schema.Column</li>
+ * <li>org.eobjects.metamodel.schema.Table</li>
+ * <li>org.eobjects.metamodel.schema.Schema</li>
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)

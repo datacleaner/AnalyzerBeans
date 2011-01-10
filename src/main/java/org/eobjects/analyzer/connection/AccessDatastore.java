@@ -19,8 +19,8 @@
  */
 package org.eobjects.analyzer.connection;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
 
 public final class AccessDatastore extends UsageAwareDatastore {
 

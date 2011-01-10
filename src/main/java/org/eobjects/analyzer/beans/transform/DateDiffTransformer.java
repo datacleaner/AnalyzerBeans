@@ -31,7 +31,7 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-import dk.eobjects.metamodel.util.DateUtils;
+import org.eobjects.metamodel.util.DateUtils;
 
 @TransformerBean("Date difference / period length")
 @Description("Calculates the length of a period made of two dates")

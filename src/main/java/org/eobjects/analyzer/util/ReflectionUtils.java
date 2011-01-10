@@ -35,9 +35,9 @@ import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
 
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Schema;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Table;
 
 public class ReflectionUtils {
 

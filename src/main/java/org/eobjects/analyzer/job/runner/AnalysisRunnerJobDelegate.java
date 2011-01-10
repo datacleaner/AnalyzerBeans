@@ -66,9 +66,9 @@ import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.MetaModelHelper;
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.MetaModelHelper;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Table;
 
 /**
  * A delegate for the AnalysisRunner to put the state of a single job into.

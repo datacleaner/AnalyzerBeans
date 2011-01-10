@@ -28,7 +28,7 @@ import org.eobjects.analyzer.beans.stringpattern.TokenPatternImpl;
 import org.eobjects.analyzer.beans.stringpattern.Tokenizer;
 import org.eobjects.analyzer.beans.stringpattern.TokenizerConfiguration;
 
-import dk.eobjects.metamodel.util.BaseObject;
+import org.eobjects.metamodel.util.BaseObject;
 
 /**
  * Represents a string pattern that is based on a sequence of token types. The

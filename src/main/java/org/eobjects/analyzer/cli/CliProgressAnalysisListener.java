@@ -30,7 +30,7 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.schema.Table;
 
 final class CliProgressAnalysisListener implements AnalysisListener {
 

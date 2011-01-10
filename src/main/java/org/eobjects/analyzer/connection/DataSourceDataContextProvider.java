@@ -23,8 +23,8 @@ import javax.sql.DataSource;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
 
 public class DataSourceDataContextProvider extends UsageAwareDataContextProvider {
 

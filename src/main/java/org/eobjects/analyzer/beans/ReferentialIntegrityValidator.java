@@ -29,16 +29,16 @@ import org.eobjects.analyzer.result.DataSetResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.eobjects.metamodel.DataContext;
-import dk.eobjects.metamodel.data.DataSet;
-import dk.eobjects.metamodel.data.Row;
-import dk.eobjects.metamodel.query.FromItem;
-import dk.eobjects.metamodel.query.JoinType;
-import dk.eobjects.metamodel.query.Query;
-import dk.eobjects.metamodel.query.SelectClause;
-import dk.eobjects.metamodel.query.SelectItem;
-import dk.eobjects.metamodel.schema.Column;
-import dk.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.query.FromItem;
+import org.eobjects.metamodel.query.JoinType;
+import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.query.SelectClause;
+import org.eobjects.metamodel.query.SelectItem;
+import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Table;
 
 /**
  * An analyzer that performs a check on a weak foreign key / reference.

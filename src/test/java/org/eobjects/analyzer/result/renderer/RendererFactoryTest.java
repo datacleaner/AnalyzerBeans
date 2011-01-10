@@ -27,7 +27,7 @@ import org.eobjects.analyzer.result.NumberResult;
 import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.test.TestHelper;
 
-import dk.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.data.Row;
 
 import junit.framework.TestCase;
 

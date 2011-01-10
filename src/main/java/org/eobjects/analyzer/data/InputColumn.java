@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.data;
 
-import dk.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Column;
 
 /**
  * Represents a column that is used to retrieve values from a row of data. A

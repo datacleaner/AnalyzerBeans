@@ -24,8 +24,8 @@ import java.util.Date;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 
-import dk.eobjects.metamodel.util.DateUtils;
-import dk.eobjects.metamodel.util.Month;
+import org.eobjects.metamodel.util.DateUtils;
+import org.eobjects.metamodel.util.Month;
 
 import junit.framework.TestCase;
 
