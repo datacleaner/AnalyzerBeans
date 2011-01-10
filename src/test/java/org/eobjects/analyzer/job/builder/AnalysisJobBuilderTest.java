@@ -106,9 +106,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 
 		Collection<InputColumn<?>> numberColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.NUMBER);
 		assertEquals(1, numberColumns.size());
-		assertEquals(
-				"[MetaModelInputColumn[Column[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
-				Arrays.toString(numberColumns.toArray()));
+		assertEquals("[MetaModelInputColumn[PUBLIC.EMPLOYEES.EMPLOYEENUMBER]]", Arrays.toString(numberColumns.toArray()));
 
 		transformerJobBuilder.addInputColumn(numberColumns.iterator().next());
 		assertTrue(transformerJobBuilder.isConfigured());
@@ -162,7 +160,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		assertEquals("ImmutableTransformerJob[name=null,transformer=Convert to string]", transformerJob.toString());
 
 		assertEquals(
-				"[MetaModelInputColumn[Column[name=EMPLOYEENUMBER,columnNumber=0,type=INTEGER,nullable=false,indexed=true,nativeType=INTEGER,columnSize=0]]]",
+				"[MetaModelInputColumn[PUBLIC.EMPLOYEES.EMPLOYEENUMBER]]",
 				Arrays.toString(transformerJob.getInput()));
 
 		Collection<AnalyzerJob> analyzerJobs = analysisJob.getAnalyzerJobs();

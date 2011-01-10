@@ -276,25 +276,17 @@ public class JaxbJobReaderTest extends TestCase {
 
 		List<MetaModelInputColumn> sourceColumns = builder.getSourceColumns();
 		assertEquals(3, sourceColumns.size());
-		assertEquals(
-				"MetaModelInputColumn[Column[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]",
-				sourceColumns.get(0).toString());
-		assertEquals(
-				"MetaModelInputColumn[Column[name=LASTNAME,columnNumber=1,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]",
-				sourceColumns.get(1).toString());
-		assertEquals(
-				"MetaModelInputColumn[Column[name=EMAIL,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=100]]",
-				sourceColumns.get(2).toString());
+		assertEquals("MetaModelInputColumn[PUBLIC.EMPLOYEES.FIRSTNAME]", sourceColumns.get(0).toString());
+		assertEquals("MetaModelInputColumn[PUBLIC.EMPLOYEES.LASTNAME]", sourceColumns.get(1).toString());
+		assertEquals("MetaModelInputColumn[PUBLIC.EMPLOYEES.EMAIL]", sourceColumns.get(2).toString());
 
 		assertEquals(1, builder.getTransformerJobBuilders().size());
 		assertEquals("[TransformedInputColumn[id=trans-1,name=username,type=STRING], "
 				+ "TransformedInputColumn[id=trans-2,name=domain,type=STRING]]", builder.getTransformerJobBuilders().get(0)
 				.getOutputColumns().toString());
-		assertEquals(
-				"[TransformedInputColumn[id=trans-1,name=username,type=STRING], "
-						+ "TransformedInputColumn[id=trans-2,name=domain,type=STRING], "
-						+ "MetaModelInputColumn[Column[name=FIRSTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
-						+ "MetaModelInputColumn[Column[name=LASTNAME,columnNumber=1,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]]",
+		assertEquals("[TransformedInputColumn[id=trans-1,name=username,type=STRING], "
+				+ "TransformedInputColumn[id=trans-2,name=domain,type=STRING], "
+				+ "MetaModelInputColumn[PUBLIC.EMPLOYEES.FIRSTNAME], " + "MetaModelInputColumn[PUBLIC.EMPLOYEES.LASTNAME]]",
 				Arrays.toString(builder.getAnalyzerJobBuilders().get(0).toAnalyzerJob().getInput()));
 
 		List<AnalyzerResult> results = new AnalysisRunnerImpl(configuration).run(builder.toAnalysisJob()).getResults();
@@ -336,11 +328,9 @@ public class JaxbJobReaderTest extends TestCase {
 				sourceColumnMapping);
 
 		assertEquals("another datastore name", job.getDatastore().getName());
-		assertEquals(
-				"[MetaModelInputColumn[Column[name=CONTACTFIRSTNAME,columnNumber=3,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
-						+ "MetaModelInputColumn[Column[name=CONTACTLASTNAME,columnNumber=2,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]], "
-						+ "MetaModelInputColumn[Column[name=PHONE,columnNumber=4,type=VARCHAR,nullable=false,indexed=false,nativeType=VARCHAR,columnSize=50]]]",
-				job.getSourceColumns().toString());
+		assertEquals("[MetaModelInputColumn[PUBLIC.CUSTOMERS.CONTACTFIRSTNAME], "
+				+ "MetaModelInputColumn[PUBLIC.CUSTOMERS.CONTACTLASTNAME], "
+				+ "MetaModelInputColumn[PUBLIC.CUSTOMERS.PHONE]]", job.getSourceColumns().toString());
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 		AnalysisResultFuture resultFuture = runner.run(job);

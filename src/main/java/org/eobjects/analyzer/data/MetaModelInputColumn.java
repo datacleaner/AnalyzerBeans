@@ -59,7 +59,7 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 		MetaModelInputColumn that2 = (MetaModelInputColumn) that;
 		return _column.equals(that2._column);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<? extends Object> getDataType() {
@@ -94,6 +94,6 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 
 	@Override
 	public String toString() {
-		return "MetaModelInputColumn[" + _column + "]";
+		return "MetaModelInputColumn[" + _column.getQualifiedLabel() + "]";
 	}
 }
