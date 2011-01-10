@@ -163,42 +163,51 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 			return null;
 		}
 
-		WeakHashMap<String, String> cache = getMasterTermCache();
-		if (cache.containsKey(term)) {
-			return cache.get(term);
+		final WeakHashMap<String, String> cache = getMasterTermCache();
+
+		final String result;
+
+		synchronized (cache) {
+
+			if (cache.containsKey(term)) {
+				result = cache.get(term);
+			} else {
+				Datastore datastore = getDatastore();
+
+				DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+
+				SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+
+				Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermQualifiedColumnName);
+				Column[] columns = schemaNavigator.convertToColumns(_synonymQualifiedColumnNames);
+
+				DataContext dataContext = dataContextProvider.getDataContext();
+				Table table = masterTermColumn.getTable();
+
+				// create a query that gets the master term where any of the
+				// synonym columns are equal to the synonym
+				SatisfiedWhereBuilder<?> queryBuilder = dataContext.query().from(table.getName()).select(masterTermColumn)
+						.where(columns[0]).equals(term);
+				for (int i = 1; i < columns.length; i++) {
+					queryBuilder = queryBuilder.or(columns[i]).equals(term);
+				}
+				Query query = queryBuilder.toQuery();
+				DataSet dataSet = dataContext.executeQuery(query);
+
+				if (dataSet.next()) {
+					Row row = dataSet.getRow();
+					result = getMasterTerm(row, masterTermColumn);
+				} else {
+					result = null;
+				}
+
+				dataSet.close();
+				dataContextProvider.close();
+
+				cache.put(term, result);
+			}
 		}
 
-		Datastore datastore = getDatastore();
-
-		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
-
-		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
-
-		Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermQualifiedColumnName);
-		Column[] columns = schemaNavigator.convertToColumns(_synonymQualifiedColumnNames);
-
-		DataContext dataContext = dataContextProvider.getDataContext();
-		Table table = masterTermColumn.getTable();
-
-		// create a query that gets the master term where any of the synonym
-		// columns are equal to the synonym
-		SatisfiedWhereBuilder<?> queryBuilder = dataContext.query().from(table.getName()).select(masterTermColumn).where(columns[0])
-				.equals(term);
-		for (int i = 1; i < columns.length; i++) {
-			queryBuilder = queryBuilder.or(columns[i]).equals(term);
-		}
-		Query query = queryBuilder.toQuery();
-		DataSet dataSet = dataContext.executeQuery(query);
-		String result = null;
-
-		if (dataSet.next()) {
-			Row row = dataSet.getRow();
-			result = getMasterTerm(row, masterTermColumn);
-		}
-		dataSet.close();
-		dataContextProvider.close();
-
-		cache.put(term, result);
 		return result;
 	}
 
