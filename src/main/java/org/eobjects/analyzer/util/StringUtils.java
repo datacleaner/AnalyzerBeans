@@ -19,7 +19,16 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.util.regex.Pattern;
+
+/**
+ * Contains various utility methods regarding string handling.
+ * 
+ * @author Kasper Sørensen
+ */
 public final class StringUtils {
+
+	private static final Pattern WHITESPACE_PATTERN = Pattern.compile("[\\s\\p{Zs}\\p{javaWhitespace}]+");
 
 	public static final String LATIN_CHARACTERS = "";
 
@@ -52,5 +61,9 @@ public final class StringUtils {
 			i--;
 		}
 		return str.substring(0, i + 1);
+	}
+
+	public static String replaceWhitespaces(String inString, String with) {
+		return WHITESPACE_PATTERN.matcher(inString).replaceAll(with);
 	}
 }

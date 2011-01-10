@@ -19,40 +19,33 @@
  */
 package org.eobjects.analyzer.data;
 
-/**
- * Defines an InputColumn which has a fixed/constant value, regardless of the
- * row.
- * 
- * These columns can be used for various purposes, eg. to mark a filter outcome
- * in the data, to open jobs as templates, even though the new datastore is
- * missing some columns etc.
- * 
- * @author Kasper Sørensen
- */
-public final class ConstantInputColumn extends AbstractExpressionBasedInputColumn<String> {
+import org.eobjects.metamodel.schema.Column;
 
-	private final String _value;
+abstract class AbstractExpressionBasedInputColumn<E> extends AbstractInputColumn<E> implements ExpressionBasedInputColumn<E> {
 
-	public ConstantInputColumn(String value) {
-		super();
-		if (value == null) {
-			throw new IllegalArgumentException("value cannot be null");
-		}
-		_value = value;
+	@Override
+	public final String getName() {
+		return '"' + getExpression() + '"';
 	}
 
 	@Override
-	public String getExpression() {
-		return _value;
+	protected final int hashCodeInternal() {
+		return getExpression().hashCode();
 	}
 
 	@Override
-	public DataTypeFamily getDataTypeFamily() {
-		return DataTypeFamily.STRING;
+	protected final Column getPhysicalColumnInternal() {
+		return null;
 	}
 
 	@Override
-	public String evaluate(InputRow row) {
-		return _value;
+	protected final boolean equalsInternal(AbstractInputColumn<?> that) {
+		AbstractExpressionBasedInputColumn<?> t = (AbstractExpressionBasedInputColumn<?>) that;
+		return getExpression().equals(t.getExpression());
+	}
+
+	@Override
+	public final String toString() {
+		return getClass().getSimpleName() + "[" + getExpression() + "]";
 	}
 }

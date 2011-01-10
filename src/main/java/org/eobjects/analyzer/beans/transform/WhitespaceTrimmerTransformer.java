@@ -26,7 +26,6 @@ import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.util.CharIterator;
 import org.eobjects.analyzer.util.StringUtils;
 
 @TransformerBean("Whitespace trimmer")
@@ -93,22 +92,7 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 			}
 		}
 		if (trimMultipleToSingleSpace) {
-			CharIterator ci = new CharIterator(value);
-
-			boolean previousWhiteSpace = false;
-			while (ci.hasNext()) {
-				ci.next();
-				boolean currentWhiteSpace = ci.isWhitespace();
-				if (currentWhiteSpace) {
-					ci.set(' ');
-					if (previousWhiteSpace) {
-						ci.remove();
-					}
-				}
-				previousWhiteSpace = currentWhiteSpace;
-			}
-
-			value = ci.toString();
+			value = StringUtils.replaceWhitespaces(value, " ");
 		}
 		return value;
 	}
