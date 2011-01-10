@@ -34,7 +34,7 @@ import org.eobjects.analyzer.util.StringUtils;
 public class WhitespaceTrimmerTransformer implements Transformer<String> {
 
 	@Configured
-	InputColumn<String> column;
+	InputColumn<String>[] columns;
 
 	@Configured(order = 1)
 	boolean trimLeft = true;
@@ -57,14 +57,25 @@ public class WhitespaceTrimmerTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(column.getName() + " (trimmed)");
+		String[] names = new String[columns.length];
+		for (int i = 0; i < columns.length; i++) {
+			InputColumn<String> column = columns[i];
+			String name = column.getName() + " (trimmed)";
+			names[i] = name;
+		}
+		return new OutputColumns(names);
 	}
 
 	@Override
 	public String[] transform(InputRow inputRow) {
-		String value = inputRow.getValue(column);
-		value = transform(value);
-		return new String[] { value };
+		String[] result = new String[columns.length];
+		for (int i = 0; i < columns.length; i++) {
+			InputColumn<String> column = columns[i];
+			String value = inputRow.getValue(column);
+			value = transform(value);
+			result[i] = value;
+		}
+		return result;
 	}
 
 	public String transform(String value) {
