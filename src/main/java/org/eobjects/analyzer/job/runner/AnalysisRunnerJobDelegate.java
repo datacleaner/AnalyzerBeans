@@ -254,12 +254,15 @@ final class AnalysisRunnerJobDelegate {
 			for (MergeInput mergeInput : input) {
 				InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
 				for (InputColumn<?> inputColumn : inputColumns) {
-					if (originatingTable == null) {
-						originatingTable = finder.findOriginatingTable(inputColumn);
-					} else {
-						if (!originatingTable.equals(finder.findOriginatingTable(inputColumn))) {
-							throw new IllegalArgumentException("Input columns in " + mergeInput
-									+ " originate from different tables");
+					Table currentTable = finder.findOriginatingTable(inputColumn);
+					if (currentTable != null) {
+						if (originatingTable == null) {
+							originatingTable = currentTable;
+						} else {
+							if (!originatingTable.equals(currentTable)) {
+								throw new IllegalArgumentException("Input columns in " + mergeInput
+										+ " originate from different tables");
+							}
 						}
 					}
 				}
