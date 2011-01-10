@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.eobjects.analyzer.data.DataTypeFamily;
-import org.eobjects.analyzer.data.FixedValueInputColumn;
+import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
@@ -37,7 +37,6 @@ import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.SourceColumns;
-
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 
@@ -111,7 +110,7 @@ public class SourceColumnFinder {
 	}
 
 	public InputColumnSourceJob findInputColumnSource(InputColumn<?> inputColumn) {
-		if (inputColumn instanceof FixedValueInputColumn) {
+		if (inputColumn instanceof ExpressionBasedInputColumn) {
 			return null;
 		}
 		for (InputColumnSourceJob source : _inputColumnSources) {

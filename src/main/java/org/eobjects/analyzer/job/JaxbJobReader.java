@@ -44,7 +44,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.data.FixedValueInputColumn;
+import org.eobjects.analyzer.data.ConstantInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -373,7 +373,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 							ref = inputType.getRef();
 							InputColumn<?> inputColumn;
 							if (StringUtils.isNullOrEmpty(ref)) {
-								inputColumn = new FixedValueInputColumn<String>(inputType.getValue());
+								inputColumn = createExpressionBasedInputColumn(inputType);
 							} else {
 								inputColumn = inputColumns.get(ref);
 							}
@@ -469,7 +469,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 							if (StringUtils.isNullOrEmpty(value)) {
 								throw new IllegalStateException("Filter input column ref & value cannot be null");
 							} else {
-								inputColumn = new FixedValueInputColumn<String>(value);
+								inputColumn = createExpressionBasedInputColumn(inputType);
 							}
 						} else {
 							inputColumn = inputColumns.get(ref);
@@ -550,15 +550,15 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(outcomeToMerge);
 
 						List<InputType> inputs = mergedOutcome.getInput();
-						for (InputType input : inputs) {
-							ref = input.getRef();
+						for (InputType inputType : inputs) {
+							ref = inputType.getRef();
 							InputColumn<?> inputColumn;
 							if (StringUtils.isNullOrEmpty(ref)) {
-								String value = input.getValue();
+								String value = inputType.getValue();
 								if (StringUtils.isNullOrEmpty(value)) {
 									throw new IllegalStateException("Merged outcome input ref & value cannot be null");
 								} else {
-									inputColumn = new FixedValueInputColumn<String>(value);
+									inputColumn = createExpressionBasedInputColumn(inputType);
 								}
 							} else {
 								inputColumn = inputColumns.get(ref);
@@ -655,7 +655,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						if (StringUtils.isNullOrEmpty(value)) {
 							throw new IllegalStateException("Analyzer input column ref & value cannot be null");
 						} else {
-							inputColumn = new FixedValueInputColumn<String>(value);
+							inputColumn = createExpressionBasedInputColumn(inputType);
 						}
 					} else {
 						inputColumn = inputColumns.get(ref);
@@ -708,6 +708,10 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		dataContextProvider.close();
 
 		return analysisJobBuilder;
+	}
+
+	private InputColumn<?> createExpressionBasedInputColumn(InputType inputType) {
+		return new ConstantInputColumn(inputType.getValue());
 	}
 
 	private void registerInputColumn(Map<String, InputColumn<?>> inputColumns, String id, InputColumn<?> inputColumn) {

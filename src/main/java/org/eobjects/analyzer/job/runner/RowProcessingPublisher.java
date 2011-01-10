@@ -33,7 +33,7 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
-import org.eobjects.analyzer.data.FixedValueInputColumn;
+import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -47,8 +47,8 @@ import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.job.concurrent.JoinTaskListener;
 import org.eobjects.analyzer.job.concurrent.ForkTaskListener;
+import org.eobjects.analyzer.job.concurrent.JoinTaskListener;
 import org.eobjects.analyzer.job.concurrent.RunNextTaskTaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
@@ -72,9 +72,6 @@ import org.eobjects.analyzer.reference.Function;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.util.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
@@ -82,6 +79,8 @@ import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class RowProcessingPublisher {
 
@@ -251,7 +250,7 @@ public final class RowProcessingPublisher {
 					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
 					for (InputColumn<?> inputColumn : requiredInput) {
 						if (!inputColumn.isPhysicalColumn()) {
-							if (!(inputColumn instanceof FixedValueInputColumn)) {
+							if (!(inputColumn instanceof ExpressionBasedInputColumn)) {
 								if (!availableVirtualColumns.contains(inputColumn)) {
 									accepted = false;
 									break;
@@ -270,7 +269,7 @@ public final class RowProcessingPublisher {
 					
 					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
 					for (InputColumn<?> inputColumn : requiredInput) {
-						if (inputColumn instanceof FixedValueInputColumn) {
+						if (inputColumn instanceof ExpressionBasedInputColumn) {
 							availableVirtualColumns.add(inputColumn);
 						}
 					}

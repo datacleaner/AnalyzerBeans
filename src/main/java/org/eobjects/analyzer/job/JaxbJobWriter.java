@@ -34,7 +34,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.data.FixedValueInputColumn;
+import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.jaxb.AnalysisType;
@@ -214,9 +214,9 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 				for (InputColumn<?> inputColumn : columns) {
 					if (inputColumn != null) {
 						InputType inputType = new InputType();
-						if (inputColumn instanceof FixedValueInputColumn) {
-							FixedValueInputColumn<?> valueInputColumn = (FixedValueInputColumn<?>) inputColumn;
-							Object columnValue = valueInputColumn.getValue();
+						if (inputColumn instanceof ExpressionBasedInputColumn) {
+							ExpressionBasedInputColumn<?> expressionBasedInputColumn = (ExpressionBasedInputColumn<?>) inputColumn;
+							Object columnValue = expressionBasedInputColumn.getExpression();
 							inputType.setValue(StringConversionUtils.serialize(columnValue));
 						} else {
 							inputType.setRef(getId(inputColumn, columnMappings));

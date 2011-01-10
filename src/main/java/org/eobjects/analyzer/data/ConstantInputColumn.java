@@ -31,11 +31,11 @@ import org.eobjects.metamodel.schema.Column;
  * 
  * @author Kasper Sørensen
  */
-public final class FixedValueInputColumn<E> extends AbstractInputColumn<E> {
+public final class ConstantInputColumn extends AbstractInputColumn<String> implements ExpressionBasedInputColumn<String> {
 
-	private final E _value;
+	private final String _value;
 
-	public FixedValueInputColumn(E value) {
+	public ConstantInputColumn(String value) {
 		super();
 		if (value == null) {
 			throw new IllegalArgumentException("value cannot be null");
@@ -44,8 +44,13 @@ public final class FixedValueInputColumn<E> extends AbstractInputColumn<E> {
 	}
 
 	@Override
+	public String getExpression() {
+		return _value;
+	}
+
+	@Override
 	public String getName() {
-		return "Value[" + _value + "]";
+		return "\"" + _value + "\"";
 	}
 
 	@Override
@@ -63,18 +68,19 @@ public final class FixedValueInputColumn<E> extends AbstractInputColumn<E> {
 		return _value.hashCode();
 	}
 
-	public E getValue() {
+	@Override
+	public String evaluate(InputRow row) {
 		return _value;
 	}
 
 	@Override
 	protected boolean equalsInternal(AbstractInputColumn<?> that) {
-		FixedValueInputColumn<?> other = (FixedValueInputColumn<?>) that;
-		return _value.equals(other.getValue());
+		ConstantInputColumn other = (ConstantInputColumn) that;
+		return _value.equals(other._value);
 	}
 
 	@Override
 	public String toString() {
-		return "FixedValueInputColumn[" + _value + "]";
+		return "ConstantInputColumn[" + _value + "]";
 	}
 }

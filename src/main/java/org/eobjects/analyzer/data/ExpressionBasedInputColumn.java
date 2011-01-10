@@ -20,24 +20,17 @@
 package org.eobjects.analyzer.data;
 
 /**
- * Abstract implementation of the InputRow.
+ * Interface for input columns that contain an expression that is evaluated when
+ * the a value is extracted from the row, as opposed to being written to the row
+ * in advance.
  * 
  * @author Kasper Sørensen
+ * 
+ * @param <E>
  */
-public abstract class AbstractInputRow implements InputRow {
+public interface ExpressionBasedInputColumn<E> extends InputColumn<E> {
 
-	@Override
-	public final <E> E getValue(InputColumn<E> column) {
-		if (column == null) {
-			return null;
-		}
-		if (column instanceof ExpressionBasedInputColumn) {
-			ExpressionBasedInputColumn<E> ebic = (ExpressionBasedInputColumn<E>) column;
-			E value = ebic.evaluate(this);
-			return value;
-		}
-		return getValueInternal(column);
-	}
-
-	protected abstract <E> E getValueInternal(InputColumn<E> column);
+	public E evaluate(InputRow row);
+	
+	public String getExpression();
 }
