@@ -33,7 +33,7 @@ import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.test.TestHelper;
 
-public class MergeAndFixedValueColumnsTest extends TestCase {
+public class MergeAndExpressionBasedInputColumnsTest extends TestCase {
 
 	public void testScenario() throws Throwable {
 		CsvDatastore datastore = new CsvDatastore("my database", "src/test/resources/example-name-lengths.csv");
@@ -51,7 +51,7 @@ public class MergeAndFixedValueColumnsTest extends TestCase {
 		ValueDistributionResult result = (ValueDistributionResult) resultFuture.getResults().get(0);
 		assertEquals(7, result.getCount("REGULAR NAME").intValue());
 		assertEquals(1, result.getCount("NO NAME").intValue());
-		assertEquals(1, result.getCount("LONG NAME").intValue());
 		assertEquals(4, result.getCount("SHORT NAME").intValue());
+		assertEquals(1, result.getCount("LONG NAME: christoffer").intValue());
 	}
 }

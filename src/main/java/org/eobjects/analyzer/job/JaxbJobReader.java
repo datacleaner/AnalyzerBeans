@@ -45,6 +45,7 @@ import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.ConstantInputColumn;
+import org.eobjects.analyzer.data.ELInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -465,12 +466,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 						InputColumn<?> inputColumn;
 						if (StringUtils.isNullOrEmpty(ref)) {
-							String value = inputType.getValue();
-							if (StringUtils.isNullOrEmpty(value)) {
-								throw new IllegalStateException("Filter input column ref & value cannot be null");
-							} else {
-								inputColumn = createExpressionBasedInputColumn(inputType);
-							}
+							inputColumn = createExpressionBasedInputColumn(inputType);
 						} else {
 							inputColumn = inputColumns.get(ref);
 							if (inputColumn == null) {
@@ -554,12 +550,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 							ref = inputType.getRef();
 							InputColumn<?> inputColumn;
 							if (StringUtils.isNullOrEmpty(ref)) {
-								String value = inputType.getValue();
-								if (StringUtils.isNullOrEmpty(value)) {
-									throw new IllegalStateException("Merged outcome input ref & value cannot be null");
-								} else {
-									inputColumn = createExpressionBasedInputColumn(inputType);
-								}
+								inputColumn = createExpressionBasedInputColumn(inputType);
 							} else {
 								inputColumn = inputColumns.get(ref);
 								if (inputColumn == null) {
@@ -651,12 +642,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 					InputColumn<?> inputColumn;
 					if (StringUtils.isNullOrEmpty(ref)) {
-						String value = inputType.getValue();
-						if (StringUtils.isNullOrEmpty(value)) {
-							throw new IllegalStateException("Analyzer input column ref & value cannot be null");
-						} else {
-							inputColumn = createExpressionBasedInputColumn(inputType);
-						}
+						inputColumn = createExpressionBasedInputColumn(inputType);
 					} else {
 						inputColumn = inputColumns.get(ref);
 						if (inputColumn == null) {
@@ -711,7 +697,15 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	}
 
 	private InputColumn<?> createExpressionBasedInputColumn(InputType inputType) {
-		return new ConstantInputColumn(inputType.getValue());
+		String expression = inputType.getValue();
+		if (StringUtils.isNullOrEmpty(expression)) {
+			throw new IllegalStateException("Input ref & value cannot both be null");
+		}
+		if (expression.indexOf("#{") == -1) {
+			return new ConstantInputColumn(expression);
+		} else {
+			return new ELInputColumn(expression);
+		}
 	}
 
 	private void registerInputColumn(Map<String, InputColumn<?>> inputColumns, String id, InputColumn<?> inputColumn) {

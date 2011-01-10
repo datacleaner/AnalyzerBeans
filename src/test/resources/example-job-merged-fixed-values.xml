@@ -42,7 +42,7 @@
 				<input value="SHORT NAME" />
 			</outcome>
 			<outcome ref="higher">
-				<input value="LONG NAME" />
+				<input value="LONG NAME: #{name}" />
 			</outcome>
 			<output id="name_status" name="Name status" />
 		</merged-outcome>
