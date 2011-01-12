@@ -198,7 +198,7 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 					Row row = dataSet.getRow();
 					result = getMasterTerm(row, masterTermColumn);
 				} else {
-					result = null;
+					result = term;
 				}
 
 				dataSet.close();
