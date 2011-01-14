@@ -37,7 +37,6 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ImmutableAnalyzerJob;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.util.ReflectionUtils;
-
 import org.eobjects.metamodel.schema.Table;
 
 public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyzer<?>> extends
@@ -192,6 +191,11 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	public RowProcessingAnalyzerJobBuilder<A> setConfiguredProperty(ConfiguredPropertyDescriptor configuredProperty,
 			Object value) {
 		if (_multipleJobsSupported && configuredProperty.isInputColumn()) {
+
+			// the dummy value is used just to pass something to the underlying
+			// prototype bean.
+			final InputColumn<?> dummyValue;
+
 			_inputColumns.clear();
 			if (ReflectionUtils.isArray(value)) {
 				int length = Array.getLength(value);
@@ -199,10 +203,23 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 					InputColumn<?> inputColumn = (InputColumn<?>) Array.get(value, i);
 					_inputColumns.add(inputColumn);
 				}
+				if (_inputColumns.isEmpty()) {
+					dummyValue = null;
+				} else {
+					dummyValue = _inputColumns.iterator().next();
+				}
 			} else {
-				_inputColumns.add((InputColumn<?>) value);
+				InputColumn<?> col = (InputColumn<?>) value;
+				_inputColumns.add(col);
+				dummyValue = col;
 			}
-			return this;
+
+			if (configuredProperty.isArray()) {
+				return super.setConfiguredProperty(configuredProperty, new InputColumn[] { dummyValue });
+			} else {
+				return super.setConfiguredProperty(configuredProperty, dummyValue);
+			}
+
 		} else {
 			return super.setConfiguredProperty(configuredProperty, value);
 		}

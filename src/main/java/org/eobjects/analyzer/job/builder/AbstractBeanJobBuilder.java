@@ -166,7 +166,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 		Map<ConfiguredPropertyDescriptor, Object> map = new HashMap<ConfiguredPropertyDescriptor, Object>();
 		Set<ConfiguredPropertyDescriptor> configuredProperties = getDescriptor().getConfiguredProperties();
 		for (ConfiguredPropertyDescriptor propertyDescriptor : configuredProperties) {
-			Object value = propertyDescriptor.getValue(getConfigurableBean());
+			Object value = getConfiguredProperty(propertyDescriptor);
 			if (value != null) {
 				map.put(propertyDescriptor, value);
 			}

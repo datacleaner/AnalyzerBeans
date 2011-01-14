@@ -76,7 +76,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 			}
 		}
 
-		Object inputColumns = propertyDescriptor.getValue(getConfigurableBean());
+		Object inputColumns = getConfiguredProperty(propertyDescriptor);
 		if (inputColumns == null) {
 			if (propertyDescriptor.isArray()) {
 				inputColumns = new InputColumn[] { inputColumn };
@@ -116,7 +116,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 	}
 
 	public B removeInputColumn(InputColumn<?> inputColumn, ConfiguredPropertyDescriptor propertyDescriptor) {
-		Object inputColumns = propertyDescriptor.getValue(getConfigurableBean());
+		Object inputColumns = getConfiguredProperty(propertyDescriptor);
 		if (inputColumns != null) {
 			if (inputColumns == inputColumn) {
 				inputColumns = null;

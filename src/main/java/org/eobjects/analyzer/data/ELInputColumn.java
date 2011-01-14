@@ -21,10 +21,13 @@ package org.eobjects.analyzer.data;
 
 import java.util.List;
 
+import javax.el.ELException;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
 
 import org.eobjects.analyzer.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.odysseus.el.ExpressionFactoryImpl;
 import de.odysseus.el.util.SimpleContext;
@@ -37,6 +40,8 @@ import de.odysseus.el.util.SimpleContext;
  * @author Kasper Sørensen
  */
 public class ELInputColumn extends AbstractExpressionBasedInputColumn<String> {
+
+	private static final Logger logger = LoggerFactory.getLogger(ELInputColumn.class);
 
 	private final ExpressionFactory _factory;
 	private final String _expression;
@@ -61,8 +66,13 @@ public class ELInputColumn extends AbstractExpressionBasedInputColumn<String> {
 			}
 		}
 
-		ValueExpression valueExpression = _factory.createValueExpression(context, _expression, String.class);
-		return (String) valueExpression.getValue(context);
+		try {
+			ValueExpression valueExpression = _factory.createValueExpression(context, _expression, String.class);
+			return (String) valueExpression.getValue(context);
+		} catch (ELException e) {
+			logger.error("Could not evaluate EL expression", e);
+			return null;
+		}
 	}
 
 	@Override
