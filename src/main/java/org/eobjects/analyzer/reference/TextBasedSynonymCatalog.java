@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.util.FileHelper;
 import org.h2.util.SoftHashMap;
 
@@ -108,7 +109,7 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	@Override
 	public String getMasterTerm(String term) {
-		if (term == null) {
+		if (StringUtils.isNullOrEmpty(term)) {
 			return null;
 		}
 		String masterTerm = getMasterTermCache().get(term);

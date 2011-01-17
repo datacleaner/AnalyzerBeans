@@ -27,6 +27,7 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.reference.SimpleSynonym;
 import org.eobjects.analyzer.reference.Synonym;
 import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.eobjects.analyzer.util.StringUtils;
 import org.junit.Ignore;
 
 @Ignore
@@ -56,6 +57,9 @@ public class SampleCustomSynonymCatalog implements SynonymCatalog {
 
 	@Override
 	public String getMasterTerm(String term) {
+		if (StringUtils.isNullOrEmpty(term)) {
+			return null;
+		}
 		for (Synonym synonym : getSynonyms()) {
 			if (synonym.getSynonyms().containsValue(term)) {
 				return synonym.getMasterTerm();

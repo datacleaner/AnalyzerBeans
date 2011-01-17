@@ -72,12 +72,10 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 
 		if (storeRow) {
 			int rowId = row.getId();
-			if (!_cachedRows.containsKey(rowId)) {
-				synchronized (_cachedRows) {
-					if (!_cachedRows.containsKey(rowId)) {
-						storeRowValues(rowId, row, distinctCount);
-						_cachedRows.put(rowId, Boolean.TRUE);
-					}
+			synchronized (_cachedRows) {
+				if (_cachedRows.get(rowId) == null) {
+					storeRowValues(rowId, row, distinctCount);
+					_cachedRows.put(rowId, Boolean.TRUE);
 				}
 			}
 			storeRowAnnotation(rowId, annotation);

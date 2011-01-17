@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.eobjects.analyzer.util.StringUtils;
+
 public final class SimpleSynonymCatalog implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
@@ -48,6 +50,9 @@ public final class SimpleSynonymCatalog implements SynonymCatalog {
 
 	@Override
 	public String getMasterTerm(String term) {
+		if (StringUtils.isNullOrEmpty(term)) {
+			return null;
+		}
 		for (Synonym synonym : _synonyms) {
 			if (synonym.getSynonyms().containsValue(term)) {
 				return synonym.getMasterTerm();

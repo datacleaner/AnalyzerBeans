@@ -31,6 +31,7 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
@@ -158,19 +159,19 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 
 	@Override
 	public String getMasterTerm(String term) {
-		if (term == null) {
+		if (StringUtils.isNullOrEmpty(term)) {
 			return null;
 		}
 
 		final SoftHashMap<String, String> cache = getMasterTermCache();
 
-		final String result;
+		String result;
 
 		synchronized (cache) {
+			
+			result = cache.get(term);
 
-			if (cache.containsKey(term)) {
-				result = cache.get(term);
-			} else {
+			if (result == null) {
 				Datastore datastore = getDatastore();
 
 				DataContextProvider dataContextProvider = datastore.getDataContextProvider();
@@ -197,7 +198,7 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 					Row row = dataSet.getRow();
 					result = getMasterTerm(row, masterTermColumn);
 				} else {
-					result = null;
+					result = "";
 				}
 
 				dataSet.close();
@@ -205,6 +206,10 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 
 				cache.put(term, result);
 			}
+		}
+		
+		if ("".equals(result)) {
+			result = null;
 		}
 
 		return result;
