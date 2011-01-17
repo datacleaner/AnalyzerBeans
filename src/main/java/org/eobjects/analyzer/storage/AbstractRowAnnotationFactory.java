@@ -22,11 +22,11 @@ package org.eobjects.analyzer.storage;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.h2.util.SoftHashMap;
 
 /**
  * An abstract RowAnnotationFactory that supports a (optional) threshold
@@ -37,7 +37,7 @@ import org.eobjects.analyzer.data.InputRow;
 public abstract class AbstractRowAnnotationFactory implements RowAnnotationFactory {
 
 	private final Map<RowAnnotationImpl, AtomicInteger> _rowCounts = new IdentityHashMap<RowAnnotationImpl, AtomicInteger>();
-	private final WeakHashMap<Integer, Boolean> _cachedRows = new WeakHashMap<Integer, Boolean>();
+	private final SoftHashMap<Integer, Boolean> _cachedRows = new SoftHashMap<Integer, Boolean>();
 	private final Integer _storedRowsThreshold;
 
 	public AbstractRowAnnotationFactory(Integer storedRowsThreshold) {
@@ -76,7 +76,7 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 				synchronized (_cachedRows) {
 					if (!_cachedRows.containsKey(rowId)) {
 						storeRowValues(rowId, row, distinctCount);
-						_cachedRows.put(rowId, true);
+						_cachedRows.put(rowId, Boolean.TRUE);
 					}
 				}
 			}

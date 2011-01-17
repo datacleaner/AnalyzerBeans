@@ -25,15 +25,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.WeakHashMap;
 
 import org.eobjects.metamodel.util.FileHelper;
+import org.h2.util.SoftHashMap;
 
 public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
-	private transient WeakHashMap<String, String> _masterTermCache;
+	private transient SoftHashMap<String, String> _masterTermCache;
 	private transient File _file;
 
 	private final String _filename;
@@ -95,11 +95,11 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 		}
 	}
 
-	private WeakHashMap<String, String> getMasterTermCache() {
+	private SoftHashMap<String, String> getMasterTermCache() {
 		if (_masterTermCache == null) {
 			synchronized (this) {
 				if (_masterTermCache == null) {
-					_masterTermCache = new WeakHashMap<String, String>();
+					_masterTermCache = new SoftHashMap<String, String>();
 				}
 			}
 		}

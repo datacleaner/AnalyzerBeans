@@ -22,7 +22,6 @@ package org.eobjects.analyzer.reference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.WeakHashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -32,9 +31,6 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
@@ -42,6 +38,9 @@ import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.query.builder.SatisfiedWhereBuilder;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.h2.util.SoftHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class DatastoreSynonymCatalog implements SynonymCatalog {
 
@@ -49,7 +48,7 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 
 	private static final Logger logger = LoggerFactory.getLogger(DatastoreSynonymCatalog.class);
 
-	private transient WeakHashMap<String, String> _masterTermCache = new WeakHashMap<String, String>();
+	private transient SoftHashMap<String, String> _masterTermCache = new SoftHashMap<String, String>();
 	private transient DatastoreCatalog _datastoreCatalog;
 	private transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
 	private final String _name;
@@ -94,11 +93,11 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 		}
 	}
 
-	private WeakHashMap<String, String> getMasterTermCache() {
+	private SoftHashMap<String, String> getMasterTermCache() {
 		if (_masterTermCache == null) {
 			synchronized (this) {
 				if (_masterTermCache == null) {
-					_masterTermCache = new WeakHashMap<String, String>();
+					_masterTermCache = new SoftHashMap<String, String>();
 				}
 			}
 		}
@@ -163,7 +162,7 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 			return null;
 		}
 
-		final WeakHashMap<String, String> cache = getMasterTermCache();
+		final SoftHashMap<String, String> cache = getMasterTermCache();
 
 		final String result;
 
