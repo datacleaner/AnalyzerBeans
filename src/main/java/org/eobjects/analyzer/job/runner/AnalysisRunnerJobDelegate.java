@@ -96,7 +96,7 @@ final class AnalysisRunnerJobDelegate {
 	private final Collection<FilterJob> _filterJobs;
 	private final Collection<MergedOutcomeJob> _mergedOutcomeJobs;
 	private final ReferenceDataActivationManager _rowProcessingReferenceDataActivationManager;
-	private final SourceColumnFinder finder;
+	private final SourceColumnFinder _sourceColumnFinder;
 
 	private ReferenceDataActivationManager _explorerReferenceDataActivationManager;
 
@@ -108,8 +108,8 @@ final class AnalysisRunnerJobDelegate {
 		_analysisListener = analysisListener;
 		_resultQueue = resultQueue;
 
-		finder = new SourceColumnFinder();
-		finder.addSources(_job);
+		_sourceColumnFinder = new SourceColumnFinder();
+		_sourceColumnFinder.addSources(_job);
 
 		// A task listener that will register either succesfull executions or
 		// unexpected errors (which will be delegated to the errorListener)
@@ -248,13 +248,14 @@ final class AnalysisRunnerJobDelegate {
 	}
 
 	private void validateSingleTableInputForMergedOutcomes(Collection<MergedOutcomeJob> mergedOutcomeJobs) {
+		Table originatingTable = null;
+
 		for (MergedOutcomeJob mergedOutcomeJob : mergedOutcomeJobs) {
-			Table originatingTable = null;
 			MergeInput[] input = mergedOutcomeJob.getMergeInputs();
 			for (MergeInput mergeInput : input) {
 				InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
 				for (InputColumn<?> inputColumn : inputColumns) {
-					Table currentTable = finder.findOriginatingTable(inputColumn);
+					Table currentTable = _sourceColumnFinder.findOriginatingTable(inputColumn);
 					if (currentTable != null) {
 						if (originatingTable == null) {
 							originatingTable = currentTable;
@@ -278,11 +279,11 @@ final class AnalysisRunnerJobDelegate {
 	 */
 	private void validateSingleTableInput(Collection<? extends ConfigurableBeanJob<?>> beanJobs) {
 		for (ConfigurableBeanJob<?> beanJob : beanJobs) {
+			Table originatingTable = null;
 			InputColumn<?>[] input = beanJob.getInput();
 
-			Table originatingTable = null;
 			for (InputColumn<?> inputColumn : input) {
-				Table table = finder.findOriginatingTable(inputColumn);
+				Table table = _sourceColumnFinder.findOriginatingTable(inputColumn);
 				if (table != null) {
 					if (originatingTable == null) {
 						originatingTable = table;
@@ -294,10 +295,8 @@ final class AnalysisRunnerJobDelegate {
 					}
 				}
 			}
-			if (originatingTable == null) {
-				throw new IllegalArgumentException("Could not determine source table for " + beanJob);
-			}
 		}
+
 	}
 
 	private void registerRowProcessingPublishers(Map<Table, RowProcessingPublisher> rowProcessingPublishers,
@@ -324,15 +323,32 @@ final class AnalysisRunnerJobDelegate {
 	private void registerRowProcessingPublishers(Map<Table, RowProcessingPublisher> rowProcessingPublishers,
 			ConfigurableBeanJob<?> beanJob, Collection<AnalyzerJobResult> resultQueue, AnalysisListener listener,
 			TaskRunner taskRunner) {
-		InputColumn<?>[] inputColumns = beanJob.getInput();
-		Set<Column> physicalColumns = new HashSet<Column>();
+		final Set<Column> physicalColumns = new HashSet<Column>();
+
+		final InputColumn<?>[] inputColumns = beanJob.getInput();
 		for (InputColumn<?> inputColumn : inputColumns) {
-			physicalColumns.addAll(findSourcePhysicalColumns(_job, inputColumn));
+			physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(inputColumn));
+		}
+		final Outcome[] requirements = beanJob.getRequirements();
+		for (Outcome requirement : requirements) {
+			physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(requirement));
 		}
 
-		Column[] physicalColumnsArray = physicalColumns.toArray(new Column[physicalColumns.size()]);
+		final Column[] physicalColumnsArray = physicalColumns.toArray(new Column[physicalColumns.size()]);
+		final Table[] tables;
+		if (physicalColumns.isEmpty()) {
+			// if not dependent on any specific tables, make component available
+			// for all tables
+			Set<Table> allTables = new HashSet<Table>();
+			Collection<InputColumn<?>> allSourceColumns = _job.getSourceColumns();
+			for (InputColumn<?> inputColumn : allSourceColumns) {
+				allTables.add(inputColumn.getPhysicalColumn().getTable());
+			}
+			tables = allTables.toArray(new Table[allTables.size()]);
+		} else {
+			tables = MetaModelHelper.getTables(physicalColumnsArray);
+		}
 
-		Table[] tables = MetaModelHelper.getTables(physicalColumnsArray);
 		for (Table table : tables) {
 			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
@@ -347,7 +363,7 @@ final class AnalysisRunnerJobDelegate {
 
 			// find which input columns (both physical or virtual) are needed by
 			// this per-table instance
-			InputColumn<?>[] localInputColumns = getLocalInputColumns(table, inputColumns, _job);
+			InputColumn<?>[] localInputColumns = getLocalInputColumns(table, inputColumns);
 
 			if (beanJob instanceof AnalyzerJob) {
 				AnalyzerJob analyzerJob = (AnalyzerJob) beanJob;
@@ -367,13 +383,13 @@ final class AnalysisRunnerJobDelegate {
 		}
 	}
 
-	private InputColumn<?>[] getLocalInputColumns(Table table, InputColumn<?>[] inputColumns, AnalysisJob analysisJob) {
+	private InputColumn<?>[] getLocalInputColumns(Table table, InputColumn<?>[] inputColumns) {
 		if (table == null || inputColumns == null || inputColumns.length == 0) {
 			return new InputColumn<?>[0];
 		}
 		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
 		for (InputColumn<?> inputColumn : inputColumns) {
-			Set<Column> sourcePhysicalColumns = findSourcePhysicalColumns(analysisJob, inputColumn);
+			Set<Column> sourcePhysicalColumns = _sourceColumnFinder.findOriginatingColumns(inputColumn);
 			for (Column physicalColumn : sourcePhysicalColumns) {
 				if (table.equals(physicalColumn.getTable())) {
 					result.add(inputColumn);
@@ -382,13 +398,5 @@ final class AnalysisRunnerJobDelegate {
 			}
 		}
 		return result.toArray(new InputColumn<?>[result.size()]);
-	}
-
-	// helper method for recursively finding all physical columns by traversing
-	// the transformers input and output
-	private Set<Column> findSourcePhysicalColumns(AnalysisJob analysisJob, InputColumn<?> inputColumn) {
-		SourceColumnFinder finder = new SourceColumnFinder();
-		finder.addSources(analysisJob);
-		return finder.findOriginatingColumns(inputColumn);
 	}
 }

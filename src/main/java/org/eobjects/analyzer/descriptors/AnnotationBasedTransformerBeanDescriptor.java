@@ -37,7 +37,7 @@ public final class AnnotationBasedTransformerBeanDescriptor<T extends Transforme
 	}
 
 	private AnnotationBasedTransformerBeanDescriptor(Class<T> transformerClass) throws DescriptorException {
-		super(transformerClass, true);
+		super(transformerClass, false);
 
 		if (!ReflectionUtils.is(transformerClass, Transformer.class)) {
 			throw new DescriptorException(transformerClass + " does not implement " + Transformer.class.getName());

@@ -248,12 +248,14 @@ public final class RowProcessingPublisher {
 				// make sure that all the required colums are present
 				if (accepted) {
 					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
-					for (InputColumn<?> inputColumn : requiredInput) {
-						if (!inputColumn.isPhysicalColumn()) {
-							if (!(inputColumn instanceof ExpressionBasedInputColumn)) {
-								if (!availableVirtualColumns.contains(inputColumn)) {
-									accepted = false;
-									break;
+					if (requiredInput != null) {
+						for (InputColumn<?> inputColumn : requiredInput) {
+							if (!inputColumn.isPhysicalColumn()) {
+								if (!(inputColumn instanceof ExpressionBasedInputColumn)) {
+									if (!availableVirtualColumns.contains(inputColumn)) {
+										accepted = false;
+										break;
+									}
 								}
 							}
 						}

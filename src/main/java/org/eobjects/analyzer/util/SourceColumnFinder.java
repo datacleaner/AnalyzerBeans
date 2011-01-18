@@ -136,8 +136,17 @@ public class SourceColumnFinder {
 		return null;
 	}
 
+	public Set<Column> findOriginatingColumns(Outcome requirement) {
+		OutcomeSourceJob source = findOutcomeSource(requirement);
+
+		HashSet<Column> result = new HashSet<Column>();
+		findOriginatingColumnsOfSource(source, result);
+		return result;
+	}
+
 	public Table findOriginatingTable(Outcome requirement) {
-		return findOriginatingTableOfSource(findOutcomeSource(requirement));
+		OutcomeSourceJob source = findOutcomeSource(requirement);
+		return findOriginatingTableOfSource(source);
 	}
 
 	public Table findOriginatingTable(InputColumn<?> inputColumn) {
@@ -211,8 +220,10 @@ public class SourceColumnFinder {
 		}
 		if (source instanceof InputColumnSinkJob) {
 			InputColumn<?>[] input = ((InputColumnSinkJob) source).getInput();
-			for (InputColumn<?> inputColumn : input) {
-				findOriginatingColumnsOfInputColumn(inputColumn, result);
+			if (input != null) {
+				for (InputColumn<?> inputColumn : input) {
+					findOriginatingColumnsOfInputColumn(inputColumn, result);
+				}
 			}
 		}
 		if (source instanceof OutcomeSinkJob) {

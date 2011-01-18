@@ -102,7 +102,7 @@
 				minOccurs="1" maxOccurs="1" />
 			<element name="properties" type="ab:configuredPropertiesType"
 				minOccurs="0" maxOccurs="1" />
-			<element name="input" type="ab:inputType" minOccurs="1"
+			<element name="input" type="ab:inputType" minOccurs="0"
 				maxOccurs="unbounded" />
 			<element name="output" type="ab:outputType" minOccurs="1"
 				maxOccurs="unbounded" />
@@ -121,7 +121,7 @@
 				minOccurs="1" maxOccurs="1" />
 			<element name="properties" type="ab:configuredPropertiesType"
 				minOccurs="0" maxOccurs="1" />
-			<element name="input" type="ab:inputType" minOccurs="1"
+			<element name="input" type="ab:inputType" minOccurs="0"
 				maxOccurs="unbounded" />
 			<element name="outcome" type="ab:outcomeType" minOccurs="1"
 				maxOccurs="unbounded" />

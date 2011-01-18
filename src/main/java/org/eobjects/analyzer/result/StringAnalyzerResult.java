@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.result;
 
+import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 
 /**
@@ -39,5 +40,10 @@ public class StringAnalyzerResult extends CrosstabResult {
 
 	public InputColumn<String>[] getColumns() {
 		return _columns;
+	}
+
+	public int getRowCount(InputColumn<?> col) {
+		return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
+				.where(StringAnalyzer.DIMENSION_MEASURES, StringAnalyzer.MEASURE_ROW_COUNT).get();
 	}
 }

@@ -53,6 +53,29 @@ import org.slf4j.LoggerFactory;
 @Concurrent(true)
 public class StringAnalyzer implements RowProcessingAnalyzer<StringAnalyzerResult> {
 
+	public static final String DIMENSION_MEASURES = "Measures";
+	public static final String DIMENSION_COLUMN = "Column";
+	public static final String MEASURE_MIN_WORDS = "Min words";
+	public static final String MEASURE_MAX_WORDS = "Max words";
+	public static final String MEASURE_WORD_COUNT = "Word count";
+	public static final String MEASURE_NON_LETTER_CHARS = "Non-letter chars";
+	public static final String MEASURE_DIACRITIC_CHARS = "Diacritic chars";
+	public static final String MEASURE_DIGIT_CHARS = "Digit chars";
+	public static final String MEASURE_LOWERCASE_CHARS = "Lowercase chars";
+	public static final String MEASURE_UPPERCASE_CHARS_EXCL_FIRST_LETTERS = "Uppercase chars (excl. first letters)";
+	public static final String MEASURE_UPPERCASE_CHARS = "Uppercase chars";
+	public static final String MEASURE_AVG_WHITE_SPACES = "Avg white spaces";
+	public static final String MEASURE_MIN_WHITE_SPACES = "Min white spaces";
+	public static final String MEASURE_MAX_WHITE_SPACES = "Max white spaces";
+	public static final String MEASURE_AVG_CHARS = "Avg chars";
+	public static final String MEASURE_MIN_CHARS = "Min chars";
+	public static final String MEASURE_MAX_CHARS = "Max chars";
+	public static final String MEASURE_TOTAL_CHAR_COUNT = "Total char count";
+	public static final String MEASURE_ENTIRELY_LOWERCASE_COUNT = "Entirely lowercase count";
+	public static final String MEASURE_ENTIRELY_UPPERCASE_COUNT = "Entirely uppercase count";
+	public static final String MEASURE_NULL_COUNT = "Null count";
+	public static final String MEASURE_ROW_COUNT = "Row count";
+
 	private static final Logger logger = LoggerFactory.getLogger(StringAnalyzer.class);
 
 	private Map<InputColumn<String>, StringAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, StringAnalyzerColumnDelegate>();
@@ -92,29 +115,29 @@ public class StringAnalyzer implements RowProcessingAnalyzer<StringAnalyzerResul
 	@Override
 	public StringAnalyzerResult getResult() {
 		logger.info("getResult()");
-		CrosstabDimension measureDimension = new CrosstabDimension("Measures");
-		measureDimension.addCategory("Row count");
-		measureDimension.addCategory("Null count");
-		measureDimension.addCategory("Entirely uppercase count");
-		measureDimension.addCategory("Entirely lowercase count");
-		measureDimension.addCategory("Total char count");
-		measureDimension.addCategory("Max chars");
-		measureDimension.addCategory("Min chars");
-		measureDimension.addCategory("Avg chars");
-		measureDimension.addCategory("Max white spaces");
-		measureDimension.addCategory("Min white spaces");
-		measureDimension.addCategory("Avg white spaces");
-		measureDimension.addCategory("Uppercase chars");
-		measureDimension.addCategory("Uppercase chars (excl. first letters)");
-		measureDimension.addCategory("Lowercase chars");
-		measureDimension.addCategory("Digit chars");
-		measureDimension.addCategory("Diacritic chars");
-		measureDimension.addCategory("Non-letter chars");
-		measureDimension.addCategory("Word count");
-		measureDimension.addCategory("Max words");
-		measureDimension.addCategory("Min words");
+		CrosstabDimension measureDimension = new CrosstabDimension(DIMENSION_MEASURES);
+		measureDimension.addCategory(MEASURE_ROW_COUNT);
+		measureDimension.addCategory(MEASURE_NULL_COUNT);
+		measureDimension.addCategory(MEASURE_ENTIRELY_UPPERCASE_COUNT);
+		measureDimension.addCategory(MEASURE_ENTIRELY_LOWERCASE_COUNT);
+		measureDimension.addCategory(MEASURE_TOTAL_CHAR_COUNT);
+		measureDimension.addCategory(MEASURE_MAX_CHARS);
+		measureDimension.addCategory(MEASURE_MIN_CHARS);
+		measureDimension.addCategory(MEASURE_AVG_CHARS);
+		measureDimension.addCategory(MEASURE_MAX_WHITE_SPACES);
+		measureDimension.addCategory(MEASURE_MIN_WHITE_SPACES);
+		measureDimension.addCategory(MEASURE_AVG_WHITE_SPACES);
+		measureDimension.addCategory(MEASURE_UPPERCASE_CHARS);
+		measureDimension.addCategory(MEASURE_UPPERCASE_CHARS_EXCL_FIRST_LETTERS);
+		measureDimension.addCategory(MEASURE_LOWERCASE_CHARS);
+		measureDimension.addCategory(MEASURE_DIGIT_CHARS);
+		measureDimension.addCategory(MEASURE_DIACRITIC_CHARS);
+		measureDimension.addCategory(MEASURE_NON_LETTER_CHARS);
+		measureDimension.addCategory(MEASURE_WORD_COUNT);
+		measureDimension.addCategory(MEASURE_MAX_WORDS);
+		measureDimension.addCategory(MEASURE_MIN_WORDS);
 
-		CrosstabDimension columnDimension = new CrosstabDimension("Column");
+		CrosstabDimension columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
 
 		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
 
@@ -158,73 +181,73 @@ public class StringAnalyzer implements RowProcessingAnalyzer<StringAnalyzerResul
 			// begin entering numbers into the crosstab
 			CrosstabNavigator<Number> nav = crosstab.where(columnDimension, columnName);
 
-			nav.where(measureDimension, "Row count").put(numRows);
+			nav.where(measureDimension, MEASURE_ROW_COUNT).put(numRows);
 
-			nav.where(measureDimension, "Null count").put(numNull);
+			nav.where(measureDimension, MEASURE_NULL_COUNT).put(numNull);
 			if (numNull > 0) {
 				addAttachment(nav, delegate.getNullAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Entirely uppercase count").put(numEntirelyUppercase);
+			nav.where(measureDimension, MEASURE_ENTIRELY_UPPERCASE_COUNT).put(numEntirelyUppercase);
 			if (numEntirelyUppercase > 0) {
 				addAttachment(nav, delegate.getEntirelyUppercaseAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Entirely lowercase count").put(numEntirelyLowercase);
+			nav.where(measureDimension, MEASURE_ENTIRELY_LOWERCASE_COUNT).put(numEntirelyLowercase);
 			if (numEntirelyLowercase > 0) {
 				addAttachment(nav, delegate.getEntirelyLowercaseAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Total char count").put(numChars);
+			nav.where(measureDimension, MEASURE_TOTAL_CHAR_COUNT).put(numChars);
 
-			nav.where(measureDimension, "Max chars").put(maxChars);
+			nav.where(measureDimension, MEASURE_MAX_CHARS).put(maxChars);
 			if (maxChars != null) {
 				addAttachment(nav, delegate.getMaxCharsAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Min chars").put(minChars);
+			nav.where(measureDimension, MEASURE_MIN_CHARS).put(minChars);
 			if (minChars != null) {
 				addAttachment(nav, delegate.getMinCharsAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Avg chars").put(avgChars);
-			nav.where(measureDimension, "Max white spaces").put(maxWhitespace);
+			nav.where(measureDimension, MEASURE_AVG_CHARS).put(avgChars);
+			nav.where(measureDimension, MEASURE_MAX_WHITE_SPACES).put(maxWhitespace);
 			if (maxWhitespace != null) {
 				addAttachment(nav, delegate.getMaxWhitespaceAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Min white spaces").put(minWhitespace);
+			nav.where(measureDimension, MEASURE_MIN_WHITE_SPACES).put(minWhitespace);
 			if (minWhitespace != null) {
 				addAttachment(nav, delegate.getMinWhitespaceAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Avg white spaces").put(avgBlanks);
-			nav.where(measureDimension, "Uppercase chars").put(numUppercase);
-			nav.where(measureDimension, "Uppercase chars (excl. first letters)").put(numUppercaseExclFirstLetter);
+			nav.where(measureDimension, MEASURE_AVG_WHITE_SPACES).put(avgBlanks);
+			nav.where(measureDimension, MEASURE_UPPERCASE_CHARS).put(numUppercase);
+			nav.where(measureDimension, MEASURE_UPPERCASE_CHARS_EXCL_FIRST_LETTERS).put(numUppercaseExclFirstLetter);
 			if (numUppercaseExclFirstLetter > 0) {
 				addAttachment(nav, delegate.getUppercaseExclFirstLetterAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Lowercase chars").put(numLowercase);
-			nav.where(measureDimension, "Digit chars").put(numDigits);
+			nav.where(measureDimension, MEASURE_LOWERCASE_CHARS).put(numLowercase);
+			nav.where(measureDimension, MEASURE_DIGIT_CHARS).put(numDigits);
 			if (numDigits > 0) {
 				addAttachment(nav, delegate.getDigitAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Diacritic chars").put(numDiacritics);
+			nav.where(measureDimension, MEASURE_DIACRITIC_CHARS).put(numDiacritics);
 			if (numDiacritics > 0) {
 				addAttachment(nav, delegate.getDiacriticAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Non-letter chars").put(numNonLetter);
-			nav.where(measureDimension, "Word count").put(numWords);
+			nav.where(measureDimension, MEASURE_NON_LETTER_CHARS).put(numNonLetter);
+			nav.where(measureDimension, MEASURE_WORD_COUNT).put(numWords);
 
-			nav.where(measureDimension, "Max words").put(maxWords);
+			nav.where(measureDimension, MEASURE_MAX_WORDS).put(maxWords);
 			if (maxWords != null) {
 				addAttachment(nav, delegate.getMaxWordsAnnotation(), column);
 			}
 
-			nav.where(measureDimension, "Min words").put(minWords);
+			nav.where(measureDimension, MEASURE_MIN_WORDS).put(minWords);
 			if (minWords != null) {
 				addAttachment(nav, delegate.getMinWordsAnnotation(), column);
 			}

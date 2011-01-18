@@ -56,7 +56,7 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 	}
 
 	private AnnotationBasedFilterBeanDescriptor(Class<F> filterClass) throws DescriptorException {
-		super(filterClass, true);
+		super(filterClass, false);
 
 		if (!ReflectionUtils.is(filterClass, Filter.class)) {
 			throw new DescriptorException(filterClass + " does not implement " + Filter.class.getName());
