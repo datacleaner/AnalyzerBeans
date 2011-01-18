@@ -61,7 +61,8 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 			logger.info("Scanning package path '{}'", packagePath);
 		}
 		try {
-			Enumeration<URL> resources = ClassLoader.getSystemResources(packagePath);
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			Enumeration<URL> resources = classLoader.getResources(packagePath);
 			while (resources.hasMoreElements()) {
 				URL resource = resources.nextElement();
 				String file = resource.getFile();
