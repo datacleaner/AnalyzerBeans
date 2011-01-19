@@ -42,6 +42,10 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 	public String getName() {
 		return _name;
 	}
+	
+	public List<Datastore> getDatastores() {
+		return _datastores;
+	}
 
 	@Override
 	protected UsageAwareDataContextProvider createDataContextProvider() {
