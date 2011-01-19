@@ -42,23 +42,24 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 	public String getName() {
 		return _name;
 	}
-	
+
 	public List<Datastore> getDatastores() {
 		return _datastores;
 	}
 
 	@Override
 	protected UsageAwareDataContextProvider createDataContextProvider() {
-		List<DataContext> dataContexts = new ArrayList<DataContext>(_datastores.size());
-		Closeable[] closeables = new Closeable[_datastores.size()];
-		for (int i = 0; i < closeables.length; i++) {
-			Datastore datastore = _datastores.get(i);
-			DataContextProvider dcp = datastore.getDataContextProvider();
-			closeables[i] = dcp;
-			DataContext dc = dcp.getDataContext();
+		final List<DataContext> dataContexts = new ArrayList<DataContext>(_datastores.size());
+		final List<Closeable> closeables = new ArrayList<Closeable>(_datastores.size());
+		for (Datastore datastore : _datastores) {
+			final DataContextProvider dcp = datastore.getDataContextProvider();
+			final DataContext dc = dcp.getDataContext();
+			closeables.add(dcp);
 			dataContexts.add(dc);
 		}
-		return new SingleDataContextProvider(DataContextFactory.createCompositeDataContext(dataContexts), this, closeables);
+		final Closeable[] closeablesArray = closeables.toArray(new Closeable[closeables.size()]);
+		return new SingleDataContextProvider(DataContextFactory.createCompositeDataContext(dataContexts), this,
+				closeablesArray);
 	}
 
 }

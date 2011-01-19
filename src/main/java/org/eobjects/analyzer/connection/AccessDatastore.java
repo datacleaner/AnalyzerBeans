@@ -38,6 +38,10 @@ public final class AccessDatastore extends UsageAwareDatastore {
 		return _name;
 	}
 
+	public String getFilename() {
+		return _filename;
+	}
+
 	@Override
 	protected UsageAwareDataContextProvider createDataContextProvider() {
 		DataContext dc = DataContextFactory.createAccessDataContext(_filename);

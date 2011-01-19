@@ -40,6 +40,10 @@ public final class ExcelDatastore extends UsageAwareDatastore {
 	public String getName() {
 		return _name;
 	}
+	
+	public String getFilename() {
+		return _filename;
+	}
 
 	@Override
 	protected UsageAwareDataContextProvider createDataContextProvider() {
