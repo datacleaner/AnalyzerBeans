@@ -109,7 +109,7 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 		return _datasourceJndiUrl;
 	}
 
-	private Connection createConnection() {
+	public Connection createConnection() throws IllegalStateException {
 		if (_jdbcUrl == null) {
 			throw new IllegalStateException("JDBC URL is null, cannot create connection!");
 		}
