@@ -48,3 +48,10 @@ a, a.externalLink {
 dl {
 	background-color: #f1eadf;
 }
+
+.source, .source pre {
+	color: #39557c;
+	background-color: #f0f0f0;
+	font-family: Verdana, sans-serif;
+	font-size: 13px;
+}
