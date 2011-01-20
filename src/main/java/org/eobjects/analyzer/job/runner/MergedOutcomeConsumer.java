@@ -108,4 +108,8 @@ final class MergedOutcomeConsumer extends AbstractOutcomeSinkJobConsumer impleme
 		return _mergedOutcomeJob;
 	}
 
+	@Override
+	public String toString() {
+		return "MergedOutcomeConsumer[" + _mergedOutcomeJob + "]";
+	}
 }
