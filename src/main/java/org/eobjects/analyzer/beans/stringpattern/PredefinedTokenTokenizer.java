@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans.stringpattern;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -46,7 +47,7 @@ public class PredefinedTokenTokenizer implements Tokenizer {
 	 */
 	@Override
 	public List<Token> tokenize(String s) {
-		LinkedList<Token> result = new LinkedList<Token>();
+		List<Token> result = new ArrayList<Token>();
 		result.add(new UndefinedToken(s));
 
 		for (PredefinedTokenDefinition predefinedTokenDefinition : _predefinedTokenDefitions) {

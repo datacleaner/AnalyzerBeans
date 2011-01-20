@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.stringpattern;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -35,6 +36,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultTokenizer.class);
 
 	private final TokenizerConfiguration _configuration;
+	private final boolean _predefinedTokens;
 
 	public DefaultTokenizer() {
 		this(new TokenizerConfiguration());
@@ -45,6 +47,15 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 			throw new NullPointerException("configuration argument cannot be null");
 		}
 		_configuration = configuration;
+
+		final List<PredefinedTokenDefinition> predefinedTokens = _configuration.getPredefinedTokens();
+		_predefinedTokens = !predefinedTokens.isEmpty() && _configuration.isTokenTypeEnabled(TokenType.PREDEFINED);
+
+		if (_predefinedTokens) {
+			logger.info("Predefined tokens are turned ON, using PredefinedTokenTokenizer");
+		} else {
+			logger.info("Predefined tokens are turned OFF, using tokenizeInternal");
+		}
 	}
 
 	public List<Token> tokenize(String string) {
@@ -54,9 +65,8 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 
 		List<Token> tokens;
 
-		List<PredefinedTokenDefinition> predefinedTokens = _configuration.getPredefinedTokens();
-		if (!predefinedTokens.isEmpty() && _configuration.isTokenTypeEnabled(TokenType.PREDEFINED)) {
-			logger.info("Predefined tokens are turned ON, using PredefinedTokenTokenizer");
+		if (_predefinedTokens) {
+			final List<PredefinedTokenDefinition> predefinedTokens = _configuration.getPredefinedTokens();
 			PredefinedTokenTokenizer tokenizer = new PredefinedTokenTokenizer(predefinedTokens);
 			tokens = tokenizer.tokenize(string);
 			for (ListIterator<Token> it = tokens.listIterator(); it.hasNext();) {
@@ -81,8 +91,7 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 				}
 			}
 		} else {
-			logger.info("Predefined tokens are turned OFF, using tokenizeInternal");
-			tokens = new LinkedList<Token>();
+			tokens = new ArrayList<Token>();
 			tokens.addAll(tokenizeInternal(string));
 		}
 
