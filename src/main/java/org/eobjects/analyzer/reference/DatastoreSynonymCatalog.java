@@ -168,7 +168,7 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 		String result;
 
 		synchronized (cache) {
-			
+
 			result = cache.get(term);
 
 			if (result == null) {
@@ -207,7 +207,7 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 				cache.put(term, result);
 			}
 		}
-		
+
 		if ("".equals(result)) {
 			result = null;
 		}

@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.job.concurrent;
 
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @param <E>
  */
-class DoubleBlockingQueue<E> extends LinkedBlockingQueue<E> {
+class DoubleBlockingQueue<E> extends ArrayBlockingQueue<E> {
 
 	private static final long serialVersionUID = 1L;
 
