@@ -19,8 +19,11 @@
  */
 package org.eobjects.analyzer.beans.stringpattern;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /***
@@ -37,13 +40,13 @@ import java.util.Set;
  */
 public abstract class PatternFinder<R> {
 
-	private final Set<TokenPattern> _patterns;
+	private final Map<String, Set<TokenPattern>> _patterns;
 	private final TokenizerConfiguration _configuration;
 	private final Tokenizer _tokenizer;
 
 	public PatternFinder(TokenizerConfiguration configuration) {
 		_configuration = configuration;
-		_patterns = new HashSet<TokenPattern>();
+		_patterns = new HashMap<String, Set<TokenPattern>>();
 		_tokenizer = new DefaultTokenizer(configuration);
 	}
 
@@ -70,29 +73,62 @@ public abstract class PatternFinder<R> {
 			} catch (RuntimeException e) {
 				throw new IllegalStateException("Error occurred while tokenizing value: " + value, e);
 			}
-			for (TokenPattern pattern : _patterns) {
-				if (pattern.match(tokens)) {
-					storeMatch(pattern, row, value, distinctCount);
-					match = true;
-				}
-			}
 
-			if (!match) {
-				final TokenPattern pattern;
-				try {
-					pattern = new TokenPatternImpl(value, tokens, _configuration);
-				} catch (RuntimeException e) {
-					throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
+			final String patternCode = getPatternCode(tokens);
+			Set<TokenPattern> patterns;
+
+			synchronized (this) {
+				patterns = _patterns.get(patternCode);
+				if (patterns == null) {
+					patterns = new HashSet<TokenPattern>();
+					_patterns.put(patternCode, patterns);
 				}
 
-				storeNewPattern(pattern, row, value, distinctCount);
-				_patterns.add(pattern);
+				for (TokenPattern pattern : patterns) {
+					if (pattern.match(tokens)) {
+						storeMatch(pattern, row, value, distinctCount);
+						match = true;
+					}
+				}
+
+				if (!match) {
+					final TokenPattern pattern;
+					try {
+						pattern = new TokenPatternImpl(value, tokens, _configuration);
+					} catch (RuntimeException e) {
+						throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
+					}
+
+					storeNewPattern(pattern, row, value, distinctCount);
+					patterns.add(pattern);
+				}
 			}
 		}
 	}
 
+	/**
+	 * Creates an almost unique String code for a list of tokens. This code is
+	 * used to improve search time when looking for potential matching patterns.
+	 * 
+	 * @param tokens
+	 * @return
+	 */
+	private String getPatternCode(List<Token> tokens) {
+		final StringBuilder sb = new StringBuilder();
+		sb.append(tokens.size());
+		for (Token token : tokens) {
+			sb.append(token.getType().ordinal());
+		}
+		return sb.toString();
+	}
+
 	public Set<TokenPattern> getPatterns() {
-		return _patterns;
+		final Set<TokenPattern> result = new HashSet<TokenPattern>();
+		final Collection<Set<TokenPattern>> values = _patterns.values();
+		for (Set<TokenPattern> set : values) {
+			result.addAll(set);
+		}
+		return result;
 	}
 
 	/**
