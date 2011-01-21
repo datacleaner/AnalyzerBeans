@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
@@ -55,6 +56,7 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
  */
 @AnalyzerBean("Number analyzer")
 @Description("Provides insight into number-column values.")
+@Concurrent(true)
 public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResult> {
 
 	private Map<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate>();

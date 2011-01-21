@@ -57,7 +57,7 @@ final class DateAndTimeAnalyzerColumnDelegate {
 		_minTimeAnnotation = _annotationFactory.createAnnotation();
 	}
 
-	public void run(Date value, InputRow row, int distinctCount) {
+	public synchronized void run(Date value, InputRow row, int distinctCount) {
 		_numRows += distinctCount;
 		if (value == null) {
 			_annotationFactory.annotate(row, distinctCount, _nullAnnotation);

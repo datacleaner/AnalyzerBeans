@@ -47,7 +47,7 @@ final class NumberAnalyzerColumnDelegate {
 		_statistics = new SummaryStatistics();
 	}
 
-	public void run(InputRow row, Number value, int distinctCount) {
+	public synchronized void run(InputRow row, Number value, int distinctCount) {
 		_numRows += distinctCount;
 		if (value != null) {
 			double doubleValue = value.doubleValue();

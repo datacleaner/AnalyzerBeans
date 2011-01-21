@@ -23,8 +23,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
@@ -38,21 +40,22 @@ import org.eobjects.analyzer.result.CrosstabResult;
 
 @AnalyzerBean("Weekday distribution")
 @Description("Finds the distribution of weekdays from Date values.")
+@Concurrent(true)
 public class WeekdayDistributionAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
-	private Map<InputColumn<Date>, Map<Integer, Integer>> distributionMap;
+	private Map<InputColumn<Date>, Map<Integer, AtomicInteger>> distributionMap;
 
 	@Configured
 	InputColumn<Date>[] dateColumns;
 
 	@Initialize
 	public void init() {
-		distributionMap = new HashMap<InputColumn<Date>, Map<Integer, Integer>>();
+		distributionMap = new HashMap<InputColumn<Date>, Map<Integer, AtomicInteger>>();
 		for (InputColumn<Date> col : dateColumns) {
-			Map<Integer, Integer> countMap = new HashMap<Integer, Integer>(7);
+			Map<Integer, AtomicInteger> countMap = new HashMap<Integer, AtomicInteger>(7);
 			for (int i = Calendar.SUNDAY; i <= Calendar.SATURDAY; i++) {
 				// put a count of 0 for each day of the week
-				countMap.put(i, 0);
+				countMap.put(i, new AtomicInteger(0));
 			}
 			distributionMap.put(col, countMap);
 		}
@@ -66,10 +69,9 @@ public class WeekdayDistributionAnalyzer implements RowProcessingAnalyzer<Crosst
 				Calendar c = Calendar.getInstance();
 				c.setTime(value);
 				int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
-				Map<Integer, Integer> countMap = distributionMap.get(col);
-				int count = countMap.get(dayOfWeek);
-				count += distinctCount;
-				countMap.put(dayOfWeek, count);
+				Map<Integer, AtomicInteger> countMap = distributionMap.get(col);
+				AtomicInteger count = countMap.get(dayOfWeek);
+				count.addAndGet(distinctCount);
 			}
 		}
 	}
@@ -84,14 +86,14 @@ public class WeekdayDistributionAnalyzer implements RowProcessingAnalyzer<Crosst
 		for (InputColumn<Date> col : dateColumns) {
 			columnDimension.addCategory(col.getName());
 			CrosstabNavigator<Integer> nav = crosstab.where(columnDimension, col.getName());
-			Map<Integer, Integer> countMap = distributionMap.get(col);
-			nav.where(weekdayDimension, "Sunday").put(countMap.get(Calendar.SUNDAY));
-			nav.where(weekdayDimension, "Monday").put(countMap.get(Calendar.MONDAY));
-			nav.where(weekdayDimension, "Tuesday").put(countMap.get(Calendar.TUESDAY));
-			nav.where(weekdayDimension, "Wednesday").put(countMap.get(Calendar.WEDNESDAY));
-			nav.where(weekdayDimension, "Thursday").put(countMap.get(Calendar.THURSDAY));
-			nav.where(weekdayDimension, "Friday").put(countMap.get(Calendar.FRIDAY));
-			nav.where(weekdayDimension, "Saturday").put(countMap.get(Calendar.SATURDAY));
+			Map<Integer, AtomicInteger> countMap = distributionMap.get(col);
+			nav.where(weekdayDimension, "Sunday").put(countMap.get(Calendar.SUNDAY).get());
+			nav.where(weekdayDimension, "Monday").put(countMap.get(Calendar.MONDAY).get());
+			nav.where(weekdayDimension, "Tuesday").put(countMap.get(Calendar.TUESDAY).get());
+			nav.where(weekdayDimension, "Wednesday").put(countMap.get(Calendar.WEDNESDAY).get());
+			nav.where(weekdayDimension, "Thursday").put(countMap.get(Calendar.THURSDAY).get());
+			nav.where(weekdayDimension, "Friday").put(countMap.get(Calendar.FRIDAY).get());
+			nav.where(weekdayDimension, "Saturday").put(countMap.get(Calendar.SATURDAY).get());
 		}
 
 		return new CrosstabResult(crosstab);
