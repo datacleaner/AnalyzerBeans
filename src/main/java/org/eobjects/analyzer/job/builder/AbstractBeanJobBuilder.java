@@ -94,8 +94,9 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 		return _name;
 	}
 
-	public void setName(String name) {
+	public B setName(String name) {
 		_name = name;
+		return (B) this;
 	}
 
 	public boolean isConfigured() {
