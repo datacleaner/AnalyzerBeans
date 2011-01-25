@@ -106,34 +106,29 @@ public final class CollectionUtils {
 	}
 
 	public static <E> E[] arrayRemove(E[] array, E elementToRemove) {
-		boolean found = false;
 		@SuppressWarnings("unchecked")
-		E[] result = (E[]) Array.newInstance(array.getClass().getComponentType(), array.length - 1);
-		int nextIndex = 0;
-		for (E e : array) {
-			if (e == elementToRemove) {
-				found = true;
-			} else {
-				result[nextIndex] = e;
-				nextIndex++;
-			}
-		}
-		if (!found) {
-			return array;
-		}
+		E[] result = (E[]) arrayRemoveInternal(array, elementToRemove);
 		return result;
 	}
 
 	public static Object arrayRemove(Object array, Object elementToRemove) {
+		return arrayRemoveInternal(array, elementToRemove);
+	}
+
+	private static Object arrayRemoveInternal(Object array, Object elementToRemove) {
 		boolean found = false;
-		int oldLength = Array.getLength(array);
-		Object result = Array.newInstance(array.getClass().getComponentType(), oldLength - 1);
+		final int oldLength = Array.getLength(array);
+		final int newLength = oldLength - 1;
+		final Object result = Array.newInstance(array.getClass().getComponentType(), newLength);
 		int nextIndex = 0;
 		for (int i = 0; i < oldLength; i++) {
-			Object e = Array.get(array, i);
-			if (e == elementToRemove) {
+			final Object e = Array.get(array, i);
+			if (e.equals(elementToRemove)) {
 				found = true;
 			} else {
+				if (nextIndex == newLength) {
+					break;
+				}
 				Array.set(result, nextIndex, e);
 				nextIndex++;
 			}

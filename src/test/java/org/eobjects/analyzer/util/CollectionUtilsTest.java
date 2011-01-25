@@ -52,4 +52,19 @@ public class CollectionUtilsTest extends TestCase {
 		assertEquals("[4, 1, 3, 2]", list1.toString());
 		assertEquals("[1, 2, 3, 4]", list2.toString());
 	}
+
+	public void testArrayRemove() throws Exception {
+		String[] arr = new String[] { "a", "b", "c", "d", "e" };
+		arr = CollectionUtils.arrayRemove(arr, "c");
+		assertEquals("[a, b, d, e]", Arrays.toString(arr));
+
+		arr = CollectionUtils.arrayRemove(arr, "e");
+		assertEquals("[a, b, d]", Arrays.toString(arr));
+
+		arr = CollectionUtils.arrayRemove(arr, "e");
+		assertEquals("[a, b, d]", Arrays.toString(arr));
+
+		arr = CollectionUtils.arrayRemove(arr, "a");
+		assertEquals("[b, d]", Arrays.toString(arr));
+	}
 }
