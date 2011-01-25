@@ -105,7 +105,14 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 
 	public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty, boolean throwException) {
 		if (configuredProperty.isRequired()) {
-			if (!getConfiguredProperties().containsKey(configuredProperty)) {
+			Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
+			Object value = configuredProperties.get(configuredProperty);
+			if (configuredProperty.isArray() && value != null) {
+				if (Array.getLength(value) == 0) {
+					value = null;
+				}
+			}
+			if (value == null) {
 				if (throwException) {
 					throw new IllegalStateException("Configured property is not set: " + configuredProperty);
 				} else {
