@@ -26,8 +26,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections15.map.ReferenceMap;
 import org.eobjects.analyzer.reference.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,5 +192,9 @@ public final class CollectionUtils {
 		ArrayList<E> list = new ArrayList<E>(col);
 		Collections.sort(list);
 		return list;
+	}
+
+	public static <K, V> Map<K, V> createCacheMap() {
+		return new ReferenceMap<K, V>(ReferenceMap.SOFT, ReferenceMap.SOFT, true);
 	}
 }

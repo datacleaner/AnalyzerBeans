@@ -22,6 +22,7 @@ package org.eobjects.analyzer.reference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -30,6 +31,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.DataContext;
@@ -39,7 +41,6 @@ import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.query.builder.SatisfiedWhereBuilder;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
-import org.h2.util.SoftHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 
 	private static final Logger logger = LoggerFactory.getLogger(DatastoreSynonymCatalog.class);
 
-	private transient SoftHashMap<String, String> _masterTermCache = new SoftHashMap<String, String>();
+	private transient Map<String, String> _masterTermCache;
 	private transient DatastoreCatalog _datastoreCatalog;
 	private transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
 	private final String _name;
@@ -94,11 +95,11 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 		}
 	}
 
-	private SoftHashMap<String, String> getMasterTermCache() {
+	private Map<String, String> getMasterTermCache() {
 		if (_masterTermCache == null) {
 			synchronized (this) {
 				if (_masterTermCache == null) {
-					_masterTermCache = new SoftHashMap<String, String>();
+					_masterTermCache = CollectionUtils.createCacheMap();
 				}
 			}
 		}
@@ -163,7 +164,7 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 			return null;
 		}
 
-		final SoftHashMap<String, String> cache = getMasterTermCache();
+		final Map<String, String> cache = getMasterTermCache();
 
 		String result;
 

@@ -25,16 +25,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.util.FileHelper;
-import org.h2.util.SoftHashMap;
 
 public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
-	private transient SoftHashMap<String, String> _masterTermCache;
+	private transient Map<String, String> _masterTermCache;
 	private transient File _file;
 
 	private final String _filename;
@@ -96,11 +97,11 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 		}
 	}
 
-	private SoftHashMap<String, String> getMasterTermCache() {
+	private Map<String, String> getMasterTermCache() {
 		if (_masterTermCache == null) {
 			synchronized (this) {
 				if (_masterTermCache == null) {
-					_masterTermCache = new SoftHashMap<String, String>();
+					_masterTermCache = CollectionUtils.createCacheMap();
 				}
 			}
 		}

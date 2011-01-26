@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.h2.util.SoftHashMap;
+import org.eobjects.analyzer.util.CollectionUtils;
 
 /**
  * An abstract RowAnnotationFactory that supports a (optional) threshold
@@ -37,7 +37,7 @@ import org.h2.util.SoftHashMap;
 public abstract class AbstractRowAnnotationFactory implements RowAnnotationFactory {
 
 	private final Map<RowAnnotationImpl, AtomicInteger> _rowCounts = new IdentityHashMap<RowAnnotationImpl, AtomicInteger>();
-	private final SoftHashMap<Integer, Boolean> _cachedRows = new SoftHashMap<Integer, Boolean>();
+	private final Map<Integer, Boolean> _cachedRows = CollectionUtils.createCacheMap();
 	private final Integer _storedRowsThreshold;
 
 	public AbstractRowAnnotationFactory(Integer storedRowsThreshold) {

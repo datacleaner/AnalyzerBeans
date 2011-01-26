@@ -22,21 +22,22 @@ package org.eobjects.analyzer.reference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
-import org.h2.util.SoftHashMap;
 
 public final class DatastoreReferenceValues implements ReferenceValues<String> {
 
 	private final Datastore _datastore;
 	private final Column _column;
-	private final SoftHashMap<String, Boolean> _containsValueCache = new SoftHashMap<String, Boolean>();
+	private final Map<String, Boolean> _containsValueCache = CollectionUtils.createCacheMap();
 
 	public DatastoreReferenceValues(Datastore datastore, Column column) {
 		_datastore = datastore;

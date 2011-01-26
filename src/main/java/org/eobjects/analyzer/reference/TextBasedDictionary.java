@@ -22,10 +22,11 @@ package org.eobjects.analyzer.reference;
 import java.io.BufferedReader;
 import java.io.File;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.metamodel.util.FileHelper;
-import org.h2.util.SoftHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public class TextBasedDictionary implements Dictionary {
 
 	private static final Logger logger = LoggerFactory.getLogger(TextBasedDictionary.class);
 
-	private transient SoftHashMap<String, Boolean> _containsValueCache;
+	private transient Map<String, Boolean> _containsValueCache;
 	private final String _name;
 	private final String _filename;
 	private final String _encoding;
@@ -46,11 +47,11 @@ public class TextBasedDictionary implements Dictionary {
 		_encoding = encoding;
 	}
 
-	private SoftHashMap<String, Boolean> getContainsValueCache() {
+	private Map<String, Boolean> getContainsValueCache() {
 		if (_containsValueCache == null) {
 			synchronized (this) {
 				if (_containsValueCache == null) {
-					_containsValueCache = new SoftHashMap<String, Boolean>();
+					_containsValueCache = CollectionUtils.createCacheMap();
 				}
 			}
 		}
