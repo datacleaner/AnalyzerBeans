@@ -144,6 +144,7 @@ public final class RowProcessingPublisher {
 
 		int expectedRows = -1;
 		final Query countQuery = dataContext.query().from(_table).selectCount().toQuery();
+		countQuery.getSelectClause().getItem(0).setFunctionApproximationAllowed(true);
 		final DataSet countDataSet = dataContext.executeQuery(countQuery);
 		if (countDataSet.next()) {
 			Number count = (Number) countDataSet.getRow().getValue(0);
@@ -268,7 +269,7 @@ public final class RowProcessingPublisher {
 					changed = true;
 
 					ComponentJob componentJob = consumer.getComponentJob();
-					
+
 					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
 					for (InputColumn<?> inputColumn : requiredInput) {
 						if (inputColumn instanceof ExpressionBasedInputColumn) {
