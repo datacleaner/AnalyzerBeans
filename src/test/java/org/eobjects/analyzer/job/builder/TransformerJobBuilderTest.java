@@ -20,16 +20,19 @@
 package org.eobjects.analyzer.job.builder;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
+import org.eobjects.analyzer.beans.transform.WhitespaceTrimmerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.AnnotationBasedTransformerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -135,5 +138,50 @@ public class TransformerJobBuilderTest extends TestCase {
 		ConfiguredPropertyDescriptor propertyDescriptor = descriptor.getConfiguredPropertiesForInput().iterator().next();
 		Object object = builder.getConfiguredProperties().get(propertyDescriptor);
 		assertEquals("TransformedInputColumn[id=-1,name=foo,type=STRING]", object.toString());
+	}
+
+	public void testReplaceAutomaticOutputColumnNames() throws Exception {
+		IdGenerator IdGenerator = new PrefixedIdGenerator("id");
+
+		AnnotationBasedTransformerBeanDescriptor<WhitespaceTrimmerTransformer> descriptor = AnnotationBasedTransformerBeanDescriptor
+				.create(WhitespaceTrimmerTransformer.class);
+
+		TransformerJobBuilder<WhitespaceTrimmerTransformer> builder = new TransformerJobBuilder<WhitespaceTrimmerTransformer>(
+				new AnalysisJobBuilder(null), descriptor, IdGenerator, new LinkedList<TransformerChangeListener>());
+
+		MockInputColumn<String> colA = new MockInputColumn<String>("A", String.class);
+		MockInputColumn<String> colB = new MockInputColumn<String>("B", String.class);
+		MockInputColumn<String> colC = new MockInputColumn<String>("C", String.class);
+		builder.addInputColumn(colA);
+		builder.addInputColumn(colB);
+		builder.addInputColumn(colC);
+
+		List<MutableInputColumn<?>> outputColumns = builder.getOutputColumns();
+		assertEquals(3, outputColumns.size());
+		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed),type=STRING], "
+				+ "TransformedInputColumn[id=id-2,name=B (trimmed),type=STRING], "
+				+ "TransformedInputColumn[id=id-3,name=C (trimmed),type=STRING]]", outputColumns.toString());
+
+		builder.removeInputColumn(colB);
+
+		outputColumns = builder.getOutputColumns();
+		assertEquals(2, outputColumns.size());
+		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed),type=STRING], "
+				+ "TransformedInputColumn[id=id-2,name=C (trimmed),type=STRING]]", outputColumns.toString());
+
+		builder.addInputColumn(colB);
+		outputColumns = builder.getOutputColumns();
+		assertEquals(3, outputColumns.size());
+		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed),type=STRING], "
+				+ "TransformedInputColumn[id=id-2,name=C (trimmed),type=STRING], "
+				+ "TransformedInputColumn[id=id-4,name=B (trimmed),type=STRING]]", outputColumns.toString());
+
+		ConfiguredPropertyDescriptor inputColumnProperty = descriptor.getConfiguredPropertiesForInput().iterator().next();
+		builder.setConfiguredProperty(inputColumnProperty, new InputColumn[] { colA, colB, colC });
+		outputColumns = builder.getOutputColumns();
+		assertEquals(3, outputColumns.size());
+		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed),type=STRING], "
+				+ "TransformedInputColumn[id=id-2,name=B (trimmed),type=STRING], "
+				+ "TransformedInputColumn[id=id-4,name=C (trimmed),type=STRING]]", outputColumns.toString());
 	}
 }

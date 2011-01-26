@@ -20,7 +20,7 @@
 package org.eobjects.analyzer.job.builder;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.OutputColumns;
@@ -45,6 +45,7 @@ import org.eobjects.analyzer.lifecycle.LifeCycleState;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.InMemoryStorageProvider;
+import org.eobjects.analyzer.util.StringUtils;
 
 /**
  * @author Kasper Sørensen
@@ -57,7 +58,8 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		InputColumnSourceJob, InputColumnSinkJob, OutcomeSinkJob {
 
 	private final AnalysisJobBuilder _analysisJobBuilder;
-	private final LinkedList<MutableInputColumn<?>> _outputColumns = new LinkedList<MutableInputColumn<?>>();
+	private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
+	private final List<String> _automaticOutputColumnNames = new ArrayList<String>();
 	private final IdGenerator _idGenerator;
 	private final List<TransformerChangeListener> _transformerChangeListeners;
 
@@ -73,7 +75,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		if (!isConfigured()) {
 			// as long as the transformer is not configured, just return an
 			// empty list
-			return new LinkedList<MutableInputColumn<?>>();
+			return Collections.emptyList();
 		}
 
 		final TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(getDescriptor());
@@ -96,9 +98,13 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			throw new IllegalStateException("getOutputColumns() returned null on transformer: "
 					+ transformerBeanInstance.getBean());
 		}
+		boolean changed = false;
+
+		// adjust the amount of output columns
 		int expectedCols = outputColumns.getColumnCount();
 		int existingCols = _outputColumns.size();
 		if (expectedCols != existingCols) {
+			changed = true;
 			int colDiff = expectedCols - existingCols;
 			if (colDiff > 0) {
 				for (int i = 0; i < colDiff; i++) {
@@ -109,19 +115,38 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 					}
 					DataTypeFamily type = getDescriptor().getOutputDataTypeFamily();
 					_outputColumns.add(new TransformedInputColumn<Object>(name, type, _idGenerator));
+					_automaticOutputColumnNames.add(name);
 				}
 			} else if (colDiff < 0) {
 				for (int i = 0; i < Math.abs(colDiff); i++) {
 					// remove from the tail
-					_outputColumns.removeLast();
+					_outputColumns.remove(_outputColumns.size() - 1);
+					_automaticOutputColumnNames.remove(_automaticOutputColumnNames.size() - 1);
 				}
 			}
+		}
 
+		// automatically update names of columns if they have not been manually
+		// set
+		for (int i = 0; i < expectedCols; i++) {
+			MutableInputColumn<?> col = _outputColumns.get(i);
+			String automaticName = _automaticOutputColumnNames.get(i);
+			String columnName = col.getName();
+			if (StringUtils.isNullOrEmpty(columnName) || automaticName.equals(columnName)) {
+				String proposedName = outputColumns.getColumnName(i);
+				if (proposedName != null) {
+					col.setName(proposedName);
+					_automaticOutputColumnNames.set(i, proposedName);
+				}
+			}
+		}
+
+		if (changed) {
 			// notify listeners
 			onOutputChanged();
 		}
 
-		return _outputColumns;
+		return Collections.unmodifiableList(_outputColumns);
 	}
 
 	public void onOutputChanged() {
