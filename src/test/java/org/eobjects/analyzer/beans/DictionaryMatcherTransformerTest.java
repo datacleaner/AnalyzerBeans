@@ -43,18 +43,14 @@ import org.eobjects.analyzer.test.TestHelper;
 public class DictionaryMatcherTransformerTest extends TestCase {
 
 	public void testParseAndAssignDictionaries() throws Exception {
-		Datastore datastore = new CsvDatastore("my database",
-				"src/test/resources/projects.csv");
-		AnalyzerBeansConfiguration configuration = TestHelper
-				.createAnalyzerBeansConfiguration(datastore);
-		AnalysisJobBuilder job = new JaxbJobReader(configuration)
-				.create(new File(
-						"src/test/resources/example-job-dictionary.xml"));
+		Datastore datastore = new CsvDatastore("my database", "src/test/resources/projects.csv");
+		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(datastore);
+		AnalysisJobBuilder job = new JaxbJobReader(configuration).create(new File(
+				"src/test/resources/example-job-dictionary.xml"));
 		assertTrue(job.isConfigured());
 
 		AnalysisJob analysisJob = job.toAnalysisJob();
-		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(
-				configuration).run(analysisJob);
+		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(analysisJob);
 		List<AnalyzerResult> results = resultFuture.getResults();
 
 		assertEquals(4, results.size());
@@ -81,12 +77,9 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 
 	public void testTransform() throws Exception {
 		Dictionary[] dictionaries = new Dictionary[] {
-				new SimpleDictionary("danish male names", "kasper", "kim",
-						"asbjørn"),
-				new SimpleDictionary("danish female names", "trine", "kim",
-						"lene") };
-		DictionaryMatcherTransformer transformer = new DictionaryMatcherTransformer(
-				dictionaries);
+				new SimpleDictionary("danish male names", "kasper", "kim", "asbjørn"),
+				new SimpleDictionary("danish female names", "trine", "kim", "lene") };
+		DictionaryMatcherTransformer transformer = new DictionaryMatcherTransformer(null, dictionaries);
 		assertEquals("[true, false]", Arrays.toString(transformer.transform("kasper")));
 		assertEquals("[false, false]", Arrays.toString(transformer.transform("foobar")));
 		assertEquals("[false, true]", Arrays.toString(transformer.transform("trine")));

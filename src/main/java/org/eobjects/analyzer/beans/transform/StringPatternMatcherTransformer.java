@@ -37,6 +37,15 @@ public class StringPatternMatcherTransformer implements Transformer<Boolean> {
 	@Configured
 	InputColumn<?> _column;
 
+	public StringPatternMatcherTransformer(InputColumn<?> column, StringPattern[] stringPatterns) {
+		this();
+		_column = column;
+		_stringPatterns = stringPatterns;
+	}
+
+	public StringPatternMatcherTransformer() {
+	}
+	
 	@Override
 	public OutputColumns getOutputColumns() {
 		String columnName = _column.getName();
@@ -65,11 +74,11 @@ public class StringPatternMatcherTransformer implements Transformer<Boolean> {
 		}
 		return result;
 	}
-	
+
 	public void setStringPatterns(StringPattern[] stringPatterns) {
 		_stringPatterns = stringPatterns;
 	}
-	
+
 	public void setColumn(InputColumn<?> column) {
 		_column = column;
 	}

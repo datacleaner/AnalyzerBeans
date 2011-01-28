@@ -24,6 +24,7 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.reference.Dictionary;
@@ -36,18 +37,23 @@ public class DictionaryMatcherTransformer implements Transformer<Boolean> {
 	Dictionary[] _dictionaries;
 
 	@Configured
-	InputColumn<String> _column;
+	InputColumn<?> _column;
 
 	public DictionaryMatcherTransformer() {
 	}
 
-	public DictionaryMatcherTransformer(Dictionary[] dictionaries) {
+	public DictionaryMatcherTransformer(InputColumn<?> column, Dictionary[] dictionaries) {
 		this();
+		_column = column;
 		_dictionaries = dictionaries;
 	}
 	
 	public void setDictionaries(Dictionary[] dictionaries) {
 		_dictionaries = dictionaries;
+	}
+	
+	public void setColumn(InputColumn<?> column) {
+		_column = column;
 	}
 
 	@Override
@@ -62,15 +68,16 @@ public class DictionaryMatcherTransformer implements Transformer<Boolean> {
 
 	@Override
 	public Boolean[] transform(InputRow inputRow) {
-		String value = inputRow.getValue(_column);
+		Object value = inputRow.getValue(_column);
 		return transform(value);
 	}
 
-	public Boolean[] transform(String value) {
+	public Boolean[] transform(final Object value) {
+		String stringValue = ConvertToStringTransformer.transformValue(value);
 		Boolean[] result = new Boolean[_dictionaries.length];
-		if (value != null) {
+		if (stringValue != null) {
 			for (int i = 0; i < result.length; i++) {
-				boolean containsValue = _dictionaries[i].containsValue(value);
+				boolean containsValue = _dictionaries[i].containsValue(stringValue);
 				result[i] = containsValue;
 			}
 		}
