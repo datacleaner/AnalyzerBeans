@@ -66,6 +66,17 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests(new java.sql.Date(1234 - localeOffset), "1970-01-01T00:00:01 234");
 	}
 
+	public void testAbstractNumber() throws Exception {
+		Number n = StringConversionUtils.deserialize("1", Number.class, null, null, null);
+		assertTrue(n instanceof Integer);
+		assertEquals(1, n.intValue());
+		
+		n = StringConversionUtils.deserialize("1.0", Number.class, null, null, null);
+		assertTrue(n instanceof Double);
+		assertEquals(1.0, n.doubleValue());
+		assertEquals(1, n.intValue());
+	}
+
 	public void testEnum() throws Exception {
 		String serialized = StringConversionUtils.serialize(ValidationCategory.VALID);
 		assertEquals("VALID", serialized);
@@ -118,8 +129,9 @@ public class StringConversionUtilsTest extends TestCase {
 		synonymCatalogs.add(synonymCatalog);
 
 		Collection<StringPattern> stringPatterns = new ArrayList<StringPattern>();
-		
-		ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs, stringPatterns);
+
+		ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs,
+				stringPatterns);
 
 		Dictionary dictionaryResult = StringConversionUtils.deserialize("my dict", Dictionary.class, null,
 				referenceDataCatalog, null);

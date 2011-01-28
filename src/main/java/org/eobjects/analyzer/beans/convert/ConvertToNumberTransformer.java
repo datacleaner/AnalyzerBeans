@@ -30,6 +30,7 @@ import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.Percentage;
 
 /**
  * Attempts to convert anything to a Number (Double) value
@@ -84,8 +85,15 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 				}
 			} else {
 				String stringValue = value.toString();
+
 				try {
-					n = Double.parseDouble(stringValue);
+					if (stringValue.indexOf('%') != -1) {
+						n = Percentage.parsePercentage(stringValue);
+					} else if (stringValue.indexOf('.') != -1) {
+						n = Double.parseDouble(stringValue);
+					} else {
+						n = Integer.parseInt(stringValue);
+					}
 				} catch (NumberFormatException e) {
 					// ignore
 				}

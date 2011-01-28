@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.reference.Dictionary;
@@ -314,6 +315,9 @@ public final class StringConversionUtils {
 				}
 				return (E) datastore;
 			}
+		}
+		if (ReflectionUtils.isNumber(type)) {
+			return (E) ConvertToNumberTransformer.transformValue(str);
 		}
 
 		throw new IllegalArgumentException("Could not convert to type: " + type.getName());
