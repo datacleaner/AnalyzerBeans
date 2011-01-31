@@ -19,13 +19,26 @@
  */
 package org.eobjects.analyzer.beans.convert;
 
+import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.data.MockInputColumn;
+
 import junit.framework.TestCase;
 
 public class ConvertToBooleanTransformerTest extends TestCase {
 
+	public void testGetOutputColumns() throws Exception {
+		ConvertToBooleanTransformer t = new ConvertToBooleanTransformer(new MockInputColumn<String>("my col", String.class));
+		OutputColumns outputColumns = t.getOutputColumns();
+		
+		assertEquals(1, outputColumns.getColumnCount());
+		assertEquals("my col (as boolean)", outputColumns.getColumnName(0));
+	}
+
 	public void testTransform() throws Exception {
 		String[] f = ConvertToBooleanTransformer.DEFAULT_FALSE_TOKENS;
 		String[] t = ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS;
+		
+		assertNull(ConvertToBooleanTransformer.transformValue(null, t, f));
 
 		assertNull(ConvertToBooleanTransformer.transformValue("hello", t, f));
 		assertNull(ConvertToBooleanTransformer.transformValue("", t, f));
@@ -33,6 +46,7 @@ public class ConvertToBooleanTransformerTest extends TestCase {
 		assertNull(ConvertToBooleanTransformer.transformValue(5000, t, f));
 
 		assertTrue(ConvertToBooleanTransformer.transformValue(true, t, f));
+		assertTrue(ConvertToBooleanTransformer.transformValue(Boolean.TRUE, t, f));
 		assertTrue(ConvertToBooleanTransformer.transformValue("true", t, f));
 		assertTrue(ConvertToBooleanTransformer.transformValue(1, t, f));
 		assertTrue(ConvertToBooleanTransformer.transformValue("yes", t, f));

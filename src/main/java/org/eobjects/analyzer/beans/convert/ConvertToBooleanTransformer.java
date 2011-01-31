@@ -43,7 +43,7 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 
 	@Inject
 	@Configured
-	InputColumn<?> input;
+	InputColumn<?> column;
 
 	@Configured(required = false)
 	Boolean nullReplacement;
@@ -56,14 +56,22 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 	@Description("Text tokens that will translate to 'false'")
 	String[] _falseTokens = DEFAULT_FALSE_TOKENS;
 
+	public ConvertToBooleanTransformer(InputColumn<?> column) {
+		this();
+		this.column = column;
+	}
+
+	public ConvertToBooleanTransformer() {
+	}
+
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(input.getName() + " (as boolean)");
+		return new OutputColumns(column.getName() + " (as boolean)");
 	}
 
 	@Override
 	public Boolean[] transform(InputRow inputRow) {
-		Object value = inputRow.getValue(input);
+		Object value = inputRow.getValue(column);
 		Boolean b = transformValue(value, _trueTokens, _falseTokens);
 		if (b == null) {
 			b = nullReplacement;

@@ -20,11 +20,11 @@
 package org.eobjects.analyzer.beans.convert;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Arrays;
 
 import javax.inject.Inject;
 
@@ -76,23 +76,24 @@ public class ConvertToStringTransformer implements Transformer<String> {
 				value = new InputStreamReader(new BufferedInputStream((InputStream) value));
 			}
 			if (value instanceof Reader) {
-				StringBuilder sb = new StringBuilder();
+				char[] buffer = new char[1024];
+
 				Reader reader = (Reader) value;
-				BufferedReader br = new BufferedReader(reader);
+
+				StringBuilder sb = new StringBuilder();
 				try {
-					for (String line = br.readLine(); line != null; line = br.readLine()) {
-						sb.append(line);
-						sb.append('\n');
-					}
-					int lastIndexOf = sb.lastIndexOf("\n");
-					if (lastIndexOf != -1) {
-						sb.deleteCharAt(lastIndexOf);
+					for (int read = reader.read(buffer); read != -1; read = reader.read(buffer)) {
+						char[] charsToWrite = buffer;
+						if (read != buffer.length) {
+							charsToWrite = Arrays.copyOf(charsToWrite, read);
+						}
+						sb.append(charsToWrite);
 					}
 				} catch (IOException e) {
 					throw new IllegalStateException(e);
 				} finally {
 					try {
-						br.close();
+						reader.close();
 					} catch (Exception e) {
 						// do nothing
 					}

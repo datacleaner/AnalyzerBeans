@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.convert;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 
 import junit.framework.TestCase;
@@ -33,5 +34,23 @@ public class ConvertToStringTransformerTest extends TestCase {
 				ConvertToStringTransformer.transformValue(new ByteArrayInputStream("w00p\nw0000p".getBytes())));
 
 		assertEquals("mrr\nrh", ConvertToStringTransformer.transformValue(new StringReader("mrr\nrh")));
+	}
+
+	public void testTransformInputStream() throws Exception {
+		InputStream inputStream = new ByteArrayInputStream("hello\nworld".getBytes());
+		assertEquals("hello\nworld", ConvertToStringTransformer.transformValue(inputStream));
+
+		inputStream = new ByteArrayInputStream("hello\r\nworld\n".getBytes());
+		assertEquals("hello\r\nworld\n", ConvertToStringTransformer.transformValue(inputStream));
+
+		// make a string that will not fit into the buffer being used in the
+		// converter
+		StringBuilder longString = new StringBuilder("hello");
+		for (int i = 0; i < 1024; i++) {
+			longString.append(" hello");
+		}
+
+		inputStream = new ByteArrayInputStream(longString.toString().getBytes());
+		assertEquals(longString.toString(), ConvertToStringTransformer.transformValue(inputStream));
 	}
 }
