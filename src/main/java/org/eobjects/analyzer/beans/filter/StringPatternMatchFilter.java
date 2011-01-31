@@ -37,6 +37,15 @@ public class StringPatternMatchFilter implements Filter<ValidationCategory> {
 	@Configured
 	StringPattern stringPattern;
 
+	public StringPatternMatchFilter(InputColumn<String> column, StringPattern stringPattern) {
+		this();
+		this.column = column;
+		this.stringPattern = stringPattern;
+	}
+
+	public StringPatternMatchFilter() {
+	}
+
 	@Override
 	public ValidationCategory categorize(InputRow inputRow) {
 		String value = inputRow.getValue(column);

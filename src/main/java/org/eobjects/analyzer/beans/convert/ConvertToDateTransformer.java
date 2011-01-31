@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.convert;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -88,9 +89,8 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 		if (value != null) {
 			if (value instanceof Date) {
 				d = (Date) value;
-			} else if (value instanceof java.sql.Date) {
-				java.sql.Date sqlDate = (java.sql.Date) value;
-				d = new Date(sqlDate.getTime());
+			} else if (value instanceof Calendar) {
+				d = ((Calendar) value).getTime();
 			} else if (value instanceof String) {
 				d = convertFromString((String) value);
 			} else if (value instanceof Number) {

@@ -54,6 +54,9 @@ public final class SimpleSynonymCatalog implements SynonymCatalog {
 			return null;
 		}
 		for (Synonym synonym : _synonyms) {
+			if (synonym.getMasterTerm().equals(term)) {
+				return synonym.getMasterTerm();
+			}
 			if (synonym.getSynonyms().containsValue(term)) {
 				return synonym.getMasterTerm();
 			}

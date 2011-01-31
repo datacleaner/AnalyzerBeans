@@ -39,26 +39,19 @@ public class ConvertToDateTransformerTest extends TestCase {
 
 		assertTrue(cal.getTime().getTime() > 5000000);
 
-		assertEquals("1970-04-03",
-				format(ConvertToDateTransformer.convertFromNumber(8000000000l)));
-		assertEquals("1997-05-19",
-				format(ConvertToDateTransformer.convertFromNumber(10000)));
-		assertEquals("1997-05-19",
-				format(ConvertToDateTransformer.convertFromNumber(19970519)));
-		assertEquals("1997-05-19",
-				format(ConvertToDateTransformer.convertFromNumber(970519)));
+		assertEquals("1971-01-01", format(ConvertToDateTransformer.transformValue(cal)));
+		assertEquals("1971-01-01", format(ConvertToDateTransformer.transformValue(cal.getTime())));
+
+		assertEquals("1970-04-03", format(ConvertToDateTransformer.convertFromNumber(8000000000l)));
+		assertEquals("1997-05-19", format(ConvertToDateTransformer.convertFromNumber(10000)));
+		assertEquals("1997-05-19", format(ConvertToDateTransformer.convertFromNumber(19970519)));
+		assertEquals("1997-05-19", format(ConvertToDateTransformer.convertFromNumber(970519)));
 	}
 
 	public void testConvertFromString() throws Exception {
-		assertEquals(
-				"1999-04-20",
-				format(ConvertToDateTransformer.convertFromString("1999-04-20")));
-		assertEquals(
-				"1999-04-20",
-				format(ConvertToDateTransformer.convertFromString("04/20/1999")));
-		assertEquals(
-				"1999-04-20",
-				format(ConvertToDateTransformer.convertFromString("1999/04/20")));
+		assertEquals("1999-04-20", format(ConvertToDateTransformer.convertFromString("1999-04-20")));
+		assertEquals("1999-04-20", format(ConvertToDateTransformer.convertFromString("04/20/1999")));
+		assertEquals("1999-04-20", format(ConvertToDateTransformer.convertFromString("1999/04/20")));
 	}
 
 	private String format(Date date) {
