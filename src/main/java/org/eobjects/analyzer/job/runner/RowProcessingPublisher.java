@@ -94,9 +94,16 @@ public final class RowProcessingPublisher {
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
 	private final ReferenceDataActivationManager _referenceDataActivationManager;
+	private final boolean _allowGroupByOptimization;
 
 	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table, TaskRunner taskRunner,
 			AnalysisListener analysisListener, ReferenceDataActivationManager referenceDataActivationManager) {
+		this(job, storageProvider, table, taskRunner, analysisListener, referenceDataActivationManager, false);
+	}
+
+	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table, TaskRunner taskRunner,
+			AnalysisListener analysisListener, ReferenceDataActivationManager referenceDataActivationManager,
+			boolean allowGroupByOptimization) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
@@ -118,6 +125,7 @@ public final class RowProcessingPublisher {
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
 		_referenceDataActivationManager = referenceDataActivationManager;
+		_allowGroupByOptimization = allowGroupByOptimization;
 	}
 
 	public void addPhysicalColumns(Column... columns) {
@@ -209,21 +217,22 @@ public final class RowProcessingPublisher {
 	}
 
 	private boolean useGroupByOptimization() {
-		if (_physicalColumns.size() > 3) {
-			logger.info("Skipping GROUP BY optimization because of the high column amount");
-			return false;
-		}
+		if (_allowGroupByOptimization) {
+			if (_physicalColumns.size() > 3) {
+				logger.info("Skipping GROUP BY optimization because of the high column amount");
+				return false;
+			}
 
-		Datastore datastore = _job.getDatastore();
-		if (datastore == null) {
-			logger.info("Skipping GROUP BY optimization because no datastore is attached to the DataContextProvider");
-			return false;
-		}
+			final Datastore datastore = _job.getDatastore();
+			if (datastore == null) {
+				logger.info("Skipping GROUP BY optimization because no datastore is attached to the DataContextProvider");
+				return false;
+			}
 
-		if (datastore instanceof JdbcDatastore || datastore instanceof OdbDatastore) {
-			return true;
+			if (datastore instanceof JdbcDatastore || datastore instanceof OdbDatastore) {
+				return true;
+			}
 		}
-
 		return false;
 	}
 

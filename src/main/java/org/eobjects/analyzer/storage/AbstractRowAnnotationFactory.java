@@ -88,6 +88,7 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 	public final void reset(RowAnnotation annotation) {
 		RowAnnotationImpl ann = (RowAnnotationImpl) annotation;
 		ann.resetRowCount();
+		_rowCounts.remove(annotation);
 		resetRows(annotation);
 	}
 

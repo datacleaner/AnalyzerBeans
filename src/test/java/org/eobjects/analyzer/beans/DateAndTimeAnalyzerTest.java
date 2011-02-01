@@ -83,16 +83,16 @@ public class DateAndTimeAnalyzerTest extends TestCase {
 		InputColumn<?> column = ajb.getSourceColumnByName("ORDERDATE");
 
 		ResultProducer resultProducer = nav.where("Measure", "Highest date").explore();
-		testAnnotatedRowResult(resultProducer.getResult(), column, 19, 2);
+		testAnnotatedRowResult(resultProducer.getResult(), column, 19, 19);
 
 		resultProducer = nav.where("Measure", "Lowest date").explore();
-		testAnnotatedRowResult(resultProducer.getResult(), column, 4, 1);
+		testAnnotatedRowResult(resultProducer.getResult(), column, 4, 4);
 
 		resultProducer = nav.where("Measure", "Highest time").explore();
-		testAnnotatedRowResult(resultProducer.getResult(), column, 2996, 323);
+		testAnnotatedRowResult(resultProducer.getResult(), column, 2996, 1000);
 
 		resultProducer = nav.where("Measure", "Lowest time").explore();
-		testAnnotatedRowResult(resultProducer.getResult(), column, 2996, 323);
+		testAnnotatedRowResult(resultProducer.getResult(), column, 2996, 1000);
 	}
 
 	private void testAnnotatedRowResult(AnalyzerResult result, InputColumn<?> col, int rowCount, int distinctRowCount) {
