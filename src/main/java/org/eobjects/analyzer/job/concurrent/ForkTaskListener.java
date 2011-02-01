@@ -67,7 +67,11 @@ public final class ForkTaskListener implements TaskListener {
 	public void onError(Task task, Throwable throwable) {
 		for (TaskRunnable tr : _tasks) {
 			TaskListener listener = tr.getListener();
-			listener.onError(task, throwable);
+			if (listener == null) {
+				logger.warn("TaskListener for {} was null", tr);
+			} else {
+				listener.onError(task, throwable);
+			}
 		}
 	}
 }

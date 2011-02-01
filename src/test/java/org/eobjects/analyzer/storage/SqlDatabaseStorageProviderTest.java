@@ -173,7 +173,10 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 		SqlDatabaseSet<String> set = new SqlDatabaseSet<String>(connectionMock, "MY_TABLE", "VARCHAR");
 		assertEquals(0, set.size());
 		set = null;
+		
+		Thread.sleep(500);
 		System.gc();
+		Thread.sleep(500);
 		System.runFinalization();
 
 		EasyMock.verify(statementMock, connectionMock);

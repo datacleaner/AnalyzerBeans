@@ -23,6 +23,12 @@ import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Represents a Runnable wrapper for a task. A task might have also a listener
+ * which will be invoked based on the outcome of the task.
+ * 
+ * @author Kasper Sørensen
+ */
 public final class TaskRunnable implements Runnable {
 
 	private final static Logger logger = LoggerFactory.getLogger(TaskRunnable.class);
@@ -63,10 +69,20 @@ public final class TaskRunnable implements Runnable {
 		}
 	}
 
+	/**
+	 * Gets the task to run, or null if none exists
+	 * 
+	 * @return the task to run, or null if none exists
+	 */
 	public final Task getTask() {
 		return _task;
 	}
 
+	/**
+	 * Gets the task listener for the task, or null if none exists.
+	 * 
+	 * @return the task listener for the task, or null if none exists.
+	 */
 	public final TaskListener getListener() {
 		return _listener;
 	}
