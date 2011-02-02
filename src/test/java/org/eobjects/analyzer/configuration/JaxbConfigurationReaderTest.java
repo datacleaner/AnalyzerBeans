@@ -56,7 +56,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
 		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
 		assertEquals(
-				"[my_jdbc_connection, my_dbase, my_csv, my_custom, my_odb, my_jdbc_datasource, my_excel_2003, my_composite, my_access]",
+				"[my_jdbc_connection, my_dbase, my_csv, my_xml, my_custom, my_odb, my_jdbc_datasource, my_excel_2003, my_composite, my_access]",
 				Arrays.toString(datastoreNames));
 
 		for (String name : datastoreNames) {

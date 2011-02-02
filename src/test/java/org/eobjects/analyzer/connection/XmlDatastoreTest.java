@@ -19,35 +19,24 @@
  */
 package org.eobjects.analyzer.connection;
 
-import java.io.File;
+import java.util.Arrays;
 
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
+import junit.framework.TestCase;
 
-public final class ExcelDatastore extends UsageAwareDatastore {
+public class XmlDatastoreTest extends TestCase {
 
-	private static final long serialVersionUID = 1L;
+	private XmlDatastore ds = new XmlDatastore("foobar", "src/test/resources/example-xml-file.xml");
 
-	private final String _name;
-	private final String _filename;
-
-	public ExcelDatastore(String name, String filename) {
-		_name = name;
-		_filename = filename;
+	public void testGetters() throws Exception {
+		assertEquals("foobar", ds.getName());
+		assertEquals("src/test/resources/example-xml-file.xml", ds.getFilename());
 	}
 
-	@Override
-	public String getName() {
-		return _name;
-	}
+	public void testGetDataContextProvider() throws Exception {
+		DataContextProvider dcp = ds.getDataContextProvider();
+		String[] tableNames = dcp.getDataContext().getDefaultSchema().getTableNames();
+		assertEquals("[greeting]", Arrays.toString(tableNames));
 
-	public String getFilename() {
-		return _filename;
-	}
-
-	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
-		DataContext dc = DataContextFactory.createExcelDataContext(new File(_filename));
-		return new SingleDataContextProvider(dc, this);
+		dcp.close();
 	}
 }

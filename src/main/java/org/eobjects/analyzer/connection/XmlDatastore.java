@@ -24,14 +24,14 @@ import java.io.File;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
-public final class ExcelDatastore extends UsageAwareDatastore {
+public class XmlDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String _name;
 	private final String _filename;
 
-	public ExcelDatastore(String name, String filename) {
+	public XmlDatastore(String name, String filename) {
 		_name = name;
 		_filename = filename;
 	}
@@ -47,7 +47,8 @@ public final class ExcelDatastore extends UsageAwareDatastore {
 
 	@Override
 	protected UsageAwareDataContextProvider createDataContextProvider() {
-		DataContext dc = DataContextFactory.createExcelDataContext(new File(_filename));
-		return new SingleDataContextProvider(dc, this);
+		final File file = new File(_filename);
+		final DataContext dataContext = DataContextFactory.createXmlDataContext(file, true, false);
+		return new SingleDataContextProvider(dataContext, this);
 	}
 }

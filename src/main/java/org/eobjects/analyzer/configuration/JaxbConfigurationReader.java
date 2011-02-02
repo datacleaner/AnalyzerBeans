@@ -36,11 +36,13 @@ import javax.xml.bind.Unmarshaller;
 import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.BerkeleyDbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType;
+import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType.Package;
 import org.eobjects.analyzer.configuration.jaxb.CompositeDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.Configuration;
 import org.eobjects.analyzer.configuration.jaxb.ConfigurationMetadataType;
 import org.eobjects.analyzer.configuration.jaxb.CsvDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.CustomElementType;
+import org.eobjects.analyzer.configuration.jaxb.CustomElementType.Property;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreSynonymCatalogType;
@@ -53,17 +55,16 @@ import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.OpenOfficeDatabaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType;
+import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
+import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.StringPatterns;
+import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
 import org.eobjects.analyzer.configuration.jaxb.RegexPatternType;
 import org.eobjects.analyzer.configuration.jaxb.SimplePatternType;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.TextFileDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.TextFileSynonymCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ValueListDictionaryType;
-import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType.Package;
-import org.eobjects.analyzer.configuration.jaxb.CustomElementType.Property;
-import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
-import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.StringPatterns;
-import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
+import org.eobjects.analyzer.configuration.jaxb.XmlDatastoreType;
 import org.eobjects.analyzer.connection.AccessDatastore;
 import org.eobjects.analyzer.connection.CompositeDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -74,6 +75,7 @@ import org.eobjects.analyzer.connection.DbaseDatastore;
 import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
+import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
@@ -103,10 +105,9 @@ import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringConversionUtils;
 import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eobjects.metamodel.util.FileHelper;
 
 /**
  * Configuration reader that uses the JAXB model to read XML file based
@@ -284,7 +285,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 			SynonymCatalogs synonymCatalogs = referenceDataCatalog.getSynonymCatalogs();
 			if (synonymCatalogs != null) {
-				for (Object synonymCatalogType : synonymCatalogs.getAllTypesOfSynonymCatalogs()) {
+				for (Object synonymCatalogType : synonymCatalogs
+						.getTextFileSynonymCatalogOrDatastoreSynonymCatalogOrCustomSynonymCatalog()) {
 					if (synonymCatalogType instanceof TextFileSynonymCatalogType) {
 						TextFileSynonymCatalogType tfsct = (TextFileSynonymCatalogType) synonymCatalogType;
 						String name = tfsct.getName();
@@ -396,6 +398,20 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			}
 			String filename = accessDatastoreType.getFilename();
 			datastores.put(name, new AccessDatastore(name, filename));
+		}
+
+		List<XmlDatastoreType> xmlDatastores = CollectionUtils.filterOnClass(datastoreTypes, XmlDatastoreType.class);
+		for (XmlDatastoreType xmlDatastoreType : xmlDatastores) {
+			String name = xmlDatastoreType.getName();
+			if (StringUtils.isNullOrEmpty(name)) {
+				throw new IllegalStateException("Datastore name cannot be null");
+			}
+
+			if (datastores.containsKey(name)) {
+				throw new IllegalStateException("Datastore name is not unique: " + name);
+			}
+			String filename = xmlDatastoreType.getFilename();
+			datastores.put(name, new XmlDatastore(name, filename));
 		}
 
 		List<ExcelDatastoreType> excelDatastores = CollectionUtils.filterOnClass(datastoreTypes, ExcelDatastoreType.class);

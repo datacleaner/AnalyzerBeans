@@ -18,6 +18,10 @@
 			<datasource-jndi-url>java:comp/env/jdbc/mydb</datasource-jndi-url>
 		</jdbc-datastore>
 
+		<excel-datastore name="my_xml">
+			<filename>src/test/resources/example-xml-file.xml</filename>
+		</excel-datastore>
+
 		<csv-datastore name="my_csv">
 			<filename>src/test/resources/employees.csv</filename>
 			<quote-char>"</quote-char>

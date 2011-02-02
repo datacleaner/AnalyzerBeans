@@ -115,6 +115,8 @@
 				minOccurs="0" maxOccurs="unbounded" />
 			<element name="odb-datastore" type="ab:openOfficeDatabaseDatastoreType"
 				minOccurs="0" maxOccurs="unbounded" />
+			<element name="xml-datastore" type="ab:xmlDatastoreType"
+				minOccurs="0" maxOccurs="unbounded" />
 			<element name="custom-datastore" type="ab:customElementType"
 				minOccurs="0" maxOccurs="unbounded" />
 			<element name="composite-datastore" type="ab:compositeDatastoreType"
@@ -148,6 +150,13 @@
 	</complexType>
 
 	<complexType name="excelDatastoreType">
+		<sequence>
+			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="xmlDatastoreType">
 		<sequence>
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
@@ -258,12 +267,14 @@
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 	</complexType>
-	
+
 	<complexType name="datastoreSynonymCatalogType">
 		<sequence>
 			<element name="column-name" minOccurs="1" maxOccurs="1" type="string" />
-			<element name="datastore-name" minOccurs="1" maxOccurs="1" type="string" />
-			<element name="synonym-column-names" minOccurs="1" maxOccurs="unbounded" type="string" />
+			<element name="datastore-name" minOccurs="1" maxOccurs="1"
+				type="string" />
+			<element name="synonym-column-names" minOccurs="1" maxOccurs="unbounded"
+				type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 	</complexType>
