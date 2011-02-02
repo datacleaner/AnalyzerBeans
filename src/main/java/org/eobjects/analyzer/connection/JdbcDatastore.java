@@ -171,4 +171,19 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 			}
 		}
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("JdbcDatastore[name=");
+		sb.append(_name);
+		if (_jdbcUrl != null) {
+			sb.append(",url=");
+			sb.append(_jdbcUrl);
+		} else {
+			sb.append(",jndi=");
+			sb.append(_datasourceJndiUrl);
+		}
+		return sb.toString();
+	}
 }
