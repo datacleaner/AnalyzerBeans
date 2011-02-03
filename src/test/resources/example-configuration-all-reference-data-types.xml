@@ -66,4 +66,10 @@
 
 	<multithreaded-taskrunner />
 
+	<storage-provider>
+		<h2-database>
+			<temp-directory>target/temp</temp-directory>
+		</h2-database>
+	</storage-provider>
+
 </configuration>

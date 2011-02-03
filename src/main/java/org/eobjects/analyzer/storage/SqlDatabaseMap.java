@@ -28,10 +28,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eobjects.analyzer.util.CollectionUtils;
+
 final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, SqlDatabaseCollection {
 
+	private final Map<K, V> _cache = CollectionUtils.createCacheMap();
 	private final Connection _connection;
 	private final String _tableName;
+	private final PreparedStatement _getPreparedStatement;
+	private final PreparedStatement _updatePreparedStatement;
+	private final PreparedStatement _insertPreparedStatement;
 	private volatile int _size;
 
 	public SqlDatabaseMap(Connection connection, String tableName, String keyTypeName, String valueTypeName) {
@@ -40,6 +46,16 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 
 		SqlDatabaseUtils.performUpdate(_connection, SqlDatabaseUtils.CREATE_TABLE_PREFIX + tableName + " (map_key "
 				+ keyTypeName + " PRIMARY KEY, map_value " + valueTypeName + ")");
+
+		try {
+			_getPreparedStatement = _connection.prepareStatement("SELECT map_value FROM " + _tableName
+					+ " WHERE map_key = ?;");
+			_updatePreparedStatement = _connection.prepareStatement("UPDATE " + _tableName
+					+ " SET map_value = ? WHERE map_key = ?;");
+			_insertPreparedStatement = _connection.prepareStatement("INSERT INTO  " + _tableName + " VALUES (?,?);");
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	@Override
@@ -49,13 +65,16 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public V get(Object key) {
+	public synchronized V get(Object key) {
+		V v = _cache.get(key);
+		if (v != null) {
+			return v;
+		}
+
 		ResultSet rs = null;
-		PreparedStatement st = null;
 		try {
-			st = _connection.prepareStatement("SELECT map_value FROM " + _tableName + " WHERE map_key = ?;");
-			st.setObject(1, key);
-			rs = st.executeQuery();
+			_getPreparedStatement.setObject(1, key);
+			rs = _getPreparedStatement.executeQuery();
 			if (rs.next()) {
 				return (V) rs.getObject(1);
 			}
@@ -63,12 +82,16 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			SqlDatabaseUtils.safeClose(rs, st);
+			SqlDatabaseUtils.safeClose(rs, null);
 		}
 	}
 
 	@Override
-	public boolean containsKey(Object key) {
+	public synchronized boolean containsKey(Object key) {
+		if (_cache.containsKey(key)) {
+			return true;
+		}
+
 		ResultSet rs = null;
 		PreparedStatement st = null;
 		try {
@@ -87,27 +110,24 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 	}
 
 	public synchronized V put(K key, V value) {
-		PreparedStatement st = null;
 		try {
+			final V v;
 			if (containsKey(key)) {
-				V v = get(key);
-				st = _connection.prepareStatement("UPDATE " + _tableName + " SET map_value = ? WHERE map_key = ?;");
-				st.setObject(1, value);
-				st.setObject(2, key);
-				st.executeUpdate();
-				return v;
+				v = get(key);
+				_updatePreparedStatement.setObject(1, value);
+				_updatePreparedStatement.setObject(2, key);
+				_updatePreparedStatement.executeUpdate();
 			} else {
-				st = _connection.prepareStatement("INSERT INTO  " + _tableName + " VALUES (?,?);");
-				st.setObject(1, key);
-				st.setObject(2, value);
-				st.executeUpdate();
+				_insertPreparedStatement.setObject(1, key);
+				_insertPreparedStatement.setObject(2, value);
+				_insertPreparedStatement.executeUpdate();
 				_size++;
-				return null;
+				v = null;
 			}
+			_cache.put(key, value);
+			return v;
 		} catch (SQLException e) {
 			throw new IllegalStateException(e);
-		} finally {
-			SqlDatabaseUtils.safeClose(null, st);
 		}
 	};
 
@@ -126,13 +146,14 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 			} finally {
 				SqlDatabaseUtils.safeClose(null, st);
 			}
+			_cache.remove(key);
 			return result;
 		}
 		return null;
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<K, V>> entrySet() {
+	public synchronized Set<java.util.Map.Entry<K, V>> entrySet() {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {

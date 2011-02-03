@@ -36,27 +36,8 @@
 					<element name="custom-taskrunner" type="ab:customElementType"
 						minOccurs="1" maxOccurs="1" />
 				</choice>
-				<choice minOccurs="0" maxOccurs="1">
-					<element name="in-memory-storage-provider" type="ab:inMemoryStorageProviderType"
-						minOccurs="1" maxOccurs="1">
-						<annotation>
-							<documentation>
-								Select this storage provider to store staging data
-								and intermediary results in memory. This is by far the best
-								performing storage provider but it also brings in the risk of
-								running out of memory for very large jobs.  
-							</documentation>
-						</annotation>
-					</element>
-					<element name="hsqldb-storage-provider" type="ab:hsqldbStorageProviderType"
-						minOccurs="1" maxOccurs="1" />
-					<element name="h2-database-storage-provider" type="ab:h2StorageProviderType"
-						minOccurs="1" maxOccurs="1" />
-					<element name="berkeley-db-storage-provider" type="ab:berkeleyDbStorageProviderType"
-						minOccurs="1" maxOccurs="1" />
-					<element name="custom-storage-provider" type="ab:customElementType"
-						minOccurs="1" maxOccurs="1" />
-				</choice>
+				<element name="storage-provider" type="ab:storageProviderType"
+					minOccurs="0" maxOccurs="1" />
 				<element name="classpath-scanner" minOccurs="0" maxOccurs="1"
 					type="ab:classpathScannerType">
 					<annotation>
@@ -69,6 +50,55 @@
 			</sequence>
 		</complexType>
 	</element>
+
+	<complexType name="storageProviderType">
+		<choice minOccurs="1" maxOccurs="1">
+			<element name="combined" type="ab:combinedStorageProviderType"
+				minOccurs="1" maxOccurs="1">
+				<annotation>
+					<documentation>
+						Select this storage provider to use a storage
+						provider that combines different technologies based on the
+						storage
+						entity type. This is the recommended storage provider
+						for typical
+						data profiling needs as it allows to combine
+						in-memory row
+						annotations (for previewing in profiling results)
+						with database
+						backed collections (for intermediary results).
+					</documentation>
+				</annotation>
+			</element>
+			<element name="in-memory" type="ab:inMemoryStorageProviderType"
+				minOccurs="1" maxOccurs="1">
+				<annotation>
+					<documentation>
+						Select this storage provider to store staging data
+						and intermediary results in memory. This is by far the best
+						performing storage provider but it also brings in the risk of
+						running out of memory for very large jobs.  
+							</documentation>
+				</annotation>
+			</element>
+			<element name="h2-database" type="ab:h2StorageProviderType"
+				minOccurs="1" maxOccurs="1">
+				<annotation>
+					<documentation>
+						This storage provider uses the H2 database engine
+						as
+						a backing store for intermediary results.
+							</documentation>
+				</annotation>
+			</element>
+			<element name="hsqldb" type="ab:hsqldbStorageProviderType"
+				minOccurs="1" maxOccurs="1" />
+			<element name="berkeley-db" type="ab:berkeleyDbStorageProviderType"
+				minOccurs="1" maxOccurs="1" />
+			<element name="custom-storage-provider" type="ab:customElementType"
+				minOccurs="1" maxOccurs="1" />
+		</choice>
+	</complexType>
 
 	<complexType name="configurationMetadataType">
 		<sequence>
@@ -339,13 +369,21 @@
 				<annotation>
 					<documentation>
 						Sets the path for the directory to use for on-disk
-						storage. This is
-						optional as H2 will otherwise automatically assign
-						a temporary
-						directory for the purpose.
+						storage. This is optional as H2 will otherwise
+						automatically assign
+						a temporary directory for the purpose.
 				</documentation>
 				</annotation>
 			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="combinedStorageProviderType">
+		<sequence>
+			<element name="collections-storage" minOccurs="1" maxOccurs="1"
+				type="ab:storageProviderType" />
+			<element name="row-annotation-storage" minOccurs="1"
+				maxOccurs="1" type="ab:storageProviderType" />
 		</sequence>
 	</complexType>
 

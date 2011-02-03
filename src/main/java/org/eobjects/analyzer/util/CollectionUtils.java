@@ -193,7 +193,7 @@ public final class CollectionUtils {
 		Collections.sort(list);
 		return list;
 	}
-
+	
 	public static <K, V> Map<K, V> createCacheMap() {
 		return new ReferenceMap<K, V>(ReferenceMap.SOFT, ReferenceMap.SOFT, true);
 	}

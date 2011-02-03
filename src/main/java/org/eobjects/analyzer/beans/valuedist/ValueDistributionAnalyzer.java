@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -112,7 +112,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 			bottomValues = ValueCountListImpl.createBottomList(_bottomFrequentValues);
 		}
 
-		List<String> uniqueValues = new LinkedList<String>();
+		List<String> uniqueValues = new ArrayList<String>();
 		int uniqueCount = 0;
 		Set<Entry<String, Integer>> entrySet = _valueDistribution.entrySet();
 		for (Entry<String, Integer> entry : entrySet) {
@@ -141,7 +141,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 	public void setValueDistribution(Map<String, Integer> valueDistribution) {
 		_valueDistribution = valueDistribution;
 	}
-	
+
 	public void setRecordUniqueValues(boolean recordUniqueValues) {
 		_recordUniqueValues = recordUniqueValues;
 	}

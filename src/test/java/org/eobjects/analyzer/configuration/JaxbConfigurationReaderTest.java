@@ -32,6 +32,10 @@ import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
+import org.eobjects.analyzer.storage.CombinedStorageProvider;
+import org.eobjects.analyzer.storage.HsqldbStorageProvider;
+import org.eobjects.analyzer.storage.StorageProvider;
 import org.junit.Assert;
 
 import org.eobjects.metamodel.DataContext;
@@ -50,6 +54,18 @@ public class JaxbConfigurationReaderTest extends TestCase {
 				Arrays.toString(datastoreCatalog.getDatastoreNames()));
 
 		assertTrue(configuration.getTaskRunner() instanceof SingleThreadedTaskRunner);
+	}
+
+	public void testCombinedStorage() throws Exception {
+		AnalyzerBeansConfiguration configuration = reader.create(new File(
+				"src/test/resources/example-configuration-combined-storage.xml"));
+		StorageProvider storageProvider = configuration.getStorageProvider();
+		
+		assertEquals(CombinedStorageProvider.class, storageProvider.getClass());
+		
+		CombinedStorageProvider csp = (CombinedStorageProvider) storageProvider;
+		assertEquals(BerkeleyDbStorageProvider.class, csp.getCollectionsStorageProvider().getClass());
+		assertEquals(HsqldbStorageProvider.class, csp.getRowAnnotationsStorageProvider().getClass());
 	}
 
 	public void testAllDatastoreTypes() throws Exception {

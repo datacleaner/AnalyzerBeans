@@ -34,16 +34,17 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for h2StorageProviderType complex type.
+ * <p>Java class for combinedStorageProviderType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="h2StorageProviderType">
+ * &lt;complexType name="combinedStorageProviderType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="temp-directory" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="collections-storage" type="{http://eobjects.org/analyzerbeans/configuration/1.0}storageProviderType"/>
+ *         &lt;element name="row-annotation-storage" type="{http://eobjects.org/analyzerbeans/configuration/1.0}storageProviderType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -53,36 +54,63 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "h2StorageProviderType", propOrder = {
-    "tempDirectory"
+@XmlType(name = "combinedStorageProviderType", propOrder = {
+    "collectionsStorage",
+    "rowAnnotationStorage"
 })
-public class H2StorageProviderType {
+public class CombinedStorageProviderType {
 
-    @XmlElement(name = "temp-directory")
-    protected String tempDirectory;
+    @XmlElement(name = "collections-storage", required = true)
+    protected StorageProviderType collectionsStorage;
+    @XmlElement(name = "row-annotation-storage", required = true)
+    protected StorageProviderType rowAnnotationStorage;
 
     /**
-     * Gets the value of the tempDirectory property.
+     * Gets the value of the collectionsStorage property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link StorageProviderType }
      *     
      */
-    public String getTempDirectory() {
-        return tempDirectory;
+    public StorageProviderType getCollectionsStorage() {
+        return collectionsStorage;
     }
 
     /**
-     * Sets the value of the tempDirectory property.
+     * Sets the value of the collectionsStorage property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link StorageProviderType }
      *     
      */
-    public void setTempDirectory(String value) {
-        this.tempDirectory = value;
+    public void setCollectionsStorage(StorageProviderType value) {
+        this.collectionsStorage = value;
+    }
+
+    /**
+     * Gets the value of the rowAnnotationStorage property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link StorageProviderType }
+     *     
+     */
+    public StorageProviderType getRowAnnotationStorage() {
+        return rowAnnotationStorage;
+    }
+
+    /**
+     * Sets the value of the rowAnnotationStorage property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link StorageProviderType }
+     *     
+     */
+    public void setRowAnnotationStorage(StorageProviderType value) {
+        this.rowAnnotationStorage = value;
     }
 
 }

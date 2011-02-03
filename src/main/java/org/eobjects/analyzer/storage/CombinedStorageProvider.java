@@ -19,60 +19,60 @@
  */
 package org.eobjects.analyzer.storage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.Mongo;
 
 /**
- * Experimental storage provider that uses MongoDB as a backing store.
- * 
- * Currently only supports row annotation factory creation, the remaining
- * storage entities are in-memory based.
+ * A storage provider that delegates to different backing storage providers,
+ * depending on which type of storage entity to use.
  * 
  * @author Kasper Sørensen
  */
-public class MongoDbStorageProvider implements StorageProvider {
+public final class CombinedStorageProvider implements StorageProvider {
 
-	private final AtomicInteger id = new AtomicInteger(1);
+	private final StorageProvider _collectionsStorageProvider;
+	private final StorageProvider _rowAnnotationStorageProvider;
+
+	/**
+	 * 
+	 * @param collectionsStorageProvider
+	 *            the StorageProvider to use for provided Collections
+	 * @param rowAnnotationStorageProvider
+	 *            the StorageProvider to use for provided RowAnnotations and
+	 *            RowAnnotationFactories.
+	 */
+	public CombinedStorageProvider(StorageProvider collectionsStorageProvider, StorageProvider rowAnnotationStorageProvider) {
+		_collectionsStorageProvider = collectionsStorageProvider;
+		_rowAnnotationStorageProvider = rowAnnotationStorageProvider;
+	}
+	
+	public StorageProvider getCollectionsStorageProvider() {
+		return _collectionsStorageProvider;
+	}
+	
+	public StorageProvider getRowAnnotationsStorageProvider() {
+		return _rowAnnotationStorageProvider;
+	}
 
 	@Override
 	public <E> List<E> createList(Class<E> valueType) throws IllegalStateException {
-		return new ArrayList<E>();
+		return _collectionsStorageProvider.createList(valueType);
 	}
 
 	@Override
 	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
-		return new HashSet<E>();
+		return _collectionsStorageProvider.createSet(valueType);
 	}
 
 	@Override
 	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
-		return new HashMap<K, V>();
+		return _collectionsStorageProvider.createMap(keyType, valueType);
 	}
 
 	@Override
 	public RowAnnotationFactory createRowAnnotationFactory() {
-		try {
-			Mongo mongo = new Mongo();
-			DB db = mongo.getDB("analyzerbeans");
-			String name = "rowannotationfactory" + id.getAndIncrement();
-			DBCollection collection = db.createCollection(name, null);
-
-			// drop the collection in case it already exists
-			collection.drop();
-			collection = db.createCollection(name, null);
-
-			return new MongoDbRowAnnotationFactory(collection);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		return _rowAnnotationStorageProvider.createRowAnnotationFactory();
 	}
+
 }
