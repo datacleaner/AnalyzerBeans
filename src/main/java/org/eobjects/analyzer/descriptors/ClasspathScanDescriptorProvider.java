@@ -151,11 +151,13 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 					return file.isDirectory();
 				}
 			});
-			if (logger.isInfoEnabled() && subDirectories.length > 0) {
-				logger.info("Recursively scanning " + subDirectories.length + " subdirectories");
-			}
-			for (File subDir : subDirectories) {
-				scanDirectory(subDir, true);
+			if (subDirectories != null) {
+				if (logger.isInfoEnabled() && subDirectories.length > 0) {
+					logger.info("Recursively scanning " + subDirectories.length + " subdirectories");
+				}
+				for (File subDir : subDirectories) {
+					scanDirectory(subDir, true);
+				}
 			}
 		}
 	}
