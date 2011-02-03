@@ -35,7 +35,6 @@ import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableTransformerJob;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
-import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
@@ -219,11 +218,5 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 	@Override
 	public MutableInputColumn<?>[] getOutput() {
 		return getOutputColumns().toArray(new MutableInputColumn<?>[0]);
-	}
-
-	@Override
-	public Outcome[] getRequirements() {
-		// TODO
-		return null;
 	}
 }
