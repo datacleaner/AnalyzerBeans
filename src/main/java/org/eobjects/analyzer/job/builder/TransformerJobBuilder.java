@@ -41,7 +41,6 @@ import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleState;
-import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.util.StringUtils;
@@ -77,25 +76,23 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			return Collections.emptyList();
 		}
 
-		final TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(getDescriptor());
+		final Transformer<?> bean = getConfigurableBean();
 
 		// mimic the configuration of a real transformer bean instance
 		final AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(
 				new ImmutableBeanConfiguration(getConfiguredProperties()), null);
-		assignConfiguredCallback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, transformerBeanInstance.getBean(),
-				getDescriptor());
+		assignConfiguredCallback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, bean, getDescriptor());
 
 		final AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(new InMemoryStorageProvider(),
 				new InMemoryRowAnnotationFactory(), null);
-		assignProvidedCallback.onEvent(LifeCycleState.ASSIGN_PROVIDED, transformerBeanInstance.getBean(), getDescriptor());
+		assignProvidedCallback.onEvent(LifeCycleState.ASSIGN_PROVIDED, bean, getDescriptor());
 
 		final InitializeCallback initializeCallback = new InitializeCallback();
-		initializeCallback.onEvent(LifeCycleState.INITIALIZE, transformerBeanInstance.getBean(), getDescriptor());
+		initializeCallback.onEvent(LifeCycleState.INITIALIZE, bean, getDescriptor());
 
-		final OutputColumns outputColumns = transformerBeanInstance.getBean().getOutputColumns();
+		final OutputColumns outputColumns = bean.getOutputColumns();
 		if (outputColumns == null) {
-			throw new IllegalStateException("getOutputColumns() returned null on transformer: "
-					+ transformerBeanInstance.getBean());
+			throw new IllegalStateException("getOutputColumns() returned null on transformer: " + bean);
 		}
 		boolean changed = false;
 
