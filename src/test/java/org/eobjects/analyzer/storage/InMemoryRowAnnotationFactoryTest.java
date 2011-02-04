@@ -49,4 +49,28 @@ public class InMemoryRowAnnotationFactoryTest extends TestCase {
 		assertEquals(0, f.getRows(a).length);
 		assertEquals(0, f.getValueCounts(a, col1).size());
 	}
+	
+	public void testCountingAboveThreshold() throws Exception {
+		InMemoryRowAnnotationFactory f = new InMemoryRowAnnotationFactory(5);
+		RowAnnotation a = f.createAnnotation();
+		
+		f.annotate(new MockInputRow(), 1, a);
+		f.annotate(new MockInputRow(), 1, a);
+		f.annotate(new MockInputRow(), 1, a);
+		f.annotate(new MockInputRow(), 1, a);
+		
+		assertEquals(4, a.getRowCount());
+		
+		f.annotate(new MockInputRow(), 1, a);
+		
+		assertEquals(5, a.getRowCount());
+		
+		f.annotate(new MockInputRow(), 1, a);
+		
+		assertEquals(6, a.getRowCount());
+		
+		f.annotate(new MockInputRow(), 1, a);
+		
+		assertEquals(7, a.getRowCount());
+	}
 }

@@ -68,7 +68,7 @@ public interface RowAnnotationFactory {
 	public void reset(RowAnnotation annotation);
 
 	/**
-	 * Gets all the rows with a given annotation.
+	 * Gets all the available rows with a given annotation.
 	 * 
 	 * @param annotation
 	 * @return
