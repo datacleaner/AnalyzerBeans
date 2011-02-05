@@ -19,8 +19,6 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -35,6 +33,7 @@ import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.ValueDistributionResult;
+import org.eobjects.analyzer.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,16 +111,19 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 			bottomValues = ValueCountListImpl.createBottomList(_bottomFrequentValues);
 		}
 
-		List<String> uniqueValues = new ArrayList<String>();
+		final Map<String,Integer> uniqueValues = CollectionUtils.createCacheMap();
 		int uniqueCount = 0;
-		Set<Entry<String, Integer>> entrySet = _valueDistribution.entrySet();
+		final Set<Entry<String, Integer>> entrySet = _valueDistribution.entrySet();
+		int entryCount = 0;
 		for (Entry<String, Integer> entry : entrySet) {
+			if (entryCount % 100000 == 0 && entryCount != 0) {
+				logger.info("Processing unique value entry no. {}", entryCount);
+			}
 			if (entry.getValue() == 1) {
 				if (_recordUniqueValues) {
-					uniqueValues.add(entry.getKey());
-				} else {
-					uniqueCount++;
+					uniqueValues.put(entry.getKey(), Integer.valueOf(1));
 				}
+				uniqueCount++;
 			} else {
 				ValueCount vc = new ValueCount(entry.getKey(), entry.getValue());
 				topValues.register(vc);
@@ -129,10 +131,11 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 					bottomValues.register(vc);
 				}
 			}
+			entryCount++;
 		}
 
 		if (_recordUniqueValues) {
-			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueValues);
+			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueValues.keySet(), uniqueCount);
 		} else {
 			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueCount);
 		}

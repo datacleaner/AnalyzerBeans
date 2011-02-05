@@ -19,7 +19,9 @@
  */
 package org.eobjects.analyzer.test.full.scenarios;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
@@ -46,7 +48,6 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.MetaModelTestCase;
@@ -123,6 +124,7 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 
 		for (AnalyzerResult analyzerResult : results) {
 			ValueDistributionResult result = (ValueDistributionResult) analyzerResult;
+			Collection<String> uniqueValues = new TreeSet<String>(result.getUniqueValues());
 			if ("first word".equals(result.getColumnName())) {
 				assertEquals("ValueCountList[[[Sales->19], [VP->2]]]", result.getTopValues().toString());
 				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
@@ -139,14 +141,14 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 				assertEquals(20, result.getNullCount());
 
 				assertEquals(3, result.getUniqueCount());
-				assertEquals("[(NA), (JAPAN,, (EMEA)]", result.getUniqueValues().toString());
+				assertEquals("[(EMEA), (JAPAN,, (NA)]", uniqueValues.toString());
 			} else if ("fourth words".equals(result.getColumnName())) {
 				assertEquals("ValueCountList[[]]", result.getTopValues().toString());
 				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(22, result.getNullCount());
 
 				assertEquals(1, result.getUniqueCount());
-				assertEquals("[APAC)]", result.getUniqueValues().toString());
+				assertEquals("[APAC)]", uniqueValues.toString());
 			} else {
 				fail("Unexpected columnName: " + result.getColumnName());
 			}

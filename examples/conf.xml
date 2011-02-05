@@ -32,9 +32,7 @@
 	<storage-provider>
 		<combined>
 			<collections-storage>
-				<h2-database>
-					<temp-directory>target/temp</temp-directory>
-				</h2-database>
+				<berkeley-db />
 			</collections-storage>
 			<row-annotation-storage>
 				<in-memory />

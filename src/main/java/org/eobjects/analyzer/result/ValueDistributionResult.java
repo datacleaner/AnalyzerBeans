@@ -38,7 +38,7 @@ public class ValueDistributionResult implements AnalyzerResult {
 	private final int _uniqueValueCount;
 	private final String _columnName;
 
-	private ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
+	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
 			int nullCount, Collection<String> uniqueValues, int uniqueValueCount) {
 		_columnName = column.getName();
 		_topValues = topValues;
@@ -46,11 +46,6 @@ public class ValueDistributionResult implements AnalyzerResult {
 		_nullCount = nullCount;
 		_uniqueValues = uniqueValues;
 		_uniqueValueCount = uniqueValueCount;
-	}
-
-	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, Collection<String> uniqueValues) {
-		this(column, topValues, bottomValues, nullCount, uniqueValues, -1);
 	}
 
 	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
