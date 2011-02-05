@@ -111,7 +111,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 			bottomValues = ValueCountListImpl.createBottomList(_bottomFrequentValues);
 		}
 
-		final Map<String,Integer> uniqueValues = CollectionUtils.createCacheMap();
+		final Map<String, Integer> uniqueValues = CollectionUtils.createCacheMap();
 		int uniqueCount = 0;
 		final Set<Entry<String, Integer>> entrySet = _valueDistribution.entrySet();
 		int entryCount = 0;
@@ -135,7 +135,8 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 		}
 
 		if (_recordUniqueValues) {
-			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueValues.keySet(), uniqueCount);
+			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueValues.keySet(),
+					uniqueCount);
 		} else {
 			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueCount);
 		}
