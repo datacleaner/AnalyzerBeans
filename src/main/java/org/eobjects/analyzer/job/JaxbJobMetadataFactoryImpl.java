@@ -28,8 +28,20 @@ import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 public class JaxbJobMetadataFactoryImpl implements JaxbJobMetadataFactory {
 
 	private final DatatypeFactory _datatypeFactory;
+	private final String _author;
+	private final String _jobName;
+	private final String _jobDescription;
+	private final String _jobVersion;
 
 	public JaxbJobMetadataFactoryImpl() {
+		this(null, null, null, null);
+	}
+
+	public JaxbJobMetadataFactoryImpl(String author, String jobName, String jobDescription, String jobVersion) {
+		_author = author;
+		_jobName = jobName;
+		_jobDescription = jobDescription;
+		_jobVersion = jobVersion;
 		try {
 			_datatypeFactory = DatatypeFactory.newInstance();
 		} catch (Exception e) {
@@ -41,6 +53,12 @@ public class JaxbJobMetadataFactoryImpl implements JaxbJobMetadataFactory {
 	public JobMetadataType create(AnalysisJob analysisJob) {
 		JobMetadataType jobMetadata = new JobMetadataType();
 		jobMetadata.setUpdatedDate(_datatypeFactory.newXMLGregorianCalendar(new GregorianCalendar()));
+
+		jobMetadata.setAuthor(_author);
+		jobMetadata.setJobName(_jobName);
+		jobMetadata.setJobDescription(_jobDescription);
+		jobMetadata.setJobVersion(_jobVersion);
+
 		return jobMetadata;
 	}
 
