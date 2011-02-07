@@ -24,6 +24,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -70,7 +71,7 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 	public JdbcDatastore(String name, String datasourceJndiUrl) {
 		this(name, null, null, null, null, datasourceJndiUrl);
 	}
-
+	
 	/**
 	 * Alternative constructor usable only for in-memory (ie. non-persistent)
 	 * datastores, because the datastore will not be able to create new
@@ -82,6 +83,16 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 	public JdbcDatastore(String name, DataContext dc) {
 		this(name, null, null, null, null, null);
 		setDataContextProvider(new SingleDataContextProvider(dc, this));
+	}
+	
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_driverClass);
+		identifiers.add(_jdbcUrl);
+		identifiers.add(_datasourceJndiUrl);
+		identifiers.add(_username);
+		identifiers.add(_password);
 	}
 
 	public String getJdbcUrl() {
