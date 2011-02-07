@@ -85,9 +85,19 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 		return _rows;
 	}
 
+	/**
+	 * Creates a table model containing only distinct values from a particular
+	 * input column, and the counts of those distinct values. Note that the
+	 * counts may only be the count from the data that is available in the
+	 * annotation row storage, which may just be a preview/subset of the actual
+	 * data.
+	 * 
+	 * @param inputColumnOfInterest
+	 * @return
+	 */
 	public TableModel toDistinctValuesTableModel(InputColumn<?> inputColumnOfInterest) {
 		Map<Object, Integer> valueCounts = _annotationFactory.getValueCounts(_annotation, inputColumnOfInterest);
-		DefaultTableModel tableModel = new DefaultTableModel(new String[] { inputColumnOfInterest.getName(), "COUNT(*)" },
+		DefaultTableModel tableModel = new DefaultTableModel(new String[] { inputColumnOfInterest.getName(), "Count in dataset" },
 				valueCounts.size());
 
 		// sort the set

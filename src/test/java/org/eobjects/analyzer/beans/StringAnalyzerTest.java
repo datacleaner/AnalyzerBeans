@@ -148,7 +148,7 @@ public class StringAnalyzerTest extends TestCase {
 		assertEquals(2, tableModel.getColumnCount());
 		assertEquals(2, tableModel.getColumnCount());
 		assertEquals("greetings", tableModel.getColumnName(0));
-		assertEquals("COUNT(*)", tableModel.getColumnName(1));
+		assertEquals("Count in dataset", tableModel.getColumnName(1));
 		assertEquals("SØREN SEN", tableModel.getValueAt(0, 0));
 		assertEquals(4, tableModel.getValueAt(0, 1));
 		assertEquals(" HËJSÄN", tableModel.getValueAt(1, 0));
