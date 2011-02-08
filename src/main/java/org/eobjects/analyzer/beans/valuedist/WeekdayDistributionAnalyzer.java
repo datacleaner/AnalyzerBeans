@@ -43,14 +43,17 @@ import org.eobjects.analyzer.result.CrosstabResult;
 @Concurrent(true)
 public class WeekdayDistributionAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
-	private Map<InputColumn<Date>, Map<Integer, AtomicInteger>> distributionMap;
+	private final Map<InputColumn<Date>, Map<Integer, AtomicInteger>> distributionMap;
 
 	@Configured
 	InputColumn<Date>[] dateColumns;
 
+	public WeekdayDistributionAnalyzer() {
+		distributionMap = new HashMap<InputColumn<Date>, Map<Integer, AtomicInteger>>();
+	}
+
 	@Initialize
 	public void init() {
-		distributionMap = new HashMap<InputColumn<Date>, Map<Integer, AtomicInteger>>();
 		for (InputColumn<Date> col : dateColumns) {
 			Map<Integer, AtomicInteger> countMap = new HashMap<Integer, AtomicInteger>(7);
 			for (int i = Calendar.SUNDAY; i <= Calendar.SATURDAY; i++) {
