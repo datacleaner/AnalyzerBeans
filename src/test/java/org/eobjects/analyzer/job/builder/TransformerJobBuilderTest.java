@@ -27,8 +27,10 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
+import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.beans.transform.WhitespaceTrimmerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.data.ConstantInputColumn;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
@@ -84,6 +86,29 @@ public class TransformerJobBuilderTest extends TestCase {
 
 		tjb.removeInputColumn(ajb.getSourceColumns().get(1));
 		assertFalse(tjb.isConfigured());
+	}
+	
+	public void testClearInputColumnsArray() throws Exception {
+		TransformerJobBuilder<ConcatenatorTransformer> tjb = ajb.addTransformer(ConcatenatorTransformer.class);
+		tjb.addInputColumn(ajb.getSourceColumns().get(1));
+		tjb.addInputColumn(new ConstantInputColumn("foo"));
+		
+		assertEquals(2, tjb.getInputColumns().size());
+		
+		tjb.clearInputColumns();
+		
+		assertEquals(0, tjb.getInputColumns().size());
+	}
+	
+	public void testClearInputColumnsSingle() throws Exception {
+		TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb.addTransformer(EmailStandardizerTransformer.class);
+		tjb.addInputColumn(ajb.getSourceColumns().get(1));
+		
+		assertEquals(1, tjb.getInputColumns().size());
+		
+		tjb.clearInputColumns();
+		
+		assertEquals(0, tjb.getInputColumns().size());
 	}
 
 	public void testGetAvailableInputColumns() throws Exception {

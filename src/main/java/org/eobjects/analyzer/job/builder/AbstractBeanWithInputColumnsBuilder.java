@@ -47,6 +47,20 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 	}
 
 	/**
+	 * Removes/clears all input columns
+	 */
+	public void clearInputColumns() {
+		Set<ConfiguredPropertyDescriptor> configuredProperties = getDescriptor().getConfiguredPropertiesForInput();
+		for (ConfiguredPropertyDescriptor configuredProperty : configuredProperties) {
+			if (configuredProperty.isArray()) {
+				setConfiguredProperty(configuredProperty, new InputColumn[0]);
+			} else {
+				setConfiguredProperty(configuredProperty, null);
+			}
+		}
+	}
+
+	/**
 	 * 
 	 * @param inputColumn
 	 * @throws IllegalArgumentException
