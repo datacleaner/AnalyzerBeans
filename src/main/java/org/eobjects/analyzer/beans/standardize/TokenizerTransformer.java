@@ -39,10 +39,15 @@ import org.eobjects.analyzer.data.InputRow;
 public class TokenizerTransformer implements Transformer<String> {
 
 	@Configured("Number of tokens")
+	@Description("Defines the max amount of tokens to expect")
 	Integer numTokens;
 
 	@Configured
 	InputColumn<String> column;
+
+	@Configured
+	@Description("Characters to tokenize by")
+	char[] delimiters = new char[] { ' ', '\t', '\n', '\r', '\f' };
 
 	public TokenizerTransformer() {
 	}
@@ -67,7 +72,7 @@ public class TokenizerTransformer implements Transformer<String> {
 		String[] result = new String[numTokens];
 
 		int i = 0;
-		StringTokenizer st = new StringTokenizer(value);
+		StringTokenizer st = new StringTokenizer(value, new String(delimiters));
 		while (i < result.length && st.hasMoreTokens()) {
 			result[i] = st.nextToken();
 			i++;
