@@ -28,12 +28,37 @@ import junit.framework.TestCase;
 
 public class StringPatternMatchFilterTest extends TestCase {
 
-	public void testFilter() throws Exception {
+	public void testFilterSinglePattern() throws Exception {
 		StringPattern stringPattern = new RegexStringPattern("very simple email pattern", ".+@.+", true);
 		MockInputColumn<String> column = new MockInputColumn<String>("my col", String.class);
-		StringPatternMatchFilter filter = new StringPatternMatchFilter(column, stringPattern);
+		StringPatternMatchFilter filter = new StringPatternMatchFilter(column, new StringPattern[] { stringPattern },
+				MatchFilterCriteria.ANY);
 
 		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "kasper@eobjects.org")));
 		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "kasper@")));
+
+		// it shouldn't matter if ANY or ALL criteria is being used
+		filter = new StringPatternMatchFilter(column, new StringPattern[] { stringPattern }, MatchFilterCriteria.ALL);
+
+		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "kasper@eobjects.org")));
+		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "kasper@")));
+	}
+
+	public void testFilterMultiplePatterns() throws Exception {
+		StringPattern stringPattern1 = new RegexStringPattern("very simple email pattern", ".+@.+", true);
+		StringPattern stringPattern2 = new RegexStringPattern("something with 'kas'", ".*kas.*", true);
+		MockInputColumn<String> column = new MockInputColumn<String>("my col", String.class);
+		StringPatternMatchFilter filter = new StringPatternMatchFilter(column, new StringPattern[] { stringPattern1,
+				stringPattern2 }, MatchFilterCriteria.ANY);
+
+		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "kasper@eobjects.org")));
+		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "kasper@")));
+		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "ankit@")));
+
+		filter = new StringPatternMatchFilter(column, new StringPattern[] { stringPattern1, stringPattern2 },
+				MatchFilterCriteria.ALL);
+		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "kasper@eobjects.org")));
+		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "kasper@")));
+		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "ankit@")));
 	}
 }

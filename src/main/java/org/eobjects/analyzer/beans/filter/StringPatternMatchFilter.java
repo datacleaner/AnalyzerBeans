@@ -28,19 +28,25 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.reference.StringPattern;
 
 @FilterBean("String pattern match")
-@Description("Filters values that matches and does not match a string pattern")
+@Description("Filters values that matches and does not match string patterns")
 public class StringPatternMatchFilter implements Filter<ValidationCategory> {
 
 	@Configured
 	InputColumn<String> column;
 
 	@Configured
-	StringPattern stringPattern;
+	StringPattern[] stringPatterns;
 
-	public StringPatternMatchFilter(InputColumn<String> column, StringPattern stringPattern) {
+	@Configured
+	@Description("Require values to match all or just any of the string patterns?")
+	MatchFilterCriteria matchCriteria = MatchFilterCriteria.ANY;
+
+	public StringPatternMatchFilter(InputColumn<String> column, StringPattern[] stringPatterns,
+			MatchFilterCriteria matchCriteria) {
 		this();
 		this.column = column;
-		this.stringPattern = stringPattern;
+		this.stringPatterns = stringPatterns;
+		this.matchCriteria = matchCriteria;
 	}
 
 	public StringPatternMatchFilter() {
@@ -50,8 +56,17 @@ public class StringPatternMatchFilter implements Filter<ValidationCategory> {
 	public ValidationCategory categorize(InputRow inputRow) {
 		String value = inputRow.getValue(column);
 		if (value != null) {
-			if (stringPattern.matches(value)) {
-				return ValidationCategory.VALID;
+			int matches = 0;
+			for (StringPattern stringPattern : stringPatterns) {
+				if (stringPattern.matches(value)) {
+					matches++;
+					if (matchCriteria == MatchFilterCriteria.ANY) {
+						return ValidationCategory.VALID;
+					}
+				}
+			}
+			if (matchCriteria == MatchFilterCriteria.ALL) {
+				return ValidationCategory.valueOf(matches == stringPatterns.length);
 			}
 		}
 		return ValidationCategory.INVALID;
