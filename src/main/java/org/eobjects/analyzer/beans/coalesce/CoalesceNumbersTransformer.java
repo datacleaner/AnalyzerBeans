@@ -44,7 +44,7 @@ public class CoalesceNumbersTransformer implements Transformer<Number> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns("Coalsced number");
+		return new OutputColumns("Coalesced number");
 	}
 
 	@Override
