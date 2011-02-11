@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eobjects.analyzerbeans</groupId>
 	<artifactId>AnalyzerBeans</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.1-SNAPSHOT</version>
 	<name>AnalyzerBeans</name>
 	<url>http://analyzerbeans.eobjects.org</url>
 	<description>
@@ -14,7 +14,7 @@
 	</description>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
-		<metamodel.version>1.5-SNAPSHOT</metamodel.version>
+		<metamodel.version>1.5</metamodel.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<developers>
