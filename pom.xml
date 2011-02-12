@@ -273,7 +273,6 @@
 			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-xml</artifactId>
 			<version>${metamodel.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
