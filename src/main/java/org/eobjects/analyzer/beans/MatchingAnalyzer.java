@@ -45,10 +45,10 @@ public class MatchingAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerRe
 	@Configured(order = 1)
 	InputColumn<?>[] columns;
 
-	@Configured(order = 2)
+	@Configured(order = 2, required = false)
 	Dictionary[] dictionaries;
 
-	@Configured(order = 3)
+	@Configured(order = 3, required = false)
 	StringPattern[] stringPatterns;
 
 	private BooleanAnalyzer _booleanAnalyzer;
