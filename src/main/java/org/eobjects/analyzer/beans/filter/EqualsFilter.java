@@ -33,24 +33,25 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @FilterBean("Equals")
-@Description("A filter that checks for values equal (=) to a given parameter")
+@Description("A filter that excludes values that are not equal (=) to specific set of valid values")
 public class EqualsFilter implements Filter<ValidationCategory> {
 
 	@Configured
 	InputColumn<?> column;
 
 	@Configured
-	String value;
+	@Description("Accepted values for inclusion")
+	String[] values;
 
-	private Object operand;
+	private Object[] operands;
 	private boolean number = false;
 
 	public EqualsFilter() {
 	}
 
-	public EqualsFilter(String value, InputColumn<?> column) {
+	public EqualsFilter(String[] values, InputColumn<?> column) {
 		this();
-		this.value = value;
+		this.values = values;
 		this.column = column;
 		init();
 	}
@@ -58,16 +59,22 @@ public class EqualsFilter implements Filter<ValidationCategory> {
 	@Initialize
 	public void init() {
 		DataTypeFamily dataTypeFamily = column.getDataTypeFamily();
-		if (dataTypeFamily == DataTypeFamily.BOOLEAN) {
-			operand = ConvertToBooleanTransformer.transformValue(value, ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS,
-					ConvertToBooleanTransformer.DEFAULT_FALSE_TOKENS);
-		} else if (dataTypeFamily == DataTypeFamily.DATE) {
-			operand = ConvertToDateTransformer.transformValue(value);
-		} else if (dataTypeFamily == DataTypeFamily.NUMBER) {
-			operand = ConvertToNumberTransformer.transformValue(value);
-			number = true;
-		} else {
-			operand = ConvertToStringTransformer.transformValue(value);
+		operands = new Object[values.length];
+		for (int i = 0; i < values.length; i++) {
+			final String value = values[i];
+			final Object operand;
+			if (dataTypeFamily == DataTypeFamily.BOOLEAN) {
+				operand = ConvertToBooleanTransformer.transformValue(value, ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS,
+						ConvertToBooleanTransformer.DEFAULT_FALSE_TOKENS);
+			} else if (dataTypeFamily == DataTypeFamily.DATE) {
+				operand = ConvertToDateTransformer.transformValue(value);
+			} else if (dataTypeFamily == DataTypeFamily.NUMBER) {
+				operand = ConvertToNumberTransformer.transformValue(value);
+				number = true;
+			} else {
+				operand = ConvertToStringTransformer.transformValue(value);
+			}
+			operands[i] = operand;
 		}
 	}
 
@@ -79,17 +86,25 @@ public class EqualsFilter implements Filter<ValidationCategory> {
 
 	public ValidationCategory filter(Object v) {
 		if (v == null) {
-			return ValidationCategory.valueOf(value == null);
+			for (Object obj : operands) {
+				if (obj == null) {
+					return ValidationCategory.VALID;
+				}
+			}
+			return ValidationCategory.INVALID;
 		}
 
-		if (number) {
-			Number n1 = (Number) operand;
-			Number n2 = (Number) v;
-			boolean equals = equals(n1, n2);
-			return ValidationCategory.valueOf(equals);
-		}
-		if (operand.equals(v)) {
-			return ValidationCategory.VALID;
+		for (Object operand : operands) {
+			if (number) {
+				Number n1 = (Number) operand;
+				Number n2 = (Number) v;
+				if (equals(n1, n2)) {
+					return ValidationCategory.VALID;
+				}
+			}
+			if (operand.equals(v)) {
+				return ValidationCategory.VALID;
+			}
 		}
 
 		return ValidationCategory.INVALID;

@@ -25,18 +25,37 @@ import junit.framework.TestCase;
 
 public class EqualsFilterTest extends TestCase {
 
-	public void testString() throws Exception {
-		EqualsFilter f = new EqualsFilter("hello", new MockInputColumn<String>("col", String.class));
+	public void testSingleString() throws Exception {
+		EqualsFilter f = new EqualsFilter(new String[] { "hello" }, new MockInputColumn<String>("col", String.class));
 		assertEquals(ValidationCategory.VALID, f.filter("hello"));
 		assertEquals(ValidationCategory.INVALID, f.filter("Hello"));
 		assertEquals(ValidationCategory.INVALID, f.filter(""));
 		assertEquals(ValidationCategory.INVALID, f.filter(null));
 	}
 
-	public void testNumber() throws Exception {
-		EqualsFilter f = new EqualsFilter("1234", new MockInputColumn<Number>("col", Number.class));
+	public void testSingleNumber() throws Exception {
+		EqualsFilter f = new EqualsFilter(new String[] { "1234" }, new MockInputColumn<Number>("col", Number.class));
 		assertEquals(ValidationCategory.VALID, f.filter(1234));
 		assertEquals(ValidationCategory.VALID, f.filter(1234.0));
+		assertEquals(ValidationCategory.INVALID, f.filter(2));
+		assertEquals(ValidationCategory.INVALID, f.filter(-2));
+	}
+	
+	public void testMultipleStrings() throws Exception {
+		EqualsFilter f = new EqualsFilter(new String[] { "hello", "Hello", "World" }, new MockInputColumn<String>("col", String.class));
+		assertEquals(ValidationCategory.VALID, f.filter("hello"));
+		assertEquals(ValidationCategory.VALID, f.filter("Hello"));
+		assertEquals(ValidationCategory.INVALID, f.filter(""));
+		assertEquals(ValidationCategory.INVALID, f.filter("world"));
+		assertEquals(ValidationCategory.INVALID, f.filter(null));
+	}
+
+	public void testMultipleNumbers() throws Exception {
+		EqualsFilter f = new EqualsFilter(new String[] { "1234", "1235" }, new MockInputColumn<Number>("col", Number.class));
+		assertEquals(ValidationCategory.VALID, f.filter(1234));
+		assertEquals(ValidationCategory.VALID, f.filter(1234.0));
+		assertEquals(ValidationCategory.VALID, f.filter(1235));
+		assertEquals(ValidationCategory.VALID, f.filter(1235.0));
 		assertEquals(ValidationCategory.INVALID, f.filter(2));
 		assertEquals(ValidationCategory.INVALID, f.filter(-2));
 	}
