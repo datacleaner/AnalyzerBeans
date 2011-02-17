@@ -385,7 +385,8 @@ public final class AnalysisJobBuilder implements Closeable {
 	 * @return true if the analysis job builder is correctly configured
 	 * @throws IllegalStateException
 	 */
-	public boolean isConfigured(final boolean throwException) throws IllegalStateException {
+	public boolean isConfigured(final boolean throwException) throws IllegalStateException,
+			UnconfiguredConfiguredPropertyException {
 		if (_dataContextProvider == null) {
 			if (throwException) {
 				throw new IllegalStateException("No DataContextProvider set");

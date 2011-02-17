@@ -81,33 +81,40 @@ public class TransformerJobBuilderTest extends TestCase {
 		tjb.addInputColumn(ajb.getSourceColumns().get(1));
 		assertFalse(tjb.isConfigured());
 
+		try {
+			tjb.isConfigured(true);
+			fail("Exception occurred");
+		} catch (UnconfiguredConfiguredPropertyException e) {
+			assertEquals("Property 'Number of tokens' is not properly configured", e.getMessage());
+		}
+
 		tjb.setConfiguredProperty("Number of tokens", 10);
 		assertTrue(tjb.isConfigured());
 
 		tjb.removeInputColumn(ajb.getSourceColumns().get(1));
 		assertFalse(tjb.isConfigured());
 	}
-	
+
 	public void testClearInputColumnsArray() throws Exception {
 		TransformerJobBuilder<ConcatenatorTransformer> tjb = ajb.addTransformer(ConcatenatorTransformer.class);
 		tjb.addInputColumn(ajb.getSourceColumns().get(1));
 		tjb.addInputColumn(new ConstantInputColumn("foo"));
-		
+
 		assertEquals(2, tjb.getInputColumns().size());
-		
+
 		tjb.clearInputColumns();
-		
+
 		assertEquals(0, tjb.getInputColumns().size());
 	}
-	
+
 	public void testClearInputColumnsSingle() throws Exception {
 		TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb.addTransformer(EmailStandardizerTransformer.class);
 		tjb.addInputColumn(ajb.getSourceColumns().get(1));
-		
+
 		assertEquals(1, tjb.getInputColumns().size());
-		
+
 		tjb.clearInputColumns();
-		
+
 		assertEquals(0, tjb.getInputColumns().size());
 	}
 

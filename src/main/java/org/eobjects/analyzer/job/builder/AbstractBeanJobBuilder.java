@@ -77,11 +77,12 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 		return _configurableBean;
 	}
 
-	public boolean isConfigured(boolean throwException) throws IllegalStateException {
+	public final boolean isConfigured(boolean throwException) throws IllegalStateException,
+			UnconfiguredConfiguredPropertyException {
 		for (ConfiguredPropertyDescriptor configuredProperty : _descriptor.getConfiguredProperties()) {
 			if (!isConfigured(configuredProperty, throwException)) {
 				if (throwException) {
-					throw new IllegalStateException("Property is not properly configured: " + configuredProperty);
+					throw new UnconfiguredConfiguredPropertyException(this, configuredProperty);
 				} else {
 					return false;
 				}
@@ -114,7 +115,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 			}
 			if (value == null) {
 				if (throwException) {
-					throw new IllegalStateException("Configured property is not set: " + configuredProperty);
+					throw new UnconfiguredConfiguredPropertyException(this, configuredProperty);
 				} else {
 					logger.debug("Configured property is not set: " + configuredProperty);
 					return false;
