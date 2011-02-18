@@ -21,7 +21,6 @@ package org.eobjects.analyzer.storage;
 
 import java.io.File;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +28,7 @@ import java.util.UUID;
 
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptorImpl;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +51,6 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
-import org.eobjects.metamodel.util.FileHelper;
-
 /**
  * Berkeley DB based implementation of the StorageProvider interface.
  * 
@@ -60,11 +58,11 @@ import org.eobjects.metamodel.util.FileHelper;
  */
 public final class BerkeleyDbStorageProvider implements StorageProvider {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
-	private Environment environment;
-	private Boolean deleteOnExit;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private Environment _environment;
 	private File _targetDir;
-	
+	private boolean _deleteOnExit = false;
+
 	public Object createProvidedCollection(ProvidedPropertyDescriptorImpl providedDescriptor) {
 		Type typeArgument = providedDescriptor.getTypeArgument(0);
 		Class<?> clazz1 = (Class<?>) typeArgument;
@@ -82,74 +80,53 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		}
 	}
 
-	public void cleanUp(Object obj) {
-		if (obj instanceof Collection<?>) {
-			((Collection<?>) obj).clear();
-		} else if (obj instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) obj;
-			map.clear();
-		} else {
-			throw new IllegalStateException("Cannot clean up object: " + obj);
+	private Environment getEnvironment() throws DatabaseException {
+		if (_environment == null) {
+			EnvironmentConfig config = new EnvironmentConfig();
+			config.setAllowCreate(true);
+			File targetDir = getTargetDir();
+			_environment = new Environment(targetDir, config);
 		}
+		return _environment;
+	}
 
-		try {
-			getEnvironment().compress();
-			getEnvironment().cleanLog();
-			getEnvironment().sync();
-		} catch (DatabaseException e) {
-			log.error("Exception occurred while cleaning up object: " + obj, e);
-		}
-
-		if (deleteOnExit) {
+	private File getTargetDir() {
+		if (_targetDir == null) {
+			File tempDir = FileHelper.getTempDir();
+			while (_targetDir == null) {
+				try {
+					File candidateDir = new File(tempDir.getAbsolutePath() + File.separatorChar + "analyzerBeans_"
+							+ UUID.randomUUID().toString());
+					if (!candidateDir.exists() && candidateDir.mkdir()) {
+						_targetDir = candidateDir;
+						_deleteOnExit = true;
+					}
+				} catch (Exception e) {
+					logger.error("Exception thrown while trying to create targetDir inside tempDir", e);
+					_targetDir = tempDir;
+				}
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Using target directory for persistent collections (deleteOnExit=" + _deleteOnExit + "): "
+						+ _targetDir.getAbsolutePath());
+			}
 			initDeleteOnExit(_targetDir);
 		}
+		return _targetDir;
 	}
 
 	private void initDeleteOnExit(File dir) {
-		dir.deleteOnExit();
 		File[] files = dir.listFiles();
+		dir.deleteOnExit();
 		for (File file : files) {
 			if (file.isDirectory()) {
 				initDeleteOnExit(file);
 			} else if (file.isFile()) {
 				file.deleteOnExit();
 			} else {
-				log.warn("Unable to set the deleteOnExit flag on file: " + file);
+				logger.warn("Unable to set the deleteOnExit flag on file: " + file);
 			}
 		}
-	}
-
-	private Environment getEnvironment() throws DatabaseException {
-		if (environment == null) {
-			EnvironmentConfig config = new EnvironmentConfig();
-			config.setAllowCreate(true);
-			File targetDir = createTargetDir();
-			environment = new Environment(targetDir, config);
-		}
-		return environment;
-	}
-
-	private File createTargetDir() {
-		File tempDir = FileHelper.getTempDir();
-		deleteOnExit = false;
-		while (_targetDir == null) {
-			try {
-				File candidateDir = new File(tempDir.getAbsolutePath() + File.separatorChar + "analyzerBeans_"
-						+ UUID.randomUUID().toString());
-				if (!candidateDir.exists() && candidateDir.mkdir()) {
-					_targetDir = candidateDir;
-					deleteOnExit = true;
-				}
-			} catch (Exception e) {
-				log.error("Exception thrown while trying to create targetDir inside tempDir", e);
-				_targetDir = tempDir;
-			}
-		}
-		if (log.isInfoEnabled()) {
-			log.info("Using target directory for persistent collections (deleteOnExit=" + deleteOnExit + "): "
-					+ _targetDir.getAbsolutePath());
-		}
-		return _targetDir;
 	}
 
 	private Database createDatabase() throws DatabaseException {
@@ -167,14 +144,15 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		// Berkeley StoredLists are non-functional!
 		// return new StoredList<E>(createDatabase(), valueBinding, true);
 
-		return new BerkeleyDbList<E>(this, map);
+		return new BerkeleyDbList<E>(map);
 	}
 
 	@Override
 	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
 		try {
-			StoredKeySet set = new StoredKeySet(createDatabase(), createBinding(valueType), true);
-			return new BerkeleyDbSet<E>(this, set);
+			Database database = createDatabase();
+			StoredKeySet set = new StoredKeySet(database, createBinding(valueType), true);
+			return new BerkeleyDbSet<E>(getEnvironment(), database, set);
 		} catch (DatabaseException e) {
 			throw new IllegalStateException(e);
 		}
@@ -183,10 +161,11 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	@Override
 	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
 		try {
-			EntryBinding keyBinding = createBinding(keyType);
-			EntryBinding valueBinding = createBinding(valueType);
-			StoredMap map = new StoredMap(createDatabase(), keyBinding, valueBinding, true);
-			return new BerkeleyDbMap<K, V>(this, map);
+			final EntryBinding keyBinding = createBinding(keyType);
+			final EntryBinding valueBinding = createBinding(valueType);
+			final Database database = createDatabase();
+			final StoredMap map = new StoredMap(database, keyBinding, valueBinding, true);
+			return new BerkeleyDbMap<K, V>(getEnvironment(), database, map);
 		} catch (DatabaseException e) {
 			throw new IllegalStateException(e);
 		}
@@ -225,7 +204,7 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		}
 		throw new UnsupportedOperationException("Cannot provide collection of type " + type);
 	}
-	
+
 	@Override
 	public RowAnnotationFactory createRowAnnotationFactory() {
 		// TODO: Create a persistent RowAnnotationFactory

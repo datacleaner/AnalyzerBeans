@@ -24,16 +24,20 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.sleepycat.collections.StoredKeySet;
+import com.sleepycat.je.Database;
+import com.sleepycat.je.Environment;
 
 final class BerkeleyDbSet<E> implements Set<E> {
 
 	private final Set<E> _wrappedSet;
-	private final BerkeleyDbStorageProvider _storageProvider;
+	private final Environment _environment;
+	private final Database _database;
 
 	@SuppressWarnings("unchecked")
-	public BerkeleyDbSet(BerkeleyDbStorageProvider storageProvider, StoredKeySet set) {
+	public BerkeleyDbSet(Environment environment, Database database, StoredKeySet set) {
+		_environment = environment;
+		_database = database;
 		_wrappedSet = set;
-		_storageProvider = storageProvider;
 	}
 
 	public Set<E> getWrappedSet() {
@@ -43,7 +47,9 @@ final class BerkeleyDbSet<E> implements Set<E> {
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
-		_storageProvider.cleanUp(_wrappedSet);
+		String name = _database.getDatabaseName();
+		_database.close();
+		_environment.removeDatabase(null, name);
 	}
 
 	public int size() {

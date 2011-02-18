@@ -24,25 +24,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A map wrapped in the List interface. This is used because the berkeley db
- * does not support persistent lists, but only maps. Instead a persistent map is
+ * A map wrapped in the List interface. This is used because the berkeley db.
+ * Does not support persistent lists, but only maps. Instead a persistent map is
  * wrapped by this List-implementation.
  */
 final class BerkeleyDbList<E> extends AbstractList<E> implements List<E> {
 
 	private final Map<Integer, E> _wrappedMap;
-	private final BerkeleyDbStorageProvider _storageProvider;
 
 	public Map<Integer, E> getWrappedMap() {
 		return _wrappedMap;
 	}
 
-	public BerkeleyDbList(BerkeleyDbStorageProvider storageProvider, Map<Integer, E> map) {
+	public BerkeleyDbList(Map<Integer, E> map) {
 		super();
-		_storageProvider = storageProvider;
 		_wrappedMap = map;
 	}
-
+	
 	@Override
 	public E get(int index) {
 		if (!_wrappedMap.containsKey(index)) {
@@ -93,11 +91,5 @@ final class BerkeleyDbList<E> extends AbstractList<E> implements List<E> {
 		}
 		_wrappedMap.remove(_wrappedMap.size() - 1);
 		return element;
-	}
-	
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		_storageProvider.cleanUp(this);
 	}
 }

@@ -19,18 +19,16 @@
  */
 package org.eobjects.analyzer.storage;
 
-import java.util.HashMap;
-
-import org.eobjects.analyzer.storage.BerkeleyDbList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
-public class ProvidedListTest extends TestCase {
+public class BerkeleyDbListTest extends TestCase {
 
 	private BerkeleyDbStorageProvider sp = new BerkeleyDbStorageProvider();
 
 	public void testAdd() throws Exception {
-		BerkeleyDbList<String> list = new BerkeleyDbList<String>(sp, new HashMap<Integer, String>());
+		BerkeleyDbList<String> list = (BerkeleyDbList<String>) sp.createList(String.class);
 
 		list.add("foo1");
 		list.add("foo2");
@@ -46,10 +44,11 @@ public class ProvidedListTest extends TestCase {
 		list.add(null);
 
 		assertEquals("[foo1, foo2, foo5, foo3, foo4, null]", list.toString());
+		
 	}
 
 	public void testSet() throws Exception {
-		BerkeleyDbList<String> list = new BerkeleyDbList<String>(sp, new HashMap<Integer, String>());
+		List<String> list = sp.createList(String.class);
 
 		list.add("foo1");
 		list.add("foo2");
@@ -62,7 +61,7 @@ public class ProvidedListTest extends TestCase {
 	}
 
 	public void testRemove() throws Exception {
-		BerkeleyDbList<String> list = new BerkeleyDbList<String>(sp, new HashMap<Integer, String>());
+		List<String> list = sp.createList(String.class);
 
 		list.add("foo1");
 		list.add("foo2");

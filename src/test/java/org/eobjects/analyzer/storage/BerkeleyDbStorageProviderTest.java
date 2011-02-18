@@ -20,22 +20,28 @@
 package org.eobjects.analyzer.storage;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
 
 import junit.framework.TestCase;
 
 public class BerkeleyDbStorageProviderTest extends TestCase {
 
-	private BerkeleyDbStorageProvider sp = new BerkeleyDbStorageProvider();
+	private BerkeleyDbStorageProvider sp;
+	
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		sp = new BerkeleyDbStorageProvider();
+	}
+	
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+	}
 
-	public void testCreateMap() throws Exception {
-		Map<String, Long> map = sp.createMap(String.class, Long.class);
+	public void testCreateMap() throws Throwable {
+		BerkeleyDbMap<String, Long> map = (BerkeleyDbMap<String, Long>) sp.createMap(String.class, Long.class);
 		assertNotNull(map);
-		
-		sp.cleanUp(map);
+		map.finalize();
 	}
 
 	public void testCreateList() throws Exception {
@@ -46,12 +52,10 @@ public class BerkeleyDbStorageProviderTest extends TestCase {
 		assertEquals(2, list.size());
 		list.add("hi");
 		assertEquals(3, list.size());
-		
-		sp.cleanUp(list);
 	}
 	
-	public void testCreateSet() throws Exception {
-		Set<String> set = sp.createSet(String.class);
+	public void testCreateSet() throws Throwable {
+		BerkeleyDbSet<String> set = (BerkeleyDbSet<String>) sp.createSet(String.class);
 		set.add("hello");
 		set.add("hello");
 		assertEquals(1, set.size());
@@ -65,6 +69,6 @@ public class BerkeleyDbStorageProviderTest extends TestCase {
 		set.remove("world");
 		assertEquals(1, set.size());
 		
-		sp.cleanUp(set);
+		set.finalize();
 	}
 }

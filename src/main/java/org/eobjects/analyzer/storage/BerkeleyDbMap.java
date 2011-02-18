@@ -24,22 +24,28 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sleepycat.collections.StoredMap;
+import com.sleepycat.je.Database;
+import com.sleepycat.je.Environment;
 
 final class BerkeleyDbMap<K, V> implements Map<K, V> {
 
 	private final Map<K, V> _wrappedMap;
-	private final BerkeleyDbStorageProvider _storageProvider;
+	private final Database _database;
+	private final Environment _environment;
 
 	@SuppressWarnings("unchecked")
-	public BerkeleyDbMap(BerkeleyDbStorageProvider storageProvider, StoredMap map) {
-		_storageProvider = storageProvider;
+	public BerkeleyDbMap(Environment environment, Database database, StoredMap map) {
+		_environment = environment;
+		_database = database;
 		_wrappedMap = map;
 	}
 
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
-		_storageProvider.cleanUp(_wrappedMap);
+		String name = _database.getDatabaseName();
+		_database.close();
+		_environment.removeDatabase(null, name);
 	}
 
 	public int size() {
@@ -59,7 +65,13 @@ final class BerkeleyDbMap<K, V> implements Map<K, V> {
 	}
 
 	public V get(Object key) {
-		return _wrappedMap.get(key);
+		try {
+			return _wrappedMap.get(key);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// there's a bug in berkeley that sometime causes this exception
+			// when the value is null!
+			return null;
+		}
 	}
 
 	public V put(K key, V value) {
