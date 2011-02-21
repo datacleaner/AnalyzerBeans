@@ -120,6 +120,9 @@ public final class CollectionUtils {
 	private static Object arrayRemoveInternal(Object array, Object elementToRemove) {
 		boolean found = false;
 		final int oldLength = Array.getLength(array);
+		if (oldLength == 0) {
+			return array;
+		}
 		final int newLength = oldLength - 1;
 		final Object result = Array.newInstance(array.getClass().getComponentType(), newLength);
 		int nextIndex = 0;
