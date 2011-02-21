@@ -25,6 +25,7 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.StringUtils;
 
 @FilterBean("Not null")
 @Description("Filter rows that contain null values.")
@@ -54,7 +55,7 @@ public class NotNullFilter implements Filter<ValidationCategory> {
 				return ValidationCategory.INVALID;
 			}
 
-			if (considerEmptyStringAsNull && "".equals(value)) {
+			if (considerEmptyStringAsNull && StringUtils.isNullOrEmpty(value.toString())) {
 				return ValidationCategory.INVALID;
 			}
 		}
