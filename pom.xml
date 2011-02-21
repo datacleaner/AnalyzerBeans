@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eobjects.analyzerbeans</groupId>
 	<artifactId>AnalyzerBeans</artifactId>
-	<version>0.2-SNAPSHOT</version>
+	<version>0.2</version>
 	<name>AnalyzerBeans</name>
 	<url>http://analyzerbeans.eobjects.org</url>
 	<description>
@@ -49,13 +49,13 @@
 	</parent>
 	<scm>
 		<connection>
-			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
+			scm:svn:http://eobjects.org/svn/AnalyzerBeans/tags/AnalyzerBeans-0.2
 		</connection>
 		<developerConnection>
-			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
+			scm:svn:http://eobjects.org/svn/AnalyzerBeans/tags/AnalyzerBeans-0.2
 		</developerConnection>
 		<url>
-			http://eobjects.org/svn/AnalyzerBeans/trunk/ 
+			http://eobjects.org/svn/AnalyzerBeans/tags/AnalyzerBeans-0.2 
 		</url>
 	</scm>
 	<distributionManagement>
