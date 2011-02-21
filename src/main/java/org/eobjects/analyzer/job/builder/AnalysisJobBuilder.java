@@ -393,8 +393,16 @@ public final class AnalysisJobBuilder implements Closeable {
 			}
 			return false;
 		}
+		
+		boolean rowProcessingAnalyzers = false;
+		for (AnalyzerJobBuilder<?> analyzerJobBuilder : _analyzerJobBuilders) {
+			if (analyzerJobBuilder.getDescriptor().isRowProcessingAnalyzer()) {
+				rowProcessingAnalyzers = true;
+				break;
+			}
+		}
 
-		if (_sourceColumns.isEmpty()) {
+		if (rowProcessingAnalyzers && _sourceColumns.isEmpty()) {
 			if (throwException) {
 				throw new IllegalStateException("No source columns in job");
 			}
