@@ -389,7 +389,14 @@ public final class AnalysisJobBuilder implements Closeable {
 			UnconfiguredConfiguredPropertyException {
 		if (_dataContextProvider == null) {
 			if (throwException) {
-				throw new IllegalStateException("No DataContextProvider set");
+				throw new IllegalStateException("No Datastore or DataContextProvider set");
+			}
+			return false;
+		}
+
+		if (_sourceColumns.isEmpty()) {
+			if (throwException) {
+				throw new IllegalStateException("No source columns in job");
 			}
 			return false;
 		}
