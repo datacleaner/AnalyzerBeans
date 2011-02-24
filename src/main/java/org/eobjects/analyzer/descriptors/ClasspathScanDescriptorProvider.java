@@ -199,8 +199,12 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 			Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) visitor.getBeanClass();
 			RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(rendererClass);
 			if (descriptor == null) {
-				descriptor = new AnnotationBasedRendererBeanDescriptor(rendererClass);
-				_rendererBeanDescriptors.put(rendererClass, descriptor);
+				try {
+					descriptor = new AnnotationBasedRendererBeanDescriptor(rendererClass);
+					_rendererBeanDescriptors.put(rendererClass, descriptor);
+				} catch (Exception e) {
+					logger.error("Unexpected error occurred while creating descriptor for: " + rendererClass, e);
+				}
 			}
 		}
 	}

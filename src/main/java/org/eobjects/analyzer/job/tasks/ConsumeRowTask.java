@@ -19,11 +19,13 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.OutcomeSink;
 import org.eobjects.analyzer.job.runner.OutcomeSinkImpl;
@@ -42,9 +44,11 @@ public final class ConsumeRowTask implements Task {
 	private final AnalysisJob _job;
 	private final SelectItem _countAllItem;
 	private final AtomicInteger _rowCounter;
+	private final Collection<? extends Outcome> _availableOutcomes;
 
 	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, Table table, Row row, SelectItem countAllItem,
-			AtomicInteger rowCounter, AnalysisJob job, AnalysisListener analysisListener) {
+			AtomicInteger rowCounter, AnalysisJob job, AnalysisListener analysisListener,
+			Collection<? extends Outcome> availableOutcomes) {
 		_consumers = consumers;
 		_table = table;
 		_row = row;
@@ -52,11 +56,12 @@ public final class ConsumeRowTask implements Task {
 		_rowCounter = rowCounter;
 		_job = job;
 		_analysisListener = analysisListener;
+		_availableOutcomes = availableOutcomes;
 	}
 
 	@Override
 	public void execute() {
-		OutcomeSink outcomeSink = new OutcomeSinkImpl();
+		OutcomeSink outcomeSink = new OutcomeSinkImpl(_availableOutcomes);
 
 		int distinctCount = 1;
 		if (_countAllItem != null) {

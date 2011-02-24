@@ -96,7 +96,7 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 
 	@Override
 	public Type getTypeArgument(int i) throws IndexOutOfBoundsException {
-		return ReflectionUtils.getTypeParameter(_genericType, i);
+		return ReflectionUtils.getTypeParameter(_field, i);
 	}
 
 	@Override

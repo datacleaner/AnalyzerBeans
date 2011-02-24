@@ -19,8 +19,6 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -84,17 +82,11 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<C> getCategoryEnum() {
-		Type[] interfaces = getComponentClass().getGenericInterfaces();
-		for (Type type : interfaces) {
-			if (type instanceof ParameterizedType) {
-				ParameterizedType pType = (ParameterizedType) type;
-				if (pType.getRawType() == Filter.class) {
-					Class<?> typeParameter = ReflectionUtils.getTypeParameter(pType, 0);
-					return (Class<C>) typeParameter;
-				}
-			}
+		Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), Filter.class, 0);
+		if (typeParameter == null) {
+			throw new IllegalStateException("Could not determine Filter's category enum type");
 		}
-		throw new IllegalStateException("Could not determine Filter's category enum type");
+		return (Class<C>) typeParameter;
 	}
 
 	@Override

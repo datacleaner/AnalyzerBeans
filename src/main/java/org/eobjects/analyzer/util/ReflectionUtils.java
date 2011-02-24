@@ -34,10 +34,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
-
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+
+import com.googlecode.gentyref.GenericTypeReflector;
 
 public class ReflectionUtils {
 
@@ -245,12 +246,15 @@ public class ReflectionUtils {
 		return 0;
 	}
 
-	public static Class<?> getTypeParameter(Field field, int parameterIndex) {
-		Type genericType = field.getGenericType();
-		return getTypeParameter(genericType, parameterIndex);
+	public static Class<?> getTypeParameter(Class<?> clazz, Class<?> genericInterface, int parameterIndex) {
+		Type baseType = GenericTypeReflector.getExactSuperType(clazz, genericInterface);
+		ParameterizedType pBaseType = (ParameterizedType) baseType;
+		Type typeParameterForBaseInterface = pBaseType.getActualTypeArguments()[parameterIndex];
+		return getSafeClassToUse(typeParameterForBaseInterface);
 	}
 
-	public static Class<?> getTypeParameter(Type genericType, int parameterIndex) {
+	public static Class<?> getTypeParameter(Field field, int parameterIndex) {
+		Type genericType = field.getGenericType();
 		if (genericType instanceof GenericArrayType) {
 			GenericArrayType gaType = (GenericArrayType) genericType;
 			genericType = gaType.getGenericComponentType();
@@ -296,6 +300,7 @@ public class ReflectionUtils {
 			ParameterizedType pType = (ParameterizedType) someType;
 			return (Class<?>) pType.getRawType();
 		}
+
 		throw new UnsupportedOperationException("Parameter type not supported: " + someType);
 	}
 

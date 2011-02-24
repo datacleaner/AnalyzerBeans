@@ -19,9 +19,6 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.DataTypeFamily;
@@ -53,7 +50,7 @@ public final class AnnotationBasedTransformerBeanDescriptor<T extends Transforme
 			displayName = ReflectionUtils.explodeCamelCase(transformerClass.getSimpleName(), false);
 		}
 		_displayName = displayName;
-		
+
 		visitClass();
 	}
 
@@ -64,16 +61,22 @@ public final class AnnotationBasedTransformerBeanDescriptor<T extends Transforme
 
 	@Override
 	public DataTypeFamily getOutputDataTypeFamily() {
-		Type[] interfaces = getComponentClass().getGenericInterfaces();
-		for (Type type : interfaces) {
-			if (type instanceof ParameterizedType) {
-				ParameterizedType pType = (ParameterizedType) type;
-				if (pType.getRawType() == Transformer.class) {
-					Class<?> typeParameter = ReflectionUtils.getTypeParameter(pType, 0);
-					return DataTypeFamily.valueOf(typeParameter);
-				}
-			}
+		Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), Transformer.class, 0);
+		if (typeParameter == null) {
+			throw new IllegalStateException("Could not determine Transformer's output data type");
 		}
-		return DataTypeFamily.UNDEFINED;
+		return DataTypeFamily.valueOf(typeParameter);
+
+//		Type[] interfaces = getComponentClass().getGenericInterfaces();
+//		for (Type type : interfaces) {
+//			if (type instanceof ParameterizedType) {
+//				ParameterizedType pType = (ParameterizedType) type;
+//				if (pType.getRawType() == Transformer.class) {
+//					Class<?> typeParameter = ReflectionUtils.getTypeParameter(pType, 0);
+//					return DataTypeFamily.valueOf(typeParameter);
+//				}
+//			}
+//		}
+//		return DataTypeFamily.UNDEFINED;
 	}
 }

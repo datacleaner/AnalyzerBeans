@@ -21,9 +21,8 @@ package org.eobjects.analyzer.job.runner;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -31,9 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.connection.OdbDatastore;
-import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -41,8 +37,6 @@ import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.FilterOutcome;
-import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
@@ -94,16 +88,9 @@ public final class RowProcessingPublisher {
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
 	private final ReferenceDataActivationManager _referenceDataActivationManager;
-	private final boolean _allowGroupByOptimization;
 
 	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table, TaskRunner taskRunner,
 			AnalysisListener analysisListener, ReferenceDataActivationManager referenceDataActivationManager) {
-		this(job, storageProvider, table, taskRunner, analysisListener, referenceDataActivationManager, false);
-	}
-
-	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table, TaskRunner taskRunner,
-			AnalysisListener analysisListener, ReferenceDataActivationManager referenceDataActivationManager,
-			boolean allowGroupByOptimization) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
@@ -125,7 +112,6 @@ public final class RowProcessingPublisher {
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
 		_referenceDataActivationManager = referenceDataActivationManager;
-		_allowGroupByOptimization = allowGroupByOptimization;
 	}
 
 	public void addPhysicalColumns(Column... columns) {
@@ -163,33 +149,44 @@ public final class RowProcessingPublisher {
 
 		_analysisListener.rowProcessingBegin(_job, _table, expectedRows);
 
-		final Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
-		final Query q = dataContext.query().from(_table).select(columnArray).toQuery();
-
+		final Query finalQuery;
+		final List<RowProcessingConsumer> finalConsumers;
+		final Collection<? extends Outcome> availableOutcomes;
 		SelectItem countAllItem = null;
-		if (useGroupByOptimization()) {
-			logger.info("Using GROUP BY optimization");
-			q.groupBy(columnArray);
-			countAllItem = SelectItem.getCountAllItem();
-			q.select(countAllItem);
-		}
+		{
+			final Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
+			final Query baseQuery = dataContext.query().from(_table).select(columnArray).toQuery();
 
-		logger.debug("Employing query for row processing: {}", q);
+			logger.debug("Base query for row processing: {}", baseQuery);
 
-		final Iterable<RowProcessingConsumer> consumers = createProcessOrderedConsumerList(_consumers);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Row processing order ({} consumers):", _consumers.size());
-			int i = 1;
-			for (RowProcessingConsumer rowProcessingConsumer : consumers) {
-				logger.debug(" {}) {}", i, rowProcessingConsumer);
-				i++;
+			final RowProcessingConsumerSorter sorter = new RowProcessingConsumerSorter(_consumers);
+			final List<RowProcessingConsumer> sortedConsumers = sorter.createProcessOrderedConsumerList();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Row processing order ({} consumers):", sortedConsumers.size());
+				int i = 1;
+				for (RowProcessingConsumer rowProcessingConsumer : sortedConsumers) {
+					logger.debug(" {}) {}", i, rowProcessingConsumer);
+					i++;
+				}
+			}
+
+			final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(sortedConsumers, baseQuery);
+			if (optimizer.isOptimizable()) {
+				finalQuery = optimizer.getOptimizedQuery();
+				finalConsumers = optimizer.getOptimizedConsumers();
+				availableOutcomes = optimizer.getOptimizedAvailableOutcomes();
+				logger.info("Base query was optimizable to: {}, (maxrows={})", finalQuery, finalQuery.getMaxRows());
+			} else {
+				finalQuery = baseQuery;
+				finalConsumers = sortedConsumers;
+				availableOutcomes = Collections.emptyList();
 			}
 		}
 
 		// TODO: Needs to delegate errors downstream
 		final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(_job, _analysisListener);
 		final AtomicInteger rowNumber = new AtomicInteger(0);
-		final DataSet dataSet = dataContext.executeQuery(q);
+		final DataSet dataSet = dataContext.executeQuery(finalQuery);
 
 		// represents the distinct count of rows as well as the number of tasks
 		// to execute
@@ -200,8 +197,8 @@ public final class RowProcessingPublisher {
 				break;
 			}
 			Row metaModelRow = dataSet.getRow();
-			ConsumeRowTask task = new ConsumeRowTask(consumers, _table, metaModelRow, countAllItem, rowNumber, _job,
-					_analysisListener);
+			ConsumeRowTask task = new ConsumeRowTask(finalConsumers, _table, metaModelRow, countAllItem, rowNumber, _job,
+					_analysisListener, availableOutcomes);
 			_taskRunner.run(task, taskListener);
 			numTasks++;
 		}
@@ -214,102 +211,6 @@ public final class RowProcessingPublisher {
 		if (!taskListener.isErrornous()) {
 			_analysisListener.rowProcessingSuccess(_job, _table);
 		}
-	}
-
-	private boolean useGroupByOptimization() {
-		if (_allowGroupByOptimization) {
-			if (_physicalColumns.size() > 3) {
-				logger.info("Skipping GROUP BY optimization because of the high column amount");
-				return false;
-			}
-
-			final Datastore datastore = _job.getDatastore();
-			if (datastore == null) {
-				logger.info("Skipping GROUP BY optimization because no datastore is attached to the DataContextProvider");
-				return false;
-			}
-
-			if (datastore instanceof JdbcDatastore || datastore instanceof OdbDatastore) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	protected static List<RowProcessingConsumer> createProcessOrderedConsumerList(
-			Collection<? extends RowProcessingConsumer> consumers) {
-		List<RowProcessingConsumer> result = new LinkedList<RowProcessingConsumer>();
-
-		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(consumers);
-		Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
-		Set<Outcome> availableOutcomes = new HashSet<Outcome>();
-
-		while (!remainingConsumers.isEmpty()) {
-			boolean changed = false;
-			for (Iterator<RowProcessingConsumer> it = remainingConsumers.iterator(); it.hasNext();) {
-				RowProcessingConsumer consumer = it.next();
-
-				boolean accepted = true;
-
-				// make sure that any dependent filter outcome is evaluated
-				// before this component
-				accepted = consumer.satisfiedForFlowOrdering(availableOutcomes);
-
-				// make sure that all the required colums are present
-				if (accepted) {
-					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
-					if (requiredInput != null) {
-						for (InputColumn<?> inputColumn : requiredInput) {
-							if (!inputColumn.isPhysicalColumn()) {
-								if (!(inputColumn instanceof ExpressionBasedInputColumn)) {
-									if (!availableVirtualColumns.contains(inputColumn)) {
-										accepted = false;
-										break;
-									}
-								}
-							}
-						}
-					}
-				}
-
-				if (accepted) {
-					result.add(consumer);
-					it.remove();
-					changed = true;
-
-					ComponentJob componentJob = consumer.getComponentJob();
-
-					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
-					for (InputColumn<?> inputColumn : requiredInput) {
-						if (inputColumn instanceof ExpressionBasedInputColumn) {
-							availableVirtualColumns.add(inputColumn);
-						}
-					}
-
-					if (componentJob instanceof InputColumnSourceJob) {
-						InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();
-						for (InputColumn<?> col : output) {
-							availableVirtualColumns.add(col);
-						}
-					}
-
-					if (componentJob instanceof OutcomeSourceJob) {
-						Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
-						for (Outcome outcome : outcomes) {
-							availableOutcomes.add(outcome);
-						}
-					}
-				}
-			}
-
-			if (!changed) {
-				// should never happen, but if a bug enters the
-				// algorithm this exception will quickly expose it
-				throw new IllegalStateException("Could not detect next consumer in processing order");
-			}
-		}
-
-		return result;
 	}
 
 	public void addRowProcessingAnalyzerBean(AnalyzerBeanInstance analyzerBeanInstance, AnalyzerJob analyzerJob,
@@ -332,11 +233,11 @@ public final class RowProcessingPublisher {
 
 	public boolean containsOutcome(Outcome prerequisiteOutcome) {
 		for (RowProcessingConsumer consumer : _consumers) {
-			if (consumer instanceof FilterConsumer) {
-				FilterJob fj = (FilterJob) consumer.getComponentJob();
-				FilterOutcome[] outcomes = fj.getOutcomes();
-				for (FilterOutcome filterOutcome : outcomes) {
-					if (filterOutcome.satisfiesRequirement(prerequisiteOutcome)) {
+			ComponentJob componentJob = consumer.getComponentJob();
+			if (componentJob instanceof OutcomeSourceJob) {
+				Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
+				for (Outcome outcome : outcomes) {
+					if (outcome.satisfiesRequirement(prerequisiteOutcome)) {
 						return true;
 					}
 				}

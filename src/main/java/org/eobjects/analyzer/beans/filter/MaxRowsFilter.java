@@ -23,13 +23,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.metamodel.query.Query;
 
 @FilterBean("Max rows")
 @Description("Sets a maximum of rows to process.")
-public class MaxRowsFilter implements Filter<ValidationCategory> {
+public class MaxRowsFilter implements QueryOptimizedFilter<ValidationCategory> {
 
 	@Configured
 	int maxRows = 1000;
@@ -38,12 +39,12 @@ public class MaxRowsFilter implements Filter<ValidationCategory> {
 
 	public MaxRowsFilter() {
 	}
-	
+
 	public MaxRowsFilter(int maxRows) {
 		this();
 		this.maxRows = maxRows;
 	}
-	
+
 	@Override
 	public ValidationCategory categorize(InputRow inputRow) {
 		int count = counter.incrementAndGet();
@@ -51,6 +52,22 @@ public class MaxRowsFilter implements Filter<ValidationCategory> {
 			return ValidationCategory.INVALID;
 		}
 		return ValidationCategory.VALID;
+	}
+
+	@Override
+	public boolean isOptimizable(ValidationCategory category) {
+		// can only optimize the valid records
+		return category == ValidationCategory.VALID;
+	}
+
+	@Override
+	public Query optimizeQuery(Query q, ValidationCategory category) {
+		if (category == ValidationCategory.VALID) {
+			q.setMaxRows(maxRows);
+		} else {
+			throw new IllegalStateException("Can only optimize the VALID max rows category");
+		}
+		return q;
 	}
 
 }

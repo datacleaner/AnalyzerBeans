@@ -21,6 +21,7 @@ package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -92,5 +93,17 @@ final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements Row
 	@Override
 	public String toString() {
 		return "FilterConsumer[" + _filterBeanInstance + "]";
+	}
+
+	public boolean isQueryOptimizable(FilterOutcome filterOutcome) {
+		Filter<?> filter = _filterBeanInstance.getBean();
+		if (filter instanceof QueryOptimizedFilter) {
+			@SuppressWarnings("rawtypes")
+			QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) filter;
+			@SuppressWarnings("unchecked")
+			boolean optimizable = queryOptimizedFilter.isOptimizable(filterOutcome.getCategory());
+			return optimizable;
+		}
+		return false;
 	}
 }

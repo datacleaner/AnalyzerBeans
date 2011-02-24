@@ -20,13 +20,24 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eobjects.analyzer.job.Outcome;
 
 public final class OutcomeSinkImpl implements OutcomeSink {
 
-	private final List<Outcome> outcomes = new ArrayList<Outcome>();
+	private final List<Outcome> outcomes;
+
+	@SuppressWarnings("unchecked")
+	public OutcomeSinkImpl() {
+		this(Collections.EMPTY_LIST);
+	}
+
+	public OutcomeSinkImpl(Collection<? extends Outcome> availableOutcomes) {
+		outcomes = new ArrayList<Outcome>(availableOutcomes);
+	}
 
 	@Override
 	public void add(Outcome filterOutcome) {

@@ -22,6 +22,8 @@ package org.eobjects.analyzer.beans.filter;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
+import org.eobjects.analyzer.descriptors.AnnotationBasedFilterBeanDescriptor;
+import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 
 import junit.framework.TestCase;
 
@@ -48,5 +50,11 @@ public class NotNullFilterTest extends TestCase {
 
 		assertEquals(ValidationCategory.INVALID,
 				filter.categorize(new MockInputRow().put(col1, null).put(col2, null).put(col3, null)));
+	}
+	
+	public void testDescriptor() throws Exception {
+		FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = AnnotationBasedFilterBeanDescriptor.create(NotNullFilter.class);
+		Class<ValidationCategory> categoryEnum = desc.getCategoryEnum();
+		assertEquals(ValidationCategory.class, categoryEnum);
 	}
 }

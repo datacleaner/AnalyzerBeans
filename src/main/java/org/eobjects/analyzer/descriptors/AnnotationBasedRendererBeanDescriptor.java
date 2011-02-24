@@ -21,8 +21,6 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.RendererBean;
@@ -66,35 +64,18 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 			throw new DescriptorException("Rendering format (" + _renderingFormat + ") is not a non-abstract class");
 		}
 
-		Type[] genericInterfaces = _renderingFormat.getGenericInterfaces();
-		for (Type type : genericInterfaces) {
-			if (type instanceof ParameterizedType) {
-				ParameterizedType pType = (ParameterizedType) type;
-				if (pType.getRawType() == RenderingFormat.class) {
-					_formatOutputType = ReflectionUtils.getTypeParameter(pType, 0);
-					logger.debug("Found format output type: {}", _formatOutputType);
-					break;
-				}
-			}
-		}
+		_formatOutputType = ReflectionUtils.getTypeParameter(_renderingFormat, RenderingFormat.class, 0);
+		logger.debug("Found format output type: {}", _formatOutputType);
 
 		if (_formatOutputType == null) {
 			throw new DescriptorException("Could not determine output type of rendering format: " + _renderingFormat);
 		}
 
-		genericInterfaces = _componentClass.getGenericInterfaces();
-		for (Type type : genericInterfaces) {
-			if (type instanceof ParameterizedType) {
-				ParameterizedType pType = (ParameterizedType) type;
-				if (pType.getRawType() == Renderer.class) {
-					_rendererInputType = (Class<? extends AnalyzerResult>) ReflectionUtils.getTypeParameter(pType, 0);
-					logger.debug("Found renderer input type: {}", _rendererInputType);
-					_rendererOutputType = ReflectionUtils.getTypeParameter(pType, 1);
-					logger.debug("Found renderer output type: {}", _rendererOutputType);
-					break;
-				}
-			}
-		}
+		_rendererInputType = (Class<? extends AnalyzerResult>) ReflectionUtils.getTypeParameter(_componentClass,
+				Renderer.class, 0);
+		logger.debug("Found renderer input type: {}", _rendererInputType);
+		_rendererOutputType = ReflectionUtils.getTypeParameter(_componentClass, Renderer.class, 1);
+		logger.debug("Found renderer output type: {}", _rendererOutputType);
 
 		if (_rendererOutputType == null) {
 			throw new DescriptorException("Could not determine output type of renderer: " + _componentClass);
@@ -165,16 +146,16 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 		return false;
 	}
 
-	public boolean isOutputApplicableFor(Class<?> inquiredClass) {
-		if (!ReflectionUtils.is(inquiredClass, _formatOutputType)) {
-			logger.debug("{} is not applicable to the format output type: {}", inquiredClass, _formatOutputType);
+	public boolean isOutputApplicableFor(Class<?> requiredClass) {
+		if (!ReflectionUtils.is(requiredClass, _formatOutputType)) {
+			logger.debug("{} is not applicable to the format output type: {}", requiredClass, _formatOutputType);
 			return false;
 		}
 
-		boolean result = ReflectionUtils.is(_rendererOutputType, inquiredClass);
+		boolean result = ReflectionUtils.is(_rendererOutputType, requiredClass);
 
 		if (!result) {
-			logger.debug("{} is not applicable to the renderer output type: {}", inquiredClass, _rendererOutputType);
+			logger.debug("{} is not applicable to the renderer output type: {}", requiredClass, _rendererOutputType);
 		}
 
 		return result;
