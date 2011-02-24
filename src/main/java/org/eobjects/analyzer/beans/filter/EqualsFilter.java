@@ -19,11 +19,14 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
@@ -31,10 +34,15 @@ import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.metamodel.query.FilterItem;
+import org.eobjects.metamodel.query.OperatorType;
+import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.query.SelectItem;
+import org.eobjects.metamodel.schema.Column;
 
 @FilterBean("Equals")
 @Description("A filter that excludes values that are not equal (=) to specific set of valid values")
-public class EqualsFilter implements Filter<ValidationCategory> {
+public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
 
 	@Configured
 	InputColumn<?> column;
@@ -117,5 +125,28 @@ public class EqualsFilter implements Filter<ValidationCategory> {
 			return n1.longValue() == n2.longValue();
 		}
 		return n1.doubleValue() == n2.doubleValue();
+	}
+
+	@Override
+	public boolean isOptimizable(ValidationCategory category) {
+		return true;
+	}
+
+	@Override
+	public Query optimizeQuery(Query q, ValidationCategory category) {
+		Column physicalColumn = column.getPhysicalColumn();
+		if (category == ValidationCategory.VALID) {
+			List<FilterItem> filterItems = new ArrayList<FilterItem>();
+			SelectItem selectItem = new SelectItem(physicalColumn);
+			for (Object operand : operands) {
+				filterItems.add(new FilterItem(selectItem, OperatorType.EQUALS_TO, operand));
+			}
+			q.where(new FilterItem(filterItems.toArray(new FilterItem[filterItems.size()])));
+		} else {
+			for (Object operand : operands) {
+				q.where(column.getPhysicalColumn(), OperatorType.DIFFERENT_FROM, operand);
+			}
+		}
+		return q;
 	}
 }
