@@ -50,7 +50,7 @@ public @interface FileProperty {
 	 * Defines whether or not the property is used to open an existing file or
 	 * to specify a file to save.
 	 * 
-	 * @return
+	 * @return the access mode of this file property
 	 */
 	public FileAccessMode accessMode() default FileAccessMode.OPEN;
 
@@ -59,7 +59,7 @@ public @interface FileProperty {
 	 * be automatically prefixed with a dot and are case insensitive. Examples:
 	 * "csv", "xls", "txt" etc.
 	 * 
-	 * @return
+	 * @return the expected file extension of this file property
 	 */
 	public String[] extension() default {};
 }

@@ -21,6 +21,8 @@ package org.eobjects.analyzer.data;
 
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Transformer;
+
 /**
  * Represents a row of data where each value pertain to a column.
  * 

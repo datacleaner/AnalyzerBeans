@@ -39,12 +39,11 @@ import org.joda.time.Years;
  * <img src="doc-files/DateToAgeTransformer.jpg" alt=""/>
  * 
  * <p>
- * The transformer has been more thouroughly explained at kasper's source, see
- * link below.
+ * The transformer has been more thouroughly explained at kasper's source, see:
+ * <a href=
+ * "http://kasper.eobjects.org/2010/09/developing-value-transformer-using.html"
+ * >Developing a value transformer</a>.
  * </p>
- * 
- * @see http
- *      ://kasper.eobjects.org/2010/09/developing-value-transformer-using.html
  * 
  * @author Kasper Sørensen
  */

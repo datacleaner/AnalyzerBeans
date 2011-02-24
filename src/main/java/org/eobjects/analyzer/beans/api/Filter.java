@@ -29,6 +29,10 @@ import org.eobjects.analyzer.data.InputRow;
  * category can then be used to set up a requirement for succeeding row
  * processing.
  * 
+ * A sub-interface of Filter exists, {@link QueryOptimizedFilter}, which allows
+ * filter functionality to be pushed down to the query in certain circumstances
+ * where it is desirable to do so.
+ * 
  * @author Kasper Sørensen
  * 
  * @param <C>
