@@ -277,6 +277,10 @@ public final class AnalysisJobBuilder implements Closeable {
 
 	public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterBeanDescriptor<F, C> descriptor) {
 		FilterJobBuilder<F, C> fjb = new FilterJobBuilder<F, C>(this, descriptor);
+		return addFilter(fjb);
+	}
+	
+	public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterJobBuilder<F, C> fjb) {
 		_filterJobBuilders.add(fjb);
 
 		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);

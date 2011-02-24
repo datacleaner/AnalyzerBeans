@@ -44,6 +44,14 @@ public class MaxRowsFilter implements QueryOptimizedFilter<ValidationCategory> {
 		this();
 		this.maxRows = maxRows;
 	}
+	
+	public void setMaxRows(int maxRows) {
+		this.maxRows = maxRows;
+	}
+	
+	public int getMaxRows() {
+		return maxRows;
+	}
 
 	@Override
 	public ValidationCategory categorize(InputRow inputRow) {
