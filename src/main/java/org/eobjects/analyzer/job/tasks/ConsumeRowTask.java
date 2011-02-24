@@ -30,9 +30,7 @@ import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.OutcomeSink;
 import org.eobjects.analyzer.job.runner.OutcomeSinkImpl;
 import org.eobjects.analyzer.job.runner.RowProcessingConsumer;
-
 import org.eobjects.metamodel.data.Row;
-import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Table;
 
 public final class ConsumeRowTask implements Task {
@@ -42,17 +40,15 @@ public final class ConsumeRowTask implements Task {
 	private final Row _row;
 	private final AnalysisListener _analysisListener;
 	private final AnalysisJob _job;
-	private final SelectItem _countAllItem;
 	private final AtomicInteger _rowCounter;
 	private final Collection<? extends Outcome> _availableOutcomes;
 
-	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, Table table, Row row, SelectItem countAllItem,
+	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, Table table, Row row,
 			AtomicInteger rowCounter, AnalysisJob job, AnalysisListener analysisListener,
 			Collection<? extends Outcome> availableOutcomes) {
 		_consumers = consumers;
 		_table = table;
 		_row = row;
-		_countAllItem = countAllItem;
 		_rowCounter = rowCounter;
 		_job = job;
 		_analysisListener = analysisListener;
@@ -63,10 +59,7 @@ public final class ConsumeRowTask implements Task {
 	public void execute() {
 		OutcomeSink outcomeSink = new OutcomeSinkImpl(_availableOutcomes);
 
-		int distinctCount = 1;
-		if (_countAllItem != null) {
-			distinctCount = ((Number) _row.getValue(_countAllItem)).intValue();
-		}
+		final int distinctCount = 1;
 
 		int rowNumber = _rowCounter.addAndGet(distinctCount);
 		InputRow inputRow = new MetaModelInputRow(rowNumber, _row);

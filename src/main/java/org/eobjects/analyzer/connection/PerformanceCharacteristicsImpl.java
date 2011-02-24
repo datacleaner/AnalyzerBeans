@@ -19,40 +19,22 @@
  */
 package org.eobjects.analyzer.connection;
 
-import java.io.File;
+/**
+ * Simple implementation of the performance characteristics interface.
+ * 
+ * @author Kasper Sørensen
+ */
+final class PerformanceCharacteristicsImpl implements PerformanceCharacteristics {
 
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
+	private final boolean _queryOptimizationPreferred;
 
-public final class ExcelDatastore extends UsageAwareDatastore {
-
-	private static final long serialVersionUID = 1L;
-
-	private final String _name;
-	private final String _filename;
-
-	public ExcelDatastore(String name, String filename) {
-		_name = name;
-		_filename = filename;
+	public PerformanceCharacteristicsImpl(boolean queryOptimizationPreferred) {
+		_queryOptimizationPreferred = queryOptimizationPreferred;
 	}
 
 	@Override
-	public String getName() {
-		return _name;
+	public boolean isQueryOptimizationPreferred() {
+		return _queryOptimizationPreferred;
 	}
 
-	public String getFilename() {
-		return _filename;
-	}
-
-	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
-		DataContext dc = DataContextFactory.createExcelDataContext(new File(_filename));
-		return new SingleDataContextProvider(dc, this);
-	}
-
-	@Override
-	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
-	}
 }

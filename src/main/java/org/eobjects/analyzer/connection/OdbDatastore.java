@@ -55,4 +55,9 @@ public final class OdbDatastore extends UsageAwareDatastore {
 		DataContext dc = DataContextFactory.createOpenOfficeDataContext(new File(_filename));
 		return new SingleDataContextProvider(dc, this);
 	}
+	
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return new PerformanceCharacteristicsImpl(true);
+	}
 }

@@ -62,4 +62,8 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 				closeablesArray);
 	}
 
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return new PerformanceCharacteristicsImpl(true);
+	}
 }

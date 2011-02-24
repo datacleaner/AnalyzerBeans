@@ -51,4 +51,9 @@ public class XmlDatastore extends UsageAwareDatastore {
 		final DataContext dataContext = DataContextFactory.createXmlDataContext(file, true, false);
 		return new SingleDataContextProvider(dataContext, this);
 	}
+
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return new PerformanceCharacteristicsImpl(false);
+	}
 }

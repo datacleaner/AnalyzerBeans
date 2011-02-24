@@ -38,7 +38,7 @@ public final class DbaseDatastore extends UsageAwareDatastore {
 	public String getName() {
 		return _name;
 	}
-	
+
 	public String getFilename() {
 		return _filename;
 	}
@@ -47,5 +47,10 @@ public final class DbaseDatastore extends UsageAwareDatastore {
 	protected UsageAwareDataContextProvider createDataContextProvider() {
 		DataContext dc = DataContextFactory.createDbaseDataContext(_filename);
 		return new SingleDataContextProvider(dc, this);
+	}
+
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return new PerformanceCharacteristicsImpl(false);
 	}
 }

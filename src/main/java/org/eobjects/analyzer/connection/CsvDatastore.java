@@ -92,5 +92,10 @@ public final class CsvDatastore extends UsageAwareDatastore {
 		}
 		return new SingleDataContextProvider(dataContext, this);
 	}
+	
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return new PerformanceCharacteristicsImpl(false);
+	}
 
 }

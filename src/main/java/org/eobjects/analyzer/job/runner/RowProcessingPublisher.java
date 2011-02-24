@@ -70,7 +70,6 @@ import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
 import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 import org.slf4j.Logger;
@@ -136,23 +135,9 @@ public final class RowProcessingPublisher {
 		final DataContextProvider dcp = datastore.getDataContextProvider();
 		final DataContext dataContext = dcp.getDataContext();
 
-		int expectedRows = -1;
-		final Query countQuery = dataContext.query().from(_table).selectCount().toQuery();
-		countQuery.getSelectClause().getItem(0).setFunctionApproximationAllowed(true);
-		final DataSet countDataSet = dataContext.executeQuery(countQuery);
-		if (countDataSet.next()) {
-			Number count = (Number) countDataSet.getRow().getValue(0);
-			if (count != null) {
-				expectedRows = count.intValue();
-			}
-		}
-
-		_analysisListener.rowProcessingBegin(_job, _table, expectedRows);
-
 		final Query finalQuery;
 		final List<RowProcessingConsumer> finalConsumers;
 		final Collection<? extends Outcome> availableOutcomes;
-		SelectItem countAllItem = null;
 		{
 			final Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
 			final Query baseQuery = dataContext.query().from(_table).select(columnArray).toQuery();
@@ -170,18 +155,46 @@ public final class RowProcessingPublisher {
 				}
 			}
 
-			final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(sortedConsumers, baseQuery);
-			if (optimizer.isOptimizable()) {
-				finalQuery = optimizer.getOptimizedQuery();
-				finalConsumers = optimizer.getOptimizedConsumers();
-				availableOutcomes = optimizer.getOptimizedAvailableOutcomes();
-				logger.info("Base query was optimizable to: {}, (maxrows={})", finalQuery, finalQuery.getMaxRows());
+			if (datastore.getPerformanceCharacteristics().isQueryOptimizationPreferred()) {
+				final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(sortedConsumers, baseQuery);
+				if (optimizer.isOptimizable()) {
+					finalQuery = optimizer.getOptimizedQuery();
+					finalConsumers = optimizer.getOptimizedConsumers();
+					availableOutcomes = optimizer.getOptimizedAvailableOutcomes();
+					logger.info("Base query was optimizable to: {}, (maxrows={})", finalQuery, finalQuery.getMaxRows());
+				} else {
+					finalQuery = baseQuery;
+					finalConsumers = sortedConsumers;
+					availableOutcomes = Collections.emptyList();
+				}
 			} else {
 				finalQuery = baseQuery;
 				finalConsumers = sortedConsumers;
 				availableOutcomes = Collections.emptyList();
 			}
 		}
+
+		int expectedRows = -1;
+		{
+			final Query countQuery = finalQuery.clone();
+			countQuery.setMaxRows(null);
+			countQuery.getSelectClause().removeItems();
+			countQuery.selectCount();
+			countQuery.getSelectClause().getItem(0).setFunctionApproximationAllowed(true);
+			final DataSet countDataSet = dataContext.executeQuery(countQuery);
+			if (countDataSet.next()) {
+				Number count = (Number) countDataSet.getRow().getValue(0);
+				if (count != null) {
+					expectedRows = count.intValue();
+				}
+			}
+			Integer maxRows = finalQuery.getMaxRows();
+			if (maxRows != null) {
+				expectedRows = Math.min(expectedRows, maxRows.intValue());
+			}
+		}
+
+		_analysisListener.rowProcessingBegin(_job, _table, expectedRows);
 
 		// TODO: Needs to delegate errors downstream
 		final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(_job, _analysisListener);
@@ -197,7 +210,7 @@ public final class RowProcessingPublisher {
 				break;
 			}
 			Row metaModelRow = dataSet.getRow();
-			ConsumeRowTask task = new ConsumeRowTask(finalConsumers, _table, metaModelRow, countAllItem, rowNumber, _job,
+			ConsumeRowTask task = new ConsumeRowTask(finalConsumers, _table, metaModelRow, rowNumber, _job,
 					_analysisListener, availableOutcomes);
 			_taskRunner.run(task, taskListener);
 			numTasks++;

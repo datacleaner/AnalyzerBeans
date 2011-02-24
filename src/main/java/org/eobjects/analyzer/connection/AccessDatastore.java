@@ -47,4 +47,9 @@ public final class AccessDatastore extends UsageAwareDatastore {
 		DataContext dc = DataContextFactory.createAccessDataContext(_filename);
 		return new SingleDataContextProvider(dc, this);
 	}
+
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return new PerformanceCharacteristicsImpl(false);
+	}
 }

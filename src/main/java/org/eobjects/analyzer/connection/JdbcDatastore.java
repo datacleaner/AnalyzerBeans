@@ -182,6 +182,11 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 			}
 		}
 	}
+	
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return new PerformanceCharacteristicsImpl(true);
+	}
 
 	@Override
 	public String toString() {

@@ -24,6 +24,7 @@ import java.io.File;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.PerformanceCharacteristics;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.junit.Ignore;
 
@@ -31,7 +32,7 @@ import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
 @Ignore
-public class SampleCustomDatastore implements Datastore {
+public class SampleCustomDatastore implements Datastore, PerformanceCharacteristics {
 
 	private static final long serialVersionUID = 1L;
 
@@ -50,5 +51,15 @@ public class SampleCustomDatastore implements Datastore {
 	public DataContextProvider getDataContextProvider() {
 		DataContext dc = DataContextFactory.createXmlDataContext(xmlFile, false, false);
 		return new SingleDataContextProvider(dc, this);
+	}
+
+	@Override
+	public boolean isQueryOptimizationPreferred() {
+		return false;
+	}
+
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return this;
 	}
 }

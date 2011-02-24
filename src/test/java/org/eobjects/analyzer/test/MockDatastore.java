@@ -21,8 +21,9 @@ package org.eobjects.analyzer.test;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.PerformanceCharacteristics;
 
-public class MockDatastore implements Datastore {
+public class MockDatastore implements Datastore, PerformanceCharacteristics {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,5 +35,15 @@ public class MockDatastore implements Datastore {
 	@Override
 	public DataContextProvider getDataContextProvider() {
 		return new MockDataContextProvider();
+	}
+	
+	@Override
+	public PerformanceCharacteristics getPerformanceCharacteristics() {
+		return this;
+	}
+
+	@Override
+	public boolean isQueryOptimizationPreferred() {
+		return true;
 	}
 }

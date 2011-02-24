@@ -56,7 +56,7 @@ public final class SqlDatabaseUtils {
 			return "DOUBLE";
 		}
 		if (Short.class == valueType) {
-			return "SHORT";
+			return "SMALLINT";
 		}
 		if (Float.class == valueType) {
 			return "FLOAT";

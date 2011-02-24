@@ -21,9 +21,38 @@ package org.eobjects.analyzer.connection;
 
 import java.io.Serializable;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+
+/**
+ * Defines a datastore from which data can be queried.
+ * 
+ * Datastores are kept in the {@link AnalyzerBeansConfiguration}, or rather in
+ * the {@link DatastoreCatalog}.
+ * 
+ * @author Kasper Sørensen
+ */
 public interface Datastore extends Serializable {
 
+	/**
+	 * Gets the name of this datastore
+	 * 
+	 * @return the name of this datastore
+	 */
 	public String getName();
 
+	/**
+	 * Gets a DataContextProvider, which is to be treated as a "connection" to
+	 * the datastore - a handle that allows you to query and explore the
+	 * datastore.
+	 * 
+	 * @return a DataContextProvider for this datastore.
+	 */
 	public DataContextProvider getDataContextProvider();
+
+	/**
+	 * Gets the performance characteristics of this datastore.
+	 * 
+	 * @return the performance characteristics of this datastore.
+	 */
+	public PerformanceCharacteristics getPerformanceCharacteristics();
 }
