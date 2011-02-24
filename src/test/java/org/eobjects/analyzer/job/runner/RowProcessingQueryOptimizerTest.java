@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
+import org.eobjects.analyzer.beans.filter.NotNullFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
@@ -34,11 +35,15 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
+import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
+import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.test.TestHelper;
@@ -78,10 +83,8 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		stringAnalyzerBuilder.addInputColumn(lastNameInputColumn);
 
 		consumers = new ArrayList<RowProcessingConsumer>();
-		consumers.add(new FilterConsumer(null, new FilterBeanInstance(maxRowsBuilder.getDescriptor()), maxRowsBuilder
-				.toFilterJob(), new InputColumn[0], null));
-		consumers.add(new AnalyzerConsumer(null, new AnalyzerBeanInstance(stringAnalyzerBuilder.getDescriptor()),
-				stringAnalyzerBuilder.toAnalyzerJob(), new InputColumn[] { lastNameInputColumn }, null));
+		consumers.add(createConsumer(maxRowsBuilder));
+		consumers.add(createConsumer(stringAnalyzerBuilder));
 
 		baseQuery = dcp.getDataContext().query().from("EMPLOYEES").select("LASTNAME").toQuery();
 	}
@@ -89,7 +92,6 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-
 		dcp.close();
 	}
 
@@ -119,10 +121,8 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 		// remove the string analyzer and add the transformer in between
 		consumers.remove(1);
-		consumers.add(new TransformerConsumer(null, new TransformerBeanInstance(emailStdBuilder.getDescriptor()),
-				emailStdBuilder.toTransformerJob(), new InputColumn[] { emailInputColumn }, null));
-		consumers.add(new AnalyzerConsumer(null, new AnalyzerBeanInstance(stringAnalyzerBuilder.getDescriptor()),
-				stringAnalyzerBuilder.toAnalyzerJob(), outputColumns.toArray(new InputColumn[0]), null));
+		consumers.add(createConsumer(emailStdBuilder));
+		consumers.add(createConsumer(stringAnalyzerBuilder));
 
 		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
 
@@ -132,10 +132,8 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		consumers.remove(2);
 		consumers.remove(1);
 		emailStdBuilder.setRequirement(maxRowsBuilder, ValidationCategory.VALID);
-		consumers.add(new TransformerConsumer(null, new TransformerBeanInstance(emailStdBuilder.getDescriptor()),
-				emailStdBuilder.toTransformerJob(), new InputColumn[] { emailInputColumn }, null));
-		consumers.add(new AnalyzerConsumer(null, new AnalyzerBeanInstance(stringAnalyzerBuilder.getDescriptor()),
-				stringAnalyzerBuilder.toAnalyzerJob(), outputColumns.toArray(new InputColumn[0]), null));
+		consumers.add(createConsumer(emailStdBuilder));
+		consumers.add(createConsumer(stringAnalyzerBuilder));
 
 		optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
 		assertTrue(optimizer.isOptimizable());
@@ -144,8 +142,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		// optimizable, because of it's dependency to the email standardizer
 		stringAnalyzerBuilder.setRequirement(null);
 		consumers.remove(2);
-		consumers.add(new AnalyzerConsumer(null, new AnalyzerBeanInstance(stringAnalyzerBuilder.getDescriptor()),
-				stringAnalyzerBuilder.toAnalyzerJob(), outputColumns.toArray(new InputColumn[0]), null));
+		consumers.add(createConsumer(stringAnalyzerBuilder));
 
 		optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
 		assertTrue(optimizer.isOptimizable());
@@ -155,10 +152,78 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb
 				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
 		patternFinderBuilder.addInputColumn(lastNameInputColumn);
-		consumers.add(new AnalyzerConsumer(null, new AnalyzerBeanInstance(patternFinderBuilder.getDescriptor()),
-				patternFinderBuilder.toAnalyzerJob(), new InputColumn[] { lastNameInputColumn }, null));
+		consumers.add(createConsumer(patternFinderBuilder));
 
 		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
 		assertFalse(optimizer.isOptimizable());
+	}
+
+	public void testMultipleOptimizations() throws Exception {
+		FilterJobBuilder<NotNullFilter, ValidationCategory> notNullBuilder = ajb.addFilter(NotNullFilter.class);
+		Column emailColumn = dcp.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
+		ajb.addSourceColumn(emailColumn);
+		InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
+		notNullBuilder.addInputColumn(emailInputColumn);
+		notNullBuilder.setRequirement(maxRowsBuilder, ValidationCategory.VALID);
+		stringAnalyzerBuilder.setRequirement(notNullBuilder, ValidationCategory.VALID);
+
+		consumers.remove(1);
+		consumers.add(createConsumer(notNullBuilder));
+		consumers.add(createConsumer(stringAnalyzerBuilder));
+
+		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		assertTrue(optimizer.isOptimizable());
+
+		List<RowProcessingConsumer> optimizedConsumers = optimizer.getOptimizedConsumers();
+		assertEquals(1, optimizedConsumers.size());
+
+		Query q = optimizer.getOptimizedQuery();
+		assertEquals(
+				"SELECT \"EMPLOYEES\".\"LASTNAME\" FROM PUBLIC.\"EMPLOYEES\" WHERE \"EMPLOYEES\".\"EMAIL\" IS NOT NULL",
+				q.toSql());
+		assertEquals(1000, q.getMaxRows().intValue());
+	}
+
+	public void testMultipleOutcomesUsed() throws Exception {
+		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb
+				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		patternFinderBuilder.addInputColumn(lastNameInputColumn);
+		patternFinderBuilder.setRequirement(maxRowsBuilder, ValidationCategory.INVALID);
+		consumers.add(createConsumer(patternFinderBuilder));
+
+		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		assertFalse(optimizer.isOptimizable());
+	}
+
+	private FilterConsumer createConsumer(FilterJobBuilder<?, ?> filterJobBuilder) {
+		FilterJob filterJob = filterJobBuilder.toFilterJob();
+		FilterBeanInstance filterBeanInstance = new FilterBeanInstance(filterJobBuilder.getDescriptor());
+		filterBeanInstance.getAssignConfiguredCallbacks().add(
+				new AssignConfiguredCallback(filterJob.getConfiguration(), null));
+		filterBeanInstance.assignConfigured();
+		FilterConsumer consumer = new FilterConsumer(null, filterBeanInstance, filterJob, filterJobBuilder.getInput(), null);
+		return consumer;
+	}
+
+	private TransformerConsumer createConsumer(TransformerJobBuilder<?> transformerJobBuilder) {
+		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(transformerJobBuilder.getDescriptor());
+		TransformerJob transformerJob = transformerJobBuilder.toTransformerJob();
+		transformerBeanInstance.getAssignConfiguredCallbacks().add(
+				new AssignConfiguredCallback(transformerJob.getConfiguration(), null));
+		transformerBeanInstance.assignConfigured();
+		TransformerConsumer consumer = new TransformerConsumer(null, transformerBeanInstance, transformerJob,
+				transformerJobBuilder.getInput(), null);
+		return consumer;
+	}
+
+	private AnalyzerConsumer createConsumer(RowProcessingAnalyzerJobBuilder<?> analyzerBuilder) {
+		AnalyzerBeanInstance analyzerBeanInstance = new AnalyzerBeanInstance(analyzerBuilder.getDescriptor());
+		AnalyzerJob analyzerJob = analyzerBuilder.toAnalyzerJob();
+		analyzerBeanInstance.getAssignConfiguredCallbacks().add(
+				new AssignConfiguredCallback(analyzerJob.getConfiguration(), null));
+		analyzerBeanInstance.assignConfigured();
+		AnalyzerConsumer consumer = new AnalyzerConsumer(null, analyzerBeanInstance, analyzerJob,
+				analyzerBuilder.getInput(), null);
+		return consumer;
 	}
 }

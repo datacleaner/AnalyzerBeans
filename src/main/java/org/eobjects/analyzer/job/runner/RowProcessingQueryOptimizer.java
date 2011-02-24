@@ -66,15 +66,27 @@ public class RowProcessingQueryOptimizer {
 			if (consumer instanceof FilterConsumer) {
 				FilterConsumer filterConsumer = (FilterConsumer) consumer;
 				FilterOutcome[] outcomes = filterConsumer.getComponentJob().getOutcomes();
+				FilterOutcome optimizableOutcome = null;
+
 				for (FilterOutcome outcome : outcomes) {
 					boolean optimizable = isOptimizable(filterConsumer, outcome, consumerIndex);
 					if (optimizable) {
-						_optimizedFilters.put(filterConsumer, outcome);
-					} else {
-						break;
+						if (optimizableOutcome != null) {
+							// cannot have multiple optimizable outcomes for a
+							// single filter
+							break;
+						}
+						optimizableOutcome = outcome;
 					}
 				}
+
+				if (optimizableOutcome == null) {
+					break;
+				}
+
+				_optimizedFilters.put(filterConsumer, optimizableOutcome);
 			}
+			consumerIndex++;
 		}
 	}
 
