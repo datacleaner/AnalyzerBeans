@@ -104,16 +104,18 @@ public final class AnalysisJobBuilder implements Closeable {
 	}
 
 	public AnalysisJobBuilder setDatastore(Datastore datastore) {
+		final DataContextProvider dataContextProvider;
 		if (datastore == null) {
-			throw new IllegalArgumentException("Datastore cannot be null");
+			dataContextProvider = null;
+		} else {
+			dataContextProvider = datastore.getDataContextProvider();
 		}
-		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
 		return setDataContextProvider(dataContextProvider);
 	}
 
 	public AnalysisJobBuilder setDataContextProvider(DataContextProvider dataContextProvider) {
-		if (dataContextProvider == null) {
-			throw new IllegalArgumentException("DataContextProvider cannot be null");
+		if (_dataContextProvider != null) {
+			_dataContextProvider.close();
 		}
 		_dataContextProvider = dataContextProvider;
 		return this;
@@ -723,6 +725,8 @@ public final class AnalysisJobBuilder implements Closeable {
 
 	@Override
 	public void close() {
-		_dataContextProvider.close();
+		if (_dataContextProvider != null) {
+			_dataContextProvider.close();
+		}
 	}
 }
