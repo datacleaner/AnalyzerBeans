@@ -28,10 +28,13 @@ import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
+import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.NotNullFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
@@ -159,9 +162,7 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		TransformerJob transformerJob = transformerJobs.iterator().next();
 		assertEquals("ImmutableTransformerJob[name=null,transformer=Convert to string]", transformerJob.toString());
 
-		assertEquals(
-				"[MetaModelInputColumn[PUBLIC.EMPLOYEES.EMPLOYEENUMBER]]",
-				Arrays.toString(transformerJob.getInput()));
+		assertEquals("[MetaModelInputColumn[PUBLIC.EMPLOYEES.EMPLOYEENUMBER]]", Arrays.toString(transformerJob.getInput()));
 
 		Collection<AnalyzerJob> analyzerJobs = analysisJob.getAnalyzerJobs();
 		assertEquals(1, analyzerJobs.size());
@@ -203,5 +204,41 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
 		assertEquals(1, result.size());
 		assertEquals(result.get(0), saAjb);
+	}
+
+	public void testRemoveFilter() throws Exception {
+		DataContextProvider dcp = datastore.getDataContextProvider();
+
+		FilterJobBuilder<MaxRowsFilter, ValidationCategory> maxRowsFilter = analysisJobBuilder
+				.addFilter(MaxRowsFilter.class);
+		analysisJobBuilder.setDefaultRequirement(maxRowsFilter, ValidationCategory.VALID);
+
+		TransformerJobBuilder<EmailStandardizerTransformer> emailStdTransformer = analysisJobBuilder
+				.addTransformer(EmailStandardizerTransformer.class);
+		assertSame(maxRowsFilter.getOutcome(ValidationCategory.VALID), emailStdTransformer.getRequirement());
+
+		FilterJobBuilder<NotNullFilter, ValidationCategory> notNullFilter = analysisJobBuilder
+				.addFilter(NotNullFilter.class);
+		notNullFilter.setRequirement(null);
+		maxRowsFilter.setRequirement(notNullFilter.getOutcome(ValidationCategory.VALID));
+
+		assertNull(notNullFilter.getRequirement());
+
+		analysisJobBuilder.addSourceColumn(dcp.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL"));
+		emailStdTransformer.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"));
+
+		RowProcessingAnalyzerJobBuilder<StringAnalyzer> stringAnalyzer = analysisJobBuilder
+				.addRowProcessingAnalyzer(StringAnalyzer.class);
+		stringAnalyzer.addInputColumns(emailStdTransformer.getOutputColumns());
+		
+		assertSame(maxRowsFilter.getOutcome(ValidationCategory.VALID), stringAnalyzer.getRequirement());
+		
+		analysisJobBuilder.removeFilter(maxRowsFilter);
+		
+		assertNull(analysisJobBuilder.getDefaultRequirement());
+		assertSame(notNullFilter.getOutcome(ValidationCategory.VALID), stringAnalyzer.getRequirement());
+		assertSame(notNullFilter.getOutcome(ValidationCategory.VALID), emailStdTransformer.getRequirement());
+
+		dcp.close();
 	}
 }

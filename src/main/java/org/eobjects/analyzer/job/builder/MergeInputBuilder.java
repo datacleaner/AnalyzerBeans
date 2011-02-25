@@ -34,9 +34,9 @@ public final class MergeInputBuilder {
 	private final Outcome _outcome;
 
 	public MergeInputBuilder(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
-		_outcome = new LazyFilterOutcome(filterJobBuilder, category);
+		_outcome = filterJobBuilder.getOutcome(category);
 	}
-	
+
 	public Outcome getOutcome() {
 		return _outcome;
 	}

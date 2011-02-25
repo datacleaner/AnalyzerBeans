@@ -20,15 +20,17 @@
 package org.eobjects.analyzer.job.builder;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableFilterJob;
-import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 
 public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> extends
@@ -40,10 +42,16 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 	// We keep a cached version of the resulting filter job because of
 	// references coming from other objects, particular LazyFilterOutcome.
 	private FilterJob _cachedJob;
+	private EnumMap<C, FilterOutcome> _outcomes;
 
 	public FilterJobBuilder(AnalysisJobBuilder analysisJobBuilder, FilterBeanDescriptor<F, C> descriptor) {
 		super(descriptor, FilterJobBuilder.class);
 		_analysisJobBuilder = analysisJobBuilder;
+		_outcomes = new EnumMap<C, FilterOutcome>(descriptor.getCategoryEnum());
+		EnumSet<C> categories = descriptor.getCategories();
+		for (C category : categories) {
+			_outcomes.put(category, new LazyFilterOutcome(this, category));
+		}
 	}
 
 	public FilterJob toFilterJob() {
@@ -90,12 +98,24 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 	}
 
 	@Override
-	public Outcome[] getOutcomes() {
-		EnumSet<C> categories = getDescriptor().getCategories();
-		List<Outcome> result = new ArrayList<Outcome>(categories.size());
-		for (Enum<?> category : categories) {
-			result.add(new LazyFilterOutcome(this, category));
+	public FilterOutcome[] getOutcomes() {
+		Collection<FilterOutcome> outcomes = _outcomes.values();
+		return outcomes.toArray(new FilterOutcome[outcomes.size()]);
+	}
+
+	public FilterOutcome getOutcome(C category) {
+		FilterOutcome outcome = _outcomes.get(category);
+		if (outcome == null) {
+			throw new IllegalArgumentException(category + " is not a valid category for " + this);
 		}
-		return result.toArray(new Outcome[categories.size()]);
+		return outcome;
+	}
+
+	public FilterOutcome getOutcome(Object category) {
+		FilterOutcome outcome = _outcomes.get(category);
+		if (outcome == null) {
+			throw new IllegalArgumentException(category + " is not a valid category for " + this);
+		}
+		return outcome;
 	}
 }

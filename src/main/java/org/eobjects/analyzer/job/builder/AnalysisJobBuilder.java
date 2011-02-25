@@ -47,13 +47,15 @@ import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
+import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main entry to the Job Builder API. Use this class to build jobs either
@@ -67,6 +69,8 @@ import org.eobjects.metamodel.schema.Table;
  * @author Kasper Sørensen
  */
 public final class AnalysisJobBuilder implements Closeable {
+
+	private static final Logger logger = LoggerFactory.getLogger(AnalysisJobBuilder.class);
 
 	private final AnalyzerBeansConfiguration _configuration;
 	private final IdGenerator _transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
@@ -85,6 +89,7 @@ public final class AnalysisJobBuilder implements Closeable {
 	private final List<TransformerChangeListener> _transformerChangeListeners = new ArrayList<TransformerChangeListener>();
 	private final List<FilterChangeListener> _filterChangeListeners = new ArrayList<FilterChangeListener>();
 	private final List<MergedOutcomeChangeListener> _mergedOutcomeChangeListener = new ArrayList<MergedOutcomeChangeListener>();
+	private Outcome _defaultRequirement;
 
 	public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;
@@ -240,6 +245,9 @@ public final class AnalysisJobBuilder implements Closeable {
 	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor) {
 		TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(this, descriptor, _transformedColumnIdGenerator,
 				_transformerChangeListeners);
+		if (tjb.getRequirement() == null) {
+			tjb.setRequirement(_defaultRequirement);
+		}
 		_transformerJobBuilders.add(tjb);
 
 		// make a copy since some of the listeners may add additional listeners
@@ -279,9 +287,13 @@ public final class AnalysisJobBuilder implements Closeable {
 		FilterJobBuilder<F, C> fjb = new FilterJobBuilder<F, C>(this, descriptor);
 		return addFilter(fjb);
 	}
-	
+
 	public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterJobBuilder<F, C> fjb) {
 		_filterJobBuilders.add(fjb);
+
+		if (fjb.getRequirement() == null) {
+			fjb.setRequirement(_defaultRequirement);
+		}
 
 		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
 		for (FilterChangeListener listener : listeners) {
@@ -290,12 +302,47 @@ public final class AnalysisJobBuilder implements Closeable {
 		return fjb;
 	}
 
-	public AnalysisJobBuilder removeFilter(FilterJobBuilder<?, ?> fjb) {
-		boolean removed = _filterJobBuilders.remove(fjb);
+	public AnalysisJobBuilder removeFilter(FilterJobBuilder<?, ?> filterJobBuilder) {
+		boolean removed = _filterJobBuilders.remove(filterJobBuilder);
+
 		if (removed) {
+			final Outcome previousRequirement = filterJobBuilder.getRequirement();
+
+			// clean up components who depend on this filter
+			Outcome[] outcomes = filterJobBuilder.getOutcomes();
+			for (final Outcome outcome : outcomes) {
+				if (outcome.equals(_defaultRequirement)) {
+					setDefaultRequirement(null);
+				}
+
+				for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
+					if (ajb instanceof RowProcessingAnalyzerJobBuilder) {
+						RowProcessingAnalyzerJobBuilder<?> rowProcessingAnalyzerJobBuilder = (RowProcessingAnalyzerJobBuilder<?>) ajb;
+						Outcome requirement = rowProcessingAnalyzerJobBuilder.getRequirement();
+						if (outcome.equals(requirement)) {
+							rowProcessingAnalyzerJobBuilder.setRequirement(previousRequirement);
+						}
+					}
+				}
+
+				for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
+					Outcome requirement = tjb.getRequirement();
+					if (outcome.equals(requirement)) {
+						tjb.setRequirement(previousRequirement);
+					}
+				}
+
+				for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
+					Outcome requirement = fjb.getRequirement();
+					if (outcome.equals(requirement)) {
+						fjb.setRequirement(previousRequirement);
+					}
+				}
+			}
+
 			List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
 			for (FilterChangeListener listener : listeners) {
-				listener.onRemove(fjb);
+				listener.onRemove(filterJobBuilder);
 			}
 		}
 		return this;
@@ -331,6 +378,10 @@ public final class AnalysisJobBuilder implements Closeable {
 			AnalyzerBeanDescriptor<A> descriptor) {
 		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(this, descriptor);
 		_analyzerJobBuilders.add(analyzerJobBuilder);
+
+		if (analyzerJobBuilder.getRequirement() == null) {
+			analyzerJobBuilder.setRequirement(_defaultRequirement);
+		}
 
 		// make a copy since some of the listeners may add additional listeners
 		// which will otherwise cause ConcurrentModificationExceptions
@@ -397,7 +448,7 @@ public final class AnalysisJobBuilder implements Closeable {
 			}
 			return false;
 		}
-		
+
 		boolean exploringAnalyzers = false;
 		for (AnalyzerJobBuilder<?> analyzerJobBuilder : _analyzerJobBuilders) {
 			if (analyzerJobBuilder.getDescriptor().isExploringAnalyzer()) {
@@ -591,6 +642,69 @@ public final class AnalysisJobBuilder implements Closeable {
 		return result;
 	}
 
+	/**
+	 * Sets a default requirement for all newly added and existing row
+	 * processing component, unless they have another requirement.
+	 * 
+	 * @param filterJobBuilder
+	 * @param category
+	 */
+	public void setDefaultRequirement(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
+		setDefaultRequirement(filterJobBuilder.getOutcome(category));
+	}
+
+	/**
+	 * Sets a default requirement for all newly added and existing row
+	 * processing component, unless they have another requirement.
+	 * 
+	 * @param defaultRequirement
+	 */
+	public void setDefaultRequirement(final Outcome defaultRequirement) {
+		_defaultRequirement = defaultRequirement;
+		if (defaultRequirement != null) {
+			for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
+				if (ajb instanceof RowProcessingAnalyzerJobBuilder) {
+					RowProcessingAnalyzerJobBuilder<?> rowProcessingAnalyzerJobBuilder = (RowProcessingAnalyzerJobBuilder<?>) ajb;
+					Outcome requirement = rowProcessingAnalyzerJobBuilder.getRequirement();
+					if (requirement == null) {
+						rowProcessingAnalyzerJobBuilder.setRequirement(defaultRequirement);
+					}
+				}
+			}
+
+			for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
+				if (tjb.getRequirement() == null) {
+					tjb.setRequirement(defaultRequirement);
+				}
+			}
+
+			final FilterJobBuilder<?, ?> sourceFilterJobBuilder;
+			if (defaultRequirement instanceof LazyFilterOutcome) {
+				sourceFilterJobBuilder = ((LazyFilterOutcome) defaultRequirement).getFilterJobBuilder();
+			} else {
+				logger.warn("Default requirement is not a LazyFilterOutcome. This might cause self-referring requirements.");
+				sourceFilterJobBuilder = null;
+			}
+
+			for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
+				if (fjb != sourceFilterJobBuilder && fjb.getRequirement() == null) {
+					fjb.setRequirement(defaultRequirement);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Gets a default requirement, which will be applied to all newly added row
+	 * processing components.
+	 * 
+	 * @return a default requirement, which will be applied to all newly added
+	 *         row processing components.
+	 */
+	public Outcome getDefaultRequirement() {
+		return _defaultRequirement;
+	}
+
 	public List<SourceColumnChangeListener> getSourceColumnListeners() {
 		return _sourceColumnListeners;
 	}
@@ -611,5 +725,4 @@ public final class AnalysisJobBuilder implements Closeable {
 	public void close() {
 		_dataContextProvider.close();
 	}
-
 }

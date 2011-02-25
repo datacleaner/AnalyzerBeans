@@ -174,12 +174,14 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		if (!categories.contains(category)) {
 			throw new IllegalArgumentException("No such category found in available outcomes: " + category);
 		}
-		setRequirement(new LazyFilterOutcome(filterJobBuilder, category));
+		setRequirement(filterJobBuilder.getOutcome(category));
 	}
 
 	public void setRequirement(Outcome requirement) {
-		_requirement = requirement;
-		onRequirementChanged();
+		if (_requirement != requirement) {
+			_requirement = requirement;
+			onRequirementChanged();
+		}
 	}
 
 	/**
@@ -193,7 +195,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		EnumSet<?> categories = filterJobBuilder.getDescriptor().getCategories();
 		for (Enum<?> c : categories) {
 			if (c.name().equals(category)) {
-				setRequirement(new LazyFilterOutcome(filterJobBuilder, c));
+				setRequirement(filterJobBuilder.getOutcome(c));
 				return;
 			}
 		}

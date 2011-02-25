@@ -58,7 +58,6 @@ import org.eobjects.analyzer.job.builder.AbstractBeanJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.ExploringAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
-import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
 import org.eobjects.analyzer.job.builder.MergeInputBuilder;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
@@ -86,10 +85,9 @@ import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.StringConversionUtils;
 import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eobjects.metamodel.schema.Column;
 
 public class JaxbJobReader implements JobReader<InputStream> {
 
@@ -506,7 +504,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						if (outcomeMapping.containsKey(id)) {
 							throw new IllegalStateException("Outcome id '" + id + "' is not unique");
 						}
-						outcomeMapping.put(id, new LazyFilterOutcome(filterJobBuilder, category));
+						outcomeMapping.put(id, filterJobBuilder.getOutcome(category));
 					}
 				}
 
