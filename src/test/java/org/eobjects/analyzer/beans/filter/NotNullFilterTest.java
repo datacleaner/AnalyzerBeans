@@ -19,11 +19,17 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnnotationBasedFilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
+import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.metamodel.query.Query;
 
 import junit.framework.TestCase;
 
@@ -51,10 +57,38 @@ public class NotNullFilterTest extends TestCase {
 		assertEquals(ValidationCategory.INVALID,
 				filter.categorize(new MockInputRow().put(col1, null).put(col2, null).put(col3, null)));
 	}
-	
+
 	public void testDescriptor() throws Exception {
-		FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = AnnotationBasedFilterBeanDescriptor.create(NotNullFilter.class);
+		FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = AnnotationBasedFilterBeanDescriptor
+				.create(NotNullFilter.class);
 		Class<ValidationCategory> categoryEnum = desc.getCategoryEnum();
 		assertEquals(ValidationCategory.class, categoryEnum);
+	}
+
+	public void testOptimizeQuery() throws Exception {
+		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("mydb");
+		DataContextProvider dcp = datastore.getDataContextProvider();
+		SchemaNavigator nav = dcp.getSchemaNavigator();
+
+		MetaModelInputColumn col1 = new MetaModelInputColumn(nav.convertToColumn("EMPLOYEES.EMAIL"));
+		MetaModelInputColumn col2 = new MetaModelInputColumn(nav.convertToColumn("EMPLOYEES.EMPLOYEENUMBER"));
+		InputColumn<?>[] columns = new InputColumn[] { col1, col2 };
+
+		NotNullFilter filter = new NotNullFilter(columns, true);
+
+		Query baseQuery = dcp.getDataContext().query().from("EMPLOYEES").select("EMAIL").and("EMPLOYEENUMBER").toQuery();
+		Query optimizedQuery = filter.optimizeQuery(baseQuery.clone(), ValidationCategory.VALID);
+
+		assertEquals("SELECT \"EMPLOYEES\".\"EMAIL\", \"EMPLOYEES\".\"EMPLOYEENUMBER\" FROM "
+				+ "PUBLIC.\"EMPLOYEES\" WHERE \"EMPLOYEES\".\"EMAIL\" IS NOT NULL AND \"EMPLOYEES\".\"EMAIL\" <> '' AND "
+				+ "\"EMPLOYEES\".\"EMPLOYEENUMBER\" IS NOT NULL", optimizedQuery.toSql());
+		
+		optimizedQuery = filter.optimizeQuery(baseQuery.clone(), ValidationCategory.INVALID);
+
+		assertEquals("SELECT \"EMPLOYEES\".\"EMAIL\", \"EMPLOYEES\".\"EMPLOYEENUMBER\" FROM "
+				+ "PUBLIC.\"EMPLOYEES\" WHERE (\"EMPLOYEES\".\"EMAIL\" IS NULL OR \"EMPLOYEES\".\"EMAIL\" = '' OR "
+				+ "\"EMPLOYEES\".\"EMPLOYEENUMBER\" IS NULL)", optimizedQuery.toSql());
+
+		dcp.close();
 	}
 }

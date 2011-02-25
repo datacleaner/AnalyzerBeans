@@ -19,10 +19,14 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
+import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.query.FilterItem;
@@ -62,23 +66,25 @@ public class NotNullFilter implements QueryOptimizedFilter<ValidationCategory> {
 			for (InputColumn<?> col : columns) {
 				Column column = col.getPhysicalColumn();
 				q.where(column, OperatorType.DIFFERENT_FROM, null);
-				if (considerEmptyStringAsNull) {
+				if (considerEmptyStringAsNull && col.getDataTypeFamily() == DataTypeFamily.STRING) {
 					q.where(column, OperatorType.DIFFERENT_FROM, "");
 				}
 			}
 		} else {
+			// if INVALID all filter items will be OR'ed.
+			List<FilterItem> filterItems = new ArrayList<FilterItem>();
 			for (InputColumn<?> col : columns) {
 				Column column = col.getPhysicalColumn();
 
 				SelectItem selectItem = new SelectItem(column);
 				FilterItem fi1 = new FilterItem(selectItem, OperatorType.EQUALS_TO, null);
-				if (considerEmptyStringAsNull) {
+				filterItems.add(fi1);
+				if (considerEmptyStringAsNull && col.getDataTypeFamily() == DataTypeFamily.STRING) {
 					FilterItem fi2 = new FilterItem(selectItem, OperatorType.EQUALS_TO, "");
-					q.where(new FilterItem(fi1, fi2));
-				} else {
-					q.where(fi1);
+					filterItems.add(fi2);
 				}
 			}
+			q.where(new FilterItem(filterItems.toArray(new FilterItem[filterItems.size()])));
 		}
 		return q;
 	}
