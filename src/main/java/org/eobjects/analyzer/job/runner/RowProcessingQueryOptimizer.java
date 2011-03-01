@@ -28,8 +28,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
+import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.FilterOutcome;
@@ -48,11 +51,14 @@ import org.eobjects.metamodel.query.Query;
  */
 public class RowProcessingQueryOptimizer {
 
+	private static final Class<?>[] ALWAYS_OPTIMIZABLE = new Class[] { MaxRowsFilter.class };
+	private final Datastore _datastore;
 	private final Query _baseQuery;
 	private final List<RowProcessingConsumer> _consumers;
 	private final Map<FilterConsumer, FilterOutcome> _optimizedFilters;
 
-	public RowProcessingQueryOptimizer(List<RowProcessingConsumer> consumers, Query baseQuery) {
+	public RowProcessingQueryOptimizer(Datastore datastore, List<RowProcessingConsumer> consumers, Query baseQuery) {
+		_datastore = datastore;
 		_consumers = consumers;
 		_baseQuery = baseQuery;
 		_optimizedFilters = new HashMap<FilterConsumer, FilterOutcome>();
@@ -93,7 +99,17 @@ public class RowProcessingQueryOptimizer {
 	private boolean isOptimizable(final FilterConsumer filterConsumer, final FilterOutcome filterOutcome,
 			final int consumerIndex) {
 		if (!filterConsumer.isQueryOptimizable(filterOutcome)) {
+			// the filter is not optimizable
 			return false;
+		}
+
+		if (!_datastore.getPerformanceCharacteristics().isQueryOptimizationPreferred()) {
+			// the datastore doesn't prefer query optimization
+			Class<?> filterClass = filterConsumer.getComponentJob().getDescriptor().getComponentClass();
+			if (!ArrayUtils.contains(ALWAYS_OPTIMIZABLE, filterClass)) {
+				// the filter is not in the "always optimizable" set.
+				return false;
+			}
 		}
 
 		Set<InputColumn<?>> satisfiedColumns = new HashSet<InputColumn<?>>();

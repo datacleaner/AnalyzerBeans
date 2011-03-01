@@ -31,7 +31,9 @@ import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -96,7 +98,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	}
 
 	public void testSimpleOptimization() throws Exception {
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 
 		assertTrue(optimizer.isOptimizable());
 
@@ -105,7 +107,21 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		assertNotNull("No max rows specified!", maxRows);
 		assertEquals(1000, maxRows.intValue());
 	}
-
+	
+	public void testAlwaysOptimizableFilter() throws Exception {
+		Datastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
+		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+		
+		assertTrue(optimizer.isOptimizable());
+		
+		FilterJobBuilder<?, ?> fjb = ajb.addFilter(NotNullFilter.class).addInputColumn(lastNameInputColumn);
+		maxRowsBuilder.setRequirement(fjb, ValidationCategory.VALID);
+		consumers.add(0, createConsumer(fjb));
+		
+		optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+		assertFalse(optimizer.isOptimizable());
+	}
+	
 	public void testOptimizedChainedTransformer() throws Exception {
 		TransformerJobBuilder<EmailStandardizerTransformer> emailStdBuilder = ajb
 				.addTransformer(EmailStandardizerTransformer.class);
@@ -124,7 +140,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		consumers.add(createConsumer(emailStdBuilder));
 		consumers.add(createConsumer(stringAnalyzerBuilder));
 
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 
 		// not optimizable because the transformer doesn't have the requirement
 		assertFalse(optimizer.isOptimizable());
@@ -135,7 +151,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		consumers.add(createConsumer(emailStdBuilder));
 		consumers.add(createConsumer(stringAnalyzerBuilder));
 
-		optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 		assertTrue(optimizer.isOptimizable());
 
 		// even without the requirement, the string analyzer should still be
@@ -144,7 +160,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		consumers.remove(2);
 		consumers.add(createConsumer(stringAnalyzerBuilder));
 
-		optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 		assertTrue(optimizer.isOptimizable());
 	}
 
@@ -154,7 +170,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		patternFinderBuilder.addInputColumn(lastNameInputColumn);
 		consumers.add(createConsumer(patternFinderBuilder));
 
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 		assertFalse(optimizer.isOptimizable());
 	}
 
@@ -171,7 +187,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		consumers.add(createConsumer(notNullBuilder));
 		consumers.add(createConsumer(stringAnalyzerBuilder));
 
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 		assertTrue(optimizer.isOptimizable());
 
 		List<RowProcessingConsumer> optimizedConsumers = optimizer.getOptimizedConsumers();
@@ -191,7 +207,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		patternFinderBuilder.setRequirement(maxRowsBuilder, ValidationCategory.INVALID);
 		consumers.add(createConsumer(patternFinderBuilder));
 
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(consumers, baseQuery);
+		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 		assertFalse(optimizer.isOptimizable());
 	}
 

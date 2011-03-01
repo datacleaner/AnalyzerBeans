@@ -155,18 +155,13 @@ public final class RowProcessingPublisher {
 				}
 			}
 
-			if (datastore.getPerformanceCharacteristics().isQueryOptimizationPreferred()) {
-				final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(sortedConsumers, baseQuery);
-				if (optimizer.isOptimizable()) {
-					finalQuery = optimizer.getOptimizedQuery();
-					finalConsumers = optimizer.getOptimizedConsumers();
-					availableOutcomes = optimizer.getOptimizedAvailableOutcomes();
-					logger.info("Base query was optimizable to: {}, (maxrows={})", finalQuery, finalQuery.getMaxRows());
-				} else {
-					finalQuery = baseQuery;
-					finalConsumers = sortedConsumers;
-					availableOutcomes = Collections.emptyList();
-				}
+			final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, sortedConsumers,
+					baseQuery);
+			if (optimizer.isOptimizable()) {
+				finalQuery = optimizer.getOptimizedQuery();
+				finalConsumers = optimizer.getOptimizedConsumers();
+				availableOutcomes = optimizer.getOptimizedAvailableOutcomes();
+				logger.info("Base query was optimizable to: {}, (maxrows={})", finalQuery, finalQuery.getMaxRows());
 			} else {
 				finalQuery = baseQuery;
 				finalConsumers = sortedConsumers;
