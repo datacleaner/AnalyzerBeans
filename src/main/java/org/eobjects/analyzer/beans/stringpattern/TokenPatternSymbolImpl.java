@@ -73,12 +73,11 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 				_symbolicString = prototypeToken.getString();
 			}
 			break;
-		case MIXED:
-			_symbolicString = prototypeToken.getString();
-			break;
 		case PREDEFINED:
 			PredefinedToken pt = (PredefinedToken) prototypeToken;
 			_symbolicString = '[' + pt.getPredefinedTokenDefintion().getName() + ']';
+			break;
+		case MIXED:
 			break;
 		default:
 			throw new UnsupportedOperationException("Unsupported token type: " + _tokenType);
@@ -102,7 +101,7 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 			result[_length - 2] = _decimalSeparator;
 		}
 
-		return new String(result);
+		return String.valueOf(result);
 	}
 
 	private char getSymbolicChar() {
@@ -193,22 +192,22 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 			String str2 = token.getString();
 			char char2 = str2.charAt(0);
 			boolean upperCase = Character.isUpperCase(char2);
-			
+
 			boolean caseMatches = isUpperCaseOnly() == upperCase;
 			if (!caseMatches) {
 				return false;
 			}
-			
+
 			if (upperCase && !configuration.isUpperCaseExpandable()) {
 				// the token is not expandable, we need to verify same length
 				return str2.length() == _length;
 			}
-			
+
 			if (!upperCase && !configuration.isLowerCaseExpandable()) {
 				// the token is not expandable, we need to verify same length
 				return str2.length() == _length;
 			}
-			
+
 			return true;
 		}
 		return true;

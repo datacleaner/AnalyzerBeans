@@ -87,7 +87,7 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		assertEquals(7, resultLines.length);
 		assertEquals("                      Match count Sample      ", resultLines[0]);
 		assertEquals("Aaaaaaa aaaaaaaa                2 Sales director ", resultLines[1]);
-		assertEquals("1st aa aaa aaaaa                1 1st on the phone ", resultLines[2]);
+		assertEquals("??? aa aaa aaaaa                1 1st on the phone ", resultLines[2]);
 		assertEquals("Aaa aaaaaaa aaaaaaa             1 Key account manager ", resultLines[3]);
 		assertEquals("Aaaaa Aaaaaaa, AAA              1 Sales Manager, USA ", resultLines[4]);
 		assertEquals("Aaaaa aaaaaaa (AAAA)            1 Sales manager (EMEA) ", resultLines[5]);
