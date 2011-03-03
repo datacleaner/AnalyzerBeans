@@ -22,7 +22,7 @@ package org.eobjects.analyzer.connection;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
-public final class DbaseDatastore extends UsageAwareDatastore {
+public final class DbaseDatastore extends UsageAwareDatastore implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -39,6 +39,7 @@ public final class DbaseDatastore extends UsageAwareDatastore {
 		return _name;
 	}
 
+	@Override
 	public String getFilename() {
 		return _filename;
 	}

@@ -22,7 +22,7 @@ package org.eobjects.analyzer.connection;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
-public final class AccessDatastore extends UsageAwareDatastore {
+public final class AccessDatastore extends UsageAwareDatastore implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 	private final String _name;
@@ -38,6 +38,7 @@ public final class AccessDatastore extends UsageAwareDatastore {
 		return _name;
 	}
 
+	@Override
 	public String getFilename() {
 		return _filename;
 	}

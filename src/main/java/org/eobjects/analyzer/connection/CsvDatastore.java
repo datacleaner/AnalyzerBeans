@@ -27,7 +27,7 @@ import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.DefaultDataContext;
 import org.eobjects.metamodel.util.FileHelper;
 
-public final class CsvDatastore extends UsageAwareDatastore {
+public final class CsvDatastore extends UsageAwareDatastore implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -67,6 +67,7 @@ public final class CsvDatastore extends UsageAwareDatastore {
 		return _encoding;
 	}
 
+	@Override
 	public String getFilename() {
 		return _filename;
 	}

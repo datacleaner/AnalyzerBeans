@@ -29,7 +29,7 @@ import org.eobjects.metamodel.DataContextFactory;
  * 
  * @author Kasper Sørensen
  */
-public final class OdbDatastore extends UsageAwareDatastore {
+public final class OdbDatastore extends UsageAwareDatastore implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -46,6 +46,7 @@ public final class OdbDatastore extends UsageAwareDatastore {
 		return _name;
 	}
 	
+	@Override
 	public String getFilename() {
 		return _filename;
 	}

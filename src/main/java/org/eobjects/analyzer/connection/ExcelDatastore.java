@@ -24,7 +24,7 @@ import java.io.File;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
-public final class ExcelDatastore extends UsageAwareDatastore {
+public final class ExcelDatastore extends UsageAwareDatastore implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -41,6 +41,7 @@ public final class ExcelDatastore extends UsageAwareDatastore {
 		return _name;
 	}
 
+	@Override
 	public String getFilename() {
 		return _filename;
 	}
