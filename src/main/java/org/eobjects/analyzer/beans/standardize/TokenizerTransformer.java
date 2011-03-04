@@ -71,11 +71,13 @@ public class TokenizerTransformer implements Transformer<String> {
 		String value = inputRow.getValue(column);
 		String[] result = new String[numTokens];
 
-		int i = 0;
-		StringTokenizer st = new StringTokenizer(value, new String(delimiters));
-		while (i < result.length && st.hasMoreTokens()) {
-			result[i] = st.nextToken();
-			i++;
+		if (value != null) {
+			int i = 0;
+			StringTokenizer st = new StringTokenizer(value, new String(delimiters));
+			while (i < result.length && st.hasMoreTokens()) {
+				result[i] = st.nextToken();
+				i++;
+			}
 		}
 
 		return result;

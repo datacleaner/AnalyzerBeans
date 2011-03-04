@@ -24,6 +24,15 @@ import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import junit.framework.TestCase;
 
 public class EmailStandardizerTransformerTest extends TestCase {
+	
+	public void testNull() throws Exception {
+		EmailStandardizerTransformer transformer = new EmailStandardizerTransformer();
+
+		String[] result = transformer.transform((String)null);
+		assertEquals(2, result.length);
+		assertEquals(null, result[0]);
+		assertEquals(null, result[1]);
+	}
 
 	public void testTransform() throws Exception {
 		EmailStandardizerTransformer transformer = new EmailStandardizerTransformer();

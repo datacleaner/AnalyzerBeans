@@ -78,14 +78,16 @@ public class EmailStandardizerTransformer implements Transformer<String> {
 		String username = null;
 		String domain = null;
 
-		NamedPatternMatch<EmailPart> match = EMAIL_PATTERN.match(value);
-		if (match != null) {
-			username = match.get(EmailPart.USERNAME);
-			domain = match.get(EmailPart.DOMAIN);
+		if (value != null) {
+			NamedPatternMatch<EmailPart> match = EMAIL_PATTERN.match(value);
+			if (match != null) {
+				username = match.get(EmailPart.USERNAME);
+				domain = match.get(EmailPart.DOMAIN);
+			}
 		}
 		return new String[] { username, domain };
 	}
-	
+
 	public void setInputColumn(InputColumn<String> inputColumn) {
 		this.inputColumn = inputColumn;
 	}

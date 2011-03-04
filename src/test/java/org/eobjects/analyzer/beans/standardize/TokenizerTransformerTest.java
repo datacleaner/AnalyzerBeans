@@ -66,4 +66,20 @@ public class TokenizerTransformerTest extends TestCase {
 		assertEquals("Kasper", values[0]);
 		assertNull(values[1]);
 	}
+	
+	public void testTransformNull() throws Exception {
+		InputColumn<?> col = new MetaModelInputColumn(new MutableColumn("name"));
+
+		@SuppressWarnings("unchecked")
+		TokenizerTransformer transformer = new TokenizerTransformer((InputColumn<String>) col, 2);
+
+		assertEquals(2, transformer.getOutputColumns().getColumnCount());
+
+		TransformedInputRow row = new TransformedInputRow(null);
+		row.addValue(col, null);
+		String[] values = transformer.transform(row);
+		assertEquals(2, values.length);
+		assertEquals(null, values[0]);
+		assertEquals(null, values[1]);
+	}
 }
