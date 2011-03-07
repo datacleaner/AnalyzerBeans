@@ -35,7 +35,8 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
-	private transient Map<String, String> _masterTermCache;
+	private transient volatile Map<String, String> _masterTermCache;
+	private transient volatile long _lastModified;
 	private transient File _file;
 
 	private final String _filename;
@@ -53,16 +54,8 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 	public TextBasedSynonymCatalog(String name, File file, boolean caseSensitive, String encoding) {
 		_name = name;
 		_filename = file.getPath();
-		_file = file;
 		_caseSensitive = caseSensitive;
 		_encoding = encoding;
-	}
-
-	private File getFile() {
-		if (_file == null) {
-			_file = new File(_filename);
-		}
-		return _file;
 	}
 
 	@Override
@@ -84,7 +77,7 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 
 	@Override
 	public Collection<Synonym> getSynonyms() {
-		BufferedReader reader = FileHelper.getBufferedReader(getFile(), _encoding);
+		BufferedReader reader = FileHelper.getBufferedReader(_file, _encoding);
 		try {
 			List<Synonym> synonyms = new ArrayList<Synonym>();
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
@@ -103,6 +96,19 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 				if (_masterTermCache == null) {
 					_masterTermCache = CollectionUtils.createCacheMap();
 				}
+				_file = new File(_filename);
+				_lastModified = _file.lastModified();
+			}
+		} else {
+			long lastModified = _file.lastModified();
+			if (_lastModified != lastModified) {
+				synchronized (this) {
+					lastModified = _file.lastModified();
+					if (_lastModified != lastModified) {
+						_masterTermCache = CollectionUtils.createCacheMap();
+						_lastModified = lastModified;
+					}
+				}
 			}
 		}
 		return _masterTermCache;
@@ -118,7 +124,7 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 			return masterTerm;
 		}
 
-		BufferedReader reader = FileHelper.getBufferedReader(getFile(), _encoding);
+		BufferedReader reader = FileHelper.getBufferedReader(_file, _encoding);
 		try {
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 				line = line.trim();

@@ -36,7 +36,9 @@ public class TextBasedDictionary implements Dictionary {
 
 	private static final Logger logger = LoggerFactory.getLogger(TextBasedDictionary.class);
 
-	private transient Map<String, Boolean> _containsValueCache;
+	private transient volatile Map<String, Boolean> _containsValueCache;
+	private transient volatile long _lastModified;
+	private transient File _file;
 	private final String _name;
 	private final String _filename;
 	private final String _encoding;
@@ -52,6 +54,19 @@ public class TextBasedDictionary implements Dictionary {
 			synchronized (this) {
 				if (_containsValueCache == null) {
 					_containsValueCache = CollectionUtils.createCacheMap();
+				}
+				_file = new File(_filename);
+				_lastModified = _file.lastModified();
+			}
+		} else {
+			long lastModified = _file.lastModified();
+			if (_lastModified != lastModified) {
+				synchronized (this) {
+					lastModified = _file.lastModified();
+					if (_lastModified != lastModified) {
+						_containsValueCache = CollectionUtils.createCacheMap();
+						_lastModified = lastModified;
+					}
 				}
 			}
 		}
@@ -81,7 +96,7 @@ public class TextBasedDictionary implements Dictionary {
 			BufferedReader reader = null;
 			try {
 				result = false;
-				reader = FileHelper.getBufferedReader(new File(_filename), _encoding);
+				reader = FileHelper.getBufferedReader(_file, _encoding);
 				for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 					if (value.equals(line)) {
 						result = true;
