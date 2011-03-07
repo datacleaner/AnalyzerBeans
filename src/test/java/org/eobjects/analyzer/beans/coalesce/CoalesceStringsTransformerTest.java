@@ -38,7 +38,12 @@ public class CoalesceStringsTransformerTest extends TestCase {
 		assertEquals("hello", t.transform(new MockInputRow().put(col2, "hello").put(col3, "world"))[0]);
 		assertEquals("world", t.transform(new MockInputRow().put(col2, "hello").put(col1, "world"))[0]);
 		assertEquals("hello", t.transform(new MockInputRow().put(col1, "hello").put(col2, "world"))[0]);
+		assertEquals("world", t.transform(new MockInputRow().put(col1, "").put(col2, "world"))[0]);
+		assertEquals("world", t.transform(new MockInputRow().put(col1, null).put(col2, "world"))[0]);
 
 		assertNull(t.transform(new MockInputRow().put(col2, null).put(col1, null))[0]);
+
+		t.considerEmptyStringAsNull = false;
+		assertEquals("", t.transform(new MockInputRow().put(col1, "").put(col2, "world"))[0]);
 	}
 }

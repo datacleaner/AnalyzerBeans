@@ -34,6 +34,10 @@ public class CoalesceStringsTransformer implements Transformer<String> {
 	@Configured
 	InputColumn<String>[] input;
 
+	@Configured
+	@Description("Consider empty strings (\"\") as null also?")
+	boolean considerEmptyStringAsNull = true;
+
 	public CoalesceStringsTransformer() {
 	}
 
@@ -52,7 +56,13 @@ public class CoalesceStringsTransformer implements Transformer<String> {
 		for (InputColumn<String> column : input) {
 			String value = inputRow.getValue(column);
 			if (value != null) {
-				return new String[] { value };
+				if (considerEmptyStringAsNull) {
+					if (!"".equals(value)) {
+						return new String[] { value };
+					}
+				} else {
+					return new String[] { value };
+				}
 			}
 		}
 		return new String[1];
