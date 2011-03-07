@@ -178,7 +178,9 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 	private String[] getDefaultDateMasks() {
 		final List<String> defaultDateMasks = new ArrayList<String>();
 
+		defaultDateMasks.add("yyyy-MM-dd HH:mm:ss.S");
 		defaultDateMasks.add("yyyy-MM-dd HH:mm:ss");
+		defaultDateMasks.add("yyyyMMddHHmmssZ");
 		defaultDateMasks.add("yyMMddHHmmssZ");
 
 		for (String string : prototypePatterns) {
