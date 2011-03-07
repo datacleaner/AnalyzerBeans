@@ -62,7 +62,7 @@ public final class MetaModelInputRow extends AbstractInputRow {
 		DataTypeFamily dataTypeFamily = column.getDataTypeFamily();
 		switch (dataTypeFamily) {
 		case DATE:
-			value = ConvertToDateTransformer.transformValue(value);
+			value = ConvertToDateTransformer.getInternalInstance().transformValue(value);
 			break;
 		case BOOLEAN:
 			value = ConvertToBooleanTransformer.transformValue(value, ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS,

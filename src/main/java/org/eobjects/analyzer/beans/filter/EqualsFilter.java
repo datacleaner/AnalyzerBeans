@@ -75,7 +75,7 @@ public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
 				operand = ConvertToBooleanTransformer.transformValue(value, ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS,
 						ConvertToBooleanTransformer.DEFAULT_FALSE_TOKENS);
 			} else if (dataTypeFamily == DataTypeFamily.DATE) {
-				operand = ConvertToDateTransformer.transformValue(value);
+				operand = ConvertToDateTransformer.getInternalInstance().transformValue(value);
 			} else if (dataTypeFamily == DataTypeFamily.NUMBER) {
 				operand = ConvertToNumberTransformer.transformValue(value);
 				number = true;

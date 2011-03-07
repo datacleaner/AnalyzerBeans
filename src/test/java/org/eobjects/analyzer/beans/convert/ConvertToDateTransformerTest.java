@@ -39,19 +39,29 @@ public class ConvertToDateTransformerTest extends TestCase {
 
 		assertTrue(cal.getTime().getTime() > 5000000);
 
-		assertEquals("1971-01-01", format(ConvertToDateTransformer.transformValue(cal)));
-		assertEquals("1971-01-01", format(ConvertToDateTransformer.transformValue(cal.getTime())));
+		ConvertToDateTransformer transformer = new ConvertToDateTransformer();
+		transformer.init();
 
-		assertEquals("1970-04-03", format(ConvertToDateTransformer.convertFromNumber(8000000000l)));
-		assertEquals("1997-05-19", format(ConvertToDateTransformer.convertFromNumber(10000)));
-		assertEquals("1997-05-19", format(ConvertToDateTransformer.convertFromNumber(19970519)));
-		assertEquals("1997-05-19", format(ConvertToDateTransformer.convertFromNumber(970519)));
+		assertEquals("1971-01-01", format(transformer.transformValue(cal)));
+		assertEquals("1971-01-01", format(transformer.transformValue(cal.getTime())));
+
+		assertEquals("1970-04-03", format(transformer.convertFromNumber(8000000000l)));
+		assertEquals("1997-05-19", format(transformer.convertFromNumber(10000)));
+		assertEquals("1997-05-19", format(transformer.convertFromNumber(19970519)));
+		assertEquals("1997-05-19", format(transformer.convertFromNumber(970519)));
 	}
 
 	public void testConvertFromString() throws Exception {
-		assertEquals("1999-04-20", format(ConvertToDateTransformer.convertFromString("1999-04-20")));
-		assertEquals("1999-04-20", format(ConvertToDateTransformer.convertFromString("04/20/1999")));
-		assertEquals("1999-04-20", format(ConvertToDateTransformer.convertFromString("1999/04/20")));
+		ConvertToDateTransformer transformer = new ConvertToDateTransformer();
+		transformer.init();
+
+		assertEquals("1999-04-20", format(transformer.convertFromString("1999-04-20")));
+		assertEquals("1999-04-20", format(transformer.convertFromString("04/20/1999")));
+		assertEquals("1999-04-20", format(transformer.convertFromString("1999/04/20")));
+		assertEquals("2008-07-11", format(transformer.convertFromString("2008-07-11 00:00:00")));
+
+		Date result = transformer.convertFromString("2008-07-11 14:05:13");
+		assertEquals("2008-07-11 14:05:13", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(result));
 	}
 
 	private String format(Date date) {

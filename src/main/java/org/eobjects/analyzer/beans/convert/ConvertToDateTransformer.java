@@ -28,6 +28,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -45,29 +46,50 @@ import org.joda.time.format.DateTimeFormatter;
 @Description("Converts anything to a date (or null).")
 public class ConvertToDateTransformer implements Transformer<Date> {
 
-	private static final List<DateTimeFormatter> dateTimeFormatters;
-
-	static {
-		dateTimeFormatters = new ArrayList<DateTimeFormatter>();
-		String[] prototypePatterns = { "yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy" };
-		for (String string : prototypePatterns) {
-			dateTimeFormatters.add(DateTimeFormat.forPattern(string));
-			string = string.replaceAll("\\-", "\\.");
-			dateTimeFormatters.add(DateTimeFormat.forPattern(string));
-			string = string.replaceAll("\\.", "\\/");
-			dateTimeFormatters.add(DateTimeFormat.forPattern(string));
-		}
-	}
+	private static final String[] prototypePatterns = { "yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy" };
 
 	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_LONG = DateTimeFormat.forPattern("yyyyMMdd");
 	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_SHORT = DateTimeFormat.forPattern("yyMMdd");
 
+	private static ConvertToDateTransformer internalInstance;
+
 	@Inject
-	@Configured
+	@Configured(order = 1)
 	InputColumn<?> input;
 
-	@Configured(required = false)
+	@Inject
+	@Configured(required = false, order = 2)
 	Date nullReplacement;
+
+	@Inject
+	@Configured(required = false, order = 3)
+	String[] dateMasks;
+
+	private DateTimeFormatter[] _dateTimeFormatters;
+
+	public static ConvertToDateTransformer getInternalInstance() {
+		if (internalInstance == null) {
+			internalInstance = new ConvertToDateTransformer();
+			internalInstance.init();
+		}
+		return internalInstance;
+	}
+
+	public ConvertToDateTransformer() {
+		dateMasks = getDefaultDateMasks();
+	}
+
+	@Initialize
+	public void init() {
+		if (dateMasks == null) {
+			dateMasks = getDefaultDateMasks();
+		}
+		_dateTimeFormatters = new DateTimeFormatter[dateMasks.length];
+		for (int i = 0; i < dateMasks.length; i++) {
+			String dateMask = dateMasks[i];
+			_dateTimeFormatters[i] = DateTimeFormat.forPattern(dateMask);
+		}
+	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -84,7 +106,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 		return new Date[] { d };
 	}
 
-	public static Date transformValue(Object value) {
+	public Date transformValue(Object value) {
 		Date d = null;
 		if (value != null) {
 			if (value instanceof Date) {
@@ -100,7 +122,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 		return d;
 	}
 
-	protected static Date convertFromString(String value) {
+	protected Date convertFromString(String value) {
 		try {
 			long longValue = Long.parseLong(value);
 			return convertFromNumber(longValue);
@@ -108,7 +130,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 			// do nothing, proceed to dateFormat parsing
 		}
 
-		for (DateTimeFormatter formatter : dateTimeFormatters) {
+		for (DateTimeFormatter formatter : _dateTimeFormatters) {
 			try {
 				return formatter.parseDateTime(value).toDate();
 			} catch (Exception e) {
@@ -119,7 +141,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 		return null;
 	}
 
-	protected static Date convertFromNumber(Number value) {
+	protected Date convertFromNumber(Number value) {
 		Number numberValue = (Number) value;
 		long longValue = numberValue.longValue();
 
@@ -153,4 +175,20 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 		}
 	}
 
+	private String[] getDefaultDateMasks() {
+		final List<String> defaultDateMasks = new ArrayList<String>();
+
+		defaultDateMasks.add("yyyy-MM-dd HH:mm:ss");
+		defaultDateMasks.add("yyMMddHHmmssZ");
+
+		for (String string : prototypePatterns) {
+			defaultDateMasks.add(string);
+			string = string.replaceAll("\\-", "\\.");
+			defaultDateMasks.add(string);
+			string = string.replaceAll("\\.", "\\/");
+			defaultDateMasks.add(string);
+		}
+
+		return defaultDateMasks.toArray(new String[defaultDateMasks.size()]);
+	}
 }
