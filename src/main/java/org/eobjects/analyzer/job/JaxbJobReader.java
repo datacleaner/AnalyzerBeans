@@ -231,7 +231,12 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 	public AnalysisJobBuilder create(InputStream inputStream, SourceColumnMapping sourceColumnMapping)
 			throws NoSuchDatastoreException {
-		return create(unmarshallJob(inputStream), sourceColumnMapping, null);
+		return create(inputStream, sourceColumnMapping, null);
+	}
+
+	public AnalysisJobBuilder create(InputStream inputStream, SourceColumnMapping sourceColumnMapping,
+			Map<String, String> variableOverrides) throws NoSuchDatastoreException {
+		return create(unmarshallJob(inputStream), sourceColumnMapping, variableOverrides);
 	}
 
 	public AnalysisJobBuilder create(InputStream inputStream, Map<String, String> variableOverrides)
