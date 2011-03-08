@@ -41,6 +41,8 @@
 				minOccurs="1" maxOccurs="1" />
 			<element name="columns" type="ab:columnsType" minOccurs="0"
 				maxOccurs="1" />
+			<element name="variables" type="ab:variablesType" minOccurs="0"
+				maxOccurs="1" />
 		</sequence>
 	</complexType>
 
@@ -74,8 +76,42 @@
 	</complexType>
 
 	<complexType name="columnType">
-		<attribute name="id" type="ID" use="required" />
-		<attribute name="path" type="normalizedString" use="required" />
+		<attribute name="id" type="token" use="required" />
+		<attribute name="path" type="normalizedString" use="required">
+			<annotation>
+				<documentation>
+					The path to the column. The path is expected to be
+					qualified with prepending dots (.) to represent the schema and
+					table names of the column.
+				</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+
+	<complexType name="variablesType">
+		<sequence>
+			<element name="variable" type="ab:variableType" minOccurs="1"
+				maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Represents a job-level variable that can be
+						referenced by certain properties, allowing for centralized
+						management of important configuration elements. 
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="variableType">
+		<attribute name="id" type="token" use="required" />
+		<attribute name="value" type="string" use="required">
+			<annotation>
+				<documentation>
+					Default value for this variable.
+				</documentation>
+			</annotation>
+		</attribute>
 	</complexType>
 
 	<complexType name="mergedOutcomeType">
@@ -186,7 +222,21 @@
 			<element name="property" minOccurs="0" maxOccurs="unbounded">
 				<complexType>
 					<attribute name="name" type="string" use="required" />
-					<attribute name="value" type="string" use="required" />
+					<attribute name="ref" type="token" use="optional">
+						<annotation>
+							<documentation>
+								A reference to the id of a variable (defined in
+								the source section). If a ref is defined, the value of the
+								variable will be inserted instead of the value of this property
+								element.
+							</documentation>
+						</annotation>
+					</attribute>
+					<attribute name="value" type="string" use="optional">
+						<annotation>
+							<documentation>The value of the property.</documentation>
+						</annotation>
+					</attribute>
 				</complexType>
 			</element>
 		</sequence>

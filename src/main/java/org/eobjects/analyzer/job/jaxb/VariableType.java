@@ -33,21 +33,20 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
- * <p>Java class for columnType complex type.
+ * <p>Java class for variableType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="columnType">
+ * &lt;complexType name="variableType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}token" />
- *       &lt;attribute name="path" use="required" type="{http://www.w3.org/2001/XMLSchema}normalizedString" />
+ *       &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -56,17 +55,15 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "columnType")
-public class ColumnType {
+@XmlType(name = "variableType")
+public class VariableType {
 
     @XmlAttribute(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String id;
     @XmlAttribute(required = true)
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    @XmlSchemaType(name = "normalizedString")
-    protected String path;
+    protected String value;
 
     /**
      * Gets the value of the id property.
@@ -93,27 +90,27 @@ public class ColumnType {
     }
 
     /**
-     * Gets the value of the path property.
+     * Gets the value of the value property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getPath() {
-        return path;
+    public String getValue() {
+        return value;
     }
 
     /**
-     * Sets the value of the path property.
+     * Sets the value of the value property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setPath(String value) {
-        this.path = value;
+    public void setValue(String value) {
+        this.value = value;
     }
 
 }
