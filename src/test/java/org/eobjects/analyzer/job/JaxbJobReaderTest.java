@@ -22,20 +22,25 @@ package org.eobjects.analyzer.job;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
+import org.eobjects.analyzer.beans.transform.DateMaskMatcherTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
+import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
@@ -51,7 +56,6 @@ import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.result.renderer.DateGapTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
-
 import org.eobjects.metamodel.util.ToStringComparator;
 
 public class JaxbJobReaderTest extends TestCase {
@@ -200,7 +204,8 @@ public class JaxbJobReaderTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 			assertEquals("javax.xml.bind.UnmarshalException: unexpected element "
 					+ "(uri:\"http://eobjects.org/analyzerbeans/job/1.0\", local:\"datacontext\"). "
-					+ "Expected elements are <{http://eobjects.org/analyzerbeans/job/1.0}columns>,"
+					+ "Expected elements are <{http://eobjects.org/analyzerbeans/job/1.0}variables>,"
+					+ "<{http://eobjects.org/analyzerbeans/job/1.0}columns>,"
 					+ "<{http://eobjects.org/analyzerbeans/job/1.0}data-context>", e.getMessage());
 		}
 	}
@@ -351,5 +356,24 @@ public class JaxbJobReaderTest extends TestCase {
 		assertEquals(
 				"Null count                                         122              122                0                0 ",
 				resultLines[2]);
+	}
+
+	public void testReadVariables() throws Exception {
+		CsvDatastore datastore = new CsvDatastore("date-datastore", "src/test/resources/example-dates.csv");
+		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(datastore);
+		JaxbJobReader reader = new JaxbJobReader(configuration);
+		File file = new File("src/test/resources/example-job-variables.xml");
+		assertTrue(file.exists());
+		AnalysisJobBuilder ajb = reader.create(file);
+
+		List<TransformerJobBuilder<?>> tjbs = ajb.getTransformerJobBuilders();
+
+		DateMaskMatcherTransformer dateMaskMatcherTransformer = (DateMaskMatcherTransformer) tjbs.get(0)
+				.getConfigurableBean();
+		assertEquals("[yyyy-MM-dd]", Arrays.toString(dateMaskMatcherTransformer.getDateMasks()));
+
+		ConvertToDateTransformer convertToDateTransformer = (ConvertToDateTransformer) tjbs.get(1).getConfigurableBean();
+		assertEquals("[yyyy-MM-dd]", Arrays.toString(convertToDateTransformer.getDateMasks()));
+		assertEquals("2000-01-01", new SimpleDateFormat("yyyy-MM-dd").format(convertToDateTransformer.getNullReplacement()));
 	}
 }

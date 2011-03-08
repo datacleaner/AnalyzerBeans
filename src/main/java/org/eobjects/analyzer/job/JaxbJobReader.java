@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -81,6 +83,8 @@ import org.eobjects.analyzer.job.jaxb.SourceType;
 import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
+import org.eobjects.analyzer.job.jaxb.VariableType;
+import org.eobjects.analyzer.job.jaxb.VariablesType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.StringConversionUtils;
@@ -135,6 +139,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	public AnalysisJobMetadata readMetadata(Job job) {
 		final String datastoreName = job.getSource().getDataContext().getRef();
 		final List<String> sourceColumnPaths = getSourceColumnPaths(job);
+		final Map<String, String> variables = getVariables(job);
 
 		final String jobName;
 		final String jobVersion;
@@ -175,7 +180,23 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		}
 
 		return new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author, createdDate, updatedDate,
-				datastoreName, sourceColumnPaths);
+				datastoreName, sourceColumnPaths, variables);
+	}
+
+	public Map<String, String> getVariables(Job job) {
+		final Map<String, String> result = new HashMap<String, String>();
+
+		VariablesType variablesType = job.getSource().getVariables();
+		if (variablesType != null) {
+			List<VariableType> variables = variablesType.getVariable();
+			for (VariableType variableType : variables) {
+				String id = variableType.getId();
+				String value = variableType.getValue();
+				result.put(id, value);
+			}
+		}
+
+		return result;
 	}
 
 	public List<String> getSourceColumnPaths(Job job) {
@@ -205,12 +226,17 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	}
 
 	public AnalysisJobBuilder create(InputStream inputStream) throws NoSuchDatastoreException {
-		return create(inputStream, null);
+		return create(unmarshallJob(inputStream), null, null);
 	}
 
 	public AnalysisJobBuilder create(InputStream inputStream, SourceColumnMapping sourceColumnMapping)
 			throws NoSuchDatastoreException {
-		return create(unmarshallJob(inputStream), sourceColumnMapping);
+		return create(unmarshallJob(inputStream), sourceColumnMapping, null);
+	}
+
+	public AnalysisJobBuilder create(InputStream inputStream, Map<String, String> variableOverrides)
+			throws NoSuchDatastoreException {
+		return create(unmarshallJob(inputStream), null, variableOverrides);
 	}
 
 	private Job unmarshallJob(InputStream inputStream) {
@@ -226,15 +252,27 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	}
 
 	public AnalysisJobBuilder create(Job job) {
-		return create(job, null);
+		return create(job, null, null);
 	}
 
-	public AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping) throws NoSuchDatastoreException {
+	public AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping, Map<String, String> variableOverrides)
+			throws NoSuchDatastoreException {
 		if (job == null) {
 			throw new IllegalArgumentException("Job cannot be null");
 		}
 		if (sourceColumnMapping != null && !sourceColumnMapping.isSatisfied()) {
 			throw new IllegalArgumentException("Source column mapping is not satisfied!");
+		}
+
+		final Map<String, String> variables = getVariables(job);
+		if (variableOverrides != null) {
+			final Set<Entry<String, String>> entrySet = variableOverrides.entrySet();
+			for (Entry<String, String> entry : entrySet) {
+				final String key = entry.getKey();
+				final String value = entry.getValue();
+				String originalValue = variables.put(key, value);
+				logger.info("Overriding variable: {}={} (original value was {})", new Object[] { key, value, originalValue });
+			}
 		}
 
 		final JobMetadataType metadata = job.getJobMetadata();
@@ -335,7 +373,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 					transformerJobBuilder.setName(transformer.getName());
 
-					applyProperties(transformerJobBuilder, transformer.getProperties(), schemaNavigator);
+					applyProperties(transformerJobBuilder, transformer.getProperties(), schemaNavigator, variables);
 
 					transformerJobBuilders.put(transformer, transformerJobBuilder);
 				}
@@ -484,7 +522,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						}
 					}
 
-					applyProperties(filterJobBuilder, filter.getProperties(), schemaNavigator);
+					applyProperties(filterJobBuilder, filter.getProperties(), schemaNavigator, variables);
 
 					filterJobBuilders.put(filter, filterJobBuilder);
 
@@ -662,7 +700,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						analyzerJobBuilder.addInputColumn(inputColumn, propertyDescriptor);
 					}
 				}
-				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator);
+				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator, variables);
 
 				ref = analyzerType.getRequires();
 				if (ref != null) {
@@ -679,7 +717,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				ExploringAnalyzerJobBuilder<? extends ExploringAnalyzer<?>> analyzerJobBuilder = analysisJobBuilder
 						.addExploringAnalyzer(beanClass);
 				analyzerJobBuilder.setName(analyzerType.getName());
-				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator);
+				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator, variables);
 
 				if (analyzerType.getRequires() != null) {
 					throw new IllegalStateException("Cannot add outcome requirement to exploring analyzer: "
@@ -719,18 +757,30 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	}
 
 	private void applyProperties(AbstractBeanJobBuilder<? extends BeanDescriptor<?>, ?, ?> builder,
-			ConfiguredPropertiesType configuredPropertiesType, SchemaNavigator schemaNavigator) {
+			ConfiguredPropertiesType configuredPropertiesType, SchemaNavigator schemaNavigator, Map<String, String> variables) {
 		if (configuredPropertiesType != null) {
 			List<Property> properties = configuredPropertiesType.getProperty();
 			BeanDescriptor<?> descriptor = builder.getDescriptor();
 			for (Property property : properties) {
-				String name = property.getName();
-				String stringValue = property.getValue();
-
-				ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty(name);
+				final String name = property.getName();
+				final ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty(name);
 
 				if (configuredProperty == null) {
 					throw new IllegalStateException("No such property: " + name);
+				}
+
+				String stringValue = property.getValue();
+				if (stringValue == null) {
+					String variableRef = property.getRef();
+					if (variableRef == null) {
+						throw new IllegalStateException("Neither value nor ref was specified for property: " + name);
+					}
+
+					stringValue = variables.get(variableRef);
+
+					if (stringValue == null) {
+						throw new IllegalStateException("No such variable: " + variableRef);
+					}
 				}
 
 				Object value = StringConversionUtils.deserialize(stringValue, configuredProperty.getType(), schemaNavigator,

@@ -193,4 +193,12 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 
 		return defaultDateMasks.toArray(new String[defaultDateMasks.size()]);
 	}
+	
+	public String[] getDateMasks() {
+		return dateMasks;
+	}
+	
+	public Date getNullReplacement() {
+		return nullReplacement;
+	}
 }

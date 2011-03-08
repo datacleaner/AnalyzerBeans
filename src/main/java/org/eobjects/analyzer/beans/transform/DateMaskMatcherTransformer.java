@@ -104,4 +104,8 @@ public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 	public void setDateMasks(String[] dateMasks) {
 		_dateMasks = dateMasks;
 	}
+	
+	public String[] getDateMasks() {
+		return _dateMasks;
+	}
 }

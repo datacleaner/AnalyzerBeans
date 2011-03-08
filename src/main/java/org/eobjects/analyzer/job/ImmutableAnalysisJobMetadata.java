@@ -22,7 +22,9 @@ package org.eobjects.analyzer.job;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eobjects.metamodel.util.BaseObject;
 
@@ -36,9 +38,11 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
 	private final Date _updatedDate;
 	private final String _datastoreName;
 	private final List<String> _sourceColumnPaths;
+	private final Map<String, String> _variables;
 
 	public ImmutableAnalysisJobMetadata(String jobName, String jobVersion, String jobDescription, String author,
-			Date createdDate, Date updatedDate, String datastoreName, List<String> sourceColumnPaths) {
+			Date createdDate, Date updatedDate, String datastoreName, List<String> sourceColumnPaths,
+			Map<String, String> variables) {
 		_jobName = jobName;
 		_jobVersion = jobVersion;
 		_jobDescription = jobDescription;
@@ -52,6 +56,13 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
 			sourceColumnPaths = new ArrayList<String>(sourceColumnPaths);
 		}
 		_sourceColumnPaths = Collections.unmodifiableList(sourceColumnPaths);
+
+		if (variables == null) {
+			variables = Collections.emptyMap();
+		} else {
+			variables = new HashMap<String, String>(variables);
+		}
+		_variables = Collections.unmodifiableMap(variables);
 	}
 
 	@Override
@@ -64,6 +75,7 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
 		identifiers.add(_updatedDate);
 		identifiers.add(_datastoreName);
 		identifiers.add(_sourceColumnPaths);
+		identifiers.add(_variables);
 	}
 
 	@Override
@@ -104,5 +116,10 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
 	@Override
 	public List<String> getSourceColumnPaths() {
 		return _sourceColumnPaths;
+	}
+
+	@Override
+	public Map<String, String> getVariables() {
+		return _variables;
 	}
 }

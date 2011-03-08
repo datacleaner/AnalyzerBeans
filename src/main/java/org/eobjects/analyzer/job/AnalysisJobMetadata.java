@@ -21,6 +21,7 @@ package org.eobjects.analyzer.job;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Defines the metadata of a job. This metadata type can be used to present
@@ -49,4 +50,6 @@ public interface AnalysisJobMetadata {
 	public String getDatastoreName();
 
 	public List<String> getSourceColumnPaths();
+
+	public Map<String, String> getVariables();
 }

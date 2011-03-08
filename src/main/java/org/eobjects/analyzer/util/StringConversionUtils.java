@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -327,8 +328,14 @@ public final class StringConversionUtils {
 		try {
 			return new SimpleDateFormat(dateFormatString).parse(str);
 		} catch (ParseException e) {
-			logger.error("Could not parse date: " + str, e);
-			throw new IllegalArgumentException(e);
+
+			Date date = ConvertToDateTransformer.getInternalInstance().transformValue(str);
+			if (date == null) {
+				logger.error("Could not parse date: " + str, e);
+				throw new IllegalArgumentException(e);
+			} else {
+				return date;
+			}
 		}
 	}
 
