@@ -59,6 +59,18 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 @Concurrent(true)
 public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResult> {
 
+	public static final String DIMENSION_COLUMN = "Column";
+	public static final String DIMENSION_MEASURE = "Measure";
+	public static final String MEASURE_ROW_COUNT = "Row count";
+	public static final String MEASURE_NULL_COUNT = "Null count";
+	public static final String MEASURE_HIGHEST_VALUE = "Highest value";
+	public static final String MEASURE_LOWEST_VALUE = "Lowest value";
+	public static final String MEASURE_SUM = "Sum";
+	public static final String MEASURE_MEAN = "Mean";
+	public static final String MEASURE_GEOMETRIC_MEAN = "Geometric mean";
+	public static final String MEASURE_STANDARD_DEVIATION = "Standard deviation";
+	public static final String MEASURE_VARIANCE = "Variance";
+
 	private Map<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate>();
 
 	@Configured
@@ -96,18 +108,18 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 
 	@Override
 	public NumberAnalyzerResult getResult() {
-		CrosstabDimension measureDimension = new CrosstabDimension("Measure");
-		measureDimension.addCategory("Row count");
-		measureDimension.addCategory("Null count");
-		measureDimension.addCategory("Highest value");
-		measureDimension.addCategory("Lowest value");
-		measureDimension.addCategory("Sum");
-		measureDimension.addCategory("Mean");
-		measureDimension.addCategory("Geometric mean");
-		measureDimension.addCategory("Standard deviation");
-		measureDimension.addCategory("Variance");
+		CrosstabDimension measureDimension = new CrosstabDimension(DIMENSION_MEASURE);
+		measureDimension.addCategory(MEASURE_ROW_COUNT);
+		measureDimension.addCategory(MEASURE_NULL_COUNT);
+		measureDimension.addCategory(MEASURE_HIGHEST_VALUE);
+		measureDimension.addCategory(MEASURE_LOWEST_VALUE);
+		measureDimension.addCategory(MEASURE_SUM);
+		measureDimension.addCategory(MEASURE_MEAN);
+		measureDimension.addCategory(MEASURE_GEOMETRIC_MEAN);
+		measureDimension.addCategory(MEASURE_STANDARD_DEVIATION);
+		measureDimension.addCategory(MEASURE_VARIANCE);
 
-		CrosstabDimension columnDimension = new CrosstabDimension("Column");
+		CrosstabDimension columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
 		for (InputColumn<? extends Number> column : _columns) {
 			columnDimension.addCategory(column.getName());
 		}
@@ -120,14 +132,14 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 			SummaryStatistics s = delegate.getStatistics();
 			int nullCount = delegate.getNullCount();
 
-			nav.where(measureDimension, "Null count").put(nullCount);
+			nav.where(measureDimension, MEASURE_NULL_COUNT).put(nullCount);
 
 			if (nullCount > 0) {
 				addAttachment(nav, delegate.getNullAnnotation(), column);
 			}
 
 			int numRows = delegate.getNumRows();
-			nav.where(measureDimension, "Row count").put(numRows);
+			nav.where(measureDimension, MEASURE_ROW_COUNT).put(numRows);
 
 			long nonNullCount = s.getN();
 
@@ -140,17 +152,17 @@ public class NumberAnalyzer implements RowProcessingAnalyzer<NumberAnalyzerResul
 				double standardDeviation = s.getStandardDeviation();
 				double variance = s.getVariance();
 
-				nav.where(measureDimension, "Highest value").put(highestValue);
+				nav.where(measureDimension, MEASURE_HIGHEST_VALUE).put(highestValue);
 				addAttachment(nav, delegate.getMaxAnnotation(), column);
 
-				nav.where(measureDimension, "Lowest value").put(lowestValue);
+				nav.where(measureDimension, MEASURE_LOWEST_VALUE).put(lowestValue);
 				addAttachment(nav, delegate.getMinAnnotation(), column);
 
-				nav.where(measureDimension, "Sum").put(sum);
-				nav.where(measureDimension, "Mean").put(mean);
-				nav.where(measureDimension, "Geometric mean").put(geometricMean);
-				nav.where(measureDimension, "Standard deviation").put(standardDeviation);
-				nav.where(measureDimension, "Variance").put(variance);
+				nav.where(measureDimension, MEASURE_SUM).put(sum);
+				nav.where(measureDimension, MEASURE_MEAN).put(mean);
+				nav.where(measureDimension, MEASURE_GEOMETRIC_MEAN).put(geometricMean);
+				nav.where(measureDimension, MEASURE_STANDARD_DEVIATION).put(standardDeviation);
+				nav.where(measureDimension, MEASURE_VARIANCE).put(variance);
 			}
 		}
 		return new NumberAnalyzerResult(_columns, crosstab);
