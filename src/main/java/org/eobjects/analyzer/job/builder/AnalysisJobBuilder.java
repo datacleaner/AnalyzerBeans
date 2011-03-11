@@ -723,6 +723,61 @@ public final class AnalysisJobBuilder implements Closeable {
 		return _filterChangeListeners;
 	}
 
+	/**
+	 * Removes all source columns and all components from the job
+	 */
+	public void reset() {
+		removeAllSourceColumns();
+		removeAllMergedOutcomes();
+		removeAllFilters();
+		removeAllTransformers();
+		removeAllAnalyzers();
+	}
+
+	public void removeAllSourceColumns() {
+		List<MetaModelInputColumn> sourceColumns = new ArrayList<MetaModelInputColumn>(_sourceColumns);
+		for (MetaModelInputColumn inputColumn : sourceColumns) {
+			removeSourceColumn(inputColumn);
+		}
+		assert _sourceColumns.isEmpty();
+	}
+
+	public void removeAllAnalyzers() {
+		List<AnalyzerJobBuilder<?>> analyzers = new ArrayList<AnalyzerJobBuilder<?>>(_analyzerJobBuilders);
+		for (AnalyzerJobBuilder<?> ajb : analyzers) {
+			if (ajb instanceof RowProcessingAnalyzerJobBuilder) {
+				removeAnalyzer((RowProcessingAnalyzerJobBuilder<?>) ajb);
+			} else {
+				removeAnalyzer((ExploringAnalyzerJobBuilder<?>) ajb);
+			}
+		}
+		assert _analyzerJobBuilders.isEmpty();
+	}
+
+	public void removeAllTransformers() {
+		List<TransformerJobBuilder<?>> transformers = new ArrayList<TransformerJobBuilder<?>>(_transformerJobBuilders);
+		for (TransformerJobBuilder<?> transformerJobBuilder : transformers) {
+			removeTransformer(transformerJobBuilder);
+		}
+		assert _transformerJobBuilders.isEmpty();
+	}
+
+	public void removeAllFilters() {
+		List<FilterJobBuilder<?, ?>> filters = new ArrayList<FilterJobBuilder<?, ?>>(_filterJobBuilders);
+		for (FilterJobBuilder<?, ?> filterJobBuilder : filters) {
+			removeFilter(filterJobBuilder);
+		}
+		assert _filterJobBuilders.isEmpty();
+	}
+
+	public void removeAllMergedOutcomes() {
+		List<MergedOutcomeJobBuilder> mojbs = new ArrayList<MergedOutcomeJobBuilder>(_mergedOutcomeJobBuilders);
+		for (MergedOutcomeJobBuilder mergedOutcomeJobBuilder : mojbs) {
+			removeMergedOutcomeJobBuilder(mergedOutcomeJobBuilder);
+		}
+		assert _mergedOutcomeJobBuilders.isEmpty();
+	}
+
 	@Override
 	public void close() {
 		if (_dataContextProvider != null) {
