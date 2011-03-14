@@ -70,6 +70,10 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 		logger.info("shutdown() called, shutting down executor service");
 		_executorService.shutdown();
 	}
+	
+	public ExecutorService getExecutorService() {
+		return _executorService;
+	}
 
 	@Override
 	protected void finalize() throws Throwable {
