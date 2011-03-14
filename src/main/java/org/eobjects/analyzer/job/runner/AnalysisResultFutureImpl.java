@@ -58,6 +58,13 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	}
 
 	@Override
+	public void cancel() {
+		if (!_done) {
+			_jobTaskListener.onError(null, new AnalysisJobCancellation());
+		}
+	}
+
+	@Override
 	public void await(long timeout, TimeUnit timeUnit) {
 		if (!isDone()) {
 			try {
@@ -172,5 +179,10 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 			return JobStatus.NOT_FINISHED;
 		}
 		return JobStatus.ERRORNOUS;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return _errorAware.isCancelled();
 	}
 }

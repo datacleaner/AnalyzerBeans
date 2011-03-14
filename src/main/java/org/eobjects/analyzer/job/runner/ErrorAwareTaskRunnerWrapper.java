@@ -54,6 +54,8 @@ final class ErrorAwareTaskRunnerWrapper implements TaskRunner, ErrorAware {
 	public void run(Task task, TaskListener taskListener) {
 		if (isErrornous()) {
 			taskListener.onError(task, exception);
+		} else if (isCancelled()) {
+			taskListener.onError(task, null);
 		} else {
 			_taskRunner.run(task, taskListener);
 		}
@@ -79,4 +81,8 @@ final class ErrorAwareTaskRunnerWrapper implements TaskRunner, ErrorAware {
 		return _errorAware.getErrors();
 	}
 
+	@Override
+	public boolean isCancelled() {
+		return _errorAware.isCancelled();
+	}
 }

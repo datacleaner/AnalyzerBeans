@@ -53,6 +53,11 @@ public interface AnalysisResultFuture extends ErrorAware {
 	 * job has ended.
 	 */
 	public void await();
+	
+	/**
+	 * Cancels the job, if it is still running.
+	 */
+	public void cancel();
 
 	/**
 	 * Blocks the current thread until interrupted, either because the job has

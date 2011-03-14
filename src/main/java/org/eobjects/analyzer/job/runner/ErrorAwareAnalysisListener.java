@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job.runner;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -43,7 +44,8 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 	private static final Logger logger = LoggerFactory.getLogger(ErrorAwareAnalysisListener.class);
 
 	private final List<Throwable> _errors = new LinkedList<Throwable>();
-
+	private final AtomicBoolean _cancelled = new AtomicBoolean(false);
+	
 	@Override
 	public void jobBegin(AnalysisJob job) {
 	}
@@ -53,6 +55,9 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 	}
 
 	private void storeError(AnalysisJob job, Throwable throwable) {
+		if (throwable instanceof AnalysisJobCancellation) {
+			_cancelled.set(true);
+		}
 		synchronized (_errors) {
 			if (!_errors.contains(throwable)) {
 				_errors.add(throwable);
@@ -116,5 +121,10 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 
 	@Override
 	public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return _cancelled.get();
 	}
 }

@@ -24,6 +24,8 @@ import java.util.List;
 public interface ErrorAware {
 
 	public boolean isErrornous();
+	
+	public boolean isCancelled();
 
 	public List<Throwable> getErrors();
 }

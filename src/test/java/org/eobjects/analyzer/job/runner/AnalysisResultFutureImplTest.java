@@ -76,7 +76,7 @@ public class AnalysisResultFutureImplTest extends TestCase {
 		assertEquals("1", resultFuture.getResult(analyzerJob1).toString());
 		assertEquals("2", resultFuture.getResult(analyzerJob2).toString());
 		assertNull(resultFuture.getResult(analyzerJob3));
-		
+
 		Map<AnalyzerJob, AnalyzerResult> resultMap = resultFuture.getResultMap();
 
 		EasyMock.verify(jobCompletionListener, errorAware);
@@ -84,5 +84,23 @@ public class AnalysisResultFutureImplTest extends TestCase {
 		assertEquals(2, resultMap.size());
 		assertEquals("1", resultMap.get(analyzerJob1).toString());
 		assertEquals("2", resultMap.get(analyzerJob2).toString());
+	}
+
+	public void testCancel() throws Exception {
+		Queue<AnalyzerJobResult> resultQueue = new LinkedList<AnalyzerJobResult>();
+		StatusAwareTaskListener jobCompletionListener = EasyMock.createMock(StatusAwareTaskListener.class);
+		ErrorAware errorAware = EasyMock.createMock(ErrorAware.class);
+
+		jobCompletionListener.onError(null, new AnalysisJobCancellation());
+		EasyMock.expect(errorAware.isCancelled()).andReturn(true);
+
+		EasyMock.replay(jobCompletionListener, errorAware);
+
+		AnalysisResultFutureImpl resultFuture = new AnalysisResultFutureImpl(resultQueue, jobCompletionListener, errorAware);
+		resultFuture.cancel();
+
+		assertTrue(resultFuture.isCancelled());
+
+		EasyMock.verify(jobCompletionListener, errorAware);
 	}
 }
