@@ -35,9 +35,8 @@ public class JavaScriptTransformerTest extends TestCase {
 		t.setSourceCode("function eval() {return 1+1;}; eval();");
 		t.setColumns(new InputColumn[0]);
 		t.init();
-		Object object = t.transform(null)[0];
+		String object = t.transform(null)[0];
 		assertEquals("2", object.toString());
-		assertTrue(object instanceof String);
 	}
 
 	/**
