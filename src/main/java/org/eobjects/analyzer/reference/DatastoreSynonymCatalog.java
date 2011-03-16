@@ -130,6 +130,14 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 		return _name;
 	}
 
+	public String getDatastoreName() {
+		return _datastoreName;
+	}
+
+	public String getMasterTermQualifiedColumnName() {
+		return _masterTermQualifiedColumnName;
+	}
+
 	@Override
 	public Collection<Synonym> getSynonyms() {
 
