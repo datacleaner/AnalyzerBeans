@@ -179,7 +179,8 @@ public class TransformerJobBuilderTest extends TestCase {
 				.create(WhitespaceTrimmerTransformer.class);
 
 		TransformerJobBuilder<WhitespaceTrimmerTransformer> builder = new TransformerJobBuilder<WhitespaceTrimmerTransformer>(
-				new AnalysisJobBuilder(null), descriptor, IdGenerator, new LinkedList<TransformerChangeListener>());
+				new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration()), descriptor, IdGenerator,
+				new LinkedList<TransformerChangeListener>());
 
 		MockInputColumn<String> colA = new MockInputColumn<String>("A", String.class);
 		MockInputColumn<String> colB = new MockInputColumn<String>("B", String.class);

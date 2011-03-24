@@ -23,8 +23,10 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
+import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
 /**
  * Default implementation of the AnalysisRunner interface.
@@ -81,9 +83,13 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 		// set up the task runner that is aware of errors
 		final TaskRunner taskRunner = new ErrorAwareTaskRunnerWrapper(errorListener, _configuration.getTaskRunner());
 
+		final DatastoreCatalog datastoreCatalog = _configuration.getDatastoreCatalog();
+		final ReferenceDataCatalog referenceDataCatalog = _configuration.getReferenceDataCatalog();
+
 		// the delegate will do all the actual work
-		final AnalysisRunnerJobDelegate delegate = new AnalysisRunnerJobDelegate(job, taskRunner,
-				_configuration.getStorageProvider(), analysisListener, resultQueue, errorListener);
+		final AnalysisRunnerJobDelegate delegate = new AnalysisRunnerJobDelegate(job, datastoreCatalog,
+				referenceDataCatalog, taskRunner, _configuration.getStorageProvider(), analysisListener, resultQueue,
+				errorListener);
 		return delegate.run();
 	}
 }

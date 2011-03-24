@@ -27,9 +27,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation that marks a no-arg method as an initializing method. Use this
- * annotation if you need to initialize the state of a bean before it starts
- * executing a job.
+ * Annotation that marks method as an initializing method. Use this annotation
+ * if you need to initialize the state of a bean before it starts executing a
+ * job.
  * 
  * The @Initialize annotation can be used on methods in the following component
  * types:
@@ -49,6 +49,15 @@ import java.lang.annotation.Target;
  * The method is invoked after any @Configured and @Provided methods/fields are
  * invoked/assigned but before any business methods (such as run(...) on an
  * analyzer) are invoked.
+ * 
+ * The initialize method can optionally include optional parameters of these
+ * types, which will allow injection of environment and ease serializability for
+ * components that reference items in the surrounding configuration:
+ * 
+ * <ul>
+ * <li>DatastoreCatalog</li>
+ * <li>ReferenceDataCatalog</li>
+ * </ul>
  * 
  * @Initialize is often used in conjunction with the @Close annotation.
  * 

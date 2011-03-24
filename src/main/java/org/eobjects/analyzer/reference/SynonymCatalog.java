@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.reference;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 import org.eobjects.analyzer.beans.api.Close;
@@ -47,7 +46,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
  * 
  * @author Kasper Sørensen
  */
-public interface SynonymCatalog extends Serializable {
+public interface SynonymCatalog extends ReferenceData {
 
 	/**
 	 * @return The name of this synonym catalog

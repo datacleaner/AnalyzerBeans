@@ -22,11 +22,44 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+
+/**
+ * Descriptor for an initialize method. The most common way of registering an
+ * initialize method is using the @Initialize annotation.
+ * 
+ * @see Initialize
+ * 
+ * @author Kasper Sørensen
+ */
 public interface InitializeMethodDescriptor {
 
-	public void initialize(Object bean);
+	/**
+	 * Invokes the initialize method
+	 * 
+	 * @param bean
+	 * @param datastoreCatalog
+	 * @param referenceDataCatalog
+	 */
+	public void initialize(Object bean, DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog);
 
+	/**
+	 * Gets the annotations of the method
+	 * 
+	 * @return the annotations of the method
+	 */
 	public Set<Annotation> getAnnotations();
 
+	/**
+	 * Gets a particular annotation of the method
+	 * 
+	 * @param <A>
+	 *            the annotation type
+	 * @param annotationClass
+	 *            the annotation class to look for
+	 * @return a matching annotation or null, if none is present
+	 */
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 }

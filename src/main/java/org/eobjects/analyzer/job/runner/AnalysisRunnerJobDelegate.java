@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -61,6 +62,7 @@ import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
+import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.slf4j.Logger;
@@ -97,13 +99,17 @@ final class AnalysisRunnerJobDelegate {
 	private final Collection<MergedOutcomeJob> _mergedOutcomeJobs;
 	private final ReferenceDataActivationManager _rowProcessingReferenceDataActivationManager;
 	private final SourceColumnFinder _sourceColumnFinder;
+	private final DatastoreCatalog _datastoreCatalog;
+	private final ReferenceDataCatalog _referenceDataCatalog;
+	private final ReferenceDataActivationManager _explorerReferenceDataActivationManager;
 
-	private ReferenceDataActivationManager _explorerReferenceDataActivationManager;
-
-	public AnalysisRunnerJobDelegate(AnalysisJob job, TaskRunner taskRunner, StorageProvider storageProvider,
+	public AnalysisRunnerJobDelegate(AnalysisJob job, DatastoreCatalog datastoreCatalog,
+			ReferenceDataCatalog referenceDataCatalog, TaskRunner taskRunner, StorageProvider storageProvider,
 			AnalysisListener analysisListener, Queue<AnalyzerJobResult> resultQueue, ErrorAware errorAware) {
-		_storageProvider = storageProvider;
 		_job = job;
+		_datastoreCatalog = datastoreCatalog;
+		_referenceDataCatalog = referenceDataCatalog;
+		_storageProvider = storageProvider;
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
 		_resultQueue = resultQueue;
@@ -209,6 +215,8 @@ final class AnalysisRunnerJobDelegate {
 		final TaskListener explorersDoneTaskListener = new JoinTaskListener(numExplorerJobs, new ForkTaskListener(
 				"Exploring analyzers done", _taskRunner, finalTasks));
 
+		final InitializeCallback initializeCallback = new InitializeCallback(_datastoreCatalog, _referenceDataCatalog);
+
 		// begin explorer jobs first because they can run independently (
 		for (AnalyzerJob explorerJob : _explorerJobs) {
 			final DataContextProvider dataContextProvider = _datastore.getDataContextProvider();
@@ -228,7 +236,8 @@ final class AnalysisRunnerJobDelegate {
 			TaskListener referenceDataInitFinishedListener = new RunNextTaskTaskListener(_taskRunner, runTask,
 					runFinishedListener);
 
-			Task initializeReferenceData = new InitializeReferenceDataTask(_explorerReferenceDataActivationManager);
+			Task initializeReferenceData = new InitializeReferenceDataTask(_datastoreCatalog, _referenceDataCatalog,
+					_explorerReferenceDataActivationManager);
 			RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner, initializeReferenceData,
 					referenceDataInitFinishedListener);
 
@@ -240,7 +249,7 @@ final class AnalysisRunnerJobDelegate {
 
 			AssignCallbacksAndInitializeTask initTask = new AssignCallbacksAndInitializeTask(instance, _storageProvider,
 					_storageProvider.createRowAnnotationFactory(), dataContextProvider, assignConfiguredCallback,
-					new InitializeCallback(), runExplorerCallback, returnResultsCallback, closeCallback);
+					initializeCallback, runExplorerCallback, returnResultsCallback, closeCallback);
 
 			// begin the explorers
 			_taskRunner.run(initTask, initializeFinishedListener);
@@ -353,7 +362,7 @@ final class AnalysisRunnerJobDelegate {
 			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
 				rowPublisher = new RowProcessingPublisher(_job, _storageProvider, table, taskRunner, listener,
-						_rowProcessingReferenceDataActivationManager);
+						_datastoreCatalog, _referenceDataCatalog, _rowProcessingReferenceDataActivationManager);
 				rowProcessingPublishers.put(table, rowPublisher);
 			}
 

@@ -19,8 +19,6 @@
  */
 package org.eobjects.analyzer.reference;
 
-import java.io.Serializable;
-
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
 
@@ -48,9 +46,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
  * 
  * @author Kasper Sørensen
  */
-public interface StringPattern extends Serializable {
-
-	public String getName();
+public interface StringPattern extends ReferenceData {
 
 	public boolean matches(String string);
 }

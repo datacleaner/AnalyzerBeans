@@ -167,6 +167,28 @@ public class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implemen
 	}
 
 	@Override
+	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesByType(Class<?> type, boolean includeArrays) {
+		Set<ConfiguredPropertyDescriptor> set = new TreeSet<ConfiguredPropertyDescriptor>();
+		for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
+			final boolean include;
+			if (includeArrays) {
+				include = ReflectionUtils.is(configuredDescriptor.getBaseType(), type);
+			} else {
+				Class<?> baseType = configuredDescriptor.getType();
+				if (baseType.isArray() == type.isArray()) {
+					include = ReflectionUtils.is(baseType, type);
+				} else {
+					include = false;
+				}
+			}
+			if (include) {
+				set.add(configuredDescriptor);
+			}
+		}
+		return set;
+	}
+
+	@Override
 	public int compareTo(ComponentDescriptor<?> o) {
 		if (o == null) {
 			return 1;

@@ -19,8 +19,6 @@
  */
 package org.eobjects.analyzer.reference;
 
-import java.io.Serializable;
-
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
 
@@ -50,9 +48,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
  * 
  * @author Kasper Sørensen
  */
-public interface Dictionary extends Serializable {
-
-	public String getName();
+public interface Dictionary extends ReferenceData {
 
 	public boolean containsValue(String value);
 

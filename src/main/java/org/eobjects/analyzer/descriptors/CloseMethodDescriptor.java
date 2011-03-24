@@ -22,11 +22,42 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.Close;
+
+/**
+ * Descriptor for a close method. The most common way of registering a close
+ * method is by using the @Close annotation or by implementing the Closeable
+ * interface.
+ * 
+ * @see Close
+ * 
+ * @author Kasper Sørensen
+ * 
+ */
 public interface CloseMethodDescriptor {
 
+	/**
+	 * Invokes the close method
+	 * 
+	 * @param bean
+	 */
 	public void close(Object bean);
 
+	/**
+	 * Gets the annotations of the method
+	 * 
+	 * @return the annotations of the method
+	 */
 	public Set<Annotation> getAnnotations();
 
+	/**
+	 * Gets a particular annotation of the method
+	 * 
+	 * @param <A>
+	 *            the annotation type
+	 * @param annotationClass
+	 *            the annotation class to look for
+	 * @return a matching annotation or null, if none is present
+	 */
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 }

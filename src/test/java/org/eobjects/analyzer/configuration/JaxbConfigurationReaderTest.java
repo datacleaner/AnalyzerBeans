@@ -28,6 +28,7 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
@@ -36,9 +37,8 @@ import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
 import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
-import org.junit.Assert;
-
 import org.eobjects.metamodel.DataContext;
+import org.junit.Assert;
 
 public class JaxbConfigurationReaderTest extends TestCase {
 
@@ -60,9 +60,9 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		AnalyzerBeansConfiguration configuration = reader.create(new File(
 				"src/test/resources/example-configuration-combined-storage.xml"));
 		StorageProvider storageProvider = configuration.getStorageProvider();
-		
+
 		assertEquals(CombinedStorageProvider.class, storageProvider.getClass());
-		
+
 		CombinedStorageProvider csp = (CombinedStorageProvider) storageProvider;
 		assertEquals(BerkeleyDbStorageProvider.class, csp.getCollectionsStorageProvider().getClass());
 		assertEquals(HsqldbStorageProvider.class, csp.getRowAnnotationsStorageProvider().getClass());
@@ -105,26 +105,33 @@ public class JaxbConfigurationReaderTest extends TestCase {
 	}
 
 	public void testReferenceDataCatalog() throws Exception {
-		ReferenceDataCatalog referenceDataCatalog = getConfigurationFromXMLFile().getReferenceDataCatalog();
+		AnalyzerBeansConfiguration conf = getConfigurationFromXMLFile();
+		ReferenceDataCatalog referenceDataCatalog = conf.getReferenceDataCatalog();
 		String[] dictionaryNames = referenceDataCatalog.getDictionaryNames();
 		assertEquals("[datastore_dict, textfile_dict, valuelist_dict, custom_dict]", Arrays.toString(dictionaryNames));
 
+		LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf);
+
 		Dictionary d = referenceDataCatalog.getDictionary("datastore_dict");
+		lifeCycleHelper.initialize(d);
 		assertTrue(d.containsValue("Patterson"));
 		assertTrue(d.containsValue("Murphy"));
 		assertFalse(d.containsValue("Gates"));
 
 		d = referenceDataCatalog.getDictionary("textfile_dict");
+		lifeCycleHelper.initialize(d);
 		assertTrue(d.containsValue("Patterson"));
 		assertFalse(d.containsValue("Murphy"));
 		assertTrue(d.containsValue("Gates"));
 
 		d = referenceDataCatalog.getDictionary("valuelist_dict");
+		lifeCycleHelper.initialize(d);
 		assertFalse(d.containsValue("Patterson"));
 		assertFalse(d.containsValue("Murphy"));
 		assertTrue(d.containsValue("greetings"));
 
 		d = referenceDataCatalog.getDictionary("custom_dict");
+		lifeCycleHelper.initialize(d);
 		assertFalse(d.containsValue("Patterson"));
 		assertFalse(d.containsValue("Murphy"));
 		assertFalse(d.containsValue("Gates"));
@@ -139,6 +146,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("[textfile_syn, custom_syn]", Arrays.toString(synonymCatalogNames));
 
 		SynonymCatalog s = referenceDataCatalog.getSynonymCatalog("textfile_syn");
+		lifeCycleHelper.initialize(s);
 		assertEquals("DNK", s.getMasterTerm("Denmark"));
 		assertEquals("DNK", s.getMasterTerm("Danmark"));
 		assertEquals("DNK", s.getMasterTerm("DK"));
@@ -146,6 +154,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals(null, s.getMasterTerm("Netherlands"));
 
 		s = referenceDataCatalog.getSynonymCatalog("custom_syn");
+		lifeCycleHelper.initialize(s);
 		assertEquals("DNK", s.getMasterTerm("Denmark"));
 		assertEquals("DNK", s.getMasterTerm("Danmark"));
 		assertEquals(null, s.getMasterTerm("DK"));
@@ -156,12 +165,14 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("[regex danish email, simple email]", Arrays.toString(stringPatternNames));
 
 		StringPattern pattern = referenceDataCatalog.getStringPattern("regex danish email");
+		lifeCycleHelper.initialize(pattern);
 		assertEquals("RegexStringPattern[name=regex danish email,expression=[a-z]+@[a-z]+\\.dk]", pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));
 		assertFalse(pattern.matches("kasper@eobjects.org"));
 		assertFalse(pattern.matches(" kasper@eobjects.dk"));
 
 		pattern = referenceDataCatalog.getStringPattern("simple email");
+		lifeCycleHelper.initialize(pattern);
 		assertEquals("SimpleStringPattern[name=simple email,expression=aaaa@aaaaa.aa]", pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));
 		assertTrue(pattern.matches("kasper@eobjects.org"));

@@ -58,10 +58,9 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 	private final String _masterTermQualifiedColumnName;
 	private final String[] _synonymQualifiedColumnNames;
 
-	public DatastoreSynonymCatalog(String name, DatastoreCatalog datastoreCatalog, String datastoreName,
-			String masterTermQualifiedColumnName, String[] synonymQualifiedColumnNames) {
+	public DatastoreSynonymCatalog(String name, String datastoreName, String masterTermQualifiedColumnName,
+			String[] synonymQualifiedColumnNames) {
 		_name = name;
-		_datastoreCatalog = datastoreCatalog;
 		_datastoreName = datastoreName;
 		_masterTermQualifiedColumnName = masterTermQualifiedColumnName;
 		_synonymQualifiedColumnNames = synonymQualifiedColumnNames;
@@ -75,8 +74,9 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 	 * Initializes a DataContextProvider, which will keep the connection open
 	 */
 	@Initialize
-	public void init() {
+	public void init(DatastoreCatalog datastoreCatalog) {
 		logger.info("Initializing dictionary: {}", this);
+		setDatastoreCatalog(datastoreCatalog);
 		Datastore datastore = getDatastore();
 		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
 		getDataContextProviders().add(dataContextProvider);

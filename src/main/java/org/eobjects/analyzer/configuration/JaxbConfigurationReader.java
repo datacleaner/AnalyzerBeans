@@ -177,7 +177,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		TaskRunner taskRunner = createTaskRunner(configuration);
 		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog());
-		StorageProvider storageProvider = createStorageProvider(configuration.getStorageProvider(), datastoreCatalog);
+		ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(configuration.getReferenceDataCatalog(),
+				datastoreCatalog);
+		StorageProvider storageProvider = createStorageProvider(configuration.getStorageProvider(), datastoreCatalog,
+				referenceDataCatalog);
 
 		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
 		ClasspathScannerType classpathScanner = configuration.getClasspathScanner();
@@ -196,14 +199,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			}
 		}
 
-		ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(configuration.getReferenceDataCatalog(),
-				datastoreCatalog);
-
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
 				storageProvider);
 	}
 
-	private StorageProvider createStorageProvider(StorageProviderType storageProviderType, DatastoreCatalog datastoreCatalog) {
+	private StorageProvider createStorageProvider(StorageProviderType storageProviderType,
+			DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog) {
 		if (storageProviderType == null) {
 			// In-memory is the default storage provider
 			return new InMemoryStorageProvider();
@@ -214,9 +215,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			final StorageProviderType collectionsStorage = combinedStorageProvider.getCollectionsStorage();
 			final StorageProviderType rowAnnotationStorage = combinedStorageProvider.getRowAnnotationStorage();
 
-			final StorageProvider collectionsStorageProvider = createStorageProvider(collectionsStorage, datastoreCatalog);
+			final StorageProvider collectionsStorageProvider = createStorageProvider(collectionsStorage, datastoreCatalog,
+					referenceDataCatalog);
 			final StorageProvider rowAnnotationStorageProvider = createStorageProvider(rowAnnotationStorage,
-					datastoreCatalog);
+					datastoreCatalog, referenceDataCatalog);
 
 			return new CombinedStorageProvider(collectionsStorageProvider, rowAnnotationStorageProvider);
 		}
@@ -229,7 +231,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		CustomElementType customStorageProvider = storageProviderType.getCustomStorageProvider();
 		if (customStorageProvider != null) {
-			return createCustomElement(customStorageProvider, StorageProvider.class, datastoreCatalog, true);
+			return createCustomElement(customStorageProvider, StorageProvider.class, datastoreCatalog, referenceDataCatalog,
+					true);
 		}
 
 		BerkeleyDbStorageProviderType berkeleyDbStorageProvider = storageProviderType.getBerkeleyDb();
@@ -279,7 +282,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						String dsName = ddt.getDatastoreName();
 						String columnPath = ddt.getColumnPath();
 
-						dictionaryList.add(new DatastoreDictionary(name, datastoreCatalog, dsName, columnPath));
+						dictionaryList.add(new DatastoreDictionary(name, dsName, columnPath));
 					} else if (dictionaryType instanceof TextFileDictionaryType) {
 						TextFileDictionaryType tfdt = (TextFileDictionaryType) dictionaryType;
 						String name = tfdt.getName();
@@ -296,7 +299,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						dictionaryList.add(new SimpleDictionary(name, values));
 					} else if (dictionaryType instanceof CustomElementType) {
 						Dictionary customDictionary = createCustomElement((CustomElementType) dictionaryType,
-								Dictionary.class, datastoreCatalog, false);
+								Dictionary.class, datastoreCatalog, null, false);
 						dictionaryList.add(customDictionary);
 					} else {
 						throw new IllegalStateException("Unsupported dictionary type: " + dictionaryType);
@@ -324,7 +327,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 								encoding));
 					} else if (synonymCatalogType instanceof CustomElementType) {
 						SynonymCatalog customSynonymCatalog = createCustomElement((CustomElementType) synonymCatalogType,
-								SynonymCatalog.class, datastoreCatalog, false);
+								SynonymCatalog.class, datastoreCatalog, null, false);
 						synonymCatalogList.add(customSynonymCatalog);
 					} else if (synonymCatalogType instanceof DatastoreSynonymCatalogType) {
 						DatastoreSynonymCatalogType datastoreSynonymCatalogType = (DatastoreSynonymCatalogType) synonymCatalogType;
@@ -334,8 +337,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 						String[] synonymColumnNames = datastoreSynonymCatalogType.getSynonymColumnNames().toArray(
 								new String[0]);
-						synonymCatalogList.add(new DatastoreSynonymCatalog(name, datastoreCatalog, dataStoreName,
-								columnName, synonymColumnNames));
+						synonymCatalogList.add(new DatastoreSynonymCatalog(name, dataStoreName, columnName,
+								synonymColumnNames));
 					} else {
 						throw new IllegalStateException("Unsupported synonym catalog type: " + synonymCatalogType);
 					}
@@ -509,7 +512,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		List<CustomElementType> customDatastores = CollectionUtils.filterOnClass(datastoreTypes, CustomElementType.class);
 		for (CustomElementType customElementType : customDatastores) {
-			Datastore ds = createCustomElement(customElementType, Datastore.class, null, true);
+			Datastore ds = createCustomElement(customElementType, Datastore.class, null, null, true);
 			String name = ds.getName();
 			if (StringUtils.isNullOrEmpty(name)) {
 				throw new IllegalStateException("Datastore name cannot be null");
@@ -567,7 +570,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				taskRunner = new MultiThreadedTaskRunner();
 			}
 		} else if (customTaskrunner != null) {
-			taskRunner = createCustomElement(customTaskrunner, TaskRunner.class, null, true);
+			taskRunner = createCustomElement(customTaskrunner, TaskRunner.class, null, null, true);
 		} else {
 			// default task runner type is multithreaded
 			taskRunner = new MultiThreadedTaskRunner();
@@ -587,6 +590,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 	 *            an expected class or interface that the component should honor
 	 * @param datastoreCatalog
 	 *            the datastore catalog (for lookups/injections)
+	 * @param referenceDataCatalog
+	 *            the reference data catalog (for lookups/injections)
 	 * @param initialize
 	 *            whether or not to call any initialize methods on the component
 	 *            (reference data should not be initialized, while eg. custom
@@ -595,7 +600,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 	 */
 	@SuppressWarnings("unchecked")
 	private <E> E createCustomElement(CustomElementType customElementType, Class<E> expectedClazz,
-			DatastoreCatalog datastoreCatalog, boolean initialize) {
+			DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog, boolean initialize) {
 		E result = null;
 		Class<?> foundClass;
 		String className = customElementType.getClassName();
@@ -646,7 +651,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		if (initialize) {
 			Set<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
 			for (InitializeMethodDescriptor initializeMethod : initializeMethods) {
-				initializeMethod.initialize(result);
+				initializeMethod.initialize(result, datastoreCatalog, referenceDataCatalog);
 			}
 		}
 

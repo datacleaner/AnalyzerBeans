@@ -21,17 +21,33 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Set;
 
+import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class InitializeMethodDescriptorImpl implements InitializeMethodDescriptor {
 
+	private static final Class<?>[] ALLOWED_PARAMETER_TYPES = new Class[] { DatastoreCatalog.class, ReferenceDataCatalog.class };
+
 	private final Method _method;
+	private final Class<?>[] _parameterTypes;
 
 	public InitializeMethodDescriptorImpl(Method method) {
-		if (method.getParameterTypes().length != 0) {
-			throw new DescriptorException("Initialize methods cannot have parameters");
+		_parameterTypes = method.getParameterTypes();
+		for (Class<?> parameterType : _parameterTypes) {
+			boolean accepted = false;
+			for (Class<?> allowedClass : ALLOWED_PARAMETER_TYPES) {
+				if (parameterType == allowedClass) {
+					accepted = true;
+					break;
+				}
+			}
+			if (!accepted) {
+				throwIllegalParameterException(parameterType);
+			}
 		}
 		if (method.getReturnType() != void.class) {
 			throw new DescriptorException("Initialize methods can only be void");
@@ -40,12 +56,34 @@ public final class InitializeMethodDescriptorImpl implements InitializeMethodDes
 		_method.setAccessible(true);
 	}
 
-	public void initialize(Object bean) throws IllegalStateException {
+	public Class<?>[] getParameterTypes() {
+		return _parameterTypes;
+	}
+
+	public void initialize(Object bean, DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog)
+			throws IllegalStateException {
+		Object[] arguments = new Object[_parameterTypes.length];
+		for (int i = 0; i < arguments.length; i++) {
+			Class<?> parameterType = _parameterTypes[i];
+			if (parameterType == DatastoreCatalog.class) {
+				arguments[i] = datastoreCatalog;
+			} else if (parameterType == ReferenceDataCatalog.class) {
+				arguments[i] = referenceDataCatalog;
+			} else {
+				throwIllegalParameterException(parameterType);
+			}
+		}
+
 		try {
-			_method.invoke(bean);
+			_method.invoke(bean, arguments);
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not invoke initializing method " + _method, e);
 		}
+	}
+
+	private void throwIllegalParameterException(Class<?> parameterType) {
+		throw new DescriptorException("Initialize methods can only have parameters with the following types: "
+				+ Arrays.toString(ALLOWED_PARAMETER_TYPES) + ", found: " + parameterType);
 	}
 
 	@Override

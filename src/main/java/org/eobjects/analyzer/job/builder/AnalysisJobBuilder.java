@@ -124,6 +124,10 @@ public final class AnalysisJobBuilder implements Closeable {
 	public DataContextProvider getDataContextProvider() {
 		return _dataContextProvider;
 	}
+	
+	protected AnalyzerBeansConfiguration getConfiguration() {
+		return _configuration;
+	}
 
 	public AnalysisJobBuilder addSourceColumn(Column column) {
 		MetaModelInputColumn inputColumn = new MetaModelInputColumn(column);

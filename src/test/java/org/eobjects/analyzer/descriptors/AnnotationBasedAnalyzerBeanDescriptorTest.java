@@ -24,6 +24,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.MatchingAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
@@ -31,6 +32,8 @@ import org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock;
 import org.eobjects.analyzer.beans.mock.RowProcessingAnalyzerMock;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.reference.Dictionary;
+import org.eobjects.analyzer.reference.ReferenceData;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
@@ -54,6 +57,29 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		assertTrue(it.hasNext());
 		assertEquals("Configured2", it.next().getName());
 		assertFalse(it.hasNext());
+	}
+
+	public void testGetConfiguredPropertiesOfType() throws Exception {
+		AnnotationBasedAnalyzerBeanDescriptor<MatchingAnalyzer> desc = AnnotationBasedAnalyzerBeanDescriptor
+				.create(MatchingAnalyzer.class);
+
+		Set<ConfiguredPropertyDescriptor> properties = desc.getConfiguredPropertiesByType(Number.class, false);
+		assertEquals(0, properties.size());
+
+		properties = desc.getConfiguredPropertiesByType(Number.class, true);
+		assertEquals(0, properties.size());
+
+		properties = desc.getConfiguredPropertiesByType(Dictionary.class, false);
+		assertEquals(0, properties.size());
+
+		properties = desc.getConfiguredPropertiesByType(Dictionary.class, true);
+		assertEquals(1, properties.size());
+
+		properties = desc.getConfiguredPropertiesByType(ReferenceData.class, false);
+		assertEquals(0, properties.size());
+
+		properties = desc.getConfiguredPropertiesByType(ReferenceData.class, true);
+		assertEquals(2, properties.size());
 	}
 
 	public void testRowProcessingType() throws Exception {

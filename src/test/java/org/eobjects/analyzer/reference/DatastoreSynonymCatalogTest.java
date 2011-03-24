@@ -39,8 +39,9 @@ public class DatastoreSynonymCatalogTest {
 		CsvDatastore csvDatastore = new CsvDatastore("region datastore",
 				"src/test/resources/datastore-synonym-countries.csv");
 		DatastoreCatalog datastoreCatalog = TestHelper.createAnalyzerBeansConfiguration(csvDatastore).getDatastoreCatalog();
-		_dataStoreBasedSynonymCatalog = new DatastoreSynonymCatalog("my synonym catalog", datastoreCatalog,
-				"region datastore", "region", new String[] { "firstsynonym", "secondsynonym", "thirdsynonym" });
+		_dataStoreBasedSynonymCatalog = new DatastoreSynonymCatalog("my synonym catalog", "region datastore", "region",
+				new String[] { "firstsynonym", "secondsynonym", "thirdsynonym" });
+		_dataStoreBasedSynonymCatalog.init(datastoreCatalog);
 	}
 
 	@Test

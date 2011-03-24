@@ -55,10 +55,8 @@ public class DatastoreDictionary implements Dictionary {
 	private final String _qualifiedColumnName;
 	private final String _name;
 
-	public DatastoreDictionary(String name, DatastoreCatalog datastoreCatalog, String datastoreName,
-			String qualifiedColumnName) {
+	public DatastoreDictionary(String name, String datastoreName, String qualifiedColumnName) {
 		_name = name;
-		_datastoreCatalog = datastoreCatalog;
 		_datastoreName = datastoreName;
 		_qualifiedColumnName = qualifiedColumnName;
 	}
@@ -78,8 +76,9 @@ public class DatastoreDictionary implements Dictionary {
 	 * Initializes a DataContextProvider, which will keep the connection open
 	 */
 	@Initialize
-	public void init() {
+	public void init(DatastoreCatalog datastoreCatalog) {
 		logger.info("Initializing dictionary: {}", this);
+		setDatastoreCatalog(datastoreCatalog);
 		Datastore datastore = getDatastore();
 		DataContextProvider dcp = datastore.getDataContextProvider();
 		getDataContextProviders().add(dcp);

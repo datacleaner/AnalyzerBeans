@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -87,7 +88,10 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 				new InMemoryRowAnnotationFactory(), null);
 		assignProvidedCallback.onEvent(LifeCycleState.ASSIGN_PROVIDED, bean, getDescriptor());
 
-		final InitializeCallback initializeCallback = new InitializeCallback();
+		final AnalyzerBeansConfiguration configuration = _analysisJobBuilder.getConfiguration();
+
+		final InitializeCallback initializeCallback = new InitializeCallback(configuration.getDatastoreCatalog(),
+				configuration.getReferenceDataCatalog());
 		initializeCallback.onEvent(LifeCycleState.INITIALIZE, bean, getDescriptor());
 
 		final OutputColumns outputColumns = bean.getOutputColumns();

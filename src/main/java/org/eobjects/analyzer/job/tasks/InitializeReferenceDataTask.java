@@ -21,10 +21,12 @@ package org.eobjects.analyzer.job.tasks;
 
 import java.util.Collection;
 
+import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.SimpleComponentDescriptor;
 import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleState;
+import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
 /**
  * Task that invokes initializing methods for reference data where this is
@@ -35,8 +37,13 @@ import org.eobjects.analyzer.lifecycle.LifeCycleState;
 public class InitializeReferenceDataTask implements Task {
 
 	private final ReferenceDataActivationManager _referenceDataActivationManager;
+	private DatastoreCatalog _datastoreCatalog;
+	private ReferenceDataCatalog _referenceDataCatalog;
 
-	public InitializeReferenceDataTask(ReferenceDataActivationManager referenceDataActivationManager) {
+	public InitializeReferenceDataTask(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
+			ReferenceDataActivationManager referenceDataActivationManager) {
+		_datastoreCatalog = datastoreCatalog;
+		_referenceDataCatalog = referenceDataCatalog;
 		_referenceDataActivationManager = referenceDataActivationManager;
 	}
 
@@ -45,7 +52,8 @@ public class InitializeReferenceDataTask implements Task {
 		Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
 		for (Object object : referenceData) {
 			SimpleComponentDescriptor<? extends Object> descriptor = SimpleComponentDescriptor.create(object.getClass());
-			new InitializeCallback().onEvent(LifeCycleState.INITIALIZE, object, descriptor);
+			new InitializeCallback(_datastoreCatalog, _referenceDataCatalog).onEvent(LifeCycleState.INITIALIZE, object,
+					descriptor);
 		}
 	}
 
