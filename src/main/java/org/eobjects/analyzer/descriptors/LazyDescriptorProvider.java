@@ -28,9 +28,9 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.beans.api.Transformer;
-import org.eobjects.analyzer.result.renderer.Renderer;
-import org.eobjects.analyzer.result.renderer.RenderingFormat;
 
 public class LazyDescriptorProvider implements DescriptorProvider {
 

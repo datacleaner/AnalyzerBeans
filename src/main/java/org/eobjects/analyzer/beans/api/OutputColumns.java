@@ -33,12 +33,25 @@ public final class OutputColumns implements Serializable {
 
 	private static OutputColumns singleOutputColumn = new OutputColumns(1);
 
+	/**
+	 * Factory/convenience method for retrieving a single output column
+	 * instance.
+	 * 
+	 * @return a single output column instance.
+	 */
 	public static OutputColumns singleOutputColumn() {
 		return singleOutputColumn;
 	}
 
-	private String[] columnNames;
+	private final String[] columnNames;
 
+	/**
+	 * Constructs an OutputColumns object with a variable amount of anonymous
+	 * columns.
+	 * 
+	 * @param columns
+	 *            the amount of columns.
+	 */
 	public OutputColumns(int columns) {
 		if (columns < 1) {
 			throw new IllegalArgumentException("columns must be 1 or higher");
@@ -46,6 +59,12 @@ public final class OutputColumns implements Serializable {
 		columnNames = new String[columns];
 	}
 
+	/**
+	 * Constructs an OutputColumns object with named columns.
+	 * 
+	 * @param columnNames
+	 *            the names of the output columns.
+	 */
 	public OutputColumns(String[] columnNames) {
 		if (columnNames == null) {
 			throw new IllegalArgumentException("column cannot be null");
@@ -56,6 +75,14 @@ public final class OutputColumns implements Serializable {
 		this.columnNames = columnNames.clone();
 	}
 
+	/**
+	 * Constructs an OutputColumns object with named columns.
+	 * 
+	 * @param firstColumnName
+	 *            the first column name
+	 * @param additionalColumnNames
+	 *            the additional column names (varargs)
+	 */
 	public OutputColumns(String firstColumnName, String... additionalColumnNames) {
 		columnNames = new String[additionalColumnNames.length + 1];
 		columnNames[0] = firstColumnName;
@@ -64,10 +91,22 @@ public final class OutputColumns implements Serializable {
 		}
 	}
 
+	/**
+	 * Gets the column name of a column by index.
+	 * 
+	 * @param index
+	 *            the index of the column.
+	 * @return the name of the column.
+	 */
 	public String getColumnName(int index) {
 		return columnNames[index];
 	}
 
+	/**
+	 * Gets the amount of columns in this OutputColumns object.
+	 * 
+	 * @return an integer representing the amount of columns available.
+	 */
 	public int getColumnCount() {
 		return columnNames.length;
 	}

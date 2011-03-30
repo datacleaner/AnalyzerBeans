@@ -21,6 +21,8 @@ package org.eobjects.analyzer.result.renderer;
 
 import javax.swing.JComponent;
 
+import org.eobjects.analyzer.beans.api.RenderingFormat;
+
 public class SwingRenderingFormat implements RenderingFormat<JComponent> {
 
 	@Override

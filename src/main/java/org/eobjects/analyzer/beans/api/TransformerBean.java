@@ -27,12 +27,13 @@ import java.lang.annotation.Target;
 
 /**
  * Classes that are annotated with the @TransformerBean annotation are
- * components for data transformation. 
+ * components for data transformation.
  * 
- * A @TransformerBean annotated class should implement the Transformer interface.
+ * A @TransformerBean annotated class should implement the Transformer
+ * interface.
  * 
- * TransformerBeans are by default assumed to be concurrent and thread-safe. This
- * behaviour can be overridden by using the @Concurrent annotation.
+ * TransformerBeans are by default assumed to be concurrent and thread-safe.
+ * This behaviour can be overridden by using the @Concurrent annotation.
  * 
  * @see Transformer
  * @see Concurrent

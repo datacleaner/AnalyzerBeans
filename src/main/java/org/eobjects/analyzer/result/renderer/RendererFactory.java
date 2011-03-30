@@ -21,6 +21,8 @@ package org.eobjects.analyzer.result.renderer;
 
 import java.util.Collection;
 
+import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
 import org.eobjects.analyzer.result.AnalyzerResult;

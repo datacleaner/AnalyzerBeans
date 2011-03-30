@@ -23,10 +23,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.renderer.Renderer;
-import org.eobjects.analyzer.result.renderer.RenderingFormat;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;

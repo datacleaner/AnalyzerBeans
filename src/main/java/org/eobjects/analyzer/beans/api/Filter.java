@@ -40,5 +40,12 @@ import org.eobjects.analyzer.data.InputRow;
  */
 public interface Filter<C extends Enum<C>> {
 
+	/**
+	 * Categorizes/filters a single row.
+	 * 
+	 * @param inputRow
+	 *            the row to categorize.
+	 * @return an enum representing the category applied to the row.
+	 */
 	public C categorize(InputRow inputRow);
 }

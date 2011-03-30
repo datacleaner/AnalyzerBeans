@@ -38,8 +38,8 @@ import java.util.jar.JarFile;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.Transformer;
-import org.eobjects.analyzer.result.renderer.Renderer;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

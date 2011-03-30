@@ -22,6 +22,7 @@ package org.eobjects.analyzer.result.renderer;
 import java.text.NumberFormat;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;

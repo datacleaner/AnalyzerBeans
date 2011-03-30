@@ -57,5 +57,11 @@ import org.eobjects.metamodel.DataContext;
  */
 public interface ExploringAnalyzer<R extends AnalyzerResult> extends Analyzer<R> {
 
-	public void run(DataContext dc);
+	/**
+	 * Executes the analyzer
+	 * 
+	 * @param dataContext
+	 *            the DataContext to use for querying
+	 */
+	public void run(DataContext dataContext);
 }

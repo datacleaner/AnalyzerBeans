@@ -27,7 +27,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation used to provide a description of a bean or a configured property
+ * Annotation used to provide a description of a component or a configured
+ * property
  * 
  * @author Kasper Sørensen
  */
@@ -37,5 +38,10 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Description {
 
+	/**
+	 * Determines the description of the annotated element
+	 * 
+	 * @return a String representing the description of the annotated element
+	 */
 	String value();
 }

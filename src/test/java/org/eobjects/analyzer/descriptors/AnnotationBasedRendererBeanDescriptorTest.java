@@ -19,12 +19,12 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.DefaultTextRenderer;
-import org.eobjects.analyzer.result.renderer.Renderer;
-import org.eobjects.analyzer.result.renderer.RenderingFormat;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 

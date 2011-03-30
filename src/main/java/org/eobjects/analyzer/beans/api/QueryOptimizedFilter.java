@@ -39,7 +39,30 @@ import org.eobjects.metamodel.query.Query;
  */
 public interface QueryOptimizedFilter<C extends Enum<C>> extends Filter<C> {
 
+	/**
+	 * Inquires the filter if a given category is optimizable by the use of a
+	 * query.
+	 * 
+	 * @param category
+	 *            the category to optimize
+	 * @return a boolean indicating whether or not the provided category is
+	 *         query optimizable.
+	 */
 	public boolean isOptimizable(C category);
 
+	/**
+	 * Optimizes the filter execution by retrieving a query (as opposed to
+	 * invoking the categorize(...) method for each row).
+	 * 
+	 * This method will only be invoked if a preceding call to
+	 * isOptimizable(...) with the same category returned true.
+	 * 
+	 * @param q
+	 *            the query to optimize.
+	 * @param category
+	 *            the filter category to optimize.
+	 * @return a new query (or a mutated version of the parameterized query)
+	 *         that includes query optimization.
+	 */
 	public Query optimizeQuery(Query q, C category);
 }

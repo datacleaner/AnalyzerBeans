@@ -35,5 +35,10 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  */
 public interface Analyzer<R extends AnalyzerResult> {
 
+	/**
+	 * Gets the result of the analysis that the analyzer has conducted.
+	 * 
+	 * @return an analyzer result object.
+	 */
 	public R getResult();
 }

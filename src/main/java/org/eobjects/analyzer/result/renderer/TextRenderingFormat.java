@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
+import org.eobjects.analyzer.beans.api.RenderingFormat;
+
 public class TextRenderingFormat implements RenderingFormat<CharSequence> {
 
 	@Override

@@ -48,6 +48,9 @@ import org.eobjects.analyzer.data.InputRow;
 public interface Transformer<E> {
 
 	/**
+	 * Gets the output columns (given the current configuration) of this
+	 * transformer.
+	 * 
 	 * @return an object with the information needed to create the output
 	 *         columns
 	 */

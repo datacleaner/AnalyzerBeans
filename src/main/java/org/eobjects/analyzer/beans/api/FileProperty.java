@@ -42,6 +42,9 @@ import javax.inject.Qualifier;
 @Qualifier
 public @interface FileProperty {
 
+	/**
+	 * Defines the access modes available for a file property
+	 */
 	public static enum FileAccessMode {
 		OPEN, SAVE;
 	}

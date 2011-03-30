@@ -25,8 +25,8 @@ import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.Transformer;
-import org.eobjects.analyzer.result.renderer.Renderer;
 
 /**
  * A simple descriptor provider with a method signature suitable externalizing

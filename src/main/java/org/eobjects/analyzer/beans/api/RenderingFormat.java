@@ -17,9 +17,8 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.beans.api;
 
-import org.eobjects.analyzer.beans.api.RendererBean;
 
 /**
  * Represents a rendering format to be used for rendering. AnalyzerBeans ships

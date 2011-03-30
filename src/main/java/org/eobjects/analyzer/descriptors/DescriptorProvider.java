@@ -23,9 +23,9 @@ import java.util.Collection;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.beans.api.Transformer;
-import org.eobjects.analyzer.result.renderer.Renderer;
-import org.eobjects.analyzer.result.renderer.RenderingFormat;
 
 /**
  * An interface for components that provide descriptors for analyzer beans.

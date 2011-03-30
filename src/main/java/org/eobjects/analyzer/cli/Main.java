@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
 import org.eobjects.analyzer.connection.DataContextProvider;
@@ -40,7 +41,6 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.renderer.Renderer;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 import org.kohsuke.args4j.CmdLineException;

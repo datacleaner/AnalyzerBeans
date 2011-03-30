@@ -17,12 +17,14 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.beans.api;
 
-import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
+ * Interface for renderers of analyzer results. Renderers are used to transform
+ * the logical results into readable results such as HTML pages, Swing
+ * components, Text or XML files.
  * 
  * @author Kasper Sørensen
  * 
@@ -37,5 +39,12 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  */
 public interface Renderer<I extends AnalyzerResult, O> {
 
+	/**
+	 * Renders an analyzer result.
+	 * 
+	 * @param result
+	 *            the result to render.
+	 * @return the outcoming, rendered result.
+	 */
 	public O render(I result);
 }

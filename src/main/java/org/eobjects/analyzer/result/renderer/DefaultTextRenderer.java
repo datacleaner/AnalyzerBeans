@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
+import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.AnalyzerResult;
 

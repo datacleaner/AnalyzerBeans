@@ -21,6 +21,7 @@ package org.eobjects.analyzer.result.renderer;
 
 import java.util.LinkedList;
 
+import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.NumberResult;

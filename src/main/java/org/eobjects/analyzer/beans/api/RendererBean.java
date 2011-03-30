@@ -25,10 +25,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.eobjects.analyzer.result.renderer.RenderingFormat;
-
 /**
  * Annotation used to mark a class as a renderer for AnalyzerResults.
+ * 
+ * Renderers are grouped together by rendering formats, which are defined by the
+ * parameter to this annotation. This makes it possible to combine renderers for
+ * particular result types and for particular output formats such as HTML,
+ * Swing, clear text, XML etc.
+ * 
+ * Renderers are resolved by combining the rendering format with the best
+ * fitting output type defined by the Renderer interface.
+ * 
+ * @see RenderingFormat
+ * @see Renderer
  * 
  * @author Kasper Sørensen
  */
@@ -37,5 +46,10 @@ import org.eobjects.analyzer.result.renderer.RenderingFormat;
 @Documented
 public @interface RendererBean {
 
+	/**
+	 * Defines the rendering format of this renderer bean.
+	 * 
+	 * @return the class constant which represents the rendering format.
+	 */
 	public Class<? extends RenderingFormat<?>> value();
 }

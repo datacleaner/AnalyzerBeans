@@ -47,5 +47,13 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  */
 public interface RowProcessingAnalyzer<R extends AnalyzerResult> extends Analyzer<R> {
 
+	/**
+	 * Executes the analyzer for a single row.
+	 * 
+	 * @param row
+	 *            the row to analyze
+	 * @param distinctCount
+	 *            the distinct count of the row.
+	 */
 	public void run(InputRow row, int distinctCount);
 }

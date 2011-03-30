@@ -54,5 +54,12 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Concurrent {
 
+	/**
+	 * Determines whether or not the component with this annotation is
+	 * thread-safe/concurrent.
+	 * 
+	 * @return a boolean indicating whether or not concurrent execution of the
+	 *         component is allowed.
+	 */
 	public boolean value();
 }
