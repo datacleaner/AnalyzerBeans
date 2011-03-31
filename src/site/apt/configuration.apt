@@ -1,0 +1,10 @@
+ ------
+ AnalyzerBeans configuration
+ ------
+
+AnalyzerBeans configuration
+
+ Configuration of AnalyzerBeans is handled through the class AnalyzerBeansConfiguration.
+ 
+ We are working on a more user-friendly documentation, but in the meantime please
+ refer to the {{{http://datacleaner.eobjects.org}Visit AnalyzerBeansConfiguration API documentation}}.

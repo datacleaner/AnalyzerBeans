@@ -1,0 +1,11 @@
+ ------
+ Projects that use AnalyzerBeans
+ ------
+
+Projects that use AnalyzerBeans
+
+ The purpose of AnalyzerBeans is to make a very extensible and reusable engine for executing data flows, targeted at data analysis.
+
+ For now the main project that uses AnalyzerBeans is DataCleaner, but more examples will be added soon.
+ 
+ {{{http://datacleaner.eobjects.org}Visit DataCleaner's website}}

@@ -1,3 +1,7 @@
+ ------
+ AnalyzerBeans architecture
+ ------
+
 AnalyzerBeans architecture
 
  There are several issues to cover when you want to understand the architecture of AnalyzerBeans. On this page we will collect the high-level concepts that make up the framework in AnalyzerBeans.
@@ -36,7 +40,7 @@ Dictionaries, synonyms and other reference data
  
 Row processing framework
 
- TODO hello
+ TODO
  
 Exploring analyzers
 

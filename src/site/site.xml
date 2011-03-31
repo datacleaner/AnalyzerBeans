@@ -18,11 +18,11 @@
 
 		<menu name="About AnalyzerBeans">
 			<item name="FAQ" href="faq.html" />
-			<item name="Projects that use AnalyzerBeans" href="javascript:alert('todo');" />
+			<item name="Projects that use AnalyzerBeans" href="project_cases.html;" />
 		</menu>
 
 		<menu name="Examples">
-			<item name="Configuration reference" href="javascript:alert('todo');" />
+			<item name="Configuration reference" href="configuration.html" />
 			<item name="Job examples"
 				href="http://eobjects.org/svn/AnalyzerBeans/trunk/examples/" />
 			<item name="Job authoring tutorial"
