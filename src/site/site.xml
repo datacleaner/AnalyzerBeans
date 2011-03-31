@@ -18,7 +18,7 @@
 
 		<menu name="About AnalyzerBeans">
 			<item name="FAQ" href="faq.html" />
-			<item name="Projects that use AnalyzerBeans" href="project_cases.html;" />
+			<item name="Projects that use AnalyzerBeans" href="project_cases.html" />
 		</menu>
 
 		<menu name="Examples">
