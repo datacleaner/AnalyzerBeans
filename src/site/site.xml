@@ -36,6 +36,7 @@
 			<item name="Transformer tutorial"
 				href="http://kasper.eobjects.org/2010/09/developing-value-transformer-using.html" />
 			<item name="Filter tutorial" href="javascript:alert('todo');" />
+			<item name="API Documentation" href="apidocs/" />
 		</menu>
 
 		<menu ref="reports" />
