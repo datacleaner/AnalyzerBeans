@@ -13,7 +13,7 @@
 	</description>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
-		<metamodel.version>1.5</metamodel.version>
+		<metamodel.version>1.6</metamodel.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<developers>
