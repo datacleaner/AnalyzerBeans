@@ -96,10 +96,10 @@ public class CancellationAndMultiThreadingTest extends MetaModelTestCase {
 		assertEquals(30, executorService.getMaximumPoolSize());
 
 		long completedTaskCount = executorService.getCompletedTaskCount();
-		assertTrue("completedTaskCount was: " + completedTaskCount, completedTaskCount > 10);
+		assertTrue("completedTaskCount was: " + completedTaskCount, completedTaskCount > 5);
 
 		int largestPoolSize = executorService.getLargestPoolSize();
-		assertTrue("largestPoolSize was: " + largestPoolSize, largestPoolSize > 10);
+		assertTrue("largestPoolSize was: " + largestPoolSize, largestPoolSize > 5);
 		assertEquals(0, executorService.getActiveCount());
 	}
 }
