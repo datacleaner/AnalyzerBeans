@@ -40,6 +40,7 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.metamodel.util.FileHelper;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,50 +163,55 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		}
 	}
 
-	protected void scanInputStream(InputStream inputStream) throws IOException {
-		ClassReader classReader = new ClassReader(inputStream);
-		BeanClassVisitor visitor = new BeanClassVisitor();
-		classReader.accept(visitor, ClassReader.SKIP_CODE);
+	protected void scanInputStream(final InputStream inputStream) throws IOException {
+		try {
 
-		if (visitor.isAnalyzer()) {
-			@SuppressWarnings("unchecked")
-			Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) visitor.getBeanClass();
-			AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(analyzerClass);
-			if (descriptor == null) {
-				descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(analyzerClass);
-				_analyzerBeanDescriptors.put(analyzerClass, descriptor);
-			}
-		}
-		if (visitor.isTransformer()) {
-			@SuppressWarnings("unchecked")
-			Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) visitor.getBeanClass();
-			TransformerBeanDescriptor<?> descriptor = _transformerBeanDescriptors.get(transformerClass);
-			if (descriptor == null) {
-				descriptor = AnnotationBasedTransformerBeanDescriptor.create(transformerClass);
-				_transformerBeanDescriptors.put(transformerClass, descriptor);
-			}
-		}
-		if (visitor.isFilter()) {
-			@SuppressWarnings("unchecked")
-			Class<? extends Filter<? extends Enum<?>>> filterClass = (Class<? extends Filter<?>>) visitor.getBeanClass();
-			FilterBeanDescriptor<?, ?> descriptor = _filterBeanDescriptors.get(filterClass);
-			if (descriptor == null) {
-				descriptor = AnnotationBasedFilterBeanDescriptor.createUnbound(filterClass);
-				_filterBeanDescriptors.put(filterClass, descriptor);
-			}
-		}
-		if (visitor.isRenderer()) {
-			@SuppressWarnings("unchecked")
-			Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) visitor.getBeanClass();
-			RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(rendererClass);
-			if (descriptor == null) {
-				try {
-					descriptor = new AnnotationBasedRendererBeanDescriptor(rendererClass);
-					_rendererBeanDescriptors.put(rendererClass, descriptor);
-				} catch (Exception e) {
-					logger.error("Unexpected error occurred while creating descriptor for: " + rendererClass, e);
+			ClassReader classReader = new ClassReader(inputStream);
+			BeanClassVisitor visitor = new BeanClassVisitor();
+			classReader.accept(visitor, ClassReader.SKIP_CODE);
+
+			if (visitor.isAnalyzer()) {
+				@SuppressWarnings("unchecked")
+				Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) visitor.getBeanClass();
+				AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(analyzerClass);
+				if (descriptor == null) {
+					descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(analyzerClass);
+					_analyzerBeanDescriptors.put(analyzerClass, descriptor);
 				}
 			}
+			if (visitor.isTransformer()) {
+				@SuppressWarnings("unchecked")
+				Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) visitor.getBeanClass();
+				TransformerBeanDescriptor<?> descriptor = _transformerBeanDescriptors.get(transformerClass);
+				if (descriptor == null) {
+					descriptor = AnnotationBasedTransformerBeanDescriptor.create(transformerClass);
+					_transformerBeanDescriptors.put(transformerClass, descriptor);
+				}
+			}
+			if (visitor.isFilter()) {
+				@SuppressWarnings("unchecked")
+				Class<? extends Filter<? extends Enum<?>>> filterClass = (Class<? extends Filter<?>>) visitor.getBeanClass();
+				FilterBeanDescriptor<?, ?> descriptor = _filterBeanDescriptors.get(filterClass);
+				if (descriptor == null) {
+					descriptor = AnnotationBasedFilterBeanDescriptor.createUnbound(filterClass);
+					_filterBeanDescriptors.put(filterClass, descriptor);
+				}
+			}
+			if (visitor.isRenderer()) {
+				@SuppressWarnings("unchecked")
+				Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) visitor.getBeanClass();
+				RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(rendererClass);
+				if (descriptor == null) {
+					try {
+						descriptor = new AnnotationBasedRendererBeanDescriptor(rendererClass);
+						_rendererBeanDescriptors.put(rendererClass, descriptor);
+					} catch (Exception e) {
+						logger.error("Unexpected error occurred while creating descriptor for: " + rendererClass, e);
+					}
+				}
+			}
+		} finally {
+			FileHelper.safeClose(inputStream);
 		}
 	}
 
