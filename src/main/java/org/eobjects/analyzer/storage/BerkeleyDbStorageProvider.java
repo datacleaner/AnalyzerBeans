@@ -64,6 +64,11 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	private boolean _deleteOnExit = false;
 	
 	public BerkeleyDbStorageProvider(File parentDirectory) {
+		if (!parentDirectory.exists()) {
+			if (!parentDirectory.mkdirs()) {
+				throw new IllegalArgumentException("Could not create directory: " + parentDirectory);
+			}
+		}
 		_parentDirectory = parentDirectory;
 	}
 

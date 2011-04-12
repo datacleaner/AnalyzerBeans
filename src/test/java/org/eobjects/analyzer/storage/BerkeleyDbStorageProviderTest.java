@@ -31,7 +31,7 @@ public class BerkeleyDbStorageProviderTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		sp = new BerkeleyDbStorageProvider(new File("target"));
+		sp = new BerkeleyDbStorageProvider(new File("target/berkeleydbtest"));
 	}
 	
 	@Override
