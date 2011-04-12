@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptorImpl;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +58,14 @@ import com.sleepycat.je.EnvironmentConfig;
 public final class BerkeleyDbStorageProvider implements StorageProvider {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private Environment _environment;
+	private final File _parentDirectory;
 	private File _targetDir;
+	private Environment _environment;
 	private boolean _deleteOnExit = false;
+	
+	public BerkeleyDbStorageProvider(File parentDirectory) {
+		_parentDirectory = parentDirectory;
+	}
 
 	public Object createProvidedCollection(ProvidedPropertyDescriptorImpl providedDescriptor) {
 		Type typeArgument = providedDescriptor.getTypeArgument(0);
@@ -92,10 +96,9 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 
 	private File getTargetDir() {
 		if (_targetDir == null) {
-			File tempDir = FileHelper.getTempDir();
 			while (_targetDir == null) {
 				try {
-					File candidateDir = new File(tempDir.getAbsolutePath() + File.separatorChar + "analyzerBeans_"
+					File candidateDir = new File(_parentDirectory.getAbsolutePath() + File.separatorChar + "analyzerBeans_"
 							+ UUID.randomUUID().toString());
 					if (!candidateDir.exists() && candidateDir.mkdir()) {
 						_targetDir = candidateDir;
@@ -103,7 +106,7 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 					}
 				} catch (Exception e) {
 					logger.error("Exception thrown while trying to create targetDir inside tempDir", e);
-					_targetDir = tempDir;
+					_targetDir = _parentDirectory;
 				}
 			}
 			if (logger.isInfoEnabled()) {

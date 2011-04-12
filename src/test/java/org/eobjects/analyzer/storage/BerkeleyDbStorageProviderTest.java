@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.storage;
 
+import java.io.File;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -30,7 +31,7 @@ public class BerkeleyDbStorageProviderTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		sp = new BerkeleyDbStorageProvider();
+		sp = new BerkeleyDbStorageProvider(new File("target"));
 	}
 	
 	@Override

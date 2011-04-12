@@ -29,4 +29,6 @@ public interface ConfigurationReaderInterceptor {
 
 	String createFilename(String filename);
 
+	String getTemporaryStorageDirectory();
+
 }

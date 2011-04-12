@@ -19,13 +19,14 @@
  */
 package org.eobjects.analyzer.storage;
 
+import java.io.File;
 import java.util.List;
 
 import junit.framework.TestCase;
 
 public class BerkeleyDbListTest extends TestCase {
 
-	private BerkeleyDbStorageProvider sp = new BerkeleyDbStorageProvider();
+	private BerkeleyDbStorageProvider sp = new BerkeleyDbStorageProvider(new File("target"));
 
 	public void testAdd() throws Exception {
 		BerkeleyDbList<String> list = (BerkeleyDbList<String>) sp.createList(String.class);

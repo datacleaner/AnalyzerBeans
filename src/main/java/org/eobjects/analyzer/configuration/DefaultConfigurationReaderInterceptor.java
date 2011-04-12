@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import org.eobjects.metamodel.util.FileHelper;
+
 /**
  * Defines a default implementation of the
  * {@link ConfigurationReaderInterceptor} interface. This implementation does
@@ -31,6 +33,11 @@ public class DefaultConfigurationReaderInterceptor implements ConfigurationReade
 	@Override
 	public String createFilename(String filename) {
 		return filename;
+	}
+
+	@Override
+	public String getTemporaryStorageDirectory() {
+		return FileHelper.getTempDir().getAbsolutePath();
 	}
 
 }

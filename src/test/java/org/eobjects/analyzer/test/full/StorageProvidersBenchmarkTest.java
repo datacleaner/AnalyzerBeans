@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.test.full;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class StorageProvidersBenchmarkTest extends TestCase {
 		_storageProviders.put("1) In-Memory", new InMemoryStorageProvider());
 		_storageProviders.put("2) H2", new H2StorageProvider());
 		_storageProviders.put("3) Hsqldb", new HsqldbStorageProvider());
-		_storageProviders.put("4) Berkeley DB", new BerkeleyDbStorageProvider());
+		_storageProviders.put("4) Berkeley DB", new BerkeleyDbStorageProvider(new File("target")));
 	}
 
 	public void testOneBigBatch() throws Exception {

@@ -81,6 +81,7 @@ import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
 import org.eobjects.analyzer.descriptors.SimpleComponentDescriptor;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
@@ -125,7 +126,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 	private static final Logger logger = LoggerFactory.getLogger(JaxbConfigurationReader.class);
 
 	private final JAXBContext _jaxbContext;
-	private final ConfigurationReaderInterceptor _configurationReaderInterceptor;
+	private final ConfigurationReaderInterceptor _interceptor;
 
 	public JaxbConfigurationReader() {
 		this(null);
@@ -135,7 +136,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		if (configurationReaderCallback == null) {
 			configurationReaderCallback = new DefaultConfigurationReaderInterceptor();
 		}
-		_configurationReaderInterceptor = configurationReaderCallback;
+		_interceptor = configurationReaderCallback;
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
 		} catch (JAXBException e) {
@@ -190,7 +191,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				datastoreCatalog);
 		StorageProvider storageProvider = createStorageProvider(configuration.getStorageProvider(), datastoreCatalog,
 				referenceDataCatalog);
+		DescriptorProvider descriptorProvider = createDescriptorProvider(configuration);
 
+		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
+				storageProvider);
+	}
+
+	private DescriptorProvider createDescriptorProvider(Configuration configuration) {
 		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
 		ClasspathScannerType classpathScanner = configuration.getClasspathScanner();
 		if (classpathScanner != null) {
@@ -207,9 +214,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				}
 			}
 		}
-
-		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
-				storageProvider);
+		return descriptorProvider;
 	}
 
 	private StorageProvider createStorageProvider(StorageProviderType storageProviderType,
@@ -246,12 +251,19 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		BerkeleyDbStorageProviderType berkeleyDbStorageProvider = storageProviderType.getBerkeleyDb();
 		if (berkeleyDbStorageProvider != null) {
-			return new BerkeleyDbStorageProvider();
+			File parentDirectory = new File(_interceptor.getTemporaryStorageDirectory());
+			return new BerkeleyDbStorageProvider(parentDirectory);
 		}
 
 		HsqldbStorageProviderType hsqldbStorageProvider = storageProviderType.getHsqldb();
 		if (hsqldbStorageProvider != null) {
 			String directoryPath = hsqldbStorageProvider.getTempDirectory();
+			if (directoryPath == null) {
+				directoryPath = _interceptor.getTemporaryStorageDirectory();
+			}
+
+			directoryPath = _interceptor.createFilename(directoryPath);
+
 			if (directoryPath == null) {
 				return new HsqldbStorageProvider();
 			} else {
@@ -262,6 +274,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		H2StorageProviderType h2StorageProvider = storageProviderType.getH2Database();
 		if (h2StorageProvider != null) {
 			String directoryPath = h2StorageProvider.getTempDirectory();
+			if (directoryPath == null) {
+				directoryPath = _interceptor.getTemporaryStorageDirectory();
+			}
+
+			directoryPath = _interceptor.createFilename(directoryPath);
+
 			if (directoryPath == null) {
 				return new H2StorageProvider();
 			} else {
@@ -295,7 +313,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 					} else if (dictionaryType instanceof TextFileDictionaryType) {
 						TextFileDictionaryType tfdt = (TextFileDictionaryType) dictionaryType;
 						String name = tfdt.getName();
-						String filename = _configurationReaderInterceptor.createFilename(tfdt.getFilename());
+						String filename = _interceptor.createFilename(tfdt.getFilename());
 						String encoding = tfdt.getEncoding();
 						if (encoding == null) {
 							encoding = FileHelper.UTF_8_ENCODING;
@@ -323,7 +341,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 					if (synonymCatalogType instanceof TextFileSynonymCatalogType) {
 						TextFileSynonymCatalogType tfsct = (TextFileSynonymCatalogType) synonymCatalogType;
 						String name = tfsct.getName();
-						String filename = _configurationReaderInterceptor.createFilename(tfsct.getFilename());
+						String filename = _interceptor.createFilename(tfsct.getFilename());
 						String encoding = tfsct.getEncoding();
 						if (encoding == null) {
 							encoding = FileHelper.UTF_8_ENCODING;
@@ -394,7 +412,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
-			String filename = _configurationReaderInterceptor.createFilename(csvDatastoreType.getFilename());
+			String filename = _interceptor.createFilename(csvDatastoreType.getFilename());
 			String quoteCharString = csvDatastoreType.getQuoteChar();
 			Character quoteChar = null;
 			String separatorCharString = csvDatastoreType.getSeparatorChar();
@@ -429,7 +447,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			if (datastores.containsKey(name)) {
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
-			String filename = _configurationReaderInterceptor.createFilename(accessDatastoreType.getFilename());
+			String filename = _interceptor.createFilename(accessDatastoreType.getFilename());
 			datastores.put(name, new AccessDatastore(name, filename));
 		}
 
@@ -443,7 +461,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			if (datastores.containsKey(name)) {
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
-			String filename = _configurationReaderInterceptor.createFilename(xmlDatastoreType.getFilename());
+			String filename = _interceptor.createFilename(xmlDatastoreType.getFilename());
 			datastores.put(name, new XmlDatastore(name, filename));
 		}
 
@@ -457,7 +475,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			if (datastores.containsKey(name)) {
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
-			String filename = _configurationReaderInterceptor.createFilename(excelDatastoreType.getFilename());
+			String filename = _interceptor.createFilename(excelDatastoreType.getFilename());
 			datastores.put(name, new ExcelDatastore(name, filename));
 		}
 
@@ -499,7 +517,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
-			String filename = _configurationReaderInterceptor.createFilename(dbaseDatastoreType.getFilename());
+			String filename = _interceptor.createFilename(dbaseDatastoreType.getFilename());
 			datastores.put(name, new DbaseDatastore(name, filename));
 		}
 
@@ -515,7 +533,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
-			String filename = _configurationReaderInterceptor.createFilename(odbDatastoreType.getFilename());
+			String filename = _interceptor.createFilename(odbDatastoreType.getFilename());
 			datastores.put(name, new OdbDatastore(name, filename));
 		}
 
