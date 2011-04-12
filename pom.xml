@@ -184,6 +184,12 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		
+		<plugin>
+			<groupId>org.codehaus.sonar</groupId>
+			<artifactId>sonar-maven-plugin</artifactId>
+			<version>2.2</version>
+		</plugin>
 	</build>
 	<reporting>
 		<plugins>
