@@ -300,10 +300,11 @@
 
 	<complexType name="datastoreSynonymCatalogType">
 		<sequence>
-			<element name="column-name" minOccurs="1" maxOccurs="1" type="string" />
 			<element name="datastore-name" minOccurs="1" maxOccurs="1"
 				type="string" />
-			<element name="synonym-column-names" minOccurs="1" maxOccurs="unbounded"
+			<element name="master-term-column-path" minOccurs="1"
+				maxOccurs="1" type="string" />
+			<element name="synonym-column-path" minOccurs="1" maxOccurs="unbounded"
 				type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />

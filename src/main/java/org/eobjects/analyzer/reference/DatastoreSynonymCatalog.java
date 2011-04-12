@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.reference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -37,8 +39,10 @@ import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.query.FilterItem;
+import org.eobjects.metamodel.query.OperatorType;
 import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.query.builder.SatisfiedWhereBuilder;
+import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 import org.slf4j.Logger;
@@ -55,15 +59,15 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 	private transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
 	private final String _name;
 	private final String _datastoreName;
-	private final String _masterTermQualifiedColumnName;
-	private final String[] _synonymQualifiedColumnNames;
+	private final String _masterTermColumnPath;
+	private final String[] _synonymColumnPaths;
 
-	public DatastoreSynonymCatalog(String name, String datastoreName, String masterTermQualifiedColumnName,
-			String[] synonymQualifiedColumnNames) {
+	public DatastoreSynonymCatalog(String name, String datastoreName, String masterTermColumnPath,
+			String[] synonymColumnPaths) {
 		_name = name;
 		_datastoreName = datastoreName;
-		_masterTermQualifiedColumnName = masterTermQualifiedColumnName;
-		_synonymQualifiedColumnNames = synonymQualifiedColumnNames;
+		_masterTermColumnPath = masterTermColumnPath;
+		_synonymColumnPaths = synonymColumnPaths;
 	}
 
 	public void setDatastoreCatalog(DatastoreCatalog datastoreCatalog) {
@@ -134,8 +138,12 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 		return _datastoreName;
 	}
 
-	public String getMasterTermQualifiedColumnName() {
-		return _masterTermQualifiedColumnName;
+	public String getMasterTermColumnPath() {
+		return _masterTermColumnPath;
+	}
+
+	public String[] getSynonymColumnPaths() {
+		return Arrays.copyOf(_synonymColumnPaths, _synonymColumnPaths.length);
 	}
 
 	@Override
@@ -148,8 +156,8 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 
 		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
 
-		Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermQualifiedColumnName);
-		Column[] columns = schemaNavigator.convertToColumns(_synonymQualifiedColumnNames);
+		Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
+		Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
 
 		Table table = masterTermColumn.getTable();
 
@@ -184,34 +192,49 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 				Datastore datastore = getDatastore();
 
 				DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+				try {
 
-				SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+					SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
 
-				Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermQualifiedColumnName);
-				Column[] columns = schemaNavigator.convertToColumns(_synonymQualifiedColumnNames);
+					Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
+					Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
 
-				DataContext dataContext = dataContextProvider.getDataContext();
-				Table table = masterTermColumn.getTable();
+					DataContext dataContext = dataContextProvider.getDataContext();
+					Table table = masterTermColumn.getTable();
 
-				// create a query that gets the master term where any of the
-				// synonym columns are equal to the synonym
-				SatisfiedWhereBuilder<?> queryBuilder = dataContext.query().from(table.getName()).select(masterTermColumn)
-						.where(columns[0]).equals(term);
-				for (int i = 1; i < columns.length; i++) {
-					queryBuilder = queryBuilder.or(columns[i]).equals(term);
+					// create a query that gets the master term where any of the
+					// synonym columns are equal to the synonym
+					Query query = dataContext.query().from(table.getName()).select(masterTermColumn).toQuery();
+					List<FilterItem> filterItems = new ArrayList<FilterItem>();
+					for (int i = 0; i < columns.length; i++) {
+						Column column = columns[i];
+						if (column.getType().isNumber()) {
+							Number numberValue = ConvertToNumberTransformer.transformValue(term);
+							if (numberValue != null) {
+								filterItems.add(new FilterItem(new SelectItem(column), OperatorType.EQUALS_TO, numberValue));
+							}
+						} else {
+							filterItems.add(new FilterItem(new SelectItem(column), OperatorType.EQUALS_TO, term));
+						}
+					}
+					if (filterItems.isEmpty()) {
+						result = "";
+					} else {
+						query.where(new FilterItem(filterItems.toArray(new FilterItem[0])));
+
+						DataSet dataSet = dataContext.executeQuery(query);
+
+						if (dataSet.next()) {
+							Row row = dataSet.getRow();
+							result = getMasterTerm(row, masterTermColumn);
+						} else {
+							result = "";
+						}
+						dataSet.close();
+					}
+				} finally {
+					dataContextProvider.close();
 				}
-				Query query = queryBuilder.toQuery();
-				DataSet dataSet = dataContext.executeQuery(query);
-
-				if (dataSet.next()) {
-					Row row = dataSet.getRow();
-					result = getMasterTerm(row, masterTermColumn);
-				} else {
-					result = "";
-				}
-
-				dataSet.close();
-				dataContextProvider.close();
 
 				cache.put(term, result);
 			}

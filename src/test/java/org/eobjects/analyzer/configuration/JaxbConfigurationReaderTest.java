@@ -143,7 +143,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertFalse(d.containsValue("value5"));
 
 		String[] synonymCatalogNames = referenceDataCatalog.getSynonymCatalogNames();
-		assertEquals("[textfile_syn, custom_syn]", Arrays.toString(synonymCatalogNames));
+		assertEquals("[textfile_syn, datastore_syn, custom_syn]", Arrays.toString(synonymCatalogNames));
 
 		SynonymCatalog s = referenceDataCatalog.getSynonymCatalog("textfile_syn");
 		lifeCycleHelper.initialize(s);
@@ -152,6 +152,15 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("DNK", s.getMasterTerm("DK"));
 		assertEquals("ALB", s.getMasterTerm("Albania"));
 		assertEquals(null, s.getMasterTerm("Netherlands"));
+
+		s = referenceDataCatalog.getSynonymCatalog("datastore_syn");
+		lifeCycleHelper.initialize(s);
+
+		// lookup by id
+		assertEquals("La Rochelle Gifts", s.getMasterTerm("119"));
+		// lookup by phone number (string)
+		assertEquals("Danish Wholesale Imports", s.getMasterTerm("31 12 3555"));
+		assertEquals(null, s.getMasterTerm("foobar"));
 
 		s = referenceDataCatalog.getSynonymCatalog("custom_syn");
 		lifeCycleHelper.initialize(s);

@@ -45,6 +45,12 @@
 				<encoding>UTF-8</encoding>
 				<case-sensitive>false</case-sensitive>
 			</text-file-synonym-catalog>
+			<datastore-synonym-catalog name="datastore_syn">
+				<datastore-name>my_jdbc_connection</datastore-name>
+				<master-term-column-path>CUSTOMERS.CUSTOMERNAME</master-term-column-path>
+				<synonym-column-path>CUSTOMERS.CUSTOMERNUMBER</synonym-column-path>
+				<synonym-column-path>CUSTOMERS.PHONE</synonym-column-path>
+			</datastore-synonym-catalog>
 			<custom-synonym-catalog
 				class-name="org.eobjects.analyzer.configuration.SampleCustomSynonymCatalog">
 				<property name="Name" value="custom_syn" />

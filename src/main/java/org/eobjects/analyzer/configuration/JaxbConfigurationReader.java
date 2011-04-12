@@ -333,12 +333,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						DatastoreSynonymCatalogType datastoreSynonymCatalogType = (DatastoreSynonymCatalogType) synonymCatalogType;
 						String name = datastoreSynonymCatalogType.getName();
 						String dataStoreName = datastoreSynonymCatalogType.getDatastoreName();
-						String columnName = datastoreSynonymCatalogType.getColumnName();
+						String masterTermColumnPath = datastoreSynonymCatalogType.getMasterTermColumnPath();
 
-						String[] synonymColumnNames = datastoreSynonymCatalogType.getSynonymColumnNames().toArray(
+						String[] synonymColumnPaths = datastoreSynonymCatalogType.getSynonymColumnPath().toArray(
 								new String[0]);
-						synonymCatalogList.add(new DatastoreSynonymCatalog(name, dataStoreName, columnName,
-								synonymColumnNames));
+						synonymCatalogList.add(new DatastoreSynonymCatalog(name, dataStoreName, masterTermColumnPath,
+								synonymColumnPaths));
 					} else {
 						throw new IllegalStateException("Unsupported synonym catalog type: " + synonymCatalogType);
 					}
