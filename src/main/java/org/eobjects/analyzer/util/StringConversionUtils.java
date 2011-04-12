@@ -270,6 +270,7 @@ public final class StringConversionUtils {
 			Column column = schemaNavigator.convertToColumn(str);
 			if (column == null) {
 				logger.warn("Column not found: {}", str);
+				// TODO: Throw exception?
 			}
 			return (E) column;
 		}
@@ -277,6 +278,7 @@ public final class StringConversionUtils {
 			Table table = schemaNavigator.convertToTable(str);
 			if (table == null) {
 				logger.warn("Table not found: {}", str);
+				// TODO: Throw exception?
 			}
 			return (E) table;
 		}
@@ -284,6 +286,7 @@ public final class StringConversionUtils {
 			Schema schema = schemaNavigator.convertToSchema(str);
 			if (schema == null) {
 				logger.warn("Schema not found: {}", str);
+				// TODO: Throw exception?
 			}
 			return (E) schema;
 		}
@@ -291,6 +294,7 @@ public final class StringConversionUtils {
 			Dictionary dictionary = referenceDataCatalog.getDictionary(str);
 			if (dictionary == null) {
 				logger.warn("Dictionary not found: {}", str);
+				// TODO: Throw exception?
 			}
 			return (E) dictionary;
 		}
@@ -298,6 +302,7 @@ public final class StringConversionUtils {
 			SynonymCatalog synonymCatalog = referenceDataCatalog.getSynonymCatalog(str);
 			if (synonymCatalog == null) {
 				logger.warn("SynonymCatalog not found: {}", str);
+				// TODO: Throw exception?
 			}
 			return (E) synonymCatalog;
 		}
@@ -305,6 +310,7 @@ public final class StringConversionUtils {
 			StringPattern stringPattern = referenceDataCatalog.getStringPattern(str);
 			if (stringPattern == null) {
 				logger.warn("StringPattern not found: {}", str);
+				// TODO: Throw exception?
 			}
 			return (E) stringPattern;
 		}
@@ -313,6 +319,7 @@ public final class StringConversionUtils {
 				Datastore datastore = datastoreCatalog.getDatastore(str);
 				if (datastore == null) {
 					logger.warn("Datastore not found: {}", str);
+					// TODO: Throw exception?
 				}
 				return (E) datastore;
 			}

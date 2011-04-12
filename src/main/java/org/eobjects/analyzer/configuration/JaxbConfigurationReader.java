@@ -125,8 +125,17 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 	private static final Logger logger = LoggerFactory.getLogger(JaxbConfigurationReader.class);
 
 	private final JAXBContext _jaxbContext;
+	private final ConfigurationReaderInterceptor _configurationReaderInterceptor;
 
 	public JaxbConfigurationReader() {
+		this(null);
+	}
+
+	public JaxbConfigurationReader(ConfigurationReaderInterceptor configurationReaderCallback) {
+		if (configurationReaderCallback == null) {
+			configurationReaderCallback = new DefaultConfigurationReaderInterceptor();
+		}
+		_configurationReaderInterceptor = configurationReaderCallback;
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
 		} catch (JAXBException e) {
@@ -286,7 +295,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 					} else if (dictionaryType instanceof TextFileDictionaryType) {
 						TextFileDictionaryType tfdt = (TextFileDictionaryType) dictionaryType;
 						String name = tfdt.getName();
-						String filename = tfdt.getFilename();
+						String filename = _configurationReaderInterceptor.createFilename(tfdt.getFilename());
 						String encoding = tfdt.getEncoding();
 						if (encoding == null) {
 							encoding = FileHelper.UTF_8_ENCODING;
@@ -314,7 +323,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 					if (synonymCatalogType instanceof TextFileSynonymCatalogType) {
 						TextFileSynonymCatalogType tfsct = (TextFileSynonymCatalogType) synonymCatalogType;
 						String name = tfsct.getName();
-						String filename = tfsct.getFilename();
+						String filename = _configurationReaderInterceptor.createFilename(tfsct.getFilename());
 						String encoding = tfsct.getEncoding();
 						if (encoding == null) {
 							encoding = FileHelper.UTF_8_ENCODING;
@@ -385,7 +394,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
-			String filename = csvDatastoreType.getFilename();
+			String filename = _configurationReaderInterceptor.createFilename(csvDatastoreType.getFilename());
 			String quoteCharString = csvDatastoreType.getQuoteChar();
 			Character quoteChar = null;
 			String separatorCharString = csvDatastoreType.getSeparatorChar();
@@ -420,7 +429,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			if (datastores.containsKey(name)) {
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
-			String filename = accessDatastoreType.getFilename();
+			String filename = _configurationReaderInterceptor.createFilename(accessDatastoreType.getFilename());
 			datastores.put(name, new AccessDatastore(name, filename));
 		}
 
@@ -434,7 +443,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			if (datastores.containsKey(name)) {
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
-			String filename = xmlDatastoreType.getFilename();
+			String filename = _configurationReaderInterceptor.createFilename(xmlDatastoreType.getFilename());
 			datastores.put(name, new XmlDatastore(name, filename));
 		}
 
@@ -448,7 +457,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			if (datastores.containsKey(name)) {
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
-			String filename = excelDatastoreType.getFilename();
+			String filename = _configurationReaderInterceptor.createFilename(excelDatastoreType.getFilename());
 			datastores.put(name, new ExcelDatastore(name, filename));
 		}
 
@@ -490,7 +499,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
-			String filename = dbaseDatastoreType.getFilename();
+			String filename = _configurationReaderInterceptor.createFilename(dbaseDatastoreType.getFilename());
 			datastores.put(name, new DbaseDatastore(name, filename));
 		}
 
@@ -506,7 +515,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				throw new IllegalStateException("Datastore name is not unique: " + name);
 			}
 
-			String filename = odbDatastoreType.getFilename();
+			String filename = _configurationReaderInterceptor.createFilename(odbDatastoreType.getFilename());
 			datastores.put(name, new OdbDatastore(name, filename));
 		}
 
