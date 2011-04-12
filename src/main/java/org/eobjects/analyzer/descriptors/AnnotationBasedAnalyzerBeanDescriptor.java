@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
@@ -83,6 +84,6 @@ public final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> 
 		if (isRowProcessingAnalyzer()) {
 			return super.getConfiguredPropertiesForInput();
 		}
-		return null;
+		return Collections.emptySet();
 	}
 }

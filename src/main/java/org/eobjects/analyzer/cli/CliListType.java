@@ -19,37 +19,12 @@
  */
 package org.eobjects.analyzer.cli;
 
-import java.io.PrintWriter;
-
-import org.kohsuke.args4j.CmdLineException;
-
 /**
- * Main class for the AnalyzerBeans Command-line interface (CLI).
+ * Defines the list types that the user can query for in the CLI.
  * 
  * @author Kasper Sørensen
  */
-public final class Main {
-	
-	private static PrintWriter out = new PrintWriter(System.out);
+public enum CliListType {
 
-	/**
-	 * Main method of the Command-line interface (CLI)
-	 * 
-	 * @param args
-	 *            command-line arguments
-	 */
-	public static void main(String[] args) {
-		try {
-			CliArguments arguments = CliArguments.parse(args);
-			CliRunner runner = new CliRunner(arguments, out);
-			runner.run();
-		} catch (CmdLineException e) {
-			CliArguments.printUsage(out);
-		}
-		out.flush();
-	}
-	
-	public static void setOut(PrintWriter out) {
-		Main.out = out;
-	}
+	ANALYZERS, TRANSFORMERS, FILTERS, DATASTORES, SCHEMAS, TABLES, COLUMNS
 }
