@@ -28,10 +28,10 @@ import junit.framework.TestCase;
 
 import org.eobjects.metamodel.util.FileHelper;
 
-public class TextBasedDictionaryTest extends TestCase {
+public class TextFileDictionaryTest extends TestCase {
 
 	public void testThreadSafety() throws Exception {
-		final TextBasedDictionary dict = new TextBasedDictionary("foobar", "src/test/resources/lastnames.txt", "UTF-8");
+		final TextFileDictionary dict = new TextFileDictionary("foobar", "src/test/resources/lastnames.txt", "UTF-8");
 
 		final Runnable r = new Runnable() {
 			@Override
@@ -60,7 +60,7 @@ public class TextBasedDictionaryTest extends TestCase {
 		File file = new File("target/TextBasedDictionaryTest-modification.txt");
 		FileHelper.writeStringAsFile(file, "foo\nbar");
 
-		Dictionary dict = new TextBasedDictionary("dict", file.getPath(), "UTF-8");
+		Dictionary dict = new TextFileDictionary("dict", file.getPath(), "UTF-8");
 		assertTrue(dict.containsValue("foo"));
 		assertTrue(dict.containsValue("bar"));
 		assertFalse(dict.containsValue("foobar"));

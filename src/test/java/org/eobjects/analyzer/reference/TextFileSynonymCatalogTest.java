@@ -29,10 +29,10 @@ import org.eobjects.metamodel.util.FileHelper;
 
 import junit.framework.TestCase;
 
-public class TextBasedSynonymCatalogTest extends TestCase {
+public class TextFileSynonymCatalogTest extends TestCase {
 
 	public void testCountrySynonyms() throws Exception {
-		SynonymCatalog cat = new TextBasedSynonymCatalog("foobar", "src/test/resources/synonym-countries.txt", true, "UTF-8");
+		SynonymCatalog cat = new TextFileSynonymCatalog("foobar", "src/test/resources/synonym-countries.txt", true, "UTF-8");
 		assertNull(cat.getMasterTerm("foobar"));
 		assertEquals("DNK", cat.getMasterTerm("Denmark"));
 		assertEquals("GBR", cat.getMasterTerm("England"));
@@ -42,7 +42,7 @@ public class TextBasedSynonymCatalogTest extends TestCase {
 	}
 
 	public void testSerializationAndDeserialization() throws Exception {
-		SynonymCatalog cat = new TextBasedSynonymCatalog("foobar", "src/test/resources/synonym-countries.txt", true, "UTF-8");
+		SynonymCatalog cat = new TextFileSynonymCatalog("foobar", "src/test/resources/synonym-countries.txt", true, "UTF-8");
 		assertEquals("DNK", cat.getMasterTerm("Denmark"));
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -65,7 +65,7 @@ public class TextBasedSynonymCatalogTest extends TestCase {
 	public void testModificationsClearCache() throws Exception {
 		File file = new File("target/TextBasedSynonymCatalogTest-modification.txt");
 		FileHelper.writeStringAsFile(file, "foo,fooo,fo\nbar,baar,br");
-		SynonymCatalog cat = new TextBasedSynonymCatalog("sc", file, true, "UTF-8");
+		SynonymCatalog cat = new TextFileSynonymCatalog("sc", file, true, "UTF-8");
 		assertEquals("foo", cat.getMasterTerm("fooo"));
 		assertEquals("bar", cat.getMasterTerm("br"));
 		assertEquals(null, cat.getMasterTerm("foob"));

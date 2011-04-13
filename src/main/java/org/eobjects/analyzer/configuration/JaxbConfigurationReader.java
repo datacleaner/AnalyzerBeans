@@ -49,6 +49,7 @@ import org.eobjects.analyzer.configuration.jaxb.DatastoreDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreSynonymCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.DbaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ExcelDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.FixedWidthDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.H2StorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.HsqldbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.InMemoryStorageProviderType;
@@ -76,6 +77,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DbaseDatastore;
 import org.eobjects.analyzer.connection.ExcelDatastore;
+import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.connection.XmlDatastore;
@@ -97,8 +99,8 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleStringPattern;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
-import org.eobjects.analyzer.reference.TextBasedDictionary;
-import org.eobjects.analyzer.reference.TextBasedSynonymCatalog;
+import org.eobjects.analyzer.reference.TextFileDictionary;
+import org.eobjects.analyzer.reference.TextFileSynonymCatalog;
 import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
 import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.H2StorageProvider;
@@ -318,7 +320,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						if (encoding == null) {
 							encoding = FileHelper.UTF_8_ENCODING;
 						}
-						dictionaryList.add(new TextBasedDictionary(name, filename, encoding));
+						dictionaryList.add(new TextFileDictionary(name, filename, encoding));
 					} else if (dictionaryType instanceof ValueListDictionaryType) {
 						ValueListDictionaryType vldt = (ValueListDictionaryType) dictionaryType;
 						String name = vldt.getName();
@@ -350,7 +352,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						if (caseSensitive == null) {
 							caseSensitive = true;
 						}
-						synonymCatalogList.add(new TextBasedSynonymCatalog(name, filename, caseSensitive.booleanValue(),
+						synonymCatalogList.add(new TextFileSynonymCatalog(name, filename, caseSensitive.booleanValue(),
 								encoding));
 					} else if (synonymCatalogType instanceof CustomElementType) {
 						SynonymCatalog customSynonymCatalog = createCustomElement((CustomElementType) synonymCatalogType,
@@ -434,6 +436,28 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			}
 
 			datastores.put(name, new CsvDatastore(name, filename, quoteChar, separatorChar, encoding));
+		}
+
+		List<FixedWidthDatastoreType> fixedWidthDatastores = CollectionUtils.filterOnClass(datastoreTypes,
+				FixedWidthDatastoreType.class);
+		for (FixedWidthDatastoreType fixedWidthDatastore : fixedWidthDatastores) {
+			String name = fixedWidthDatastore.getName();
+			if (StringUtils.isNullOrEmpty(name)) {
+				throw new IllegalStateException("Datastore name cannot be null");
+			}
+
+			if (datastores.containsKey(name)) {
+				throw new IllegalStateException("Datastore name is not unique: " + name);
+			}
+
+			String filename = _interceptor.createFilename(fixedWidthDatastore.getFilename());
+			int fixedValueWidth = fixedWidthDatastore.getFixedValueWidth();
+			String encoding = fixedWidthDatastore.getEncoding();
+			if (!StringUtils.isNullOrEmpty(encoding)) {
+				encoding = FileHelper.UTF_8_ENCODING;
+			}
+
+			datastores.put(name, new FixedWidthDatastore(name, filename, encoding, fixedValueWidth));
 		}
 
 		List<AccessDatastoreType> accessDatastores = CollectionUtils

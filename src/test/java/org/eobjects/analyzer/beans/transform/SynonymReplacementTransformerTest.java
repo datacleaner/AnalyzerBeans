@@ -25,12 +25,12 @@ import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.reference.SynonymCatalog;
-import org.eobjects.analyzer.reference.TextBasedSynonymCatalog;
+import org.eobjects.analyzer.reference.TextFileSynonymCatalog;
 
 public class SynonymReplacementTransformerTest extends TestCase {
 
 	public void testTransform() throws Exception {
-		SynonymCatalog sc = new TextBasedSynonymCatalog("my synonyms", "src/test/resources/synonym-countries.txt", true,
+		SynonymCatalog sc = new TextFileSynonymCatalog("my synonyms", "src/test/resources/synonym-countries.txt", true,
 				"UTF8");
 		MockInputColumn<String> col = new MockInputColumn<String>("my col", String.class);
 

@@ -26,24 +26,22 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.filemonitor.FileMonitor;
+import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
 import org.eobjects.metamodel.util.FileHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class TextBasedDictionary implements Dictionary {
+public class TextFileDictionary implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LoggerFactory.getLogger(TextBasedDictionary.class);
-
 	private transient volatile Map<String, Boolean> _containsValueCache;
-	private transient volatile long _lastModified;
 	private transient File _file;
+	private transient FileMonitor _fileMonitor;
 	private final String _name;
 	private final String _filename;
 	private final String _encoding;
 
-	public TextBasedDictionary(String name, String filename, String encoding) {
+	public TextFileDictionary(String name, String filename, String encoding) {
 		_name = name;
 		_filename = filename;
 		_encoding = encoding;
@@ -56,18 +54,11 @@ public class TextBasedDictionary implements Dictionary {
 					_containsValueCache = CollectionUtils.createCacheMap();
 				}
 				_file = new File(_filename);
-				_lastModified = _file.lastModified();
+				_fileMonitor = FileMonitorFactory.getFileMonitor(_file);
 			}
 		} else {
-			long lastModified = _file.lastModified();
-			if (_lastModified != lastModified) {
-				synchronized (this) {
-					lastModified = _file.lastModified();
-					if (_lastModified != lastModified) {
-						_containsValueCache = CollectionUtils.createCacheMap();
-						_lastModified = lastModified;
-					}
-				}
+			if (_fileMonitor.hasChanged()) {
+				_containsValueCache = CollectionUtils.createCacheMap();
 			}
 		}
 		return _containsValueCache;
@@ -107,13 +98,7 @@ public class TextBasedDictionary implements Dictionary {
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			} finally {
-				if (reader != null) {
-					try {
-						reader.close();
-					} catch (Exception e) {
-						logger.error("Exception occurred when closing reader", e);
-					}
-				}
+				FileHelper.safeClose(reader);
 			}
 		}
 		return result;
@@ -132,13 +117,7 @@ public class TextBasedDictionary implements Dictionary {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (Exception e) {
-					logger.error("Exception occurred when closing reader", e);
-				}
-			}
+			FileHelper.safeClose(reader);
 		}
 	}
 

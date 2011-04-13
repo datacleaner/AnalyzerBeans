@@ -29,29 +29,31 @@ import java.util.Map;
 
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.analyzer.util.filemonitor.FileMonitor;
+import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
-public final class TextBasedSynonymCatalog implements SynonymCatalog {
+public final class TextFileSynonymCatalog implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
 	private transient volatile Map<String, String> _masterTermCache;
-	private transient volatile long _lastModified;
 	private transient File _file;
+	private transient FileMonitor _fileMonitor;
 
 	private final String _filename;
 	private final String _name;
 	private final boolean _caseSensitive;
 	private final String _encoding;
 
-	public TextBasedSynonymCatalog(String name, String filename, boolean caseSensitive, String encoding) {
+	public TextFileSynonymCatalog(String name, String filename, boolean caseSensitive, String encoding) {
 		_name = name;
 		_filename = filename;
 		_caseSensitive = caseSensitive;
 		_encoding = encoding;
 	}
 
-	public TextBasedSynonymCatalog(String name, File file, boolean caseSensitive, String encoding) {
+	public TextFileSynonymCatalog(String name, File file, boolean caseSensitive, String encoding) {
 		_name = name;
 		_filename = file.getPath();
 		_caseSensitive = caseSensitive;
@@ -82,11 +84,13 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 			List<Synonym> synonyms = new ArrayList<Synonym>();
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 				line = line.trim();
-				synonyms.add(new TextBasedSynonym(line, _caseSensitive));
+				synonyms.add(new TextFileSynonym(line, _caseSensitive));
 			}
 			return synonyms;
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			FileHelper.safeClose(_file);
 		}
 	}
 
@@ -97,18 +101,12 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 					_masterTermCache = CollectionUtils.createCacheMap();
 				}
 				_file = new File(_filename);
-				_lastModified = _file.lastModified();
+				_fileMonitor = FileMonitorFactory.getFileMonitor(_file);
 			}
 		} else {
-			long lastModified = _file.lastModified();
-			if (_lastModified != lastModified) {
-				synchronized (this) {
-					lastModified = _file.lastModified();
-					if (_lastModified != lastModified) {
-						_masterTermCache = CollectionUtils.createCacheMap();
-						_lastModified = lastModified;
-					}
-				}
+			if (_fileMonitor.hasChanged()) {
+				// reset the cache
+				_masterTermCache = CollectionUtils.createCacheMap();
 			}
 		}
 		return _masterTermCache;
@@ -128,7 +126,7 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 		try {
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 				line = line.trim();
-				TextBasedSynonym synonym = new TextBasedSynonym(line, _caseSensitive);
+				TextFileSynonym synonym = new TextFileSynonym(line, _caseSensitive);
 				masterTerm = synonym.getMasterTerm();
 				if (term.equals(masterTerm) || synonym.getSynonyms().containsValue(term)) {
 					getMasterTermCache().put(term, masterTerm);
@@ -138,6 +136,8 @@ public final class TextBasedSynonymCatalog implements SynonymCatalog {
 			return null;
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			FileHelper.safeClose(reader);
 		}
 	}
 }

@@ -134,23 +134,91 @@
 	<complexType name="datastoreCatalogType">
 		<choice minOccurs="0" maxOccurs="unbounded">
 			<element name="jdbc-datastore" type="ab:jdbcDatastoreType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a JDBC database
+						connection.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="access-datastore" type="ab:accessDatastoreType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a MS Access database
+						file.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="csv-datastore" type="ab:csvDatastoreType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a Comma-separated file.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="fixed-width-datastore" type="ab:fixedWidthDatastoreType"
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a fixed width file.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="excel-datastore" type="ab:excelDatastoreType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a MS Excel spreadsheet
+						file.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="dbase-datastore" type="ab:dbaseDatastoreType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a dBase database file.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="odb-datastore" type="ab:openOfficeDatabaseDatastoreType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a OpenOffice.org
+						database file.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="xml-datastore" type="ab:xmlDatastoreType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on an XML file.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="custom-datastore" type="ab:customElementType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a custom datastore based on a class
+						implementing the Datastore interface.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="composite-datastore" type="ab:compositeDatastoreType"
-				minOccurs="0" maxOccurs="unbounded" />
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a composite datastore, which allows to
+						virtually treat several datastores as a single datastore.
+					</documentation>
+				</annotation>
+			</element>
 		</choice>
 	</complexType>
 
@@ -174,6 +242,16 @@
 			<element name="quote-char" minOccurs="0" maxOccurs="1" type="token" />
 			<element name="separator-char" minOccurs="0" maxOccurs="1"
 				type="token" />
+			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="fixedWidthDatastoreType">
+		<sequence>
+			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="fixed-value-width" minOccurs="1" maxOccurs="1"
+				type="int" default="15" />
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
