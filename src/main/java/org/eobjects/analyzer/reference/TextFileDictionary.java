@@ -52,9 +52,9 @@ public class TextFileDictionary implements Dictionary {
 			synchronized (this) {
 				if (_containsValueCache == null) {
 					_containsValueCache = CollectionUtils.createCacheMap();
+					_file = new File(_filename);
+					_fileMonitor = FileMonitorFactory.getFileMonitor(_file);
 				}
-				_file = new File(_filename);
-				_fileMonitor = FileMonitorFactory.getFileMonitor(_file);
 			}
 		} else {
 			if (_fileMonitor.hasChanged()) {

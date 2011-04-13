@@ -93,15 +93,15 @@ public final class TextFileSynonymCatalog implements SynonymCatalog {
 			FileHelper.safeClose(_file);
 		}
 	}
-
+	
 	private Map<String, String> getMasterTermCache() {
 		if (_masterTermCache == null) {
 			synchronized (this) {
 				if (_masterTermCache == null) {
 					_masterTermCache = CollectionUtils.createCacheMap();
+					_file = new File(_filename);
+					_fileMonitor = FileMonitorFactory.getFileMonitor(_file);
 				}
-				_file = new File(_filename);
-				_fileMonitor = FileMonitorFactory.getFileMonitor(_file);
 			}
 		} else {
 			if (_fileMonitor.hasChanged()) {
