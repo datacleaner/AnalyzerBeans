@@ -50,6 +50,7 @@ public class CliArguments {
 
 	/**
 	 * Prints the usage information for the CLI
+	 * 
 	 * @param out
 	 */
 	public static void printUsage(PrintWriter out) {
@@ -85,47 +86,23 @@ public class CliArguments {
 		return configurationFile;
 	}
 
-	public void setConfigurationFile(File configurationFile) {
-		this.configurationFile = configurationFile;
-	}
-
 	public File getJobFile() {
 		return jobFile;
-	}
-
-	public void setJobFile(File jobFile) {
-		this.jobFile = jobFile;
 	}
 
 	public CliListType getListType() {
 		return listType;
 	}
 
-	public void setListType(CliListType listType) {
-		this.listType = listType;
-	}
-
 	public String getDatastoreName() {
 		return datastoreName;
-	}
-
-	public void setDatastoreName(String datastoreName) {
-		this.datastoreName = datastoreName;
 	}
 
 	public String getSchemaName() {
 		return schemaName;
 	}
 
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
-
 	public String getTableName() {
 		return tableName;
-	}
-
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
 	}
 }
