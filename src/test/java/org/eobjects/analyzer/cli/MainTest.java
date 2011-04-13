@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.job.cli;
+package org.eobjects.analyzer.cli;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -41,24 +41,24 @@ public class MainTest extends TestCase {
 		assertEquals(8, lines.length);
 
 		assertEquals(
-				" -conf (-configuration, --configuration-file) FILE          : XML file describing the configuration of AnalyzerBeans",
-				lines[0]);
+				"-conf (-configuration, --configuration-file) FILE          : XML file describing the configuration of AnalyzerBeans",
+				lines[0].trim());
 		assertEquals(
-				" -ds (-datastore, --datastore-name) VAL                     : Name of datastore when printing a list of schemas, tables ",
-				lines[1]);
-		assertEquals("                                                              or columns", lines[2]);
-		assertEquals(" -job (--job-file) FILE                                     : An analysis job XML file to execute",
-				lines[3]);
+				"-ds (-datastore, --datastore-name) VAL                     : Name of datastore when printing a list of schemas, tables",
+				lines[1].trim());
+		assertEquals("or columns", lines[2].trim());
+		assertEquals("-job (--job-file) FILE                                     : An analysis job XML file to execute",
+				lines[3].trim());
 		assertEquals(
-				" -list [ANALYZERS | TRANSFORMERS | FILTERS | DATASTORES | S : Used to print a list of various elements available in the ",
-				lines[4]);
-		assertEquals(" CHEMAS | TABLES | COLUMNS]                                 : configuration", lines[5]);
+				"-list [ANALYZERS | TRANSFORMERS | FILTERS | DATASTORES | S : Used to print a list of various elements available in the",
+				lines[4].trim());
+		assertEquals("CHEMAS | TABLES | COLUMNS]                                 : configuration", lines[5].trim());
 		assertEquals(
-				" -s (-schema, --schema-name) VAL                            : Name of schema when printing a list of tables or columns",
-				lines[6]);
+				"-s (-schema, --schema-name) VAL                            : Name of schema when printing a list of tables or columns",
+				lines[6].trim());
 		assertEquals(
-				" -t (-table, --table-name) VAL                              : Name of table when printing a list of columns",
-				lines[7]);
+				"-t (-table, --table-name) VAL                              : Name of table when printing a list of columns",
+				lines[7].trim());
 
 		// again without the -usage flag
 		stringWriter = new StringWriter();
@@ -75,7 +75,7 @@ public class MainTest extends TestCase {
 
 		Main.main("-conf examples/conf.xml -list DATASTORES".split(" "));
 
-		String out = stringWriter.toString();
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
 		assertEquals("Datastores:\n-----------\norderdb\nemployees_csv\nall_datastores\n", out);
 	}
 
@@ -85,7 +85,7 @@ public class MainTest extends TestCase {
 
 		Main.main("-conf examples/conf.xml -ds orderdb -list SCHEMAS".split(" "));
 
-		String out = stringWriter.toString();
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
 		assertEquals("Schemas:\n" + "--------\n" + "INFORMATION_SCHEMA\n" + "PUBLIC\n", out);
 	}
 
@@ -95,7 +95,7 @@ public class MainTest extends TestCase {
 
 		Main.main("-conf examples/conf.xml -ds orderdb -schema PUBLIC -list TABLES".split(" "));
 
-		String out = stringWriter.toString();
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
 		assertEquals(
 				"Tables:\n-------\nCUSTOMERS\nCUSTOMER_W_TER\nDEPARTMENT_MANAGERS\nDIM_TIME\nEMPLOYEES\nOFFICES\nORDERDETAILS\nORDERFACT\nORDERS\nPAYMENTS\nPRODUCTS\nQUADRANT_ACTUALS\nTRIAL_BALANCE\n",
 				out);
@@ -107,7 +107,7 @@ public class MainTest extends TestCase {
 
 		Main.main("-conf examples/conf.xml -ds orderdb -schema PUBLIC -table EMPLOYEES -list COLUMNS".split(" "));
 
-		String out = stringWriter.toString();
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
 		assertEquals(
 				"Columns:\n--------\nEMPLOYEENUMBER\nLASTNAME\nFIRSTNAME\nEXTENSION\nEMAIL\nOFFICECODE\nREPORTSTO\nJOBTITLE\n",
 				out);
@@ -119,7 +119,7 @@ public class MainTest extends TestCase {
 
 		Main.main("-conf examples/conf.xml -list TRANSFORMERS".split(" "));
 
-		String out = stringWriter.toString();
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
 		String[] lines = out.split("\n");
 
 		assertEquals("Transformers:", lines[0]);
@@ -134,7 +134,7 @@ public class MainTest extends TestCase {
 
 		Main.main("-conf examples/conf.xml -list FILTERS".split(" "));
 
-		String out = stringWriter.toString();
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
 		String[] lines = out.split("\n");
 
 		assertEquals("Filters:", lines[0]);
@@ -149,7 +149,7 @@ public class MainTest extends TestCase {
 
 		Main.main("-conf examples/conf.xml -list ANALYZERS".split(" "));
 
-		String out = stringWriter.toString();
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
 		String[] lines = out.split("\n");
 
 		assertEquals("Analyzers:", lines[0]);
@@ -164,7 +164,7 @@ public class MainTest extends TestCase {
 		Main.setOut(new PrintWriter(stringWriter));
 		Main.main("-conf examples/conf.xml -job examples/employees_job.xml".split(" "));
 
-		String out = stringWriter.toString();
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
 		String[] lines = out.split("\n");
 		assertEquals("SUCCESS!", lines[0]);
 
