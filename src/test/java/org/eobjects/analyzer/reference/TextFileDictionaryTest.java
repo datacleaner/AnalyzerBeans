@@ -68,9 +68,9 @@ public class TextFileDictionaryTest extends TestCase {
 		long lm1 = file.lastModified();
 		assertTrue(lm1 != 0l);
 
-		// sleep for a second because some filesystems only support modification
-		// dating for the nearest second.
-		Thread.sleep(1000);
+		// sleep for two seconds because some filesystems only support
+		// modification dating for the nearest second.
+		Thread.sleep(2000);
 
 		FileHelper.writeStringAsFile(file, "foo\nfoobar");
 		long lm2 = file.lastModified();

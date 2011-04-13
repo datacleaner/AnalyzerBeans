@@ -70,9 +70,9 @@ public class TextFileSynonymCatalogTest extends TestCase {
 		assertEquals("bar", cat.getMasterTerm("br"));
 		assertEquals(null, cat.getMasterTerm("foob"));
 
-		// sleep for a second because some filesystems only support modification
-		// dating for the nearest second.
-		Thread.sleep(1000);
+		// sleep for two seconds because some filesystems only support
+		// modification dating for the nearest second.
+		Thread.sleep(2000);
 
 		FileHelper.writeStringAsFile(file, "foo,fooo,fo\nfoobar,foob");
 		assertEquals("foo", cat.getMasterTerm("fooo"));
