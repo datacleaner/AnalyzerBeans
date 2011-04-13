@@ -37,6 +37,7 @@ public class TextFileDictionary implements Dictionary {
 	private transient volatile Map<String, Boolean> _containsValueCache;
 	private transient File _file;
 	private transient FileMonitor _fileMonitor;
+	
 	private final String _name;
 	private final String _filename;
 	private final String _encoding;
@@ -47,17 +48,37 @@ public class TextFileDictionary implements Dictionary {
 		_encoding = encoding;
 	}
 
+	private File getFile() {
+		if (_file == null) {
+			synchronized (this) {
+				if (_file == null) {
+					_file = new File(_filename);
+				}
+			}
+		}
+		return _file;
+	}
+
+	private FileMonitor getFileMonitor() {
+		if (_fileMonitor == null) {
+			synchronized (this) {
+				if (_fileMonitor == null) {
+					_fileMonitor = FileMonitorFactory.getFileMonitor(getFile());
+				}
+			}
+		}
+		return _fileMonitor;
+	}
+
 	private Map<String, Boolean> getContainsValueCache() {
 		if (_containsValueCache == null) {
 			synchronized (this) {
 				if (_containsValueCache == null) {
 					_containsValueCache = CollectionUtils.createCacheMap();
-					_file = new File(_filename);
-					_fileMonitor = FileMonitorFactory.getFileMonitor(_file);
 				}
 			}
 		} else {
-			if (_fileMonitor.hasChanged()) {
+			if (getFileMonitor().hasChanged()) {
 				_containsValueCache = CollectionUtils.createCacheMap();
 			}
 		}
@@ -87,7 +108,7 @@ public class TextFileDictionary implements Dictionary {
 			BufferedReader reader = null;
 			try {
 				result = false;
-				reader = FileHelper.getBufferedReader(_file, _encoding);
+				reader = FileHelper.getBufferedReader(getFile(), _encoding);
 				for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 					if (value.equals(line)) {
 						result = true;
@@ -109,7 +130,7 @@ public class TextFileDictionary implements Dictionary {
 		BufferedReader reader = null;
 		try {
 			Set<String> values = new HashSet<String>();
-			reader = FileHelper.getBufferedReader(new File(_filename), _encoding);
+			reader = FileHelper.getBufferedReader(getFile(), _encoding);
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 				values.add(line);
 			}

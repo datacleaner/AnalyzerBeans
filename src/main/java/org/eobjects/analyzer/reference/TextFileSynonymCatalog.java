@@ -77,9 +77,31 @@ public final class TextFileSynonymCatalog implements SynonymCatalog {
 		return _caseSensitive;
 	}
 
+	private File getFile() {
+		if (_file == null) {
+			synchronized (this) {
+				if (_file == null) {
+					_file = new File(_filename);
+				}
+			}
+		}
+		return _file;
+	}
+
+	private FileMonitor getFileMonitor() {
+		if (_fileMonitor == null) {
+			synchronized (this) {
+				if (_fileMonitor == null) {
+					_fileMonitor = FileMonitorFactory.getFileMonitor(getFile());
+				}
+			}
+		}
+		return _fileMonitor;
+	}
+
 	@Override
 	public Collection<Synonym> getSynonyms() {
-		BufferedReader reader = FileHelper.getBufferedReader(_file, _encoding);
+		BufferedReader reader = FileHelper.getBufferedReader(getFile(), _encoding);
 		try {
 			List<Synonym> synonyms = new ArrayList<Synonym>();
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
@@ -90,21 +112,19 @@ public final class TextFileSynonymCatalog implements SynonymCatalog {
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			FileHelper.safeClose(_file);
+			FileHelper.safeClose(reader);
 		}
 	}
-	
+
 	private Map<String, String> getMasterTermCache() {
 		if (_masterTermCache == null) {
 			synchronized (this) {
 				if (_masterTermCache == null) {
 					_masterTermCache = CollectionUtils.createCacheMap();
-					_file = new File(_filename);
-					_fileMonitor = FileMonitorFactory.getFileMonitor(_file);
 				}
 			}
 		} else {
-			if (_fileMonitor.hasChanged()) {
+			if (getFileMonitor().hasChanged()) {
 				// reset the cache
 				_masterTermCache = CollectionUtils.createCacheMap();
 			}
@@ -122,7 +142,7 @@ public final class TextFileSynonymCatalog implements SynonymCatalog {
 			return masterTerm;
 		}
 
-		BufferedReader reader = FileHelper.getBufferedReader(_file, _encoding);
+		BufferedReader reader = FileHelper.getBufferedReader(getFile(), _encoding);
 		try {
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 				line = line.trim();
