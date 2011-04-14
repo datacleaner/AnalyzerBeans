@@ -37,7 +37,7 @@ public class TextFileDictionary implements Dictionary {
 	private final String _name;
 	private final String _filename;
 	private final String _encoding;
-	
+
 	private Set<String> _entries = null;
 
 	public TextFileDictionary(String name, String filename, String encoding) {
@@ -69,7 +69,7 @@ public class TextFileDictionary implements Dictionary {
 	public String getEncoding() {
 		return _encoding;
 	}
-	
+
 	@Initialize
 	public void init() {
 		Set<String> entries = new HashSet<String>();
@@ -86,7 +86,7 @@ public class TextFileDictionary implements Dictionary {
 		}
 		_entries = Collections.unmodifiableSet(entries);
 	}
-	
+
 	@Close
 	public void close() {
 		_entries = null;
@@ -94,6 +94,9 @@ public class TextFileDictionary implements Dictionary {
 
 	@Override
 	public boolean containsValue(String value) {
+		if (_entries == null) {
+			init();
+		}
 		if (value == null) {
 			return false;
 		}
@@ -102,6 +105,9 @@ public class TextFileDictionary implements Dictionary {
 
 	@Override
 	public ReferenceValues<String> getValues() {
+		if (_entries == null) {
+			init();
+		}
 		return new SimpleStringReferenceValues(_entries, true);
 	}
 }
