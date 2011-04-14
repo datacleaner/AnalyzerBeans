@@ -21,26 +21,24 @@ package org.eobjects.analyzer.reference;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.eobjects.analyzer.util.CollectionUtils;
-import org.eobjects.analyzer.util.filemonitor.FileMonitor;
-import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
+import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.metamodel.util.FileHelper;
 
 public class TextFileDictionary implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
-	private transient volatile Map<String, Boolean> _containsValueCache;
 	private transient File _file;
-	private transient FileMonitor _fileMonitor;
-	
 	private final String _name;
 	private final String _filename;
 	private final String _encoding;
+	
+	private Set<String> _entries = null;
 
 	public TextFileDictionary(String name, String filename, String encoding) {
 		_name = name;
@@ -59,32 +57,6 @@ public class TextFileDictionary implements Dictionary {
 		return _file;
 	}
 
-	private FileMonitor getFileMonitor() {
-		if (_fileMonitor == null) {
-			synchronized (this) {
-				if (_fileMonitor == null) {
-					_fileMonitor = FileMonitorFactory.getFileMonitor(getFile());
-				}
-			}
-		}
-		return _fileMonitor;
-	}
-
-	private Map<String, Boolean> getContainsValueCache() {
-		if (_containsValueCache == null) {
-			synchronized (this) {
-				if (_containsValueCache == null) {
-					_containsValueCache = CollectionUtils.createCacheMap();
-				}
-			}
-		} else {
-			if (getFileMonitor().hasChanged()) {
-				_containsValueCache = CollectionUtils.createCacheMap();
-			}
-		}
-		return _containsValueCache;
-	}
-
 	@Override
 	public String getName() {
 		return _name;
@@ -97,49 +69,39 @@ public class TextFileDictionary implements Dictionary {
 	public String getEncoding() {
 		return _encoding;
 	}
+	
+	@Initialize
+	public void init() {
+		Set<String> entries = new HashSet<String>();
+		BufferedReader reader = null;
+		try {
+			reader = FileHelper.getBufferedReader(getFile(), _encoding);
+			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+				entries.add(line);
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		} finally {
+			FileHelper.safeClose(reader);
+		}
+		_entries = Collections.unmodifiableSet(entries);
+	}
+	
+	@Close
+	public void close() {
+		_entries = null;
+	}
 
 	@Override
 	public boolean containsValue(String value) {
 		if (value == null) {
 			return false;
 		}
-		Boolean result = getContainsValueCache().get(value);
-		if (result == null) {
-			BufferedReader reader = null;
-			try {
-				result = false;
-				reader = FileHelper.getBufferedReader(getFile(), _encoding);
-				for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-					if (value.equals(line)) {
-						result = true;
-						break;
-					}
-				}
-				getContainsValueCache().put(value, result);
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			} finally {
-				FileHelper.safeClose(reader);
-			}
-		}
-		return result;
+		return _entries.contains(value);
 	}
 
 	@Override
 	public ReferenceValues<String> getValues() {
-		BufferedReader reader = null;
-		try {
-			Set<String> values = new HashSet<String>();
-			reader = FileHelper.getBufferedReader(getFile(), _encoding);
-			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-				values.add(line);
-			}
-			return new SimpleStringReferenceValues(values, true);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		} finally {
-			FileHelper.safeClose(reader);
-		}
+		return new SimpleStringReferenceValues(_entries, true);
 	}
-
 }

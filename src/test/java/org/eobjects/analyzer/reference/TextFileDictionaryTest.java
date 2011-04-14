@@ -33,6 +33,7 @@ public class TextFileDictionaryTest extends TestCase {
 	public void testThreadSafety() throws Exception {
 		final TextFileDictionary dict = new TextFileDictionary("foobar", "src/test/resources/lastnames.txt", "UTF-8");
 
+		dict.init();
 		final Runnable r = new Runnable() {
 			@Override
 			public void run() {
@@ -60,22 +61,16 @@ public class TextFileDictionaryTest extends TestCase {
 		File file = new File("target/TextBasedDictionaryTest-modification.txt");
 		FileHelper.writeStringAsFile(file, "foo\nbar");
 
-		Dictionary dict = new TextFileDictionary("dict", file.getPath(), "UTF-8");
+		TextFileDictionary dict = new TextFileDictionary("dict", file.getPath(), "UTF-8");
+		dict.init();
 		assertTrue(dict.containsValue("foo"));
 		assertTrue(dict.containsValue("bar"));
 		assertFalse(dict.containsValue("foobar"));
 
-		long lm1 = file.lastModified();
-		assertTrue(lm1 != 0l);
-
-		// sleep for two seconds because some filesystems only support
-		// modification dating for the nearest second.
-		Thread.sleep(2000);
-
+		dict.close();
 		FileHelper.writeStringAsFile(file, "foo\nfoobar");
-		long lm2 = file.lastModified();
+		dict.init();
 
-		assertTrue(lm1 != lm2);
 		assertTrue(dict.containsValue("foo"));
 		assertFalse(dict.containsValue("bar"));
 		assertTrue(dict.containsValue("foobar"));
