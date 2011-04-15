@@ -67,7 +67,9 @@ public class TextFileDictionaryTest extends TestCase {
 		assertTrue(dict.containsValue("bar"));
 		assertFalse(dict.containsValue("foobar"));
 
-		dict.close();
+		// sleep to make sure the file monitor will catch a file change
+		Thread.sleep(2000);
+		
 		FileHelper.writeStringAsFile(file, "foo\nfoobar");
 		dict.init();
 

@@ -21,12 +21,12 @@ package org.eobjects.analyzer.reference;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.util.filemonitor.FileMonitor;
+import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
 public class TextFileDictionary implements Dictionary {
@@ -34,11 +34,12 @@ public class TextFileDictionary implements Dictionary {
 	private static final long serialVersionUID = 1L;
 
 	private transient File _file;
+	private transient FileMonitor _fileMonitor;
+	private transient Set<String> _entries;
+
 	private final String _name;
 	private final String _filename;
 	private final String _encoding;
-
-	private Set<String> _entries = null;
 
 	public TextFileDictionary(String name, String filename, String encoding) {
 		_name = name;
@@ -57,6 +58,13 @@ public class TextFileDictionary implements Dictionary {
 		return _file;
 	}
 
+	private FileMonitor getFileMonitor() {
+		if (_fileMonitor == null) {
+			_fileMonitor = FileMonitorFactory.getFileMonitor(getFile());
+		}
+		return _fileMonitor;
+	}
+
 	@Override
 	public String getName() {
 		return _name;
@@ -72,6 +80,19 @@ public class TextFileDictionary implements Dictionary {
 
 	@Initialize
 	public void init() {
+		if (getFileMonitor().hasChanged()) {
+			_entries = loadEntries();
+		}
+	}
+	
+	public Set<String> getEntries() {
+		if (_entries == null) {
+			_entries = loadEntries();
+		}
+		return _entries;
+	}
+
+	private Set<String> loadEntries() {
 		Set<String> entries = new HashSet<String>();
 		BufferedReader reader = null;
 		try {
@@ -84,30 +105,19 @@ public class TextFileDictionary implements Dictionary {
 		} finally {
 			FileHelper.safeClose(reader);
 		}
-		_entries = Collections.unmodifiableSet(entries);
-	}
-
-	@Close
-	public void close() {
-		_entries = null;
+		return entries;
 	}
 
 	@Override
 	public boolean containsValue(String value) {
-		if (_entries == null) {
-			init();
-		}
 		if (value == null) {
 			return false;
 		}
-		return _entries.contains(value);
+		return getEntries().contains(value);
 	}
 
 	@Override
 	public ReferenceValues<String> getValues() {
-		if (_entries == null) {
-			init();
-		}
-		return new SimpleStringReferenceValues(_entries, true);
+		return new SimpleStringReferenceValues(getEntries(), true);
 	}
 }
