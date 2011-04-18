@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.easymock.EasyMock;
+import org.easymock.IArgumentMatcher;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
@@ -41,9 +43,13 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MetaModelInputColumn;
+import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
+import org.eobjects.analyzer.descriptors.AnnotationBasedTransformerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
+import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
@@ -54,8 +60,8 @@ import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
-
 import org.eobjects.metamodel.MetaModelTestCase;
+import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 
 public class AnalysisJobBuilderTest extends MetaModelTestCase {
@@ -101,8 +107,13 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 				.getTableByName("EMPLOYEES");
 		assertNotNull(employeeTable);
 
+		Column emailColumn = employeeTable.getColumnByName("EMAIL");
 		analysisJobBuilder.addSourceColumns(employeeTable.getColumnByName("EMPLOYEENUMBER"),
-				employeeTable.getColumnByName("FIRSTNAME"), employeeTable.getColumnByName("EMAIL"));
+				employeeTable.getColumnByName("FIRSTNAME"), emailColumn);
+
+		assertTrue(analysisJobBuilder.containsSourceColumn(emailColumn));
+		assertFalse(analysisJobBuilder.containsSourceColumn(null));
+		assertFalse(analysisJobBuilder.containsSourceColumn(employeeTable.getColumnByName("LASTNAME")));
 
 		TransformerJobBuilder<ConvertToStringTransformer> transformerJobBuilder = analysisJobBuilder
 				.addTransformer(ConvertToStringTransformer.class);
@@ -230,15 +241,121 @@ public class AnalysisJobBuilderTest extends MetaModelTestCase {
 		RowProcessingAnalyzerJobBuilder<StringAnalyzer> stringAnalyzer = analysisJobBuilder
 				.addRowProcessingAnalyzer(StringAnalyzer.class);
 		stringAnalyzer.addInputColumns(emailStdTransformer.getOutputColumns());
-		
+
 		assertSame(maxRowsFilter.getOutcome(ValidationCategory.VALID), stringAnalyzer.getRequirement());
-		
+
 		analysisJobBuilder.removeFilter(maxRowsFilter);
-		
+
 		assertNull(analysisJobBuilder.getDefaultRequirement());
 		assertSame(notNullFilter.getOutcome(ValidationCategory.VALID), stringAnalyzer.getRequirement());
 		assertSame(notNullFilter.getOutcome(ValidationCategory.VALID), emailStdTransformer.getRequirement());
 
 		dcp.close();
+	}
+
+	public void testSourceColumnListeners() throws Exception {
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration(TestHelper
+				.createSampleDatabaseDatastore("mydb")));
+		ajb.setDatastore("mydb");
+
+		SourceColumnChangeListener listener1 = EasyMock.createMock(SourceColumnChangeListener.class);
+		ajb.getSourceColumnListeners().add(listener1);
+
+		Column column = ajb.getDataContextProvider().getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
+		MetaModelInputColumn inputColumn = new MetaModelInputColumn(column);
+
+		// scene 1: add source column
+		listener1.onAdd(inputColumn);
+		listener1.onRemove(inputColumn);
+		listener1.onAdd(inputColumn);
+
+		EasyMock.replay(listener1);
+
+		ajb.addSourceColumns(inputColumn);
+		ajb.removeSourceColumn(column);
+		ajb.addSourceColumn(inputColumn);
+
+		EasyMock.verify(listener1);
+		EasyMock.reset(listener1);
+
+		// scene 2: add transformer
+		TransformerChangeListener listener2 = EasyMock.createMock(TransformerChangeListener.class);
+		ajb.getTransformerChangeListeners().add(listener2);
+
+		final TransformerBeanDescriptor<EmailStandardizerTransformer> descriptor = AnnotationBasedTransformerBeanDescriptor
+				.create(EmailStandardizerTransformer.class);
+		IArgumentMatcher tjbMatcher = new IArgumentMatcher() {
+			@Override
+			public boolean matches(Object argument) {
+				TransformerJobBuilder<?> tjb = (TransformerJobBuilder<?>) argument;
+				return tjb.getDescriptor() == descriptor;
+			}
+
+			@Override
+			public void appendTo(StringBuffer buffer) {
+				buffer.append("transformer job builder");
+			}
+		};
+		EasyMock.reportMatcher(tjbMatcher);
+		listener2.onAdd(null);
+
+		// output updated
+		EasyMock.reportMatcher(tjbMatcher);
+		EasyMock.reportMatcher(new IArgumentMatcher() {
+
+			@Override
+			public boolean matches(Object argument) {
+				@SuppressWarnings("unchecked")
+				List<MutableInputColumn<?>> list = (List<MutableInputColumn<?>>) argument;
+				if (list.size() == 2) {
+					if (list.get(0).getName().equals("Username")) {
+						if (list.get(1).getName().equals("Domain")) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+			@Override
+			public void appendTo(StringBuffer buffer) {
+				buffer.append("list of output columns");
+			}
+		});
+		listener2.onOutputChanged(null, null);
+
+		// configuration updated
+		EasyMock.reportMatcher(tjbMatcher);
+		listener2.onConfigurationChanged(null);
+
+		// remove transformer
+		EasyMock.reportMatcher(tjbMatcher);
+		EasyMock.reportMatcher(new IArgumentMatcher() {
+
+			@Override
+			public boolean matches(Object argument) {
+				@SuppressWarnings("unchecked")
+				List<MutableInputColumn<?>> list = (List<MutableInputColumn<?>>) argument;
+				return list.isEmpty();
+			}
+
+			@Override
+			public void appendTo(StringBuffer buffer) {
+				buffer.append("empty list of output columns");
+			}
+		});
+		listener2.onOutputChanged(null, null);
+
+		EasyMock.reportMatcher(tjbMatcher);
+		listener2.onRemove(null);
+
+		listener1.onRemove(inputColumn);
+
+		EasyMock.replay(listener1, listener2);
+
+		ajb.addTransformer(descriptor).addInputColumn(inputColumn);
+		ajb.reset();
+
+		EasyMock.verify(listener1, listener2);
 	}
 }
