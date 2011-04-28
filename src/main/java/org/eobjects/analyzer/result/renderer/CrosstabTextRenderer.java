@@ -168,6 +168,9 @@ public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
 
 		@Override
 		public String getResult() {
+			if (sb == null) {
+				return "";
+			}
 			return sb.toString();
 		}
 

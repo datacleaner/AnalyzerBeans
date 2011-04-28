@@ -34,18 +34,14 @@ public class CrosstabRendererTest extends TestCase {
 		c.where("Region", "Asia").put(3, true);
 
 		CrosstabRenderer crosstabRenderer = new CrosstabRenderer(c);
-		String result = crosstabRenderer
-				.render(new HtmlCrosstabRendererCallback());
+		String result = crosstabRenderer.render(new HtmlCrosstabRendererCallback());
 		assertEquals("<table><tr><td>EU</td><td>USA</td><td>Asia</td></tr>"
-				+ "<tr><td>1</td><td>2</td><td>3</td></tr></table>",
-				result.replaceAll("\"", "'"));
+				+ "<tr><td>1</td><td>2</td><td>3</td></tr></table>", result.replaceAll("\"", "'"));
 
 		crosstabRenderer.makeVertical(c.getDimension(0));
 		result = crosstabRenderer.render(new HtmlCrosstabRendererCallback());
-		assertEquals("<table><tr><td>EU</td><td>1</td></tr>"
-				+ "<tr><td>USA</td><td>2</td></tr>"
-				+ "<tr><td>Asia</td><td>3</td></tr></table>",
-				result.replaceAll("\"", "'"));
+		assertEquals("<table><tr><td>EU</td><td>1</td></tr>" + "<tr><td>USA</td><td>2</td></tr>"
+				+ "<tr><td>Asia</td><td>3</td></tr></table>", result.replaceAll("\"", "'"));
 	}
 
 	public void testMultipleDimensions() throws Exception {
@@ -54,21 +50,18 @@ public class CrosstabRendererTest extends TestCase {
 		// USA), Age-group (children, teenagers and adult)
 		// and Gender (male and female)
 
-		Crosstab<Integer> c = new Crosstab<Integer>(Integer.class, "Region",
-				"Age-group", "Gender", "Native");
+		Crosstab<Integer> c = new Crosstab<Integer>(Integer.class, "Region", "Age-group", "Gender", "Native");
 		String[] genderValues = { "Male", "Female" };
 		String[] regionValues = { "EU", "USA" };
 		String[] ageGroupValues = { "Child", "Teenager", "Adult" };
-		String[] nativeValues = { "Yes", "No, immigrant",
-				"No, second-generation" };
+		String[] nativeValues = { "Yes", "No, immigrant", "No, second-generation" };
 
 		int i = 0;
 		for (String gender : genderValues) {
 			for (String region : regionValues) {
 				for (String ageGroup : ageGroupValues) {
 					for (String nativeValue : nativeValues) {
-						c.where("Region", region).where("Age-group", ageGroup)
-								.where("Gender", gender)
+						c.where("Region", region).where("Age-group", ageGroup).where("Gender", gender)
 								.where("Native", nativeValue).put(i, true);
 						i++;
 					}
@@ -77,8 +70,7 @@ public class CrosstabRendererTest extends TestCase {
 		}
 
 		String[] dimensionNames = c.getDimensionNames();
-		assertEquals("[Region, Age-group, Gender, Native]",
-				Arrays.toString(dimensionNames));
+		assertEquals("[Region, Age-group, Gender, Native]", Arrays.toString(dimensionNames));
 
 		CrosstabRenderer crosstabRenderer = new CrosstabRenderer(c);
 
@@ -92,8 +84,7 @@ public class CrosstabRendererTest extends TestCase {
 						+ "<tr><td rowspan='3'>Female</td><td>Yes</td><td>18</td><td>21</td><td>24</td><td>27</td><td>30</td><td>33</td></tr>"
 						+ "<tr><td>No, immigrant</td><td>19</td><td>22</td><td>25</td><td>28</td><td>31</td><td>34</td></tr>"
 						+ "<tr><td>No, second-generation</td><td>20</td><td>23</td><td>26</td><td>29</td><td>32</td><td>35</td></tr></table>",
-				crosstabRenderer.render(new HtmlCrosstabRendererCallback())
-						.replaceAll("\"", "'"));
+				crosstabRenderer.render(new HtmlCrosstabRendererCallback()).replaceAll("\"", "'"));
 
 		// try all vertical
 		crosstabRenderer.makeVertical(c.getDimension(0));
@@ -132,12 +123,19 @@ public class CrosstabRendererTest extends TestCase {
 						+ "<tr><td>Teenager</td><td>31</td></tr>"
 						+ "<tr><td>Adult</td><td>34</td></tr>"
 						+ "<tr><td rowspan='6'>No, second-generation</td><td rowspan='3'>EU</td><td>Child</td><td>20</td></tr>"
-						+ "<tr><td>Teenager</td><td>23</td></tr>"
-						+ "<tr><td>Adult</td><td>26</td></tr>"
+						+ "<tr><td>Teenager</td><td>23</td></tr>" + "<tr><td>Adult</td><td>26</td></tr>"
 						+ "<tr><td rowspan='3'>USA</td><td>Child</td><td>29</td></tr>"
-						+ "<tr><td>Teenager</td><td>32</td></tr>"
-						+ "<tr><td>Adult</td><td>35</td></tr></table>",
-				crosstabRenderer.render(new HtmlCrosstabRendererCallback())
-						.replaceAll("\"", "'"));
+						+ "<tr><td>Teenager</td><td>32</td></tr>" + "<tr><td>Adult</td><td>35</td></tr></table>",
+				crosstabRenderer.render(new HtmlCrosstabRendererCallback()).replaceAll("\"", "'"));
+	}
+
+	public void testEmptyDimension() throws Exception {
+		Crosstab<Integer> crosstab = new Crosstab<Integer>(Integer.class, "foo", "bar");
+
+		CrosstabTextRenderer renderer = new CrosstabTextRenderer();
+		String result = renderer.render(crosstab);
+		
+		assertEquals("", result);
+		
 	}
 }

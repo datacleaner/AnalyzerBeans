@@ -19,12 +19,14 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
+import org.eobjects.analyzer.util.CollectionUtils;
 
 /**
  * A class that encapsulates all the complicated logic of traversing a crosstab
@@ -40,9 +42,9 @@ public class CrosstabRenderer {
 
 	private static final int MAX_HORIZONTAL_CELLS = 10;
 
-	private Crosstab<?> crosstab;
-	private List<CrosstabDimension> horizontalDimensions;
-	private List<CrosstabDimension> verticalDimensions;
+	private final Crosstab<?> crosstab;
+	private final List<CrosstabDimension> horizontalDimensions;
+	private final List<CrosstabDimension> verticalDimensions;
 	private int horizontalCells = 1;
 	private int verticalCells = 1;
 
@@ -51,8 +53,8 @@ public class CrosstabRenderer {
 			throw new IllegalArgumentException("Crosstab cannot be null");
 		}
 		this.crosstab = crosstab;
-		this.horizontalDimensions = new LinkedList<CrosstabDimension>();
-		this.verticalDimensions = new LinkedList<CrosstabDimension>();
+		this.horizontalDimensions = new ArrayList<CrosstabDimension>();
+		this.verticalDimensions = new ArrayList<CrosstabDimension>();
 	}
 
 	public void autoAssignDimensions() {
@@ -63,7 +65,7 @@ public class CrosstabRenderer {
 		List<CrosstabDimension> autoAssignDimensions = new LinkedList<CrosstabDimension>();
 
 		for (CrosstabDimension dimension : dimensions) {
-			if (!isAssigned(dimension)) {
+			if (dimension.getCategoryCount() > 0 && !isAssigned(dimension)) {
 				autoAssignDimensions.add(dimension);
 			}
 		}
@@ -119,7 +121,11 @@ public class CrosstabRenderer {
 		autoAssignDimensions();
 
 		List<CrosstabDimension> dimensions = crosstab.getDimensions();
-		if (dimensions == null || dimensions.isEmpty()) {
+		if (CollectionUtils.isNullOrEmpty(dimensions)) {
+			return callback.getResult();
+		}
+
+		if (CollectionUtils.isNullOrEmpty(horizontalDimensions) && CollectionUtils.isNullOrEmpty(verticalDimensions)) {
 			return callback.getResult();
 		}
 
