@@ -74,4 +74,15 @@ public class MatchingAnalyzerTest extends TestCase {
 				"False count                            1                            4                            4                            0                            4                            4                            2                            3                            0                            4 ",
 				resultLines[4]);
 	}
+
+	public void testNoReferenceData() throws Exception {
+		MatchingAnalyzer analyzer = new MatchingAnalyzer();
+
+		try {
+			analyzer.init();
+			fail("Exception expected");
+		} catch (IllegalStateException e) {
+			assertEquals("No dictionaries or string patterns selected", e.getMessage());
+		}
+	}
 }

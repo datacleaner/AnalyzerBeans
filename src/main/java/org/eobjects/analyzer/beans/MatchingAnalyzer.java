@@ -37,6 +37,7 @@ import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.result.BooleanAnalyzerResult;
+import org.eobjects.analyzer.util.CollectionUtils;
 
 @AnalyzerBean("Matching analyzer")
 @Description("Provides a handy shortcut for doing matching with dictionaries and string patterns as well as retrieving matching matrices for all matches.")
@@ -68,6 +69,10 @@ public class MatchingAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerRe
 
 	@Initialize
 	public void init() {
+		if (CollectionUtils.isNullOrEmpty(dictionaries) && CollectionUtils.isNullOrEmpty(stringPatterns)) {
+			throw new IllegalStateException("No dictionaries or string patterns selected");
+		}
+
 		_dictionaryMatchers = new DictionaryMatcherTransformer[columns.length];
 		_stringPatternMatchers = new StringPatternMatcherTransformer[columns.length];
 		_matchColumns = new ArrayList<InputColumn<Boolean>>();

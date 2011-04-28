@@ -200,4 +200,8 @@ public final class CollectionUtils {
 	public static <K, V> Map<K, V> createCacheMap() {
 		return new ReferenceMap<K, V>(ReferenceMap.SOFT, ReferenceMap.SOFT, true);
 	}
+
+	public static <E> boolean isNullOrEmpty(E[] arr) {
+		return arr == null || arr.length == 0;
+	}
 }
