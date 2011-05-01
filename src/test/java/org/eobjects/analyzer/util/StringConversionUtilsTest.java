@@ -68,12 +68,12 @@ public class StringConversionUtilsTest extends TestCase {
 
 	public void testAbstractNumber() throws Exception {
 		Number n = StringConversionUtils.deserialize("1", Number.class, null, null, null);
-		assertTrue(n instanceof Integer);
+		assertTrue(n instanceof Long);
 		assertEquals(1, n.intValue());
 		
-		n = StringConversionUtils.deserialize("1.0", Number.class, null, null, null);
+		n = StringConversionUtils.deserialize("1.01", Number.class, null, null, null);
 		assertTrue(n instanceof Double);
-		assertEquals(1.0, n.doubleValue());
+		assertEquals(1.01, n.doubleValue());
 		assertEquals(1, n.intValue());
 	}
 

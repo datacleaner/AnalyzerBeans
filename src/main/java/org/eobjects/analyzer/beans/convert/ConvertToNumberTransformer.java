@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans.convert;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -31,6 +33,8 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.Percentage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Attempts to convert anything to a Number (Double) value
@@ -41,12 +45,48 @@ import org.eobjects.analyzer.util.Percentage;
 @Description("Converts anything to a number (or null).")
 public class ConvertToNumberTransformer implements Transformer<Number> {
 
+	private static final Logger logger = LoggerFactory.getLogger(ConvertToNumberTransformer.class);
+
 	@Inject
 	@Configured
 	InputColumn<?> input;
 
+	@Inject
+	@Configured
+	char decimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
+
+	@Inject
+	@Configured
+	char thousandSeparator = DecimalFormatSymbols.getInstance().getGroupingSeparator();
+
+	@Inject
+	@Configured
+	char minusSign = DecimalFormatSymbols.getInstance().getMinusSign();
+
+	@Inject
 	@Configured(required = false)
 	Number nullReplacement;
+
+	// no-args constructor
+	public ConvertToNumberTransformer() {
+	}
+
+	public ConvertToNumberTransformer(char decimalSeparator, char thousandSeparator, char minusSign) {
+		this();
+		this.decimalSeparator = decimalSeparator;
+		this.thousandSeparator = thousandSeparator;
+		this.minusSign = minusSign;
+	}
+
+	public DecimalFormat getDecimalFormat() {
+		DecimalFormat format = new DecimalFormat();
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator(decimalSeparator);
+		symbols.setGroupingSeparator(thousandSeparator);
+		symbols.setMinusSign(minusSign);
+		format.setDecimalFormatSymbols(symbols);
+		return format;
+	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -56,14 +96,29 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 	@Override
 	public Number[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(input);
-		Number n = transformValue(value);
+		Number n = transform(value);
 		if (n == null) {
 			n = nullReplacement;
 		}
 		return new Number[] { n };
 	}
 
+	protected Number transform(Object value) {
+		return transformValue(value, getDecimalFormat());
+	}
+
 	public static Number transformValue(Object value) {
+		// use java's normal decimal symbols
+		DecimalFormat format = new DecimalFormat();
+		DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+		symbols.setDecimalSeparator('.');
+		symbols.setGroupingSeparator(',');
+		symbols.setMinusSign('-');
+		format.setDecimalFormatSymbols(symbols);
+		return transformValue(value, format);
+	}
+
+	public static Number transformValue(Object value, DecimalFormat decimalFormat) {
 		Number n = null;
 		if (value != null) {
 			if (value instanceof Number) {
@@ -89,13 +144,11 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 				try {
 					if (stringValue.indexOf('%') != -1) {
 						n = Percentage.parsePercentage(stringValue);
-					} else if (stringValue.indexOf('.') != -1) {
-						n = Double.parseDouble(stringValue);
 					} else {
-						n = Integer.parseInt(stringValue);
+						n = decimalFormat.parse(stringValue);
 					}
-				} catch (NumberFormatException e) {
-					// ignore
+				} catch (Exception e) {
+					logger.info("Error occured parsing string as number: {}", stringValue);
 				}
 			}
 		}
