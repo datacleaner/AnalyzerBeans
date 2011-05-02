@@ -99,13 +99,13 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		jobType.setSource(sourceType);
 
 		final Datastore datastore = analysisJob.getDatastore();
-		if (datastore != null) {
-			DataContextType dcType = new DataContextType();
-			dcType.setRef(datastore.getName());
-			sourceType.setDataContext(dcType);
-		} else {
+		final DataContextType dataContextType = new DataContextType();
+		if (datastore == null) {
 			logger.warn("No datastore specified for analysis job: {}", analysisJob);
+		} else {
+			dataContextType.setRef(datastore.getName());
 		}
+		sourceType.setDataContext(dataContextType);
 
 		// mappings for lookup of ID's
 		final Map<InputColumn<?>, String> columnMappings = new HashMap<InputColumn<?>, String>();

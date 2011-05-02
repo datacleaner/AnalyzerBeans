@@ -139,13 +139,16 @@ public class JaxbJobWriterTest extends TestCase {
 		Datastore ds = EasyMock.createMock(Datastore.class);
 
 		EasyMock.expect(job.getDatastore()).andReturn(ds);
+		
+		EasyMock.expect(ds.getName()).andReturn("myds");
+		
 		EasyMock.expect(job.getSourceColumns()).andReturn(new ArrayList<InputColumn<?>>());
 		EasyMock.expect(job.getTransformerJobs()).andReturn(new ArrayList<TransformerJob>());
 		EasyMock.expect(job.getFilterJobs()).andReturn(new ArrayList<FilterJob>());
 		EasyMock.expect(job.getMergedOutcomeJobs()).andReturn(new ArrayList<MergedOutcomeJob>());
 		EasyMock.expect(job.getAnalyzerJobs()).andReturn(new ArrayList<AnalyzerJob>());
 
-		EasyMock.replay(job);
+		EasyMock.replay(job, ds);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -164,14 +167,14 @@ public class JaxbJobWriterTest extends TestCase {
 		assertEquals("        <created-date>2010-11-12Z</created-date>", lines[5]);
 		assertEquals("    </job-metadata>", lines[6]);
 		assertEquals("    <source>", lines[7]);
-		assertEquals("        <data-context/>", lines[8]);
+		assertEquals("        <data-context ref=_myds_/>", lines[8]);
 		assertEquals("        <columns/>", lines[9]);
 		assertEquals("    </source>", lines[10]);
 		assertEquals("    <transformation/>", lines[11]);
 		assertEquals("    <analysis/>", lines[12]);
 		assertEquals("</job>", lines[13]);
 
-		EasyMock.verify(job);
+		EasyMock.verify(job, ds);
 	}
 
 	public void testCompareWithBenchmarkFiles() throws Exception {
