@@ -41,8 +41,13 @@ import org.slf4j.LoggerFactory;
 final class BeanClassVisitor implements ClassVisitor {
 
 	private final static Logger _logger = LoggerFactory.getLogger(BeanClassVisitor.class);
+	private final ClassLoader _classLoader;
 	private Class<?> _beanClazz;
 	private String _name;
+
+	public BeanClassVisitor(ClassLoader classLoader) {
+		_classLoader = classLoader;
+	}
 
 	@Override
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -66,7 +71,7 @@ final class BeanClassVisitor implements ClassVisitor {
 		if (_beanClazz == null) {
 			String javaName = _name.replace('/', '.');
 			try {
-				_beanClazz = Class.forName(javaName);
+				_beanClazz = Class.forName(javaName, true, _classLoader);
 			} catch (ClassNotFoundException e) {
 				_logger.error("Could not load class: " + javaName, e);
 			}

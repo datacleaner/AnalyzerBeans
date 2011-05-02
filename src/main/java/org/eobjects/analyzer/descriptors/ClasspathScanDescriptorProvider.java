@@ -55,6 +55,10 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	private final Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
 
 	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive) {
+		return scanPackage(packageName, recursive, Thread.currentThread().getContextClassLoader());
+	}
+
+	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive, ClassLoader classLoader) {
 		String packagePath = packageName.replace('.', '/');
 		if (recursive) {
 			logger.info("Scanning package path '{}' (and subpackages recursively)", packagePath);
@@ -62,7 +66,6 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 			logger.info("Scanning package path '{}'", packagePath);
 		}
 		try {
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			Enumeration<URL> resources = classLoader.getResources(packagePath);
 			while (resources.hasMoreElements()) {
 				URL resource = resources.nextElement();
@@ -72,13 +75,13 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 
 				if (dir.isDirectory()) {
 					logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
-					scanDirectory(dir, recursive);
+					scanDirectory(dir, recursive, classLoader);
 				} else {
 					URLConnection connection = resource.openConnection();
 					if (connection instanceof JarURLConnection) {
 						JarURLConnection jarUrlConnection = (JarURLConnection) connection;
 						logger.debug("Resource is a JAR file, scanning file: " + jarUrlConnection.getJarFile().getName());
-						scanJar(jarUrlConnection, packagePath, recursive);
+						scanJar(jarUrlConnection, classLoader, packagePath, recursive);
 					} else {
 						throw new IllegalStateException("Unknown connection type: " + connection);
 					}
@@ -91,7 +94,8 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		return this;
 	}
 
-	private void scanJar(JarURLConnection jarUrlConnection, String packagePath, boolean recursive) throws IOException {
+	private void scanJar(JarURLConnection jarUrlConnection, ClassLoader classLoader, String packagePath, boolean recursive)
+			throws IOException {
 		JarFile jarFile = jarUrlConnection.getJarFile();
 		Enumeration<JarEntry> entries = jarFile.entries();
 
@@ -101,7 +105,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 			if (entryName.startsWith(packagePath) && entryName.endsWith(".class")) {
 				if (recursive) {
 					InputStream inputStream = jarFile.getInputStream(entry);
-					scanInputStream(inputStream);
+					scanInputStream(inputStream, classLoader);
 				} else {
 					String trailingPart = entryName.substring(packagePath.length());
 					if (trailingPart.startsWith("/")) {
@@ -109,7 +113,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 					}
 					if (trailingPart.indexOf('/') == -1) {
 						InputStream inputStream = jarFile.getInputStream(entry);
-						scanInputStream(inputStream);
+						scanInputStream(inputStream, classLoader);
 					} else {
 						logger.debug("Omitting recursive JAR file entry: {}", entryName);
 					}
@@ -120,7 +124,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		}
 	}
 
-	private void scanDirectory(File dir, boolean recursive) {
+	private void scanDirectory(File dir, boolean recursive, ClassLoader classLoader) {
 		if (!dir.exists()) {
 			throw new IllegalArgumentException("Directory '" + dir + "' does not exist");
 		}
@@ -139,7 +143,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		for (File file : classFiles) {
 			try {
 				InputStream inputStream = new FileInputStream(file);
-				scanInputStream(inputStream);
+				scanInputStream(inputStream, classLoader);
 			} catch (IOException e) {
 				logger.error("Could not read file", e);
 			}
@@ -157,17 +161,17 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 					logger.info("Recursively scanning " + subDirectories.length + " subdirectories");
 				}
 				for (File subDir : subDirectories) {
-					scanDirectory(subDir, true);
+					scanDirectory(subDir, true, classLoader);
 				}
 			}
 		}
 	}
 
-	protected void scanInputStream(final InputStream inputStream) throws IOException {
+	protected void scanInputStream(final InputStream inputStream, final ClassLoader classLoader) throws IOException {
 		try {
 
 			ClassReader classReader = new ClassReader(inputStream);
-			BeanClassVisitor visitor = new BeanClassVisitor();
+			BeanClassVisitor visitor = new BeanClassVisitor(classLoader);
 			classReader.accept(visitor, ClassReader.SKIP_CODE);
 
 			if (visitor.isAnalyzer()) {
