@@ -19,11 +19,27 @@
  */
 package org.eobjects.analyzer.beans.stringpattern;
 
+/**
+ * Defines a "predefined" token which is a token type that have been found based
+ * on the users entered patterns, before any other pattern finding processing.
+ * using a set of regular expressions and given a name.
+ * 
+ * @author Kasper Sørensen
+ * 
+ */
 public class PredefinedToken implements Token {
 
 	private PredefinedTokenDefinition _predefinedTokenDefintion;
 	private String _string;
 
+	/**
+	 * Constructs a predefined token.
+	 * 
+	 * @param tokenDefinition
+	 *            the definition of the token type
+	 * @param string
+	 *            the string part that matches the token definition.
+	 */
 	public PredefinedToken(PredefinedTokenDefinition tokenDefinition, String string) {
 		_predefinedTokenDefintion = tokenDefinition;
 		_string = string;
