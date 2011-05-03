@@ -212,6 +212,7 @@ public class JdbcDatastore extends UsageAwareDatastore {
 			sb.append(",jndi=");
 			sb.append(_datasourceJndiUrl);
 		}
+		sb.append("]");
 		return sb.toString();
 	}
 }

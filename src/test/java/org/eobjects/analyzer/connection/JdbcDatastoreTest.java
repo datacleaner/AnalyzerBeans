@@ -36,4 +36,23 @@ public class JdbcDatastoreTest extends TestCase {
 		ds2 = new JdbcDatastore("hello", "url2", "driver", "username", "pw");
 		assertFalse(ds1.equals(ds2));
 	}
+
+	public void testGetters() throws Exception {
+		JdbcDatastore ds = new JdbcDatastore("name", "url", "driver", "username", "pw");
+
+		assertEquals(null, ds.getDatasourceJndiUrl());
+		assertEquals("name", ds.getName());
+		assertEquals("url", ds.getJdbcUrl());
+		assertEquals("driver", ds.getDriverClass());
+		assertEquals("username", ds.getUsername());
+		assertEquals("pw", ds.getPassword());
+		
+		assertEquals("JdbcDatastore[name=name,url=url]", ds.toString());
+	}
+	
+	public void testToStringDataSource() throws Exception {
+		JdbcDatastore ds = new JdbcDatastore("foo","bar");
+		
+		assertEquals("JdbcDatastore[name=foo,jndi=bar]", ds.toString());
+	}
 }
