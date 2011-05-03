@@ -30,25 +30,19 @@ import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.descriptors.LazyDescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.result.NumberResult;
 import org.eobjects.analyzer.test.ActivityAwareMultiThreadedTaskRunner;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
-
 import org.eobjects.metamodel.schema.Column;
 
 /**
@@ -91,9 +85,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		ActivityAwareMultiThreadedTaskRunner taskRunner = new ActivityAwareMultiThreadedTaskRunner();
 
 		Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
-		DescriptorProvider descriptorProvider = new LazyDescriptorProvider();
-		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl(new DatastoreCatalogImpl(datastore),
-				new ReferenceDataCatalogImpl(), descriptorProvider, taskRunner, TestHelper.createStorageProvider());
+		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(datastore);
 
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(datastore);

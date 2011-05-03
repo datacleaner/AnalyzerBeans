@@ -29,10 +29,16 @@ import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.beans.api.Transformer;
 
+/**
+ * Abstract descriptor provider implementation that implements most trivial
+ * methods.
+ * 
+ * @author Kasper Sørensen
+ */
 public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@Override
-	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name) {
+	public final AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name) {
 		if (name != null) {
 			for (AnalyzerBeanDescriptor<?> descriptor : getAnalyzerBeanDescriptors()) {
 				if (name.equals(descriptor.getDisplayName())) {
@@ -45,7 +51,8 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(Class<A> analyzerBeanClass) {
+	public final <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(
+			Class<A> analyzerBeanClass) {
 		for (AnalyzerBeanDescriptor<?> descriptor : getAnalyzerBeanDescriptors()) {
 			if (descriptor.getComponentClass() == analyzerBeanClass) {
 				return (AnalyzerBeanDescriptor<A>) descriptor;
@@ -55,7 +62,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	}
 
 	@Override
-	public FilterBeanDescriptor<?, ?> getFilterBeanDescriptorByDisplayName(String name) {
+	public final FilterBeanDescriptor<?, ?> getFilterBeanDescriptorByDisplayName(String name) {
 		if (name != null) {
 			for (FilterBeanDescriptor<?, ?> descriptor : getFilterBeanDescriptors()) {
 				if (name.equals(descriptor.getDisplayName())) {
@@ -68,7 +75,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(
+	public final <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(
 			Class<F> filterClass) {
 		return (FilterBeanDescriptor<F, C>) getFilterBeanDescriptorForClassUnbounded(filterClass);
 	}
@@ -85,7 +92,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	 * @param clazz
 	 * @return
 	 */
-	protected FilterBeanDescriptor<?, ?> getFilterBeanDescriptorForClassUnbounded(Class<?> filterClass) {
+	protected final FilterBeanDescriptor<?, ?> getFilterBeanDescriptorForClassUnbounded(Class<?> filterClass) {
 		for (FilterBeanDescriptor<?, ?> descriptor : getFilterBeanDescriptors()) {
 			if (filterClass == descriptor.getComponentClass()) {
 				return descriptor;
@@ -95,7 +102,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	}
 
 	@Override
-	public RendererBeanDescriptor getRendererBeanDescriptorForClass(Class<? extends Renderer<?, ?>> rendererBeanClass) {
+	public final RendererBeanDescriptor getRendererBeanDescriptorForClass(Class<? extends Renderer<?, ?>> rendererBeanClass) {
 		for (RendererBeanDescriptor descriptor : getRendererBeanDescriptors()) {
 			if (descriptor.getComponentClass() == rendererBeanClass) {
 				return descriptor;
@@ -105,7 +112,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	}
 
 	@Override
-	public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(String name) {
+	public final TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(String name) {
 		if (name != null) {
 			for (TransformerBeanDescriptor<?> descriptor : getTransformerBeanDescriptors()) {
 				if (name.equals(descriptor.getDisplayName())) {
@@ -118,7 +125,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
+	public final <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
 			Class<T> transformerBeanClass) {
 		for (TransformerBeanDescriptor<?> descriptor : getTransformerBeanDescriptors()) {
 			if (descriptor.getComponentClass() == transformerBeanClass) {
@@ -129,7 +136,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	}
 
 	@Override
-	public Collection<RendererBeanDescriptor> getRendererBeanDescriptorsForRenderingFormat(
+	public final Collection<RendererBeanDescriptor> getRendererBeanDescriptorsForRenderingFormat(
 			Class<? extends RenderingFormat<?>> renderingFormat) {
 		Set<RendererBeanDescriptor> result = new HashSet<RendererBeanDescriptor>();
 		Collection<RendererBeanDescriptor> descriptors = getRendererBeanDescriptors();

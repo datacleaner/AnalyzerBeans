@@ -28,25 +28,14 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.BooleanAnalyzer;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.transform.DictionaryMatcherTransformer;
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
-import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.descriptors.LazyDescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
-import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
-import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.reference.Dictionary;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
-import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
-import org.eobjects.analyzer.reference.StringPattern;
-import org.eobjects.analyzer.reference.SynonymCatalog;
-import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class ReferenceDataActivationManagerTest extends TestCase {
@@ -66,17 +55,10 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 		dictionaries.add(dict1);
 		dictionaries.add(dict2);
 		dictionaries.add(dict3);
-		ReferenceDataCatalog referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries,
-				new ArrayList<SynonymCatalog>(), new ArrayList<StringPattern>());
 
-		DescriptorProvider descriptorProvider = new LazyDescriptorProvider();
-		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("db");
-		DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(datastore);
-		StorageProvider storageProvider = TestHelper.createStorageProvider();
 
-		AnalyzerBeansConfigurationImpl configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				referenceDataCatalog, descriptorProvider, taskRunner, storageProvider);
+		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(datastore);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
@@ -114,7 +96,7 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 		assertEquals(1, dict2.getCloseCount());
 		assertEquals(1, dict3.getInitCount());
 		assertEquals(1, dict3.getCloseCount());
-		
+
 		result = runner.run(job);
 
 		if (!result.isSuccessful()) {
