@@ -163,7 +163,7 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 			while (rs.next()) {
 				@SuppressWarnings("unchecked")
 				K key = (K) rs.getObject(1);
-				result.add(new HsqldbEntry(key));
+				result.add(new SqlDatabaseEntry(key));
 			}
 			return result;
 		} catch (SQLException e) {
@@ -178,11 +178,11 @@ final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 		return _tableName;
 	}
 
-	private class HsqldbEntry implements Entry<K, V> {
+	private class SqlDatabaseEntry implements Entry<K, V> {
 
 		private final K _key;
 
-		public HsqldbEntry(K key) {
+		public SqlDatabaseEntry(K key) {
 			_key = key;
 		}
 

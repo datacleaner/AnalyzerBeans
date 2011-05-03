@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -89,6 +90,31 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 		map.put(5, "bar");
 
 		assertEquals(3, map.size());
+
+		Iterator<Entry<Integer, String>> it = map.entrySet().iterator();
+		Entry<Integer, String> next;
+		assertTrue(it.hasNext());
+		next = it.next();
+		assertEquals(1, next.getKey().intValue());
+		assertEquals("hello", next.getValue());
+		assertTrue(it.hasNext());
+		next = it.next();
+		assertEquals(2, next.getKey().intValue());
+		assertEquals("world", next.getValue());
+		next.setValue("universe");
+		assertEquals(next.getKey().hashCode(), next.hashCode());
+		assertTrue(it.hasNext());
+		next = it.next();
+		assertEquals(5, next.getKey().intValue());
+		assertEquals("bar", next.getValue());
+
+		assertFalse(it.hasNext());
+
+		assertEquals("universe", map.get(2));
+		
+		map.remove(2);
+		assertNull(map.get(2));
+		assertFalse(map.containsKey(2));
 	}
 
 	public void testCreateSet() throws Exception {
@@ -173,7 +199,7 @@ public class SqlDatabaseStorageProviderTest extends TestCase {
 		SqlDatabaseSet<String> set = new SqlDatabaseSet<String>(connectionMock, "MY_TABLE", "VARCHAR");
 		assertEquals(0, set.size());
 		set = null;
-		
+
 		Thread.sleep(500);
 		System.gc();
 		Thread.sleep(500);
