@@ -33,9 +33,32 @@ import java.util.Set;
  */
 public interface CollectionFactory {
 
+	/**
+	 * Creates a potentially large list
+	 * 
+	 * @param <E>
+	 * @param elementClass
+	 * @return
+	 */
 	public <E> List<E> createList(Class<E> elementClass);
 
+	/**
+	 * Creates a potentially large set
+	 * 
+	 * @param <E>
+	 * @param elementClass
+	 * @return
+	 */
 	public <E> Set<E> createSet(Class<E> elementClass);
 
-	public <K, V> Map<K, V> createSet(Class<K> keyClass, Class<V> valueClass);
+	/**
+	 * Creates a potentially large map
+	 * 
+	 * @param <K>
+	 * @param <V>
+	 * @param keyClass
+	 * @param valueClass
+	 * @return
+	 */
+	public <K, V> Map<K, V> createMap(Class<K> keyClass, Class<V> valueClass);
 }

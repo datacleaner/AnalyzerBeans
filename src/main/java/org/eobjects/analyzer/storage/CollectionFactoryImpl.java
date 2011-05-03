@@ -24,6 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Simple collection factory, which delegates to the storage provider for
+ * everything.
+ * 
+ * @author Kasper Sørensen
+ * 
+ */
 public final class CollectionFactoryImpl implements CollectionFactory {
 
 	private final StorageProvider _storageProvider;
@@ -49,7 +56,7 @@ public final class CollectionFactoryImpl implements CollectionFactory {
 	}
 
 	@Override
-	public <K, V> Map<K, V> createSet(Class<K> keyClass, Class<V> valueClass) {
+	public <K, V> Map<K, V> createMap(Class<K> keyClass, Class<V> valueClass) {
 		Map<K, V> map = _storageProvider.createMap(keyClass, valueClass);
 		_collections.add(map);
 		return map;
