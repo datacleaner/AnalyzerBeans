@@ -53,15 +53,20 @@ public final class TestHelper {
 			"org.eobjects.analyzer.beans", true).scanPackage("org.eobjects.analyzer.result.renderer", true);
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration(Datastore datastore) {
-		TaskRunner taskRunner = new SingleThreadedTaskRunner();
+		TaskRunner taskRunner = createTaskRunner();
 		return createAnalyzerBeansConfiguration(taskRunner, datastore);
 	}
 
 	public static AnalyzerBeansConfiguration createAnalyzerBeansConfiguration() {
-		TaskRunner taskRunner = new SingleThreadedTaskRunner();
+		TaskRunner taskRunner = createTaskRunner();
 		StorageProvider storageProvider = createStorageProvider();
 		return new AnalyzerBeansConfigurationImpl(createDatastoreCatalog(), createReferenceDataCatalog(),
 				descriptorProvider, taskRunner, storageProvider);
+	}
+
+	public static TaskRunner createTaskRunner() {
+		TaskRunner taskRunner = new SingleThreadedTaskRunner();
+		return taskRunner;
 	}
 
 	public static StorageProvider createStorageProvider() {
