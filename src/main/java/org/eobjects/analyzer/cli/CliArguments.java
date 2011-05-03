@@ -21,10 +21,14 @@ package org.eobjects.analyzer.cli;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines the Command-line arguments. These are populated by the CLI parser.
@@ -32,6 +36,8 @@ import org.kohsuke.args4j.Option;
  * @author Kasper Sørensen
  */
 public class CliArguments {
+
+	private static final Logger logger = LoggerFactory.getLogger(CliArguments.class);
 
 	/**
 	 * Parses the CLI arguments and creates a CliArguments instance
@@ -41,10 +47,16 @@ public class CliArguments {
 	 * @return
 	 * @throws CmdLineException
 	 */
-	public static CliArguments parse(String[] args) throws CmdLineException {
+	public static CliArguments parse(String[] args) {
 		CliArguments arguments = new CliArguments();
-		CmdLineParser parser = new CmdLineParser(arguments);
-		parser.parseArgument(args);
+		if (args != null) {
+			CmdLineParser parser = new CmdLineParser(arguments);
+			try {
+				parser.parseArgument(args);
+			} catch (CmdLineException e) {
+				logger.info("Error occurred parsing command line options", e);
+			}
+		}
 		return arguments;
 	}
 
@@ -60,7 +72,7 @@ public class CliArguments {
 		parser.printUsage(out, null);
 	}
 
-	@Option(name = "-conf", aliases = { "-configuration", "--configuration-file" }, usage = "XML file describing the configuration of AnalyzerBeans", required = true)
+	@Option(name = "-conf", aliases = { "-configuration", "--configuration-file" }, usage = "XML file describing the configuration of AnalyzerBeans")
 	private File configurationFile;
 
 	@Option(name = "-job", aliases = { "--job-file" }, usage = "An analysis job XML file to execute")
@@ -104,5 +116,29 @@ public class CliArguments {
 
 	public String getTableName() {
 		return tableName;
+	}
+
+	/**
+	 * Gets whether (<i>any</i> of) the arguments have been set or not.
+	 * 
+	 * @return true if <i>any</i> of the arguments have been set, or false if
+	 *         none of them has.
+	 */
+	public boolean isSet() {
+		Field[] fields = CliArguments.class.getDeclaredFields();
+		for (Field field : fields) {
+			field.setAccessible(true);
+			if (!Modifier.isStatic(field.getModifiers())) {
+				try {
+					Object value = field.get(this);
+					if (value != null) {
+						return true;
+					}
+				} catch (Exception e) {
+					throw new IllegalStateException(e);
+				}
+			}
+		}
+		return false;
 	}
 }

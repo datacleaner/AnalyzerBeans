@@ -21,15 +21,13 @@ package org.eobjects.analyzer.cli;
 
 import java.io.PrintWriter;
 
-import org.kohsuke.args4j.CmdLineException;
-
 /**
  * Main class for the AnalyzerBeans Command-line interface (CLI).
  * 
  * @author Kasper Sørensen
  */
 public final class Main {
-	
+
 	private static PrintWriter out = new PrintWriter(System.out);
 
 	/**
@@ -39,16 +37,16 @@ public final class Main {
 	 *            command-line arguments
 	 */
 	public static void main(String[] args) {
-		try {
-			CliArguments arguments = CliArguments.parse(args);
+		CliArguments arguments = CliArguments.parse(args);
+		if (arguments.isSet()) {
 			CliRunner runner = new CliRunner(arguments, out);
 			runner.run();
-		} catch (CmdLineException e) {
+		} else {
 			CliArguments.printUsage(out);
 		}
 		out.flush();
 	}
-	
+
 	public static void setOut(PrintWriter out) {
 		Main.out = out;
 	}
