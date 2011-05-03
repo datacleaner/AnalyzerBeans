@@ -26,17 +26,25 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.DataContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-
-public final class JdbcDatastore extends UsageAwareDatastore {
+/**
+ * Datastore implementation for JDBC based connections. Connections can either
+ * be based on JDBC urls or JNDI urls.
+ * 
+ * @author Kasper Sørensen
+ * 
+ */
+public class JdbcDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -71,7 +79,7 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 	public JdbcDatastore(String name, String datasourceJndiUrl) {
 		this(name, null, null, null, null, datasourceJndiUrl);
 	}
-	
+
 	/**
 	 * Alternative constructor usable only for in-memory (ie. non-persistent)
 	 * datastores, because the datastore will not be able to create new
@@ -84,7 +92,7 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 		this(name, null, null, null, null, null);
 		setDataContextProvider(new SingleDataContextProvider(dc, this));
 	}
-	
+
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
 		super.decorateIdentity(identifiers);
@@ -173,7 +181,7 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 			return new SingleDataContextProvider(dataContext, this, new CloseableJdbcConnection(connection));
 		} else {
 			try {
-				InitialContext initialContext = new InitialContext();
+				Context initialContext = getJndiNamingContext();
 				DataSource dataSource = (DataSource) initialContext.lookup(_datasourceJndiUrl);
 				return new DataSourceDataContextProvider(dataSource, this);
 			} catch (Exception e) {
@@ -182,7 +190,11 @@ public final class JdbcDatastore extends UsageAwareDatastore {
 			}
 		}
 	}
-	
+
+	protected Context getJndiNamingContext() throws NamingException {
+		return new InitialContext();
+	}
+
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return new PerformanceCharacteristicsImpl(true);
