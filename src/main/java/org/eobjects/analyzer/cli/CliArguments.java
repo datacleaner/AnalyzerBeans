@@ -27,8 +27,6 @@ import java.lang.reflect.Modifier;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Defines the Command-line arguments. These are populated by the CLI parser.
@@ -36,8 +34,6 @@ import org.slf4j.LoggerFactory;
  * @author Kasper Sørensen
  */
 public class CliArguments {
-
-	private static final Logger logger = LoggerFactory.getLogger(CliArguments.class);
 
 	/**
 	 * Parses the CLI arguments and creates a CliArguments instance
@@ -54,7 +50,14 @@ public class CliArguments {
 			try {
 				parser.parseArgument(args);
 			} catch (CmdLineException e) {
-				logger.info("Error occurred parsing command line options", e);
+				// ignore
+			}
+
+			arguments.usageMode = false;
+			for (String string : args) {
+				if ("-usage".equalsIgnoreCase(string)) {
+					arguments.usageMode = true;
+				}
 			}
 		}
 		return arguments;
@@ -90,6 +93,8 @@ public class CliArguments {
 	@Option(name = "-t", aliases = { "-table", "--table-name" }, usage = "Name of table when printing a list of columns")
 	private String tableName;
 
+	private boolean usageMode;
+
 	private CliArguments() {
 		// instantiation only allowed by factory (parse(...)) method.
 	}
@@ -118,6 +123,10 @@ public class CliArguments {
 		return tableName;
 	}
 
+	public boolean isUsageMode() {
+		return usageMode;
+	}
+
 	/**
 	 * Gets whether (<i>any</i> of) the arguments have been set or not.
 	 * 
@@ -131,8 +140,14 @@ public class CliArguments {
 			if (!Modifier.isStatic(field.getModifiers())) {
 				try {
 					Object value = field.get(this);
-					if (value != null) {
-						return true;
+					if (field.getType() == boolean.class) {
+						if ((Boolean) value) {
+							return true;
+						}
+					} else {
+						if (value != null) {
+							return true;
+						}
 					}
 				} catch (Exception e) {
 					throw new IllegalStateException(e);

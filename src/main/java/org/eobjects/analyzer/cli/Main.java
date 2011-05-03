@@ -38,7 +38,7 @@ public final class Main {
 	 */
 	public static void main(String[] args) {
 		CliArguments arguments = CliArguments.parse(args);
-		if (arguments.isSet()) {
+		if (arguments.isSet() && !arguments.isUsageMode()) {
 			CliRunner runner = new CliRunner(arguments, out);
 			runner.run();
 		} else {

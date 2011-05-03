@@ -17,30 +17,17 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.cli;
+package org.eobjects.analyzer.descriptors;
 
 import junit.framework.TestCase;
 
-public class CliArgumentsTest extends TestCase {
+public class DescriptorExceptionTest extends TestCase {
 
-	public void testIsSetFalse() throws Exception {
-		CliArguments args;
-		args = CliArguments.parse(new String[0]);
-		assertFalse(args.isSet());
-
-		args = CliArguments.parse(null);
-		assertFalse(args.isSet());
-
-		args = CliArguments.parse(new String[] { "-hello", "world" });
-		assertFalse(args.isSet());
-	}
-
-	public void testIsSetTrue() throws Exception {
-		CliArguments args;
-		args = CliArguments.parse(new String[] { "-ds", "mrrh" });
-		assertTrue(args.isSet());
-		
-		args = CliArguments.parse(new String[] { "-usage" });
-		assertTrue(args.isSet());
+	public void testConstructors() throws Exception {
+		assertNull(new DescriptorException().getMessage());
+		assertEquals("foo", new DescriptorException("foo").getMessage());
+		assertEquals("foo", new DescriptorException("foo", new NullPointerException("bar")).getMessage());
+		assertEquals("java.lang.NullPointerException: bar",
+				new DescriptorException(new NullPointerException("bar")).getMessage());
 	}
 }
