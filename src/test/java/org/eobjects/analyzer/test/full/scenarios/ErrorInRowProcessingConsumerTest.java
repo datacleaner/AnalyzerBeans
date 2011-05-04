@@ -33,6 +33,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
@@ -85,7 +86,9 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		ActivityAwareMultiThreadedTaskRunner taskRunner = new ActivityAwareMultiThreadedTaskRunner();
 
 		Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
-		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(datastore);
+		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(taskRunner, datastore);
+		ClasspathScanDescriptorProvider descriptorProvider = (ClasspathScanDescriptorProvider) conf.getDescriptorProvider();
+		descriptorProvider.addAnalyzerClass(ErrornousAnalyzer.class);
 
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(datastore);
@@ -139,6 +142,6 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		}
 
 		int taskCount = taskRunner.assertAllBegunTasksFinished(500);
-		assertTrue(taskCount > 4);
+		assertTrue("taskCount was: " + taskCount, taskCount > 4);
 	}
 }

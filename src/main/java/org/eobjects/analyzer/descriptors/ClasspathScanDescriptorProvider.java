@@ -169,53 +169,80 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 
 	protected void scanInputStream(final InputStream inputStream, final ClassLoader classLoader) throws IOException {
 		try {
-
-			ClassReader classReader = new ClassReader(inputStream);
-			BeanClassVisitor visitor = new BeanClassVisitor(classLoader);
+			final ClassReader classReader = new ClassReader(inputStream);
+			final BeanClassVisitor visitor = new BeanClassVisitor(classLoader);
 			classReader.accept(visitor, ClassReader.SKIP_CODE);
 
 			if (visitor.isAnalyzer()) {
 				@SuppressWarnings("unchecked")
 				Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) visitor.getBeanClass();
-				AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(analyzerClass);
-				if (descriptor == null) {
-					descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(analyzerClass);
-					_analyzerBeanDescriptors.put(analyzerClass, descriptor);
-				}
+				addAnalyzerClass(analyzerClass);
 			}
 			if (visitor.isTransformer()) {
 				@SuppressWarnings("unchecked")
 				Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) visitor.getBeanClass();
-				TransformerBeanDescriptor<?> descriptor = _transformerBeanDescriptors.get(transformerClass);
-				if (descriptor == null) {
-					descriptor = AnnotationBasedTransformerBeanDescriptor.create(transformerClass);
-					_transformerBeanDescriptors.put(transformerClass, descriptor);
-				}
+				addTransformerClass(transformerClass);
 			}
 			if (visitor.isFilter()) {
 				@SuppressWarnings("unchecked")
 				Class<? extends Filter<? extends Enum<?>>> filterClass = (Class<? extends Filter<?>>) visitor.getBeanClass();
-				FilterBeanDescriptor<?, ?> descriptor = _filterBeanDescriptors.get(filterClass);
-				if (descriptor == null) {
-					descriptor = AnnotationBasedFilterBeanDescriptor.createUnbound(filterClass);
-					_filterBeanDescriptors.put(filterClass, descriptor);
-				}
+				addFilterClass(filterClass);
 			}
 			if (visitor.isRenderer()) {
 				@SuppressWarnings("unchecked")
 				Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) visitor.getBeanClass();
-				RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(rendererClass);
-				if (descriptor == null) {
-					try {
-						descriptor = new AnnotationBasedRendererBeanDescriptor(rendererClass);
-						_rendererBeanDescriptors.put(rendererClass, descriptor);
-					} catch (Exception e) {
-						logger.error("Unexpected error occurred while creating descriptor for: " + rendererClass, e);
-					}
-				}
+				addRendererClass(rendererClass);
 			}
 		} finally {
 			FileHelper.safeClose(inputStream);
+		}
+	}
+
+	public void addAnalyzerClass(Class<? extends Analyzer<?>> clazz) {
+		AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(clazz);
+		if (descriptor == null) {
+			try {
+				descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(clazz);
+				_analyzerBeanDescriptors.put(clazz, descriptor);
+			} catch (Exception e) {
+				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
+			}
+		}
+	}
+
+	public void addTransformerClass(Class<? extends Transformer<?>> clazz) {
+		TransformerBeanDescriptor<? extends Transformer<?>> descriptor = _transformerBeanDescriptors.get(clazz);
+		if (descriptor == null) {
+			try {
+				descriptor = AnnotationBasedTransformerBeanDescriptor.create(clazz);
+				_transformerBeanDescriptors.put(clazz, descriptor);
+			} catch (Exception e) {
+				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
+			}
+		}
+	}
+
+	public void addFilterClass(Class<? extends Filter<?>> clazz) {
+		FilterBeanDescriptor<? extends Filter<?>, ?> descriptor = _filterBeanDescriptors.get(clazz);
+		if (descriptor == null) {
+			try {
+				descriptor = AnnotationBasedFilterBeanDescriptor.create(clazz);
+				_filterBeanDescriptors.put(clazz, descriptor);
+			} catch (Exception e) {
+				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
+			}
+		}
+	}
+
+	public void addRendererClass(Class<? extends Renderer<?, ?>> clazz) {
+		RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(clazz);
+		if (descriptor == null) {
+			try {
+				descriptor = new AnnotationBasedRendererBeanDescriptor(clazz);
+				_rendererBeanDescriptors.put(clazz, descriptor);
+			} catch (Exception e) {
+				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
+			}
 		}
 	}
 
