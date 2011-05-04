@@ -226,7 +226,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		FilterBeanDescriptor<? extends Filter<?>, ?> descriptor = _filterBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
-				descriptor = AnnotationBasedFilterBeanDescriptor.create(clazz);
+				descriptor = AnnotationBasedFilterBeanDescriptor.createUnbound(clazz);
 				_filterBeanDescriptors.put(clazz, descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
