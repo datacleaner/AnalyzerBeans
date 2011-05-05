@@ -36,6 +36,15 @@ public class DictionaryLookupFilter implements Filter<ValidationCategory> {
 
 	@Configured
 	Dictionary dictionary;
+	
+	public DictionaryLookupFilter() {
+	}
+	
+	public DictionaryLookupFilter(InputColumn<String> column, Dictionary dictionary) {
+		this();
+		this.column = column;
+		this.dictionary = dictionary;
+	}
 
 	@Override
 	public ValidationCategory categorize(InputRow inputRow) {
