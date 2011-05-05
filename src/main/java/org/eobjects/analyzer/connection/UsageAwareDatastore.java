@@ -52,7 +52,7 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 	protected void setDataContextProviderRef(Reference<UsageAwareDataContextProvider> dataContextProviderRef) {
 		_dataContextProviderRef = dataContextProviderRef;
 	}
-	
+
 	protected void setDataContextProvider(DataContextProvider dataContextProvider) {
 		_dataContextProvider = dataContextProvider;
 	}
@@ -66,7 +66,7 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 		UsageAwareDataContextProvider dataContextProvider;
 		if (_dataContextProviderRef != null) {
 			dataContextProvider = _dataContextProviderRef.get();
-			if (dataContextProvider != null && !dataContextProvider.isClosed()) {
+			if (isDataContextProviderOpen(dataContextProvider)) {
 				// reuse existing data context provider
 				logger.info("Reusing existing DataContextProvider: {}", dataContextProvider);
 				dataContextProvider.incrementUsageCount();
@@ -88,5 +88,23 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
 		identifiers.add(getName());
+	}
+
+	/**
+	 * Gets whether the datacontext provider is already open / ready or if it
+	 * has to be created.
+	 * 
+	 * @return a boolean indicating if the datacontext provider is open
+	 */
+	public boolean isDataContextProviderOpen() {
+		if (_dataContextProviderRef == null) {
+			return false;
+		}
+		UsageAwareDataContextProvider dataContextProvider = _dataContextProviderRef.get();
+		return isDataContextProviderOpen(dataContextProvider);
+	}
+
+	private boolean isDataContextProviderOpen(UsageAwareDataContextProvider dataContextProvider) {
+		return dataContextProvider != null && !dataContextProvider.isClosed();
 	}
 }

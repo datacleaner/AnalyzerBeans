@@ -37,14 +37,37 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.metamodel.util.FileHelper;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Descriptor provider implementation that works by scanning particular packages
+ * in the classpath for annotated classes. Descriptors will be generated based
+ * on encountered annotations.
+ * 
+ * This implementation also supports adding single descriptors by using the
+ * add... methods.
+ * 
+ * Classes with either of these annotations will be picked up by the classpath
+ * scanner:
+ * <ul>
+ * <li>{@link AnalyzerBean}</li>
+ * <li>{@link TransformerBean}</li>
+ * <li>{@link FilterBean}</li>
+ * <li>{@link RendererBean}</li>
+ * </ul>
+ * 
+ * @author Kasper Sørensen
+ */
 public final class ClasspathScanDescriptorProvider extends AbstractDescriptorProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClasspathScanDescriptorProvider.class);
@@ -54,10 +77,32 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	private final Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>>();
 	private final Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
 
+	/**
+	 * Scans a package in the classpath (of the current thread's context
+	 * classloader) for annotated components.
+	 * 
+	 * @param packageName
+	 *            the package name to scan
+	 * @param recursive
+	 *            whether or not to scan subpackages recursively
+	 * @return
+	 */
 	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive) {
 		return scanPackage(packageName, recursive, Thread.currentThread().getContextClassLoader());
 	}
 
+	/**
+	 * Scans a package in the classpath (of a particular classloader) for
+	 * annotated components.
+	 * 
+	 * @param packageName
+	 *            the package name to scan
+	 * @param recursive
+	 *            whether or not to scan subpackages recursively
+	 * @param classLoader
+	 *            the classloader to use
+	 * @return
+	 */
 	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive, ClassLoader classLoader) {
 		String packagePath = packageName.replace('.', '/');
 		if (recursive) {
@@ -198,7 +243,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		}
 	}
 
-	public void addAnalyzerClass(Class<? extends Analyzer<?>> clazz) {
+	public ClasspathScanDescriptorProvider addAnalyzerClass(Class<? extends Analyzer<?>> clazz) {
 		AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
@@ -208,9 +253,10 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
 			}
 		}
+		return this;
 	}
 
-	public void addTransformerClass(Class<? extends Transformer<?>> clazz) {
+	public ClasspathScanDescriptorProvider addTransformerClass(Class<? extends Transformer<?>> clazz) {
 		TransformerBeanDescriptor<? extends Transformer<?>> descriptor = _transformerBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
@@ -220,9 +266,10 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
 			}
 		}
+		return this;
 	}
 
-	public void addFilterClass(Class<? extends Filter<?>> clazz) {
+	public ClasspathScanDescriptorProvider addFilterClass(Class<? extends Filter<?>> clazz) {
 		FilterBeanDescriptor<? extends Filter<?>, ?> descriptor = _filterBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
@@ -232,9 +279,10 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
 			}
 		}
+		return this;
 	}
 
-	public void addRendererClass(Class<? extends Renderer<?, ?>> clazz) {
+	public ClasspathScanDescriptorProvider addRendererClass(Class<? extends Renderer<?, ?>> clazz) {
 		RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
@@ -244,6 +292,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
 			}
 		}
+		return this;
 	}
 
 	@Override

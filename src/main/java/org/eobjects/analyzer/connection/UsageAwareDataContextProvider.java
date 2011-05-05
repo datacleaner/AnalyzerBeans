@@ -35,7 +35,7 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 
 	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDataContextProvider.class);
 
-	private final AtomicInteger usageCount = new AtomicInteger(1);
+	private final AtomicInteger _usageCount = new AtomicInteger(1);
 	private final Datastore _datastore;
 	private boolean _closed = false;
 
@@ -52,7 +52,7 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 	}
 
 	public final void incrementUsageCount() {
-		int count = usageCount.incrementAndGet();
+		int count = _usageCount.incrementAndGet();
 		logger.info("Usage incremented to {} for {}", count, this);
 
 		if (logger.isDebugEnabled()) {
@@ -71,7 +71,7 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 
 	@Override
 	public final void close() {
-		int users = usageCount.decrementAndGet();
+		int users = _usageCount.decrementAndGet();
 		logger.info("Method close() invoked, usage decremented to {} for {}", users, this);
 		if (users == 0) {
 			logger.info("Closing {}", this);
@@ -94,7 +94,7 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 
 				logger.warn(
 						"Method finalize() invoked but not all usages closed ({} remaining) (for {}). Closing DataContextProvider.",
-						usageCount.get(), this);
+						_usageCount.get(), this);
 			}
 			// in case of gc, also do the closing
 			closeInternal();
@@ -116,5 +116,14 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 			return _datastore.getName();
 		}
 		return "<null>";
+	}
+
+	/**
+	 * Gets the amount of usages this datacontext provider currently has.
+	 * 
+	 * @return
+	 */
+	public int getUsageCount() {
+		return _usageCount.get();
 	}
 }

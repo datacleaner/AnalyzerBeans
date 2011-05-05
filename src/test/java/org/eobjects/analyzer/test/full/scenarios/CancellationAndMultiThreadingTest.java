@@ -21,12 +21,14 @@ package org.eobjects.analyzer.test.full.scenarios;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -38,17 +40,14 @@ import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.MetaModelTestCase;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 
-public class CancellationAndMultiThreadingTest extends MetaModelTestCase {
+public class CancellationAndMultiThreadingTest extends TestCase {
 
 	public void testScenario() throws Throwable {
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
-				"org.eobjects.analyzer.beans", true);
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
+				.addAnalyzerClass(ValueDistributionAnalyzer.class);
 		StorageProvider storageProvider = TestHelper.createStorageProvider();
 
 		MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(30);
@@ -64,12 +63,13 @@ public class CancellationAndMultiThreadingTest extends MetaModelTestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
+		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("foobar");
+		DataContextProvider dcp = ds.getDataContextProvider();
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
-		analysisJobBuilder.setDataContextProvider(new SingleDataContextProvider(dc, new JdbcDatastore("foobar", dc)));
+		analysisJobBuilder.setDatastore(ds);
 
-		Table table = dc.getDefaultSchema().getTableByName("ORDERFACT");
+		Table table = dcp.getDataContext().getDefaultSchema().getTableByName("ORDERFACT");
 		assertNotNull(table);
 
 		Column statusColumn = table.getColumnByName("STATUS");
@@ -101,5 +101,12 @@ public class CancellationAndMultiThreadingTest extends MetaModelTestCase {
 		int largestPoolSize = executorService.getLargestPoolSize();
 		assertTrue("largestPoolSize was: " + largestPoolSize, largestPoolSize > 5);
 		assertEquals(0, executorService.getActiveCount());
+
+		assertTrue(ds.isDataContextProviderOpen());
+
+		dcp.close();
+		analysisJobBuilder.close();
+
+		assertFalse(ds.isDataContextProviderOpen());
 	}
 }

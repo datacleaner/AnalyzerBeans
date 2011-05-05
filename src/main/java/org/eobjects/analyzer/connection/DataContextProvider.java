@@ -34,4 +34,5 @@ public interface DataContextProvider extends Closeable {
 	public Datastore getDatastore();
 
 	public void close();
+
 }
