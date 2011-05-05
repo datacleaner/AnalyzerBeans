@@ -19,7 +19,14 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.schema.Column;
 
 import junit.framework.TestCase;
 
@@ -40,9 +47,10 @@ public class EqualsFilterTest extends TestCase {
 		assertEquals(ValidationCategory.INVALID, f.filter(2));
 		assertEquals(ValidationCategory.INVALID, f.filter(-2));
 	}
-	
+
 	public void testMultipleStrings() throws Exception {
-		EqualsFilter f = new EqualsFilter(new String[] { "hello", "Hello", "World" }, new MockInputColumn<String>("col", String.class));
+		EqualsFilter f = new EqualsFilter(new String[] { "hello", "Hello", "World" }, new MockInputColumn<String>("col",
+				String.class));
 		assertEquals(ValidationCategory.VALID, f.filter("hello"));
 		assertEquals(ValidationCategory.VALID, f.filter("Hello"));
 		assertEquals(ValidationCategory.INVALID, f.filter(""));
@@ -58,5 +66,29 @@ public class EqualsFilterTest extends TestCase {
 		assertEquals(ValidationCategory.VALID, f.filter(1235.0));
 		assertEquals(ValidationCategory.INVALID, f.filter(2));
 		assertEquals(ValidationCategory.INVALID, f.filter(-2));
+	}
+
+	public void testOptimizeQuery() throws Exception {
+		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("ds");
+		DataContextProvider dcp = ds.getDataContextProvider();
+		Column column = dcp.getSchemaNavigator().convertToColumn("PUBLIC.EMPLOYEES.FIRSTNAME");
+		InputColumn<?> inputColumn = new MetaModelInputColumn(column);
+
+		EqualsFilter filter = new EqualsFilter(new String[] { "foobar" }, inputColumn);
+		assertTrue(filter.isOptimizable(ValidationCategory.VALID));
+		assertTrue(filter.isOptimizable(ValidationCategory.INVALID));
+
+		Query query = dcp.getDataContext().query().from(column.getTable()).select(column).toQuery();
+		String originalSql = query.toSql();
+		assertEquals("SELECT \"EMPLOYEES\".\"FIRSTNAME\" FROM PUBLIC.\"EMPLOYEES\"", originalSql);
+
+		Query result;
+		result = filter.optimizeQuery(query.clone(), ValidationCategory.VALID);
+		assertEquals(originalSql + " WHERE (\"EMPLOYEES\".\"FIRSTNAME\" = 'foobar')", result.toSql());
+
+		result = filter.optimizeQuery(query.clone(), ValidationCategory.INVALID);
+		assertEquals(originalSql + " WHERE \"EMPLOYEES\".\"FIRSTNAME\" <> 'foobar'", result.toSql());
+
+		dcp.close();
 	}
 }
