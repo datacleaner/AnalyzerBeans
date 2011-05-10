@@ -21,10 +21,9 @@ package org.eobjects.analyzer.connection;
 
 import java.io.File;
 
-import org.eobjects.metamodel.CsvDataContextStrategy;
+import org.eobjects.metamodel.CsvConfiguration;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.DefaultDataContext;
 import org.eobjects.metamodel.util.FileHelper;
 
 public final class CsvDatastore extends UsageAwareDatastore implements FileDatastore {
@@ -36,7 +35,7 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 	 * occur in any valid Unicode string.
 	 */
 	public static final char NOT_A_CHAR = '\uFFFF';
-	
+
 	public static final char DEFAULT_QUOTE_CHAR = NOT_A_CHAR;
 	public static final char DEFAULT_SEPARATOR_CHAR = DataContextFactory.DEFAULT_CSV_SEPARATOR_CHAR;
 
@@ -86,14 +85,16 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 		if (_quoteChar == null && _separatorChar == null) {
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename));
 		} else {
-			char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
-			char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
-			dataContext = new DefaultDataContext(new CsvDataContextStrategy(new File(_filename), separatorChar, quoteChar,
-					(_encoding == null ? FileHelper.UTF_8_ENCODING : _encoding)));
+			final char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
+			final char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
+			final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
+			final CsvConfiguration configuration = new CsvConfiguration(CsvConfiguration.DEFAULT_COLUMN_NAME_LINE, encoding,
+					separatorChar, quoteChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR);
+			dataContext = DataContextFactory.createCsvDataContext(new File(_filename), configuration);
 		}
 		return new SingleDataContextProvider(dataContext, this);
 	}
-	
+
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return new PerformanceCharacteristicsImpl(false);
