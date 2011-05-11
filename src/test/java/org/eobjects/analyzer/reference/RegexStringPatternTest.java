@@ -23,6 +23,16 @@ import junit.framework.TestCase;
 
 public class RegexStringPatternTest extends TestCase {
 
+	public void testEquals() throws Exception {
+		RegexStringPattern rsp1 = new RegexStringPattern("Danish email", "[a-z]+@[a-z]+\\.dk", true);
+		RegexStringPattern rsp2 = new RegexStringPattern("Danish email", "[a-z]+@[a-z]+\\.com", true);
+
+		assertFalse(rsp1.equals(rsp2));
+
+		rsp2 = new RegexStringPattern("Danish email", "[a-z]+@[a-z]+\\.dk", true);
+		assertTrue(rsp1.equals(rsp1));
+	}
+
 	public void testMatchesEntireString() throws Exception {
 		RegexStringPattern rsp = new RegexStringPattern("Danish email", "[a-z]+@[a-z]+\\.dk", true);
 		assertEquals("Danish email", rsp.getName());
