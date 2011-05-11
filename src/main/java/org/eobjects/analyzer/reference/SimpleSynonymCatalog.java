@@ -26,25 +26,24 @@ import java.util.List;
 
 import org.eobjects.analyzer.util.StringUtils;
 
-public final class SimpleSynonymCatalog implements SynonymCatalog {
+public final class SimpleSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _name;
 	private final List<Synonym> _synonyms;
 
 	public SimpleSynonymCatalog(String name) {
-		_name = name;
+		super(name);
 		_synonyms = new ArrayList<Synonym>();
 	}
 
 	public SimpleSynonymCatalog(String name, Synonym... synonyms) {
-		_name = name;
+		super(name);
 		_synonyms = new ArrayList<Synonym>(Arrays.asList(synonyms));
 	}
 
 	public SimpleSynonymCatalog(String name, List<Synonym> synonyms) {
-		_name = name;
+		super(name);
 		_synonyms = synonyms;
 	}
 
@@ -62,11 +61,6 @@ public final class SimpleSynonymCatalog implements SynonymCatalog {
 			}
 		}
 		return null;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	@Override

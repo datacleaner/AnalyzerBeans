@@ -34,11 +34,26 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 public interface Datastore extends Serializable {
 
 	/**
-	 * Gets the name of this datastore
+	 * Gets the name of the datastore
 	 * 
-	 * @return the name of this datastore
+	 * @return a String name
 	 */
 	public String getName();
+
+	/**
+	 * Gets an optional description of the datastore.
+	 * 
+	 * @return a String description, or null if no description is available.
+	 */
+	public String getDescription();
+
+	/**
+	 * Sets the description of the datastore.
+	 * 
+	 * @param description
+	 *            the new description of the datastore.
+	 */
+	public void setDescription(String description);
 
 	/**
 	 * Gets a DataContextProvider, which is to be treated as a "connection" to

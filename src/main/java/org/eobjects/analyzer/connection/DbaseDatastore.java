@@ -22,21 +22,20 @@ package org.eobjects.analyzer.connection;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
+/**
+ * Datastore implementation for dBase databases.
+ * 
+ * @author Kasper Sørensen
+ */
 public final class DbaseDatastore extends UsageAwareDatastore implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _name;
 	private final String _filename;
 
 	public DbaseDatastore(String name, String filename) {
-		_name = name;
+		super(name);
 		_filename = filename;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	@Override

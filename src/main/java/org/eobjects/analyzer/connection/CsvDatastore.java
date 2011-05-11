@@ -26,6 +26,11 @@ import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
+/**
+ * Datastore implementation for CSV files.
+ * 
+ * @author Kasper Sørensen
+ */
 public final class CsvDatastore extends UsageAwareDatastore implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
@@ -39,7 +44,6 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 	public static final char DEFAULT_QUOTE_CHAR = NOT_A_CHAR;
 	public static final char DEFAULT_SEPARATOR_CHAR = DataContextFactory.DEFAULT_CSV_SEPARATOR_CHAR;
 
-	private final String _name;
 	private final String _filename;
 	private final Character _quoteChar;
 	private final Character _separatorChar;
@@ -50,16 +54,11 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 	}
 
 	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding) {
-		_name = name;
+		super(name);
 		_filename = filename;
 		_quoteChar = quoteChar;
 		_separatorChar = separatorChar;
 		_encoding = encoding;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	public String getEncoding() {

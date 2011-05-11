@@ -45,6 +45,37 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 	private transient volatile Reference<UsageAwareDataContextProvider> _dataContextProviderRef;
 	private transient volatile DataContextProvider _dataContextProvider = null;
 
+	private final String _name;
+	private String _description;
+
+	public UsageAwareDatastore(String name) {
+		_name = name;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final String getName() {
+		return _name;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final String getDescription() {
+		return _description;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final void setDescription(String description) {
+		_description = description;
+	}
+
 	protected Reference<UsageAwareDataContextProvider> getDataContextProviderRef() {
 		return _dataContextProviderRef;
 	}
@@ -57,6 +88,9 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 		_dataContextProvider = dataContextProvider;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public synchronized final DataContextProvider getDataContextProvider() {
 		if (_dataContextProvider != null) {
@@ -96,7 +130,7 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 	 * 
 	 * @return a boolean indicating if the datacontext provider is open
 	 */
-	public boolean isDataContextProviderOpen() {
+	public final boolean isDataContextProviderOpen() {
 		if (_dataContextProviderRef == null) {
 			return false;
 		}

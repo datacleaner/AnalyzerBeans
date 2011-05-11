@@ -234,6 +234,7 @@
 				type="string" />
 		</choice>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="csvDatastoreType">
@@ -245,6 +246,7 @@
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="fixedWidthDatastoreType">
@@ -255,6 +257,7 @@
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="excelDatastoreType">
@@ -262,6 +265,7 @@
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="xmlDatastoreType">
@@ -269,6 +273,7 @@
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="accessDatastoreType">
@@ -276,6 +281,7 @@
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="compositeDatastoreType">
@@ -284,6 +290,7 @@
 				type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="dbaseDatastoreType">
@@ -291,6 +298,7 @@
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="openOfficeDatabaseDatastoreType">
@@ -298,6 +306,7 @@
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="referenceDataCatalogType">
@@ -357,6 +366,7 @@
 			</element>
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="simplePatternType">
@@ -364,6 +374,7 @@
 			<element name="expression" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="textFileSynonymCatalogType">
@@ -374,6 +385,7 @@
 				type="boolean" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="datastoreSynonymCatalogType">
@@ -386,6 +398,7 @@
 				type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="textFileDictionaryType">
@@ -394,6 +407,7 @@
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="valueListDictionaryType">
@@ -402,6 +416,7 @@
 				type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="datastoreDictionaryType">
@@ -411,6 +426,7 @@
 			<element name="column-path" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="inMemoryStorageProviderType">

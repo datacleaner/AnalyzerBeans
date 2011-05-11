@@ -24,21 +24,20 @@ import java.io.File;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
+/**
+ * Datastore implementation for XML files.
+ * 
+ * @author Kasper Sørensen
+ */
 public class XmlDatastore extends UsageAwareDatastore implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _name;
 	private final String _filename;
 
 	public XmlDatastore(String name, String filename) {
-		_name = name;
+		super(name);
 		_filename = filename;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	@Override

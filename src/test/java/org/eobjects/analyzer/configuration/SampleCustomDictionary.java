@@ -42,6 +42,9 @@ public class SampleCustomDictionary implements Dictionary {
 
 	@Configured
 	Datastore datastore;
+	
+	@Configured
+	String description;
 
 	@Override
 	public String getName() {
@@ -61,5 +64,15 @@ public class SampleCustomDictionary implements Dictionary {
 		}
 		SimpleStringReferenceValues refValues = new SimpleStringReferenceValues(values, true);
 		return refValues;
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	@Override
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

@@ -26,10 +26,9 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.PerformanceCharacteristics;
 import org.eobjects.analyzer.connection.SingleDataContextProvider;
-import org.junit.Ignore;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
+import org.junit.Ignore;
 
 @Ignore
 public class SampleCustomDatastore implements Datastore, PerformanceCharacteristics {
@@ -41,6 +40,9 @@ public class SampleCustomDatastore implements Datastore, PerformanceCharacterist
 
 	@Configured
 	File xmlFile;
+
+	@Configured
+	String description;
 
 	@Override
 	public String getName() {
@@ -61,5 +63,15 @@ public class SampleCustomDatastore implements Datastore, PerformanceCharacterist
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return this;
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	@Override
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

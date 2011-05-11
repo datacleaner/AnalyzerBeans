@@ -17,15 +17,18 @@
 
 	<reference-data-catalog>
 		<dictionaries>
-			<datastore-dictionary name="datastore_dict">
+			<datastore-dictionary name="datastore_dict"
+				description="dict_ds">
 				<datastore-name>my_jdbc_connection</datastore-name>
 				<column-path>EMPLOYEES.LASTNAME</column-path>
 			</datastore-dictionary>
-			<text-file-dictionary name="textfile_dict">
+			<text-file-dictionary name="textfile_dict"
+				description="dict_txt">
 				<filename>src/test/resources/lastnames.txt</filename>
 				<encoding>UTF-8</encoding>
 			</text-file-dictionary>
-			<value-list-dictionary name="valuelist_dict">
+			<value-list-dictionary name="valuelist_dict"
+				description="dict_simple">
 				<value>hello</value>
 				<value>hi</value>
 				<value>greetings</value>
@@ -36,16 +39,19 @@
 				<property name="Name" value="custom_dict" />
 				<property name="Values" value="5" />
 				<property name="Datastore" value="my_jdbc_connection" />
+				<property name="Description" value="dict_custom" />
 			</custom-dictionary>
 		</dictionaries>
 
 		<synonym-catalogs>
-			<text-file-synonym-catalog name="textfile_syn">
+			<text-file-synonym-catalog name="textfile_syn"
+				description="syn_txt">
 				<filename>src/test/resources/synonym-countries.txt</filename>
 				<encoding>UTF-8</encoding>
 				<case-sensitive>false</case-sensitive>
 			</text-file-synonym-catalog>
-			<datastore-synonym-catalog name="datastore_syn">
+			<datastore-synonym-catalog name="datastore_syn"
+				description="syn_ds">
 				<datastore-name>my_jdbc_connection</datastore-name>
 				<master-term-column-path>CUSTOMERS.CUSTOMERNAME</master-term-column-path>
 				<synonym-column-path>CUSTOMERS.CUSTOMERNUMBER</synonym-column-path>
@@ -56,15 +62,16 @@
 				<property name="Name" value="custom_syn" />
 				<property name="Values"
 					value="[[DNK,Denmark,Danmark],[GBR,Great Britain,UK,United Kingdom],[NLD,Netherlands]]" />
+				<property name="Description" value="syn_custom" />
 			</custom-synonym-catalog>
 		</synonym-catalogs>
 
 		<string-patterns>
-			<regex-pattern name="regex danish email">
+			<regex-pattern name="regex danish email" description="pattern_reg">
 				<expression>[a-z]+@[a-z]+\.dk</expression>
 				<match-entire-string>true</match-entire-string>
 			</regex-pattern>
-			<simple-pattern name="simple email">
+			<simple-pattern name="simple email" description="pattern_simple">
 				<expression>aaaa@aaaaa.aa</expression>
 			</simple-pattern>
 		</string-patterns>

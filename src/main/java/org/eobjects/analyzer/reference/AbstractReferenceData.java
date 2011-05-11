@@ -17,42 +17,55 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.connection;
+package org.eobjects.analyzer.reference;
 
-import java.io.File;
+import java.util.List;
 
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.util.BaseObject;
 
-/**
- * Datastore implementation for Excel spreadsheets.
- * 
- * @author Kasper Sørensen
- */
-public final class ExcelDatastore extends UsageAwareDatastore implements FileDatastore {
+public abstract class AbstractReferenceData extends BaseObject implements ReferenceData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _filename;
+	private final String _name;
+	private String _description;
 
-	public ExcelDatastore(String name, String filename) {
-		super(name);
-		_filename = filename;
+	public AbstractReferenceData(String name) {
+		_name = name;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final String getDescription() {
+		return _description;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final String getName() {
+		return _name;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final void setDescription(String description) {
+		_description = description;
 	}
 
 	@Override
-	public String getFilename() {
-		return _filename;
+	protected void decorateIdentity(List<Object> identifiers) {
+		identifiers.add(getName());
+		identifiers.add(getDescription());
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
-		DataContext dc = DataContextFactory.createExcelDataContext(new File(_filename));
-		return new SingleDataContextProvider(dc, this);
-	}
-
-	@Override
-	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
+	public String toString() {
+		return getClass().getSimpleName() + "[name=" + getName() + "]";
 	}
 }

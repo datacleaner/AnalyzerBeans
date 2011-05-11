@@ -30,17 +30,11 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _name;
 	private final List<Datastore> _datastores;
 
 	public CompositeDatastore(String name, List<Datastore> datastores) {
-		_name = name;
+		super(name);
 		_datastores = datastores;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	public List<Datastore> getDatastores() {

@@ -33,19 +33,13 @@ public final class OdbDatastore extends UsageAwareDatastore implements FileDatas
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _name;
 	private final String _filename;
 
 	public OdbDatastore(String name, String filename) {
-		_name = name;
+		super(name);
 		_filename = filename;
 	}
 
-	@Override
-	public String getName() {
-		return _name;
-	}
-	
 	@Override
 	public String getFilename() {
 		return _filename;
@@ -56,7 +50,7 @@ public final class OdbDatastore extends UsageAwareDatastore implements FileDatas
 		DataContext dc = DataContextFactory.createOpenOfficeDataContext(new File(_filename));
 		return new SingleDataContextProvider(dc, this);
 	}
-	
+
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return new PerformanceCharacteristicsImpl(true);

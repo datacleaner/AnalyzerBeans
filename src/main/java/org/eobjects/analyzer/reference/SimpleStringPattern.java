@@ -28,8 +28,6 @@ import org.eobjects.analyzer.beans.stringpattern.TokenPatternImpl;
 import org.eobjects.analyzer.beans.stringpattern.Tokenizer;
 import org.eobjects.analyzer.beans.stringpattern.TokenizerConfiguration;
 
-import org.eobjects.metamodel.util.BaseObject;
-
 /**
  * Represents a string pattern that is based on a sequence of token types. The
  * pattern format is similar to the one used by the Pattern finder analyzer,
@@ -39,17 +37,16 @@ import org.eobjects.metamodel.util.BaseObject;
  * 
  * @author Kasper Sørensen
  */
-public class SimpleStringPattern extends BaseObject implements StringPattern {
+public final class SimpleStringPattern extends AbstractReferenceData implements StringPattern {
 
 	private static final long serialVersionUID = 1L;
-	private final String _name;
 	private final String _expression;
 	private transient TokenPatternImpl _tokenPattern;
 	private transient DefaultTokenizer _tokenizer;
 	private transient TokenizerConfiguration _configuration;
 
 	public SimpleStringPattern(String name, String expression) {
-		_name = name;
+		super(name);
 		_expression = expression;
 	}
 
@@ -77,11 +74,6 @@ public class SimpleStringPattern extends BaseObject implements StringPattern {
 		return _tokenPattern;
 	}
 
-	@Override
-	public String getName() {
-		return _name;
-	}
-
 	public String getExpression() {
 		return _expression;
 	}
@@ -97,12 +89,12 @@ public class SimpleStringPattern extends BaseObject implements StringPattern {
 
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_name);
+		super.decorateIdentity(identifiers);
 		identifiers.add(_expression);
 	}
 
 	@Override
 	public String toString() {
-		return "SimpleStringPattern[name=" + _name + ",expression=" + _expression + "]";
+		return "SimpleStringPattern[name=" + getName() + ",expression=" + _expression + "]";
 	}
 }

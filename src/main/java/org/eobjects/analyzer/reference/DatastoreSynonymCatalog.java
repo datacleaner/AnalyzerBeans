@@ -48,7 +48,7 @@ import org.eobjects.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class DatastoreSynonymCatalog implements SynonymCatalog {
+public final class DatastoreSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
@@ -57,14 +57,13 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 	private transient Map<String, String> _masterTermCache;
 	private transient DatastoreCatalog _datastoreCatalog;
 	private transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
-	private final String _name;
 	private final String _datastoreName;
 	private final String _masterTermColumnPath;
 	private final String[] _synonymColumnPaths;
 
 	public DatastoreSynonymCatalog(String name, String datastoreName, String masterTermColumnPath,
 			String[] synonymColumnPaths) {
-		_name = name;
+		super(name);
 		_datastoreName = datastoreName;
 		_masterTermColumnPath = masterTermColumnPath;
 		_synonymColumnPaths = synonymColumnPaths;
@@ -127,11 +126,6 @@ public final class DatastoreSynonymCatalog implements SynonymCatalog {
 			throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
 		}
 		return datastore;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	public String getDatastoreName() {

@@ -23,24 +23,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.reference.AbstractReferenceData;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceValues;
 import org.junit.Ignore;
 
 @Ignore
-public class MockMonitoredDictionary implements Dictionary {
+public class MockMonitoredDictionary extends AbstractReferenceData implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
 	private static int id = 0;
-	
-	private final String _name;
+
 	private final AtomicInteger _initCount = new AtomicInteger(0);
 	private final AtomicInteger _closeCount = new AtomicInteger(0);
-	
+
 	public MockMonitoredDictionary() {
-		id++;
-		_name = "mock_dict_" + id;
+		super("mock_dict_" + ++id);
 	}
 
 	@Initialize
@@ -52,18 +51,13 @@ public class MockMonitoredDictionary implements Dictionary {
 	public void close() {
 		_closeCount.incrementAndGet();
 	}
-	
+
 	public int getInitCount() {
 		return _initCount.get();
 	}
-	
+
 	public int getCloseCount() {
 		return _closeCount.get();
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	@Override

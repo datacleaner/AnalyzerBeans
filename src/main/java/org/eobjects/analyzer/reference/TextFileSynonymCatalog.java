@@ -33,7 +33,7 @@ import org.eobjects.analyzer.util.filemonitor.FileMonitor;
 import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
-public final class TextFileSynonymCatalog implements SynonymCatalog {
+public final class TextFileSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,27 +42,21 @@ public final class TextFileSynonymCatalog implements SynonymCatalog {
 	private transient FileMonitor _fileMonitor;
 
 	private final String _filename;
-	private final String _name;
 	private final boolean _caseSensitive;
 	private final String _encoding;
 
 	public TextFileSynonymCatalog(String name, String filename, boolean caseSensitive, String encoding) {
-		_name = name;
+		super(name);
 		_filename = filename;
 		_caseSensitive = caseSensitive;
 		_encoding = encoding;
 	}
 
 	public TextFileSynonymCatalog(String name, File file, boolean caseSensitive, String encoding) {
-		_name = name;
+		super(name);
 		_filename = file.getPath();
 		_caseSensitive = caseSensitive;
 		_encoding = encoding;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	public String getEncoding() {

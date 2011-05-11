@@ -34,21 +34,15 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _name;
 	private final String _filename;
 	private final String _encoding;
 	private final int _fixedValueWidth;
 
 	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth) {
-		_name = name;
+		super(name);
 		_filename = filename;
 		_encoding = encoding;
 		_fixedValueWidth = fixedValueWidth;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	@Override

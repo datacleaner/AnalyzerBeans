@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eobjects.metamodel.util.BaseObject;
-
 /**
  * Represents a string pattern which is based on a regular expression (regex).
  * There are two basic modes of matching when using a regex string pattern:
@@ -33,24 +31,18 @@ import org.eobjects.metamodel.util.BaseObject;
  * 
  * @author Kasper Sørensen
  */
-public final class RegexStringPattern extends BaseObject implements StringPattern {
+public final class RegexStringPattern extends AbstractReferenceData implements StringPattern {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _name;
 	private final String _expression;
 	private final boolean _matchEntireString;
 	private transient Pattern _pattern;
 
 	public RegexStringPattern(String name, String expression, boolean matchEntireString) {
-		_name = name;
+		super(name);
 		_expression = expression;
 		_matchEntireString = matchEntireString;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	@Override
@@ -95,14 +87,14 @@ public final class RegexStringPattern extends BaseObject implements StringPatter
 
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_name);
+		super.decorateIdentity(identifiers);
 		identifiers.add(_expression);
 		identifiers.add(_matchEntireString);
 	}
 
 	@Override
 	public String toString() {
-		return "RegexStringPattern[name=" + _name + ",expression=" + _expression + "]";
+		return "RegexStringPattern[name=" + getName() + ",expression=" + _expression + "]";
 	}
 
 }

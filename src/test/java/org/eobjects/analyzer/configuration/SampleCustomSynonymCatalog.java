@@ -41,6 +41,9 @@ public class SampleCustomSynonymCatalog implements SynonymCatalog {
 	@Configured
 	String[][] values;
 
+	@Configured
+	String description;
+
 	@Override
 	public String getName() {
 		return name;
@@ -68,4 +71,13 @@ public class SampleCustomSynonymCatalog implements SynonymCatalog {
 		return null;
 	}
 
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	@Override
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }

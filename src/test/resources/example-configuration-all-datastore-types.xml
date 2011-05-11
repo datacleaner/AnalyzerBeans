@@ -7,40 +7,40 @@
 	</configuration-metadata>
 
 	<datastore-catalog>
-		<jdbc-datastore name="my_jdbc_connection">
+		<jdbc-datastore name="my_jdbc_connection" description="jdbc_con">
 			<url>jdbc:hsqldb:res:metamodel</url>
 			<driver>org.hsqldb.jdbcDriver</driver>
 			<username>SA</username>
 			<password></password>
 		</jdbc-datastore>
 
-		<jdbc-datastore name="my_jdbc_datasource">
+		<jdbc-datastore name="my_jdbc_datasource" description="jdbc_ds">
 			<datasource-jndi-url>java:comp/env/jdbc/mydb</datasource-jndi-url>
 		</jdbc-datastore>
 
-		<excel-datastore name="my_xml">
+		<excel-datastore name="my_xml" description="xml">
 			<filename>src/test/resources/example-xml-file.xml</filename>
 		</excel-datastore>
 
-		<csv-datastore name="my_csv">
+		<csv-datastore name="my_csv" description="csv">
 			<filename>src/test/resources/employees.csv</filename>
 			<quote-char>"</quote-char>
 			<separator-char>,</separator-char>
 		</csv-datastore>
 
-		<excel-datastore name="my_excel_2003">
+		<excel-datastore name="my_excel_2003" description="xls">
 			<filename>src/test/resources/Spreadsheet2003.xls</filename>
 		</excel-datastore>
 
-		<access-datastore name="my_access">
+		<access-datastore name="my_access" description="mdb">
 			<filename>src/test/resources/developers.mdb</filename>
 		</access-datastore>
 
-		<dbase-datastore name="my_dbase">
+		<dbase-datastore name="my_dbase" description="dbf">
 			<filename>src/test/resources/report.dbf</filename>
 		</dbase-datastore>
 
-		<odb-datastore name="my_odb">
+		<odb-datastore name="my_odb" description="odb">
 			<filename>src/test/resources/openoffice_db.odb</filename>
 		</odb-datastore>
 
@@ -48,9 +48,10 @@
 			class-name="org.eobjects.analyzer.configuration.SampleCustomDatastore">
 			<property name="Name" value="my_custom" />
 			<property name="Xml file" value="src/test/resources/log4j.xml" />
+			<property name="Description" value="custom" />
 		</custom-datastore>
 
-		<composite-datastore name="my_composite">
+		<composite-datastore name="my_composite" description="comp">
 			<datastore-name>my_jdbc_connection</datastore-name>
 			<datastore-name>my_csv</datastore-name>
 			<datastore-name>my_excel_2003</datastore-name>

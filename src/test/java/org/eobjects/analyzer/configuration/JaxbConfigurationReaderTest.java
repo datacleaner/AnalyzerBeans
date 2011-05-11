@@ -75,6 +75,17 @@ public class JaxbConfigurationReaderTest extends TestCase {
 				"[my_jdbc_connection, my_dbase, my_csv, my_xml, my_custom, my_odb, my_jdbc_datasource, my_excel_2003, my_composite, my_access]",
 				Arrays.toString(datastoreNames));
 
+		assertEquals("jdbc_con", datastoreCatalog.getDatastore("my_jdbc_connection").getDescription());
+		assertEquals("jdbc_ds", datastoreCatalog.getDatastore("my_jdbc_datasource").getDescription());
+		assertEquals("dbf", datastoreCatalog.getDatastore("my_dbase").getDescription());
+		assertEquals("csv", datastoreCatalog.getDatastore("my_csv").getDescription());
+		assertEquals("xml", datastoreCatalog.getDatastore("my_xml").getDescription());
+		assertEquals("custom", datastoreCatalog.getDatastore("my_custom").getDescription());
+		assertEquals("odb", datastoreCatalog.getDatastore("my_odb").getDescription());
+		assertEquals("xls", datastoreCatalog.getDatastore("my_excel_2003").getDescription());
+		assertEquals("comp", datastoreCatalog.getDatastore("my_composite").getDescription());
+		assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
+
 		for (String name : datastoreNames) {
 			// test that all connections, except the JNDI-based on will work
 			if (!"my_jdbc_datasource".equals(name)) {
@@ -113,24 +124,28 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf);
 
 		Dictionary d = referenceDataCatalog.getDictionary("datastore_dict");
+		assertEquals("dict_ds", d.getDescription());
 		lifeCycleHelper.initialize(d);
 		assertTrue(d.containsValue("Patterson"));
 		assertTrue(d.containsValue("Murphy"));
 		assertFalse(d.containsValue("Gates"));
 
 		d = referenceDataCatalog.getDictionary("textfile_dict");
+		assertEquals("dict_txt", d.getDescription());
 		lifeCycleHelper.initialize(d);
 		assertTrue(d.containsValue("Patterson"));
 		assertFalse(d.containsValue("Murphy"));
 		assertTrue(d.containsValue("Gates"));
 
 		d = referenceDataCatalog.getDictionary("valuelist_dict");
+		assertEquals("dict_simple", d.getDescription());
 		lifeCycleHelper.initialize(d);
 		assertFalse(d.containsValue("Patterson"));
 		assertFalse(d.containsValue("Murphy"));
 		assertTrue(d.containsValue("greetings"));
 
 		d = referenceDataCatalog.getDictionary("custom_dict");
+		assertEquals("dict_custom", d.getDescription());
 		lifeCycleHelper.initialize(d);
 		assertFalse(d.containsValue("Patterson"));
 		assertFalse(d.containsValue("Murphy"));
@@ -146,6 +161,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("[textfile_syn, datastore_syn, custom_syn]", Arrays.toString(synonymCatalogNames));
 
 		SynonymCatalog s = referenceDataCatalog.getSynonymCatalog("textfile_syn");
+		assertEquals("syn_txt",s.getDescription());
 		lifeCycleHelper.initialize(s);
 		assertEquals("DNK", s.getMasterTerm("Denmark"));
 		assertEquals("DNK", s.getMasterTerm("Danmark"));
@@ -154,6 +170,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals(null, s.getMasterTerm("Netherlands"));
 
 		s = referenceDataCatalog.getSynonymCatalog("datastore_syn");
+		assertEquals("syn_ds",s.getDescription());
 		lifeCycleHelper.initialize(s);
 
 		// lookup by id
@@ -163,6 +180,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals(null, s.getMasterTerm("foobar"));
 
 		s = referenceDataCatalog.getSynonymCatalog("custom_syn");
+		assertEquals("syn_custom",s.getDescription());
 		lifeCycleHelper.initialize(s);
 		assertEquals("DNK", s.getMasterTerm("Denmark"));
 		assertEquals("DNK", s.getMasterTerm("Danmark"));
@@ -174,6 +192,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("[regex danish email, simple email]", Arrays.toString(stringPatternNames));
 
 		StringPattern pattern = referenceDataCatalog.getStringPattern("regex danish email");
+		assertEquals("pattern_reg",pattern.getDescription());
 		lifeCycleHelper.initialize(pattern);
 		assertEquals("RegexStringPattern[name=regex danish email,expression=[a-z]+@[a-z]+\\.dk]", pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));
@@ -181,6 +200,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertFalse(pattern.matches(" kasper@eobjects.dk"));
 
 		pattern = referenceDataCatalog.getStringPattern("simple email");
+		assertEquals("pattern_simple",pattern.getDescription());
 		lifeCycleHelper.initialize(pattern);
 		assertEquals("SimpleStringPattern[name=simple email,expression=aaaa@aaaaa.aa]", pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));

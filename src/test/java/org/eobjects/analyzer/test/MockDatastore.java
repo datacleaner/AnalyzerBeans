@@ -33,10 +33,19 @@ public class MockDatastore implements Datastore, PerformanceCharacteristics {
 	}
 
 	@Override
+	public String getDescription() {
+		return null;
+	}
+
+	@Override
+	public void setDescription(String description) {
+	}
+
+	@Override
 	public DataContextProvider getDataContextProvider() {
 		return new MockDataContextProvider();
 	}
-	
+
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return this;

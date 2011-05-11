@@ -50,7 +50,6 @@ public class JdbcDatastore extends UsageAwareDatastore {
 
 	private static final Logger logger = LoggerFactory.getLogger(JdbcDatastore.class);
 
-	private final String _name;
 	private final String _jdbcUrl;
 	private final String _username;
 	private final String _password;
@@ -59,8 +58,7 @@ public class JdbcDatastore extends UsageAwareDatastore {
 
 	private JdbcDatastore(String name, String jdbcUrl, String driverClass, String username, String password,
 			String datasourceJndiUrl) {
-		super();
-		_name = name;
+		super(name);
 		_jdbcUrl = jdbcUrl;
 		_driverClass = driverClass;
 		_username = username;
@@ -117,11 +115,6 @@ public class JdbcDatastore extends UsageAwareDatastore {
 
 	public String getDriverClass() {
 		return _driverClass;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	public String getDatasourceJndiUrl() {
@@ -204,7 +197,7 @@ public class JdbcDatastore extends UsageAwareDatastore {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("JdbcDatastore[name=");
-		sb.append(_name);
+		sb.append(getName());
 		if (_jdbcUrl != null) {
 			sb.append(",url=");
 			sb.append(_jdbcUrl);

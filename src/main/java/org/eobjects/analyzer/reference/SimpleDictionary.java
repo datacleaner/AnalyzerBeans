@@ -21,28 +21,28 @@ package org.eobjects.analyzer.reference;
 
 import java.util.Collection;
 
-public final class SimpleDictionary implements Dictionary {
+/**
+ * The simplest possible Dictionary implementation. Based on an in-memory set of
+ * values.
+ * 
+ * @author Kasper Sørensen
+ */
+public final class SimpleDictionary extends AbstractReferenceData implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String _name;
 	private final ReferenceValues<String> _values;
 
 	public SimpleDictionary(String name, String... values) {
-		_name = name;
+		super(name);
 		_values = new SimpleReferenceValues<String>(values);
 	}
 
 	public SimpleDictionary(String name, Collection<String> values) {
-		_name = name;
+		super(name);
 		_values = new SimpleReferenceValues<String>(values.toArray(new String[values.size()]));
 	}
 
-	@Override
-	public String getName() {
-		return _name;
-	}
-	
 	@Override
 	public ReferenceValues<String> getValues() {
 		return _values;

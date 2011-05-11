@@ -42,7 +42,7 @@ import org.eobjects.metamodel.schema.Column;
  * 
  * @author Kasper Sørensen
  */
-public class DatastoreDictionary implements Dictionary {
+public final class DatastoreDictionary extends AbstractReferenceData implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
@@ -53,10 +53,9 @@ public class DatastoreDictionary implements Dictionary {
 	private transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
-	private final String _name;
 
 	public DatastoreDictionary(String name, String datastoreName, String qualifiedColumnName) {
-		_name = name;
+		super(name);
 		_datastoreName = datastoreName;
 		_qualifiedColumnName = qualifiedColumnName;
 	}
@@ -119,11 +118,6 @@ public class DatastoreDictionary implements Dictionary {
 
 	public String getQualifiedColumnName() {
 		return _qualifiedColumnName;
-	}
-
-	@Override
-	public String getName() {
-		return _name;
 	}
 
 	@Override

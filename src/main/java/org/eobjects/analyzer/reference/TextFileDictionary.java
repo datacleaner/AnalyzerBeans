@@ -29,7 +29,7 @@ import org.eobjects.analyzer.util.filemonitor.FileMonitor;
 import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
-public class TextFileDictionary implements Dictionary {
+public final class TextFileDictionary extends AbstractReferenceData implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,12 +37,11 @@ public class TextFileDictionary implements Dictionary {
 	private transient FileMonitor _fileMonitor;
 	private transient Set<String> _entries;
 
-	private final String _name;
 	private final String _filename;
 	private final String _encoding;
 
 	public TextFileDictionary(String name, String filename, String encoding) {
-		_name = name;
+		super(name);
 		_filename = filename;
 		_encoding = encoding;
 	}
@@ -65,11 +64,6 @@ public class TextFileDictionary implements Dictionary {
 		return _fileMonitor;
 	}
 
-	@Override
-	public String getName() {
-		return _name;
-	}
-
 	public String getFilename() {
 		return _filename;
 	}
@@ -84,7 +78,7 @@ public class TextFileDictionary implements Dictionary {
 			_entries = loadEntries();
 		}
 	}
-	
+
 	public Set<String> getEntries() {
 		if (_entries == null) {
 			_entries = loadEntries();

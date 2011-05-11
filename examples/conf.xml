@@ -7,7 +7,7 @@
 	</configuration-metadata>
 
 	<datastore-catalog>
-		<jdbc-datastore name="orderdb">
+		<jdbc-datastore name="orderdb" description="our normal testdatabase">
 			<url>jdbc:hsqldb:file:examples/orderdb;readonly=true</url>
 			<driver>org.hsqldb.jdbcDriver</driver>
 			<username>SA</username>
