@@ -10,7 +10,7 @@
 		A framework for processing and analyzing data in a database, spreadsheet or other
 		data source. AnalyzerBeans is widely based on a simple annotation-based development
 		model where plugin/component development is very easy while it still supports reuse
-		of business logic, configurability and super-fast execution.
+		of business logic, configurability, type-safety and super-fast execution.
 	</description>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
@@ -89,6 +89,30 @@
 					<target>1.6</target>
 					<encoding>utf-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Because of bugs related to complex generic expressions in previous 
+					Java compilers we require at least Java 6 update 18. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<id>enforce-java</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<message>AnalyzerBeans requires Java 6 update 18 or higher to
+										compile!</message>
+									<version>1.6.0-18,</version>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<!-- make the jar file executable when dependencies are available in 
