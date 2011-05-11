@@ -195,5 +195,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 		resultProducer = crosstab.where("Column", "FIRSTNAME").where("Measures", "Diacritic chars").explore();
 		assertNull(resultProducer);
+
+		taskRunner.shutdown();
 	}
 }

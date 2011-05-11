@@ -153,5 +153,7 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 				fail("Unexpected columnName: " + result.getColumnName());
 			}
 		}
+		
+		taskRunner.shutdown();
 	}
 }

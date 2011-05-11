@@ -169,5 +169,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 			assertEquals(1, rows.length);
 			assertEquals("wpatterson@classicmodelcars.com", rows[0].getValue(emailInputColumn).toString());
 		}
+		
+		taskRunner.shutdown();
 	}
 }

@@ -45,7 +45,24 @@ import org.eobjects.metamodel.schema.Table;
 
 public class CancellationAndMultiThreadingTest extends TestCase {
 
-	public void testScenario() throws Throwable {
+	public void test10Times() throws Exception {
+		Thread[] threads = new Thread[10];
+		for (int i = 0; i < threads.length; i++) {
+			Thread thread = new Thread() {
+				public void run() {
+					runScenario();
+				};
+			};
+			thread.start();
+			threads[i] = thread;
+		}
+
+		for (int i = 0; i < threads.length; i++) {
+			threads[i].join();
+		}
+	}
+
+	public void runScenario() {
 		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
 				.addAnalyzerClass(ValueDistributionAnalyzer.class);
 		StorageProvider storageProvider = TestHelper.createStorageProvider();
@@ -83,7 +100,12 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 
 		AnalysisResultFuture resultFuture = runner.run(job);
 
-		Thread.sleep(180);
+		try {
+			Thread.sleep(550);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			fail("Interrupted! " + e.getMessage());
+		}
 
 		resultFuture.cancel();
 
@@ -91,7 +113,12 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 		assertTrue(resultFuture.isCancelled());
 		assertTrue(resultFuture.isErrornous());
 
-		Thread.sleep(150);
+		try {
+			Thread.sleep(400);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			fail("Interrupted! " + e.getMessage());
+		}
 
 		assertEquals(30, executorService.getMaximumPoolSize());
 
@@ -108,5 +135,7 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 		analysisJobBuilder.close();
 
 		assertFalse(ds.isDataContextProviderOpen());
+		
+		taskRunner.shutdown();
 	}
 }
