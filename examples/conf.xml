@@ -30,9 +30,14 @@
 	<multithreaded-taskrunner max-threads="20" />
 
 	<storage-provider>
-		<h2-database>
-			<temp-directory>staging</temp-directory>
-		</h2-database>
+		<combined>
+			<collections-storage>
+				<berkeley-db />
+			</collections-storage>
+			<row-annotation-storage>
+				<in-memory max-rows-threshold="1000" />
+			</row-annotation-storage>
+		</combined>
 	</storage-provider>
 
 	<classpath-scanner>
