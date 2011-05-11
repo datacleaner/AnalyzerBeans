@@ -141,4 +141,9 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 	private boolean isDataContextProviderOpen(UsageAwareDataContextProvider dataContextProvider) {
 		return dataContextProvider != null && !dataContextProvider.isClosed();
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[name=" + getName() + "]";
+	}
 }

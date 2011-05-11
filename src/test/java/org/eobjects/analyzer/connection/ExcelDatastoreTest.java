@@ -61,4 +61,9 @@ public class ExcelDatastoreTest extends TestCase {
 				"Column[name=date,columnNumber=2,type=VARCHAR,nullable=true,indexed=false,nativeType=null,columnSize=null]",
 				col3.toString());
 	}
+
+	public void testToString() throws Exception {
+		Datastore datastore = new ExcelDatastore("foobar", "src/test/resources/Spreadsheet2007.xlsx");
+		assertEquals("ExcelDatastore[name=foobar]", datastore.toString());
+	}
 }
