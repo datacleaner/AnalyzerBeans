@@ -194,7 +194,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		StringPattern pattern = referenceDataCatalog.getStringPattern("regex danish email");
 		assertEquals("pattern_reg",pattern.getDescription());
 		lifeCycleHelper.initialize(pattern);
-		assertEquals("RegexStringPattern[name=regex danish email,expression=[a-z]+@[a-z]+\\.dk]", pattern.toString());
+		assertEquals("RegexStringPattern[name=regex danish email, expression=[a-z]+@[a-z]+\\.dk, matchEntireString=true]", pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));
 		assertFalse(pattern.matches("kasper@eobjects.org"));
 		assertFalse(pattern.matches(" kasper@eobjects.dk"));
@@ -202,7 +202,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		pattern = referenceDataCatalog.getStringPattern("simple email");
 		assertEquals("pattern_simple",pattern.getDescription());
 		lifeCycleHelper.initialize(pattern);
-		assertEquals("SimpleStringPattern[name=simple email,expression=aaaa@aaaaa.aa]", pattern.toString());
+		assertEquals("SimpleStringPattern[name=simple email, expression=aaaa@aaaaa.aa]", pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));
 		assertTrue(pattern.matches("kasper@eobjects.org"));
 		assertFalse(pattern.matches(" kasper@eobjects.dk"));

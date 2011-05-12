@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.connection;
 
+import org.apache.commons.lang.SerializationUtils;
+
 import junit.framework.TestCase;
 
 public class JdbcDatastoreTest extends TestCase {
@@ -35,6 +37,13 @@ public class JdbcDatastoreTest extends TestCase {
 
 		ds2 = new JdbcDatastore("hello", "url2", "driver", "username", "pw");
 		assertFalse(ds1.equals(ds2));
+	}
+	
+	public void testSerializationAndDeserialization() throws Exception {
+		JdbcDatastore ds = new JdbcDatastore("name", "url", "driver", "username", "pw");
+		
+		Object clone = SerializationUtils.clone(ds);
+		assertEquals(ds, clone);
 	}
 
 	public void testGetters() throws Exception {

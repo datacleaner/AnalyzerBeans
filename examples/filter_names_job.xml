@@ -39,7 +39,7 @@
 			</properties>
 			<input ref="age_years" />
 			<outcome category="LOWER" id="is_child" />
-			<outcome category="EQUAL" id="is_eighteen" />
+			<outcome category="VALID" id="is_eighteen" />
 			<outcome category="HIGHER" id="is_adult" />
 		</filter>
 	</transformation>

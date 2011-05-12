@@ -20,7 +20,11 @@
 package org.eobjects.analyzer.connection;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.List;
 
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
@@ -43,6 +47,10 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 		_filename = filename;
 		_encoding = encoding;
 		_fixedValueWidth = fixedValueWidth;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, FixedWidthDatastore.class).readObject(stream);
 	}
 
 	@Override
@@ -70,5 +78,19 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 	@Override
 	public String getFilename() {
 		return _filename;
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_filename);
+		identifiers.add(_encoding);
+		identifiers.add(_fixedValueWidth);
+	}
+
+	@Override
+	public String toString() {
+		return "FixedWidthDatastore[name=" + getName() + ", filename=" + _filename + ", encoding=" + _encoding
+				+ ", fixedValueWidth=" + _fixedValueWidth + "]";
 	}
 }

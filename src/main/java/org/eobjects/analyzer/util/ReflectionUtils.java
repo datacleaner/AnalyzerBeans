@@ -386,6 +386,19 @@ public class ReflectionUtils {
 		return result.toArray(new Field[result.size()]);
 	}
 
+	public static Field getField(Class<?> clazz, String fieldName) {
+		if (clazz == Object.class || clazz == null) {
+			return null;
+		}
+		try {
+			return clazz.getDeclaredField(fieldName);
+		} catch (SecurityException e) {
+			throw new IllegalStateException(e);
+		} catch (NoSuchFieldException e) {
+			return getField(clazz.getSuperclass(), fieldName);
+		}
+	}
+
 	/**
 	 * Gets all methods of a class, excluding those from Object
 	 * 

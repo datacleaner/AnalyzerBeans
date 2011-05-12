@@ -20,7 +20,11 @@
 package org.eobjects.analyzer.connection;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.List;
 
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.CsvConfiguration;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
@@ -61,6 +65,10 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 		_encoding = encoding;
 	}
 
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, CsvDatastore.class).readObject(stream);
+	}
+
 	public String getEncoding() {
 		return _encoding;
 	}
@@ -99,4 +107,18 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 		return new PerformanceCharacteristicsImpl(false);
 	}
 
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_filename);
+		identifiers.add(_encoding);
+		identifiers.add(_quoteChar);
+		identifiers.add(_separatorChar);
+	}
+
+	@Override
+	public String toString() {
+		return "CsvDatastore[name=" + getName() + ", filename=" + _filename + ", quoteChar='" + _quoteChar
+				+ "', separatorChar='" + _separatorChar + "', encoding=" + _encoding + "]";
+	}
 }

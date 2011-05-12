@@ -38,20 +38,26 @@ public class FixedWidthDatastoreTest extends TestCase {
 		assertFalse(ds.getPerformanceCharacteristics().isQueryOptimizationPreferred());
 	}
 
+	public void testToString() throws Exception {
+		FixedWidthDatastore ds = new FixedWidthDatastore("name", "filename", "encoding", 5);
+		assertEquals("FixedWidthDatastore[name=name, filename=filename, encoding=encoding, fixedValueWidth=5]",
+				ds.toString());
+	}
+
 	public void testGetDataContextProvider() throws Exception {
 		FixedWidthDatastore ds = new FixedWidthDatastore("example datastore",
 				"src/test/resources/employees-fixed-width.txt", "UTF-8", 19);
-		
+
 		DataContextProvider dcp = ds.getDataContextProvider();
-		
+
 		Schema schema = dcp.getDataContext().getDefaultSchema();
 		assertEquals("employees-fixed-width.txt", schema.getName());
-		
+
 		Table table = schema.getTables()[0];
 		assertEquals("employees-fixed-width", table.getName());
-		
+
 		assertEquals("[name, email]", Arrays.toString(table.getColumnNames()));
-		
+
 		dcp.close();
 	}
 }

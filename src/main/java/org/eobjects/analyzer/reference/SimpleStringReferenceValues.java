@@ -22,11 +22,13 @@ package org.eobjects.analyzer.reference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.metamodel.util.BaseObject;
 
-public final class SimpleStringReferenceValues implements ReferenceValues<String> {
+public final class SimpleStringReferenceValues extends BaseObject implements ReferenceValues<String> {
 
 	private final Set<String> _values;
 	private final boolean _caseSensitive;
@@ -38,11 +40,18 @@ public final class SimpleStringReferenceValues implements ReferenceValues<String
 
 	public SimpleStringReferenceValues(Collection<String> values, boolean caseSensitive) {
 		if (values instanceof Set<?>) {
-			_values =(Set<String>) values;
+			_values = (Set<String>) values;
 		} else {
 			_values = new HashSet<String>(values);
 		}
 		_caseSensitive = caseSensitive;
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		identifiers.add(_values);
+		identifiers.add(_caseSensitive);
+
 	}
 
 	@Override

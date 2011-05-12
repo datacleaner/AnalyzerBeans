@@ -19,14 +19,17 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import org.eobjects.analyzer.util.ReadObjectBuilder;
+import org.eobjects.analyzer.util.ReadObjectBuilder.Moved;
+import org.eobjects.metamodel.util.BaseObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eobjects.metamodel.util.BaseObject;
 
 /**
  * Abstract datastore implementation that uses a shared
@@ -45,11 +48,17 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 	private transient volatile Reference<UsageAwareDataContextProvider> _dataContextProviderRef;
 	private transient volatile DataContextProvider _dataContextProvider = null;
 
+	@Moved
 	private final String _name;
+
 	private String _description;
 
 	public UsageAwareDatastore(String name) {
 		_name = name;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, UsageAwareDatastore.class).readObject(stream);
 	}
 
 	/**
@@ -121,7 +130,8 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(getName());
+		identifiers.add(_name);
+		identifiers.add(_description);
 	}
 
 	/**

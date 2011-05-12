@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -31,6 +33,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
@@ -76,6 +79,10 @@ public class JdbcDatastore extends UsageAwareDatastore {
 
 	public JdbcDatastore(String name, String datasourceJndiUrl) {
 		this(name, null, null, null, null, datasourceJndiUrl);
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, JdbcDatastore.class).readObject(stream);
 	}
 
 	/**

@@ -19,19 +19,29 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.List;
 
+import org.eobjects.analyzer.util.ReadObjectBuilder;
+import org.eobjects.analyzer.util.ReadObjectBuilder.Moved;
 import org.eobjects.metamodel.util.BaseObject;
 
 public abstract class AbstractReferenceData extends BaseObject implements ReferenceData {
 
 	private static final long serialVersionUID = 1L;
 
+	@Moved
 	private final String _name;
+
 	private String _description;
 
 	public AbstractReferenceData(String name) {
 		_name = name;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, AbstractReferenceData.class).readObject(stream);
 	}
 
 	/**

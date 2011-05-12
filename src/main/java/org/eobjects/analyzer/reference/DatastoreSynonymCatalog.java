@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,6 +36,7 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.DataContext;
@@ -67,6 +70,18 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 		_datastoreName = datastoreName;
 		_masterTermColumnPath = masterTermColumnPath;
 		_synonymColumnPaths = synonymColumnPaths;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, DatastoreSynonymCatalog.class).readObject(stream);
+	}
+	
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_datastoreName);
+		identifiers.add(_masterTermColumnPath);
+		identifiers.add(_synonymColumnPaths);
 	}
 
 	public void setDatastoreCatalog(DatastoreCatalog datastoreCatalog) {

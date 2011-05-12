@@ -19,11 +19,14 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
 
 public final class SimpleSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
@@ -45,6 +48,16 @@ public final class SimpleSynonymCatalog extends AbstractReferenceData implements
 	public SimpleSynonymCatalog(String name, List<Synonym> synonyms) {
 		super(name);
 		_synonyms = synonyms;
+	}
+	
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_synonyms);
+	}
+	
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, SimpleSynonymCatalog.class).readObject(stream);
 	}
 
 	@Override

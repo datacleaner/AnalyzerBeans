@@ -19,6 +19,11 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.List;
+
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
@@ -37,6 +42,10 @@ public final class AccessDatastore extends UsageAwareDatastore implements FileDa
 		_filename = filename;
 	}
 
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, AccessDatastore.class).readObject(stream);
+	}
+
 	@Override
 	public String getFilename() {
 		return _filename;
@@ -51,5 +60,11 @@ public final class AccessDatastore extends UsageAwareDatastore implements FileDa
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return new PerformanceCharacteristicsImpl(false);
+	}
+	
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_filename);
 	}
 }

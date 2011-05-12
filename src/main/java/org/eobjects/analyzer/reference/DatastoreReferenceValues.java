@@ -32,16 +32,28 @@ import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.util.BaseObject;
 
-public final class DatastoreReferenceValues implements ReferenceValues<String> {
+/**
+ * Reference values implementation based on a datastore column.
+ * 
+ * @author Kasper Sørensen
+ */
+public final class DatastoreReferenceValues extends BaseObject implements ReferenceValues<String> {
 
 	private final Datastore _datastore;
 	private final Column _column;
-	private final Map<String, Boolean> _containsValueCache = CollectionUtils.createCacheMap();
+	private transient Map<String, Boolean> _containsValueCache = CollectionUtils.createCacheMap();
 
 	public DatastoreReferenceValues(Datastore datastore, Column column) {
 		_datastore = datastore;
 		_column = column;
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		identifiers.add(_datastore);
+		identifiers.add(_column);
 	}
 
 	public void clearCache() {

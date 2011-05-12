@@ -22,8 +22,20 @@ package org.eobjects.analyzer.reference;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
-public final class SimpleReferenceValues<E> implements ReferenceValues<E>, Serializable {
+import org.eobjects.metamodel.util.BaseObject;
+
+/**
+ * Simple array/in-memory based implementation of the {@link ReferenceValues}
+ * interface.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <E>
+ *            the type of values
+ */
+public final class SimpleReferenceValues<E> extends BaseObject implements ReferenceValues<E>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -56,4 +68,8 @@ public final class SimpleReferenceValues<E> implements ReferenceValues<E>, Seria
 		return Arrays.asList(_values);
 	}
 
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		identifiers.add(_values);
+	}
 }

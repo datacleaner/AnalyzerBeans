@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.stringpattern.DefaultTokenizer;
@@ -27,6 +29,7 @@ import org.eobjects.analyzer.beans.stringpattern.TokenPattern;
 import org.eobjects.analyzer.beans.stringpattern.TokenPatternImpl;
 import org.eobjects.analyzer.beans.stringpattern.Tokenizer;
 import org.eobjects.analyzer.beans.stringpattern.TokenizerConfiguration;
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 
 /**
  * Represents a string pattern that is based on a sequence of token types. The
@@ -48,6 +51,16 @@ public final class SimpleStringPattern extends AbstractReferenceData implements 
 	public SimpleStringPattern(String name, String expression) {
 		super(name);
 		_expression = expression;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, SimpleStringPattern.class).readObject(stream);
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_expression);
 	}
 
 	private Tokenizer getTokenizer() {
@@ -88,13 +101,7 @@ public final class SimpleStringPattern extends AbstractReferenceData implements 
 	}
 
 	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		super.decorateIdentity(identifiers);
-		identifiers.add(_expression);
-	}
-
-	@Override
 	public String toString() {
-		return "SimpleStringPattern[name=" + getName() + ",expression=" + _expression + "]";
+		return "SimpleStringPattern[name=" + getName() + ", expression=" + _expression + "]";
 	}
 }

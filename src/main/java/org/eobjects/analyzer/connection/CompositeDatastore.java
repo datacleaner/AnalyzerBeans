@@ -20,9 +20,12 @@
 package org.eobjects.analyzer.connection;
 
 import java.io.Closeable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
@@ -35,6 +38,10 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 	public CompositeDatastore(String name, List<Datastore> datastores) {
 		super(name);
 		_datastores = datastores;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, CompositeDatastore.class).readObject(stream);
 	}
 
 	public List<Datastore> getDatastores() {
@@ -59,5 +66,11 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return new PerformanceCharacteristicsImpl(true);
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_datastores);
 	}
 }

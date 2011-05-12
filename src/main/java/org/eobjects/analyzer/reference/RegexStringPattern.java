@@ -19,9 +19,13 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 
 /**
  * Represents a string pattern which is based on a regular expression (regex).
@@ -43,6 +47,17 @@ public final class RegexStringPattern extends AbstractReferenceData implements S
 		super(name);
 		_expression = expression;
 		_matchEntireString = matchEntireString;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, RegexStringPattern.class).readObject(stream);
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_expression);
+		identifiers.add(_matchEntireString);
 	}
 
 	@Override
@@ -86,15 +101,9 @@ public final class RegexStringPattern extends AbstractReferenceData implements S
 	}
 
 	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		super.decorateIdentity(identifiers);
-		identifiers.add(_expression);
-		identifiers.add(_matchEntireString);
-	}
-
-	@Override
 	public String toString() {
-		return "RegexStringPattern[name=" + getName() + ",expression=" + _expression + "]";
+		return "RegexStringPattern[name=" + getName() + ", expression=" + _expression + ", matchEntireString="
+				+ _matchEntireString + "]";
 	}
 
 }

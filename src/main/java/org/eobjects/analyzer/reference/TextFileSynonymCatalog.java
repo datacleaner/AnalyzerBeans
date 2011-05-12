@@ -22,17 +22,35 @@ package org.eobjects.analyzer.reference;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.filemonitor.FileMonitor;
 import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
+/**
+ * Synonym catalog based on a text file.
+ * 
+ * Each line in the file should contain a master term with trailing
+ * comma-separated synonyms.
+ * 
+ * Example:
+ * 
+ * <pre>
+ * DK,Denmark,Danmark,Dänemark
+ * NL,Holland,The Netherlands
+ * FR,France
+ * </pre>
+ * 
+ * @author Kasper Sørensen
+ */
 public final class TextFileSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
 
 	private static final long serialVersionUID = 1L;
@@ -57,6 +75,24 @@ public final class TextFileSynonymCatalog extends AbstractReferenceData implemen
 		_filename = file.getPath();
 		_caseSensitive = caseSensitive;
 		_encoding = encoding;
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_filename);
+		identifiers.add(_caseSensitive);
+		identifiers.add(_encoding);
+	}
+
+	@Override
+	public String toString() {
+		return "TextFileSynonymCatalog[name=" + getName() + ", filename=" + _filename + ", caseSensitive=" + _caseSensitive
+				+ ", encoding=" + _encoding + "]";
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, TextFileSynonymCatalog.class).readObject(stream);
 	}
 
 	public String getEncoding() {

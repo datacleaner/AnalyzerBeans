@@ -21,14 +21,25 @@ package org.eobjects.analyzer.reference;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.filemonitor.FileMonitor;
 import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
+/**
+ * Dictionary based on a simple text file containing the values of the
+ * dictionary. Each line of the file will be treated as a value within the
+ * dictionary.
+ * 
+ * @author Kasper Sørensen
+ */
 public final class TextFileDictionary extends AbstractReferenceData implements Dictionary {
 
 	private static final long serialVersionUID = 1L;
@@ -44,6 +55,22 @@ public final class TextFileDictionary extends AbstractReferenceData implements D
 		super(name);
 		_filename = filename;
 		_encoding = encoding;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, TextFileDictionary.class).readObject(stream);
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_filename);
+		identifiers.add(_encoding);
+	}
+
+	@Override
+	public String toString() {
+		return "TextFileDictionary[name=" + getName() + ", filename=" + _filename + ", encoding=" + _encoding + "]";
 	}
 
 	private File getFile() {

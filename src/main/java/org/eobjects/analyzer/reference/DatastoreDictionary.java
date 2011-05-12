@@ -19,6 +19,9 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -27,11 +30,11 @@ import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eobjects.metamodel.schema.Column;
 
 /**
  * A dictionary backed by a column in a datastore.
@@ -58,6 +61,17 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 		super(name);
 		_datastoreName = datastoreName;
 		_qualifiedColumnName = qualifiedColumnName;
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, DatastoreDictionary.class).readObject(stream);
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_datastoreName);
+		identifiers.add(_qualifiedColumnName);
 	}
 
 	private BlockingQueue<DataContextProvider> getDataContextProviders() {

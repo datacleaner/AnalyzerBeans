@@ -19,7 +19,12 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Collection;
+import java.util.List;
+
+import org.eobjects.analyzer.util.ReadObjectBuilder;
 
 /**
  * The simplest possible Dictionary implementation. Based on an in-memory set of
@@ -31,7 +36,7 @@ public final class SimpleDictionary extends AbstractReferenceData implements Dic
 
 	private static final long serialVersionUID = 1L;
 
-	private final ReferenceValues<String> _values;
+	private final SimpleReferenceValues<String> _values;
 
 	public SimpleDictionary(String name, String... values) {
 		super(name);
@@ -41,6 +46,16 @@ public final class SimpleDictionary extends AbstractReferenceData implements Dic
 	public SimpleDictionary(String name, Collection<String> values) {
 		super(name);
 		_values = new SimpleReferenceValues<String>(values.toArray(new String[values.size()]));
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		ReadObjectBuilder.create(this, SimpleDictionary.class).readObject(stream);
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_values);
 	}
 
 	@Override
