@@ -21,6 +21,8 @@ package org.eobjects.analyzer.connection;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang.SerializationUtils;
+
 import junit.framework.TestCase;
 
 public class XmlDatastoreTest extends TestCase {
@@ -38,5 +40,14 @@ public class XmlDatastoreTest extends TestCase {
 		assertEquals("[greeting]", Arrays.toString(tableNames));
 
 		dcp.close();
+	}
+
+	public void testGetPerformanceCharacteristics() throws Exception {
+		assertEquals(false, ds.getPerformanceCharacteristics().isQueryOptimizationPreferred());
+	}
+
+	public void testCloneAndEquals() throws Exception {
+		Object clone = SerializationUtils.clone(ds);
+		assertEquals(ds, clone);
 	}
 }
