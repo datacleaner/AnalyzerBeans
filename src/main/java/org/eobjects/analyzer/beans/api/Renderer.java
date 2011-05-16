@@ -43,9 +43,9 @@ public interface Renderer<I extends Renderable, O> {
 	/**
 	 * Renders an analyzer result.
 	 * 
-	 * @param result
-	 *            the result to render.
+	 * @param renderable
+	 *            the {@link Renderable} to render.
 	 * @return the outcoming, rendered result.
 	 */
-	public O render(I result);
+	public O render(I renderable);
 }
