@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.result.renderer.Renderable;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,21 +44,26 @@ import org.slf4j.LoggerFactory;
  *            RowProcessingAnalyzerJobBuilder)
  */
 @SuppressWarnings("unchecked")
-public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
+public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implements Renderable {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final D _descriptor;
 	private final E _configurableBean;
 	private volatile String _name;
+	private final AnalysisJobBuilder _analysisJobBuilder;
 
-	public AbstractBeanJobBuilder(D descriptor, Class<?> builderClass) {
+	public AbstractBeanJobBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor, Class<?> builderClass) {
+		if (analysisJobBuilder == null) {
+			throw new IllegalArgumentException("analysisJobBuilder cannot be null");
+		}
 		if (descriptor == null) {
 			throw new IllegalArgumentException("descriptor cannot be null");
 		}
 		if (builderClass == null) {
 			throw new IllegalArgumentException("builderClass cannot be null");
 		}
+		_analysisJobBuilder = analysisJobBuilder;
 		_descriptor = descriptor;
 		if (!ReflectionUtils.is(getClass(), builderClass)) {
 			throw new IllegalArgumentException("Builder class does not correspond to actual class of builder");
@@ -69,11 +75,15 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> {
 		}
 	}
 
-	public D getDescriptor() {
+	public final AnalysisJobBuilder getAnalysisJobBuilder() {
+		return _analysisJobBuilder;
+	}
+	
+	public final D getDescriptor() {
 		return _descriptor;
 	}
 
-	public E getConfigurableBean() {
+	public final E getConfigurableBean() {
 		return _configurableBean;
 	}
 

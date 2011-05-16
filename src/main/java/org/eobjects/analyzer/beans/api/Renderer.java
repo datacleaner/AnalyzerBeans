@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.beans.api;
 
-import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.renderer.Renderable;
 
 /**
  * Interface for renderers of analyzer results. Renderers are used to transform
@@ -29,7 +29,8 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * @author Kasper Sørensen
  * 
  * @param <I>
- *            the input of the renderer, ie. the result type to render
+ *            the input of the renderer, ie. the result type (or
+ *            {@link Renderable} in general) to render
  * @param <O>
  *            the output type of the renderer. This should be the same as or a
  *            subclass of the output class of the matching RenderingFormat.
@@ -37,7 +38,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * @see RendererBean
  * @see RenderingFormat
  */
-public interface Renderer<I extends AnalyzerResult, O> {
+public interface Renderer<I extends Renderable, O> {
 
 	/**
 	 * Renders an analyzer result.

@@ -42,8 +42,8 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 
 	private Outcome _requirement;
 
-	public AbstractBeanWithInputColumnsBuilder(D descriptor, Class<?> builderClass) {
-		super(descriptor, builderClass);
+	public AbstractBeanWithInputColumnsBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor, Class<?> builderClass) {
+		super(analysisJobBuilder, descriptor, builderClass);
 	}
 
 	/**

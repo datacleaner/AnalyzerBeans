@@ -32,11 +32,8 @@ public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> e
 		AbstractBeanJobBuilder<AnalyzerBeanDescriptor<A>, A, ExploringAnalyzerJobBuilder<A>> implements
 		AnalyzerJobBuilder<A> {
 
-	private final AnalysisJobBuilder _analysisJobBuilder;
-
 	public ExploringAnalyzerJobBuilder(AnalysisJobBuilder analysisJobBuilder, AnalyzerBeanDescriptor<A> descriptor) {
-		super(descriptor, ExploringAnalyzerJobBuilder.class);
-		_analysisJobBuilder = analysisJobBuilder;
+		super(analysisJobBuilder, descriptor, ExploringAnalyzerJobBuilder.class);
 	}
 
 	@Override
@@ -62,8 +59,8 @@ public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> e
 	@Override
 	public void onConfigurationChanged() {
 		super.onConfigurationChanged();
-		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(
-				_analysisJobBuilder.getAnalyzerChangeListeners());
+		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(getAnalysisJobBuilder()
+				.getAnalyzerChangeListeners());
 		for (AnalyzerChangeListener listener : listeners) {
 			listener.onConfigurationChanged(this);
 		}

@@ -21,9 +21,11 @@ package org.eobjects.analyzer.result;
 
 import java.io.Serializable;
 
+import org.eobjects.analyzer.result.renderer.Renderable;
+
 /**
  * An AnalysisResult represents the result of an analysis execution.
  */
-public interface AnalyzerResult extends Serializable {
+public interface AnalyzerResult extends Renderable, Serializable {
 
 }

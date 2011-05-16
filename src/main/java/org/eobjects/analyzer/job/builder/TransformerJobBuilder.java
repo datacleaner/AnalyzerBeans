@@ -56,7 +56,6 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> implements
 		InputColumnSourceJob, InputColumnSinkJob, OutcomeSinkJob {
 
-	private final AnalysisJobBuilder _analysisJobBuilder;
 	private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
 	private final List<String> _automaticOutputColumnNames = new ArrayList<String>();
 	private final IdGenerator _idGenerator;
@@ -64,8 +63,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 
 	public TransformerJobBuilder(AnalysisJobBuilder analysisJobBuilder, TransformerBeanDescriptor<T> descriptor,
 			IdGenerator idGenerator, List<TransformerChangeListener> transformerChangeListeners) {
-		super(descriptor, TransformerJobBuilder.class);
-		_analysisJobBuilder = analysisJobBuilder;
+		super(analysisJobBuilder, descriptor, TransformerJobBuilder.class);
 		_idGenerator = idGenerator;
 		_transformerChangeListeners = transformerChangeListeners;
 	}
@@ -88,7 +86,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 				new InMemoryRowAnnotationFactory(), null);
 		assignProvidedCallback.onEvent(LifeCycleState.ASSIGN_PROVIDED, bean, getDescriptor());
 
-		final AnalyzerBeansConfiguration configuration = _analysisJobBuilder.getConfiguration();
+		final AnalyzerBeansConfiguration configuration = getAnalysisJobBuilder().getConfiguration();
 
 		final InitializeCallback initializeCallback = new InitializeCallback(configuration.getDatastoreCatalog(),
 				configuration.getReferenceDataCatalog());
@@ -195,7 +193,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		}
 
 		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(
-				_analysisJobBuilder.getTransformerChangeListeners());
+				getAnalysisJobBuilder().getTransformerChangeListeners());
 		for (TransformerChangeListener listener : listeners) {
 			listener.onConfigurationChanged(this);
 		}
@@ -205,7 +203,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 	public void onRequirementChanged() {
 		super.onRequirementChanged();
 		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(
-				_analysisJobBuilder.getTransformerChangeListeners());
+				getAnalysisJobBuilder().getTransformerChangeListeners());
 		for (TransformerChangeListener listener : listeners) {
 			listener.onRequirementChanged(this);
 		}

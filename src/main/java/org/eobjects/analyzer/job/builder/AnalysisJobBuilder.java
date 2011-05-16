@@ -125,7 +125,7 @@ public final class AnalysisJobBuilder implements Closeable {
 		return _dataContextProvider;
 	}
 	
-	protected AnalyzerBeansConfiguration getConfiguration() {
+	public AnalyzerBeansConfiguration getConfiguration() {
 		return _configuration;
 	}
 

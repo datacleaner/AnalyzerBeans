@@ -43,8 +43,6 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 		AbstractBeanWithInputColumnsBuilder<AnalyzerBeanDescriptor<A>, A, RowProcessingAnalyzerJobBuilder<A>> implements
 		AnalyzerJobBuilder<A> {
 
-	private final AnalysisJobBuilder _analysisJobBuilder;
-
 	/**
 	 * Field that determines if this analyzer is applicable for building
 	 * multiple jobs where the input columns have been partitioned based on
@@ -55,8 +53,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	private final ConfiguredPropertyDescriptor _inputProperty;
 
 	public RowProcessingAnalyzerJobBuilder(AnalysisJobBuilder analysisJobBuilder, AnalyzerBeanDescriptor<A> descriptor) {
-		super(descriptor, RowProcessingAnalyzerJobBuilder.class);
-		_analysisJobBuilder = analysisJobBuilder;
+		super(analysisJobBuilder, descriptor, RowProcessingAnalyzerJobBuilder.class);
 
 		Set<ConfiguredPropertyDescriptor> inputProperties = descriptor.getConfiguredPropertiesForInput();
 		if (inputProperties.size() == 1) {
@@ -102,7 +99,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 		List<InputColumn<?>> tableLessColumns = new ArrayList<InputColumn<?>>();
 		Map<Table, List<InputColumn<?>>> originatingTables = new LinkedHashMap<Table, List<InputColumn<?>>>();
 		for (InputColumn<?> inputColumn : _inputColumns) {
-			Table table = _analysisJobBuilder.getOriginatingTable(inputColumn);
+			Table table = getAnalysisJobBuilder().getOriginatingTable(inputColumn);
 			if (table == null) {
 				// some columns (such as those based on an expression) don't
 				// originate from a table. They should be applied to all jobs.
@@ -237,8 +234,8 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	@Override
 	public void onConfigurationChanged() {
 		super.onConfigurationChanged();
-		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(
-				_analysisJobBuilder.getAnalyzerChangeListeners());
+		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(getAnalysisJobBuilder()
+				.getAnalyzerChangeListeners());
 		for (AnalyzerChangeListener listener : listeners) {
 			listener.onConfigurationChanged(this);
 		}
@@ -247,8 +244,8 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	@Override
 	public void onRequirementChanged() {
 		super.onRequirementChanged();
-		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(
-				_analysisJobBuilder.getAnalyzerChangeListeners());
+		List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(getAnalysisJobBuilder()
+				.getAnalyzerChangeListeners());
 		for (AnalyzerChangeListener listener : listeners) {
 			listener.onRequirementChanged(this);
 		}

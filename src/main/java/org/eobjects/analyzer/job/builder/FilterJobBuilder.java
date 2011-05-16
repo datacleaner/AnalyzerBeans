@@ -37,16 +37,13 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 		AbstractBeanWithInputColumnsBuilder<FilterBeanDescriptor<F, C>, F, FilterJobBuilder<F, C>> implements
 		OutcomeSourceJob {
 
-	private final AnalysisJobBuilder _analysisJobBuilder;
-
 	// We keep a cached version of the resulting filter job because of
 	// references coming from other objects, particular LazyFilterOutcome.
 	private FilterJob _cachedJob;
 	private EnumMap<C, FilterOutcome> _outcomes;
 
 	public FilterJobBuilder(AnalysisJobBuilder analysisJobBuilder, FilterBeanDescriptor<F, C> descriptor) {
-		super(descriptor, FilterJobBuilder.class);
-		_analysisJobBuilder = analysisJobBuilder;
+		super(analysisJobBuilder, descriptor, FilterJobBuilder.class);
 		_outcomes = new EnumMap<C, FilterOutcome>(descriptor.getCategoryEnum());
 		EnumSet<C> categories = descriptor.getCategories();
 		for (C category : categories) {
@@ -81,7 +78,7 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 	public void onConfigurationChanged() {
 		super.onConfigurationChanged();
 		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(
-				_analysisJobBuilder.getFilterChangeListeners());
+				getAnalysisJobBuilder().getFilterChangeListeners());
 		for (FilterChangeListener listener : listeners) {
 			listener.onConfigurationChanged(this);
 		}
@@ -91,7 +88,7 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 	public void onRequirementChanged() {
 		super.onRequirementChanged();
 		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(
-				_analysisJobBuilder.getFilterChangeListeners());
+				getAnalysisJobBuilder().getFilterChangeListeners());
 		for (FilterChangeListener listener : listeners) {
 			listener.onRequirementChanged(this);
 		}
