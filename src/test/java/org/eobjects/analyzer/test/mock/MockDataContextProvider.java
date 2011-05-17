@@ -17,31 +17,33 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.test;
+package org.eobjects.analyzer.test.mock;
 
-import org.easymock.IArgumentMatcher;
+import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.util.SchemaNavigator;
 
-import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.DataContext;
 
-public class QueryMatcher implements IArgumentMatcher {
+public final class MockDataContextProvider implements DataContextProvider {
 
-	private String queryToString;
-
-	public QueryMatcher(String queryToString) {
-		if (queryToString == null) {
-			throw new NullPointerException();
-		}
-		this.queryToString = queryToString;
+	@Override
+	public DataContext getDataContext() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean matches(Object argument) {
-		Query q = (Query) argument;
-		return queryToString.equals(q.toString());
+	public SchemaNavigator getSchemaNavigator() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void appendTo(StringBuffer buffer) {
-		buffer.append("QueryMatcher(" + queryToString + ")");
+	public Datastore getDatastore() {
+		return new MockDatastore();
 	}
+
+	@Override
+	public void close() {
+	}
+
 }

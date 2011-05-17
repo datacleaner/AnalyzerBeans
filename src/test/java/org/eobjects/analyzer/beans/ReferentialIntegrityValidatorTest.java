@@ -30,7 +30,7 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
-import org.eobjects.analyzer.test.QueryMatcher;
+import org.eobjects.analyzer.test.mock.QueryMatcher;
 
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;

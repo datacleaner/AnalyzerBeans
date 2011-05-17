@@ -20,8 +20,8 @@
 package org.eobjects.analyzer.configuration;
 
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.test.MockDatastore;
 import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.analyzer.test.mock.MockDatastore;
 
 import org.eobjects.metamodel.schema.MutableColumn;
 import junit.framework.TestCase;

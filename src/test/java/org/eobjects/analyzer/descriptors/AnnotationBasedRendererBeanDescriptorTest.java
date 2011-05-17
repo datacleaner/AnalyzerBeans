@@ -19,17 +19,17 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import org.eobjects.analyzer.beans.api.Renderer;
-import org.eobjects.analyzer.beans.api.RendererBean;
-import org.eobjects.analyzer.beans.api.RendererPrecedence;
-import org.eobjects.analyzer.beans.api.RenderingFormat;
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.renderer.DefaultTextRenderer;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
+import org.eobjects.analyzer.result.renderer.DefaultTextRenderer;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
-
-import junit.framework.TestCase;
+import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer1;
+import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer2;
+import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer3;
+import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer4;
 
 public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 
@@ -70,7 +70,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(
-					"class org.eobjects.analyzer.descriptors.AnnotationBasedRendererBeanDescriptorTest$InvalidRenderer2 doesn't implement the RendererBean annotation",
+					"class org.eobjects.analyzer.test.mock.MockRenderers$InvalidRenderer2 doesn't implement the RendererBean annotation",
 					e.getMessage());
 		}
 
@@ -79,7 +79,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(
-					"Renderer (interface org.eobjects.analyzer.descriptors.AnnotationBasedRendererBeanDescriptorTest$InvalidRenderer3) is not a non-abstract class",
+					"Renderer (interface org.eobjects.analyzer.test.mock.MockRenderers$InvalidRenderer3) is not a non-abstract class",
 					e.getMessage());
 		}
 
@@ -88,60 +88,8 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(
-					"Rendering format (class org.eobjects.analyzer.descriptors.AnnotationBasedRendererBeanDescriptorTest$InvalidRenderingFormat) is not a non-abstract class",
+					"Rendering format (class org.eobjects.analyzer.test.mock.MockRenderers$InvalidRenderingFormat) is not a non-abstract class",
 					e.getMessage());
-		}
-	}
-
-	@RendererBean(TextRenderingFormat.class)
-	public static class InvalidRenderer1 implements Renderer<AnalyzerResult, Object> {
-
-		@Override
-		public RendererPrecedence getPrecedence(AnalyzerResult renderable) {
-			return RendererPrecedence.MEDIUM;
-		}
-
-		@Override
-		public Object render(AnalyzerResult result) {
-			return null;
-		}
-	}
-
-	public static class InvalidRenderer2 implements Renderer<AnalyzerResult, String> {
-		@Override
-		public RendererPrecedence getPrecedence(AnalyzerResult renderable) {
-			return RendererPrecedence.MEDIUM;
-		}
-
-		@Override
-		public String render(AnalyzerResult result) {
-			return null;
-		}
-	}
-
-	@RendererBean(TextRenderingFormat.class)
-	public static interface InvalidRenderer3 extends Renderer<AnalyzerResult, Integer> {
-	}
-
-	@RendererBean(InvalidRenderingFormat.class)
-	public static class InvalidRenderer4 implements Renderer<AnalyzerResult, Integer> {
-
-		@Override
-		public RendererPrecedence getPrecedence(AnalyzerResult renderable) {
-			return RendererPrecedence.MEDIUM;
-		}
-
-		@Override
-		public Integer render(AnalyzerResult result) {
-			return null;
-		}
-	}
-
-	public static abstract class InvalidRenderingFormat implements RenderingFormat<Number> {
-
-		@Override
-		public Class<Number> getOutputClass() {
-			return Number.class;
 		}
 	}
 }

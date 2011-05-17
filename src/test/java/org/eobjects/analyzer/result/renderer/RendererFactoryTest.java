@@ -21,20 +21,24 @@ package org.eobjects.analyzer.result.renderer;
 
 import java.util.LinkedList;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.NumberResult;
 import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.test.TestHelper;
-
+import org.eobjects.analyzer.test.mock.MockRenderers.BarPrecedenceRenderer;
+import org.eobjects.analyzer.test.mock.MockRenderers.ConditionalPrecedenceRenderer;
+import org.eobjects.analyzer.test.mock.MockRenderers.FooPrecedenceRenderer;
+import org.eobjects.analyzer.test.mock.MockRenderers.RenderableString;
 import org.eobjects.metamodel.data.Row;
-
-import junit.framework.TestCase;
 
 public class RendererFactoryTest extends TestCase {
 
-	public void testGetRenderer() throws Exception {
+	public void testGetRendererByHierarchyDistance() throws Exception {
 		RendererFactory rendererFactory = new RendererFactory(TestHelper.createAnalyzerBeansConfiguration()
 				.getDescriptorProvider());
 		Renderer<?, ? extends CharSequence> r;
@@ -50,5 +54,31 @@ public class RendererFactoryTest extends TestCase {
 
 		r = rendererFactory.getRenderer(new DataSetResult(new LinkedList<Row>()), TextRenderingFormat.class);
 		assertEquals(DefaultTextRenderer.class, r.getClass());
+	}
+
+	public void testGetRendererByPrecedence() throws Exception {
+		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
+		descriptorProvider.addRendererClass(FooPrecedenceRenderer.class);
+		descriptorProvider.addRendererClass(BarPrecedenceRenderer.class);
+
+		RendererFactory factory = new RendererFactory(descriptorProvider);
+		assertEquals(FooPrecedenceRenderer.class,
+				factory.getRenderer(new RenderableString("foobar"), TextRenderingFormat.class).getClass());
+		assertEquals(FooPrecedenceRenderer.class, factory
+				.getRenderer(new RenderableString("foo"), TextRenderingFormat.class).getClass());
+		assertEquals(BarPrecedenceRenderer.class, factory
+				.getRenderer(new RenderableString("bar"), TextRenderingFormat.class).getClass());
+
+		descriptorProvider.addRendererClass(ConditionalPrecedenceRenderer.class);
+
+		assertEquals(FooPrecedenceRenderer.class, factory
+				.getRenderer(new RenderableString("foo"), TextRenderingFormat.class).getClass());
+		assertEquals(BarPrecedenceRenderer.class, factory
+				.getRenderer(new RenderableString("bar"), TextRenderingFormat.class).getClass());
+
+		assertEquals(FooPrecedenceRenderer.class,
+				factory.getRenderer(new RenderableString("MEDIUM"), TextRenderingFormat.class).getClass());
+		assertEquals(ConditionalPrecedenceRenderer.class,
+				factory.getRenderer(new RenderableString("HIGHEST"), TextRenderingFormat.class).getClass());
 	}
 }
