@@ -162,7 +162,7 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 	}
 
 	@Override
-	public Class<? extends AnalyzerResult> getAnalyzerResultType() {
+	public Class<? extends AnalyzerResult> getRenderableType() {
 		return _rendererInputType;
 	}
 }

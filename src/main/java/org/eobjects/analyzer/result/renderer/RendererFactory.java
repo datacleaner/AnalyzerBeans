@@ -25,7 +25,6 @@ import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
-import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 public class RendererFactory {
@@ -36,28 +35,28 @@ public class RendererFactory {
 		this.descriptorProvider = descriptorProvider;
 	}
 
-	public <I extends AnalyzerResult, O> Renderer<? super I, ? extends O> getRenderer(I analyzerResult,
+	public <I extends Renderable, O> Renderer<? super I, ? extends O> getRenderer(I renderable,
 			Class<? extends RenderingFormat<O>> renderingFormat) {
 
-		Class<? extends AnalyzerResult> analyzerResultType = analyzerResult.getClass();
+		Class<? extends Renderable> renderableType = renderable.getClass();
 		RendererBeanDescriptor bestMatchingDescriptor = null;
 
 		Collection<RendererBeanDescriptor> descriptors = descriptorProvider
 				.getRendererBeanDescriptorsForRenderingFormat(renderingFormat);
 		for (RendererBeanDescriptor descriptor : descriptors) {
-			Class<? extends AnalyzerResult> analyzerResultType1 = descriptor.getAnalyzerResultType();
-			if (ReflectionUtils.is(analyzerResultType, analyzerResultType1)) {
+			Class<? extends Renderable> renderableType1 = descriptor.getRenderableType();
+			if (ReflectionUtils.is(renderableType, renderableType1)) {
 				if (bestMatchingDescriptor == null) {
 					bestMatchingDescriptor = descriptor;
 				} else {
-					int dist1 = ReflectionUtils.getHierarchyDistance(analyzerResultType, analyzerResultType1);
+					int dist1 = ReflectionUtils.getHierarchyDistance(renderableType, renderableType1);
 					if (dist1 == 0) {
 						bestMatchingDescriptor = descriptor;
 						break;
 					}
-					
-					Class<? extends AnalyzerResult> analyzerResultType2 = bestMatchingDescriptor.getAnalyzerResultType();
-					int dist2 = ReflectionUtils.getHierarchyDistance(analyzerResultType, analyzerResultType2);
+
+					Class<? extends Renderable> renderableType2 = bestMatchingDescriptor.getRenderableType();
+					int dist2 = ReflectionUtils.getHierarchyDistance(renderableType, renderableType2);
 					if (dist1 < dist2) {
 						bestMatchingDescriptor = descriptor;
 					}
@@ -73,7 +72,7 @@ public class RendererFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <I extends AnalyzerResult, O> Renderer<I, O> instantiate(RendererBeanDescriptor descriptor) {
+	private <I extends Renderable, O> Renderer<I, O> instantiate(RendererBeanDescriptor descriptor) {
 		try {
 			Renderer<?, ?> renderer = descriptor.getComponentClass().newInstance();
 			return (Renderer<I, O>) renderer;

@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
-import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.renderer.Renderable;
 
 public interface RendererBeanDescriptor extends Comparable<RendererBeanDescriptor> {
 
@@ -36,5 +36,5 @@ public interface RendererBeanDescriptor extends Comparable<RendererBeanDescripto
 
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
-	public Class<? extends AnalyzerResult> getAnalyzerResultType();
+	public Class<? extends Renderable> getRenderableType();
 }

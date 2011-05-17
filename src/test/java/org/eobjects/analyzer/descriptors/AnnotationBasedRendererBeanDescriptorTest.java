@@ -41,12 +41,12 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 
 	public void testGetAnalyzerResultType() throws Exception {
 		Class<? extends AnalyzerResult> analyzerResultType = descriptor
-				.getAnalyzerResultType();
+				.getRenderableType();
 		assertEquals(AnalyzerResult.class, analyzerResultType);
 
 		AnnotationBasedRendererBeanDescriptor desc2 = new AnnotationBasedRendererBeanDescriptor(
 				CrosstabTextRenderer.class);
-		assertEquals(CrosstabResult.class, desc2.getAnalyzerResultType());
+		assertEquals(CrosstabResult.class, desc2.getRenderableType());
 	}
 
 	public void testIsOutputApplicableFor() throws Exception {
