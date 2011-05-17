@@ -41,6 +41,16 @@ import org.eobjects.analyzer.result.renderer.Renderable;
 public interface Renderer<I extends Renderable, O> {
 
 	/**
+	 * Checks whether this renderer is capable of rendering a particular
+	 * renderable. This method allows renderers to respond to specific state
+	 * available in the renderables.
+	 * 
+	 * @param renderable
+	 * @return
+	 */
+	public RendererPrecedence getPrecedence(I renderable);
+
+	/**
 	 * Renders an analyzer result.
 	 * 
 	 * @param renderable

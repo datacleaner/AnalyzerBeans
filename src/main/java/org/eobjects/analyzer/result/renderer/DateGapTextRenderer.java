@@ -24,14 +24,13 @@ import java.util.Date;
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.DateGapAnalyzerResult;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.TimeInterval;
 
 @RendererBean(TextRenderingFormat.class)
-public class DateGapTextRenderer implements Renderer<DateGapAnalyzerResult, String> {
+public class DateGapTextRenderer extends AbstractRenderer<DateGapAnalyzerResult, String> {
 
 	private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 

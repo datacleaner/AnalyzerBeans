@@ -21,6 +21,7 @@ package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
+import org.eobjects.analyzer.beans.api.RendererPrecedence;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
@@ -40,12 +41,10 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 	}
 
 	public void testGetAnalyzerResultType() throws Exception {
-		Class<? extends AnalyzerResult> analyzerResultType = descriptor
-				.getRenderableType();
+		Class<? extends AnalyzerResult> analyzerResultType = descriptor.getRenderableType();
 		assertEquals(AnalyzerResult.class, analyzerResultType);
 
-		AnnotationBasedRendererBeanDescriptor desc2 = new AnnotationBasedRendererBeanDescriptor(
-				CrosstabTextRenderer.class);
+		AnnotationBasedRendererBeanDescriptor desc2 = new AnnotationBasedRendererBeanDescriptor(CrosstabTextRenderer.class);
 		assertEquals(CrosstabResult.class, desc2.getRenderableType());
 	}
 
@@ -62,10 +61,8 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 			new AnnotationBasedRendererBeanDescriptor(InvalidRenderer1.class);
 			fail("Exception expected");
 		} catch (DescriptorException e) {
-			assertEquals(
-					"The renderer output type (class java.lang.Object) is not a valid instance or sub-class "
-							+ "of format output type (interface java.lang.CharSequence)",
-					e.getMessage());
+			assertEquals("The renderer output type (class java.lang.Object) is not a valid instance or sub-class "
+					+ "of format output type (interface java.lang.CharSequence)", e.getMessage());
 		}
 
 		try {
@@ -97,8 +94,12 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 	}
 
 	@RendererBean(TextRenderingFormat.class)
-	public static class InvalidRenderer1 implements
-			Renderer<AnalyzerResult, Object> {
+	public static class InvalidRenderer1 implements Renderer<AnalyzerResult, Object> {
+
+		@Override
+		public RendererPrecedence getPrecedence(AnalyzerResult renderable) {
+			return RendererPrecedence.MEDIUM;
+		}
 
 		@Override
 		public Object render(AnalyzerResult result) {
@@ -106,8 +107,11 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 		}
 	}
 
-	public static class InvalidRenderer2 implements
-			Renderer<AnalyzerResult, String> {
+	public static class InvalidRenderer2 implements Renderer<AnalyzerResult, String> {
+		@Override
+		public RendererPrecedence getPrecedence(AnalyzerResult renderable) {
+			return RendererPrecedence.MEDIUM;
+		}
 
 		@Override
 		public String render(AnalyzerResult result) {
@@ -116,13 +120,16 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 	}
 
 	@RendererBean(TextRenderingFormat.class)
-	public static interface InvalidRenderer3 extends
-			Renderer<AnalyzerResult, Integer> {
+	public static interface InvalidRenderer3 extends Renderer<AnalyzerResult, Integer> {
 	}
 
 	@RendererBean(InvalidRenderingFormat.class)
-	public static class InvalidRenderer4 implements
-			Renderer<AnalyzerResult, Integer> {
+	public static class InvalidRenderer4 implements Renderer<AnalyzerResult, Integer> {
+
+		@Override
+		public RendererPrecedence getPrecedence(AnalyzerResult renderable) {
+			return RendererPrecedence.MEDIUM;
+		}
 
 		@Override
 		public Integer render(AnalyzerResult result) {
@@ -130,8 +137,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 		}
 	}
 
-	public static abstract class InvalidRenderingFormat implements
-			RenderingFormat<Number> {
+	public static abstract class InvalidRenderingFormat implements RenderingFormat<Number> {
 
 		@Override
 		public Class<Number> getOutputClass() {

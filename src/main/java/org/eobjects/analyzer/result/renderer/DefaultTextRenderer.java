@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
-import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
@@ -31,7 +30,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * @author Kasper Sørensen
  */
 @RendererBean(TextRenderingFormat.class)
-public class DefaultTextRenderer implements Renderer<AnalyzerResult, String> {
+public class DefaultTextRenderer extends AbstractRenderer<AnalyzerResult, String> {
 
 	@Override
 	public String render(AnalyzerResult result) {

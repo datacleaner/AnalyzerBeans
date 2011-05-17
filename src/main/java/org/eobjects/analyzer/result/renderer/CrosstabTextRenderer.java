@@ -22,18 +22,16 @@ package org.eobjects.analyzer.result.renderer;
 import java.text.NumberFormat;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.util.ReflectionUtils;
-
 import org.eobjects.metamodel.util.FormatHelper;
 
 @RendererBean(TextRenderingFormat.class)
-public class CrosstabTextRenderer implements Renderer<CrosstabResult, String> {
+public class CrosstabTextRenderer extends AbstractRenderer<CrosstabResult, String> {
 
 	private static class TextCrosstabRendererCallback implements CrosstabRendererCallback<String> {
 

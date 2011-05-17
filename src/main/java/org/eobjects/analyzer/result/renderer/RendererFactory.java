@@ -22,62 +22,170 @@ package org.eobjects.analyzer.result.renderer;
 import java.util.Collection;
 
 import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.beans.api.RendererPrecedence;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class RendererFactory {
+/**
+ * A factory that can resolve the best suited {@link Renderer} for a particular
+ * {@link Renderable}. The resolving mechanism inspects the available renderers
+ * in the {@link DescriptorProvider}.
+ * 
+ * @author Kasper Sørensen
+ */
+public final class RendererFactory {
 
-	private DescriptorProvider descriptorProvider;
+	private static final Logger logger = LoggerFactory.getLogger(RendererFactory.class);
 
-	public RendererFactory(DescriptorProvider descriptorProvider) {
-		this.descriptorProvider = descriptorProvider;
+	/**
+	 * Represents a selection of a renderer. Will be used to store everything
+	 * related to a renderer while finding the most suited renderer.
+	 * 
+	 * @author Kasper Sørensen
+	 * 
+	 */
+	private static class RendererSelection {
+		private final Renderer<?, ?> renderer;
+		private final RendererPrecedence precedence;
+		private final int hierarchyDistance;
+
+		public RendererSelection(Renderer<?, ?> renderer, RendererPrecedence precedence, int hierarchyDistance) {
+			this.renderer = renderer;
+			this.precedence = precedence;
+			this.hierarchyDistance = hierarchyDistance;
+		}
+
+		public Renderer<?, ?> getRenderer() {
+			return renderer;
+		}
+
+		public RendererPrecedence getPrecedence() {
+			return precedence;
+		}
+
+		public int getHierarchyDistance() {
+			return hierarchyDistance;
+		}
 	}
 
+	private final DescriptorProvider _descriptorProvider;
+
+	public RendererFactory(DescriptorProvider descriptorProvider) {
+		_descriptorProvider = descriptorProvider;
+	}
+
+	/**
+	 * Gets the best suited {@link Renderer} for the given {@link Renderable} to
+	 * the given {@link RenderingFormat}.
+	 * 
+	 * @param <I>
+	 * @param <O>
+	 * @param renderable
+	 * @param renderingFormat
+	 * @return
+	 */
 	public <I extends Renderable, O> Renderer<? super I, ? extends O> getRenderer(I renderable,
 			Class<? extends RenderingFormat<O>> renderingFormat) {
 
-		Class<? extends Renderable> renderableType = renderable.getClass();
-		RendererBeanDescriptor bestMatchingDescriptor = null;
+		RendererSelection bestMatch = null;
 
-		Collection<RendererBeanDescriptor> descriptors = descriptorProvider
+		Collection<RendererBeanDescriptor> descriptors = _descriptorProvider
 				.getRendererBeanDescriptorsForRenderingFormat(renderingFormat);
 		for (RendererBeanDescriptor descriptor : descriptors) {
-			Class<? extends Renderable> renderableType1 = descriptor.getRenderableType();
-			if (ReflectionUtils.is(renderableType, renderableType1)) {
-				if (bestMatchingDescriptor == null) {
-					bestMatchingDescriptor = descriptor;
-				} else {
-					int dist1 = ReflectionUtils.getHierarchyDistance(renderableType, renderableType1);
-					if (dist1 == 0) {
-						bestMatchingDescriptor = descriptor;
-						break;
-					}
-
-					Class<? extends Renderable> renderableType2 = bestMatchingDescriptor.getRenderableType();
-					int dist2 = ReflectionUtils.getHierarchyDistance(renderableType, renderableType2);
-					if (dist1 < dist2) {
-						bestMatchingDescriptor = descriptor;
-					}
-				}
+			RendererSelection rendererMatch = isRendererMatch(descriptor, renderable, bestMatch);
+			if (rendererMatch != null) {
+				bestMatch = rendererMatch;
 			}
 		}
 
-		if (bestMatchingDescriptor == null) {
+		if (bestMatch == null) {
 			return null;
 		}
 
-		return instantiate(bestMatchingDescriptor);
+		@SuppressWarnings("unchecked")
+		Renderer<? super I, ? extends O> renderer = (Renderer<? super I, ? extends O>) bestMatch.getRenderer();
+		return renderer;
+	}
+
+	/**
+	 * Checks if a particular renderer (descriptor) is a good match for a
+	 * particular renderer.
+	 * 
+	 * @param rendererDescriptor
+	 *            the renderer (descriptor) to check.
+	 * @param renderable
+	 *            the renderable that needs rendering.
+	 * @param bestMatchingDescriptor
+	 *            the currently "best matching" renderer (descriptor), or null
+	 *            if no other renderers matches yet.
+	 * @return a {@link RendererSelection} object if the renderer is a match, or
+	 *         null if not.
+	 */
+	private static RendererSelection isRendererMatch(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
+			RendererSelection bestMatch) {
+		final Class<? extends Renderable> renderableType = rendererDescriptor.getRenderableType();
+		if (ReflectionUtils.is(renderable.getClass(), renderableType)) {
+			if (bestMatch == null) {
+				return isRendererCapable(rendererDescriptor, renderable, bestMatch);
+			} else {
+				int hierarchyDistance = ReflectionUtils.getHierarchyDistance(renderable.getClass(), renderableType);
+
+				if (hierarchyDistance == 0) {
+					// no hierarchy distance
+					return isRendererCapable(rendererDescriptor, renderable, bestMatch);
+				}
+
+				if (hierarchyDistance < bestMatch.getHierarchyDistance()) {
+					// lower hierarchy distance than best match
+					return isRendererCapable(rendererDescriptor, renderable, bestMatch);
+				}
+			}
+		}
+		return null;
+	}
+
+	private static RendererSelection isRendererCapable(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
+			RendererSelection bestMatch) {
+		final Renderer<Renderable, ?> renderer = instantiate(rendererDescriptor);
+		RendererPrecedence precedence;
+		try {
+			precedence = renderer.getPrecedence(renderable);
+			if (precedence == null) {
+				logger.debug("Renderer precedence was null for {}, using MEDIUM", renderer);
+				precedence = RendererPrecedence.MEDIUM;
+			}
+
+			if (bestMatch != null) {
+				final RendererPrecedence bestPrecedence = bestMatch.getPrecedence();
+				if (precedence.ordinal() < bestPrecedence.ordinal()) {
+					logger.info("precedence did not match or supersede best matching precedende.");
+					return null;
+				}
+			}
+
+		} catch (Exception e) {
+			logger.error("Could not get precedence of renderer, returning null", e);
+			return null;
+		}
+
+		final Class<? extends Renderable> renderableType = rendererDescriptor.getRenderableType();
+		final int hierarchyDistance = ReflectionUtils.getHierarchyDistance(renderable.getClass(), renderableType);
+
+		return new RendererSelection(renderer, precedence, hierarchyDistance);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <I extends Renderable, O> Renderer<I, O> instantiate(RendererBeanDescriptor descriptor) {
+	private static <I extends Renderable, O> Renderer<I, O> instantiate(RendererBeanDescriptor descriptor) {
+		final Class<? extends Renderer<?, ?>> componentClass = descriptor.getComponentClass();
 		try {
-			Renderer<?, ?> renderer = descriptor.getComponentClass().newInstance();
+			Renderer<?, ?> renderer = componentClass.newInstance();
 			return (Renderer<I, O>) renderer;
 		} catch (Exception e) {
-			throw new IllegalStateException(e);
+			throw new IllegalStateException("Could not instantiate renderer: " + componentClass.getName(), e);
 		}
 	}
 }
