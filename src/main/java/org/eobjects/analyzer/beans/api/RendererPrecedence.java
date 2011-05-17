@@ -32,5 +32,5 @@ package org.eobjects.analyzer.beans.api;
  */
 public enum RendererPrecedence {
 
-	LOWEST, LOW, MEDIUM, HIGH, HIGHEST;
+	NOT_CAPABLE, LOWEST, LOW, MEDIUM, HIGH, HIGHEST;
 }

@@ -108,6 +108,9 @@ public final class RendererFactory {
 
 		@SuppressWarnings("unchecked")
 		Renderer<? super I, ? extends O> renderer = (Renderer<? super I, ? extends O>) bestMatch.getRenderer();
+
+		logger.info("Returning renderer '{}' for renderable '{}' in format '{}'", new Object[] { renderer, renderable,
+				renderingFormat.getName() });
 		return renderer;
 	}
 
@@ -157,6 +160,11 @@ public final class RendererFactory {
 			if (precedence == null) {
 				logger.debug("Renderer precedence was null for {}, using MEDIUM", renderer);
 				precedence = RendererPrecedence.MEDIUM;
+			}
+
+			if (precedence == RendererPrecedence.NOT_CAPABLE) {
+				logger.debug("Renderer is not capable of rendering this renderable!");
+				return null;
 			}
 
 			if (bestMatch != null) {
