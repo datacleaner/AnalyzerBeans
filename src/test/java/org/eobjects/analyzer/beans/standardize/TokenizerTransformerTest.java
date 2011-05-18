@@ -35,13 +35,25 @@ public class TokenizerTransformerTest extends TestCase {
 		InputColumn<?> col = new MetaModelInputColumn(new MutableColumn("name"));
 
 		@SuppressWarnings("unchecked")
-		TokenizerTransformer transformer = new TokenizerTransformer((InputColumn<String>) col, 2);
+		InputColumn<String> castColumn = (InputColumn<String>) col;
+		TokenizerTransformer transformer = new TokenizerTransformer(castColumn, 2);
 
 		OutputColumns oc = transformer.getOutputColumns();
 
 		assertEquals(2, oc.getColumnCount());
 		assertEquals("name (token 1)", oc.getColumnName(0));
 		assertEquals("name (token 2)", oc.getColumnName(1));
+
+		transformer = new TokenizerTransformer(castColumn, 1);
+		assertEquals("OutputColumns[name (token 1)]", transformer.getOutputColumns().toString());
+
+		transformer = new TokenizerTransformer(castColumn, 0);
+		try {
+			transformer.getOutputColumns();
+			fail("Exception expected");
+		} catch (IllegalArgumentException e) {
+			assertEquals("columns must be 1 or higher", e.getMessage());
+		}
 	}
 
 	public void testTransform() throws Exception {
@@ -66,7 +78,7 @@ public class TokenizerTransformerTest extends TestCase {
 		assertEquals("Kasper", values[0]);
 		assertNull(values[1]);
 	}
-	
+
 	public void testTransformNull() throws Exception {
 		InputColumn<?> col = new MetaModelInputColumn(new MutableColumn("name"));
 
