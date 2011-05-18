@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.api;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Represents the output columns yielded by a Transformer given a certain
@@ -109,5 +110,10 @@ public final class OutputColumns implements Serializable {
 	 */
 	public int getColumnCount() {
 		return columnNames.length;
+	}
+
+	@Override
+	public String toString() {
+		return "OutputColumns" + Arrays.toString(columnNames);
 	}
 }
