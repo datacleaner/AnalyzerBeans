@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.util;
 
 import java.io.File;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.Datastore;
@@ -166,6 +168,10 @@ public final class StringConversionUtils {
 			result = new SimpleDateFormat(dateFormatString).format((Date) o);
 		} else if (o instanceof Pattern) {
 			result = o.toString();
+		} else if (o instanceof Serializable) {
+			logger.info("No built-in handling of type: {}, using serialization.", o.getClass().getName());
+			byte[] bytes = SerializationUtils.serialize((Serializable) o);
+			result = serialize(bytes);
 		} else {
 			logger.warn("Could not convert type: {}", o.getClass().getName());
 			result = o.toString();
@@ -326,6 +332,11 @@ public final class StringConversionUtils {
 		}
 		if (ReflectionUtils.isNumber(type)) {
 			return (E) ConvertToNumberTransformer.transformValue(str);
+		}
+		if (ReflectionUtils.is(type, Serializable.class)) {
+			logger.warn("No built-in handling of type: {}, using deserialization", type.getName());
+			byte[] bytes = deserialize(str, byte[].class, schemaNavigator, referenceDataCatalog, datastoreCatalog);
+			return (E) SerializationUtils.deserialize(bytes);
 		}
 
 		throw new IllegalArgumentException("Could not convert to type: " + type.getName());

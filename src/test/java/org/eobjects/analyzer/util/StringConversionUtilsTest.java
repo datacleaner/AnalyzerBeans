@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.util;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -36,7 +37,6 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
-
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableSchema;
 import org.eobjects.metamodel.schema.MutableTable;
@@ -66,11 +66,43 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests(new java.sql.Date(1234 - localeOffset), "1970-01-01T00:00:01 234");
 	}
 
+	public static class MySerializable implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final String myString;
+		private final int myInt;
+
+		public MySerializable(String myString, int myInt) {
+			this.myString = myString;
+			this.myInt = myInt;
+		}
+
+		public int getMyInt() {
+			return myInt;
+		}
+
+		public String getMyString() {
+			return myString;
+		}
+	}
+
+	public void testConvertSerializable() throws Exception {
+		String serialized = StringConversionUtils.serialize(new MySerializable("foobar", 1337));
+		assertEquals(
+				"&#91;-84&#44;-19&#44;0&#44;5&#44;115&#44;114&#44;0&#44;67&#44;111&#44;114&#44;103&#44;46&#44;101&#44;111&#44;98&#44;106&#44;101&#44;99&#44;116&#44;115&#44;46&#44;97&#44;110&#44;97&#44;108&#44;121&#44;122&#44;101&#44;114&#44;46&#44;117&#44;116&#44;105&#44;108&#44;46&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;67&#44;111&#44;110&#44;118&#44;101&#44;114&#44;115&#44;105&#44;111&#44;110&#44;85&#44;116&#44;105&#44;108&#44;115&#44;84&#44;101&#44;115&#44;116&#44;36&#44;77&#44;121&#44;83&#44;101&#44;114&#44;105&#44;97&#44;108&#44;105&#44;122&#44;97&#44;98&#44;108&#44;101&#44;0&#44;0&#44;0&#44;0&#44;0&#44;0&#44;0&#44;1&#44;2&#44;0&#44;2&#44;73&#44;0&#44;5&#44;109&#44;121&#44;73&#44;110&#44;116&#44;76&#44;0&#44;8&#44;109&#44;121&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;116&#44;0&#44;18&#44;76&#44;106&#44;97&#44;118&#44;97&#44;47&#44;108&#44;97&#44;110&#44;103&#44;47&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;59&#44;120&#44;112&#44;0&#44;0&#44;5&#44;57&#44;116&#44;0&#44;6&#44;102&#44;111&#44;111&#44;98&#44;97&#44;114&#93;",
+				serialized);
+
+		MySerializable deserialized = StringConversionUtils.deserialize(serialized, MySerializable.class, null, null, null);
+		assertEquals("foobar", deserialized.getMyString());
+		assertEquals(1337, deserialized.getMyInt());
+	}
+
 	public void testAbstractNumber() throws Exception {
 		Number n = StringConversionUtils.deserialize("1", Number.class, null, null, null);
 		assertTrue(n instanceof Long);
 		assertEquals(1, n.intValue());
-		
+
 		n = StringConversionUtils.deserialize("1.01", Number.class, null, null, null);
 		assertTrue(n instanceof Double);
 		assertEquals(1.01, n.doubleValue());
