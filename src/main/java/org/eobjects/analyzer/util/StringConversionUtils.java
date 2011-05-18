@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -41,12 +42,11 @@ import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for converting objects to and from string representations as
@@ -336,7 +336,15 @@ public final class StringConversionUtils {
 		if (ReflectionUtils.is(type, Serializable.class)) {
 			logger.warn("No built-in handling of type: {}, using deserialization", type.getName());
 			byte[] bytes = deserialize(str, byte[].class, schemaNavigator, referenceDataCatalog, datastoreCatalog);
-			return (E) SerializationUtils.deserialize(bytes);
+			try {
+				ChangeAwareObjectInputStream objectInputStream = new ChangeAwareObjectInputStream(new ByteArrayInputStream(
+						bytes));
+				objectInputStream.addClassLoader(type.getClassLoader());
+				Object obj = objectInputStream.readObject();
+				return (E) obj;
+			} catch (Exception e) {
+				throw new IllegalStateException("Could not deserialize to " + type + ".", e);
+			}
 		}
 
 		throw new IllegalArgumentException("Could not convert to type: " + type.getName());

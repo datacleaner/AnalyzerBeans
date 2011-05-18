@@ -25,8 +25,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -42,6 +44,11 @@ import org.slf4j.LoggerFactory;
  * {@link ObjectInputStream} implementation that is aware of changes such as
  * class or package renaming. This can be used to deserialize classes with
  * historic/legacy class names.
+ * 
+ * Furthermore the deserialization mechanism is aware of multiple
+ * {@link ClassLoader}s. This means that if the object being deserialized
+ * pertains to a different {@link ClassLoader}, then this classloader can be
+ * added using the {@link #addClassLoader(ClassLoader)} method.
  * 
  * @author Kasper Sørensen
  */
@@ -65,6 +72,7 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
 		}
 	};
 
+	private final List<ClassLoader> additionalClassLoaders;
 	private final Map<String, String> renamedPackages;
 	private final Map<String, String> renamedClasses;
 
@@ -72,10 +80,15 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
 		super(in);
 		renamedPackages = new TreeMap<String, String>(comparator);
 		renamedClasses = new HashMap<String, String>();
+		additionalClassLoaders = new ArrayList<ClassLoader>();
 
 		// add analyzerbeans' own renamed classes
 		addRenamedClass("org.eobjects.analyzer.reference.TextBasedDictionary", TextFileDictionary.class);
 		addRenamedClass("org.eobjects.analyzer.reference.TextBasedSynonymCatalog", TextFileSynonymCatalog.class);
+	}
+
+	public void addClassLoader(ClassLoader classLoader) {
+		additionalClassLoaders.add(classLoader);
 	}
 
 	public void addRenamedPackage(String originalPackageName, String newPackageName) {
@@ -118,7 +131,7 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
 
 	private ObjectStreamClass getClassDescriptor(final String className, final ObjectStreamClass originalClassDescriptor)
 			throws ClassNotFoundException {
-		final ObjectStreamClass newClassDescriptor = ObjectStreamClass.lookup(Class.forName(className));
+		final ObjectStreamClass newClassDescriptor = ObjectStreamClass.lookup(resolveClass(className));
 		final String[] newFieldNames = getFieldNames(newClassDescriptor);
 		final String[] originalFieldNames = getFieldNames(originalClassDescriptor);
 		if (!EqualsBuilder.equals(originalFieldNames, newFieldNames)) {
@@ -142,6 +155,29 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
 			}
 		}
 		return newClassDescriptor;
+	}
+	
+	@Override
+	protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+		return resolveClass(desc.getName());
+	}
+
+	private Class<?> resolveClass(String className) throws ClassNotFoundException {
+		logger.debug("Resolving class '{}'", className);
+		try {
+			return Class.forName(className);
+		} catch (ClassNotFoundException e) {
+			logger.info("Class '{}' was not resolved in main class loader.", className);
+			for (ClassLoader classLoader : additionalClassLoaders) {
+				try {
+					return classLoader.loadClass(className);
+				} catch (ClassNotFoundException minorException) {
+					logger.info("Class '{}' was not resolved in additional class loader '{}'", className, classLoader);
+				}
+			}
+			logger.warn("Could not resolve class of name '{}'", className);
+			throw e;
+		}
 	}
 
 	private String[] getFieldNames(ObjectStreamClass classDescriptor) {
