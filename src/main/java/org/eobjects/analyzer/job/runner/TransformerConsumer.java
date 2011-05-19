@@ -81,12 +81,20 @@ final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implement
 
 		assert outputColumns.length == outputValues.length;
 
-		TransformedInputRow result = new TransformedInputRow(row);
-		for (int i = 0; i < outputColumns.length; i++) {
-			result.addValue(outputColumns[i], outputValues[i]);
+		TransformedInputRow resultRow;
+		if (row instanceof TransformedInputRow) {
+			// re-use existing transformed input row.
+			resultRow = (TransformedInputRow) row;
+		} else {
+			resultRow = new TransformedInputRow(row);
 		}
 
-		return result;
+		// add output values to row.
+		for (int i = 0; i < outputColumns.length; i++) {
+			resultRow.addValue(outputColumns[i], outputValues[i]);
+		}
+
+		return resultRow;
 	}
 
 	@Override

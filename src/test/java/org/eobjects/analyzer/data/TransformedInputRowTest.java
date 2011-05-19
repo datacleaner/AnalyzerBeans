@@ -21,22 +21,58 @@ package org.eobjects.analyzer.data;
 
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 
+import org.eobjects.metamodel.data.DefaultRow;
+import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.MutableColumn;
 import junit.framework.TestCase;
 
 public class TransformedInputRowTest extends TestCase {
 
-	public void testGetValue() throws Exception {
+	public void testConstaints() throws Exception {
+		try {
+			new TransformedInputRow(null);
+			fail("Exception expected");
+		} catch (IllegalArgumentException e) {
+			assertEquals("Delegate cannot be null", e.getMessage());
+		}
+
 		Column col1 = new MutableColumn("foo");
-		Column col2 = new MutableColumn("bar");
 		InputColumn<?> inputColumn1 = new MetaModelInputColumn(col1);
+
+		TransformedInputRow row = new TransformedInputRow(new MockInputRow());
+
+		try {
+			row.addValue(inputColumn1, "bar");
+			fail("Exception expected");
+		} catch (IllegalArgumentException e) {
+			assertEquals("Cannot add physical column values to transformed InputRow.", e.getMessage());
+		}
+	}
+
+	public void testDelegateOnPhysicalColumn() throws Exception {
+		Column col1 = new MutableColumn("foo");
+		InputColumn<?> inputColumn1 = new MetaModelInputColumn(col1);
+
+		Column col2 = new MutableColumn("bar");
 		InputColumn<?> inputColumn2 = new MetaModelInputColumn(col2);
-		MutableInputColumn<String> inputColumn3 = new TransformedInputColumn<String>(
-				"bar", DataTypeFamily.STRING, new PrefixedIdGenerator("test"));
+
+		SelectItem[] selectItems = new SelectItem[] { new SelectItem(col1), new SelectItem(col2) };
+		Object[] values = new Object[] { 1234, 4567 };
+		TransformedInputRow row = new TransformedInputRow(new MetaModelInputRow(0, new DefaultRow(selectItems, values)));
+
+		assertEquals(1234, row.getValue(inputColumn1));
+		assertEquals(4567, row.getValue(inputColumn2));
+	}
+
+	public void testGetValue() throws Exception {
+		InputColumn<String> inputColumn1 = new MockInputColumn<String>("foo", String.class);
+		InputColumn<String> inputColumn2 = new MockInputColumn<String>("bar", String.class);
+		MutableInputColumn<String> inputColumn3 = new TransformedInputColumn<String>("bar", DataTypeFamily.STRING,
+				new PrefixedIdGenerator("test"));
 		assertEquals("test-1", inputColumn3.getId());
 
-		TransformedInputRow row1 = new TransformedInputRow(null);
+		TransformedInputRow row1 = new TransformedInputRow(new MockInputRow());
 		row1.addValue(inputColumn1, "f");
 		row1.addValue(inputColumn2, "b");
 		assertEquals("f", row1.getValue(inputColumn1));

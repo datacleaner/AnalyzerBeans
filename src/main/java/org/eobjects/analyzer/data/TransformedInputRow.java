@@ -24,18 +24,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Represents a row with transformed values as well as a delegate row (typically
+ * a {@link MetaModelInputRow} delegate).
+ * 
+ * @author Kasper Sørensen
+ */
 public final class TransformedInputRow extends AbstractInputRow {
 
+	private static final Logger logger = LoggerFactory.getLogger(TransformedInputRow.class);
 	private final InputRow _delegate;
 	private final Map<InputColumn<?>, Object> _values;
 
 	public TransformedInputRow(InputRow delegate) {
-		this(delegate, new HashMap<InputColumn<?>, Object>());
-	}
-
-	public TransformedInputRow(InputRow delegateInputRow, Map<InputColumn<?>, Object> values) {
-		_delegate = delegateInputRow;
-		_values = values;
+		if (delegate == null) {
+			throw new IllegalArgumentException("Delegate cannot be null");
+		}
+		_delegate = delegate;
+		_values = new HashMap<InputColumn<?>, Object>();
 	}
 
 	@Override
@@ -44,17 +53,21 @@ public final class TransformedInputRow extends AbstractInputRow {
 	}
 
 	public void addValue(InputColumn<?> inputColumn, Object value) {
+		if (inputColumn.isPhysicalColumn()) {
+			throw new IllegalArgumentException("Cannot add physical column values to transformed InputRow.");
+		}
 		_values.put(inputColumn, value);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E> E getValueInternal(InputColumn<E> column) {
+		if (column.isPhysicalColumn()) {
+			logger.debug("Column is physical, delegating.");
+			return _delegate.getValue(column);
+		}
 		if (_values.containsKey(column)) {
 			return (E) _values.get(column);
-		}
-		if (_delegate == null) {
-			return null;
 		}
 		return _delegate.getValue(column);
 	}
