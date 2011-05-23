@@ -91,29 +91,55 @@ public class ValueDistributionResult implements AnalyzerResult {
 
 	@Override
 	public String toString() {
+		return toString(10);
+	}
+
+	/**
+	 * Creates a string representation with a maximum amount of entries
+	 * 
+	 * @param maxEntries
+	 * @return
+	 */
+	public String toString(int maxEntries) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Value distribution for column: ");
 		sb.append(_columnName);
 
-		if (_topValues != null && _topValues.getActualSize() > 0) {
-			sb.append("\nTop values:");
-			List<ValueCount> valueCounts = _topValues.getValueCounts();
-			for (ValueCount valueCount : valueCounts) {
-				sb.append("\n - ");
-				sb.append(valueCount.getValue());
-				sb.append(": ");
-				sb.append(valueCount.getCount());
+		if (maxEntries != 0) {
+			if (_topValues != null && _topValues.getActualSize() > 0) {
+				sb.append("\nTop values:");
+				List<ValueCount> valueCounts = _topValues.getValueCounts();
+				for (ValueCount valueCount : valueCounts) {
+					sb.append("\n - ");
+					sb.append(valueCount.getValue());
+					sb.append(": ");
+					sb.append(valueCount.getCount());
+
+					maxEntries--;
+					if (maxEntries == 0) {
+						sb.append("\n ...");
+						break;
+					}
+				}
 			}
 		}
 
-		if (_bottomValues != null && _bottomValues.getActualSize() > 0) {
-			sb.append("\nBottom values:");
-			List<ValueCount> valueCounts = _bottomValues.getValueCounts();
-			for (ValueCount valueCount : valueCounts) {
-				sb.append("\n - ");
-				sb.append(valueCount.getValue());
-				sb.append(": ");
-				sb.append(valueCount.getCount());
+		if (maxEntries != 0) {
+			if (_bottomValues != null && _bottomValues.getActualSize() > 0) {
+				sb.append("\nBottom values:");
+				List<ValueCount> valueCounts = _bottomValues.getValueCounts();
+				for (ValueCount valueCount : valueCounts) {
+					sb.append("\n - ");
+					sb.append(valueCount.getValue());
+					sb.append(": ");
+					sb.append(valueCount.getCount());
+
+					maxEntries--;
+					if (maxEntries == 0) {
+						sb.append("\n ...");
+						break;
+					}
+				}
 			}
 		}
 
@@ -127,6 +153,12 @@ public class ValueDistributionResult implements AnalyzerResult {
 			for (String value : _uniqueValues) {
 				sb.append("\n - ");
 				sb.append(value);
+
+				maxEntries--;
+				if (maxEntries == 0) {
+					sb.append("\n ...");
+					break;
+				}
 			}
 		}
 		return sb.toString();
