@@ -150,16 +150,15 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		Set<ConfiguredPropertyDescriptor> configuredPropertiesForInput = getDescriptor().getConfiguredPropertiesForInput();
 		for (ConfiguredPropertyDescriptor configuredPropertyForInput : configuredPropertiesForInput) {
 			Object inputColumns = getConfiguredProperty(configuredPropertyForInput);
-			if (inputColumns == null) {
-				return Collections.emptyList();
-			}
-			if (inputColumns.getClass().isArray()) {
-				int length = Array.getLength(inputColumns);
-				for (int i = 0; i < length; i++) {
-					result.add((InputColumn<?>) Array.get(inputColumns, i));
+			if (inputColumns != null) {
+				if (inputColumns.getClass().isArray()) {
+					int length = Array.getLength(inputColumns);
+					for (int i = 0; i < length; i++) {
+						result.add((InputColumn<?>) Array.get(inputColumns, i));
+					}
+				} else {
+					result.add((InputColumn<?>) inputColumns);
 				}
-			} else {
-				result.add((InputColumn<?>) inputColumns);
 			}
 		}
 		return Collections.unmodifiableList(result);

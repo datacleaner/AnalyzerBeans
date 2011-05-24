@@ -73,8 +73,10 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
 		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
 			Object property = _beanConfiguration.getProperty(propertyDescriptor);
 			InputColumn<?>[] inputs = CollectionUtils.arrayOf(InputColumn.class, property);
-			for (InputColumn<?> inputColumn : inputs) {
-				result.add(inputColumn);
+			if (inputs != null) {
+				for (InputColumn<?> inputColumn : inputs) {
+					result.add(inputColumn);
+				}
 			}
 		}
 		return result.toArray(new InputColumn<?>[result.size()]);
