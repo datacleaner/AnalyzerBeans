@@ -32,7 +32,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 public abstract class AbstractComponentCategory implements ComponentCategory {
 
 	@Override
-	public final String getName() {
+	public String getName() {
 		String simpleName = getClass().getSimpleName();
 		if (simpleName.endsWith("Category")) {
 			simpleName = simpleName.substring(0, simpleName.length() - "Category".length());
