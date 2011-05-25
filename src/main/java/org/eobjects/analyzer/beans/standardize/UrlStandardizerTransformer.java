@@ -22,12 +22,14 @@ package org.eobjects.analyzer.beans.standardize;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.MatchingAndStandardizationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.HasGroupLiteral;
@@ -36,6 +38,7 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
 
 @TransformerBean("URL standardizer")
 @Description("Retrieve the individual parts of an URL, including protocol, domain, port, path and querystring.")
+@Categorized({ MatchingAndStandardizationCategory.class })
 public class UrlStandardizerTransformer implements Transformer<String> {
 
 	public static final String[] PATTERNS = { "PROTOCOL://DOMAIN:PORTPATH\\?QUERYSTRING",

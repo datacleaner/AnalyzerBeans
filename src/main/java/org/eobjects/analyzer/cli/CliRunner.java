@@ -354,7 +354,7 @@ public final class CliRunner {
 			}
 
 			if (descriptor instanceof FilterBeanDescriptor<?, ?>) {
-				Set<String> categoryNames = ((FilterBeanDescriptor<?, ?>) descriptor).getCategoryNames();
+				Set<String> categoryNames = ((FilterBeanDescriptor<?, ?>) descriptor).getOutcomeCategoryNames();
 				for (String categoryName : categoryNames) {
 					_out.println(" - Outcome category: " + categoryName);
 				}

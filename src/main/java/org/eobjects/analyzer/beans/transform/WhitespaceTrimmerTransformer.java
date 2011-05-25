@@ -19,17 +19,20 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.StringUtils;
 
 @TransformerBean("Whitespace trimmer")
 @Description("Trims your String values either on left, right or both sides.")
+@Categorized({ StringManipulationCategory.class })
 public class WhitespaceTrimmerTransformer implements Transformer<String> {
 
 	@Configured

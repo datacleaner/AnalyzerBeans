@@ -17,31 +17,9 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.api;
+package org.eobjects.analyzer.beans.categories;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
-/**
- * Annotation used to provide a description of a component or a configured
- * property.
- * 
- * @author Kasper Sørensen
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD })
-@Documented
-@Inherited
-public @interface Description {
+public class ConversionCategory extends AbstractComponentCategory {
 
-	/**
-	 * Determines the description of the annotated element
-	 * 
-	 * @return a String representing the description of the annotated element
-	 */
-	String value();
 }

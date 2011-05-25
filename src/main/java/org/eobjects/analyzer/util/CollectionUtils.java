@@ -48,15 +48,11 @@ public final class CollectionUtils {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> List<T> list(Class<? extends List> listClass, T... elements) {
-		try {
-			List list = listClass.newInstance();
-			for (T t : elements) {
-				list.add(t);
-			}
-			return list;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		List list = ReflectionUtils.newInstance(listClass);
+		for (T t : elements) {
+			list.add(t);
 		}
+		return list;
 	}
 
 	public static <T> Set<T> set(T... elements) {
@@ -65,15 +61,11 @@ public final class CollectionUtils {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> Set<T> set(Class<? extends Set> setClass, T... elements) {
-		try {
-			Set set = setClass.newInstance();
-			for (T t : elements) {
-				set.add(t);
-			}
-			return set;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		Set set = ReflectionUtils.newInstance(setClass);
+		for (T t : elements) {
+			set.add(t);
 		}
+		return set;
 	}
 
 	@SuppressWarnings("unchecked")

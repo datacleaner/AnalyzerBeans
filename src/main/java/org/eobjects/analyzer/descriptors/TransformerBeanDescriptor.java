@@ -22,7 +22,20 @@ package org.eobjects.analyzer.descriptors;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 
+/**
+ * Descriptor interface for {@link Transformer}s.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <B>
+ */
 public interface TransformerBeanDescriptor<B extends Transformer<?>> extends BeanDescriptor<B> {
 
+	/**
+	 * Gets the output data's {@link DataTypeFamily}.
+	 * 
+	 * @return a {@link DataTypeFamily} value that represents the data type of
+	 *         this transformer bean's output.
+	 */
 	public DataTypeFamily getOutputDataTypeFamily();
 }

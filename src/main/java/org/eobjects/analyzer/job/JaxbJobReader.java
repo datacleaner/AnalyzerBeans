@@ -534,7 +534,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					List<OutcomeType> outcomeTypes = filter.getOutcome();
 					for (OutcomeType outcomeType : outcomeTypes) {
 						String categoryName = outcomeType.getCategory();
-						Enum<?> category = filterJobBuilder.getDescriptor().getCategoryByName(categoryName);
+						Enum<?> category = filterJobBuilder.getDescriptor().getOutcomeCategoryByName(categoryName);
 						if (category == null) {
 							throw new IllegalStateException("No such outcome category name: " + categoryName + " (in "
 									+ filterJobBuilder.getDescriptor().getDisplayName());

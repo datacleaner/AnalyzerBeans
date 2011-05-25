@@ -79,7 +79,7 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
 
 	@Override
 	public FilterOutcome[] getOutcomes() {
-		EnumSet<?> categories = _descriptor.getCategories();
+		EnumSet<?> categories = _descriptor.getOutcomeCategories();
 		FilterOutcome[] outcomes = new FilterOutcome[categories.size()];
 		int i = 0;
 		for (Enum<?> category : categories) {

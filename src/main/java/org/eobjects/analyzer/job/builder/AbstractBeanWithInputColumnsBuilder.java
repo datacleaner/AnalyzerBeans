@@ -169,7 +169,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 	}
 
 	public void setRequirement(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
-		EnumSet<?> categories = filterJobBuilder.getDescriptor().getCategories();
+		EnumSet<?> categories = filterJobBuilder.getDescriptor().getOutcomeCategories();
 		if (!categories.contains(category)) {
 			throw new IllegalArgumentException("No such category found in available outcomes: " + category);
 		}
@@ -191,7 +191,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 	}
 
 	public void setRequirement(FilterJobBuilder<?, ?> filterJobBuilder, String category) {
-		EnumSet<?> categories = filterJobBuilder.getDescriptor().getCategories();
+		EnumSet<?> categories = filterJobBuilder.getDescriptor().getOutcomeCategories();
 		for (Enum<?> c : categories) {
 			if (c.name().equals(category)) {
 				setRequirement(filterJobBuilder.getOutcome(c));

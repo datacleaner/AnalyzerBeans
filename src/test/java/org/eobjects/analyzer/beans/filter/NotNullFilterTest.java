@@ -61,7 +61,7 @@ public class NotNullFilterTest extends TestCase {
 	public void testDescriptor() throws Exception {
 		FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = AnnotationBasedFilterBeanDescriptor
 				.create(NotNullFilter.class);
-		Class<ValidationCategory> categoryEnum = desc.getCategoryEnum();
+		Class<ValidationCategory> categoryEnum = desc.getOutcomeCategoryEnum();
 		assertEquals(ValidationCategory.class, categoryEnum);
 	}
 

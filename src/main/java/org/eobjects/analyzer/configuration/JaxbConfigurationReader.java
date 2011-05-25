@@ -687,7 +687,6 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 	@SuppressWarnings("unchecked")
 	private <E> E createCustomElement(CustomElementType customElementType, Class<E> expectedClazz,
 			DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog, boolean initialize) {
-		E result = null;
 		Class<?> foundClass;
 		String className = customElementType.getClassName();
 
@@ -700,11 +699,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		if (!ReflectionUtils.is(foundClass, expectedClazz)) {
 			throw new IllegalStateException(className + " is not a valid " + expectedClazz);
 		}
-		try {
-			result = (E) foundClass.newInstance();
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		
+		E result = (E) ReflectionUtils.newInstance(foundClass);
 
 		SimpleComponentDescriptor<?> descriptor = SimpleComponentDescriptor.create(foundClass);
 

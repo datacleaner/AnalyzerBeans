@@ -19,11 +19,13 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.MatchingAndStandardizationCategory;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -31,6 +33,7 @@ import org.eobjects.analyzer.reference.StringPattern;
 
 @TransformerBean("String pattern matcher")
 @Description("Matches string values against a set of string patterns, producing a corresponding set of output columns specifying whether or not the values matched those string patterns")
+@Categorized({ MatchingAndStandardizationCategory.class })
 public class StringPatternMatcherTransformer implements Transformer<Boolean> {
 
 	@Configured

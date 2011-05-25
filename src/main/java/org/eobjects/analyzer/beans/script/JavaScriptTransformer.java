@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans.script;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
@@ -26,6 +27,7 @@ import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.StringProperty;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.ScriptingCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.mozilla.javascript.Context;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 @TransformerBean("JavaScript transformer")
 @Description("Supply your own piece of JavaScript to do a custom transformation")
+@Categorized({ ScriptingCategory.class })
 public class JavaScriptTransformer implements Transformer<String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(JavaScriptTransformer.class);

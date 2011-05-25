@@ -24,16 +24,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Extract date part")
 @Description("Extract the parts of a date (year, month, day etc.)")
+@Categorized({ DateAndTimeCategory.class })
 public class DatePartTransformer implements Transformer<Number> {
 
 	@Configured(order = 1)

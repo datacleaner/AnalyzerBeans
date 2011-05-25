@@ -21,11 +21,13 @@ package org.eobjects.analyzer.beans.convert;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.ConversionCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
@@ -36,6 +38,7 @@ import org.eobjects.analyzer.data.InputRow;
  */
 @TransformerBean("Convert to boolean")
 @Description("Converts anything to a boolean (or null).")
+@Categorized({ ConversionCategory.class })
 public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 
 	public static final String[] DEFAULT_TRUE_TOKENS = new String[] { "true", "yes", "1", "x" };

@@ -189,11 +189,7 @@ public final class RendererFactory {
 	@SuppressWarnings("unchecked")
 	private static <I extends Renderable, O> Renderer<I, O> instantiate(RendererBeanDescriptor descriptor) {
 		final Class<? extends Renderer<?, ?>> componentClass = descriptor.getComponentClass();
-		try {
-			Renderer<?, ?> renderer = componentClass.newInstance();
-			return (Renderer<I, O>) renderer;
-		} catch (Exception e) {
-			throw new IllegalStateException("Could not instantiate renderer: " + componentClass.getName(), e);
-		}
+		final Renderer<?, ?> renderer = ReflectionUtils.newInstance(componentClass);
+		return (Renderer<I, O>) renderer;
 	}
 }

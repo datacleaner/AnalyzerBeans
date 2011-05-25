@@ -27,21 +27,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation used to provide a description of a component or a configured
- * property.
+ * Annotation used to assign a set of categories to a component.
  * 
  * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD })
+@Target({ ElementType.TYPE })
 @Documented
 @Inherited
-public @interface Description {
+public @interface Categorized {
 
-	/**
-	 * Determines the description of the annotated element
-	 * 
-	 * @return a String representing the description of the annotated element
-	 */
-	String value();
+	public Class<? extends ComponentCategory>[] value();
 }

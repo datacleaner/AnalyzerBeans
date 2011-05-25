@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +52,8 @@ public abstract class AbstractBeanInstance<E> {
 		if (descriptor == null) {
 			throw new IllegalArgumentException("Descriptor cannot be null");
 		}
-		try {
-			this._bean = (E) descriptor.getComponentClass().newInstance();
-		} catch (Exception e) {
-			throw new IllegalArgumentException(
-					"Could not instantiate analyzer bean type: " + descriptor.getComponentClass(), e);
-		}
-		this._descriptor = descriptor;
+		_bean = (E) ReflectionUtils.newInstance(descriptor.getComponentClass());
+		_descriptor = descriptor;
 	}
 
 	public E getBean() {

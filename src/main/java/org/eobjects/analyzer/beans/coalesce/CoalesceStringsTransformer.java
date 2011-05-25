@@ -19,16 +19,20 @@
  */
 package org.eobjects.analyzer.beans.coalesce;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.CoalesceCategory;
+import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Coalesce strings")
 @Description("Returns the first non-null string.")
+@Categorized({ CoalesceCategory.class, StringManipulationCategory.class })
 public class CoalesceStringsTransformer implements Transformer<String> {
 
 	@Configured

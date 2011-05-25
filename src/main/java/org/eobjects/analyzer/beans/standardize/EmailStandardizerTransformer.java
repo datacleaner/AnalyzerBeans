@@ -21,11 +21,13 @@ package org.eobjects.analyzer.beans.standardize;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.MatchingAndStandardizationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.HasGroupLiteral;
@@ -39,6 +41,7 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
  */
 @TransformerBean("Email standardizer")
 @Description("Retrieve the username or domain from an email address.")
+@Categorized({ MatchingAndStandardizationCategory.class })
 public class EmailStandardizerTransformer implements Transformer<String> {
 
 	public static final NamedPattern<EmailPart> EMAIL_PATTERN = new NamedPattern<EmailPart>("USERNAME@DOMAIN",

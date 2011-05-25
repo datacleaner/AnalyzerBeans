@@ -28,12 +28,14 @@ import java.util.Arrays;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.StringProperty;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.ConversionCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
@@ -44,6 +46,7 @@ import org.eobjects.analyzer.data.InputRow;
  */
 @TransformerBean("Convert to string")
 @Description("Converts anything to a string (or null).")
+@Categorized({ ConversionCategory.class })
 public class ConvertToStringTransformer implements Transformer<String> {
 
 	@Inject

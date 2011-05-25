@@ -24,12 +24,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.MatchingAndStandardizationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.HasGroupLiteral;
@@ -44,6 +46,7 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
  */
 @TransformerBean("Name standardizer")
 @Description("Identify the various parts of a full name column and turn it into separate, standardized tokens.")
+@Categorized({ MatchingAndStandardizationCategory.class })
 public class NameStandardizerTransformer implements Transformer<String> {
 
 	public static final String[] DEFAULT_PATTERNS = { "FIRSTNAME LASTNAME", "TITULATION. FIRSTNAME LASTNAME",

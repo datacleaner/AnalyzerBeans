@@ -23,18 +23,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-
 import org.eobjects.metamodel.util.DateUtils;
 
 @TransformerBean("Date difference / period length")
 @Description("Calculates the length of a period made of two dates")
+@Categorized({ DateAndTimeCategory.class })
 public class DateDiffTransformer implements Transformer<Number> {
 
 	@Configured(order = 1)

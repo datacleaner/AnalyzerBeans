@@ -19,12 +19,14 @@
  */
 package org.eobjects.analyzer.beans.script;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.StringProperty;
+import org.eobjects.analyzer.beans.categories.ScriptingCategory;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -37,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @FilterBean("JavaScript filter")
+@Description("Supply your own piece of JavaScript that evaluates whether rows should be included or excluded from processing.")
+@Categorized({ScriptingCategory.class})
 public class JavaScriptFilter implements Filter<ValidationCategory> {
 
 	private static final Logger logger = LoggerFactory.getLogger(JavaScriptFilter.class);

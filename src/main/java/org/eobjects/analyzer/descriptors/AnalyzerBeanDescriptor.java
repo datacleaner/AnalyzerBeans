@@ -21,6 +21,13 @@ package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 
+/**
+ * Descriptor interface for {@link Analyzer}s.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <B>
+ */
 public interface AnalyzerBeanDescriptor<B extends Analyzer<?>> extends BeanDescriptor<B> {
 
 	public boolean isExploringAnalyzer();

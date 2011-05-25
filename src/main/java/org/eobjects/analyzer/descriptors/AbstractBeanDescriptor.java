@@ -22,16 +22,20 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Categorized;
+import org.eobjects.analyzer.beans.api.ComponentCategory;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +79,7 @@ public abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescripto
 	@Override
 	protected void visitField(Field field) {
 		super.visitField(field);
-		
+
 		Configured configuredAnnotation = field.getAnnotation(Configured.class);
 		Provided providedAnnotation = field.getAnnotation(Provided.class);
 
@@ -126,5 +130,25 @@ public abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescripto
 	@Override
 	public Set<Annotation> getAnnotations() {
 		return CollectionUtils.set(getComponentClass().getAnnotations());
+	}
+
+	@Override
+	public Set<ComponentCategory> getComponentCategories() {
+		Categorized categorized = getAnnotation(Categorized.class);
+		if (categorized == null) {
+			return Collections.emptySet();
+		}
+		Class<? extends ComponentCategory>[] value = categorized.value();
+		if (value == null || value.length == 0) {
+			return Collections.emptySet();
+		}
+
+		Set<ComponentCategory> result = new HashSet<ComponentCategory>();
+		for (Class<? extends ComponentCategory> categoryClass : value) {
+			ComponentCategory category = ReflectionUtils.newInstance(categoryClass);
+			result.add(category);
+		}
+
+		return result;
 	}
 }

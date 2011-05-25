@@ -44,8 +44,8 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 
 	public FilterJobBuilder(AnalysisJobBuilder analysisJobBuilder, FilterBeanDescriptor<F, C> descriptor) {
 		super(analysisJobBuilder, descriptor, FilterJobBuilder.class);
-		_outcomes = new EnumMap<C, FilterOutcome>(descriptor.getCategoryEnum());
-		EnumSet<C> categories = descriptor.getCategories();
+		_outcomes = new EnumMap<C, FilterOutcome>(descriptor.getOutcomeCategoryEnum());
+		EnumSet<C> categories = descriptor.getOutcomeCategories();
 		for (C category : categories) {
 			_outcomes.put(category, new LazyFilterOutcome(this, category));
 		}

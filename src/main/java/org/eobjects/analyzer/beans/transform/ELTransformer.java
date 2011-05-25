@@ -19,12 +19,14 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.ScriptingCategory;
 import org.eobjects.analyzer.data.ConstantInputColumn;
 import org.eobjects.analyzer.data.ELInputColumn;
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
@@ -32,6 +34,7 @@ import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Expression language (EL) transformer")
 @Description("Generates a column based on an EL expression")
+@Categorized({ ScriptingCategory.class })
 public class ELTransformer implements Transformer<String> {
 
 	@Configured

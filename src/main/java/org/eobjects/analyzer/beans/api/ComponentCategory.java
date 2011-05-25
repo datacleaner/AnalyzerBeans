@@ -19,29 +19,20 @@
  */
 package org.eobjects.analyzer.beans.api;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Annotation used to provide a description of a component or a configured
- * property.
+ * Represents a category that a component can be applied to. Categories aid the
+ * description of the components by building relationships through related
+ * categories.
  * 
  * @author Kasper Sørensen
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD })
-@Documented
-@Inherited
-public @interface Description {
+public interface ComponentCategory {
 
 	/**
-	 * Determines the description of the annotated element
+	 * Gets the name of the category. The name is often used as the primary
+	 * identifier of a category.
 	 * 
-	 * @return a String representing the description of the annotated element
+	 * @return a string name
 	 */
-	String value();
+	public String getName();
 }

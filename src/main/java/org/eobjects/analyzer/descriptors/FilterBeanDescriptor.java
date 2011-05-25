@@ -24,13 +24,20 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Filter;
 
+/**
+ * Descriptor interface for {@link Filter}s.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <B>
+ */
 public interface FilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends BeanDescriptor<F> {
 
-	public Class<C> getCategoryEnum();
+	public Class<C> getOutcomeCategoryEnum();
 
-	public EnumSet<C> getCategories();
+	public EnumSet<C> getOutcomeCategories();
 
-	public Set<String> getCategoryNames();
+	public Set<String> getOutcomeCategoryNames();
 
-	public Enum<C> getCategoryByName(String category);
+	public Enum<C> getOutcomeCategoryByName(String category);
 }

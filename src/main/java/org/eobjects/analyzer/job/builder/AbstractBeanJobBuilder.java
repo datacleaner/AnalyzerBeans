@@ -68,11 +68,8 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
 		if (!ReflectionUtils.is(getClass(), builderClass)) {
 			throw new IllegalArgumentException("Builder class does not correspond to actual class of builder");
 		}
-		try {
-			_configurableBean = _descriptor.getComponentClass().newInstance();
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not instantiate bean class: " + _descriptor.getComponentClass(), e);
-		}
+
+		_configurableBean = ReflectionUtils.newInstance(_descriptor.getComponentClass());
 	}
 
 	public final AnalysisJobBuilder getAnalysisJobBuilder() {

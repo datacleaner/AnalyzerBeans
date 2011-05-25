@@ -37,10 +37,19 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.googlecode.gentyref.GenericTypeReflector;
 
-public class ReflectionUtils {
+/**
+ * Various static methods for reflection related tasks.
+ * 
+ * @author Kasper Sørensen
+ */
+public final class ReflectionUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(ReflectionUtils.class);
 
 	private ReflectionUtils() {
 		// Prevent instantiation
@@ -431,4 +440,15 @@ public class ReflectionUtils {
 		return f;
 	}
 
+	public static <E> E newInstance(Class<? extends E> clazz) {
+		try {
+			return clazz.newInstance();
+		} catch (Exception e) {
+			logger.warn("Could not instantiate {}: {}", clazz, e);
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException) e;
+			}
+			throw new IllegalStateException(e);
+		}
+	}
 }

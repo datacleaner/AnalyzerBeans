@@ -21,12 +21,15 @@ package org.eobjects.analyzer.beans.transform;
 
 import java.util.Arrays;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
+import org.eobjects.analyzer.beans.categories.MatchingAndStandardizationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.joda.time.format.DateTimeFormat;
@@ -34,6 +37,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 @TransformerBean("Date mask matcher")
 @Description("Matches String values against a set of date masks, producing a corresponding set of output columns, specifying whether or not the strings could be interpreted as dates given those date masks")
+@Categorized({ MatchingAndStandardizationCategory.class, DateAndTimeCategory.class })
 public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 
 	public static final String[] DEFAULT_DATE_MASKS = new String[] { "yyyy-MM-dd", "yyyy/MM/dd", "dd.MM.yyyy", "dd/MM/yyyy",
@@ -104,7 +108,7 @@ public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 	public void setDateMasks(String[] dateMasks) {
 		_dateMasks = dateMasks;
 	}
-	
+
 	public String[] getDateMasks() {
 		return _dateMasks;
 	}

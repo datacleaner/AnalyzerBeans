@@ -33,13 +33,13 @@ public class AnnotationBasedFilterDescriptorTest extends TestCase {
 			.create(NotNullFilter.class);
 
 	public void testGetCategoryEnum() throws Exception {
-		Class<ValidationCategory> categoryEnum = desc.getCategoryEnum();
+		Class<ValidationCategory> categoryEnum = desc.getOutcomeCategoryEnum();
 
 		assertEquals(ValidationCategory.class, categoryEnum);
 	}
 
 	public void testGetCategoryNames() throws Exception {
-		Set<String> categoryNames = desc.getCategoryNames();
+		Set<String> categoryNames = desc.getOutcomeCategoryNames();
 		categoryNames = new TreeSet<String>(categoryNames);
 		assertEquals("[INVALID, VALID]", categoryNames.toString());
 	}

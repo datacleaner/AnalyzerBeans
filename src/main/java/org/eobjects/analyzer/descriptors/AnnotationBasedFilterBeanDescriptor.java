@@ -81,7 +81,7 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Class<C> getCategoryEnum() {
+	public Class<C> getOutcomeCategoryEnum() {
 		Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), Filter.class, 0);
 		if (typeParameter == null) {
 			throw new IllegalStateException("Could not determine Filter's category enum type");
@@ -90,14 +90,14 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 	}
 
 	@Override
-	public EnumSet<C> getCategories() {
-		Class<C> categoryEnum = getCategoryEnum();
+	public EnumSet<C> getOutcomeCategories() {
+		Class<C> categoryEnum = getOutcomeCategoryEnum();
 		return EnumSet.allOf(categoryEnum);
 	}
 
 	@Override
-	public Set<String> getCategoryNames() {
-		EnumSet<C> enumSet = getCategories();
+	public Set<String> getOutcomeCategoryNames() {
+		EnumSet<C> enumSet = getOutcomeCategories();
 		Set<String> result = new HashSet<String>();
 		for (Enum<C> category : enumSet) {
 			result.add(category.name());
@@ -106,8 +106,8 @@ public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C ex
 	}
 
 	@Override
-	public Enum<C> getCategoryByName(String categoryName) {
-		EnumSet<C> categories = getCategories();
+	public Enum<C> getOutcomeCategoryByName(String categoryName) {
+		EnumSet<C> categories = getOutcomeCategories();
 		for (Enum<C> c : categories) {
 			if (c.name().equals(categoryName)) {
 				return c;
