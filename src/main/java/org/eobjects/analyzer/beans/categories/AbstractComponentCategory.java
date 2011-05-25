@@ -49,7 +49,12 @@ public abstract class AbstractComponentCategory implements ComponentCategory {
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return getClass().hashCode();
+	}
+	
+	@Override
+	public final String toString() {
+		return getName();
 	}
 }
