@@ -40,7 +40,7 @@ public class RendererFactoryTest extends TestCase {
 
 	public void testGetRendererByHierarchyDistance() throws Exception {
 		RendererFactory rendererFactory = new RendererFactory(TestHelper.createAnalyzerBeansConfiguration()
-				.getDescriptorProvider());
+				.getDescriptorProvider(), null);
 		Renderer<?, ? extends CharSequence> r;
 
 		r = rendererFactory.getRenderer(new NumberResult(1), TextRenderingFormat.class);
@@ -61,7 +61,7 @@ public class RendererFactoryTest extends TestCase {
 		descriptorProvider.addRendererClass(FooPrecedenceRenderer.class);
 		descriptorProvider.addRendererClass(BarPrecedenceRenderer.class);
 
-		RendererFactory factory = new RendererFactory(descriptorProvider);
+		RendererFactory factory = new RendererFactory(descriptorProvider, null);
 		assertEquals(FooPrecedenceRenderer.class,
 				factory.getRenderer(new RenderableString("foobar"), TextRenderingFormat.class).getClass());
 		assertEquals(FooPrecedenceRenderer.class, factory

@@ -73,9 +73,11 @@ public final class RendererFactory {
 	}
 
 	private final DescriptorProvider _descriptorProvider;
+	private final RendererInitializer _rendererInitializer;
 
-	public RendererFactory(DescriptorProvider descriptorProvider) {
+	public RendererFactory(DescriptorProvider descriptorProvider, RendererInitializer rendererInitializer) {
 		_descriptorProvider = descriptorProvider;
+		_rendererInitializer = rendererInitializer;
 	}
 
 	/**
@@ -111,6 +113,7 @@ public final class RendererFactory {
 
 		logger.info("Returning renderer '{}' for renderable '{}' in format '{}'", new Object[] { renderer, renderable,
 				renderingFormat.getName() });
+		
 		return renderer;
 	}
 
@@ -128,7 +131,7 @@ public final class RendererFactory {
 	 * @return a {@link RendererSelection} object if the renderer is a match, or
 	 *         null if not.
 	 */
-	private static RendererSelection isRendererMatch(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
+	private RendererSelection isRendererMatch(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
 			RendererSelection bestMatch) {
 		final Class<? extends Renderable> renderableType = rendererDescriptor.getRenderableType();
 		if (ReflectionUtils.is(renderable.getClass(), renderableType)) {
@@ -151,9 +154,14 @@ public final class RendererFactory {
 		return null;
 	}
 
-	private static RendererSelection isRendererCapable(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
+	private RendererSelection isRendererCapable(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
 			RendererSelection bestMatch) {
 		final Renderer<Renderable, ?> renderer = instantiate(rendererDescriptor);
+		
+		if (_rendererInitializer != null) {
+			_rendererInitializer.initialize(renderer);
+		}
+		
 		RendererPrecedence precedence;
 		try {
 			precedence = renderer.getPrecedence(renderable);

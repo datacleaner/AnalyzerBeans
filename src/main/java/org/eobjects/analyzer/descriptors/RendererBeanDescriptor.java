@@ -23,9 +23,20 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.result.renderer.Renderable;
 
+/**
+ * Defines an abstract descriptor for renderer beans.
+ * 
+ * @see RendererBean
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <B>
+ *            the Bean type
+ */
 public interface RendererBeanDescriptor extends Comparable<RendererBeanDescriptor> {
 
 	public Class<? extends Renderer<?, ?>> getComponentClass();

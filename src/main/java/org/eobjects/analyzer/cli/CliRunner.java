@@ -249,7 +249,7 @@ public final class CliRunner {
 			_out.println("SUCCESS!");
 			List<AnalyzerResult> results = resultFuture.getResults();
 
-			RendererFactory rendererFinder = new RendererFactory(configuration.getDescriptorProvider());
+			RendererFactory rendererFinder = new RendererFactory(configuration.getDescriptorProvider(), null);
 
 			for (AnalyzerResult result : results) {
 				_out.println("\nRESULT:");
