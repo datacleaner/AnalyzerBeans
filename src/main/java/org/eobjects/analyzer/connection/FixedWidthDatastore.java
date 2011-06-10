@@ -41,12 +41,18 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 	private final String _filename;
 	private final String _encoding;
 	private final int _fixedValueWidth;
-
+	private final boolean _failOnInconsistencies;
+	
 	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth) {
+		this(name, filename, encoding, fixedValueWidth, true);
+	}
+
+	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth, boolean failOnInconsistencies) {
 		super(name);
 		_filename = filename;
 		_encoding = encoding;
 		_fixedValueWidth = fixedValueWidth;
+		_failOnInconsistencies = failOnInconsistencies;
 	}
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -79,6 +85,10 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 	public String getFilename() {
 		return _filename;
 	}
+	
+	public boolean isFailOnInconsistencies() {
+		return _failOnInconsistencies;
+	}
 
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
@@ -86,6 +96,7 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 		identifiers.add(_filename);
 		identifiers.add(_encoding);
 		identifiers.add(_fixedValueWidth);
+		identifiers.add(_failOnInconsistencies);
 	}
 
 	@Override

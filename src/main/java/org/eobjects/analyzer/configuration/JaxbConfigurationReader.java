@@ -450,7 +450,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				encoding = FileHelper.UTF_8_ENCODING;
 			}
 
-			CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, encoding);
+			Boolean failOnInconsistencies = csvDatastoreType.isFailOnInconsistencies();
+			if (failOnInconsistencies == null) {
+				failOnInconsistencies = true;
+			}
+
+			CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, encoding, failOnInconsistencies);
 			ds.setDescription(csvDatastoreType.getDescription());
 			datastores.put(name, ds);
 		}
@@ -474,7 +479,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				encoding = FileHelper.UTF_8_ENCODING;
 			}
 
-			FixedWidthDatastore ds = new FixedWidthDatastore(name, filename, encoding, fixedValueWidth);
+			Boolean failOnInconsistencies = fixedWidthDatastore.isFailOnInconsistencies();
+			if (failOnInconsistencies == null) {
+				failOnInconsistencies = true;
+			}
+
+			FixedWidthDatastore ds = new FixedWidthDatastore(name, filename, encoding, fixedValueWidth,
+					failOnInconsistencies);
 			ds.setDescription(fixedWidthDatastore.getDescription());
 			datastores.put(name, ds);
 		}
@@ -699,7 +710,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		if (!ReflectionUtils.is(foundClass, expectedClazz)) {
 			throw new IllegalStateException(className + " is not a valid " + expectedClazz);
 		}
-		
+
 		E result = (E) ReflectionUtils.newInstance(foundClass);
 
 		SimpleComponentDescriptor<?> descriptor = SimpleComponentDescriptor.create(foundClass);

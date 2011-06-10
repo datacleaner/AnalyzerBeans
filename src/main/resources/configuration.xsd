@@ -244,6 +244,8 @@
 			<element name="separator-char" minOccurs="0" maxOccurs="1"
 				type="token" />
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
+			<element name="failOnInconsistencies" minOccurs="0"
+				maxOccurs="1" type="boolean" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />
@@ -255,6 +257,8 @@
 			<element name="fixed-value-width" minOccurs="1" maxOccurs="1"
 				type="int" default="15" />
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
+			<element name="failOnInconsistencies" minOccurs="0"
+				maxOccurs="1" type="boolean" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />

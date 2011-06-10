@@ -52,17 +52,24 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 	private final Character _quoteChar;
 	private final Character _separatorChar;
 	private final String _encoding;
+	private final boolean _failOnInconsistencies;
 
 	public CsvDatastore(String name, String filename) {
 		this(name, filename, null, null, null);
 	}
 
 	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding) {
+		this(name, filename, quoteChar, separatorChar, encoding, true);
+	}
+
+	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
+			boolean failOnInconsistencies) {
 		super(name);
 		_filename = filename;
 		_quoteChar = quoteChar;
 		_separatorChar = separatorChar;
 		_encoding = encoding;
+		_failOnInconsistencies = failOnInconsistencies;
 	}
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -96,7 +103,7 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 			final char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
 			final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
 			final CsvConfiguration configuration = new CsvConfiguration(CsvConfiguration.DEFAULT_COLUMN_NAME_LINE, encoding,
-					separatorChar, quoteChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR);
+					separatorChar, quoteChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, _failOnInconsistencies);
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename), configuration);
 		}
 		return new SingleDataContextProvider(dataContext, this);
@@ -106,6 +113,10 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return new PerformanceCharacteristicsImpl(false);
 	}
+	
+	public boolean isFailOnInconsistencies() {
+		return _failOnInconsistencies;
+	}
 
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
@@ -114,6 +125,7 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 		identifiers.add(_encoding);
 		identifiers.add(_quoteChar);
 		identifiers.add(_separatorChar);
+		identifiers.add(_failOnInconsistencies);
 	}
 
 	@Override
