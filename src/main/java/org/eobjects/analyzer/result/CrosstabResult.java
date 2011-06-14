@@ -33,6 +33,10 @@ public class CrosstabResult implements AnalyzerResult {
 		return crosstab;
 	}
 
+	public String toString(int maxEntries) {
+		return crosstab.toString(maxEntries);
+	}
+
 	@Override
 	public String toString() {
 		return crosstab.toString();

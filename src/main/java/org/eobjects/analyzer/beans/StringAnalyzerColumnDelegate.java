@@ -217,12 +217,12 @@ final class StringAnalyzerColumnDelegate {
 			}
 
 			if (numLetters > 0) {
-				if (value.equals(value.toUpperCase())) {
+				if (isEntirelyUpperCase(value)) {
 					_numEntirelyUppercase += distinctCount;
 					_annotationFactory.annotate(row, distinctCount, _entirelyUppercaseAnnotation);
 				}
 
-				if (value.equals(value.toLowerCase())) {
+				if (isEntirelyLowerCase(value)) {
 					_numEntirelyLowercase += distinctCount;
 					_annotationFactory.annotate(row, distinctCount, _entirelyLowercaseAnnotation);
 				}
@@ -231,6 +231,14 @@ final class StringAnalyzerColumnDelegate {
 			_charAverageBuilder.addValue(numChars);
 			_whitespaceAverageBuilder.addValue(numWhitespace);
 		}
+	}
+
+	protected static boolean isEntirelyLowerCase(String value) {
+		return value.equals(value.toLowerCase());
+	}
+
+	protected static boolean isEntirelyUpperCase(String value) {
+		return value.equals(value.toUpperCase());
 	}
 
 	public int getNumRows() {

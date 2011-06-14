@@ -210,15 +210,33 @@ public final class Crosstab<E extends Serializable> implements Serializable {
 
 	@Override
 	public String toString() {
+		return toString(8);
+	}
+
+	/**
+	 * Returns a string representation with a maximum restraint on the amount of
+	 * crosstab entries to include.
+	 * 
+	 * @param maxEntries
+	 *            the maximum amount of crosstab entries to include, or negative
+	 *            if all entries should be included.
+	 * @return
+	 */
+	public String toString(int maxEntries) {
 		StringBuilder sb = new StringBuilder("Crosstab:");
 
 		Set<String> keySet = new TreeSet<String>(values.keySet());
 		for (String key : keySet) {
+			if (maxEntries == 0) {
+				break;
+			}
 			sb.append('\n');
 			sb.append(key.replaceAll("\\^", ","));
 			sb.append(": ");
 			E value = values.get(key);
 			sb.append(value);
+
+			maxEntries--;
 		}
 
 		return sb.toString();

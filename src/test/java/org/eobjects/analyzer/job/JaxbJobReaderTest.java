@@ -298,7 +298,7 @@ public class JaxbJobReaderTest extends TestCase {
 		assertEquals(1, results.size());
 		CrosstabResult crosstabResult = (CrosstabResult) results.get(0);
 
-		String[] resultLines = crosstabResult.toString().split("\n");
+		String[] resultLines = crosstabResult.toString(-1).split("\n");
 		assertEquals(81, resultLines.length);
 		assertEquals("Crosstab:", resultLines[0]);
 		assertEquals("FIRSTNAME,Avg chars: 5.391304347826087", resultLines[1]);
