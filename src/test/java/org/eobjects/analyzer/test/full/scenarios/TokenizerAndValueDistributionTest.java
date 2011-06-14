@@ -57,10 +57,10 @@ import org.eobjects.metamodel.schema.Table;
 public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 
 	public void testScenario() throws Throwable {
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
+		TaskRunner taskRunner = new MultiThreadedTaskRunner(5);
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner).scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		StorageProvider storageProvider = TestHelper.createStorageProvider();
-		TaskRunner taskRunner = new MultiThreadedTaskRunner(30);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();

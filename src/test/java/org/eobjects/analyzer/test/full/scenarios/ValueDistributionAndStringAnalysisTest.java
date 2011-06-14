@@ -63,10 +63,10 @@ import org.eobjects.metamodel.schema.Table;
 public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 	public void testScenario() throws Exception {
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
+		TaskRunner taskRunner = new MultiThreadedTaskRunner(5);
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner).scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		StorageProvider storageProvider = TestHelper.createStorageProvider();
-		TaskRunner taskRunner = new MultiThreadedTaskRunner(3);
 
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();

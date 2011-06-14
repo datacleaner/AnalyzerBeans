@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -44,6 +45,10 @@ import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
+import org.eobjects.analyzer.job.concurrent.TaskListener;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
+import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.metamodel.util.FileHelper;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
@@ -76,6 +81,24 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	private final Map<Class<? extends Filter<?>>, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<Class<? extends Filter<?>>, FilterBeanDescriptor<?, ?>>();
 	private final Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>>();
 	private final Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
+	private final TaskRunner _taskRunner;
+	private final AtomicInteger _tasksPending;
+
+	public ClasspathScanDescriptorProvider() {
+		this(new SingleThreadedTaskRunner());
+	}
+
+	/**
+	 * Constructs a {@link ClasspathScanDescriptorProvider} using a specified
+	 * {@link TaskRunner}. The taskrunner will be used to perform the classpath
+	 * scan, potentially in a parallel fashion.
+	 * 
+	 * @param taskRunner
+	 */
+	public ClasspathScanDescriptorProvider(TaskRunner taskRunner) {
+		_taskRunner = taskRunner;
+		_tasksPending = new AtomicInteger(0);
+	}
 
 	/**
 	 * Scans a package in the classpath (of the current thread's context
@@ -103,39 +126,65 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	 *            the classloader to use
 	 * @return
 	 */
-	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive, ClassLoader classLoader) {
-		String packagePath = packageName.replace('.', '/');
-		if (recursive) {
-			logger.info("Scanning package path '{}' (and subpackages recursively)", packagePath);
-		} else {
-			logger.info("Scanning package path '{}'", packagePath);
-		}
-		try {
-			Enumeration<URL> resources = classLoader.getResources(packagePath);
-			while (resources.hasMoreElements()) {
-				URL resource = resources.nextElement();
-				String file = resource.getFile();
-				File dir = new File(file);
-				dir = new File(dir.getAbsolutePath().replaceAll("\\%20", " "));
+	public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
+			final ClassLoader classLoader) {
+		_tasksPending.incrementAndGet();
+		final TaskListener listener = new TaskListener() {
+			@Override
+			public void onBegin(Task task) {
+				logger.info("Scan of '{}' beginning", packageName);
+			}
 
-				if (dir.isDirectory()) {
-					logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
-					scanDirectory(dir, recursive, classLoader);
+			@Override
+			public void onComplete(Task task) {
+				logger.info("Scan of '{}' complete", packageName);
+				taskDone();
+			}
+
+			@Override
+			public void onError(Task task, Throwable throwable) {
+				logger.info("Scan of '{}' failed: {}", packageName, throwable.getMessage());
+				taskDone();
+			}
+		};
+		final Task task = new Task() {
+			@Override
+			public void execute() throws Exception {
+				String packagePath = packageName.replace('.', '/');
+				if (recursive) {
+					logger.info("Scanning package path '{}' (and subpackages recursively)", packagePath);
 				} else {
-					URLConnection connection = resource.openConnection();
-					if (connection instanceof JarURLConnection) {
-						JarURLConnection jarUrlConnection = (JarURLConnection) connection;
-						logger.debug("Resource is a JAR file, scanning file: " + jarUrlConnection.getJarFile().getName());
-						scanJar(jarUrlConnection, classLoader, packagePath, recursive);
-					} else {
-						throw new IllegalStateException("Unknown connection type: " + connection);
+					logger.info("Scanning package path '{}'", packagePath);
+				}
+				try {
+					Enumeration<URL> resources = classLoader.getResources(packagePath);
+					while (resources.hasMoreElements()) {
+						URL resource = resources.nextElement();
+						String file = resource.getFile();
+						File dir = new File(file);
+						dir = new File(dir.getAbsolutePath().replaceAll("\\%20", " "));
+
+						if (dir.isDirectory()) {
+							logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
+							scanDirectory(dir, recursive, classLoader);
+						} else {
+							URLConnection connection = resource.openConnection();
+							if (connection instanceof JarURLConnection) {
+								JarURLConnection jarUrlConnection = (JarURLConnection) connection;
+								logger.debug("Resource is a JAR file, scanning file: "
+										+ jarUrlConnection.getJarFile().getName());
+								scanJar(jarUrlConnection, classLoader, packagePath, recursive);
+							} else {
+								throw new IllegalStateException("Unknown connection type: " + connection);
+							}
+						}
 					}
+				} catch (IOException e) {
+					logger.error("Could not open classpath resource", e);
 				}
 			}
-		} catch (IOException e) {
-			logger.error("Could not open classpath resource", e);
-		}
-
+		};
+		_taskRunner.run(task, listener);
 		return this;
 	}
 
@@ -295,23 +344,55 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		return this;
 	}
 
+	private void taskDone() {
+		int tasks = _tasksPending.decrementAndGet();
+		if (tasks == 0) {
+			synchronized (this) {
+				notifyAll();
+			}
+		}
+	}
+
+	/**
+	 * Waits for all pending tasks to finish
+	 */
+	private void awaitTasks() {
+		if (_tasksPending.get() == 0) {
+			return;
+		}
+		synchronized (this) {
+			while (_tasksPending.get() != 0) {
+				try {
+					logger.warn("Scan tasks still pending, waiting");
+					wait();
+				} catch (InterruptedException e) {
+					logger.debug("Interrupted while awaiting task completion", e);
+				}
+			}
+		}
+	}
+
 	@Override
 	public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors() {
+		awaitTasks();
 		return Collections.unmodifiableCollection(_filterBeanDescriptors.values());
 	}
 
 	@Override
 	public Collection<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
+		awaitTasks();
 		return Collections.unmodifiableCollection(_analyzerBeanDescriptors.values());
 	}
 
 	@Override
 	public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
+		awaitTasks();
 		return Collections.unmodifiableCollection(_transformerBeanDescriptors.values());
 	}
 
 	@Override
 	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors() {
+		awaitTasks();
 		return Collections.unmodifiableCollection(_rendererBeanDescriptors.values());
 	}
 }

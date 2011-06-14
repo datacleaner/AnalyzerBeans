@@ -23,12 +23,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
 
+import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
+
 import junit.framework.TestCase;
 
 public class ClasspathScanDescriptorProviderTest extends TestCase {
 
+	private MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(2);
+
 	public void testScanNonExistingPackage() throws Exception {
-		ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider();
+		ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
 		Collection<AnalyzerBeanDescriptor<?>> analyzerDescriptors = provider.scanPackage(
 				"org.eobjects.analyzer.nonexistingbeans", true).getAnalyzerBeanDescriptors();
 		assertEquals("[]", Arrays.toString(analyzerDescriptors.toArray()));
@@ -38,7 +42,7 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 	}
 
 	public void testScanPackageRecursive() throws Exception {
-		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
+		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
 		Collection<AnalyzerBeanDescriptor<?>> analyzerDescriptors = descriptorProvider.scanPackage(
 				"org.eobjects.analyzer.beans.mock", true).getAnalyzerBeanDescriptors();
 		Object[] array = analyzerDescriptors.toArray();
@@ -52,13 +56,13 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 		assertEquals("[AnnotationBasedTransformerBeanDescriptor[org.eobjects.analyzer.beans.mock.TransformerMock]]",
 				Arrays.toString(transformerBeanDescriptors.toArray()));
 
-		analyzerDescriptors = new ClasspathScanDescriptorProvider().scanPackage("org.eobjects.analyzer.job", true)
+		analyzerDescriptors = new ClasspathScanDescriptorProvider(taskRunner).scanPackage("org.eobjects.analyzer.job", true)
 				.getAnalyzerBeanDescriptors();
 		assertEquals(0, analyzerDescriptors.size());
 	}
 
 	public void testScanRenderers() throws Exception {
-		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
+		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
 		Collection<RendererBeanDescriptor> rendererBeanDescriptors = descriptorProvider.scanPackage(
 				"org.eobjects.analyzer.result.renderer", true).getRendererBeanDescriptors();
 		assertEquals("[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "

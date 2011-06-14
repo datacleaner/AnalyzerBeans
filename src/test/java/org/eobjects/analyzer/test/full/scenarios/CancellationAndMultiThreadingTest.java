@@ -63,11 +63,11 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 	}
 
 	public void runScenario() {
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
+		MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(30);
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner)
 				.addAnalyzerClass(ValueDistributionAnalyzer.class);
 		StorageProvider storageProvider = TestHelper.createStorageProvider();
 
-		MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(30);
 		ThreadPoolExecutor executorService = (ThreadPoolExecutor) taskRunner.getExecutorService();
 		assertEquals(30, executorService.getMaximumPoolSize());
 		assertEquals(0, executorService.getActiveCount());

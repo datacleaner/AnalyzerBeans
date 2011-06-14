@@ -188,19 +188,19 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		}
 
 		TaskRunner taskRunner = createTaskRunner(configuration);
+		DescriptorProvider descriptorProvider = createDescriptorProvider(configuration, taskRunner);
 		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog());
 		ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(configuration.getReferenceDataCatalog(),
 				datastoreCatalog);
 		StorageProvider storageProvider = createStorageProvider(configuration.getStorageProvider(), datastoreCatalog,
 				referenceDataCatalog);
-		DescriptorProvider descriptorProvider = createDescriptorProvider(configuration);
 
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner,
 				storageProvider);
 	}
 
-	private DescriptorProvider createDescriptorProvider(Configuration configuration) {
-		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
+	private DescriptorProvider createDescriptorProvider(Configuration configuration, TaskRunner taskRunner) {
+		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
 		ClasspathScannerType classpathScanner = configuration.getClasspathScanner();
 		if (classpathScanner != null) {
 			List<Package> packages = classpathScanner.getPackage();

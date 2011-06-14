@@ -61,10 +61,10 @@ import org.eobjects.metamodel.schema.Table;
 public class NameAndEmailPartEqualityTest extends TestCase {
 
 	public void testScenario() throws Throwable {
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
+		TaskRunner taskRunner = new SingleThreadedTaskRunner();
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner).scanPackage(
 				"org.eobjects.analyzer.beans", true);
 		StorageProvider storageProvider = TestHelper.createStorageProvider();
-		TaskRunner taskRunner = new SingleThreadedTaskRunner();
 		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
 		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
