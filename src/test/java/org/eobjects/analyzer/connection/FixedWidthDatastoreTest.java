@@ -40,13 +40,14 @@ public class FixedWidthDatastoreTest extends TestCase {
 
 	public void testToString() throws Exception {
 		FixedWidthDatastore ds = new FixedWidthDatastore("name", "filename", "encoding", 5);
-		assertEquals("FixedWidthDatastore[name=name, filename=filename, encoding=encoding, fixedValueWidth=5]",
+		assertEquals(
+				"FixedWidthDatastore[name=name, filename=filename, encoding=encoding, valueWidths=[], fixedValueWidth=5]",
 				ds.toString());
 	}
 
 	public void testGetDataContextProvider() throws Exception {
 		FixedWidthDatastore ds = new FixedWidthDatastore("example datastore",
-				"src/test/resources/employees-fixed-width.txt", "UTF-8", 19);
+				"src/test/resources/employees-fixed-width.txt", "UTF-8", 19, false);
 
 		DataContextProvider dcp = ds.getDataContextProvider();
 

@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.reference.Dictionary;
@@ -50,7 +51,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 				"src/test/resources/example-configuration-valid.xml"));
 
 		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(configuration);
-		assertEquals("[mydb_jndi, persons_csv, composite_datastore, my database]",
+		assertEquals("[composite_datastore, my database, mydb_jndi, persons_csv]",
 				Arrays.toString(datastoreCatalog.getDatastoreNames()));
 
 		assertTrue(configuration.getTaskRunner() instanceof SingleThreadedTaskRunner);
@@ -72,7 +73,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
 		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
 		assertEquals(
-				"[my_jdbc_connection, my_dbase, my_csv, my_xml, my_custom, my_odb, my_jdbc_datasource, my_excel_2003, my_composite, my_access]",
+				"[my_access, my_composite, my_csv, my_custom, my_dbase, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_xml]",
 				Arrays.toString(datastoreNames));
 
 		assertEquals("jdbc_con", datastoreCatalog.getDatastore("my_jdbc_connection").getDescription());
@@ -85,6 +86,14 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("xls", datastoreCatalog.getDatastore("my_excel_2003").getDescription());
 		assertEquals("comp", datastoreCatalog.getDatastore("my_composite").getDescription());
 		assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
+
+		FixedWidthDatastore ds = (FixedWidthDatastore) datastoreCatalog.getDatastore("my_fixed_width_1");
+		assertEquals(19, ds.getFixedValueWidth());
+		assertEquals("[]", Arrays.toString(ds.getValueWidths()));
+
+		ds = (FixedWidthDatastore) datastoreCatalog.getDatastore("my_fixed_width_2");
+		assertEquals(-1, ds.getFixedValueWidth());
+		assertEquals("[4, 17, 19]", Arrays.toString(ds.getValueWidths()));
 
 		for (String name : datastoreNames) {
 			// test that all connections, except the JNDI-based on will work
@@ -161,7 +170,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("[textfile_syn, datastore_syn, custom_syn]", Arrays.toString(synonymCatalogNames));
 
 		SynonymCatalog s = referenceDataCatalog.getSynonymCatalog("textfile_syn");
-		assertEquals("syn_txt",s.getDescription());
+		assertEquals("syn_txt", s.getDescription());
 		lifeCycleHelper.initialize(s);
 		assertEquals("DNK", s.getMasterTerm("Denmark"));
 		assertEquals("DNK", s.getMasterTerm("Danmark"));
@@ -170,7 +179,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals(null, s.getMasterTerm("Netherlands"));
 
 		s = referenceDataCatalog.getSynonymCatalog("datastore_syn");
-		assertEquals("syn_ds",s.getDescription());
+		assertEquals("syn_ds", s.getDescription());
 		lifeCycleHelper.initialize(s);
 
 		// lookup by id
@@ -180,7 +189,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals(null, s.getMasterTerm("foobar"));
 
 		s = referenceDataCatalog.getSynonymCatalog("custom_syn");
-		assertEquals("syn_custom",s.getDescription());
+		assertEquals("syn_custom", s.getDescription());
 		lifeCycleHelper.initialize(s);
 		assertEquals("DNK", s.getMasterTerm("Denmark"));
 		assertEquals("DNK", s.getMasterTerm("Danmark"));
@@ -192,15 +201,16 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("[regex danish email, simple email]", Arrays.toString(stringPatternNames));
 
 		StringPattern pattern = referenceDataCatalog.getStringPattern("regex danish email");
-		assertEquals("pattern_reg",pattern.getDescription());
+		assertEquals("pattern_reg", pattern.getDescription());
 		lifeCycleHelper.initialize(pattern);
-		assertEquals("RegexStringPattern[name=regex danish email, expression=[a-z]+@[a-z]+\\.dk, matchEntireString=true]", pattern.toString());
+		assertEquals("RegexStringPattern[name=regex danish email, expression=[a-z]+@[a-z]+\\.dk, matchEntireString=true]",
+				pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));
 		assertFalse(pattern.matches("kasper@eobjects.org"));
 		assertFalse(pattern.matches(" kasper@eobjects.dk"));
 
 		pattern = referenceDataCatalog.getStringPattern("simple email");
-		assertEquals("pattern_simple",pattern.getDescription());
+		assertEquals("pattern_simple", pattern.getDescription());
 		lifeCycleHelper.initialize(pattern);
 		assertEquals("SimpleStringPattern[name=simple email, expression=aaaa@aaaaa.aa]", pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));

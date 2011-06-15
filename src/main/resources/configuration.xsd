@@ -163,7 +163,8 @@
 				minOccurs="0" maxOccurs="unbounded">
 				<annotation>
 					<documentation>
-						Defines a datastore based on a fixed width file.
+						Defines a datastore based on a fixed width value
+						file.
 					</documentation>
 				</annotation>
 			</element>
@@ -254,8 +255,14 @@
 	<complexType name="fixedWidthDatastoreType">
 		<sequence>
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
-			<element name="fixed-value-width" minOccurs="1" maxOccurs="1"
-				type="int" default="15" />
+			<choice>
+				<element name="fixed-value-width" minOccurs="1" maxOccurs="1"
+					type="int" default="10" />
+				<sequence>
+					<element name="value-width" minOccurs="1" maxOccurs="unbounded"
+						type="int" default="5" />
+				</sequence>
+			</choice>
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 			<element name="failOnInconsistencies" minOccurs="0"
 				maxOccurs="1" type="boolean" />

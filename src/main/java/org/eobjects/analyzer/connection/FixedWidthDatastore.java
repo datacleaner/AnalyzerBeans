@@ -22,11 +22,13 @@ package org.eobjects.analyzer.connection;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.FixedWidthConfiguration;
 
 /**
  * Datastore based on fixed width files
@@ -41,17 +43,34 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 	private final String _filename;
 	private final String _encoding;
 	private final int _fixedValueWidth;
+	private final int[] _valueWidths;
 	private final boolean _failOnInconsistencies;
-	
+
 	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth) {
 		this(name, filename, encoding, fixedValueWidth, true);
 	}
 
-	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth, boolean failOnInconsistencies) {
+	public FixedWidthDatastore(String name, String filename, String encoding, int[] valueWidths) {
+		this(name, filename, encoding, valueWidths, true);
+	}
+
+	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth,
+			boolean failOnInconsistencies) {
 		super(name);
 		_filename = filename;
 		_encoding = encoding;
 		_fixedValueWidth = fixedValueWidth;
+		_valueWidths = new int[0];
+		_failOnInconsistencies = failOnInconsistencies;
+	}
+
+	public FixedWidthDatastore(String name, String filename, String encoding, int[] valueWidths,
+			boolean failOnInconsistencies) {
+		super(name);
+		_filename = filename;
+		_encoding = encoding;
+		_fixedValueWidth = -1;
+		_valueWidths = valueWidths;
 		_failOnInconsistencies = failOnInconsistencies;
 	}
 
@@ -69,7 +88,17 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 		File file = new File(_filename);
 		assert file.exists();
 
-		DataContext dataContext = DataContextFactory.createFixedWidthDataContext(file, _encoding, _fixedValueWidth);
+		final int columnNameLineNumber = 0;
+		final FixedWidthConfiguration configuration;
+		if (_fixedValueWidth == -1) {
+			configuration = new FixedWidthConfiguration(columnNameLineNumber, _encoding, _valueWidths,
+					_failOnInconsistencies);
+		} else {
+			configuration = new FixedWidthConfiguration(columnNameLineNumber, _encoding, _fixedValueWidth,
+					_failOnInconsistencies);
+		}
+
+		DataContext dataContext = DataContextFactory.createFixedWidthDataContext(file, configuration);
 		return new SingleDataContextProvider(dataContext, this);
 	}
 
@@ -81,11 +110,15 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 		return _fixedValueWidth;
 	}
 
+	public int[] getValueWidths() {
+		return _valueWidths;
+	}
+
 	@Override
 	public String getFilename() {
 		return _filename;
 	}
-	
+
 	public boolean isFailOnInconsistencies() {
 		return _failOnInconsistencies;
 	}
@@ -96,12 +129,13 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 		identifiers.add(_filename);
 		identifiers.add(_encoding);
 		identifiers.add(_fixedValueWidth);
+		identifiers.add(_valueWidths);
 		identifiers.add(_failOnInconsistencies);
 	}
 
 	@Override
 	public String toString() {
 		return "FixedWidthDatastore[name=" + getName() + ", filename=" + _filename + ", encoding=" + _encoding
-				+ ", fixedValueWidth=" + _fixedValueWidth + "]";
+				+ ", valueWidths=" + Arrays.toString(_valueWidths) + ", fixedValueWidth=" + _fixedValueWidth + "]";
 	}
 }

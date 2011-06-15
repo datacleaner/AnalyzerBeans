@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.connection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 public class DatastoreCatalogImpl implements DatastoreCatalog {
@@ -50,6 +51,7 @@ public class DatastoreCatalogImpl implements DatastoreCatalog {
 			names[i] = ds.getName();
 			i++;
 		}
+		Arrays.sort(names);
 		return names;
 	}
 

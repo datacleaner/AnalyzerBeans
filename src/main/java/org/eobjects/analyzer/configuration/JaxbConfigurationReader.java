@@ -473,7 +473,6 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			}
 
 			String filename = _interceptor.createFilename(fixedWidthDatastore.getFilename());
-			int fixedValueWidth = fixedWidthDatastore.getFixedValueWidth();
 			String encoding = fixedWidthDatastore.getEncoding();
 			if (!StringUtils.isNullOrEmpty(encoding)) {
 				encoding = FileHelper.UTF_8_ENCODING;
@@ -484,8 +483,18 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				failOnInconsistencies = true;
 			}
 
-			FixedWidthDatastore ds = new FixedWidthDatastore(name, filename, encoding, fixedValueWidth,
-					failOnInconsistencies);
+			final FixedWidthDatastore ds;
+			final Integer fixedValueWidth = fixedWidthDatastore.getFixedValueWidth();
+			if (fixedValueWidth == null) {
+				final List<Integer> valueWidthsBoxed = fixedWidthDatastore.getValueWidth();
+				int[] valueWidths = new int[valueWidthsBoxed.size()];
+				for (int i = 0; i < valueWidths.length; i++) {
+					valueWidths[i] = valueWidthsBoxed.get(i).intValue();
+				}
+				ds = new FixedWidthDatastore(name, filename, encoding, valueWidths, failOnInconsistencies);
+			} else {
+				ds = new FixedWidthDatastore(name, filename, encoding, fixedValueWidth, failOnInconsistencies);
+			}
 			ds.setDescription(fixedWidthDatastore.getDescription());
 			datastores.put(name, ds);
 		}

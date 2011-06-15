@@ -76,7 +76,7 @@ public class MainTest extends TestCase {
 		Main.main("-conf examples/conf.xml -list DATASTORES".split(" "));
 
 		String out = stringWriter.toString().replaceAll("\r\n", "\n");
-		assertEquals("Datastores:\n-----------\norderdb\nemployees_csv\nall_datastores\n", out);
+		assertEquals("Datastores:\n-----------\nall_datastores\nemployees_csv\norderdb\n", out);
 	}
 
 	public void testListSchemas() throws Exception {
