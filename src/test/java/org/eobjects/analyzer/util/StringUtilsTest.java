@@ -68,4 +68,11 @@ public class StringUtilsTest extends TestCase {
 		assertTrue(StringUtils.isDiacritic('š'));
 		assertTrue(StringUtils.isDiacritic('á'));
 	}
+	
+	public void testIndexOf() throws Exception {
+		assertEquals(-1, StringUtils.indexOf('a', "bcd".toCharArray()));
+		assertEquals(0, StringUtils.indexOf('a', "abcd".toCharArray()));
+		assertEquals(2, StringUtils.indexOf('c', "abcd".toCharArray()));
+		assertEquals(3, StringUtils.indexOf('d', "abcd".toCharArray()));
+	}
 }

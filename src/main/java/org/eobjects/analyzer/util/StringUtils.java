@@ -66,4 +66,13 @@ public final class StringUtils {
 	public static String replaceWhitespaces(String inString, String with) {
 		return WHITESPACE_PATTERN.matcher(inString).replaceAll(with);
 	}
+
+	public static int indexOf(final char c, final char[] chars) {
+		for (int i = 0; i < chars.length; i++) {
+			if (c == chars[i]) {
+				return i;
+			}
+		}
+		return -1;
+	}
 }
