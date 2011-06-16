@@ -17,13 +17,12 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.similarity;
+package org.eobjects.analyzer.result;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.CollectionUtils;

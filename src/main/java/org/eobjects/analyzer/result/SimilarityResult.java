@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eobjects.analyzer.beans.similarity.SimilarityGroup;
 
 public class SimilarityResult implements AnalyzerResult {
 

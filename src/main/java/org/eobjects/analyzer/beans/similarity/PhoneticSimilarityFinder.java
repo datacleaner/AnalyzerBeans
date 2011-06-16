@@ -36,6 +36,7 @@ import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.result.SimilarityGroup;
 import org.eobjects.analyzer.result.SimilarityResult;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;

@@ -17,7 +17,9 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.similarity;
+package org.eobjects.analyzer.result;
+
+import org.eobjects.analyzer.result.SimilarityGroup;
 
 import junit.framework.TestCase;
 

@@ -17,13 +17,14 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.similarity;
+package org.eobjects.analyzer.result;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.result.SimilarityGroup;
 import org.eobjects.analyzer.result.SimilarityResult;
 
 public class SimilarityResultTest extends TestCase {
