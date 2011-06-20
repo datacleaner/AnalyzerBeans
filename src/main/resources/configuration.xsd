@@ -78,7 +78,7 @@
 						and intermediary results in memory. This is by far the best
 						performing storage provider but it also brings in the risk of
 						running out of memory for very large jobs.  
-							</documentation>
+					</documentation>
 				</annotation>
 			</element>
 			<element name="h2-database" type="ab:h2StorageProviderType"
@@ -86,9 +86,8 @@
 				<annotation>
 					<documentation>
 						This storage provider uses the H2 database engine
-						as
-						a backing store for intermediary results.
-							</documentation>
+						as a backing store for intermediary results.
+					</documentation>
 				</annotation>
 			</element>
 			<element name="hsqldb" type="ab:hsqldbStorageProviderType"
@@ -165,6 +164,14 @@
 					<documentation>
 						Defines a datastore based on a fixed width value
 						file.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="sas-datastore" type="ab:sasDatastoreType"
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a directory of SAS data sets.
 					</documentation>
 				</annotation>
 			</element>
@@ -266,6 +273,14 @@
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 			<element name="failOnInconsistencies" minOccurs="0"
 				maxOccurs="1" type="boolean" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
+	</complexType>
+	
+	<complexType name="sasDatastoreType">
+		<sequence>
+			<element name="directory" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />

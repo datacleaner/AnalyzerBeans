@@ -73,7 +73,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
 		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
 		assertEquals(
-				"[my_access, my_composite, my_csv, my_custom, my_dbase, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_xml]",
+				"[my_access, my_composite, my_csv, my_custom, my_dbase, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_sas, my_xml]",
 				Arrays.toString(datastoreNames));
 
 		assertEquals("jdbc_con", datastoreCatalog.getDatastore("my_jdbc_connection").getDescription());
@@ -86,6 +86,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("xls", datastoreCatalog.getDatastore("my_excel_2003").getDescription());
 		assertEquals("comp", datastoreCatalog.getDatastore("my_composite").getDescription());
 		assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
+		assertEquals("folder of sas7bdat files", datastoreCatalog.getDatastore("my_sas").getDescription());
 
 		FixedWidthDatastore ds = (FixedWidthDatastore) datastoreCatalog.getDatastore("my_fixed_width_1");
 		assertEquals(19, ds.getFixedValueWidth());

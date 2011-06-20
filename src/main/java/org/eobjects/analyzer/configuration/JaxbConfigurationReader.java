@@ -62,6 +62,7 @@ import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Diction
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.StringPatterns;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
 import org.eobjects.analyzer.configuration.jaxb.RegexPatternType;
+import org.eobjects.analyzer.configuration.jaxb.SasDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.SimplePatternType;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.StorageProviderType;
@@ -80,6 +81,7 @@ import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
+import org.eobjects.analyzer.connection.SasDatastore;
 import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -92,6 +94,7 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.reference.DatastoreDictionary;
 import org.eobjects.analyzer.reference.DatastoreSynonymCatalog;
 import org.eobjects.analyzer.reference.Dictionary;
+import org.eobjects.analyzer.reference.ReferenceData;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.reference.RegexStringPattern;
@@ -308,6 +311,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						DatastoreDictionaryType ddt = (DatastoreDictionaryType) dictionaryType;
 
 						String name = ddt.getName();
+						checkName(name, Dictionary.class, dictionaryList);
+
 						String dsName = ddt.getDatastoreName();
 						String columnPath = ddt.getColumnPath();
 
@@ -317,7 +322,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						dictionaryList.add(dict);
 					} else if (dictionaryType instanceof TextFileDictionaryType) {
 						TextFileDictionaryType tfdt = (TextFileDictionaryType) dictionaryType;
+
 						String name = tfdt.getName();
+						checkName(name, Dictionary.class, dictionaryList);
+
 						String filename = _interceptor.createFilename(tfdt.getFilename());
 						String encoding = tfdt.getEncoding();
 						if (encoding == null) {
@@ -328,7 +336,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						dictionaryList.add(dict);
 					} else if (dictionaryType instanceof ValueListDictionaryType) {
 						ValueListDictionaryType vldt = (ValueListDictionaryType) dictionaryType;
+
 						String name = vldt.getName();
+						checkName(name, Dictionary.class, dictionaryList);
+
 						List<String> values = vldt.getValue();
 						SimpleDictionary dict = new SimpleDictionary(name, values);
 						dict.setDescription(vldt.getDescription());
@@ -336,6 +347,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 					} else if (dictionaryType instanceof CustomElementType) {
 						Dictionary customDictionary = createCustomElement((CustomElementType) dictionaryType,
 								Dictionary.class, datastoreCatalog, null, false);
+						checkName(customDictionary.getName(), Dictionary.class, dictionaryList);
 						dictionaryList.add(customDictionary);
 					} else {
 						throw new IllegalStateException("Unsupported dictionary type: " + dictionaryType);
@@ -349,7 +361,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						.getTextFileSynonymCatalogOrDatastoreSynonymCatalogOrCustomSynonymCatalog()) {
 					if (synonymCatalogType instanceof TextFileSynonymCatalogType) {
 						TextFileSynonymCatalogType tfsct = (TextFileSynonymCatalogType) synonymCatalogType;
+
 						String name = tfsct.getName();
+						checkName(name, SynonymCatalog.class, synonymCatalogList);
+
 						String filename = _interceptor.createFilename(tfsct.getFilename());
 						String encoding = tfsct.getEncoding();
 						if (encoding == null) {
@@ -366,10 +381,14 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 					} else if (synonymCatalogType instanceof CustomElementType) {
 						SynonymCatalog customSynonymCatalog = createCustomElement((CustomElementType) synonymCatalogType,
 								SynonymCatalog.class, datastoreCatalog, null, false);
+						checkName(customSynonymCatalog.getName(), SynonymCatalog.class, synonymCatalogList);
 						synonymCatalogList.add(customSynonymCatalog);
 					} else if (synonymCatalogType instanceof DatastoreSynonymCatalogType) {
 						DatastoreSynonymCatalogType datastoreSynonymCatalogType = (DatastoreSynonymCatalogType) synonymCatalogType;
+
 						String name = datastoreSynonymCatalogType.getName();
+						checkName(name, SynonymCatalog.class, synonymCatalogList);
+
 						String dataStoreName = datastoreSynonymCatalogType.getDatastoreName();
 						String masterTermColumnPath = datastoreSynonymCatalogType.getMasterTermColumnPath();
 
@@ -390,7 +409,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				for (Object obj : stringPatternTypes.getRegexPatternOrSimplePattern()) {
 					if (obj instanceof RegexPatternType) {
 						RegexPatternType regexPatternType = (RegexPatternType) obj;
+
 						String name = regexPatternType.getName();
+						checkName(name, StringPattern.class, stringPatterns);
+
 						String expression = regexPatternType.getExpression();
 						boolean matchEntireString = regexPatternType.isMatchEntireString();
 						RegexStringPattern sp = new RegexStringPattern(name, expression, matchEntireString);
@@ -398,7 +420,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 						stringPatterns.add(sp);
 					} else if (obj instanceof SimplePatternType) {
 						SimplePatternType simplePatternType = (SimplePatternType) obj;
+
 						String name = simplePatternType.getName();
+						checkName(name, StringPattern.class, stringPatterns);
+
 						String expression = simplePatternType.getExpression();
 						SimpleStringPattern sp = new SimpleStringPattern(name, expression);
 						sp.setDescription(simplePatternType.getDescription());
@@ -421,13 +446,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		List<CsvDatastoreType> csvDatastores = CollectionUtils.filterOnClass(datastoreTypes, CsvDatastoreType.class);
 		for (CsvDatastoreType csvDatastoreType : csvDatastores) {
 			String name = csvDatastoreType.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 
 			String filename = _interceptor.createFilename(csvDatastoreType.getFilename());
 			String quoteCharString = csvDatastoreType.getQuoteChar();
@@ -464,13 +483,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				FixedWidthDatastoreType.class);
 		for (FixedWidthDatastoreType fixedWidthDatastore : fixedWidthDatastores) {
 			String name = fixedWidthDatastore.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 
 			String filename = _interceptor.createFilename(fixedWidthDatastore.getFilename());
 			String encoding = fixedWidthDatastore.getEncoding();
@@ -499,17 +512,21 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
+		List<SasDatastoreType> sasDatastores = CollectionUtils.filterOnClass(datastoreTypes, SasDatastoreType.class);
+		for (SasDatastoreType sasDatastoreType : sasDatastores) {
+			final String name = sasDatastoreType.getName();
+			checkName(name, Datastore.class, datastores);
+			final File directory = new File(sasDatastoreType.getDirectory());
+			final SasDatastore ds = new SasDatastore(name, directory);
+			ds.setDescription(sasDatastoreType.getDescription());
+			datastores.put(name, ds);
+		}
+
 		List<AccessDatastoreType> accessDatastores = CollectionUtils
 				.filterOnClass(datastoreTypes, AccessDatastoreType.class);
 		for (AccessDatastoreType accessDatastoreType : accessDatastores) {
 			String name = accessDatastoreType.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 			String filename = _interceptor.createFilename(accessDatastoreType.getFilename());
 			AccessDatastore ds = new AccessDatastore(name, filename);
 			ds.setDescription(accessDatastoreType.getDescription());
@@ -519,13 +536,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		List<XmlDatastoreType> xmlDatastores = CollectionUtils.filterOnClass(datastoreTypes, XmlDatastoreType.class);
 		for (XmlDatastoreType xmlDatastoreType : xmlDatastores) {
 			String name = xmlDatastoreType.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 			String filename = _interceptor.createFilename(xmlDatastoreType.getFilename());
 			XmlDatastore ds = new XmlDatastore(name, filename);
 			ds.setDescription(xmlDatastoreType.getDescription());
@@ -535,13 +546,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		List<ExcelDatastoreType> excelDatastores = CollectionUtils.filterOnClass(datastoreTypes, ExcelDatastoreType.class);
 		for (ExcelDatastoreType excelDatastoreType : excelDatastores) {
 			String name = excelDatastoreType.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 			String filename = _interceptor.createFilename(excelDatastoreType.getFilename());
 			ExcelDatastore ds = new ExcelDatastore(name, filename);
 			ds.setDescription(excelDatastoreType.getDescription());
@@ -551,13 +556,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		List<JdbcDatastoreType> jdbcDatastores = CollectionUtils.filterOnClass(datastoreTypes, JdbcDatastoreType.class);
 		for (JdbcDatastoreType jdbcDatastoreType : jdbcDatastores) {
 			String name = jdbcDatastoreType.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 
 			JdbcDatastore ds;
 
@@ -580,13 +579,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		List<DbaseDatastoreType> dbaseDatastores = CollectionUtils.filterOnClass(datastoreTypes, DbaseDatastoreType.class);
 		for (DbaseDatastoreType dbaseDatastoreType : dbaseDatastores) {
 			String name = dbaseDatastoreType.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 
 			String filename = _interceptor.createFilename(dbaseDatastoreType.getFilename());
 			DbaseDatastore ds = new DbaseDatastore(name, filename);
@@ -600,13 +593,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				OpenOfficeDatabaseDatastoreType.class);
 		for (OpenOfficeDatabaseDatastoreType odbDatastoreType : odbDatastores) {
 			String name = odbDatastoreType.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 
 			String filename = _interceptor.createFilename(odbDatastoreType.getFilename());
 			OdbDatastore ds = new OdbDatastore(name, filename);
@@ -618,13 +605,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		for (CustomElementType customElementType : customDatastores) {
 			Datastore ds = createCustomElement(customElementType, Datastore.class, null, null, true);
 			String name = ds.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 			datastores.put(name, ds);
 		}
 
@@ -632,13 +613,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				CompositeDatastoreType.class);
 		for (CompositeDatastoreType compositeDatastoreType : compositeDatastores) {
 			String name = compositeDatastoreType.getName();
-			if (StringUtils.isNullOrEmpty(name)) {
-				throw new IllegalStateException("Datastore name cannot be null");
-			}
-
-			if (datastores.containsKey(name)) {
-				throw new IllegalStateException("Datastore name is not unique: " + name);
-			}
+			checkName(name, Datastore.class, datastores);
 
 			List<String> datastoreNames = compositeDatastoreType.getDatastoreName();
 			List<Datastore> childDatastores = new ArrayList<Datastore>(datastoreNames.size());
@@ -658,6 +633,54 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
 		return result;
+	}
+
+	/**
+	 * Checks if a string is a valid name of a component.
+	 * 
+	 * @param name
+	 *            the name to be validated
+	 * @param type
+	 *            the type of component (used for error messages)
+	 * @param previousEntries
+	 *            the previous entries of that component type (for uniqueness
+	 *            check)
+	 * @throws IllegalStateException
+	 *             if the name is invalid
+	 */
+	private static void checkName(final String name, Class<?> type, final Map<String, ?> previousEntries)
+			throws IllegalStateException {
+		if (StringUtils.isNullOrEmpty(name)) {
+			throw new IllegalStateException(type.getSimpleName() + " name cannot be null");
+		}
+		if (previousEntries.containsKey(name)) {
+			throw new IllegalStateException(type.getSimpleName() + " name is not unique: " + name);
+		}
+	}
+
+	/**
+	 * Checks if a string is a valid name of a component.
+	 * 
+	 * @param name
+	 *            the name to be validated
+	 * @param type
+	 *            the type of component (used for error messages)
+	 * @param previousEntries
+	 *            the previous entries of that component type (for uniqueness
+	 *            check)
+	 * @throws IllegalStateException
+	 *             if the name is invalid
+	 */
+	private static void checkName(String name, Class<?> type, List<? extends ReferenceData> previousEntries)
+			throws IllegalStateException {
+		if (StringUtils.isNullOrEmpty(name)) {
+			throw new IllegalStateException(type.getSimpleName() + " name cannot be null");
+		}
+		for (ReferenceData referenceData : previousEntries) {
+			if (name.equals(referenceData.getName())) {
+				throw new IllegalStateException(type.getSimpleName() + " name is not unique: " + name);
+			}
+		}
 	}
 
 	private TaskRunner createTaskRunner(Configuration configuration) {
