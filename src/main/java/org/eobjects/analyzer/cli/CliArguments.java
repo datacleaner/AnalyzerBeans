@@ -21,8 +21,6 @@ package org.eobjects.analyzer.cli;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -128,31 +126,19 @@ public class CliArguments {
 	}
 
 	/**
-	 * Gets whether (<i>any</i> of) the arguments have been set or not.
+	 * Gets whether the arguments have been sufficiently set to execute a CLI task.
 	 * 
-	 * @return true if <i>any</i> of the arguments have been set, or false if
-	 *         none of them has.
+	 * @return true if the CLI arguments have been sufficiently set.
 	 */
 	public boolean isSet() {
-		Field[] fields = CliArguments.class.getDeclaredFields();
-		for (Field field : fields) {
-			field.setAccessible(true);
-			if (!Modifier.isStatic(field.getModifiers())) {
-				try {
-					Object value = field.get(this);
-					if (field.getType() == boolean.class) {
-						if ((Boolean) value) {
-							return true;
-						}
-					} else {
-						if (value != null) {
-							return true;
-						}
-					}
-				} catch (Exception e) {
-					throw new IllegalStateException(e);
-				}
-			}
+		if (isUsageMode()) {
+			return true;
+		}
+		if (getJobFile() != null) {
+			return true;
+		}
+		if (getListType() != null) {
+			return true;
 		}
 		return false;
 	}

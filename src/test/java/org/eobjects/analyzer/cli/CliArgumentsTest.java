@@ -37,10 +37,14 @@ public class CliArgumentsTest extends TestCase {
 
 	public void testIsSetTrue() throws Exception {
 		CliArguments args;
-		args = CliArguments.parse(new String[] { "-ds", "mrrh" });
+		args = CliArguments.parse(new String[] { "-list", "TABLES", "-ds", "mrrh" });
 		assertTrue(args.isSet());
-		
+
 		args = CliArguments.parse(new String[] { "-usage" });
 		assertTrue(args.isSet());
+		
+		args = CliArguments.parse(new String[] { "-ds", "foo" });
+		assertFalse(args.isSet());
+		assertEquals("foo", args.getDatastoreName());
 	}
 }
