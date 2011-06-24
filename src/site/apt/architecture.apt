@@ -44,11 +44,28 @@ Row processing framework
  
 Exploring analyzers
 
- TODO
+ Exploring analyzers are a different breed of analyzers than those, that can be placed
+ within the row processing framework. Some analyses cannot rely solely on an optimized row
+ processing framework. For example:
+ 
+  * An analysis that asserts which columns are most likely joinable.
+  * A comparison of two tables, either in structure or in content.
+
+ For such scenarios you need a component that is not placed within a flow, but is explorative.
+ This is the purpose of the "Exploring" analyzer type. An exploring analyzer doesn't consume rows,
+ like a row processing analyzer, but consumes a complete DataContext object from which it has the
+ ability to perform any kind of analysis.
+ 
+ In terms of performance, the exploring analyzers doesn't enjoy all the multithreading optimizations
+ that the row processing framework provides. To somewhat compensate, each exploring analyzer is
+ executed in it's own thread.
 
 Row annotations
 
- TODO
+ Row annotations are used as a centralized way of handling the proces of marking rows
+ of interest for analysis. A row annotation typically represents a particular category
+ of rows. To annotate rows, an AnalyzerBeans component can inject a @Provided RowAnnotationFactory
+ and use this to create and use annotations.
  
 Concurrency model
 

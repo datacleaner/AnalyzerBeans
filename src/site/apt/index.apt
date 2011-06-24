@@ -19,5 +19,5 @@ eobjects.org AnalyzerBeans
  
  * Supports transformations, filtering and analyzer components.
  
- * Is NOT a full blown ETL engine (that would make some of the advantages in
+ * It is NOT a full blown ETL engine (that would make some of the advantages in
    our threading model impossible).

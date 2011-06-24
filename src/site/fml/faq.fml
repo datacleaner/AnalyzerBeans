@@ -66,6 +66,14 @@
 						for tabular data).
 					</li>
 					<li>
+						Fixed width value files (where line length is constant).
+					</li>
+					<li>
+						SAS datasets (
+						<b>.sas7bdat</b>
+						)
+					</li>
+					<li>
 						dBase databases (
 						<b>.dbf</b>
 						)

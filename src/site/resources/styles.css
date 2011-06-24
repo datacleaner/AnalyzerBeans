@@ -41,7 +41,7 @@ body,p,div,span,table,dl,ul,li,td,th {
 	background-color: white;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
-	behavior: url("http://eobjects.org/resources/border-radius.htc");
+	behavior: url("/border-radius.htc");
 	border-radius: 10px;
 }
 
@@ -67,7 +67,7 @@ h1,h2,h3,h4,h5 {
 	border: 1px solid #999;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
-	behavior: url("http://eobjects.org/resources/border-radius.htc");
+	behavior: url("/border-radius.htc");
 	border-radius: 10px;
 	margin-left: 14px;
 }
@@ -77,7 +77,7 @@ h1,h2,h3,h4,h5 {
 	background-color: white;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
-	behavior: url("http://eobjects.org/resources/border-radius.htc");
+	behavior: url("/border-radius.htc");
 	border-radius: 10px;
 	margin-left: 10px;
 }
@@ -92,7 +92,7 @@ h1,h2,h3,h4,h5 {
 	background-color: white;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
-	behavior: url("http://eobjects.org/resources/border-radius.htc");
+	behavior: url("/border-radius.htc");
 	border-radius: 10px;
 	margin-left: 10px;
 }

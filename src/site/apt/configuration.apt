@@ -8,3 +8,7 @@ AnalyzerBeans configuration
  
  We are working on a more user-friendly documentation, but in the meantime please
  refer to the {{{http://datacleaner.eobjects.org}Visit AnalyzerBeansConfiguration API documentation}}.
+ 
+ Also, the DataCleaner project provides examples of editing the AnalyzerBeans configuration file
+ (with the fixed filename 'conf.xml' in that project). Please go to the
+ {{{http://datacleaner.eobjects.org/docs}DataCleaner docs}} for more information.
