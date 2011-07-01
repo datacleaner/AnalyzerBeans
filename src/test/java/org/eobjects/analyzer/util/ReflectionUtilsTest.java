@@ -27,6 +27,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.PatternFinderResult;
+import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.util.ReflectionUtilTestHelpClass.ClassA;
 import org.eobjects.analyzer.util.ReflectionUtilTestHelpClass.ClassB;
 
@@ -89,7 +90,7 @@ public class ReflectionUtilsTest extends TestCase {
 		assertTrue(ReflectionUtils.isNumber(Float.class));
 		assertFalse(ReflectionUtils.isNumber(String.class));
 		assertFalse(ReflectionUtils.isNumber(Object.class));
-		
+
 		assertTrue(ReflectionUtils.isNumber(byte.class));
 		assertTrue(ReflectionUtils.isNumber(short.class));
 		assertTrue(ReflectionUtils.isNumber(int.class));
@@ -109,7 +110,8 @@ public class ReflectionUtilsTest extends TestCase {
 		assertEquals(1, ReflectionUtils.getHierarchyDistance(Integer.class, Number.class));
 
 		assertEquals(1, ReflectionUtils.getHierarchyDistance(CrosstabResult.class, AnalyzerResult.class));
-		assertEquals(2, ReflectionUtils.getHierarchyDistance(PatternFinderResult.class, AnalyzerResult.class));
+		assertEquals(2, ReflectionUtils.getHierarchyDistance(StringAnalyzerResult.class, AnalyzerResult.class));
+		assertEquals(1, ReflectionUtils.getHierarchyDistance(PatternFinderResult.class, AnalyzerResult.class));
 	}
 
 	public void testGetFields() throws Exception {
@@ -127,5 +129,5 @@ public class ReflectionUtilsTest extends TestCase {
 		assertEquals(ClassA.class, fields[1].getDeclaringClass());
 		assertEquals("a", fields[1].getName());
 	}
-	
+
 }

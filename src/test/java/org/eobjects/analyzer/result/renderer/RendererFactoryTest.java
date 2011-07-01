@@ -50,7 +50,7 @@ public class RendererFactoryTest extends TestCase {
 		assertEquals(CrosstabTextRenderer.class, r.getClass());
 
 		r = rendererFactory.getRenderer(new PatternFinderResult(null, null), TextRenderingFormat.class);
-		assertEquals(CrosstabTextRenderer.class, r.getClass());
+		assertEquals(PatternFinderResultTextRenderer.class, r.getClass());
 
 		r = rendererFactory.getRenderer(new DataSetResult(new LinkedList<Row>()), TextRenderingFormat.class);
 		assertEquals(DefaultTextRenderer.class, r.getClass());

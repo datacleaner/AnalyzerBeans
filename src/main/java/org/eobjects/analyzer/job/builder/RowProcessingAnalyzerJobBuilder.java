@@ -55,7 +55,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	public RowProcessingAnalyzerJobBuilder(AnalysisJobBuilder analysisJobBuilder, AnalyzerBeanDescriptor<A> descriptor) {
 		super(analysisJobBuilder, descriptor, RowProcessingAnalyzerJobBuilder.class);
 
-		Set<ConfiguredPropertyDescriptor> inputProperties = descriptor.getConfiguredPropertiesForInput();
+		Set<ConfiguredPropertyDescriptor> inputProperties = descriptor.getConfiguredPropertiesForInput(false);
 		if (inputProperties.size() == 1) {
 			_multipleJobsSupported = true;
 			_inputColumns = new ArrayList<InputColumn<?>>();
@@ -65,6 +65,10 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 			_inputColumns = null;
 			_inputProperty = null;
 		}
+	}
+
+	public boolean isMultipleJobsDeterminedBy(ConfiguredPropertyDescriptor propertyDescriptor) {
+		return _multipleJobsSupported && propertyDescriptor.isInputColumn() && propertyDescriptor.isRequired();
 	}
 
 	@Override
@@ -145,7 +149,11 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	@Override
 	public RowProcessingAnalyzerJobBuilder<A> addInputColumn(InputColumn<?> inputColumn,
 			ConfiguredPropertyDescriptor propertyDescriptor) {
-		if (_multipleJobsSupported) {
+		assert propertyDescriptor.isInputColumn();
+		if (inputColumn == null) {
+			throw new IllegalArgumentException("InputColumn cannot be null");
+		}
+		if (isMultipleJobsDeterminedBy(propertyDescriptor)) {
 			_inputColumns.add(inputColumn);
 			return this;
 		} else {
@@ -187,7 +195,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	@Override
 	public RowProcessingAnalyzerJobBuilder<A> setConfiguredProperty(ConfiguredPropertyDescriptor configuredProperty,
 			Object value) {
-		if (_multipleJobsSupported && configuredProperty.isInputColumn()) {
+		if (isMultipleJobsDeterminedBy(configuredProperty)) {
 
 			// the dummy value is used just to pass something to the underlying
 			// prototype bean.
@@ -224,7 +232,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 
 	@Override
 	public Object getConfiguredProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
-		if (_multipleJobsSupported && propertyDescriptor.isInputColumn()) {
+		if (isMultipleJobsDeterminedBy(propertyDescriptor)) {
 			return _inputColumns.toArray(new InputColumn[_inputColumns.size()]);
 		} else {
 			return super.getConfiguredProperty(propertyDescriptor);

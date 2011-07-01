@@ -40,8 +40,8 @@ import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
+import org.eobjects.analyzer.result.PatternFinderResult;
+import org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class MergedOutcomeJobBuilderTest extends TestCase {
@@ -153,13 +153,13 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
 		List<AnalyzerResult> results = resultFuture.getResults();
 		assertEquals(1, results.size());
 
-		CrosstabResult result = (CrosstabResult) results.get(0);
-		String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
-		assertEquals(5, resultLines.length);
+		PatternFinderResult result = (PatternFinderResult) results.get(0);
+		String[] resultLines = new PatternFinderResultTextRenderer().render(result).split("\n");
 		assertEquals("                Match count Sample      ", resultLines[0]);
 		assertEquals("aaaa.aaa                  3 john.doe    ", resultLines[1]);
 		assertEquals("Aaa. Aaaaaa Aaa           1 Mrs. Foobar Foo ", resultLines[2]);
 		assertEquals("Aaaaaaa Aaaaa             1 Asbjørn Leeth ", resultLines[3]);
 		assertEquals("aaaaaa                    1 kasper      ", resultLines[4]);
+		assertEquals(5, resultLines.length);
 	}
 }

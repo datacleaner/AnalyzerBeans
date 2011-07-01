@@ -28,7 +28,6 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.test.TestHelper;
-
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableTable;
@@ -81,8 +80,7 @@ public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 	}
 
 	public void testNoOriginatingTableBecauseOfMockColumns() throws Exception {
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> jobBuilder = ajb
-				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		RowProcessingAnalyzerJobBuilder<StringAnalyzer> jobBuilder = ajb.addRowProcessingAnalyzer(StringAnalyzer.class);
 		jobBuilder.addInputColumn(new MockInputColumn<String>("foo", String.class));
 		jobBuilder.addInputColumn(new MockInputColumn<String>("bar", String.class));
 
@@ -91,7 +89,7 @@ public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 			fail("Exception expected");
 		} catch (IllegalStateException e) {
 			assertEquals(
-					"Could not determine source for analyzer 'RowProcessingAnalyzerJobBuilder[analyzer=Pattern finder,inputColumns=[MockInputColumn[name=foo], MockInputColumn[name=bar]]]'",
+					"Could not determine source for analyzer 'RowProcessingAnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[MockInputColumn[name=foo], MockInputColumn[name=bar]]]'",
 					e.getMessage());
 		}
 	}

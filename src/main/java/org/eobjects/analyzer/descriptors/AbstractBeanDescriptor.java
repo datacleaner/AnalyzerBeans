@@ -98,10 +98,17 @@ public abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescripto
 
 	@Override
 	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
+		return getConfiguredPropertiesForInput(true);
+	}
+
+	@Override
+	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput(boolean includeOptional) {
 		Set<ConfiguredPropertyDescriptor> descriptors = new TreeSet<ConfiguredPropertyDescriptor>(_configuredProperties);
 		for (Iterator<ConfiguredPropertyDescriptor> it = descriptors.iterator(); it.hasNext();) {
 			ConfiguredPropertyDescriptor propertyDescriptor = it.next();
 			if (!propertyDescriptor.isInputColumn()) {
+				it.remove();
+			} else if (!includeOptional && !propertyDescriptor.isRequired()) {
 				it.remove();
 			}
 		}

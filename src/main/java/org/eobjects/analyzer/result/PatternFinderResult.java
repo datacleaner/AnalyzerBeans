@@ -19,19 +19,49 @@
  */
 package org.eobjects.analyzer.result;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eobjects.analyzer.data.InputColumn;
 
-public class PatternFinderResult extends CrosstabResult {
+public class PatternFinderResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 	private final InputColumn<String> _column;
+	private final InputColumn<String> _groupColumn;
+	private final Map<String, Crosstab<?>> _crosstabs;
 
 	public PatternFinderResult(InputColumn<String> column, Crosstab<?> crosstab) {
-		super(crosstab);
 		_column = column;
+		_groupColumn = null;
+		_crosstabs = new HashMap<String, Crosstab<?>>();
+		_crosstabs.put(null, crosstab);
+	}
+
+	public PatternFinderResult(InputColumn<String> column, InputColumn<String> groupColumn,
+			Map<String, Crosstab<?>> crosstabs) {
+		_column = column;
+		_groupColumn = groupColumn;
+		_crosstabs = crosstabs;
 	}
 
 	public InputColumn<String> getColumn() {
 		return _column;
+	}
+
+	public InputColumn<String> getGroupColumn() {
+		return _groupColumn;
+	}
+
+	public Map<String, Crosstab<?>> getGroupedCrosstabs() {
+		return _crosstabs;
+	}
+
+	public Crosstab<?> getSingleCrosstab() {
+		return _crosstabs.get(null);
+	}
+
+	public boolean isGroupingEnabled() {
+		return _groupColumn != null;
 	}
 }

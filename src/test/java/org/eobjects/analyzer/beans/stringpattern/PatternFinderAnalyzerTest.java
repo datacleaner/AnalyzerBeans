@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
-import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
+import org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 
 public class PatternFinderAnalyzerTest extends TestCase {
@@ -47,7 +47,8 @@ public class PatternFinderAnalyzerTest extends TestCase {
 
 		pf.run(new MockInputRow().put(column, "blabla"), 1);
 
-		assertEquals("Crosstab:\nMatch count,aaaaaa: 1\nSample,aaaaaa: blabla", pf.getResult().getCrosstab().toString());
+		assertEquals("Crosstab:\nMatch count,aaaaaa: 1\nSample,aaaaaa: blabla", pf.getResult().getSingleCrosstab()
+				.toString());
 	}
 
 	public void testEmployeeTitles() throws Exception {
@@ -63,7 +64,7 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		pf.run(new MockInputRow().put(column, "Sales director"), 1);
 
 		String[] resultLines;
-		resultLines = new CrosstabTextRenderer().render(pf.getResult()).split("\n");
+		resultLines = new PatternFinderResultTextRenderer().render(pf.getResult()).split("\n");
 		assertEquals(2, resultLines.length);
 		assertEquals("               Match count Sample      ", resultLines[0]);
 		assertEquals("Aaaaa aaaaaaaa           1 Sales director ", resultLines[1]);
@@ -72,7 +73,7 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		pf.run(new MockInputRow().put(column, "Account manager"), 1);
 		pf.run(new MockInputRow().put(column, "Sales manager (EMEA)"), 1);
 
-		resultLines = new CrosstabTextRenderer().render(pf.getResult()).split("\n");
+		resultLines = new PatternFinderResultTextRenderer().render(pf.getResult()).split("\n");
 		assertEquals(4, resultLines.length);
 		assertEquals("                     Match count Sample      ", resultLines[0]);
 		assertEquals("Aaaaaaa aaaaaaaa               2 Sales director ", resultLines[1]);
@@ -83,7 +84,7 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		pf.run(new MockInputRow().put(column, "Account Manager (USA)"), 1);
 		pf.run(new MockInputRow().put(column, "1st on the phone"), 1);
 
-		resultLines = new CrosstabTextRenderer().render(pf.getResult()).split("\n");
+		resultLines = new PatternFinderResultTextRenderer().render(pf.getResult()).split("\n");
 		assertEquals(7, resultLines.length);
 		assertEquals("                      Match count Sample      ", resultLines[0]);
 		assertEquals("Aaaaaaa aaaaaaaa                2 Sales director ", resultLines[1]);
@@ -109,10 +110,57 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		pf.run(new MockInputRow().put(column, "john@doe.com"), 1);
 		pf.run(new MockInputRow().put(column, "john.doe@company.com"), 1);
 
-		String[] resultLines = new CrosstabTextRenderer().render(pf.getResult()).split("\n");
+		String[] resultLines = new PatternFinderResultTextRenderer().render(pf.getResult()).split("\n");
 		assertEquals(3, resultLines.length);
 		assertEquals("                             Match count Sample      ", resultLines[0]);
 		assertEquals("aaaaaa.aaaaaaaa@aaaaaaaa.aaa           2 kasper.sorensen@eobjects.dk ", resultLines[1]);
 		assertEquals("aaaaaa@aaaaaaaa.aaa                    2 kasper@eobjects.dk ", resultLines[2]);
+	}
+
+	public void testGroupEmailByDomain() throws Exception {
+		PatternFinderAnalyzer pf = new PatternFinderAnalyzer();
+		MockInputColumn<String> col1 = new MockInputColumn<String>("username", String.class);
+		MockInputColumn<String> col2 = new MockInputColumn<String>("domain", String.class);
+
+		pf.setRowAnnotationFactory(new InMemoryRowAnnotationFactory());
+		pf.setColumn(col1);
+		pf.setGroupColumn(col2);
+		pf.setDiscriminateTextCase(true);
+
+		pf.init();
+		String[] resultLines;
+
+		resultLines = new PatternFinderResultTextRenderer().render(pf.getResult()).split("\n");
+		assertEquals(1, resultLines.length);
+		assertEquals("No patterns found", resultLines[0]);
+
+		pf.run(new MockInputRow().put(col1, "kasper").put(col2, null), 1);
+
+		resultLines = new PatternFinderResultTextRenderer().render(pf.getResult()).split("\n");
+		assertEquals("Patterns for group: null", resultLines[0]);
+		assertEquals("       Match count Sample      ", resultLines[1]);
+		assertEquals("aaaaaa           1 kasper      ", resultLines[2]);
+		assertEquals(3, resultLines.length);
+
+		pf.run(new MockInputRow().put(col1, "kasper").put(col2, "eobjects.dk"), 1);
+		pf.run(new MockInputRow().put(col1, "kasper.sorensen").put(col2, "eobjects.dk"), 1);
+		pf.run(new MockInputRow().put(col1, "kaspersorensen").put(col2, "eobjects.dk"), 1);
+		pf.run(new MockInputRow().put(col1, "john").put(col2, "company.com"), 1);
+		pf.run(new MockInputRow().put(col1, "doe").put(col2, "company.com"), 1);
+
+		resultLines = new PatternFinderResultTextRenderer().render(pf.getResult()).split("\n");
+		assertEquals("Patterns for group: null", resultLines[0]);
+		assertEquals("       Match count Sample      ", resultLines[1]);
+		assertEquals("aaaaaa           1 kasper      ", resultLines[2]);
+		assertEquals("", resultLines[3]);
+		assertEquals("Patterns for group: company.com", resultLines[4]);
+		assertEquals("     Match count Sample      ", resultLines[5]);
+		assertEquals("aaaa           2 john        ", resultLines[6]);
+		assertEquals("", resultLines[7]);
+		assertEquals("Patterns for group: eobjects.dk", resultLines[8]);
+		assertEquals("                Match count Sample      ", resultLines[9]);
+		assertEquals("aaaaaaaaaaaaaa            2 kasper      ", resultLines[10]);
+		assertEquals("aaaaaa.aaaaaaaa           1 kasper.sorensen ", resultLines[11]);
+		assertEquals(12, resultLines.length);
 	}
 }

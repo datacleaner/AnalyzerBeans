@@ -76,6 +76,17 @@ public interface BeanDescriptor<B> extends ComponentDescriptor<B> {
 	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput();
 
 	/**
+	 * Gets the configured properties that have {@link InputColumn} type.
+	 * 
+	 * @param onlyRequired
+	 *            a boolean indicating if optional properties should be
+	 *            returned. If false, only required properties will be included.
+	 * @return a set containing all configured property descriptors of
+	 *         {@link InputColumn}s in the bean.
+	 */
+	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput(boolean includeOptional);
+
+	/**
 	 * Gets the provided properties of the bean.
 	 * 
 	 * @return a set of provided properties.

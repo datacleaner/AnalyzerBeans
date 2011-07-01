@@ -162,9 +162,9 @@ public final class CollectionUtils {
 		return result;
 	}
 
-	public static <E> List<E> filter(List<E> list, Function<E, Boolean> predicate) {
+	public static <E> List<E> filter(Collection<E> col, Function<E, Boolean> predicate) {
 		List<E> result = new ArrayList<E>();
-		for (E obj : list) {
+		for (E obj : col) {
 			try {
 				if (predicate.run(obj)) {
 					result.add(obj);

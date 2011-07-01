@@ -69,7 +69,7 @@
                 <property value="&amp;#44;" name="Thousands separator"/>
                 <property value="-" name="Minus sign"/>
             </properties>
-            <input ref="col_0"/>
+            <input name="Column" ref="col_0"/>
         </analyzer>
         <analyzer name="pf 1">
             <descriptor ref="Pattern finder"/>
@@ -85,7 +85,7 @@
                 <property value="&amp;#44;" name="Thousands separator"/>
                 <property value="-" name="Minus sign"/>
             </properties>
-            <input ref="col_3"/>
+            <input name="Column" ref="col_3"/>
         </analyzer>
         <analyzer name="pf 2">
             <descriptor ref="Pattern finder"/>
@@ -101,7 +101,7 @@
                 <property value="&amp;#44;" name="Thousands separator"/>
                 <property value="-" name="Minus sign"/>
             </properties>
-            <input ref="col_5"/>
+            <input name="Column" ref="col_5"/>
         </analyzer>
     </analysis>
 </job>

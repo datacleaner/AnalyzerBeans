@@ -124,7 +124,7 @@ public final class AnalysisJobBuilder implements Closeable {
 	public DataContextProvider getDataContextProvider() {
 		return _dataContextProvider;
 	}
-	
+
 	public AnalyzerBeansConfiguration getConfiguration() {
 		return _configuration;
 	}
@@ -567,6 +567,13 @@ public final class AnalysisJobBuilder implements Closeable {
 
 	public InputColumn<?> getSourceColumnByName(String name) {
 		if (name != null) {
+			for (MetaModelInputColumn inputColumn : _sourceColumns) {
+				String qualifiedLabel = inputColumn.getPhysicalColumn().getQualifiedLabel();
+				if (name.equalsIgnoreCase(qualifiedLabel)) {
+					return inputColumn;
+				}
+			}
+
 			for (MetaModelInputColumn inputColumn : _sourceColumns) {
 				if (name.equals(inputColumn.getName())) {
 					return inputColumn;
