@@ -171,6 +171,9 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	}
 
 	private void run(String group, String value, InputRow row, int distinctCount) {
+		if (value == null) {
+			return;
+		}
 		DefaultPatternFinder patternFinder = getPatternFinderForGroup(group);
 		patternFinder.run(row, value, distinctCount);
 	}
@@ -216,8 +219,7 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 		Set<Entry<TokenPattern, RowAnnotation>> entrySet = patternFinder.getAnnotations().entrySet();
 
 		// sort the entries so that the ones with the highest amount of
-		// matches
-		// are at the top
+		// matches are at the top
 		Set<Entry<TokenPattern, RowAnnotation>> sortedEntrySet = new TreeSet<Entry<TokenPattern, RowAnnotation>>(
 				new Comparator<Entry<TokenPattern, RowAnnotation>>() {
 					public int compare(Entry<TokenPattern, RowAnnotation> o1, Entry<TokenPattern, RowAnnotation> o2) {

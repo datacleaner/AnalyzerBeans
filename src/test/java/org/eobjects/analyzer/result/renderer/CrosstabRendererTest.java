@@ -136,6 +136,5 @@ public class CrosstabRendererTest extends TestCase {
 		String result = renderer.render(crosstab);
 		
 		assertEquals("", result);
-		
 	}
 }
