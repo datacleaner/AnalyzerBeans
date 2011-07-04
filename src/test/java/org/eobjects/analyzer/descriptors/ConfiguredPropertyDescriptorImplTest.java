@@ -53,7 +53,7 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 	public void testCompareTo() throws Exception {
 		Set<ConfiguredPropertyDescriptor> properties = AnnotationBasedAnalyzerBeanDescriptor.create(DateGapAnalyzer.class)
 				.getConfiguredProperties();
-		assertEquals(4, properties.size());
+		assertEquals(5, properties.size());
 		Iterator<ConfiguredPropertyDescriptor> it = properties.iterator();
 		assertTrue(it.hasNext());
 		assertEquals("From column", it.next().getName());
@@ -63,6 +63,8 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 		assertEquals("Group column", it.next().getName());
 		assertTrue(it.hasNext());
 		assertEquals("Count intersecting from and to dates as overlaps", it.next().getName());
+		assertTrue(it.hasNext());
+		assertEquals("Fault tolerant switch from/to dates", it.next().getName());
 		assertFalse(it.hasNext());
 
 		Field f1 = getClass().getDeclaredField("str1");

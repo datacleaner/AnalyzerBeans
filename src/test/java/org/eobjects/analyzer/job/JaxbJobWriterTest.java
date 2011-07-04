@@ -103,7 +103,7 @@ public class JaxbJobWriterTest extends TestCase {
 		str = str.replaceAll("\"", "_");
 
 		String[] lines = str.split("\n");
-		assertEquals(26, lines.length);
+		assertEquals(27, lines.length);
 
 		assertEquals("<?xml version=_1.0_ encoding=_UTF-8_ standalone=_yes_?>", lines[0]);
 		assertEquals("<job xmlns=_http://eobjects.org/analyzerbeans/job/1.0_>", lines[1]);
@@ -126,12 +126,13 @@ public class JaxbJobWriterTest extends TestCase {
 		assertEquals("            <properties>", lines[18]);
 		assertEquals("                <property value=_true_ name=_Count intersecting from and to dates as overlaps_/>",
 				lines[19]);
-		assertEquals("            </properties>", lines[20]);
-		assertEquals("            <input name=_From column_ ref=_col_0_/>", lines[21]);
-		assertEquals("            <input name=_To column_ ref=_col_1_/>", lines[22]);
-		assertEquals("        </analyzer>", lines[23]);
-		assertEquals("    </analysis>", lines[24]);
-		assertEquals("</job>", lines[25]);
+		assertEquals("                <property value=_true_ name=_Fault tolerant switch from/to dates_/>", lines[20]);
+		assertEquals("            </properties>", lines[21]);
+		assertEquals("            <input name=_From column_ ref=_col_0_/>", lines[22]);
+		assertEquals("            <input name=_To column_ ref=_col_1_/>", lines[23]);
+		assertEquals("        </analyzer>", lines[24]);
+		assertEquals("    </analysis>", lines[25]);
+		assertEquals("</job>", lines[26]);
 	}
 
 	public void testEmptyJobEnvelope() throws Exception {
@@ -139,9 +140,9 @@ public class JaxbJobWriterTest extends TestCase {
 		Datastore ds = EasyMock.createMock(Datastore.class);
 
 		EasyMock.expect(job.getDatastore()).andReturn(ds);
-		
+
 		EasyMock.expect(ds.getName()).andReturn("myds");
-		
+
 		EasyMock.expect(job.getSourceColumns()).andReturn(new ArrayList<InputColumn<?>>());
 		EasyMock.expect(job.getTransformerJobs()).andReturn(new ArrayList<TransformerJob>());
 		EasyMock.expect(job.getFilterJobs()).andReturn(new ArrayList<FilterJob>());
