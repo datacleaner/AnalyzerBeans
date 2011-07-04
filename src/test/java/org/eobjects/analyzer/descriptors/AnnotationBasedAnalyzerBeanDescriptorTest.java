@@ -113,7 +113,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		assertEquals(DataTypeFamily.STRING, propertyDescriptor.getInputColumnDataTypeFamily());
 
 		descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(ValueDistributionAnalyzer.class);
-		configuredProperties = descriptor.getConfiguredPropertiesForInput();
+		configuredProperties = descriptor.getConfiguredPropertiesForInput(false);
 		assertEquals(1, configuredProperties.size());
 		propertyDescriptor = configuredProperties.iterator().next();
 		assertEquals(DataTypeFamily.UNDEFINED, propertyDescriptor.getInputColumnDataTypeFamily());

@@ -53,9 +53,6 @@ import org.eobjects.analyzer.util.NullTolerableComparator;
 @Concurrent(true)
 public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinderResult> {
 
-	public static final String NULL_GROUP = "<null>";
-	public static final String NO_GROUP = "";
-
 	@Configured(order = 1)
 	InputColumn<String> column;
 

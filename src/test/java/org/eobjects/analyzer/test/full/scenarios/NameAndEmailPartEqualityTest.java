@@ -53,7 +53,6 @@ import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
-
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
@@ -154,34 +153,39 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		ValueDistributionResult vdResult = (ValueDistributionResult) results.get(1);
 		assertEquals("Firstname", vdResult.getColumnName());
-		assertEquals(0, vdResult.getNullCount());
-		assertEquals(2, vdResult.getUniqueCount());
-		assertEquals("ValueCountList[[[barack->4]]]", vdResult.getTopValues().toString());
+		assertEquals(0, vdResult.getSingleValueDistributionResult().getNullCount());
+		assertEquals(2, vdResult.getSingleValueDistributionResult().getUniqueCount());
+		assertEquals("ValueCountList[[[barack->4]]]", vdResult.getSingleValueDistributionResult().getTopValues()
+				.toString());
 
 		vdResult = (ValueDistributionResult) results.get(2);
 		assertEquals("Lastname", vdResult.getColumnName());
-		assertEquals(0, vdResult.getNullCount());
-		assertEquals(0, vdResult.getUniqueCount());
-		assertEquals("ValueCountList[[[obama->4], [doe->2]]]", vdResult.getTopValues().toString());
+		assertEquals(0, vdResult.getSingleValueDistributionResult().getNullCount());
+		assertEquals(0, vdResult.getSingleValueDistributionResult().getUniqueCount());
+		assertEquals("ValueCountList[[[obama->4], [doe->2]]]", vdResult.getSingleValueDistributionResult()
+				.getTopValues().toString());
 
 		vdResult = (ValueDistributionResult) results.get(3);
 		assertEquals("Middlename", vdResult.getColumnName());
-		assertEquals(4, vdResult.getNullCount());
-		assertEquals(0, vdResult.getUniqueCount());
-		assertEquals("ValueCountList[[[hussein->2]]]", vdResult.getTopValues().toString());
-		
+		assertEquals(4, vdResult.getSingleValueDistributionResult().getNullCount());
+		assertEquals(0, vdResult.getSingleValueDistributionResult().getUniqueCount());
+		assertEquals("ValueCountList[[[hussein->2]]]", vdResult.getSingleValueDistributionResult().getTopValues()
+				.toString());
+
 		vdResult = (ValueDistributionResult) results.get(4);
 		assertEquals("Titulation", vdResult.getColumnName());
-		assertEquals(6, vdResult.getNullCount());
-		assertEquals(0, vdResult.getUniqueCount());
-		assertEquals("ValueCountList[[]]", vdResult.getTopValues().toString());
+		assertEquals(6, vdResult.getSingleValueDistributionResult().getNullCount());
+		assertEquals(0, vdResult.getSingleValueDistributionResult().getUniqueCount());
+		assertEquals("ValueCountList[[]]", vdResult.getSingleValueDistributionResult().getTopValues().toString());
 
 		StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) results.get(5);
 		assertEquals(1, stringAnalyzerResult.getColumns().length);
-		assertEquals("4", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count").get().toString());
-		
+		assertEquals("4", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count").get()
+				.toString());
+
 		stringAnalyzerResult = (StringAnalyzerResult) results.get(6);
 		assertEquals(1, stringAnalyzerResult.getColumns().length);
-		assertEquals("2", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count").get().toString());
+		assertEquals("2", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count").get()
+				.toString());
 	}
 }

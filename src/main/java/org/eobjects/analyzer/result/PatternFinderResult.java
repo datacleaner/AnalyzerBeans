@@ -22,8 +22,21 @@ package org.eobjects.analyzer.result;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 
+/**
+ * Represents the result of the {@link PatternFinderAnalyzer}.
+ * 
+ * A pattern finder result has two basic forms: Grouped or ungrouped. To find
+ * out which type a particular instance has, use the
+ * {@link #isGroupingEnabled()} method.
+ * 
+ * Ungrouped results only contain a single/global crosstab. A grouped result
+ * contain multiple crosstabs, based on groups.
+ * 
+ * @author Kasper Sørensen
+ */
 public class PatternFinderResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
@@ -54,10 +67,16 @@ public class PatternFinderResult implements AnalyzerResult {
 	}
 
 	public Map<String, Crosstab<?>> getGroupedCrosstabs() {
+		if (!isGroupingEnabled()) {
+			throw new IllegalStateException("This result is not a grouped crosstab based Pattern Finder result");
+		}
 		return _crosstabs;
 	}
 
 	public Crosstab<?> getSingleCrosstab() {
+		if (isGroupingEnabled()) {
+			throw new IllegalStateException("This result is not a single crosstab based Pattern Finder result");
+		}
 		return _crosstabs.get(null);
 	}
 

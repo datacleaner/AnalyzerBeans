@@ -56,23 +56,23 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 		assertEquals(4, results.size());
 		ValueDistributionResult res = (ValueDistributionResult) results.get(0);
 		assertEquals("eobjects match", res.getColumnName());
-		assertEquals(8, res.getCount("true").intValue());
-		assertEquals(4, res.getCount("false").intValue());
+		assertEquals(8, res.getSingleValueDistributionResult().getCount("true").intValue());
+		assertEquals(4, res.getSingleValueDistributionResult().getCount("false").intValue());
 
 		res = (ValueDistributionResult) results.get(1);
 		assertEquals("apache match", res.getColumnName());
-		assertEquals(2, res.getCount("true").intValue());
-		assertEquals(10, res.getCount("false").intValue());
+		assertEquals(2, res.getSingleValueDistributionResult().getCount("true").intValue());
+		assertEquals(10, res.getSingleValueDistributionResult().getCount("false").intValue());
 
 		res = (ValueDistributionResult) results.get(2);
 		assertEquals("logging match", res.getColumnName());
-		assertEquals(3, res.getCount("true").intValue());
-		assertEquals(9, res.getCount("false").intValue());
+		assertEquals(3, res.getSingleValueDistributionResult().getCount("true").intValue());
+		assertEquals(9, res.getSingleValueDistributionResult().getCount("false").intValue());
 
 		res = (ValueDistributionResult) results.get(3);
 		assertEquals("logging match -> number", res.getColumnName());
-		assertEquals(3, res.getCount("1").intValue());
-		assertEquals(9, res.getCount("0").intValue());
+		assertEquals(3, res.getSingleValueDistributionResult().getCount("1").intValue());
+		assertEquals(9, res.getSingleValueDistributionResult().getCount("0").intValue());
 	}
 
 	public void testTransform() throws Exception {

@@ -19,180 +19,94 @@
  */
 package org.eobjects.analyzer.result;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-import org.eobjects.analyzer.beans.valuedist.ValueCount;
-import org.eobjects.analyzer.beans.valuedist.ValueCountList;
-import org.eobjects.analyzer.beans.valuedist.ValueCountListImpl;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 
+/**
+ * Represents the result of the {@link ValueDistributionAnalyzer}.
+ * 
+ * A value distribution result has two basic forms: Grouped or ungrouped. To
+ * find out which type a particular instance has, use the
+ * {@link #isGroupingEnabled()} method.
+ * 
+ * Ungrouped results only contain a single/global value distribution. A grouped
+ * result contain multiple value distributions, based on groups.
+ * 
+ * @author Kasper Sørensen
+ */
 public class ValueDistributionResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
-	private final ValueCountList _topValues;
-	private final ValueCountList _bottomValues;
-	private final int _nullCount;
-	private final Collection<String> _uniqueValues;
-	private final int _uniqueValueCount;
-	private final String _columnName;
 
-	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, Collection<String> uniqueValues, int uniqueValueCount) {
-		_columnName = column.getName();
-		_topValues = topValues;
-		_bottomValues = bottomValues;
-		_nullCount = nullCount;
-		_uniqueValues = uniqueValues;
-		_uniqueValueCount = uniqueValueCount;
+	private final InputColumn<?> _column;
+	private final InputColumn<String> _groupColumn;
+	private final SortedSet<ValueDistributionGroupResult> _result;
+
+	public ValueDistributionResult(InputColumn<?> column, ValueDistributionGroupResult ungroupedResult) {
+		_column = column;
+		_groupColumn = null;
+		_result = new TreeSet<ValueDistributionGroupResult>();
+		_result.add(ungroupedResult);
 	}
 
-	public ValueDistributionResult(InputColumn<?> column, ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, int uniqueValueCount) {
-		this(column, topValues, bottomValues, nullCount, null, uniqueValueCount);
-	}
-
-	public ValueCountList getTopValues() {
-		if (_topValues == null) {
-			return ValueCountListImpl.emptyList();
-		}
-		return _topValues;
-	}
-
-	public ValueCountList getBottomValues() {
-		if (_bottomValues == null) {
-			return ValueCountListImpl.emptyList();
-		}
-		return _bottomValues;
-	}
-
-	public int getNullCount() {
-		return _nullCount;
-	}
-
-	public int getUniqueCount() {
-		if (_uniqueValues != null) {
-			return _uniqueValues.size();
-		}
-		return _uniqueValueCount;
-	}
-
-	public Collection<String> getUniqueValues() {
-		if (_uniqueValues == null) {
-			return Collections.emptyList();
-		}
-		return Collections.unmodifiableCollection(_uniqueValues);
+	public ValueDistributionResult(InputColumn<?> column, InputColumn<String> groupColumn,
+			SortedSet<ValueDistributionGroupResult> groupedResult) {
+		_column = column;
+		_groupColumn = groupColumn;
+		_result = groupedResult;
 	}
 
 	public String getColumnName() {
-		return _columnName;
+		return _column.getName();
+	}
+	
+	public String getGroupColumnName() {
+		if (_groupColumn == null) {
+			return null;
+		}
+		return _groupColumn.getName();
+	}
+
+	public boolean isGroupingEnabled() {
+		return _groupColumn != null;
+	}
+
+	public Set<ValueDistributionGroupResult> getGroupedValueDistributionResults() {
+		if (!isGroupingEnabled()) {
+			throw new IllegalStateException("This result is not a grouped result based Value Distribution result");
+		}
+		return Collections.unmodifiableSet(_result);
+	}
+
+	public ValueDistributionGroupResult getSingleValueDistributionResult() {
+		if (isGroupingEnabled()) {
+			throw new IllegalStateException("This result is not a single result based Value Distribution result");
+		}
+		return _result.iterator().next();
 	}
 
 	@Override
 	public String toString() {
-		return toString(10);
-	}
-
-	/**
-	 * Creates a string representation with a maximum amount of entries
-	 * 
-	 * @param maxEntries
-	 * @return
-	 */
-	public String toString(int maxEntries) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Value distribution for column: ");
-		sb.append(_columnName);
+		sb.append(_column.getName());
+		if (isGroupingEnabled()) {
+			for (ValueDistributionGroupResult valueDistributionGroupResult : getGroupedValueDistributionResults()) {
+				sb.append("\n");
+				sb.append("\nGroup: ");
+				sb.append(valueDistributionGroupResult.getGroupName());
 
-		if (maxEntries != 0) {
-			if (_topValues != null && _topValues.getActualSize() > 0) {
-				sb.append("\nTop values:");
-				List<ValueCount> valueCounts = _topValues.getValueCounts();
-				for (ValueCount valueCount : valueCounts) {
-					sb.append("\n - ");
-					sb.append(valueCount.getValue());
-					sb.append(": ");
-					sb.append(valueCount.getCount());
-
-					maxEntries--;
-					if (maxEntries == 0) {
-						sb.append("\n ...");
-						break;
-					}
-				}
+				valueDistributionGroupResult.appendToString(sb, 5);
 			}
-		}
-
-		if (maxEntries != 0) {
-			if (_bottomValues != null && _bottomValues.getActualSize() > 0) {
-				sb.append("\nBottom values:");
-				List<ValueCount> valueCounts = _bottomValues.getValueCounts();
-				for (ValueCount valueCount : valueCounts) {
-					sb.append("\n - ");
-					sb.append(valueCount.getValue());
-					sb.append(": ");
-					sb.append(valueCount.getCount());
-
-					maxEntries--;
-					if (maxEntries == 0) {
-						sb.append("\n ...");
-						break;
-					}
-				}
-			}
-		}
-
-		sb.append("\nNull count: ");
-		sb.append(_nullCount);
-
-		sb.append("\nUnique values: ");
-		if (_uniqueValues == null) {
-			sb.append(_uniqueValueCount);
 		} else {
-			for (String value : _uniqueValues) {
-				sb.append("\n - ");
-				sb.append(value);
-
-				maxEntries--;
-				if (maxEntries == 0) {
-					sb.append("\n ...");
-					break;
-				}
-			}
+			ValueDistributionGroupResult valueDistributionGroupResult = getSingleValueDistributionResult();
+			valueDistributionGroupResult.appendToString(sb, 10);
 		}
 		return sb.toString();
-	}
-
-	public Integer getCount(final String value) {
-		if (value == null) {
-			return _nullCount;
-		}
-
-		if (_topValues != null) {
-			List<ValueCount> valueCounts = _topValues.getValueCounts();
-			for (ValueCount valueCount : valueCounts) {
-				if (value.equals(valueCount.getValue())) {
-					return valueCount.getCount();
-				}
-			}
-		}
-
-		if (_bottomValues != null) {
-			List<ValueCount> valueCounts = _bottomValues.getValueCounts();
-			for (ValueCount valueCount : valueCounts) {
-				if (value.equals(valueCount.getValue())) {
-					return valueCount.getCount();
-				}
-			}
-		}
-
-		if (_uniqueValues != null) {
-			if (_uniqueValues.contains(value)) {
-				return 1;
-			}
-		}
-
-		return null;
 	}
 }

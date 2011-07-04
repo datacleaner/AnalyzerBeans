@@ -137,14 +137,15 @@ public class JaxbJobReaderTest extends TestCase {
 		// this result represents the single manager (one unique and no repeated
 		// values)
 		ValueDistributionResult res1 = (ValueDistributionResult) results.get(1);
-		assertEquals(1, res1.getUniqueCount());
-		assertEquals("ValueCountList[[]]", res1.getTopValues().toString());
+		assertEquals(1, res1.getSingleValueDistributionResult().getUniqueCount());
+		assertEquals("ValueCountList[[]]", res1.getSingleValueDistributionResult().getTopValues().toString());
 
 		// this result represents all the employees: Two repeated values and 18
 		// unique
 		ValueDistributionResult res2 = (ValueDistributionResult) results.get(2);
-		assertEquals(18, res2.getUniqueCount());
-		assertEquals("ValueCountList[[[Leslie->2], [Gerard->2]]]", res2.getTopValues().toString());
+		assertEquals(18, res2.getSingleValueDistributionResult().getUniqueCount());
+		assertEquals("ValueCountList[[[Leslie->2], [Gerard->2]]]", res2.getSingleValueDistributionResult()
+				.getTopValues().toString());
 	}
 
 	public void testNamedInputs() throws Exception {

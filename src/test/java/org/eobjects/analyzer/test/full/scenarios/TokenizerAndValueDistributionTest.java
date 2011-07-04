@@ -45,6 +45,7 @@ import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.ValueDistributionGroupResult;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
@@ -123,26 +124,27 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 		assertEquals(4, results.size());
 
 		for (AnalyzerResult analyzerResult : results) {
-			ValueDistributionResult result = (ValueDistributionResult) analyzerResult;
+			ValueDistributionResult vdResult = (ValueDistributionResult) analyzerResult;
+			ValueDistributionGroupResult result = vdResult.getSingleValueDistributionResult();
 			Collection<String> uniqueValues = new TreeSet<String>(result.getUniqueValues());
-			if ("first word".equals(result.getColumnName())) {
+			if ("first word".equals(vdResult.getColumnName())) {
 				assertEquals("ValueCountList[[[Sales->19], [VP->2]]]", result.getTopValues().toString());
 				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(0, result.getNullCount());
 				assertEquals(2, result.getUniqueCount());
-			} else if ("second word".equals(result.getColumnName())) {
+			} else if ("second word".equals(vdResult.getColumnName())) {
 				assertEquals("ValueCountList[[[Rep->17], [Manager->3]]]", result.getTopValues().toString());
 				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(1, result.getNullCount());
 				assertEquals(2, result.getUniqueCount());
-			} else if ("third words".equals(result.getColumnName())) {
+			} else if ("third words".equals(vdResult.getColumnName())) {
 				assertEquals("ValueCountList[[]]", result.getTopValues().toString());
 				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(20, result.getNullCount());
 
 				assertEquals(3, result.getUniqueCount());
 				assertEquals("[(EMEA), (JAPAN,, (NA)]", uniqueValues.toString());
-			} else if ("fourth words".equals(result.getColumnName())) {
+			} else if ("fourth words".equals(vdResult.getColumnName())) {
 				assertEquals("ValueCountList[[]]", result.getTopValues().toString());
 				assertTrue(result.getBottomValues().getValueCounts().isEmpty());
 				assertEquals(22, result.getNullCount());
@@ -150,10 +152,10 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 				assertEquals(1, result.getUniqueCount());
 				assertEquals("[APAC)]", uniqueValues.toString());
 			} else {
-				fail("Unexpected columnName: " + result.getColumnName());
+				fail("Unexpected columnName: " + vdResult.getColumnName());
 			}
 		}
-		
+
 		taskRunner.shutdown();
 	}
 }

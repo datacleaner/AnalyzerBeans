@@ -53,7 +53,6 @@ import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.MetaModelTestCase;
@@ -163,12 +162,15 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		assertNotNull(jobTitleResult);
 		assertNotNull(lastnameResult);
 
-		assertEquals("Patterson", lastnameResult.getTopValues().getValueCounts().get(0).getValue());
-		assertEquals(3, lastnameResult.getTopValues().getValueCounts().get(0).getCount());
-		assertEquals(16, lastnameResult.getUniqueCount());
-		assertEquals(0, lastnameResult.getNullCount());
+		assertEquals("Patterson", lastnameResult.getSingleValueDistributionResult().getTopValues().getValueCounts()
+				.get(0).getValue());
+		assertEquals(3, lastnameResult.getSingleValueDistributionResult().getTopValues().getValueCounts().get(0)
+				.getCount());
+		assertEquals(16, lastnameResult.getSingleValueDistributionResult().getUniqueCount());
+		assertEquals(0, lastnameResult.getSingleValueDistributionResult().getNullCount());
 
-		assertEquals("Sales Rep", jobTitleResult.getTopValues().getValueCounts().get(0).getValue());
+		assertEquals("Sales Rep", jobTitleResult.getSingleValueDistributionResult().getTopValues().getValueCounts()
+				.get(0).getValue());
 
 		String[] resultLines = new CrosstabTextRenderer().render(stringAnalyzerResult).split("\n");
 		assertEquals(
