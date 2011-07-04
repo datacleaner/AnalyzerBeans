@@ -465,7 +465,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			}
 
 			String encoding = csvDatastoreType.getEncoding();
-			if (!StringUtils.isNullOrEmpty(encoding)) {
+			if (StringUtils.isNullOrEmpty(encoding)) {
 				encoding = FileHelper.UTF_8_ENCODING;
 			}
 

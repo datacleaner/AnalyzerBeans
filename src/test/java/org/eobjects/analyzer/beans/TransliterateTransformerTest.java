@@ -43,6 +43,8 @@ public class TransliterateTransformerTest extends TestCase {
 		assertEquals("DataCleaner", t.transform(new MockInputRow().put(t.column, "DataCleaner"))[0]);
 		assertEquals("DataClaenor", t.transform(new MockInputRow().put(t.column, "DåtåClænør"))[0]);
 		assertEquals("Dannyecistogo", t.transform(new MockInputRow().put(t.column, "Данныечистого"))[0]);
+		assertEquals("shu ju qing jie", t.transform(new MockInputRow().put(t.column, "數據清潔"))[0]);
+		assertEquals("byanat alanzf", t.transform(new MockInputRow().put(t.column, "بيانات الأنظف"))[0]);
 		assertEquals("du lieu sach hon", t.transform(new MockInputRow().put(t.column, "dữ liệu sạch hơn"))[0]);
 	}
 
@@ -51,6 +53,8 @@ public class TransliterateTransformerTest extends TestCase {
 		assertEquals("DataCleaner", t.transform(new MockInputRow().put(t.column, "DataCleaner"))[0]);
 		assertEquals("DåtåClænør", t.transform(new MockInputRow().put(t.column, "DåtåClænør"))[0]);
 		assertEquals("Dannyečistogo", t.transform(new MockInputRow().put(t.column, "Данныечистого"))[0]);
+		assertEquals("shù jù qīng jié", t.transform(new MockInputRow().put(t.column, "數據清潔"))[0]);
+		assertEquals("byạnạt ạlạ̉nẓf", t.transform(new MockInputRow().put(t.column, "بيانات الأنظف"))[0]);
 		assertEquals("dữ liệu sạch hơn", t.transform(new MockInputRow().put(t.column, "dữ liệu sạch hơn"))[0]);
 	}
 
