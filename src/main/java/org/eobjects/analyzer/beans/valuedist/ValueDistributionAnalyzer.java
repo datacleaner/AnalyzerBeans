@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -33,7 +35,6 @@ import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.ValueDistributionResult;
-import org.eobjects.analyzer.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +112,12 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 			bottomValues = ValueCountListImpl.createBottomList(_bottomFrequentValues);
 		}
 
-		final Map<String, Integer> uniqueValues = CollectionUtils.createCacheMap();
+		final List<String> uniqueValues;
+		if (_recordUniqueValues) {
+			uniqueValues = new ArrayList<String>();
+		} else {
+			uniqueValues = null;
+		}
 		int uniqueCount = 0;
 		final Set<Entry<String, Integer>> entrySet = _valueDistribution.entrySet();
 		int entryCount = 0;
@@ -121,7 +127,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 			}
 			if (entry.getValue() == 1) {
 				if (_recordUniqueValues) {
-					uniqueValues.put(entry.getKey(), Integer.valueOf(1));
+					uniqueValues.add(entry.getKey());
 				}
 				uniqueCount++;
 			} else {
@@ -135,8 +141,7 @@ public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDis
 		}
 
 		if (_recordUniqueValues) {
-			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueValues.keySet(),
-					uniqueCount);
+			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueValues, uniqueCount);
 		} else {
 			return new ValueDistributionResult(_column, topValues, bottomValues, _nullCount, uniqueCount);
 		}
