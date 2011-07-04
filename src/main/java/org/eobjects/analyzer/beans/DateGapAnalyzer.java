@@ -56,6 +56,10 @@ public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerRes
 	@Configured(order = 4, required = false, value = "Count intersecting from and to dates as overlaps")
 	Boolean singleDateOverlaps = false;
 
+	@Configured(order = 5, value = "Fault tolerant switch from/to dates", required = false)
+	@Description("Turn on/off automatic switching of FROM and TO dates, if FROM has a higher value than TO.")
+	boolean faultTolerantDateSwitch = true;
+
 	private final Map<String, TimeLine> timelines = new HashMap<String, TimeLine>();
 
 	public DateGapAnalyzer() {
@@ -78,7 +82,13 @@ public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerRes
 				groupName = row.getValue(groupColumn);
 			}
 
-			put(groupName, new TimeInterval(from, to));
+			if (faultTolerantDateSwitch && from.compareTo(to) > 0) {
+				logger.info("Switching around from and to, because {} is higher than {} (row: {})", new Object[] { from, to,
+						row });
+				put(groupName, new TimeInterval(to, from));
+			} else {
+				put(groupName, new TimeInterval(from, to));
+			}
 		} else {
 			logger.info("Encountered row where from column or to column was null, ignoring");
 		}
