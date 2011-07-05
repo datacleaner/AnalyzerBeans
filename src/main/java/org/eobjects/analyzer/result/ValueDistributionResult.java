@@ -101,11 +101,11 @@ public class ValueDistributionResult implements AnalyzerResult {
 				sb.append("\nGroup: ");
 				sb.append(valueDistributionGroupResult.getGroupName());
 
-				valueDistributionGroupResult.appendToString(sb, 5);
+				valueDistributionGroupResult.appendToString(sb, 4);
 			}
 		} else {
 			ValueDistributionGroupResult valueDistributionGroupResult = getSingleValueDistributionResult();
-			valueDistributionGroupResult.appendToString(sb, 10);
+			valueDistributionGroupResult.appendToString(sb, 8);
 		}
 		return sb.toString();
 	}

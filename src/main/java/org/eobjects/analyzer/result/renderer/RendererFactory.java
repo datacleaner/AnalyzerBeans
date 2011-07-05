@@ -111,9 +111,11 @@ public final class RendererFactory {
 		@SuppressWarnings("unchecked")
 		Renderer<? super I, ? extends O> renderer = (Renderer<? super I, ? extends O>) bestMatch.getRenderer();
 
-		logger.info("Returning renderer '{}' for renderable '{}' in format '{}'", new Object[] { renderer, renderable,
-				renderingFormat.getName() });
-		
+		if (logger.isInfoEnabled()) {
+			logger.info("Returning renderer '{}' for renderable '{}' in format '{}'", new Object[] { renderer,
+					renderable.getClass().getName(), renderingFormat.getName() });
+		}
+
 		return renderer;
 	}
 
@@ -157,11 +159,11 @@ public final class RendererFactory {
 	private RendererSelection isRendererCapable(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
 			RendererSelection bestMatch) {
 		final Renderer<Renderable, ?> renderer = instantiate(rendererDescriptor);
-		
+
 		if (_rendererInitializer != null) {
 			_rendererInitializer.initialize(renderer);
 		}
-		
+
 		RendererPrecedence precedence;
 		try {
 			precedence = renderer.getPrecedence(renderable);
