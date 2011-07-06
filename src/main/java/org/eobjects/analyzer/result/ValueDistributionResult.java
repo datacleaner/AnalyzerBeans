@@ -89,7 +89,7 @@ public class ValueDistributionResult implements AnalyzerResult {
 		}
 		return _result.iterator().next();
 	}
-
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

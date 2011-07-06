@@ -39,20 +39,24 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
 	private final Collection<String> _uniqueValues;
 	private final int _uniqueValueCount;
 	private final String _groupName;
+	private final int _totalCount;
+	private final int _distinctCount;
 
 	public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, Collection<String> uniqueValues, int uniqueValueCount) {
+			int nullCount, Collection<String> uniqueValues, int uniqueValueCount, int distinctCount, int totalCount) {
 		_groupName = groupName;
 		_topValues = topValues;
 		_bottomValues = bottomValues;
 		_nullCount = nullCount;
 		_uniqueValues = uniqueValues;
 		_uniqueValueCount = uniqueValueCount;
+		_totalCount = totalCount;
+		_distinctCount = distinctCount;
 	}
 
 	public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, int uniqueValueCount) {
-		this(groupName, topValues, bottomValues, nullCount, null, uniqueValueCount);
+			int nullCount, int uniqueValueCount, int distinctCount, int totalCount) {
+		this(groupName, topValues, bottomValues, nullCount, null, uniqueValueCount, distinctCount, totalCount);
 	}
 
 	public ValueCountList getTopValues() {
@@ -191,6 +195,14 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
 		}
 
 		return null;
+	}
+
+	public int getDistinctCount() {
+		return _distinctCount;
+	}
+	
+	public int getTotalCount() {
+		return _totalCount;
 	}
 
 	@Override

@@ -44,6 +44,7 @@ class ValueDistributionGroup {
 	private final Map<String, Integer> _map;
 	private final String _groupName;
 	private int _nullCount;
+	private int _totalCount;
 
 	public ValueDistributionGroup(String groupName, CollectionFactory collectionFactory) {
 		_groupName = groupName;
@@ -61,6 +62,7 @@ class ValueDistributionGroup {
 			count = count + distinctCount;
 			_map.put(value, count);
 		}
+		_totalCount += distinctCount;
 	}
 
 	public ValueDistributionGroupResult createResult(Integer topFrequentValues, Integer bottomFrequentValues,
@@ -103,10 +105,19 @@ class ValueDistributionGroup {
 			entryCount++;
 		}
 
-		if (recordUniqueValues) {
-			return new ValueDistributionGroupResult(_groupName, topValues, bottomValues, _nullCount, uniqueValues, uniqueCount);
+		int distinctCount;
+		if (_nullCount > 0) {
+			distinctCount = 1 + entryCount;
 		} else {
-			return new ValueDistributionGroupResult(_groupName, topValues, bottomValues, _nullCount, uniqueCount);
+			distinctCount = entryCount;
+		}
+
+		if (recordUniqueValues) {
+			return new ValueDistributionGroupResult(_groupName, topValues, bottomValues, _nullCount, uniqueValues,
+					uniqueCount, distinctCount, _totalCount);
+		} else {
+			return new ValueDistributionGroupResult(_groupName, topValues, bottomValues, _nullCount, uniqueCount,
+					distinctCount, _totalCount);
 		}
 	}
 }
