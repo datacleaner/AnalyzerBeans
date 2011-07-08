@@ -53,6 +53,9 @@ import org.eobjects.analyzer.util.NullTolerableComparator;
 @Concurrent(true)
 public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinderResult> {
 
+	public static final String DIMENSION_NAME_MEASURES = "Measures";
+	public static final String DIMENSION_NAME_PATTERN = "Pattern";
+
 	@Configured(order = 1)
 	InputColumn<String> column;
 
@@ -211,9 +214,9 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 	}
 
 	private Crosstab<Serializable> createCrosstab(DefaultPatternFinder patternFinder) {
-		CrosstabDimension measuresDimension = new CrosstabDimension("Measures");
+		CrosstabDimension measuresDimension = new CrosstabDimension(DIMENSION_NAME_MEASURES);
 		measuresDimension.addCategory("Match count");
-		CrosstabDimension patternDimension = new CrosstabDimension("Pattern");
+		CrosstabDimension patternDimension = new CrosstabDimension(DIMENSION_NAME_PATTERN);
 		Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, measuresDimension, patternDimension);
 
 		Set<Entry<TokenPattern, RowAnnotation>> entrySet = patternFinder.getAnnotations().entrySet();
