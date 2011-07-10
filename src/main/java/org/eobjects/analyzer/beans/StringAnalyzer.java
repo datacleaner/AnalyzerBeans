@@ -78,7 +78,7 @@ public class StringAnalyzer implements RowProcessingAnalyzer<StringAnalyzerResul
 
 	private static final Logger logger = LoggerFactory.getLogger(StringAnalyzer.class);
 
-	private Map<InputColumn<String>, StringAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, StringAnalyzerColumnDelegate>();
+	private final Map<InputColumn<String>, StringAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, StringAnalyzerColumnDelegate>();
 
 	@Configured
 	InputColumn<String>[] _columns;

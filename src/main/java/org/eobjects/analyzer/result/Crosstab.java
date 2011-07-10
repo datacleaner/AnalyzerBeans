@@ -174,6 +174,10 @@ public final class Crosstab<E extends Serializable> implements Serializable {
 		return dimensions.get(i);
 	}
 
+	public CrosstabDimension getDimension(String dimensionName) {
+		return getDimension(getDimensionIndex(dimensionName));
+	}
+
 	protected void attachResultProducer(ResultProducer resultProducer, String[] categories) throws IllegalArgumentException,
 			NullPointerException {
 		if (transientResultProducers == null) {
