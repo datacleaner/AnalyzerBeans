@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.PropertyDescriptor;
-import org.eobjects.analyzer.util.CompareUtils;
+import org.eobjects.metamodel.util.EqualsBuilder;
 
 public final class ImmutableBeanConfiguration implements BeanConfiguration {
 
@@ -84,7 +84,7 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
 				Object v2 = other._properties.get(key);
 				if (v1 != v2 && !v1.equals(v2)) {
 					if (v1.getClass().isArray() && v2.getClass().isArray()) {
-						if (!CompareUtils.equals(v1, v2)) {
+						if (!EqualsBuilder.equals(v1, v2)) {
 							return false;
 						}
 					} else {

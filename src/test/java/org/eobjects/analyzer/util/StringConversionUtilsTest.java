@@ -41,6 +41,7 @@ import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableSchema;
 import org.eobjects.metamodel.schema.MutableTable;
 import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.util.EqualsBuilder;
 
 public class StringConversionUtilsTest extends TestCase {
 
@@ -121,7 +122,7 @@ public class StringConversionUtilsTest extends TestCase {
 		assertEquals("[VALID,INVALID]", serialized);
 
 		deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory[].class, null, null, null);
-		assertTrue(CompareUtils.equals(array, deserialized));
+		assertTrue(EqualsBuilder.equals(array, deserialized));
 	}
 
 	public void testFile() throws Exception {
@@ -133,7 +134,7 @@ public class StringConversionUtilsTest extends TestCase {
 		assertEquals("pom.xml", serialized);
 
 		Object deserialized = StringConversionUtils.deserialize(serialized, File.class, null, null, null);
-		assertTrue(CompareUtils.equals(file1, deserialized));
+		assertTrue(EqualsBuilder.equals(file1, deserialized));
 
 		serialized = StringConversionUtils.serialize(fileAbs);
 		assertEquals(fileAbs.getAbsolutePath(), serialized);
@@ -144,7 +145,7 @@ public class StringConversionUtilsTest extends TestCase {
 		assertEquals("[pom.xml,src]", serialized);
 
 		deserialized = StringConversionUtils.deserialize(serialized, File[].class, null, null, null);
-		assertTrue(CompareUtils.equals(arr, deserialized));
+		assertTrue(EqualsBuilder.equals(arr, deserialized));
 	}
 
 	public void testReferenceDataSerialization() throws Exception {
@@ -240,7 +241,7 @@ public class StringConversionUtilsTest extends TestCase {
 		}
 		Object o2 = StringConversionUtils.deserialize(s, o.getClass(), null, null, null);
 		if (ReflectionUtils.isArray(o)) {
-			boolean equals = CompareUtils.equals(o, o2);
+			boolean equals = EqualsBuilder.equals(o, o2);
 			if (!equals) {
 				StringBuilder sb = new StringBuilder();
 				sb.append("Not equals!");

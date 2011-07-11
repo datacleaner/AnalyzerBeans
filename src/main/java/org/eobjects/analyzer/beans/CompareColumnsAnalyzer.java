@@ -29,13 +29,12 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.ColumnDifference;
-import org.eobjects.analyzer.util.CompareUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Compare column structures")
 public class CompareColumnsAnalyzer implements ExploringAnalyzer<ColumnComparisonResult> {
@@ -110,7 +109,7 @@ public class CompareColumnsAnalyzer implements ExploringAnalyzer<ColumnCompariso
 	}
 
 	private <T> void addDiff(List<ColumnDifference<?>> differences, String valueName, T value1, T value2) {
-		if (!CompareUtils.equals(value1, value2)) {
+		if (!EqualsBuilder.equals(value1, value2)) {
 			ColumnDifference<T> diff = new ColumnDifference<T>(column1, column2, valueName, value1, value2);
 			differences.add(diff);
 		}

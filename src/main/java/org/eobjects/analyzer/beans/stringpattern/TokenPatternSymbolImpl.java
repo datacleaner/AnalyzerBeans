@@ -21,7 +21,7 @@ package org.eobjects.analyzer.beans.stringpattern;
 
 import java.util.Arrays;
 
-import org.eobjects.analyzer.util.CompareUtils;
+import org.eobjects.metamodel.util.EqualsBuilder;
 
 public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 
@@ -148,7 +148,7 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 
 	@Override
 	public boolean matches(Token token, TokenizerConfiguration configuration) {
-		if (CompareUtils.equals(_tokenType, token.getType())) {
+		if (EqualsBuilder.equals(_tokenType, token.getType())) {
 			if (configuration.isDistriminateTokenLength(_tokenType)) {
 				if (toSymbolicString().length() != token.getString().length()) {
 					// not a match, based on length
@@ -225,7 +225,7 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 		Character minusSign = configuration.getMinusSign();
 		if (discriminateNegativeNumbers && minusSign != null) {
 			boolean negative1 = isNegative();
-			boolean negative2 = CompareUtils.equals(minusSign, str2.charAt(0));
+			boolean negative2 = EqualsBuilder.equals(minusSign, str2.charAt(0));
 			if (negative1 != negative2) {
 				return false;
 			}

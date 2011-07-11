@@ -26,7 +26,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.CollectionUtils;
-import org.eobjects.analyzer.util.CompareUtils;
+import org.eobjects.metamodel.util.EqualsBuilder;
 
 /**
  * Represents a group of values that have been marked as similar, typically by
@@ -97,7 +97,7 @@ public final class SimilarityGroup implements Serializable, Comparable<Similarit
 		}
 		if (obj.getClass() == getClass()) {
 			SimilarityGroup that = (SimilarityGroup) obj;
-			return CompareUtils.equals(_values, that._values);
+			return EqualsBuilder.equals(_values, that._values);
 		}
 		return false;
 	}

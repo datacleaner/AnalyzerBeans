@@ -31,11 +31,10 @@ import org.eobjects.analyzer.result.SchemaComparisonResult;
 import org.eobjects.analyzer.result.SchemaDifference;
 import org.eobjects.analyzer.result.TableComparisonResult;
 import org.eobjects.analyzer.util.CollectionUtils;
-import org.eobjects.analyzer.util.CompareUtils;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.EqualsBuilder;
 
 @AnalyzerBean("Compare schema structures")
 public class CompareSchemasAnalyzer implements ExploringAnalyzer<SchemaComparisonResult> {
@@ -121,7 +120,7 @@ public class CompareSchemasAnalyzer implements ExploringAnalyzer<SchemaCompariso
 	}
 
 	private <T> void addDiff(List<SchemaDifference<?>> differences, String valueName, T value1, T value2) {
-		if (!CompareUtils.equals(value1, value2)) {
+		if (!EqualsBuilder.equals(value1, value2)) {
 			SchemaDifference<T> diff = new SchemaDifference<T>(schema1, schema2, valueName, value1, value2);
 			differences.add(diff);
 		}

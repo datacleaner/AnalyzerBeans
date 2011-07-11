@@ -31,13 +31,12 @@ import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.TableComparisonResult;
 import org.eobjects.analyzer.result.TableDifference;
 import org.eobjects.analyzer.util.CollectionUtils;
-import org.eobjects.analyzer.util.CompareUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Compare table structures")
 public class CompareTablesAnalyzer implements ExploringAnalyzer<TableComparisonResult> {
@@ -124,7 +123,7 @@ public class CompareTablesAnalyzer implements ExploringAnalyzer<TableComparisonR
 	}
 
 	private <T> void addDiff(List<TableDifference<?>> differences, String valueName, T value1, T value2) {
-		if (!CompareUtils.equals(value1, value2)) {
+		if (!EqualsBuilder.equals(value1, value2)) {
 			TableDifference<T> diff = new TableDifference<T>(table1, table2, valueName, value1, value2);
 			differences.add(diff);
 		}
