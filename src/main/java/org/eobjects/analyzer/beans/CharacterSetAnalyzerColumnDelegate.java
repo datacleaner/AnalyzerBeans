@@ -35,14 +35,14 @@ import org.slf4j.LoggerFactory;
 
 import com.ibm.icu.text.UnicodeSet;
 
-final class CharacterSetFinderColumnDelegate {
+final class CharacterSetAnalyzerColumnDelegate {
 
-	private static final Logger logger = LoggerFactory.getLogger(CharacterSetFinderColumnDelegate.class);
+	private static final Logger logger = LoggerFactory.getLogger(CharacterSetAnalyzerColumnDelegate.class);
 	private final RowAnnotationFactory _annotationFactory;
 	private final Map<String, UnicodeSet> _unicodeSets;
 	private final Map<String, RowAnnotation> _annotations;
 
-	public CharacterSetFinderColumnDelegate(RowAnnotationFactory annotationFactory, Map<String, UnicodeSet> unicodeSets) {
+	public CharacterSetAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory, Map<String, UnicodeSet> unicodeSets) {
 		_annotationFactory = annotationFactory;
 		_unicodeSets = unicodeSets;
 		_annotations = new HashMap<String, RowAnnotation>();

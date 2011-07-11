@@ -45,10 +45,10 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 
 import com.ibm.icu.text.UnicodeSet;
 
-@AnalyzerBean("Character set finder")
+@AnalyzerBean("Character set analyzer")
 @Description("Inspects text characters according to character set affinity, such as Latin, Hebrew, Cyrillic, Chinese and more.")
 @Concurrent(true)
-public class CharacterSetFinder implements RowProcessingAnalyzer<CrosstabResult> {
+public class CharacterSetAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
 
 	private static final Map<String, UnicodeSet> UNICODE_SETS = createUnicodeSets();
 
@@ -60,12 +60,12 @@ public class CharacterSetFinder implements RowProcessingAnalyzer<CrosstabResult>
 	@Provided
 	RowAnnotationFactory _annotationFactory;
 
-	private final Map<InputColumn<String>, CharacterSetFinderColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, CharacterSetFinderColumnDelegate>();
+	private final Map<InputColumn<String>, CharacterSetAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, CharacterSetAnalyzerColumnDelegate>();
 
 	@Initialize
 	public void init() {
 		for (InputColumn<String> column : _columns) {
-			CharacterSetFinderColumnDelegate delegate = new CharacterSetFinderColumnDelegate(_annotationFactory,
+			CharacterSetAnalyzerColumnDelegate delegate = new CharacterSetAnalyzerColumnDelegate(_annotationFactory,
 					UNICODE_SETS);
 			_columnDelegates.put(column, delegate);
 		}
@@ -125,7 +125,7 @@ public class CharacterSetFinder implements RowProcessingAnalyzer<CrosstabResult>
 	public void run(InputRow row, int distinctCount) {
 		for (InputColumn<String> column : _columns) {
 			String value = row.getValue(column);
-			CharacterSetFinderColumnDelegate delegate = _columnDelegates.get(column);
+			CharacterSetAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 			delegate.run(value, row, distinctCount);
 		}
 	}
@@ -144,7 +144,7 @@ public class CharacterSetFinder implements RowProcessingAnalyzer<CrosstabResult>
 
 		for (InputColumn<String> column : _columns) {
 			String columnName = column.getName();
-			CharacterSetFinderColumnDelegate delegate = _columnDelegates.get(column);
+			CharacterSetAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 			columnDimension.addCategory(columnName);
 
 			CrosstabNavigator<Number> nav = crosstab.navigate().where(columnDimension, columnName);

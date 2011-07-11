@@ -36,12 +36,12 @@ import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 
 import com.ibm.icu.text.UnicodeSet;
 
-public class CharacterSetFinderTest extends TestCase {
+public class CharacterSetAnalyzerTest extends TestCase {
 
 	private static final String CHARSET_NAMES = "[Arabic, Armenian, Bengali, Cyrillic, Devanagari, Georgian, Greek, Gujarati, Gurmukhi, Han, Hangul, Hebrew, Hiragana, Kannada, Katakana, Latin, ASCII, Latin, non-ASCII, Malayalam, Oriya, Syriac, Tamil, Telugu, Thaana, Thai]";
 
 	public void testCreateFilters() throws Exception {
-		Map<String, UnicodeSet> unicodeSets = CharacterSetFinder.createUnicodeSets();
+		Map<String, UnicodeSet> unicodeSets = CharacterSetAnalyzer.createUnicodeSets();
 		Set<String> keys = unicodeSets.keySet();
 		assertEquals(CHARSET_NAMES, keys.toString());
 
@@ -63,7 +63,7 @@ public class CharacterSetFinderTest extends TestCase {
 	}
 
 	public void testSimpleScenario() throws Exception {
-		CharacterSetFinder analyzer = new CharacterSetFinder();
+		CharacterSetAnalyzer analyzer = new CharacterSetAnalyzer();
 		InputColumn<String> col1 = new MockInputColumn<String>("foo", String.class);
 		InputColumn<String> col2 = new MockInputColumn<String>("bar", String.class);
 
