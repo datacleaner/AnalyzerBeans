@@ -38,7 +38,7 @@ import com.ibm.icu.text.UnicodeSet;
 
 public class CharacterSetFinderTest extends TestCase {
 
-	private static final String CHARSET_NAMES = "[Arabic, Chinese, Cyrillic, Greek, Hebrew, Indic, Japanese, Korean, Latin, ASCII, Latin, non-ASCII, Thai]";
+	private static final String CHARSET_NAMES = "[Arabic, Armenian, Bengali, Cyrillic, Devanagari, Georgian, Greek, Gujarati, Gurmukhi, Han, Hangul, Hebrew, Hiragana, Kannada, Katakana, Latin, ASCII, Latin, non-ASCII, Malayalam, Oriya, Syriac, Tamil, Telugu, Thaana, Thai]";
 
 	public void testCreateFilters() throws Exception {
 		Map<String, UnicodeSet> unicodeSets = CharacterSetFinder.createUnicodeSets();
@@ -84,21 +84,13 @@ public class CharacterSetFinderTest extends TestCase {
 
 		assertEquals(CHARSET_NAMES, crosstab.getDimension("Measures").getCategories().toString());
 
-		assertEquals("1", crosstab.navigate().where("Column", "foo").where("Measures", "Arabic").get().toString());
-		assertEquals("1", crosstab.navigate().where("Column", "foo").where("Measures", "Chinese").get().toString());
 		CrosstabNavigator<?> cyrillicNavigation = crosstab.navigate().where("Column", "foo").where("Measures", "Cyrillic");
 		assertEquals("1", cyrillicNavigation.get().toString());
 		AnnotatedRowsResult cyrillicAnnotatedRowsResult = (AnnotatedRowsResult) cyrillicNavigation.explore().getResult();
 		InputRow[] annotatedRows = cyrillicAnnotatedRowsResult.getRows();
 		assertEquals(1, annotatedRows.length);
 		assertEquals("Данныечистого", annotatedRows[0].getValue(col1));
-		assertEquals("0", crosstab.navigate().where("Column", "foo").where("Measures", "Greek").get().toString());
-		assertEquals("0", crosstab.navigate().where("Column", "foo").where("Measures", "Hebrew").get().toString());
-		assertEquals("0", crosstab.navigate().where("Column", "foo").where("Measures", "Indic").get().toString());
-		assertEquals("0", crosstab.navigate().where("Column", "foo").where("Measures", "Japanese").get().toString());
-		assertEquals("0", crosstab.navigate().where("Column", "foo").where("Measures", "Korean").get().toString());
 		assertEquals("2", crosstab.navigate().where("Column", "foo").where("Measures", "Latin, ASCII").get().toString());
 		assertEquals("2", crosstab.navigate().where("Column", "foo").where("Measures", "Latin, non-ASCII").get().toString());
-		assertEquals("0", crosstab.navigate().where("Column", "foo").where("Measures", "Thai").get().toString());
 	}
 }

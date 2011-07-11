@@ -88,17 +88,29 @@ public class CharacterSetFinder implements RowProcessingAnalyzer<CrosstabResult>
 		unicodeSets.put("Latin, ASCII", new UnicodeSet("[:ASCII:]"));
 		unicodeSets.put("Latin, non-ASCII", subUnicodeSet("[:Latin:]", "[:ASCII:]"));
 		unicodeSets.put("Arabic", new UnicodeSet("[:Script=Arabic:]"));
+		unicodeSets.put("Armenian", new UnicodeSet("[:Script=Armenian:]"));
+		unicodeSets.put("Bengali", new UnicodeSet("[:Script=Bengali:]"));
 		unicodeSets.put("Cyrillic", new UnicodeSet("[:Script=Cyrillic:]"));
-		unicodeSets.put("Hebrew", new UnicodeSet("[:Script=Hebrew:]"));
+		unicodeSets.put("Devanagari", new UnicodeSet("[:Script=Devanagari:]"));
 		unicodeSets.put("Greek", new UnicodeSet("[:Script=Greek:]"));
-		unicodeSets.put("Korean", new UnicodeSet("[:Script=Hangul:]"));
+		unicodeSets.put("Han", new UnicodeSet("[:Script=Han:]"));
+		unicodeSets.put("Gujarati", new UnicodeSet("[:Script=Gujarati:]"));
+		unicodeSets.put("Georgian", new UnicodeSet("[:Script=Georgian:]"));
+		unicodeSets.put("Gurmukhi", new UnicodeSet("[:Script=Gurmukhi:]"));
+		unicodeSets.put("Hangul", new UnicodeSet("[:Script=Hangul:]"));
+		unicodeSets.put("Hebrew", new UnicodeSet("[:Script=Hebrew:]"));
+		unicodeSets.put("Hiragana", new UnicodeSet("[:Script=Hiragana:]"));
+//		unicodeSets.put("Kanji", new UnicodeSet("[:Script=Kanji:]"));
+		unicodeSets.put("Kannada", new UnicodeSet("[:Script=Kannada:]"));
+		unicodeSets.put("Katakana", new UnicodeSet("[:Script=Katakana:]"));
+		unicodeSets.put("Malayalam", new UnicodeSet("[:Script=Malayalam:]"));
+//		unicodeSets.put("Mandarin", new UnicodeSet("[:Script=Mandarin:]"));
+		unicodeSets.put("Oriya", new UnicodeSet("[:Script=Oriya:]"));
+		unicodeSets.put("Syriac", new UnicodeSet("[:Script=Syriac:]"));
+		unicodeSets.put("Tamil", new UnicodeSet("[:Script=Tamil:]"));
+		unicodeSets.put("Telugu", new UnicodeSet("[:Script=Telugu:]"));
+		unicodeSets.put("Thaana", new UnicodeSet("[:Script=Thaana:]"));
 		unicodeSets.put("Thai", new UnicodeSet("[:Script=Thai:]"));
-		unicodeSets.put("Chinese", new UnicodeSet("[:Script=Han:]"));
-		unicodeSets.put("Japanese", sumUnicodeSet("Katakana", "Hiragana"));
-		unicodeSets.put(
-				"Indic",
-				sumUnicodeSet("Bengali", "Hiragana", "Gujarati", "Gurmukhi", "Kannada", "Malayalam", "Oriya", "Tamil",
-						"Telugu"));
 		return unicodeSets;
 	}
 
@@ -106,14 +118,6 @@ public class CharacterSetFinder implements RowProcessingAnalyzer<CrosstabResult>
 		UnicodeSet unicodeSet = new UnicodeSet();
 		unicodeSet.addAll(new UnicodeSet(pattern1));
 		unicodeSet.removeAll(new UnicodeSet(pattern2));
-		return unicodeSet;
-	}
-
-	private static UnicodeSet sumUnicodeSet(String... scriptNames) {
-		UnicodeSet unicodeSet = new UnicodeSet();
-		for (String scriptName : scriptNames) {
-			unicodeSet.addAll(new UnicodeSet("[:Script=" + scriptName + ":]"));
-		}
 		return unicodeSet;
 	}
 
