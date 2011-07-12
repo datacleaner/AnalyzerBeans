@@ -105,6 +105,6 @@ public final class TestHelper {
 	}
 
 	public static JdbcDatastore createSampleDatabaseDatastore(String name) {
-		return new JdbcDatastore(name, "jdbc:hsqldb:res:metamodel", "org.hsqldb.jdbcDriver");
+		return new JdbcDatastore(name, "jdbc:hsqldb:file:examples/orderdb;readonly=true", "org.hsqldb.jdbcDriver");
 	}
 }

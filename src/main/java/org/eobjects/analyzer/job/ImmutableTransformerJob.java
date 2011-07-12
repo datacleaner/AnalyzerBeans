@@ -30,7 +30,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 
 import org.eobjects.metamodel.util.BaseObject;
 
@@ -72,7 +72,7 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
 		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
 		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
 			Object property = _beanConfiguration.getProperty(propertyDescriptor);
-			InputColumn<?>[] inputs = CollectionUtils.arrayOf(InputColumn.class, property);
+			InputColumn<?>[] inputs = CollectionUtils2.arrayOf(InputColumn.class, property);
 			if (inputs != null) {
 				for (InputColumn<?> inputColumn : inputs) {
 					result.add(inputColumn);

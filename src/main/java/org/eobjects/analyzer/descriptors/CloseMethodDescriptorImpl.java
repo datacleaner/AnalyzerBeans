@@ -21,9 +21,9 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
-
-import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 
@@ -55,7 +55,8 @@ public final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return CollectionUtils.set(_method.getAnnotations());
+		Annotation[] annotations = _method.getAnnotations();
+		return new HashSet<Annotation>(Arrays.asList(annotations));
 	}
 
 	@Override

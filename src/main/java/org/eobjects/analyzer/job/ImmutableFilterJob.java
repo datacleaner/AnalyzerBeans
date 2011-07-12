@@ -27,7 +27,7 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 
 import org.eobjects.metamodel.util.BaseObject;
 
@@ -67,7 +67,7 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
 		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
 		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
 			Object property = _beanConfiguration.getProperty(propertyDescriptor);
-			InputColumn<?>[] inputs = CollectionUtils.arrayOf(InputColumn.class, property);
+			InputColumn<?>[] inputs = CollectionUtils2.arrayOf(InputColumn.class, property);
 			if (inputs != null) {
 				for (InputColumn<?> inputColumn : inputs) {
 					result.add(inputColumn);

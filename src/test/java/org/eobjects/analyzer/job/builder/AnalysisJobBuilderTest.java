@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.TestCase;
+
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.eobjects.analyzer.beans.StringAnalyzer;
@@ -60,11 +62,10 @@ import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.MetaModelTestCase;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 
-public class AnalysisJobBuilderTest extends MetaModelTestCase {
+public class AnalysisJobBuilderTest extends TestCase {
 
 	private AnalysisJobBuilder analysisJobBuilder;
 	private AnalyzerBeansConfigurationImpl configuration;

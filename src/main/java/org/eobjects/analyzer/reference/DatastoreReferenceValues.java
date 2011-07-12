@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
@@ -43,7 +43,7 @@ public final class DatastoreReferenceValues extends BaseObject implements Refere
 
 	private final Datastore _datastore;
 	private final Column _column;
-	private transient Map<String, Boolean> _containsValueCache = CollectionUtils.createCacheMap();
+	private transient Map<String, Boolean> _containsValueCache = CollectionUtils2.createCacheMap();
 
 	public DatastoreReferenceValues(Datastore datastore, Column column) {
 		_datastore = datastore;

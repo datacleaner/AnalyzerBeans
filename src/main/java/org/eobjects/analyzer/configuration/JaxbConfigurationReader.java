@@ -110,7 +110,7 @@ import org.eobjects.analyzer.storage.H2StorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringConversionUtils;
@@ -443,7 +443,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		List<Object> datastoreTypes = datastoreCatalogType.getJdbcDatastoreOrAccessDatastoreOrCsvDatastore();
 
-		List<CsvDatastoreType> csvDatastores = CollectionUtils.filterOnClass(datastoreTypes, CsvDatastoreType.class);
+		List<CsvDatastoreType> csvDatastores = CollectionUtils2.filterOnClass(datastoreTypes, CsvDatastoreType.class);
 		for (CsvDatastoreType csvDatastoreType : csvDatastores) {
 			String name = csvDatastoreType.getName();
 			checkName(name, Datastore.class, datastores);
@@ -479,7 +479,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<FixedWidthDatastoreType> fixedWidthDatastores = CollectionUtils.filterOnClass(datastoreTypes,
+		List<FixedWidthDatastoreType> fixedWidthDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
 				FixedWidthDatastoreType.class);
 		for (FixedWidthDatastoreType fixedWidthDatastore : fixedWidthDatastores) {
 			String name = fixedWidthDatastore.getName();
@@ -512,7 +512,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<SasDatastoreType> sasDatastores = CollectionUtils.filterOnClass(datastoreTypes, SasDatastoreType.class);
+		List<SasDatastoreType> sasDatastores = CollectionUtils2.filterOnClass(datastoreTypes, SasDatastoreType.class);
 		for (SasDatastoreType sasDatastoreType : sasDatastores) {
 			final String name = sasDatastoreType.getName();
 			checkName(name, Datastore.class, datastores);
@@ -522,7 +522,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<AccessDatastoreType> accessDatastores = CollectionUtils
+		List<AccessDatastoreType> accessDatastores = CollectionUtils2
 				.filterOnClass(datastoreTypes, AccessDatastoreType.class);
 		for (AccessDatastoreType accessDatastoreType : accessDatastores) {
 			String name = accessDatastoreType.getName();
@@ -533,7 +533,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<XmlDatastoreType> xmlDatastores = CollectionUtils.filterOnClass(datastoreTypes, XmlDatastoreType.class);
+		List<XmlDatastoreType> xmlDatastores = CollectionUtils2.filterOnClass(datastoreTypes, XmlDatastoreType.class);
 		for (XmlDatastoreType xmlDatastoreType : xmlDatastores) {
 			String name = xmlDatastoreType.getName();
 			checkName(name, Datastore.class, datastores);
@@ -543,7 +543,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<ExcelDatastoreType> excelDatastores = CollectionUtils.filterOnClass(datastoreTypes, ExcelDatastoreType.class);
+		List<ExcelDatastoreType> excelDatastores = CollectionUtils2.filterOnClass(datastoreTypes, ExcelDatastoreType.class);
 		for (ExcelDatastoreType excelDatastoreType : excelDatastores) {
 			String name = excelDatastoreType.getName();
 			checkName(name, Datastore.class, datastores);
@@ -553,7 +553,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<JdbcDatastoreType> jdbcDatastores = CollectionUtils.filterOnClass(datastoreTypes, JdbcDatastoreType.class);
+		List<JdbcDatastoreType> jdbcDatastores = CollectionUtils2.filterOnClass(datastoreTypes, JdbcDatastoreType.class);
 		for (JdbcDatastoreType jdbcDatastoreType : jdbcDatastores) {
 			String name = jdbcDatastoreType.getName();
 			checkName(name, Datastore.class, datastores);
@@ -576,7 +576,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<DbaseDatastoreType> dbaseDatastores = CollectionUtils.filterOnClass(datastoreTypes, DbaseDatastoreType.class);
+		List<DbaseDatastoreType> dbaseDatastores = CollectionUtils2.filterOnClass(datastoreTypes, DbaseDatastoreType.class);
 		for (DbaseDatastoreType dbaseDatastoreType : dbaseDatastores) {
 			String name = dbaseDatastoreType.getName();
 			checkName(name, Datastore.class, datastores);
@@ -589,7 +589,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<OpenOfficeDatabaseDatastoreType> odbDatastores = CollectionUtils.filterOnClass(datastoreTypes,
+		List<OpenOfficeDatabaseDatastoreType> odbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
 				OpenOfficeDatabaseDatastoreType.class);
 		for (OpenOfficeDatabaseDatastoreType odbDatastoreType : odbDatastores) {
 			String name = odbDatastoreType.getName();
@@ -601,7 +601,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<CustomElementType> customDatastores = CollectionUtils.filterOnClass(datastoreTypes, CustomElementType.class);
+		List<CustomElementType> customDatastores = CollectionUtils2.filterOnClass(datastoreTypes, CustomElementType.class);
 		for (CustomElementType customElementType : customDatastores) {
 			Datastore ds = createCustomElement(customElementType, Datastore.class, null, null, true);
 			String name = ds.getName();
@@ -609,7 +609,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<CompositeDatastoreType> compositeDatastores = CollectionUtils.filterOnClass(datastoreTypes,
+		List<CompositeDatastoreType> compositeDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
 				CompositeDatastoreType.class);
 		for (CompositeDatastoreType compositeDatastoreType : compositeDatastores) {
 			String name = compositeDatastoreType.getName();

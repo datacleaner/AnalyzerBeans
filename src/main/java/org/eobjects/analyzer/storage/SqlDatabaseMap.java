@@ -28,11 +28,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 
 final class SqlDatabaseMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, SqlDatabaseCollection {
 
-	private final Map<K, V> _cache = CollectionUtils.createCacheMap();
+	private final Map<K, V> _cache = CollectionUtils2.createCacheMap();
 	private final Connection _connection;
 	private final String _tableName;
 	private final PreparedStatement _getPreparedStatement;

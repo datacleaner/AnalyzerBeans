@@ -22,9 +22,10 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
-import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
@@ -81,7 +82,8 @@ public class AbstractPropertyDescriptor implements PropertyDescriptor {
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return CollectionUtils.set(_field.getAnnotations());
+		Annotation[] annotations = _field.getAnnotations();
+		return new HashSet<Annotation>(Arrays.asList(annotations));
 	}
 
 	@Override

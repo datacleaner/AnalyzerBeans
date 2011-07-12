@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.filemonitor.FileMonitor;
@@ -150,13 +150,13 @@ public final class TextFileSynonymCatalog extends AbstractReferenceData implemen
 		if (_masterTermCache == null) {
 			synchronized (this) {
 				if (_masterTermCache == null) {
-					_masterTermCache = CollectionUtils.createCacheMap();
+					_masterTermCache = CollectionUtils2.createCacheMap();
 				}
 			}
 		} else {
 			if (getFileMonitor().hasChanged()) {
 				// reset the cache
-				_masterTermCache = CollectionUtils.createCacheMap();
+				_masterTermCache = CollectionUtils2.createCacheMap();
 			}
 		}
 		return _masterTermCache;

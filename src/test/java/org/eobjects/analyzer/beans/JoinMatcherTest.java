@@ -23,17 +23,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.TestCase;
+
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
-
+import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.MetaModelTestCase;
 import org.eobjects.metamodel.schema.Relationship;
 
-public class JoinMatcherTest extends MetaModelTestCase {
+public class JoinMatcherTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
 		AnalyzerBeanDescriptor<JoinMatcher> descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(JoinMatcher.class);
@@ -49,7 +50,9 @@ public class JoinMatcherTest extends MetaModelTestCase {
 	}
 
 	public void testNoMismatch() throws Exception {
-		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
+		DataContextProvider dcp = TestHelper.createSampleDatabaseDatastore("ds").getDataContextProvider();
+		
+		DataContext dc = dcp.getDataContext();
 		Relationship r = dc.getDefaultSchema().getRelationships()[0];
 		assertEquals(
 				"Relationship[primaryTable=PRODUCTS,primaryColumns=[PRODUCTCODE],foreignTable=ORDERFACT,foreignColumns=[PRODUCTCODE]]",
@@ -72,5 +75,7 @@ public class JoinMatcherTest extends MetaModelTestCase {
 		assertEquals(
 				"[S18_3233, 1985 Toyota Supra, Classic Cars, 1:18, Highway 66 Mini Classics, This model features soft rubber tires, working steering, rubber mud guards, authentic Ford logos, detailed undercarriage, opening doors and hood, removable split rear gate, full size spare mounted in bed, detailed interior with opening glove box, 7733, 57.01, 107.57, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]",
 				Arrays.toString(rowData.get(0)));
+		
+		dcp.close();
 	}
 }

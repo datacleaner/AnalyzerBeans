@@ -21,6 +21,7 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,7 +35,6 @@ import org.eobjects.analyzer.beans.api.ComponentCategory;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +136,8 @@ public abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescripto
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return CollectionUtils.set(getComponentClass().getAnnotations());
+		Annotation[] annotations = getComponentClass().getAnnotations();
+		return new HashSet<Annotation>(Arrays.asList(annotations));
 	}
 
 	@Override

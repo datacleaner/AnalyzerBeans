@@ -21,20 +21,19 @@ package org.eobjects.analyzer.beans;
 
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.ColumnDifference;
 import org.eobjects.analyzer.result.SchemaDifference;
 import org.eobjects.analyzer.result.TableComparisonResult;
-
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableSchema;
 import org.eobjects.metamodel.schema.MutableTable;
 import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.schema.TableType;
-import junit.framework.TestCase;
 
 public class CompareSchemasAnalyzerTest extends TestCase {
 
@@ -69,8 +68,8 @@ public class CompareSchemasAnalyzerTest extends TestCase {
 		Column col1 = new MutableColumn("col1", ColumnType.VARCHAR);
 		Column col2 = new MutableColumn("col2");
 		Column col3 = new MutableColumn("col1", ColumnType.BIGINT);
-		Table table1 = new MutableTable("table", TableType.TABLE, null, col1, col2);
-		Table table2 = new MutableTable("table", TableType.VIEW, null, col3, col2);
+		MutableTable table1 = new MutableTable("table", TableType.TABLE, null, col1, col2);
+		MutableTable table2 = new MutableTable("table", TableType.VIEW, null, col3, col2);
 		Schema schema1 = new MutableSchema("schema", table1);
 		Schema schema2 = new MutableSchema("schema", table2);
 

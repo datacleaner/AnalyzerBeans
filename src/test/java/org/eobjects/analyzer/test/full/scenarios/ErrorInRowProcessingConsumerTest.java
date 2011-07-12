@@ -42,7 +42,7 @@ import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.NumberResult;
 import org.eobjects.analyzer.test.ActivityAwareMultiThreadedTaskRunner;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.schema.Column;
 
@@ -116,7 +116,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		assertTrue(numErrors == 2 || numErrors == 3);
 
 		// sort the errors to make the order deterministic
-		errors = CollectionUtils.sorted(errors, new Comparator<Throwable>() {
+		errors = CollectionUtils2.sorted(errors, new Comparator<Throwable>() {
 			@Override
 			public int compare(Throwable o1, Throwable o2) {
 				return o1.getClass().getName().compareTo(o2.getClass().getName());

@@ -74,10 +74,10 @@ public class StringAnalyzerTest extends TestCase {
 		assertEquals("Total char count                             15        32 ", resultLines[5]);
 		assertEquals("Max chars                                     5        12 ", resultLines[6]);
 		assertEquals("Min chars                                     2         5 ", resultLines[7]);
-		assertEquals("Avg chars                                  3,75         8 ", resultLines[8]);
+		assertEquals("Avg chars                                  3.75         8 ", resultLines[8]);
 		assertEquals("Max white spaces                              0         1 ", resultLines[9]);
 		assertEquals("Min white spaces                              0         0 ", resultLines[10]);
-		assertEquals("Avg white spaces                              0      0,25 ", resultLines[11]);
+		assertEquals("Avg white spaces                              0      0.25 ", resultLines[11]);
 		assertEquals("Uppercase chars                               2         0 ", resultLines[12]);
 		assertEquals("Uppercase chars (excl. first letters)         0         0 ", resultLines[13]);
 		assertEquals("Lowercase chars                              13        31 ", resultLines[14]);
@@ -112,10 +112,10 @@ public class StringAnalyzerTest extends TestCase {
 		assertEquals("Total char count                             63        30 ", resultLines[5]);
 		assertEquals("Max chars                                     9        12 ", resultLines[6]);
 		assertEquals("Min chars                                     5         2 ", resultLines[7]);
-		assertEquals("Avg chars                                   6,5         6 ", resultLines[8]);
+		assertEquals("Avg chars                                   6.5         6 ", resultLines[8]);
 		assertEquals("Max white spaces                              1         2 ", resultLines[9]);
 		assertEquals("Min white spaces                              0         0 ", resultLines[10]);
-		assertEquals("Avg white spaces                            0,5         1 ", resultLines[11]);
+		assertEquals("Avg white spaces                            0.5         1 ", resultLines[11]);
 		assertEquals("Uppercase chars                              58         0 ", resultLines[12]);
 		assertEquals("Uppercase chars (excl. first letters)        49         0 ", resultLines[13]);
 		assertEquals("Lowercase chars                               0        19 ", resultLines[14]);

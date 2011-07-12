@@ -23,9 +23,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eobjects.metamodel.util.ToStringComparator;
-
 import junit.framework.TestCase;
+
+import org.eobjects.metamodel.util.CollectionUtils;
+import org.eobjects.metamodel.util.ToStringComparator;
 
 public class CollectionUtilsTest extends TestCase {
 
@@ -36,7 +37,7 @@ public class CollectionUtilsTest extends TestCase {
 
 	public void testArray2() throws Exception {
 		Object existingArray = new Object[] { 'c' };
-		Object[] result = CollectionUtils.array(Object.class, existingArray, "foo", 1, "bar");
+		Object[] result = CollectionUtils2.array(Object.class, existingArray, "foo", 1, "bar");
 
 		assertEquals("[c, foo, 1, bar]", Arrays.toString(result));
 	}
@@ -48,7 +49,7 @@ public class CollectionUtilsTest extends TestCase {
 		list1.add("3");
 		list1.add("2");
 
-		List<String> list2 = CollectionUtils.sorted(list1, ToStringComparator.getComparator());
+		List<String> list2 = CollectionUtils2.sorted(list1, ToStringComparator.getComparator());
 		assertEquals("[4, 1, 3, 2]", list1.toString());
 		assertEquals("[1, 2, 3, 4]", list2.toString());
 	}

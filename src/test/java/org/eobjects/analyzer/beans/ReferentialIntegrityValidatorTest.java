@@ -19,22 +19,22 @@
  */
 package org.eobjects.analyzer.beans;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.easymock.EasyMock;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
+import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.test.mock.QueryMatcher;
-
 import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.MetaModelTestCase;
 import org.eobjects.metamodel.data.DefaultRow;
 import org.eobjects.metamodel.data.InMemoryDataSet;
 import org.eobjects.metamodel.data.Row;
@@ -42,12 +42,15 @@ import org.eobjects.metamodel.query.FromItem;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.MutableColumn;
+import org.eobjects.metamodel.schema.MutableSchema;
+import org.eobjects.metamodel.schema.MutableTable;
 import org.eobjects.metamodel.schema.Table;
 
-public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
+public class ReferentialIntegrityValidatorTest extends TestCase {
 
-	private Connection con;
+	private DataContextProvider dcp;
 	private DataContext dc;
 	private Table employeesTable;
 	private Table officesTable;
@@ -55,8 +58,8 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		con = getTestDbConnection();
-		dc = DataContextFactory.createJdbcDataContext(con);
+		dcp = TestHelper.createSampleDatabaseDatastore("ds").getDataContextProvider();
+		dc = dcp.getDataContext();
 		employeesTable = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		officesTable = dc.getDefaultSchema().getTableByName("OFFICES");
 	}
@@ -64,14 +67,13 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		con.close();
+		dcp.close();
 	}
 
 	public void testDescriptor() throws Exception {
 		AnalyzerBeanDescriptor<ReferentialIntegrityValidator> descriptor = AnnotationBasedAnalyzerBeanDescriptor
 				.create(ReferentialIntegrityValidator.class);
-		assertEquals(
-				"AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
+		assertEquals("AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
 				descriptor.toString());
 
 		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
@@ -110,17 +112,28 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 	}
 
 	public void testReferentialInconsistency() throws Exception {
-		Schema schema = getExampleSchema();
-		Column foreignKeyColumn = schema.getTableByName(TABLE_ROLE).getColumnByName(COLUMN_ROLE_CONTRIBUTOR_ID);
-		Column primaryKeyColumn = schema.getTableByName(TABLE_CONTRIBUTOR)
-				.getColumnByName(COLUMN_CONTRIBUTOR_CONTRIBUTOR_ID);
+		MutableSchema schema = new MutableSchema("projects");
+
+		MutableTable roleTable = new MutableTable("role").setSchema(schema);
+		roleTable.addColumn(new MutableColumn("project_id").setTable(roleTable).setType(ColumnType.INTEGER));
+		roleTable.addColumn(new MutableColumn("name").setTable(roleTable).setType(ColumnType.INTEGER));
+		roleTable.addColumn(new MutableColumn("contributor_id").setTable(roleTable).setType(ColumnType.INTEGER));
+		schema.addTable(roleTable);
+
+		MutableTable contributorTable = new MutableTable("contributor").setSchema(schema);
+		contributorTable.addColumn(new MutableColumn("contributor_id").setTable(contributorTable)
+				.setType(ColumnType.INTEGER));
+		schema.addTable(contributorTable);
+
+		Column foreignKeyColumn = schema.getTableByName("role").getColumnByName("contributor_id");
+		Column primaryKeyColumn = schema.getTableByName("contributor").getColumnByName("contributor_id");
 
 		ReferentialIntegrityValidator bean = new ReferentialIntegrityValidator();
 		bean.setAcceptNullForeignKey(false);
 		bean.setPrimaryKeyColumn(primaryKeyColumn);
 		bean.setForeignKeyColumn(foreignKeyColumn);
 
-		DataContext dcMock = createMock(DataContext.class);
+		DataContext dcMock = EasyMock.createMock(DataContext.class);
 
 		List<Row> rows = new ArrayList<Row>();
 
@@ -149,16 +162,16 @@ public class ReferentialIntegrityValidatorTest extends MetaModelTestCase {
 				new Object[] { "foo", "foo" }));
 
 		EasyMock.reportMatcher(new QueryMatcher("SELECT b.contributor_id, a.contributor_id, a.project_id, a.name "
-				+ "FROM (SELECT role.contributor_id, role.project_id, role.name FROM MetaModelSchema.role) a "
-				+ "LEFT JOIN (SELECT contributor.contributor_id FROM MetaModelSchema.contributor) b "
+				+ "FROM (SELECT role.contributor_id, role.project_id, role.name FROM projects.role) a "
+				+ "LEFT JOIN (SELECT contributor.contributor_id FROM projects.contributor) b "
 				+ "ON a.contributor_id = b.contributor_id"));
 		EasyMock.expect(dcMock.executeQuery(null)).andReturn(new InMemoryDataSet(rows));
 
-		replayMocks();
+		EasyMock.replay(dcMock);
 
 		bean.run(dcMock);
 
-		verifyMocks();
+		EasyMock.verify(dcMock);
 
 		DataSetResult invalidRows = bean.getResult();
 		assertEquals(2, invalidRows.getRows().size());

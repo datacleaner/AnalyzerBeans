@@ -21,14 +21,16 @@ package org.eobjects.analyzer.test.full.scenarios;
 
 import java.util.Arrays;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
@@ -51,14 +53,11 @@ import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
-
 import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.MetaModelTestCase;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 
-public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTestCase {
+public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 
 	public void testScenario() throws Throwable {
 		TaskRunner taskRunner = new MultiThreadedTaskRunner(5);
@@ -72,11 +71,13 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
 				referenceDataCatalog, descriptorProvider, taskRunner, storageProvider);
 
-		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
+		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
+		DataContextProvider dcp = datastore.getDataContextProvider();
+		DataContext dc = dcp.getDataContext();
 
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
-		ajb.setDataContextProvider(new SingleDataContextProvider(dc, new JdbcDatastore("foobar", dc)));
-
+		ajb.setDataContextProvider(dcp);
+		
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
 
@@ -170,6 +171,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends MetaModelTe
 			assertEquals("wpatterson@classicmodelcars.com", rows[0].getValue(emailInputColumn).toString());
 		}
 
+		dcp.close();
 		taskRunner.shutdown();
 	}
 }

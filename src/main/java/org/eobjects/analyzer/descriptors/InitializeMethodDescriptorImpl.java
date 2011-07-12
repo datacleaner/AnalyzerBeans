@@ -22,11 +22,11 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
-import org.eobjects.analyzer.util.CollectionUtils;
 
 public final class InitializeMethodDescriptorImpl implements InitializeMethodDescriptor {
 
@@ -93,7 +93,8 @@ public final class InitializeMethodDescriptorImpl implements InitializeMethodDes
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return CollectionUtils.set(_method.getAnnotations());
+		Annotation[] annotations = _method.getAnnotations();
+		return new HashSet<Annotation>(Arrays.asList(annotations));
 	}
 
 	@Override

@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -30,7 +31,6 @@ import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.TableComparisonResult;
 import org.eobjects.analyzer.result.TableDifference;
-import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
@@ -81,8 +81,8 @@ public class CompareTablesAnalyzer implements ExploringAnalyzer<TableComparisonR
 		addDiff(differences, "type", table1.getType(), table2.getType());
 		addDiff(differences, "remarks", table1.getRemarks(), table2.getRemarks());
 
-		List<String> columnNames1 = CollectionUtils.list(table1.getColumnNames());
-		List<String> columnNames2 = CollectionUtils.list(table2.getColumnNames());
+		List<String> columnNames1 = Arrays.asList(table1.getColumnNames());
+		List<String> columnNames2 = Arrays.asList(table2.getColumnNames());
 
 		List<String> columnsOnlyInTable1 = new ArrayList<String>(columnNames1);
 		columnsOnlyInTable1.removeAll(columnNames2);

@@ -25,7 +25,7 @@ import java.util.Arrays;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.metamodel.util.CollectionUtils;
 import org.eobjects.metamodel.util.EqualsBuilder;
 
 /**

@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.text.DecimalFormatSymbols;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -45,7 +46,6 @@ import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.NullTolerableComparator;
 
 @AnalyzerBean("Pattern finder")
@@ -153,7 +153,10 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 		}
 
 		if (predefinedTokenName != null && predefinedTokenPatterns != null) {
-			Set<String> tokenRegexes = CollectionUtils.set(predefinedTokenPatterns);
+			Set<String> tokenRegexes = new HashSet<String>();
+			for (String predefinedTokenPattern : predefinedTokenPatterns) {
+				tokenRegexes.add(predefinedTokenPattern);
+			}
 			_configuration.getPredefinedTokens().add(new PredefinedTokenDefinition(predefinedTokenName, tokenRegexes));
 		}
 

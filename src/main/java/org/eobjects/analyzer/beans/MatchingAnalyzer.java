@@ -37,7 +37,7 @@ import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.result.BooleanAnalyzerResult;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.metamodel.util.CollectionUtils;
 
 @AnalyzerBean("Matching analyzer")
 @Description("Provides a handy shortcut for doing matching with dictionaries and string patterns as well as retrieving matching matrices for all matches.")

@@ -26,7 +26,7 @@ import java.util.List;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.metamodel.util.CollectionUtils;
 
 /**
  * A class that encapsulates all the complicated logic of traversing a crosstab

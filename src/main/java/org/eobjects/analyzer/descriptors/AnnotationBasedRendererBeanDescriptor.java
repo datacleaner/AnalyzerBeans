@@ -21,13 +21,14 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +100,8 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		return CollectionUtils.set(_componentClass.getAnnotations());
+		Annotation[] annotations = _componentClass.getAnnotations();
+		return new HashSet<Annotation>(Arrays.asList(annotations));
 	}
 
 	@Override

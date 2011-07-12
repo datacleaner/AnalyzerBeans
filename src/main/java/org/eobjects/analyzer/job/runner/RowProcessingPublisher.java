@@ -66,14 +66,14 @@ import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.storage.StorageProvider;
-import org.eobjects.analyzer.util.CollectionUtils;
-import org.eobjects.analyzer.util.Function;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.CollectionUtils;
+import org.eobjects.metamodel.util.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -269,11 +269,9 @@ public final class RowProcessingPublisher {
 			TaskListener rowProcessorPublishersTaskListener, Datastore datastore) {
 
 		final List<RowProcessingConsumer> configurableConsumers = CollectionUtils.filter(_consumers,
-				new Function<RowProcessingConsumer, Boolean>() {
-					private static final long serialVersionUID = 1L;
-
+				new Predicate<RowProcessingConsumer>() {
 					@Override
-					public Boolean run(RowProcessingConsumer input) throws Exception {
+					public Boolean eval(RowProcessingConsumer input) {
 						return input.getComponentJob() instanceof ConfigurableBeanJob<?>;
 					}
 				});

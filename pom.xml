@@ -14,7 +14,7 @@
 	</description>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
-		<metamodel.version>1.7.5</metamodel.version>
+		<metamodel.version>2.0-RC1</metamodel.version>
 		<sshwagon.version>1.0-beta-7</sshwagon.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -469,11 +469,17 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- The MetaModel-testware module includes junit, easymock and some sampledata -->
+		<!--Test dependencies -->
 		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-testware</artifactId>
-			<version>${metamodel.version}</version>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>3.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -22,13 +22,15 @@ package org.eobjects.analyzer.test.full.scenarios;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -54,12 +56,10 @@ import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.MetaModelTestCase;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 
-public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
+public class ValueDistributionAndStringAnalysisTest extends TestCase {
 
 	public void testScenario() throws Exception {
 		TaskRunner taskRunner = new MultiThreadedTaskRunner(5);
@@ -75,10 +75,12 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
+		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
+		DataContextProvider dcp = datastore.getDataContextProvider();
+		DataContext dc = dcp.getDataContext();
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
-		analysisJobBuilder.setDataContextProvider(new SingleDataContextProvider(dc, new JdbcDatastore("foobar", dc)));
+		analysisJobBuilder.setDataContextProvider(dcp);
 
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
@@ -162,15 +164,14 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		assertNotNull(jobTitleResult);
 		assertNotNull(lastnameResult);
 
-		assertEquals("Patterson", lastnameResult.getSingleValueDistributionResult().getTopValues().getValueCounts()
-				.get(0).getValue());
-		assertEquals(3, lastnameResult.getSingleValueDistributionResult().getTopValues().getValueCounts().get(0)
-				.getCount());
+		assertEquals("Patterson", lastnameResult.getSingleValueDistributionResult().getTopValues().getValueCounts().get(0)
+				.getValue());
+		assertEquals(3, lastnameResult.getSingleValueDistributionResult().getTopValues().getValueCounts().get(0).getCount());
 		assertEquals(16, lastnameResult.getSingleValueDistributionResult().getUniqueCount());
 		assertEquals(0, lastnameResult.getSingleValueDistributionResult().getNullCount());
 
-		assertEquals("Sales Rep", jobTitleResult.getSingleValueDistributionResult().getTopValues().getValueCounts()
-				.get(0).getValue());
+		assertEquals("Sales Rep", jobTitleResult.getSingleValueDistributionResult().getTopValues().getValueCounts().get(0)
+				.getValue());
 
 		String[] resultLines = new CrosstabTextRenderer().render(stringAnalyzerResult).split("\n");
 		assertEquals(
@@ -198,6 +199,7 @@ public class ValueDistributionAndStringAnalysisTest extends MetaModelTestCase {
 		resultProducer = crosstab.where("Column", "FIRSTNAME").where("Measures", "Diacritic chars").explore();
 		assertNull(resultProducer);
 
+		dcp.close();
 		taskRunner.shutdown();
 	}
 }

@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -30,7 +31,6 @@ import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.result.SchemaComparisonResult;
 import org.eobjects.analyzer.result.SchemaDifference;
 import org.eobjects.analyzer.result.TableComparisonResult;
-import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
@@ -77,8 +77,8 @@ public class CompareSchemasAnalyzer implements ExploringAnalyzer<SchemaCompariso
 
 		addDiff(differences, "name", schema1.getName(), schema2.getName());
 
-		List<String> tableNames1 = CollectionUtils.list(schema1.getTableNames());
-		List<String> tableNames2 = CollectionUtils.list(schema2.getTableNames());
+		List<String> tableNames1 = Arrays.asList(schema1.getTableNames());
+		List<String> tableNames2 = Arrays.asList(schema2.getTableNames());
 
 		List<String> tablesOnlyInSchema1 = new ArrayList<String>(tableNames1);
 		tablesOnlyInSchema1.removeAll(tableNames2);

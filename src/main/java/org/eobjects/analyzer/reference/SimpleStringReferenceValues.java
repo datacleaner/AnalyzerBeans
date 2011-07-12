@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eobjects.analyzer.util.CollectionUtils;
 import org.eobjects.metamodel.util.BaseObject;
 
 public final class SimpleStringReferenceValues extends BaseObject implements ReferenceValues<String> {
@@ -34,7 +33,10 @@ public final class SimpleStringReferenceValues extends BaseObject implements Ref
 	private final boolean _caseSensitive;
 
 	public SimpleStringReferenceValues(String[] values, boolean caseSensitive) {
-		_values = CollectionUtils.set(values);
+		_values = new HashSet<String>();
+		for (String value : values) {
+			_values.add(value);
+		}
 		_caseSensitive = caseSensitive;
 	}
 

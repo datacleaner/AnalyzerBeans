@@ -33,7 +33,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.InputColumnComparator;
 
 /**
@@ -70,7 +70,7 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 			} else {
 				_inputColumns = new ArrayList<InputColumn<?>>(0);
 			}
-			_inputColumns = CollectionUtils.sorted(_inputColumns, new InputColumnComparator());
+			_inputColumns = CollectionUtils2.sorted(_inputColumns, new InputColumnComparator());
 		}
 		return _inputColumns;
 	}

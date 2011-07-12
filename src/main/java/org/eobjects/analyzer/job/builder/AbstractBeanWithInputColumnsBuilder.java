@@ -34,7 +34,8 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
+import org.eobjects.metamodel.util.CollectionUtils;
 
 @SuppressWarnings("unchecked")
 public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends AbstractBeanJobBuilder<D, E, B>
@@ -99,7 +100,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 				inputColumns = inputColumn;
 			}
 		} else {
-			inputColumns = CollectionUtils.array(InputColumn.class, inputColumns, inputColumn);
+			inputColumns = CollectionUtils2.array(InputColumn.class, inputColumns, inputColumn);
 		}
 		setConfiguredProperty(propertyDescriptor, inputColumns);
 		return (B) this;

@@ -25,9 +25,9 @@ import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.CsvConfiguration;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.util.FileHelper;
 
 /**

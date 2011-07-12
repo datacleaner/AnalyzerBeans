@@ -35,7 +35,7 @@ import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
-import org.eobjects.analyzer.util.CollectionUtils;
+import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.StringUtils;
@@ -117,7 +117,7 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 		if (_masterTermCache == null) {
 			synchronized (this) {
 				if (_masterTermCache == null) {
-					_masterTermCache = CollectionUtils.createCacheMap();
+					_masterTermCache = CollectionUtils2.createCacheMap();
 				}
 			}
 		}

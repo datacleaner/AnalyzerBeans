@@ -22,6 +22,7 @@ package org.eobjects.analyzer.test.mock;
 import org.easymock.IArgumentMatcher;
 
 import org.eobjects.metamodel.query.Query;
+import org.junit.Assert;
 
 public class QueryMatcher implements IArgumentMatcher {
 
@@ -37,7 +38,9 @@ public class QueryMatcher implements IArgumentMatcher {
 	@Override
 	public boolean matches(Object argument) {
 		Query q = (Query) argument;
-		return queryToString.equals(q.toString());
+		String sql = q.toString();
+		Assert.assertEquals(queryToString, sql);
+		return true;
 	}
 
 	@Override

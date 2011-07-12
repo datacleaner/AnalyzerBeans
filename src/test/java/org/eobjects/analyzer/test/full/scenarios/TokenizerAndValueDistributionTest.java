@@ -23,13 +23,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
@@ -50,12 +52,10 @@ import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.MetaModelTestCase;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 
-public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
+public class TokenizerAndValueDistributionTest extends TestCase {
 
 	public void testScenario() throws Throwable {
 		TaskRunner taskRunner = new MultiThreadedTaskRunner(5);
@@ -71,10 +71,12 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		DataContext dc = DataContextFactory.createJdbcDataContext(getTestDbConnection());
+		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
+		DataContextProvider dcp = datastore.getDataContextProvider();
+		DataContext dc = dcp.getDataContext();
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
-		analysisJobBuilder.setDataContextProvider(new SingleDataContextProvider(dc, new JdbcDatastore("foobar", dc)));
+		analysisJobBuilder.setDataContextProvider(dcp);
 
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
@@ -156,6 +158,7 @@ public class TokenizerAndValueDistributionTest extends MetaModelTestCase {
 			}
 		}
 
+		dcp.close();
 		taskRunner.shutdown();
 	}
 }
