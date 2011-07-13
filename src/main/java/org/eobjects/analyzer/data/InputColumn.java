@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.data;
 
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.util.HasName;
 
 /**
  * Represents a column that is used to retrieve values from a row of data. A
@@ -35,11 +36,12 @@ import org.eobjects.metamodel.schema.Column;
  *            the data type of the column. See <code>DataTypeFamily</code> for
  *            available values.
  */
-public interface InputColumn<E> extends Comparable<InputColumn<E>> {
+public interface InputColumn<E> extends HasName, Comparable<InputColumn<E>> {
 
 	/**
 	 * @return the name of this column
 	 */
+	@Override
 	public String getName();
 
 	/**

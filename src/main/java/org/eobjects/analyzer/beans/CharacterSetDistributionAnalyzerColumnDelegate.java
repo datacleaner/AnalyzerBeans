@@ -35,14 +35,21 @@ import org.slf4j.LoggerFactory;
 
 import com.ibm.icu.text.UnicodeSet;
 
-final class CharacterSetAnalyzerColumnDelegate {
+/**
+ * Performs character set distribution analysis for a single column. Used by the
+ * {@link CharacterSetDistributionAnalyzer} for splitting up work.
+ * 
+ * @author Kasper Sørensen
+ */
+final class CharacterSetDistributionAnalyzerColumnDelegate {
 
-	private static final Logger logger = LoggerFactory.getLogger(CharacterSetAnalyzerColumnDelegate.class);
+	private static final Logger logger = LoggerFactory.getLogger(CharacterSetDistributionAnalyzerColumnDelegate.class);
 	private final RowAnnotationFactory _annotationFactory;
 	private final Map<String, UnicodeSet> _unicodeSets;
 	private final Map<String, RowAnnotation> _annotations;
 
-	public CharacterSetAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory, Map<String, UnicodeSet> unicodeSets) {
+	public CharacterSetDistributionAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory,
+			Map<String, UnicodeSet> unicodeSets) {
 		_annotationFactory = annotationFactory;
 		_unicodeSets = unicodeSets;
 		_annotations = new HashMap<String, RowAnnotation>();

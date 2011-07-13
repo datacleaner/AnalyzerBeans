@@ -36,19 +36,19 @@ import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
+import org.eobjects.analyzer.result.CharacterSetDistributionResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
-import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 
 import com.ibm.icu.text.UnicodeSet;
 
-@AnalyzerBean("Character set analyzer")
-@Description("Inspects text characters according to character set affinity, such as Latin, Hebrew, Cyrillic, Chinese and more.")
+@AnalyzerBean("Character set distribution")
+@Description("Inspects and maps text characters according to character set affinity, such as Latin, Hebrew, Cyrillic, Chinese and more.")
 @Concurrent(true)
-public class CharacterSetAnalyzer implements RowProcessingAnalyzer<CrosstabResult> {
+public class CharacterSetDistributionAnalyzer implements RowProcessingAnalyzer<CharacterSetDistributionResult> {
 
 	private static final Map<String, UnicodeSet> UNICODE_SETS = createUnicodeSets();
 
@@ -60,12 +60,12 @@ public class CharacterSetAnalyzer implements RowProcessingAnalyzer<CrosstabResul
 	@Provided
 	RowAnnotationFactory _annotationFactory;
 
-	private final Map<InputColumn<String>, CharacterSetAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, CharacterSetAnalyzerColumnDelegate>();
+	private final Map<InputColumn<String>, CharacterSetDistributionAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, CharacterSetDistributionAnalyzerColumnDelegate>();
 
 	@Initialize
 	public void init() {
 		for (InputColumn<String> column : _columns) {
-			CharacterSetAnalyzerColumnDelegate delegate = new CharacterSetAnalyzerColumnDelegate(_annotationFactory,
+			CharacterSetDistributionAnalyzerColumnDelegate delegate = new CharacterSetDistributionAnalyzerColumnDelegate(_annotationFactory,
 					UNICODE_SETS);
 			_columnDelegates.put(column, delegate);
 		}
@@ -100,11 +100,11 @@ public class CharacterSetAnalyzer implements RowProcessingAnalyzer<CrosstabResul
 		unicodeSets.put("Hangul", new UnicodeSet("[:Script=Hangul:]"));
 		unicodeSets.put("Hebrew", new UnicodeSet("[:Script=Hebrew:]"));
 		unicodeSets.put("Hiragana", new UnicodeSet("[:Script=Hiragana:]"));
-//		unicodeSets.put("Kanji", new UnicodeSet("[:Script=Kanji:]"));
+		// unicodeSets.put("Kanji", new UnicodeSet("[:Script=Kanji:]"));
 		unicodeSets.put("Kannada", new UnicodeSet("[:Script=Kannada:]"));
 		unicodeSets.put("Katakana", new UnicodeSet("[:Script=Katakana:]"));
 		unicodeSets.put("Malayalam", new UnicodeSet("[:Script=Malayalam:]"));
-//		unicodeSets.put("Mandarin", new UnicodeSet("[:Script=Mandarin:]"));
+		// unicodeSets.put("Mandarin", new UnicodeSet("[:Script=Mandarin:]"));
 		unicodeSets.put("Oriya", new UnicodeSet("[:Script=Oriya:]"));
 		unicodeSets.put("Syriac", new UnicodeSet("[:Script=Syriac:]"));
 		unicodeSets.put("Tamil", new UnicodeSet("[:Script=Tamil:]"));
@@ -125,13 +125,13 @@ public class CharacterSetAnalyzer implements RowProcessingAnalyzer<CrosstabResul
 	public void run(InputRow row, int distinctCount) {
 		for (InputColumn<String> column : _columns) {
 			String value = row.getValue(column);
-			CharacterSetAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
+			CharacterSetDistributionAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 			delegate.run(value, row, distinctCount);
 		}
 	}
 
 	@Override
-	public CrosstabResult getResult() {
+	public CharacterSetDistributionResult getResult() {
 		CrosstabDimension measureDimension = new CrosstabDimension("Measures");
 		Set<String> unicodeSetNames = UNICODE_SETS.keySet();
 		for (String name : unicodeSetNames) {
@@ -144,7 +144,7 @@ public class CharacterSetAnalyzer implements RowProcessingAnalyzer<CrosstabResul
 
 		for (InputColumn<String> column : _columns) {
 			String columnName = column.getName();
-			CharacterSetAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
+			CharacterSetDistributionAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 			columnDimension.addCategory(columnName);
 
 			CrosstabNavigator<Number> nav = crosstab.navigate().where(columnDimension, columnName);
@@ -158,6 +158,6 @@ public class CharacterSetAnalyzer implements RowProcessingAnalyzer<CrosstabResul
 				}
 			}
 		}
-		return new CrosstabResult(crosstab);
+		return new CharacterSetDistributionResult(_columns, unicodeSetNames, crosstab);
 	}
 }
