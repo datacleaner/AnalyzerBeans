@@ -20,8 +20,12 @@
 package org.eobjects.analyzer.connection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.eobjects.metamodel.util.CollectionUtils;
+import org.eobjects.metamodel.util.HasNameMapper;
 
 public class DatastoreCatalogImpl implements DatastoreCatalog {
 
@@ -45,14 +49,9 @@ public class DatastoreCatalogImpl implements DatastoreCatalog {
 
 	@Override
 	public String[] getDatastoreNames() {
-		String[] names = new String[_datastores.size()];
-		int i = 0;
-		for (Datastore ds : _datastores) {
-			names[i] = ds.getName();
-			i++;
-		}
-		Arrays.sort(names);
-		return names;
+		List<String> names = CollectionUtils.map(_datastores, new HasNameMapper());
+		Collections.sort(names);
+		return names.toArray(new String[names.size()]);
 	}
 
 	@Override

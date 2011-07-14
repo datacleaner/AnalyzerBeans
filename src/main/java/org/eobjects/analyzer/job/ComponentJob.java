@@ -19,16 +19,21 @@
  */
 package org.eobjects.analyzer.job;
 
+import org.eobjects.metamodel.util.HasName;
+
 /**
  * Super-interface for all job entries in an Analysis
  * 
  * @author Kasper Sørensen
  */
-public interface ComponentJob {
+public interface ComponentJob extends HasName {
 
 	/**
+	 * Gets the name of this component job
+	 * 
 	 * @return an optional name given by the user to identify this component in
 	 *         a job (can be null if no name is assigned).
 	 */
+	@Override
 	public String getName();
 }

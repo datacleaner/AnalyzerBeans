@@ -19,8 +19,17 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.data.DataTypeFamily;
 
+/**
+ * Descriptor for user-configured properties. Typically such properties are
+ * registered using the {@link Configured} annotation.
+ * 
+ * @see Configured
+ * 
+ * @author Kasper Sørensen
+ */
 public interface ConfiguredPropertyDescriptor extends PropertyDescriptor {
 
 	public boolean isInputColumn();

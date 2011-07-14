@@ -22,6 +22,7 @@ package org.eobjects.analyzer.connection;
 import java.io.Serializable;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.metamodel.util.HasName;
 
 /**
  * Defines a datastore from which data can be queried.
@@ -31,13 +32,14 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
  * 
  * @author Kasper Sørensen
  */
-public interface Datastore extends Serializable {
+public interface Datastore extends Serializable, HasName {
 
 	/**
 	 * Gets the name of the datastore
 	 * 
 	 * @return a String name
 	 */
+	@Override
 	public String getName();
 
 	/**

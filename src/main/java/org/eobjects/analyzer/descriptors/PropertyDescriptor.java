@@ -23,13 +23,49 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-public interface PropertyDescriptor extends Comparable<PropertyDescriptor> {
+import org.eobjects.metamodel.util.HasName;
 
+/**
+ * Super-interface for descriptor objects that describe metadata about
+ * properties, typically configurable by the user or the framework.
+ * 
+ * A property exist within a component, which are described by the
+ * {@link ComponentDescriptor} interface.
+ * 
+ * @author Kasper Sørensen
+ */
+public interface PropertyDescriptor extends Comparable<PropertyDescriptor>, HasName {
+
+	/**
+	 * Gets the name of the property
+	 * 
+	 * @return a string representation, the name, of the property
+	 */
+	@Override
 	public String getName();
 
+	/**
+	 * Sets the value of the property on a component instance.
+	 * 
+	 * @param component
+	 *            the component instance
+	 * @param value
+	 *            the new value of the property
+	 * @throws IllegalArgumentException
+	 *             if the component is invalid or the value has a wrong type
+	 */
 	public void setValue(Object component, Object value) throws IllegalArgumentException;
 
-	public Object getValue(Object bean) throws IllegalArgumentException;
+	/**
+	 * Gets the current value of this property on a component.
+	 * 
+	 * @param component
+	 *            the component to get the value from
+	 * @return the current value of this property
+	 * @throws IllegalArgumentException
+	 *             if the component is invalid.
+	 */
+	public Object getValue(Object component) throws IllegalArgumentException;
 
 	public Set<Annotation> getAnnotations();
 
@@ -54,6 +90,11 @@ public interface PropertyDescriptor extends Comparable<PropertyDescriptor> {
 	 */
 	public Class<?> getBaseType();
 
+	/**
+	 * Gets the descriptor of the component that has this property.
+	 * 
+	 * @return a descriptor object of the owning component.
+	 */
 	public ComponentDescriptor<?> getComponentDescriptor();
 
 	public int getTypeArgumentCount();

@@ -21,8 +21,14 @@ package org.eobjects.analyzer.reference;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.eobjects.metamodel.util.CollectionUtils;
+import org.eobjects.metamodel.util.HasName;
+import org.eobjects.metamodel.util.HasNameMapper;
 
 public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 
@@ -82,13 +88,13 @@ public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 
 	@Override
 	public String[] getDictionaryNames() {
-		String[] names = new String[_dictionaries.size()];
-		int i = 0;
-		for (Dictionary d : _dictionaries) {
-			names[i] = d.getName();
-			i++;
-		}
-		return names;
+		return getNames(_dictionaries);
+	}
+
+	private String[] getNames(Collection<? extends HasName> items) {
+		List<String> names = CollectionUtils.map(items, new HasNameMapper());
+		Collections.sort(names);
+		return names.toArray(new String[names.size()]);
 	}
 
 	@Override
@@ -105,13 +111,7 @@ public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 
 	@Override
 	public String[] getSynonymCatalogNames() {
-		String[] names = new String[_synonymCatalogs.size()];
-		int i = 0;
-		for (SynonymCatalog sc : _synonymCatalogs) {
-			names[i] = sc.getName();
-			i++;
-		}
-		return names;
+		return getNames(_synonymCatalogs);
 	}
 
 	@Override
@@ -140,12 +140,6 @@ public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 
 	@Override
 	public String[] getStringPatternNames() {
-		String[] names = new String[_stringPatterns.size()];
-		int i = 0;
-		for (StringPattern sp : _stringPatterns) {
-			names[i] = sp.getName();
-			i++;
-		}
-		return names;
+		return getNames(_stringPatterns);
 	}
 }

@@ -21,18 +21,21 @@ package org.eobjects.analyzer.reference;
 
 import java.io.Serializable;
 
+import org.eobjects.metamodel.util.HasName;
+
 /**
  * Abstraction over all reference data types in AnalyzerBeans
  * 
  * @author Kasper Sørensen
  */
-public interface ReferenceData extends Serializable {
+public interface ReferenceData extends Serializable, HasName {
 
 	/**
 	 * Gets the name of the reference data item.
 	 * 
 	 * @return a String containing the name of this reference data item.
 	 */
+	@Override
 	public String getName();
 
 	/**
