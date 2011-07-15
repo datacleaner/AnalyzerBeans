@@ -134,21 +134,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Makes source jar's available also (for repo deployment) -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.1.2</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<!-- Copy dependencies to lib/ folder -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -165,13 +150,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<!-- Releases new versions of AnalyzerBeans using release:prepare and 
-					release:perform -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.1</version>
 			</plugin>
 			<plugin>
 				<!-- Ensure inclusion of license header in all main java files -->
@@ -336,7 +314,7 @@
 		<dependency>
 			<groupId>org.eobjects.sassyreader</groupId>
 			<artifactId>SassyReader</artifactId>
-			<version>0.1</version>
+			<version>0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
