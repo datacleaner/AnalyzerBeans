@@ -129,7 +129,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		AnalyzerBeansConfiguration conf = getConfigurationFromXMLFile();
 		ReferenceDataCatalog referenceDataCatalog = conf.getReferenceDataCatalog();
 		String[] dictionaryNames = referenceDataCatalog.getDictionaryNames();
-		assertEquals("[datastore_dict, textfile_dict, valuelist_dict, custom_dict]", Arrays.toString(dictionaryNames));
+		assertEquals("[custom_dict, datastore_dict, textfile_dict, valuelist_dict]", Arrays.toString(dictionaryNames));
 
 		LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf);
 
@@ -168,7 +168,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertFalse(d.containsValue("value5"));
 
 		String[] synonymCatalogNames = referenceDataCatalog.getSynonymCatalogNames();
-		assertEquals("[textfile_syn, datastore_syn, custom_syn]", Arrays.toString(synonymCatalogNames));
+		assertEquals("[custom_syn, datastore_syn, textfile_syn]", Arrays.toString(synonymCatalogNames));
 
 		SynonymCatalog s = referenceDataCatalog.getSynonymCatalog("textfile_syn");
 		assertEquals("syn_txt", s.getDescription());
