@@ -170,15 +170,23 @@ public class StringConversionUtilsTest extends TestCase {
 				referenceDataCatalog, null);
 		assertSame(dictionaryResult, dictionary);
 
-		dictionaryResult = StringConversionUtils.deserialize("foo", Dictionary.class, null, referenceDataCatalog, null);
-		assertNull(dictionaryResult);
+		try {
+			StringConversionUtils.deserialize("foo", Dictionary.class, null, referenceDataCatalog, null);
+			fail("Exception expected");
+		} catch (IllegalArgumentException e) {
+			assertEquals("Dictionary not found: foo", e.getMessage());
+		}
 
 		SynonymCatalog synonymCatalogResult = StringConversionUtils.deserialize("my synonyms", SynonymCatalog.class, null,
 				referenceDataCatalog, null);
 		assertSame(synonymCatalogResult, synonymCatalog);
-		synonymCatalogResult = StringConversionUtils.deserialize("bar", SynonymCatalog.class, null, referenceDataCatalog,
-				null);
-		assertNull(synonymCatalogResult);
+		try {
+			StringConversionUtils.deserialize("bar", SynonymCatalog.class, null, referenceDataCatalog,
+					null);
+			fail("Exception expected");
+		} catch (IllegalArgumentException e) {
+			assertEquals("Synonym catalog not found: bar", e.getMessage());
+		}
 	}
 
 	public void testSerializeUnknownTypes() throws Exception {
