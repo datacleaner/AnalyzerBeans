@@ -275,48 +275,42 @@ public final class StringConversionUtils {
 		if (ReflectionUtils.isColumn(type)) {
 			Column column = schemaNavigator.convertToColumn(str);
 			if (column == null) {
-				logger.warn("Column not found: {}", str);
-				// TODO: Throw exception?
+				throw new IllegalArgumentException("Column not found: " + str);
 			}
 			return (E) column;
 		}
 		if (ReflectionUtils.isTable(type)) {
 			Table table = schemaNavigator.convertToTable(str);
 			if (table == null) {
-				logger.warn("Table not found: {}", str);
-				// TODO: Throw exception?
+				throw new IllegalArgumentException("Table not found: " + str);
 			}
 			return (E) table;
 		}
 		if (ReflectionUtils.isSchema(type)) {
 			Schema schema = schemaNavigator.convertToSchema(str);
 			if (schema == null) {
-				logger.warn("Schema not found: {}", str);
-				// TODO: Throw exception?
+				throw new IllegalArgumentException("Schema not found: " + str);
 			}
 			return (E) schema;
 		}
 		if (ReflectionUtils.is(type, Dictionary.class)) {
 			Dictionary dictionary = referenceDataCatalog.getDictionary(str);
 			if (dictionary == null) {
-				logger.warn("Dictionary not found: {}", str);
-				// TODO: Throw exception?
+				throw new IllegalArgumentException("Dictionary not found: " + str);
 			}
 			return (E) dictionary;
 		}
 		if (ReflectionUtils.is(type, SynonymCatalog.class)) {
 			SynonymCatalog synonymCatalog = referenceDataCatalog.getSynonymCatalog(str);
 			if (synonymCatalog == null) {
-				logger.warn("SynonymCatalog not found: {}", str);
-				// TODO: Throw exception?
+				throw new IllegalArgumentException("Synonym catalog not found: " + str);
 			}
 			return (E) synonymCatalog;
 		}
 		if (ReflectionUtils.is(type, StringPattern.class)) {
 			StringPattern stringPattern = referenceDataCatalog.getStringPattern(str);
 			if (stringPattern == null) {
-				logger.warn("StringPattern not found: {}", str);
-				// TODO: Throw exception?
+				throw new IllegalArgumentException("String pattern not found: " + str);
 			}
 			return (E) stringPattern;
 		}
@@ -324,8 +318,7 @@ public final class StringConversionUtils {
 			if (null != datastoreCatalog) {
 				Datastore datastore = datastoreCatalog.getDatastore(str);
 				if (datastore == null) {
-					logger.warn("Datastore not found: {}", str);
-					// TODO: Throw exception?
+					throw new IllegalArgumentException("Datastore not found: " + str);
 				}
 				return (E) datastore;
 			}
