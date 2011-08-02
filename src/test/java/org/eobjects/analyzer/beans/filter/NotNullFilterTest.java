@@ -19,19 +19,19 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-import org.eobjects.analyzer.descriptors.AnnotationBasedFilterBeanDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.query.Query;
-
-import junit.framework.TestCase;
 
 public class NotNullFilterTest extends TestCase {
 
@@ -59,8 +59,7 @@ public class NotNullFilterTest extends TestCase {
 	}
 
 	public void testDescriptor() throws Exception {
-		FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = AnnotationBasedFilterBeanDescriptor
-				.create(NotNullFilter.class);
+		FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = Descriptors.ofFilter(NotNullFilter.class);
 		Class<ValidationCategory> categoryEnum = desc.getOutcomeCategoryEnum();
 		assertEquals(ValidationCategory.class, categoryEnum);
 	}
@@ -82,7 +81,7 @@ public class NotNullFilterTest extends TestCase {
 		assertEquals("SELECT \"EMPLOYEES\".\"EMAIL\", \"EMPLOYEES\".\"EMPLOYEENUMBER\" FROM "
 				+ "PUBLIC.\"EMPLOYEES\" WHERE \"EMPLOYEES\".\"EMAIL\" IS NOT NULL AND \"EMPLOYEES\".\"EMAIL\" <> '' AND "
 				+ "\"EMPLOYEES\".\"EMPLOYEENUMBER\" IS NOT NULL", optimizedQuery.toSql());
-		
+
 		optimizedQuery = filter.optimizeQuery(baseQuery.clone(), ValidationCategory.INVALID);
 
 		assertEquals("SELECT \"EMPLOYEES\".\"EMAIL\", \"EMPLOYEES\".\"EMPLOYEENUMBER\" FROM "

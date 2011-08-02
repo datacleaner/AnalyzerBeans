@@ -28,9 +28,10 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 
 import org.eobjects.metamodel.DataContext;
 
-public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescriptor implements ProvidedPropertyDescriptor {
+final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescriptor implements ProvidedPropertyDescriptor {
 
-	public ProvidedPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor) throws DescriptorException {
+	protected ProvidedPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor)
+			throws DescriptorException {
 		super(field, componentDescriptor);
 	}
 
@@ -53,7 +54,7 @@ public final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescri
 	public boolean isSchemaNavigator() {
 		return getBaseType() == SchemaNavigator.class;
 	}
-	
+
 	@Override
 	public boolean isRowAnnotationFactory() {
 		return getBaseType() == RowAnnotationFactory.class;

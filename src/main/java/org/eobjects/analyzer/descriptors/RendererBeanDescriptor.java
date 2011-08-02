@@ -48,4 +48,6 @@ public interface RendererBeanDescriptor extends Comparable<RendererBeanDescripto
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
 	public Class<? extends Renderable> getRenderableType();
+
+	boolean isOutputApplicableFor(Class<?> requiredClass);
 }

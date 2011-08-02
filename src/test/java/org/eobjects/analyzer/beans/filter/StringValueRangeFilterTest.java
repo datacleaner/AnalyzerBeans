@@ -22,11 +22,11 @@ package org.eobjects.analyzer.beans.filter;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eobjects.analyzer.descriptors.AnnotationBasedFilterBeanDescriptor;
-import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
-import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
-
 import junit.framework.TestCase;
+
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
+import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 
 public class StringValueRangeFilterTest extends TestCase {
 
@@ -48,10 +48,10 @@ public class StringValueRangeFilterTest extends TestCase {
 	}
 
 	public void testOrderingOfProperties() throws Exception {
-		FilterBeanDescriptor<StringValueRangeFilter, RangeFilterCategory> d = AnnotationBasedFilterBeanDescriptor
-				.create(StringValueRangeFilter.class);
+		FilterBeanDescriptor<StringValueRangeFilter, RangeFilterCategory> d = Descriptors
+				.ofFilter(StringValueRangeFilter.class);
 		Set<ConfiguredPropertyDescriptor> configuredProperties = d.getConfiguredProperties();
-		
+
 		Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
 		assertTrue(it.hasNext());
 		assertEquals("Column", it.next().getName());

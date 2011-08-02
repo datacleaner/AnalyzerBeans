@@ -32,40 +32,29 @@ import junit.framework.TestCase;
 public class AnnotationBasedTransformerBeanDescriptorTest extends TestCase {
 
 	public void testGetDataTypeFamilies() throws Exception {
-		TransformerBeanDescriptor<?> descriptor = AnnotationBasedTransformerBeanDescriptor
-				.create(TokenizerTransformer.class);
+		TransformerBeanDescriptor<?> descriptor = Descriptors.ofTransformer(TokenizerTransformer.class);
 		assertEquals(DataTypeFamily.STRING, getDataTypeFamily(descriptor));
-		assertEquals(DataTypeFamily.STRING,
-				descriptor.getOutputDataTypeFamily());
+		assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
 
-		descriptor = AnnotationBasedTransformerBeanDescriptor
-				.create(ConvertToNumberTransformer.class);
+		descriptor = Descriptors.ofTransformer(ConvertToNumberTransformer.class);
 		assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));
-		assertEquals(DataTypeFamily.NUMBER,
-				descriptor.getOutputDataTypeFamily());
+		assertEquals(DataTypeFamily.NUMBER, descriptor.getOutputDataTypeFamily());
 
-		descriptor = AnnotationBasedTransformerBeanDescriptor
-				.create(ConvertToStringTransformer.class);
+		descriptor = Descriptors.ofTransformer(ConvertToStringTransformer.class);
 		assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));
-		assertEquals(DataTypeFamily.STRING,
-				descriptor.getOutputDataTypeFamily());
+		assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
 	}
 
-	private DataTypeFamily getDataTypeFamily(
-			TransformerBeanDescriptor<?> descriptor) {
-		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor
-				.getConfiguredPropertiesForInput();
+	private DataTypeFamily getDataTypeFamily(TransformerBeanDescriptor<?> descriptor) {
+		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
 		assertEquals(1, configuredProperties.size());
-		ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties
-				.iterator().next();
+		ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
 		return propertyDescriptor.getInputColumnDataTypeFamily();
 	}
 
 	public void testConcatenator() throws Exception {
-		TransformerBeanDescriptor<?> descriptor = AnnotationBasedTransformerBeanDescriptor
-				.create(ConcatenatorTransformer.class);
+		TransformerBeanDescriptor<?> descriptor = Descriptors.ofTransformer(ConcatenatorTransformer.class);
 		assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));
-		assertEquals(DataTypeFamily.STRING,
-				descriptor.getOutputDataTypeFamily());
+		assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
 	}
 }

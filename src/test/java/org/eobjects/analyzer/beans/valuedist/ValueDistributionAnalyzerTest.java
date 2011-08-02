@@ -24,14 +24,14 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.metamodel.schema.MutableColumn;
 
 public class ValueDistributionAnalyzerTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor<?> desc = AnnotationBasedAnalyzerBeanDescriptor.create(ValueDistributionAnalyzer.class);
+		AnalyzerBeanDescriptor<?> desc = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
 		assertEquals(true, desc.isRowProcessingAnalyzer());
 		assertEquals(false, desc.isExploringAnalyzer());
 		assertEquals(0, desc.getInitializeMethods().size());

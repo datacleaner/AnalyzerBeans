@@ -296,7 +296,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
-				descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(clazz);
+				descriptor = Descriptors.ofAnalyzer(clazz);
 				_analyzerBeanDescriptors.put(clazz, descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
@@ -309,7 +309,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		TransformerBeanDescriptor<? extends Transformer<?>> descriptor = _transformerBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
-				descriptor = AnnotationBasedTransformerBeanDescriptor.create(clazz);
+				descriptor = Descriptors.ofTransformer(clazz);
 				_transformerBeanDescriptors.put(clazz, descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
@@ -322,7 +322,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		FilterBeanDescriptor<? extends Filter<?>, ?> descriptor = _filterBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
-				descriptor = AnnotationBasedFilterBeanDescriptor.createUnbound(clazz);
+				descriptor = Descriptors.ofFilterUnbound(clazz);
 				_filterBeanDescriptors.put(clazz, descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
@@ -335,7 +335,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(clazz);
 		if (descriptor == null) {
 			try {
-				descriptor = new AnnotationBasedRendererBeanDescriptor(clazz);
+				descriptor = Descriptors.ofRenderer(clazz);
 				_rendererBeanDescriptors.put(clazz, descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);

@@ -47,11 +47,11 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		_descriptor = AnnotationBasedFilterBeanDescriptor.create(MockFilter.class);
+		_descriptor = Descriptors.ofFilter(MockFilter.class);
 	}
 
 	public void testCompareTo() throws Exception {
-		Set<ConfiguredPropertyDescriptor> properties = AnnotationBasedAnalyzerBeanDescriptor.create(DateGapAnalyzer.class)
+		Set<ConfiguredPropertyDescriptor> properties = Descriptors.ofAnalyzer(DateGapAnalyzer.class)
 				.getConfiguredProperties();
 		assertEquals(5, properties.size());
 		Iterator<ConfiguredPropertyDescriptor> it = properties.iterator();

@@ -29,8 +29,7 @@ import org.eobjects.analyzer.beans.filter.ValidationCategory;
 
 public class AnnotationBasedFilterDescriptorTest extends TestCase {
 
-	FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = AnnotationBasedFilterBeanDescriptor
-			.create(NotNullFilter.class);
+	private FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = Descriptors.ofFilter(NotNullFilter.class);
 
 	public void testGetCategoryEnum() throws Exception {
 		Class<ValidationCategory> categoryEnum = desc.getOutcomeCategoryEnum();

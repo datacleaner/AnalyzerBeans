@@ -25,6 +25,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.result.renderer.DefaultTextRenderer;
+import org.eobjects.analyzer.result.renderer.Renderable;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer1;
 import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer2;
@@ -33,18 +34,17 @@ import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer4;
 
 public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 
-	private AnnotationBasedRendererBeanDescriptor descriptor = new AnnotationBasedRendererBeanDescriptor(
-			DefaultTextRenderer.class);
+	private RendererBeanDescriptor descriptor = Descriptors.ofRenderer(DefaultTextRenderer.class);
 
 	public void testGetRenderingFormat() throws Exception {
 		assertEquals(TextRenderingFormat.class, descriptor.getRenderingFormat());
 	}
 
-	public void testGetAnalyzerResultType() throws Exception {
-		Class<? extends AnalyzerResult> analyzerResultType = descriptor.getRenderableType();
-		assertEquals(AnalyzerResult.class, analyzerResultType);
+	public void testGetRenderableType() throws Exception {
+		Class<? extends Renderable> renderableType = descriptor.getRenderableType();
+		assertEquals(AnalyzerResult.class, renderableType);
 
-		AnnotationBasedRendererBeanDescriptor desc2 = new AnnotationBasedRendererBeanDescriptor(CrosstabTextRenderer.class);
+		RendererBeanDescriptor desc2 = Descriptors.ofRenderer(CrosstabTextRenderer.class);
 		assertEquals(CrosstabResult.class, desc2.getRenderableType());
 	}
 
@@ -58,7 +58,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 
 	public void testInvalidRendererAnnotations() throws Exception {
 		try {
-			new AnnotationBasedRendererBeanDescriptor(InvalidRenderer1.class);
+			Descriptors.ofRenderer(InvalidRenderer1.class);
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals("The renderer output type (class java.lang.Object) is not a valid instance or sub-class "
@@ -66,7 +66,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 		}
 
 		try {
-			new AnnotationBasedRendererBeanDescriptor(InvalidRenderer2.class);
+			Descriptors.ofRenderer(InvalidRenderer2.class);
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(
@@ -75,7 +75,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 		}
 
 		try {
-			new AnnotationBasedRendererBeanDescriptor(InvalidRenderer3.class);
+			Descriptors.ofRenderer(InvalidRenderer3.class);
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(
@@ -84,7 +84,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 		}
 
 		try {
-			new AnnotationBasedRendererBeanDescriptor(InvalidRenderer4.class);
+			Descriptors.ofRenderer(InvalidRenderer4.class);
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(

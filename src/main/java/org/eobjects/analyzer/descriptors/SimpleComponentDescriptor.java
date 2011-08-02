@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Kasper Sørensen
  */
-public class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements ComponentDescriptor<B> {
+class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements ComponentDescriptor<B> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimpleComponentDescriptor.class);
 
@@ -70,17 +70,7 @@ public class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implemen
 		this(beanClass, false);
 	}
 
-	/**
-	 * Factory method for creating a SimpleComponentDescriptor
-	 * 
-	 * @param beanClass
-	 * @return
-	 */
-	public static <B> SimpleComponentDescriptor<B> create(Class<B> beanClass) {
-		return new SimpleComponentDescriptor<B>(beanClass, true);
-	}
-
-	private SimpleComponentDescriptor(final Class<B> beanClass, final boolean initialize) {
+	protected SimpleComponentDescriptor(final Class<B> beanClass, final boolean initialize) {
 		super(beanClass);
 		_configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>();
 		_initializeMethods = new HashSet<InitializeMethodDescriptor>();

@@ -84,10 +84,11 @@ import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.connection.SasDatastore;
 import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
-import org.eobjects.analyzer.descriptors.SimpleComponentDescriptor;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -522,8 +523,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 			datastores.put(name, ds);
 		}
 
-		List<AccessDatastoreType> accessDatastores = CollectionUtils2
-				.filterOnClass(datastoreTypes, AccessDatastoreType.class);
+		List<AccessDatastoreType> accessDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+				AccessDatastoreType.class);
 		for (AccessDatastoreType accessDatastoreType : accessDatastores) {
 			String name = accessDatastoreType.getName();
 			checkName(name, Datastore.class, datastores);
@@ -745,7 +746,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
 		E result = (E) ReflectionUtils.newInstance(foundClass);
 
-		SimpleComponentDescriptor<?> descriptor = SimpleComponentDescriptor.create(foundClass);
+		ComponentDescriptor<?> descriptor = Descriptors.ofComponent(foundClass);
 
 		List<Property> propertyTypes = customElementType.getProperty();
 		if (propertyTypes != null) {

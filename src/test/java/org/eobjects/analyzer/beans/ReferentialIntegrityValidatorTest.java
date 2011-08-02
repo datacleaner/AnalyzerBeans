@@ -29,8 +29,8 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
-import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.test.mock.QueryMatcher;
@@ -71,8 +71,7 @@ public class ReferentialIntegrityValidatorTest extends TestCase {
 	}
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor<ReferentialIntegrityValidator> descriptor = AnnotationBasedAnalyzerBeanDescriptor
-				.create(ReferentialIntegrityValidator.class);
+		AnalyzerBeanDescriptor<ReferentialIntegrityValidator> descriptor = Descriptors.ofAnalyzer(ReferentialIntegrityValidator.class);
 		assertEquals("AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.ReferentialIntegrityValidator]",
 				descriptor.toString());
 

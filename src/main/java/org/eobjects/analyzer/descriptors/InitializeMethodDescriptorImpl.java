@@ -28,14 +28,15 @@ import java.util.Set;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
-public final class InitializeMethodDescriptorImpl implements InitializeMethodDescriptor {
+final class InitializeMethodDescriptorImpl implements InitializeMethodDescriptor {
 
-	private static final Class<?>[] ALLOWED_PARAMETER_TYPES = new Class[] { DatastoreCatalog.class, ReferenceDataCatalog.class };
+	private static final Class<?>[] ALLOWED_PARAMETER_TYPES = new Class[] { DatastoreCatalog.class,
+			ReferenceDataCatalog.class };
 
 	private final Method _method;
 	private final Class<?>[] _parameterTypes;
 
-	public InitializeMethodDescriptorImpl(Method method) {
+	protected InitializeMethodDescriptorImpl(Method method) {
 		_parameterTypes = method.getParameterTypes();
 		for (Class<?> parameterType : _parameterTypes) {
 			boolean accepted = false;

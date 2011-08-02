@@ -25,7 +25,15 @@ import java.lang.reflect.Modifier;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public abstract class AbstractDescriptor<B> {
+/**
+ * Abstract descriptor implementation which contains only the bare bones of a
+ * class field- and method-inspecting descriptor.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <B>
+ */
+abstract class AbstractDescriptor<B> {
 
 	private final Class<B> _componentClass;
 
@@ -39,13 +47,13 @@ public abstract class AbstractDescriptor<B> {
 
 		_componentClass = componentClass;
 	}
-	
+
 	protected void visitClass() {
 		Field[] fields = ReflectionUtils.getFields(_componentClass);
 		for (Field field : fields) {
 			visitField(field);
 		}
-		
+
 		Method[] methods = ReflectionUtils.getMethods(_componentClass);
 		for (Method method : methods) {
 			visitMethod(method);

@@ -24,7 +24,7 @@ import java.lang.reflect.Array;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
-import org.eobjects.analyzer.descriptors.SimpleComponentDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
 /**
@@ -59,7 +59,7 @@ public final class LifeCycleHelper {
 				initialize(object);
 			}
 		} else {
-			SimpleComponentDescriptor<? extends Object> descriptor = SimpleComponentDescriptor.create(o.getClass());
+			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(o.getClass());
 			initialize(descriptor, o);
 		}
 	}
@@ -76,7 +76,7 @@ public final class LifeCycleHelper {
 				close(object);
 			}
 		} else {
-			SimpleComponentDescriptor<? extends Object> descriptor = SimpleComponentDescriptor.create(o.getClass());
+			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(o.getClass());
 			close(descriptor, o);
 		}
 	}

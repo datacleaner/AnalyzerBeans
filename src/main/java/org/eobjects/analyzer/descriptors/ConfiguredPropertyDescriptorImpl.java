@@ -27,10 +27,10 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
+final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
 		ConfiguredPropertyDescriptor {
 
-	public ConfiguredPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor)
+	protected ConfiguredPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor)
 			throws DescriptorException {
 		super(field, componentDescriptor);
 	}

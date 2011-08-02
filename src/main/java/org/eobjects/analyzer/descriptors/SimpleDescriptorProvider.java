@@ -127,7 +127,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 			Class<? extends Analyzer<?>> c = (Class<? extends Analyzer<?>>) Class.forName(className);
 			AnalyzerBeanDescriptor<?> descriptor = getAnalyzerBeanDescriptorForClass(c);
 			if (descriptor == null) {
-				addAnalyzerBeanDescriptor(AnnotationBasedAnalyzerBeanDescriptor.create(c));
+				addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(c));
 			}
 		}
 	}
@@ -138,7 +138,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 			Class<? extends Transformer<?>> c = (Class<? extends Transformer<?>>) Class.forName(className);
 			TransformerBeanDescriptor<?> descriptor = getTransformerBeanDescriptorForClass(c);
 			if (descriptor == null) {
-				addTransformerBeanDescriptor(AnnotationBasedTransformerBeanDescriptor.create(c));
+				addTransformerBeanDescriptor(Descriptors.ofTransformer(c));
 			}
 		}
 	}
@@ -149,7 +149,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 			Class<? extends Renderer<?, ?>> c = (Class<? extends Renderer<?, ?>>) Class.forName(className);
 			RendererBeanDescriptor descriptor = getRendererBeanDescriptorForClass(c);
 			if (descriptor == null) {
-				addRendererBeanDescriptor(new AnnotationBasedRendererBeanDescriptor(c));
+				addRendererBeanDescriptor(Descriptors.ofRenderer(c));
 			}
 		}
 	}
@@ -162,7 +162,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 			FilterBeanDescriptor<?, ?> descriptor = getFilterBeanDescriptorForClassUnbounded(c);
 
 			if (descriptor == null) {
-				addFilterBeanDescriptor(AnnotationBasedFilterBeanDescriptor.createUnbound(c));
+				addFilterBeanDescriptor(Descriptors.ofFilterUnbound(c));
 			}
 		}
 	}

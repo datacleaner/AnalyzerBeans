@@ -22,7 +22,8 @@ package org.eobjects.analyzer.job.tasks;
 import java.util.Collection;
 
 import org.eobjects.analyzer.connection.DatastoreCatalog;
-import org.eobjects.analyzer.descriptors.SimpleComponentDescriptor;
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleState;
@@ -51,7 +52,7 @@ public class InitializeReferenceDataTask implements Task {
 	public void execute() throws Exception {
 		Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
 		for (Object object : referenceData) {
-			SimpleComponentDescriptor<? extends Object> descriptor = SimpleComponentDescriptor.create(object.getClass());
+			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(object.getClass());
 			new InitializeCallback(_datastoreCatalog, _referenceDataCatalog).onEvent(LifeCycleState.INITIALIZE, object,
 					descriptor);
 		}

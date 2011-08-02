@@ -22,14 +22,13 @@ package org.eobjects.analyzer.beans.filter;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.data.MockInputRow;
-import org.eobjects.analyzer.descriptors.AnnotationBasedFilterBeanDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 
 public class MaxRowsFilterTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		FilterBeanDescriptor<MaxRowsFilter, ValidationCategory> desc = AnnotationBasedFilterBeanDescriptor
-				.create(MaxRowsFilter.class);
+		FilterBeanDescriptor<MaxRowsFilter, ValidationCategory> desc = Descriptors.ofFilter(MaxRowsFilter.class);
 
 		assertEquals("Max rows", desc.getDisplayName());
 	}

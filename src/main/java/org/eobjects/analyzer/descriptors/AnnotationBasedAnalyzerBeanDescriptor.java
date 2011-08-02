@@ -28,18 +28,14 @@ import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends AbstractBeanDescriptor<A> implements
+final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends AbstractBeanDescriptor<A> implements
 		AnalyzerBeanDescriptor<A> {
 
 	private final String _displayName;
 	private final boolean _exploringAnalyzer;
 	private final boolean _rowProcessingAnalyzer;
 
-	public static <A extends Analyzer<?>> AnnotationBasedAnalyzerBeanDescriptor<A> create(Class<A> analyzerClass) {
-		return new AnnotationBasedAnalyzerBeanDescriptor<A>(analyzerClass);
-	}
-
-	private AnnotationBasedAnalyzerBeanDescriptor(Class<A> analyzerClass) throws DescriptorException {
+	protected AnnotationBasedAnalyzerBeanDescriptor(Class<A> analyzerClass) throws DescriptorException {
 		super(analyzerClass, ReflectionUtils.is(analyzerClass, RowProcessingAnalyzer.class));
 
 		_rowProcessingAnalyzer = ReflectionUtils.is(analyzerClass, RowProcessingAnalyzer.class);

@@ -46,7 +46,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testExploringType() throws Exception {
-		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(ExploringAnalyzerMock.class);
+		AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(ExploringAnalyzerMock.class);
 		assertEquals(true, descriptor.isExploringAnalyzer());
 		assertEquals(false, descriptor.isRowProcessingAnalyzer());
 
@@ -60,8 +60,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testGetConfiguredPropertiesOfType() throws Exception {
-		AnnotationBasedAnalyzerBeanDescriptor<MatchingAnalyzer> desc = AnnotationBasedAnalyzerBeanDescriptor
-				.create(MatchingAnalyzer.class);
+		AnalyzerBeanDescriptor<MatchingAnalyzer> desc = Descriptors.ofAnalyzer(MatchingAnalyzer.class);
 
 		Set<ConfiguredPropertyDescriptor> properties = desc.getConfiguredPropertiesByType(Number.class, false);
 		assertEquals(0, properties.size());
@@ -83,8 +82,8 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testRowProcessingType() throws Exception {
-		AnalyzerBeanDescriptor<RowProcessingAnalyzerMock> descriptor = AnnotationBasedAnalyzerBeanDescriptor
-				.create(RowProcessingAnalyzerMock.class);
+		AnalyzerBeanDescriptor<RowProcessingAnalyzerMock> descriptor = Descriptors
+				.ofAnalyzer(RowProcessingAnalyzerMock.class);
 		assertEquals(false, descriptor.isExploringAnalyzer());
 		assertEquals(true, descriptor.isRowProcessingAnalyzer());
 
@@ -105,14 +104,14 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testGetInputDataTypeFamily() throws Exception {
-		AnalyzerBeanDescriptor<?> descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(StringAnalyzer.class);
+		AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(StringAnalyzer.class);
 		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
 		assertEquals(1, configuredProperties.size());
 		ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
 
 		assertEquals(DataTypeFamily.STRING, propertyDescriptor.getInputColumnDataTypeFamily());
 
-		descriptor = AnnotationBasedAnalyzerBeanDescriptor.create(ValueDistributionAnalyzer.class);
+		descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
 		configuredProperties = descriptor.getConfiguredPropertiesForInput(false);
 		assertEquals(1, configuredProperties.size());
 		propertyDescriptor = configuredProperties.iterator().next();
@@ -121,7 +120,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 
 	public void testAbstractBeanClass() throws Exception {
 		try {
-			AnnotationBasedAnalyzerBeanDescriptor.create(InvalidAnalyzer.class);
+			Descriptors.ofComponent(InvalidAnalyzer.class);
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(

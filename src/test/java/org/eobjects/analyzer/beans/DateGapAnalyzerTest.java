@@ -19,15 +19,15 @@
  */
 package org.eobjects.analyzer.beans;
 
-import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
-
 import junit.framework.TestCase;
+
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 
 public class DateGapAnalyzerTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		AnnotationBasedAnalyzerBeanDescriptor<DateGapAnalyzer> descriptor = AnnotationBasedAnalyzerBeanDescriptor
-				.create(DateGapAnalyzer.class);
+		AnalyzerBeanDescriptor<DateGapAnalyzer> descriptor = Descriptors.ofAnalyzer(DateGapAnalyzer.class);
 		assertEquals("Date gap analyzer", descriptor.getDisplayName());
 	}
 }

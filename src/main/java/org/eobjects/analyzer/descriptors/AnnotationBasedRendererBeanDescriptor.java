@@ -33,7 +33,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class AnnotationBasedRendererBeanDescriptor implements RendererBeanDescriptor {
+final class AnnotationBasedRendererBeanDescriptor implements RendererBeanDescriptor {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnnotationBasedRendererBeanDescriptor.class);
 
@@ -45,7 +45,7 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 	private Class<?> _rendererOutputType = null;
 
 	@SuppressWarnings("unchecked")
-	public AnnotationBasedRendererBeanDescriptor(Class<? extends Renderer<?, ?>> beanClass) throws DescriptorException {
+	protected AnnotationBasedRendererBeanDescriptor(Class<? extends Renderer<?, ?>> beanClass) throws DescriptorException {
 		if (beanClass == null) {
 			throw new IllegalArgumentException("beanClass cannot be null");
 		}
@@ -148,6 +148,7 @@ public final class AnnotationBasedRendererBeanDescriptor implements RendererBean
 		return false;
 	}
 
+	@Override
 	public boolean isOutputApplicableFor(Class<?> requiredClass) {
 		if (!ReflectionUtils.is(requiredClass, _formatOutputType)) {
 			logger.debug("{} is not applicable to the format output type: {}", requiredClass, _formatOutputType);

@@ -22,12 +22,12 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.reflect.Method;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.reference.DatastoreDictionary;
 import org.eobjects.analyzer.test.TestHelper;
-
-import junit.framework.TestCase;
 
 public class InitializeMethodDescriptorImplTest extends TestCase {
 
@@ -49,7 +49,7 @@ public class InitializeMethodDescriptorImplTest extends TestCase {
 	}
 
 	public void testInitWithCatalogs() throws Exception {
-		SimpleComponentDescriptor<DatastoreDictionary> desc = SimpleComponentDescriptor.create(DatastoreDictionary.class);
+		ComponentDescriptor<DatastoreDictionary> desc = Descriptors.ofComponent(DatastoreDictionary.class);
 		Set<InitializeMethodDescriptor> initializeMethods = desc.getInitializeMethods();
 		assertEquals(1, initializeMethods.size());
 

@@ -25,11 +25,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
+final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 
 	private final Method _method;
 
-	public CloseMethodDescriptorImpl(Method method) {
+	protected CloseMethodDescriptorImpl(Method method) {
 		if (method.getParameterTypes().length != 0) {
 			throw new DescriptorException("Close methods cannot have parameters");
 		}

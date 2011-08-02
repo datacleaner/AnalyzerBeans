@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptorImpl;
+import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		_parentDirectory = parentDirectory;
 	}
 
-	public Object createProvidedCollection(ProvidedPropertyDescriptorImpl providedDescriptor) {
+	public Object createProvidedCollection(ProvidedPropertyDescriptor providedDescriptor) {
 		Type typeArgument = providedDescriptor.getTypeArgument(0);
 		Class<?> clazz1 = (Class<?>) typeArgument;
 		if (providedDescriptor.isList()) {

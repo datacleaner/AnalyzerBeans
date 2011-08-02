@@ -27,33 +27,12 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-public final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends
+final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends
 		AbstractBeanDescriptor<F> implements FilterBeanDescriptor<F, C> {
 
 	private final String _displayName;
 
-	public static <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> create(Class<F> filterClass) {
-		return new AnnotationBasedFilterBeanDescriptor<F, C>(filterClass);
-	}
-
-	/**
-	 * Alternative factory method used when sufficient type-information about
-	 * the class is not available.
-	 * 
-	 * This method is basically a hack to make the compiler happy, see Ticket
-	 * #417.
-	 * 
-	 * @see http://eobjects.org/trac/ticket/417
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static FilterBeanDescriptor<?, ?> createUnbound(Class<?> clazz) {
-		return new AnnotationBasedFilterBeanDescriptor(clazz);
-	}
-
-	private AnnotationBasedFilterBeanDescriptor(Class<F> filterClass) throws DescriptorException {
+	protected AnnotationBasedFilterBeanDescriptor(Class<F> filterClass) throws DescriptorException {
 		super(filterClass, false);
 
 		if (!ReflectionUtils.is(filterClass, Filter.class)) {

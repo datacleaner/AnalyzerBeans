@@ -39,7 +39,15 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> implements BeanDescriptor<B> {
+/**
+ * Abstract implementation of the {@link BeanDescriptor} interface. Convenient
+ * for implementing it's subclasses.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <B>
+ */
+abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> implements BeanDescriptor<B> {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractBeanDescriptor.class);
 

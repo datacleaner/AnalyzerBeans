@@ -36,15 +36,12 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
-import org.eobjects.analyzer.descriptors.AnnotationBasedTransformerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
+import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
-import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.TransformerChangeListener;
-import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.test.TestHelper;
-
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 
@@ -156,8 +153,8 @@ public class TransformerJobBuilderTest extends TestCase {
 	public void testConfigureByConfigurableBean() throws Exception {
 		IdGenerator IdGenerator = new PrefixedIdGenerator("");
 
-		AnnotationBasedTransformerBeanDescriptor<ConvertToNumberTransformer> descriptor = AnnotationBasedTransformerBeanDescriptor
-				.create(ConvertToNumberTransformer.class);
+		TransformerBeanDescriptor<ConvertToNumberTransformer> descriptor = Descriptors
+				.ofTransformer(ConvertToNumberTransformer.class);
 		TransformerJobBuilder<ConvertToNumberTransformer> builder = new TransformerJobBuilder<ConvertToNumberTransformer>(
 				new AnalysisJobBuilder(null), descriptor, IdGenerator, new LinkedList<TransformerChangeListener>());
 		assertFalse(builder.isConfigured());
@@ -175,8 +172,8 @@ public class TransformerJobBuilderTest extends TestCase {
 	public void testReplaceAutomaticOutputColumnNames() throws Exception {
 		IdGenerator IdGenerator = new PrefixedIdGenerator("id");
 
-		AnnotationBasedTransformerBeanDescriptor<WhitespaceTrimmerTransformer> descriptor = AnnotationBasedTransformerBeanDescriptor
-				.create(WhitespaceTrimmerTransformer.class);
+		TransformerBeanDescriptor<WhitespaceTrimmerTransformer> descriptor = Descriptors
+				.ofTransformer(WhitespaceTrimmerTransformer.class);
 
 		TransformerJobBuilder<WhitespaceTrimmerTransformer> builder = new TransformerJobBuilder<WhitespaceTrimmerTransformer>(
 				new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration()), descriptor, IdGenerator,

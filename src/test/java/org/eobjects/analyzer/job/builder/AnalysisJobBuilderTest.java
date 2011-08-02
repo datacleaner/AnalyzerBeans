@@ -48,9 +48,9 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
-import org.eobjects.analyzer.descriptors.AnnotationBasedTransformerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -283,8 +283,8 @@ public class AnalysisJobBuilderTest extends TestCase {
 		TransformerChangeListener listener2 = EasyMock.createMock(TransformerChangeListener.class);
 		ajb.getTransformerChangeListeners().add(listener2);
 
-		final TransformerBeanDescriptor<EmailStandardizerTransformer> descriptor = AnnotationBasedTransformerBeanDescriptor
-				.create(EmailStandardizerTransformer.class);
+		final TransformerBeanDescriptor<EmailStandardizerTransformer> descriptor = Descriptors
+				.ofTransformer(EmailStandardizerTransformer.class);
 		IArgumentMatcher tjbMatcher = new IArgumentMatcher() {
 			@Override
 			public boolean matches(Object argument) {

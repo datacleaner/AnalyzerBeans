@@ -23,7 +23,8 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 
@@ -31,8 +32,7 @@ public class PatternFinderAnalyzerTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
 		// simply test that the analyzer is valid
-		AnnotationBasedAnalyzerBeanDescriptor<PatternFinderAnalyzer> descriptor = AnnotationBasedAnalyzerBeanDescriptor
-				.create(PatternFinderAnalyzer.class);
+		AnalyzerBeanDescriptor<PatternFinderAnalyzer> descriptor = Descriptors.ofAnalyzer(PatternFinderAnalyzer.class);
 		assertEquals("Pattern finder", descriptor.getDisplayName());
 	}
 

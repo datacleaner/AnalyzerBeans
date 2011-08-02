@@ -29,7 +29,14 @@ import java.util.Set;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-public class AbstractPropertyDescriptor implements PropertyDescriptor {
+/**
+ * Abstract implementation of {@link PropertyDescriptor}. Convenient when
+ * implementing sub-interfaces such as {@link ConfiguredPropertyDescriptor} and
+ * {@link ProvidedPropertyDescriptor}.
+ * 
+ * @author Kasper Sørensen
+ */
+public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 
 	private final Field _field;
 	private final Class<?> _baseType;
