@@ -144,20 +144,23 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 			} else if (ci.is(configuration.getMinusSign())) {
 				// the meaning of minus sign is dependent on the next token
 				// (maybe it's the negative number operator)
-				boolean treatAsOperator = false;
-				if (ci.hasNext()) {
-					char next = ci.next();
-					if (ci.isDigit()) {
-						// the minus sign was the number operator
-						treatAsOperator = true;
-						lastToken = registerChar(result, null, c, TokenType.NUMBER);
-						lastToken = registerChar(result, lastToken, next, TokenType.NUMBER);
-					} else {
-						ci.previous();
+				boolean treatAsMinus = false;
+
+				if (lastToken == null || lastToken.getType() != TokenType.NUMBER) {
+					if (ci.hasNext()) {
+						char next = ci.next();
+						if (ci.isDigit()) {
+							// the minus sign was the number operator
+							treatAsMinus = true;
+							lastToken = registerChar(result, null, c, TokenType.NUMBER);
+							lastToken = registerChar(result, lastToken, next, TokenType.NUMBER);
+						} else {
+							ci.previous();
+						}
 					}
 				}
 
-				if (!treatAsOperator) {
+				if (!treatAsMinus) {
 					// the minus sign is treated as a delim
 					lastToken = registerChar(result, lastToken, c, TokenType.DELIM);
 				}

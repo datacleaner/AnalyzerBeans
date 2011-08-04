@@ -25,18 +25,23 @@ import junit.framework.TestCase;
 
 public class DefaultTokenizerTest extends TestCase {
 
-	private TokenizerConfiguration conf = new TokenizerConfiguration(false,
-			'.', ',', '-');
-	
+	private TokenizerConfiguration conf = new TokenizerConfiguration(false, '.', ',', '-');
+
 	public void testTokenizeEmptyString() throws Exception {
-		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize(
-				"", conf);
+		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize("", conf);
 		assertTrue(tokens.isEmpty());
 	}
 
+	public void testMinusSignAsDelimOrAsMinus() throws Exception {
+		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize("123-456", conf);
+		assertEquals(3, tokens.size());
+		assertEquals("Token['123' (NUMBER)]", tokens.get(0).toString());
+		assertEquals("Token['-' (DELIM)]", tokens.get(1).toString());
+		assertEquals("Token['456' (NUMBER)]", tokens.get(2).toString());
+	}
+
 	public void testPreliminaryTokenizeAndMixedTokens() throws Exception {
-		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize(
-				"hi \t123there - yay -10", conf);
+		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize("hi \t123there - yay -10", conf);
 		assertEquals(10, tokens.size());
 		assertEquals("Token['hi' (TEXT)]", tokens.get(0).toString());
 		assertEquals("Token[' \t' (WHITESPACE)]", tokens.get(1).toString());
@@ -65,16 +70,15 @@ public class DefaultTokenizerTest extends TestCase {
 	}
 
 	public void testNegativeNumbers() throws Exception {
-		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize("10-4",
-				conf);
-		assertEquals(2, tokens.size());
+		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize("10 -4", conf);
+		assertEquals(3, tokens.size());
 		assertEquals("Token['10' (NUMBER)]", tokens.get(0).toString());
-		assertEquals("Token['-4' (NUMBER)]", tokens.get(1).toString());
+		assertEquals("Token[' ' (WHITESPACE)]", tokens.get(1).toString());
+		assertEquals("Token['-4' (NUMBER)]", tokens.get(2).toString());
 	}
 
 	public void testDecimals() throws Exception {
-		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize(
-				"yay 10.1 whut 20,632. hmm", conf);
+		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize("yay 10.1 whut 20,632. hmm", conf);
 		assertEquals(10, tokens.size());
 		assertEquals("Token['yay' (TEXT)]", tokens.get(0).toString());
 		assertEquals("Token[' ' (WHITESPACE)]", tokens.get(1).toString());
@@ -104,8 +108,7 @@ public class DefaultTokenizerTest extends TestCase {
 		tokens = DefaultTokenizer.preliminaryTokenize(",-20,632.20213", conf);
 		assertEquals(2, tokens.size());
 		assertEquals("Token[',' (DELIM)]", tokens.get(0).toString());
-		assertEquals("Token['-20,632.20213' (NUMBER)]", tokens.get(1)
-				.toString());
+		assertEquals("Token['-20,632.20213' (NUMBER)]", tokens.get(1).toString());
 
 		tokens = DefaultTokenizer.preliminaryTokenize("20,632.20213,", conf);
 		assertEquals(2, tokens.size());
@@ -113,17 +116,16 @@ public class DefaultTokenizerTest extends TestCase {
 		assertEquals("Token[',' (DELIM)]", tokens.get(1).toString());
 
 		tokens = DefaultTokenizer.preliminaryTokenize("20,632-20213,", conf);
-		assertEquals(3, tokens.size());
+		assertEquals(4, tokens.size());
 		assertEquals("Token['20,632' (NUMBER)]", tokens.get(0).toString());
-		assertEquals("Token['-20213' (NUMBER)]", tokens.get(1).toString());
-		assertEquals("Token[',' (DELIM)]", tokens.get(2).toString());
+		assertEquals("Token['-' (DELIM)]", tokens.get(1).toString());
+		assertEquals("Token['20213' (NUMBER)]", tokens.get(2).toString());
+		assertEquals("Token[',' (DELIM)]", tokens.get(3).toString());
 	}
 
 	public void testNumberParsingWithoutSeparatorChars() throws Exception {
-		TokenizerConfiguration c = new TokenizerConfiguration(false, null,
-				null, null);
-		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize(
-				"20,-632.20213", c);
+		TokenizerConfiguration c = new TokenizerConfiguration(false, null, null, null);
+		List<SimpleToken> tokens = DefaultTokenizer.preliminaryTokenize("20,-632.20213", c);
 		assertEquals(5, tokens.size());
 		assertEquals("Token['20' (NUMBER)]", tokens.get(0).toString());
 		assertEquals("Token[',-' (DELIM)]", tokens.get(1).toString());
