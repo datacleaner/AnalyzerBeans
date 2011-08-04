@@ -54,7 +54,7 @@ public class JavaScriptTransformer implements Transformer<String> {
 	InputColumn<?>[] columns;
 
 	@Configured
-	@Description("Available variables:\nvalues[0..]: Array of values\nvalues[\"my_col\"]: Map of values\nmy_col: Each column value has it's own variable\nout: Print to console using out.println('hello')\nlogger: Print to log using log.info(...), log.warn(...), log.error(...)")
+	@Description("Available variables:\nvalues[0..]: Array of values\nvalues[\"my_col\"]: Map of values\nmy_col: Each column value has it's own variable\nout: Print to console using out.println('hello')\nlog: Print to log using log.info(...), log.warn(...), log.error(...)")
 	@StringProperty(multiline = true, mimeType = { "text/javascript", "application/x-javascript" })
 	String sourceCode = "function eval() {\n  return \"hello \" + values[0];\n}\n\neval();";
 
