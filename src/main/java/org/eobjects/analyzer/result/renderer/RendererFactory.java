@@ -105,6 +105,7 @@ public final class RendererFactory {
 		}
 
 		if (bestMatch == null) {
+			logger.warn("Didn't find any matches for renderable {} (format={})", renderable, renderingFormat);
 			return null;
 		}
 

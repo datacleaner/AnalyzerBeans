@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.reference;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.util.Collection;
 
@@ -46,7 +45,7 @@ public class DatastoreSynonymCatalogTest {
 
 	@Test
 	public void shouldReturnCorrectMasterTerm() {
-		assertNull(_dataStoreBasedSynonymCatalog.getMasterTerm("region"));
+		assertEquals(null, _dataStoreBasedSynonymCatalog.getMasterTerm("region"));
 		assertEquals("DNK", _dataStoreBasedSynonymCatalog.getMasterTerm("Denmark"));
 		assertEquals("GBR", _dataStoreBasedSynonymCatalog.getMasterTerm("Great Britain"));
 		assertEquals("DNK", _dataStoreBasedSynonymCatalog.getMasterTerm("DK"));
