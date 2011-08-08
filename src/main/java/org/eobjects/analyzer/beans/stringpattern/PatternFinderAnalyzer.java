@@ -47,11 +47,15 @@ import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.NullTolerableComparator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Pattern finder")
 @Description("The Pattern Finder will inspect your String values and generate and match string patterns that suit your data.\nIt can be used for a lot of purposes but is excellent for verifying or getting ideas about the format of the string-values in a column.")
 @Concurrent(true)
 public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinderResult> {
+	
+	private static final Logger logger = LoggerFactory.getLogger(PatternFinderAnalyzer.class);
 
 	public static final String DIMENSION_NAME_MEASURES = "Measures";
 	public static final String DIMENSION_NAME_PATTERN = "Pattern";
@@ -211,6 +215,9 @@ public class PatternFinderAnalyzer implements RowProcessingAnalyzer<PatternFinde
 				final DefaultPatternFinder patternFinder = entry.getValue();
 				final Crosstab<Serializable> crosstab = createCrosstab(patternFinder);
 				crosstabs.put(entry.getKey(), crosstab);
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Grouped result contains {} groups", crosstabs.size());
 			}
 			return new PatternFinderResult(column, groupColumn, crosstabs);
 		}

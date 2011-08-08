@@ -52,9 +52,9 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 		_predefinedTokens = !predefinedTokens.isEmpty() && _configuration.isTokenTypeEnabled(TokenType.PREDEFINED);
 
 		if (_predefinedTokens) {
-			logger.info("Predefined tokens are turned ON, using PredefinedTokenTokenizer");
+			logger.debug("Predefined tokens are turned ON, using PredefinedTokenTokenizer");
 		} else {
-			logger.info("Predefined tokens are turned OFF, using tokenizeInternal");
+			logger.debug("Predefined tokens are turned OFF, using tokenizeInternal");
 		}
 	}
 
