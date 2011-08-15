@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.Set;
 
 import org.eobjects.metamodel.util.HasName;
@@ -99,6 +98,6 @@ public interface PropertyDescriptor extends Comparable<PropertyDescriptor>, HasN
 
 	public int getTypeArgumentCount();
 
-	public Type getTypeArgument(int i) throws IndexOutOfBoundsException;
+	public Class<?> getTypeArgument(int i) throws IndexOutOfBoundsException;
 
 }

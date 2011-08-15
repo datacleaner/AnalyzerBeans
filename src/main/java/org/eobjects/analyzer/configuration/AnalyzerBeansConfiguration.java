@@ -36,13 +36,39 @@ import org.eobjects.analyzer.storage.StorageProvider;
  */
 public interface AnalyzerBeansConfiguration extends Serializable {
 
+	/**
+	 * @see DatastoreCatalog
+	 * @return the datastore catalog defined in this configuration
+	 */
 	public DatastoreCatalog getDatastoreCatalog();
 
+	/**
+	 * @see ReferenceDataCatalog
+	 * @return the reference data catalog defined in this configuration
+	 */
 	public ReferenceDataCatalog getReferenceDataCatalog();
 
+	/**
+	 * @see DescriptorProvider
+	 * @return the descriptor provider defined in this configuration
+	 */
 	public DescriptorProvider getDescriptorProvider();
 
+	/**
+	 * @see StorageProvider
+	 * @return the storage provider defined in this configuration
+	 */
 	public StorageProvider getStorageProvider();
 
+	/**
+	 * @see InjectionManagerFactory
+	 * @return the injection manager factory defined in this configuration
+	 */
+	public InjectionManagerFactory getInjectionManagerFactory();
+
+	/**
+	 * @see TaskRunner
+	 * @return the task runner defined in this configuration
+	 */
 	public TaskRunner getTaskRunner();
 }

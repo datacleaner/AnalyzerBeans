@@ -777,7 +777,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		if (initialize) {
 			Set<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
 			for (InitializeMethodDescriptor initializeMethod : initializeMethods) {
-				initializeMethod.initialize(result, datastoreCatalog, referenceDataCatalog);
+				initializeMethod.initialize(result, new InjectionManagerImpl(datastoreCatalog, referenceDataCatalog, null));
 			}
 		}
 

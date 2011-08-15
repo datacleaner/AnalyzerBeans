@@ -36,8 +36,6 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract implementation of the {@link BeanDescriptor} interface. Convenient
@@ -48,8 +46,6 @@ import org.slf4j.LoggerFactory;
  * @param <B>
  */
 abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> implements BeanDescriptor<B> {
-
-	private static final Logger logger = LoggerFactory.getLogger(AbstractBeanDescriptor.class);
 
 	protected final Set<ProvidedPropertyDescriptor> _providedProperties;
 	private final boolean _requireInputColumns;
@@ -88,13 +84,12 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 	protected void visitField(Field field) {
 		super.visitField(field);
 
+		Inject injectAnnotation = field.getAnnotation(Inject.class);
 		Configured configuredAnnotation = field.getAnnotation(Configured.class);
 		Provided providedAnnotation = field.getAnnotation(Provided.class);
 
-		if (providedAnnotation != null) {
-			if (!field.isAnnotationPresent(Inject.class)) {
-				logger.info("No @Inject annotation found for @Provided field: {}", field);
-			}
+		if (configuredAnnotation == null && (injectAnnotation != null || providedAnnotation != null)) {
+			// provided properties = @Inject or @Provided, and NOT @Configured
 			_providedProperties.add(new ProvidedPropertyDescriptorImpl(field, this));
 		}
 

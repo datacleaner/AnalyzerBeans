@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
@@ -27,8 +27,6 @@ import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
-import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.analyzer.storage.StorageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +34,9 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final StorageProvider _storageProvider;
-	private final DataContextProvider _dataContextProvider;
-	private final RowAnnotationFactory _rowAnnotationFactory;
 	private final AbstractBeanInstance<?> _beanInstance;
 	private final AnalyzerBeanInstance _analyzerBeanInstance;
+	private final InjectionManager _injectionManager;
 
 	// represents the default lifecycle callbacks ...
 	private AssignConfiguredCallback _assignConfiguredCallback;
@@ -49,13 +45,11 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 	private AnalyzerLifeCycleCallback _returnResultsCallback;
 	private CloseCallback _closeCallback;
 
-	public AssignCallbacksAndInitializeTask(AbstractBeanInstance<?> beanInstance, StorageProvider storageProvider,
-			RowAnnotationFactory rowAnnotationFactory, AssignConfiguredCallback assignConfiguredCallback,
-			InitializeCallback initializeCallback, CloseCallback closeCallback) {
+	public AssignCallbacksAndInitializeTask(AbstractBeanInstance<?> beanInstance, InjectionManager injectionManager,
+			AssignConfiguredCallback assignConfiguredCallback, InitializeCallback initializeCallback,
+			CloseCallback closeCallback) {
 		_beanInstance = beanInstance;
-		_storageProvider = storageProvider;
-		_rowAnnotationFactory = rowAnnotationFactory;
-		_dataContextProvider = null;
+		_injectionManager = injectionManager;
 		_assignConfiguredCallback = assignConfiguredCallback;
 		_initializeCallback = initializeCallback;
 		_closeCallback = closeCallback;
@@ -64,15 +58,12 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 		_returnResultsCallback = null;
 	}
 
-	public AssignCallbacksAndInitializeTask(AnalyzerBeanInstance beanInstance, StorageProvider storageProvider,
-			RowAnnotationFactory rowAnnotationFactory, DataContextProvider dataContextProvider,
+	public AssignCallbacksAndInitializeTask(AnalyzerBeanInstance beanInstance, InjectionManager injectionManager,
 			AssignConfiguredCallback assignConfiguredCallback, InitializeCallback initializeCallback,
 			AnalyzerLifeCycleCallback runCallback, AnalyzerLifeCycleCallback returnResultsCallback,
 			CloseCallback closeCallback) {
 		_beanInstance = beanInstance;
-		_storageProvider = storageProvider;
-		_rowAnnotationFactory = rowAnnotationFactory;
-		_dataContextProvider = dataContextProvider;
+		_injectionManager = injectionManager;
 		_assignConfiguredCallback = assignConfiguredCallback;
 		_initializeCallback = initializeCallback;
 		_closeCallback = closeCallback;
@@ -89,8 +80,7 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 			_beanInstance.getAssignConfiguredCallbacks().add(_assignConfiguredCallback);
 		}
 
-		AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(_storageProvider, _rowAnnotationFactory,
-				_dataContextProvider);
+		AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(_injectionManager);
 		_beanInstance.getAssignProvidedCallbacks().add(assignProvidedCallback);
 
 		if (_initializeCallback != null) {

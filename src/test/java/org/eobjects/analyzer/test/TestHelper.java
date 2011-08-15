@@ -99,9 +99,12 @@ public final class TestHelper {
 		return new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs, stringPatterns);
 	}
 
-	public static DatastoreCatalog createDatastoreCatalog() {
-		List<Datastore> datastores = new LinkedList<Datastore>();
-		return new DatastoreCatalogImpl(datastores);
+	public static DatastoreCatalog createDatastoreCatalog(Datastore... datastores) {
+		List<Datastore> datastoreList = new LinkedList<Datastore>();
+		for (Datastore datastore : datastores) {
+			datastoreList.add(datastore);
+		}
+		return new DatastoreCatalogImpl(datastoreList);
 	}
 
 	public static JdbcDatastore createSampleDatabaseDatastore(String name) {

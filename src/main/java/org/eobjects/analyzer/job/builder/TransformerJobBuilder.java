@@ -25,7 +25,8 @@ import java.util.List;
 
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.InjectionManager;
+import org.eobjects.analyzer.configuration.InjectionManagerImpl;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -42,7 +43,6 @@ import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleState;
-import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.util.StringUtils;
 
@@ -82,14 +82,13 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 				new ImmutableBeanConfiguration(getConfiguredProperties()), null);
 		assignConfiguredCallback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, bean, getDescriptor());
 
-		final AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(new InMemoryStorageProvider(),
-				new InMemoryRowAnnotationFactory(), null);
+		final InjectionManager injectionManager = new InjectionManagerImpl(null, null, new InMemoryStorageProvider());
+
+		final AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(injectionManager);
+
 		assignProvidedCallback.onEvent(LifeCycleState.ASSIGN_PROVIDED, bean, getDescriptor());
 
-		final AnalyzerBeansConfiguration configuration = getAnalysisJobBuilder().getConfiguration();
-
-		final InitializeCallback initializeCallback = new InitializeCallback(configuration.getDatastoreCatalog(),
-				configuration.getReferenceDataCatalog());
+		final InitializeCallback initializeCallback = new InitializeCallback(injectionManager);
 		initializeCallback.onEvent(LifeCycleState.INITIALIZE, bean, getDescriptor());
 
 		final OutputColumns outputColumns = bean.getOutputColumns();
@@ -192,8 +191,8 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			getOutputColumns();
 		}
 
-		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(
-				getAnalysisJobBuilder().getTransformerChangeListeners());
+		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(getAnalysisJobBuilder()
+				.getTransformerChangeListeners());
 		for (TransformerChangeListener listener : listeners) {
 			listener.onConfigurationChanged(this);
 		}
@@ -202,8 +201,8 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 	@Override
 	public void onRequirementChanged() {
 		super.onRequirementChanged();
-		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(
-				getAnalysisJobBuilder().getTransformerChangeListeners());
+		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(getAnalysisJobBuilder()
+				.getTransformerChangeListeners());
 		for (TransformerChangeListener listener : listeners) {
 			listener.onRequirementChanged(this);
 		}

@@ -21,10 +21,9 @@ package org.eobjects.analyzer.lifecycle;
 
 import java.util.Set;
 
-import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
 /**
  * Life cycle callback for the initialize phase.
@@ -33,12 +32,10 @@ import org.eobjects.analyzer.reference.ReferenceDataCatalog;
  */
 public final class InitializeCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
 
-	private final ReferenceDataCatalog _referenceDataCatalog;
-	private final DatastoreCatalog _datastoreCatalog;
+	private final InjectionManager _injectionManager;
 
-	public InitializeCallback(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog) {
-		_datastoreCatalog = datastoreCatalog;
-		_referenceDataCatalog = referenceDataCatalog;
+	public InitializeCallback(InjectionManager injectionManager) {
+		_injectionManager = injectionManager;
 	}
 
 	@Override
@@ -47,7 +44,7 @@ public final class InitializeCallback implements LifeCycleCallback<Object, Compo
 
 		Set<InitializeMethodDescriptor> initializeDescriptors = descriptor.getInitializeMethods();
 		for (InitializeMethodDescriptor initializeDescriptor : initializeDescriptors) {
-			initializeDescriptor.initialize(component, _datastoreCatalog, _referenceDataCatalog);
+			initializeDescriptor.initialize(component, _injectionManager);
 		}
 	}
 

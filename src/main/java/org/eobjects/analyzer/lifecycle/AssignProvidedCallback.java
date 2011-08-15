@@ -19,72 +19,36 @@
  */
 package org.eobjects.analyzer.lifecycle;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.configuration.InjectionManager;
+import org.eobjects.analyzer.configuration.InjectionPoint;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
-import org.eobjects.analyzer.storage.CollectionFactoryImpl;
-import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.analyzer.storage.StorageProvider;
 
 public final class AssignProvidedCallback implements LifeCycleCallback<Object, BeanDescriptor<?>> {
 
-	private final StorageProvider _storageProvider;
-	private final DataContextProvider _dataContextProvider;
-	private final RowAnnotationFactory _rowAnnotationFactory;
-
-	public AssignProvidedCallback(StorageProvider storageProvider, RowAnnotationFactory rowAnnotationFactory) {
-		this(storageProvider, rowAnnotationFactory, null);
-	}
+	private final InjectionManager _injectionManager;
 
 	/**
-	 * 
-	 * @param storageProvider
-	 * @param rowAnnotationFactory
-	 * @param dataContextProvider
-	 *            the DataContextProvider used throughout the execution of the
-	 *            job. This parameter should only be provided if the bean being
-	 *            configured is an exploring analyzer.
+	 * @param injectionManager
 	 */
-	public AssignProvidedCallback(StorageProvider storageProvider, RowAnnotationFactory rowAnnotationFactory,
-			DataContextProvider dataContextProvider) {
-		_storageProvider = storageProvider;
-		_rowAnnotationFactory = rowAnnotationFactory;
-		_dataContextProvider = dataContextProvider;
+	public AssignProvidedCallback(InjectionManager injectionManager) {
+		_injectionManager = injectionManager;
 	}
 
 	@Override
 	public void onEvent(LifeCycleState state, Object bean, BeanDescriptor<?> descriptor) {
 		assert state == LifeCycleState.ASSIGN_PROVIDED;
-
+		
 		Set<ProvidedPropertyDescriptor> providedDescriptors = descriptor.getProvidedProperties();
 		for (ProvidedPropertyDescriptor providedDescriptor : providedDescriptors) {
-			if (providedDescriptor.isCollectionFactory()) {
-				CollectionFactoryImpl factory = new CollectionFactoryImpl(_storageProvider);
-				providedDescriptor.setValue(bean, factory);
-			} else if (providedDescriptor.isRowAnnotationFactory()) {
-				providedDescriptor.setValue(bean, _rowAnnotationFactory);
-			} else if (providedDescriptor.isDataContext()) {
-				providedDescriptor.setValue(bean, _dataContextProvider.getDataContext());
-			} else if (providedDescriptor.isSchemaNavigator()) {
-				providedDescriptor.setValue(bean, _dataContextProvider.getSchemaNavigator());
-			} else {
-				Class<?> clazz1 = (Class<?>) providedDescriptor.getTypeArgument(0);
-				if (providedDescriptor.isList()) {
-					List<?> list = _storageProvider.createList(clazz1);
-					providedDescriptor.setValue(bean, list);
-				} else if (providedDescriptor.isSet()) {
-					Set<?> set = _storageProvider.createSet(clazz1);
-					providedDescriptor.setValue(bean, set);
-				} else if (providedDescriptor.isMap()) {
-					Class<?> clazz2 = (Class<?>) providedDescriptor.getTypeArgument(1);
-					Map<?, ?> map = _storageProvider.createMap(clazz1, clazz2);
-					providedDescriptor.setValue(bean, map);
-				}
-			}
+			
+			
+			InjectionPoint<Object> injectionPoint = new PropertyInjectionPoint(providedDescriptor, bean);
+			Object value = _injectionManager.getInstance(injectionPoint);
+			providedDescriptor.setValue(bean, value);
+			
 		}
 	}
 }

@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.analyzer.util.SchemaNavigator;
 
 /**
  * Abstract implementation of {@link PropertyDescriptor}. Convenient when
@@ -52,13 +51,6 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 		_baseType = _field.getType();
 		_genericType = _field.getGenericType();
 		_componentDescriptor = componentDescriptor;
-		init();
-	}
-
-	private void init() {
-		if (!(ReflectionUtils.isMap(_baseType) || ReflectionUtils.isList(_baseType) || SchemaNavigator.class != _baseType)) {
-			throw new DescriptorException("The type " + _baseType + " is not supported by the @Provided annotation");
-		}
 	}
 
 	@Override
@@ -104,7 +96,7 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 	}
 
 	@Override
-	public Type getTypeArgument(int i) throws IndexOutOfBoundsException {
+	public Class<?> getTypeArgument(int i) throws IndexOutOfBoundsException {
 		return ReflectionUtils.getTypeParameter(_field, i);
 	}
 

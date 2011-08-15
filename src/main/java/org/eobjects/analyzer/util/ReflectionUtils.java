@@ -262,9 +262,8 @@ public final class ReflectionUtils {
 		Type typeParameterForBaseInterface = pBaseType.getActualTypeArguments()[parameterIndex];
 		return getSafeClassToUse(typeParameterForBaseInterface);
 	}
-
-	public static Class<?> getTypeParameter(Field field, int parameterIndex) {
-		Type genericType = field.getGenericType();
+	
+	public static Class<?> getTypeParameter(Type genericType, int parameterIndex) {
 		if (genericType instanceof GenericArrayType) {
 			GenericArrayType gaType = (GenericArrayType) genericType;
 			genericType = gaType.getGenericComponentType();
@@ -279,7 +278,12 @@ public final class ReflectionUtils {
 				throw new IllegalArgumentException("Only " + typeArguments.length + " parameters available");
 			}
 		}
-		throw new IllegalArgumentException("Field type is not parameterized: " + genericType);
+		return null;
+	}
+
+	public static Class<?> getTypeParameter(Field field, int parameterIndex) {
+		Type genericType = field.getGenericType();
+		return getTypeParameter(genericType, parameterIndex);
 	}
 
 	public static boolean isWildcard(Type type) {

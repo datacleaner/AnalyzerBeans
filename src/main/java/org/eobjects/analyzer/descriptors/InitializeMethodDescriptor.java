@@ -23,8 +23,7 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Initialize;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.configuration.InjectionManager;
 
 /**
  * Descriptor for an initialize method. The most common way of registering an
@@ -40,10 +39,9 @@ public interface InitializeMethodDescriptor {
 	 * Invokes the initialize method
 	 * 
 	 * @param bean
-	 * @param datastoreCatalog
-	 * @param referenceDataCatalog
+	 * @param injectionManager
 	 */
-	public void initialize(Object bean, DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog);
+	public void initialize(Object bean, InjectionManager injectionManager);
 
 	/**
 	 * Gets the annotations of the method

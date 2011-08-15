@@ -28,9 +28,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -62,15 +63,12 @@ import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
-import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eobjects.metamodel.MetaModelHelper;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A delegate for the AnalysisRunner to put the state of a single job into.
@@ -84,8 +82,8 @@ final class AnalysisRunnerJobDelegate {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnalysisRunnerJobDelegate.class);
 
-	private final StorageProvider _storageProvider;
 	private final AnalysisJob _job;
+	private final AnalyzerBeansConfiguration _configuration;
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
 	private final Queue<AnalyzerJobResult> _resultQueue;
@@ -99,17 +97,12 @@ final class AnalysisRunnerJobDelegate {
 	private final Collection<MergedOutcomeJob> _mergedOutcomeJobs;
 	private final ReferenceDataActivationManager _rowProcessingReferenceDataActivationManager;
 	private final SourceColumnFinder _sourceColumnFinder;
-	private final DatastoreCatalog _datastoreCatalog;
-	private final ReferenceDataCatalog _referenceDataCatalog;
 	private final ReferenceDataActivationManager _explorerReferenceDataActivationManager;
 
-	public AnalysisRunnerJobDelegate(AnalysisJob job, DatastoreCatalog datastoreCatalog,
-			ReferenceDataCatalog referenceDataCatalog, TaskRunner taskRunner, StorageProvider storageProvider,
+	public AnalysisRunnerJobDelegate(AnalysisJob job, AnalyzerBeansConfiguration configuration, TaskRunner taskRunner,
 			AnalysisListener analysisListener, Queue<AnalyzerJobResult> resultQueue, ErrorAware errorAware) {
 		_job = job;
-		_datastoreCatalog = datastoreCatalog;
-		_referenceDataCatalog = referenceDataCatalog;
-		_storageProvider = storageProvider;
+		_configuration = configuration;
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
 		_resultQueue = resultQueue;
@@ -147,6 +140,11 @@ final class AnalysisRunnerJobDelegate {
 		_explorerReferenceDataActivationManager = new ReferenceDataActivationManager();
 	}
 
+	/**
+	 * Runs the job
+	 * 
+	 * @return
+	 */
 	public AnalysisResultFuture run() {
 		_analysisListener.jobBegin(_job);
 
@@ -156,17 +154,25 @@ final class AnalysisRunnerJobDelegate {
 
 		validateSingleTableInput(_rowProcessingJobs);
 
+		InjectionManager injectionManager = _configuration.getInjectionManagerFactory().getInjectionManager(_job);
+
 		// at this point we are done validating the job, it will run.
-		scheduleExplorers();
-		scheduleRowProcessing();
+		scheduleExplorers(injectionManager);
+		scheduleRowProcessing(injectionManager);
 
 		return new AnalysisResultFutureImpl(_resultQueue, _jobCompletionTaskListener, _errorAware);
 	}
 
-	private void scheduleRowProcessing() {
+	/**
+	 * Starts row processing job flows.
+	 * 
+	 * @param injectionManager
+	 */
+	private void scheduleRowProcessing(InjectionManager injectionManager) {
 		final Map<Table, RowProcessingPublisher> rowProcessingPublishers = new HashMap<Table, RowProcessingPublisher>();
 		for (FilterJob filterJob : _filterJobs) {
-			registerRowProcessingPublishers(rowProcessingPublishers, filterJob, _resultQueue, _analysisListener, _taskRunner);
+			registerRowProcessingPublishers(rowProcessingPublishers, filterJob, _analysisListener, _taskRunner,
+					injectionManager);
 		}
 
 		for (MergedOutcomeJob mergedOutcomeJob : _mergedOutcomeJobs) {
@@ -174,12 +180,12 @@ final class AnalysisRunnerJobDelegate {
 		}
 
 		for (TransformerJob transformerJob : _transformerJobs) {
-			registerRowProcessingPublishers(rowProcessingPublishers, transformerJob, _resultQueue, _analysisListener,
-					_taskRunner);
+			registerRowProcessingPublishers(rowProcessingPublishers, transformerJob, _analysisListener, _taskRunner,
+					injectionManager);
 		}
 		for (AnalyzerJob analyzerJob : _rowProcessingJobs) {
-			registerRowProcessingPublishers(rowProcessingPublishers, analyzerJob, _resultQueue, _analysisListener,
-					_taskRunner);
+			registerRowProcessingPublishers(rowProcessingPublishers, analyzerJob, _analysisListener, _taskRunner,
+					injectionManager);
 		}
 
 		logger.info("Created {} row processor publishers", rowProcessingPublishers.size());
@@ -201,7 +207,12 @@ final class AnalysisRunnerJobDelegate {
 		}
 	}
 
-	private void scheduleExplorers() {
+	/**
+	 * Starts exploration based job flows.
+	 * 
+	 * @param injectionManager
+	 */
+	private void scheduleExplorers(final InjectionManager injectionManager) {
 		final int numExplorerJobs = _explorerJobs.size();
 		if (numExplorerJobs == 0) {
 			_jobCompletionTaskListener.onComplete(null);
@@ -215,7 +226,7 @@ final class AnalysisRunnerJobDelegate {
 		final TaskListener explorersDoneTaskListener = new JoinTaskListener(numExplorerJobs, new ForkTaskListener(
 				"Exploring analyzers done", _taskRunner, finalTasks));
 
-		final InitializeCallback initializeCallback = new InitializeCallback(_datastoreCatalog, _referenceDataCatalog);
+		final InitializeCallback initializeCallback = new InitializeCallback(injectionManager);
 
 		// begin explorer jobs first because they can run independently (
 		for (AnalyzerJob explorerJob : _explorerJobs) {
@@ -236,7 +247,7 @@ final class AnalysisRunnerJobDelegate {
 			TaskListener referenceDataInitFinishedListener = new RunNextTaskTaskListener(_taskRunner, runTask,
 					runFinishedListener);
 
-			Task initializeReferenceData = new InitializeReferenceDataTask(_datastoreCatalog, _referenceDataCatalog,
+			Task initializeReferenceData = new InitializeReferenceDataTask(injectionManager,
 					_explorerReferenceDataActivationManager);
 			RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner, initializeReferenceData,
 					referenceDataInitFinishedListener);
@@ -247,9 +258,8 @@ final class AnalysisRunnerJobDelegate {
 					_explorerReferenceDataActivationManager);
 			CloseCallback closeCallback = new CloseCallback();
 
-			AssignCallbacksAndInitializeTask initTask = new AssignCallbacksAndInitializeTask(instance, _storageProvider,
-					_storageProvider.createRowAnnotationFactory(), dataContextProvider, assignConfiguredCallback,
-					initializeCallback, runExplorerCallback, returnResultsCallback, closeCallback);
+			AssignCallbacksAndInitializeTask initTask = new AssignCallbacksAndInitializeTask(instance, injectionManager,
+					assignConfiguredCallback, initializeCallback, runExplorerCallback, returnResultsCallback, closeCallback);
 
 			// begin the explorers
 			_taskRunner.run(initTask, initializeFinishedListener);
@@ -330,8 +340,8 @@ final class AnalysisRunnerJobDelegate {
 	}
 
 	private void registerRowProcessingPublishers(Map<Table, RowProcessingPublisher> rowProcessingPublishers,
-			ConfigurableBeanJob<?> beanJob, Collection<AnalyzerJobResult> resultQueue, AnalysisListener listener,
-			TaskRunner taskRunner) {
+			ConfigurableBeanJob<?> beanJob, AnalysisListener listener, TaskRunner taskRunner,
+			InjectionManager injectionManager) {
 		final Set<Column> physicalColumns = new HashSet<Column>();
 
 		final InputColumn<?>[] inputColumns = beanJob.getInput();
@@ -361,8 +371,8 @@ final class AnalysisRunnerJobDelegate {
 		for (Table table : tables) {
 			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
-				rowPublisher = new RowProcessingPublisher(_job, _storageProvider, table, taskRunner, listener,
-						_datastoreCatalog, _referenceDataCatalog, _rowProcessingReferenceDataActivationManager);
+				rowPublisher = new RowProcessingPublisher(_job, table, taskRunner, listener, injectionManager,
+						_rowProcessingReferenceDataActivationManager);
 				rowProcessingPublishers.put(table, rowPublisher);
 			}
 

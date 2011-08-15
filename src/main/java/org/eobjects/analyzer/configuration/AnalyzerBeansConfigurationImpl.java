@@ -34,9 +34,16 @@ public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfig
 	private final transient TaskRunner _taskRunner;
 	private final DatastoreCatalog _datastoreCatalog;
 	private final ReferenceDataCatalog _referenceDataCatalog;
+	private final InjectionManagerFactory _injectionManagerFactory;
 
 	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
 			DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider) {
+		this(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner, storageProvider, null);
+	}
+
+	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
+			DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider,
+			InjectionManagerFactory injectionManagerFactory) {
 		if (datastoreCatalog == null) {
 			throw new IllegalArgumentException("datastoreCatalog cannot be null");
 		}
@@ -57,6 +64,16 @@ public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfig
 		_descriptorProvider = descriptorProvider;
 		_taskRunner = taskRunner;
 		_storageProvider = storageProvider;
+
+		if (injectionManagerFactory == null) {
+			injectionManagerFactory = new InjectionManagerFactoryImpl(this);
+		}
+		_injectionManagerFactory = injectionManagerFactory;
+	}
+	
+	@Override
+	public InjectionManagerFactory getInjectionManagerFactory() {
+		return _injectionManagerFactory;
 	}
 
 	@Override

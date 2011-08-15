@@ -21,11 +21,9 @@ package org.eobjects.analyzer.lifecycle;
 
 import java.lang.reflect.Array;
 
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 
 /**
  * Utility/convenience class for doing simple lifecycle management and/or
@@ -35,20 +33,12 @@ import org.eobjects.analyzer.reference.ReferenceDataCatalog;
  */
 public final class LifeCycleHelper {
 
-	private final DatastoreCatalog _datastoreCatalog;
-	private final ReferenceDataCatalog _referenceDataCatalog;
 	private final InitializeCallback _initializeCallback;
 	private final CloseCallback _closeCallback;
 
-	public LifeCycleHelper(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog) {
-		_datastoreCatalog = datastoreCatalog;
-		_referenceDataCatalog = referenceDataCatalog;
-		_initializeCallback = new InitializeCallback(_datastoreCatalog, _referenceDataCatalog);
+	public LifeCycleHelper(InjectionManager injectionManager) {
+		_initializeCallback = new InitializeCallback(injectionManager);
 		_closeCallback = new CloseCallback();
-	}
-
-	public LifeCycleHelper(AnalyzerBeansConfiguration conf) {
-		this(conf.getDatastoreCatalog(), conf.getReferenceDataCatalog());
 	}
 
 	public void initialize(Object o) {

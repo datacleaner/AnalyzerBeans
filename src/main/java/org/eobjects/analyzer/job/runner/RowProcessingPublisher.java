@@ -28,9 +28,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -63,9 +63,6 @@ import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
-import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
@@ -84,22 +81,16 @@ public final class RowProcessingPublisher {
 	private final Set<Column> _physicalColumns = new HashSet<Column>();
 	private final List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
 	private final AnalysisJob _job;
-	private final StorageProvider _storageProvider;
 	private final Table _table;
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
 	private final ReferenceDataActivationManager _referenceDataActivationManager;
-	private final DatastoreCatalog _datastoreCatalog;
-	private final ReferenceDataCatalog _referenceDataCatalog;
+	private final InjectionManager _injectionManager;
 
-	public RowProcessingPublisher(AnalysisJob job, StorageProvider storageProvider, Table table, TaskRunner taskRunner,
-			AnalysisListener analysisListener, DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
-			ReferenceDataActivationManager referenceDataActivationManager) {
+	public RowProcessingPublisher(AnalysisJob job, Table table, TaskRunner taskRunner, AnalysisListener analysisListener,
+			InjectionManager injectionManager, ReferenceDataActivationManager referenceDataActivationManager) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
-		}
-		if (storageProvider == null) {
-			throw new IllegalArgumentException("CollectionProvider cannot be null");
 		}
 		if (table == null) {
 			throw new IllegalArgumentException("Table cannot be null");
@@ -111,12 +102,10 @@ public final class RowProcessingPublisher {
 			throw new IllegalArgumentException("AnalysisListener cannot be null");
 		}
 		_job = job;
-		_storageProvider = storageProvider;
 		_table = table;
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
-		_datastoreCatalog = datastoreCatalog;
-		_referenceDataCatalog = referenceDataCatalog;
+		_injectionManager = injectionManager;
 		_referenceDataActivationManager = referenceDataActivationManager;
 	}
 
@@ -293,21 +282,16 @@ public final class RowProcessingPublisher {
 		final TaskListener referenceDataInitFinishedListener = new ForkTaskListener("Initialize row consumers", taskRunner,
 				new TaskRunnable(runTask, runCompletionListener));
 
-		final InitializeCallback initializeCallback = new InitializeCallback(_datastoreCatalog, _referenceDataCatalog);
+		final InitializeCallback initializeCallback = new InitializeCallback(_injectionManager);
 
 		final RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner,
-				new InitializeReferenceDataTask(_datastoreCatalog, _referenceDataCatalog, _referenceDataActivationManager),
+				new InitializeReferenceDataTask(_injectionManager, _referenceDataActivationManager),
 				referenceDataInitFinishedListener);
 		final TaskListener initFinishedListener = new JoinTaskListener(numConfigurableConsumers, joinFinishedListener);
 
-		// Ticket #459: The RowAnnotationFactory should be shared by all
-		// components within the same RowProcessingPublisher
-		final RowAnnotationFactory rowAnnotationFactory = _storageProvider.createRowAnnotationFactory();
-
 		final List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
 		for (RowProcessingConsumer consumer : configurableConsumers) {
-			initTasks.add(createInitTask(consumer, rowAnnotationFactory, initFinishedListener, resultQueue, datastore,
-					initializeCallback));
+			initTasks.add(createInitTask(consumer, initFinishedListener, resultQueue, initializeCallback));
 		}
 		return initTasks;
 	}
@@ -322,9 +306,8 @@ public final class RowProcessingPublisher {
 		}
 	}
 
-	private TaskRunnable createInitTask(RowProcessingConsumer consumer, RowAnnotationFactory rowAnnotationFactory,
-			TaskListener listener, Queue<AnalyzerJobResult> resultQueue, Datastore datastore,
-			InitializeCallback initializeCallback) {
+	private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener,
+			Queue<AnalyzerJobResult> resultQueue, InitializeCallback initializeCallback) {
 		ComponentJob componentJob = consumer.getComponentJob();
 		BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
 
@@ -337,22 +320,22 @@ public final class RowProcessingPublisher {
 			TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
 			TransformerBeanInstance transformerBeanInstance = transformerConsumer.getBeanInstance();
 
-			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _storageProvider, rowAnnotationFactory,
+			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _injectionManager,
 					assignConfiguredCallback, initializeCallback, closeCallback);
 		} else if (consumer instanceof FilterConsumer) {
 			FilterConsumer filterConsumer = (FilterConsumer) consumer;
 			FilterBeanInstance filterBeanInstance = filterConsumer.getBeanInstance();
 
-			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _storageProvider, rowAnnotationFactory,
-					assignConfiguredCallback, initializeCallback, closeCallback);
+			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _injectionManager, assignConfiguredCallback,
+					initializeCallback, closeCallback);
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
 			AnalyzerBeanInstance analyzerBeanInstance = analyzerConsumer.getBeanInstance();
 			AnalyzerLifeCycleCallback returnResultsCallback = new ReturnResultsCallback(_job,
 					analyzerConsumer.getComponentJob(), resultQueue, _analysisListener);
 
-			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _storageProvider, rowAnnotationFactory, null,
-					assignConfiguredCallback, initializeCallback, null, returnResultsCallback, closeCallback);
+			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _injectionManager, assignConfiguredCallback,
+					initializeCallback, null, returnResultsCallback, closeCallback);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}
