@@ -72,6 +72,24 @@ public class InjectionManagerImpl implements InjectionManager {
 	}
 
 	/**
+	 * Constructs an {@link InjectionManager} for use within the scope of a job
+	 * execution.
+	 * 
+	 * @param datastoreCatalog
+	 * @param referenceDataCatalog
+	 * @param storageProvider
+	 * @param job
+	 */
+	public InjectionManagerImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
+			StorageProvider storageProvider, AnalysisJob job) {
+		_datastoreCatalog = datastoreCatalog;
+		_referenceDataCatalog = referenceDataCatalog;
+		_storageProvider = storageProvider;
+		_rowAnntationFactoryRef = createRowAnnotationFactoryRef();
+		_job = job;
+	}
+
+	/**
 	 * Creates a new {@link InjectionManager} without any job-context.
 	 * Convenient for use outside of an actual job, mimicing a job situation
 	 * etc.
