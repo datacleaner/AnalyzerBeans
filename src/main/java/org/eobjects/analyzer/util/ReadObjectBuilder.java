@@ -139,7 +139,9 @@ public final class ReadObjectBuilder<E extends Serializable> {
 				}
 			} else {
 				final Object value = getField.get(fieldName, null);
-				logger.info("{}.{} was  {}", new Object[] { _clazz, field, value });
+				if (logger.isDebugEnabled()) {
+					logger.debug("{}.{} was  {}", new Object[] { _clazz, field, value });
+				}
 				if (value != null) {
 					field.set(_serializable, value);
 				}

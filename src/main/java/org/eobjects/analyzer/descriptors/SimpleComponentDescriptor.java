@@ -103,7 +103,7 @@ class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements Comp
 		Configured configuredAnnotation = field.getAnnotation(Configured.class);
 		if (configuredAnnotation != null) {
 			if (!field.isAnnotationPresent(Inject.class)) {
-				logger.info("No @Inject annotation found for @Configured field: {}", field);
+				logger.debug("No @Inject annotation found for @Configured field: {}", field);
 			}
 			_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(field, this));
 		}
