@@ -144,6 +144,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 			@Override
 			public void onError(Task task, Throwable throwable) {
 				logger.info("Scan of '{}' failed: {}", packageName, throwable.getMessage());
+				logger.warn("Exception occurred while scanning and installing package", throwable);
 				taskDone();
 			}
 		};
