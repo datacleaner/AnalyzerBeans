@@ -154,7 +154,8 @@ final class AnalysisRunnerJobDelegate {
 
 		validateSingleTableInput(_rowProcessingJobs);
 
-		InjectionManager injectionManager = _configuration.getInjectionManagerFactory().getInjectionManager(_job);
+		// the injection manager is job scoped
+		final InjectionManager injectionManager = _configuration.getInjectionManagerFactory().getInjectionManager(_job);
 
 		// at this point we are done validating the job, it will run.
 		scheduleExplorers(injectionManager);

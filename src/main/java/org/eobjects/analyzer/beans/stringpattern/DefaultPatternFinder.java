@@ -46,6 +46,9 @@ public final class DefaultPatternFinder extends PatternFinder<InputRow> {
 	 */
 	public DefaultPatternFinder(TokenizerConfiguration configuration, RowAnnotationFactory annotationFactory) {
 		super(configuration);
+		if (annotationFactory == null) {
+			throw new IllegalArgumentException("RowAnnotationFactory cannot be null");
+		}
 		_annotations = new HashMap<TokenPattern, RowAnnotation>();
 		_annotationFactory = annotationFactory;
 	}

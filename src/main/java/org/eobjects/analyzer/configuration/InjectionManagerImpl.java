@@ -123,7 +123,12 @@ public class InjectionManagerImpl implements InjectionManager {
 		return new LazyRef<RowAnnotationFactory>() {
 			@Override
 			protected RowAnnotationFactory fetch() {
-				return _storageProvider.createRowAnnotationFactory();
+				logger.info("Creating RowAnnotationFactory for job: {}", _job);
+				RowAnnotationFactory rowAnnotationFactory = _storageProvider.createRowAnnotationFactory();
+				if (rowAnnotationFactory == null) {
+					throw new IllegalStateException("Storage provider returned null RowAnnotationFactory!");
+				}
+				return rowAnnotationFactory;
 			}
 		};
 	}
