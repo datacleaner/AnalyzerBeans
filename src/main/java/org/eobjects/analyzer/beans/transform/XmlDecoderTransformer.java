@@ -32,7 +32,7 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MockInputColumn;
 
 @TransformerBean("XML decoder")
-@Description("Decodes XML content into plain text with or without XML tags")
+@Description("Decodes XML content into plain text")
 @Categorized({ StringManipulationCategory.class })
 public class XmlDecoderTransformer implements Transformer<String> {
 
