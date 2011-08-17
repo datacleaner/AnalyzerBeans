@@ -86,7 +86,8 @@
 				<annotation>
 					<documentation>
 						This storage provider uses the H2 database engine
-						as a backing store for intermediary results.
+						as
+						a backing store for intermediary results.
 					</documentation>
 				</annotation>
 			</element>
@@ -171,7 +172,8 @@
 				minOccurs="0" maxOccurs="unbounded">
 				<annotation>
 					<documentation>
-						Defines a datastore based on a directory of SAS data sets.
+						Defines a datastore based on a directory of SAS data
+						sets.
 					</documentation>
 				</annotation>
 			</element>
@@ -254,6 +256,15 @@
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 			<element name="failOnInconsistencies" minOccurs="0"
 				maxOccurs="1" type="boolean" />
+			<element name="headerLineNumber" minOccurs="0" maxOccurs="1"
+				type="int" default="0">
+				<annotation>
+					<documentation>
+						The index (0-based) of the header line number. If no
+						header line is present, use -1.
+					</documentation>
+				</annotation>
+			</element>
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />
@@ -277,7 +288,7 @@
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />
 	</complexType>
-	
+
 	<complexType name="sasDatastoreType">
 		<sequence>
 			<element name="directory" minOccurs="1" maxOccurs="1" type="string" />

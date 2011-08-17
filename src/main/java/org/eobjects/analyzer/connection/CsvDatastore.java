@@ -53,6 +53,7 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 	private final Character _separatorChar;
 	private final String _encoding;
 	private final boolean _failOnInconsistencies;
+	private final int _headerLineNumber;
 
 	public CsvDatastore(String name, String filename) {
 		this(name, filename, null, null, null);
@@ -64,12 +65,22 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 
 	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
 			boolean failOnInconsistencies) {
+		this(name, filename, quoteChar, separatorChar, encoding, failOnInconsistencies,
+				CsvConfiguration.DEFAULT_COLUMN_NAME_LINE);
+	}
+
+	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
+			boolean failOnInconsistencies, int headerLineNumber) {
 		super(name);
 		_filename = filename;
 		_quoteChar = quoteChar;
 		_separatorChar = separatorChar;
 		_encoding = encoding;
 		_failOnInconsistencies = failOnInconsistencies;
+		if (headerLineNumber < 0) {
+			headerLineNumber = CsvConfiguration.NO_COLUMN_NAME_LINE;
+		}
+		_headerLineNumber = headerLineNumber;
 	}
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -102,8 +113,8 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 			final char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
 			final char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
 			final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
-			final CsvConfiguration configuration = new CsvConfiguration(CsvConfiguration.DEFAULT_COLUMN_NAME_LINE, encoding,
-					separatorChar, quoteChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, _failOnInconsistencies);
+			final CsvConfiguration configuration = new CsvConfiguration(_headerLineNumber, encoding, separatorChar,
+					quoteChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, _failOnInconsistencies);
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename), configuration);
 		}
 		return new SingleDataContextProvider(dataContext, this);
@@ -113,9 +124,13 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return new PerformanceCharacteristicsImpl(false);
 	}
-	
+
 	public boolean isFailOnInconsistencies() {
 		return _failOnInconsistencies;
+	}
+
+	public int getHeaderLineNumber() {
+		return _headerLineNumber;
 	}
 
 	@Override
@@ -126,11 +141,13 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 		identifiers.add(_quoteChar);
 		identifiers.add(_separatorChar);
 		identifiers.add(_failOnInconsistencies);
+		identifiers.add(_headerLineNumber);
 	}
 
 	@Override
 	public String toString() {
 		return "CsvDatastore[name=" + getName() + ", filename=" + _filename + ", quoteChar='" + _quoteChar
-				+ "', separatorChar='" + _separatorChar + "', encoding=" + _encoding + "]";
+				+ "', separatorChar='" + _separatorChar + "', encoding=" + _encoding + ", headerLineNumber="
+				+ _headerLineNumber + "]";
 	}
 }

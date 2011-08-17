@@ -116,6 +116,7 @@ import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringConversionUtils;
 import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -475,7 +476,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 				failOnInconsistencies = true;
 			}
 
-			CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, encoding, failOnInconsistencies);
+			Integer headerLineNumber = csvDatastoreType.getHeaderLineNumber();
+			if (headerLineNumber == null) {
+				headerLineNumber = CsvConfiguration.DEFAULT_COLUMN_NAME_LINE;
+			}
+
+			CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, encoding, failOnInconsistencies,
+					headerLineNumber);
 			ds.setDescription(csvDatastoreType.getDescription());
 			datastores.put(name, ds);
 		}
