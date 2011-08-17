@@ -259,7 +259,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 		BerkeleyDbStorageProviderType berkeleyDbStorageProvider = storageProviderType.getBerkeleyDb();
 		if (berkeleyDbStorageProvider != null) {
 			File parentDirectory = new File(_interceptor.getTemporaryStorageDirectory());
-			return new BerkeleyDbStorageProvider(parentDirectory);
+			BerkeleyDbStorageProvider storageProvider = new BerkeleyDbStorageProvider(parentDirectory);
+			Boolean cleanDirectoryOnStartup = berkeleyDbStorageProvider.isCleanDirectoryOnStartup();
+			if (cleanDirectoryOnStartup != null && cleanDirectoryOnStartup.booleanValue()) {
+				storageProvider.cleanDirectory();
+			}
+			return storageProvider;
 		}
 
 		HsqldbStorageProviderType hsqldbStorageProvider = storageProviderType.getHsqldb();

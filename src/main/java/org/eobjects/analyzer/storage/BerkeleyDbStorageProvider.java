@@ -20,10 +20,8 @@
 package org.eobjects.analyzer.storage;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
@@ -51,18 +49,19 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
 /**
- * Berkeley DB based implementation of the StorageProvider interface.
+ * Berkeley DB based implementation of the {@link StorageProvider} interface.
  * 
  * @author Kasper Sørensen
  */
 public final class BerkeleyDbStorageProvider implements StorageProvider {
 
+	private static final String DIRECTORY_PREFIX = "analyzerBeans_";
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private final File _parentDirectory;
 	private File _targetDir;
 	private Environment _environment;
 	private boolean _deleteOnExit = false;
-	
+
 	public BerkeleyDbStorageProvider(File parentDirectory) {
 		if (!parentDirectory.exists()) {
 			if (!parentDirectory.mkdirs()) {
@@ -70,6 +69,54 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 			}
 		}
 		_parentDirectory = parentDirectory;
+	}
+
+	public File getParentDirectory() {
+		return _parentDirectory;
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		if (_environment != null) {
+			_environment.close();
+			cleanDirectory();
+		}
+	}
+
+	/**
+	 * Cleans the parent directory of this storage provider. This action will
+	 * delete all previous collection storages made in this directory, and thus
+	 * it should only be invoked either before any collections has been made or
+	 * when all collections are ensured to be unused.
+	 */
+	public void cleanDirectory() {
+		File[] directories = _parentDirectory.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.startsWith(DIRECTORY_PREFIX);
+			}
+		});
+		for (File directory : directories) {
+			delete(directory);
+		}
+	}
+
+	/**
+	 * Recursively deletes a directory and all it's files
+	 * 
+	 * @param file
+	 */
+	private void delete(File file) {
+		if (file.isDirectory()) {
+			File[] children = file.listFiles();
+			for (File child : children) {
+				delete(child);
+			}
+		}
+		if (!file.delete()) {
+			logger.warn("Unable to clean/delete file: {}", file);
+		}
 	}
 
 	public Object createProvidedCollection(ProvidedPropertyDescriptor providedDescriptor) {
@@ -89,7 +136,7 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		}
 	}
 
-	private Environment getEnvironment() throws DatabaseException {
+	protected Environment getEnvironment() throws DatabaseException {
 		if (_environment == null) {
 			EnvironmentConfig config = new EnvironmentConfig();
 			config.setAllowCreate(true);
@@ -103,8 +150,7 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		if (_targetDir == null) {
 			while (_targetDir == null) {
 				try {
-					File candidateDir = new File(_parentDirectory.getAbsolutePath() + File.separatorChar + "analyzerBeans_"
-							+ UUID.randomUUID().toString());
+					File candidateDir = new File(_parentDirectory, DIRECTORY_PREFIX + UUID.randomUUID().toString());
 					if (!candidateDir.exists() && candidateDir.mkdir()) {
 						_targetDir = candidateDir;
 						_deleteOnExit = true;
@@ -146,8 +192,8 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	}
 
 	@Override
-	public <E> List<E> createList(Class<E> valueType) throws IllegalStateException {
-		Map<Integer, E> map = createMap(Integer.class, valueType);
+	public <E> BerkeleyDbList<E> createList(Class<E> valueType) throws IllegalStateException {
+		BerkeleyDbMap<Integer, E> map = createMap(Integer.class, valueType);
 
 		// Berkeley StoredLists are non-functional!
 		// return new StoredList<E>(createDatabase(), valueBinding, true);
@@ -156,7 +202,7 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	}
 
 	@Override
-	public <E> Set<E> createSet(Class<E> valueType) throws IllegalStateException {
+	public <E> BerkeleyDbSet<E> createSet(Class<E> valueType) throws IllegalStateException {
 		try {
 			Database database = createDatabase();
 			StoredKeySet set = new StoredKeySet(database, createBinding(valueType), true);
@@ -167,7 +213,7 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	}
 
 	@Override
-	public <K, V> Map<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
+	public <K, V> BerkeleyDbMap<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
 		try {
 			final EntryBinding keyBinding = createBinding(keyType);
 			final EntryBinding valueBinding = createBinding(valueType);

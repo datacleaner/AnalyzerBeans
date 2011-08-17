@@ -519,7 +519,12 @@
 		</sequence>
 	</complexType>
 
-	<complexType name="berkeleyDbStorageProviderType" />
+	<complexType name="berkeleyDbStorageProviderType">
+		<sequence>
+			<element name="clean-directory-on-startup" type="boolean"
+				minOccurs="0" maxOccurs="1" default="false" />
+		</sequence>
+	</complexType>
 
 	<complexType name="multithreadedTaskrunnerType">
 		<attribute name="max-threads" type="short" use="optional">

@@ -30,15 +30,21 @@ import java.util.Map;
  */
 final class BerkeleyDbList<E> extends AbstractList<E> implements List<E> {
 
-	private final Map<Integer, E> _wrappedMap;
+	private final BerkeleyDbMap<Integer, E> _wrappedMap;
 
 	public Map<Integer, E> getWrappedMap() {
 		return _wrappedMap;
 	}
 
-	public BerkeleyDbList(Map<Integer, E> map) {
+	public BerkeleyDbList(BerkeleyDbMap<Integer, E> map) {
 		super();
 		_wrappedMap = map;
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		_wrappedMap.finalize();
 	}
 	
 	@Override
