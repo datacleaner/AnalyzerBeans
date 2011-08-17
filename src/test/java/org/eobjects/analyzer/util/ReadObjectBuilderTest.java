@@ -43,7 +43,7 @@ public class ReadObjectBuilderTest extends TestCase {
 		assertEquals("JdbcDatastore[name=my_jdbc_connection,url=jdbc:hsqldb:res:metamodel]", list.get(0).toString());
 		assertEquals("DbaseDatastore[name=my_dbase]", list.get(1).toString());
 		assertEquals(
-				"CsvDatastore[name=my_csv, filename=src/test/resources/employees.csv, quoteChar='\"', separatorChar=',', encoding=null]",
+				"CsvDatastore[name=my_csv, filename=src/test/resources/employees.csv, quoteChar='\"', separatorChar=',', encoding=null, headerLineNumber=0]",
 				list.get(2).toString());
 		assertEquals("ExcelDatastore[name=my_xml]", list.get(3).toString());
 		assertEquals("OdbDatastore[name=my_odb]", list.get(4).toString());
