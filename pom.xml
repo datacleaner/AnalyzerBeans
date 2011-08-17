@@ -14,7 +14,7 @@
 	</description>
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
-		<metamodel.version>2.0-RC3-SNAPSHOT</metamodel.version>
+		<metamodel.version>2.0</metamodel.version>
 		<sshwagon.version>1.0-beta-7</sshwagon.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
