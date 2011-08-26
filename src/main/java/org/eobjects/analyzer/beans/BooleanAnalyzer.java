@@ -89,16 +89,12 @@ public class BooleanAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerRes
 	@Override
 	public void run(InputRow row, int distinctCount) {
 		Boolean[] values = new Boolean[_columns.length];
-		int numTrue = 0;
 		for (int i = 0; i < values.length; i++) {
 			InputColumn<Boolean> col = _columns[i];
 			Boolean value = row.getValue(col);
 			BooleanAnalyzerColumnDelegate delegate = _columnDelegates.get(col);
 			values[i] = value;
 			delegate.run(value, row, distinctCount);
-			if (value != null && value.booleanValue()) {
-				numTrue++;
-			}
 		}
 
 		// collect all combinations of booleans
