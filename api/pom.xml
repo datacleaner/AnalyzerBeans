@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>AnalyzerBeans-api</artifactId>
+	<url>http://analyzerbeans.eobjects.org</url>
+	<parent>
+		<groupId>org.eobjects.analyzerbeans</groupId>
+		<artifactId>AnalyzerBeans</artifactId>
+		<version>0.7-SNAPSHOT</version>
+	</parent>
+	<dependencies>
+		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-core</artifactId>
+			<version>${metamodel.version}</version>
+		</dependency>
+		
+		<!-- JSR 330: Dependency Injection -->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+
+		<!-- Logging dependencies -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		
+	</dependencies>
+</project>
