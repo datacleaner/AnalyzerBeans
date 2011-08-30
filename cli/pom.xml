@@ -9,6 +9,7 @@
 		<version>0.7-SNAPSHOT</version>
 	</parent>
 	<build>
+		<finalName>AnalyzerBeans</finalName>
 		<plugins>
 			<plugin>
 				<!-- make the jar file executable when dependencies are available in 
