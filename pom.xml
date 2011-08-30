@@ -87,7 +87,6 @@
 		</site>
 	</distributionManagement>
 	<build>
-		<finalName>AnalyzerBeans</finalName>
 		<plugins>
 			<plugin>
 				<!-- Ensures java 6 compatibility -->
