@@ -17,6 +17,12 @@
 	</repositories>
 	<dependencies>
 		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-api</artifactId>
+			<version>0.7-SNAPSHOT</version>
+		</dependency>
+	
+		<dependency>
 			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-full</artifactId>
 			<version>${metamodel.version}</version>
