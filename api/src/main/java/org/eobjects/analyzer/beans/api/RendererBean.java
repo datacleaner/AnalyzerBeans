@@ -25,8 +25,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.eobjects.analyzer.result.renderer.RendererFactory;
-
 /**
  * Annotation used to mark a class as a renderer. Mostly renderers are used for
  * AnalyzerResults, but can also be used as a UI representation of eg.
@@ -41,10 +39,10 @@ import org.eobjects.analyzer.result.renderer.RendererFactory;
  * fitting output type defined by the Renderer interface.
  * 
  * The configuration of renderer beans are not standardized since they target
- * very different situations. A {@link RendererFactory} is used to retrieve
+ * very different situations. A RendererFactory is used to retrieve
  * perform instantiation and initialization of a renderer, so any life cycle
  * steps pertaining to renderer initialization and more is dependent on the
- * usage of the {@link RendererFactory}.
+ * usage of the RendererFactory.
  * 
  * @see RenderingFormat
  * @see Renderer

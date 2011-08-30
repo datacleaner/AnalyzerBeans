@@ -26,6 +26,7 @@
 		of business logic, configurability, type-safety and super-fast execution.</description>
 	<packaging>pom</packaging>
 	<modules>
+		<module>api</module>
 		<module>core</module>
 		<module>cli</module>
 	</modules>

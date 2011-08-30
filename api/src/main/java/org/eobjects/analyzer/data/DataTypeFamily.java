@@ -22,8 +22,6 @@ package org.eobjects.analyzer.data;
 import java.lang.reflect.Type;
 import java.util.Date;
 
-import org.eobjects.analyzer.util.ReflectionUtils;
-
 /**
  * An enum with high-level data types. The enum values represent the valid type
  * parameters for InputColumn and hence the valid types that can be used to
@@ -73,17 +71,20 @@ public enum DataTypeFamily {
 	}
 
 	public static DataTypeFamily valueOf(Type javaDataType) {
-		if (ReflectionUtils.isString(javaDataType)) {
-			return STRING;
-		}
-		if (ReflectionUtils.isBoolean(javaDataType)) {
-			return BOOLEAN;
-		}
-		if (ReflectionUtils.isNumber(javaDataType)) {
-			return NUMBER;
-		}
-		if (ReflectionUtils.isDate(javaDataType)) {
-			return DATE;
+		if (javaDataType instanceof Class) {
+			Class<?> cls = (Class<?>) javaDataType;
+			if (String.class.isAssignableFrom(cls)) {
+				return STRING;
+			}
+			if (Boolean.class.isAssignableFrom(cls) || boolean.class.isAssignableFrom(cls)) {
+				return BOOLEAN;
+			}
+			if (Number.class.isAssignableFrom(cls)) {
+				return NUMBER;
+			}
+			if (Date.class.isAssignableFrom(cls)) {
+				return DATE;
+			}
 		}
 		return UNDEFINED;
 	}

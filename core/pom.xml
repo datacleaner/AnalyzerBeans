@@ -153,13 +153,6 @@
 			<version>3.2.76</version>
 		</dependency>
 
-		<!-- JSR 330: Dependency Injection -->
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-			<version>1</version>
-		</dependency>
-
 		<!-- Command line args parsing -->
 		<dependency>
 			<groupId>args4j</groupId>
@@ -168,11 +161,6 @@
 		</dependency>
 
 		<!-- Logging dependencies -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
