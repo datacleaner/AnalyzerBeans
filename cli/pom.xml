@@ -52,6 +52,7 @@
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-core</artifactId>
+			<version>0.7-SNAPSHOT</version>
 		</dependency>
 		
 		<!-- Command line args parsing -->
