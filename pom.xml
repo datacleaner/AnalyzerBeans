@@ -28,6 +28,8 @@
 	<modules>
 		<module>api</module>
 		<module>core</module>
+		<module>components</module>
+		<module>env</module>
 		<module>cli</module>
 	</modules>
 	<organization>
