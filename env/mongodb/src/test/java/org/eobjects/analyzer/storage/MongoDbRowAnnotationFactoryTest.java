@@ -41,8 +41,10 @@ public class MongoDbRowAnnotationFactoryTest extends TestCase {
 		super.setUp();
 		try {
 			db = new Mongo().getDB("analyzerbeans");
-		} catch (MongoInternalException e) {
+			assertTrue(db.isAuthenticated());
+		} catch (Throwable e) {
 			e.printStackTrace();
+			db = null;
 		}
 	}
 
