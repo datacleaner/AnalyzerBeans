@@ -75,6 +75,11 @@
 			<artifactId>AnalyzerBeans-xml-config</artifactId>
 			<version>0.7-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-el</artifactId>
+			<version>0.7-SNAPSHOT</version>
+		</dependency>
 		
 		<!-- Command line args parsing -->
 		<dependency>

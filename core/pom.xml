@@ -104,13 +104,6 @@
 			<version>1.1.0</version>
 		</dependency>
 
-		<!-- Used for EL support in input columns and transformers -->
-		<dependency>
-			<groupId>de.odysseus.juel</groupId>
-			<artifactId>juel</artifactId>
-			<version>2.1.3</version>
-		</dependency>
-
 		<!-- Used for classpath scanning. Required if the ClasspathScanDescriptorProvider 
 			is used -->
 		<dependency>
