@@ -7,6 +7,7 @@
 		<version>0.7-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-cli</artifactId>
+	<description>Command-Line Interface (CLI) for AnalyzerBeans</description>
 	<build>
 		<finalName>AnalyzerBeans</finalName>
 		<plugins>

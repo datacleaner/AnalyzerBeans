@@ -7,7 +7,7 @@
 		<version>0.7-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-components</artifactId>
-	<description></description>
+	<description>Parent for all additional components to AnalyzerBeans. Child modules represent optional components that typically require additional dependencies, which is why they have been separated for the sake of dependency mangement and flexibility in application composition.</description>
 	<packaging>pom</packaging>
 	<modules>
 		<module>scala</module>
