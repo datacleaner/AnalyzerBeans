@@ -26,6 +26,6 @@ import org.junit.Ignore;
 public final class TestHelper {
 
 	public static JdbcDatastore createSampleDatabaseDatastore(String name) {
-		return new JdbcDatastore(name, "jdbc:hsqldb:file:../cli/examples/orderdb;readonly=true", "org.hsqldb.jdbcDriver");
+		return new JdbcDatastore(name, "jdbc:hsqldb:file:../../cli/examples/orderdb;readonly=true", "org.hsqldb.jdbcDriver");
 	}
 }

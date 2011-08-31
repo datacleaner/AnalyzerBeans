@@ -52,7 +52,6 @@ import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.test.TestHelper;
-
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.util.FileHelper;
 
@@ -89,7 +88,7 @@ public class JaxbJobWriterTest extends TestCase {
 				.replace(new DatastoreCatalogImpl(ds));
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(ds);
-
+	
 		DateGapAnalyzer dga = ajb.addRowProcessingAnalyzer(
 				DateGapAnalyzer.class).getConfigurableBean();
 		Column orderDateColumn = ds.getDataContextProvider()

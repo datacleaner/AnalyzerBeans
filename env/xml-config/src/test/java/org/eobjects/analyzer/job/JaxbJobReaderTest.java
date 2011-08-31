@@ -36,10 +36,13 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
@@ -62,9 +65,13 @@ import org.eobjects.metamodel.util.ToStringComparator;
 
 public class JaxbJobReaderTest extends TestCase {
 
+	private final DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
+			.scanPackage("org.eobjects.analyzer.beans", true).scanPackage(
+					"org.eobjects.analyzer.result", true);
+	private final DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(
+			TestHelper.createSampleDatabaseDatastore("my database"));
 	private final AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl()
-			.replace(new DatastoreCatalogImpl(TestHelper
-					.createSampleDatabaseDatastore("my database")));
+			.replace(datastoreCatalog).replace(descriptorProvider);
 
 	public void testReadComponentNames() throws Exception {
 		JobReader<InputStream> reader = new JaxbJobReader(conf);
@@ -251,8 +258,8 @@ public class JaxbJobReaderTest extends TestCase {
 				"src/test/resources/example-job-compare-tables.xml"));
 		AnalysisJob analysisJob = builder.toAnalysisJob();
 
-		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(
-				conf).run(analysisJob);
+		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf)
+				.run(analysisJob);
 		List<AnalyzerResult> results = resultFuture.getResults();
 		assertEquals(1, results.size());
 
@@ -345,8 +352,8 @@ public class JaxbJobReaderTest extends TestCase {
 				Arrays.toString(builder.getAnalyzerJobBuilders().get(0)
 						.toAnalyzerJob().getInput()));
 
-		List<AnalyzerResult> results = new AnalysisRunnerImpl(conf)
-				.run(builder.toAnalysisJob()).getResults();
+		List<AnalyzerResult> results = new AnalysisRunnerImpl(conf).run(
+				builder.toAnalysisJob()).getResults();
 		assertEquals(1, results.size());
 		CrosstabResult crosstabResult = (CrosstabResult) results.get(0);
 
@@ -424,7 +431,8 @@ public class JaxbJobReaderTest extends TestCase {
 		CsvDatastore datastore = new CsvDatastore("date-datastore",
 				"src/test/resources/example-dates.csv");
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
-				.replace(new DatastoreCatalogImpl(datastore));
+				.replace(new DatastoreCatalogImpl(datastore)).replace(
+						descriptorProvider);
 		JaxbJobReader reader = new JaxbJobReader(configuration);
 		File file = new File("src/test/resources/example-job-variables.xml");
 		assertTrue(file.exists());
