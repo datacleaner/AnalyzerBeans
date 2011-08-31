@@ -6,7 +6,7 @@
 		<artifactId>AnalyzerBeans-env</artifactId>
 		<version>0.7-SNAPSHOT</version>
 	</parent>
-	<artifactId>AnalyzerBeans-xml</artifactId>
+	<artifactId>AnalyzerBeans-xml-config</artifactId>
 	<description>Reader of XML based configuration and job files</description>
 	<dependencies>
 		<dependency>

@@ -14,6 +14,6 @@
 		<module>berkeleydb</module>
 		<module>h2</module>
 		<module>ejb</module>
-		<module>xml</module>
+		<module>xml-config</module>
 	</modules>
 </project>
