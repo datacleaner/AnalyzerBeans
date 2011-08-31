@@ -27,6 +27,8 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
@@ -37,9 +39,10 @@ import org.eobjects.analyzer.result.ValueDistributionResult;
 public class MergeAndExpressionBasedInputColumnsTest extends TestCase {
 
 	public void testScenario() throws Throwable {
-		CsvDatastore datastore = new CsvDatastore("my database", "src/test/resources/example-name-lengths.csv");
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage("org.eobjects.analyzer.beans", true);
+		CsvDatastore datastore = new CsvDatastore("my database", "../../core/src/test/resources/example-name-lengths.csv");
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
-				datastore));
+				datastore)).replace(descriptorProvider);
 		AnalysisJob job = new JaxbJobReader(configuration).read(new FileInputStream(
 				"src/test/resources/example-job-merged-fixed-values.xml"));
 

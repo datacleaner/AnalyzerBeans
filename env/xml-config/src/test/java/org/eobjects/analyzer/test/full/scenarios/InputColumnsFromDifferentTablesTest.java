@@ -26,6 +26,8 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
@@ -41,13 +43,19 @@ import org.eobjects.analyzer.test.TestHelper;
 public class InputColumnsFromDifferentTablesTest extends TestCase {
 
 	public void testScenario() throws Exception {
-		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(TestHelper
-				.createSampleDatabaseDatastore("my database")));
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
+				.scanPackage("org.eobjects.analyzer.beans", true);
+		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl()
+				.replace(
+						new DatastoreCatalogImpl(TestHelper
+								.createSampleDatabaseDatastore("my database")))
+				.replace(descriptorProvider);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(conf);
 
-		AnalysisJobBuilder jobBuilder = new JaxbJobReader(conf).create(new File(
-				"src/test/resources/example-job-input-columns-from-different-tables.xml"));
+		AnalysisJobBuilder jobBuilder = new JaxbJobReader(conf)
+				.create(new File(
+						"src/test/resources/example-job-input-columns-from-different-tables.xml"));
 
 		try {
 			runner.run(jobBuilder.toAnalysisJob());

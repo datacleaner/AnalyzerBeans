@@ -28,6 +28,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
@@ -38,11 +39,14 @@ import org.eobjects.analyzer.result.StringAnalyzerResult;
 public class ComponentsWithoutInputColumnsTest extends TestCase {
 
 	public void testScenario() throws Throwable {
-		CsvDatastore datastore = new CsvDatastore("my database", "src/test/resources/example-name-lengths.csv");
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
-				datastore));
-		AnalysisJob job = new JaxbJobReader(configuration).read(new FileInputStream(
-				"src/test/resources/example-job-components-without-inputcolumns.xml"));
+		CsvDatastore datastore = new CsvDatastore("my database",
+				"../../core/src/test/resources/example-name-lengths.csv");
+		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage("org.eobjects.analyzer.beans", true);
+		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
+				.replace(new DatastoreCatalogImpl(datastore)).replace(descriptorProvider);
+		AnalysisJob job = new JaxbJobReader(configuration)
+				.read(new FileInputStream(
+						"src/test/resources/example-job-components-without-inputcolumns.xml"));
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 		AnalysisResultFuture resultFuture = runner.run(job);
@@ -51,10 +55,12 @@ public class ComponentsWithoutInputColumnsTest extends TestCase {
 			throw resultFuture.getErrors().get(0);
 		}
 
-		InputColumn<?>[] input = job.getAnalyzerJobs().iterator().next().getInput();
+		InputColumn<?>[] input = job.getAnalyzerJobs().iterator().next()
+				.getInput();
 		assertEquals(4, input.length);
 
-		StringAnalyzerResult result = (StringAnalyzerResult) resultFuture.getResults().get(0);
+		StringAnalyzerResult result = (StringAnalyzerResult) resultFuture
+				.getResults().get(0);
 		for (int i = 0; i < input.length; i++) {
 			assertEquals(5, result.getRowCount(input[i]));
 		}

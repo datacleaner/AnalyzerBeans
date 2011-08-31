@@ -29,7 +29,10 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -45,13 +48,18 @@ import org.eobjects.analyzer.test.TestHelper;
 public class AnalyzerJobPartitioningTest extends TestCase {
 
 	public void testScenario() throws Exception {
-		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(TestHelper
-				.createSampleDatabaseDatastore("my database")));
+		DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(
+				TestHelper.createSampleDatabaseDatastore("my database"));
+		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider()
+				.scanPackage("org.eobjects.analyzer.beans", true);
+		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl()
+				.replace(datastoreCatalog).replace(descriptorProvider);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(conf);
 
-		AnalysisJobBuilder jobBuilder = new JaxbJobReader(conf).create(new File(
-				"src/test/resources/example-job-partitioning.xml"));
+		AnalysisJobBuilder jobBuilder = new JaxbJobReader(conf)
+				.create(new File(
+						"src/test/resources/example-job-partitioning.xml"));
 
 		AnalysisJob analysisJob = jobBuilder.toAnalysisJob();
 		assertEquals(6, analysisJob.getAnalyzerJobs().size());
@@ -77,23 +85,34 @@ public class AnalyzerJobPartitioningTest extends TestCase {
 		assertEquals(4, vdResults);
 		assertEquals(2, saResults.size());
 
-		final int dimensionIndex = saResults.get(0).getCrosstab().getDimensionIndex("Column");
+		final int dimensionIndex = saResults.get(0).getCrosstab()
+				.getDimensionIndex("Column");
 
 		Collections.sort(saResults, new Comparator<CrosstabResult>() {
 			@Override
 			public int compare(CrosstabResult o1, CrosstabResult o2) {
-				int count1 = o1.getCrosstab().getDimension(dimensionIndex).getCategoryCount();
-				int count2 = o2.getCrosstab().getDimension(dimensionIndex).getCategoryCount();
+				int count1 = o1.getCrosstab().getDimension(dimensionIndex)
+						.getCategoryCount();
+				int count2 = o2.getCrosstab().getDimension(dimensionIndex)
+						.getCategoryCount();
 				return count1 - count2;
 			}
 		});
 
-		String[] resultLines1 = new CrosstabTextRenderer().render(saResults.get(0)).split("\n");
-		assertEquals("                                      CUSTOMERNAME ", resultLines1[0]);
-		assertEquals("Row count                                      122 ", resultLines1[1]);
+		String[] resultLines1 = new CrosstabTextRenderer().render(
+				saResults.get(0)).split("\n");
+		assertEquals("                                      CUSTOMERNAME ",
+				resultLines1[0]);
+		assertEquals("Row count                                      122 ",
+				resultLines1[1]);
 
-		String[] resultLines2 = new CrosstabTextRenderer().render(saResults.get(1)).split("\n");
-		assertEquals("                                      FIRSTNAME  LASTNAME     EMAIL ", resultLines2[0]);
-		assertEquals("Row count                                    23        23        23 ", resultLines2[1]);
+		String[] resultLines2 = new CrosstabTextRenderer().render(
+				saResults.get(1)).split("\n");
+		assertEquals(
+				"                                      FIRSTNAME  LASTNAME     EMAIL ",
+				resultLines2[0]);
+		assertEquals(
+				"Row count                                    23        23        23 ",
+				resultLines2[1]);
 	}
 }

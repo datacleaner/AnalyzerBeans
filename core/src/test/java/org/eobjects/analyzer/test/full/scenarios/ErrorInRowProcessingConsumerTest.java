@@ -35,7 +35,6 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
@@ -90,8 +89,6 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
 		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(taskRunner).replace(
 				new DatastoreCatalogImpl(datastore));
-		ClasspathScanDescriptorProvider descriptorProvider = (ClasspathScanDescriptorProvider) conf.getDescriptorProvider();
-		descriptorProvider.addAnalyzerClass(ErrornousAnalyzer.class);
 
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(datastore);
