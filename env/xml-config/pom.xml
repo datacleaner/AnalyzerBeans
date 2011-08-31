@@ -14,5 +14,23 @@
 			<artifactId>AnalyzerBeans-core</artifactId>
 			<version>0.7-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-i18n</artifactId>
+			<version>0.7-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-h2</artifactId>
+			<version>0.7-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-berkeleydb</artifactId>
+			<version>0.7-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 </project>
