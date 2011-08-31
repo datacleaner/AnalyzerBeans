@@ -30,7 +30,6 @@ import org.eobjects.analyzer.data.MockInputRow;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.Mongo;
-import com.mongodb.MongoInternalException;
 
 public class MongoDbRowAnnotationFactoryTest extends TestCase {
 
