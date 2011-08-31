@@ -31,7 +31,7 @@ import junit.framework.TestCase;
 public class SimpleDescriptorProviderTest extends TestCase {
 
 	public void testSetBeanClassNames() throws Exception {
-		SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
+		SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider(false);
 
 		assertNull(descriptorProvider.getAnalyzerBeanDescriptorForClass(ValueDistributionAnalyzer.class));
 		assertNull(descriptorProvider.getTransformerBeanDescriptorForClass(ConvertToBooleanTransformer.class));

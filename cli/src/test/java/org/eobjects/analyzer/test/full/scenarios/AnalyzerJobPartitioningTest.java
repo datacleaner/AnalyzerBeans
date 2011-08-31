@@ -28,6 +28,8 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -43,8 +45,8 @@ import org.eobjects.analyzer.test.TestHelper;
 public class AnalyzerJobPartitioningTest extends TestCase {
 
 	public void testScenario() throws Exception {
-		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(TestHelper
-				.createSampleDatabaseDatastore("my database"));
+		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(TestHelper
+				.createSampleDatabaseDatastore("my database")));
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(conf);
 

@@ -20,9 +20,14 @@
 package org.eobjects.analyzer.configuration;
 
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
+import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
+import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
+import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
 
 public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfiguration {
@@ -35,6 +40,35 @@ public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfig
 	private final DatastoreCatalog _datastoreCatalog;
 	private final ReferenceDataCatalog _referenceDataCatalog;
 	private final InjectionManagerFactory _injectionManagerFactory;
+
+	private static StorageProvider defaultStorageProvider() {
+		return new InMemoryStorageProvider();
+	}
+
+	private static TaskRunner defaultTaskRunner() {
+		return new SingleThreadedTaskRunner();
+	}
+
+	private static DescriptorProvider defaultDescriptorProvider() {
+		return new SimpleDescriptorProvider();
+	}
+
+	private static ReferenceDataCatalog defaultReferenceDataCatalog() {
+		return new ReferenceDataCatalogImpl();
+	}
+
+	private static DatastoreCatalog defaultDatastoreCatalog() {
+		return new DatastoreCatalogImpl();
+	}
+
+	/**
+	 * Creates a minimalistic configuration object, mostly suitable for stubbing
+	 * and testing
+	 */
+	public AnalyzerBeansConfigurationImpl() {
+		this(defaultDatastoreCatalog(), defaultReferenceDataCatalog(), defaultDescriptorProvider(), defaultTaskRunner(),
+				defaultStorageProvider());
+	}
 
 	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
 			DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider) {
@@ -70,7 +104,44 @@ public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfig
 		}
 		_injectionManagerFactory = injectionManagerFactory;
 	}
+
+	/**
+	 * Creates a new {@link AnalyzerBeansConfiguration} with a different
+	 * {@link TaskRunner}
+	 * 
+	 * @param taskRunner
+	 * @return
+	 */
+	public AnalyzerBeansConfigurationImpl replace(TaskRunner taskRunner) {
+		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider, taskRunner,
+				_storageProvider);
+	}
+
+	public AnalyzerBeansConfigurationImpl replace(DescriptorProvider descriptorProvider) {
+		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, descriptorProvider, _taskRunner,
+				_storageProvider);
+	}
+
+	public AnalyzerBeansConfigurationImpl replace(DatastoreCatalog datastoreCatalog) {
+		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, _referenceDataCatalog, _descriptorProvider, _taskRunner,
+				_storageProvider);
+	}
+
+	public AnalyzerBeansConfigurationImpl replace(ReferenceDataCatalog referenceDataCatalog) {
+		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, referenceDataCatalog, _descriptorProvider, _taskRunner,
+				_storageProvider);
+	}
+
+	public AnalyzerBeansConfigurationImpl replace(StorageProvider storageProvider) {
+		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
+				_taskRunner, storageProvider);
+	}
 	
+	public AnalyzerBeansConfigurationImpl replace(InjectionManagerFactory injectionManagerFactory) {
+		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
+				_taskRunner, _storageProvider, injectionManagerFactory);
+	}
+
 	@Override
 	public InjectionManagerFactory getInjectionManagerFactory() {
 		return _injectionManagerFactory;

@@ -29,7 +29,6 @@ import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.NumberResult;
 import org.eobjects.analyzer.result.PatternFinderResult;
-import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.test.mock.MockRenderers.BarPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.ConditionalPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.FooPrecedenceRenderer;
@@ -39,8 +38,7 @@ import org.eobjects.metamodel.data.Row;
 public class RendererFactoryTest extends TestCase {
 
 	public void testGetRendererByHierarchyDistance() throws Exception {
-		RendererFactory rendererFactory = new RendererFactory(TestHelper.createAnalyzerBeansConfiguration()
-				.getDescriptorProvider(), null);
+		RendererFactory rendererFactory = new RendererFactory(new ClasspathScanDescriptorProvider().scanPackage("org.eobjects.analyzer.result.renderer", true), null);
 		Renderer<?, ? extends CharSequence> r;
 
 		r = rendererFactory.getRenderer(new NumberResult(1), TextRenderingFormat.class);

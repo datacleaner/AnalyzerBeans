@@ -27,18 +27,13 @@ import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DataContextProvider;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
-import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
@@ -64,19 +59,12 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 
 	public void runScenario() {
 		MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(30);
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner)
-				.addAnalyzerClass(ValueDistributionAnalyzer.class);
-		StorageProvider storageProvider = TestHelper.createStorageProvider();
 
 		ThreadPoolExecutor executorService = (ThreadPoolExecutor) taskRunner.getExecutorService();
 		assertEquals(30, executorService.getMaximumPoolSize());
 		assertEquals(0, executorService.getActiveCount());
 
-		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
-		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
-
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				referenceDataCatalog, descriptorProvider, taskRunner, storageProvider);
+		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
@@ -135,7 +123,7 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 		analysisJobBuilder.close();
 
 		assertFalse(ds.isDataContextProviderOpen());
-		
+
 		taskRunner.shutdown();
 	}
 }

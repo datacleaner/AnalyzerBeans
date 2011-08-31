@@ -31,9 +31,11 @@ import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -72,7 +74,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		// analyzer on the LASTNAME
 		// column
 		datastore = TestHelper.createSampleDatabaseDatastore("mydb");
-		conf = TestHelper.createAnalyzerBeansConfiguration(datastore);
+		conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(datastore));
 		ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(datastore);
 		maxRowsBuilder = ajb.addFilter(MaxRowsFilter.class);

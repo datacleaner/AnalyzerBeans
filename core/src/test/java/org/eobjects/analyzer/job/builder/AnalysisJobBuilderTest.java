@@ -40,7 +40,6 @@ import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.DataTypeFamily;
@@ -48,19 +47,12 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
-import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
-import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
-import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
-import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
@@ -80,14 +72,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		datastore = TestHelper.createSampleDatabaseDatastore("my db");
 		datastores.add(datastore);
 
-		DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(datastores);
-		ReferenceDataCatalog referenceDataCatalog = new ReferenceDataCatalogImpl();
-		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner).scanPackage(
-				"org.eobjects.analyzer.beans", true);
-		StorageProvider storageProvider = TestHelper.createStorageProvider();
-		configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider,
-				taskRunner, storageProvider);
+		configuration = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(datastores));
 
 		analysisJobBuilder = new AnalysisJobBuilder(configuration);
 		analysisJobBuilder.setDatastore("my db");
@@ -255,9 +240,9 @@ public class AnalysisJobBuilderTest extends TestCase {
 	}
 
 	public void testSourceColumnListeners() throws Exception {
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration(TestHelper
-				.createSampleDatabaseDatastore("mydb")));
-		ajb.setDatastore("mydb");
+		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("mydb");
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
+		ajb.setDatastore(datastore);
 
 		SourceColumnChangeListener listener1 = EasyMock.createMock(SourceColumnChangeListener.class);
 		ajb.getSourceColumnListeners().add(listener1);

@@ -29,17 +29,16 @@ import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
-import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
-import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.test.TestHelper;
@@ -89,10 +88,8 @@ public class InjectionManagerImplTest extends TestCase {
 		final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
 		descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(FancyTransformer.class));
 
-		final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl(
-				TestHelper.createDatastoreCatalog(TestHelper.createSampleDatabaseDatastore("orderdb")),
-				TestHelper.createReferenceDataCatalog(), descriptorProvider, new SingleThreadedTaskRunner(),
-				new InMemoryStorageProvider());
+		final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
+				TestHelper.createSampleDatabaseDatastore("orderdb")));
 
 		final AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore("orderdb");
@@ -104,7 +101,7 @@ public class InjectionManagerImplTest extends TestCase {
 
 		final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());
 		assertTrue(result.isSuccessful());
-		
+
 		AnnotatedRowsResult res = (AnnotatedRowsResult) result.getResults().get(0);
 		assertEquals(13, res.getRowCount());
 		assertNotNull(listRef.get());

@@ -19,31 +19,31 @@
  */
 package org.eobjects.analyzer.connection;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
 
 public class UsageAwareDatastoreTest extends TestCase {
 
 	public void testSerializationAndDeserializationOfAllDatastoreTypes() throws Exception {
-		JaxbConfigurationReader reader = new JaxbConfigurationReader();
-		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-all-datastore-types.xml"));
-		DatastoreCatalog datastoreCatalog = configuration.getDatastoreCatalog();
+		List<UsageAwareDatastore> datastores = new ArrayList<UsageAwareDatastore>();
+		datastores.add(new AccessDatastore("access", "bar.mdb"));
+		datastores.add(new CsvDatastore("csv", "bar.csv"));
+		datastores.add(new DbaseDatastore("dbase", "bar.dbf"));
+		datastores.add(new ExcelDatastore("excel", "bar.xls"));
+		datastores.add(new JdbcDatastore("jdbc", "url"));
+		datastores.add(new FixedWidthDatastore("fixedwidth", "foo.dat", "UTF8", new int[] { 1, 2, 3 }));
+		datastores
+				.add(new CompositeDatastore("foo", Arrays.asList(datastores.get(0), datastores.get(1), datastores.get(3))));
 
-		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
-		for (String name : datastoreNames) {
-			Datastore ds = datastoreCatalog.getDatastore(name);
-
-			if (ds instanceof UsageAwareDatastore) {
-				System.out.println("Cloning datastore: " + ds);
-				Object clone = SerializationUtils.clone(ds);
-				assertEquals(ds, clone);
-			}
+		for (UsageAwareDatastore ds : datastores) {
+			System.out.println("Cloning datastore: " + ds);
+			Object clone = SerializationUtils.clone(ds);
+			assertEquals(ds, clone);
 		}
 	}
 }

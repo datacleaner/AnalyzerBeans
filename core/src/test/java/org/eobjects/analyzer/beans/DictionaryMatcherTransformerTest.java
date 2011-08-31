@@ -19,38 +19,83 @@
  */
 package org.eobjects.analyzer.beans;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.transform.DictionaryMatcherTransformer;
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.reference.Dictionary;
+import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.reference.SimpleDictionary;
+import org.eobjects.analyzer.reference.SimpleSynonym;
+import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
+import org.eobjects.analyzer.reference.StringPattern;
+import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.ValueDistributionResult;
-import org.eobjects.analyzer.test.TestHelper;
 
 public class DictionaryMatcherTransformerTest extends TestCase {
 
 	public void testParseAndAssignDictionaries() throws Exception {
+		Collection<Dictionary> dictionaries = new ArrayList<Dictionary>();
+		dictionaries.add(new SimpleDictionary("eobjects.org products", "MetaModel", "DataCleaner", "AnalyzerBeans"));
+		dictionaries.add(new SimpleDictionary("apache products", "commons-lang", "commons-math", "commons-codec",
+				"commons-logging"));
+		dictionaries.add(new SimpleDictionary("logging products", "commons-logging", "log4j", "slf4j", "java.util.Logging"));
+
+		Collection<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
+		synonymCatalogs.add(new SimpleSynonymCatalog("translated terms", new SimpleSynonym("hello", "howdy", "hi", "yo",
+				"hey"), new SimpleSynonym("goodbye", "bye", "see you", "hey")));
+
+		Collection<StringPattern> stringPatterns = new ArrayList<StringPattern>();
+
+		ReferenceDataCatalogImpl ref = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs, stringPatterns);
+
 		Datastore datastore = new CsvDatastore("my database", "src/test/resources/projects.csv");
-		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(datastore);
-		AnalysisJobBuilder job = new JaxbJobReader(configuration).create(new File(
-				"src/test/resources/example-job-dictionary.xml"));
+		AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl();
+		AnalysisJobBuilder job = new AnalysisJobBuilder(conf);
+		job.setDatastore(datastore);
+		job.addSourceColumns("product", "version");
+		TransformerJobBuilder<DictionaryMatcherTransformer> tjb1 = job.addTransformer(DictionaryMatcherTransformer.class);
+		tjb1.setConfiguredProperty(
+				"Dictionaries",
+				new Dictionary[] { ref.getDictionary("eobjects.org products"), ref.getDictionary("apache products"),
+						ref.getDictionary("logging products") });
+		tjb1.addInputColumn(job.getSourceColumnByName("product"));
+		List<MutableInputColumn<?>> outputColumns = tjb1.getOutputColumns();
+		assertEquals(3, outputColumns.size());
+		outputColumns.get(0).setName("eobjects match");
+		outputColumns.get(1).setName("apache match");
+		outputColumns.get(2).setName("logging match");
+
+		TransformerJobBuilder<ConvertToNumberTransformer> tjb2 = job.addTransformer(ConvertToNumberTransformer.class);
+		tjb2.addInputColumn(outputColumns.get(2));
+		tjb2.getOutputColumns().get(0).setName("logging match -> number");
+
+		RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> ajb = job
+				.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
+		ajb.addInputColumns(tjb1.getOutputColumns());
+		ajb.addInputColumns(tjb2.getOutputColumns());
+
 		assertTrue(job.isConfigured());
 
 		AnalysisJob analysisJob = job.toAnalysisJob();
-		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(analysisJob);
+		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(analysisJob);
 		List<AnalyzerResult> results = resultFuture.getResults();
 
 		assertEquals(4, results.size());

@@ -30,7 +30,10 @@ import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -47,8 +50,9 @@ import org.eobjects.analyzer.test.TestHelper;
 public class MergedOutcomeJobBuilderTest extends TestCase {
 
 	public void testSimpleBuildNoColumnMerge() throws Exception {
+		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("mydb");
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
-				TestHelper.createAnalyzerBeansConfiguration(TestHelper.createSampleDatabaseDatastore("mydb")));
+				new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds)));
 
 		analysisJobBuilder.setDatastore("mydb");
 		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
@@ -98,8 +102,8 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
 	}
 
 	public void testRunAnalysis() throws Throwable {
-		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(new CsvDatastore("mydb",
-				"src/test/resources/employees-missing-values.csv"));
+		CsvDatastore ds = new CsvDatastore("mydb", "src/test/resources/employees-missing-values.csv");
+		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds));
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 
 		ajb.setDatastore("mydb");

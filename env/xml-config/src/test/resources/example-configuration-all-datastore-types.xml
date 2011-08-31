@@ -67,7 +67,7 @@
 		<custom-datastore
 			class-name="org.eobjects.analyzer.configuration.SampleCustomDatastore">
 			<property name="Name" value="my_custom" />
-			<property name="Xml file" value="src/test/resources/log4j.xml" />
+			<property name="Xml file" value="pom.xml" />
 			<property name="Description" value="custom" />
 		</custom-datastore>
 

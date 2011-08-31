@@ -24,6 +24,8 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -41,8 +43,8 @@ import org.eobjects.analyzer.test.TestHelper;
 public class DateAndTimeAnalyzerTest extends TestCase {
 
 	public void testOrderFactTable() throws Throwable {
-		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(TestHelper
-				.createSampleDatabaseDatastore("orderdb"));
+		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(TestHelper
+				.createSampleDatabaseDatastore("orderdb")));
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 
 		ajb.setDatastore("orderdb");

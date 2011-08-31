@@ -33,9 +33,9 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 
 	private static final long serialVersionUID = 1L;
 
-	private final List<Datastore> _datastores;
+	private final List<? extends Datastore> _datastores;
 
-	public CompositeDatastore(String name, List<Datastore> datastores) {
+	public CompositeDatastore(String name, List<? extends Datastore> datastores) {
 		super(name);
 		_datastores = datastores;
 	}
@@ -44,7 +44,7 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 		ReadObjectBuilder.create(this, CompositeDatastore.class).readObject(stream);
 	}
 
-	public List<Datastore> getDatastores() {
+	public List<? extends Datastore> getDatastores() {
 		return _datastores;
 	}
 

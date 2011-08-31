@@ -29,18 +29,15 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.descriptors.Descriptors;
-import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
-import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.NumberResult;
-import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.test.TestHelper;
 import org.junit.Ignore;
 
@@ -79,9 +76,6 @@ public class InjectionManagerFactoryTest extends TestCase {
 			}
 		};
 
-		final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
-		descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(FancyTransformer.class));
-
 		final InjectionManagerFactory injectionManagerFactory = new InjectionManagerFactory() {
 			@Override
 			public InjectionManager getInjectionManager(AnalysisJob job) {
@@ -89,10 +83,9 @@ public class InjectionManagerFactoryTest extends TestCase {
 			}
 		};
 
-		final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl(
-				TestHelper.createDatastoreCatalog(TestHelper.createSampleDatabaseDatastore("orderdb")),
-				TestHelper.createReferenceDataCatalog(), descriptorProvider, new SingleThreadedTaskRunner(),
-				new InMemoryStorageProvider(), injectionManagerFactory);
+		final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl().replace(
+				new DatastoreCatalogImpl(TestHelper.createSampleDatabaseDatastore("orderdb"))).replace(
+				injectionManagerFactory);
 
 		final AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore("orderdb");

@@ -49,6 +49,50 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 		return null;
 	}
 
+	/**
+	 * Overridable method for handling (and perhaps discovering) unfound
+	 * analyzer descriptors by class.
+	 * 
+	 * @param analyzerClass
+	 * @return
+	 */
+	protected <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> notFoundAnalyzer(Class<A> analyzerClass) {
+		return null;
+	}
+
+	/**
+	 * Overridable method for handling (and perhaps discovering) unfound
+	 * transformer descriptors by class.
+	 * 
+	 * @param transformerClass
+	 * @return
+	 */
+	protected <A extends Transformer<?>> TransformerBeanDescriptor<A> notFoundTransformer(Class<A> transformerClass) {
+		return null;
+	}
+
+	/**
+	 * Overridable method for handling (and perhaps discovering) unfound
+	 * filter descriptors by class.
+	 * 
+	 * @param filterClass
+	 * @return
+	 */
+	protected FilterBeanDescriptor<?, ?> notFoundFilter(Class<?> filterClass) {
+		return null;
+	}
+
+	/**
+	 * Overridable method for handling (and perhaps discovering) unfound
+	 * renderer descriptors by class.
+	 * 
+	 * @param rendererClass
+	 * @return
+	 */
+	protected RendererBeanDescriptor notFoundRenderer(Class<? extends Renderer<?, ?>> rendererClass) {
+		return null;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public final <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(
@@ -58,7 +102,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 				return (AnalyzerBeanDescriptor<A>) descriptor;
 			}
 		}
-		return null;
+		return notFoundAnalyzer(analyzerBeanClass);
 	}
 
 	@Override
@@ -98,7 +142,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 				return descriptor;
 			}
 		}
-		return null;
+		return notFoundFilter(filterClass);
 	}
 
 	@Override
@@ -108,7 +152,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 				return descriptor;
 			}
 		}
-		return null;
+		return notFoundRenderer(rendererBeanClass);
 	}
 
 	@Override
@@ -126,13 +170,13 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	@SuppressWarnings("unchecked")
 	@Override
 	public final <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
-			Class<T> transformerBeanClass) {
+			Class<T> transformerClass) {
 		for (TransformerBeanDescriptor<?> descriptor : getTransformerBeanDescriptors()) {
-			if (descriptor.getComponentClass() == transformerBeanClass) {
+			if (descriptor.getComponentClass() == transformerClass) {
 				return (TransformerBeanDescriptor<T>) descriptor;
 			}
 		}
-		return null;
+		return notFoundTransformer(transformerClass);
 	}
 
 	@Override

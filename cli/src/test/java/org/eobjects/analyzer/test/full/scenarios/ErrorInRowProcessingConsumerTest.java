@@ -30,7 +30,9 @@ import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
@@ -86,7 +88,8 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		ActivityAwareMultiThreadedTaskRunner taskRunner = new ActivityAwareMultiThreadedTaskRunner();
 
 		Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
-		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(taskRunner, datastore);
+		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(taskRunner).replace(
+				new DatastoreCatalogImpl(datastore));
 		ClasspathScanDescriptorProvider descriptorProvider = (ClasspathScanDescriptorProvider) conf.getDescriptorProvider();
 		descriptorProvider.addAnalyzerClass(ErrornousAnalyzer.class);
 

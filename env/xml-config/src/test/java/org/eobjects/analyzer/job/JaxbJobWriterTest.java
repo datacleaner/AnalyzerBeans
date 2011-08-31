@@ -39,7 +39,9 @@ import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -65,12 +67,15 @@ public class JaxbJobWriterTest extends TestCase {
 	protected void setUp() throws Exception {
 		_metadataFactory = new JaxbJobMetadataFactory() {
 			@Override
-			public JobMetadataType create(AnalysisJob analysisJob) throws Exception {
+			public JobMetadataType create(AnalysisJob analysisJob)
+					throws Exception {
 				JobMetadataType jobMetadata = new JobMetadataType();
 				jobMetadata.setAuthor("John Doe");
 				jobMetadata.setJobVersion("2.0");
-				jobMetadata.setCreatedDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(2010, 11, 12, 13, 48, 0, 0,
-						0));
+				jobMetadata
+						.setCreatedDate(DatatypeFactory.newInstance()
+								.newXMLGregorianCalendar(2010, 11, 12, 13, 48,
+										0, 0, 0));
 				return jobMetadata;
 			}
 		};
@@ -80,19 +85,26 @@ public class JaxbJobWriterTest extends TestCase {
 	@SuppressWarnings("unchecked")
 	public void testNullColumnProperty() throws Exception {
 		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("db");
-		AnalyzerBeansConfiguration conf = TestHelper.createAnalyzerBeansConfiguration(ds);
+		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl()
+				.replace(new DatastoreCatalogImpl(ds));
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(ds);
 
-		DateGapAnalyzer dga = ajb.addRowProcessingAnalyzer(DateGapAnalyzer.class).getConfigurableBean();
-		Column orderDateColumn = ds.getDataContextProvider().getSchemaNavigator().convertToColumn("PUBLIC.ORDERS.ORDERDATE");
-		Column shippedDateColumn = ds.getDataContextProvider().getSchemaNavigator()
+		DateGapAnalyzer dga = ajb.addRowProcessingAnalyzer(
+				DateGapAnalyzer.class).getConfigurableBean();
+		Column orderDateColumn = ds.getDataContextProvider()
+				.getSchemaNavigator()
+				.convertToColumn("PUBLIC.ORDERS.ORDERDATE");
+		Column shippedDateColumn = ds.getDataContextProvider()
+				.getSchemaNavigator()
 				.convertToColumn("PUBLIC.ORDERS.SHIPPEDDATE");
 
 		ajb.addSourceColumns(orderDateColumn, shippedDateColumn);
 
-		dga.setFromColumn((InputColumn<Date>) ajb.getSourceColumnByName("ORDERDATE"));
-		dga.setToColumn((InputColumn<Date>) ajb.getSourceColumnByName("SHIPPEDDATE"));
+		dga.setFromColumn((InputColumn<Date>) ajb
+				.getSourceColumnByName("ORDERDATE"));
+		dga.setToColumn((InputColumn<Date>) ajb
+				.getSourceColumnByName("SHIPPEDDATE"));
 		dga.setSingleDateOverlaps(true);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -105,31 +117,44 @@ public class JaxbJobWriterTest extends TestCase {
 		String[] lines = str.split("\n");
 		assertEquals(27, lines.length);
 
-		assertEquals("<?xml version=_1.0_ encoding=_UTF-8_ standalone=_yes_?>", lines[0]);
-		assertEquals("<job xmlns=_http://eobjects.org/analyzerbeans/job/1.0_>", lines[1]);
+		assertEquals("<?xml version=_1.0_ encoding=_UTF-8_ standalone=_yes_?>",
+				lines[0]);
+		assertEquals("<job xmlns=_http://eobjects.org/analyzerbeans/job/1.0_>",
+				lines[1]);
 		assertEquals("    <job-metadata>", lines[2]);
 		assertEquals("        <job-version>2.0</job-version>", lines[3]);
 		assertEquals("        <author>John Doe</author>", lines[4]);
-		assertEquals("        <created-date>2010-11-12Z</created-date>", lines[5]);
+		assertEquals("        <created-date>2010-11-12Z</created-date>",
+				lines[5]);
 		assertEquals("    </job-metadata>", lines[6]);
 		assertEquals("    <source>", lines[7]);
 		assertEquals("        <data-context ref=_db_/>", lines[8]);
 		assertEquals("        <columns>", lines[9]);
-		assertEquals("            <column path=_PUBLIC.ORDERS.ORDERDATE_ id=_col_0_/>", lines[10]);
-		assertEquals("            <column path=_PUBLIC.ORDERS.SHIPPEDDATE_ id=_col_1_/>", lines[11]);
+		assertEquals(
+				"            <column path=_PUBLIC.ORDERS.ORDERDATE_ id=_col_0_/>",
+				lines[10]);
+		assertEquals(
+				"            <column path=_PUBLIC.ORDERS.SHIPPEDDATE_ id=_col_1_/>",
+				lines[11]);
 		assertEquals("        </columns>", lines[12]);
 		assertEquals("    </source>", lines[13]);
 		assertEquals("    <transformation/>", lines[14]);
 		assertEquals("    <analysis>", lines[15]);
 		assertEquals("        <analyzer>", lines[16]);
-		assertEquals("            <descriptor ref=_Date gap analyzer_/>", lines[17]);
+		assertEquals("            <descriptor ref=_Date gap analyzer_/>",
+				lines[17]);
 		assertEquals("            <properties>", lines[18]);
-		assertEquals("                <property value=_true_ name=_Count intersecting from and to dates as overlaps_/>",
+		assertEquals(
+				"                <property value=_true_ name=_Count intersecting from and to dates as overlaps_/>",
 				lines[19]);
-		assertEquals("                <property value=_true_ name=_Fault tolerant switch from/to dates_/>", lines[20]);
+		assertEquals(
+				"                <property value=_true_ name=_Fault tolerant switch from/to dates_/>",
+				lines[20]);
 		assertEquals("            </properties>", lines[21]);
-		assertEquals("            <input name=_From column_ ref=_col_0_/>", lines[22]);
-		assertEquals("            <input name=_To column_ ref=_col_1_/>", lines[23]);
+		assertEquals("            <input name=_From column_ ref=_col_0_/>",
+				lines[22]);
+		assertEquals("            <input name=_To column_ ref=_col_1_/>",
+				lines[23]);
 		assertEquals("        </analyzer>", lines[24]);
 		assertEquals("    </analysis>", lines[25]);
 		assertEquals("</job>", lines[26]);
@@ -143,11 +168,16 @@ public class JaxbJobWriterTest extends TestCase {
 
 		EasyMock.expect(ds.getName()).andReturn("myds");
 
-		EasyMock.expect(job.getSourceColumns()).andReturn(new ArrayList<InputColumn<?>>());
-		EasyMock.expect(job.getTransformerJobs()).andReturn(new ArrayList<TransformerJob>());
-		EasyMock.expect(job.getFilterJobs()).andReturn(new ArrayList<FilterJob>());
-		EasyMock.expect(job.getMergedOutcomeJobs()).andReturn(new ArrayList<MergedOutcomeJob>());
-		EasyMock.expect(job.getAnalyzerJobs()).andReturn(new ArrayList<AnalyzerJob>());
+		EasyMock.expect(job.getSourceColumns()).andReturn(
+				new ArrayList<InputColumn<?>>());
+		EasyMock.expect(job.getTransformerJobs()).andReturn(
+				new ArrayList<TransformerJob>());
+		EasyMock.expect(job.getFilterJobs()).andReturn(
+				new ArrayList<FilterJob>());
+		EasyMock.expect(job.getMergedOutcomeJobs()).andReturn(
+				new ArrayList<MergedOutcomeJob>());
+		EasyMock.expect(job.getAnalyzerJobs()).andReturn(
+				new ArrayList<AnalyzerJob>());
 
 		EasyMock.replay(job, ds);
 
@@ -160,12 +190,15 @@ public class JaxbJobWriterTest extends TestCase {
 		String[] lines = str.split("\n");
 		assertEquals(14, lines.length);
 
-		assertEquals("<?xml version=_1.0_ encoding=_UTF-8_ standalone=_yes_?>", lines[0]);
-		assertEquals("<job xmlns=_http://eobjects.org/analyzerbeans/job/1.0_>", lines[1]);
+		assertEquals("<?xml version=_1.0_ encoding=_UTF-8_ standalone=_yes_?>",
+				lines[0]);
+		assertEquals("<job xmlns=_http://eobjects.org/analyzerbeans/job/1.0_>",
+				lines[1]);
 		assertEquals("    <job-metadata>", lines[2]);
 		assertEquals("        <job-version>2.0</job-version>", lines[3]);
 		assertEquals("        <author>John Doe</author>", lines[4]);
-		assertEquals("        <created-date>2010-11-12Z</created-date>", lines[5]);
+		assertEquals("        <created-date>2010-11-12Z</created-date>",
+				lines[5]);
 		assertEquals("    </job-metadata>", lines[6]);
 		assertEquals("    <source>", lines[7]);
 		assertEquals("        <data-context ref=_myds_/>", lines[8]);
@@ -179,50 +212,67 @@ public class JaxbJobWriterTest extends TestCase {
 	}
 
 	public void testCompareWithBenchmarkFiles() throws Exception {
-		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration(datastore));
+		JdbcDatastore datastore = TestHelper
+				.createSampleDatabaseDatastore("my db");
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(
+				new AnalyzerBeansConfigurationImpl()
+						.replace(new DatastoreCatalogImpl(datastore)));
 
 		ajb.setDatastore("my db");
 
-		ajb.addSourceColumns("PUBLIC.EMPLOYEES.FIRSTNAME", "PUBLIC.EMPLOYEES.LASTNAME", "PUBLIC.EMPLOYEES.EMAIL");
+		ajb.addSourceColumns("PUBLIC.EMPLOYEES.FIRSTNAME",
+				"PUBLIC.EMPLOYEES.LASTNAME", "PUBLIC.EMPLOYEES.EMAIL");
 
 		InputColumn<?> fnCol = ajb.getSourceColumnByName("FIRSTNAME");
 		InputColumn<?> lnCol = ajb.getSourceColumnByName("LASTNAME");
 		InputColumn<?> emailCol = ajb.getSourceColumnByName("EMAIL");
 
-		RowProcessingAnalyzerJobBuilder<StringAnalyzer> strAnalyzer = ajb.addRowProcessingAnalyzer(StringAnalyzer.class);
+		RowProcessingAnalyzerJobBuilder<StringAnalyzer> strAnalyzer = ajb
+				.addRowProcessingAnalyzer(StringAnalyzer.class);
 		strAnalyzer.addInputColumns(fnCol, lnCol);
 
-		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file1.xml");
+		assertMatchesBenchmark(ajb.toAnalysisJob(),
+				"JaxbJobWriterTest-file1.xml");
 
-		TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb.addTransformer(EmailStandardizerTransformer.class);
+		TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb
+				.addTransformer(EmailStandardizerTransformer.class);
 		tjb.addInputColumn(emailCol);
 		strAnalyzer.addInputColumns(tjb.getOutputColumns());
 
-		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file2.xml");
+		assertMatchesBenchmark(ajb.toAnalysisJob(),
+				"JaxbJobWriterTest-file2.xml");
 
-		FilterJobBuilder<NotNullFilter, ValidationCategory> fjb1 = ajb.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NotNullFilter, ValidationCategory> fjb1 = ajb
+				.addFilter(NotNullFilter.class);
 		fjb1.addInputColumn(fnCol);
 		strAnalyzer.setRequirement(fjb1, "VALID");
 
-		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file3.xml");
+		assertMatchesBenchmark(ajb.toAnalysisJob(),
+				"JaxbJobWriterTest-file3.xml");
 
 		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder1 = ajb
 				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
 		makeCrossPlatformCompatible(patternFinder1);
-		MutableInputColumn<?> usernameColumn = tjb.getOutputColumnByName("Username");
-		patternFinder1.addInputColumn(fnCol).addInputColumn(usernameColumn).getConfigurableBean()
-				.setEnableMixedTokens(false);
+		MutableInputColumn<?> usernameColumn = tjb
+				.getOutputColumnByName("Username");
+		patternFinder1.addInputColumn(fnCol).addInputColumn(usernameColumn)
+				.getConfigurableBean().setEnableMixedTokens(false);
 
-		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file4.xml");
+		assertMatchesBenchmark(ajb.toAnalysisJob(),
+				"JaxbJobWriterTest-file4.xml");
 
-		FilterJobBuilder<SingleWordFilter, ValidationCategory> fjb2 = ajb.addFilter(SingleWordFilter.class);
+		FilterJobBuilder<SingleWordFilter, ValidationCategory> fjb2 = ajb
+				.addFilter(SingleWordFilter.class);
 		fjb2.addInputColumn(usernameColumn);
 
-		MergedOutcomeJobBuilder mergedOutcome = ajb.addMergedOutcomeJobBuilder();
-		mergedOutcome.addMergedOutcome(fjb1, ValidationCategory.INVALID).addInputColumn(fnCol);
-		mergedOutcome.addMergedOutcome(fjb2, ValidationCategory.INVALID).addInputColumn(usernameColumn);
-		MutableInputColumn<?> mergedColumn = mergedOutcome.getOutputColumns().get(0);
+		MergedOutcomeJobBuilder mergedOutcome = ajb
+				.addMergedOutcomeJobBuilder();
+		mergedOutcome.addMergedOutcome(fjb1, ValidationCategory.INVALID)
+				.addInputColumn(fnCol);
+		mergedOutcome.addMergedOutcome(fjb2, ValidationCategory.INVALID)
+				.addInputColumn(usernameColumn);
+		MutableInputColumn<?> mergedColumn = mergedOutcome.getOutputColumns()
+				.get(0);
 		mergedColumn.setName("Merged output column (fn or username)");
 
 		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder2 = ajb
@@ -230,7 +280,8 @@ public class JaxbJobWriterTest extends TestCase {
 		makeCrossPlatformCompatible(patternFinder2);
 		patternFinder2.addInputColumn(mergedColumn);
 
-		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file5.xml");
+		assertMatchesBenchmark(ajb.toAnalysisJob(),
+				"JaxbJobWriterTest-file5.xml");
 
 		mergedOutcome.setName("merge1");
 		tjb.setName("trans1");
@@ -239,7 +290,8 @@ public class JaxbJobWriterTest extends TestCase {
 		patternFinder1.setName("pf 1");
 		patternFinder2.setName("pf 2");
 
-		assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file6.xml");
+		assertMatchesBenchmark(ajb.toAnalysisJob(),
+				"JaxbJobWriterTest-file6.xml");
 	}
 
 	/**
@@ -249,14 +301,16 @@ public class JaxbJobWriterTest extends TestCase {
 	 * 
 	 * @param pfb
 	 */
-	private void makeCrossPlatformCompatible(RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pfb) {
+	private void makeCrossPlatformCompatible(
+			RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pfb) {
 		PatternFinderAnalyzer pf = pfb.getConfigurableBean();
 		pf.setDecimalSeparator('.');
 		pf.setMinusSign('-');
 		pf.setThousandsSeparator(',');
 	}
 
-	private void assertMatchesBenchmark(AnalysisJob analysisJob, String filename) throws Exception {
+	private void assertMatchesBenchmark(AnalysisJob analysisJob, String filename)
+			throws Exception {
 		final File outputFolder = new File("target/test-output/");
 		if (!outputFolder.exists()) {
 			assertTrue("Could not create output folder!", outputFolder.mkdirs());
@@ -266,7 +320,8 @@ public class JaxbJobWriterTest extends TestCase {
 
 		File outputFile = new File(outputFolder, filename);
 
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(outputFile));
+		BufferedOutputStream bos = new BufferedOutputStream(
+				new FileOutputStream(outputFile));
 		_writer.write(analysisJob, bos);
 		bos.flush();
 		bos.close();

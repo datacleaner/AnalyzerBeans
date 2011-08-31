@@ -19,21 +19,46 @@
  */
 package org.eobjects.analyzer.reference;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
+import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.test.TestHelper;
 
 public class AbstractReferenceDataTest extends TestCase {
 
+	private ReferenceDataCatalogImpl referenceDataCatalog;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		if (referenceDataCatalog == null) {
+			JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("my_jdbc_connection");
+
+			List<Dictionary> dictionaries = new ArrayList<Dictionary>();
+			dictionaries.add(new DatastoreDictionary("datastore_dict", "my_jdbc_connection", "EMPLOYEES.LASTNAME"));
+			dictionaries.add(new TextFileDictionary("dict_txt", "src/test/resources/lastnames.txt", "UTF-8"));
+			dictionaries.add(new SimpleDictionary("valuelist_dict", "hello", "hi", "greetings", "godday"));
+
+			List<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
+			synonymCatalogs.add(new TextFileSynonymCatalog("textfile_syn", "src/test/resources/synonym-countries.txt",
+					false, "UTF-8"));
+			synonymCatalogs.add(new DatastoreSynonymCatalog("datastore_syn", ds.getName(), "CUSTOMERS.CUSTOMERNAME",
+					new String[] { "CUSTOMERS.CUSTOMERNUMBER", "CUSTOMERS.PHONE" }));
+
+			List<StringPattern> stringPatterns = new ArrayList<StringPattern>();
+			stringPatterns.add(new RegexStringPattern("regex danish mail", "[a-z]+@[a-z]+\\.dk", true));
+			stringPatterns.add(new SimpleStringPattern("simple email", "aaaa@aaaaa.aa"));
+
+			referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs, stringPatterns);
+		}
+	}
+
 	public void testSerializationAndDeserializationOfDictionaries() throws Exception {
-		JaxbConfigurationReader reader = new JaxbConfigurationReader();
-		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-all-reference-data-types.xml"));
-		ReferenceDataCatalog referenceDataCatalog = configuration.getReferenceDataCatalog();
 
 		String[] dictionaryNames = referenceDataCatalog.getDictionaryNames();
 
@@ -52,11 +77,6 @@ public class AbstractReferenceDataTest extends TestCase {
 	}
 
 	public void testSerializationAndDeserializationOfSynonymCatalogs() throws Exception {
-		JaxbConfigurationReader reader = new JaxbConfigurationReader();
-		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-all-reference-data-types.xml"));
-		ReferenceDataCatalog referenceDataCatalog = configuration.getReferenceDataCatalog();
-
 		String[] synonymCatalogNames = referenceDataCatalog.getSynonymCatalogNames();
 
 		for (String name : synonymCatalogNames) {
@@ -71,11 +91,6 @@ public class AbstractReferenceDataTest extends TestCase {
 	}
 
 	public void testSerializationAndDeserializationOfStringPatterns() throws Exception {
-		JaxbConfigurationReader reader = new JaxbConfigurationReader();
-		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-all-reference-data-types.xml"));
-		ReferenceDataCatalog referenceDataCatalog = configuration.getReferenceDataCatalog();
-
 		String[] patternNames = referenceDataCatalog.getStringPatternNames();
 
 		for (String name : patternNames) {

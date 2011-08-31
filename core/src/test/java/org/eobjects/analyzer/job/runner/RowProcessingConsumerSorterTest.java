@@ -25,6 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.filter.NotNullFilter;
@@ -32,6 +34,7 @@ import org.eobjects.analyzer.beans.filter.SingleWordFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
 import org.eobjects.analyzer.beans.transform.WhitespaceTrimmerTransformer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -48,13 +51,10 @@ import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
-import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.test.mock.MockDataContextProvider;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableTable;
-
-import junit.framework.TestCase;
 
 public class RowProcessingConsumerSorterTest extends TestCase {
 
@@ -74,7 +74,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 	}
 
 	public void testCreateProcessOrderedConsumerListWithMergedOutcomes() throws Exception {
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
 		ajb.setDataContextProvider(new MockDataContextProvider());
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
@@ -122,7 +122,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 	}
 
 	public void testCreateProcessOrderedConsumerListWithFilterDependencies() throws Exception {
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
 		ajb.setDataContextProvider(new MockDataContextProvider());
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
@@ -169,7 +169,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 	}
 
 	public void testCreateProcessOrderedConsumerListChainedTransformers() throws Exception {
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
+		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
 		ajb.addSourceColumn(physicalColumn);
 
 		TransformerJobBuilder<TransformerMock> tjb1 = ajb.addTransformer(TransformerMock.class).addInputColumn(

@@ -23,11 +23,11 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableTable;
@@ -40,7 +40,7 @@ public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		ajb = new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration());
+		ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
 	}
 
 	public void testBuildMultipleJobsForSingleInputAnalyzer() throws Exception {

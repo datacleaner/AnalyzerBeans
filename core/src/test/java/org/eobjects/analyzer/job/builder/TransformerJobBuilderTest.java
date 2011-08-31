@@ -30,6 +30,7 @@ import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
 import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.beans.transform.WhitespaceTrimmerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.ConstantInputColumn;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
@@ -41,7 +42,6 @@ import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
-import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 
@@ -53,7 +53,7 @@ public class TransformerJobBuilderTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		configuration = TestHelper.createAnalyzerBeansConfiguration();
+		configuration = new AnalyzerBeansConfigurationImpl();
 
 		ajb = new AnalysisJobBuilder(configuration);
 
@@ -176,7 +176,7 @@ public class TransformerJobBuilderTest extends TestCase {
 				.ofTransformer(WhitespaceTrimmerTransformer.class);
 
 		TransformerJobBuilder<WhitespaceTrimmerTransformer> builder = new TransformerJobBuilder<WhitespaceTrimmerTransformer>(
-				new AnalysisJobBuilder(TestHelper.createAnalyzerBeansConfiguration()), descriptor, IdGenerator,
+				new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl()), descriptor, IdGenerator,
 				new LinkedList<TransformerChangeListener>());
 
 		MockInputColumn<String> colA = new MockInputColumn<String>("A", String.class);

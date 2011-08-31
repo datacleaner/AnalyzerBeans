@@ -24,22 +24,25 @@ import java.io.FileInputStream;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.result.ValueDistributionResult;
-import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.analyzer.result.StringAnalyzerResult;
 
-public class MergeAndExpressionBasedInputColumnsTest extends TestCase {
+public class ComponentsWithoutInputColumnsTest extends TestCase {
 
 	public void testScenario() throws Throwable {
 		CsvDatastore datastore = new CsvDatastore("my database", "src/test/resources/example-name-lengths.csv");
-		AnalyzerBeansConfiguration configuration = TestHelper.createAnalyzerBeansConfiguration(datastore);
+		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
+				datastore));
 		AnalysisJob job = new JaxbJobReader(configuration).read(new FileInputStream(
-				"src/test/resources/example-job-merged-fixed-values.xml"));
+				"src/test/resources/example-job-components-without-inputcolumns.xml"));
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 		AnalysisResultFuture resultFuture = runner.run(job);
@@ -48,10 +51,12 @@ public class MergeAndExpressionBasedInputColumnsTest extends TestCase {
 			throw resultFuture.getErrors().get(0);
 		}
 
-		ValueDistributionResult result = (ValueDistributionResult) resultFuture.getResults().get(0);
-		assertEquals(7, result.getSingleValueDistributionResult().getCount("REGULAR NAME").intValue());
-		assertEquals(1, result.getSingleValueDistributionResult().getCount("NO NAME").intValue());
-		assertEquals(4, result.getSingleValueDistributionResult().getCount("SHORT NAME").intValue());
-		assertEquals(1, result.getSingleValueDistributionResult().getCount("LONG NAME: christoffer").intValue());
+		InputColumn<?>[] input = job.getAnalyzerJobs().iterator().next().getInput();
+		assertEquals(4, input.length);
+
+		StringAnalyzerResult result = (StringAnalyzerResult) resultFuture.getResults().get(0);
+		for (int i = 0; i < input.length; i++) {
+			assertEquals(5, result.getRowCount(input[i]));
+		}
 	}
 }

@@ -33,11 +33,8 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DataContextProvider;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
-import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
@@ -47,12 +44,9 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.result.ValueDistributionResult;
-import org.eobjects.analyzer.storage.StorageProvider;
-import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
@@ -61,13 +55,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 	public void testScenario() throws Throwable {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		DescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner).scanPackage(
-				"org.eobjects.analyzer.beans", true);
-		StorageProvider storageProvider = TestHelper.createStorageProvider();
-		DatastoreCatalog datastoreCatalog = TestHelper.createDatastoreCatalog();
-		ReferenceDataCatalog referenceDataCatalog = TestHelper.createReferenceDataCatalog();
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl(datastoreCatalog,
-				referenceDataCatalog, descriptorProvider, taskRunner, storageProvider);
+		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
@@ -155,22 +143,20 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		assertEquals("Firstname", vdResult.getColumnName());
 		assertEquals(0, vdResult.getSingleValueDistributionResult().getNullCount());
 		assertEquals(2, vdResult.getSingleValueDistributionResult().getUniqueCount());
-		assertEquals("ValueCountList[[[barack->4]]]", vdResult.getSingleValueDistributionResult().getTopValues()
-				.toString());
+		assertEquals("ValueCountList[[[barack->4]]]", vdResult.getSingleValueDistributionResult().getTopValues().toString());
 
 		vdResult = (ValueDistributionResult) results.get(2);
 		assertEquals("Lastname", vdResult.getColumnName());
 		assertEquals(0, vdResult.getSingleValueDistributionResult().getNullCount());
 		assertEquals(0, vdResult.getSingleValueDistributionResult().getUniqueCount());
-		assertEquals("ValueCountList[[[obama->4], [doe->2]]]", vdResult.getSingleValueDistributionResult()
-				.getTopValues().toString());
+		assertEquals("ValueCountList[[[obama->4], [doe->2]]]", vdResult.getSingleValueDistributionResult().getTopValues()
+				.toString());
 
 		vdResult = (ValueDistributionResult) results.get(3);
 		assertEquals("Middlename", vdResult.getColumnName());
 		assertEquals(4, vdResult.getSingleValueDistributionResult().getNullCount());
 		assertEquals(0, vdResult.getSingleValueDistributionResult().getUniqueCount());
-		assertEquals("ValueCountList[[[hussein->2]]]", vdResult.getSingleValueDistributionResult().getTopValues()
-				.toString());
+		assertEquals("ValueCountList[[[hussein->2]]]", vdResult.getSingleValueDistributionResult().getTopValues().toString());
 
 		vdResult = (ValueDistributionResult) results.get(4);
 		assertEquals("Titulation", vdResult.getColumnName());

@@ -25,7 +25,7 @@ import java.util.Collection;
 
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
-import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +37,7 @@ public class DatastoreSynonymCatalogTest {
 	public void createCsvDataStore() {
 		CsvDatastore csvDatastore = new CsvDatastore("region datastore",
 				"src/test/resources/datastore-synonym-countries.csv");
-		DatastoreCatalog datastoreCatalog = TestHelper.createAnalyzerBeansConfiguration(csvDatastore).getDatastoreCatalog();
+		DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(csvDatastore);
 		_dataStoreBasedSynonymCatalog = new DatastoreSynonymCatalog("my synonym catalog", "region datastore", "region",
 				new String[] { "firstsynonym", "secondsynonym", "thirdsynonym" });
 		_dataStoreBasedSynonymCatalog.init(datastoreCatalog);
