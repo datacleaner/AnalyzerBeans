@@ -8,6 +8,21 @@
 	</parent>
 	<artifactId>AnalyzerBeans-xml-config</artifactId>
 	<description>Reader of XML based configuration and job files</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<configuration>
+					<instrumentation>
+						<excludes>
+							<exclude>org/eobjects/analyzer/**/jaxb/**/*.class</exclude>
+						</excludes>
+					</instrumentation>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
