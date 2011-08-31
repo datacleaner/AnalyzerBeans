@@ -39,7 +39,8 @@ public class BerkeleyDbStorageProviderTest extends TestCase {
 	}
 
 	public void testCreateMap() throws Throwable {
-		BerkeleyDbMap<String, Long> map = sp.createMap(String.class, Long.class);
+		BerkeleyDbMap<String, Long> map = sp
+				.createMap(String.class, Long.class);
 		assertNotNull(map);
 		map.finalize();
 	}
@@ -96,8 +97,11 @@ public class BerkeleyDbStorageProviderTest extends TestCase {
 				result += countDbFiles(file);
 			} else if ("je.lck".equals(file.getName())) {
 				// ignore lock files
+			} else if (file.getName().startsWith(".nfs")) {
+				// ignore .nfs files (sometimes shows up on *nix systems)
 			} else {
 				result++;
+				System.out.print("Found berkeleydb temp file: " + file);
 			}
 		}
 		return result;

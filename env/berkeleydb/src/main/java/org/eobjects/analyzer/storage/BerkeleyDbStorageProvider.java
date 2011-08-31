@@ -65,7 +65,8 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	public BerkeleyDbStorageProvider(File parentDirectory) {
 		if (!parentDirectory.exists()) {
 			if (!parentDirectory.mkdirs()) {
-				throw new IllegalArgumentException("Could not create directory: " + parentDirectory);
+				throw new IllegalArgumentException(
+						"Could not create directory: " + parentDirectory);
 			}
 		}
 		_parentDirectory = parentDirectory;
@@ -115,11 +116,16 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 			}
 		}
 		if (!file.delete()) {
-			logger.warn("Unable to clean/delete file: {}", file);
+			if (!file.isDirectory()) {
+				logger.warn("Unable to clean/delete file: {}", file);
+			} else {
+				logger.debug("Unable to clean/delete directory: {}", file);
+			}
 		}
 	}
 
-	public Object createProvidedCollection(ProvidedPropertyDescriptor providedDescriptor) {
+	public Object createProvidedCollection(
+			ProvidedPropertyDescriptor providedDescriptor) {
 		Type typeArgument = providedDescriptor.getTypeArgument(0);
 		Class<?> clazz1 = (Class<?>) typeArgument;
 		if (providedDescriptor.isList()) {
@@ -150,19 +156,22 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		if (_targetDir == null) {
 			while (_targetDir == null) {
 				try {
-					File candidateDir = new File(_parentDirectory, DIRECTORY_PREFIX + UUID.randomUUID().toString());
+					File candidateDir = new File(_parentDirectory,
+							DIRECTORY_PREFIX + UUID.randomUUID().toString());
 					if (!candidateDir.exists() && candidateDir.mkdir()) {
 						_targetDir = candidateDir;
 						_deleteOnExit = true;
 					}
 				} catch (Exception e) {
-					logger.error("Exception thrown while trying to create targetDir inside tempDir", e);
+					logger.error(
+							"Exception thrown while trying to create targetDir inside tempDir",
+							e);
 					_targetDir = _parentDirectory;
 				}
 			}
 			if (logger.isInfoEnabled()) {
-				logger.info("Using target directory for persistent collections (deleteOnExit=" + _deleteOnExit + "): "
-						+ _targetDir.getAbsolutePath());
+				logger.info("Using target directory for persistent collections (deleteOnExit="
+						+ _deleteOnExit + "): " + _targetDir.getAbsolutePath());
 			}
 			initDeleteOnExit(_targetDir);
 		}
@@ -178,7 +187,8 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 			} else if (file.isFile()) {
 				file.deleteOnExit();
 			} else {
-				logger.warn("Unable to set the deleteOnExit flag on file: " + file);
+				logger.warn("Unable to set the deleteOnExit flag on file: "
+						+ file);
 			}
 		}
 	}
@@ -187,12 +197,14 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		DatabaseConfig databaseConfig = new DatabaseConfig();
 		databaseConfig.setAllowCreate(true);
 		String databaseName = UUID.randomUUID().toString();
-		Database database = getEnvironment().openDatabase(null, databaseName, databaseConfig);
+		Database database = getEnvironment().openDatabase(null, databaseName,
+				databaseConfig);
 		return database;
 	}
 
 	@Override
-	public <E> BerkeleyDbList<E> createList(Class<E> valueType) throws IllegalStateException {
+	public <E> BerkeleyDbList<E> createList(Class<E> valueType)
+			throws IllegalStateException {
 		BerkeleyDbMap<Integer, E> map = createMap(Integer.class, valueType);
 
 		// Berkeley StoredLists are non-functional!
@@ -202,10 +214,12 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	}
 
 	@Override
-	public <E> BerkeleyDbSet<E> createSet(Class<E> valueType) throws IllegalStateException {
+	public <E> BerkeleyDbSet<E> createSet(Class<E> valueType)
+			throws IllegalStateException {
 		try {
 			Database database = createDatabase();
-			StoredKeySet set = new StoredKeySet(database, createBinding(valueType), true);
+			StoredKeySet set = new StoredKeySet(database,
+					createBinding(valueType), true);
 			return new BerkeleyDbSet<E>(getEnvironment(), database, set);
 		} catch (DatabaseException e) {
 			throw new IllegalStateException(e);
@@ -213,19 +227,22 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 	}
 
 	@Override
-	public <K, V> BerkeleyDbMap<K, V> createMap(Class<K> keyType, Class<V> valueType) throws IllegalStateException {
+	public <K, V> BerkeleyDbMap<K, V> createMap(Class<K> keyType,
+			Class<V> valueType) throws IllegalStateException {
 		try {
 			final EntryBinding keyBinding = createBinding(keyType);
 			final EntryBinding valueBinding = createBinding(valueType);
 			final Database database = createDatabase();
-			final StoredMap map = new StoredMap(database, keyBinding, valueBinding, true);
+			final StoredMap map = new StoredMap(database, keyBinding,
+					valueBinding, true);
 			return new BerkeleyDbMap<K, V>(getEnvironment(), database, map);
 		} catch (DatabaseException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	private EntryBinding createBinding(Type type) throws UnsupportedOperationException {
+	private EntryBinding createBinding(Type type)
+			throws UnsupportedOperationException {
 		if (ReflectionUtils.isString(type)) {
 			return new StringBinding();
 		}
@@ -256,7 +273,8 @@ public final class BerkeleyDbStorageProvider implements StorageProvider {
 		if (ReflectionUtils.isByteArray(type)) {
 			return new ByteArrayBinding();
 		}
-		throw new UnsupportedOperationException("Cannot provide collection of type " + type);
+		throw new UnsupportedOperationException(
+				"Cannot provide collection of type " + type);
 	}
 
 	@Override
