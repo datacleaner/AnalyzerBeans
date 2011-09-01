@@ -184,6 +184,7 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<!-- Ignore instructions for m2e (overrides eclipse warning) -->
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
 					<version>1.0.0</version>

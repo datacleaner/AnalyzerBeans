@@ -67,6 +67,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-scala</artifactId>
+			<version>0.7-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-berkeleydb</artifactId>
 			<version>0.7-SNAPSHOT</version>
 		</dependency>
