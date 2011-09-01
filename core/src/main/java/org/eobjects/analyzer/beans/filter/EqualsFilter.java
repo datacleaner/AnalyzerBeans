@@ -45,10 +45,11 @@ import org.eobjects.metamodel.schema.Column;
 public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
 
 	@Configured
+	@Description("Select the column to compare with value(s)")
 	InputColumn<?> column;
 
 	@Configured
-	@Description("Accepted values for inclusion")
+	@Description("Accepted value(s) for inclusion/validation")
 	String[] values;
 
 	private Object[] operands;

@@ -40,6 +40,7 @@ import org.eobjects.metamodel.schema.Column;
 public class NotNullFilter implements QueryOptimizedFilter<ValidationCategory> {
 
 	@Configured
+	@Description("Select columns that should NOT have null values")
 	InputColumn<?>[] columns;
 
 	@Configured

@@ -11,7 +11,7 @@ import org.eobjects.analyzer.beans.api.OutputColumns
 import org.eobjects.analyzer.data.InputRow
 
 @TransformerBean("String length")
-@Description("Counts the length of Strings and create a separate column with this metric.")
+@Description("Counts the length of Strings and creates a separate column with this metric.")
 @Categorized(Array(classOf[StringManipulationCategory]))
 class StringLengthTransformer(col: InputColumn[String]) extends Transformer[Number] {
 
