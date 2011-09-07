@@ -23,10 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.storage.CollectionFactoryImpl;
@@ -139,6 +141,8 @@ public class InjectionManagerImpl implements InjectionManager {
 		final Class<E> baseType = injectionPoint.getBaseType();
 		if (baseType == ReferenceDataCatalog.class) {
 			return (E) _referenceDataCatalog;
+		} else if (baseType == OutputRowCollector.class) {
+			return (E) new ThreadLocalOutputRowCollector();
 		} else if (baseType == DatastoreCatalog.class) {
 			return (E) _datastoreCatalog;
 		} else if (baseType == CollectionFactory.class) {

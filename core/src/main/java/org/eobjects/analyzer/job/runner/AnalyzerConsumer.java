@@ -65,14 +65,14 @@ final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements R
 	}
 
 	@Override
-	public InputRow consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
+	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
 		RowProcessingAnalyzer<?> analyzer = (RowProcessingAnalyzer<?>) _analyzerBeanInstance.getBean();
 		try {
 			analyzer.run(row, distinctCount);
 		} catch (RuntimeException e) {
 			_analysisListener.errorInAnalyzer(_job, _analyzerJob, e);
 		}
-		return row;
+		return new InputRow[] { row };
 	}
 
 	@Override

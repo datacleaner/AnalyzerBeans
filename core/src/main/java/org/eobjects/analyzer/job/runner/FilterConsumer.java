@@ -68,7 +68,7 @@ final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements Row
 	}
 
 	@Override
-	public InputRow consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
+	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
 		Filter<?> filter = _filterBeanInstance.getBean();
 		try {
 			Enum<?> category = filter.categorize(row);
@@ -77,7 +77,7 @@ final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements Row
 		} catch (RuntimeException e) {
 			_analysisListener.errorInFilter(_job, _filterJob, e);
 		}
-		return row;
+		return new InputRow[] { row };
 	}
 
 	@Override

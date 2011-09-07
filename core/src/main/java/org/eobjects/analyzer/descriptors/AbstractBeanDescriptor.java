@@ -131,6 +131,17 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 	public Set<ProvidedPropertyDescriptor> getProvidedProperties() {
 		return Collections.unmodifiableSet(_providedProperties);
 	}
+	
+	@Override
+	public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls) {
+		Set<ProvidedPropertyDescriptor> result = new HashSet<ProvidedPropertyDescriptor>();
+		for (ProvidedPropertyDescriptor descriptor : _providedProperties) {
+			if (ReflectionUtils.is(descriptor.getType(), cls)) {
+				result.add(descriptor);
+			}
+		}
+		return result;
+	}
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {

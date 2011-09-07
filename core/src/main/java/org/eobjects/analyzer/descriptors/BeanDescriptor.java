@@ -92,4 +92,13 @@ public interface BeanDescriptor<B> extends ComponentDescriptor<B> {
 	 * @return a set of provided properties.
 	 */
 	public Set<ProvidedPropertyDescriptor> getProvidedProperties();
+
+	/**
+	 * Gets the provided properties of a particular type in the bean
+	 * 
+	 * @param cls
+	 *            the type of the configured properties
+	 * @return a set of provided properties.
+	 */
+	public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls);
 }

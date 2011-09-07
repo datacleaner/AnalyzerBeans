@@ -79,7 +79,7 @@ public interface RowProcessingConsumer {
 	 * @param outcomes
 	 * @return
 	 */
-	public InputRow consume(InputRow row, int distinctCount, OutcomeSink outcomes);
+	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes);
 
 	/**
 	 * @return the bean instance or null if none is available

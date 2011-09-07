@@ -19,7 +19,9 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.data.InputRow;
@@ -41,43 +43,70 @@ public final class ConsumeRowTask implements Task {
 	private final AnalysisListener _analysisListener;
 	private final AnalysisJob _job;
 	private final AtomicInteger _rowCounter;
-	private final Collection<? extends Outcome> _availableOutcomes;
+	private final Collection<? extends Outcome> _initialOutcomes;
 
-	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, Table table, Row row,
-			AtomicInteger rowCounter, AnalysisJob job, AnalysisListener analysisListener,
-			Collection<? extends Outcome> availableOutcomes) {
+	/**
+	 * 
+	 * @param consumers
+	 * @param table
+	 * @param row
+	 * @param rowCounter
+	 * @param job
+	 * @param analysisListener
+	 * @param initialOutcomes
+	 *            the initial list of available outcomes (if non-empty, this
+	 *            will contain query-optimized outcomes)
+	 */
+	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, Table table, Row row, AtomicInteger rowCounter,
+			AnalysisJob job, AnalysisListener analysisListener, Collection<? extends Outcome> initialOutcomes) {
 		_consumers = consumers;
 		_table = table;
 		_row = row;
 		_rowCounter = rowCounter;
 		_job = job;
 		_analysisListener = analysisListener;
-		_availableOutcomes = availableOutcomes;
+		_initialOutcomes = initialOutcomes;
 	}
 
 	@Override
 	public void execute() {
-		OutcomeSink outcomeSink = new OutcomeSinkImpl(_availableOutcomes);
+		OutcomeSink outcomeSink = new OutcomeSinkImpl(_initialOutcomes);
 
 		final int distinctCount = 1;
 
 		int rowNumber = _rowCounter.addAndGet(distinctCount);
-		InputRow inputRow = new MetaModelInputRow(rowNumber, _row);
+		List<InputRow> inputRows = new ArrayList<InputRow>();
+		inputRows.add(new MetaModelInputRow(rowNumber, _row));
 
 		for (RowProcessingConsumer consumer : _consumers) {
 			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes());
 
 			if (process) {
 				if (consumer.isConcurrent()) {
-					inputRow = consumer.consume(inputRow, distinctCount, outcomeSink);
+					handleConsumer(outcomeSink, distinctCount, inputRows, consumer);
 				} else {
 					synchronized (consumer) {
-						inputRow = consumer.consume(inputRow, distinctCount, outcomeSink);
+						handleConsumer(outcomeSink, distinctCount, inputRows, consumer);
 					}
 				}
 			}
 		}
 		_analysisListener.rowProcessingProgress(_job, _table, rowNumber);
+	}
+
+	private void handleConsumer(OutcomeSink outcomeSink, final int distinctCount, List<InputRow> rows,
+			RowProcessingConsumer consumer) {
+		final List<InputRow> newRows = new ArrayList<InputRow>();
+
+		for (InputRow row : rows) {
+			InputRow[] outputRows = consumer.consume(row, distinctCount, outcomeSink);
+			for (InputRow newRow : outputRows) {
+				newRows.add(newRow);
+			}
+		}
+
+		rows.clear();
+		rows.addAll(newRows);
 	}
 
 }

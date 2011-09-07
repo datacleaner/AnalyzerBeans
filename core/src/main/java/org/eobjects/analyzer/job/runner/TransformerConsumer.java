@@ -19,13 +19,22 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.eobjects.analyzer.beans.api.Concurrent;
+import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.TransformedInputRow;
+import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.TransformerJob;
+import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
+import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector.Listener;
 import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 
 final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
@@ -66,35 +75,100 @@ final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implement
 	}
 
 	@Override
-	public InputRow consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
-		InputColumn<?>[] outputColumns = _transformerJob.getOutput();
+	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
+		final InputColumn<?>[] outputColumns = _transformerJob.getOutput();
 
-		Transformer<?> transformer = _transformerBeanInstance.getBean();
+		final Transformer<?> transformer = _transformerBeanInstance.getBean();
 
-		Object[] outputValues;
+		final List<Object[]> outputValues = new ArrayList<Object[]>();
+
+		final Listener listener = new Listener() {
+			@Override
+			public void onValues(Object[] values) {
+				outputValues.add(values);
+			}
+		};
+
+		registerListener(transformer, listener);
+
 		try {
-			outputValues = transformer.transform(row);
+			outputValues.add(transformer.transform(row));
 		} catch (RuntimeException e) {
 			_analysisListener.errorInTransformer(_job, _transformerJob, e);
-			outputValues = new Object[outputColumns.length];
+			outputValues.add(new Object[outputColumns.length]);
 		}
 
-		assert outputColumns.length == outputValues.length;
+		unregisterListener(transformer);
 
-		TransformedInputRow resultRow;
-		if (row instanceof TransformedInputRow) {
-			// re-use existing transformed input row.
-			resultRow = (TransformedInputRow) row;
+		// remove nulls
+		for (Iterator<Object[]> iterator = outputValues.iterator(); iterator.hasNext();) {
+			Object[] values = iterator.next();
+			if (values == null) {
+				iterator.remove();
+			}
+		}
+
+		final List<InputRow> result = new ArrayList<InputRow>();
+
+		if (outputValues.size() == 1) {
+			final TransformedInputRow resultRow;
+			if (row instanceof TransformedInputRow) {
+				// re-use existing transformed input row.
+				resultRow = (TransformedInputRow) row;
+			} else {
+				resultRow = new TransformedInputRow(row);
+			}
+
+			final Object[] values = outputValues.get(0);
+
+			assert values != null;
+
+			addValuesToRow(resultRow, outputColumns, values);
+			result.add(resultRow);
 		} else {
-			resultRow = new TransformedInputRow(row);
+			for (Object[] values : outputValues) {
+				final TransformedInputRow resultRow = new TransformedInputRow(row);
+
+				addValuesToRow(resultRow, outputColumns, values);
+				result.add(resultRow);
+			}
 		}
 
+		return result.toArray(new InputRow[result.size()]);
+	}
+
+	private void unregisterListener(Transformer<?> transformer) {
+		final Set<ProvidedPropertyDescriptor> outputRowCollectorProperties = _transformerJob.getDescriptor()
+				.getProvidedPropertiesByType(OutputRowCollector.class);
+		for (ProvidedPropertyDescriptor descriptor : outputRowCollectorProperties) {
+			OutputRowCollector outputRowCollector = (OutputRowCollector) descriptor.getValue(transformer);
+			if (outputRowCollector instanceof ThreadLocalOutputRowCollector) {
+				((ThreadLocalOutputRowCollector) outputRowCollector).removeListener();
+			}
+		}
+	}
+
+	private void registerListener(final Transformer<?> transformer, final Listener listener) {
+		final Set<ProvidedPropertyDescriptor> outputRowCollectorProperties = _transformerJob.getDescriptor()
+				.getProvidedPropertiesByType(OutputRowCollector.class);
+		for (ProvidedPropertyDescriptor descriptor : outputRowCollectorProperties) {
+			OutputRowCollector outputRowCollector = (OutputRowCollector) descriptor.getValue(transformer);
+			if (outputRowCollector instanceof ThreadLocalOutputRowCollector) {
+				((ThreadLocalOutputRowCollector) outputRowCollector).setListener(listener);
+			} else {
+				throw new UnsupportedOperationException("Unsupported output row collector type: " + outputRowCollector);
+			}
+		}
+	}
+
+	private void addValuesToRow(TransformedInputRow resultRow, final InputColumn<?>[] outputColumns, Object[] values) {
 		// add output values to row.
+		assert outputColumns.length == values.length;
 		for (int i = 0; i < outputColumns.length; i++) {
-			resultRow.addValue(outputColumns[i], outputValues[i]);
+			Object value = values[i];
+			InputColumn<?> column = outputColumns[i];
+			resultRow.addValue(column, value);
 		}
-
-		return resultRow;
 	}
 
 	@Override

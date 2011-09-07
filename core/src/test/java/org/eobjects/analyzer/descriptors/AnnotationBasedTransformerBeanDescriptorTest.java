@@ -21,11 +21,13 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
 import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.job.tasks.MockMultiRowTransformer;
 
 import junit.framework.TestCase;
 
@@ -56,5 +58,16 @@ public class AnnotationBasedTransformerBeanDescriptorTest extends TestCase {
 		TransformerBeanDescriptor<?> descriptor = Descriptors.ofTransformer(ConcatenatorTransformer.class);
 		assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));
 		assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
+	}
+
+	public void testGetProvidedPropertiesOfType() throws Exception {
+		TransformerBeanDescriptor<MockMultiRowTransformer> descriptor = Descriptors
+				.ofTransformer(MockMultiRowTransformer.class);
+
+		Set<ProvidedPropertyDescriptor> properties = descriptor.getProvidedPropertiesByType(OutputRowCollector.class);
+		assertEquals(1, properties.size());
+		ProvidedPropertyDescriptor property = properties.iterator().next();
+		assertEquals(OutputRowCollector.class, property.getType());
+		assertEquals("outputRowCollector", property.getName());
 	}
 }
