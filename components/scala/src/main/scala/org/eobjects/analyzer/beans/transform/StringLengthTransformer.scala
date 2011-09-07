@@ -16,6 +16,7 @@ import org.eobjects.analyzer.data.InputRow
 class StringLengthTransformer(col: InputColumn[String]) extends Transformer[Number] {
 
   @Configured
+  @Description("Column to compute string lengths from")
   var column: InputColumn[String] = col;
 
   def this() = this(null)
