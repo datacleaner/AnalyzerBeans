@@ -45,7 +45,8 @@ public class ConsumeRowTaskTest extends TestCase {
 	public void testMultiRowTransformer() throws Throwable {
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl();
 
-		AnalysisJob job;
+		final InputColumn<?> countingColumn;
+		final AnalysisJob job;
 
 		// build example job
 		{
@@ -66,7 +67,10 @@ public class ConsumeRowTaskTest extends TestCase {
 			TransformerJobBuilder<MockMultiRowTransformer> multiRowTransformer = builder.addTransformer(
 					MockMultiRowTransformer.class).addInputColumn(numberColumn);
 
-			builder.addRowProcessingAnalyzer(MockAnalyzer.class).addInputColumns(multiRowTransformer.getOutputColumns());
+			List<MutableInputColumn<?>> mockTransformerColumns = multiRowTransformer.getOutputColumns();
+			countingColumn = mockTransformerColumns.get(0);
+			assertEquals("Mock multi row transformer (1)", countingColumn.getName());
+			builder.addRowProcessingAnalyzer(MockAnalyzer.class).addInputColumns(mockTransformerColumns);
 
 			job = builder.toAnalysisJob();
 		}
@@ -87,11 +91,6 @@ public class ConsumeRowTaskTest extends TestCase {
 
 		// we expect 13 rows (3 + 10 + 0)
 		assertEquals(13, list.size());
-		List<InputColumn<?>> inputColumns = list.get(0).getInputColumns();
-		assertEquals(4, inputColumns.size());
-		InputColumn<?> countingColumn = inputColumns.get(2);
-		assertEquals("Mock multi row transformer (1)", countingColumn.getName());
-		assertEquals("Mock multi row transformer (2)", inputColumns.get(3).getName());
 
 		assertEquals(1, list.get(0).getValue(countingColumn));
 		assertEquals(2, list.get(1).getValue(countingColumn));

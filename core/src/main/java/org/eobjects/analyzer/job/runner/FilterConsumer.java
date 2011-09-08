@@ -77,7 +77,7 @@ final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements Row
 		} catch (RuntimeException e) {
 			_analysisListener.errorInFilter(_job, _filterJob, e);
 		}
-		return new InputRow[] { row };
+		return null;
 	}
 
 	@Override

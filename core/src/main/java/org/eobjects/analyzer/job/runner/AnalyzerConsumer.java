@@ -72,7 +72,7 @@ final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements R
 		} catch (RuntimeException e) {
 			_analysisListener.errorInAnalyzer(_job, _analyzerJob, e);
 		}
-		return new InputRow[] { row };
+		return null;
 	}
 
 	@Override

@@ -98,15 +98,24 @@ public final class ConsumeRowTask implements Task {
 			RowProcessingConsumer consumer) {
 		final List<InputRow> newRows = new ArrayList<InputRow>();
 
+		// used for optimization: if output rows aren't modified by consumers
+		// (they return null), then we don't need to rebuild the rows list.
+		boolean outputRowsSame = true;
+
 		for (InputRow row : rows) {
 			InputRow[] outputRows = consumer.consume(row, distinctCount, outcomeSink);
-			for (InputRow newRow : outputRows) {
-				newRows.add(newRow);
+			if (outputRows != null) {
+				outputRowsSame = false;
+				for (InputRow newRow : outputRows) {
+					newRows.add(newRow);
+				}
 			}
 		}
 
-		rows.clear();
-		rows.addAll(newRows);
+		if (!outputRowsSame) {
+			rows.clear();
+			rows.addAll(newRows);
+		}
 	}
 
 }

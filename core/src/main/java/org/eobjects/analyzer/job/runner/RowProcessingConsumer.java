@@ -77,7 +77,8 @@ public interface RowProcessingConsumer {
 	 * @param row
 	 * @param distinctCount
 	 * @param outcomes
-	 * @return
+	 * @return a new set of rows to pass into the processing flow, or null if
+	 *         the rows are unmodified
 	 */
 	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes);
 
