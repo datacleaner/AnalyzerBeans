@@ -55,6 +55,10 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E> implements
 		return _initialName;
 	}
 
+	public void setInitialName(String initialName) {
+		_initialName = initialName;
+	}
+
 	@Override
 	public void setName(String name) {
 		_name = name;

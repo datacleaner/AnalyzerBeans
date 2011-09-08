@@ -192,17 +192,19 @@ public class TransformerJobBuilderTest extends TestCase {
 				+ "TransformedInputColumn[id=id-2,name=B (trimmed),type=STRING], "
 				+ "TransformedInputColumn[id=id-3,name=C (trimmed),type=STRING]]", outputColumns.toString());
 
+		outputColumns.get(0).setName("Foo A");
+		
 		builder.removeInputColumn(colB);
 
 		outputColumns = builder.getOutputColumns();
 		assertEquals(2, outputColumns.size());
-		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed),type=STRING], "
+		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A,type=STRING], "
 				+ "TransformedInputColumn[id=id-2,name=C (trimmed),type=STRING]]", outputColumns.toString());
 
 		builder.addInputColumn(colB);
 		outputColumns = builder.getOutputColumns();
 		assertEquals(3, outputColumns.size());
-		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed),type=STRING], "
+		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A,type=STRING], "
 				+ "TransformedInputColumn[id=id-2,name=C (trimmed),type=STRING], "
 				+ "TransformedInputColumn[id=id-4,name=B (trimmed),type=STRING]]", outputColumns.toString());
 
@@ -210,8 +212,10 @@ public class TransformerJobBuilderTest extends TestCase {
 		builder.setConfiguredProperty(inputColumnProperty, new InputColumn[] { colA, colB, colC });
 		outputColumns = builder.getOutputColumns();
 		assertEquals(3, outputColumns.size());
-		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed),type=STRING], "
+		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A,type=STRING], "
 				+ "TransformedInputColumn[id=id-2,name=B (trimmed),type=STRING], "
 				+ "TransformedInputColumn[id=id-4,name=C (trimmed),type=STRING]]", outputColumns.toString());
+		
+		assertEquals("A (trimmed)", outputColumns.get(0).getInitialName());
 	}
 }

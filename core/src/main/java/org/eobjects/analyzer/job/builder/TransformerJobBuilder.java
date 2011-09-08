@@ -126,11 +126,12 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		// automatically update names of columns if they have not been manually
 		// set
 		for (int i = 0; i < expectedCols; i++) {
-			MutableInputColumn<?> col = _outputColumns.get(i);
+			final String proposedName = outputColumns.getColumnName(i);
+			TransformedInputColumn<?> col = (TransformedInputColumn<?>) _outputColumns.get(i);
+			col.setInitialName(proposedName);
 			String automaticName = _automaticOutputColumnNames.get(i);
 			String columnName = col.getName();
 			if (StringUtils.isNullOrEmpty(columnName) || automaticName.equals(columnName)) {
-				String proposedName = outputColumns.getColumnName(i);
 				if (proposedName != null) {
 					col.setName(proposedName);
 					_automaticOutputColumnNames.set(i, proposedName);
