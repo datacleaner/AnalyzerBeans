@@ -32,9 +32,11 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E> implements
 	private final String _id;
 	private final DataTypeFamily _type;
 	private String _name;
+	private String _initialName;
 
 	public TransformedInputColumn(String name, DataTypeFamily type, IdGenerator idGenerator) {
 		_name = name;
+		_initialName = name;
 		if (type == null) {
 			_type = DataTypeFamily.UNDEFINED;
 		} else {
@@ -46,6 +48,11 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E> implements
 	@Override
 	public String getName() {
 		return _name;
+	}
+
+	@Override
+	public String getInitialName() {
+		return _initialName;
 	}
 
 	@Override

@@ -37,6 +37,11 @@ public interface MutableInputColumn<E> extends InputColumn<E> {
 	public void setName(String name);
 
 	/**
+	 * Gets the initial name of the column
+	 */
+	public String getInitialName();
+	
+	/**
 	 * @return an id that is unique within the AnalysisJob that is being built
 	 *         or executed.
 	 */
