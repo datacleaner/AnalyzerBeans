@@ -46,16 +46,25 @@ import org.slf4j.LoggerFactory;
 @TransformerBean("JavaScript transformer")
 @Description("Supply your own piece of JavaScript to do a custom transformation")
 @Categorized({ ScriptingCategory.class })
-public class JavaScriptTransformer implements Transformer<String> {
+public class JavaScriptTransformer implements Transformer<Object> {
 
-	private static final Logger logger = LoggerFactory.getLogger(JavaScriptTransformer.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(JavaScriptTransformer.class);
+
+	public static enum ReturnType {
+		STRING, NUMBER, BOOLEAN;
+	}
 
 	@Configured
 	InputColumn<?>[] columns;
 
 	@Configured
+	ReturnType returnType = ReturnType.STRING;
+
+	@Configured
 	@Description("Available variables:\nvalues[0..]: Array of values\nvalues[\"my_col\"]: Map of values\nmy_col: Each column value has it's own variable\nout: Print to console using out.println('hello')\nlog: Print to log using log.info(...), log.warn(...), log.error(...)")
-	@StringProperty(multiline = true, mimeType = { "text/javascript", "application/x-javascript" })
+	@StringProperty(multiline = true, mimeType = { "text/javascript",
+			"application/x-javascript" })
 	String sourceCode = "function eval() {\n  return \"hello \" + values[0];\n}\n\neval();";
 
 	private ContextFactory _contextFactory;
@@ -64,13 +73,27 @@ public class JavaScriptTransformer implements Transformer<String> {
 	// this scope is shared between all threads
 	private ScriptableObject _sharedScope;
 
+	@Override
+	public OutputColumns getOutputColumns() {
+		OutputColumns outputColumns = new OutputColumns("JavaScript output");
+		if (returnType == ReturnType.NUMBER) {
+			outputColumns.setColumnType(0, Number.class);
+		} else if (returnType == ReturnType.BOOLEAN) {
+			outputColumns.setColumnType(0, Boolean.class);
+		} else {
+			outputColumns.setColumnType(0, String.class);
+		}
+		return outputColumns;
+	}
+
 	@Initialize
 	public void init() {
 		_contextFactory = new ContextFactory();
 		Context context = _contextFactory.enterContext();
 
 		try {
-			_script = context.compileString(sourceCode, this.getClass().getSimpleName(), 1, null);
+			_script = context.compileString(sourceCode, this.getClass()
+					.getSimpleName(), 1, null);
 			_sharedScope = context.initStandardObjects();
 
 			JavaScriptUtils.addToScope(_sharedScope, logger, "logger", "log");
@@ -81,12 +104,7 @@ public class JavaScriptTransformer implements Transformer<String> {
 	}
 
 	@Override
-	public OutputColumns getOutputColumns() {
-		return new OutputColumns("JavaScript output");
-	}
-
-	@Override
-	public String[] transform(InputRow inputRow) {
+	public Object[] transform(InputRow inputRow) {
 		Context context = _contextFactory.enterContext();
 
 		try {
@@ -99,9 +117,16 @@ public class JavaScriptTransformer implements Transformer<String> {
 			JavaScriptUtils.addToScope(scope, inputRow, columns, "values");
 
 			Object result = _script.exec(context, scope);
-			String stringResult = Context.toString(result);
+			// String stringResult = Context.toString(result);
 
-			return new String[] { stringResult };
+			if (returnType == ReturnType.NUMBER) {
+				result = Context.toNumber(result);
+			} else if (returnType == ReturnType.BOOLEAN) {
+				result = Context.toBoolean(result);
+			} else {
+				result = Context.toString(result);
+			}
+			return new Object[] { result };
 		} finally {
 			Context.exit();
 		}

@@ -23,12 +23,9 @@ import javax.swing.table.TableModel;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-import org.eobjects.analyzer.data.TransformedInputColumn;
-import org.eobjects.analyzer.job.IdGenerator;
-import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.StringAnalyzerResult;
@@ -36,7 +33,6 @@ import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 
 public class StringAnalyzerTest extends TestCase {
 
-	private IdGenerator ig;
 	private InputColumn<String> c1;
 	private InputColumn<String> c2;
 	private StringAnalyzer stringAnalyzer;
@@ -46,9 +42,8 @@ public class StringAnalyzerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		ig = new PrefixedIdGenerator("id");
-		c1 = new TransformedInputColumn<String>("greetings", DataTypeFamily.STRING, ig);
-		c2 = new TransformedInputColumn<String>("greeters", DataTypeFamily.STRING, ig);
+		c1 = new MockInputColumn<String>("greetings", String.class);
+		c2 = new MockInputColumn<String>("greeters", String.class);
 		stringAnalyzer = new StringAnalyzer(c1, c2);
 	}
 

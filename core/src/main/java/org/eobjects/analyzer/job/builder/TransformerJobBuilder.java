@@ -110,8 +110,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 					if (name == null) {
 						name = getDescriptor().getDisplayName() + " (" + (nextIndex + 1) + ")";
 					}
-					DataTypeFamily type = getDescriptor().getOutputDataTypeFamily();
-					_outputColumns.add(new TransformedInputColumn<Object>(name, type, _idGenerator));
+					_outputColumns.add(new TransformedInputColumn<Object>(name, _idGenerator));
 					_automaticOutputColumnNames.add(name);
 				}
 			} else if (colDiff < 0) {
@@ -123,12 +122,28 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			}
 		}
 
-		// automatically update names of columns if they have not been manually
+		// automatically update names and types of columns if they have not been
+		// manually
 		// set
 		for (int i = 0; i < expectedCols; i++) {
 			final String proposedName = outputColumns.getColumnName(i);
+			Class<?> dataType = outputColumns.getColumnType(i);
+			if (dataType == null) {
+				dataType = getDescriptor().getOutputDataTypeFamily().getJavaType();
+			}
+			DataTypeFamily dataTypeFamily = DataTypeFamily.valueOf(dataType);
+
 			TransformedInputColumn<?> col = (TransformedInputColumn<?>) _outputColumns.get(i);
 			col.setInitialName(proposedName);
+			if (dataType != col.getDataType()) {
+				col.setDataType(dataType);
+				changed = true;
+			}
+			if (dataTypeFamily != col.getDataTypeFamily()) {
+				col.setDataTypeFamily(dataTypeFamily);
+				changed = true;
+			}
+
 			String automaticName = _automaticOutputColumnNames.get(i);
 			String columnName = col.getName();
 			if (StringUtils.isNullOrEmpty(columnName) || automaticName.equals(columnName)) {

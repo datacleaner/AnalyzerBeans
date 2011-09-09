@@ -22,11 +22,11 @@ package org.eobjects.analyzer.beans.script;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-
-import junit.framework.TestCase;
 
 public class JavaScriptTransformerTest extends TestCase {
 
@@ -35,8 +35,16 @@ public class JavaScriptTransformerTest extends TestCase {
 		t.setSourceCode("function eval() {return 1+1;}; eval();");
 		t.setColumns(new InputColumn[0]);
 		t.init();
-		String object = t.transform(null)[0];
+		Object object = t.transform(null)[0];
 		assertEquals("2", object.toString());
+		assertEquals(String.class, object.getClass());
+
+		t.returnType = JavaScriptTransformer.ReturnType.NUMBER;
+		object = t.transform(null)[0];
+		assertEquals("2.0", object.toString());
+		assertEquals(Double.class, object.getClass());
+		
+		assertEquals(Number.class, t.getOutputColumns().getColumnType(0));
 	}
 
 	/**
@@ -73,7 +81,8 @@ public class JavaScriptTransformerTest extends TestCase {
 	public void testAddNumberTypes() throws Exception {
 		JavaScriptTransformer t = new JavaScriptTransformer();
 		t.setSourceCode("function eval() {return values[0] + 2;}; eval();");
-		InputColumn<Number> col = new MockInputColumn<Number>("my number", Number.class);
+		InputColumn<Number> col = new MockInputColumn<Number>("my number",
+				Number.class);
 		t.setColumns(new InputColumn[] { col });
 
 		t.init();

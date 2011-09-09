@@ -45,13 +45,12 @@ import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
-import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.schema.Column;
@@ -146,8 +145,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		assertEquals(3, sourceColumns.size());
 
 		try {
-			sourceColumns.add(new TransformedInputColumn<Boolean>("bla", DataTypeFamily.BOOLEAN, new PrefixedIdGenerator(
-					"mock")));
+			sourceColumns.add(new MockInputColumn<Boolean>("bla", Boolean.class));
 			fail("Exception expected");
 		} catch (UnsupportedOperationException e) {
 			// do nothing

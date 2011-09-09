@@ -36,7 +36,6 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
-import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
@@ -160,13 +159,13 @@ public class TransformerJobBuilderTest extends TestCase {
 		assertFalse(builder.isConfigured());
 
 		ConvertToNumberTransformer configurableBean = builder.getConfigurableBean();
-		InputColumn<String> input = new TransformedInputColumn<String>("foo", DataTypeFamily.STRING, IdGenerator);
+		InputColumn<String> input = new MockInputColumn<String>("foo", String.class);
 		configurableBean.setInput(input);
 
 		assertTrue(builder.isConfigured());
 		ConfiguredPropertyDescriptor propertyDescriptor = descriptor.getConfiguredPropertiesForInput().iterator().next();
 		Object object = builder.getConfiguredProperties().get(propertyDescriptor);
-		assertEquals("TransformedInputColumn[id=-1,name=foo,type=STRING]", object.toString());
+		assertEquals("MockInputColumn[name=foo]", object.toString());
 	}
 
 	public void testReplaceAutomaticOutputColumnNames() throws Exception {
@@ -188,9 +187,9 @@ public class TransformerJobBuilderTest extends TestCase {
 
 		List<MutableInputColumn<?>> outputColumns = builder.getOutputColumns();
 		assertEquals(3, outputColumns.size());
-		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed),type=STRING], "
-				+ "TransformedInputColumn[id=id-2,name=B (trimmed),type=STRING], "
-				+ "TransformedInputColumn[id=id-3,name=C (trimmed),type=STRING]]", outputColumns.toString());
+		assertEquals("[TransformedInputColumn[id=id-1,name=A (trimmed)], "
+				+ "TransformedInputColumn[id=id-2,name=B (trimmed)], "
+				+ "TransformedInputColumn[id=id-3,name=C (trimmed)]]", outputColumns.toString());
 
 		outputColumns.get(0).setName("Foo A");
 		
@@ -198,23 +197,23 @@ public class TransformerJobBuilderTest extends TestCase {
 
 		outputColumns = builder.getOutputColumns();
 		assertEquals(2, outputColumns.size());
-		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A,type=STRING], "
-				+ "TransformedInputColumn[id=id-2,name=C (trimmed),type=STRING]]", outputColumns.toString());
+		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A], "
+				+ "TransformedInputColumn[id=id-2,name=C (trimmed)]]", outputColumns.toString());
 
 		builder.addInputColumn(colB);
 		outputColumns = builder.getOutputColumns();
 		assertEquals(3, outputColumns.size());
-		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A,type=STRING], "
-				+ "TransformedInputColumn[id=id-2,name=C (trimmed),type=STRING], "
-				+ "TransformedInputColumn[id=id-4,name=B (trimmed),type=STRING]]", outputColumns.toString());
+		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A], "
+				+ "TransformedInputColumn[id=id-2,name=C (trimmed)], "
+				+ "TransformedInputColumn[id=id-4,name=B (trimmed)]]", outputColumns.toString());
 
 		ConfiguredPropertyDescriptor inputColumnProperty = descriptor.getConfiguredPropertiesForInput().iterator().next();
 		builder.setConfiguredProperty(inputColumnProperty, new InputColumn[] { colA, colB, colC });
 		outputColumns = builder.getOutputColumns();
 		assertEquals(3, outputColumns.size());
-		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A,type=STRING], "
-				+ "TransformedInputColumn[id=id-2,name=B (trimmed),type=STRING], "
-				+ "TransformedInputColumn[id=id-4,name=C (trimmed),type=STRING]]", outputColumns.toString());
+		assertEquals("[TransformedInputColumn[id=id-1,name=Foo A], "
+				+ "TransformedInputColumn[id=id-2,name=B (trimmed)], "
+				+ "TransformedInputColumn[id=id-4,name=C (trimmed)]]", outputColumns.toString());
 		
 		assertEquals("A (trimmed)", outputColumns.get(0).getInitialName());
 	}

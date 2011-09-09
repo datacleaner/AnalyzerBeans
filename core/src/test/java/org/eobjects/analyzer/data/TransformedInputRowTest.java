@@ -19,13 +19,12 @@
  */
 package org.eobjects.analyzer.data;
 
-import org.eobjects.analyzer.job.PrefixedIdGenerator;
+import junit.framework.TestCase;
 
 import org.eobjects.metamodel.data.DefaultRow;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.MutableColumn;
-import junit.framework.TestCase;
 
 public class TransformedInputRowTest extends TestCase {
 
@@ -68,9 +67,7 @@ public class TransformedInputRowTest extends TestCase {
 	public void testGetValue() throws Exception {
 		InputColumn<String> inputColumn1 = new MockInputColumn<String>("foo", String.class);
 		InputColumn<String> inputColumn2 = new MockInputColumn<String>("bar", String.class);
-		MutableInputColumn<String> inputColumn3 = new TransformedInputColumn<String>("bar", DataTypeFamily.STRING,
-				new PrefixedIdGenerator("test"));
-		assertEquals("test-1", inputColumn3.getId());
+		InputColumn<String> inputColumn3 = new MockInputColumn<String>("bar", String.class);
 
 		TransformedInputRow row1 = new TransformedInputRow(new MockInputRow());
 		row1.addValue(inputColumn1, "f");

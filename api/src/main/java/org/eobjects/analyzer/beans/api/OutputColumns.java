@@ -26,6 +26,11 @@ import java.util.Arrays;
  * Represents the output columns yielded by a Transformer given a certain
  * configuration.
  * 
+ * By default the output columns of a transformer will have the type specified
+ * by the generic argument (E) in {@link Transformer}<E>. The column type can
+ * however be overridden using the output columns, by setting specific column
+ * types per column index using the {@link #setColumnType(int, Class)} method.
+ * 
  * @author Kasper Sørensen
  */
 public final class OutputColumns implements Serializable {
@@ -45,6 +50,7 @@ public final class OutputColumns implements Serializable {
 	}
 
 	private final String[] columnNames;
+	private final Class<?>[] columnTypes;
 
 	/**
 	 * Constructs an OutputColumns object with a variable amount of anonymous
@@ -58,6 +64,7 @@ public final class OutputColumns implements Serializable {
 			throw new IllegalArgumentException("columns must be 1 or higher");
 		}
 		columnNames = new String[columns];
+		columnTypes = new Class[columns];
 	}
 
 	/**
@@ -74,6 +81,7 @@ public final class OutputColumns implements Serializable {
 			throw new IllegalArgumentException("columns must be 1 or higher");
 		}
 		this.columnNames = columnNames.clone();
+		this.columnTypes = new Class[columnNames.length];
 	}
 
 	/**
@@ -85,7 +93,9 @@ public final class OutputColumns implements Serializable {
 	 *            the additional column names (varargs)
 	 */
 	public OutputColumns(String firstColumnName, String... additionalColumnNames) {
-		columnNames = new String[additionalColumnNames.length + 1];
+		int length = additionalColumnNames.length + 1;
+		columnNames = new String[length];
+		columnTypes = new Class[length];
 		columnNames[0] = firstColumnName;
 		for (int i = 0; i < additionalColumnNames.length; i++) {
 			columnNames[i + 1] = additionalColumnNames[i];
@@ -93,20 +103,35 @@ public final class OutputColumns implements Serializable {
 	}
 
 	/**
-	 * Gets the column name of a column by index.
+	 * Gets the column type (if specified) by index
 	 * 
 	 * @param index
-	 *            the index of the column.
-	 * @return the name of the column.
+	 *            the index of the column
+	 * @return the type (if specified) of the column
+	 */
+	public Class<?> getColumnType(int index) {
+		return columnTypes[index];
+	}
+
+	public void setColumnType(int index, Class<?> type) {
+		columnTypes[index] = type;
+	}
+
+	/**
+	 * Gets the column name of a column by index
+	 * 
+	 * @param index
+	 *            the index of the column
+	 * @return the name of the column
 	 */
 	public String getColumnName(int index) {
 		return columnNames[index];
 	}
 
 	/**
-	 * Gets the amount of columns in this OutputColumns object.
+	 * Gets the amount of columns in this OutputColumns object
 	 * 
-	 * @return an integer representing the amount of columns available.
+	 * @return an integer representing the amount of columns available
 	 */
 	public int getColumnCount() {
 		return columnNames.length;

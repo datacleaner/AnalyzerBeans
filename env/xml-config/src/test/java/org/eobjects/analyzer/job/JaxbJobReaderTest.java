@@ -340,13 +340,13 @@ public class JaxbJobReaderTest extends TestCase {
 
 		assertEquals(1, builder.getTransformerJobBuilders().size());
 		assertEquals(
-				"[TransformedInputColumn[id=trans-1,name=username,type=STRING], "
-						+ "TransformedInputColumn[id=trans-2,name=domain,type=STRING]]",
+				"[TransformedInputColumn[id=trans-1,name=username], "
+						+ "TransformedInputColumn[id=trans-2,name=domain]]",
 				builder.getTransformerJobBuilders().get(0).getOutputColumns()
 						.toString());
 		assertEquals(
-				"[TransformedInputColumn[id=trans-1,name=username,type=STRING], "
-						+ "TransformedInputColumn[id=trans-2,name=domain,type=STRING], "
+				"[TransformedInputColumn[id=trans-1,name=username], "
+						+ "TransformedInputColumn[id=trans-2,name=domain], "
 						+ "MetaModelInputColumn[PUBLIC.EMPLOYEES.FIRSTNAME], "
 						+ "MetaModelInputColumn[PUBLIC.EMPLOYEES.LASTNAME]]",
 				Arrays.toString(builder.getAnalyzerJobBuilders().get(0)

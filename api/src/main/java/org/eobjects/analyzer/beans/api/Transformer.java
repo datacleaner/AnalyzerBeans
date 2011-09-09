@@ -37,8 +37,19 @@ import org.eobjects.analyzer.data.InputRow;
  * Use of the @TransformerBean annotation is required for transformers in order
  * to be automatically discovered.
  * 
+ * While the above description covers most common usage of the transformer
+ * interface, there are however a few ways to build even more advanced
+ * transformations:
+ * <ul>
+ * <li>Transformers can inject an {@link OutputRowCollector} in order to output
+ * multiple records.</li>
+ * <li>Transformers can specify that their output type is Object and specify
+ * more specific types in the {@link #getOutputColumns()} method.</li> </li>
+ * 
  * @see TransformerBean
  * @see Configured
+ * @see OutputRowCollector
+ * @see OutputColumns
  * 
  * @author Kasper Sørensen
  * 

@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.data;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +44,7 @@ public final class TransformedInputRow extends AbstractInputRow {
 			throw new IllegalArgumentException("Delegate cannot be null");
 		}
 		_delegate = delegate;
-		_values = new HashMap<InputColumn<?>, Object>();
+		_values = new LinkedHashMap<InputColumn<?>, Object>();
 	}
 
 	@Override

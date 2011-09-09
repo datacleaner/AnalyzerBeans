@@ -33,8 +33,6 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.analyzer.util.CollectionUtils2;
-import org.eobjects.analyzer.util.InputColumnComparator;
 
 /**
  * Represents a typical "drill to detail" result consisting of a set of
@@ -70,7 +68,6 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 			} else {
 				_inputColumns = new ArrayList<InputColumn<?>>(0);
 			}
-			_inputColumns = CollectionUtils2.sorted(_inputColumns, new InputColumnComparator());
 		}
 		return _inputColumns;
 	}
@@ -97,8 +94,8 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 	 */
 	public TableModel toDistinctValuesTableModel(InputColumn<?> inputColumnOfInterest) {
 		Map<Object, Integer> valueCounts = _annotationFactory.getValueCounts(_annotation, inputColumnOfInterest);
-		DefaultTableModel tableModel = new DefaultTableModel(new String[] { inputColumnOfInterest.getName(), "Count in dataset" },
-				valueCounts.size());
+		DefaultTableModel tableModel = new DefaultTableModel(new String[] { inputColumnOfInterest.getName(),
+				"Count in dataset" }, valueCounts.size());
 
 		// sort the set
 		TreeSet<Entry<Object, Integer>> set = new TreeSet<Entry<Object, Integer>>(new Comparator<Entry<Object, Integer>>() {

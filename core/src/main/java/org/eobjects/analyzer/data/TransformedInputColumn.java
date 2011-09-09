@@ -25,23 +25,26 @@ import org.eobjects.analyzer.job.IdGenerator;
 
 import org.eobjects.metamodel.schema.Column;
 
-public class TransformedInputColumn<E> extends AbstractInputColumn<E> implements MutableInputColumn<E>, Serializable {
+/**
+ * Represents an InputColumn that is a result of a transformer.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <E>
+ */
+public class TransformedInputColumn<E> implements MutableInputColumn<E>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String _id;
-	private final DataTypeFamily _type;
+	private DataTypeFamily _dataTypeFamily;
+	private Class<?> _dataType;
 	private String _name;
 	private String _initialName;
 
-	public TransformedInputColumn(String name, DataTypeFamily type, IdGenerator idGenerator) {
+	public TransformedInputColumn(String name, IdGenerator idGenerator) {
 		_name = name;
 		_initialName = name;
-		if (type == null) {
-			_type = DataTypeFamily.UNDEFINED;
-		} else {
-			_type = type;
-		}
 		_id = idGenerator.nextId();
 	}
 
@@ -69,6 +72,14 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E> implements
 		return _id;
 	}
 
+	public void setDataType(Class<?> dataType) {
+		_dataType = dataType;
+	}
+
+	public void setDataTypeFamily(DataTypeFamily dataTypeFamily) {
+		_dataTypeFamily = dataTypeFamily;
+	}
+
 	@Override
 	public boolean isPhysicalColumn() {
 		return false;
@@ -80,29 +91,42 @@ public class TransformedInputColumn<E> extends AbstractInputColumn<E> implements
 	}
 
 	@Override
-	protected boolean equalsInternal(AbstractInputColumn<?> that) {
-		@SuppressWarnings("unchecked")
-		TransformedInputColumn<E> that2 = (TransformedInputColumn<E>) that;
-		return this.getId().equals(that2.getId());
-	}
-
-	@Override
-	protected Column getPhysicalColumnInternal() {
-		return null;
-	}
-
-	@Override
-	protected int hashCodeInternal() {
-		return _id.hashCode();
-	}
-
-	@Override
 	public DataTypeFamily getDataTypeFamily() {
-		return _type;
+		return _dataTypeFamily;
 	}
 
 	@Override
 	public String toString() {
-		return "TransformedInputColumn[id=" + _id + ",name=" + _name + ",type=" + _type + "]";
+		return "TransformedInputColumn[id=" + _id + ",name=" + _name + "]";
+	}
+
+	@Override
+	public Column getPhysicalColumn() throws IllegalStateException {
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Class<? extends E> getDataType() {
+		return (Class<? extends E>) _dataType;
+	}
+
+	@Override
+	public int hashCode() {
+		return _id.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof TransformedInputColumn) {
+			TransformedInputColumn<?> that = (TransformedInputColumn<?>) obj;
+			return getId().equals(that.getId());
+		}
+		return false;
+	}
+
+	@Override
+	public int compareTo(InputColumn<E> o) {
+		return hashCode() - o.hashCode();
 	}
 }

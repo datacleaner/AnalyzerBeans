@@ -38,5 +38,5 @@ public interface TransformerBeanDescriptor<B extends Transformer<?>> extends Bea
 	 *         this transformer bean's output.
 	 */
 	public DataTypeFamily getOutputDataTypeFamily();
-
+	
 }
