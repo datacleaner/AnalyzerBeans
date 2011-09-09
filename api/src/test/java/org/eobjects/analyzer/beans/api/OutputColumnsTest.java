@@ -37,7 +37,7 @@ public class OutputColumnsTest extends TestCase {
 			new OutputColumns(null);
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
-			assertEquals("column cannot be null", e.getMessage());
+			assertEquals("arguments cannot be null", e.getMessage());
 		}
 	}
 	
@@ -46,7 +46,7 @@ public class OutputColumnsTest extends TestCase {
 			new OutputColumns(new String[0]);
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
-			assertEquals("columns must be 1 or higher", e.getMessage());
+			assertEquals("column names length must be 1 or higher", e.getMessage());
 		}
 	}
 }

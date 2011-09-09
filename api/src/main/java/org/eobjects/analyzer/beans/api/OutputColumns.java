@@ -74,7 +74,7 @@ public final class OutputColumns implements Serializable {
 	 *            the names of the output columns.
 	 */
 	public OutputColumns(String[] columnNames) {
-		this(columnNames, new Class[columnNames.length]);
+		this(columnNames, null);
 	}
 
 	/**
@@ -104,11 +104,14 @@ public final class OutputColumns implements Serializable {
 	 *            the types of the output columns.
 	 */
 	public OutputColumns(String[] columnNames, Class<?>[] columnTypes) {
-		if (columnNames == null || columnTypes == null) {
+		if (columnNames == null) {
 			throw new IllegalArgumentException("arguments cannot be null");
 		}
 		if (columnNames.length < 1) {
 			throw new IllegalArgumentException("column names length must be 1 or higher");
+		}
+		if (columnTypes == null) {
+			columnTypes = new Class[columnNames.length];
 		}
 		if (columnNames.length != columnTypes.length) {
 			throw new IllegalArgumentException("column names and column types must have equal length");
