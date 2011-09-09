@@ -209,6 +209,10 @@ public final class AnalysisJobBuilder implements Closeable {
 
 	public MergedOutcomeJobBuilder addMergedOutcomeJobBuilder() {
 		MergedOutcomeJobBuilder mojb = new MergedOutcomeJobBuilder(_transformedColumnIdGenerator);
+		return addMergedOutcomeJobBuilder(mojb);
+	}
+
+	public MergedOutcomeJobBuilder addMergedOutcomeJobBuilder(MergedOutcomeJobBuilder mojb) {
 		_mergedOutcomeJobBuilders.add(mojb);
 
 		List<MergedOutcomeChangeListener> listeners = new ArrayList<MergedOutcomeChangeListener>(
@@ -251,6 +255,10 @@ public final class AnalysisJobBuilder implements Closeable {
 	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor) {
 		TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(this, descriptor, _transformedColumnIdGenerator,
 				_transformerChangeListeners);
+		return addTransformer(tjb);
+	}
+
+	public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerJobBuilder<T> tjb) {
 		if (tjb.getRequirement() == null) {
 			tjb.setRequirement(_defaultRequirement);
 		}
@@ -383,6 +391,11 @@ public final class AnalysisJobBuilder implements Closeable {
 	public <A extends RowProcessingAnalyzer<?>> RowProcessingAnalyzerJobBuilder<A> addRowProcessingAnalyzer(
 			AnalyzerBeanDescriptor<A> descriptor) {
 		RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder = new RowProcessingAnalyzerJobBuilder<A>(this, descriptor);
+		return addRowProcessingAnalyzer(analyzerJobBuilder);
+	}
+
+	public <A extends RowProcessingAnalyzer<?>> RowProcessingAnalyzerJobBuilder<A> addRowProcessingAnalyzer(
+			RowProcessingAnalyzerJobBuilder<A> analyzerJobBuilder) {
 		_analyzerJobBuilders.add(analyzerJobBuilder);
 
 		if (analyzerJobBuilder.getRequirement() == null) {
