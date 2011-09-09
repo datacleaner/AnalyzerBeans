@@ -21,10 +21,14 @@ package org.eobjects.analyzer.beans.standardize;
 
 import java.util.StringTokenizer;
 
+import javax.inject.Inject;
+
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.OutputRowCollector;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
@@ -41,16 +45,32 @@ import org.eobjects.analyzer.data.InputRow;
 @Categorized({ StringManipulationCategory.class })
 public class TokenizerTransformer implements Transformer<String> {
 
+	public static enum TokenTarget {
+		COLUMNS, ROWS
+	}
+
+	@Inject
 	@Configured("Number of tokens")
 	@Description("Defines the max amount of tokens to expect")
 	Integer numTokens;
 
+	@Inject
 	@Configured
 	InputColumn<String> column;
 
+	@Inject
 	@Configured
 	@Description("Characters to tokenize by")
 	char[] delimiters = new char[] { ' ', '\t', '\n', '\r', '\f' };
+
+	@Inject
+	@Configured
+	@Description("Add tokens as columns or as separate rows?")
+	TokenTarget tokenTarget = TokenTarget.COLUMNS;
+
+	@Inject
+	@Provided
+	OutputRowCollector outputRowCollector;
 
 	public TokenizerTransformer() {
 	}
@@ -62,11 +82,15 @@ public class TokenizerTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		String[] names = new String[numTokens];
-		for (int i = 0; i < names.length; i++) {
-			names[i] = column.getName() + " (token " + (i + 1) + ")";
+		if (tokenTarget == TokenTarget.COLUMNS) {
+			String[] names = new String[numTokens];
+			for (int i = 0; i < names.length; i++) {
+				names[i] = column.getName() + " (token " + (i + 1) + ")";
+			}
+			return new OutputColumns(names);
+		} else {
+			return new OutputColumns(column.getName() + " (token)");
 		}
-		return new OutputColumns(names);
 	}
 
 	@Override
@@ -83,7 +107,16 @@ public class TokenizerTransformer implements Transformer<String> {
 			}
 		}
 
-		return result;
+		if (tokenTarget == TokenTarget.COLUMNS) {
+			return result;
+		} else {
+			for (int i = 0; i < result.length; i++) {
+				if (result[i] != null) {
+					outputRowCollector.putValues(result[i]);
+				}
+			}
+			return null;
+		}
 	}
 
 }

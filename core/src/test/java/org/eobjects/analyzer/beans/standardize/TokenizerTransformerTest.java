@@ -21,7 +21,10 @@ package org.eobjects.analyzer.beans.standardize;
 
 import junit.framework.TestCase;
 
+import org.easymock.EasyMock;
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.OutputRowCollector;
+import org.eobjects.analyzer.beans.standardize.TokenizerTransformer.TokenTarget;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
@@ -54,7 +57,7 @@ public class TokenizerTransformerTest extends TestCase {
 		}
 	}
 
-	public void testTransform() throws Exception {
+	public void testTransformToColumns() throws Exception {
 		InputColumn<?> col = new MetaModelInputColumn(new MutableColumn("name"));
 
 		@SuppressWarnings("unchecked")
@@ -91,5 +94,28 @@ public class TokenizerTransformerTest extends TestCase {
 		assertEquals(2, values.length);
 		assertEquals(null, values[0]);
 		assertEquals(null, values[1]);
+	}
+
+	public void testTransformToRows() throws Exception {
+		InputColumn<?> col = new MetaModelInputColumn(new MutableColumn("name"));
+
+		@SuppressWarnings("unchecked")
+		TokenizerTransformer transformer = new TokenizerTransformer((InputColumn<String>) col, 2);
+		transformer.tokenTarget = TokenTarget.ROWS;
+		OutputRowCollector collectorMock = EasyMock.createMock(OutputRowCollector.class);
+		transformer.outputRowCollector = collectorMock;
+
+		assertEquals(1, transformer.getOutputColumns().getColumnCount());
+		assertEquals("name (token)", transformer.getOutputColumns().getColumnName(0));
+		
+		collectorMock.putValues("Hello");
+		collectorMock.putValues("world");
+
+		EasyMock.replay(collectorMock);
+
+		String[] result = transformer.transform(new MockInputRow().put(col, "Hello world"));
+		assertNull(result);
+
+		EasyMock.verify(collectorMock);
 	}
 }
