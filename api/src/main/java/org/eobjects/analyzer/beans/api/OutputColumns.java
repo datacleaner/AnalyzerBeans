@@ -74,14 +74,7 @@ public final class OutputColumns implements Serializable {
 	 *            the names of the output columns.
 	 */
 	public OutputColumns(String[] columnNames) {
-		if (columnNames == null) {
-			throw new IllegalArgumentException("column cannot be null");
-		}
-		if (columnNames.length < 1) {
-			throw new IllegalArgumentException("columns must be 1 or higher");
-		}
-		this.columnNames = columnNames.clone();
-		this.columnTypes = new Class[columnNames.length];
+		this(columnNames, new Class[columnNames.length]);
 	}
 
 	/**
@@ -95,11 +88,33 @@ public final class OutputColumns implements Serializable {
 	public OutputColumns(String firstColumnName, String... additionalColumnNames) {
 		int length = additionalColumnNames.length + 1;
 		columnNames = new String[length];
-		columnTypes = new Class[length];
 		columnNames[0] = firstColumnName;
 		for (int i = 0; i < additionalColumnNames.length; i++) {
 			columnNames[i + 1] = additionalColumnNames[i];
 		}
+		columnTypes = new Class[length];
+	}
+
+	/**
+	 * Constructs an OutputColumns object with named columns.
+	 * 
+	 * @param columnNames
+	 *            the names of the output columns.
+	 * @param columnTypes
+	 *            the types of the output columns.
+	 */
+	public OutputColumns(String[] columnNames, Class<?>[] columnTypes) {
+		if (columnNames == null || columnTypes == null) {
+			throw new IllegalArgumentException("arguments cannot be null");
+		}
+		if (columnNames.length < 1) {
+			throw new IllegalArgumentException("column names length must be 1 or higher");
+		}
+		if (columnNames.length != columnTypes.length) {
+			throw new IllegalArgumentException("column names and column types must have equal length");
+		}
+		this.columnNames = columnNames.clone();
+		this.columnTypes = columnTypes.clone();
 	}
 
 	/**
@@ -113,6 +128,14 @@ public final class OutputColumns implements Serializable {
 		return columnTypes[index];
 	}
 
+	/**
+	 * Sets the type of a column.
+	 * 
+	 * @param index
+	 *            the index of a column
+	 * @param type
+	 *            the column type
+	 */
 	public void setColumnType(int index, Class<?> type) {
 		columnTypes[index] = type;
 	}
@@ -126,6 +149,18 @@ public final class OutputColumns implements Serializable {
 	 */
 	public String getColumnName(int index) {
 		return columnNames[index];
+	}
+
+	/**
+	 * Sets the name of a column.
+	 * 
+	 * @param index
+	 *            the index of a column
+	 * @param name
+	 *            the column name
+	 */
+	public void setColumnName(int index, String name) {
+		columnNames[index] = name;
 	}
 
 	/**
