@@ -52,7 +52,11 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 	}
 
 	public FilterJob toFilterJob() {
-		if (!isConfigured()) {
+		return toFilterJob(true);
+	}
+
+	public FilterJob toFilterJob(boolean validate) {
+		if (validate && !isConfigured()) {
 			throw new IllegalStateException("Filter job is not correctly configured");
 		}
 
@@ -77,8 +81,8 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 	@Override
 	public void onConfigurationChanged() {
 		super.onConfigurationChanged();
-		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(
-				getAnalysisJobBuilder().getFilterChangeListeners());
+		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(getAnalysisJobBuilder()
+				.getFilterChangeListeners());
 		for (FilterChangeListener listener : listeners) {
 			listener.onConfigurationChanged(this);
 		}
@@ -87,8 +91,8 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 	@Override
 	public void onRequirementChanged() {
 		super.onRequirementChanged();
-		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(
-				getAnalysisJobBuilder().getFilterChangeListeners());
+		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(getAnalysisJobBuilder()
+				.getFilterChangeListeners());
 		for (FilterChangeListener listener : listeners) {
 			listener.onRequirementChanged(this);
 		}

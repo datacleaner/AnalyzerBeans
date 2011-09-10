@@ -82,11 +82,11 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob, Inpu
 		return Collections.unmodifiableList(_mergeInputs);
 	}
 
-	public MergedOutcomeJob toMergedOutcomeJob() throws IllegalStateException {
-		if (_mergeInputs.isEmpty()) {
+	public MergedOutcomeJob toMergedOutcomeJob(boolean validate) {
+		if (validate && _mergeInputs.isEmpty()) {
 			throw new IllegalStateException("Merged outcome jobs need at least 2 merged outcomes, none found");
 		}
-		if (_mergeInputs.size() == 1) {
+		if (validate && _mergeInputs.size() == 1) {
 			throw new IllegalStateException("Merged outcome jobs need at least 2 merged outcomes, only 1 found");
 		}
 
@@ -106,6 +106,10 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob, Inpu
 			}
 		}
 		return _cachedJob;
+	}
+
+	public MergedOutcomeJob toMergedOutcomeJob() throws IllegalStateException {
+		return toMergedOutcomeJob(true);
 	}
 
 	public List<MutableInputColumn<?>> getOutputColumns() {

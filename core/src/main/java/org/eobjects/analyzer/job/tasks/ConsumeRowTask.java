@@ -80,7 +80,7 @@ public final class ConsumeRowTask implements Task {
 
 		for (RowProcessingConsumer consumer : _consumers) {
 			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes());
-
+			
 			if (process) {
 				if (consumer.isConcurrent()) {
 					handleConsumer(outcomeSink, distinctCount, inputRows, consumer);

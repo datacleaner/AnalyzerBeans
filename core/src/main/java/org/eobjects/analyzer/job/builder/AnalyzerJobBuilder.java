@@ -24,14 +24,19 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalyzerJob;
 
 public interface AnalyzerJobBuilder<A extends Analyzer<?>> {
-	
+
 	public AnalyzerJob toAnalyzerJob() throws IllegalStateException;
 
+	public AnalyzerJob toAnalyzerJob(boolean validate) throws IllegalStateException;
+
 	public AnalyzerJob[] toAnalyzerJobs() throws IllegalStateException;
-	
+
+	public AnalyzerJob[] toAnalyzerJobs(boolean validate);
+
 	public AnalyzerBeanDescriptor<A> getDescriptor();
-	
+
 	public boolean isConfigured(boolean throwException);
 
 	public boolean isConfigured();
+
 }

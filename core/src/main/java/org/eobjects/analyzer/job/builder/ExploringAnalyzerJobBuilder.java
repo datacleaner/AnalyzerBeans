@@ -38,7 +38,12 @@ public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> e
 
 	@Override
 	public AnalyzerJob toAnalyzerJob() throws IllegalStateException {
-		if (!isConfigured()) {
+		return toAnalyzerJob(true);
+	}
+
+	@Override
+	public AnalyzerJob toAnalyzerJob(boolean validate) throws IllegalStateException {
+		if (validate && !isConfigured()) {
 			throw new IllegalStateException("Exploring Analyzer job is not correctly configured");
 		}
 
@@ -48,7 +53,12 @@ public final class ExploringAnalyzerJobBuilder<A extends ExploringAnalyzer<?>> e
 
 	@Override
 	public AnalyzerJob[] toAnalyzerJobs() throws IllegalStateException {
-		return new AnalyzerJob[] { toAnalyzerJob() };
+		return toAnalyzerJobs(true);
+	}
+
+	@Override
+	public AnalyzerJob[] toAnalyzerJobs(boolean validate) {
+		return new AnalyzerJob[] { toAnalyzerJob(validate) };
 	}
 
 	@Override

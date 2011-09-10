@@ -70,25 +70,34 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 	public boolean isMultipleJobsDeterminedBy(ConfiguredPropertyDescriptor propertyDescriptor) {
 		return _multipleJobsSupported && propertyDescriptor.isInputColumn() && propertyDescriptor.isRequired();
 	}
-
+	
 	@Override
 	public AnalyzerJob toAnalyzerJob() throws IllegalStateException {
+		return toAnalyzerJob(true);
+	}
+
+	@Override
+	public AnalyzerJob toAnalyzerJob(boolean validate) throws IllegalStateException {
 		AnalyzerJob[] analyzerJobs = toAnalyzerJobs();
 
 		if (analyzerJobs == null || analyzerJobs.length == 0) {
 			return null;
 		}
 
-		if (analyzerJobs.length > 1) {
+		if (validate && analyzerJobs.length > 1) {
 			throw new IllegalStateException("This builder generates " + analyzerJobs.length
 					+ " jobs, but a single job was requested");
 		}
 
 		return analyzerJobs[0];
 	}
+	
+	public AnalyzerJob[] toAnalyzerJobs() throws IllegalStateException {
+		return toAnalyzerJobs(true);
+	}
 
 	@Override
-	public AnalyzerJob[] toAnalyzerJobs() throws IllegalStateException {
+	public AnalyzerJob[] toAnalyzerJobs(boolean validate) throws IllegalStateException {
 		Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
 		if (!_multipleJobsSupported) {
 			ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
@@ -96,7 +105,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 			return new AnalyzerJob[] { job };
 		}
 
-		if (_inputColumns.isEmpty()) {
+		if (validate && _inputColumns.isEmpty()) {
 			throw new IllegalStateException("No input column configured");
 		}
 
@@ -118,7 +127,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 			}
 		}
 
-		if (originatingTables.isEmpty()) {
+		if (validate && originatingTables.isEmpty()) {
 			throw new IllegalStateException("Could not determine source for analyzer '" + this + "'");
 		}
 
@@ -139,7 +148,7 @@ public final class RowProcessingAnalyzerJobBuilder<A extends RowProcessingAnalyz
 				}
 			}
 		}
-		if (!isConfigured()) {
+		if (validate && !isConfigured()) {
 			throw new IllegalStateException("Row processing Analyzer job is not correctly configured");
 		}
 
