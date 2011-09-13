@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +32,6 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.util.CollectionUtils2;
-
 import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableTransformerJob extends BaseObject implements TransformerJob {
@@ -85,6 +85,68 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
 	@Override
 	public MutableInputColumn<?>[] getOutput() {
 		return _output.toArray(new MutableInputColumn<?>[_output.size()]);
+	}
+
+	@Override
+	public boolean equalsIgnoreColumnIds(TransformerJob other) {
+		ImmutableTransformerJob transformerJob1 = new ImmutableTransformerJob(_name, _descriptor, _beanConfiguration,
+				Collections.<MutableInputColumn<?>> emptyList(), _requirement);
+		Outcome requirement = null;
+		Outcome[] requirements = other.getRequirements();
+		if (requirements != null && requirements.length > 0) {
+			requirement = requirements[0];
+		}
+		if (equalsOutputColumnNames(other.getOutput())) {
+			ImmutableTransformerJob transformerJob2 = new ImmutableTransformerJob(other.getName(), other.getDescriptor(),
+					other.getConfiguration(), Collections.<MutableInputColumn<?>> emptyList(), requirement);
+			return transformerJob1.equals(transformerJob2);
+		}
+		return false;
+	}
+
+	/**
+	 * Compares the names of this output columns to the names of the specified
+	 * other output columns. The result is true if and only if the argument is
+	 * not null and is a columns object that represents the same sequence of
+	 * column names as this output columns.
+	 * 
+	 * @param other
+	 *            The columns to compare this columns against
+	 * 
+	 * @return true if the given object represents the same sequence of column
+	 *         names as this output columns, false otherwise
+	 */
+	private boolean equalsOutputColumnNames(InputColumn<?>[] other) {
+		if (other == null) {
+			return false;
+		}
+
+		List<String> outputNames = new ArrayList<String>();
+		for (MutableInputColumn<?> mic : _output) {
+			outputNames.add(mic.getName());
+		}
+		List<String> otherOutputNames = new ArrayList<String>();
+		for (InputColumn<?> inputColumn : other) {
+			otherOutputNames.add(inputColumn.getName());
+		}
+
+		if (outputNames.size() != otherOutputNames.size()) {
+			return false;
+		}
+
+		Iterator<String> it1 = outputNames.iterator();
+		Iterator<String> it2 = otherOutputNames.iterator();
+		while (it1.hasNext()) {
+			assert it2.hasNext();
+			String next1 = it1.next();
+			String next2 = it2.next();
+			if (!next1.equals(next2)) {
+				return false;
+			}
+		}
+		assert !it2.hasNext();
+
+		return true;
 	}
 
 	@Override
