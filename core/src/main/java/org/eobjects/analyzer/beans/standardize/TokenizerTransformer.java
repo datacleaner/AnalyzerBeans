@@ -34,6 +34,7 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.metamodel.util.HasName;
 
 /**
  * Tokenizes values into a configurable amount of tokens.
@@ -45,8 +46,17 @@ import org.eobjects.analyzer.data.InputRow;
 @Categorized({ StringManipulationCategory.class })
 public class TokenizerTransformer implements Transformer<String> {
 
-	public static enum TokenTarget {
-		COLUMNS, ROWS
+	public static enum TokenTarget implements HasName {
+		COLUMNS, ROWS;
+
+		@Override
+		public String getName() {
+			if (this == COLUMNS) {
+				return "Columns";
+			} else {
+				return "Rows";
+			}
+		}
 	}
 
 	@Inject
