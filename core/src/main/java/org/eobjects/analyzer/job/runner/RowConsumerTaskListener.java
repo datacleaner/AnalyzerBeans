@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
 
 public final class RowConsumerTaskListener implements TaskListener {
@@ -32,10 +33,12 @@ public final class RowConsumerTaskListener implements TaskListener {
 	private final AtomicBoolean _errorsReported = new AtomicBoolean(false);
 	private final AnalysisListener _analysisListener;
 	private final AnalysisJob _analysisJob;
+	private final TaskRunner _taskRunner;
 
-	public RowConsumerTaskListener(AnalysisJob analysisJob, AnalysisListener analysisListener) {
+	public RowConsumerTaskListener(AnalysisJob analysisJob, AnalysisListener analysisListener, TaskRunner taskRunner) {
 		_analysisListener = analysisListener;
 		_analysisJob = analysisJob;
+		_taskRunner = taskRunner;
 	}
 
 	@Override
@@ -56,12 +59,9 @@ public final class RowConsumerTaskListener implements TaskListener {
 
 		incrementCounter();
 	}
-	
+
 	private void incrementCounter() {
-		synchronized (this) {
-			_counter.incrementAndGet();
-			notifyAll();
-		}
+		_counter.incrementAndGet();
 	}
 
 	public boolean isErrornous() {
@@ -69,14 +69,8 @@ public final class RowConsumerTaskListener implements TaskListener {
 	}
 
 	public void awaitTasks(final int numTasks) {
-		synchronized (this) {
-			while (numTasks > _counter.get()) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					System.out.println("!!! " + e.getMessage());
-				}
-			}
+		while (numTasks > _counter.get()) {
+			_taskRunner.assistExecution();
 		}
 	}
 }

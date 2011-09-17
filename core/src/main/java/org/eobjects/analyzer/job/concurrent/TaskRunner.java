@@ -28,4 +28,6 @@ public interface TaskRunner {
 	public void run(TaskRunnable taskRunnable);
 
 	public void shutdown();
+
+	public void assistExecution();
 }

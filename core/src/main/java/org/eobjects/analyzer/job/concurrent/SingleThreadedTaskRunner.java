@@ -44,4 +44,9 @@ public final class SingleThreadedTaskRunner implements TaskRunner {
 	public void shutdown() {
 		logger.info("shutdown() called, nothing to do");
 	}
+	
+	@Override
+	public void assistExecution() {
+		// do nothing, not relevant as all tasks are already being taken care of
+	}
 }

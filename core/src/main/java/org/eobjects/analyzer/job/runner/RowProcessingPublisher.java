@@ -188,7 +188,7 @@ public final class RowProcessingPublisher {
 		_analysisListener.rowProcessingBegin(_job, _table, expectedRows);
 
 		// TODO: Needs to delegate errors downstream
-		final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(_job, _analysisListener);
+		final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(_job, _analysisListener, _taskRunner);
 		final AtomicInteger rowNumber = new AtomicInteger(0);
 		final DataSet dataSet = dataContext.executeQuery(finalQuery);
 
@@ -206,9 +206,7 @@ public final class RowProcessingPublisher {
 			_taskRunner.run(task, taskListener);
 			numTasks++;
 		}
-
-		// TODO: ideally offer this thread to help execution. With very low
-		// available threads, this await call may cause a deadlock
+		
 		taskListener.awaitTasks(numTasks);
 
 		dataSet.close();

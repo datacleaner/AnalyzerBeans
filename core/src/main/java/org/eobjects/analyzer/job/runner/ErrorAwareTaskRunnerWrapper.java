@@ -85,4 +85,11 @@ final class ErrorAwareTaskRunnerWrapper implements TaskRunner, ErrorAware {
 	public boolean isCancelled() {
 		return _errorAware.isCancelled();
 	}
+
+	@Override
+	public void assistExecution() {
+		if (!isErrornous() && !isCancelled()) {
+			_taskRunner.assistExecution();
+		}
+	}
 }

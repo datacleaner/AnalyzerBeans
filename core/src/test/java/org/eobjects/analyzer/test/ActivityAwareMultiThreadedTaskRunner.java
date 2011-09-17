@@ -116,4 +116,9 @@ public final class ActivityAwareMultiThreadedTaskRunner implements TaskRunner {
 		}
 		return taskCount;
 	}
+
+	@Override
+	public void assistExecution() {
+		// do nothing
+	}
 }

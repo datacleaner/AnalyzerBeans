@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.job.concurrent;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -35,6 +36,7 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 
 	private final ExecutorService _executorService;
 	private final int _numThreads;
+	private final BlockingQueue<Runnable> _workQueue;
 
 	public MultiThreadedTaskRunner() {
 		this(30);
@@ -49,8 +51,9 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 		// there will be a minimum task capacity of 20
 		final int taskCapacity = Math.max(20, numThreads);
 		
+		_workQueue =  new ArrayBlockingQueue<Runnable>(taskCapacity);
 		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS,
-				new ArrayBlockingQueue<Runnable>(taskCapacity), rejectionHandler);
+				_workQueue, rejectionHandler);
 	}
 
 	/**
@@ -94,5 +97,13 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 	@Override
 	protected void finalize() throws Throwable {
 		shutdown();
+	}
+	
+	@Override
+	public void assistExecution() {
+		Runnable task = _workQueue.poll();
+		if (task != null) {
+			task.run();
+		}
 	}
 }
