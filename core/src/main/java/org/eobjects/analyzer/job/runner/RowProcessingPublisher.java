@@ -207,6 +207,8 @@ public final class RowProcessingPublisher {
 			numTasks++;
 		}
 
+		// TODO: ideally offer this thread to help execution. With very low
+		// available threads, this await call may cause a deadlock
 		taskListener.awaitTasks(numTasks);
 
 		dataSet.close();

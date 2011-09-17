@@ -19,8 +19,9 @@
  */
 package org.eobjects.analyzer.job.concurrent;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -41,8 +42,15 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 
 	public MultiThreadedTaskRunner(int numThreads) {
 		_numThreads = numThreads;
-		BlockingQueue<Runnable> workQueue = new DoubleBlockingQueue<Runnable>(numThreads * 3);
-		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS, workQueue);
+
+		// if all threads are busy, newly submitted tasks will by run by caller
+		final ThreadPoolExecutor.CallerRunsPolicy rejectionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
+
+		// there will be a minimum task capacity of 20
+		final int taskCapacity = Math.max(20, numThreads);
+		
+		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS,
+				new ArrayBlockingQueue<Runnable>(taskCapacity), rejectionHandler);
 	}
 
 	/**
@@ -56,13 +64,21 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 	@Override
 	public void run(final Task task, final TaskListener listener) {
 		logger.debug("run({},{})", task, listener);
-		_executorService.execute(new TaskRunnable(task, listener));
+		executeInternal(new TaskRunnable(task, listener));
 	}
 
 	@Override
 	public void run(TaskRunnable taskRunnable) {
 		logger.debug("run({})", taskRunnable);
-		_executorService.execute(taskRunnable);
+		executeInternal(taskRunnable);
+	}
+
+	private void executeInternal(TaskRunnable taskRunnable) {
+		try {
+			_executorService.execute(taskRunnable);
+		} catch (RejectedExecutionException e) {
+			logger.error("Unexpected rejected execution!", e);
+		}
 	}
 
 	@Override
@@ -70,7 +86,7 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 		logger.info("shutdown() called, shutting down executor service");
 		_executorService.shutdown();
 	}
-	
+
 	public ExecutorService getExecutorService() {
 		return _executorService;
 	}

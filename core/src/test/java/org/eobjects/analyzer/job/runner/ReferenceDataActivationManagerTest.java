@@ -93,6 +93,10 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 			throw result.getErrors().get(0);
 		}
 
+		// sleep to ensure that close is invoked (happens after results are
+		// returned)
+		Thread.sleep(700);
+
 		assertEquals(1, dict1.getInitCount());
 		assertEquals(1, dict1.getCloseCount());
 		assertEquals(1, dict2.getInitCount());
@@ -105,6 +109,10 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 		if (!result.isSuccessful()) {
 			throw result.getErrors().get(0);
 		}
+
+		// sleep to ensure that close is invoked (happens after results are
+		// returned)
+		Thread.sleep(700);
 
 		assertEquals(2, dict1.getInitCount());
 		assertEquals(2, dict1.getCloseCount());
