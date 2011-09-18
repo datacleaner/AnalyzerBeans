@@ -48,12 +48,12 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 		// if all threads are busy, newly submitted tasks will by run by caller
 		final ThreadPoolExecutor.CallerRunsPolicy rejectionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
 
-		// there will be a minimum task capacity of 20
-		final int taskCapacity = Math.max(20, numThreads);
-		
-		_workQueue =  new ArrayBlockingQueue<Runnable>(taskCapacity);
-		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS,
-				_workQueue, rejectionHandler);
+		// there will be a minimum task capacity of 20, and preferably
+		// numThreads * 3 (to avoid blocking buffer behaviour)
+		final int taskCapacity = Math.max(20, numThreads * 3);
+
+		_workQueue = new ArrayBlockingQueue<Runnable>(taskCapacity);
+		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS, _workQueue, rejectionHandler);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 	protected void finalize() throws Throwable {
 		shutdown();
 	}
-	
+
 	@Override
 	public void assistExecution() {
 		Runnable task = _workQueue.poll();
