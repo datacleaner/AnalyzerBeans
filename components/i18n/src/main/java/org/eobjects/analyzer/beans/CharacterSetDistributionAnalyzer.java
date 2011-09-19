@@ -26,13 +26,13 @@ import java.util.TreeMap;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
@@ -48,7 +48,8 @@ import com.ibm.icu.text.UnicodeSet;
 @AnalyzerBean("Character set distribution")
 @Description("Inspects and maps text characters according to character set affinity, such as Latin, Hebrew, Cyrillic, Chinese and more.")
 @Concurrent(true)
-public class CharacterSetDistributionAnalyzer implements RowProcessingAnalyzer<CharacterSetDistributionResult> {
+public class CharacterSetDistributionAnalyzer implements
+		Analyzer<CharacterSetDistributionResult> {
 
 	private static final Map<String, UnicodeSet> UNICODE_SETS = createUnicodeSets();
 
@@ -65,8 +66,8 @@ public class CharacterSetDistributionAnalyzer implements RowProcessingAnalyzer<C
 	@Initialize
 	public void init() {
 		for (InputColumn<String> column : _columns) {
-			CharacterSetDistributionAnalyzerColumnDelegate delegate = new CharacterSetDistributionAnalyzerColumnDelegate(_annotationFactory,
-					UNICODE_SETS);
+			CharacterSetDistributionAnalyzerColumnDelegate delegate = new CharacterSetDistributionAnalyzerColumnDelegate(
+					_annotationFactory, UNICODE_SETS);
 			_columnDelegates.put(column, delegate);
 		}
 	}
@@ -86,7 +87,8 @@ public class CharacterSetDistributionAnalyzer implements RowProcessingAnalyzer<C
 	protected static Map<String, UnicodeSet> createUnicodeSets() {
 		Map<String, UnicodeSet> unicodeSets = new TreeMap<String, UnicodeSet>();
 		unicodeSets.put("Latin, ASCII", new UnicodeSet("[:ASCII:]"));
-		unicodeSets.put("Latin, non-ASCII", subUnicodeSet("[:Latin:]", "[:ASCII:]"));
+		unicodeSets.put("Latin, non-ASCII",
+				subUnicodeSet("[:Latin:]", "[:ASCII:]"));
 		unicodeSets.put("Arabic", new UnicodeSet("[:Script=Arabic:]"));
 		unicodeSets.put("Armenian", new UnicodeSet("[:Script=Armenian:]"));
 		unicodeSets.put("Bengali", new UnicodeSet("[:Script=Bengali:]"));
@@ -125,7 +127,8 @@ public class CharacterSetDistributionAnalyzer implements RowProcessingAnalyzer<C
 	public void run(InputRow row, int distinctCount) {
 		for (InputColumn<String> column : _columns) {
 			String value = row.getValue(column);
-			CharacterSetDistributionAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
+			CharacterSetDistributionAnalyzerColumnDelegate delegate = _columnDelegates
+					.get(column);
 			delegate.run(value, row, distinctCount);
 		}
 	}
@@ -140,24 +143,29 @@ public class CharacterSetDistributionAnalyzer implements RowProcessingAnalyzer<C
 
 		CrosstabDimension columnDimension = new CrosstabDimension("Column");
 
-		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
+		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class,
+				columnDimension, measureDimension);
 
 		for (InputColumn<String> column : _columns) {
 			String columnName = column.getName();
-			CharacterSetDistributionAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
+			CharacterSetDistributionAnalyzerColumnDelegate delegate = _columnDelegates
+					.get(column);
 			columnDimension.addCategory(columnName);
 
-			CrosstabNavigator<Number> nav = crosstab.navigate().where(columnDimension, columnName);
+			CrosstabNavigator<Number> nav = crosstab.navigate().where(
+					columnDimension, columnName);
 
 			for (String name : unicodeSetNames) {
 				RowAnnotation annotation = delegate.getAnnotation(name);
 				int rowCount = annotation.getRowCount();
 				nav.where(measureDimension, name).put(rowCount);
 				if (rowCount > 0) {
-					nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
+					nav.attach(new AnnotatedRowsResult(annotation,
+							_annotationFactory, column));
 				}
 			}
 		}
-		return new CharacterSetDistributionResult(_columns, unicodeSetNames, crosstab);
+		return new CharacterSetDistributionResult(_columns, unicodeSetNames,
+				crosstab);
 	}
 }
