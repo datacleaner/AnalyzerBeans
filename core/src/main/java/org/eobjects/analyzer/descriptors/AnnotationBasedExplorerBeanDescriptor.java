@@ -19,26 +19,29 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import org.eobjects.analyzer.beans.api.Analyzer;
+import java.util.Collections;
+import java.util.Set;
+
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends AbstractBeanDescriptor<A> implements
-		AnalyzerBeanDescriptor<A> {
+final class AnnotationBasedExplorerBeanDescriptor<E extends Explorer<?>> extends AbstractBeanDescriptor<E> implements
+		ExplorerBeanDescriptor<E> {
 
 	private final String _displayName;
 
-	protected AnnotationBasedAnalyzerBeanDescriptor(Class<A> analyzerClass) throws DescriptorException {
-		super(analyzerClass, true);
+	protected AnnotationBasedExplorerBeanDescriptor(Class<E> explorerClass) throws DescriptorException {
+		super(explorerClass, false);
 
-		AnalyzerBean analyzerAnnotation = analyzerClass.getAnnotation(AnalyzerBean.class);
+		AnalyzerBean analyzerAnnotation = explorerClass.getAnnotation(AnalyzerBean.class);
 		if (analyzerAnnotation == null) {
-			throw new DescriptorException(analyzerClass + " doesn't implement the AnalyzerBean annotation");
+			throw new DescriptorException(explorerClass + " doesn't implement the AnalyzerBean annotation");
 		}
 
 		String displayName = analyzerAnnotation.value();
 		if (displayName == null || displayName.trim().length() == 0) {
-			displayName = ReflectionUtils.explodeCamelCase(analyzerClass.getSimpleName(), false);
+			displayName = ReflectionUtils.explodeCamelCase(explorerClass.getSimpleName(), false);
 		}
 		_displayName = displayName;
 
@@ -48,5 +51,10 @@ final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends
 	@Override
 	public String getDisplayName() {
 		return _displayName;
+	}
+
+	@Override
+	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
+		return Collections.emptySet();
 	}
 }

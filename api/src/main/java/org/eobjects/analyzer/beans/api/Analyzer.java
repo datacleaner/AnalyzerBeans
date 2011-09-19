@@ -19,7 +19,9 @@
  */
 package org.eobjects.analyzer.beans.api;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.HasAnalyzerResult;
 
 /**
  * Super-interface for analyzers. Analyzers should implement one of the two
@@ -33,12 +35,23 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * @param <R>
  *            the result type of this analyzer.
  */
-public interface Analyzer<R extends AnalyzerResult> {
+public interface Analyzer<R extends AnalyzerResult> extends HasAnalyzerResult<R> {
+
+	/**
+	 * Executes the analyzer for a single row.
+	 * 
+	 * @param row
+	 *            the row to analyze
+	 * @param distinctCount
+	 *            the distinct count of the row.
+	 */
+	public void run(InputRow row, int distinctCount);
 
 	/**
 	 * Gets the result of the analysis that the analyzer has conducted.
 	 * 
 	 * @return an analyzer result object.
 	 */
+	@Override
 	public R getResult();
 }

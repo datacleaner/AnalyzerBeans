@@ -6,13 +6,13 @@
 	</source>
 
 	<analysis>
-		<analyzer>
+		<explorer>
 			<descriptor ref="Compare table structures" />
 			<properties>
 				<property name="Table2" value="PUBLIC.CUSTOMERS"/>
 				<property name="Table1" value="PUBLIC.CUSTOMER_W_TER"/>
 			</properties>
-		</analyzer>
+		</explorer>
 	</analysis>
 
 </job>

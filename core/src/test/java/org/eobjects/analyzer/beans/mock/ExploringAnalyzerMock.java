@@ -28,15 +28,14 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.result.NumberResult;
-
 import org.eobjects.metamodel.DataContext;
 
 @AnalyzerBean("Exploring mock")
-public class ExploringAnalyzerMock implements ExploringAnalyzer<NumberResult> {
+public class ExploringAnalyzerMock implements Explorer<NumberResult> {
 
 	private static List<ExploringAnalyzerMock> instances = new LinkedList<ExploringAnalyzerMock>();
 

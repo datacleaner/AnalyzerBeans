@@ -27,7 +27,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.result.SchemaComparisonResult;
 import org.eobjects.analyzer.result.SchemaDifference;
 import org.eobjects.analyzer.result.TableComparisonResult;
@@ -37,7 +37,7 @@ import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.EqualsBuilder;
 
 @AnalyzerBean("Compare schema structures")
-public class CompareSchemasAnalyzer implements ExploringAnalyzer<SchemaComparisonResult> {
+public class CompareSchemasAnalyzer implements Explorer<SchemaComparisonResult> {
 
 	@Inject
 	@Configured

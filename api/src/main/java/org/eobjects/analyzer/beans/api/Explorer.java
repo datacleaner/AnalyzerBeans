@@ -20,6 +20,8 @@
 package org.eobjects.analyzer.beans.api;
 
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.HasAnalyzerResult;
+import org.eobjects.metamodel.DataContext;
 
 /**
  * An analyzer that explores a datastore (in the form of a DataContext).
@@ -52,10 +54,14 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * 
  * @param <R>
  *            the result type returned by this explorer
- * 
- * @deprecated Use the {@link Explorer} interface instead.
  */
-@Deprecated
-public interface ExploringAnalyzer<R extends AnalyzerResult> extends Explorer<R> {
+public interface Explorer<R extends AnalyzerResult> extends HasAnalyzerResult<R> {
 
+	/**
+	 * Executes the explorer
+	 * 
+	 * @param dataContext
+	 *            the DataContext to use for querying
+	 */
+	public void run(DataContext dataContext);
 }

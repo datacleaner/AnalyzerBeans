@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,15 +29,19 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
+import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
+import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
@@ -55,14 +60,10 @@ import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
 import org.eobjects.analyzer.job.tasks.InitializeReferenceDataTask;
 import org.eobjects.analyzer.job.tasks.RunExplorerTask;
 import org.eobjects.analyzer.job.tasks.Task;
-import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
-import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
-import org.eobjects.analyzer.lifecycle.ReturnResultsCallback;
-import org.eobjects.analyzer.lifecycle.RunExplorerCallback;
-import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.eobjects.metamodel.MetaModelHelper;
 import org.eobjects.metamodel.schema.Column;
@@ -86,12 +87,12 @@ final class AnalysisRunnerJobDelegate {
 	private final AnalyzerBeansConfiguration _configuration;
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
-	private final Queue<AnalyzerJobResult> _resultQueue;
+	private final Queue<JobAndResult> _resultQueue;
 	private final JobCompletionTaskListener _jobCompletionTaskListener;
 	private final ErrorAware _errorAware;
-	private final ArrayList<AnalyzerJob> _explorerJobs;
-	private final ArrayList<AnalyzerJob> _rowProcessingJobs;
 	private final Datastore _datastore;
+	private final Collection<ExplorerJob> _explorerJobs;
+	private final Collection<AnalyzerJob> _analyzerJobs;
 	private final Collection<TransformerJob> _transformerJobs;
 	private final Collection<FilterJob> _filterJobs;
 	private final Collection<MergedOutcomeJob> _mergedOutcomeJobs;
@@ -100,7 +101,7 @@ final class AnalysisRunnerJobDelegate {
 	private final ReferenceDataActivationManager _explorerReferenceDataActivationManager;
 
 	public AnalysisRunnerJobDelegate(AnalysisJob job, AnalyzerBeansConfiguration configuration, TaskRunner taskRunner,
-			AnalysisListener analysisListener, Queue<AnalyzerJobResult> resultQueue, ErrorAware errorAware) {
+			AnalysisListener analysisListener, Queue<JobAndResult> resultQueue, ErrorAware errorAware) {
 		_job = job;
 		_configuration = configuration;
 		_taskRunner = taskRunner;
@@ -120,21 +121,8 @@ final class AnalysisRunnerJobDelegate {
 		_filterJobs = _job.getFilterJobs();
 		_mergedOutcomeJobs = _job.getMergedOutcomeJobs();
 
-		Collection<AnalyzerJob> analyzerJobs = _job.getAnalyzerJobs();
-
-		_explorerJobs = new ArrayList<AnalyzerJob>();
-		_rowProcessingJobs = new ArrayList<AnalyzerJob>();
-		for (AnalyzerJob analyzerJob : analyzerJobs) {
-			AnalyzerBeanDescriptor<?> descriptor = analyzerJob.getDescriptor();
-			if (descriptor.isExploringAnalyzer()) {
-				_explorerJobs.add(analyzerJob);
-			} else if (descriptor.isRowProcessingAnalyzer()) {
-				_rowProcessingJobs.add(analyzerJob);
-			} else {
-				throw new IllegalStateException("AnalyzerBeanDescriptor is neither exploring nor row processing: "
-						+ descriptor);
-			}
-		}
+		_explorerJobs = _job.getExplorerJobs();
+		_analyzerJobs = _job.getAnalyzerJobs();
 
 		_rowProcessingReferenceDataActivationManager = new ReferenceDataActivationManager();
 		_explorerReferenceDataActivationManager = new ReferenceDataActivationManager();
@@ -152,7 +140,7 @@ final class AnalysisRunnerJobDelegate {
 		validateSingleTableInput(_filterJobs);
 		validateSingleTableInputForMergedOutcomes(_mergedOutcomeJobs);
 
-		validateSingleTableInput(_rowProcessingJobs);
+		validateSingleTableInput(_analyzerJobs);
 
 		// the injection manager is job scoped
 		final InjectionManager injectionManager = _configuration.getInjectionManagerFactory().getInjectionManager(_job);
@@ -184,7 +172,7 @@ final class AnalysisRunnerJobDelegate {
 			registerRowProcessingPublishers(rowProcessingPublishers, transformerJob, _analysisListener, _taskRunner,
 					injectionManager);
 		}
-		for (AnalyzerJob analyzerJob : _rowProcessingJobs) {
+		for (AnalyzerJob analyzerJob : _analyzerJobs) {
 			registerRowProcessingPublishers(rowProcessingPublishers, analyzerJob, _analysisListener, _taskRunner,
 					injectionManager);
 		}
@@ -230,20 +218,16 @@ final class AnalysisRunnerJobDelegate {
 		final InitializeCallback initializeCallback = new InitializeCallback(injectionManager);
 
 		// begin explorer jobs first because they can run independently (
-		for (AnalyzerJob explorerJob : _explorerJobs) {
+		for (ExplorerJob explorerJob : _explorerJobs) {
 			final DataContextProvider dataContextProvider = _datastore.getDataContextProvider();
 
-			AnalyzerBeanInstance instance = new AnalyzerBeanInstance(explorerJob.getDescriptor());
-
-			RunExplorerCallback runExplorerCallback = new RunExplorerCallback(_job, explorerJob, _datastore,
-					_analysisListener);
-			ReturnResultsCallback returnResultsCallback = new ReturnResultsCallback(_job, explorerJob, _resultQueue,
-					_analysisListener);
+			BeanInstance<? extends Explorer<?>> beanInstance = BeanInstance.create(explorerJob.getDescriptor());
 
 			// set up scheduling for the explorers
-			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(instance, dataContextProvider);
+			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(beanInstance,
+					new Closeable[] { dataContextProvider }, _job, explorerJob, _resultQueue, _analysisListener);
 			TaskListener runFinishedListener = new RunNextTaskTaskListener(_taskRunner, closeTask, explorersDoneTaskListener);
-			Task runTask = new RunExplorerTask(instance);
+			Task runTask = new RunExplorerTask(beanInstance, _job, explorerJob, _datastore, _analysisListener);
 
 			TaskListener referenceDataInitFinishedListener = new RunNextTaskTaskListener(_taskRunner, runTask,
 					runFinishedListener);
@@ -259,8 +243,8 @@ final class AnalysisRunnerJobDelegate {
 					_explorerReferenceDataActivationManager);
 			CloseCallback closeCallback = new CloseCallback();
 
-			AssignCallbacksAndInitializeTask initTask = new AssignCallbacksAndInitializeTask(instance, injectionManager,
-					assignConfiguredCallback, initializeCallback, runExplorerCallback, returnResultsCallback, closeCallback);
+			AssignCallbacksAndInitializeTask initTask = new AssignCallbacksAndInitializeTask(beanInstance, injectionManager,
+					assignConfiguredCallback, initializeCallback, closeCallback);
 
 			// begin the explorers
 			_taskRunner.run(initTask, initializeFinishedListener);
@@ -387,16 +371,16 @@ final class AnalysisRunnerJobDelegate {
 
 			if (beanJob instanceof AnalyzerJob) {
 				AnalyzerJob analyzerJob = (AnalyzerJob) beanJob;
-				AnalyzerBeanInstance analyzerBeanInstance = new AnalyzerBeanInstance(analyzerJob.getDescriptor());
-				rowPublisher.addRowProcessingAnalyzerBean(analyzerBeanInstance, analyzerJob, localInputColumns);
+				BeanInstance<? extends Analyzer<?>> beanInstance = BeanInstance.create(analyzerJob.getDescriptor());
+				rowPublisher.addRowProcessingAnalyzerBean(beanInstance, analyzerJob, localInputColumns);
 			} else if (beanJob instanceof TransformerJob) {
 				TransformerJob transformerJob = (TransformerJob) beanJob;
-				TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(transformerJob.getDescriptor());
-				rowPublisher.addTransformerBean(transformerBeanInstance, transformerJob, localInputColumns);
+				BeanInstance<? extends Transformer<?>> beanInstance = BeanInstance.create(transformerJob.getDescriptor());
+				rowPublisher.addTransformerBean(beanInstance, transformerJob, localInputColumns);
 			} else if (beanJob instanceof FilterJob) {
 				FilterJob filterJob = (FilterJob) beanJob;
-				FilterBeanInstance filterBeanInstance = new FilterBeanInstance(filterJob.getDescriptor());
-				rowPublisher.addFilterBean(filterBeanInstance, filterJob, localInputColumns);
+				BeanInstance<? extends Filter<?>> beanInstance = BeanInstance.create(filterJob.getDescriptor());
+				rowPublisher.addFilterBean(beanInstance, filterJob, localInputColumns);
 			} else {
 				throw new UnsupportedOperationException("Unsupported job type: " + beanJob);
 			}

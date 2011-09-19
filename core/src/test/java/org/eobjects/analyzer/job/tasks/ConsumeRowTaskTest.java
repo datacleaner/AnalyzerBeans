@@ -70,7 +70,7 @@ public class ConsumeRowTaskTest extends TestCase {
 			List<MutableInputColumn<?>> mockTransformerColumns = multiRowTransformer.getOutputColumns();
 			countingColumn = mockTransformerColumns.get(0);
 			assertEquals("Mock multi row transformer (1)", countingColumn.getName());
-			builder.addRowProcessingAnalyzer(MockAnalyzer.class).addInputColumns(mockTransformerColumns);
+			builder.addAnalyzer(MockAnalyzer.class).addInputColumns(mockTransformerColumns);
 
 			job = builder.toAnalysisJob();
 		}

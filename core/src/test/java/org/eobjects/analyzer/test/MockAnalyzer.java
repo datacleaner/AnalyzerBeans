@@ -22,15 +22,15 @@ package org.eobjects.analyzer.test;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.ListResult;
 
 @AnalyzerBean("Mock analyzer")
-public class MockAnalyzer implements RowProcessingAnalyzer<ListResult<InputRow>> {
+public class MockAnalyzer implements Analyzer<ListResult<InputRow>> {
 
 	@Configured
 	InputColumn<?>[] cols;

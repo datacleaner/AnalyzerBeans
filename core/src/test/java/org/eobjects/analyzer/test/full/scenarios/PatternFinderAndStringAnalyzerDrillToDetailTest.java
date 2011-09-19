@@ -33,7 +33,7 @@ import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -81,13 +81,13 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 		TransformerJobBuilder<EmailStandardizerTransformer> emailStd1 = ajb.addTransformer(
 				EmailStandardizerTransformer.class).addInputColumn(emailInputColumn);
 
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pf = ajb
-				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> pf = ajb
+				.addAnalyzer(PatternFinderAnalyzer.class);
 		InputColumn<?> jobtitleInputColumn = ajb.getSourceColumnByName("JOBTITLE");
 		pf.addInputColumn(jobtitleInputColumn);
 		pf.getConfigurableBean().setDiscriminateTextCase(false);
 
-		RowProcessingAnalyzerJobBuilder<StringAnalyzer> sa = ajb.addRowProcessingAnalyzer(StringAnalyzer.class);
+		AnalyzerJobBuilder<StringAnalyzer> sa = ajb.addAnalyzer(StringAnalyzer.class);
 		sa.addInputColumns(emailInputColumn, emailStd1.getOutputColumnByName("Username"),
 				emailStd1.getOutputColumnByName("Domain"));
 

@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @param <E>
  *            the bean type, ie. Filter, Analyzer or Transformer
  */
-public abstract class AbstractBeanInstance<E> {
+public final class BeanInstance<E> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -47,12 +47,16 @@ public abstract class AbstractBeanInstance<E> {
 	private final List<InitializeCallback> initializeCallbacks = new LinkedList<InitializeCallback>();
 	private final List<CloseCallback> closeCallbacks = new LinkedList<CloseCallback>();
 
-	@SuppressWarnings("unchecked")
-	public AbstractBeanInstance(BeanDescriptor<?> descriptor) {
+	public static <E> BeanInstance<E> create(BeanDescriptor<E> descriptor) {
+		return new BeanInstance<E>(descriptor);
+	}
+
+	private BeanInstance(BeanDescriptor<E> descriptor) {
 		if (descriptor == null) {
 			throw new IllegalArgumentException("Descriptor cannot be null");
 		}
-		_bean = (E) ReflectionUtils.newInstance(descriptor.getComponentClass());
+		Class<E> componentClass = descriptor.getComponentClass();
+		_bean = ReflectionUtils.newInstance(componentClass);
 		_descriptor = descriptor;
 	}
 
@@ -108,7 +112,7 @@ public abstract class AbstractBeanInstance<E> {
 		return closeCallbacks;
 	}
 
-	private void runCallbacks(List<? extends LifeCycleCallback<Object, ? super BeanDescriptor<?>>> callbacks,
+	protected final void runCallbacks(List<? extends LifeCycleCallback<Object, ? super BeanDescriptor<?>>> callbacks,
 			LifeCycleState state) {
 		logger.debug("running {} callbacks: {}", callbacks.size(), callbacks);
 		for (LifeCycleCallback<Object, ? super BeanDescriptor<?>> lifeCycleCallback : callbacks) {

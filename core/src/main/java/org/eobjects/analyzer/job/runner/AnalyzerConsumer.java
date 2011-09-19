@@ -19,28 +19,28 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Concurrent;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 
 final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final AnalyzerJob _analyzerJob;
-	private final AnalyzerBeanInstance _analyzerBeanInstance;
+	private final BeanInstance<? extends Analyzer<?>> _beanInstance;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
 	private final boolean _concurrent;
 
-	public AnalyzerConsumer(AnalysisJob job, AnalyzerBeanInstance analyzerBeanInstance, AnalyzerJob analyzerJob,
+	public AnalyzerConsumer(AnalysisJob job, BeanInstance<? extends Analyzer<?>> beanInstance, AnalyzerJob analyzerJob,
 			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
 		super(analyzerJob);
 		_job = job;
-		_analyzerBeanInstance = analyzerBeanInstance;
+		_beanInstance = beanInstance;
 		_analyzerJob = analyzerJob;
 		_inputColumns = inputColumns;
 		_analysisListener = analysisListener;
@@ -66,7 +66,7 @@ final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements R
 
 	@Override
 	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
-		RowProcessingAnalyzer<?> analyzer = (RowProcessingAnalyzer<?>) _analyzerBeanInstance.getBean();
+		Analyzer<?> analyzer = _beanInstance.getBean();
 		try {
 			analyzer.run(row, distinctCount);
 		} catch (RuntimeException e) {
@@ -76,8 +76,8 @@ final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements R
 	}
 
 	@Override
-	public AnalyzerBeanInstance getBeanInstance() {
-		return _analyzerBeanInstance;
+	public BeanInstance<? extends Analyzer<?>> getBeanInstance() {
+		return _beanInstance;
 	}
 
 	@Override
@@ -87,6 +87,6 @@ final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements R
 
 	@Override
 	public String toString() {
-		return "AnalyzerConsumer[" + _analyzerBeanInstance + "]";
+		return "AnalyzerConsumer[" + _beanInstance + "]";
 	}
 }

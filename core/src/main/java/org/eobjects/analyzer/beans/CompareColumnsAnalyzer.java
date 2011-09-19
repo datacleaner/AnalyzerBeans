@@ -26,7 +26,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.ColumnDifference;
 import org.eobjects.metamodel.DataContext;
@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Compare column structures")
-public class CompareColumnsAnalyzer implements ExploringAnalyzer<ColumnComparisonResult> {
+public class CompareColumnsAnalyzer implements Explorer<ColumnComparisonResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CompareColumnsAnalyzer.class);
 

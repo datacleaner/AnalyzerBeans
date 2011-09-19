@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
@@ -48,6 +49,18 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 		}
 		return null;
 	}
+	
+	@Override
+	public final ExplorerBeanDescriptor<?> getExplorerBeanDescriptorByDisplayName(String name) {
+		if (name != null) {
+			for (ExplorerBeanDescriptor<?> descriptor : getExplorerBeanDescriptors()) {
+				if (name.equals(descriptor.getDisplayName())) {
+					return descriptor;
+				}
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Overridable method for handling (and perhaps discovering) unfound
@@ -57,6 +70,17 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	 * @return
 	 */
 	protected <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> notFoundAnalyzer(Class<A> analyzerClass) {
+		return null;
+	}
+	
+	/**
+	 * Overridable method for handling (and perhaps discovering) unfound
+	 * explorer descriptors by class.
+	 * 
+	 * @param explorerClass
+	 * @return
+	 */
+	protected <E extends Explorer<?>> ExplorerBeanDescriptor<E> notFoundExplorer(Class<E> explorerClass) {
 		return null;
 	}
 
@@ -103,6 +127,17 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 			}
 		}
 		return notFoundAnalyzer(analyzerBeanClass);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public final <E extends Explorer<?>> ExplorerBeanDescriptor<E> getExplorerBeanDescriptorForClass(Class<E> explorerClass) {
+		for (ExplorerBeanDescriptor<?> descriptor : getExplorerBeanDescriptors()) {
+			if (descriptor.getComponentClass() == explorerClass) {
+				return (ExplorerBeanDescriptor<E>) descriptor;
+			}
+		}
+		return notFoundExplorer(explorerClass);
 	}
 
 	@Override

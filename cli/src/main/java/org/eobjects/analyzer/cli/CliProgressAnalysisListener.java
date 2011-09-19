@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
@@ -91,6 +92,18 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 
 	@Override
 	public void errorUknown(AnalysisJob job, Throwable throwable) {
+	}
+
+	@Override
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob) {
+	}
+
+	@Override
+	public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
+	}
+
+	@Override
+	public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
 	}
 
 }

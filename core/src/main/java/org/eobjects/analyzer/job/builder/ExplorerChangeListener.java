@@ -17,21 +17,20 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.lifecycle;
-
-import org.eobjects.analyzer.beans.api.Filter;
-import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
+package org.eobjects.analyzer.job.builder;
 
 /**
- * Represents an instance of an @FilterBean annotated class at runtime. The
- * FilterBeanInstance class is responsible for performing life-cycle actions at
- * an per-instance level. This makes it possible to add callbacks at various
- * stages in the life-cycle of a FilterBean
+ * Listener interface for receiving notifications that explorers are being added
+ * or removed from a job that is being built.
+ * 
+ * @author Kasper Sørensen
  */
-public class FilterBeanInstance extends AbstractBeanInstance<Filter<?>> {
+public interface ExplorerChangeListener {
 
-	public FilterBeanInstance(FilterBeanDescriptor<?, ?> descriptor) {
-		super(descriptor);
-	}
+	public void onAdd(ExplorerJobBuilder<?> analyzerJobBuilder);
+
+	public void onConfigurationChanged(ExplorerJobBuilder<?> analyzerJobBuilder);
+
+	public void onRemove(ExplorerJobBuilder<?> analyzerJobBuilder);
 
 }

@@ -22,13 +22,13 @@ package org.eobjects.analyzer.beans;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 @AnalyzerBean("String analyzer")
 @Description("The String analyzer is used to collect a variety of typical metrics on string values.\nMetrics include statistics on character case, words, diacritics, white-spaces and more...")
 @Concurrent(true)
-public class StringAnalyzer implements RowProcessingAnalyzer<StringAnalyzerResult> {
+public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 
 	public static final String DIMENSION_MEASURES = "Measures";
 	public static final String DIMENSION_COLUMN = "Column";

@@ -28,21 +28,21 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
-import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 
 final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
-	private final FilterBeanInstance _filterBeanInstance;
+	private final BeanInstance<? extends Filter<?>> _beanInstance;
 	private final FilterJob _filterJob;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
 	private final boolean _concurrent;
 
-	public FilterConsumer(AnalysisJob job, FilterBeanInstance filterBeanInstance, FilterJob filterJob,
+	public FilterConsumer(AnalysisJob job, BeanInstance<? extends Filter<?>> beanInstance, FilterJob filterJob,
 			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
 		super(filterJob);
-		_filterBeanInstance = filterBeanInstance;
+		_beanInstance = beanInstance;
 		_filterJob = filterJob;
 		_inputColumns = inputColumns;
 		_job = job;
@@ -69,7 +69,7 @@ final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements Row
 
 	@Override
 	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
-		Filter<?> filter = _filterBeanInstance.getBean();
+		Filter<?> filter = _beanInstance.getBean();
 		try {
 			Enum<?> category = filter.categorize(row);
 			FilterOutcome outcome = new ImmutableFilterOutcome(_filterJob, category);
@@ -81,8 +81,8 @@ final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements Row
 	}
 
 	@Override
-	public FilterBeanInstance getBeanInstance() {
-		return _filterBeanInstance;
+	public BeanInstance<? extends Filter<?>> getBeanInstance() {
+		return _beanInstance;
 	}
 
 	@Override
@@ -92,11 +92,11 @@ final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements Row
 
 	@Override
 	public String toString() {
-		return "FilterConsumer[" + _filterBeanInstance + "]";
+		return "FilterConsumer[" + _beanInstance + "]";
 	}
 
 	public boolean isQueryOptimizable(FilterOutcome filterOutcome) {
-		Filter<?> filter = _filterBeanInstance.getBean();
+		Filter<?> filter = _beanInstance.getBean();
 		if (filter instanceof QueryOptimizedFilter) {
 			@SuppressWarnings("rawtypes")
 			QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) filter;

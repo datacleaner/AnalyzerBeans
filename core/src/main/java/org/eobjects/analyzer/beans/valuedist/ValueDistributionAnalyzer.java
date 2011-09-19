@@ -26,12 +26,12 @@ import java.util.TreeSet;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.ValueDistributionGroupResult;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @AnalyzerBean("Value distribution")
 @Description("Gets the distributions of values that occur in a dataset.\nOften used as an initial way to see if a lot of repeated values are to be expected, if nulls occur and if a few un-repeated values add exceptions to the typical usage-pattern.")
 @Concurrent(true)
-public class ValueDistributionAnalyzer implements RowProcessingAnalyzer<ValueDistributionResult> {
+public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ValueDistributionAnalyzer.class);
 

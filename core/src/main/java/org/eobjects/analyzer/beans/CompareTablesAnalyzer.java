@@ -27,7 +27,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.TableComparisonResult;
 import org.eobjects.analyzer.result.TableDifference;
@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Compare table structures")
-public class CompareTablesAnalyzer implements ExploringAnalyzer<TableComparisonResult> {
+public class CompareTablesAnalyzer implements Explorer<TableComparisonResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(TableComparisonResult.class);
 

@@ -17,20 +17,13 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.lifecycle;
+package org.eobjects.analyzer.job;
 
-import org.eobjects.analyzer.beans.api.Transformer;
-import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 
-/**
- * Represents an instance of an @TransformerBean annotated class at runtime. The
- * TransformerBeanInstance class is responsible for performing life-cycle
- * actions at an per-instance level. This makes it possible to add callbacks at
- * various stages in the life-cycle of a TransformerBean
- */
-public class TransformerBeanInstance extends AbstractBeanInstance<Transformer<?>> {
+public interface ExplorerJob extends ComponentJob {
 
-	public TransformerBeanInstance(TransformerBeanDescriptor<?> descriptor) {
-		super(descriptor);
-	}
+	public ExplorerBeanDescriptor<?> getDescriptor();
+
+	public BeanConfiguration getConfiguration();
 }

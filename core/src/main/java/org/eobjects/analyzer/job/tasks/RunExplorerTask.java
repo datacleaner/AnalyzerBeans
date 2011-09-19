@@ -19,23 +19,49 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
-import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
+import org.eobjects.analyzer.beans.api.Explorer;
+import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.ExplorerJob;
+import org.eobjects.analyzer.job.runner.AnalysisListener;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
+import org.eobjects.metamodel.DataContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class RunExplorerTask implements Task {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private static final Logger logger = LoggerFactory.getLogger(RunExplorerTask.class);
 
-	private final AnalyzerBeanInstance _analyzerBeanInstance;
+	private final BeanInstance<? extends Explorer<?>> _beanInstance;
+	private final AnalysisJob _job;
+	private final ExplorerJob _explorerJob;
+	private final Datastore _datastore;
+	private final AnalysisListener _analysisListener;
 
-	public RunExplorerTask(AnalyzerBeanInstance analyzerBeanInstance) {
-		_analyzerBeanInstance = analyzerBeanInstance;
+	public RunExplorerTask(BeanInstance<? extends Explorer<?>> beanInstance, AnalysisJob job, ExplorerJob explorerJob,
+			Datastore datastore, AnalysisListener analysisListener) {
+		_beanInstance = beanInstance;
+		_job = job;
+		_explorerJob = explorerJob;
+		_datastore = datastore;
+		_analysisListener = analysisListener;
 	}
 
 	@Override
 	public void execute() throws Exception {
 		logger.debug("execute()");
-		_analyzerBeanInstance.run();
+
+		if (_analysisListener != null) {
+			_analysisListener.explorerBegin(_job, _explorerJob);
+		}
+		DataContextProvider dcp = _datastore.getDataContextProvider();
+		DataContext dc = dcp.getDataContext();
+		try {
+			_beanInstance.getBean().run(dc);
+		} finally {
+			dcp.close();
+		}
 	}
 }

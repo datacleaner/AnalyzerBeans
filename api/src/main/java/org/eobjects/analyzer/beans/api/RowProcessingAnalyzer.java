@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.beans.api;
 
-import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
@@ -44,16 +43,10 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * 
  * @param <R>
  *            the result type returned by this analyzer
+ * 
+ * @deprecated use the {@link Analyzer} interface instead.
  */
+@Deprecated
 public interface RowProcessingAnalyzer<R extends AnalyzerResult> extends Analyzer<R> {
 
-	/**
-	 * Executes the analyzer for a single row.
-	 * 
-	 * @param row
-	 *            the row to analyze
-	 * @param distinctCount
-	 *            the distinct count of the row.
-	 */
-	public void run(InputRow row, int distinctCount);
 }

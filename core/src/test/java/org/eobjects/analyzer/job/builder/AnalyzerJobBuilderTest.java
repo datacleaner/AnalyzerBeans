@@ -33,7 +33,7 @@ import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableTable;
 import org.eobjects.metamodel.schema.Table;
 
-public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
+public class AnalyzerJobBuilderTest extends TestCase {
 
 	private AnalysisJobBuilder ajb;
 
@@ -44,8 +44,8 @@ public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 	}
 
 	public void testBuildMultipleJobsForSingleInputAnalyzer() throws Exception {
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> jobBuilder = ajb
-				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> jobBuilder = ajb
+				.addAnalyzer(PatternFinderAnalyzer.class);
 
 		assertFalse(jobBuilder.isConfigured());
 
@@ -80,7 +80,7 @@ public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 	}
 
 	public void testNoOriginatingTableBecauseOfMockColumns() throws Exception {
-		RowProcessingAnalyzerJobBuilder<StringAnalyzer> jobBuilder = ajb.addRowProcessingAnalyzer(StringAnalyzer.class);
+		AnalyzerJobBuilder<StringAnalyzer> jobBuilder = ajb.addAnalyzer(StringAnalyzer.class);
 		jobBuilder.addInputColumn(new MockInputColumn<String>("foo", String.class));
 		jobBuilder.addInputColumn(new MockInputColumn<String>("bar", String.class));
 
@@ -89,13 +89,13 @@ public class RowProcessingAnalyzerJobBuilderTest extends TestCase {
 			fail("Exception expected");
 		} catch (IllegalStateException e) {
 			assertEquals(
-					"Could not determine source for analyzer 'RowProcessingAnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[MockInputColumn[name=foo], MockInputColumn[name=bar]]]'",
+					"Could not determine source for analyzer 'AnalyzerJobBuilder[analyzer=String analyzer,inputColumns=[MockInputColumn[name=foo], MockInputColumn[name=bar]]]'",
 					e.getMessage());
 		}
 	}
 
 	public void testBuildMultipleJobsForEachTable() throws Exception {
-		RowProcessingAnalyzerJobBuilder<StringAnalyzer> jobBuilder = ajb.addRowProcessingAnalyzer(StringAnalyzer.class);
+		AnalyzerJobBuilder<StringAnalyzer> jobBuilder = ajb.addAnalyzer(StringAnalyzer.class);
 
 		Table table1 = new MutableTable("table1");
 		jobBuilder.addInputColumn(new MetaModelInputColumn(new MutableColumn("foo", ColumnType.VARCHAR, table1, 0, true)));

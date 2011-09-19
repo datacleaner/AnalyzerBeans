@@ -42,10 +42,11 @@ Row processing framework
 
  TODO
  
-Exploring analyzers
+Explorers
 
- Exploring analyzers are a different breed of analyzers than those, that can be placed
- within the row processing framework. Some analyses cannot rely solely on an optimized row
+ Explorers (previously known as Exploring analyzers) are a different breed of analysis result providers,
+ which have the full power to define their own queries. Unfortunately this also means that they cannot
+ be placed within the row processing framework. Some analyses cannot rely solely on an optimized row
  processing framework. For example:
  
   * An analysis that asserts which columns are most likely joinable.

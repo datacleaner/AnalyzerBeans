@@ -27,7 +27,7 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.TransformedInputRow;
 import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
-import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +98,7 @@ final class MergedOutcomeConsumer extends AbstractOutcomeSinkJobConsumer impleme
 	}
 
 	@Override
-	public AbstractBeanInstance<?> getBeanInstance() {
+	public BeanInstance<?> getBeanInstance() {
 		// no bean instance available
 		return null;
 	}

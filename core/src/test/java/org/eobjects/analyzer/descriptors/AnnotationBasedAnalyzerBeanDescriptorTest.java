@@ -26,10 +26,9 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.MatchingAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
-import org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock;
-import org.eobjects.analyzer.beans.mock.RowProcessingAnalyzerMock;
+import org.eobjects.analyzer.beans.mock.AnalyzerMock;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.reference.Dictionary;
@@ -41,22 +40,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		ExploringAnalyzerMock.clearInstances();
-		RowProcessingAnalyzerMock.clearInstances();
-	}
-
-	public void testExploringType() throws Exception {
-		AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(ExploringAnalyzerMock.class);
-		assertEquals(true, descriptor.isExploringAnalyzer());
-		assertEquals(false, descriptor.isRowProcessingAnalyzer());
-
-		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
-		Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
-		assertTrue(it.hasNext());
-		assertEquals("Configured1", it.next().getName());
-		assertTrue(it.hasNext());
-		assertEquals("Configured2", it.next().getName());
-		assertFalse(it.hasNext());
+		AnalyzerMock.clearInstances();
 	}
 
 	public void testGetConfiguredPropertiesOfType() throws Exception {
@@ -82,10 +66,8 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testRowProcessingType() throws Exception {
-		AnalyzerBeanDescriptor<RowProcessingAnalyzerMock> descriptor = Descriptors
-				.ofAnalyzer(RowProcessingAnalyzerMock.class);
-		assertEquals(false, descriptor.isExploringAnalyzer());
-		assertEquals(true, descriptor.isRowProcessingAnalyzer());
+		AnalyzerBeanDescriptor<AnalyzerMock> descriptor = Descriptors
+				.ofAnalyzer(AnalyzerMock.class);
 
 		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
 		Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
@@ -97,7 +79,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		assertEquals("Configured2", it.next().getName());
 		assertFalse(it.hasNext());
 
-		RowProcessingAnalyzerMock analyzerBean = new RowProcessingAnalyzerMock();
+		AnalyzerMock analyzerBean = new AnalyzerMock();
 		ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty("Configured1");
 		configuredProperty.setValue(analyzerBean, "foobar");
 		assertEquals("foobar", analyzerBean.getConfigured1());
@@ -130,6 +112,6 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	@AnalyzerBean("invalid analyzer")
-	public abstract class InvalidAnalyzer implements RowProcessingAnalyzer<AnalyzerResult> {
+	public abstract class InvalidAnalyzer implements Analyzer<AnalyzerResult> {
 	}
 }

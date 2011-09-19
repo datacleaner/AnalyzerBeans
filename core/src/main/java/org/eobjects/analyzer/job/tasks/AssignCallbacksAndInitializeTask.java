@@ -20,11 +20,9 @@
 package org.eobjects.analyzer.job.tasks;
 
 import org.eobjects.analyzer.configuration.InjectionManager;
-import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
-import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
-import org.eobjects.analyzer.lifecycle.AnalyzerLifeCycleCallback;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
 import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
 import org.eobjects.analyzer.lifecycle.InitializeCallback;
 import org.slf4j.Logger;
@@ -34,18 +32,15 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final AbstractBeanInstance<?> _beanInstance;
-	private final AnalyzerBeanInstance _analyzerBeanInstance;
+	private final BeanInstance<?> _beanInstance;
 	private final InjectionManager _injectionManager;
 
 	// represents the default lifecycle callbacks ...
-	private AssignConfiguredCallback _assignConfiguredCallback;
-	private InitializeCallback _initializeCallback;
-	private AnalyzerLifeCycleCallback _runCallback;
-	private AnalyzerLifeCycleCallback _returnResultsCallback;
-	private CloseCallback _closeCallback;
+	private final AssignConfiguredCallback _assignConfiguredCallback;
+	private final InitializeCallback _initializeCallback;
+	private final CloseCallback _closeCallback;
 
-	public AssignCallbacksAndInitializeTask(AbstractBeanInstance<?> beanInstance, InjectionManager injectionManager,
+	public AssignCallbacksAndInitializeTask(BeanInstance<?> beanInstance, InjectionManager injectionManager,
 			AssignConfiguredCallback assignConfiguredCallback, InitializeCallback initializeCallback,
 			CloseCallback closeCallback) {
 		_beanInstance = beanInstance;
@@ -53,23 +48,6 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 		_assignConfiguredCallback = assignConfiguredCallback;
 		_initializeCallback = initializeCallback;
 		_closeCallback = closeCallback;
-		_analyzerBeanInstance = null;
-		_runCallback = null;
-		_returnResultsCallback = null;
-	}
-
-	public AssignCallbacksAndInitializeTask(AnalyzerBeanInstance beanInstance, InjectionManager injectionManager,
-			AssignConfiguredCallback assignConfiguredCallback, InitializeCallback initializeCallback,
-			AnalyzerLifeCycleCallback runCallback, AnalyzerLifeCycleCallback returnResultsCallback,
-			CloseCallback closeCallback) {
-		_beanInstance = beanInstance;
-		_injectionManager = injectionManager;
-		_assignConfiguredCallback = assignConfiguredCallback;
-		_initializeCallback = initializeCallback;
-		_closeCallback = closeCallback;
-		_analyzerBeanInstance = beanInstance;
-		_runCallback = runCallback;
-		_returnResultsCallback = returnResultsCallback;
 	}
 
 	@Override
@@ -85,14 +63,6 @@ public final class AssignCallbacksAndInitializeTask implements Task {
 
 		if (_initializeCallback != null) {
 			_beanInstance.getInitializeCallbacks().add(_initializeCallback);
-		}
-
-		if (_runCallback != null) {
-			_analyzerBeanInstance.getRunCallbacks().add(_runCallback);
-		}
-
-		if (_returnResultsCallback != null) {
-			_analyzerBeanInstance.getReturnResultsCallbacks().add(_returnResultsCallback);
 		}
 
 		if (_closeCallback != null) {

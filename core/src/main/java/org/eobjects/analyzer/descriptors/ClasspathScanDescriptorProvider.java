@@ -39,6 +39,7 @@ import java.util.jar.JarFile;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Renderer;
@@ -81,6 +82,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	private final Map<Class<? extends Filter<?>>, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<Class<? extends Filter<?>>, FilterBeanDescriptor<?, ?>>();
 	private final Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>>();
 	private final Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
+	private final Map<Class<? extends Explorer<?>>, ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new HashMap<Class<? extends Explorer<?>>, ExplorerBeanDescriptor<?>>();
 	private final TaskRunner _taskRunner;
 	private final AtomicInteger _tasksPending;
 
@@ -273,6 +275,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 				Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) visitor.getBeanClass();
 				addAnalyzerClass(analyzerClass);
 			}
+			if (visitor.isExplorer()) {
+				@SuppressWarnings("unchecked")
+				Class<? extends Explorer<?>> explorerClass = (Class<? extends Explorer<?>>) visitor.getBeanClass();
+				addExplorerClass(explorerClass);
+			}
 			if (visitor.isTransformer()) {
 				@SuppressWarnings("unchecked")
 				Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) visitor.getBeanClass();
@@ -291,6 +298,19 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 		} finally {
 			FileHelper.safeClose(inputStream);
 		}
+	}
+
+	public ClasspathScanDescriptorProvider addExplorerClass(Class<? extends Explorer<?>> explorerClass) {
+		ExplorerBeanDescriptor<?> descriptor = _explorerBeanDescriptors.get(explorerClass);
+		if (descriptor == null) {
+			try {
+				descriptor = Descriptors.ofExplorer(explorerClass);
+				_explorerBeanDescriptors.put(explorerClass, descriptor);
+			} catch (Exception e) {
+				logger.error("Unexpected error occurred while creating descriptor for: " + explorerClass, e);
+			}
+		}
+		return this;
 	}
 
 	public ClasspathScanDescriptorProvider addAnalyzerClass(Class<? extends Analyzer<?>> clazz) {
@@ -395,5 +415,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors() {
 		awaitTasks();
 		return Collections.unmodifiableCollection(_rendererBeanDescriptors.values());
+	}
+
+	@Override
+	public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
+		awaitTasks();
+		return Collections.unmodifiableCollection(_explorerBeanDescriptors.values());
 	}
 }

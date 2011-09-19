@@ -26,12 +26,12 @@ import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
@@ -46,7 +46,7 @@ import org.eobjects.analyzer.util.ValueCombination;
 
 @AnalyzerBean("Boolean analyzer")
 @Description("Inspect your boolean values. How is the distribution of true/false? Are there null values?")
-public class BooleanAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerResult> {
+public class BooleanAnalyzer implements Analyzer<BooleanAnalyzerResult> {
 
 	// comparator used to sort entries, getting the most frequent value
 	// combinations to the top

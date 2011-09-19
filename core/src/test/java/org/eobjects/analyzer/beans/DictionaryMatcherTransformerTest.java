@@ -35,7 +35,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
@@ -87,8 +87,8 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 		tjb2.addInputColumn(outputColumns.get(2));
 		tjb2.getOutputColumns().get(0).setName("logging match -> number");
 
-		RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> ajb = job
-				.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
+		AnalyzerJobBuilder<ValueDistributionAnalyzer> ajb = job
+				.addAnalyzer(ValueDistributionAnalyzer.class);
 		ajb.addInputColumns(tjb1.getOutputColumns());
 		ajb.addInputColumns(tjb2.getOutputColumns());
 

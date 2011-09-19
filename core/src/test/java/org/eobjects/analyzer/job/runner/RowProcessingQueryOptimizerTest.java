@@ -25,6 +25,9 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.NotNullFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
@@ -43,13 +46,11 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
-import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
 import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
-import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
-import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
@@ -60,7 +61,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	private AnalyzerBeansConfiguration conf;
 	private AnalysisJobBuilder ajb;
 	private FilterJobBuilder<MaxRowsFilter, ValidationCategory> maxRowsBuilder;
-	private RowProcessingAnalyzerJobBuilder<StringAnalyzer> stringAnalyzerBuilder;
+	private AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerBuilder;
 	private DataContextProvider dcp;
 	private Column lastnameColumn;
 	private InputColumn<?> lastNameInputColumn;
@@ -78,7 +79,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(datastore);
 		maxRowsBuilder = ajb.addFilter(MaxRowsFilter.class);
-		stringAnalyzerBuilder = ajb.addRowProcessingAnalyzer(StringAnalyzer.class);
+		stringAnalyzerBuilder = ajb.addAnalyzer(StringAnalyzer.class);
 		stringAnalyzerBuilder.setRequirement(maxRowsBuilder, ValidationCategory.VALID);
 		dcp = conf.getDatastoreCatalog().getDatastore("mydb").getDataContextProvider();
 		lastnameColumn = dcp.getSchemaNavigator().convertToColumn("EMPLOYEES.LASTNAME");
@@ -109,21 +110,21 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		assertNotNull("No max rows specified!", maxRows);
 		assertEquals(1000, maxRows.intValue());
 	}
-	
+
 	public void testAlwaysOptimizableFilter() throws Exception {
 		Datastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
 		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
-		
+
 		assertTrue(optimizer.isOptimizable());
-		
+
 		FilterJobBuilder<?, ?> fjb = ajb.addFilter(NotNullFilter.class).addInputColumn(lastNameInputColumn);
 		maxRowsBuilder.setRequirement(fjb, ValidationCategory.VALID);
 		consumers.add(0, createConsumer(fjb));
-		
+
 		optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 		assertFalse(optimizer.isOptimizable());
 	}
-	
+
 	public void testOptimizedChainedTransformer() throws Exception {
 		TransformerJobBuilder<EmailStandardizerTransformer> emailStdBuilder = ajb
 				.addTransformer(EmailStandardizerTransformer.class);
@@ -167,8 +168,8 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	}
 
 	public void testDontOptimizeWhenComponentsHaveNoRequirements() throws Exception {
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb
-				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb
+				.addAnalyzer(PatternFinderAnalyzer.class);
 		patternFinderBuilder.addInputColumn(lastNameInputColumn);
 		consumers.add(createConsumer(patternFinderBuilder));
 
@@ -203,8 +204,8 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	}
 
 	public void testMultipleOutcomesUsed() throws Exception {
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb
-				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb
+				.addAnalyzer(PatternFinderAnalyzer.class);
 		patternFinderBuilder.addInputColumn(lastNameInputColumn);
 		patternFinderBuilder.setRequirement(maxRowsBuilder, ValidationCategory.INVALID);
 		consumers.add(createConsumer(patternFinderBuilder));
@@ -215,7 +216,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 	private FilterConsumer createConsumer(FilterJobBuilder<?, ?> filterJobBuilder) {
 		FilterJob filterJob = filterJobBuilder.toFilterJob();
-		FilterBeanInstance filterBeanInstance = new FilterBeanInstance(filterJobBuilder.getDescriptor());
+		BeanInstance<? extends Filter<?>> filterBeanInstance = BeanInstance.create(filterJobBuilder.getDescriptor());
 		filterBeanInstance.getAssignConfiguredCallbacks().add(
 				new AssignConfiguredCallback(filterJob.getConfiguration(), null));
 		filterBeanInstance.assignConfigured();
@@ -224,24 +225,22 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	}
 
 	private TransformerConsumer createConsumer(TransformerJobBuilder<?> transformerJobBuilder) {
-		TransformerBeanInstance transformerBeanInstance = new TransformerBeanInstance(transformerJobBuilder.getDescriptor());
+		BeanInstance<? extends Transformer<?>> beanInstance = BeanInstance.create(transformerJobBuilder.getDescriptor());
 		TransformerJob transformerJob = transformerJobBuilder.toTransformerJob();
-		transformerBeanInstance.getAssignConfiguredCallbacks().add(
+		beanInstance.getAssignConfiguredCallbacks().add(
 				new AssignConfiguredCallback(transformerJob.getConfiguration(), null));
-		transformerBeanInstance.assignConfigured();
-		TransformerConsumer consumer = new TransformerConsumer(null, transformerBeanInstance, transformerJob,
+		beanInstance.assignConfigured();
+		TransformerConsumer consumer = new TransformerConsumer(null, beanInstance, transformerJob,
 				transformerJobBuilder.getInput(), null);
 		return consumer;
 	}
 
-	private AnalyzerConsumer createConsumer(RowProcessingAnalyzerJobBuilder<?> analyzerBuilder) {
-		AnalyzerBeanInstance analyzerBeanInstance = new AnalyzerBeanInstance(analyzerBuilder.getDescriptor());
+	private AnalyzerConsumer createConsumer(AnalyzerJobBuilder<?> analyzerBuilder) {
+		BeanInstance<? extends Analyzer<?>> beanInstance = BeanInstance.create(analyzerBuilder.getDescriptor());
 		AnalyzerJob analyzerJob = analyzerBuilder.toAnalyzerJob();
-		analyzerBeanInstance.getAssignConfiguredCallbacks().add(
-				new AssignConfiguredCallback(analyzerJob.getConfiguration(), null));
-		analyzerBeanInstance.assignConfigured();
-		AnalyzerConsumer consumer = new AnalyzerConsumer(null, analyzerBeanInstance, analyzerJob,
-				analyzerBuilder.getInput(), null);
+		beanInstance.getAssignConfiguredCallbacks().add(new AssignConfiguredCallback(analyzerJob.getConfiguration(), null));
+		beanInstance.assignConfigured();
+		AnalyzerConsumer consumer = new AnalyzerConsumer(null, beanInstance, analyzerJob, analyzerBuilder.getInput(), null);
 		return consumer;
 	}
 }

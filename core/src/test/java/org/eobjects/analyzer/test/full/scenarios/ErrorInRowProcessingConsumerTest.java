@@ -26,9 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
@@ -56,7 +56,7 @@ import org.eobjects.metamodel.schema.Column;
 public class ErrorInRowProcessingConsumerTest extends TestCase {
 
 	@AnalyzerBean("Errornous analyzer")
-	public static class ErrornousAnalyzer implements RowProcessingAnalyzer<NumberResult> {
+	public static class ErrornousAnalyzer implements Analyzer<NumberResult> {
 
 		private final AtomicInteger counter = new AtomicInteger(0);
 
@@ -98,7 +98,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		assertNotNull(column);
 
 		ajb.addSourceColumn(column);
-		ajb.addRowProcessingAnalyzer(ErrornousAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
+		ajb.addAnalyzer(ErrornousAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
 
 		AnalysisJob job = ajb.toAnalysisJob();
 

@@ -35,7 +35,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
@@ -78,16 +78,16 @@ public class ValueDistributionAndStringAnalysisTest extends TestCase {
 		analysisJobBuilder.addSourceColumns(columns);
 
 		for (InputColumn<?> inputColumn : analysisJobBuilder.getSourceColumns()) {
-			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
-					.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
+			AnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
+					.addAnalyzer(ValueDistributionAnalyzer.class);
 			valueDistribuitionJobBuilder.addInputColumn(inputColumn);
 			valueDistribuitionJobBuilder.setConfiguredProperty("Record unique values", false);
 			valueDistribuitionJobBuilder.setConfiguredProperty("Top n most frequent values", null);
 			valueDistribuitionJobBuilder.setConfiguredProperty("Bottom n most frequent values", null);
 		}
 
-		RowProcessingAnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder
-				.addRowProcessingAnalyzer(StringAnalyzer.class);
+		AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder
+				.addAnalyzer(StringAnalyzer.class);
 		stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING));
 
 		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();

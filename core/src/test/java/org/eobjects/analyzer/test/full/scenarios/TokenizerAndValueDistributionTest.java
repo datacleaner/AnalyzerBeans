@@ -35,7 +35,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -87,8 +87,8 @@ public class TokenizerAndValueDistributionTest extends TestCase {
 		transformerOutput.get(3).setName("fourth words");
 
 		for (InputColumn<?> inputColumn : transformerOutput) {
-			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
-					.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
+			AnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
+					.addAnalyzer(ValueDistributionAnalyzer.class);
 			valueDistribuitionJobBuilder.addInputColumn(inputColumn);
 			valueDistribuitionJobBuilder.setConfiguredProperty("Record unique values", true);
 			valueDistribuitionJobBuilder.setConfiguredProperty("Top n most frequent values", null);

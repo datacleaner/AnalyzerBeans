@@ -26,9 +26,9 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.connection.DataContextProvider;
-import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
+import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.DataContext;
@@ -37,7 +37,7 @@ import org.eobjects.metamodel.schema.Relationship;
 public class JoinMatcherTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor<JoinMatcher> descriptor = Descriptors.ofAnalyzer(JoinMatcher.class);
+		ExplorerBeanDescriptor<JoinMatcher> descriptor = Descriptors.ofExplorer(JoinMatcher.class);
 
 		List<ConfiguredPropertyDescriptor> configuredProperties = new ArrayList<ConfiguredPropertyDescriptor>(
 				descriptor.getConfiguredProperties());

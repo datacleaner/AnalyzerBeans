@@ -84,7 +84,7 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 		tjb.addInputColumn(usernameColumn);
 		List<MutableInputColumn<?>> outputColumns = tjb.getOutputColumns();
 
-		ajb.addRowProcessingAnalyzer(BooleanAnalyzer.class).addInputColumns(outputColumns);
+		ajb.addAnalyzer(BooleanAnalyzer.class).addInputColumns(outputColumns);
 		AnalysisJob job = ajb.toAnalysisJob();
 
 		AnalysisResultFuture result = runner.run(job);

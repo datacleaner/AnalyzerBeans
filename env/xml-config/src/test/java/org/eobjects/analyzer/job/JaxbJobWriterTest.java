@@ -46,9 +46,9 @@ import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.test.TestHelper;
@@ -88,8 +88,8 @@ public class JaxbJobWriterTest extends TestCase {
 				.replace(new DatastoreCatalogImpl(ds));
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(ds);
-	
-		DateGapAnalyzer dga = ajb.addRowProcessingAnalyzer(
+
+		DateGapAnalyzer dga = ajb.addAnalyzer(
 				DateGapAnalyzer.class).getConfigurableBean();
 		Column orderDateColumn = ds.getDataContextProvider()
 				.getSchemaNavigator()
@@ -177,6 +177,8 @@ public class JaxbJobWriterTest extends TestCase {
 				new ArrayList<MergedOutcomeJob>());
 		EasyMock.expect(job.getAnalyzerJobs()).andReturn(
 				new ArrayList<AnalyzerJob>());
+		EasyMock.expect(job.getExplorerJobs()).andReturn(
+				new ArrayList<ExplorerJob>());
 
 		EasyMock.replay(job, ds);
 
@@ -226,8 +228,8 @@ public class JaxbJobWriterTest extends TestCase {
 		InputColumn<?> lnCol = ajb.getSourceColumnByName("LASTNAME");
 		InputColumn<?> emailCol = ajb.getSourceColumnByName("EMAIL");
 
-		RowProcessingAnalyzerJobBuilder<StringAnalyzer> strAnalyzer = ajb
-				.addRowProcessingAnalyzer(StringAnalyzer.class);
+		AnalyzerJobBuilder<StringAnalyzer> strAnalyzer = ajb
+				.addAnalyzer(StringAnalyzer.class);
 		strAnalyzer.addInputColumns(fnCol, lnCol);
 
 		assertMatchesBenchmark(ajb.toAnalysisJob(),
@@ -249,8 +251,8 @@ public class JaxbJobWriterTest extends TestCase {
 		assertMatchesBenchmark(ajb.toAnalysisJob(),
 				"JaxbJobWriterTest-file3.xml");
 
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder1 = ajb
-				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder1 = ajb
+				.addAnalyzer(PatternFinderAnalyzer.class);
 		makeCrossPlatformCompatible(patternFinder1);
 		MutableInputColumn<?> usernameColumn = tjb
 				.getOutputColumnByName("Username");
@@ -274,8 +276,8 @@ public class JaxbJobWriterTest extends TestCase {
 				.get(0);
 		mergedColumn.setName("Merged output column (fn or username)");
 
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder2 = ajb
-				.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder2 = ajb
+				.addAnalyzer(PatternFinderAnalyzer.class);
 		makeCrossPlatformCompatible(patternFinder2);
 		patternFinder2.addInputColumn(mergedColumn);
 
@@ -301,7 +303,7 @@ public class JaxbJobWriterTest extends TestCase {
 	 * @param pfb
 	 */
 	private void makeCrossPlatformCompatible(
-			RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> pfb) {
+			AnalyzerJobBuilder<PatternFinderAnalyzer> pfb) {
 		PatternFinderAnalyzer pf = pfb.getConfigurableBean();
 		pf.setDecimalSeparator('.');
 		pf.setMinusSign('-');

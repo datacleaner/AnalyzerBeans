@@ -26,13 +26,13 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
@@ -48,7 +48,7 @@ import org.joda.time.LocalTime;
 @AnalyzerBean("Date/time analyzer")
 @Description("Records a variety of interesting measures for date or time based data. Which are the highest/lowest values? How is the year distribution of dates? Are there null values?")
 @Concurrent(true)
-public class DateAndTimeAnalyzer implements RowProcessingAnalyzer<DateAndTimeAnalyzerResult> {
+public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> {
 
 	private Map<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate> _delegates = new HashMap<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate>();
 

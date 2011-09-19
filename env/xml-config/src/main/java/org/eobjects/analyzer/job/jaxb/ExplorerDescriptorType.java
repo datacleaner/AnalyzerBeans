@@ -37,12 +37,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
- * <p>Java class for transformerDescriptorType complex type.
+ * <p>Java class for explorerDescriptorType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="transformerDescriptorType">
+ * &lt;complexType name="explorerDescriptorType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;attribute name="ref" use="required" type="{http://www.w3.org/2001/XMLSchema}token" />
@@ -54,8 +54,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "transformerDescriptorType")
-public class TransformerDescriptorType {
+@XmlType(name = "explorerDescriptorType")
+public class ExplorerDescriptorType {
 
     @XmlAttribute(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

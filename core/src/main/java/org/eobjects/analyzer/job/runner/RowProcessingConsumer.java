@@ -26,7 +26,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 
 /**
  * Interface for objects that recieve rows from the RowProcessingPublisher.
@@ -85,7 +85,7 @@ public interface RowProcessingConsumer {
 	/**
 	 * @return the bean instance or null if none is available
 	 */
-	public AbstractBeanInstance<?> getBeanInstance();
+	public BeanInstance<?> getBeanInstance();
 
 	/**
 	 * @return the componbent job

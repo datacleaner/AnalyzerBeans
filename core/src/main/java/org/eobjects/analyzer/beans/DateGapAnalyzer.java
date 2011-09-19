@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.DateGapAnalyzerResult;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Date gap analyzer")
 @Description("Analyze the periodic gaps between FROM and TO dates.")
-public class DateGapAnalyzer implements RowProcessingAnalyzer<DateGapAnalyzerResult> {
+public class DateGapAnalyzer implements Analyzer<DateGapAnalyzerResult> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DateGapAnalyzer.class);
 

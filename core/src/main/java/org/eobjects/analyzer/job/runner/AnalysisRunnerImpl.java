@@ -62,7 +62,7 @@ public final class AnalysisRunnerImpl implements AnalysisRunner {
 
 	@Override
 	public AnalysisResultFuture run(final AnalysisJob job) {
-		final Queue<AnalyzerJobResult> resultQueue = new LinkedBlockingQueue<AnalyzerJobResult>();
+		final Queue<JobAndResult> resultQueue = new LinkedBlockingQueue<JobAndResult>();
 
 		// This analysis listener will keep track of all collected errors
 		final ErrorAwareAnalysisListener errorListener = new ErrorAwareAnalysisListener();

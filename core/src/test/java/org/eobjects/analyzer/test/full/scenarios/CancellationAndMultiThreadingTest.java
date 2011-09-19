@@ -81,7 +81,7 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 		Column commentsColumn = table.getColumnByName("COMMENTS");
 
 		analysisJobBuilder.addSourceColumns(statusColumn, commentsColumn);
-		analysisJobBuilder.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class).addInputColumns(
+		analysisJobBuilder.addAnalyzer(ValueDistributionAnalyzer.class).addInputColumns(
 				analysisJobBuilder.getSourceColumns());
 
 		AnalysisJob job = analysisJobBuilder.toAnalysisJob();

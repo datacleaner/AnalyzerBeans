@@ -21,6 +21,7 @@ package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -67,6 +68,21 @@ public class InfoLoggingAnalysisListener implements AnalysisListener {
 		if (currentRow > 0 && currentRow % 1000 == 0) {
 			logger.info("Reading row no. {} in {}", new Object[] { currentRow, table.getName() });
 		}
+	}
+
+	@Override
+	public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
+		// do nothing
+	}
+
+	@Override
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob) {
+		// do nothing
+	}
+
+	@Override
+	public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
+		// do nothing
 	}
 
 	@Override

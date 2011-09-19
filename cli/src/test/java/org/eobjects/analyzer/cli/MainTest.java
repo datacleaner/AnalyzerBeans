@@ -50,9 +50,9 @@ public class MainTest extends TestCase {
 		assertEquals("-job (--job-file) FILE                                     : An analysis job XML file to execute",
 				lines[3].trim());
 		assertEquals(
-				"-list [ANALYZERS | TRANSFORMERS | FILTERS | DATASTORES | S : Used to print a list of various elements available in the",
+				"-list [ANALYZERS | TRANSFORMERS | FILTERS | EXPLORERS | DA : Used to print a list of various elements available in the",
 				lines[4].trim());
-		assertEquals("CHEMAS | TABLES | COLUMNS]                                 : configuration", lines[5].trim());
+		assertEquals("TASTORES | SCHEMAS | TABLES | COLUMNS]                     : configuration", lines[5].trim());
 		assertEquals(
 				"-s (-schema, --schema-name) VAL                            : Name of schema when printing a list of tables or columns",
 				lines[6].trim());
@@ -156,6 +156,19 @@ public class MainTest extends TestCase {
 
 		assertTrue(out.indexOf("name: Pattern finder") != -1);
 		assertTrue(out.indexOf("name: String analyzer") != -1);
+	}
+	
+	public void testListExplorers() throws Exception {
+		StringWriter stringWriter = new StringWriter();
+		Main.setOut(new PrintWriter(stringWriter));
+
+		Main.main("-conf examples/conf.xml -list EXPLORERS".split(" "));
+
+		String out = stringWriter.toString().replaceAll("\r\n", "\n");
+		String[] lines = out.split("\n");
+
+		assertEquals("Explorers:", lines[0]);
+
 		assertTrue(out.indexOf("name: Compare schema structures") != -1);
 	}
 

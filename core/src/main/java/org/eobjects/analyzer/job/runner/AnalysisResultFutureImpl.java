@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
-import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.concurrent.StatusAwareTaskListener;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
@@ -36,12 +36,12 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnalysisResultFutureImpl.class);
 
-	private final Queue<AnalyzerJobResult> _resultQueue;
+	private final Queue<JobAndResult> _resultQueue;
 	private final ErrorAware _errorAware;
 	private final StatusAwareTaskListener _jobTaskListener;
 	private volatile boolean _done;
 
-	public AnalysisResultFutureImpl(Queue<AnalyzerJobResult> resultQueue, StatusAwareTaskListener jobCompletionListener,
+	public AnalysisResultFutureImpl(Queue<JobAndResult> resultQueue, StatusAwareTaskListener jobCompletionListener,
 			ErrorAware errorAware) {
 		_resultQueue = resultQueue;
 		_jobTaskListener = jobCompletionListener;
@@ -94,23 +94,23 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 		if (isErrornous()) {
 			throwError();
 		}
-		ArrayList<AnalyzerJobResult> resultQueueCopy = new ArrayList<AnalyzerJobResult>(_resultQueue);
+		ArrayList<JobAndResult> resultQueueCopy = new ArrayList<JobAndResult>(_resultQueue);
 		ArrayList<AnalyzerResult> result = new ArrayList<AnalyzerResult>(resultQueueCopy.size());
-		for (AnalyzerJobResult jobResult : resultQueueCopy) {
+		for (JobAndResult jobResult : resultQueueCopy) {
 			result.add(jobResult.getResult());
 		}
 		return result;
 	}
 
 	@Override
-	public AnalyzerResult getResult(AnalyzerJob analyzerJob) throws IllegalStateException {
+	public AnalyzerResult getResult(ComponentJob componentJob) throws IllegalStateException {
 		await();
 		if (isErrornous()) {
 			throwError();
 		}
-		ArrayList<AnalyzerJobResult> resultQueueCopy = new ArrayList<AnalyzerJobResult>(_resultQueue);
-		for (AnalyzerJobResult jobResult : resultQueueCopy) {
-			if (jobResult.getJob().equals(analyzerJob)) {
+		ArrayList<JobAndResult> resultQueueCopy = new ArrayList<JobAndResult>(_resultQueue);
+		for (JobAndResult jobResult : resultQueueCopy) {
+			if (jobResult.getJob().equals(componentJob)) {
 				return jobResult.getResult();
 			}
 		}
@@ -118,15 +118,15 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	}
 
 	@Override
-	public Map<AnalyzerJob, AnalyzerResult> getResultMap() throws IllegalStateException {
+	public Map<ComponentJob, AnalyzerResult> getResultMap() throws IllegalStateException {
 		await();
 		if (isErrornous()) {
 			throwError();
 		}
-		ArrayList<AnalyzerJobResult> resultQueueCopy = new ArrayList<AnalyzerJobResult>(_resultQueue);
-		Map<AnalyzerJob, AnalyzerResult> result = new HashMap<AnalyzerJob, AnalyzerResult>();
-		for (AnalyzerJobResult jobResult : resultQueueCopy) {
-			AnalyzerJob job = jobResult.getJob();
+		ArrayList<JobAndResult> resultQueueCopy = new ArrayList<JobAndResult>(_resultQueue);
+		Map<ComponentJob, AnalyzerResult> result = new HashMap<ComponentJob, AnalyzerResult>();
+		for (JobAndResult jobResult : resultQueueCopy) {
+			ComponentJob job = jobResult.getJob();
 			AnalyzerResult analyzerResult = jobResult.getResult();
 			result.put(job, analyzerResult);
 		}

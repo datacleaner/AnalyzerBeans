@@ -96,8 +96,8 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
 		assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(), ValidationCategory.VALID)));
 		assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(), ValidationCategory.INVALID)));
 
-		RowProcessingAnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder
-				.addRowProcessingAnalyzer(StringAnalyzer.class);
+		AnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder
+				.addAnalyzer(StringAnalyzer.class);
 		ajb.setRequirement(outcome);
 	}
 
@@ -137,7 +137,7 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
 		assertTrue(outputColumn.isVirtualColumn());
 		assertEquals("Merged column 1", outputColumn.getName());
 
-		RowProcessingAnalyzerJobBuilder<PatternFinderAnalyzer> a = ajb.addRowProcessingAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> a = ajb.addAnalyzer(PatternFinderAnalyzer.class);
 		a.addInputColumn(outputColumn);
 
 		AnalysisJob analysisJob = ajb.toAnalysisJob();

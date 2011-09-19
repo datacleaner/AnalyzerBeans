@@ -29,7 +29,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -51,8 +51,8 @@ public class DateAndTimeAnalyzerTest extends TestCase {
 
 		ajb.addSourceColumns("ORDERFACT.ORDERDATE", "ORDERFACT.REQUIREDDATE", "ORDERFACT.SHIPPEDDATE");
 
-		RowProcessingAnalyzerJobBuilder<DateAndTimeAnalyzer> analyzer = ajb
-				.addRowProcessingAnalyzer(DateAndTimeAnalyzer.class);
+		AnalyzerJobBuilder<DateAndTimeAnalyzer> analyzer = ajb
+				.addAnalyzer(DateAndTimeAnalyzer.class);
 		analyzer.addInputColumns(ajb.getSourceColumns());
 
 		AnalysisJob job = ajb.toAnalysisJob();

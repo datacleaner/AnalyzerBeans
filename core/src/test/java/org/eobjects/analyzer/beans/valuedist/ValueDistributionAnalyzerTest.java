@@ -32,8 +32,6 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
 		AnalyzerBeanDescriptor<?> desc = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
-		assertEquals(true, desc.isRowProcessingAnalyzer());
-		assertEquals(false, desc.isExploringAnalyzer());
 		assertEquals(0, desc.getInitializeMethods().size());
 		assertEquals(5, desc.getConfiguredProperties().size());
 		assertEquals(1, desc.getProvidedProperties().size());

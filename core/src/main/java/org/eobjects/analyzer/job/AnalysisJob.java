@@ -37,4 +37,6 @@ public interface AnalysisJob {
 	public Collection<MergedOutcomeJob> getMergedOutcomeJobs();
 
 	public Collection<AnalyzerJob> getAnalyzerJobs();
+	
+	public Collection<ExplorerJob> getExplorerJobs();
 }

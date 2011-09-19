@@ -25,17 +25,17 @@ import javax.inject.Inject;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
@@ -51,7 +51,7 @@ public class InjectionManagerImplTest extends TestCase {
 
 	@Ignore
 	@AnalyzerBean("Fancy transformer")
-	public static class FancyTransformer implements RowProcessingAnalyzer<AnnotatedRowsResult> {
+	public static class FancyTransformer implements Analyzer<AnnotatedRowsResult> {
 
 		@Provided
 		List<String> stringList;
@@ -95,8 +95,8 @@ public class InjectionManagerImplTest extends TestCase {
 		ajb.setDatastore("orderdb");
 		ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
 
-		final RowProcessingAnalyzerJobBuilder<FancyTransformer> analyzerBuilder = ajb
-				.addRowProcessingAnalyzer(FancyTransformer.class);
+		final AnalyzerJobBuilder<FancyTransformer> analyzerBuilder = ajb
+				.addAnalyzer(FancyTransformer.class);
 		analyzerBuilder.addInputColumns(ajb.getSourceColumns());
 
 		final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());

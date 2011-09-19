@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
@@ -53,7 +53,7 @@ public interface AnalysisResultFuture extends ErrorAware {
 	 * job has ended.
 	 */
 	public void await();
-	
+
 	/**
 	 * Cancels the job, if it is still running.
 	 */
@@ -93,24 +93,26 @@ public interface AnalysisResultFuture extends ErrorAware {
 	/**
 	 * Finds (and waits if nescesary) the results of a single Analyzer.
 	 * 
-	 * @param analyzerJob
-	 * @return the result for a given analyzer job
+	 * @param componentJob
+	 *            the component (either analyzer or explorer) job to find the
+	 *            result for
+	 * @return the result for a given component job
 	 * @throws IllegalStateException
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
-	public AnalyzerResult getResult(AnalyzerJob analyzerJob) throws IllegalStateException;
+	public AnalyzerResult getResult(ComponentJob componentJob) throws IllegalStateException;
 
 	/**
 	 * Finds (and waits if nescesary) the results mapped to the Analyzer jobs
 	 * 
-	 * @return a map with AnalyzerJobs as keys to the corresponding
+	 * @return a map with ComponentJobs as keys to the corresponding
 	 *         AnalyzerResults.
 	 * @throws IllegalStateException
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
-	public Map<AnalyzerJob, AnalyzerResult> getResultMap() throws IllegalStateException;
+	public Map<ComponentJob, AnalyzerResult> getResultMap() throws IllegalStateException;
 
 	/**
 	 * @return any errors reported during execution, if the job was not

@@ -24,11 +24,8 @@ import java.util.List;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.result.DataSetResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
@@ -39,6 +36,8 @@ import org.eobjects.metamodel.query.SelectClause;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An analyzer that performs a check on a weak foreign key / reference.
@@ -46,7 +45,7 @@ import org.eobjects.metamodel.schema.Table;
  * @author Kasper Sørensen
  */
 @AnalyzerBean("Referential Integrity validator")
-public class ReferentialIntegrityValidator implements ExploringAnalyzer<DataSetResult> {
+public class ReferentialIntegrityValidator implements Explorer<DataSetResult> {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private List<Row> invalidRows;

@@ -22,6 +22,7 @@ package org.eobjects.analyzer.descriptors;
 import java.util.Collection;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
@@ -39,6 +40,12 @@ public interface DescriptorProvider {
 	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(Class<A> analyzerClass);
 
 	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name);
+	
+	public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors();
+
+	public <E extends Explorer<?>> ExplorerBeanDescriptor<E> getExplorerBeanDescriptorForClass(Class<E> explorerClass);
+
+	public ExplorerBeanDescriptor<?> getExplorerBeanDescriptorByDisplayName(String name);
 
 	public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors();
 

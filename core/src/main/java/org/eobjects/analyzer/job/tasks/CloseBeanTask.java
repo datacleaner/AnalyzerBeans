@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
-import org.eobjects.analyzer.lifecycle.AbstractBeanInstance;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +27,14 @@ public class CloseBeanTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final AbstractBeanInstance<?> _beanInstance;
+	private final BeanInstance<?> _beanInstance;
 
-	public CloseBeanTask(AbstractBeanInstance<?> beanInstance) {
+	public CloseBeanTask(BeanInstance<?> beanInstance) {
 		_beanInstance = beanInstance;
+	}
+	
+	public BeanInstance<?> getBeanInstance() {
+		return _beanInstance;
 	}
 
 	@Override

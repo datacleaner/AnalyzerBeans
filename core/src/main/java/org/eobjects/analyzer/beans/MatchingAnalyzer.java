@@ -22,12 +22,12 @@ package org.eobjects.analyzer.beans;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.beans.transform.DictionaryMatcherTransformer;
 import org.eobjects.analyzer.beans.transform.StringPatternMatcherTransformer;
 import org.eobjects.analyzer.data.InputColumn;
@@ -41,7 +41,7 @@ import org.eobjects.metamodel.util.CollectionUtils;
 
 @AnalyzerBean("Matching analyzer")
 @Description("Provides a handy shortcut for doing matching with dictionaries and string patterns as well as retrieving matching matrices for all matches.")
-public class MatchingAnalyzer implements RowProcessingAnalyzer<BooleanAnalyzerResult> {
+public class MatchingAnalyzer implements Analyzer<BooleanAnalyzerResult> {
 
 	@Configured(order = 1)
 	InputColumn<?>[] columns;

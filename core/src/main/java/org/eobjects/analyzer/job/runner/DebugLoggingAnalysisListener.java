@@ -21,6 +21,7 @@ package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -78,8 +79,18 @@ public class DebugLoggingAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob) {
+		logger.debug("explorerBegin({}, {})", new Object[] { job, explorerJob });
+	}
+
+	@Override
 	public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
 		logger.debug("analyzerSuccess({}, {})", new Object[] { job, analyzerJob, result });
+	}
+
+	@Override
+	public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
+		logger.debug("explorerSuccess({}, {}, {})", new Object[] { job, explorerJob, result });
 	}
 
 	@Override
@@ -95,6 +106,11 @@ public class DebugLoggingAnalysisListener implements AnalysisListener {
 	@Override
 	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, Throwable throwable) {
 		logger.debug("errorInAnalyzer(" + job + "," + analyzerJob + ")", throwable);
+	}
+
+	@Override
+	public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
+		logger.debug("errorInExplorer(" + job + "," + explorerJob + ")", throwable);
 	}
 
 	@Override

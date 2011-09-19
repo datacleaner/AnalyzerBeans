@@ -36,8 +36,8 @@ import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -55,13 +55,16 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 	public void testScenario() throws Throwable {
 		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
+		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
+				.replace(taskRunner);
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		CsvDatastore ds = new CsvDatastore("data.csv", "../../core/src/test/resources/NameAndEmailPartEqualityTest-data.csv");
+		CsvDatastore ds = new CsvDatastore("data.csv",
+				"../../core/src/test/resources/NameAndEmailPartEqualityTest-data.csv");
 
-		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
+		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
+				configuration);
 		analysisJobBuilder.setDatastore(ds);
 
 		DataContextProvider dcp = ds.getDataContextProvider();
@@ -76,12 +79,15 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		TransformerJobBuilder<NameStandardizerTransformer> nameTransformerJobBuilder = analysisJobBuilder
 				.addTransformer(NameStandardizerTransformer.class);
-		nameTransformerJobBuilder.addInputColumn(analysisJobBuilder.getSourceColumnByName("name"));
-		nameTransformerJobBuilder.setConfiguredProperty("Name patterns", NameStandardizerTransformer.DEFAULT_PATTERNS);
+		nameTransformerJobBuilder.addInputColumn(analysisJobBuilder
+				.getSourceColumnByName("name"));
+		nameTransformerJobBuilder.setConfiguredProperty("Name patterns",
+				NameStandardizerTransformer.DEFAULT_PATTERNS);
 
 		assertTrue(nameTransformerJobBuilder.isConfigured());
 
-		final List<MutableInputColumn<?>> nameColumns = nameTransformerJobBuilder.getOutputColumns();
+		final List<MutableInputColumn<?>> nameColumns = nameTransformerJobBuilder
+				.getOutputColumns();
 		assertEquals(4, nameColumns.size());
 		assertEquals("Firstname", nameColumns.get(0).getName());
 		assertEquals("Lastname", nameColumns.get(1).getName());
@@ -90,7 +96,8 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		TransformerJobBuilder<EmailStandardizerTransformer> emailTransformerJobBuilder = analysisJobBuilder
 				.addTransformer(EmailStandardizerTransformer.class);
-		emailTransformerJobBuilder.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"));
+		emailTransformerJobBuilder.addInputColumn(analysisJobBuilder
+				.getSourceColumnByName("email"));
 
 		assertTrue(emailTransformerJobBuilder.isConfigured());
 
@@ -99,34 +106,47 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 				.getOutputColumnByName("Username");
 		assertNotNull(usernameColumn);
 
-		assertTrue(analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumns(nameColumns)
-				.addInputColumns(emailTransformerJobBuilder.getOutputColumns()).isConfigured());
+		assertTrue(analysisJobBuilder
+				.addAnalyzer(StringAnalyzer.class)
+				.addInputColumns(nameColumns)
+				.addInputColumns(emailTransformerJobBuilder.getOutputColumns())
+				.isConfigured());
 
 		for (InputColumn<?> inputColumn : nameColumns) {
-			RowProcessingAnalyzerJobBuilder<ValueDistributionAnalyzer> analyzerJobBuilder = analysisJobBuilder
-					.addRowProcessingAnalyzer(ValueDistributionAnalyzer.class);
+			AnalyzerJobBuilder<ValueDistributionAnalyzer> analyzerJobBuilder = analysisJobBuilder
+					.addAnalyzer(ValueDistributionAnalyzer.class);
 			analyzerJobBuilder.addInputColumn(inputColumn);
-			analyzerJobBuilder.setConfiguredProperty("Record unique values", false);
-			analyzerJobBuilder.setConfiguredProperty("Top n most frequent values", 1000);
-			analyzerJobBuilder.setConfiguredProperty("Bottom n most frequent values", 1000);
+			analyzerJobBuilder.setConfiguredProperty("Record unique values",
+					false);
+			analyzerJobBuilder.setConfiguredProperty(
+					"Top n most frequent values", 1000);
+			analyzerJobBuilder.setConfiguredProperty(
+					"Bottom n most frequent values", 1000);
 			assertTrue(analyzerJobBuilder.isConfigured());
 		}
 
-		FilterJobBuilder<JavaScriptFilter, ValidationCategory> fjb = analysisJobBuilder.addFilter(JavaScriptFilter.class);
-		fjb.addInputColumn(nameTransformerJobBuilder.getOutputColumnByName("Firstname"));
+		FilterJobBuilder<JavaScriptFilter, ValidationCategory> fjb = analysisJobBuilder
+				.addFilter(JavaScriptFilter.class);
+		fjb.addInputColumn(nameTransformerJobBuilder
+				.getOutputColumnByName("Firstname"));
 		fjb.addInputColumn(usernameColumn);
 		fjb.setConfiguredProperty("Source code", "values[0] == values[1];");
 
 		assertTrue(fjb.isConfigured());
 
-		analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class)
-				.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"))
+		analysisJobBuilder
+				.addAnalyzer(StringAnalyzer.class)
+				.addInputColumn(
+						analysisJobBuilder.getSourceColumnByName("email"))
 				.setRequirement(fjb, ValidationCategory.VALID);
-		analysisJobBuilder.addRowProcessingAnalyzer(StringAnalyzer.class)
-				.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"))
+		analysisJobBuilder
+				.addAnalyzer(StringAnalyzer.class)
+				.addInputColumn(
+						analysisJobBuilder.getSourceColumnByName("email"))
 				.setRequirement(fjb, ValidationCategory.INVALID);
 
-		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
+		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder
+				.toAnalysisJob());
 
 		dcp.close();
 
@@ -139,39 +159,54 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 
 		assertEquals(7, results.size());
 
-		ValueDistributionResult vdResult = (ValueDistributionResult) results.get(1);
+		ValueDistributionResult vdResult = (ValueDistributionResult) results
+				.get(1);
 		assertEquals("Firstname", vdResult.getColumnName());
-		assertEquals(0, vdResult.getSingleValueDistributionResult().getNullCount());
-		assertEquals(2, vdResult.getSingleValueDistributionResult().getUniqueCount());
-		assertEquals("ValueCountList[[[barack->4]]]", vdResult.getSingleValueDistributionResult().getTopValues().toString());
+		assertEquals(0, vdResult.getSingleValueDistributionResult()
+				.getNullCount());
+		assertEquals(2, vdResult.getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals("ValueCountList[[[barack->4]]]", vdResult
+				.getSingleValueDistributionResult().getTopValues().toString());
 
 		vdResult = (ValueDistributionResult) results.get(2);
 		assertEquals("Lastname", vdResult.getColumnName());
-		assertEquals(0, vdResult.getSingleValueDistributionResult().getNullCount());
-		assertEquals(0, vdResult.getSingleValueDistributionResult().getUniqueCount());
-		assertEquals("ValueCountList[[[obama->4], [doe->2]]]", vdResult.getSingleValueDistributionResult().getTopValues()
-				.toString());
+		assertEquals(0, vdResult.getSingleValueDistributionResult()
+				.getNullCount());
+		assertEquals(0, vdResult.getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals("ValueCountList[[[obama->4], [doe->2]]]", vdResult
+				.getSingleValueDistributionResult().getTopValues().toString());
 
 		vdResult = (ValueDistributionResult) results.get(3);
 		assertEquals("Middlename", vdResult.getColumnName());
-		assertEquals(4, vdResult.getSingleValueDistributionResult().getNullCount());
-		assertEquals(0, vdResult.getSingleValueDistributionResult().getUniqueCount());
-		assertEquals("ValueCountList[[[hussein->2]]]", vdResult.getSingleValueDistributionResult().getTopValues().toString());
+		assertEquals(4, vdResult.getSingleValueDistributionResult()
+				.getNullCount());
+		assertEquals(0, vdResult.getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals("ValueCountList[[[hussein->2]]]", vdResult
+				.getSingleValueDistributionResult().getTopValues().toString());
 
 		vdResult = (ValueDistributionResult) results.get(4);
 		assertEquals("Titulation", vdResult.getColumnName());
-		assertEquals(6, vdResult.getSingleValueDistributionResult().getNullCount());
-		assertEquals(0, vdResult.getSingleValueDistributionResult().getUniqueCount());
-		assertEquals("ValueCountList[[]]", vdResult.getSingleValueDistributionResult().getTopValues().toString());
+		assertEquals(6, vdResult.getSingleValueDistributionResult()
+				.getNullCount());
+		assertEquals(0, vdResult.getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals("ValueCountList[[]]", vdResult
+				.getSingleValueDistributionResult().getTopValues().toString());
 
-		StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) results.get(5);
+		StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) results
+				.get(5);
 		assertEquals(1, stringAnalyzerResult.getColumns().length);
-		assertEquals("4", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count").get()
-				.toString());
+		assertEquals("4",
+				stringAnalyzerResult.getCrosstab().where("Column", "email")
+						.where("Measures", "Row count").get().toString());
 
 		stringAnalyzerResult = (StringAnalyzerResult) results.get(6);
 		assertEquals(1, stringAnalyzerResult.getColumns().length);
-		assertEquals("2", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count").get()
-				.toString());
+		assertEquals("2",
+				stringAnalyzerResult.getCrosstab().where("Column", "email")
+						.where("Measures", "Row count").get().toString());
 	}
 }

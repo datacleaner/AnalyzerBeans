@@ -25,22 +25,22 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.NumberResult;
 
 @AnalyzerBean("Row-processing mock")
-public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer<NumberResult> {
+public class AnalyzerMock implements Analyzer<NumberResult> {
 
-	private static List<RowProcessingAnalyzerMock> instances = new LinkedList<RowProcessingAnalyzerMock>();
+	private static List<AnalyzerMock> instances = new LinkedList<AnalyzerMock>();
 
-	public static List<RowProcessingAnalyzerMock> getInstances() {
+	public static List<AnalyzerMock> getInstances() {
 		return instances;
 	}
 
@@ -48,7 +48,7 @@ public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer<NumberRe
 		instances.clear();
 	}
 
-	public RowProcessingAnalyzerMock() {
+	public AnalyzerMock() {
 		instances.add(this);
 	}
 
@@ -151,6 +151,6 @@ public class RowProcessingAnalyzerMock implements RowProcessingAnalyzer<NumberRe
 	}
 
 	public NumberResult getResult() {
-		return new NumberResult( rowCount);
+		return new NumberResult(rowCount);
 	}
 }

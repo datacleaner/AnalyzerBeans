@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -62,12 +63,13 @@ import org.eobjects.analyzer.beans.api.Transformer;
 public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 
 	private List<AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new ArrayList<AnalyzerBeanDescriptor<?>>();
+	private List<ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new ArrayList<ExplorerBeanDescriptor<?>>();
 	private List<TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new ArrayList<TransformerBeanDescriptor<?>>();
 	private List<RendererBeanDescriptor> _rendererBeanDescriptors = new ArrayList<RendererBeanDescriptor>();
 	private List<FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new ArrayList<FilterBeanDescriptor<?, ?>>();
-	
+
 	private final boolean _autoDiscover;
-	
+
 	public SimpleDescriptorProvider() {
 		this(true);
 	}
@@ -75,7 +77,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 	public SimpleDescriptorProvider(boolean autoDiscover) {
 		_autoDiscover = autoDiscover;
 	}
-	
+
 	@Override
 	protected <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> notFoundAnalyzer(Class<A> analyzerClass) {
 		if (!_autoDiscover) {
@@ -83,7 +85,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 		}
 		return Descriptors.ofAnalyzer(analyzerClass);
 	}
-	
+
 	@Override
 	protected FilterBeanDescriptor<?, ?> notFoundFilter(Class<?> filterClass) {
 		if (!_autoDiscover) {
@@ -91,7 +93,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 		}
 		return Descriptors.ofFilterUnbound(filterClass);
 	}
-	
+
 	@Override
 	protected RendererBeanDescriptor notFoundRenderer(Class<? extends Renderer<?, ?>> rendererClass) {
 		if (!_autoDiscover) {
@@ -99,7 +101,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 		}
 		return Descriptors.ofRenderer(rendererClass);
 	}
-	
+
 	@Override
 	protected <A extends Transformer<?>> TransformerBeanDescriptor<A> notFoundTransformer(Class<A> transformerClass) {
 		if (!_autoDiscover) {
@@ -136,6 +138,16 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 	@Override
 	public List<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
 		return _transformerBeanDescriptors;
+	}
+
+	@Override
+	public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
+		return _explorerBeanDescriptors;
+	}
+	
+	@Override
+	protected <E extends Explorer<?>> ExplorerBeanDescriptor<E> notFoundExplorer(Class<E> explorerClass) {
+		return Descriptors.ofExplorer(explorerClass);
 	}
 
 	public void setTransformerBeanDescriptors(List<TransformerBeanDescriptor<?>> transformerBeanDescriptors) {
@@ -205,4 +217,5 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 			}
 		}
 	}
+
 }

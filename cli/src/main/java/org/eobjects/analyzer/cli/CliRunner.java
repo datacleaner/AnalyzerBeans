@@ -34,6 +34,7 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.JaxbJobReader;
@@ -87,6 +88,9 @@ public final class CliRunner {
 					break;
 				case FILTERS:
 					printFilters(configuration);
+					break;
+				case EXPLORERS:
+					printExplorers(configuration);
 					break;
 				case DATASTORES:
 					printDatastores(configuration);
@@ -306,6 +310,18 @@ public final class CliRunner {
 		} else {
 			_out.println("Filters:");
 			_out.println("--------");
+			printBeanDescriptors(descriptors);
+		}
+	}
+
+	private void printExplorers(AnalyzerBeansConfiguration configuration) {
+		Collection<ExplorerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
+				.getExplorerBeanDescriptors();
+		if (descriptors == null || descriptors.isEmpty()) {
+			_out.println("No explorers configured!");
+		} else {
+			_out.println("Explorers:");
+			_out.println("----------");
 			printBeanDescriptors(descriptors);
 		}
 	}

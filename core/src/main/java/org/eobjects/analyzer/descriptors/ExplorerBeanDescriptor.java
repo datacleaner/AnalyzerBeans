@@ -17,26 +17,17 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.job.runner;
+package org.eobjects.analyzer.descriptors;
 
-import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.beans.api.Explorer;
 
-public final class AnalyzerJobResult {
+/**
+ * Descriptor interface for {@link Explorer}s.
+ * 
+ * @author Kasper Sørensen
+ * 
+ * @param <B>
+ */
+public interface ExplorerBeanDescriptor<B extends Explorer<?>> extends BeanDescriptor<B> {
 
-	private final AnalyzerJob _job;
-	private final AnalyzerResult _result;
-
-	public AnalyzerJobResult(AnalyzerResult result, AnalyzerJob job) {
-		_job = job;
-		_result = result;
-	}
-
-	public AnalyzerJob getJob() {
-		return _job;
-	}
-
-	public AnalyzerResult getResult() {
-		return _result;
-	}
 }

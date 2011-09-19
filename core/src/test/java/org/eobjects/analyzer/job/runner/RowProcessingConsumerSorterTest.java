@@ -48,9 +48,7 @@ import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
-import org.eobjects.analyzer.lifecycle.AnalyzerBeanInstance;
-import org.eobjects.analyzer.lifecycle.FilterBeanInstance;
-import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.eobjects.analyzer.test.mock.MockDataContextProvider;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
@@ -99,7 +97,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		fjb2.addInputColumn(mergedColumn1);
 
 		// 5: add an analyzer
-		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(mergedColumn1)
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(mergedColumn1)
 				.setRequirement(fjb2, ValidationCategory.VALID);
 
 		assertTrue(ajb.isConfigured());
@@ -147,9 +145,9 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		// 5 and 6: Analyze VALID and INVALID output of single-word filter
 		// separately (the order of these two are not deterministic because of
 		// the shuffle)
-		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn)
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn)
 				.setRequirement(fjb2, ValidationCategory.VALID);
-		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn)
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn)
 				.setRequirement(fjb2, ValidationCategory.INVALID);
 
 		assertTrue(ajb.isConfigured());
@@ -179,8 +177,8 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		TransformerJobBuilder<ConvertToStringTransformer> tjb3 = ajb.addTransformer(ConvertToStringTransformer.class)
 				.addInputColumn(tjb2.getOutputColumns().get(0));
 
-		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
-		ajb.addRowProcessingAnalyzer(StringAnalyzer.class).addInputColumn(tjb3.getOutputColumns().get(0));
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(tjb3.getOutputColumns().get(0));
 
 		ajb.setDataContextProvider(new MockDataContextProvider());
 
@@ -230,17 +228,17 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		AnalysisListener listener = null;
 
 		for (AnalyzerJob analyzerJob : analysisJob.getAnalyzerJobs()) {
-			RowProcessingConsumer consumer = new AnalyzerConsumer(analysisJob, new AnalyzerBeanInstance(
-					analyzerJob.getDescriptor()), analyzerJob, analyzerJob.getInput(), listener);
+			RowProcessingConsumer consumer = new AnalyzerConsumer(analysisJob, BeanInstance.create(analyzerJob
+					.getDescriptor()), analyzerJob, analyzerJob.getInput(), listener);
 			consumers.add(consumer);
 		}
 		for (TransformerJob transformerJob : analysisJob.getTransformerJobs()) {
-			RowProcessingConsumer consumer = new TransformerConsumer(analysisJob, new TransformerBeanInstance(
-					transformerJob.getDescriptor()), transformerJob, transformerJob.getInput(), listener);
+			RowProcessingConsumer consumer = new TransformerConsumer(analysisJob, BeanInstance.create(transformerJob
+					.getDescriptor()), transformerJob, transformerJob.getInput(), listener);
 			consumers.add(consumer);
 		}
 		for (FilterJob filterJob : analysisJob.getFilterJobs()) {
-			FilterConsumer consumer = new FilterConsumer(analysisJob, new FilterBeanInstance(filterJob.getDescriptor()),
+			FilterConsumer consumer = new FilterConsumer(analysisJob, BeanInstance.create(filterJob.getDescriptor()),
 					filterJob, filterJob.getInput(), listener);
 			consumers.add(consumer);
 		}

@@ -24,9 +24,8 @@ import java.util.List;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.result.DataSetResult;
-
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.MetaModelHelper;
 import org.eobjects.metamodel.data.DataSet;
@@ -48,7 +47,7 @@ import org.eobjects.metamodel.schema.Table;
  * @author Kasper Sørensen
  */
 @AnalyzerBean("Join matcher")
-public class JoinMatcher implements ExploringAnalyzer<DataSetResult> {
+public class JoinMatcher implements Explorer<DataSetResult> {
 
 	@Configured(order = 1)
 	private Table leftTable;

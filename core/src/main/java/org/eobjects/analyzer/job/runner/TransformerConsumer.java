@@ -35,22 +35,22 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector.Listener;
-import org.eobjects.analyzer.lifecycle.TransformerBeanInstance;
+import org.eobjects.analyzer.lifecycle.BeanInstance;
 
 final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
-	private final TransformerBeanInstance _transformerBeanInstance;
+	private final BeanInstance<? extends Transformer<?>> _beanInstance;
 	private final TransformerJob _transformerJob;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
 	private final boolean _concurrent;
 
-	public TransformerConsumer(AnalysisJob job, TransformerBeanInstance transformerBeanInstance,
+	public TransformerConsumer(AnalysisJob job, BeanInstance<? extends Transformer<?>> beanInstance,
 			TransformerJob transformerJob, InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
 		super(transformerJob);
 		_job = job;
-		_transformerBeanInstance = transformerBeanInstance;
+		_beanInstance = beanInstance;
 		_transformerJob = transformerJob;
 		_inputColumns = inputColumns;
 		_analysisListener = analysisListener;
@@ -78,7 +78,7 @@ final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implement
 	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
 		final InputColumn<?>[] outputColumns = _transformerJob.getOutput();
 
-		final Transformer<?> transformer = _transformerBeanInstance.getBean();
+		final Transformer<?> transformer = _beanInstance.getBean();
 
 		final List<Object[]> outputValues = new ArrayList<Object[]>();
 
@@ -172,8 +172,8 @@ final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implement
 	}
 
 	@Override
-	public TransformerBeanInstance getBeanInstance() {
-		return _transformerBeanInstance;
+	public BeanInstance<? extends Transformer<?>> getBeanInstance() {
+		return _beanInstance;
 	}
 
 	@Override
@@ -183,6 +183,6 @@ final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implement
 
 	@Override
 	public String toString() {
-		return "TransformerConsumer[" + _transformerBeanInstance + "]";
+		return "TransformerConsumer[" + _beanInstance + "]";
 	}
 }

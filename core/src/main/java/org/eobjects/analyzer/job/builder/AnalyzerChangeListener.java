@@ -27,18 +27,12 @@ package org.eobjects.analyzer.job.builder;
  */
 public interface AnalyzerChangeListener {
 
-	public void onAdd(ExploringAnalyzerJobBuilder<?> analyzerJobBuilder);
-
-	public void onAdd(RowProcessingAnalyzerJobBuilder<?> analyzerJobBuilder);
+	public void onAdd(AnalyzerJobBuilder<?> analyzerJobBuilder);
 	
-	public void onConfigurationChanged(ExploringAnalyzerJobBuilder<?> analyzerJobBuilder);
-
-	public void onConfigurationChanged(RowProcessingAnalyzerJobBuilder<?> analyzerJobBuilder);
+	public void onConfigurationChanged(AnalyzerJobBuilder<?> analyzerJobBuilder);
 	
-	public void onRequirementChanged(RowProcessingAnalyzerJobBuilder<?> analyzerJobBuilder);
+	public void onRequirementChanged(AnalyzerJobBuilder<?> analyzerJobBuilder);
 
-	public void onRemove(ExploringAnalyzerJobBuilder<?> analyzerJobBuilder);
-
-	public void onRemove(RowProcessingAnalyzerJobBuilder<?> analyzerJobBuilder);
+	public void onRemove(AnalyzerJobBuilder<?> analyzerJobBuilder);
 	
 }

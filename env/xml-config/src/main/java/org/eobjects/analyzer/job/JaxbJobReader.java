@@ -40,8 +40,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.eobjects.analyzer.beans.api.ExploringAnalyzer;
-import org.eobjects.analyzer.beans.api.RowProcessingAnalyzer;
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.DataContextProvider;
@@ -54,15 +54,16 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.builder.AbstractBeanJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.builder.ExploringAnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.ExplorerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.MergeInputBuilder;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
-import org.eobjects.analyzer.job.builder.RowProcessingAnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.AnalysisType;
 import org.eobjects.analyzer.job.jaxb.AnalyzerType;
@@ -71,6 +72,7 @@ import org.eobjects.analyzer.job.jaxb.ColumnsType;
 import org.eobjects.analyzer.job.jaxb.ConfiguredPropertiesType;
 import org.eobjects.analyzer.job.jaxb.ConfiguredPropertiesType.Property;
 import org.eobjects.analyzer.job.jaxb.DataContextType;
+import org.eobjects.analyzer.job.jaxb.ExplorerType;
 import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
@@ -85,6 +87,7 @@ import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.job.jaxb.VariableType;
 import org.eobjects.analyzer.job.jaxb.VariablesType;
+import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.StringConversionUtils;
@@ -95,7 +98,8 @@ import org.slf4j.LoggerFactory;
 
 public class JaxbJobReader implements JobReader<InputStream> {
 
-	private static final Logger logger = LoggerFactory.getLogger(JaxbJobReader.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(JaxbJobReader.class);
 
 	private final JAXBContext _jaxbContext;
 	private final AnalyzerBeansConfiguration _configuration;
@@ -103,27 +107,31 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	public JaxbJobReader(AnalyzerBeansConfiguration configuration) {
 		_configuration = configuration;
 		try {
-			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
+			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class
+					.getPackage().getName());
 		} catch (JAXBException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
 	@Override
-	public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException {
+	public AnalysisJob read(InputStream inputStream)
+			throws NoSuchDatastoreException {
 		AnalysisJobBuilder ajb = create(inputStream);
 		return ajb.toAnalysisJob();
 	}
 
 	@Override
-	public AnalysisJob read(InputStream inputStream, SourceColumnMapping sourceColumnMapping) {
+	public AnalysisJob read(InputStream inputStream,
+			SourceColumnMapping sourceColumnMapping) {
 		AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping);
 		return ajb.toAnalysisJob();
 	}
 
 	public AnalysisJobMetadata readMetadata(File file) {
 		try {
-			BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+			BufferedInputStream inputStream = new BufferedInputStream(
+					new FileInputStream(file));
 			return readMetadata(inputStream);
 		} catch (FileNotFoundException e) {
 			throw new IllegalArgumentException(e);
@@ -162,7 +170,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			jobDescription = metadata.getJobDescription();
 			author = metadata.getAuthor();
 
-			final XMLGregorianCalendar createdDateCal = metadata.getCreatedDate();
+			final XMLGregorianCalendar createdDateCal = metadata
+					.getCreatedDate();
 
 			if (createdDateCal == null) {
 				createdDate = null;
@@ -170,7 +179,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				createdDate = createdDateCal.toGregorianCalendar().getTime();
 			}
 
-			final XMLGregorianCalendar updatedDateCal = metadata.getUpdatedDate();
+			final XMLGregorianCalendar updatedDateCal = metadata
+					.getUpdatedDate();
 
 			if (updatedDateCal == null) {
 				updatedDate = null;
@@ -179,7 +189,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			}
 		}
 
-		return new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author, createdDate, updatedDate,
+		return new ImmutableAnalysisJobMetadata(jobName, jobVersion,
+				jobDescription, author, createdDate, updatedDate,
 				datastoreName, sourceColumnPaths, variables);
 	}
 
@@ -218,28 +229,35 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 	public AnalysisJobBuilder create(File file) {
 		try {
-			BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+			BufferedInputStream inputStream = new BufferedInputStream(
+					new FileInputStream(file));
 			return create(inputStream);
 		} catch (FileNotFoundException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	public AnalysisJobBuilder create(InputStream inputStream) throws NoSuchDatastoreException {
+	public AnalysisJobBuilder create(InputStream inputStream)
+			throws NoSuchDatastoreException {
 		return create(unmarshallJob(inputStream), null, null);
 	}
 
-	public AnalysisJobBuilder create(InputStream inputStream, SourceColumnMapping sourceColumnMapping)
+	public AnalysisJobBuilder create(InputStream inputStream,
+			SourceColumnMapping sourceColumnMapping)
 			throws NoSuchDatastoreException {
 		return create(inputStream, sourceColumnMapping, null);
 	}
 
-	public AnalysisJobBuilder create(InputStream inputStream, SourceColumnMapping sourceColumnMapping,
-			Map<String, String> variableOverrides) throws NoSuchDatastoreException {
-		return create(unmarshallJob(inputStream), sourceColumnMapping, variableOverrides);
+	public AnalysisJobBuilder create(InputStream inputStream,
+			SourceColumnMapping sourceColumnMapping,
+			Map<String, String> variableOverrides)
+			throws NoSuchDatastoreException {
+		return create(unmarshallJob(inputStream), sourceColumnMapping,
+				variableOverrides);
 	}
 
-	public AnalysisJobBuilder create(InputStream inputStream, Map<String, String> variableOverrides)
+	public AnalysisJobBuilder create(InputStream inputStream,
+			Map<String, String> variableOverrides)
 			throws NoSuchDatastoreException {
 		return create(unmarshallJob(inputStream), null, variableOverrides);
 	}
@@ -260,23 +278,29 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		return create(job, null, null);
 	}
 
-	public AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping, Map<String, String> variableOverrides)
+	public AnalysisJobBuilder create(Job job,
+			SourceColumnMapping sourceColumnMapping,
+			Map<String, String> variableOverrides)
 			throws NoSuchDatastoreException {
 		if (job == null) {
 			throw new IllegalArgumentException("Job cannot be null");
 		}
 		if (sourceColumnMapping != null && !sourceColumnMapping.isSatisfied()) {
-			throw new IllegalArgumentException("Source column mapping is not satisfied!");
+			throw new IllegalArgumentException(
+					"Source column mapping is not satisfied!");
 		}
 
 		final Map<String, String> variables = getVariables(job);
 		if (variableOverrides != null) {
-			final Set<Entry<String, String>> entrySet = variableOverrides.entrySet();
+			final Set<Entry<String, String>> entrySet = variableOverrides
+					.entrySet();
 			for (Entry<String, String> entry : entrySet) {
 				final String key = entry.getKey();
 				final String value = entry.getValue();
 				String originalValue = variables.put(key, value);
-				logger.info("Overriding variable: {}={} (original value was {})", new Object[] { key, value, originalValue });
+				logger.info(
+						"Overriding variable: {}={} (original value was {})",
+						new Object[] { key, value, originalValue });
 			}
 		}
 
@@ -290,7 +314,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			logger.info("Updated date: {}", metadata.getUpdatedDate());
 		}
 
-		final AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(_configuration);
+		final AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
+				_configuration);
 
 		String ref;
 		final Datastore datastore;
@@ -332,16 +357,19 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			for (ColumnType column : columns) {
 				String path = column.getPath();
 				if (StringUtils.isNullOrEmpty(path)) {
-					throw new IllegalStateException("Column path cannot be null");
+					throw new IllegalStateException(
+							"Column path cannot be null");
 				}
 				Column physicalColumn = sourceColumnMapping.getColumn(path);
 				if (physicalColumn == null) {
 					throw new IllegalStateException("No such column: " + path);
 				}
-				MetaModelInputColumn inputColumn = new MetaModelInputColumn(physicalColumn);
+				MetaModelInputColumn inputColumn = new MetaModelInputColumn(
+						physicalColumn);
 				String id = column.getId();
 				if (StringUtils.isNullOrEmpty(id)) {
-					throw new IllegalStateException("Source column id cannot be null");
+					throw new IllegalStateException(
+							"Source column id cannot be null");
 				}
 
 				registerInputColumn(inputColumns, id, inputColumn);
@@ -349,13 +377,15 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			}
 		}
 
-		final SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+		final SchemaNavigator schemaNavigator = dataContextProvider
+				.getSchemaNavigator();
 		final Map<String, Outcome> outcomeMapping = new HashMap<String, Outcome>();
 
 		final TransformationType transformation = job.getTransformation();
 		if (transformation != null) {
 
-			final List<Object> transformersAndFilters = transformation.getTransformerOrFilterOrMergedOutcome();
+			final List<Object> transformersAndFilters = transformation
+					.getTransformerOrFilterOrMergedOutcome();
 
 			final Map<TransformerType, TransformerJobBuilder<?>> transformerJobBuilders = new HashMap<TransformerType, TransformerJobBuilder<?>>();
 			final Map<FilterType, FilterJobBuilder<?, ?>> filterJobBuilders = new HashMap<FilterType, FilterJobBuilder<?, ?>>();
@@ -366,21 +396,27 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					TransformerType transformer = (TransformerType) o;
 					ref = transformer.getDescriptor().getRef();
 					if (StringUtils.isNullOrEmpty(ref)) {
-						throw new IllegalStateException("Transformer descriptor ref cannot be null");
+						throw new IllegalStateException(
+								"Transformer descriptor ref cannot be null");
 					}
-					TransformerBeanDescriptor<?> transformerBeanDescriptor = _configuration.getDescriptorProvider()
+					TransformerBeanDescriptor<?> transformerBeanDescriptor = _configuration
+							.getDescriptorProvider()
 							.getTransformerBeanDescriptorByDisplayName(ref);
 					if (transformerBeanDescriptor == null) {
-						throw new IllegalStateException("No such transformer descriptor: " + ref);
+						throw new IllegalStateException(
+								"No such transformer descriptor: " + ref);
 					}
 					TransformerJobBuilder<?> transformerJobBuilder = analysisJobBuilder
 							.addTransformer(transformerBeanDescriptor);
 
 					transformerJobBuilder.setName(transformer.getName());
 
-					applyProperties(transformerJobBuilder, transformer.getProperties(), schemaNavigator, variables);
+					applyProperties(transformerJobBuilder,
+							transformer.getProperties(), schemaNavigator,
+							variables);
 
-					transformerJobBuilders.put(transformer, transformerJobBuilder);
+					transformerJobBuilders.put(transformer,
+							transformerJobBuilder);
 				}
 			}
 
@@ -389,17 +425,20 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					transformerJobBuilders.keySet());
 			while (!unconfiguredTransformerKeys.isEmpty()) {
 				boolean progress = false;
-				for (Iterator<TransformerType> it = unconfiguredTransformerKeys.iterator(); it.hasNext();) {
+				for (Iterator<TransformerType> it = unconfiguredTransformerKeys
+						.iterator(); it.hasNext();) {
 					boolean configurable = true;
 
 					TransformerType unconfiguredTransformerKey = it.next();
-					List<InputType> input = unconfiguredTransformerKey.getInput();
+					List<InputType> input = unconfiguredTransformerKey
+							.getInput();
 					for (InputType inputType : input) {
 						ref = inputType.getRef();
 						if (StringUtils.isNullOrEmpty(ref)) {
 							String value = inputType.getValue();
 							if (StringUtils.isNullOrEmpty(value)) {
-								throw new IllegalStateException("Transformer input column ref & value cannot be null");
+								throw new IllegalStateException(
+										"Transformer input column ref & value cannot be null");
 							}
 						} else if (!inputColumns.containsKey(ref)) {
 							configurable = false;
@@ -422,16 +461,21 @@ public class JaxbJobReader implements JobReader<InputStream> {
 								inputColumn = inputColumns.get(ref);
 							}
 							if (StringUtils.isNullOrEmpty(name)) {
-								transformerJobBuilder.addInputColumn(inputColumn);
+								transformerJobBuilder
+										.addInputColumn(inputColumn);
 							} else {
-								ConfiguredPropertyDescriptor configuredProperty = transformerJobBuilder.getDescriptor()
-										.getConfiguredProperty(name);
-								transformerJobBuilder.addInputColumn(inputColumn, configuredProperty);
+								ConfiguredPropertyDescriptor configuredProperty = transformerJobBuilder
+										.getDescriptor().getConfiguredProperty(
+												name);
+								transformerJobBuilder.addInputColumn(
+										inputColumn, configuredProperty);
 							}
 						}
 
-						List<MutableInputColumn<?>> outputColumns = transformerJobBuilder.getOutputColumns();
-						List<OutputType> output = unconfiguredTransformerKey.getOutput();
+						List<MutableInputColumn<?>> outputColumns = transformerJobBuilder
+								.getOutputColumns();
+						List<OutputType> output = unconfiguredTransformerKey
+								.getOutput();
 
 						assert outputColumns.size() == output.size();
 
@@ -444,7 +488,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 							}
 							String id = o1.getId();
 							if (StringUtils.isNullOrEmpty(id)) {
-								throw new IllegalStateException("Transformer output column id cannot be null");
+								throw new IllegalStateException(
+										"Transformer output column id cannot be null");
 							}
 							registerInputColumn(inputColumns, id, o2);
 						}
@@ -459,7 +504,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						if (sb.length() != 0) {
 							sb.append(", ");
 						}
-						TransformerDescriptorType descriptor = transformerType.getDescriptor();
+						TransformerDescriptorType descriptor = transformerType
+								.getDescriptor();
 						sb.append(descriptor.getRef());
 						sb.append("(input: ");
 
@@ -479,8 +525,9 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						}
 						sb.append(")");
 					}
-					throw new IllegalStateException("Could not connect column dependencies for transformers: "
-							+ sb.toString());
+					throw new IllegalStateException(
+							"Could not connect column dependencies for transformers: "
+									+ sb.toString());
 				}
 			}
 
@@ -492,14 +539,18 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					ref = filter.getDescriptor().getRef();
 
 					if (StringUtils.isNullOrEmpty(ref)) {
-						throw new IllegalStateException("Filter descriptor ref cannot be null");
+						throw new IllegalStateException(
+								"Filter descriptor ref cannot be null");
 					}
-					FilterBeanDescriptor<?, ?> filterBeanDescriptor = _configuration.getDescriptorProvider()
+					FilterBeanDescriptor<?, ?> filterBeanDescriptor = _configuration
+							.getDescriptorProvider()
 							.getFilterBeanDescriptorByDisplayName(ref);
 					if (filterBeanDescriptor == null) {
-						throw new IllegalStateException("No such filter descriptor: " + ref);
+						throw new IllegalStateException(
+								"No such filter descriptor: " + ref);
 					}
-					FilterJobBuilder<?, ?> filterJobBuilder = analysisJobBuilder.addFilter(filterBeanDescriptor);
+					FilterJobBuilder<?, ?> filterJobBuilder = analysisJobBuilder
+							.addFilter(filterBeanDescriptor);
 
 					filterJobBuilder.setName(filter.getName());
 
@@ -513,7 +564,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						} else {
 							inputColumn = inputColumns.get(ref);
 							if (inputColumn == null) {
-								throw new IllegalStateException("No such input column: " + ref);
+								throw new IllegalStateException(
+										"No such input column: " + ref);
 							}
 						}
 
@@ -521,33 +573,44 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						if (StringUtils.isNullOrEmpty(name)) {
 							filterJobBuilder.addInputColumn(inputColumn);
 						} else {
-							ConfiguredPropertyDescriptor propertyDescriptor = filterJobBuilder.getDescriptor()
+							ConfiguredPropertyDescriptor propertyDescriptor = filterJobBuilder
+									.getDescriptor()
 									.getConfiguredProperty(name);
-							filterJobBuilder.addInputColumn(inputColumn, propertyDescriptor);
+							filterJobBuilder.addInputColumn(inputColumn,
+									propertyDescriptor);
 						}
 					}
 
-					applyProperties(filterJobBuilder, filter.getProperties(), schemaNavigator, variables);
+					applyProperties(filterJobBuilder, filter.getProperties(),
+							schemaNavigator, variables);
 
 					filterJobBuilders.put(filter, filterJobBuilder);
 
 					List<OutcomeType> outcomeTypes = filter.getOutcome();
 					for (OutcomeType outcomeType : outcomeTypes) {
 						String categoryName = outcomeType.getCategory();
-						Enum<?> category = filterJobBuilder.getDescriptor().getOutcomeCategoryByName(categoryName);
+						Enum<?> category = filterJobBuilder.getDescriptor()
+								.getOutcomeCategoryByName(categoryName);
 						if (category == null) {
-							throw new IllegalStateException("No such outcome category name: " + categoryName + " (in "
-									+ filterJobBuilder.getDescriptor().getDisplayName());
+							throw new IllegalStateException(
+									"No such outcome category name: "
+											+ categoryName
+											+ " (in "
+											+ filterJobBuilder.getDescriptor()
+													.getDisplayName());
 						}
 
 						String id = outcomeType.getId();
 						if (StringUtils.isNullOrEmpty(id)) {
-							throw new IllegalStateException("Outcome id cannot be null");
+							throw new IllegalStateException(
+									"Outcome id cannot be null");
 						}
 						if (outcomeMapping.containsKey(id)) {
-							throw new IllegalStateException("Outcome id '" + id + "' is not unique");
+							throw new IllegalStateException("Outcome id '" + id
+									+ "' is not unique");
 						}
-						outcomeMapping.put(id, filterJobBuilder.getOutcome(category));
+						outcomeMapping.put(id,
+								filterJobBuilder.getOutcome(category));
 					}
 				}
 
@@ -555,13 +618,16 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					MergedOutcomeType mergedOutcomeType = (MergedOutcomeType) o;
 					String id = mergedOutcomeType.getId();
 					if (StringUtils.isNullOrEmpty(id)) {
-						throw new IllegalStateException("Outcome id cannot be null");
+						throw new IllegalStateException(
+								"Outcome id cannot be null");
 					}
 					if (outcomeMapping.containsKey(id)) {
-						throw new IllegalStateException("Outcome id '" + id + "' is not unique");
+						throw new IllegalStateException("Outcome id '" + id
+								+ "' is not unique");
 					}
 
-					MergedOutcomeJobBuilder mojb = analysisJobBuilder.addMergedOutcomeJobBuilder();
+					MergedOutcomeJobBuilder mojb = analysisJobBuilder
+							.addMergedOutcomeJobBuilder();
 					mojb.setName(mergedOutcomeType.getName());
 					outcomeMapping.put(id, new LazyMergedOutcome(mojb));
 				}
@@ -575,18 +641,22 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					String id = mergedOutcomeType.getId();
 
 					// we added this element during the previous iteration
-					LazyMergedOutcome outcome = (LazyMergedOutcome) outcomeMapping.get(id);
+					LazyMergedOutcome outcome = (LazyMergedOutcome) outcomeMapping
+							.get(id);
 					MergedOutcomeJobBuilder builder = outcome.getBuilder();
 
 					// map the input requirements and columns
-					List<MergedOutcomeType.Outcome> mergedOutcomes = ((MergedOutcomeType) o).getOutcome();
+					List<MergedOutcomeType.Outcome> mergedOutcomes = ((MergedOutcomeType) o)
+							.getOutcome();
 					for (MergedOutcomeType.Outcome mergedOutcome : mergedOutcomes) {
 						ref = mergedOutcome.getRef();
 						if (StringUtils.isNullOrEmpty(ref)) {
-							throw new IllegalStateException("Merged outcome ref cannot be null");
+							throw new IllegalStateException(
+									"Merged outcome ref cannot be null");
 						}
 						Outcome outcomeToMerge = outcomeMapping.get(ref);
-						MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(outcomeToMerge);
+						MergeInputBuilder mergedOutcomeBuilder = builder
+								.addMergedOutcome(outcomeToMerge);
 
 						List<InputType> inputs = mergedOutcome.getInput();
 						for (InputType inputType : inputs) {
@@ -597,7 +667,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 							} else {
 								inputColumn = inputColumns.get(ref);
 								if (inputColumn == null) {
-									throw new IllegalStateException("No such input column: " + ref);
+									throw new IllegalStateException(
+											"No such input column: " + ref);
 								}
 							}
 							mergedOutcomeBuilder.addInputColumn(inputColumn);
@@ -605,15 +676,18 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					}
 
 					// map the output columns
-					List<MutableInputColumn<?>> outputColumns = builder.getOutputColumns();
+					List<MutableInputColumn<?>> outputColumns = builder
+							.getOutputColumns();
 
-					List<OutputType> output = ((MergedOutcomeType) o).getOutput();
+					List<OutputType> output = ((MergedOutcomeType) o)
+							.getOutput();
 
 					assert output.size() == outputColumns.size();
 
 					for (int i = 0; i < output.size(); i++) {
 						OutputType outputType = output.get(i);
-						MutableInputColumn<?> outputColumn = outputColumns.get(i);
+						MutableInputColumn<?> outputColumn = outputColumns
+								.get(i);
 						id = outputType.getId();
 						String name = outputType.getName();
 
@@ -631,107 +705,133 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				if (o instanceof TransformerType) {
 					ref = ((TransformerType) o).getRequires();
 					if (ref != null) {
-						TransformerJobBuilder<?> builder = transformerJobBuilders.get(o);
+						TransformerJobBuilder<?> builder = transformerJobBuilders
+								.get(o);
 						Outcome requirement = outcomeMapping.get(ref);
 						if (requirement == null) {
-							throw new IllegalStateException("No such outcome id: " + ref);
+							throw new IllegalStateException(
+									"No such outcome id: " + ref);
 						}
 						builder.setRequirement(requirement);
 					}
 				} else if (o instanceof FilterType) {
 					ref = ((FilterType) o).getRequires();
 					if (ref != null) {
-						FilterJobBuilder<?, ?> builder = filterJobBuilders.get(o);
+						FilterJobBuilder<?, ?> builder = filterJobBuilders
+								.get(o);
 						Outcome requirement = outcomeMapping.get(ref);
 						if (requirement == null) {
-							throw new IllegalStateException("No such outcome id: " + ref);
+							throw new IllegalStateException(
+									"No such outcome id: " + ref);
 						}
 						builder.setRequirement(requirement);
 					}
 				} else if (o instanceof MergedOutcomeType) {
 					// do nothing
 				} else {
-					throw new IllegalStateException("Unexpected transformation child element: " + o);
+					throw new IllegalStateException(
+							"Unexpected transformation child element: " + o);
 				}
 			}
 		}
 
 		AnalysisType analysis = job.getAnalysis();
-		List<AnalyzerType> analyzers = analysis.getAnalyzer();
+
+		List<AnalyzerType> analyzers = CollectionUtils2.filterOnClass(
+				analysis.getAnalyzerOrExplorer(), AnalyzerType.class);
 		for (AnalyzerType analyzerType : analyzers) {
 			ref = analyzerType.getDescriptor().getRef();
 			if (StringUtils.isNullOrEmpty(ref)) {
-				throw new IllegalStateException("Analyzer descriptor ref cannot be null");
+				throw new IllegalStateException(
+						"Analyzer descriptor ref cannot be null");
 			}
 
-			AnalyzerBeanDescriptor<?> descriptor = _configuration.getDescriptorProvider()
+			AnalyzerBeanDescriptor<?> descriptor = _configuration
+					.getDescriptorProvider()
 					.getAnalyzerBeanDescriptorByDisplayName(ref);
 
 			if (descriptor == null) {
-				throw new IllegalStateException("No such analyzer descriptor: " + ref);
+				throw new IllegalStateException("No such analyzer descriptor: "
+						+ ref);
 			}
 
-			if (descriptor.isRowProcessingAnalyzer()) {
-				@SuppressWarnings("unchecked")
-				Class<? extends RowProcessingAnalyzer<?>> beanClass = (Class<? extends RowProcessingAnalyzer<?>>) descriptor
-						.getComponentClass();
-				RowProcessingAnalyzerJobBuilder<? extends RowProcessingAnalyzer<?>> analyzerJobBuilder = analysisJobBuilder
-						.addRowProcessingAnalyzer(beanClass);
-				analyzerJobBuilder.setName(analyzerType.getName());
+			Class<? extends Analyzer<?>> beanClass = descriptor
+					.getComponentClass();
+			AnalyzerJobBuilder<? extends Analyzer<?>> analyzerJobBuilder = analysisJobBuilder
+					.addAnalyzer(beanClass);
+			analyzerJobBuilder.setName(analyzerType.getName());
 
-				List<InputType> input = analyzerType.getInput();
-				for (InputType inputType : input) {
-					ref = inputType.getRef();
+			List<InputType> input = analyzerType.getInput();
+			for (InputType inputType : input) {
+				ref = inputType.getRef();
 
-					InputColumn<?> inputColumn;
-					if (StringUtils.isNullOrEmpty(ref)) {
-						inputColumn = createExpressionBasedInputColumn(inputType);
-					} else {
-						inputColumn = inputColumns.get(ref);
-						if (inputColumn == null) {
-							throw new IllegalStateException("No such input column: " + ref);
-						}
-					}
-
-					String name = inputType.getName();
-					if (StringUtils.isNullOrEmpty(name)) {
-						analyzerJobBuilder.addInputColumn(inputColumn);
-					} else {
-						ConfiguredPropertyDescriptor propertyDescriptor = analyzerJobBuilder.getDescriptor()
-								.getConfiguredProperty(name);
-						if (propertyDescriptor == null) {
-							throw new IllegalStateException("No such input property name: " + name);
-						}
-						analyzerJobBuilder.addInputColumn(inputColumn, propertyDescriptor);
+				InputColumn<?> inputColumn;
+				if (StringUtils.isNullOrEmpty(ref)) {
+					inputColumn = createExpressionBasedInputColumn(inputType);
+				} else {
+					inputColumn = inputColumns.get(ref);
+					if (inputColumn == null) {
+						throw new IllegalStateException(
+								"No such input column: " + ref);
 					}
 				}
-				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator, variables);
 
-				ref = analyzerType.getRequires();
-				if (ref != null) {
-					Outcome requirement = outcomeMapping.get(ref);
-					if (requirement == null) {
-						throw new IllegalStateException("No such outcome id: " + ref);
+				String name = inputType.getName();
+				if (StringUtils.isNullOrEmpty(name)) {
+					analyzerJobBuilder.addInputColumn(inputColumn);
+				} else {
+					ConfiguredPropertyDescriptor propertyDescriptor = analyzerJobBuilder
+							.getDescriptor().getConfiguredProperty(name);
+					if (propertyDescriptor == null) {
+						throw new IllegalStateException(
+								"No such input property name: " + name);
 					}
-					analyzerJobBuilder.setRequirement(requirement);
+					analyzerJobBuilder.addInputColumn(inputColumn,
+							propertyDescriptor);
 				}
-			} else if (descriptor.isExploringAnalyzer()) {
-				@SuppressWarnings("unchecked")
-				Class<? extends ExploringAnalyzer<?>> beanClass = (Class<? extends ExploringAnalyzer<?>>) descriptor
-						.getComponentClass();
-				ExploringAnalyzerJobBuilder<? extends ExploringAnalyzer<?>> analyzerJobBuilder = analysisJobBuilder
-						.addExploringAnalyzer(beanClass);
-				analyzerJobBuilder.setName(analyzerType.getName());
-				applyProperties(analyzerJobBuilder, analyzerType.getProperties(), schemaNavigator, variables);
-
-				if (analyzerType.getRequires() != null) {
-					throw new IllegalStateException("Cannot add outcome requirement to exploring analyzer: "
-							+ analyzerJobBuilder.getDescriptor().getDisplayName());
-				}
-			} else {
-				throw new IllegalStateException("AnalyzerBeanDescriptor is neither row processing or exploring: "
-						+ descriptor);
 			}
+			applyProperties(analyzerJobBuilder, analyzerType.getProperties(),
+					schemaNavigator, variables);
+
+			ref = analyzerType.getRequires();
+			if (ref != null) {
+				Outcome requirement = outcomeMapping.get(ref);
+				if (requirement == null) {
+					throw new IllegalStateException("No such outcome id: "
+							+ ref);
+				}
+				analyzerJobBuilder.setRequirement(requirement);
+			}
+
+		}
+
+		List<ExplorerType> explorers = CollectionUtils2.filterOnClass(
+				analysis.getAnalyzerOrExplorer(), ExplorerType.class);
+		for (ExplorerType explorerType : explorers) {
+
+			ref = explorerType.getDescriptor().getRef();
+			if (StringUtils.isNullOrEmpty(ref)) {
+				throw new IllegalStateException(
+						"Explorer descriptor ref cannot be null");
+			}
+
+			ExplorerBeanDescriptor<?> descriptor = _configuration
+					.getDescriptorProvider()
+					.getExplorerBeanDescriptorByDisplayName(ref);
+
+			if (descriptor == null) {
+				throw new IllegalStateException("No such explorer descriptor: "
+						+ ref);
+			}
+
+			Class<? extends Explorer<?>> beanClass = descriptor
+					.getComponentClass();
+
+			ExplorerJobBuilder<? extends Explorer<?>> explorerJobBuilder = analysisJobBuilder
+					.addExplorer(beanClass);
+			explorerJobBuilder.setName(explorerType.getName());
+			applyProperties(explorerJobBuilder, explorerType.getProperties(),
+					schemaNavigator, variables);
 		}
 
 		dataContextProvider.close();
@@ -742,7 +842,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	private InputColumn<?> createExpressionBasedInputColumn(InputType inputType) {
 		String expression = inputType.getValue();
 		if (StringUtils.isNullOrEmpty(expression)) {
-			throw new IllegalStateException("Input ref & value cannot both be null");
+			throw new IllegalStateException(
+					"Input ref & value cannot both be null");
 		}
 		if (expression.indexOf("#{") == -1) {
 			return new ConstantInputColumn(expression);
@@ -751,7 +852,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		}
 	}
 
-	private void registerInputColumn(Map<String, InputColumn<?>> inputColumns, String id, InputColumn<?> inputColumn) {
+	private void registerInputColumn(Map<String, InputColumn<?>> inputColumns,
+			String id, InputColumn<?> inputColumn) {
 		if (StringUtils.isNullOrEmpty(id)) {
 			throw new IllegalStateException("Column id cannot be null");
 		}
@@ -761,14 +863,17 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		inputColumns.put(id, inputColumn);
 	}
 
-	private void applyProperties(AbstractBeanJobBuilder<? extends BeanDescriptor<?>, ?, ?> builder,
-			ConfiguredPropertiesType configuredPropertiesType, SchemaNavigator schemaNavigator, Map<String, String> variables) {
+	private void applyProperties(
+			AbstractBeanJobBuilder<? extends BeanDescriptor<?>, ?, ?> builder,
+			ConfiguredPropertiesType configuredPropertiesType,
+			SchemaNavigator schemaNavigator, Map<String, String> variables) {
 		if (configuredPropertiesType != null) {
 			List<Property> properties = configuredPropertiesType.getProperty();
 			BeanDescriptor<?> descriptor = builder.getDescriptor();
 			for (Property property : properties) {
 				final String name = property.getName();
-				final ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty(name);
+				final ConfiguredPropertyDescriptor configuredProperty = descriptor
+						.getConfiguredProperty(name);
 
 				if (configuredProperty == null) {
 					throw new IllegalStateException("No such property: " + name);
@@ -778,18 +883,23 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				if (stringValue == null) {
 					String variableRef = property.getRef();
 					if (variableRef == null) {
-						throw new IllegalStateException("Neither value nor ref was specified for property: " + name);
+						throw new IllegalStateException(
+								"Neither value nor ref was specified for property: "
+										+ name);
 					}
 
 					stringValue = variables.get(variableRef);
 
 					if (stringValue == null) {
-						throw new IllegalStateException("No such variable: " + variableRef);
+						throw new IllegalStateException("No such variable: "
+								+ variableRef);
 					}
 				}
 
-				Object value = StringConversionUtils.deserialize(stringValue, configuredProperty.getType(), schemaNavigator,
-						_configuration.getReferenceDataCatalog(), _configuration.getDatastoreCatalog());
+				Object value = StringConversionUtils.deserialize(stringValue,
+						configuredProperty.getType(), schemaNavigator,
+						_configuration.getReferenceDataCatalog(),
+						_configuration.getDatastoreCatalog());
 
 				logger.debug("Setting property '{}' to {}", name, value);
 				builder.setConfiguredProperty(configuredProperty, value);

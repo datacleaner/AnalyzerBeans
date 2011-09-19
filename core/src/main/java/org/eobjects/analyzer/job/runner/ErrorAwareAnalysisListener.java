@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -45,7 +46,7 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 
 	private final List<Throwable> _errors = new LinkedList<Throwable>();
 	private final AtomicBoolean _cancelled = new AtomicBoolean(false);
-	
+
 	@Override
 	public void jobBegin(AnalysisJob job) {
 	}
@@ -97,10 +98,24 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 	}
 
 	@Override
+	public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
+		logger.warn("errorInExplorer({},{},{})", new Object[] { job, explorerJob, throwable });
+		storeError(job, throwable);
+	}
+
+	@Override
 	public void errorUknown(AnalysisJob job, Throwable throwable) {
 		logger.warn("errorUnknown({},{})", new Object[] { job, throwable });
 		logger.warn("Exception stack trace:", throwable);
 		storeError(job, throwable);
+	}
+
+	@Override
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob) {
+	}
+
+	@Override
+	public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
 	}
 
 	@Override
