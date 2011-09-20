@@ -50,6 +50,7 @@ import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
+import org.eobjects.analyzer.util.ClassLoaderUtils;
 import org.eobjects.metamodel.util.FileHelper;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
@@ -113,7 +114,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	 * @return
 	 */
 	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive) {
-		return scanPackage(packageName, recursive, Thread.currentThread().getContextClassLoader());
+		return scanPackage(packageName, recursive, ClassLoaderUtils.getParentClassLoader());
 	}
 
 	/**
