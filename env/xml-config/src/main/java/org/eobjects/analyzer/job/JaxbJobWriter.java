@@ -75,7 +75,8 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 	public JaxbJobWriter(JaxbJobMetadataFactory jobMetadataFactory) {
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class
-					.getPackage().getName());
+					.getPackage().getName(), ObjectFactory.class
+					.getClassLoader());
 			_jobMetadataFactory = jobMetadataFactory;
 		} catch (Exception e) {
 			throw new IllegalStateException(e);

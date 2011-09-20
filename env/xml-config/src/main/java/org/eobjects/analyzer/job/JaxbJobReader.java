@@ -108,7 +108,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		_configuration = configuration;
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class
-					.getPackage().getName());
+					.getPackage().getName(), ObjectFactory.class.getClassLoader());
 		} catch (JAXBException e) {
 			throw new IllegalStateException(e);
 		}
