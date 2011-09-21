@@ -53,6 +53,11 @@ public final class JoinTaskListener implements TaskListener {
 	}
 
 	@Override
+	public String toString() {
+		return "Join[countDown=" + _countDown.get() + "]";
+	}
+
+	@Override
 	public void onBegin(Task task) {
 	}
 

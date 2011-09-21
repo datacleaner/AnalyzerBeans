@@ -21,6 +21,7 @@ package org.eobjects.analyzer.test.full.scenarios;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.AssertionFailedError;
@@ -28,6 +29,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
@@ -55,6 +57,8 @@ import org.eobjects.metamodel.schema.Column;
  */
 public class ErrorInRowProcessingConsumerTest extends TestCase {
 
+	private static final AtomicBoolean closed = new AtomicBoolean();
+
 	@AnalyzerBean("Errornous analyzer")
 	public static class ErrornousAnalyzer implements Analyzer<NumberResult> {
 
@@ -81,9 +85,16 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 			}
 		}
 
+		@Close
+		public void close() {
+			closed.set(true);
+		}
+
 	}
 
 	public void testScenario() throws Exception {
+		closed.set(false);
+		
 		ActivityAwareMultiThreadedTaskRunner taskRunner = new ActivityAwareMultiThreadedTaskRunner();
 
 		Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
@@ -143,5 +154,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 
 		int taskCount = taskRunner.assertAllBegunTasksFinished(500);
 		assertTrue("taskCount was: " + taskCount, taskCount > 4);
+		
+		assertTrue(closed.get());
 	}
 }

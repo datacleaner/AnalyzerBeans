@@ -69,6 +69,23 @@ public final class TaskRunnable implements Runnable {
 		}
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('[');
+		if (_task != null) {
+			sb.append("task=" + _task);
+			if (_listener != null) {
+				sb.append(',');
+			}
+		}
+		if (_listener != null) {
+			sb.append("listener=" + _listener);
+		}
+		sb.append(']');
+		return sb.toString();
+	}
+
 	/**
 	 * Gets the task to run, or null if none exists
 	 * 

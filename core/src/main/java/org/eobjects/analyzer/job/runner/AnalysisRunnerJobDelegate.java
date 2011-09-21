@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,8 +54,10 @@ import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.AssignCallbacksAndInitializeTask;
-import org.eobjects.analyzer.job.tasks.CloseReferenceDataTask;
-import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
+import org.eobjects.analyzer.job.tasks.CloseBeanTaskListener;
+import org.eobjects.analyzer.job.tasks.CloseReferenceDataTaskListener;
+import org.eobjects.analyzer.job.tasks.CloseResourcesTaskListener;
+import org.eobjects.analyzer.job.tasks.CollectResultsTask;
 import org.eobjects.analyzer.job.tasks.InitializeReferenceDataTask;
 import org.eobjects.analyzer.job.tasks.RunExplorerTask;
 import org.eobjects.analyzer.job.tasks.Task;
@@ -179,12 +180,16 @@ final class AnalysisRunnerJobDelegate {
 
 		logger.info("Created {} row processor publishers", rowProcessingPublishers.size());
 
-		final TaskRunnable[] finalTasks = new TaskRunnable[2];
-		finalTasks[0] = new TaskRunnable(null, _jobCompletionTaskListener);
-		finalTasks[1] = new TaskRunnable(new CloseReferenceDataTask(_rowProcessingReferenceDataActivationManager), null);
+		final List<TaskRunnable> finalTasks = new ArrayList<TaskRunnable>(2);
+		finalTasks.add(new TaskRunnable(null, _jobCompletionTaskListener));
+		finalTasks.add(new TaskRunnable(null, new CloseReferenceDataTaskListener(
+				_rowProcessingReferenceDataActivationManager)));
 
+		final ForkTaskListener finalTaskListener = new ForkTaskListener("All row consumers finished", _taskRunner,
+				finalTasks);
+		
 		final TaskListener rowProcessorPublishersDoneCompletionListener = new JoinTaskListener(
-				rowProcessingPublishers.size(), new ForkTaskListener("All row consumers finished", _taskRunner, finalTasks));
+				rowProcessingPublishers.size(), finalTaskListener);
 
 		for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers.values()) {
 			List<TaskRunnable> initTasks = rowProcessingPublisher.createInitialTasks(_taskRunner, _resultQueue,
@@ -208,9 +213,9 @@ final class AnalysisRunnerJobDelegate {
 			return;
 		}
 
-		final TaskRunnable[] finalTasks = new TaskRunnable[2];
-		finalTasks[0] = new TaskRunnable(null, _jobCompletionTaskListener);
-		finalTasks[1] = new TaskRunnable(new CloseReferenceDataTask(_explorerReferenceDataActivationManager), null);
+		final List<TaskRunnable> finalTasks = new ArrayList<TaskRunnable>();
+		finalTasks.add(new TaskRunnable(null, _jobCompletionTaskListener));
+		finalTasks.add(new TaskRunnable(null, new CloseReferenceDataTaskListener(_explorerReferenceDataActivationManager)));
 
 		final TaskListener explorersDoneTaskListener = new JoinTaskListener(numExplorerJobs, new ForkTaskListener(
 				"Exploring analyzers done", _taskRunner, finalTasks));
@@ -220,12 +225,13 @@ final class AnalysisRunnerJobDelegate {
 		// begin explorer jobs first because they can run independently (
 		for (ExplorerJob explorerJob : _explorerJobs) {
 			final DataContextProvider dataContextProvider = _datastore.getDataContextProvider();
+			final BeanInstance<? extends Explorer<?>> beanInstance = BeanInstance.create(explorerJob.getDescriptor());
 
-			BeanInstance<? extends Explorer<?>> beanInstance = BeanInstance.create(explorerJob.getDescriptor());
+			finalTasks.add(new TaskRunnable(null, new CloseResourcesTaskListener(dataContextProvider)));
+			finalTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(beanInstance)));
 
 			// set up scheduling for the explorers
-			Task closeTask = new CollectResultsAndCloseAnalyzerBeanTask(beanInstance,
-					new Closeable[] { dataContextProvider }, _job, explorerJob, _resultQueue, _analysisListener);
+			Task closeTask = new CollectResultsTask(beanInstance, _job, explorerJob, _resultQueue, _analysisListener);
 			TaskListener runFinishedListener = new RunNextTaskTaskListener(_taskRunner, closeTask, explorersDoneTaskListener);
 			Task runTask = new RunExplorerTask(beanInstance, _job, explorerJob, _datastore, _analysisListener);
 

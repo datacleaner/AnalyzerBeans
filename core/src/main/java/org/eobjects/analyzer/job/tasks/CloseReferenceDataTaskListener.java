@@ -23,30 +23,45 @@ import java.util.Collection;
 
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
+import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
 import org.eobjects.analyzer.lifecycle.CloseCallback;
 import org.eobjects.analyzer.lifecycle.LifeCycleState;
 
 /**
- * Task that calls closing methods for reference data where this is nescesary.
+ * Task listener that calls closing methods for reference data where this is
+ * nescesary.
  * 
  * @author Kasper Sørensen
  */
-public final class CloseReferenceDataTask implements Task {
+public final class CloseReferenceDataTaskListener implements TaskListener {
 
 	private final ReferenceDataActivationManager _referenceDataActivationManager;
 
-	public CloseReferenceDataTask(ReferenceDataActivationManager referenceDataActivationManager) {
+	public CloseReferenceDataTaskListener(ReferenceDataActivationManager referenceDataActivationManager) {
 		_referenceDataActivationManager = referenceDataActivationManager;
 	}
 
-	@Override
-	public void execute() throws Exception {
+	private void cleanup() {
 		Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
 		for (Object object : referenceData) {
 			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(object.getClass());
 			new CloseCallback().onEvent(LifeCycleState.CLOSE, object, descriptor);
 		}
+	}
+
+	@Override
+	public void onBegin(Task task) {
+	}
+
+	@Override
+	public void onComplete(Task task) {
+		cleanup();
+	}
+
+	@Override
+	public void onError(Task task, Throwable throwable) {
+		cleanup();
 	}
 
 }

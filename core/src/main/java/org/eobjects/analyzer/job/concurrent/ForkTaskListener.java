@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.job.concurrent;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.eobjects.analyzer.job.tasks.Task;
@@ -40,10 +39,20 @@ public final class ForkTaskListener implements TaskListener {
 	private final Collection<TaskRunnable> _tasks;
 	private final String _whatAreYouWaitingFor;
 
-	public ForkTaskListener(String whatAreYouWaitingFor, TaskRunner taskRunner, TaskRunnable... tasksToSchedule) {
-		this(whatAreYouWaitingFor, taskRunner, Arrays.asList(tasksToSchedule));
-	}
-
+	/**
+	 * Creates a new {@link ForkTaskListener}.
+	 * 
+	 * @param whatAreYouWaitingFor
+	 *            a description of what the task is waiting for (used for
+	 *            debugging and messaging)
+	 * @param taskRunner
+	 * @param tasksToSchedule
+	 * @param executeOnErrors
+	 *            defines whether the tasks should be executed/forked even if
+	 *            previous errors have been encountered. Default value should be
+	 *            false, but in some cases (like tasks that clean up resources)
+	 *            this can be set to true.
+	 */
 	public ForkTaskListener(String whatAreYouWaitingFor, TaskRunner taskRunner, Collection<TaskRunnable> tasksToSchedule) {
 		_whatAreYouWaitingFor = whatAreYouWaitingFor;
 		_taskRunner = taskRunner;
@@ -52,10 +61,12 @@ public final class ForkTaskListener implements TaskListener {
 
 	@Override
 	public void onComplete(Task task) {
-		logger.debug("onComplete({})", _whatAreYouWaitingFor);
-		logger.info("Scheduling {} tasks", _tasks.size());
+		logger.info("onComplete({})", _whatAreYouWaitingFor);
+		int index = 1;
 		for (TaskRunnable tr : _tasks) {
+			logger.info("Scheduling task {} out of {}: {}", new Object[] { index, _tasks.size(), tr });
 			_taskRunner.run(tr);
+			index++;
 		}
 	}
 

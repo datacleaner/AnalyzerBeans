@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
-import java.io.Closeable;
 import java.util.Collection;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
@@ -36,22 +35,24 @@ import org.eobjects.analyzer.result.HasAnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class CollectResultsAndCloseAnalyzerBeanTask extends CloseBeanTask {
+/**
+ * Task that collects the {@link AnalyzerResult} from an analyzer/explorer.
+ * 
+ * @author Kasper Sørensen
+ */
+public final class CollectResultsTask implements Task {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private static final Logger logger = LoggerFactory.getLogger(CollectResultsTask.class);
 
-	private final Closeable[] _closeables;
 	private final BeanInstance<? extends HasAnalyzerResult<?>> _beanInstance;
 	private final Collection<JobAndResult> _results;
 	private final AnalysisListener _analysisListener;
 	private final AnalysisJob _job;
 	private final ComponentJob _componentJob;
 
-	public CollectResultsAndCloseAnalyzerBeanTask(BeanInstance<? extends HasAnalyzerResult<?>> beanInstance,
-			Closeable[] closeables, AnalysisJob job, ComponentJob componentJob, Collection<JobAndResult> results, AnalysisListener analysisListener) {
-		super(beanInstance);
+	public CollectResultsTask(BeanInstance<? extends HasAnalyzerResult<?>> beanInstance,
+			AnalysisJob job, ComponentJob componentJob, Collection<JobAndResult> results, AnalysisListener analysisListener) {
 		_beanInstance = beanInstance;
-		_closeables = closeables;
 		_job = job;
 		_componentJob = componentJob;
 		_results = results;
@@ -75,12 +76,6 @@ public final class CollectResultsAndCloseAnalyzerBeanTask extends CloseBeanTask 
 			throw new UnsupportedOperationException("Unsupported component type: " + hasAnalyzerResult);
 		}
 		_results.add(new JobAndResult(_componentJob, result));
-
-		super.execute();
-
-		for (int i = 0; i < _closeables.length; i++) {
-			_closeables[i].close();
-		}
 	}
 
 }

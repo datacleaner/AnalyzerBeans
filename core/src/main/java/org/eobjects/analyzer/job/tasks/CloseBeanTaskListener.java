@@ -19,29 +19,43 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloseBeanTask implements Task {
+public class CloseBeanTaskListener implements TaskListener {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final BeanInstance<?> _beanInstance;
 
-	public CloseBeanTask(BeanInstance<?> beanInstance) {
+	public CloseBeanTaskListener(BeanInstance<?> beanInstance) {
 		_beanInstance = beanInstance;
 	}
-	
+
 	public BeanInstance<?> getBeanInstance() {
 		return _beanInstance;
 	}
 
-	@Override
-	public void execute() throws Exception {
+	private void cleanup() {
 		logger.debug("execute()");
 
 		// close can occur AFTER completion
 		_beanInstance.close();
+	}
+
+	@Override
+	public void onBegin(Task task) {
+	}
+
+	@Override
+	public void onComplete(Task task) {
+		cleanup();
+	}
+
+	@Override
+	public void onError(Task task, Throwable throwable) {
+		cleanup();
 	}
 }

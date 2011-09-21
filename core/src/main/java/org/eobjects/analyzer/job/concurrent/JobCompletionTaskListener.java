@@ -48,13 +48,6 @@ public final class JobCompletionTaskListener implements StatusAwareTaskListener 
 		_countDownLatch = new CountDownLatch(callablesToWaitFor);
 	}
 
-	public void cancel() {
-		logger.warn("Cancelling job: {}", _job);
-		while (_countDownLatch.getCount() > 0) {
-			_countDownLatch.countDown();
-		}
-	}
-
 	public void await() throws InterruptedException {
 		_countDownLatch.await();
 	}

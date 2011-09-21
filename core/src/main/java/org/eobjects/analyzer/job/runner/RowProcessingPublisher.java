@@ -19,8 +19,8 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -53,8 +53,8 @@ import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.AssignCallbacksAndInitializeTask;
-import org.eobjects.analyzer.job.tasks.CloseBeanTask;
-import org.eobjects.analyzer.job.tasks.CollectResultsAndCloseAnalyzerBeanTask;
+import org.eobjects.analyzer.job.tasks.CloseBeanTaskListener;
+import org.eobjects.analyzer.job.tasks.CollectResultsTask;
 import org.eobjects.analyzer.job.tasks.ConsumeRowTask;
 import org.eobjects.analyzer.job.tasks.InitializeReferenceDataTask;
 import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
@@ -273,7 +273,12 @@ public final class RowProcessingPublisher {
 		final List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
 		for (RowProcessingConsumer consumer : configurableConsumers) {
 			Task closeTask = createCloseTask(consumer, resultQueue);
-			closeTasks.add(new TaskRunnable(closeTask, closeTaskListener));
+			if (closeTask == null) {
+				closeTasks.add(new TaskRunnable(null, closeTaskListener));
+			} else {
+				closeTasks.add(new TaskRunnable(closeTask, closeTaskListener));
+			}
+			closeTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(consumer.getBeanInstance())));
 		}
 
 		final TaskListener runCompletionListener = new ForkTaskListener("run row processing", taskRunner, closeTasks);
@@ -281,7 +286,7 @@ public final class RowProcessingPublisher {
 		final RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this);
 
 		final TaskListener referenceDataInitFinishedListener = new ForkTaskListener("Initialize row consumers", taskRunner,
-				new TaskRunnable(runTask, runCompletionListener));
+				Arrays.asList(new TaskRunnable(runTask, runCompletionListener)));
 
 		final InitializeCallback initializeCallback = new InitializeCallback(_injectionManager);
 
@@ -299,12 +304,11 @@ public final class RowProcessingPublisher {
 
 	private Task createCloseTask(RowProcessingConsumer consumer, Queue<JobAndResult> resultQueue) {
 		if (consumer instanceof TransformerConsumer || consumer instanceof FilterConsumer) {
-			return new CloseBeanTask(consumer.getBeanInstance());
+			return null;
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
 			BeanInstance<? extends Analyzer<?>> beanInstance = analyzerConsumer.getBeanInstance();
-			return new CollectResultsAndCloseAnalyzerBeanTask(beanInstance, new Closeable[0], _job,
-					consumer.getComponentJob(), resultQueue, _analysisListener);
+			return new CollectResultsTask(beanInstance, _job, consumer.getComponentJob(), resultQueue, _analysisListener);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}
