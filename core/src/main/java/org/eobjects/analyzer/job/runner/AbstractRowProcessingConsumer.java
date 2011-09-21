@@ -42,10 +42,10 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 	 */
 	@Override
 	public final boolean satisfiedForConsume(Outcome[] outcomes, Collection<InputColumn<?>> columns) {
-		return (satisfiedOutcomesForConsume(outcomes) && satisfiedInputsForConsumer(columns));
+		return (satisfiedOutcomesForConsume(outcomes) && satisfiedInputsForConsume(columns));
 	}
 
-	private boolean satisfiedInputsForConsumer(Collection<InputColumn<?>> availableInputColumns) {
+	private boolean satisfiedInputsForConsume(Collection<InputColumn<?>> availableInputColumns) {
 		boolean isSatisfiedInputColumns = true;
 		InputColumn<?>[] requiredInputColumns = _inputColumnSinkJob.getInput();
 		if (requiredInputColumns == null || requiredInputColumns.length == 0) {
