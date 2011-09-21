@@ -30,7 +30,7 @@ import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
 import org.eobjects.analyzer.lifecycle.BeanInstance;
 
-final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
+final class FilterConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final BeanInstance<? extends Filter<?>> _beanInstance;
@@ -41,7 +41,7 @@ final class FilterConsumer extends AbstractOutcomeSinkJobConsumer implements Row
 
 	public FilterConsumer(AnalysisJob job, BeanInstance<? extends Filter<?>> beanInstance, FilterJob filterJob,
 			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
-		super(filterJob);
+		super(filterJob, filterJob);
 		_beanInstance = beanInstance;
 		_filterJob = filterJob;
 		_inputColumns = inputColumns;

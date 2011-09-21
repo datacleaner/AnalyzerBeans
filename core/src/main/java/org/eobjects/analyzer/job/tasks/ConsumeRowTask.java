@@ -73,21 +73,15 @@ public final class ConsumeRowTask implements Task {
 		OutcomeSink outcomeSink = new OutcomeSinkImpl(_initialOutcomes);
 
 		final int distinctCount = 1;
-
 		int rowNumber = _rowCounter.addAndGet(distinctCount);
 		List<InputRow> inputRows = new ArrayList<InputRow>();
 		inputRows.add(new MetaModelInputRow(rowNumber, _row));
-
 		for (RowProcessingConsumer consumer : _consumers) {
-			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes());
-			
-			if (process) {
-				if (consumer.isConcurrent()) {
+			if (consumer.isConcurrent()) {
+				handleConsumer(outcomeSink, distinctCount, inputRows, consumer);
+			} else {
+				synchronized (consumer) {
 					handleConsumer(outcomeSink, distinctCount, inputRows, consumer);
-				} else {
-					synchronized (consumer) {
-						handleConsumer(outcomeSink, distinctCount, inputRows, consumer);
-					}
 				}
 			}
 		}
@@ -103,11 +97,14 @@ public final class ConsumeRowTask implements Task {
 		boolean outputRowsSame = true;
 
 		for (InputRow row : rows) {
-			InputRow[] outputRows = consumer.consume(row, distinctCount, outcomeSink);
-			if (outputRows != null) {
-				outputRowsSame = false;
-				for (InputRow newRow : outputRows) {
-					newRows.add(newRow);
+			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes(), row.getInputColumns());
+			if (process) {
+				InputRow[] outputRows = consumer.consume(row, distinctCount, outcomeSink);
+				if (outputRows != null) {
+					outputRowsSame = false;
+					for (InputRow newRow : outputRows) {
+						newRows.add(newRow);
+					}
 				}
 			}
 		}
@@ -117,5 +114,4 @@ public final class ConsumeRowTask implements Task {
 			rows.addAll(newRows);
 		}
 	}
-
 }

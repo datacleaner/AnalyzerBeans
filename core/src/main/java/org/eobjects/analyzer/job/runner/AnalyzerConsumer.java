@@ -27,7 +27,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.lifecycle.BeanInstance;
 
-final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
+final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final AnalyzerJob _analyzerJob;
@@ -38,7 +38,7 @@ final class AnalyzerConsumer extends AbstractOutcomeSinkJobConsumer implements R
 
 	public AnalyzerConsumer(AnalysisJob job, BeanInstance<? extends Analyzer<?>> beanInstance, AnalyzerJob analyzerJob,
 			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
-		super(analyzerJob);
+		super(analyzerJob, analyzerJob);
 		_job = job;
 		_beanInstance = beanInstance;
 		_analyzerJob = analyzerJob;

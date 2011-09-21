@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.data.InputColumn;
@@ -67,7 +68,7 @@ public interface RowProcessingConsumer {
 	 *         are sufficient for including this component for a particular
 	 *         row's processing. If false, this component will be skipped.
 	 */
-	public boolean satisfiedForConsume(Outcome[] outcomes);
+	public boolean satisfiedForConsume(Outcome[] outcomes, Collection<InputColumn<?>> columns);
 
 	/**
 	 * Main method of the consumer. Recieves the input row, dispatches it to the

@@ -37,7 +37,7 @@ import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector.Listener;
 import org.eobjects.analyzer.lifecycle.BeanInstance;
 
-final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
+final class TransformerConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final BeanInstance<? extends Transformer<?>> _beanInstance;
@@ -48,7 +48,7 @@ final class TransformerConsumer extends AbstractOutcomeSinkJobConsumer implement
 
 	public TransformerConsumer(AnalysisJob job, BeanInstance<? extends Transformer<?>> beanInstance,
 			TransformerJob transformerJob, InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
-		super(transformerJob);
+		super(transformerJob, transformerJob);
 		_job = job;
 		_beanInstance = beanInstance;
 		_transformerJob = transformerJob;

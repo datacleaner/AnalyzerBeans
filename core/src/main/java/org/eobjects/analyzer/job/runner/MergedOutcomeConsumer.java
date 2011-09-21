@@ -31,13 +31,13 @@ import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class MergedOutcomeConsumer extends AbstractOutcomeSinkJobConsumer implements RowProcessingConsumer {
+final class MergedOutcomeConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
 	private static final Logger logger = LoggerFactory.getLogger(MergedOutcomeConsumer.class);
 	private final MergedOutcomeJob _mergedOutcomeJob;
 
 	public MergedOutcomeConsumer(MergedOutcomeJob mergedOutcomeJob) {
-		super(mergedOutcomeJob);
+		super(mergedOutcomeJob, mergedOutcomeJob);
 		_mergedOutcomeJob = mergedOutcomeJob;
 	}
 
