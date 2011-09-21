@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.data.InputColumn;
