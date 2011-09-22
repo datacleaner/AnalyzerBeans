@@ -21,11 +21,9 @@ package org.eobjects.analyzer.result;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
-
-import org.eobjects.analyzer.result.SimilarityGroup;
-import org.eobjects.analyzer.result.SimilarityResult;
 
 public class SimilarityResultTest extends TestCase {
 
@@ -37,6 +35,6 @@ public class SimilarityResultTest extends TestCase {
 		similarValues.add(new SimilarityGroup("foo", "world"));
 		SimilarityResult result = new SimilarityResult(similarValues);
 
-		assertEquals("[hello, foobar, foo, bar, world]", result.getValues().toString());
+		assertEquals("[bar, foo, foobar, hello, world]", new TreeSet<String>(result.getValues()).toString());
 	}
 }
