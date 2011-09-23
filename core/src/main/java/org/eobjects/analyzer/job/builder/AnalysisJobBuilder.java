@@ -469,6 +469,30 @@ public final class AnalysisJobBuilder implements Closeable {
 		return this;
 	}
 
+	/**
+	 * Finds the available input columns (source or transformed) that match the
+	 * given data type specification.
+	 * 
+	 * @param dataTypeFamily
+	 *            the {@link DataTypeFamily} to search for
+	 * @return a list of matching InputColumns.
+	 */
+	public List<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily) {
+		return getAvailableInputColumns(dataTypeFamily, null);
+	}
+
+	/**
+	 * Finds the available input columns (source or transformed) that match the
+	 * given data type specification.
+	 * 
+	 * @param dataTypeFamily
+	 *            the {@link DataTypeFamily} to search for
+	 * @param dataType
+	 *            optionally a concrete type to look for, if the
+	 *            {@link DataTypeFamily} is null or
+	 *            {@link DataTypeFamily#UNDEFINED}.
+	 * @return a list of matching InputColumns.
+	 */
 	public List<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily, Class<?> dataType) {
 		SourceColumnFinder finder = new SourceColumnFinder();
 		finder.addSources(this);
