@@ -43,10 +43,6 @@ public class MockConvertToMonthObjectTransformer implements Transformer<Month> {
 	@Configured("String month input")
 	InputColumn<String> monthString;
 
-	@Inject
-	@Provided
-	OutputRowCollector outputRowCollector;
-	
 	@Override
 	public OutputColumns getOutputColumns() {
 		return new OutputColumns(monthString.getName() + " (as Month Object)");

@@ -35,7 +35,6 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.ListResult;
-import org.eobjects.analyzer.test.MockAnalyzer;
 
 public class CustomColumnTypeTest extends TestCase {
 
@@ -55,7 +54,7 @@ public class CustomColumnTypeTest extends TestCase {
 					MockConvertToMonthObjectTransformer.class).addInputColumn(builder.getSourceColumnByName("month"));
 			monthObjectColumn = convertTransformer.getOutputColumns().get(0);
 
-			builder.addAnalyzer(MockAnalyzer.class).addInputColumns(monthObjectColumn);
+			builder.addAnalyzer(MockMonthConsumingAnalyzer.class).addInputColumns(monthObjectColumn);
 			job = builder.toAnalysisJob();
 		}
 
