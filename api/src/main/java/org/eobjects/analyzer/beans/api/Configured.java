@@ -35,7 +35,7 @@ import javax.inject.Qualifier;
  * annotated with @Configured need to have a single argument, equivalent to a
  * property setter/modifier method.
  * 
- * Valid types for @Configured annotated fields and method arguments are single
+ * Valid types for @Configured annotated fields are single
  * instances or arrays of:
  * <ul>
  * <li>Boolean</li>
