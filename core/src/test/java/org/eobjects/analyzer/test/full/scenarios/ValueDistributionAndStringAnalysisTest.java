@@ -86,9 +86,8 @@ public class ValueDistributionAndStringAnalysisTest extends TestCase {
 			valueDistribuitionJobBuilder.setConfiguredProperty("Bottom n most frequent values", null);
 		}
 
-		AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder
-				.addAnalyzer(StringAnalyzer.class);
-		stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING));
+		AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
+		stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING, null));
 
 		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
 

@@ -103,7 +103,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		TransformerJobBuilder<ConvertToStringTransformer> transformerJobBuilder = analysisJobBuilder
 				.addTransformer(ConvertToStringTransformer.class);
 
-		Collection<InputColumn<?>> numberColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.NUMBER);
+		Collection<InputColumn<?>> numberColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.NUMBER,null);
 		assertEquals(1, numberColumns.size());
 		assertEquals("[MetaModelInputColumn[PUBLIC.EMPLOYEES.EMPLOYEENUMBER]]", Arrays.toString(numberColumns.toArray()));
 
@@ -116,7 +116,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		AnalyzerJobBuilder<StringAnalyzer> analyzerJobBuilder = analysisJobBuilder
 				.addAnalyzer(StringAnalyzer.class);
 
-		List<InputColumn<?>> stringInputColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING);
+		List<InputColumn<?>> stringInputColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING,null);
 		Set<String> columnNames = new TreeSet<String>();
 		for (InputColumn<?> inputColumn : stringInputColumns) {
 			columnNames.add(inputColumn.getName());

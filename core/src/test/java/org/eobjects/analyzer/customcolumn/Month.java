@@ -18,7 +18,7 @@
  * Boston, MA  02110-1301  USA
  */
 package org.eobjects.analyzer.customcolumn;
-
+ 
 public class Month {
 	
 	private String monthNameFull;

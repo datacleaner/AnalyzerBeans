@@ -469,10 +469,10 @@ public final class AnalysisJobBuilder implements Closeable {
 		return this;
 	}
 
-	public List<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily) {
+	public List<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily, Class<?> dataType) {
 		SourceColumnFinder finder = new SourceColumnFinder();
 		finder.addSources(this);
-		return finder.findInputColumns(dataTypeFamily);
+		return finder.findInputColumns(dataTypeFamily, dataType);
 	}
 
 	/**

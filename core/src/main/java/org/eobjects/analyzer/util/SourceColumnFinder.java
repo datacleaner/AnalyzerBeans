@@ -90,7 +90,7 @@ public class SourceColumnFinder {
 		addSources(job.getAnalyzerJobs());
 	}
 
-	public List<InputColumn<?>> findInputColumns(DataTypeFamily dataTypeFamily) {
+	public List<InputColumn<?>> findInputColumns(DataTypeFamily dataTypeFamily, Class<?> dataType) {
 		if (dataTypeFamily == null) {
 			dataTypeFamily = DataTypeFamily.UNDEFINED;
 		}
@@ -101,7 +101,13 @@ public class SourceColumnFinder {
 			for (InputColumn<?> col : outputColumns) {
 				DataTypeFamily dtf = col.getDataTypeFamily();
 				if (dtf == dataTypeFamily || dataTypeFamily == DataTypeFamily.UNDEFINED) {
-					result.add(col);
+					if (dataType == null) {
+						result.add(col);
+					} else {
+						if (ReflectionUtils.is(col.getDataType(), dataType)) {
+							result.add(col);
+						}
+					}
 				}
 			}
 		}

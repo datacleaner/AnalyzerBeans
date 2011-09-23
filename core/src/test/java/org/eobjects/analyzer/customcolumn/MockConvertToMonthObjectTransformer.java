@@ -23,19 +23,15 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.OutputColumns;
-import org.eobjects.analyzer.beans.api.OutputRowCollector;
-import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.junit.Ignore;
 
 /**
  * Month transformer to convert a String Month value to Month Object.
  * 
  */
-@Ignore
 @TransformerBean("Mock Month Transformer")
 public class MockConvertToMonthObjectTransformer implements Transformer<Month> {
 
@@ -45,7 +41,7 @@ public class MockConvertToMonthObjectTransformer implements Transformer<Month> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(monthString.getName() + " (as Month Object)");
+		return new OutputColumns(new String[]{monthString.getName() + " (as Month Object)"}, new Class[]{Month.class});
 	}
 
 	@Override
