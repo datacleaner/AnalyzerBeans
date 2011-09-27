@@ -40,6 +40,13 @@ public class ELTransformerTest extends TestCase {
 
 		assertEquals(1, result.length);
 		assertEquals("Hello Donald Duck", result[0]);
+		
+		result = transformer.transform(new MockInputRow().put(
+				new MockInputColumn<String>("name", String.class),
+				null));
+
+		assertEquals(1, result.length);
+		assertEquals("Hello ", result[0]);
 
 		result = transformer.transform(new MockInputRow());
 
