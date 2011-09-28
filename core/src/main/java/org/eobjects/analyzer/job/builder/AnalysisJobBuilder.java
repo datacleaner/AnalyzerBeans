@@ -413,7 +413,6 @@ public final class AnalysisJobBuilder implements Closeable {
 		// which will otherwise cause ConcurrentModificationExceptions
 		List<ExplorerChangeListener> listeners = new ArrayList<ExplorerChangeListener>(_explorerChangeListeners);
 		for (ExplorerChangeListener listener : listeners) {
-			// TODO: Make separate listener for explorers
 			listener.onAdd(explorerJobBuilder);
 		}
 		return explorerJobBuilder;
