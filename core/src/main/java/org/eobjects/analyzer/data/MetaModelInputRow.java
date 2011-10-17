@@ -50,6 +50,24 @@ public final class MetaModelInputRow extends AbstractInputRow {
 		return _row;
 	}
 
+	@Override
+	public boolean containsInputColumn(InputColumn<?> inputColumn) {
+		if (!inputColumn.isPhysicalColumn()) {
+			return false;
+		}
+		Column physicalColumn = inputColumn.getPhysicalColumn();
+		SelectItem[] selectItems = _row.getSelectItems();
+		for (SelectItem selectItem : selectItems) {
+			if (selectItem.getColumn() != null && selectItem.getFunction() == null) {
+				Column column = selectItem.getColumn();
+				if (physicalColumn.equals(column)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E> E getValueInternal(InputColumn<E> column) {

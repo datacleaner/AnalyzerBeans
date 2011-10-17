@@ -36,7 +36,7 @@ public class MockInputRow extends AbstractInputRow {
 
 	private static final AtomicInteger _idGenerator = new AtomicInteger(Integer.MIN_VALUE);
 
-	private final Map<InputColumn<?>, Object> map = new LinkedHashMap<InputColumn<?>, Object>();
+	private final Map<InputColumn<?>, Object> _values = new LinkedHashMap<InputColumn<?>, Object>();
 	private final int _id;
 
 	public MockInputRow() {
@@ -63,14 +63,20 @@ public class MockInputRow extends AbstractInputRow {
 		return _id;
 	}
 
+	@Override
 	public List<InputColumn<?>> getInputColumns() {
-		return new ArrayList<InputColumn<?>>(map.keySet());
+		return new ArrayList<InputColumn<?>>(_values.keySet());
+	}
+	
+	@Override
+	public boolean containsInputColumn(InputColumn<?> inputColumn) {
+		return _values.containsKey(inputColumn);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E> E getValueInternal(InputColumn<E> column) {
-		return (E) map.get(column);
+		return (E) _values.get(column);
 	}
 
 	/**
@@ -81,7 +87,7 @@ public class MockInputRow extends AbstractInputRow {
 	 * @return
 	 */
 	public MockInputRow put(InputColumn<?> column, Object value) {
-		map.put(column, value);
+		_values.put(column, value);
 		return this;
 	}
 
@@ -90,7 +96,7 @@ public class MockInputRow extends AbstractInputRow {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + _id;
-		result = prime * result + ((map == null) ? 0 : map.hashCode());
+		result = prime * result + ((_values == null) ? 0 : _values.hashCode());
 		return result;
 	}
 
@@ -105,10 +111,10 @@ public class MockInputRow extends AbstractInputRow {
 		MockInputRow other = (MockInputRow) obj;
 		if (_id != other._id)
 			return false;
-		if (map == null) {
-			if (other.map != null)
+		if (_values == null) {
+			if (other._values != null)
 				return false;
-		} else if (!map.equals(other.map))
+		} else if (!_values.equals(other._values))
 			return false;
 		return true;
 	}

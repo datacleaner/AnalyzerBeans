@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
@@ -41,11 +42,11 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 	 * Ensures that just a single outcome is satisfied
 	 */
 	@Override
-	public final boolean satisfiedForConsume(Outcome[] outcomes, Collection<InputColumn<?>> columns) {
-		return (satisfiedOutcomesForConsume(outcomes) && satisfiedInputsForConsume(columns));
+	public final boolean satisfiedForConsume(Outcome[] outcomes, InputRow row) {
+		return (satisfiedOutcomesForConsume(outcomes) && satisfiedInputsForConsume(row));
 	}
 
-	private boolean satisfiedInputsForConsume(Collection<InputColumn<?>> availableInputColumns) {
+	private boolean satisfiedInputsForConsume(InputRow row) {
 		boolean isSatisfiedInputColumns = true;
 		InputColumn<?>[] requiredInputColumns = _inputColumnSinkJob.getInput();
 		if (requiredInputColumns == null || requiredInputColumns.length == 0) {
@@ -58,7 +59,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 					 * artificial columns, don't exist in the row.
 					 */
 				} else {
-					if (!availableInputColumns.contains(inputColumn)) {
+					if (!row.containsInputColumn(inputColumn)) {
 						isSatisfiedInputColumns = false;
 						break;
 					}

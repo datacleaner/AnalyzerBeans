@@ -67,7 +67,7 @@ public interface RowProcessingConsumer {
 	 *         are sufficient for including this component for a particular
 	 *         row's processing. If false, this component will be skipped.
 	 */
-	public boolean satisfiedForConsume(Outcome[] outcomes, Collection<InputColumn<?>> columns);
+	public boolean satisfiedForConsume(Outcome[] outcomes, InputRow inputRow);
 
 	/**
 	 * Main method of the consumer. Recieves the input row, dispatches it to the

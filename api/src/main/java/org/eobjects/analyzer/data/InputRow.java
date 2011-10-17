@@ -62,4 +62,13 @@ public interface InputRow {
 	 * @return the input columns represented in this row
 	 */
 	public List<InputColumn<?>> getInputColumns();
+
+	/**
+	 * Determines whether a particular {@link InputColumn} is mapped within the
+	 * row or not.
+	 * 
+	 * @param inputColumn
+	 * @return true if the input column is mapped in this input row
+	 */
+	public boolean containsInputColumn(InputColumn<?> inputColumn);
 }

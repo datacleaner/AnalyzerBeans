@@ -97,7 +97,7 @@ public final class ConsumeRowTask implements Task {
 		boolean outputRowsSame = true;
 
 		for (InputRow row : rows) {
-			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes(), row.getInputColumns());
+			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes(), row);
 			if (process) {
 				InputRow[] outputRows = consumer.consume(row, distinctCount, outcomeSink);
 				if (outputRows != null) {

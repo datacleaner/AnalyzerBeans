@@ -52,6 +52,14 @@ public final class TransformedInputRow extends AbstractInputRow {
 		return _delegate.getId();
 	}
 
+	@Override
+	public boolean containsInputColumn(InputColumn<?> inputColumn) {
+		if (inputColumn.isVirtualColumn() && _values.containsKey(inputColumn)) {
+			return true;
+		}
+		return _delegate.containsInputColumn(inputColumn);
+	}
+
 	public void addValue(InputColumn<?> inputColumn, Object value) {
 		if (inputColumn.isPhysicalColumn()) {
 			throw new IllegalArgumentException("Cannot add physical column values to transformed InputRow.");
