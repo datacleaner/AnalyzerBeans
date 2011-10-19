@@ -19,10 +19,15 @@
  */
 package org.eobjects.analyzer.cli;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Renderer;
@@ -37,6 +42,7 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
@@ -239,28 +245,39 @@ public final class CliRunner {
 		}
 	}
 
-	protected void runJob(AnalyzerBeansConfiguration configuration) {
-		File jobFile = _arguments.getJobFile();
+	protected void runJob(AnalyzerBeansConfiguration configuration) throws Exception {
+		final File jobFile = _arguments.getJobFile();
+		final InputStream inputStream = new BufferedInputStream(new FileInputStream(jobFile));
 
-		AnalysisJobBuilder analysisJobBuilder = new JaxbJobReader(configuration).create(jobFile);
+		final JaxbJobReader jobReader = new JaxbJobReader(configuration);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(configuration, new CliProgressAnalysisListener());
-		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
+		final Map<String, String> variableOverrides = _arguments.getVariableOverrides();
+		final AnalysisJobBuilder analysisJobBuilder = jobReader.create(inputStream, variableOverrides);
+
+		final AnalysisRunner runner = new AnalysisRunnerImpl(configuration, new CliProgressAnalysisListener());
+		final AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
 
 		resultFuture.await();
 
 		if (resultFuture.isSuccessful()) {
 			_out.println("SUCCESS!");
-			List<AnalyzerResult> results = resultFuture.getResults();
+			final Set<Entry<ComponentJob, AnalyzerResult>> results = resultFuture.getResultMap().entrySet();
 
-			RendererFactory rendererFinder = new RendererFactory(configuration.getDescriptorProvider(), null);
+			final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider(), null);
 
-			for (AnalyzerResult result : results) {
-				_out.println("\nRESULT:");
+			for (Entry<ComponentJob, AnalyzerResult> result : results) {
+				final ComponentJob componentJob = result.getKey();
+				final AnalyzerResult analyzerResult = result.getValue();
+				String name = componentJob.getName();
+				if (name == null) {
+					name = componentJob.toString();
+				}
 
-				Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFinder.getRenderer(result,
-						TextRenderingFormat.class);
-				CharSequence renderedResult = renderer.render(result);
+				_out.println("\nRESULT: " + name);
+
+				Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFactory.getRenderer(
+						analyzerResult, TextRenderingFormat.class);
+				CharSequence renderedResult = renderer.render(analyzerResult);
 
 				_out.println(renderedResult);
 			}

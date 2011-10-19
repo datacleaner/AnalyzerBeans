@@ -21,6 +21,7 @@ package org.eobjects.analyzer.cli;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Map;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -91,6 +92,9 @@ public class CliArguments {
 	@Option(name = "-t", aliases = { "-table", "--table-name" }, usage = "Name of table when printing a list of columns")
 	private String tableName;
 
+	@Option(name = "-v", aliases = { "-var", "--variable" }, multiValued = true)
+	private Map<String, String> variableOverrides;
+
 	private boolean usageMode;
 
 	private CliArguments() {
@@ -125,8 +129,13 @@ public class CliArguments {
 		return usageMode;
 	}
 
+	public Map<String, String> getVariableOverrides() {
+		return variableOverrides;
+	}
+
 	/**
-	 * Gets whether the arguments have been sufficiently set to execute a CLI task.
+	 * Gets whether the arguments have been sufficiently set to execute a CLI
+	 * task.
 	 * 
 	 * @return true if the CLI arguments have been sufficiently set.
 	 */

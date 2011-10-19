@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.cli;
 
+import java.util.TreeMap;
+
 import junit.framework.TestCase;
 
 public class CliArgumentsTest extends TestCase {
@@ -42,9 +44,16 @@ public class CliArgumentsTest extends TestCase {
 
 		args = CliArguments.parse(new String[] { "-usage" });
 		assertTrue(args.isSet());
-		
+
 		args = CliArguments.parse(new String[] { "-ds", "foo" });
 		assertFalse(args.isSet());
 		assertEquals("foo", args.getDatastoreName());
+	}
+
+	public void testVariableOverrides() throws Exception {
+		CliArguments args;
+		args = CliArguments.parse("-job myjob.xml -conf conf.xml -var foo=bar -v bar=c:\\foo\bar\baz.csv".split(" "));
+		assertEquals("{bar=c:\\foo\bar\baz.csv, foo=bar}",
+				new TreeMap<String, String>(args.getVariableOverrides()).toString());
 	}
 }
