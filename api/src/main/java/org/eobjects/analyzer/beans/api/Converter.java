@@ -25,6 +25,8 @@ package org.eobjects.analyzer.beans.api;
  * 
  * Converters should supply a no-args constructor.
  * 
+ * Usually Converters are registered using the {@link Convertable} annotation.
+ * 
  * @author Kasper Sørensen
  * 
  * @param <E>

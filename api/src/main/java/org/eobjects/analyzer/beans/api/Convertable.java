@@ -25,8 +25,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation used to specify a {@link Converter} of a specific type or a
+ * specific {@link Configured} property.
+ * 
+ * @author Kasper Sørensen
+ */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
+@Target({ ElementType.TYPE, ElementType.FIELD })
 @Documented
 public @interface Convertable {
 
