@@ -45,6 +45,20 @@ import org.eobjects.metamodel.util.EqualsBuilder;
 
 public class StringConversionUtilsTest extends TestCase {
 
+	public void testConvertConvertableType() throws Exception {
+		MyConvertable convertable = new MyConvertable();
+		convertable.setName("foo");
+		convertable.setDescription("bar");
+
+		String serializedForm = StringConversionUtils.serialize(convertable);
+		assertEquals("foo:bar", serializedForm);
+
+		MyConvertable copy = StringConversionUtils.deserialize(serializedForm, MyConvertable.class, null, null, null);
+		assertTrue(convertable != copy);
+		assertEquals("foo", copy.getName());
+		assertEquals("bar", copy.getDescription());
+	}
+
 	public void testConvertSimpleTypes() throws Exception {
 		runTests("hello, [world]", "hello&#44; &#91;world&#93;");
 		runTests("hello", "hello");
@@ -181,8 +195,7 @@ public class StringConversionUtilsTest extends TestCase {
 				referenceDataCatalog, null);
 		assertSame(synonymCatalogResult, synonymCatalog);
 		try {
-			StringConversionUtils.deserialize("bar", SynonymCatalog.class, null, referenceDataCatalog,
-					null);
+			StringConversionUtils.deserialize("bar", SynonymCatalog.class, null, referenceDataCatalog, null);
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
 			assertEquals("Synonym catalog not found: bar", e.getMessage());

@@ -34,6 +34,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.eobjects.analyzer.beans.api.Convertable;
+import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.Datastore;
@@ -132,6 +134,29 @@ public final class StringConversionUtils {
 			return sb.toString();
 		}
 
+		final String result;
+
+		Convertable convertable = o.getClass().getAnnotation(Convertable.class);
+		if (convertable == null) {
+			result = serializeStdType(o);
+		} else {
+			Class<? extends Converter<?>> converterClass = convertable.value();
+			try {
+				@SuppressWarnings("unchecked")
+				Converter<Object> converter = (Converter<Object>) converterClass.newInstance();
+				result = converter.toString(o);
+			} catch (Exception e) {
+				if (e instanceof RuntimeException) {
+					throw (RuntimeException) e;
+				}
+				throw new IllegalStateException("Error occurred while using converter: " + converterClass, e);
+			}
+		}
+
+		return escape(result);
+	}
+
+	private static String serializeStdType(Object o) {
 		if (o instanceof Calendar) {
 			// will now be picked up by the date conversion
 			o = ((Calendar) o).getTime();
@@ -176,8 +201,7 @@ public final class StringConversionUtils {
 			logger.warn("Could not convert type: {}", o.getClass().getName());
 			result = o.toString();
 		}
-
-		return escape(result);
+		return result;
 	}
 
 	/**
@@ -207,6 +231,27 @@ public final class StringConversionUtils {
 		}
 
 		str = unescape(str);
+
+		Convertable convertable = type.getAnnotation(Convertable.class);
+		if (convertable == null) {
+			return deserializeStdType(str, type, schemaNavigator, referenceDataCatalog, datastoreCatalog);
+		} else {
+			Class<? extends Converter<?>> converterClass = convertable.value();
+			try {
+				Converter<E> converter = (Converter<E>) converterClass.newInstance();
+				return converter.fromString(str);
+			} catch (Exception e) {
+				if (e instanceof RuntimeException) {
+					throw (RuntimeException) e;
+				}
+				throw new IllegalStateException("Error occurred while using converter: " + converterClass, e);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <E> E deserializeStdType(String str, Class<E> type, SchemaNavigator schemaNavigator,
+			ReferenceDataCatalog referenceDataCatalog, DatastoreCatalog datastoreCatalog) {
 		if (ReflectionUtils.isString(type)) {
 			return (E) str;
 		}
