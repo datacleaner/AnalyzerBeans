@@ -140,6 +140,7 @@ public class DelegatingConverter implements Converter<Object> {
 						InjectionPoint<Object> injectionPoint = new MemberInjectionPoint<Object>(field, converter);
 						value = injectionManager.getInstance(injectionPoint);
 					}
+					field.setAccessible(true);
 					try {
 						field.set(converter, value);
 					} catch (Exception e) {
