@@ -41,8 +41,11 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.InjectionManager;
+import org.eobjects.analyzer.configuration.InjectionManagerFactory;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
@@ -841,8 +844,12 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 	private StringConverter createStringConverter(
 			final AnalysisJobBuilder analysisJobBuilder) {
-		return new StringConverter(_configuration.getInjectionManagerFactory()
-				.getInjectionManager(analysisJobBuilder.toAnalysisJob(false)));
+		InjectionManagerFactory injectionManagerFactory = _configuration
+				.getInjectionManagerFactory();
+		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob(false);
+		InjectionManager injectionManager = injectionManagerFactory
+				.getInjectionManager(analysisJob);
+		return new StringConverter(injectionManager);
 	}
 
 	private InputColumn<?> createExpressionBasedInputColumn(InputType inputType) {
@@ -902,8 +909,10 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					}
 				}
 
-				Object value = stringConverter.deserialize(stringValue,
-						configuredProperty.getType());
+				final Class<? extends Converter<?>> customConverter = configuredProperty
+						.getCustomConverter();
+				final Object value = stringConverter.deserialize(stringValue,
+						configuredProperty.getType(), customConverter);
 
 				logger.debug("Setting property '{}' to {}", name, value);
 				builder.setConfiguredProperty(configuredProperty, value);

@@ -202,7 +202,8 @@ public final class JaxbConfigurationReader implements
 			logger.info("Updated date: {}", metadata.getUpdatedDate());
 		}
 
-		// injection manager will be used throughout building the configuration. It will be used to host dependencies as they appear
+		// injection manager will be used throughout building the configuration.
+		// It will be used to host dependencies as they appear
 		InjectionManager injectionManager = new InjectionManagerImpl(null,
 				null, null);
 
@@ -906,7 +907,8 @@ public final class JaxbConfigurationReader implements
 				}
 
 				Object configuredValue = stringConverter.deserialize(
-						propertyValue, configuredProperty.getType());
+						propertyValue, configuredProperty.getType(),
+						configuredProperty.getCustomConverter());
 
 				configuredProperty.setValue(result, configuredValue);
 			}

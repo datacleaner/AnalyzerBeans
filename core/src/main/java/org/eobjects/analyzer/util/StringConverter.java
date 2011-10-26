@@ -84,7 +84,9 @@ public final class StringConverter {
 
 	public final String serialize(final Object o, final Class<? extends Converter<?>> converterClass) {
 		final Collection<Class<? extends Converter<?>>> col = new ArrayList<Class<? extends Converter<?>>>();
-		col.add(converterClass);
+		if (converterClass != null) {
+			col.add(converterClass);
+		}
 		return serialize(o, col);
 	}
 
@@ -150,7 +152,9 @@ public final class StringConverter {
 
 	public final <E> E deserialize(String str, Class<E> type, Class<? extends Converter<?>> converterClass) {
 		Collection<Class<? extends Converter<?>>> col = new ArrayList<Class<? extends Converter<?>>>();
-		col.add(converterClass);
+		if (converterClass != null) {
+			col.add(converterClass);
+		}
 		return deserialize(str, type, col);
 	}
 

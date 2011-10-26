@@ -155,8 +155,8 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		addRequirements(outcomeMappings, transformerMappings, filterMappings,
 				mergedOutcomeMappings, analyzerMappings, columnMappings);
 
-		addConfiguration(analysisJob, transformerMappings, filterMappings, analyzerMappings,
-				columnMappings, explorerMappings);
+		addConfiguration(analysisJob, transformerMappings, filterMappings,
+				analyzerMappings, columnMappings, explorerMappings);
 
 		try {
 			final Marshaller marshaller = _jaxbContext.createMarshaller();
@@ -209,7 +209,8 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 					.getDescriptor().getConfiguredPropertiesForInput();
 			elementType.getInput().addAll(
 					createInputConfiguration(configuration,
-							configuredProperties, columnMappings, stringConverter));
+							configuredProperties, columnMappings,
+							stringConverter));
 
 			configuredProperties = job.getDescriptor()
 					.getConfiguredProperties();
@@ -228,7 +229,8 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 					.getDescriptor().getConfiguredPropertiesForInput();
 			elementType.getInput().addAll(
 					createInputConfiguration(configuration,
-							configuredProperties, columnMappings, stringConverter));
+							configuredProperties, columnMappings,
+							stringConverter));
 
 			configuredProperties = job.getDescriptor()
 					.getConfiguredProperties();
@@ -280,8 +282,10 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 							ExpressionBasedInputColumn<?> expressionBasedInputColumn = (ExpressionBasedInputColumn<?>) inputColumn;
 							Object columnValue = expressionBasedInputColumn
 									.getExpression();
-							inputType.setValue(stringConverter
-									.serialize(columnValue));
+							inputType
+									.setValue(stringConverter.serialize(
+											columnValue,
+											property.getCustomConverter()));
 						} else {
 							inputType
 									.setRef(getId(inputColumn, columnMappings));
@@ -311,7 +315,8 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 			if (!property.isInputColumn()) {
 				Object value = configuration.getProperty(property);
 				if (value != null) {
-					String stringValue = stringConverter.serialize(value);
+					String stringValue = stringConverter.serialize(value,
+							property.getCustomConverter());
 
 					Property propertyType = new Property();
 					propertyType.setName(property.getName());

@@ -23,6 +23,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Convertable;
+import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -101,5 +103,14 @@ final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor 
 			return super.compareTo(o);
 		}
 		return diff;
+	}
+
+	@Override
+	public Class<? extends Converter<?>> getCustomConverter() {
+		Convertable convertable = getAnnotation(Convertable.class);
+		if (convertable != null) {
+			return convertable.value();
+		}
+		return null;
 	}
 }

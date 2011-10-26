@@ -20,6 +20,8 @@
 package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Convertable;
+import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.data.DataTypeFamily;
 
 /**
@@ -32,14 +34,44 @@ import org.eobjects.analyzer.data.DataTypeFamily;
  */
 public interface ConfiguredPropertyDescriptor extends PropertyDescriptor {
 
+	/**
+	 * Determines whether this configured property is an input column (either
+	 * single instance or array)
+	 * 
+	 * @return true if the configured property is a input column type.
+	 */
 	public boolean isInputColumn();
 
 	/**
+	 * Gets the optional description of the configured property
+	 * 
 	 * @return a humanly readable description of the property
 	 */
 	public String getDescription();
 
+	/**
+	 * Gets the {@link DataTypeFamily} of the configured property, if it is an
+	 * input column type property (see {@link #isInputColumn()})
+	 * 
+	 * @return
+	 */
 	public DataTypeFamily getInputColumnDataTypeFamily();
 
+	/**
+	 * Determines whether or not the configured property is required in order
+	 * for it's component to execute.
+	 * 
+	 * @return true if the configured property is required
+	 */
 	public boolean isRequired();
+
+	/**
+	 * Gets an optional custom {@link Converter} class, in case the configured
+	 * property should be converted using custom rules.
+	 * 
+	 * @see Convertable
+	 * 
+	 * @return a custom converter, or null
+	 */
+	public Class<? extends Converter<?>> getCustomConverter();
 }
