@@ -37,6 +37,7 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.eobjects.analyzer.util.MyConvertable.SecondaryConverter;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableSchema;
 import org.eobjects.metamodel.schema.MutableTable;
@@ -58,13 +59,24 @@ public class StringConverterTest extends TestCase {
 		convertable.setName("foo");
 		convertable.setDescription("bar");
 
-		String serializedForm = stringConverter.serialize(convertable);
-		assertEquals("foo:bar", serializedForm);
+		String serializedForm1 = stringConverter.serialize(convertable);
+		assertEquals("foo:bar", serializedForm1);
+		String serializedForm2 = stringConverter.serialize(convertable, SecondaryConverter.class);
+		assertEquals("foo|bar", serializedForm2);
 
-		MyConvertable copy = stringConverter.deserialize(serializedForm, MyConvertable.class);
-		assertTrue(convertable != copy);
-		assertEquals("foo", copy.getName());
-		assertEquals("bar", copy.getDescription());
+		{
+			MyConvertable copy1 = stringConverter.deserialize(serializedForm1, MyConvertable.class);
+			assertTrue(convertable != copy1);
+			assertEquals("foo", copy1.getName());
+			assertEquals("bar", copy1.getDescription());
+		}
+		
+		{
+			MyConvertable copy2 = stringConverter.deserialize(serializedForm2, MyConvertable.class, SecondaryConverter.class);
+			assertTrue(convertable != copy2);
+			assertEquals("foo", copy2.getName());
+			assertEquals("bar", copy2.getDescription());
+		}
 	}
 
 	public void testConvertSimpleTypes() throws Exception {

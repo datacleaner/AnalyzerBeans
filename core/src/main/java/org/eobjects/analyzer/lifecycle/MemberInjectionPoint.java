@@ -53,6 +53,12 @@ public final class MemberInjectionPoint<T> extends AbstractInjectionPoint<T> imp
 	}
 
 	@Override
+	public String toString() {
+		return "MemberInjectionPoint [member=" + _member + ", parameterIndex=" + _parameterIndex + ", instance=" + _instance
+				+ "]";
+	}
+
+	@Override
 	public Object getInstance() {
 		return _instance;
 	}
