@@ -36,6 +36,7 @@ import org.apache.commons.lang.SerializationUtils;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
+import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,14 +151,17 @@ public class StandardTypeConverter implements Converter<Object> {
 		if (ReflectionUtils.is(type, Serializable.class)) {
 			logger.warn("fromString(...): No built-in handling of type: {}, using deserialization", type.getName());
 			byte[] bytes = (byte[]) parentConverter.fromString(byte[].class, str);
+			ChangeAwareObjectInputStream objectInputStream = null;
 			try {
-				ChangeAwareObjectInputStream objectInputStream = new ChangeAwareObjectInputStream(new ByteArrayInputStream(
+				objectInputStream = new ChangeAwareObjectInputStream(new ByteArrayInputStream(
 						bytes));
 				objectInputStream.addClassLoader(type.getClassLoader());
 				Object obj = objectInputStream.readObject();
 				return obj;
 			} catch (Exception e) {
 				throw new IllegalStateException("Could not deserialize to " + type + ".", e);
+			} finally {
+				FileHelper.safeClose(objectInputStream);
 			}
 		}
 
