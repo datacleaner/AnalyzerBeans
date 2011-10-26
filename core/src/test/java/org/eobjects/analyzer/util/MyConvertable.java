@@ -28,7 +28,7 @@ public class MyConvertable {
 	public static class MyConverter implements Converter<MyConvertable> {
 
 		@Override
-		public MyConvertable fromString(String serializedForm) {
+		public MyConvertable fromString(Class<?> type, String serializedForm) {
 			String[] tokens = serializedForm.split(":");
 			MyConvertable instance = new MyConvertable();
 			instance.setName(tokens[0]);
@@ -39,6 +39,11 @@ public class MyConvertable {
 		@Override
 		public String toString(MyConvertable instance) {
 			return instance.getName() + ":" + instance.getDescription();
+		}
+
+		@Override
+		public boolean isConvertable(Class<?> type) {
+			return type == MyConvertable.class;
 		}
 	}
 

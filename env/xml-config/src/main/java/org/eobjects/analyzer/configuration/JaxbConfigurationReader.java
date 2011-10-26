@@ -114,7 +114,7 @@ import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.analyzer.util.StringConversionUtils;
+import org.eobjects.analyzer.util.StringConverter;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.util.FileHelper;
@@ -202,16 +202,28 @@ public final class JaxbConfigurationReader implements
 			logger.info("Updated date: {}", metadata.getUpdatedDate());
 		}
 
-		TaskRunner taskRunner = createTaskRunner(configuration);
+		// injection manager will be used throughout building the configuration. It will be used to host dependencies as they appear
+		InjectionManager injectionManager = new InjectionManagerImpl(null,
+				null, null);
+
+		TaskRunner taskRunner = createTaskRunner(configuration,
+				injectionManager);
 		DescriptorProvider descriptorProvider = createDescriptorProvider(
 				configuration, taskRunner);
-		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration
-				.getDatastoreCatalog());
+		DatastoreCatalog datastoreCatalog = createDatastoreCatalog(
+				configuration.getDatastoreCatalog(), injectionManager);
+
+		injectionManager = new InjectionManagerImpl(datastoreCatalog, null,
+				null);
+
 		ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(
-				configuration.getReferenceDataCatalog(), datastoreCatalog);
+				configuration.getReferenceDataCatalog(), injectionManager);
+
+		injectionManager = new InjectionManagerImpl(datastoreCatalog,
+				referenceDataCatalog, null);
+
 		StorageProvider storageProvider = createStorageProvider(
-				configuration.getStorageProvider(), datastoreCatalog,
-				referenceDataCatalog);
+				configuration.getStorageProvider(), injectionManager);
 
 		return new AnalyzerBeansConfigurationImpl(datastoreCatalog,
 				referenceDataCatalog, descriptorProvider, taskRunner,
@@ -243,8 +255,7 @@ public final class JaxbConfigurationReader implements
 
 	private StorageProvider createStorageProvider(
 			StorageProviderType storageProviderType,
-			DatastoreCatalog datastoreCatalog,
-			ReferenceDataCatalog referenceDataCatalog) {
+			InjectionManager injectionManager) {
 		if (storageProviderType == null) {
 			// In-memory is the default storage provider
 			return new InMemoryStorageProvider();
@@ -259,10 +270,9 @@ public final class JaxbConfigurationReader implements
 					.getRowAnnotationStorage();
 
 			final StorageProvider collectionsStorageProvider = createStorageProvider(
-					collectionsStorage, datastoreCatalog, referenceDataCatalog);
+					collectionsStorage, injectionManager);
 			final StorageProvider rowAnnotationStorageProvider = createStorageProvider(
-					rowAnnotationStorage, datastoreCatalog,
-					referenceDataCatalog);
+					rowAnnotationStorage, injectionManager);
 
 			return new CombinedStorageProvider(collectionsStorageProvider,
 					rowAnnotationStorageProvider);
@@ -280,8 +290,7 @@ public final class JaxbConfigurationReader implements
 				.getCustomStorageProvider();
 		if (customStorageProvider != null) {
 			return createCustomElement(customStorageProvider,
-					StorageProvider.class, datastoreCatalog,
-					referenceDataCatalog, true);
+					StorageProvider.class, injectionManager, true);
 		}
 
 		BerkeleyDbStorageProviderType berkeleyDbStorageProvider = storageProviderType
@@ -340,7 +349,7 @@ public final class JaxbConfigurationReader implements
 
 	private ReferenceDataCatalog createReferenceDataCatalog(
 			ReferenceDataCatalogType referenceDataCatalog,
-			DatastoreCatalog datastoreCatalog) {
+			InjectionManager injectionManager) {
 		List<Dictionary> dictionaryList = new ArrayList<Dictionary>();
 		List<SynonymCatalog> synonymCatalogList = new ArrayList<SynonymCatalog>();
 
@@ -396,7 +405,7 @@ public final class JaxbConfigurationReader implements
 					} else if (dictionaryType instanceof CustomElementType) {
 						Dictionary customDictionary = createCustomElement(
 								(CustomElementType) dictionaryType,
-								Dictionary.class, datastoreCatalog, null, false);
+								Dictionary.class, injectionManager, false);
 						checkName(customDictionary.getName(), Dictionary.class,
 								dictionaryList);
 						dictionaryList.add(customDictionary);
@@ -438,8 +447,7 @@ public final class JaxbConfigurationReader implements
 					} else if (synonymCatalogType instanceof CustomElementType) {
 						SynonymCatalog customSynonymCatalog = createCustomElement(
 								(CustomElementType) synonymCatalogType,
-								SynonymCatalog.class, datastoreCatalog, null,
-								false);
+								SynonymCatalog.class, injectionManager, false);
 						checkName(customSynonymCatalog.getName(),
 								SynonymCatalog.class, synonymCatalogList);
 						synonymCatalogList.add(customSynonymCatalog);
@@ -513,7 +521,8 @@ public final class JaxbConfigurationReader implements
 	}
 
 	private DatastoreCatalog createDatastoreCatalog(
-			DatastoreCatalogType datastoreCatalogType) {
+			DatastoreCatalogType datastoreCatalogType,
+			InjectionManager injectionManager) {
 		Map<String, Datastore> datastores = new HashMap<String, Datastore>();
 
 		List<Object> datastoreTypes = datastoreCatalogType
@@ -708,7 +717,7 @@ public final class JaxbConfigurationReader implements
 				.filterOnClass(datastoreTypes, CustomElementType.class);
 		for (CustomElementType customElementType : customDatastores) {
 			Datastore ds = createCustomElement(customElementType,
-					Datastore.class, null, null, true);
+					Datastore.class, injectionManager, true);
 			String name = ds.getName();
 			checkName(name, Datastore.class, datastores);
 			datastores.put(name, ds);
@@ -798,7 +807,8 @@ public final class JaxbConfigurationReader implements
 		}
 	}
 
-	private TaskRunner createTaskRunner(Configuration configuration) {
+	private TaskRunner createTaskRunner(Configuration configuration,
+			InjectionManager injectionManager) {
 		SinglethreadedTaskrunnerType singlethreadedTaskrunner = configuration
 				.getSinglethreadedTaskrunner();
 		MultithreadedTaskrunnerType multithreadedTaskrunner = configuration
@@ -818,7 +828,7 @@ public final class JaxbConfigurationReader implements
 			}
 		} else if (customTaskrunner != null) {
 			taskRunner = createCustomElement(customTaskrunner,
-					TaskRunner.class, null, null, true);
+					TaskRunner.class, injectionManager, true);
 		} else {
 			// default task runner type is multithreaded
 			taskRunner = new MultiThreadedTaskRunner();
@@ -848,8 +858,8 @@ public final class JaxbConfigurationReader implements
 	 */
 	@SuppressWarnings("unchecked")
 	private <E> E createCustomElement(CustomElementType customElementType,
-			Class<E> expectedClazz, DatastoreCatalog datastoreCatalog,
-			ReferenceDataCatalog referenceDataCatalog, boolean initialize) {
+			Class<E> expectedClazz, InjectionManager injectionManager,
+			boolean initialize) {
 		Class<?> foundClass;
 		String className = customElementType.getClassName();
 
@@ -867,6 +877,8 @@ public final class JaxbConfigurationReader implements
 		E result = (E) ReflectionUtils.newInstance(foundClass);
 
 		ComponentDescriptor<?> descriptor = Descriptors.ofComponent(foundClass);
+
+		StringConverter stringConverter = new StringConverter(injectionManager);
 
 		List<Property> propertyTypes = customElementType.getProperty();
 		if (propertyTypes != null) {
@@ -893,9 +905,8 @@ public final class JaxbConfigurationReader implements
 							+ foundClass.getName() + ": " + propertyName);
 				}
 
-				Object configuredValue = StringConversionUtils.deserialize(
-						propertyValue, configuredProperty.getType(), null,
-						null, datastoreCatalog);
+				Object configuredValue = stringConverter.deserialize(
+						propertyValue, configuredProperty.getType());
 
 				configuredProperty.setValue(result, configuredValue);
 			}
@@ -905,8 +916,7 @@ public final class JaxbConfigurationReader implements
 			Set<InitializeMethodDescriptor> initializeMethods = descriptor
 					.getInitializeMethods();
 			for (InitializeMethodDescriptor initializeMethod : initializeMethods) {
-				initializeMethod.initialize(result, new InjectionManagerImpl(
-						datastoreCatalog, referenceDataCatalog, null));
+				initializeMethod.initialize(result, injectionManager);
 			}
 		}
 

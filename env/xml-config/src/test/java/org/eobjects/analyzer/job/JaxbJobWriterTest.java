@@ -78,7 +78,8 @@ public class JaxbJobWriterTest extends TestCase {
 				return jobMetadata;
 			}
 		};
-		_writer = new JaxbJobWriter(_metadataFactory);
+		_writer = new JaxbJobWriter(new AnalyzerBeansConfigurationImpl(),
+				_metadataFactory);
 	};
 
 	@SuppressWarnings("unchecked")
@@ -89,8 +90,8 @@ public class JaxbJobWriterTest extends TestCase {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(ds);
 
-		DateGapAnalyzer dga = ajb.addAnalyzer(
-				DateGapAnalyzer.class).getConfigurableBean();
+		DateGapAnalyzer dga = ajb.addAnalyzer(DateGapAnalyzer.class)
+				.getConfigurableBean();
 		Column orderDateColumn = ds.getDataContextProvider()
 				.getSchemaNavigator()
 				.convertToColumn("PUBLIC.ORDERS.ORDERDATE");

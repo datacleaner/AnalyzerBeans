@@ -33,7 +33,31 @@ package org.eobjects.analyzer.beans.api;
  */
 public interface Converter<E> {
 
-	public E fromString(String serializedForm);
+	/**
+	 * Converts a string back to a Java object.
+	 * 
+	 * @param type
+	 *            the specific type of object required. This will typically be
+	 *            the "E" type, but since E can be a supertype, you can use this
+	 *            type parameter to inspect subtypes.
+	 * @param serializedForm
+	 * @return
+	 */
+	public E fromString(Class<?> type, String serializedForm);
 
+	/**
+	 * Converts a Java object into a string.
+	 * 
+	 * @param instance
+	 * @return
+	 */
 	public String toString(E instance);
+
+	/**
+	 * Determines if this converter is able to convert the particular type.
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public boolean isConvertable(Class<?> type);
 }

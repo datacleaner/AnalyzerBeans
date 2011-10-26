@@ -89,8 +89,7 @@ import org.eobjects.analyzer.job.jaxb.VariableType;
 import org.eobjects.analyzer.job.jaxb.VariablesType;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
-import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.analyzer.util.StringConversionUtils;
+import org.eobjects.analyzer.util.StringConverter;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.schema.Column;
 import org.slf4j.Logger;
@@ -108,7 +107,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 		_configuration = configuration;
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class
-					.getPackage().getName(), ObjectFactory.class.getClassLoader());
+					.getPackage().getName(), ObjectFactory.class
+					.getClassLoader());
 		} catch (JAXBException e) {
 			throw new IllegalStateException(e);
 		}
@@ -377,8 +377,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			}
 		}
 
-		final SchemaNavigator schemaNavigator = dataContextProvider
-				.getSchemaNavigator();
+		final StringConverter stringConverter = createStringConverter(analysisJobBuilder);
+
 		final Map<String, Outcome> outcomeMapping = new HashMap<String, Outcome>();
 
 		final TransformationType transformation = job.getTransformation();
@@ -412,7 +412,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					transformerJobBuilder.setName(transformer.getName());
 
 					applyProperties(transformerJobBuilder,
-							transformer.getProperties(), schemaNavigator,
+							transformer.getProperties(), stringConverter,
 							variables);
 
 					transformerJobBuilders.put(transformer,
@@ -582,7 +582,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					}
 
 					applyProperties(filterJobBuilder, filter.getProperties(),
-							schemaNavigator, variables);
+							stringConverter, variables);
 
 					filterJobBuilders.put(filter, filterJobBuilder);
 
@@ -791,7 +791,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 				}
 			}
 			applyProperties(analyzerJobBuilder, analyzerType.getProperties(),
-					schemaNavigator, variables);
+					stringConverter, variables);
 
 			ref = analyzerType.getRequires();
 			if (ref != null) {
@@ -831,12 +831,18 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					.addExplorer(beanClass);
 			explorerJobBuilder.setName(explorerType.getName());
 			applyProperties(explorerJobBuilder, explorerType.getProperties(),
-					schemaNavigator, variables);
+					stringConverter, variables);
 		}
 
 		dataContextProvider.close();
 
 		return analysisJobBuilder;
+	}
+
+	private StringConverter createStringConverter(
+			final AnalysisJobBuilder analysisJobBuilder) {
+		return new StringConverter(_configuration.getInjectionManagerFactory()
+				.getInjectionManager(analysisJobBuilder.toAnalysisJob(false)));
 	}
 
 	private InputColumn<?> createExpressionBasedInputColumn(InputType inputType) {
@@ -866,7 +872,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	private void applyProperties(
 			AbstractBeanJobBuilder<? extends BeanDescriptor<?>, ?, ?> builder,
 			ConfiguredPropertiesType configuredPropertiesType,
-			SchemaNavigator schemaNavigator, Map<String, String> variables) {
+			StringConverter stringConverter, Map<String, String> variables) {
 		if (configuredPropertiesType != null) {
 			List<Property> properties = configuredPropertiesType.getProperty();
 			BeanDescriptor<?> descriptor = builder.getDescriptor();
@@ -896,10 +902,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					}
 				}
 
-				Object value = StringConversionUtils.deserialize(stringValue,
-						configuredProperty.getType(), schemaNavigator,
-						_configuration.getReferenceDataCatalog(),
-						_configuration.getDatastoreCatalog());
+				Object value = stringConverter.deserialize(stringValue,
+						configuredProperty.getType());
 
 				logger.debug("Setting property '{}' to {}", name, value);
 				builder.setConfiguredProperty(configuredProperty, value);

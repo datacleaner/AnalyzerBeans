@@ -24,13 +24,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import org.eobjects.analyzer.configuration.InjectionManagerImpl;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
 import org.eobjects.analyzer.reference.SimpleDictionary;
@@ -43,17 +43,25 @@ import org.eobjects.metamodel.schema.MutableTable;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.util.EqualsBuilder;
 
-public class StringConversionUtilsTest extends TestCase {
+public class StringConverterTest extends TestCase {
+
+	private final Dictionary dictionary = new SimpleDictionary("my dict");
+	private final SynonymCatalog synonymCatalog = new SimpleSynonymCatalog("my synonyms");
+	private final ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(Arrays.asList(dictionary),
+			Arrays.asList(synonymCatalog), new ArrayList<StringPattern>());
+
+	private final StringConverter stringConverter = new StringConverter(new InjectionManagerImpl(null, referenceDataCatalog,
+			null));
 
 	public void testConvertConvertableType() throws Exception {
 		MyConvertable convertable = new MyConvertable();
 		convertable.setName("foo");
 		convertable.setDescription("bar");
 
-		String serializedForm = StringConversionUtils.serialize(convertable);
+		String serializedForm = stringConverter.serialize(convertable);
 		assertEquals("foo:bar", serializedForm);
 
-		MyConvertable copy = StringConversionUtils.deserialize(serializedForm, MyConvertable.class, null, null, null);
+		MyConvertable copy = stringConverter.deserialize(serializedForm, MyConvertable.class);
 		assertTrue(convertable != copy);
 		assertEquals("foo", copy.getName());
 		assertEquals("bar", copy.getDescription());
@@ -103,39 +111,39 @@ public class StringConversionUtilsTest extends TestCase {
 	}
 
 	public void testConvertSerializable() throws Exception {
-		String serialized = StringConversionUtils.serialize(new MySerializable("foobar", 1337));
+		String serialized = stringConverter.serialize(new MySerializable("foobar", 1337));
 		assertEquals(
-				"&#91;-84&#44;-19&#44;0&#44;5&#44;115&#44;114&#44;0&#44;67&#44;111&#44;114&#44;103&#44;46&#44;101&#44;111&#44;98&#44;106&#44;101&#44;99&#44;116&#44;115&#44;46&#44;97&#44;110&#44;97&#44;108&#44;121&#44;122&#44;101&#44;114&#44;46&#44;117&#44;116&#44;105&#44;108&#44;46&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;67&#44;111&#44;110&#44;118&#44;101&#44;114&#44;115&#44;105&#44;111&#44;110&#44;85&#44;116&#44;105&#44;108&#44;115&#44;84&#44;101&#44;115&#44;116&#44;36&#44;77&#44;121&#44;83&#44;101&#44;114&#44;105&#44;97&#44;108&#44;105&#44;122&#44;97&#44;98&#44;108&#44;101&#44;0&#44;0&#44;0&#44;0&#44;0&#44;0&#44;0&#44;1&#44;2&#44;0&#44;2&#44;73&#44;0&#44;5&#44;109&#44;121&#44;73&#44;110&#44;116&#44;76&#44;0&#44;8&#44;109&#44;121&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;116&#44;0&#44;18&#44;76&#44;106&#44;97&#44;118&#44;97&#44;47&#44;108&#44;97&#44;110&#44;103&#44;47&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;59&#44;120&#44;112&#44;0&#44;0&#44;5&#44;57&#44;116&#44;0&#44;6&#44;102&#44;111&#44;111&#44;98&#44;97&#44;114&#93;",
+				"&#91;-84&#44;-19&#44;0&#44;5&#44;115&#44;114&#44;0&#44;61&#44;111&#44;114&#44;103&#44;46&#44;101&#44;111&#44;98&#44;106&#44;101&#44;99&#44;116&#44;115&#44;46&#44;97&#44;110&#44;97&#44;108&#44;121&#44;122&#44;101&#44;114&#44;46&#44;117&#44;116&#44;105&#44;108&#44;46&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;67&#44;111&#44;110&#44;118&#44;101&#44;114&#44;116&#44;101&#44;114&#44;84&#44;101&#44;115&#44;116&#44;36&#44;77&#44;121&#44;83&#44;101&#44;114&#44;105&#44;97&#44;108&#44;105&#44;122&#44;97&#44;98&#44;108&#44;101&#44;0&#44;0&#44;0&#44;0&#44;0&#44;0&#44;0&#44;1&#44;2&#44;0&#44;2&#44;73&#44;0&#44;5&#44;109&#44;121&#44;73&#44;110&#44;116&#44;76&#44;0&#44;8&#44;109&#44;121&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;116&#44;0&#44;18&#44;76&#44;106&#44;97&#44;118&#44;97&#44;47&#44;108&#44;97&#44;110&#44;103&#44;47&#44;83&#44;116&#44;114&#44;105&#44;110&#44;103&#44;59&#44;120&#44;112&#44;0&#44;0&#44;5&#44;57&#44;116&#44;0&#44;6&#44;102&#44;111&#44;111&#44;98&#44;97&#44;114&#93;",
 				serialized);
 
-		MySerializable deserialized = StringConversionUtils.deserialize(serialized, MySerializable.class, null, null, null);
+		MySerializable deserialized = stringConverter.deserialize(serialized, MySerializable.class);
 		assertEquals("foobar", deserialized.getMyString());
 		assertEquals(1337, deserialized.getMyInt());
 	}
 
 	public void testAbstractNumber() throws Exception {
-		Number n = StringConversionUtils.deserialize("1", Number.class, null, null, null);
+		Number n = stringConverter.deserialize("1", Number.class);
 		assertTrue(n instanceof Long);
 		assertEquals(1, n.intValue());
 
-		n = StringConversionUtils.deserialize("1.01", Number.class, null, null, null);
+		n = stringConverter.deserialize("1.01", Number.class);
 		assertTrue(n instanceof Double);
 		assertEquals(1.01, n.doubleValue());
 		assertEquals(1, n.intValue());
 	}
 
 	public void testEnum() throws Exception {
-		String serialized = StringConversionUtils.serialize(ValidationCategory.VALID);
+		String serialized = stringConverter.serialize(ValidationCategory.VALID);
 		assertEquals("VALID", serialized);
 
-		Object deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory.class, null, null, null);
+		Object deserialized = stringConverter.deserialize(serialized, ValidationCategory.class);
 		assertEquals(ValidationCategory.VALID, deserialized);
 
 		ValidationCategory[] array = new ValidationCategory[] { ValidationCategory.VALID, ValidationCategory.INVALID };
-		serialized = StringConversionUtils.serialize(array);
+		serialized = stringConverter.serialize(array);
 		assertEquals("[VALID,INVALID]", serialized);
 
-		deserialized = StringConversionUtils.deserialize(serialized, ValidationCategory[].class, null, null, null);
+		deserialized = stringConverter.deserialize(serialized, ValidationCategory[].class);
 		assertTrue(EqualsBuilder.equals(array, deserialized));
 	}
 
@@ -144,58 +152,42 @@ public class StringConversionUtilsTest extends TestCase {
 		File fileAbs = file1.getAbsoluteFile();
 		File dir1 = new File("src");
 
-		String serialized = StringConversionUtils.serialize(file1);
+		String serialized = stringConverter.serialize(file1);
 		assertEquals("pom.xml", serialized);
 
-		Object deserialized = StringConversionUtils.deserialize(serialized, File.class, null, null, null);
+		Object deserialized = stringConverter.deserialize(serialized, File.class);
 		assertTrue(EqualsBuilder.equals(file1, deserialized));
 
-		serialized = StringConversionUtils.serialize(fileAbs);
+		serialized = stringConverter.serialize(fileAbs);
 		assertEquals(fileAbs.getAbsolutePath(), serialized);
 
 		File[] arr = new File[] { file1, dir1 };
 
-		serialized = StringConversionUtils.serialize(arr);
+		serialized = stringConverter.serialize(arr);
 		assertEquals("[pom.xml,src]", serialized);
 
-		deserialized = StringConversionUtils.deserialize(serialized, File[].class, null, null, null);
+		deserialized = stringConverter.deserialize(serialized, File[].class);
 		assertTrue(EqualsBuilder.equals(arr, deserialized));
 	}
 
 	public void testReferenceDataSerialization() throws Exception {
-		Dictionary dictionary = new SimpleDictionary("my dict");
-		SynonymCatalog synonymCatalog = new SimpleSynonymCatalog("my synonyms");
+		assertEquals("my dict", stringConverter.serialize(dictionary));
+		assertEquals("my synonyms", stringConverter.serialize(synonymCatalog));
 
-		assertEquals("my dict", StringConversionUtils.serialize(dictionary));
-		assertEquals("my synonyms", StringConversionUtils.serialize(synonymCatalog));
-
-		Collection<Dictionary> dictionaries = new ArrayList<Dictionary>();
-		dictionaries.add(dictionary);
-
-		Collection<SynonymCatalog> synonymCatalogs = new ArrayList<SynonymCatalog>();
-		synonymCatalogs.add(synonymCatalog);
-
-		Collection<StringPattern> stringPatterns = new ArrayList<StringPattern>();
-
-		ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs,
-				stringPatterns);
-
-		Dictionary dictionaryResult = StringConversionUtils.deserialize("my dict", Dictionary.class, null,
-				referenceDataCatalog, null);
+		Dictionary dictionaryResult = stringConverter.deserialize("my dict", Dictionary.class);
 		assertSame(dictionaryResult, dictionary);
 
 		try {
-			StringConversionUtils.deserialize("foo", Dictionary.class, null, referenceDataCatalog, null);
+			stringConverter.deserialize("foo", Dictionary.class);
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
 			assertEquals("Dictionary not found: foo", e.getMessage());
 		}
 
-		SynonymCatalog synonymCatalogResult = StringConversionUtils.deserialize("my synonyms", SynonymCatalog.class, null,
-				referenceDataCatalog, null);
+		SynonymCatalog synonymCatalogResult = stringConverter.deserialize("my synonyms", SynonymCatalog.class);
 		assertSame(synonymCatalogResult, synonymCatalog);
 		try {
-			StringConversionUtils.deserialize("bar", SynonymCatalog.class, null, referenceDataCatalog, null);
+			stringConverter.deserialize("bar", SynonymCatalog.class);
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
 			assertEquals("Synonym catalog not found: bar", e.getMessage());
@@ -203,29 +195,29 @@ public class StringConversionUtilsTest extends TestCase {
 	}
 
 	public void testSerializeUnknownTypes() throws Exception {
-		String result = StringConversionUtils.serialize(new Percentage(50));
+		String result = stringConverter.serialize(new Percentage(50));
 		assertEquals("50%", result);
 	}
 
 	public void testSerializeSchemaElements() throws Exception {
 		Schema schema = new MutableSchema("s1");
-		assertEquals("s1", StringConversionUtils.serialize(schema));
+		assertEquals("s1", stringConverter.serialize(schema));
 
 		MutableTable table = new MutableTable("t1");
 		table.setSchema(schema);
-		assertEquals("s1.t1", StringConversionUtils.serialize(table));
+		assertEquals("s1.t1", stringConverter.serialize(table));
 
 		MutableColumn column = new MutableColumn("c1");
 		column.setTable(table);
-		assertEquals("s1.t1.c1", StringConversionUtils.serialize(column));
+		assertEquals("s1.t1.c1", stringConverter.serialize(column));
 	}
 
 	public void testNullArgument() throws Exception {
-		String s = StringConversionUtils.serialize(null);
+		String s = stringConverter.serialize(null);
 		assertEquals("<null>", s);
-		assertNull(StringConversionUtils.deserialize(s, String.class, null, null, null));
-		assertNull(StringConversionUtils.deserialize(s, Integer.class, null, null, null));
-		assertNull(StringConversionUtils.deserialize(s, Date.class, null, null, null));
+		assertNull(stringConverter.deserialize(s, String.class));
+		assertNull(stringConverter.deserialize(s, Integer.class));
+		assertNull(stringConverter.deserialize(s, Date.class));
 	}
 
 	public void testArrays() throws Exception {
@@ -238,7 +230,7 @@ public class StringConversionUtilsTest extends TestCase {
 		runTests(new String[0], "[]");
 		runTests(new String[3], "[<null>,<null>,<null>]");
 
-		Long[] result = StringConversionUtils.deserialize("123", Long[].class, null, null, null);
+		Long[] result = stringConverter.deserialize("123", Long[].class);
 		assertEquals(1, result.length);
 		assertEquals(123l, result[0].longValue());
 	}
@@ -256,11 +248,11 @@ public class StringConversionUtilsTest extends TestCase {
 	}
 
 	private void runTests(final Object o, String expectedStringRepresentation) {
-		String s = StringConversionUtils.serialize(o);
+		String s = stringConverter.serialize(o);
 		if (expectedStringRepresentation != null) {
 			assertEquals(expectedStringRepresentation, s);
 		}
-		Object o2 = StringConversionUtils.deserialize(s, o.getClass(), null, null, null);
+		Object o2 = stringConverter.deserialize(s, o.getClass());
 		if (ReflectionUtils.isArray(o)) {
 			boolean equals = EqualsBuilder.equals(o, o2);
 			if (!equals) {

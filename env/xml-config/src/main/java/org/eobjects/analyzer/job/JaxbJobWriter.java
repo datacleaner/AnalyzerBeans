@@ -33,6 +33,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
@@ -60,7 +61,7 @@ import org.eobjects.analyzer.job.jaxb.SourceType;
 import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
-import org.eobjects.analyzer.util.StringConversionUtils;
+import org.eobjects.analyzer.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,22 +70,25 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 	private static final Logger logger = LoggerFactory
 			.getLogger(JaxbJobWriter.class);
 
+	private final AnalyzerBeansConfiguration _configuration;
 	private final JAXBContext _jaxbContext;
 	private final JaxbJobMetadataFactory _jobMetadataFactory;
 
-	public JaxbJobWriter(JaxbJobMetadataFactory jobMetadataFactory) {
+	public JaxbJobWriter(AnalyzerBeansConfiguration configuration,
+			JaxbJobMetadataFactory jobMetadataFactory) {
+		_configuration = configuration;
+		_jobMetadataFactory = jobMetadataFactory;
 		try {
 			_jaxbContext = JAXBContext.newInstance(ObjectFactory.class
 					.getPackage().getName(), ObjectFactory.class
 					.getClassLoader());
-			_jobMetadataFactory = jobMetadataFactory;
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	public JaxbJobWriter() {
-		this(new JaxbJobMetadataFactoryImpl());
+	public JaxbJobWriter(AnalyzerBeansConfiguration configuration) {
+		this(configuration, new JaxbJobMetadataFactoryImpl());
 	}
 
 	@Override
@@ -151,7 +155,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		addRequirements(outcomeMappings, transformerMappings, filterMappings,
 				mergedOutcomeMappings, analyzerMappings, columnMappings);
 
-		addConfiguration(transformerMappings, filterMappings, analyzerMappings,
+		addConfiguration(analysisJob, transformerMappings, filterMappings, analyzerMappings,
 				columnMappings, explorerMappings);
 
 		try {
@@ -164,12 +168,16 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 		}
 	}
 
-	private void addConfiguration(
+	private void addConfiguration(final AnalysisJob analysisJob,
 			final Map<TransformerJob, TransformerType> transformerMappings,
 			final Map<FilterJob, FilterType> filterMappings,
 			final Map<AnalyzerJob, AnalyzerType> analyzerMappings,
 			final Map<InputColumn<?>, String> columnMappings,
-			Map<ExplorerJob, ExplorerType> explorerMappings) {
+			final Map<ExplorerJob, ExplorerType> explorerMappings) {
+
+		final StringConverter stringConverter = new StringConverter(
+				_configuration.getInjectionManagerFactory()
+						.getInjectionManager(analysisJob));
 
 		// configure transformers
 		for (Entry<TransformerJob, TransformerType> entry : transformerMappings
@@ -182,12 +190,13 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 					.getDescriptor().getConfiguredPropertiesForInput();
 			elementType.getInput().addAll(
 					createInputConfiguration(configuration,
-							configuredProperties, columnMappings));
+							configuredProperties, columnMappings,
+							stringConverter));
 
 			configuredProperties = job.getDescriptor()
 					.getConfiguredProperties();
 			elementType.setProperties(createPropertyConfiguration(
-					configuration, configuredProperties));
+					configuration, configuredProperties, stringConverter));
 		}
 
 		// configure filters
@@ -200,12 +209,12 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 					.getDescriptor().getConfiguredPropertiesForInput();
 			elementType.getInput().addAll(
 					createInputConfiguration(configuration,
-							configuredProperties, columnMappings));
+							configuredProperties, columnMappings, stringConverter));
 
 			configuredProperties = job.getDescriptor()
 					.getConfiguredProperties();
 			elementType.setProperties(createPropertyConfiguration(
-					configuration, configuredProperties));
+					configuration, configuredProperties, stringConverter));
 		}
 
 		// configure analyzers
@@ -219,12 +228,12 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 					.getDescriptor().getConfiguredPropertiesForInput();
 			elementType.getInput().addAll(
 					createInputConfiguration(configuration,
-							configuredProperties, columnMappings));
+							configuredProperties, columnMappings, stringConverter));
 
 			configuredProperties = job.getDescriptor()
 					.getConfiguredProperties();
 			elementType.setProperties(createPropertyConfiguration(
-					configuration, configuredProperties));
+					configuration, configuredProperties, stringConverter));
 		}
 
 		// configure explorers
@@ -237,14 +246,15 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 			Set<ConfiguredPropertyDescriptor> configuredProperties = job
 					.getDescriptor().getConfiguredProperties();
 			elementType.setProperties(createPropertyConfiguration(
-					configuration, configuredProperties));
+					configuration, configuredProperties, stringConverter));
 		}
 	}
 
 	private List<InputType> createInputConfiguration(
 			final BeanConfiguration configuration,
 			Set<ConfiguredPropertyDescriptor> configuredProperties,
-			final Map<InputColumn<?>, String> columnMappings) {
+			final Map<InputColumn<?>, String> columnMappings,
+			final StringConverter stringConverter) {
 
 		// sort the properties in order to make the result deterministic
 		configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>(
@@ -270,7 +280,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 							ExpressionBasedInputColumn<?> expressionBasedInputColumn = (ExpressionBasedInputColumn<?>) inputColumn;
 							Object columnValue = expressionBasedInputColumn
 									.getExpression();
-							inputType.setValue(StringConversionUtils
+							inputType.setValue(stringConverter
 									.serialize(columnValue));
 						} else {
 							inputType
@@ -289,7 +299,8 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 
 	private ConfiguredPropertiesType createPropertyConfiguration(
 			final BeanConfiguration configuration,
-			Set<ConfiguredPropertyDescriptor> configuredProperties) {
+			Set<ConfiguredPropertyDescriptor> configuredProperties,
+			StringConverter stringConverter) {
 
 		// sort the properties in order to make the result deterministic
 		configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>(
@@ -300,7 +311,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 			if (!property.isInputColumn()) {
 				Object value = configuration.getProperty(property);
 				if (value != null) {
-					String stringValue = StringConversionUtils.serialize(value);
+					String stringValue = stringConverter.serialize(value);
 
 					Property propertyType = new Property();
 					propertyType.setName(property.getName());

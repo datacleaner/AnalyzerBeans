@@ -151,11 +151,11 @@ public class InjectionManagerImpl implements InjectionManager {
 			return (E) _rowAnntationFactoryRef.get();
 		} else if (baseType == RowAnnotation.class) {
 			return (E) _rowAnntationFactoryRef.get().createAnnotation();
-		} else if (baseType == DataContextProvider.class) {
+		} else if (baseType == DataContextProvider.class && _job != null) {
 			return (E) _job.getDatastore().getDataContextProvider();
-		} else if (baseType == DataContext.class) {
+		} else if (baseType == DataContext.class && _job != null) {
 			return (E) _job.getDatastore().getDataContextProvider().getDataContext();
-		} else if (baseType == SchemaNavigator.class) {
+		} else if (baseType == SchemaNavigator.class && _job != null) {
 			return (E) _job.getDatastore().getDataContextProvider().getSchemaNavigator();
 		} else {
 			// only inject persistent lists, sets, maps into @Provided fields.
