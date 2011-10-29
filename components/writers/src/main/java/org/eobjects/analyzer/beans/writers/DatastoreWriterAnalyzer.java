@@ -73,14 +73,19 @@ public class DatastoreWriterAnalyzer implements Analyzer<WriterResult>,
 	@Description("Names of target columns. If not filled, target column order will be assumed.")
 	String[] targetColumns;
 
-	private final WriteBuffer writeBuffer;
-
-	public DatastoreWriterAnalyzer() {
-		writeBuffer = new WriteBuffer(5000, this);
-	}
+	private WriteBuffer _writeBuffer;
 
 	@Initialize
 	public void init() throws IllegalArgumentException {
+		final int maxObjectsInBuffer = 100000;
+
+		// add one, because there is a small "per record" overhead
+		final int objectsPerRow = values.length + 1;
+
+		final int bufferSize = maxObjectsInBuffer / objectsPerRow;
+
+		_writeBuffer = new WriteBuffer(bufferSize, this);
+
 		DataContextProvider dcp = datastore.getDataContextProvider();
 		try {
 			DataContext dc = dcp.getDataContext();
@@ -138,12 +143,12 @@ public class DatastoreWriterAnalyzer implements Analyzer<WriterResult>,
 			Object value = row.getValue(values[i]);
 			rowData[i] = value;
 		}
-		writeBuffer.addToBuffer(rowData);
+		_writeBuffer.addToBuffer(rowData);
 	}
 
 	@Override
 	public WriterResult getResult() {
-		writeBuffer.flushBuffer();
+		_writeBuffer.flushBuffer();
 
 		// TODO Auto-generated method stub
 		return new WriterResult();
