@@ -26,7 +26,7 @@ import org.eobjects.metamodel.schema.Table;
 
 public class DatastoreWriterAnalyzerTest extends TestCase {
 
-	public void testScenario() throws Exception {
+	public void testMultiThreadedRunNoColumnNames() throws Exception {
 		final CsvDatastore datastoreIn = new CsvDatastore("in",
 				"src/test/resources/datastorewriter-in.csv");
 		final CsvDatastore datastoreOut = new CsvDatastore("out",
