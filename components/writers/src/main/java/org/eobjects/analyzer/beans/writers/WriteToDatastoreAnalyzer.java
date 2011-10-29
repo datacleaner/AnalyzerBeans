@@ -28,6 +28,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
@@ -44,8 +45,9 @@ import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.Action;
 
-@AnalyzerBean("Write to database")
-public class DatastoreWriterAnalyzer implements Analyzer<WriterResult>,
+@AnalyzerBean("To datastore")
+@Categorized(WriteDataCategory.class)
+public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 		Action<Queue<Object[]>> {
 
 	@Inject
