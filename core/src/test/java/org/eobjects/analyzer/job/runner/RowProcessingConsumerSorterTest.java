@@ -49,7 +49,7 @@ import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.lifecycle.BeanInstance;
-import org.eobjects.analyzer.test.mock.MockDataContextProvider;
+import org.eobjects.analyzer.test.mock.MockDatastoreConnection;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableTable;
@@ -73,7 +73,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 
 	public void testCreateProcessOrderedConsumerListWithMergedOutcomes() throws Exception {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
-		ajb.setDataContextProvider(new MockDataContextProvider());
+		ajb.setDataContextProvider(new MockDatastoreConnection());
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
 
@@ -121,7 +121,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 
 	public void testCreateProcessOrderedConsumerListWithFilterDependencies() throws Exception {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
-		ajb.setDataContextProvider(new MockDataContextProvider());
+		ajb.setDataContextProvider(new MockDatastoreConnection());
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
 
@@ -180,7 +180,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
 		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(tjb3.getOutputColumns().get(0));
 
-		ajb.setDataContextProvider(new MockDataContextProvider());
+		ajb.setDataContextProvider(new MockDatastoreConnection());
 
 		assertTrue(ajb.isConfigured());
 		AnalysisJob analysisJob = ajb.toAnalysisJob();

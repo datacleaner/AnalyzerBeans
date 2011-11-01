@@ -28,15 +28,15 @@ import org.slf4j.LoggerFactory;
 
 import org.eobjects.metamodel.DataContext;
 
-public final class SingleDataContextProvider extends UsageAwareDataContextProvider {
+public class DatastoreConnectionImpl<E extends DataContext> extends UsageAwareDatastoreConnection<E> {
 
-	private static final Logger logger = LoggerFactory.getLogger(SingleDataContextProvider.class);
+	private static final Logger logger = LoggerFactory.getLogger(DatastoreConnectionImpl.class);
 
-	private final DataContext _dataContext;
+	private final E _dataContext;
 	private final SchemaNavigator _schemaNavigator;
 	private final Closeable[] _closeables;
 
-	public SingleDataContextProvider(DataContext dataContext, Datastore datastore, Closeable... closeables) {
+	public DatastoreConnectionImpl(E dataContext, Datastore datastore, Closeable... closeables) {
 		super(datastore);
 		_dataContext = dataContext;
 		_schemaNavigator = new SchemaNavigator(dataContext);
@@ -44,17 +44,17 @@ public final class SingleDataContextProvider extends UsageAwareDataContextProvid
 	}
 
 	@Override
-	public DataContext getDataContext() {
+	public final E getDataContext() {
 		return _dataContext;
 	}
 
 	@Override
-	public SchemaNavigator getSchemaNavigator() {
+	public final SchemaNavigator getSchemaNavigator() {
 		return _schemaNavigator;
 	}
 
 	@Override
-	protected void closeInternal() {
+	protected final void closeInternal() {
 		for (int i = 0; i < _closeables.length; i++) {
 			Closeable closeable = _closeables[i];
 			try {

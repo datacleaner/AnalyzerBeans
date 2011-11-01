@@ -33,7 +33,7 @@ import org.eobjects.metamodel.DataContextFactory;
  * 
  * @author Kasper Sørensen
  */
-public final class OdbDatastore extends UsageAwareDatastore implements FileDatastore {
+public final class OdbDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -54,9 +54,9 @@ public final class OdbDatastore extends UsageAwareDatastore implements FileDatas
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
 		DataContext dc = DataContextFactory.createOpenOfficeDataContext(new File(_filename));
-		return new SingleDataContextProvider(dc, this);
+		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}
 
 	@Override

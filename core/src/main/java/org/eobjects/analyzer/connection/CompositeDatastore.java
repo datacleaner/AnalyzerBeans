@@ -29,7 +29,7 @@ import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 
-public final class CompositeDatastore extends UsageAwareDatastore {
+public final class CompositeDatastore extends UsageAwareDatastore<DataContext> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -49,17 +49,17 @@ public final class CompositeDatastore extends UsageAwareDatastore {
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
 		final List<DataContext> dataContexts = new ArrayList<DataContext>(_datastores.size());
 		final List<Closeable> closeables = new ArrayList<Closeable>(_datastores.size());
 		for (Datastore datastore : _datastores) {
-			final DataContextProvider dcp = datastore.getDataContextProvider();
-			final DataContext dc = dcp.getDataContext();
-			closeables.add(dcp);
+			final DatastoreConnection con = datastore.openConnection();
+			final DataContext dc = con.getDataContext();
+			closeables.add(con);
 			dataContexts.add(dc);
 		}
 		final Closeable[] closeablesArray = closeables.toArray(new Closeable[closeables.size()]);
-		return new SingleDataContextProvider(DataContextFactory.createCompositeDataContext(dataContexts), this,
+		return new DatastoreConnectionImpl<DataContext>(DataContextFactory.createCompositeDataContext(dataContexts), this,
 				closeablesArray);
 	}
 

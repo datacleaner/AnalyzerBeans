@@ -19,8 +19,8 @@
  */
 package org.eobjects.analyzer.test.mock;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.PerformanceCharacteristics;
 
 public class MockDatastore implements Datastore, PerformanceCharacteristics {
@@ -42,8 +42,13 @@ public class MockDatastore implements Datastore, PerformanceCharacteristics {
 	}
 
 	@Override
-	public DataContextProvider getDataContextProvider() {
-		return new MockDataContextProvider();
+	public DatastoreConnection getDataContextProvider() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public DatastoreConnection openConnection() {
+		return new MockDatastoreConnection();
 	}
 
 	@Override

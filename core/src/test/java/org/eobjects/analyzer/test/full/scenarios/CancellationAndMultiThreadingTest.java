@@ -117,12 +117,12 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 		assertTrue("largestPoolSize was: " + largestPoolSize, largestPoolSize > 5);
 		assertEquals(0, executorService.getActiveCount());
 
-		assertTrue(ds.isDataContextProviderOpen());
+		assertTrue(ds.isDatastoreConnectionOpen());
 
 		dcp.close();
 		analysisJobBuilder.close();
 
-		assertFalse(ds.isDataContextProviderOpen());
+		assertFalse(ds.isDatastoreConnectionOpen());
 
 		taskRunner.shutdown();
 	}

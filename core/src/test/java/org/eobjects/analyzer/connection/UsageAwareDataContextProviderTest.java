@@ -25,10 +25,10 @@ public class UsageAwareDataContextProviderTest extends TestCase {
 
 	public void testGetUsageCount() throws Exception {
 		CsvDatastore ds = new CsvDatastore("foo", "src/test/resources/employees.csv");
-		assertFalse(ds.isDataContextProviderOpen());
+		assertFalse(ds.isDatastoreConnectionOpen());
 
-		UsageAwareDataContextProvider dcp1 = (UsageAwareDataContextProvider) ds.getDataContextProvider();
-		assertTrue(ds.isDataContextProviderOpen());
+		UsageAwareDatastoreConnection dcp1 = (UsageAwareDatastoreConnection) ds.getDataContextProvider();
+		assertTrue(ds.isDatastoreConnectionOpen());
 		assertEquals(1, dcp1.getUsageCount());
 
 		DataContextProvider dcp2 = ds.getDataContextProvider();
@@ -42,27 +42,27 @@ public class UsageAwareDataContextProviderTest extends TestCase {
 
 		dcp3.close();
 
-		assertTrue(ds.isDataContextProviderOpen());
+		assertTrue(ds.isDatastoreConnectionOpen());
 		assertEquals(2, dcp1.getUsageCount());
 
 		dcp2.close();
 
-		assertTrue(ds.isDataContextProviderOpen());
+		assertTrue(ds.isDatastoreConnectionOpen());
 		assertEquals(1, dcp1.getUsageCount());
 
 		dcp1.close();
 
-		assertFalse(ds.isDataContextProviderOpen());
+		assertFalse(ds.isDatastoreConnectionOpen());
 	}
 
 	public void testCloseByGarbageCollection() throws Exception {
 		CsvDatastore ds = new CsvDatastore("foo", "src/test/resources/employees.csv");
-		assertFalse(ds.isDataContextProviderOpen());
+		assertFalse(ds.isDatastoreConnectionOpen());
 
 		DataContextProvider dcp1 = ds.getDataContextProvider();
 		DataContextProvider dcp2 = ds.getDataContextProvider();
 
-		assertTrue(ds.isDataContextProviderOpen());
+		assertTrue(ds.isDatastoreConnectionOpen());
 		assertSame(dcp1, dcp2);
 
 		dcp1 = null;
@@ -72,6 +72,6 @@ public class UsageAwareDataContextProviderTest extends TestCase {
 		System.gc();
 		System.runFinalization();
 
-		assertFalse(ds.isDataContextProviderOpen());
+		assertFalse(ds.isDatastoreConnectionOpen());
 	}
 }

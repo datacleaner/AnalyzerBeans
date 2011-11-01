@@ -22,13 +22,12 @@ package org.eobjects.analyzer.connection;
 import javax.sql.DataSource;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-
-import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.UpdateableDataContext;
 
-public class DataSourceDataContextProvider extends UsageAwareDataContextProvider {
+public class DataSourceDataContextProvider extends UsageAwareDatastoreConnection<UpdateableDataContext> {
 
-	private final DataContext _dataContext;
+	private final UpdateableDataContext _dataContext;
 	private final SchemaNavigator _schemaNavigator;
 
 	public DataSourceDataContextProvider(DataSource ds, Datastore datastore) {
@@ -38,7 +37,7 @@ public class DataSourceDataContextProvider extends UsageAwareDataContextProvider
 	}
 
 	@Override
-	public DataContext getDataContext() {
+	public UpdateableDataContext getDataContext() {
 		return _dataContext;
 	}
 

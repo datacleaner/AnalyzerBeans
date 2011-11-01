@@ -32,7 +32,7 @@ import org.eobjects.metamodel.DataContextFactory;
  * 
  * @author Kasper Sørensen
  */
-public final class DbaseDatastore extends UsageAwareDatastore implements FileDatastore {
+public final class DbaseDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -53,9 +53,9 @@ public final class DbaseDatastore extends UsageAwareDatastore implements FileDat
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
 		DataContext dc = DataContextFactory.createDbaseDataContext(_filename);
-		return new SingleDataContextProvider(dc, this);
+		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}
 
 	@Override

@@ -22,9 +22,12 @@ package org.eobjects.analyzer.connection;
 import java.io.Closeable;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-
 import org.eobjects.metamodel.DataContext;
 
+/**
+ * @deprecated use {@link DatastoreConnection} instead.
+ */
+@Deprecated
 public interface DataContextProvider extends Closeable {
 
 	public DataContext getDataContext();
@@ -33,6 +36,6 @@ public interface DataContextProvider extends Closeable {
 
 	public Datastore getDatastore();
 
+	@Override
 	public void close();
-
 }

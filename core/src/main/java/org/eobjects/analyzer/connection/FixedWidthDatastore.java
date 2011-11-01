@@ -36,7 +36,7 @@ import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
  * @author Kasper Sørensen
  * 
  */
-public class FixedWidthDatastore extends UsageAwareDatastore implements FileDatastore {
+public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -84,7 +84,7 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
 		File file = new File(_filename);
 		assert file.exists();
 
@@ -99,7 +99,7 @@ public class FixedWidthDatastore extends UsageAwareDatastore implements FileData
 		}
 
 		DataContext dataContext = DataContextFactory.createFixedWidthDataContext(file, configuration);
-		return new SingleDataContextProvider(dataContext, this);
+		return new DatastoreConnectionImpl<DataContext>(dataContext, this);
 	}
 
 	public String getEncoding() {

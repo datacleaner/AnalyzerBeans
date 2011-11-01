@@ -35,8 +35,8 @@ import javax.sql.DataSource;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
-import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.UpdateableDataContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Kasper Sørensen
  * 
  */
-public class JdbcDatastore extends UsageAwareDatastore {
+public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> implements UpdateableDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -85,6 +85,12 @@ public class JdbcDatastore extends UsageAwareDatastore {
 		ReadObjectBuilder.create(this, JdbcDatastore.class).readObject(stream);
 	}
 
+	@Override
+	public UpdateableDatastoreConnection openConnection() {
+		DatastoreConnection connection = super.openConnection();
+		return (UpdateableDatastoreConnection) connection;
+	}
+
 	/**
 	 * Alternative constructor usable only for in-memory (ie. non-persistent)
 	 * datastores, because the datastore will not be able to create new
@@ -93,9 +99,9 @@ public class JdbcDatastore extends UsageAwareDatastore {
 	 * @param name
 	 * @param dc
 	 */
-	public JdbcDatastore(String name, DataContext dc) {
+	public JdbcDatastore(String name, UpdateableDataContext dc) {
 		this(name, null, null, null, null, null);
-		setDataContextProvider(new SingleDataContextProvider(dc, this));
+		setDataContextProvider(new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dc, this));
 	}
 
 	@Override
@@ -173,12 +179,13 @@ public class JdbcDatastore extends UsageAwareDatastore {
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDataContextProvider() {
 		if (StringUtils.isNullOrEmpty(_datasourceJndiUrl)) {
 			Connection connection = createConnection();
 
-			DataContext dataContext = DataContextFactory.createJdbcDataContext(connection);
-			return new SingleDataContextProvider(dataContext, this, new CloseableJdbcConnection(connection));
+			UpdateableDataContext dataContext = DataContextFactory.createJdbcDataContext(connection);
+			return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this,
+					new CloseableJdbcConnection(connection));
 		} else {
 			try {
 				Context initialContext = getJndiNamingContext();

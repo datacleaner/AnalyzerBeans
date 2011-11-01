@@ -21,25 +21,27 @@ package org.eobjects.analyzer.connection;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eobjects.metamodel.DataContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An abstract pooled DataContextProvider that is aware of the amount of times
- * it has been acquired and closed. It encapsulates the closing logic, making
- * sure that it will only close if all usages of the data context are closed.
+ * An abstract pooled {@link DatastoreConnection} that is aware of the amount of
+ * times it has been acquired and closed. It encapsulates the closing logic,
+ * making sure that it will only close if all usages of the datastore are
+ * closed.
  * 
  * @author Kasper Sørensen
  */
-public abstract class UsageAwareDataContextProvider implements DataContextProvider {
+public abstract class UsageAwareDatastoreConnection<E extends DataContext> implements DatastoreConnection {
 
-	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDataContextProvider.class);
+	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDatastoreConnection.class);
 
 	private final AtomicInteger _usageCount = new AtomicInteger(1);
 	private final Datastore _datastore;
 	private boolean _closed = false;
 
-	public UsageAwareDataContextProvider(Datastore datastore) {
+	public UsageAwareDatastoreConnection(Datastore datastore) {
 		_datastore = datastore;
 		if (logger.isDebugEnabled()) {
 			StackTraceElement[] stackTrace = new Throwable().getStackTrace();
@@ -64,6 +66,9 @@ public abstract class UsageAwareDataContextProvider implements DataContextProvid
 			}
 		}
 	}
+
+	@Override
+	public abstract E getDataContext();
 
 	public boolean isClosed() {
 		return _closed;

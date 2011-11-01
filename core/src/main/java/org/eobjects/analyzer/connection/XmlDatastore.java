@@ -33,7 +33,7 @@ import org.eobjects.metamodel.DataContextFactory;
  * 
  * @author Kasper Sørensen
  */
-public class XmlDatastore extends UsageAwareDatastore implements FileDatastore {
+public class XmlDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -54,10 +54,10 @@ public class XmlDatastore extends UsageAwareDatastore implements FileDatastore {
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
 		final File file = new File(_filename);
 		final DataContext dataContext = DataContextFactory.createXmlDataContext(file, true, false);
-		return new SingleDataContextProvider(dataContext, this);
+		return new DatastoreConnectionImpl<DataContext>(dataContext, this);
 	}
 
 	@Override

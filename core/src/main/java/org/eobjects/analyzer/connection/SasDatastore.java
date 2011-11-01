@@ -29,7 +29,7 @@ import org.eobjects.sassy.metamodel.SasDataContext;
  * 
  * @author Kasper Sørensen
  */
-public class SasDatastore extends UsageAwareDatastore implements FileDatastore {
+public class SasDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
 	private static final long serialVersionUID = 1L;
 	private final File _directory;
@@ -45,9 +45,9 @@ public class SasDatastore extends UsageAwareDatastore implements FileDatastore {
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
 		DataContext dataContext = new SasDataContext(_directory);
-		return new SingleDataContextProvider(dataContext, this);
+		return new DatastoreConnectionImpl<DataContext>(dataContext, this);
 	}
 
 	@Override

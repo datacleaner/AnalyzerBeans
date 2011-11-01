@@ -19,13 +19,12 @@
  */
 package org.eobjects.analyzer.test.mock;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.util.SchemaNavigator;
-
 import org.eobjects.metamodel.DataContext;
 
-public final class MockDataContextProvider implements DataContextProvider {
+public final class MockDatastoreConnection implements DatastoreConnection {
 
 	@Override
 	public DataContext getDataContext() {

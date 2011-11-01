@@ -25,8 +25,8 @@ import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.util.FileHelper;
 
@@ -35,7 +35,7 @@ import org.eobjects.metamodel.util.FileHelper;
  * 
  * @author Kasper Sørensen
  */
-public final class CsvDatastore extends UsageAwareDatastore implements FileDatastore {
+public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore, UpdateableDatastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -105,8 +105,8 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 	}
 
 	@Override
-	protected UsageAwareDataContextProvider createDataContextProvider() {
-		DataContext dataContext;
+	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDataContextProvider() {
+		UpdateableDataContext dataContext;
 		if (_quoteChar == null && _separatorChar == null) {
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename));
 		} else {
@@ -117,9 +117,15 @@ public final class CsvDatastore extends UsageAwareDatastore implements FileDatas
 					quoteChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, _failOnInconsistencies);
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename), configuration);
 		}
-		return new SingleDataContextProvider(dataContext, this);
+		return new DatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
 	}
-
+	
+	@Override
+	public UpdateableDatastoreConnection openConnection() {
+		DatastoreConnection connection = super.openConnection();
+		return (UpdateableDatastoreConnection) connection;
+	}
+	
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
 		return new PerformanceCharacteristicsImpl(false);

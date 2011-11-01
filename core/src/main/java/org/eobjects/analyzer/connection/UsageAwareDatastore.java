@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.ReadObjectBuilder.Moved;
+import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.util.BaseObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,18 +36,18 @@ import org.slf4j.LoggerFactory;
  * Abstract datastore implementation that uses a shared
  * UsageAwareDataContextProvider when posssible.
  * 
- * @see UsageAwareDataContextProvider
+ * @see UsageAwareDatastoreConnection
  * 
  * @author Kasper Sørensen
  */
-public abstract class UsageAwareDatastore extends BaseObject implements Datastore {
+public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObject implements Datastore {
 
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDatastore.class);
 
-	private transient volatile Reference<UsageAwareDataContextProvider> _dataContextProviderRef;
-	private transient volatile DataContextProvider _dataContextProvider = null;
+	private transient volatile Reference<UsageAwareDatastoreConnection<E>> _dataContextProviderRef;
+	private transient volatile UsageAwareDatastoreConnection<E> _dataContextProvider = null;
 
 	@Moved
 	private final String _name;
@@ -85,15 +86,15 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 		_description = description;
 	}
 
-	protected Reference<UsageAwareDataContextProvider> getDataContextProviderRef() {
+	protected Reference<UsageAwareDatastoreConnection<E>> getDataContextProviderRef() {
 		return _dataContextProviderRef;
 	}
 
-	protected void setDataContextProviderRef(Reference<UsageAwareDataContextProvider> dataContextProviderRef) {
+	protected void setDataContextProviderRef(Reference<UsageAwareDatastoreConnection<E>> dataContextProviderRef) {
 		_dataContextProviderRef = dataContextProviderRef;
 	}
 
-	protected void setDataContextProvider(DataContextProvider dataContextProvider) {
+	protected void setDataContextProvider(UsageAwareDatastoreConnection<E> dataContextProvider) {
 		_dataContextProvider = dataContextProvider;
 	}
 
@@ -101,12 +102,12 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized final DataContextProvider getDataContextProvider() {
+	public synchronized final UsageAwareDatastoreConnection<E> getDataContextProvider() {
 		if (_dataContextProvider != null) {
 			return _dataContextProvider;
 		}
 
-		UsageAwareDataContextProvider dataContextProvider;
+		UsageAwareDatastoreConnection<E> dataContextProvider;
 		if (_dataContextProviderRef != null) {
 			dataContextProvider = _dataContextProviderRef.get();
 			if (isDataContextProviderOpen(dataContextProvider)) {
@@ -121,12 +122,17 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 		if (dataContextProvider == null) {
 			throw new IllegalStateException("createDataContextProvider() returned null");
 		}
-		_dataContextProviderRef = new WeakReference<UsageAwareDataContextProvider>(dataContextProvider);
+		_dataContextProviderRef = new WeakReference<UsageAwareDatastoreConnection<E>>(dataContextProvider);
 
 		return dataContextProvider;
 	}
+	
+	@Override
+	public DatastoreConnection openConnection() {
+		return getDataContextProvider();
+	}
 
-	protected abstract UsageAwareDataContextProvider createDataContextProvider();
+	protected abstract UsageAwareDatastoreConnection<E> createDataContextProvider();
 
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
@@ -140,15 +146,15 @@ public abstract class UsageAwareDatastore extends BaseObject implements Datastor
 	 * 
 	 * @return a boolean indicating if the datacontext provider is open
 	 */
-	public final boolean isDataContextProviderOpen() {
+	public final boolean isDatastoreConnectionOpen() {
 		if (_dataContextProviderRef == null) {
 			return false;
 		}
-		UsageAwareDataContextProvider dataContextProvider = _dataContextProviderRef.get();
+		UsageAwareDatastoreConnection<E> dataContextProvider = _dataContextProviderRef.get();
 		return isDataContextProviderOpen(dataContextProvider);
 	}
 
-	private boolean isDataContextProviderOpen(UsageAwareDataContextProvider dataContextProvider) {
+	private boolean isDataContextProviderOpen(UsageAwareDatastoreConnection<E> dataContextProvider) {
 		return dataContextProvider != null && !dataContextProvider.isClosed();
 	}
 

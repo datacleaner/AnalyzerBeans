@@ -63,8 +63,22 @@ public interface Datastore extends Serializable, HasName {
 	 * datastore.
 	 * 
 	 * @return a DataContextProvider for this datastore.
+	 * 
+	 * @deprecated use {@link #open()} instead.
 	 */
-	public DataContextProvider getDataContextProvider();
+	@Deprecated
+	public DatastoreConnection getDataContextProvider();
+
+	/**
+	 * Opens up the connection to the datastore. If the datastore is already
+	 * opened, most times this method will simply share the existing connection.
+	 * 
+	 * @see DatastoreConnection
+	 * 
+	 * @return a {@link DatastoreConnection} to use for querying and exploring
+	 *         the datastore.
+	 */
+	public DatastoreConnection openConnection();
 
 	/**
 	 * Gets the performance characteristics of this datastore.
