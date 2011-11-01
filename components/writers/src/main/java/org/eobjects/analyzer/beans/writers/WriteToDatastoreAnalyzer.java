@@ -33,7 +33,8 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.UpdateableDatastore;
+import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.DataContext;
@@ -58,7 +59,7 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 	@Inject
 	@Configured
 	@Description("Datastore to write to")
-	Datastore datastore;
+	UpdateableDatastore datastore;
 
 	@Inject
 	@Configured(required = false)
@@ -88,13 +89,9 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 
 		_writeBuffer = new WriteBuffer(bufferSize, this);
 
-		DatastoreConnection con = datastore.openConnection();
+		UpdateableDatastoreConnection con = datastore.openConnection();
 		try {
-			DataContext dc = con.getDataContext();
-			if (!(dc instanceof UpdateableDataContext)) {
-				throw new IllegalArgumentException("Datastore '"
-						+ datastore.getName() + "' is not writable");
-			}
+			final UpdateableDataContext dc = con.getUpdateableDataContext();
 
 			final Schema schema = getSchema(dc);
 
