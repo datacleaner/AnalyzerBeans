@@ -162,6 +162,14 @@ public final class AnalysisJobBuilder implements Closeable {
 		_datastoreConnection = datastoreConnection;
 		return this;
 	}
+	
+	/**
+	 * @deprecated use {@link #getDatastoreConnection()} instead.
+	 */
+	@Deprecated
+	public DatastoreConnection getDataContextProvider() {
+		return _datastoreConnection;
+	}
 
 	public DatastoreConnection getDatastoreConnection() {
 		return _datastoreConnection;
