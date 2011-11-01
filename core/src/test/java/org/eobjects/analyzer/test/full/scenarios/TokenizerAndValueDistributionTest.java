@@ -29,7 +29,7 @@ import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -60,11 +60,11 @@ public class TokenizerAndValueDistributionTest extends TestCase {
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
 		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		DataContext dc = dcp.getDataContext();
+		DatastoreConnection con = datastore.openConnection();
+		DataContext dc = con.getDataContext();
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
-		analysisJobBuilder.setDataContextProvider(dcp);
+		analysisJobBuilder.setDatastoreConnection(con);
 
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
@@ -146,7 +146,7 @@ public class TokenizerAndValueDistributionTest extends TestCase {
 			}
 		}
 
-		dcp.close();
+		con.close();
 		taskRunner.shutdown();
 	}
 }

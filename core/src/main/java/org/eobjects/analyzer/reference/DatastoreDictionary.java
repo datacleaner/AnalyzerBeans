@@ -27,7 +27,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
@@ -53,7 +53,7 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 
 	private transient ReferenceValues<String> _cachedRefValues;
 	private transient DatastoreCatalog _datastoreCatalog;
-	private transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
+	private transient BlockingQueue<DatastoreConnection> _dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
 
@@ -74,11 +74,11 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 		identifiers.add(_qualifiedColumnName);
 	}
 
-	private BlockingQueue<DataContextProvider> getDataContextProviders() {
+	private BlockingQueue<DatastoreConnection> getDatastoreConnections() {
 		if (_dataContextProviders == null) {
 			synchronized (this) {
 				if (_dataContextProviders == null) {
-					_dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
+					_dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
 				}
 			}
 		}
@@ -86,27 +86,27 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 	}
 
 	/**
-	 * Initializes a DataContextProvider, which will keep the connection open
+	 * Initializes a DatastoreConnection, which will keep the connection open
 	 */
 	@Initialize
 	public void init(DatastoreCatalog datastoreCatalog) {
 		logger.info("Initializing dictionary: {}", this);
 		setDatastoreCatalog(datastoreCatalog);
 		Datastore datastore = getDatastore();
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		getDataContextProviders().add(dcp);
+		DatastoreConnection con = datastore.openConnection();
+		getDatastoreConnections().add(con);
 	}
 
 	/**
-	 * Closes a DataContextProvider, potentially closing the connection (if no
-	 * other DataContextProviders are open).
+	 * Closes a DatastoreConnection, potentially closing the connection (if no
+	 * other DatastoreConnections are open).
 	 */
 	@Close
 	public void close() {
-		DataContextProvider dcp = getDataContextProviders().poll();
-		if (dcp != null) {
+		DatastoreConnection con = getDatastoreConnections().poll();
+		if (con != null) {
 			logger.info("Closing dictionary: {}", this);
-			dcp.close();
+			con.close();
 		}
 	}
 
@@ -147,7 +147,7 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 				if (_cachedRefValues == null) {
 					Datastore datastore = getDatastore();
 
-					DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+					DatastoreConnection dataContextProvider = datastore.openConnection();
 					SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
 					Column column = schemaNavigator.convertToColumns(new String[] { _qualifiedColumnName })[0];
 					if (column == null) {

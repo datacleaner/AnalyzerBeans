@@ -54,7 +54,7 @@ public class XmlDatastore extends UsageAwareDatastore<DataContext> implements Fi
 	}
 
 	@Override
-	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
 		final File file = new File(_filename);
 		final DataContext dataContext = DataContextFactory.createXmlDataContext(file, true, false);
 		return new DatastoreConnectionImpl<DataContext>(dataContext, this);

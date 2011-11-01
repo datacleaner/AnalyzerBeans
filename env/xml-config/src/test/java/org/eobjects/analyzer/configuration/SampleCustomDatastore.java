@@ -22,10 +22,10 @@ package org.eobjects.analyzer.configuration;
 import java.io.File;
 
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
+import org.eobjects.analyzer.connection.DatastoreConnectionImpl;
 import org.eobjects.analyzer.connection.PerformanceCharacteristics;
-import org.eobjects.analyzer.connection.SingleDataContextProvider;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 import org.junit.Ignore;
@@ -50,9 +50,14 @@ public class SampleCustomDatastore implements Datastore, PerformanceCharacterist
 	}
 
 	@Override
-	public DataContextProvider getDataContextProvider() {
+	public DatastoreConnection getDataContextProvider() {
+		throw new IllegalStateException();
+	}
+	
+	@Override
+	public DatastoreConnection openConnection() {
 		DataContext dc = DataContextFactory.createXmlDataContext(xmlFile, false, false);
-		return new SingleDataContextProvider(dc, this);
+		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}
 
 	@Override

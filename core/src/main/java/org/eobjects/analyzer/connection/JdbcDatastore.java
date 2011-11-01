@@ -179,7 +179,7 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 	}
 
 	@Override
-	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
 		if (StringUtils.isNullOrEmpty(_datasourceJndiUrl)) {
 			Connection connection = createConnection();
 
@@ -190,7 +190,7 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 			try {
 				Context initialContext = getJndiNamingContext();
 				DataSource dataSource = (DataSource) initialContext.lookup(_datasourceJndiUrl);
-				return new DataSourceDataContextProvider(dataSource, this);
+				return new DataSourceDatastoreConnection(dataSource, this);
 			} catch (Exception e) {
 				logger.error("Could not retrieve DataSource '{}'", _datasourceJndiUrl);
 				throw new IllegalStateException(e);

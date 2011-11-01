@@ -92,10 +92,10 @@ public class JaxbJobWriterTest extends TestCase {
 
 		DateGapAnalyzer dga = ajb.addAnalyzer(DateGapAnalyzer.class)
 				.getConfigurableBean();
-		Column orderDateColumn = ds.getDataContextProvider()
+		Column orderDateColumn = ds.openConnection()
 				.getSchemaNavigator()
 				.convertToColumn("PUBLIC.ORDERS.ORDERDATE");
-		Column shippedDateColumn = ds.getDataContextProvider()
+		Column shippedDateColumn = ds.openConnection()
 				.getSchemaNavigator()
 				.convertToColumn("PUBLIC.ORDERS.SHIPPEDDATE");
 

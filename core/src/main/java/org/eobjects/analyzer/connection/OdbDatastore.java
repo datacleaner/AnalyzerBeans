@@ -54,7 +54,7 @@ public final class OdbDatastore extends UsageAwareDatastore<DataContext> impleme
 	}
 
 	@Override
-	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
 		DataContext dc = DataContextFactory.createOpenOfficeDataContext(new File(_filename));
 		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}

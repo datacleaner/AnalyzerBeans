@@ -33,7 +33,7 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.InjectionManager;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -128,8 +128,8 @@ public final class RowProcessingPublisher {
 		}
 
 		final Datastore datastore = _job.getDatastore();
-		final DataContextProvider dcp = datastore.getDataContextProvider();
-		final DataContext dataContext = dcp.getDataContext();
+		final DatastoreConnection con = datastore.openConnection();
+		final DataContext dataContext = con.getDataContext();
 
 		final Query finalQuery;
 		final List<RowProcessingConsumer> finalConsumers;
@@ -210,7 +210,7 @@ public final class RowProcessingPublisher {
 		taskListener.awaitTasks(numTasks);
 
 		dataSet.close();
-		dcp.close();
+		con.close();
 
 		if (!taskListener.isErrornous()) {
 			_analysisListener.rowProcessingSuccess(_job, _table);

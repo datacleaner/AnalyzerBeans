@@ -68,7 +68,7 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 		// build a job
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
 		ajb.setDatastore(datastore);
-		ajb.addSourceColumn(datastore.getDataContextProvider().getSchemaNavigator()
+		ajb.addSourceColumn(datastore.openConnection().getSchemaNavigator()
 				.convertToColumn("PUBLIC.EMPLOYEES.EMAIL"));
 
 		InputColumn<?> emailColumn = ajb.getSourceColumnByName("email");

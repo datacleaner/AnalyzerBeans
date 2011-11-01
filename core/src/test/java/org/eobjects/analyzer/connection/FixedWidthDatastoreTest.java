@@ -45,13 +45,13 @@ public class FixedWidthDatastoreTest extends TestCase {
 				ds.toString());
 	}
 
-	public void testGetDataContextProvider() throws Exception {
+	public void testGetDatastoreConnection() throws Exception {
 		FixedWidthDatastore ds = new FixedWidthDatastore("example datastore",
 				"src/test/resources/employees-fixed-width.txt", "UTF-8", 19, false);
 
-		DataContextProvider dcp = ds.getDataContextProvider();
+		DatastoreConnection con = ds.openConnection();
 
-		Schema schema = dcp.getDataContext().getDefaultSchema();
+		Schema schema = con.getDataContext().getDefaultSchema();
 		assertEquals("employees-fixed-width.txt", schema.getName());
 
 		Table table = schema.getTables()[0];
@@ -59,6 +59,6 @@ public class FixedWidthDatastoreTest extends TestCase {
 
 		assertEquals("[name, email]", Arrays.toString(table.getColumnNames()));
 
-		dcp.close();
+		con.close();
 	}
 }

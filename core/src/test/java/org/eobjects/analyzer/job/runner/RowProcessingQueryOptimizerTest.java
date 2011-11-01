@@ -36,7 +36,7 @@ import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
@@ -62,7 +62,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	private AnalysisJobBuilder ajb;
 	private FilterJobBuilder<MaxRowsFilter, ValidationCategory> maxRowsBuilder;
 	private AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerBuilder;
-	private DataContextProvider dcp;
+	private DatastoreConnection con;
 	private Column lastnameColumn;
 	private InputColumn<?> lastNameInputColumn;
 	private ArrayList<RowProcessingConsumer> consumers;
@@ -81,8 +81,8 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		maxRowsBuilder = ajb.addFilter(MaxRowsFilter.class);
 		stringAnalyzerBuilder = ajb.addAnalyzer(StringAnalyzer.class);
 		stringAnalyzerBuilder.setRequirement(maxRowsBuilder, ValidationCategory.VALID);
-		dcp = conf.getDatastoreCatalog().getDatastore("mydb").getDataContextProvider();
-		lastnameColumn = dcp.getSchemaNavigator().convertToColumn("EMPLOYEES.LASTNAME");
+		con = conf.getDatastoreCatalog().getDatastore("mydb").openConnection();
+		lastnameColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.LASTNAME");
 		ajb.addSourceColumn(lastnameColumn);
 		lastNameInputColumn = ajb.getSourceColumnByName("lastname");
 		stringAnalyzerBuilder.addInputColumn(lastNameInputColumn);
@@ -91,13 +91,13 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		consumers.add(createConsumer(maxRowsBuilder));
 		consumers.add(createConsumer(stringAnalyzerBuilder));
 
-		baseQuery = dcp.getDataContext().query().from("EMPLOYEES").select("LASTNAME").toQuery();
+		baseQuery = con.getDataContext().query().from("EMPLOYEES").select("LASTNAME").toQuery();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		dcp.close();
+		con.close();
 	}
 
 	public void testSimpleOptimization() throws Exception {
@@ -128,7 +128,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	public void testOptimizedChainedTransformer() throws Exception {
 		TransformerJobBuilder<EmailStandardizerTransformer> emailStdBuilder = ajb
 				.addTransformer(EmailStandardizerTransformer.class);
-		Column emailColumn = dcp.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
+		Column emailColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
 		ajb.addSourceColumn(emailColumn);
 		InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
 		emailStdBuilder.addInputColumn(emailInputColumn);
@@ -168,8 +168,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	}
 
 	public void testDontOptimizeWhenComponentsHaveNoRequirements() throws Exception {
-		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb
-				.addAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb.addAnalyzer(PatternFinderAnalyzer.class);
 		patternFinderBuilder.addInputColumn(lastNameInputColumn);
 		consumers.add(createConsumer(patternFinderBuilder));
 
@@ -179,7 +178,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 	public void testMultipleOptimizations() throws Exception {
 		FilterJobBuilder<NotNullFilter, ValidationCategory> notNullBuilder = ajb.addFilter(NotNullFilter.class);
-		Column emailColumn = dcp.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
+		Column emailColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
 		ajb.addSourceColumn(emailColumn);
 		InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
 		notNullBuilder.addInputColumn(emailInputColumn);
@@ -204,8 +203,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	}
 
 	public void testMultipleOutcomesUsed() throws Exception {
-		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb
-				.addAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb.addAnalyzer(PatternFinderAnalyzer.class);
 		patternFinderBuilder.addInputColumn(lastNameInputColumn);
 		patternFinderBuilder.setRequirement(maxRowsBuilder, ValidationCategory.INVALID);
 		consumers.add(createConsumer(patternFinderBuilder));

@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -69,12 +69,12 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
 		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("foobar");
-		DataContextProvider dcp = ds.getDataContextProvider();
+		DatastoreConnection con = ds.openConnection();
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
 		analysisJobBuilder.setDatastore(ds);
 
-		Table table = dcp.getDataContext().getDefaultSchema().getTableByName("ORDERFACT");
+		Table table = con.getDataContext().getDefaultSchema().getTableByName("ORDERFACT");
 		assertNotNull(table);
 
 		Column statusColumn = table.getColumnByName("STATUS");
@@ -119,7 +119,7 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 
 		assertTrue(ds.isDatastoreConnectionOpen());
 
-		dcp.close();
+		con.close();
 		analysisJobBuilder.close();
 
 		assertFalse(ds.isDatastoreConnectionOpen());

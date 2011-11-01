@@ -32,7 +32,7 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -88,9 +88,9 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 
 		_writeBuffer = new WriteBuffer(bufferSize, this);
 
-		DataContextProvider dcp = datastore.getDataContextProvider();
+		DatastoreConnection con = datastore.openConnection();
 		try {
-			DataContext dc = dcp.getDataContext();
+			DataContext dc = con.getDataContext();
 			if (!(dc instanceof UpdateableDataContext)) {
 				throw new IllegalArgumentException("Datastore '"
 						+ datastore.getName() + "' is not writable");
@@ -134,7 +134,7 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 			}
 
 		} finally {
-			dcp.close();
+			con.close();
 		}
 	}
 
@@ -158,9 +158,9 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 
 	@Override
 	public void run(final Queue<Object[]> buffer) throws Exception {
-		DataContextProvider dcp = datastore.getDataContextProvider();
+		DatastoreConnection con = datastore.openConnection();
 		try {
-			final UpdateableDataContext dc = (UpdateableDataContext) dcp
+			final UpdateableDataContext dc = (UpdateableDataContext) con
 					.getDataContext();
 			dc.executeUpdate(new UpdateScript() {
 				@Override
@@ -188,7 +188,7 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 				}
 			});
 		} finally {
-			dcp.close();
+			con.close();
 		}
 	}
 

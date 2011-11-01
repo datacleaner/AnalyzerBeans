@@ -105,7 +105,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 	}
 
 	@Override
-	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
 		UpdateableDataContext dataContext;
 		if (_quoteChar == null && _separatorChar == null) {
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename));
@@ -117,7 +117,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 					quoteChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, _failOnInconsistencies);
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename), configuration);
 		}
-		return new DatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
+		return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
 	}
 	
 	@Override

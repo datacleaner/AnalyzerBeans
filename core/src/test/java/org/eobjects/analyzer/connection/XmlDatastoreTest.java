@@ -34,12 +34,12 @@ public class XmlDatastoreTest extends TestCase {
 		assertEquals("src/test/resources/example-xml-file.xml", ds.getFilename());
 	}
 
-	public void testGetDataContextProvider() throws Exception {
-		DataContextProvider dcp = ds.getDataContextProvider();
-		String[] tableNames = dcp.getDataContext().getDefaultSchema().getTableNames();
+	public void testGetDatastoreConnection() throws Exception {
+		DatastoreConnection con = ds.openConnection();
+		String[] tableNames = con.getDataContext().getDefaultSchema().getTableNames();
 		assertEquals("[greeting]", Arrays.toString(tableNames));
 
-		dcp.close();
+		con.close();
 	}
 
 	public void testGetPerformanceCharacteristics() throws Exception {

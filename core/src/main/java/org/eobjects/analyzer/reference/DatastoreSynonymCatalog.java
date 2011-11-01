@@ -32,7 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.util.CollectionUtils2;
@@ -59,7 +59,7 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 
 	private transient Map<String, String> _masterTermCache;
 	private transient DatastoreCatalog _datastoreCatalog;
-	private transient BlockingQueue<DataContextProvider> _dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
+	private transient BlockingQueue<DatastoreConnection> _dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
 	private final String _datastoreName;
 	private final String _masterTermColumnPath;
 	private final String[] _synonymColumnPaths;
@@ -89,24 +89,24 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 	}
 
 	/**
-	 * Initializes a DataContextProvider, which will keep the connection open
+	 * Initializes a DatastoreConnection, which will keep the connection open
 	 */
 	@Initialize
 	public void init(DatastoreCatalog datastoreCatalog) {
 		logger.info("Initializing dictionary: {}", this);
 		setDatastoreCatalog(datastoreCatalog);
 		Datastore datastore = getDatastore();
-		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
-		getDataContextProviders().add(dataContextProvider);
+		DatastoreConnection dataContextProvider = datastore.openConnection();
+		getDatastoreConnections().add(dataContextProvider);
 	}
 
 	/**
-	 * Closes a DataContextProvider, potentially closing the connection (if no
-	 * other DataContextProviders are open).
+	 * Closes a DatastoreConnection, potentially closing the connection (if no
+	 * other DatastoreConnections are open).
 	 */
 	@Close
 	public void close() {
-		DataContextProvider dataContextProvider = getDataContextProviders().poll();
+		DatastoreConnection dataContextProvider = getDatastoreConnections().poll();
 		if (dataContextProvider != null) {
 			logger.info("Closing dictionary: {}", this);
 			dataContextProvider.close();
@@ -124,11 +124,11 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 		return _masterTermCache;
 	}
 
-	private BlockingQueue<DataContextProvider> getDataContextProviders() {
+	private BlockingQueue<DatastoreConnection> getDatastoreConnections() {
 		if (_dataContextProviders == null) {
 			synchronized (this) {
 				if (_dataContextProviders == null) {
-					_dataContextProviders = new LinkedBlockingQueue<DataContextProvider>();
+					_dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
 				}
 			}
 		}
@@ -160,7 +160,7 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 
 		Datastore datastore = getDatastore();
 
-		DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+		DatastoreConnection dataContextProvider = datastore.openConnection();
 		DataContext dataContext = dataContextProvider.getDataContext();
 
 		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
@@ -200,7 +200,7 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 			if (result == null) {
 				Datastore datastore = getDatastore();
 
-				DataContextProvider dataContextProvider = datastore.getDataContextProvider();
+				DatastoreConnection dataContextProvider = datastore.openConnection();
 				try {
 
 					SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();

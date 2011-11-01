@@ -20,7 +20,7 @@
 package org.eobjects.analyzer.job.tasks;
 
 import org.eobjects.analyzer.beans.api.Explorer;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.ExplorerJob;
@@ -56,12 +56,12 @@ public final class RunExplorerTask implements Task {
 		if (_analysisListener != null) {
 			_analysisListener.explorerBegin(_job, _explorerJob);
 		}
-		DataContextProvider dcp = _datastore.getDataContextProvider();
-		DataContext dc = dcp.getDataContext();
+		DatastoreConnection con = _datastore.openConnection();
+		DataContext dc = con.getDataContext();
 		try {
 			_beanInstance.getBean().run(dc);
 		} finally {
-			dcp.close();
+			con.close();
 		}
 	}
 }

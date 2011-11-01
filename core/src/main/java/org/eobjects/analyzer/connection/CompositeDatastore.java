@@ -49,7 +49,7 @@ public final class CompositeDatastore extends UsageAwareDatastore<DataContext> {
 	}
 
 	@Override
-	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
 		final List<DataContext> dataContexts = new ArrayList<DataContext>(_datastores.size());
 		final List<Closeable> closeables = new ArrayList<Closeable>(_datastores.size());
 		for (Datastore datastore : _datastores) {

@@ -46,7 +46,7 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 
 	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDatastore.class);
 
-	private transient volatile Reference<UsageAwareDatastoreConnection<E>> _dataContextProviderRef;
+	private transient volatile Reference<UsageAwareDatastoreConnection<E>> _datastoreConnectionRef;
 	private transient volatile UsageAwareDatastoreConnection<E> _dataContextProvider = null;
 
 	@Moved
@@ -87,11 +87,11 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 	}
 
 	protected Reference<UsageAwareDatastoreConnection<E>> getDataContextProviderRef() {
-		return _dataContextProviderRef;
+		return _datastoreConnectionRef;
 	}
 
 	protected void setDataContextProviderRef(Reference<UsageAwareDatastoreConnection<E>> dataContextProviderRef) {
-		_dataContextProviderRef = dataContextProviderRef;
+		_datastoreConnectionRef = dataContextProviderRef;
 	}
 
 	protected void setDataContextProvider(UsageAwareDatastoreConnection<E> dataContextProvider) {
@@ -107,24 +107,24 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 			return _dataContextProvider;
 		}
 
-		UsageAwareDatastoreConnection<E> dataContextProvider;
-		if (_dataContextProviderRef != null) {
-			dataContextProvider = _dataContextProviderRef.get();
-			if (isDataContextProviderOpen(dataContextProvider)) {
+		UsageAwareDatastoreConnection<E> datastoreConnection;
+		if (_datastoreConnectionRef != null) {
+			datastoreConnection = _datastoreConnectionRef.get();
+			if (isDataContextProviderOpen(datastoreConnection)) {
 				// reuse existing data context provider
-				logger.info("Reusing existing DataContextProvider: {}", dataContextProvider);
-				dataContextProvider.incrementUsageCount();
-				return dataContextProvider;
+				logger.info("Reusing existing DatastoreConnection: {}", datastoreConnection);
+				datastoreConnection.incrementUsageCount();
+				return datastoreConnection;
 			}
 		}
 
-		dataContextProvider = createDataContextProvider();
-		if (dataContextProvider == null) {
-			throw new IllegalStateException("createDataContextProvider() returned null");
+		datastoreConnection = createDatastoreConnection();
+		if (datastoreConnection == null) {
+			throw new IllegalStateException("createDatastoreConnection() returned null");
 		}
-		_dataContextProviderRef = new WeakReference<UsageAwareDatastoreConnection<E>>(dataContextProvider);
+		_datastoreConnectionRef = new WeakReference<UsageAwareDatastoreConnection<E>>(datastoreConnection);
 
-		return dataContextProvider;
+		return datastoreConnection;
 	}
 	
 	@Override
@@ -132,7 +132,7 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 		return getDataContextProvider();
 	}
 
-	protected abstract UsageAwareDatastoreConnection<E> createDataContextProvider();
+	protected abstract UsageAwareDatastoreConnection<E> createDatastoreConnection();
 
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
@@ -147,10 +147,10 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 	 * @return a boolean indicating if the datacontext provider is open
 	 */
 	public final boolean isDatastoreConnectionOpen() {
-		if (_dataContextProviderRef == null) {
+		if (_datastoreConnectionRef == null) {
 			return false;
 		}
-		UsageAwareDatastoreConnection<E> dataContextProvider = _dataContextProviderRef.get();
+		UsageAwareDatastoreConnection<E> dataContextProvider = _datastoreConnectionRef.get();
 		return isDataContextProviderOpen(dataContextProvider);
 	}
 

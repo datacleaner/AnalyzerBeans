@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -55,25 +55,25 @@ public class DatastoreWriterAnalyzerTest extends TestCase {
 		final Column[] columns;
 		final Number countIn;
 		{
-			DataContextProvider dcp = datastoreIn.getDataContextProvider();
-			Table table = dcp.getDataContext().getDefaultSchema().getTables()[0];
+			DatastoreConnection con = datastoreIn.openConnection();
+			Table table = con.getDataContext().getDefaultSchema().getTables()[0];
 
 			columns = table.getColumns();
 
-			DataSet ds = dcp.getDataContext().query().from(table).selectCount()
+			DataSet ds = con.getDataContext().query().from(table).selectCount()
 					.execute();
 			assertTrue(ds.next());
 			countIn = (Number) ds.getRow().getValue(0);
 			assertFalse(ds.next());
 			ds.close();
 
-			dcp.close();
+			con.close();
 		}
 
 		// create output file
 		{
-			DataContextProvider dcp = datastoreOut.getDataContextProvider();
-			final UpdateableDataContext dc = (UpdateableDataContext) dcp
+			DatastoreConnection con = datastoreOut.openConnection();
+			final UpdateableDataContext dc = (UpdateableDataContext) con
 					.getDataContext();
 			dc.executeUpdate(new UpdateScript() {
 				@Override
@@ -87,7 +87,7 @@ public class DatastoreWriterAnalyzerTest extends TestCase {
 					createTableBuilder.execute();
 				}
 			});
-			dcp.close();
+			con.close();
 		}
 
 		// run a "copy lines" job with multithreading
@@ -120,17 +120,17 @@ public class DatastoreWriterAnalyzerTest extends TestCase {
 		// count output file lines
 		final Number countOut;
 		{
-			DataContextProvider dcp = datastoreOut.getDataContextProvider();
-			DataSet ds = dcp
+			DatastoreConnection con = datastoreOut.openConnection();
+			DataSet ds = con
 					.getDataContext()
 					.query()
-					.from(dcp.getDataContext().getDefaultSchema().getTables()[0])
+					.from(con.getDataContext().getDefaultSchema().getTables()[0])
 					.selectCount().execute();
 			assertTrue(ds.next());
 			countOut = (Number) ds.getRow().getValue(0);
 			assertFalse(ds.next());
 			ds.close();
-			dcp.close();
+			con.close();
 		}
 
 		assertEquals(countIn, countOut);

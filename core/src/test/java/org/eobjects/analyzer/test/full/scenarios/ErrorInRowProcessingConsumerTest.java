@@ -104,7 +104,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 		ajb.setDatastore(datastore);
 
-		SchemaNavigator schemaNavigator = datastore.getDataContextProvider().getSchemaNavigator();
+		SchemaNavigator schemaNavigator = datastore.openConnection().getSchemaNavigator();
 		Column column = schemaNavigator.convertToColumn("PUBLIC.EMPLOYEES.EMAIL");
 		assertNotNull(column);
 

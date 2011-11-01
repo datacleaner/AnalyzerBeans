@@ -54,9 +54,9 @@ public final class ExcelDatastore extends UsageAwareDatastore<UpdateableDataCont
 	}
 
 	@Override
-	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
 		UpdateableDataContext dc = DataContextFactory.createExcelDataContext(new File(_filename));
-		return new DatastoreConnectionImpl<UpdateableDataContext>(dc, this);
+		return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dc, this);
 	}
 
 	@Override

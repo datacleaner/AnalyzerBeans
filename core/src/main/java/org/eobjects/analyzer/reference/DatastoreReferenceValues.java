@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.metamodel.DataContext;
@@ -68,8 +68,8 @@ public final class DatastoreReferenceValues extends BaseObject implements Refere
 				result = _containsValueCache.get(value);
 				if (result == null) {
 					result = false;
-					DataContextProvider dcp = _datastore.getDataContextProvider();
-					DataContext dataContext = dcp.getDataContext();
+					DatastoreConnection con = _datastore.openConnection();
+					DataContext dataContext = con.getDataContext();
 					Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).equals(value)
 							.toQuery();
 					DataSet dataSet = dataContext.executeQuery(q);
@@ -84,7 +84,7 @@ public final class DatastoreReferenceValues extends BaseObject implements Refere
 						}
 					}
 					dataSet.close();
-					dcp.close();
+					con.close();
 					_containsValueCache.put(value, result);
 				}
 			}
@@ -95,8 +95,8 @@ public final class DatastoreReferenceValues extends BaseObject implements Refere
 
 	@Override
 	public Collection<String> getValues() {
-		DataContextProvider dcp = _datastore.getDataContextProvider();
-		DataContext dataContext = dcp.getDataContext();
+		DatastoreConnection con = _datastore.openConnection();
+		DataContext dataContext = con.getDataContext();
 
 		Query q = dataContext.query().from(_column.getTable()).select(_column).toQuery();
 		q.selectDistinct();
@@ -112,7 +112,7 @@ public final class DatastoreReferenceValues extends BaseObject implements Refere
 			values.add((String) value);
 		}
 		dataSet.close();
-		dcp.close();
+		con.close();
 		return values;
 	}
 }

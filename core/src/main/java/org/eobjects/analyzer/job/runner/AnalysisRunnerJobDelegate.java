@@ -34,7 +34,7 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -224,7 +224,7 @@ final class AnalysisRunnerJobDelegate {
 
 		// begin explorer jobs first because they can run independently (
 		for (ExplorerJob explorerJob : _explorerJobs) {
-			final DataContextProvider dataContextProvider = _datastore.getDataContextProvider();
+			final DatastoreConnection dataContextProvider = _datastore.openConnection();
 			final BeanInstance<? extends Explorer<?>> beanInstance = BeanInstance.create(explorerJob.getDescriptor());
 
 			finalTasks.add(new TaskRunnable(null, new CloseResourcesTaskListener(dataContextProvider)));

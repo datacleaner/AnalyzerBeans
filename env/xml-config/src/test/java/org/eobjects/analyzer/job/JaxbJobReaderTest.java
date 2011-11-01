@@ -35,7 +35,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
@@ -382,8 +382,8 @@ public class JaxbJobReaderTest extends TestCase {
 				sourceColumnMapping.getPaths().toString());
 
 		sourceColumnMapping.setDatastore(datastore);
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		SchemaNavigator sn = dcp.getSchemaNavigator();
+		DatastoreConnection con = datastore.openConnection();
+		SchemaNavigator sn = con.getSchemaNavigator();
 		sourceColumnMapping.setColumn("PUBLIC.EMPLOYEES.EMAIL",
 				sn.convertToColumn("PUBLIC.CUSTOMERS.PHONE"));
 		sourceColumnMapping.setColumn("PUBLIC.EMPLOYEES.FIRSTNAME",

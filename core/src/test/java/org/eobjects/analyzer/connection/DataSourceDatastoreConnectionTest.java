@@ -34,7 +34,7 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.schema.Table;
 import org.springframework.mock.jndi.SimpleNamingContext;
 
-public class DataSourceDataContextProviderTest extends TestCase {
+public class DataSourceDatastoreConnectionTest extends TestCase {
 
 	public void testConstruction() throws Exception {
 		DataSource dataSource = EasyMock.createMock(DataSource.class);
@@ -62,13 +62,13 @@ public class DataSourceDataContextProviderTest extends TestCase {
 
 		assertEquals("jdbc/mydatasource", datastore.getDatasourceJndiUrl());
 
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		assertEquals(DataSourceDataContextProvider.class, dcp.getClass());
+		DatastoreConnection con = datastore.openConnection();
+		assertEquals(DataSourceDatastoreConnection.class, con.getClass());
 
-		assertEquals("mydatasource", dcp.getDatastore().getName());
-		SchemaNavigator schemaNavigator = dcp.getSchemaNavigator();
+		assertEquals("mydatasource", con.getDatastore().getName());
+		SchemaNavigator schemaNavigator = con.getSchemaNavigator();
 		assertNotNull(schemaNavigator);
-		assertEquals("PUBLIC", dcp.getDataContext().getDefaultSchema().getName());
+		assertEquals("PUBLIC", con.getDataContext().getDefaultSchema().getName());
 		Table table = schemaNavigator.convertToTable("PUBLIC.EMPLOYEES");
 		assertNotNull(table);
 		assertEquals("EMPLOYEES", table.getName());

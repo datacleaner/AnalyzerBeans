@@ -28,7 +28,7 @@ import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -60,11 +60,11 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
 
 		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		DataContext dc = dcp.getDataContext();
+		DatastoreConnection con = datastore.openConnection();
+		DataContext dc = con.getDataContext();
 
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
-		ajb.setDataContextProvider(dcp);
+		ajb.setDatastoreConnection(con);
 		
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
@@ -159,7 +159,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 			assertEquals("wpatterson@classicmodelcars.com", rows[0].getValue(emailInputColumn).toString());
 		}
 
-		dcp.close();
+		con.close();
 		taskRunner.shutdown();
 	}
 }

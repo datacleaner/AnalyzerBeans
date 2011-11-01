@@ -25,7 +25,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
@@ -151,12 +151,12 @@ public class InjectionManagerImpl implements InjectionManager {
 			return (E) _rowAnntationFactoryRef.get();
 		} else if (baseType == RowAnnotation.class) {
 			return (E) _rowAnntationFactoryRef.get().createAnnotation();
-		} else if (baseType == DataContextProvider.class && _job != null) {
-			return (E) _job.getDatastore().getDataContextProvider();
+		} else if (baseType == DatastoreConnection.class && _job != null) {
+			return (E) _job.getDatastore().openConnection();
 		} else if (baseType == DataContext.class && _job != null) {
-			return (E) _job.getDatastore().getDataContextProvider().getDataContext();
+			return (E) _job.getDatastore().openConnection().getDataContext();
 		} else if (baseType == SchemaNavigator.class && _job != null) {
-			return (E) _job.getDatastore().getDataContextProvider().getSchemaNavigator();
+			return (E) _job.getDatastore().openConnection().getSchemaNavigator();
 		} else {
 			// only inject persistent lists, sets, maps into @Provided fields.
 			if (injectionPoint.getAnnotation(Provided.class) != null && injectionPoint.isGenericType()) {

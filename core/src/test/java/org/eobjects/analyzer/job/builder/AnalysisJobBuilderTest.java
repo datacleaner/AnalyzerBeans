@@ -38,7 +38,7 @@ import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.JdbcDatastore;
@@ -88,7 +88,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 	}
 
 	public void testToAnalysisJob() throws Exception {
-		Table employeeTable = datastore.getDataContextProvider().getDataContext().getDefaultSchema()
+		Table employeeTable = datastore.openConnection().getDataContext().getDefaultSchema()
 				.getTableByName("EMPLOYEES");
 		assertNotNull(employeeTable);
 
@@ -167,7 +167,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 	}
 
 	public void testGetAvailableUnfilteredBeans() throws Exception {
-		Table customersTable = datastore.getDataContextProvider().getDataContext().getDefaultSchema()
+		Table customersTable = datastore.openConnection().getDataContext().getDefaultSchema()
 				.getTableByName("CUSTOMERS");
 		assertNotNull(customersTable);
 
@@ -202,7 +202,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 	}
 
 	public void testRemoveFilter() throws Exception {
-		DataContextProvider dcp = datastore.getDataContextProvider();
+		DatastoreConnection con = datastore.openConnection();
 
 		FilterJobBuilder<MaxRowsFilter, ValidationCategory> maxRowsFilter = analysisJobBuilder
 				.addFilter(MaxRowsFilter.class);
@@ -219,7 +219,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 
 		assertNull(notNullFilter.getRequirement());
 
-		analysisJobBuilder.addSourceColumn(dcp.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL"));
+		analysisJobBuilder.addSourceColumn(con.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL"));
 		emailStdTransformer.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"));
 
 		AnalyzerJobBuilder<StringAnalyzer> stringAnalyzer = analysisJobBuilder
@@ -234,7 +234,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		assertSame(notNullFilter.getOutcome(ValidationCategory.VALID), stringAnalyzer.getRequirement());
 		assertSame(notNullFilter.getOutcome(ValidationCategory.VALID), emailStdTransformer.getRequirement());
 
-		dcp.close();
+		con.close();
 	}
 
 	public void testSourceColumnListeners() throws Exception {
@@ -245,7 +245,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		SourceColumnChangeListener listener1 = EasyMock.createMock(SourceColumnChangeListener.class);
 		ajb.getSourceColumnListeners().add(listener1);
 
-		Column column = ajb.getDataContextProvider().getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
+		Column column = ajb.getDatastoreConnection().getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
 		MetaModelInputColumn inputColumn = new MetaModelInputColumn(column);
 
 		// scene 1: add source column

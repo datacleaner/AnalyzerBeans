@@ -27,7 +27,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
@@ -50,7 +50,7 @@ import org.eobjects.metamodel.schema.Table;
 
 public class ReferentialIntegrityValidatorTest extends TestCase {
 
-	private DataContextProvider dcp;
+	private DatastoreConnection con;
 	private DataContext dc;
 	private Table employeesTable;
 	private Table officesTable;
@@ -58,8 +58,8 @@ public class ReferentialIntegrityValidatorTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		dcp = TestHelper.createSampleDatabaseDatastore("ds").getDataContextProvider();
-		dc = dcp.getDataContext();
+		con = TestHelper.createSampleDatabaseDatastore("ds").openConnection();
+		dc = con.getDataContext();
 		employeesTable = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		officesTable = dc.getDefaultSchema().getTableByName("OFFICES");
 	}
@@ -67,7 +67,7 @@ public class ReferentialIntegrityValidatorTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		dcp.close();
+		con.close();
 	}
 
 	public void testDescriptor() throws Exception {

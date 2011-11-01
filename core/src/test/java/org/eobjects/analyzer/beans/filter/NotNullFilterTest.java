@@ -21,7 +21,7 @@ package org.eobjects.analyzer.beans.filter;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
@@ -66,8 +66,8 @@ public class NotNullFilterTest extends TestCase {
 
 	public void testOptimizeQuery() throws Exception {
 		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("mydb");
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		SchemaNavigator nav = dcp.getSchemaNavigator();
+		DatastoreConnection con = datastore.openConnection();
+		SchemaNavigator nav = con.getSchemaNavigator();
 
 		MetaModelInputColumn col1 = new MetaModelInputColumn(nav.convertToColumn("EMPLOYEES.EMAIL"));
 		MetaModelInputColumn col2 = new MetaModelInputColumn(nav.convertToColumn("EMPLOYEES.EMPLOYEENUMBER"));
@@ -75,7 +75,7 @@ public class NotNullFilterTest extends TestCase {
 
 		NotNullFilter filter = new NotNullFilter(columns, true);
 
-		Query baseQuery = dcp.getDataContext().query().from("EMPLOYEES").select("EMAIL").and("EMPLOYEENUMBER").toQuery();
+		Query baseQuery = con.getDataContext().query().from("EMPLOYEES").select("EMAIL").and("EMPLOYEENUMBER").toQuery();
 		Query optimizedQuery = filter.optimizeQuery(baseQuery.clone(), ValidationCategory.VALID);
 
 		assertEquals("SELECT \"EMPLOYEES\".\"EMAIL\", \"EMPLOYEES\".\"EMPLOYEENUMBER\" FROM "
@@ -88,6 +88,6 @@ public class NotNullFilterTest extends TestCase {
 				+ "PUBLIC.\"EMPLOYEES\" WHERE (\"EMPLOYEES\".\"EMAIL\" IS NULL OR \"EMPLOYEES\".\"EMAIL\" = '' OR "
 				+ "\"EMPLOYEES\".\"EMPLOYEENUMBER\" IS NULL)", optimizedQuery.toSql());
 
-		dcp.close();
+		con.close();
 	}
 }

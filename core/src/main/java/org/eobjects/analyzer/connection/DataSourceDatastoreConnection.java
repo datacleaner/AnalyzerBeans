@@ -25,12 +25,13 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.UpdateableDataContext;
 
-public class DataSourceDataContextProvider extends UsageAwareDatastoreConnection<UpdateableDataContext> {
+public class DataSourceDatastoreConnection extends UsageAwareDatastoreConnection<UpdateableDataContext> implements
+		UpdateableDatastoreConnection {
 
 	private final UpdateableDataContext _dataContext;
 	private final SchemaNavigator _schemaNavigator;
 
-	public DataSourceDataContextProvider(DataSource ds, Datastore datastore) {
+	public DataSourceDatastoreConnection(DataSource ds, Datastore datastore) {
 		super(datastore);
 		_dataContext = DataContextFactory.createJdbcDataContext(ds);
 		_schemaNavigator = new SchemaNavigator(_dataContext);
@@ -38,6 +39,11 @@ public class DataSourceDataContextProvider extends UsageAwareDatastoreConnection
 
 	@Override
 	public UpdateableDataContext getDataContext() {
+		return _dataContext;
+	}
+	
+	@Override
+	public UpdateableDataContext getUpdateableDataContext() {
 		return _dataContext;
 	}
 

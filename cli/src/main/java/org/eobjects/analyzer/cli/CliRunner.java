@@ -33,7 +33,7 @@ import java.util.Set;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
@@ -140,8 +140,8 @@ public final class CliRunner {
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
-				DataContextProvider dcp = ds.getDataContextProvider();
-				DataContext dc = dcp.getDataContext();
+				DatastoreConnection con = ds.openConnection();
+				DataContext dc = con.getDataContext();
 				Schema schema;
 				if (schemaName == null) {
 					schema = dc.getDefaultSchema();
@@ -163,7 +163,7 @@ public final class CliRunner {
 						}
 					}
 				}
-				dcp.close();
+				con.close();
 			}
 		}
 	}
@@ -179,8 +179,8 @@ public final class CliRunner {
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
-				DataContextProvider dcp = ds.getDataContextProvider();
-				DataContext dc = dcp.getDataContext();
+				DatastoreConnection con = ds.openConnection();
+				DataContext dc = con.getDataContext();
 				Schema schema;
 				if (schemaName == null) {
 					schema = dc.getDefaultSchema();
@@ -201,7 +201,7 @@ public final class CliRunner {
 						}
 					}
 				}
-				dcp.close();
+				con.close();
 			}
 		}
 	}
@@ -216,8 +216,8 @@ public final class CliRunner {
 			if (ds == null) {
 				System.err.println("No such datastore: " + datastoreName);
 			} else {
-				DataContextProvider dcp = ds.getDataContextProvider();
-				String[] schemaNames = dcp.getDataContext().getSchemaNames();
+				DatastoreConnection con = ds.openConnection();
+				String[] schemaNames = con.getDataContext().getSchemaNames();
 				if (schemaNames == null || schemaNames.length == 0) {
 					_out.println("No schemas in datastore!");
 				} else {
@@ -227,7 +227,7 @@ public final class CliRunner {
 						_out.println(schemaName);
 					}
 				}
-				dcp.close();
+				con.close();
 			}
 		}
 	}

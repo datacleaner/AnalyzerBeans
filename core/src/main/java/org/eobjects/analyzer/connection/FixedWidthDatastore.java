@@ -84,7 +84,7 @@ public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implem
 	}
 
 	@Override
-	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
 		File file = new File(_filename);
 		assert file.exists();
 

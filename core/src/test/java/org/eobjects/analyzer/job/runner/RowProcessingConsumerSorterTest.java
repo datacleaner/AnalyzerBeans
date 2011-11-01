@@ -73,7 +73,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 
 	public void testCreateProcessOrderedConsumerListWithMergedOutcomes() throws Exception {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
-		ajb.setDataContextProvider(new MockDatastoreConnection());
+		ajb.setDatastoreConnection(new MockDatastoreConnection());
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
 
@@ -121,7 +121,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 
 	public void testCreateProcessOrderedConsumerListWithFilterDependencies() throws Exception {
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
-		ajb.setDataContextProvider(new MockDatastoreConnection());
+		ajb.setDatastoreConnection(new MockDatastoreConnection());
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
 
@@ -180,7 +180,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
 		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(tjb3.getOutputColumns().get(0));
 
-		ajb.setDataContextProvider(new MockDatastoreConnection());
+		ajb.setDatastoreConnection(new MockDatastoreConnection());
 
 		assertTrue(ajb.isConfigured());
 		AnalysisJob analysisJob = ajb.toAnalysisJob();

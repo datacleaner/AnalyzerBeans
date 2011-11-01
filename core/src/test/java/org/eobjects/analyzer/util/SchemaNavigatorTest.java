@@ -47,11 +47,11 @@ public class SchemaNavigatorTest extends TestCase {
 
 	public void testConvertToColumnWithNoSchema() throws Exception {
 		CsvDatastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
-		SchemaNavigator schemaNavigator = datastore.getDataContextProvider().getSchemaNavigator();
+		SchemaNavigator schemaNavigator = datastore.openConnection().getSchemaNavigator();
 		Column col = schemaNavigator.convertToColumn("product");
 		assertNotNull(col);
 
-		Table table = datastore.getDataContextProvider().getDataContext().getDefaultSchema().getTables()[0];
+		Table table = datastore.openConnection().getDataContext().getDefaultSchema().getTables()[0];
 		assertEquals("projects", table.getName());
 		col = schemaNavigator.convertToColumn("projects.product");
 		assertNotNull(col);

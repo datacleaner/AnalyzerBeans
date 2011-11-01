@@ -21,36 +21,36 @@ package org.eobjects.analyzer.connection;
 
 import junit.framework.TestCase;
 
-public class UsageAwareDataContextProviderTest extends TestCase {
+public class UsageAwareDatastoreConnectionTest extends TestCase {
 
 	public void testGetUsageCount() throws Exception {
 		CsvDatastore ds = new CsvDatastore("foo", "src/test/resources/employees.csv");
 		assertFalse(ds.isDatastoreConnectionOpen());
 
-		UsageAwareDatastoreConnection dcp1 = (UsageAwareDatastoreConnection) ds.getDataContextProvider();
+		UsageAwareDatastoreConnection<?> con1 = (UsageAwareDatastoreConnection<?>) ds.openConnection();
 		assertTrue(ds.isDatastoreConnectionOpen());
-		assertEquals(1, dcp1.getUsageCount());
+		assertEquals(1, con1.getUsageCount());
 
-		DataContextProvider dcp2 = ds.getDataContextProvider();
-		assertEquals(2, dcp1.getUsageCount());
+		DatastoreConnection con2 = ds.openConnection();
+		assertEquals(2, con1.getUsageCount());
 
-		DataContextProvider dcp3 = ds.getDataContextProvider();
-		assertEquals(3, dcp1.getUsageCount());
+		DatastoreConnection con3 = ds.openConnection();
+		assertEquals(3, con1.getUsageCount());
 
-		assertSame(dcp1, dcp2);
-		assertSame(dcp1, dcp3);
+		assertSame(con1, con2);
+		assertSame(con1, con3);
 
-		dcp3.close();
-
-		assertTrue(ds.isDatastoreConnectionOpen());
-		assertEquals(2, dcp1.getUsageCount());
-
-		dcp2.close();
+		con3.close();
 
 		assertTrue(ds.isDatastoreConnectionOpen());
-		assertEquals(1, dcp1.getUsageCount());
+		assertEquals(2, con1.getUsageCount());
 
-		dcp1.close();
+		con2.close();
+
+		assertTrue(ds.isDatastoreConnectionOpen());
+		assertEquals(1, con1.getUsageCount());
+
+		con1.close();
 
 		assertFalse(ds.isDatastoreConnectionOpen());
 	}
@@ -59,14 +59,14 @@ public class UsageAwareDataContextProviderTest extends TestCase {
 		CsvDatastore ds = new CsvDatastore("foo", "src/test/resources/employees.csv");
 		assertFalse(ds.isDatastoreConnectionOpen());
 
-		DataContextProvider dcp1 = ds.getDataContextProvider();
-		DataContextProvider dcp2 = ds.getDataContextProvider();
+		DatastoreConnection con1 = ds.openConnection();
+		DatastoreConnection con2 = ds.openConnection();
 
 		assertTrue(ds.isDatastoreConnectionOpen());
-		assertSame(dcp1, dcp2);
+		assertSame(con1, con2);
 
-		dcp1 = null;
-		dcp2 = null;
+		con1 = null;
+		con2 = null;
 
 		// invoke GC
 		System.gc();

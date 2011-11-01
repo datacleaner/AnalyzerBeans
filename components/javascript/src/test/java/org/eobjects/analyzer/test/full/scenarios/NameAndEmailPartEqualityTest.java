@@ -32,7 +32,7 @@ import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -67,8 +67,8 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 				configuration);
 		analysisJobBuilder.setDatastore(ds);
 
-		DataContextProvider dcp = ds.getDataContextProvider();
-		Schema schema = dcp.getDataContext().getDefaultSchema();
+		DatastoreConnection con = ds.openConnection();
+		Schema schema = con.getDataContext().getDefaultSchema();
 		Table table = schema.getTables()[0];
 		assertNotNull(table);
 
@@ -148,7 +148,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder
 				.toAnalysisJob());
 
-		dcp.close();
+		con.close();
 
 		if (!resultFuture.isSuccessful()) {
 			List<Throwable> errors = resultFuture.getErrors();

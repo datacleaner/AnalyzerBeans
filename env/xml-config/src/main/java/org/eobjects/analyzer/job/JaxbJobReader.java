@@ -47,7 +47,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.configuration.InjectionManagerFactory;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.ConstantInputColumn;
 import org.eobjects.analyzer.data.ELInputColumn;
@@ -322,7 +322,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
 		String ref;
 		final Datastore datastore;
-		final DataContextProvider dataContextProvider;
+		final DatastoreConnection dataContextProvider;
 
 		final SourceType source = job.getSource();
 
@@ -338,14 +338,14 @@ public class JaxbJobReader implements JobReader<InputStream> {
 			if (datastore == null) {
 				throw new NoSuchDatastoreException(ref);
 			}
-			dataContextProvider = datastore.getDataContextProvider();
+			dataContextProvider = datastore.openConnection();
 
 			List<String> sourceColumnPaths = getSourceColumnPaths(job);
 			sourceColumnMapping = new SourceColumnMapping(sourceColumnPaths);
 			sourceColumnMapping.autoMap(datastore);
 		} else {
 			datastore = sourceColumnMapping.getDatastore();
-			dataContextProvider = datastore.getDataContextProvider();
+			dataContextProvider = datastore.openConnection();
 		}
 
 		// map column id's to input columns

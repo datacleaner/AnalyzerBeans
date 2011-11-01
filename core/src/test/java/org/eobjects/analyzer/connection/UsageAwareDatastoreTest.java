@@ -30,17 +30,17 @@ import org.apache.commons.lang.SerializationUtils;
 public class UsageAwareDatastoreTest extends TestCase {
 
 	public void testSerializationAndDeserializationOfAllDatastoreTypes() throws Exception {
-		List<UsageAwareDatastore> datastores = new ArrayList<UsageAwareDatastore>();
+		List<UsageAwareDatastore<?>> datastores = new ArrayList<UsageAwareDatastore<?>>();
 		datastores.add(new AccessDatastore("access", "bar.mdb"));
 		datastores.add(new CsvDatastore("csv", "bar.csv"));
 		datastores.add(new DbaseDatastore("dbase", "bar.dbf"));
 		datastores.add(new ExcelDatastore("excel", "bar.xls"));
 		datastores.add(new JdbcDatastore("jdbc", "url"));
 		datastores.add(new FixedWidthDatastore("fixedwidth", "foo.dat", "UTF8", new int[] { 1, 2, 3 }));
-		datastores
-				.add(new CompositeDatastore("foo", Arrays.asList(datastores.get(0), datastores.get(1), datastores.get(3))));
+		datastores.add(new CompositeDatastore("foo", Arrays.<Datastore> asList(datastores.get(0), datastores.get(1),
+				datastores.get(3))));
 
-		for (UsageAwareDatastore ds : datastores) {
+		for (UsageAwareDatastore<?> ds : datastores) {
 			System.out.println("Cloning datastore: " + ds);
 			Object clone = SerializationUtils.clone(ds);
 			assertEquals(ds, clone);

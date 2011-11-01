@@ -27,16 +27,16 @@ public class ExcelDatastoreTest extends TestCase {
 	public void testOpenSpreadsheetXls() throws Exception {
 		Datastore datastore = new ExcelDatastore("foobar", "src/test/resources/Spreadsheet2003.xls");
 		assertEquals("foobar", datastore.getName());
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		assertNotNull(dcp);
+		DatastoreConnection con = datastore.openConnection();
+		assertNotNull(con);
 
-		Column col1 = dcp.getSchemaNavigator().convertToColumn("string");
+		Column col1 = con.getSchemaNavigator().convertToColumn("string");
 		assertNotNull(col1);
 
-		Column col2 = dcp.getSchemaNavigator().convertToColumn("number");
+		Column col2 = con.getSchemaNavigator().convertToColumn("number");
 		assertNotNull(col2);
 
-		Column col3 = dcp.getSchemaNavigator().convertToColumn("date");
+		Column col3 = con.getSchemaNavigator().convertToColumn("date");
 		assertNotNull(col3);
 		assertEquals(
 				"Column[name=date,columnNumber=2,type=VARCHAR,nullable=true,indexed=false,nativeType=null,columnSize=null]",
@@ -46,16 +46,16 @@ public class ExcelDatastoreTest extends TestCase {
 	public void testOpenSpreadsheetXlsx() throws Exception {
 		Datastore datastore = new ExcelDatastore("foobar", "src/test/resources/Spreadsheet2007.xlsx");
 		assertEquals("foobar", datastore.getName());
-		DataContextProvider dcp = datastore.getDataContextProvider();
-		assertNotNull(dcp);
+		DatastoreConnection con = datastore.openConnection();
+		assertNotNull(con);
 
-		Column col1 = dcp.getSchemaNavigator().convertToColumn("string");
+		Column col1 = con.getSchemaNavigator().convertToColumn("string");
 		assertNotNull(col1);
 
-		Column col2 = dcp.getSchemaNavigator().convertToColumn("number");
+		Column col2 = con.getSchemaNavigator().convertToColumn("number");
 		assertNotNull(col2);
 
-		Column col3 = dcp.getSchemaNavigator().convertToColumn("date");
+		Column col3 = con.getSchemaNavigator().convertToColumn("date");
 		assertNotNull(col3);
 		assertEquals(
 				"Column[name=date,columnNumber=2,type=VARCHAR,nullable=true,indexed=false,nativeType=null,columnSize=null]",

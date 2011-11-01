@@ -98,7 +98,7 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 			if (logger.isWarnEnabled()) {
 
 				logger.warn(
-						"Method finalize() invoked but not all usages closed ({} remaining) (for {}). Closing DataContextProvider.",
+						"Method finalize() invoked but not all usages closed ({} remaining) (for {}). Closing DatastoreConnection.",
 						_usageCount.get(), this);
 			}
 			// in case of gc, also do the closing
@@ -108,7 +108,7 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 
 	@Override
 	public String toString() {
-		return "UsageAwareDataContextProvider[datastore=" + getDatastoreName() + "]";
+		return "UsageAwareDatastoreConnection[datastore=" + getDatastoreName() + "]";
 	}
 
 	@Override

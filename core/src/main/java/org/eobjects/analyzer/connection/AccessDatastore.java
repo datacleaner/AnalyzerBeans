@@ -52,7 +52,7 @@ public final class AccessDatastore extends UsageAwareDatastore<DataContext> impl
 	}
 
 	@Override
-	protected UsageAwareDatastoreConnection<DataContext> createDataContextProvider() {
+	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
 		DataContext dc = DataContextFactory.createAccessDataContext(_filename);
 		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}

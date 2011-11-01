@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
@@ -70,15 +70,15 @@ public class EqualsFilterTest extends TestCase {
 
 	public void testOptimizeQuery() throws Exception {
 		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("ds");
-		DataContextProvider dcp = ds.getDataContextProvider();
-		Column column = dcp.getSchemaNavigator().convertToColumn("PUBLIC.EMPLOYEES.FIRSTNAME");
+		DatastoreConnection con = ds.openConnection();
+		Column column = con.getSchemaNavigator().convertToColumn("PUBLIC.EMPLOYEES.FIRSTNAME");
 		InputColumn<?> inputColumn = new MetaModelInputColumn(column);
 
 		EqualsFilter filter = new EqualsFilter(new String[] { "foobar" }, inputColumn);
 		assertTrue(filter.isOptimizable(ValidationCategory.VALID));
 		assertTrue(filter.isOptimizable(ValidationCategory.INVALID));
 
-		Query query = dcp.getDataContext().query().from(column.getTable()).select(column).toQuery();
+		Query query = con.getDataContext().query().from(column.getTable()).select(column).toQuery();
 		String originalSql = query.toSql();
 		assertEquals("SELECT \"EMPLOYEES\".\"FIRSTNAME\" FROM PUBLIC.\"EMPLOYEES\"", originalSql);
 
@@ -89,6 +89,6 @@ public class EqualsFilterTest extends TestCase {
 		result = filter.optimizeQuery(query.clone(), ValidationCategory.INVALID);
 		assertEquals(originalSql + " WHERE \"EMPLOYEES\".\"FIRSTNAME\" <> 'foobar'", result.toSql());
 
-		dcp.close();
+		con.close();
 	}
 }

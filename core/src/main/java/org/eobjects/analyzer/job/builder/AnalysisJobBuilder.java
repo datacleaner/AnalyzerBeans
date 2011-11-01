@@ -31,8 +31,8 @@ import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.connection.DataContextProvider;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
@@ -78,7 +78,7 @@ public final class AnalysisJobBuilder implements Closeable {
 	private final IdGenerator _transformedColumnIdGenerator;
 
 	// the configurable components
-	private DataContextProvider _dataContextProvider;
+	private DatastoreConnection _datastoreConnection;
 	private final List<MetaModelInputColumn> _sourceColumns;
 	private final List<FilterJobBuilder<?, ?>> _filterJobBuilders;
 	private final List<TransformerJobBuilder<?>> _transformerJobBuilders;
@@ -111,13 +111,13 @@ public final class AnalysisJobBuilder implements Closeable {
 	 * 
 	 * @param explorerJobBuilders
 	 */
-	private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, DataContextProvider dataContextProvider,
+	private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, DatastoreConnection dataContextProvider,
 			List<MetaModelInputColumn> sourceColumns, Outcome defaultRequirement, IdGenerator idGenerator,
 			List<TransformerJobBuilder<?>> transformerJobBuilders, List<FilterJobBuilder<?, ?>> filterJobBuilders,
 			List<AnalyzerJobBuilder<?>> analyzerJobBuilders, List<MergedOutcomeJobBuilder> mergedOutcomeJobBuilders,
 			List<ExplorerJobBuilder<?>> explorerJobBuilders) {
 		_configuration = configuration;
-		_dataContextProvider = dataContextProvider;
+		_datastoreConnection = dataContextProvider;
 		_sourceColumns = sourceColumns;
 		_defaultRequirement = defaultRequirement;
 		_transformedColumnIdGenerator = idGenerator;
@@ -137,25 +137,34 @@ public final class AnalysisJobBuilder implements Closeable {
 	}
 
 	public AnalysisJobBuilder setDatastore(Datastore datastore) {
-		final DataContextProvider dataContextProvider;
+		final DatastoreConnection dataContextProvider;
 		if (datastore == null) {
 			dataContextProvider = null;
 		} else {
-			dataContextProvider = datastore.getDataContextProvider();
+			dataContextProvider = datastore.openConnection();
 		}
-		return setDataContextProvider(dataContextProvider);
+		return setDatastoreConnection(dataContextProvider);
 	}
 
-	public AnalysisJobBuilder setDataContextProvider(DataContextProvider dataContextProvider) {
-		if (_dataContextProvider != null) {
-			_dataContextProvider.close();
+	/**
+	 * @deprecated use {@link #setDatastoreConnection(DatastoreConnection)}
+	 *             instead.
+	 */
+	@Deprecated
+	public AnalysisJobBuilder setDataContextProvider(org.eobjects.analyzer.connection.DataContextProvider dataContextProvider) {
+		return setDatastoreConnection((DatastoreConnection) dataContextProvider);
+	}
+
+	public AnalysisJobBuilder setDatastoreConnection(DatastoreConnection datastoreConnection) {
+		if (_datastoreConnection != null) {
+			_datastoreConnection.close();
 		}
-		_dataContextProvider = dataContextProvider;
+		_datastoreConnection = datastoreConnection;
 		return this;
 	}
 
-	public DataContextProvider getDataContextProvider() {
-		return _dataContextProvider;
+	public DatastoreConnection getDatastoreConnection() {
+		return _datastoreConnection;
 	}
 
 	public AnalyzerBeansConfiguration getConfiguration() {
@@ -194,11 +203,11 @@ public final class AnalysisJobBuilder implements Closeable {
 	}
 
 	public AnalysisJobBuilder addSourceColumns(String... columnNames) {
-		if (_dataContextProvider == null) {
+		if (_datastoreConnection == null) {
 			throw new IllegalStateException(
-					"Cannot add source columns by name when no Datastore or DataContextProvider has been set");
+					"Cannot add source columns by name when no Datastore or DatastoreConnection has been set");
 		}
-		SchemaNavigator schemaNavigator = _dataContextProvider.getSchemaNavigator();
+		SchemaNavigator schemaNavigator = _datastoreConnection.getSchemaNavigator();
 		Column[] columns = new Column[columnNames.length];
 		for (int i = 0; i < columns.length; i++) {
 			String columnName = columnNames[i];
@@ -512,9 +521,9 @@ public final class AnalysisJobBuilder implements Closeable {
 	 */
 	public boolean isConfigured(final boolean throwException) throws IllegalStateException,
 			UnconfiguredConfiguredPropertyException {
-		if (_dataContextProvider == null) {
+		if (_datastoreConnection == null) {
 			if (throwException) {
-				throw new IllegalStateException("No Datastore or DataContextProvider set");
+				throw new IllegalStateException("No Datastore or DatastoreConnection set");
 			}
 			return false;
 		}
@@ -637,8 +646,8 @@ public final class AnalysisJobBuilder implements Closeable {
 			}
 		}
 
-		DataContextProvider dcp = _dataContextProvider;
-		Datastore datastore = dcp.getDatastore();
+		DatastoreConnection con = _datastoreConnection;
+		Datastore datastore = con.getDatastore();
 		return new ImmutableAnalysisJob(datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs,
 				mergedOutcomeJobs, explorerJobs);
 	}
@@ -888,13 +897,13 @@ public final class AnalysisJobBuilder implements Closeable {
 
 	@Override
 	public void close() {
-		if (_dataContextProvider != null) {
-			_dataContextProvider.close();
+		if (_datastoreConnection != null) {
+			_datastoreConnection.close();
 		}
 	}
 
 	public AnalysisJobBuilder withoutListeners() {
-		AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _dataContextProvider, _sourceColumns,
+		AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _datastoreConnection, _sourceColumns,
 				_defaultRequirement, _transformedColumnIdGenerator, _transformerJobBuilders, _filterJobBuilders,
 				_analyzerJobBuilders, _mergedOutcomeJobBuilders, _explorerJobBuilders);
 		return clone;

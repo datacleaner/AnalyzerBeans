@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
@@ -100,18 +100,18 @@ public class JaxbConfigurationReaderTest extends TestCase {
 			// test that all connections, except the JNDI-based on will work
 			if (!"my_jdbc_datasource".equals(name)) {
 				Datastore datastore = datastoreCatalog.getDatastore(name);
-				DataContext dc = datastore.getDataContextProvider().getDataContext();
+				DataContext dc = datastore.openConnection().getDataContext();
 				assertNotNull(dc);
 			}
 		}
 
 		Datastore compositeDatastore = datastoreCatalog.getDatastore("my_composite");
-		DataContextProvider dcp = compositeDatastore.getDataContextProvider();
-		DataContext dataContext = dcp.getDataContext();
+		DatastoreConnection con = compositeDatastore.openConnection();
+		DataContext dataContext = con.getDataContext();
 		String[] schemaNames = dataContext.getSchemaNames();
 		assertEquals("[INFORMATION_SCHEMA, PUBLIC, Spreadsheet2003.xls, developers.mdb, employees.csv, information_schema]",
 				Arrays.toString(schemaNames));
-		dcp.close();
+		con.close();
 	}
 
 	private AnalyzerBeansConfiguration getConfiguration() {

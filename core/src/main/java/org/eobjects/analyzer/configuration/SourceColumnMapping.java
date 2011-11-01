@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.eobjects.analyzer.connection.DataContextProvider;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.job.AnalysisJobMetadata;
 
@@ -75,14 +75,14 @@ public final class SourceColumnMapping {
 	 */
 	public void autoMap(Datastore datastore) {
 		setDatastore(datastore);
-		DataContextProvider dcp = datastore.getDataContextProvider();
+		DatastoreConnection con = datastore.openConnection();
 		for (Entry<String, Column> entry : _map.entrySet()) {
 			if (entry.getValue() == null) {
 				String path = entry.getKey();
-				entry.setValue(dcp.getSchemaNavigator().convertToColumn(path));
+				entry.setValue(con.getSchemaNavigator().convertToColumn(path));
 			}
 		}
-		dcp.close();
+		con.close();
 	}
 
 	public boolean isSatisfied() {
