@@ -19,17 +19,40 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
 
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
+import org.eobjects.analyzer.util.ClassLoaderUtils;
 
 import junit.framework.TestCase;
 
 public class ClasspathScanDescriptorProviderTest extends TestCase {
 
 	private MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(2);
+
+	public void testScanOnlySingleJar() throws Exception {
+
+		// File that only contains the XML decoder transformer
+		File pluginFile1 = new File("src/test/resources/plugin-only-xml-transformer.jar");
+		// File that only contains the Datastore writer analyzer
+		File pluginFile2 = new File("src/test/resources/plugin-only-datastore-writer.jar");
+
+		ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
+		assertEquals(0, provider.getAnalyzerBeanDescriptors().size());
+		assertEquals(0, provider.getTransformerBeanDescriptors().size());
+		File[] files = new File[] { pluginFile1, pluginFile2 };
+		provider = provider.scanPackage("org.eobjects", true, ClassLoaderUtils.createClassLoader(files), false, files);
+		assertEquals(1, provider.getAnalyzerBeanDescriptors().size());
+		assertEquals(1, provider.getTransformerBeanDescriptors().size());
+
+		assertEquals("org.eobjects.analyzer.beans.writers.WriteToDatastoreAnalyzer", provider.getAnalyzerBeanDescriptors()
+				.iterator().next().getComponentClass().getName());
+		assertEquals("org.eobjects.analyzer.beans.transform.XmlDecoderTransformer", provider.getTransformerBeanDescriptors()
+				.iterator().next().getComponentClass().getName());
+	}
 
 	public void testScanNonExistingPackage() throws Exception {
 		ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);

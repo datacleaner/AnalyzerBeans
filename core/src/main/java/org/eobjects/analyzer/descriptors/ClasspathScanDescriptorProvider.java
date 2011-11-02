@@ -154,6 +154,34 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	 */
 	public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
 			final ClassLoader classLoader, final boolean strictClassLoader) {
+		return scanPackage(packageName, recursive, classLoader, strictClassLoader, null);
+	}
+
+	/**
+	 * Scans a package in the classpath (of a particular classloader) for
+	 * annotated components. Optionally restricted by a set of JAR files to look
+	 * in.
+	 * 
+	 * @param packageName
+	 *            the package name to scan
+	 * @param recursive
+	 *            whether or not to scan subpackages recursively
+	 * @param classLoader
+	 *            the classloader to use for discovering resources in the
+	 *            classpath
+	 * @param strictClassLoader
+	 *            whether or not classes originating from other classloaders may
+	 *            be included in scan (classloaders can sometimes discover
+	 *            classes from parent classloaders which may or may not be
+	 *            wanted for inclusion).
+	 * @param jarFiles
+	 *            optionally (nullable) array of JAR files to scan. Note that if
+	 *            specified, the JAR files are assumed to be included in the
+	 *            classloaders available resources.
+	 * @return
+	 */
+	public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
+			final ClassLoader classLoader, final boolean strictClassLoader, final File[] jarFiles) {
 		_tasksPending.incrementAndGet();
 		final TaskListener listener = new TaskListener() {
 			@Override
@@ -174,35 +202,45 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 				taskDone();
 			}
 		};
+
 		final Task task = new Task() {
 			@Override
 			public void execute() throws Exception {
-				String packagePath = packageName.replace('.', '/');
+				final String packagePath = packageName.replace('.', '/');
 				if (recursive) {
 					logger.info("Scanning package path '{}' (and subpackages recursively)", packagePath);
 				} else {
 					logger.info("Scanning package path '{}'", packagePath);
 				}
-				try {
-					Enumeration<URL> resources = classLoader.getResources(packagePath);
-					while (resources.hasMoreElements()) {
-						URL resource = resources.nextElement();
-						String file = resource.getFile();
-						File dir = new File(file);
-						dir = new File(dir.getAbsolutePath().replaceAll("\\%20", " "));
 
-						if (dir.isDirectory()) {
-							logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
-							scanDirectory(dir, recursive, classLoader, strictClassLoader);
-						} else {
-							URLConnection connection = resource.openConnection();
-							if (connection instanceof JarURLConnection) {
-								JarURLConnection jarUrlConnection = (JarURLConnection) connection;
-								logger.debug("Resource is a JAR file, scanning file: "
-										+ jarUrlConnection.getJarFile().getName());
-								scanJar(jarUrlConnection, classLoader, packagePath, recursive, strictClassLoader);
+				try {
+					if (jarFiles != null && jarFiles.length > 0) {
+						for (File file : jarFiles) {
+							logger.info("Scanning JAR file: {}", file);
+							JarFile jarFile = new JarFile(file);
+							scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
+						}
+					} else {
+						Enumeration<URL> resources = classLoader.getResources(packagePath);
+						while (resources.hasMoreElements()) {
+							URL resource = resources.nextElement();
+							String file = resource.getFile();
+							File dir = new File(file);
+							dir = new File(dir.getAbsolutePath().replaceAll("\\%20", " "));
+
+							if (dir.isDirectory()) {
+								logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
+								scanDirectory(dir, recursive, classLoader, strictClassLoader);
 							} else {
-								throw new IllegalStateException("Unknown connection type: " + connection);
+								URLConnection connection = resource.openConnection();
+								if (connection instanceof JarURLConnection) {
+									JarURLConnection jarUrlConnection = (JarURLConnection) connection;
+									logger.debug("Resource is a JAR file, scanning file: "
+											+ jarUrlConnection.getJarFile().getName());
+									scanJar(jarUrlConnection, classLoader, packagePath, recursive, strictClassLoader);
+								} else {
+									throw new IllegalStateException("Unknown connection type: " + connection);
+								}
 							}
 						}
 					}
@@ -219,6 +257,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 			final boolean recursive, final boolean strictClassLoader) throws IOException {
 		JarFile jarFile = jarUrlConnection.getJarFile();
 
+		scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
+	}
+
+	private void scanJar(final JarFile jarFile, final ClassLoader classLoader, final String packagePath,
+			final boolean recursive, final boolean strictClassLoader) throws IOException {
 		Enumeration<JarEntry> entries = jarFile.entries();
 
 		while (entries.hasMoreElements()) {
@@ -300,7 +343,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 			if (beanClass == null) {
 				return;
 			}
-			
+
 			if (strictClassLoader && classLoader != null && beanClass.getClassLoader() != classLoader) {
 				logger.warn("Scanned class did not belong to required classloader: " + beanClass + ", ignoring");
 				return;

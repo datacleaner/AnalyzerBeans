@@ -86,7 +86,7 @@ final class BeanClassVisitor implements ClassVisitor {
 		}
 		return false;
 	}
-	
+
 	public boolean isExplorer() {
 		if (_beanClazz != null) {
 			return _beanClazz.isAnnotationPresent(AnalyzerBean.class) && ReflectionUtils.is(_beanClazz, Explorer.class);
