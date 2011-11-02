@@ -32,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -257,7 +258,8 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 	}
 
 	private String getMasterTerm(Row row, Column column) {
-		return (String) row.getValue(column);
+		Object value = row.getValue(column);
+		return ConvertToStringTransformer.transformValue(value);
 	}
 
 	private String[] getSynonyms(Row row, Column[] columns) {
