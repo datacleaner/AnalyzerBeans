@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.beans.writers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
@@ -37,13 +36,12 @@ import org.eobjects.analyzer.connection.UpdateableDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.metamodel.DataContext;
+import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.UpdateCallback;
 import org.eobjects.metamodel.UpdateScript;
 import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.insert.RowInsertionBuilder;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.util.Action;
 
 @AnalyzerBean("To datastore")
@@ -89,47 +87,23 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 
 		_writeBuffer = new WriteBuffer(bufferSize, this);
 
-		UpdateableDatastoreConnection con = datastore.openConnection();
+		final UpdateableDatastoreConnection con = datastore.openConnection();
 		try {
-			final UpdateableDataContext dc = con.getUpdateableDataContext();
+			final SchemaNavigator schemaNavigator = con.getSchemaNavigator();
 
-			final Schema schema = getSchema(dc);
-
-			if (schema == null) {
-				throw new IllegalArgumentException(
-						"Schema not found. Available schemas names are: "
-								+ Arrays.toString(dc.getSchemaNames()));
-			}
-
-			final Table table = getTable(schema);
-
-			if (table == null) {
-				throw new IllegalArgumentException(
-						"Table not found. Available table names are: "
-								+ Arrays.toString(schema.getTableNames()));
-			}
-
-			if (targetColumns == null) {
-				if (table.getColumnCount() != values.length) {
-					throw new IllegalArgumentException(
-							"Value count and target column count does not match. Table contains "
-									+ table.getColumnCount() + " columns but "
-									+ values.length + " values provided.");
-				}
-			} else {
-				List<String> columnsNotFound = new ArrayList<String>();
-				for (String columnName : targetColumns) {
-					if (table.getColumnByName(columnName) == null) {
-						columnsNotFound.add(columnName);
-					}
-				}
-
-				if (!columnsNotFound.isEmpty()) {
-					throw new IllegalArgumentException(
-							"Could not find columns: " + columnsNotFound);
+			final Column[] columns = schemaNavigator.convertToColumns(
+					targetschema, tableName, targetColumns);
+			final List<String> columnsNotFound = new ArrayList<String>();
+			for (int i = 0; i < columns.length; i++) {
+				if (columns[i] == null) {
+					columnsNotFound.add(targetColumns[i]);
 				}
 			}
 
+			if (!columnsNotFound.isEmpty()) {
+				throw new IllegalArgumentException("Could not find column(s): "
+						+ columnsNotFound);
+			}
 		} finally {
 			con.close();
 		}
@@ -157,6 +131,7 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 	public void run(final Queue<Object[]> buffer) throws Exception {
 		DatastoreConnection con = datastore.openConnection();
 		try {
+			final Column[] columns = con.getSchemaNavigator().convertToColumns(targetschema, tableName, targetColumns);
 			final UpdateableDataContext dc = (UpdateableDataContext) con
 					.getDataContext();
 			dc.executeUpdate(new UpdateScript() {
@@ -164,10 +139,8 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 				public void run(UpdateCallback callback) {
 					for (Object[] rowData = buffer.poll(); rowData != null; rowData = buffer
 							.poll()) {
-						Schema schema = getSchema(dc);
-						Table table = getTable(schema);
 						RowInsertionBuilder insertBuilder = callback
-								.insertInto(table);
+								.insertInto(columns[0].getTable());
 						if (targetColumns == null) {
 							for (int i = 0; i < rowData.length; i++) {
 								insertBuilder = insertBuilder.value(i,
@@ -187,31 +160,5 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 		} finally {
 			con.close();
 		}
-	}
-
-	private Table getTable(final Schema schema) {
-		final Table table;
-		if (tableName == null) {
-			if (schema.getTableCount() == 1) {
-				table = schema.getTables()[0];
-			} else {
-				throw new IllegalArgumentException(
-						"No table name specified, and multiple options exist. Available table names are: "
-								+ Arrays.toString(schema.getTableNames()));
-			}
-		} else {
-			table = schema.getTableByName(tableName);
-		}
-		return table;
-	}
-
-	private Schema getSchema(DataContext dc) {
-		final Schema schema;
-		if (targetschema == null) {
-			schema = dc.getDefaultSchema();
-		} else {
-			schema = dc.getSchemaByName(targetschema);
-		}
-		return schema;
 	}
 }

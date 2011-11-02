@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.util.Arrays;
+
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
@@ -35,17 +37,64 @@ public final class SchemaNavigator {
 	public Schema convertToSchema(String schemaName) {
 		return dataContext.getSchemaByName(schemaName);
 	}
-	
+
 	public Schema[] getSchemas() {
 		return dataContext.getSchemas();
 	}
-	
+
 	public Schema getDefaultSchema() {
 		return dataContext.getDefaultSchema();
 	}
-	
+
 	public Schema getSchemaByName(String name) {
 		return dataContext.getSchemaByName(name);
+	}
+
+	public Column[] convertToColumns(String schemaName, String tableName, String[] columnNames) {
+		if (columnNames == null) {
+			return null;
+		}
+
+		if (columnNames.length == 0) {
+			return new Column[0];
+		}
+
+		final Schema schema;
+		if (schemaName == null) {
+			schema = getDefaultSchema();
+		} else {
+			schema = getSchemaByName(schemaName);
+		}
+
+		if (schema == null) {
+			throw new IllegalArgumentException("Schema not found. Available schemas names are: "
+					+ Arrays.toString(dataContext.getSchemaNames()));
+		}
+
+		final Table table;
+		if (tableName == null) {
+			if (schema.getTableCount() == 1) {
+				table = schema.getTables()[0];
+			} else {
+				throw new IllegalArgumentException(
+						"No table name specified, and multiple options exist. Available table names are: "
+								+ Arrays.toString(schema.getTableNames()));
+			}
+		} else {
+			table = schema.getTableByName(tableName);
+		}
+
+		if (table == null) {
+			throw new IllegalArgumentException("Table not found. Available table names are: "
+					+ Arrays.toString(schema.getTableNames()));
+		}
+
+		final Column[] columns = new Column[columnNames.length];
+		for (int i = 0; i < columns.length; i++) {
+			columns[i] = table.getColumnByName(columnNames[i]);
+		}
+
+		return columns;
 	}
 
 	public Schema[] convertToSchemas(String[] schemaNames) {
@@ -81,7 +130,7 @@ public final class SchemaNavigator {
 		if (column != null) {
 			return column;
 		}
-		
+
 		Schema schema = null;
 		String[] schemaNames = dataContext.getSchemaNames();
 		for (String schemaName : schemaNames) {
