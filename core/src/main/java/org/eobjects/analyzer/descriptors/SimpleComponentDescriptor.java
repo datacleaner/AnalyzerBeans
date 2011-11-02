@@ -31,6 +31,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Initialize;
@@ -150,6 +151,13 @@ class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements Comp
 	public ConfiguredPropertyDescriptor getConfiguredProperty(String configuredName) {
 		for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
 			if (configuredName.equals(configuredDescriptor.getName())) {
+				return configuredDescriptor;
+			}
+		}
+
+		for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
+			String[] aliases = configuredDescriptor.getAliases();
+			if (ArrayUtils.contains(aliases, configuredName)) {
 				return configuredDescriptor;
 			}
 		}

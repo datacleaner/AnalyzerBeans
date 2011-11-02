@@ -30,6 +30,7 @@ import java.util.TreeSet;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.ComponentCategory;
 import org.eobjects.analyzer.beans.api.Configured;
@@ -172,5 +173,14 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 		}
 
 		return result;
+	}
+	
+	@Override
+	public String[] getAliases() {
+		Alias alias = getAnnotation(Alias.class);
+		if (alias == null) {
+			return new String[0];
+		}
+		return alias.value();
 	}
 }

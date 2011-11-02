@@ -23,6 +23,7 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.data.DataTypeFamily;
+import org.eobjects.analyzer.util.HasAliases;
 
 /**
  * Descriptor for user-configured properties. Typically such properties are
@@ -32,7 +33,7 @@ import org.eobjects.analyzer.data.DataTypeFamily;
  * 
  * @author Kasper Sørensen
  */
-public interface ConfiguredPropertyDescriptor extends PropertyDescriptor {
+public interface ConfiguredPropertyDescriptor extends PropertyDescriptor, HasAliases {
 
 	/**
 	 * Determines whether this configured property is an input column (either

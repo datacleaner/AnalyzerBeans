@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
@@ -40,26 +41,12 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@Override
 	public final AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name) {
-		if (name != null) {
-			for (AnalyzerBeanDescriptor<?> descriptor : getAnalyzerBeanDescriptors()) {
-				if (name.equals(descriptor.getDisplayName())) {
-					return descriptor;
-				}
-			}
-		}
-		return null;
+		return getBeanDescriptorByDisplayName(name, getAnalyzerBeanDescriptors());
 	}
-	
+
 	@Override
 	public final ExplorerBeanDescriptor<?> getExplorerBeanDescriptorByDisplayName(String name) {
-		if (name != null) {
-			for (ExplorerBeanDescriptor<?> descriptor : getExplorerBeanDescriptors()) {
-				if (name.equals(descriptor.getDisplayName())) {
-					return descriptor;
-				}
-			}
-		}
-		return null;
+		return getBeanDescriptorByDisplayName(name, getExplorerBeanDescriptors());
 	}
 
 	/**
@@ -72,7 +59,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	protected <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> notFoundAnalyzer(Class<A> analyzerClass) {
 		return null;
 	}
-	
+
 	/**
 	 * Overridable method for handling (and perhaps discovering) unfound
 	 * explorer descriptors by class.
@@ -96,8 +83,8 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 	}
 
 	/**
-	 * Overridable method for handling (and perhaps discovering) unfound
-	 * filter descriptors by class.
+	 * Overridable method for handling (and perhaps discovering) unfound filter
+	 * descriptors by class.
 	 * 
 	 * @param filterClass
 	 * @return
@@ -128,7 +115,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 		}
 		return notFoundAnalyzer(analyzerBeanClass);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public final <E extends Explorer<?>> ExplorerBeanDescriptor<E> getExplorerBeanDescriptorForClass(Class<E> explorerClass) {
@@ -142,14 +129,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@Override
 	public final FilterBeanDescriptor<?, ?> getFilterBeanDescriptorByDisplayName(String name) {
-		if (name != null) {
-			for (FilterBeanDescriptor<?, ?> descriptor : getFilterBeanDescriptors()) {
-				if (name.equals(descriptor.getDisplayName())) {
-					return descriptor;
-				}
-			}
-		}
-		return null;
+		return getBeanDescriptorByDisplayName(name, getFilterBeanDescriptors());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -192,16 +172,9 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
 	@Override
 	public final TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(String name) {
-		if (name != null) {
-			for (TransformerBeanDescriptor<?> descriptor : getTransformerBeanDescriptors()) {
-				if (name.equals(descriptor.getDisplayName())) {
-					return descriptor;
-				}
-			}
-		}
-		return null;
+		return getBeanDescriptorByDisplayName(name, getTransformerBeanDescriptors());
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public final <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
@@ -226,5 +199,23 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 			}
 		}
 		return result;
+	}
+
+	private <E extends BeanDescriptor<?>> E getBeanDescriptorByDisplayName(String name, Collection<E> descriptors) {
+		if (name == null || name.length() == 0) {
+			return null;
+		}
+		for (E descriptor : descriptors) {
+			if (name.equals(descriptor.getDisplayName())) {
+				return descriptor;
+			}
+		}
+
+		for (E descriptor : descriptors) {
+			if (ArrayUtils.contains(descriptor.getAliases(), name)) {
+				return descriptor;
+			}
+		}
+		return null;
 	}
 }

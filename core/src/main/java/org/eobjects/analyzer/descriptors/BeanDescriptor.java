@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.ComponentCategory;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.util.HasAliases;
 
 /**
  * Defines an abstract descriptor for beans (Analyzers, Transformers, Filters)
@@ -35,7 +36,7 @@ import org.eobjects.analyzer.data.InputColumn;
  * @param <B>
  *            the Bean type
  */
-public interface BeanDescriptor<B> extends ComponentDescriptor<B> {
+public interface BeanDescriptor<B> extends ComponentDescriptor<B>, HasAliases {
 
 	/**
 	 * @return a humanly readable display name for this bean.

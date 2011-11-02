@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
@@ -34,9 +35,10 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
  * 
  * @author Kasper Sørensen
  */
-@TransformerBean("Synonym replacement")
+@TransformerBean("Synonym lookup")
+@Alias("Synonym replacement")
 @Description("Replaces strings with their synonyms")
-public class SynonymReplacementTransformer implements Transformer<String> {
+public class SynonymLookupTransformer implements Transformer<String> {
 
 	@Configured
 	InputColumn<String> column;
@@ -48,10 +50,10 @@ public class SynonymReplacementTransformer implements Transformer<String> {
 	@Description("Retain original value in case no synonym is found (otherwise null)")
 	boolean retainOriginalValue = true;
 
-	public SynonymReplacementTransformer() {
+	public SynonymLookupTransformer() {
 	}
 
-	public SynonymReplacementTransformer(InputColumn<String> column, SynonymCatalog synonymCatalog,
+	public SynonymLookupTransformer(InputColumn<String> column, SynonymCatalog synonymCatalog,
 			boolean retainOriginalValue) {
 		this();
 		this.column = column;

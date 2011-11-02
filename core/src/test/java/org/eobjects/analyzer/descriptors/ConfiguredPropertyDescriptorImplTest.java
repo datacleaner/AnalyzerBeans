@@ -27,6 +27,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.DateGapAnalyzer;
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
@@ -100,10 +101,17 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 		assertEquals(new File("."), filter.getSomeFile());
 	}
 
+	public void testGetConfiguredPropertyByAlias() throws Exception {
+		ConfiguredPropertyDescriptor cp1 = _descriptor.getConfiguredProperty("Some file");
+		ConfiguredPropertyDescriptor cp2 = _descriptor.getConfiguredProperty("a file");
+		assertSame(cp1, cp2);
+	}
+
 	@FilterBean("Mock filter")
 	private class MockFilter implements Filter<ValidationCategory> {
 
 		@Configured
+		@Alias("a file")
 		File someFile;
 
 		@Configured

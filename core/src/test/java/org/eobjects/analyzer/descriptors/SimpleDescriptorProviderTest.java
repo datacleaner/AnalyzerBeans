@@ -21,12 +21,13 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Arrays;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
+import org.eobjects.analyzer.beans.transform.SynonymLookupTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
-
-import junit.framework.TestCase;
 
 public class SimpleDescriptorProviderTest extends TestCase {
 
@@ -57,5 +58,17 @@ public class SimpleDescriptorProviderTest extends TestCase {
 		assertEquals(
 				"AnnotationBasedTransformerBeanDescriptor[org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer]",
 				descriptorProvider.getTransformerBeanDescriptorForClass(ConvertToBooleanTransformer.class).toString());
+	}
+
+	public void testGetBeanByAlias() throws Exception {
+		SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider(false);
+		descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(SynonymLookupTransformer.class));
+
+		TransformerBeanDescriptor<?> descriptor1 = descriptorProvider
+				.getTransformerBeanDescriptorByDisplayName("Synonym lookup");
+		TransformerBeanDescriptor<?> descriptor2 = descriptorProvider
+				.getTransformerBeanDescriptorByDisplayName("Synonym replacement");
+
+		assertSame(descriptor1, descriptor2);
 	}
 }

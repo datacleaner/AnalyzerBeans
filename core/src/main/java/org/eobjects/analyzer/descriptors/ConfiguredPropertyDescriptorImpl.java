@@ -22,6 +22,7 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;
@@ -112,5 +113,14 @@ final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor 
 			return convertable.value();
 		}
 		return null;
+	}
+
+	@Override
+	public String[] getAliases() {
+		Alias alias = getAnnotation(Alias.class);
+		if (alias == null) {
+			return new String[0];
+		}
+		return alias.value();
 	}
 }

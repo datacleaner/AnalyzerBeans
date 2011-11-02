@@ -35,7 +35,7 @@ public class SynonymReplacementTransformerTest extends TestCase {
 		MockInputColumn<String> col = new MockInputColumn<String>("my col", String.class);
 
 		// with retain original value
-		Transformer<String> transformer = new SynonymReplacementTransformer(col, sc, true);
+		Transformer<String> transformer = new SynonymLookupTransformer(col, sc, true);
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 		assertEquals("my col (synonyms replaced)", transformer.getOutputColumns().getColumnName(0));
 
@@ -43,7 +43,7 @@ public class SynonymReplacementTransformerTest extends TestCase {
 		assertEquals("ALB", transformer.transform(new MockInputRow().put(col, "Albania"))[0]);
 
 		// without retain original value
-		transformer = new SynonymReplacementTransformer(col, sc, false);
+		transformer = new SynonymLookupTransformer(col, sc, false);
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 		assertEquals("my col (synonyms replaced)", transformer.getOutputColumns().getColumnName(0));
 
