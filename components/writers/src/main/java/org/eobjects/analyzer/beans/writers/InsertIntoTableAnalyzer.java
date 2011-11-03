@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.writers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
@@ -42,11 +43,16 @@ import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.insert.RowInsertionBuilder;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.util.Action;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Insert into table")
 @Categorized(WriteDataCategory.class)
 public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 		Action<Queue<Object[]>> {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(InsertIntoTableAnalyzer.class);
 
 	@Inject
 	@Configured
@@ -84,6 +90,8 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 
 		final int bufferSize = maxObjectsInBuffer / objectsPerRow;
 
+		logger.info("Row buffer size set to {}", bufferSize);
+
 		_writeBuffer = new WriteBuffer(bufferSize, this);
 
 		final UpdateableDatastoreConnection con = datastore.openConnection();
@@ -110,11 +118,17 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 
 	@Override
 	public void run(InputRow row, int distinctCount) {
-		Object[] rowData = new Object[values.length];
+		final Object[] rowData = new Object[values.length];
 		for (int i = 0; i < values.length; i++) {
 			Object value = row.getValue(values[i]);
 			rowData[i] = value;
 		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Adding row data to buffer: {}",
+					Arrays.toString(rowData));
+		}
+
 		_writeBuffer.addToBuffer(rowData);
 	}
 
@@ -132,6 +146,12 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 		try {
 			final Column[] columns = con.getSchemaNavigator().convertToColumns(
 					schemaName, tableName, columnNames);
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Inserting into columns: {}",
+						Arrays.toString(columns));
+			}
+
 			final UpdateableDataContext dc = con.getUpdateableDataContext();
 			dc.executeUpdate(new UpdateScript() {
 				@Override
@@ -144,6 +164,12 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 							insertBuilder = insertBuilder.value(columns[i],
 									rowData[i]);
 						}
+
+						if (logger.isDebugEnabled()) {
+							logger.debug("Inserting: {}",
+									Arrays.toString(rowData));
+						}
+
 						insertBuilder.execute();
 					}
 				}
