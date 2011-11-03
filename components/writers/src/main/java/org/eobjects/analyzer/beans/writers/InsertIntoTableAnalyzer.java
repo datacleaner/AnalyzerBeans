@@ -31,7 +31,6 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.UpdateableDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
@@ -53,11 +52,11 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 	@Configured
 	@Description("Values to write to the table")
 	InputColumn<?>[] values;
-	
+
 	@Inject
 	@Configured
-	@Description("Names of target columns in the table.")
-	String[] targetColumns;
+	@Description("Names of columns in the target table.")
+	String[] columnNames;
 
 	@Inject
 	@Configured
@@ -66,12 +65,13 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 
 	@Inject
 	@Configured(required = false)
-	@Description("Table to write to")
+	@Description("Table to target (insert into)")
 	String tableName;
 
 	@Inject
 	@Configured(required = false)
-	String targetschema;
+	@Description("Schema name of target table")
+	String schemaName;
 
 	private WriteBuffer _writeBuffer;
 
@@ -91,11 +91,11 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 			final SchemaNavigator schemaNavigator = con.getSchemaNavigator();
 
 			final Column[] columns = schemaNavigator.convertToColumns(
-					targetschema, tableName, targetColumns);
+					schemaName, tableName, columnNames);
 			final List<String> columnsNotFound = new ArrayList<String>();
 			for (int i = 0; i < columns.length; i++) {
 				if (columns[i] == null) {
-					columnsNotFound.add(targetColumns[i]);
+					columnsNotFound.add(columnNames[i]);
 				}
 			}
 
@@ -128,11 +128,11 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 
 	@Override
 	public void run(final Queue<Object[]> buffer) throws Exception {
-		DatastoreConnection con = datastore.openConnection();
+		UpdateableDatastoreConnection con = datastore.openConnection();
 		try {
-			final Column[] columns = con.getSchemaNavigator().convertToColumns(targetschema, tableName, targetColumns);
-			final UpdateableDataContext dc = (UpdateableDataContext) con
-					.getDataContext();
+			final Column[] columns = con.getSchemaNavigator().convertToColumns(
+					schemaName, tableName, columnNames);
+			final UpdateableDataContext dc = con.getUpdateableDataContext();
 			dc.executeUpdate(new UpdateScript() {
 				@Override
 				public void run(UpdateCallback callback) {
@@ -140,17 +140,9 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 							.poll()) {
 						RowInsertionBuilder insertBuilder = callback
 								.insertInto(columns[0].getTable());
-						if (targetColumns == null) {
-							for (int i = 0; i < rowData.length; i++) {
-								insertBuilder = insertBuilder.value(i,
-										rowData[i]);
-							}
-						} else {
-							for (int i = 0; i < rowData.length; i++) {
-								String columnName = targetColumns[i];
-								insertBuilder = insertBuilder.value(columnName,
-										rowData[i]);
-							}
+						for (int i = 0; i < rowData.length; i++) {
+							insertBuilder = insertBuilder.value(columns[i],
+									rowData[i]);
 						}
 						insertBuilder.execute();
 					}

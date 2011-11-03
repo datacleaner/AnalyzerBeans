@@ -51,6 +51,11 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 		final CsvDatastore datastoreOut = new CsvDatastore("out",
 				"target/datastorewriter-out.csv");
 
+		if (new File(datastoreOut.getFilename()).exists()) {
+			assertTrue("Could not delete output file",
+					new File(datastoreOut.getFilename()).delete());
+		}
+
 		// count input lines and get columns
 		final Column[] columns;
 		final Number countIn;
@@ -108,7 +113,8 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 					.addAnalyzer(InsertIntoTableAnalyzer.class);
 			analyzerJobBuilder.addInputColumns(ajb.getSourceColumns());
 			analyzerJobBuilder.setConfiguredProperty("Datastore", datastoreOut);
-			analyzerJobBuilder.setConfiguredProperty("Target columns", "col0,col1,col2,col3,col4".split(","));
+			analyzerJobBuilder.setConfiguredProperty("Column names",
+					"col0,col1,col2,col3,col4".split(","));
 
 			assertTrue(analyzerJobBuilder.isConfigured());
 
@@ -135,8 +141,5 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 		}
 
 		assertEquals(countIn, countOut);
-
-		assertTrue("Could not delete output file",
-				new File(datastoreOut.getFilename()).delete());
 	}
 }
