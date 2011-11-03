@@ -83,6 +83,11 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 
 	@Initialize
 	public void init() throws IllegalArgumentException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("At init() time, InputColumns are: {}",
+					Arrays.toString(values));
+		}
+		
 		final int maxObjectsInBuffer = 100000;
 
 		// add one, because there is a small "per record" overhead
@@ -118,10 +123,20 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 
 	@Override
 	public void run(InputRow row, int distinctCount) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("At run() time, InputColumns are: {}",
+					Arrays.toString(values));
+		}
+		
 		final Object[] rowData = new Object[values.length];
 		for (int i = 0; i < values.length; i++) {
 			Object value = row.getValue(values[i]);
 			rowData[i] = value;
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Value for {} set to: {}", values[i].getName(),
+						value);
+			}
 		}
 
 		if (logger.isDebugEnabled()) {

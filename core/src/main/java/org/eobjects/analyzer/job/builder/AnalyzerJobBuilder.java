@@ -127,6 +127,14 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
 			throw new IllegalStateException("Could not determine source for analyzer '" + this + "'");
 		}
 
+		if (originatingTables.size() == 1) {
+			// there's only a single table involved - leave the input columns
+			// untouched
+			ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
+					configuredProperties), getRequirement());
+			return new AnalyzerJob[] { job };
+		}
+
 		for (Entry<Table, List<InputColumn<?>>> entry : originatingTables.entrySet()) {
 			entry.getValue().addAll(tableLessColumns);
 		}
@@ -192,8 +200,8 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
 
 	@Override
 	public String toString() {
-		return "AnalyzerJobBuilder[analyzer=" + getDescriptor().getDisplayName() + ",inputColumns="
-				+ getInputColumns() + "]";
+		return "AnalyzerJobBuilder[analyzer=" + getDescriptor().getDisplayName() + ",inputColumns=" + getInputColumns()
+				+ "]";
 	}
 
 	@Override
