@@ -108,6 +108,7 @@ public class DatastoreWriterAnalyzerTest extends TestCase {
 					.addAnalyzer(WriteToDatastoreAnalyzer.class);
 			analyzerJobBuilder.addInputColumns(ajb.getSourceColumns());
 			analyzerJobBuilder.setConfiguredProperty("Datastore", datastoreOut);
+			analyzerJobBuilder.setConfiguredProperty("Target columns", "col0,col1,col2,col3,col4".split(","));
 
 			assertTrue(analyzerJobBuilder.isConfigured());
 
