@@ -40,7 +40,7 @@ public class DatastoreLookupTransformerTest extends TestCase {
 		trans.conditionValues = new InputColumn[] { col1  };
 		
 		OutputColumns outputColumns = trans.getOutputColumns();
-		assertEquals("OutputColumns[email (lookup)]", outputColumns.toString());
+		assertEquals("OutputColumns[name (lookup)]", outputColumns.toString());
 		assertEquals(String.class, outputColumns.getColumnType(0));
 		
 		trans.init();
