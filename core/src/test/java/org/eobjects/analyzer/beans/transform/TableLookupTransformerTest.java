@@ -29,10 +29,10 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 
-public class DatastoreLookupTransformerTest extends TestCase {
+public class TableLookupTransformerTest extends TestCase {
 
 	public void testScenario() throws Exception {
-		DatastoreLookupTransformer trans = new DatastoreLookupTransformer();
+		TableLookupTransformer trans = new TableLookupTransformer();
 		trans.datastore = new CsvDatastore("my ds", "src/test/resources/employees.csv");
 		trans.outputColumns = new String[] { "name" };
 		trans.conditionColumns = new String[] { "email" };

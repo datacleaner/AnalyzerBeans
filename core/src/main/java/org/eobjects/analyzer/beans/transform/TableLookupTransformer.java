@@ -48,10 +48,11 @@ import org.eobjects.metamodel.schema.Column;
  * 
  * @author Kasper Sørensen
  */
-@TransformerBean("Datastore lookup")
-@Description("Perform a lookup based on a set of columns in any datastore (like a LEFT join).")
+@TransformerBean("Table lookup")
+@Alias("Datastore lookup")
+@Description("Perform a lookup based on a table in any of your registered datastore (like a LEFT join).")
 @Concurrent(true)
-public class DatastoreLookupTransformer implements Transformer<Object> {
+public class TableLookupTransformer implements Transformer<Object> {
 
 	@Configured
 	Datastore datastore;
