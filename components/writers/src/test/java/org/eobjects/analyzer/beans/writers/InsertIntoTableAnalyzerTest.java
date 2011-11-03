@@ -43,7 +43,7 @@ import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 
-public class DatastoreWriterAnalyzerTest extends TestCase {
+public class InsertIntoTableAnalyzerTest extends TestCase {
 
 	public void testMultiThreadedRunNoColumnNames() throws Exception {
 		final CsvDatastore datastoreIn = new CsvDatastore("in",
@@ -104,8 +104,8 @@ public class DatastoreWriterAnalyzerTest extends TestCase {
 
 			ajb.addSourceColumns(columns);
 
-			AnalyzerJobBuilder<WriteToDatastoreAnalyzer> analyzerJobBuilder = ajb
-					.addAnalyzer(WriteToDatastoreAnalyzer.class);
+			AnalyzerJobBuilder<InsertIntoTableAnalyzer> analyzerJobBuilder = ajb
+					.addAnalyzer(InsertIntoTableAnalyzer.class);
 			analyzerJobBuilder.addInputColumns(ajb.getSourceColumns());
 			analyzerJobBuilder.setConfiguredProperty("Datastore", datastoreOut);
 			analyzerJobBuilder.setConfiguredProperty("Target columns", "col0,col1,col2,col3,col4".split(","));

@@ -44,15 +44,20 @@ import org.eobjects.metamodel.insert.RowInsertionBuilder;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.util.Action;
 
-@AnalyzerBean("To datastore")
+@AnalyzerBean("Insert into table")
 @Categorized(WriteDataCategory.class)
-public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
+public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 		Action<Queue<Object[]>> {
 
 	@Inject
 	@Configured
-	@Description("Values to write to the datastore")
+	@Description("Values to write to the table")
 	InputColumn<?>[] values;
+	
+	@Inject
+	@Configured
+	@Description("Names of target columns in the table.")
+	String[] targetColumns;
 
 	@Inject
 	@Configured
@@ -66,13 +71,7 @@ public class WriteToDatastoreAnalyzer implements Analyzer<WriterResult>,
 
 	@Inject
 	@Configured(required = false)
-	@Description("Target schema")
 	String targetschema;
-
-	@Inject
-	@Configured(required = false)
-	@Description("Names of target columns. If not filled, target column order will be assumed.")
-	String[] targetColumns;
 
 	private WriteBuffer _writeBuffer;
 
