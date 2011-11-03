@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Concurrent;
@@ -54,22 +56,28 @@ import org.eobjects.metamodel.schema.Column;
 @Concurrent(true)
 public class TableLookupTransformer implements Transformer<Object> {
 
+	@Inject
 	@Configured
 	Datastore datastore;
 
+	@Inject
 	@Configured
 	InputColumn<?>[] conditionValues;
 
+	@Inject
 	@Configured
 	String[] conditionColumns;
 
+	@Inject
 	@Configured
 	String[] outputColumns;
 
+	@Inject
 	@Configured(required = false)
 	@Alias("Schema")
 	String schemaName;
 
+	@Inject
 	@Configured(required = false)
 	@Alias("Table")
 	String tableName;
