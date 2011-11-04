@@ -51,7 +51,7 @@ import org.eobjects.analyzer.result.ValueDistributionResult;
 
 public class DictionaryMatcherTransformerTest extends TestCase {
 
-	public void testParseAndAssignDictionaries() throws Exception {
+	public void testParseAndAssignDictionaries() throws Throwable {
 		Collection<Dictionary> dictionaries = new ArrayList<Dictionary>();
 		dictionaries.add(new SimpleDictionary("eobjects.org products", "MetaModel", "DataCleaner", "AnalyzerBeans"));
 		dictionaries.add(new SimpleDictionary("apache products", "commons-lang", "commons-math", "commons-codec",
@@ -96,6 +96,11 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 
 		AnalysisJob analysisJob = job.toAnalysisJob();
 		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(analysisJob);
+		
+		if (!resultFuture.isSuccessful()) {
+			throw resultFuture.getErrors().get(0);
+		}
+		
 		List<AnalyzerResult> results = resultFuture.getResults();
 
 		assertEquals(4, results.size());

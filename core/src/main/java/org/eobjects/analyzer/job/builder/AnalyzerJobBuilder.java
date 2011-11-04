@@ -127,7 +127,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
 			throw new IllegalStateException("Could not determine source for analyzer '" + this + "'");
 		}
 
-		if (originatingTables.size() == 1) {
+		if (originatingTables.size() == 1 && _inputProperty.isArray()) {
 			// there's only a single table involved - leave the input columns
 			// untouched
 			ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
