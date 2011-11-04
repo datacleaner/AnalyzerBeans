@@ -68,16 +68,16 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 	@Configured
 	@Description("Datastore to write to")
 	UpdateableDatastore datastore;
+	
+	@Inject
+	@Configured(required = false)
+	@Description("Schema name of target table")
+	String schemaName;
 
 	@Inject
 	@Configured(required = false)
 	@Description("Table to target (insert into)")
 	String tableName;
-
-	@Inject
-	@Configured(required = false)
-	@Description("Schema name of target table")
-	String schemaName;
 
 	private WriteBuffer _writeBuffer;
 
