@@ -74,7 +74,6 @@ public final class WriteBuffer {
 	}
 
 	public int getWrittenRowCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		return _writtenRowCounter.get();
 	}
 }
