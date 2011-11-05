@@ -50,15 +50,7 @@ public final class SchemaNavigator {
 		return dataContext.getSchemaByName(name);
 	}
 
-	public Column[] convertToColumns(String schemaName, String tableName, String[] columnNames) {
-		if (columnNames == null) {
-			return null;
-		}
-
-		if (columnNames.length == 0) {
-			return new Column[0];
-		}
-
+	public Table convertToTable(String schemaName, String tableName) {
 		final Schema schema;
 		if (schemaName == null) {
 			schema = getDefaultSchema();
@@ -88,6 +80,20 @@ public final class SchemaNavigator {
 			throw new IllegalArgumentException("Table not found. Available table names are: "
 					+ Arrays.toString(schema.getTableNames()));
 		}
+
+		return table;
+	}
+
+	public Column[] convertToColumns(String schemaName, String tableName, String[] columnNames) {
+		if (columnNames == null) {
+			return null;
+		}
+
+		if (columnNames.length == 0) {
+			return new Column[0];
+		}
+
+		final Table table = convertToTable(schemaName, tableName);
 
 		final Column[] columns = new Column[columnNames.length];
 		for (int i = 0; i < columns.length; i++) {

@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Insert into table")
 @Categorized(WriteDataCategory.class)
-public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
+public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		Action<Queue<Object[]>> {
 
 	private static final Logger logger = LoggerFactory
@@ -87,7 +87,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 			logger.debug("At init() time, InputColumns are: {}",
 					Arrays.toString(values));
 		}
-		
+
 		final int maxObjectsInBuffer = 100000;
 
 		// add one, because there is a small "per record" overhead
@@ -127,7 +127,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 			logger.debug("At run() time, InputColumns are: {}",
 					Arrays.toString(values));
 		}
-		
+
 		final Object[] rowData = new Object[values.length];
 		for (int i = 0; i < values.length; i++) {
 			Object value = row.getValue(values[i]);
@@ -144,15 +144,17 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriterResult>,
 					Arrays.toString(rowData));
 		}
 
-		_writeBuffer.addToBuffer(rowData);
+		for (int i = 0; i < distinctCount; i++) {
+			_writeBuffer.addToBuffer(rowData);
+		}
 	}
 
 	@Override
-	public WriterResult getResult() {
+	public WriteDataResult getResult() {
 		_writeBuffer.flushBuffer();
-
-		// TODO Auto-generated method stub
-		return new WriterResult();
+		int writtenRowCount = _writeBuffer.getWrittenRowCount();
+		return new WriteDataResultImpl(writtenRowCount, datastore, schemaName,
+				tableName);
 	}
 
 	@Override

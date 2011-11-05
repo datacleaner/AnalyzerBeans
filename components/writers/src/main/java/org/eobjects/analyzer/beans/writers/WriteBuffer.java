@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans.writers;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.metamodel.util.Action;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ public final class WriteBuffer {
 	private static final Logger logger = LoggerFactory
 			.getLogger(WriteBuffer.class);
 
+	private final AtomicInteger _writtenRowCounter;
 	private final Queue<Object[]> _buffer;
 	private final Action<Queue<Object[]>> _flushAction;
 
@@ -47,9 +49,11 @@ public final class WriteBuffer {
 		}
 		_buffer = new ArrayBlockingQueue<Object[]>(bufferSize);
 		_flushAction = flushAction;
+		_writtenRowCounter = new AtomicInteger();
 	}
 
 	public final void addToBuffer(Object[] rowData) {
+		_writtenRowCounter.incrementAndGet();
 		while (!_buffer.offer(rowData)) {
 			flushBuffer();
 		}
@@ -67,5 +71,10 @@ public final class WriteBuffer {
 				throw new IllegalStateException(e);
 			}
 		}
+	}
+
+	public int getWrittenRowCount() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
