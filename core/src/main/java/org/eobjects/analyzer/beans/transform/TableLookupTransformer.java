@@ -85,6 +85,11 @@ public class TableLookupTransformer implements Transformer<Object> {
 	private final Map<List<Object>, Object[]> cache = CollectionUtils2.createCacheMap();
 	private Column[] queryOutputColumns;
 	private Column[] queryConditionColumns;
+	
+	private void resetColumns() {
+		queryOutputColumns = null;
+		queryConditionColumns = null;
+	}
 
 	private Column[] getQueryConditionColumns() {
 		if (queryConditionColumns == null) {
@@ -112,6 +117,8 @@ public class TableLookupTransformer implements Transformer<Object> {
 
 	@Initialize
 	public void init() {
+		cache.clear();
+		resetColumns();
 		Column[] queryConditionColumns = getQueryConditionColumns();
 		final List<String> columnsNotFound = new ArrayList<String>();
 		for (int i = 0; i < queryConditionColumns.length; i++) {
