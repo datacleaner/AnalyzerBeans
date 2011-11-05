@@ -28,6 +28,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-mongodb</artifactId>
+			<version>${metamodel.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-jdbc</artifactId>
 			<version>${metamodel.version}</version>
 		</dependency>

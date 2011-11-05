@@ -64,6 +64,12 @@
 			<failOnInconsistencies>true</failOnInconsistencies>
 		</fixed-width-datastore>
 
+		<mongodb-datastore name="my mongo" description="a mongo db based datastore">
+			<hostname>localhost</hostname>
+			<port>27017</port>
+			<database-name>analyzerbeans_test</database-name>
+		</mongodb-datastore>
+
 		<custom-datastore
 			class-name="org.eobjects.analyzer.configuration.SampleCustomDatastore">
 			<property name="Name" value="my_custom" />

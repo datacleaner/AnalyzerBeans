@@ -159,6 +159,14 @@
 					</documentation>
 				</annotation>
 			</element>
+			<element name="mongodb-datastore" type="ab:mongodbDatastoreType"
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines a datastore based on a MongoDB database.
+					</documentation>
+				</annotation>
+			</element>
 			<element name="fixed-width-datastore" type="ab:fixedWidthDatastoreType"
 				minOccurs="0" maxOccurs="unbounded">
 				<annotation>
@@ -265,6 +273,16 @@
 					</documentation>
 				</annotation>
 			</element>
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
+	</complexType>
+	
+	<complexType name="mongodbDatastoreType">
+		<sequence>
+			<element name="hostname" minOccurs="0" maxOccurs="1" type="string" />
+			<element name="port" minOccurs="0" maxOccurs="1" type="int" />
+			<element name="database-name" minOccurs="1" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />

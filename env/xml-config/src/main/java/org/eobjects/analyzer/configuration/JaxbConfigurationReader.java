@@ -54,6 +54,7 @@ import org.eobjects.analyzer.configuration.jaxb.H2StorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.HsqldbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.InMemoryStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.OpenOfficeDatabaseDatastoreType;
@@ -80,6 +81,7 @@ import org.eobjects.analyzer.connection.DbaseDatastore;
 import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.connection.SasDatastore;
 import org.eobjects.analyzer.connection.XmlDatastore;
@@ -711,6 +713,20 @@ public final class JaxbConfigurationReader implements
 					.getFilename());
 			OdbDatastore ds = new OdbDatastore(name, filename);
 			ds.setDescription(odbDatastoreType.getDescription());
+			datastores.put(name, ds);
+		}
+
+		List<MongodbDatastoreType> mongoDbDatastores = CollectionUtils2
+				.filterOnClass(datastoreTypes, MongodbDatastoreType.class);
+		for (MongodbDatastoreType mongodbDatastoreType : mongoDbDatastores) {
+			String name = mongodbDatastoreType.getName();
+			checkName(name, Datastore.class, datastores);
+			String hostname = mongodbDatastoreType.getHostname();
+			Integer port = mongodbDatastoreType.getPort();
+			String databaseName = mongodbDatastoreType.getDatabaseName();
+			MongoDbDatastore ds = new MongoDbDatastore(name, hostname, port,
+					databaseName);
+			ds.setDescription(mongodbDatastoreType.getDescription());
 			datastores.put(name, ds);
 		}
 

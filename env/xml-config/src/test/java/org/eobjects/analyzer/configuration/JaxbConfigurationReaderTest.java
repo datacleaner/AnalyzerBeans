@@ -28,6 +28,7 @@ import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
+import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.reference.Dictionary;
@@ -73,9 +74,10 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
 		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
 		assertEquals(
-				"[my_access, my_composite, my_csv, my_custom, my_dbase, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_sas, my_xml]",
+				"[my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_sas, my_xml]",
 				Arrays.toString(datastoreNames));
 
+		assertEquals("a mongo db based datastore", datastoreCatalog.getDatastore("my mongo").getDescription());
 		assertEquals("jdbc_con", datastoreCatalog.getDatastore("my_jdbc_connection").getDescription());
 		assertEquals("jdbc_ds", datastoreCatalog.getDatastore("my_jdbc_datasource").getDescription());
 		assertEquals("dbf", datastoreCatalog.getDatastore("my_dbase").getDescription());
@@ -87,6 +89,11 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("comp", datastoreCatalog.getDatastore("my_composite").getDescription());
 		assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
 		assertEquals("folder of sas7bdat files", datastoreCatalog.getDatastore("my_sas").getDescription());
+		
+		MongoDbDatastore mongoDbDatastore = (MongoDbDatastore) datastoreCatalog.getDatastore("my mongo");
+		assertEquals("analyzerbeans_test", mongoDbDatastore.getDatabaseName());
+		assertEquals("localhost", mongoDbDatastore.getHostname());
+		assertEquals(27017, mongoDbDatastore.getPort());
 
 		FixedWidthDatastore ds = (FixedWidthDatastore) datastoreCatalog.getDatastore("my_fixed_width_1");
 		assertEquals(19, ds.getFixedValueWidth());
