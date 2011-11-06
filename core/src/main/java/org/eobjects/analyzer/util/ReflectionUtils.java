@@ -72,11 +72,10 @@ public final class ReflectionUtils {
 				thisClass = thisClass.getComponentType();
 			}
 		}
-
 		if (thisClass == ofThatType) {
 			return true;
 		}
-
+		
 		if (thisClass.isPrimitive() != ofThatType.isPrimitive()) {
 			if (isByte(thisClass) && isByte(ofThatType)) {
 				return true;

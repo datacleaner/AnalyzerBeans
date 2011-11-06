@@ -101,7 +101,7 @@ public class SourceColumnFinder {
 			for (InputColumn<?> col : outputColumns) {
 				DataTypeFamily dtf = col.getDataTypeFamily();
 				if (dtf == dataTypeFamily || dataTypeFamily == DataTypeFamily.UNDEFINED) {
-					if (dataType == null) {
+					if (dataType == null || col.getDataType() == null) {
 						result.add(col);
 					} else {
 						if (ReflectionUtils.is(col.getDataType(), dataType)) {

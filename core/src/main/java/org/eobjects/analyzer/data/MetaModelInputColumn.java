@@ -63,7 +63,11 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<? extends Object> getDataType() {
-		return (Class<Object>) _column.getType().getJavaEquivalentClass();
+		ColumnType type = _column.getType();
+		if (type == null) {
+			return null;
+		}
+		return (Class<Object>) type.getJavaEquivalentClass();
 	}
 
 	@Override
