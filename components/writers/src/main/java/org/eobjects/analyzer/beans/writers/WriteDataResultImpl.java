@@ -23,27 +23,48 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.Func;
 
 /**
  * Default implementation of {@link WriteDataResult}.
  * 
  * @author Kasper Sørensen
  */
-class WriteDataResultImpl implements WriteDataResult {
+public final class WriteDataResultImpl implements WriteDataResult {
 
 	private static final long serialVersionUID = 1L;
 
 	private final int _writtenRowCount;
-	private final Datastore _datastore;
+	private final Func<DatastoreCatalog, Datastore> _datastoreFunc;
 	private final String _schemaName;
 	private final String _tableName;
 
-	public WriteDataResultImpl(int writtenRowCount, Datastore datastore,
-			String schemaName, String tableName) {
+	public WriteDataResultImpl(final int writtenRowCount,
+			final Datastore datastore, final String schemaName,
+			final String tableName) {
 		_writtenRowCount = writtenRowCount;
-		_datastore = datastore;
 		_schemaName = schemaName;
 		_tableName = tableName;
+		_datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
+			@Override
+			public Datastore eval(DatastoreCatalog catalog) {
+				return datastore;
+			}
+		};
+	}
+
+	public WriteDataResultImpl(final int writtenRowCount,
+			final String datastoreName, final String schemaName,
+			final String tableName) {
+		_writtenRowCount = writtenRowCount;
+		_schemaName = schemaName;
+		_tableName = tableName;
+		_datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
+			@Override
+			public Datastore eval(DatastoreCatalog catalog) {
+				return catalog.getDatastore(datastoreName);
+			}
+		};
 	}
 
 	@Override
@@ -53,7 +74,7 @@ class WriteDataResultImpl implements WriteDataResult {
 
 	@Override
 	public Datastore getDatastore(DatastoreCatalog datastoreCatalog) {
-		return _datastore;
+		return _datastoreFunc.eval(datastoreCatalog);
 	}
 
 	@Override
@@ -69,7 +90,6 @@ class WriteDataResultImpl implements WriteDataResult {
 
 	@Override
 	public String toString() {
-		return _writtenRowCount + " records written to table '" + _tableName
-				+ "' (in datastore '" + _datastore.getName() + "')";
+		return _writtenRowCount + " records written to table";
 	}
 }

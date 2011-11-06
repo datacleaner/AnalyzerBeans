@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AnalyzerBean("Insert into table")
+@Description("Insert records into a table in a registered datastore. This component allows you to map the values available in the flow with the columns of the target table.")
 @Categorized(WriteDataCategory.class)
 public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		Action<Queue<Object[]>> {
@@ -68,7 +69,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 	@Configured
 	@Description("Datastore to write to")
 	UpdateableDatastore datastore;
-	
+
 	@Inject
 	@Configured(required = false)
 	@Description("Schema name of target table")
