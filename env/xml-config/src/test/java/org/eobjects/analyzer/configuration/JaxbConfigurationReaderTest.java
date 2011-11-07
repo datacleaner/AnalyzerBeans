@@ -104,8 +104,8 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals("[4, 17, 19]", Arrays.toString(ds.getValueWidths()));
 
 		for (String name : datastoreNames) {
-			// test that all connections, except the JNDI-based on will work
-			if (!"my_jdbc_datasource".equals(name)) {
+			// test that all connections, except the JNDI- and MongoDB-based on will work
+			if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name)) {
 				Datastore datastore = datastoreCatalog.getDatastore(name);
 				DataContext dc = datastore.openConnection().getDataContext();
 				assertNotNull(dc);
