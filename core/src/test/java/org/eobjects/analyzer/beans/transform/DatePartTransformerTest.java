@@ -63,6 +63,7 @@ public class DatePartTransformerTest extends TestCase {
 		transformer.dayOfWeek = true;
 		transformer.weekNumber = true;
 		transformer.firstDayOfWeek = WeekDay.MONDAY;
+		transformer.minimalDaysInFirstWeek = 4;
 		
 		transformer.init();
 
