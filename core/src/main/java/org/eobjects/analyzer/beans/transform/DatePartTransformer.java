@@ -27,6 +27,7 @@ import java.util.List;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -38,6 +39,37 @@ import org.eobjects.analyzer.data.InputRow;
 @Description("Extract the parts of a date (year, month, day etc.)")
 @Categorized({ DateAndTimeCategory.class })
 public class DatePartTransformer implements Transformer<Number> {
+
+	public static enum WeekDay {
+		MONDAY(Calendar.MONDAY), TUESDAY(Calendar.TUESDAY), WEDNESDAY(Calendar.WEDNESDAY), THURSDAY(Calendar.THURSDAY), FRIDAY(
+				Calendar.FRIDAY), SATURDAY(Calendar.SATURDAY), SUNDAY(Calendar.SUNDAY);
+
+		private final int _calendarInt;
+
+		private WeekDay(int calendarInt) {
+			_calendarInt = calendarInt;
+		}
+
+		public int getCalendarInt() {
+			return _calendarInt;
+		}
+
+		public static WeekDay get(int firstDayOfWeek) {
+			for (WeekDay weekDay : values()) {
+				if (firstDayOfWeek == weekDay.getCalendarInt()) {
+					return weekDay;
+				}
+			}
+			return null;
+		}
+
+		public WeekDay next() {
+			if (this == SUNDAY) {
+				return MONDAY;
+			}
+			return values()[ordinal() + 1];
+		}
+	}
 
 	@Configured(order = 1)
 	InputColumn<Date> column;
@@ -59,6 +91,31 @@ public class DatePartTransformer implements Transformer<Number> {
 
 	@Configured(order = 7)
 	boolean second = false;
+
+	@Configured(order = 8)
+	boolean dayOfWeek = false;
+
+	@Configured(order = 9)
+	boolean weekNumber = false;
+
+	@Configured(order = 10)
+	int minimalDaysInFirstWeek = Calendar.getInstance().getMinimalDaysInFirstWeek();
+
+	@Configured(order = 11)
+	WeekDay firstDayOfWeek = WeekDay.get(Calendar.getInstance().getFirstDayOfWeek());
+
+	private ArrayList<WeekDay> _indexedWeekDays;
+
+	@Initialize
+	public void init() {
+		// build indexed week days for reuse in transformation
+		_indexedWeekDays = new ArrayList<WeekDay>(7);
+		WeekDay nextWeekDay = firstDayOfWeek;
+		for (int i = 0; i < 7; i++) {
+			_indexedWeekDays.add(nextWeekDay);
+			nextWeekDay = nextWeekDay.next();
+		}
+	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
@@ -83,6 +140,12 @@ public class DatePartTransformer implements Transformer<Number> {
 		if (second) {
 			columnNames.add(columnName + " (second)");
 		}
+		if (dayOfWeek) {
+			columnNames.add(columnName + " (day of week)");
+		}
+		if (weekNumber) {
+			columnNames.add(columnName + " (week number)");
+		}
 
 		if (columnNames.isEmpty()) {
 			columnNames.add(columnName + " (year)");
@@ -103,6 +166,8 @@ public class DatePartTransformer implements Transformer<Number> {
 			cal = null;
 		} else {
 			cal = Calendar.getInstance();
+			cal.setFirstDayOfWeek(firstDayOfWeek.getCalendarInt());
+			cal.setMinimalDaysInFirstWeek(minimalDaysInFirstWeek);
 			cal.setTime(date);
 		}
 
@@ -126,11 +191,34 @@ public class DatePartTransformer implements Transformer<Number> {
 		if (second) {
 			result.add(getSecond(cal));
 		}
+		if (dayOfWeek) {
+			result.add(getDayOfWeek(cal));
+		}
+		if (weekNumber) {
+			result.add(getWeekNumber(cal));
+		}
 
 		if (result.isEmpty()) {
 			result.add(getYear(cal));
 		}
 		return result.toArray(new Number[result.size()]);
+	}
+
+	private Number getWeekNumber(Calendar cal) {
+		if (cal == null) {
+			return null;
+		}
+		return cal.get(Calendar.WEEK_OF_YEAR);
+	}
+
+	private Number getDayOfWeek(Calendar cal) {
+		if (cal == null) {
+			return null;
+		}
+
+		WeekDay weekDay = WeekDay.get(cal.get(Calendar.DAY_OF_WEEK));
+
+		return _indexedWeekDays.indexOf(weekDay) + 1;
 	}
 
 	private Number getSecond(Calendar cal) {

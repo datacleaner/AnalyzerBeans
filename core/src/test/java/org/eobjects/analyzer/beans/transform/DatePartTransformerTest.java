@@ -20,15 +20,17 @@
 package org.eobjects.analyzer.beans.transform;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.transform.DatePartTransformer.WeekDay;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.metamodel.util.DateUtils;
 import org.eobjects.metamodel.util.Month;
-
-import junit.framework.TestCase;
 
 public class DatePartTransformerTest extends TestCase {
 
@@ -49,6 +51,41 @@ public class DatePartTransformerTest extends TestCase {
 		assertEquals(2011, result[0]);
 		assertEquals(3, result[1]);
 		assertEquals(16, result[2]);
+	}
+
+	public void testMondayIs1AndSundayIs7() throws Exception {
+		DatePartTransformer transformer = new DatePartTransformer();
+		MockInputColumn<Date> column = new MockInputColumn<Date>("my date", Date.class);
+		transformer.column = column;
+		transformer.year = false;
+		transformer.month = false;
+		transformer.dayOfMonth = false;
+		transformer.dayOfWeek = true;
+		transformer.weekNumber = true;
+		transformer.firstDayOfWeek = WeekDay.MONDAY;
+		
+		transformer.init();
+
+		OutputColumns outputColumns = transformer.getOutputColumns();
+		assertEquals(2, outputColumns.getColumnCount());
+		assertEquals("my date (day of week)", outputColumns.getColumnName(0));
+		assertEquals("my date (week number)", outputColumns.getColumnName(1));
+		
+		Date monday = DateUtils.get(2011, Month.NOVEMBER, 7);
+		Date sunday = DateUtils.get(2011, Month.NOVEMBER, 6);
+		
+		Number[] mondayResult = transformer.transform(new MockInputRow().put(column, monday));
+		assertEquals("[1, 45]", Arrays.toString(mondayResult));
+		Number[] sundayResult = transformer.transform(new MockInputRow().put(column, sunday));
+		assertEquals("[7, 44]", Arrays.toString(sundayResult));
+	}
+	
+	public void testCompareSundayAndMonday() throws Exception {
+		WeekDay sunday = DatePartTransformer.WeekDay.SUNDAY;
+		WeekDay monday = DatePartTransformer.WeekDay.MONDAY;
+		assertEquals(0, sunday.compareTo(sunday));
+		assertEquals(6, sunday.compareTo(monday));
+		assertEquals(-6, monday.compareTo(sunday));
 	}
 
 	public void testNullDate() throws Exception {
@@ -73,7 +110,7 @@ public class DatePartTransformerTest extends TestCase {
 		transformer.hour = true;
 		transformer.minute = true;
 		transformer.second = true;
-		
+
 		OutputColumns outputColumns = transformer.getOutputColumns();
 		assertEquals(3, outputColumns.getColumnCount());
 		assertEquals("my time (hour)", outputColumns.getColumnName(0));
