@@ -74,11 +74,11 @@ public final class CliRunner {
 		_out = out;
 	}
 
-	public void run() {
+	public void run() throws Throwable {
 		run(new JaxbConfigurationReader().create(_arguments.getConfigurationFile()));
 	}
 
-	public void run(AnalyzerBeansConfiguration configuration) {
+	public void run(AnalyzerBeansConfiguration configuration) throws Throwable {
 		File jobFile = _arguments.getJobFile();
 		CliListType listType = _arguments.getListType();
 		try {
@@ -245,7 +245,7 @@ public final class CliRunner {
 		}
 	}
 
-	protected void runJob(AnalyzerBeansConfiguration configuration) throws Exception {
+	protected void runJob(AnalyzerBeansConfiguration configuration) throws Throwable {
 		final File jobFile = _arguments.getJobFile();
 		final InputStream inputStream = new BufferedInputStream(new FileInputStream(jobFile));
 
@@ -292,6 +292,8 @@ public final class CliRunner {
 				_out.println("------");
 				throwable.printStackTrace(_out);
 			}
+			
+			throw errors.get(0);
 		}
 	}
 

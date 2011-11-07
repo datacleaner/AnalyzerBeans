@@ -35,8 +35,9 @@ public final class Main {
 	 * 
 	 * @param args
 	 *            command-line arguments
+	 * @throws Throwable
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Throwable {
 		CliArguments arguments = CliArguments.parse(args);
 		if (arguments.isSet() && !arguments.isUsageMode()) {
 			CliRunner runner = new CliRunner(arguments, out);

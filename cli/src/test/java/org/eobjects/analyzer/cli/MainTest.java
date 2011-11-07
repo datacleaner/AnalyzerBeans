@@ -24,11 +24,9 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.cli.Main;
-
 public class MainTest extends TestCase {
 
-	public void testUsage() throws Exception {
+	public void testUsage() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -69,7 +67,7 @@ public class MainTest extends TestCase {
 		assertEquals(out1, out2);
 	}
 
-	public void testListDatastores() throws Exception {
+	public void testListDatastores() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -79,7 +77,7 @@ public class MainTest extends TestCase {
 		assertEquals("Datastores:\n-----------\nall_datastores\nemployees_csv\norderdb\n", out);
 	}
 
-	public void testListSchemas() throws Exception {
+	public void testListSchemas() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -89,7 +87,7 @@ public class MainTest extends TestCase {
 		assertEquals("Schemas:\n" + "--------\n" + "INFORMATION_SCHEMA\n" + "PUBLIC\n", out);
 	}
 
-	public void testListTables() throws Exception {
+	public void testListTables() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -101,7 +99,7 @@ public class MainTest extends TestCase {
 				out);
 	}
 
-	public void testListColumns() throws Exception {
+	public void testListColumns() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -113,7 +111,7 @@ public class MainTest extends TestCase {
 				out);
 	}
 
-	public void testListTransformers() throws Exception {
+	public void testListTransformers() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -128,7 +126,7 @@ public class MainTest extends TestCase {
 		assertTrue(out.indexOf("Output type is: STRING") != -1);
 	}
 
-	public void testListFilters() throws Exception {
+	public void testListFilters() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -143,7 +141,7 @@ public class MainTest extends TestCase {
 		assertTrue(out.indexOf("- Outcome category: VALID") != -1);
 	}
 
-	public void testListAnalyzers() throws Exception {
+	public void testListAnalyzers() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -158,7 +156,7 @@ public class MainTest extends TestCase {
 		assertTrue(out.indexOf("name: String analyzer") != -1);
 	}
 
-	public void testListExplorers() throws Exception {
+	public void testListExplorers() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 
@@ -172,7 +170,7 @@ public class MainTest extends TestCase {
 		assertTrue(out.indexOf("name: Compare schema structures") != -1);
 	}
 
-	public void testExampleEmployeesJob() throws Exception {
+	public void testExampleEmployeesJob() throws Throwable {
 		StringWriter stringWriter = new StringWriter();
 		Main.setOut(new PrintWriter(stringWriter));
 		Main.main("-conf examples/conf.xml -job examples/employees_job.xml".split(" "));
