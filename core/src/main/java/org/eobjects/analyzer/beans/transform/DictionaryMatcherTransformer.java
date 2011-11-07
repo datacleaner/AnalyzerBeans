@@ -19,11 +19,13 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.MatchingAndStandardizationCategory;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -31,13 +33,17 @@ import org.eobjects.analyzer.reference.Dictionary;
 
 @TransformerBean("Dictionary matcher")
 @Description("Matches string values against a set of dictionaries, producing a corresponding set of output columns specifying whether or not the values exist in those dictionaries")
-public class DictionaryMatcherTransformer implements Transformer<Boolean> {
+@Categorized({ MatchingAndStandardizationCategory.class })
+public class DictionaryMatcherTransformer implements Transformer<Object> {
 
 	@Configured
 	Dictionary[] _dictionaries;
 
 	@Configured
 	InputColumn<?> _column;
+
+	@Configured
+	MatchOutputType _outputType = MatchOutputType.TRUE_FALSE;
 
 	public DictionaryMatcherTransformer() {
 	}
@@ -47,11 +53,11 @@ public class DictionaryMatcherTransformer implements Transformer<Boolean> {
 		_column = column;
 		_dictionaries = dictionaries;
 	}
-	
+
 	public void setDictionaries(Dictionary[] dictionaries) {
 		_dictionaries = dictionaries;
 	}
-	
+
 	public void setColumn(InputColumn<?> column) {
 		_column = column;
 	}
@@ -63,22 +69,34 @@ public class DictionaryMatcherTransformer implements Transformer<Boolean> {
 		for (int i = 0; i < names.length; i++) {
 			names[i] = columnName + " in '" + _dictionaries[i].getName() + "'";
 		}
-		return new OutputColumns(names);
+		Class<?>[] types = new Class[_dictionaries.length];
+		for (int i = 0; i < types.length; i++) {
+			types[i] = _outputType.getOutputClass();
+		}
+		return new OutputColumns(names, types);
 	}
 
 	@Override
-	public Boolean[] transform(InputRow inputRow) {
+	public Object[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(_column);
 		return transform(value);
 	}
 
-	public Boolean[] transform(final Object value) {
+	public Object[] transform(final Object value) {
 		String stringValue = ConvertToStringTransformer.transformValue(value);
-		Boolean[] result = new Boolean[_dictionaries.length];
+		Object[] result = new Object[_dictionaries.length];
 		if (stringValue != null) {
 			for (int i = 0; i < result.length; i++) {
 				boolean containsValue = _dictionaries[i].containsValue(stringValue);
-				result[i] = containsValue;
+				if (_outputType == MatchOutputType.TRUE_FALSE) {
+					result[i] = containsValue;
+				} else if (_outputType == MatchOutputType.INPUT_OR_NULL) {
+					if (containsValue) {
+						result[i] = stringValue;
+					} else {
+						result[i] = null;
+					}
+				}
 			}
 		}
 		return result;

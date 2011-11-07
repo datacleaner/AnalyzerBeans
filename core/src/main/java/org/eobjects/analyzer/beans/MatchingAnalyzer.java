@@ -130,16 +130,18 @@ public class MatchingAnalyzer implements Analyzer<BooleanAnalyzerResult> {
 			mockInputRow.put(columns[i], value);
 
 			if (isDictionaryMatchingEnabled()) {
-				Boolean[] matches = _dictionaryMatchers[i].transform(row);
-				for (Boolean match : matches) {
+				Object[] matches = _dictionaryMatchers[i].transform(row);
+				for (Object match : matches) {
+					assert match instanceof Boolean;
 					InputColumn<Boolean> matchColumn = _matchColumns.get(matchColumnIndex);
 					matchColumnIndex++;
 					mockInputRow.put(matchColumn, match);
 				}
 			}
 			if (isStringPatternMatchingEnabled()) {
-				Boolean[] matches = _stringPatternMatchers[i].transform(row);
-				for (Boolean match : matches) {
+				Object[] matches = _stringPatternMatchers[i].transform(row);
+				for (Object match : matches) {
+					assert match instanceof Boolean;
 					InputColumn<Boolean> matchColumn = _matchColumns.get(matchColumnIndex);
 					matchColumnIndex++;
 					mockInputRow.put(matchColumn, match);

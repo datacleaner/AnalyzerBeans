@@ -38,7 +38,7 @@ import org.joda.time.format.DateTimeFormatter;
 @TransformerBean("Date mask matcher")
 @Description("Matches String values against a set of date masks, producing a corresponding set of output columns, specifying whether or not the strings could be interpreted as dates given those date masks")
 @Categorized({ MatchingAndStandardizationCategory.class, DateAndTimeCategory.class })
-public class DateMaskMatcherTransformer implements Transformer<Boolean> {
+public class DateMaskMatcherTransformer implements Transformer<Object> {
 
 	public static final String[] DEFAULT_DATE_MASKS = new String[] { "yyyy-MM-dd", "yyyy/MM/dd", "dd.MM.yyyy", "dd/MM/yyyy",
 			"MM/dd/yy", "d MMM yyyy HH:mm:ss", "yyyy-MM-dd HH:mm:ss.S" };
@@ -48,6 +48,9 @@ public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 
 	@Configured
 	String[] _dateMasks = DEFAULT_DATE_MASKS;
+
+	@Configured
+	MatchOutputType _outputType = MatchOutputType.TRUE_FALSE;
 
 	private DateTimeFormatter[] _dateTimeFormatters;
 
@@ -78,26 +81,44 @@ public class DateMaskMatcherTransformer implements Transformer<Boolean> {
 		for (int i = 0; i < names.length; i++) {
 			names[i] = columnName + " '" + _dateMasks[i] + "'";
 		}
-		return new OutputColumns(names);
+		Class<?>[] types = new Class[_dateMasks.length];
+		for (int i = 0; i < types.length; i++) {
+			types[i] = _outputType.getOutputClass();
+		}
+		return new OutputColumns(names, types);
 	}
 
 	@Override
-	public Boolean[] transform(InputRow inputRow) {
-		Boolean[] result = new Boolean[_dateMasks.length];
-		Arrays.fill(result, false);
+	public Object[] transform(InputRow inputRow) {
+		Object[] result = new Object[_dateMasks.length];
+
+		if (_outputType == MatchOutputType.TRUE_FALSE) {
+			Arrays.fill(result, false);
+		}
 
 		String value = inputRow.getValue(_column);
 		if (value != null) {
 			for (int i = 0; i < _dateTimeFormatters.length; i++) {
 				DateTimeFormatter dateTimeFormatter = _dateTimeFormatters[i];
 				if (dateTimeFormatter != null) {
+					boolean match = false;
 					try {
 						// this will throw an exception if the value is not
 						// complying to the pattern
 						dateTimeFormatter.parseDateTime(value);
-						result[i] = true;
+						match = true;
 					} catch (Exception e) {
-						result[i] = false;
+						// ignore, it doesn't match
+					}
+
+					if (_outputType == MatchOutputType.TRUE_FALSE) {
+						result[i] = match;
+					} else if (_outputType == MatchOutputType.INPUT_OR_NULL) {
+						if (match) {
+							result[i] = value;
+						} else {
+							result[i] = null;
+						}
 					}
 				}
 			}

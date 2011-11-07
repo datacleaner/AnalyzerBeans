@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans;
+package org.eobjects.analyzer.beans.transform;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,5 +134,9 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 		assertEquals("[false, false]", Arrays.toString(transformer.transform("foobar")));
 		assertEquals("[false, true]", Arrays.toString(transformer.transform("trine")));
 		assertEquals("[true, true]", Arrays.toString(transformer.transform("kim")));
+		
+		transformer._outputType = MatchOutputType.INPUT_OR_NULL;
+		assertEquals("[kim, kim]", Arrays.toString(transformer.transform("kim")));
+		assertEquals("[null, trine]", Arrays.toString(transformer.transform("trine")));
 	}
 }

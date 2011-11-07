@@ -34,13 +34,16 @@ import org.eobjects.analyzer.reference.StringPattern;
 @TransformerBean("String pattern matcher")
 @Description("Matches string values against a set of string patterns, producing a corresponding set of output columns specifying whether or not the values matched those string patterns")
 @Categorized({ MatchingAndStandardizationCategory.class })
-public class StringPatternMatcherTransformer implements Transformer<Boolean> {
+public class StringPatternMatcherTransformer implements Transformer<Object> {
 
 	@Configured
 	StringPattern[] _stringPatterns;
 
 	@Configured
 	InputColumn<?> _column;
+
+	@Configured
+	MatchOutputType _outputType = MatchOutputType.TRUE_FALSE;
 
 	public StringPatternMatcherTransformer(InputColumn<?> column, StringPattern[] stringPatterns) {
 		this();
@@ -58,24 +61,35 @@ public class StringPatternMatcherTransformer implements Transformer<Boolean> {
 		for (int i = 0; i < names.length; i++) {
 			names[i] = columnName + " '" + _stringPatterns[i].getName() + "'";
 		}
-		return new OutputColumns(names);
+		Class<?>[] types = new Class[_stringPatterns.length];
+		for (int i = 0; i < types.length; i++) {
+			types[i] = _outputType.getOutputClass();
+		}
+		return new OutputColumns(names, types);
 	}
 
 	@Override
-	public Boolean[] transform(InputRow inputRow) {
+	public Object[] transform(InputRow inputRow) {
 		Object value = inputRow.getValue(_column);
-
-		Boolean[] result = doMatching(value);
-
+		Object[] result = doMatching(value);
 		return result;
 	}
 
-	public Boolean[] doMatching(Object value) {
-		Boolean[] result = new Boolean[_stringPatterns.length];
+	public Object[] doMatching(Object value) {
+		Object[] result = new Object[_stringPatterns.length];
 		String stringValue = ConvertToStringTransformer.transformValue(value);
 
 		for (int i = 0; i < result.length; i++) {
-			result[i] = _stringPatterns[i].matches(stringValue);
+			boolean matches = _stringPatterns[i].matches(stringValue);
+			if (_outputType == MatchOutputType.TRUE_FALSE) {
+				result[i] = matches;
+			} else if (_outputType == MatchOutputType.INPUT_OR_NULL) {
+				if (matches) {
+					result[i] = stringValue;
+				} else {
+					result[i] = null;
+				}
+			}
 		}
 		return result;
 	}
