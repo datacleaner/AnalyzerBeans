@@ -19,10 +19,13 @@
  */
 package org.eobjects.analyzer.beans.writers;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
@@ -32,6 +35,8 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.connection.CsvDatastore;
+import org.eobjects.analyzer.connection.FileDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
@@ -40,9 +45,12 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.UpdateCallback;
 import org.eobjects.metamodel.UpdateScript;
 import org.eobjects.metamodel.UpdateableDataContext;
+import org.eobjects.metamodel.create.TableCreationBuilder;
+import org.eobjects.metamodel.csv.CsvDataContext;
 import org.eobjects.metamodel.insert.RowInsertionBuilder;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.util.Action;
+import org.eobjects.metamodel.util.LazyRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,13 +88,55 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 	@Description("Table to target (insert into)")
 	String tableName;
 
+	@Inject
+	@Configured(value = "How to handle insertion errors?")
+	ErrorHandlingOption errorHandlingOption = ErrorHandlingOption.STOP_JOB;
+
 	private WriteBuffer _writeBuffer;
+	private AtomicInteger _writtenRowCount;
+	private AtomicInteger _errorRowCount;
+	private LazyRef<CsvDataContext> _errorDataContextRef;
 
 	@Initialize
 	public void init() throws IllegalArgumentException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("At init() time, InputColumns are: {}",
 					Arrays.toString(values));
+		}
+
+		_errorRowCount = new AtomicInteger();
+		_writtenRowCount = new AtomicInteger();
+		if (errorHandlingOption == ErrorHandlingOption.SAVE_TO_FILE) {
+			// Create a ref for the error stream
+			_errorDataContextRef = new LazyRef<CsvDataContext>() {
+
+				@Override
+				protected CsvDataContext fetch() {
+					try {
+						final File file = File.createTempFile(
+								"insertion_error", ".csv");
+						final CsvDataContext dc = new CsvDataContext(file);
+						// create the table
+						dc.executeUpdate(new UpdateScript() {
+							@Override
+							public void run(UpdateCallback cb) {
+								TableCreationBuilder tableBuilder = cb
+										.createTable(dc.getDefaultSchema(),
+												"error_table");
+								for (InputColumn<?> inputColumn : values) {
+									tableBuilder = tableBuilder
+											.withColumn(inputColumn.getName());
+								}
+								tableBuilder.execute();
+							}
+						});
+						return dc;
+					} catch (IOException e) {
+						throw new IllegalStateException(
+								"Failed to create temporary CSV file!", e);
+					}
+				}
+			};
 		}
 
 		final int maxObjectsInBuffer = 100000;
@@ -153,9 +203,21 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 	@Override
 	public WriteDataResult getResult() {
 		_writeBuffer.flushBuffer();
-		int writtenRowCount = _writeBuffer.getWrittenRowCount();
+
+		final int writtenRowCount = _writtenRowCount.get();
+
+		final FileDatastore errorDatastore;
+		if (_errorDataContextRef != null && _errorDataContextRef.isFetched()) {
+			CsvDataContext errorDataContext = _errorDataContextRef.get();
+			File file = errorDataContext.getFile();
+			errorDatastore = new CsvDatastore(file.getName(),
+					file.getAbsolutePath());
+		} else {
+			errorDatastore = null;
+		}
+
 		return new WriteDataResultImpl(writtenRowCount, datastore, schemaName,
-				tableName);
+				tableName, _errorRowCount.get(), errorDatastore);
 	}
 
 	@Override
@@ -188,7 +250,37 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 									Arrays.toString(rowData));
 						}
 
-						insertBuilder.execute();
+						try {
+							insertBuilder.execute();
+							_writtenRowCount.incrementAndGet();
+						} catch (RuntimeException e) {
+							_errorRowCount.incrementAndGet();
+							if (errorHandlingOption == ErrorHandlingOption.STOP_JOB) {
+								throw e;
+							} else {
+								logger.warn(
+										"Error occurred while inserting record. Writing to error stream",
+										e);
+								final Object[] rowValues = rowData;
+								_errorDataContextRef.get().executeUpdate(
+										new UpdateScript() {
+											@Override
+											public void run(UpdateCallback cb) {
+												RowInsertionBuilder insertBuilder = cb
+														.insertInto(_errorDataContextRef
+																.get()
+																.getDefaultSchema()
+																.getTables()[0]);
+												for (int i = 0; i < rowValues.length; i++) {
+													insertBuilder = insertBuilder
+															.value(i,
+																	rowValues[i]);
+												}
+												insertBuilder.execute();
+											}
+										});
+							}
+						}
 					}
 				}
 			});

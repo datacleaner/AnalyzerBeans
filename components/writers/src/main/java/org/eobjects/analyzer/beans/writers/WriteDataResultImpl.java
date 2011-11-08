@@ -22,6 +22,7 @@ package org.eobjects.analyzer.beans.writers;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreConnection;
+import org.eobjects.analyzer.connection.FileDatastore;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.Func;
 
@@ -38,10 +39,19 @@ public final class WriteDataResultImpl implements WriteDataResult {
 	private final Func<DatastoreCatalog, Datastore> _datastoreFunc;
 	private final String _schemaName;
 	private final String _tableName;
+	private final int _errorRowCount;
+	private final FileDatastore _errorDatastore;
 
 	public WriteDataResultImpl(final int writtenRowCount,
 			final Datastore datastore, final String schemaName,
 			final String tableName) {
+		this(writtenRowCount, datastore, schemaName, tableName, 0, null);
+	}
+
+	public WriteDataResultImpl(final int writtenRowCount,
+			final Datastore datastore, final String schemaName,
+			final String tableName, final int errorRowCount,
+			final FileDatastore errorDatastore) {
 		_writtenRowCount = writtenRowCount;
 		_schemaName = schemaName;
 		_tableName = tableName;
@@ -51,6 +61,8 @@ public final class WriteDataResultImpl implements WriteDataResult {
 				return datastore;
 			}
 		};
+		_errorRowCount = errorRowCount;
+		_errorDatastore = errorDatastore;
 	}
 
 	public WriteDataResultImpl(final int writtenRowCount,
@@ -65,6 +77,18 @@ public final class WriteDataResultImpl implements WriteDataResult {
 				return catalog.getDatastore(datastoreName);
 			}
 		};
+		_errorRowCount = 0;
+		_errorDatastore = null;
+	}
+
+	@Override
+	public FileDatastore getErrorDatastore() {
+		return _errorDatastore;
+	}
+
+	@Override
+	public int getErrorRowCount() {
+		return _errorRowCount;
 	}
 
 	@Override
@@ -90,6 +114,12 @@ public final class WriteDataResultImpl implements WriteDataResult {
 
 	@Override
 	public String toString() {
-		return _writtenRowCount + " records written to table";
+		String message = _writtenRowCount + " records written to table";
+		if (_errorRowCount > 0) {
+			message = message + "\n - WARNING! " + _errorRowCount
+					+ " record failed, written to file: "
+					+ _errorDatastore.getFilename();
+		}
+		return message;
 	}
 }

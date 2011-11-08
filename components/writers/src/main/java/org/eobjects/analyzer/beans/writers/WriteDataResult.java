@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans.writers;
 
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.FileDatastore;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.metamodel.schema.Table;
 
@@ -37,6 +38,23 @@ public interface WriteDataResult extends AnalyzerResult {
 	 * @return the amount of rows that was written.
 	 */
 	public int getWrittenRowCount();
+
+	/**
+	 * Gets the amount of rows that was errornuosly not written. This will only
+	 * be non-zero if a error handling strategy has been specified, typically
+	 * using {@link ErrorHandlingOption}.
+	 * 
+	 * @return the amount of rows that was not written.
+	 */
+	public int getErrorRowCount();
+
+	/**
+	 * Gets a reference to a datastore containing error records. Note that the
+	 * datastore is not nescesarily registered in the {@link DatastoreCatalog}.
+	 * 
+	 * @return a {@link FileDatastore} reference or null if no errors occurred.
+	 */
+	public FileDatastore getErrorDatastore();
 
 	/**
 	 * @param datastoreCatalog
