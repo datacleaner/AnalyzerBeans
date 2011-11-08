@@ -283,6 +283,8 @@
 			<element name="hostname" minOccurs="0" maxOccurs="1" type="string" />
 			<element name="port" minOccurs="0" maxOccurs="1" type="int" />
 			<element name="database-name" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="username" minOccurs="0" maxOccurs="1" type="string" />
+			<element name="password" minOccurs="0" maxOccurs="1" type="string" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />

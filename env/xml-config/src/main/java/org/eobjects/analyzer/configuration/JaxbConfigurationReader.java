@@ -724,8 +724,10 @@ public final class JaxbConfigurationReader implements
 			String hostname = mongodbDatastoreType.getHostname();
 			Integer port = mongodbDatastoreType.getPort();
 			String databaseName = mongodbDatastoreType.getDatabaseName();
+			String username = mongodbDatastoreType.getUsername();
+			String password = mongodbDatastoreType.getPassword();
 			MongoDbDatastore ds = new MongoDbDatastore(name, hostname, port,
-					databaseName);
+					databaseName, username, password);
 			ds.setDescription(mongodbDatastoreType.getDescription());
 			datastores.put(name, ds);
 		}
