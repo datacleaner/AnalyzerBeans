@@ -27,10 +27,10 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DatastoreConnection;
+import org.eobjects.analyzer.connection.FileDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
@@ -115,23 +115,27 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 
 		// make assertions about error rows
 		assertEquals(1, result.getErrorRowCount());
-		Datastore errorDatastore = result.getErrorDatastore();
+		FileDatastore errorDatastore = result.getErrorDatastore();
 		assertNotNull(errorDatastore);
 
 		DatastoreConnection errorCon = errorDatastore.openConnection();
 		Schema errorSchema = errorCon.getDataContext().getDefaultSchema();
 		assertEquals(1, errorSchema.getTableCount());
 		Table errorTable = errorSchema.getTables()[0];
-		assertEquals("[in1, in2]", Arrays.toString(errorTable.getColumnNames()));
+		assertEquals("[in1, in2, insert_into_table_error_message]",
+				Arrays.toString(errorTable.getColumnNames()));
 		DataSet ds = errorCon.getDataContext().query().from(errorTable)
-				.select("in1").and("in2").execute();
+				.select("in1").and("in2")
+				.and("insert_into_table_error_message").execute();
 		assertTrue(ds.next());
-		assertEquals("Row[values=[, hey I am a string in a number field]]", ds
-				.getRow().toString());
+		assertEquals(
+				"Row[values=[, hey I am a string in a number field, "
+						+ "Could not convert hey I am a string in a number field to number]]",
+				ds.getRow().toString());
 		assertFalse(ds.next());
 		errorCon.close();
 
-		String filename = result.getErrorDatastore().getFilename();
+		String filename = errorDatastore.getFilename();
 		assertEquals("4 records written to table\n"
 				+ " - WARNING! 1 record failed, written to file: " + filename,
 				result.toString());

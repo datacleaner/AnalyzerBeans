@@ -60,6 +60,8 @@ import org.slf4j.LoggerFactory;
 public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		Action<Queue<Object[]>> {
 
+	private static final String ERROR_MESSAGE_COLUMN_NAME = "insert_into_table_error_message";
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(InsertIntoTableAnalyzer.class);
 
@@ -127,6 +129,10 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 									tableBuilder = tableBuilder
 											.withColumn(inputColumn.getName());
 								}
+
+								tableBuilder = tableBuilder
+										.withColumn(ERROR_MESSAGE_COLUMN_NAME);
+
 								tableBuilder.execute();
 							}
 						});
@@ -253,7 +259,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 						try {
 							insertBuilder.execute();
 							_writtenRowCount.incrementAndGet();
-						} catch (RuntimeException e) {
+						} catch (final RuntimeException e) {
 							_errorRowCount.incrementAndGet();
 							if (errorHandlingOption == ErrorHandlingOption.STOP_JOB) {
 								throw e;
@@ -276,6 +282,10 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 															.value(i,
 																	rowValues[i]);
 												}
+
+												insertBuilder = insertBuilder
+														.value(ERROR_MESSAGE_COLUMN_NAME,
+																e.getMessage());
 												insertBuilder.execute();
 											}
 										});
