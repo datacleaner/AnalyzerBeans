@@ -34,6 +34,8 @@ import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.FileProperty;
+import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.FileDatastore;
@@ -49,8 +51,10 @@ import org.eobjects.metamodel.create.TableCreationBuilder;
 import org.eobjects.metamodel.csv.CsvDataContext;
 import org.eobjects.metamodel.insert.RowInsertionBuilder;
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.Action;
-import org.eobjects.metamodel.util.LazyRef;
+import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +63,8 @@ import org.slf4j.LoggerFactory;
 @Categorized(WriteDataCategory.class)
 public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		Action<Queue<Object[]>> {
+
+	private static final File TEMP_DIR = FileHelper.getTempDir();
 
 	private static final String ERROR_MESSAGE_COLUMN_NAME = "insert_into_table_error_message";
 
@@ -94,10 +100,16 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 	@Configured(value = "How to handle insertion errors?")
 	ErrorHandlingOption errorHandlingOption = ErrorHandlingOption.STOP_JOB;
 
+	@Inject
+	@Configured(value = "Error log file location")
+	@Description("Directory or file path for saving errornuos records")
+	@FileProperty(accessMode = FileAccessMode.SAVE, extension = ".csv")
+	File errorLogFile = TEMP_DIR;
+
 	private WriteBuffer _writeBuffer;
 	private AtomicInteger _writtenRowCount;
 	private AtomicInteger _errorRowCount;
-	private LazyRef<CsvDataContext> _errorDataContextRef;
+	private CsvDataContext _errorDataContext;
 
 	@Initialize
 	public void init() throws IllegalArgumentException {
@@ -109,40 +121,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		_errorRowCount = new AtomicInteger();
 		_writtenRowCount = new AtomicInteger();
 		if (errorHandlingOption == ErrorHandlingOption.SAVE_TO_FILE) {
-			// Create a ref for the error stream
-			_errorDataContextRef = new LazyRef<CsvDataContext>() {
-
-				@Override
-				protected CsvDataContext fetch() {
-					try {
-						final File file = File.createTempFile(
-								"insertion_error", ".csv");
-						final CsvDataContext dc = new CsvDataContext(file);
-						// create the table
-						dc.executeUpdate(new UpdateScript() {
-							@Override
-							public void run(UpdateCallback cb) {
-								TableCreationBuilder tableBuilder = cb
-										.createTable(dc.getDefaultSchema(),
-												"error_table");
-								for (InputColumn<?> inputColumn : values) {
-									tableBuilder = tableBuilder
-											.withColumn(inputColumn.getName());
-								}
-
-								tableBuilder = tableBuilder
-										.withColumn(ERROR_MESSAGE_COLUMN_NAME);
-
-								tableBuilder.execute();
-							}
-						});
-						return dc;
-					} catch (IOException e) {
-						throw new IllegalStateException(
-								"Failed to create temporary CSV file!", e);
-					}
-				}
-			};
+			_errorDataContext = createErrorDataContext();
 		}
 
 		final int maxObjectsInBuffer = 100000;
@@ -178,6 +157,77 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		}
 	}
 
+	private void validateCsvHeaders(CsvDataContext dc) {
+		Schema schema = dc.getDefaultSchema();
+		if (schema.getTableCount() == 0) {
+			// nothing to worry about, we will create the table ourselves
+			return;
+		}
+		Table table = schema.getTables()[0];
+
+		// verify that table names correspond to what we need!
+
+		for (String columnName : columnNames) {
+			Column column = table.getColumnByName(columnName);
+			if (column == null) {
+				throw new IllegalStateException(
+						"Error log file does not have required column header: "
+								+ columnName);
+			}
+		}
+
+		Column column = table.getColumnByName(ERROR_MESSAGE_COLUMN_NAME);
+		if (column == null) {
+			throw new IllegalStateException(
+					"Error log file does not have required column: "
+							+ ERROR_MESSAGE_COLUMN_NAME);
+		}
+	}
+
+	private CsvDataContext createErrorDataContext() {
+		final File file;
+
+		if (TEMP_DIR.equals(errorLogFile)) {
+			try {
+				file = File.createTempFile("insertion_error", ".csv");
+			} catch (IOException e) {
+				throw new IllegalStateException(
+						"Could not create new temp file", e);
+			}
+		} else if (errorLogFile.isDirectory()) {
+			file = new File(errorLogFile, "insertion_error_log.csv");
+		} else {
+			file = errorLogFile;
+		}
+
+		final CsvDataContext dc = new CsvDataContext(file);
+
+		final Schema schema = dc.getDefaultSchema();
+
+		if (file.exists() && file.length() > 0) {
+			validateCsvHeaders(dc);
+		} else {
+			// create table if no table exists.
+			dc.executeUpdate(new UpdateScript() {
+				@Override
+				public void run(UpdateCallback cb) {
+					TableCreationBuilder tableBuilder = cb.createTable(schema,
+							"error_table");
+					for (String columnName : columnNames) {
+						tableBuilder = tableBuilder.withColumn(columnName);
+					}
+
+					tableBuilder = tableBuilder
+							.withColumn(ERROR_MESSAGE_COLUMN_NAME);
+
+					tableBuilder.execute();
+				}
+			});
+		}
+
+		return dc;
+	}
+
 	@Override
 	public void run(InputRow row, int distinctCount) {
 		if (logger.isDebugEnabled()) {
@@ -191,8 +241,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 			rowData[i] = value;
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("Value for {} set to: {}", values[i].getName(),
-						value);
+				logger.debug("Value for {} set to: {}", columnNames[i], value);
 			}
 		}
 
@@ -213,9 +262,8 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		final int writtenRowCount = _writtenRowCount.get();
 
 		final FileDatastore errorDatastore;
-		if (_errorDataContextRef != null && _errorDataContextRef.isFetched()) {
-			CsvDataContext errorDataContext = _errorDataContextRef.get();
-			File file = errorDataContext.getFile();
+		if (_errorDataContext != null) {
+			File file = _errorDataContext.getFile();
 			errorDatastore = new CsvDatastore(file.getName(),
 					file.getAbsolutePath());
 		} else {
@@ -268,18 +316,17 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 										"Error occurred while inserting record. Writing to error stream",
 										e);
 								final Object[] rowValues = rowData;
-								_errorDataContextRef.get().executeUpdate(
-										new UpdateScript() {
+								_errorDataContext
+										.executeUpdate(new UpdateScript() {
 											@Override
 											public void run(UpdateCallback cb) {
 												RowInsertionBuilder insertBuilder = cb
-														.insertInto(_errorDataContextRef
-																.get()
+														.insertInto(_errorDataContext
 																.getDefaultSchema()
 																.getTables()[0]);
 												for (int i = 0; i < rowValues.length; i++) {
 													insertBuilder = insertBuilder
-															.value(i,
+															.value(columnNames[i],
 																	rowValues[i]);
 												}
 

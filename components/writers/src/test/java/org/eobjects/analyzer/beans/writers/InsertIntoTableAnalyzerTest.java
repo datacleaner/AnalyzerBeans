@@ -51,27 +51,104 @@ import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.FileHelper;
 
 public class InsertIntoTableAnalyzerTest extends TestCase {
 
-	public void testErrorHandlingOption() throws Exception {
-		JdbcDatastore datastore = new JdbcDatastore("my datastore",
-				"jdbc:hsqldb:mem:testErrorHandlingOption",
-				"org.hsqldb.jdbcDriver");
-		final UpdateableDatastoreConnection con = datastore.openConnection();
-		final UpdateableDataContext dc = con.getUpdateableDataContext();
-		dc.executeUpdate(new UpdateScript() {
-			@Override
-			public void run(UpdateCallback cb) {
-				cb.createTable(dc.getDefaultSchema(), "test_table")
-						.withColumn("foo").ofType(ColumnType.VARCHAR)
-						.withColumn("bar").ofType(ColumnType.INTEGER).execute();
-			}
-		});
-		con.close();
+	private JdbcDatastore jdbcDatastore;
 
-		InsertIntoTableAnalyzer insertIntoTable = new InsertIntoTableAnalyzer();
-		insertIntoTable.datastore = datastore;
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		if (jdbcDatastore == null) {
+			jdbcDatastore = new JdbcDatastore("my datastore",
+					"jdbc:hsqldb:mem:testErrorHandlingOption",
+					"org.hsqldb.jdbcDriver");
+			final UpdateableDatastoreConnection con = jdbcDatastore
+					.openConnection();
+			final UpdateableDataContext dc = con.getUpdateableDataContext();
+			if (dc.getDefaultSchema().getTableByName("test_table") == null) {
+				dc.executeUpdate(new UpdateScript() {
+					@Override
+					public void run(UpdateCallback cb) {
+						cb.createTable(dc.getDefaultSchema(), "test_table")
+								.withColumn("foo").ofType(ColumnType.VARCHAR)
+								.withColumn("bar").ofType(ColumnType.INTEGER)
+								.execute();
+					}
+				});
+			}
+			con.close();
+		}
+	}
+
+	public void testErrorHandlingToInvalidFile() throws Exception {
+		final InsertIntoTableAnalyzer insertIntoTable = new InsertIntoTableAnalyzer();
+		insertIntoTable.datastore = jdbcDatastore;
+		insertIntoTable.tableName = "test_table";
+		insertIntoTable.columnNames = new String[] { "foo", "bar" };
+		insertIntoTable.errorHandlingOption = ErrorHandlingOption.SAVE_TO_FILE;
+		insertIntoTable.errorLogFile = new File(
+				"src/test/resources/invalid-error-handling-file.csv");
+
+		InputColumn<Object> col1 = new MockInputColumn<Object>("in1",
+				Object.class);
+		InputColumn<Object> col2 = new MockInputColumn<Object>("in2",
+				Object.class);
+
+		insertIntoTable.values = new InputColumn[] { col1, col2 };
+
+		try {
+			insertIntoTable.init();
+			fail("Exception expected");
+		} catch (IllegalStateException e) {
+			assertEquals(
+					"Error log file does not have required column header: foo",
+					e.getMessage());
+		}
+	}
+
+	public void testErrorHandlingToAppendingFile() throws Exception {
+		final File file = new File("target/valid-error-handling-file.csv");
+		FileHelper.copy(new File(
+				"src/test/resources/valid-error-handling-file.csv"), file);
+
+		final InsertIntoTableAnalyzer insertIntoTable = new InsertIntoTableAnalyzer();
+		insertIntoTable.datastore = jdbcDatastore;
+		insertIntoTable.tableName = "test_table";
+		insertIntoTable.columnNames = new String[] { "foo", "bar" };
+		insertIntoTable.errorHandlingOption = ErrorHandlingOption.SAVE_TO_FILE;
+		insertIntoTable.errorLogFile = file;
+
+		InputColumn<Object> col1 = new MockInputColumn<Object>("in1",
+				Object.class);
+		InputColumn<Object> col2 = new MockInputColumn<Object>("in2",
+				Object.class);
+
+		insertIntoTable.values = new InputColumn[] { col1, col2 };
+
+		insertIntoTable.init();
+
+		insertIntoTable.run(
+				new MockInputRow().put(col1, "blabla").put(col2, "hello int"),
+				2);
+
+		WriteDataResult result = insertIntoTable.getResult();
+		assertEquals(0, result.getWrittenRowCount());
+		assertEquals(2, result.getErrorRowCount());
+
+		assertEquals(
+				"foo,bar,extra1,insert_into_table_error_message,extra2[newline]"
+						+ "f,b,e1,m,e2[newline]"
+						+ "\"blabla\",\"hello int\",\"\",\"Could not convert hello int to number\",\"\"[newline]"
+						+ "\"blabla\",\"hello int\",\"\",\"Could not convert hello int to number\",\"\"",
+				FileHelper.readFileAsString(file).replaceAll("\n",
+						"\\[newline\\]"));
+	}
+
+	public void testErrorHandlingToTempFile() throws Exception {
+		final InsertIntoTableAnalyzer insertIntoTable = new InsertIntoTableAnalyzer();
+		insertIntoTable.datastore = jdbcDatastore;
 		insertIntoTable.tableName = "test_table";
 		insertIntoTable.columnNames = new String[] { "foo", "bar" };
 		insertIntoTable.errorHandlingOption = ErrorHandlingOption.SAVE_TO_FILE;
@@ -109,8 +186,8 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 
 		// assertions about succes rows
 		assertEquals(4, result.getWrittenRowCount());
-		assertEquals(datastore, result.getDatastore(null));
-		Table table = result.getPreviewTable(datastore);
+		assertEquals(jdbcDatastore, result.getDatastore(null));
+		Table table = result.getPreviewTable(jdbcDatastore);
 		assertEquals("TEST_TABLE", table.getName());
 
 		// make assertions about error rows
@@ -122,10 +199,10 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 		Schema errorSchema = errorCon.getDataContext().getDefaultSchema();
 		assertEquals(1, errorSchema.getTableCount());
 		Table errorTable = errorSchema.getTables()[0];
-		assertEquals("[in1, in2, insert_into_table_error_message]",
+		assertEquals("[foo, bar, insert_into_table_error_message]",
 				Arrays.toString(errorTable.getColumnNames()));
 		DataSet ds = errorCon.getDataContext().query().from(errorTable)
-				.select("in1").and("in2")
+				.select("foo").and("bar")
 				.and("insert_into_table_error_message").execute();
 		assertTrue(ds.next());
 		assertEquals(
