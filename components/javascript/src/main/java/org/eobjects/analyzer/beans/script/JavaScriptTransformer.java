@@ -119,7 +119,9 @@ public class JavaScriptTransformer implements Transformer<Object> {
 			Object result = _script.exec(context, scope);
 			// String stringResult = Context.toString(result);
 
-			if (returnType == ReturnType.NUMBER) {
+			if (result == null) {
+				result = null;
+			} else if (returnType == ReturnType.NUMBER) {
 				result = Context.toNumber(result);
 			} else if (returnType == ReturnType.BOOLEAN) {
 				result = Context.toBoolean(result);

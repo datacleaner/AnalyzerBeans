@@ -29,6 +29,15 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 
 public class JavaScriptTransformerTest extends TestCase {
+	
+	public void testReturnNull() throws Exception {
+		JavaScriptTransformer t = new JavaScriptTransformer();
+		t.setSourceCode("function eval() {return null;}; eval();");
+		t.setColumns(new InputColumn[0]);
+		t.init();
+		Object object = t.transform(null)[0];	
+		assertNull(object);
+	}
 
 	public void testSimpleScriptExecution() throws Exception {
 		JavaScriptTransformer t = new JavaScriptTransformer();
