@@ -79,11 +79,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 
 	private static final Logger logger = LoggerFactory.getLogger(ClasspathScanDescriptorProvider.class);
 
-	private final Map<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new HashMap<Class<? extends Analyzer<?>>, AnalyzerBeanDescriptor<?>>();
-	private final Map<Class<? extends Filter<?>>, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<Class<? extends Filter<?>>, FilterBeanDescriptor<?, ?>>();
-	private final Map<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<Class<? extends Transformer<?>>, TransformerBeanDescriptor<?>>();
-	private final Map<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<Class<? extends Renderer<?, ?>>, RendererBeanDescriptor>();
-	private final Map<Class<? extends Explorer<?>>, ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new HashMap<Class<? extends Explorer<?>>, ExplorerBeanDescriptor<?>>();
+	private final Map<String, AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new HashMap<String, AnalyzerBeanDescriptor<?>>();
+	private final Map<String, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<String, FilterBeanDescriptor<?, ?>>();
+	private final Map<String, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<String, TransformerBeanDescriptor<?>>();
+	private final Map<String, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<String, RendererBeanDescriptor>();
+	private final Map<String, ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new HashMap<String, ExplorerBeanDescriptor<?>>();
 	private final TaskRunner _taskRunner;
 	private final AtomicInteger _tasksPending;
 
@@ -380,11 +380,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	}
 
 	public ClasspathScanDescriptorProvider addExplorerClass(Class<? extends Explorer<?>> explorerClass) {
-		ExplorerBeanDescriptor<?> descriptor = _explorerBeanDescriptors.get(explorerClass);
+		ExplorerBeanDescriptor<?> descriptor = _explorerBeanDescriptors.get(explorerClass.getName());
 		if (descriptor == null) {
 			try {
 				descriptor = Descriptors.ofExplorer(explorerClass);
-				_explorerBeanDescriptors.put(explorerClass, descriptor);
+				_explorerBeanDescriptors.put(explorerClass.getName(), descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + explorerClass, e);
 			}
@@ -393,11 +393,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	}
 
 	public ClasspathScanDescriptorProvider addAnalyzerClass(Class<? extends Analyzer<?>> clazz) {
-		AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(clazz);
+		AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(clazz.getName());
 		if (descriptor == null) {
 			try {
 				descriptor = Descriptors.ofAnalyzer(clazz);
-				_analyzerBeanDescriptors.put(clazz, descriptor);
+				_analyzerBeanDescriptors.put(clazz.getName(), descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
 			}
@@ -406,11 +406,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	}
 
 	public ClasspathScanDescriptorProvider addTransformerClass(Class<? extends Transformer<?>> clazz) {
-		TransformerBeanDescriptor<? extends Transformer<?>> descriptor = _transformerBeanDescriptors.get(clazz);
+		TransformerBeanDescriptor<? extends Transformer<?>> descriptor = _transformerBeanDescriptors.get(clazz.getName());
 		if (descriptor == null) {
 			try {
 				descriptor = Descriptors.ofTransformer(clazz);
-				_transformerBeanDescriptors.put(clazz, descriptor);
+				_transformerBeanDescriptors.put(clazz.getName(), descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
 			}
@@ -419,11 +419,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	}
 
 	public ClasspathScanDescriptorProvider addFilterClass(Class<? extends Filter<?>> clazz) {
-		FilterBeanDescriptor<? extends Filter<?>, ?> descriptor = _filterBeanDescriptors.get(clazz);
+		FilterBeanDescriptor<? extends Filter<?>, ?> descriptor = _filterBeanDescriptors.get(clazz.getName());
 		if (descriptor == null) {
 			try {
 				descriptor = Descriptors.ofFilterUnbound(clazz);
-				_filterBeanDescriptors.put(clazz, descriptor);
+				_filterBeanDescriptors.put(clazz.getName(), descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
 			}
@@ -432,11 +432,11 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	}
 
 	public ClasspathScanDescriptorProvider addRendererClass(Class<? extends Renderer<?, ?>> clazz) {
-		RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(clazz);
+		RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(clazz.getName());
 		if (descriptor == null) {
 			try {
 				descriptor = Descriptors.ofRenderer(clazz);
-				_rendererBeanDescriptors.put(clazz, descriptor);
+				_rendererBeanDescriptors.put(clazz.getName(), descriptor);
 			} catch (Exception e) {
 				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
 			}
