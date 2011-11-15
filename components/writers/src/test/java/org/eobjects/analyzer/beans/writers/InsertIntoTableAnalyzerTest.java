@@ -146,6 +146,67 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 						"\\[newline\\]"));
 	}
 
+	public void testErrorHandlingWithAdditionalErrorColumns() throws Exception {
+		final InsertIntoTableAnalyzer insertIntoTable = new InsertIntoTableAnalyzer();
+		insertIntoTable.datastore = jdbcDatastore;
+		insertIntoTable.tableName = "test_table";
+		insertIntoTable.columnNames = new String[] { "foo", "bar" };
+		insertIntoTable.errorHandlingOption = ErrorHandlingOption.SAVE_TO_FILE;
+		insertIntoTable.errorLogFile = null;
+
+		InputColumn<Object> col1 = new MockInputColumn<Object>("in1",
+				Object.class);
+		InputColumn<Object> col2 = new MockInputColumn<Object>("in2",
+				Object.class);
+		InputColumn<Object> col3 = new MockInputColumn<Object>("in3",
+				Object.class);
+
+		// the name of this additional column will clash with one of the
+		// target column names.
+		InputColumn<Object> col4 = new MockInputColumn<Object>("foo",
+				Object.class);
+
+		insertIntoTable.values = new InputColumn[] { col1, col2 };
+		insertIntoTable.additionalErrorLogValues = new InputColumn[] { col3,
+				col4 };
+
+		insertIntoTable.init();
+
+		// valid row
+		insertIntoTable.run(
+				new MockInputRow().put(col1, "hello world").put(col2, 123)
+						.put(col3, "addition 3").put(col4, "addition 4"), 1);
+
+		// invalid row
+		insertIntoTable.run(
+				new MockInputRow().put(col1, "hello world")
+						.put(col2, "hey I am a string in a number field")
+						.put(col3, "addition 3").put(col4, "addition 4"), 1);
+
+		WriteDataResult result = insertIntoTable.getResult();
+		assertEquals(1, result.getWrittenRowCount());
+		assertEquals(1, result.getErrorRowCount());
+		FileDatastore errorDatastore = result.getErrorDatastore();
+		DatastoreConnection con = errorDatastore.openConnection();
+		Table table = con.getDataContext().getDefaultSchema().getTables()[0];
+		assertEquals(
+				"[foo, bar, in3, foo_add, insert_into_table_error_message]",
+				Arrays.toString(table.getColumnNames()));
+
+		DataSet ds = con.getDataContext().query().from(table)
+				.select(table.getColumns()).execute();
+		assertTrue(ds.next());
+		assertEquals(
+				"Row[values=[hello world, hey I am a string in a number field, "
+						+ "addition 3, addition 4, "
+						+ "Could not convert hey I am a string in a number field to number]]",
+				ds.getRow().toString());
+		assertFalse(ds.next());
+		ds.close();
+
+		con.close();
+	}
+
 	public void testErrorHandlingToTempFile() throws Exception {
 		final InsertIntoTableAnalyzer insertIntoTable = new InsertIntoTableAnalyzer();
 		insertIntoTable.datastore = jdbcDatastore;

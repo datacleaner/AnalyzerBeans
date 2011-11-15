@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Categorized;
@@ -101,10 +102,15 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 	ErrorHandlingOption errorHandlingOption = ErrorHandlingOption.STOP_JOB;
 
 	@Inject
-	@Configured(value = "Error log file location")
+	@Configured(value = "Error log file location", required = false)
 	@Description("Directory or file path for saving errornuos records")
 	@FileProperty(accessMode = FileAccessMode.SAVE, extension = ".csv")
 	File errorLogFile = TEMP_DIR;
+
+	@Inject
+	@Configured(required = false)
+	@Description("Additional values to write to error log")
+	InputColumn<?>[] additionalErrorLogValues;
 
 	private WriteBuffer _writeBuffer;
 	private AtomicInteger _writtenRowCount;
@@ -175,6 +181,18 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 								+ columnName);
 			}
 		}
+		if (additionalErrorLogValues != null) {
+			for (InputColumn<?> inputColumn : additionalErrorLogValues) {
+				String columnName = translateAdditionalErrorLogColumnName(inputColumn
+						.getName());
+				Column column = table.getColumnByName(columnName);
+				if (column == null) {
+					throw new IllegalStateException(
+							"Error log file does not have required column header: "
+									+ columnName);
+				}
+			}
+		}
 
 		Column column = table.getColumnByName(ERROR_MESSAGE_COLUMN_NAME);
 		if (column == null) {
@@ -184,10 +202,17 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		}
 	}
 
+	private String translateAdditionalErrorLogColumnName(String columnName) {
+		if (ArrayUtils.contains(columnNames, columnName)) {
+			return translateAdditionalErrorLogColumnName(columnName + "_add");
+		}
+		return columnName;
+	}
+
 	private CsvDataContext createErrorDataContext() {
 		final File file;
 
-		if (TEMP_DIR.equals(errorLogFile)) {
+		if (errorLogFile == null || TEMP_DIR.equals(errorLogFile)) {
 			try {
 				file = File.createTempFile("insertion_error", ".csv");
 			} catch (IOException e) {
@@ -217,6 +242,14 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 						tableBuilder = tableBuilder.withColumn(columnName);
 					}
 
+					if (additionalErrorLogValues != null) {
+						for (InputColumn<?> inputColumn : additionalErrorLogValues) {
+							String columnName = translateAdditionalErrorLogColumnName(inputColumn
+									.getName());
+							tableBuilder = tableBuilder.withColumn(columnName);
+						}
+					}
+
 					tableBuilder = tableBuilder
 							.withColumn(ERROR_MESSAGE_COLUMN_NAME);
 
@@ -235,13 +268,26 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 					Arrays.toString(values));
 		}
 
-		final Object[] rowData = new Object[values.length];
+		final Object[] rowData;
+		if (additionalErrorLogValues == null) {
+			rowData = new Object[values.length];
+		} else {
+			rowData = new Object[values.length
+					+ additionalErrorLogValues.length];
+		}
 		for (int i = 0; i < values.length; i++) {
 			Object value = row.getValue(values[i]);
 			rowData[i] = value;
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Value for {} set to: {}", columnNames[i], value);
+			}
+		}
+
+		if (additionalErrorLogValues != null) {
+			for (int i = 0; i < additionalErrorLogValues.length; i++) {
+				Object value = row.getValue(additionalErrorLogValues[i]);
+				rowData[values.length + i] = value;
 			}
 		}
 
@@ -294,7 +340,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 							.poll()) {
 						RowInsertionBuilder insertBuilder = callback
 								.insertInto(columns[0].getTable());
-						for (int i = 0; i < rowData.length; i++) {
+						for (int i = 0; i < columns.length; i++) {
 							insertBuilder = insertBuilder.value(columns[i],
 									rowData[i]);
 						}
@@ -324,10 +370,22 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 														.insertInto(_errorDataContext
 																.getDefaultSchema()
 																.getTables()[0]);
-												for (int i = 0; i < rowValues.length; i++) {
+												for (int i = 0; i < columnNames.length; i++) {
 													insertBuilder = insertBuilder
 															.value(columnNames[i],
 																	rowValues[i]);
+												}
+
+												if (additionalErrorLogValues != null) {
+													for (int i = 0; i < additionalErrorLogValues.length; i++) {
+														String columnName = translateAdditionalErrorLogColumnName(additionalErrorLogValues[i]
+																.getName());
+														Object value = rowValues[columnNames.length
+																+ i];
+														insertBuilder = insertBuilder
+																.value(columnName,
+																		value);
+													}
 												}
 
 												insertBuilder = insertBuilder
