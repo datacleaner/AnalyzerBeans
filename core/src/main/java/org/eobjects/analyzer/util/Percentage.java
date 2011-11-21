@@ -19,21 +19,44 @@
  */
 package org.eobjects.analyzer.util;
 
+/**
+ * Represents a percentage number, which has a range between 0 and 100 fractions
+ * of 100.
+ * 
+ * 
+ * 
+ * @author Kasper Sørensen
+ */
 public class Percentage extends Number {
 
 	private static final long serialVersionUID = 1L;
 
 	private short percentage;
 
-	public Percentage(int percentage) {
-		this((short) percentage);
+	public Percentage(int nominator) {
+		this((short) nominator);
 	}
 
-	public Percentage(short percentage) {
-		if (percentage < 0 || percentage > 100) {
-			throw new IllegalArgumentException("Percentage has to be between 0 and 100. Invalid: " + percentage);
+	public Percentage(short nominator) {
+		if (nominator < 0 || nominator > 100) {
+			throw new IllegalArgumentException("Percentage nominator has to be between 0 and 100. Invalid: " + nominator);
 		}
-		this.percentage = percentage;
+		this.percentage = nominator;
+	}
+
+	/**
+	 * @return the nominator of a percentage, eg. if the object represents 73%,
+	 *         this method will return 73.
+	 */
+	public int getNominator() {
+		return percentage;
+	}
+
+	/**
+	 * @return the denominator of a percentage, always 100.
+	 */
+	public int getDenominator() {
+		return 100;
 	}
 
 	@Override
