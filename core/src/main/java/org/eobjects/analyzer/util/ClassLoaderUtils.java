@@ -38,13 +38,13 @@ import org.slf4j.LoggerFactory;
  * @author Kasper Sørensen
  */
 public final class ClassLoaderUtils {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ClassLoaderUtils.class);
 
 	// to find out if web start is running, use system property
 	// http://lopica.sourceforge.net/faq.html#under
 	public static final boolean IS_WEB_START = System.getProperty("javawebstart.version") != null;
-	
+
 	private ClassLoaderUtils() {
 		// prevent instantiation
 	}
@@ -63,8 +63,12 @@ public final class ClassLoaderUtils {
 			return ClassLoaderUtils.class.getClassLoader();
 		}
 	}
-	
+
 	public static ClassLoader createClassLoader(File[] files) {
+		return createClassLoader(files, getParentClassLoader());
+	}
+
+	public static ClassLoader createClassLoader(File[] files, ClassLoader parentClassLoader) {
 		try {
 			final URL[] urls = new URL[files.length];
 			for (int i = 0; i < urls.length; i++) {
@@ -72,15 +76,17 @@ public final class ClassLoaderUtils {
 				logger.debug("Using URL: {}", url);
 				urls[i] = url;
 			}
-			return createClassLoader(urls);
+			return createClassLoader(urls, parentClassLoader);
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
 	public static ClassLoader createClassLoader(final URL[] urls) {
-		final ClassLoader parentClassLoader = ClassLoaderUtils.getParentClassLoader();
+		return createClassLoader(urls, ClassLoaderUtils.getParentClassLoader());
+	}
 
+	public static ClassLoader createClassLoader(final URL[] urls, final ClassLoader parentClassLoader) {
 		// removing the security manager is nescesary for classes in
 		// external jar files to have privileges to do eg. system property
 		// lookups etc.
