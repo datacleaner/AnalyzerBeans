@@ -19,9 +19,12 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.util.List;
+
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.mongodb.MongoDbDataContext;
+import org.eobjects.metamodel.mongodb.MongoDbTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +42,7 @@ public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext>
 	private final String _databaseName;
 	private final String _username;
 	private final char[] _password;
+	private final MongoDbTableDef[] _tableDefs;
 
 	public MongoDbDatastore(String name, String databaseName) {
 		this(name, null, null, databaseName);
@@ -53,6 +57,16 @@ public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext>
 	}
 
 	public MongoDbDatastore(String name, String hostname, Integer port, String databaseName, String username, char[] password) {
+		this(name, hostname, port, databaseName, username, password, null);
+	}
+
+	public MongoDbDatastore(String name, String hostname, Integer port, String databaseName, String username,
+			String password, MongoDbTableDef[] tableDefs) {
+		this(name, hostname, port, databaseName, username, password == null ? null : password.toCharArray(), tableDefs);
+	}
+
+	public MongoDbDatastore(String name, String hostname, Integer port, String databaseName, String username,
+			char[] password, MongoDbTableDef[] tableDefs) {
 		super(name);
 		if (StringUtils.isNullOrEmpty(databaseName)) {
 			throw new IllegalArgumentException("Database name cannot be null");
@@ -70,6 +84,7 @@ public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext>
 		_databaseName = databaseName;
 		_username = username;
 		_password = password;
+		_tableDefs = tableDefs;
 	}
 
 	@Override
@@ -88,7 +103,13 @@ public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext>
 					logger.warn("Autheticate returned false!");
 				}
 			}
-			UpdateableDataContext dataContext = new MongoDbDataContext(mongoDb);
+
+			final UpdateableDataContext dataContext;
+			if (_tableDefs == null || _tableDefs.length == 0) {
+				dataContext = new MongoDbDataContext(mongoDb);
+			} else {
+				dataContext = new MongoDbDataContext(mongoDb, _tableDefs);
+			}
 			return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
@@ -115,12 +136,27 @@ public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext>
 	public String getDatabaseName() {
 		return _databaseName;
 	}
-	
+
 	public String getUsername() {
 		return _username;
 	}
-	
+
 	public char[] getPassword() {
 		return _password;
+	}
+
+	public MongoDbTableDef[] getTableDefs() {
+		return _tableDefs;
+	}
+
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		super.decorateIdentity(identifiers);
+		identifiers.add(_databaseName);
+		identifiers.add(_hostname);
+		identifiers.add(_port);
+		identifiers.add(_username);
+		identifiers.add(_password);
+		identifiers.add(_tableDefs);
 	}
 }

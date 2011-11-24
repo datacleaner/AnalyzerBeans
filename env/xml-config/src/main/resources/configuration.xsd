@@ -277,14 +277,31 @@
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />
 	</complexType>
-	
+
 	<complexType name="mongodbDatastoreType">
 		<sequence>
 			<element name="hostname" minOccurs="0" maxOccurs="1" type="string" />
 			<element name="port" minOccurs="0" maxOccurs="1" type="int" />
-			<element name="database-name" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="database-name" minOccurs="1" maxOccurs="1"
+				type="string" />
 			<element name="username" minOccurs="0" maxOccurs="1" type="string" />
 			<element name="password" minOccurs="0" maxOccurs="1" type="string" />
+			<element name="table-def" minOccurs="0" maxOccurs="unbounded">
+				<complexType>
+					<sequence>
+						<element name="collection" minOccurs="1" maxOccurs="1"
+							type="string" />
+						<element name="property" minOccurs="1" maxOccurs="unbounded">
+							<complexType>
+								<sequence>
+									<element name="name" minOccurs="1" maxOccurs="1" type="string" />
+									<element name="type" minOccurs="0" maxOccurs="1" type="string" />
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />
@@ -328,6 +345,15 @@
 	<complexType name="xmlDatastoreType">
 		<sequence>
 			<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="table-def" minOccurs="0" maxOccurs="unbounded">
+				<complexType>
+					<sequence>
+						<element name="rowXpath" minOccurs="1" maxOccurs="1" type="string" />
+						<element name="valueXpath" minOccurs="1" maxOccurs="unbounded"
+							type="string" />
+					</sequence>
+				</complexType>
+			</element>
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />

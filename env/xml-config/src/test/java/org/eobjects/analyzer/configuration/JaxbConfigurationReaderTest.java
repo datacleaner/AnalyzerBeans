@@ -29,6 +29,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
+import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.reference.Dictionary;
@@ -40,6 +41,7 @@ import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.mongodb.MongoDbTableDef;
 import org.junit.Assert;
 
 public class JaxbConfigurationReaderTest extends TestCase {
@@ -52,59 +54,96 @@ public class JaxbConfigurationReaderTest extends TestCase {
 				"src/test/resources/example-configuration-valid.xml"));
 
 		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(configuration);
-		assertEquals("[composite_datastore, my database, mydb_jndi, persons_csv]",
+		assertEquals(
+				"[composite_datastore, my database, mydb_jndi, persons_csv]",
 				Arrays.toString(datastoreCatalog.getDatastoreNames()));
 
 		assertTrue(configuration.getTaskRunner() instanceof SingleThreadedTaskRunner);
 	}
 
 	public void testCombinedStorage() throws Exception {
-		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-combined-storage.xml"));
+		AnalyzerBeansConfiguration configuration = reader
+				.create(new File(
+						"src/test/resources/example-configuration-combined-storage.xml"));
 		StorageProvider storageProvider = configuration.getStorageProvider();
 
 		assertEquals(CombinedStorageProvider.class, storageProvider.getClass());
 
 		CombinedStorageProvider csp = (CombinedStorageProvider) storageProvider;
-		assertEquals(BerkeleyDbStorageProvider.class, csp.getCollectionsStorageProvider().getClass());
-		assertEquals(HsqldbStorageProvider.class, csp.getRowAnnotationsStorageProvider().getClass());
+		assertEquals(BerkeleyDbStorageProvider.class, csp
+				.getCollectionsStorageProvider().getClass());
+		assertEquals(HsqldbStorageProvider.class, csp
+				.getRowAnnotationsStorageProvider().getClass());
 	}
 
 	public void testAllDatastoreTypes() throws Exception {
 		DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
 		String[] datastoreNames = datastoreCatalog.getDatastoreNames();
 		assertEquals(
-				"[my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_sas, my_xml]",
+				"[my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_sas, my_sax_xml]",
 				Arrays.toString(datastoreNames));
 
-		assertEquals("a mongo db based datastore", datastoreCatalog.getDatastore("my mongo").getDescription());
-		assertEquals("jdbc_con", datastoreCatalog.getDatastore("my_jdbc_connection").getDescription());
-		assertEquals("jdbc_ds", datastoreCatalog.getDatastore("my_jdbc_datasource").getDescription());
-		assertEquals("dbf", datastoreCatalog.getDatastore("my_dbase").getDescription());
-		assertEquals("csv", datastoreCatalog.getDatastore("my_csv").getDescription());
-		assertEquals("xml", datastoreCatalog.getDatastore("my_xml").getDescription());
-		assertEquals("custom", datastoreCatalog.getDatastore("my_custom").getDescription());
-		assertEquals("odb", datastoreCatalog.getDatastore("my_odb").getDescription());
-		assertEquals("xls", datastoreCatalog.getDatastore("my_excel_2003").getDescription());
-		assertEquals("comp", datastoreCatalog.getDatastore("my_composite").getDescription());
-		assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
-		assertEquals("folder of sas7bdat files", datastoreCatalog.getDatastore("my_sas").getDescription());
-		
-		MongoDbDatastore mongoDbDatastore = (MongoDbDatastore) datastoreCatalog.getDatastore("my mongo");
+		assertEquals("a mongo db based datastore", datastoreCatalog
+				.getDatastore("my mongo").getDescription());
+		assertEquals("jdbc_con",
+				datastoreCatalog.getDatastore("my_jdbc_connection")
+						.getDescription());
+		assertEquals("jdbc_ds",
+				datastoreCatalog.getDatastore("my_jdbc_datasource")
+						.getDescription());
+		assertEquals("dbf", datastoreCatalog.getDatastore("my_dbase")
+				.getDescription());
+		assertEquals("csv", datastoreCatalog.getDatastore("my_csv")
+				.getDescription());
+		assertEquals("dom xml", datastoreCatalog.getDatastore("my_dom_xml")
+				.getDescription());
+		assertEquals("sax xml", datastoreCatalog.getDatastore("my_sax_xml")
+				.getDescription());
+		assertEquals("custom", datastoreCatalog.getDatastore("my_custom")
+				.getDescription());
+		assertEquals("odb", datastoreCatalog.getDatastore("my_odb")
+				.getDescription());
+		assertEquals("xls", datastoreCatalog.getDatastore("my_excel_2003")
+				.getDescription());
+		assertEquals("comp", datastoreCatalog.getDatastore("my_composite")
+				.getDescription());
+		assertEquals("mdb", datastoreCatalog.getDatastore("my_access")
+				.getDescription());
+		assertEquals("folder of sas7bdat files",
+				datastoreCatalog.getDatastore("my_sas").getDescription());
+
+		MongoDbDatastore mongoDbDatastore = (MongoDbDatastore) datastoreCatalog
+				.getDatastore("my mongo");
 		assertEquals("analyzerbeans_test", mongoDbDatastore.getDatabaseName());
 		assertEquals("localhost", mongoDbDatastore.getHostname());
 		assertEquals(27017, mongoDbDatastore.getPort());
+		MongoDbTableDef[] tableDefs = mongoDbDatastore.getTableDefs();
+		assertEquals(
+				"[MongoDbTableDef[collectionName=my_col_1,propertyNames=[foo, null, null],columnTypes=[VARCHAR, null, null]]]",
+				Arrays.toString(tableDefs));
 
-		FixedWidthDatastore ds = (FixedWidthDatastore) datastoreCatalog.getDatastore("my_fixed_width_1");
+		XmlDatastore xmlDatastore = (XmlDatastore) datastoreCatalog
+				.getDatastore("my_sax_xml");
+		assertEquals("../../core/src/test/resources/example-xml-file.xml",
+				xmlDatastore.getFilename());
+		assertEquals(
+				"[XmlSaxTableDef[rowXpath=/greetings/greeting,"
+						+ "valueXpaths=[/greetings/greeting/how, /greetings/greeting/what]]]",
+				Arrays.toString(xmlDatastore.getTableDefs()));
+
+		FixedWidthDatastore ds = (FixedWidthDatastore) datastoreCatalog
+				.getDatastore("my_fixed_width_1");
 		assertEquals(19, ds.getFixedValueWidth());
 		assertEquals("[]", Arrays.toString(ds.getValueWidths()));
 
-		ds = (FixedWidthDatastore) datastoreCatalog.getDatastore("my_fixed_width_2");
+		ds = (FixedWidthDatastore) datastoreCatalog
+				.getDatastore("my_fixed_width_2");
 		assertEquals(-1, ds.getFixedValueWidth());
 		assertEquals("[4, 17, 19]", Arrays.toString(ds.getValueWidths()));
 
 		for (String name : datastoreNames) {
-			// test that all connections, except the JNDI- and MongoDB-based on will work
+			// test that all connections, except the JNDI- and MongoDB-based on
+			// will work
 			if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name)) {
 				Datastore datastore = datastoreCatalog.getDatastore(name);
 				DataContext dc = datastore.openConnection().getDataContext();
@@ -112,33 +151,41 @@ public class JaxbConfigurationReaderTest extends TestCase {
 			}
 		}
 
-		Datastore compositeDatastore = datastoreCatalog.getDatastore("my_composite");
+		Datastore compositeDatastore = datastoreCatalog
+				.getDatastore("my_composite");
 		DatastoreConnection con = compositeDatastore.openConnection();
 		DataContext dataContext = con.getDataContext();
 		String[] schemaNames = dataContext.getSchemaNames();
-		assertEquals("[INFORMATION_SCHEMA, PUBLIC, Spreadsheet2003.xls, developers.mdb, employees.csv, information_schema]",
+		assertEquals(
+				"[INFORMATION_SCHEMA, PUBLIC, Spreadsheet2003.xls, developers.mdb, employees.csv, information_schema]",
 				Arrays.toString(schemaNames));
 		con.close();
 	}
 
 	private AnalyzerBeansConfiguration getConfiguration() {
-		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-all-datastore-types.xml"));
+		AnalyzerBeansConfiguration configuration = reader
+				.create(new File(
+						"src/test/resources/example-configuration-all-datastore-types.xml"));
 		return configuration;
 	}
 
-	private DatastoreCatalog getDataStoreCatalog(AnalyzerBeansConfiguration configuration) {
+	private DatastoreCatalog getDataStoreCatalog(
+			AnalyzerBeansConfiguration configuration) {
 		_datastoreCatalog = configuration.getDatastoreCatalog();
 		return _datastoreCatalog;
 	}
 
 	public void testReferenceDataCatalog() throws Exception {
 		AnalyzerBeansConfiguration conf = getConfigurationFromXMLFile();
-		ReferenceDataCatalog referenceDataCatalog = conf.getReferenceDataCatalog();
+		ReferenceDataCatalog referenceDataCatalog = conf
+				.getReferenceDataCatalog();
 		String[] dictionaryNames = referenceDataCatalog.getDictionaryNames();
-		assertEquals("[custom_dict, datastore_dict, textfile_dict, valuelist_dict]", Arrays.toString(dictionaryNames));
+		assertEquals(
+				"[custom_dict, datastore_dict, textfile_dict, valuelist_dict]",
+				Arrays.toString(dictionaryNames));
 
-		LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf.getInjectionManagerFactory().getInjectionManager(null));
+		LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf
+				.getInjectionManagerFactory().getInjectionManager(null));
 
 		Dictionary d = referenceDataCatalog.getDictionary("datastore_dict");
 		assertEquals("dict_ds", d.getDescription());
@@ -174,10 +221,13 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertTrue(d.containsValue("value4"));
 		assertFalse(d.containsValue("value5"));
 
-		String[] synonymCatalogNames = referenceDataCatalog.getSynonymCatalogNames();
-		assertEquals("[custom_syn, datastore_syn, textfile_syn]", Arrays.toString(synonymCatalogNames));
+		String[] synonymCatalogNames = referenceDataCatalog
+				.getSynonymCatalogNames();
+		assertEquals("[custom_syn, datastore_syn, textfile_syn]",
+				Arrays.toString(synonymCatalogNames));
 
-		SynonymCatalog s = referenceDataCatalog.getSynonymCatalog("textfile_syn");
+		SynonymCatalog s = referenceDataCatalog
+				.getSynonymCatalog("textfile_syn");
 		assertEquals("syn_txt", s.getDescription());
 		lifeCycleHelper.initialize(s);
 		assertEquals("DNK", s.getMasterTerm("Denmark"));
@@ -205,13 +255,17 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		assertEquals(null, s.getMasterTerm("Albania"));
 		assertEquals("NLD", s.getMasterTerm("Netherlands"));
 
-		String[] stringPatternNames = referenceDataCatalog.getStringPatternNames();
-		assertEquals("[regex danish email, simple email]", Arrays.toString(stringPatternNames));
+		String[] stringPatternNames = referenceDataCatalog
+				.getStringPatternNames();
+		assertEquals("[regex danish email, simple email]",
+				Arrays.toString(stringPatternNames));
 
-		StringPattern pattern = referenceDataCatalog.getStringPattern("regex danish email");
+		StringPattern pattern = referenceDataCatalog
+				.getStringPattern("regex danish email");
 		assertEquals("pattern_reg", pattern.getDescription());
 		lifeCycleHelper.initialize(pattern);
-		assertEquals("RegexStringPattern[name=regex danish email, expression=[a-z]+@[a-z]+\\.dk, matchEntireString=true]",
+		assertEquals(
+				"RegexStringPattern[name=regex danish email, expression=[a-z]+@[a-z]+\\.dk, matchEntireString=true]",
 				pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));
 		assertFalse(pattern.matches("kasper@eobjects.org"));
@@ -220,7 +274,9 @@ public class JaxbConfigurationReaderTest extends TestCase {
 		pattern = referenceDataCatalog.getStringPattern("simple email");
 		assertEquals("pattern_simple", pattern.getDescription());
 		lifeCycleHelper.initialize(pattern);
-		assertEquals("SimpleStringPattern[name=simple email, expression=aaaa@aaaaa.aa]", pattern.toString());
+		assertEquals(
+				"SimpleStringPattern[name=simple email, expression=aaaa@aaaaa.aa]",
+				pattern.toString());
 		assertTrue(pattern.matches("kasper@eobjects.dk"));
 		assertTrue(pattern.matches("kasper@eobjects.org"));
 		assertFalse(pattern.matches(" kasper@eobjects.dk"));
@@ -228,15 +284,18 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
 	public void testCustomDictionaryWithInjectedDatastore() {
 		AnalyzerBeansConfiguration configuration = getConfigurationFromXMLFile();
-		ReferenceDataCatalog referenceDataCatalog = configuration.getReferenceDataCatalog();
+		ReferenceDataCatalog referenceDataCatalog = configuration
+				.getReferenceDataCatalog();
 		SampleCustomDictionary sampleCustomDictionary = (SampleCustomDictionary) referenceDataCatalog
 				.getDictionary("custom_dict");
-		Assert.assertEquals("my_jdbc_connection", sampleCustomDictionary.datastore.getName());
+		Assert.assertEquals("my_jdbc_connection",
+				sampleCustomDictionary.datastore.getName());
 	}
 
 	private AnalyzerBeansConfiguration getConfigurationFromXMLFile() {
-		AnalyzerBeansConfiguration configuration = reader.create(new File(
-				"src/test/resources/example-configuration-all-reference-data-types.xml"));
+		AnalyzerBeansConfiguration configuration = reader
+				.create(new File(
+						"src/test/resources/example-configuration-all-reference-data-types.xml"));
 		return configuration;
 	}
 }

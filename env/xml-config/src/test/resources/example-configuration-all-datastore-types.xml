@@ -18,9 +18,18 @@
 			<datasource-jndi-url>java:comp/env/jdbc/mydb</datasource-jndi-url>
 		</jdbc-datastore>
 
-		<excel-datastore name="my_xml" description="xml">
+		<xml-datastore name="my_dom_xml" description="dom xml">
 			<filename>../../core/src/test/resources/example-xml-file.xml</filename>
-		</excel-datastore>
+		</xml-datastore>
+
+		<xml-datastore name="my_sax_xml" description="sax xml">
+			<filename>../../core/src/test/resources/example-xml-file.xml</filename>
+			<table-def>
+				<rowXpath>/greetings/greeting</rowXpath>
+				<valueXpath>/greetings/greeting/how</valueXpath>
+				<valueXpath>/greetings/greeting/what</valueXpath>
+			</table-def>
+		</xml-datastore>
 
 		<csv-datastore name="my_csv" description="csv">
 			<filename>../../core/src/test/resources/employees.csv</filename>
@@ -68,6 +77,21 @@
 			<hostname>localhost</hostname>
 			<port>27017</port>
 			<database-name>analyzerbeans_test</database-name>
+			<table-def>
+				<collection>my_col_1</collection>
+				<property>
+					<name>foo</name>
+					<type>VARCHAR</type>
+				</property>
+				<property>
+					<name>bar</name>
+					<type>INTEGER</type>
+				</property>
+				<property>
+					<name>baz</name>
+					<type>DATE</type>
+				</property>
+			</table-def>
 		</mongodb-datastore>
 
 		<custom-datastore

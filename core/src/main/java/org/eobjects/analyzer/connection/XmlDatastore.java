@@ -27,6 +27,8 @@ import java.util.List;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.xml.XmlSaxDataContext;
+import org.eobjects.metamodel.xml.XmlSaxTableDef;
 
 /**
  * Datastore implementation for XML files.
@@ -38,10 +40,16 @@ public class XmlDatastore extends UsageAwareDatastore<DataContext> implements Fi
 	private static final long serialVersionUID = 1L;
 
 	private final String _filename;
+	private final XmlSaxTableDef[] _tableDefs;
 
 	public XmlDatastore(String name, String filename) {
+		this(name, filename, null);
+	}
+
+	public XmlDatastore(String name, String filename, XmlSaxTableDef[] tableDefs) {
 		super(name);
 		_filename = filename;
+		_tableDefs = tableDefs;
 	}
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -52,11 +60,20 @@ public class XmlDatastore extends UsageAwareDatastore<DataContext> implements Fi
 	public String getFilename() {
 		return _filename;
 	}
+	
+	public XmlSaxTableDef[] getTableDefs() {
+		return _tableDefs;
+	}
 
 	@Override
 	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
 		final File file = new File(_filename);
-		final DataContext dataContext = DataContextFactory.createXmlDataContext(file, true, false);
+		final DataContext dataContext;
+		if (_tableDefs == null || _tableDefs.length == 0) {
+			dataContext = DataContextFactory.createXmlDataContext(file, true, false);
+		} else {
+			dataContext = new XmlSaxDataContext(file, _tableDefs);
+		}
 		return new DatastoreConnectionImpl<DataContext>(dataContext, this);
 	}
 
@@ -69,5 +86,6 @@ public class XmlDatastore extends UsageAwareDatastore<DataContext> implements Fi
 	protected void decorateIdentity(List<Object> identifiers) {
 		super.decorateIdentity(identifiers);
 		identifiers.add(_filename);
+		identifiers.add(_tableDefs);
 	}
 }

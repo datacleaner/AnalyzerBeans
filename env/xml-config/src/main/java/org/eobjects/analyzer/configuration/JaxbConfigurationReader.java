@@ -71,6 +71,7 @@ import org.eobjects.analyzer.configuration.jaxb.TextFileDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.TextFileSynonymCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ValueListDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.XmlDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.XmlDatastoreType.TableDef;
 import org.eobjects.analyzer.connection.AccessDatastore;
 import org.eobjects.analyzer.connection.CompositeDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -119,7 +120,10 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringConverter;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.csv.CsvConfiguration;
+import org.eobjects.metamodel.mongodb.MongoDbTableDef;
+import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.xml.XmlSaxTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -646,7 +650,21 @@ public final class JaxbConfigurationReader implements
 			checkName(name, Datastore.class, datastores);
 			String filename = _interceptor.createFilename(xmlDatastoreType
 					.getFilename());
-			XmlDatastore ds = new XmlDatastore(name, filename);
+			List<TableDef> tableDefList = xmlDatastoreType.getTableDef();
+			final XmlSaxTableDef[] tableDefs;
+			if (tableDefList.isEmpty()) {
+				tableDefs = null;
+			} else {
+				tableDefs = new XmlSaxTableDef[tableDefList.size()];
+				for (int i = 0; i < tableDefs.length; i++) {
+					String rowXpath = tableDefList.get(i).getRowXpath();
+					String[] valueXpaths = tableDefList.get(i).getValueXpath()
+							.toArray(new String[0]);
+					tableDefs[i] = new XmlSaxTableDef(rowXpath, valueXpaths);
+				}
+			}
+
+			XmlDatastore ds = new XmlDatastore(name, filename, tableDefs);
 			ds.setDescription(xmlDatastoreType.getDescription());
 			datastores.put(name, ds);
 		}
@@ -726,8 +744,43 @@ public final class JaxbConfigurationReader implements
 			String databaseName = mongodbDatastoreType.getDatabaseName();
 			String username = mongodbDatastoreType.getUsername();
 			String password = mongodbDatastoreType.getPassword();
+
+			List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef> tableDefList = mongodbDatastoreType
+					.getTableDef();
+			final MongoDbTableDef[] tableDefs;
+			if (tableDefList.isEmpty()) {
+				tableDefs = null;
+			} else {
+				tableDefs = new MongoDbTableDef[tableDefList.size()];
+				for (int i = 0; i < tableDefs.length; i++) {
+					org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef tableDef = tableDefList
+							.get(i);
+					String collectionName = tableDef.getCollection();
+					List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef.Property> propertyList = tableDef
+							.getProperty();
+					String[] propertyNames = new String[propertyList.size()];
+					ColumnType[] columnTypes = new ColumnType[propertyList
+							.size()];
+					for (int j = 0; j < columnTypes.length; j++) {
+						String propertyName = propertyList.get(i).getName();
+						String propertyTypeName = propertyList.get(i).getType();
+						final ColumnType propertyType;
+						if (StringUtils.isNullOrEmpty(propertyTypeName)) {
+							propertyType = ColumnType.valueOf(propertyTypeName);
+						} else {
+							propertyType = ColumnType.VARCHAR;
+						}
+						propertyNames[i] = propertyName;
+						columnTypes[i] = propertyType;
+					}
+
+					tableDefs[i] = new MongoDbTableDef(collectionName,
+							propertyNames, columnTypes);
+				}
+			}
+
 			MongoDbDatastore ds = new MongoDbDatastore(name, hostname, port,
-					databaseName, username, password);
+					databaseName, username, password, tableDefs);
 			ds.setDescription(mongodbDatastoreType.getDescription());
 			datastores.put(name, ds);
 		}
