@@ -23,6 +23,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +33,8 @@ import org.slf4j.LoggerFactory;
 
 public final class MultiThreadedTaskRunner implements TaskRunner {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private static final Logger logger = LoggerFactory.getLogger(MultiThreadedTaskRunner.class);
+	private final ThreadFactory _threadFactory;
 
 	private final ExecutorService _executorService;
 	private final int _numThreads;
@@ -52,8 +54,10 @@ public final class MultiThreadedTaskRunner implements TaskRunner {
 		// numThreads * 3 (to avoid blocking buffer behaviour)
 		final int taskCapacity = Math.max(20, numThreads * 3);
 
+		_threadFactory = new DaemonThreadFactory();
 		_workQueue = new ArrayBlockingQueue<Runnable>(taskCapacity);
-		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS, _workQueue, rejectionHandler);
+		_executorService = new ThreadPoolExecutor(numThreads, numThreads, 60, TimeUnit.SECONDS, _workQueue, _threadFactory,
+				rejectionHandler);
 	}
 
 	/**
