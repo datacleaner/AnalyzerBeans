@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
@@ -174,7 +175,7 @@ public final class RowProcessingPublisher {
 			countQuery.getSelectClause().getItem(0).setFunctionApproximationAllowed(true);
 			final DataSet countDataSet = dataContext.executeQuery(countQuery);
 			if (countDataSet.next()) {
-				Number count = (Number) countDataSet.getRow().getValue(0);
+				Number count = ConvertToNumberTransformer.transformValue(countDataSet.getRow().getValue(0));
 				if (count != null) {
 					expectedRows = count.intValue();
 				}
