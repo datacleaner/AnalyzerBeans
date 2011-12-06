@@ -3,7 +3,7 @@
 		<javadoc.version>2.8</javadoc.version>
 		<sshwagon.version>1.0-beta-7</sshwagon.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j.version>1.6.3</slf4j.version>
+		<slf4j.version>1.6.4</slf4j.version>
 		<junit.version>4.10</junit.version>
 		<easymock.version>3.0</easymock.version>
 		<metamodel.version>2.1</metamodel.version>
