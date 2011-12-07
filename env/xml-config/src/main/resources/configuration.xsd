@@ -262,9 +262,9 @@
 			<element name="separator-char" minOccurs="0" maxOccurs="1"
 				type="token" />
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
-			<element name="failOnInconsistencies" minOccurs="0"
+			<element name="fail-on-inconsistencies" minOccurs="0"
 				maxOccurs="1" type="boolean" />
-			<element name="headerLineNumber" minOccurs="0" maxOccurs="1"
+			<element name="header-line-number" minOccurs="0" maxOccurs="1"
 				type="int" default="0">
 				<annotation>
 					<documentation>
@@ -319,7 +319,16 @@
 				</sequence>
 			</choice>
 			<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
-			<element name="failOnInconsistencies" minOccurs="0"
+			<element name="header-line-number" minOccurs="0" maxOccurs="1"
+				type="int" default="0">
+				<annotation>
+					<documentation>
+						The index (0-based) of the header line number. If no
+						header line is present, use -1.
+					</documentation>
+				</annotation>
+			</element>
+			<element name="fail-on-inconsistencies" minOccurs="0"
 				maxOccurs="1" type="boolean" />
 		</sequence>
 		<attribute name="name" type="string" use="required" />

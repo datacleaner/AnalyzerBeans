@@ -61,7 +61,8 @@
 			<filename>../../core/src/test/resources/employees-fixed-width.txt</filename>
 			<fixed-value-width>19</fixed-value-width>
 			<encoding>UTF-8</encoding>
-			<failOnInconsistencies>true</failOnInconsistencies>
+			<header-line-number>-1</header-line-number>
+			<fail-on-inconsistencies>true</fail-on-inconsistencies>
 		</fixed-width-datastore>
 
 		<fixed-width-datastore name="my_fixed_width_2">
@@ -70,7 +71,7 @@
 			<value-width>17</value-width>
 			<value-width>19</value-width>
 			<encoding>UTF-8</encoding>
-			<failOnInconsistencies>true</failOnInconsistencies>
+			<fail-on-inconsistencies>true</fail-on-inconsistencies>
 		</fixed-width-datastore>
 
 		<mongodb-datastore name="my mongo" description="a mongo db based datastore">

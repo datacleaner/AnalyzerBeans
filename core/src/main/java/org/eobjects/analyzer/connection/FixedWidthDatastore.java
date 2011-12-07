@@ -45,6 +45,7 @@ public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implem
 	private final int _fixedValueWidth;
 	private final int[] _valueWidths;
 	private final boolean _failOnInconsistencies;
+	private final int _headerLineNumber;
 
 	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth) {
 		this(name, filename, encoding, fixedValueWidth, true);
@@ -56,22 +57,35 @@ public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implem
 
 	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth,
 			boolean failOnInconsistencies) {
+		this(name, filename, encoding, fixedValueWidth, failOnInconsistencies,
+				FixedWidthConfiguration.DEFAULT_COLUMN_NAME_LINE);
+	}
+
+	public FixedWidthDatastore(String name, String filename, String encoding, int[] valueWidths,
+			boolean failOnInconsistencies) {
+		this(name, filename, encoding, valueWidths, failOnInconsistencies, FixedWidthConfiguration.DEFAULT_COLUMN_NAME_LINE);
+	}
+
+	public FixedWidthDatastore(String name, String filename, String encoding, int fixedValueWidth,
+			boolean failOnInconsistencies, int headerLineNumber) {
 		super(name);
 		_filename = filename;
 		_encoding = encoding;
 		_fixedValueWidth = fixedValueWidth;
 		_valueWidths = new int[0];
 		_failOnInconsistencies = failOnInconsistencies;
+		_headerLineNumber = headerLineNumber;
 	}
 
 	public FixedWidthDatastore(String name, String filename, String encoding, int[] valueWidths,
-			boolean failOnInconsistencies) {
+			boolean failOnInconsistencies, int headerLineNumber) {
 		super(name);
 		_filename = filename;
 		_encoding = encoding;
 		_fixedValueWidth = -1;
 		_valueWidths = valueWidths;
 		_failOnInconsistencies = failOnInconsistencies;
+		_headerLineNumber = headerLineNumber;
 	}
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -85,16 +99,14 @@ public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implem
 
 	@Override
 	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
-		File file = new File(_filename);
+		final File file = new File(_filename);
 		assert file.exists();
 
-		final int columnNameLineNumber = 0;
 		final FixedWidthConfiguration configuration;
 		if (_fixedValueWidth == -1) {
-			configuration = new FixedWidthConfiguration(columnNameLineNumber, _encoding, _valueWidths,
-					_failOnInconsistencies);
+			configuration = new FixedWidthConfiguration(_headerLineNumber, _encoding, _valueWidths, _failOnInconsistencies);
 		} else {
-			configuration = new FixedWidthConfiguration(columnNameLineNumber, _encoding, _fixedValueWidth,
+			configuration = new FixedWidthConfiguration(_headerLineNumber, _encoding, _fixedValueWidth,
 					_failOnInconsistencies);
 		}
 
@@ -114,6 +126,10 @@ public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implem
 		return _valueWidths;
 	}
 
+	public int getHeaderLineNumber() {
+		return _headerLineNumber;
+	}
+
 	@Override
 	public String getFilename() {
 		return _filename;
@@ -130,12 +146,14 @@ public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implem
 		identifiers.add(_encoding);
 		identifiers.add(_fixedValueWidth);
 		identifiers.add(_valueWidths);
+		identifiers.add(_headerLineNumber);
 		identifiers.add(_failOnInconsistencies);
 	}
 
 	@Override
 	public String toString() {
 		return "FixedWidthDatastore[name=" + getName() + ", filename=" + _filename + ", encoding=" + _encoding
-				+ ", valueWidths=" + Arrays.toString(_valueWidths) + ", fixedValueWidth=" + _fixedValueWidth + "]";
+				+ ", headerLineNumber=" + _headerLineNumber + ", valueWidths=" + Arrays.toString(_valueWidths)
+				+ ", fixedValueWidth=" + _fixedValueWidth + "]";
 	}
 }

@@ -22,7 +22,7 @@
 			<filename>csv/persons.csv</filename>
 			<quote-char>"</quote-char>
 			<separator-char>,</separator-char>
-			<headerLineNumber>0</headerLineNumber>
+			<header-line-number>0</header-line-number>
 		</csv-datastore>
 
 		<composite-datastore name="composite_datastore">

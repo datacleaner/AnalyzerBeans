@@ -120,6 +120,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringConverter;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.csv.CsvConfiguration;
+import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
 import org.eobjects.metamodel.mongodb.MongoDbTableDef;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.util.FileHelper;
@@ -600,6 +601,12 @@ public final class JaxbConfigurationReader implements
 				failOnInconsistencies = true;
 			}
 
+			Integer headerLineNumber = fixedWidthDatastore
+					.getHeaderLineNumber();
+			if (headerLineNumber == null) {
+				headerLineNumber = FixedWidthConfiguration.DEFAULT_COLUMN_NAME_LINE;
+			}
+
 			final FixedWidthDatastore ds;
 			final Integer fixedValueWidth = fixedWidthDatastore
 					.getFixedValueWidth();
@@ -611,10 +618,12 @@ public final class JaxbConfigurationReader implements
 					valueWidths[i] = valueWidthsBoxed.get(i).intValue();
 				}
 				ds = new FixedWidthDatastore(name, filename, encoding,
-						valueWidths, failOnInconsistencies);
+						valueWidths, failOnInconsistencies,
+						headerLineNumber.intValue());
 			} else {
 				ds = new FixedWidthDatastore(name, filename, encoding,
-						fixedValueWidth, failOnInconsistencies);
+						fixedValueWidth, failOnInconsistencies,
+						headerLineNumber.intValue());
 			}
 			ds.setDescription(fixedWidthDatastore.getDescription());
 			datastores.put(name, ds);
