@@ -41,7 +41,7 @@ public class FixedWidthDatastoreTest extends TestCase {
 	public void testToString() throws Exception {
 		FixedWidthDatastore ds = new FixedWidthDatastore("name", "filename", "encoding", 5);
 		assertEquals(
-				"FixedWidthDatastore[name=name, filename=filename, encoding=encoding, valueWidths=[], fixedValueWidth=5]",
+				"FixedWidthDatastore[name=name, filename=filename, encoding=encoding, headerLineNumber=0, valueWidths=[], fixedValueWidth=5]",
 				ds.toString());
 	}
 
