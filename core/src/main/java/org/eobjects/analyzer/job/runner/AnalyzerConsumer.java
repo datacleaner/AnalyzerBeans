@@ -44,7 +44,7 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
 		_analyzerJob = analyzerJob;
 		_inputColumns = inputColumns;
 		_analysisListener = analysisListener;
-		
+
 		Concurrent concurrent = analyzerJob.getDescriptor().getAnnotation(Concurrent.class);
 		if (concurrent == null) {
 			// analyzers are by default not concurrent
@@ -53,7 +53,7 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
 			_concurrent = concurrent.value();
 		}
 	}
-	
+
 	@Override
 	public boolean isConcurrent() {
 		return _concurrent;
@@ -70,7 +70,7 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
 		try {
 			analyzer.run(row, distinctCount);
 		} catch (RuntimeException e) {
-			_analysisListener.errorInAnalyzer(_job, _analyzerJob, e);
+			_analysisListener.errorInAnalyzer(_job, _analyzerJob, row, e);
 		}
 		return null;
 	}

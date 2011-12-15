@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ExplorerJob;
@@ -101,17 +102,17 @@ public class InfoLoggingAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void errorInFilter(AnalysisJob job, FilterJob filterJob, Throwable throwable) {
+	public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
 		// do nothing
 	}
 
 	@Override
-	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, Throwable throwable) {
+	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
 		// do nothing
 	}
 
 	@Override
-	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, Throwable throwable) {
+	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
 		// do nothing
 	}
 

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ExplorerJob;
@@ -79,15 +80,15 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void errorInFilter(AnalysisJob job, FilterJob filterJob, Throwable throwable) {
+	public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
 	}
 
 	@Override
-	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, Throwable throwable) {
+	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
 	}
 
 	@Override
-	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, Throwable throwable) {
+	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
 	}
 
 	@Override

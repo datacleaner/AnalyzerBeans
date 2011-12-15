@@ -75,7 +75,7 @@ final class FilterConsumer extends AbstractRowProcessingConsumer implements RowP
 			FilterOutcome outcome = new ImmutableFilterOutcome(_filterJob, category);
 			outcomes.add(outcome);
 		} catch (RuntimeException e) {
-			_analysisListener.errorInFilter(_job, _filterJob, e);
+			_analysisListener.errorInFilter(_job, _filterJob, row, e);
 		}
 		return null;
 	}

@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ExplorerJob;
@@ -94,18 +95,18 @@ public class DebugLoggingAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void errorInFilter(AnalysisJob job, FilterJob filterJob, Throwable throwable) {
-		logger.debug("errorInFilter(" + job + "," + filterJob + ")", throwable);
+	public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
+		logger.debug("errorInFilter(" + job + "," + filterJob + "," + row + ")", throwable);
 	}
 
 	@Override
-	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, Throwable throwable) {
-		logger.debug("errorInTransformer(" + job + "," + transformerJob + ")", throwable);
+	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
+		logger.debug("errorInTransformer(" + job + "," + transformerJob + "," + row + ")", throwable);
 	}
 
 	@Override
-	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, Throwable throwable) {
-		logger.debug("errorInAnalyzer(" + job + "," + analyzerJob + ")", throwable);
+	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
+		logger.debug("errorInAnalyzer(" + job + "," + analyzerJob + "," + row + ")", throwable);
 	}
 
 	@Override

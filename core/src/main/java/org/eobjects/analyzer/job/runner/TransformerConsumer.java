@@ -94,7 +94,7 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
 		try {
 			outputValues.add(transformer.transform(row));
 		} catch (RuntimeException e) {
-			_analysisListener.errorInTransformer(_job, _transformerJob, e);
+			_analysisListener.errorInTransformer(_job, _transformerJob, row, e);
 			outputValues.add(new Object[outputColumns.length]);
 		}
 

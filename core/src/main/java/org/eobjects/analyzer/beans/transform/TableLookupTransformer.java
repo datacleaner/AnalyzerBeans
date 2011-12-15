@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.transform;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +44,8 @@ import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.query.OperatorType;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A transformer that can do a lookup (like a left join) based on a set of
@@ -55,6 +58,8 @@ import org.eobjects.metamodel.schema.Column;
 @Description("Perform a lookup based on a table in any of your registered datastore (like a LEFT join).")
 @Concurrent(true)
 public class TableLookupTransformer implements Transformer<Object> {
+
+	private static final Logger logger = LoggerFactory.getLogger(TableLookupTransformer.class);
 
 	@Inject
 	@Configured
@@ -85,7 +90,7 @@ public class TableLookupTransformer implements Transformer<Object> {
 	private final Map<List<Object>, Object[]> cache = CollectionUtils2.createCacheMap();
 	private Column[] queryOutputColumns;
 	private Column[] queryConditionColumns;
-	
+
 	private void resetColumns() {
 		queryOutputColumns = null;
 		queryConditionColumns = null;
@@ -156,12 +161,18 @@ public class TableLookupTransformer implements Transformer<Object> {
 			queryInput.add(value);
 		}
 
+		logger.info("Looking up based on condition values: {}", queryInput);
+
 		Object[] result;
 		synchronized (cache) {
 			result = cache.get(queryInput);
 			if (result == null) {
 				result = performQuery(queryInput);
 				cache.put(queryInput, result);
+			} else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Returning cached lookup result: {}", Arrays.toString(result));
+				}
 			}
 		}
 
@@ -184,11 +195,18 @@ public class TableLookupTransformer implements Transformer<Object> {
 			final DataSet dataSet = con.getDataContext().executeQuery(query);
 			if (dataSet.next()) {
 				result = dataSet.getRow().getValues();
+				if (logger.isInfoEnabled()) {
+					logger.info("Result of lookup: " + Arrays.toString(result));
+				}
 			} else {
+				logger.warn("Result of lookup: None!");
 				result = new Object[outputColumns.length];
 			}
 			dataSet.close();
 			return result;
+		} catch (RuntimeException e) {
+			logger.error("Error occurred while looking up based on conditions: " + queryInput, e);
+			throw e;
 		} finally {
 			con.close();
 		}

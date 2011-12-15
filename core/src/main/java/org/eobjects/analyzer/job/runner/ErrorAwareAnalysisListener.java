@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ExplorerJob;
@@ -80,20 +81,20 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 	}
 
 	@Override
-	public void errorInFilter(AnalysisJob job, FilterJob filterJob, Throwable throwable) {
-		logger.warn("errorInFilter({},{},{})", new Object[] { job, filterJob, throwable });
+	public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
+		logger.warn("errorInFilter({},{},{},{})", new Object[] { job, filterJob, row, throwable });
 		storeError(job, throwable);
 	}
 
 	@Override
-	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, Throwable throwable) {
-		logger.warn("errorInTransformer({},{},{})", new Object[] { job, transformerJob, throwable });
+	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
+		logger.warn("errorInTransformer({},{},{},{})", new Object[] { job, transformerJob, row, throwable });
 		storeError(job, throwable);
 	}
 
 	@Override
-	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, Throwable throwable) {
-		logger.warn("errorInAnalyzer({},{},{})", new Object[] { job, analyzerJob, throwable });
+	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
+		logger.warn("errorInAnalyzer({},{},{},{})", new Object[] { job, analyzerJob, row, throwable });
 		storeError(job, throwable);
 	}
 
