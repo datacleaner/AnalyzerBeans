@@ -19,8 +19,6 @@
  */
 package org.eobjects.analyzer.connection;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eobjects.metamodel.DataContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +35,12 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 
 	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDatastoreConnection.class);
 
-	private final AtomicInteger _usageCount = new AtomicInteger(1);
 	private final Datastore _datastore;
-	private boolean _closed = false;
+	private volatile int _usageCount;
 
 	public UsageAwareDatastoreConnection(Datastore datastore) {
 		_datastore = datastore;
+		_usageCount = 1;
 		if (logger.isDebugEnabled()) {
 			StackTraceElement[] stackTrace = new Throwable().getStackTrace();
 			logger.debug("{} instantiated by:", this);
@@ -53,9 +51,15 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 		}
 	}
 
-	public final void incrementUsageCount() {
-		int count = _usageCount.incrementAndGet();
-		logger.info("Usage incremented to {} for {}", count, this);
+	public synchronized final boolean requestUsage() {
+		if (isClosed()) {
+			logger.info("Connection is closed, request for more usage refused");
+			return false;
+		}
+
+		_usageCount++;
+
+		logger.debug("Usage incremented to {} for {}", _usageCount, this);
 
 		if (logger.isDebugEnabled()) {
 			StackTraceElement[] stackTrace = new Throwable().getStackTrace();
@@ -65,22 +69,27 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 				logger.debug(" - {} @ line {}", ste.getClassName(), ste.getLineNumber());
 			}
 		}
+		return true;
 	}
 
 	@Override
 	public abstract E getDataContext();
 
 	public synchronized boolean isClosed() {
-		return _closed;
+		return _usageCount == 0;
 	}
 
 	@Override
 	public synchronized final void close() {
-		int users = _usageCount.decrementAndGet();
-		logger.info("Method close() invoked, usage decremented to {} for {}", users, this);
-		if (users == 0) {
+		if (_usageCount == 0) {
+			logger.warn("Connection is already closed, but close() was invoked!", new Throwable());
+			return;
+		}
+
+		_usageCount--;
+		logger.debug("Method close() invoked, usage decremented to {} for {}", _usageCount, this);
+		if (_usageCount == 0) {
 			logger.info("Closing {}", this);
-			_closed = true;
 			closeInternal();
 		}
 	}
@@ -96,10 +105,9 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 		super.finalize();
 		if (!isClosed()) {
 			if (logger.isWarnEnabled()) {
-
 				logger.warn(
 						"Method finalize() invoked but not all usages closed ({} remaining) (for {}). Closing DatastoreConnection.",
-						_usageCount.get(), this);
+						_usageCount, this);
 			}
 			// in case of gc, also do the closing
 			closeInternal();
@@ -129,6 +137,6 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 	 * @return
 	 */
 	public int getUsageCount() {
-		return _usageCount.get();
+		return _usageCount;
 	}
 }

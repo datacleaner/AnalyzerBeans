@@ -118,6 +118,7 @@ public class UsageAwareDatastoreConnectionTest extends TestCase {
 		}
 
 		final AtomicInteger creations = new AtomicInteger();
+		final AtomicInteger reuses = new AtomicInteger();
 		final MutableRef<TestConnection> conRef = new MutableRef<TestConnection>();
 
 		for (int i = 0; i < threads.length; i++) {
@@ -125,8 +126,8 @@ public class UsageAwareDatastoreConnectionTest extends TestCase {
 				@Override
 				public void run() {
 					TestConnection con = conRef.get();
-					if (con != null && !con.isClosed()) {
-						con.incrementUsageCount();
+					if (con != null && con.requestUsage()) {
+						reuses.incrementAndGet();
 					} else {
 						con = new TestConnection();
 						conRef.set(con);
@@ -150,6 +151,7 @@ public class UsageAwareDatastoreConnectionTest extends TestCase {
 
 		assertTrue(creations.get() > 0);
 		assertTrue(creations.get() < threadCount);
+		assertTrue(reuses.get() > 0);
 		assertEquals("Found " + raceConditions + " race conditions! Object creation and close() method is not thread safe!",
 				0, raceConditions.get());
 	}
