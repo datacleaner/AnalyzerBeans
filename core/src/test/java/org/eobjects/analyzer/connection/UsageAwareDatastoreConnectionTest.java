@@ -19,7 +19,13 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import junit.framework.TestCase;
+
+import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.util.MutableRef;
 
 public class UsageAwareDatastoreConnectionTest extends TestCase {
 
@@ -73,5 +79,78 @@ public class UsageAwareDatastoreConnectionTest extends TestCase {
 		System.runFinalization();
 
 		assertFalse(ds.isDatastoreConnectionOpen());
+	}
+
+	public void testCloseNoRaceConditions() throws Exception {
+		final int threadCount = 5000;
+		final Thread[] threads = new Thread[threadCount];
+		final AtomicInteger raceConditions = new AtomicInteger();
+
+		class TestConnection extends UsageAwareDatastoreConnection<DataContext> {
+
+			public TestConnection() {
+				super(null);
+			}
+
+			private final AtomicInteger _closeCount = new AtomicInteger();
+
+			@Override
+			public SchemaNavigator getSchemaNavigator() {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public DataContext getDataContext() {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			protected void closeInternal() {
+				try {
+					Thread.sleep(14);
+				} catch (InterruptedException e) {
+				}
+				int closeCount = _closeCount.incrementAndGet();
+				if (closeCount != 1) {
+					raceConditions.incrementAndGet();
+				}
+			}
+		}
+
+		final AtomicInteger creations = new AtomicInteger();
+		final MutableRef<TestConnection> conRef = new MutableRef<TestConnection>();
+
+		for (int i = 0; i < threads.length; i++) {
+			threads[i] = new Thread() {
+				@Override
+				public void run() {
+					TestConnection con = conRef.get();
+					if (con != null && !con.isClosed()) {
+						con.incrementUsageCount();
+					} else {
+						con = new TestConnection();
+						conRef.set(con);
+						creations.incrementAndGet();
+					}
+					try {
+						Thread.sleep((long) (Math.random() * 10));
+					} catch (InterruptedException e) {
+					}
+					con.close();
+				}
+			};
+		}
+
+		for (int i = 0; i < threads.length; i++) {
+			if (raceConditions.get() > 0) {
+				break;
+			}
+			threads[i].start();
+		}
+
+		assertTrue(creations.get() > 0);
+		assertTrue(creations.get() < threadCount);
+		assertEquals("Found " + raceConditions + " race conditions! Object creation and close() method is not thread safe!",
+				0, raceConditions.get());
 	}
 }

@@ -70,12 +70,12 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 	@Override
 	public abstract E getDataContext();
 
-	public boolean isClosed() {
+	public synchronized boolean isClosed() {
 		return _closed;
 	}
 
 	@Override
-	public final void close() {
+	public synchronized final void close() {
 		int users = _usageCount.decrementAndGet();
 		logger.info("Method close() invoked, usage decremented to {} for {}", users, this);
 		if (users == 0) {
