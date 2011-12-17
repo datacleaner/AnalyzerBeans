@@ -128,7 +128,12 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 
 	@Override
 	public DatastoreConnection openConnection() {
-		return getDataContextProvider();
+		UsageAwareDatastoreConnection<E> connection = getDataContextProvider();
+		if (connection instanceof UpdateableDatastoreConnection) {
+			return new UpdateableDatastoreConnectionLease((UpdateableDatastoreConnection) connection);
+		} else {
+			return new DatastoreConnectionLease(connection);
+		}
 	}
 
 	protected abstract UsageAwareDatastoreConnection<E> createDatastoreConnection();

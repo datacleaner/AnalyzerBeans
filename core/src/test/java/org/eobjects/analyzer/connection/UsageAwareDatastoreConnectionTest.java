@@ -33,30 +33,31 @@ public class UsageAwareDatastoreConnectionTest extends TestCase {
 		CsvDatastore ds = new CsvDatastore("foo", "src/test/resources/employees.csv");
 		assertFalse(ds.isDatastoreConnectionOpen());
 
-		UsageAwareDatastoreConnection<?> con1 = (UsageAwareDatastoreConnection<?>) ds.openConnection();
+		UpdateableDatastoreConnectionLease connection1 = (UpdateableDatastoreConnectionLease) ds.openConnection();
+
+		UsageAwareDatastoreConnection<?> usageAware = (UsageAwareDatastoreConnection<?>) connection1.getDelegate();
 		assertTrue(ds.isDatastoreConnectionOpen());
-		assertEquals(1, con1.getUsageCount());
+		assertEquals(1, usageAware.getUsageCount());
 
 		DatastoreConnection con2 = ds.openConnection();
-		assertEquals(2, con1.getUsageCount());
+		assertEquals(2, usageAware.getUsageCount());
 
 		DatastoreConnection con3 = ds.openConnection();
-		assertEquals(3, con1.getUsageCount());
-
-		assertSame(con1, con2);
-		assertSame(con1, con3);
+		assertEquals(3, usageAware.getUsageCount());
 
 		con3.close();
 
 		assertTrue(ds.isDatastoreConnectionOpen());
-		assertEquals(2, con1.getUsageCount());
+		assertEquals(2, usageAware.getUsageCount());
 
+		// call the same close method twice!
+		con2.close();
 		con2.close();
 
 		assertTrue(ds.isDatastoreConnectionOpen());
-		assertEquals(1, con1.getUsageCount());
+		assertEquals(1, usageAware.getUsageCount());
 
-		con1.close();
+		usageAware.close();
 
 		assertFalse(ds.isDatastoreConnectionOpen());
 	}
@@ -65,11 +66,11 @@ public class UsageAwareDatastoreConnectionTest extends TestCase {
 		CsvDatastore ds = new CsvDatastore("foo", "src/test/resources/employees.csv");
 		assertFalse(ds.isDatastoreConnectionOpen());
 
-		DatastoreConnection con1 = ds.openConnection();
-		DatastoreConnection con2 = ds.openConnection();
+		DatastoreConnectionLease con1 = (DatastoreConnectionLease) ds.openConnection();
+		DatastoreConnectionLease con2 = (DatastoreConnectionLease) ds.openConnection();
 
 		assertTrue(ds.isDatastoreConnectionOpen());
-		assertSame(con1, con2);
+		assertSame(con1.getDelegate(), con2.getDelegate());
 
 		con1 = null;
 		con2 = null;

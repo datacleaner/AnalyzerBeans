@@ -63,8 +63,7 @@ public class DataSourceDatastoreConnectionTest extends TestCase {
 		assertEquals("jdbc/mydatasource", datastore.getDatasourceJndiUrl());
 
 		DatastoreConnection con = datastore.openConnection();
-		assertEquals(DataSourceDatastoreConnection.class, con.getClass());
-
+		
 		assertEquals("mydatasource", con.getDatastore().getName());
 		SchemaNavigator schemaNavigator = con.getSchemaNavigator();
 		assertNotNull(schemaNavigator);
