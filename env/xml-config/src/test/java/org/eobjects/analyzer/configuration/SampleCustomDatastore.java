@@ -56,7 +56,7 @@ public class SampleCustomDatastore implements Datastore, PerformanceCharacterist
 	
 	@Override
 	public DatastoreConnection openConnection() {
-		DataContext dc = DataContextFactory.createXmlDataContext(xmlFile, false, false);
+		DataContext dc = DataContextFactory.createXmlDataContext(xmlFile, false);
 		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}
 

@@ -32,8 +32,7 @@ import org.eobjects.metamodel.schema.Table;
 public class SchemaNavigatorTest extends TestCase {
 
 	public void testSchemaWithDot() throws Exception {
-		DataContext dc = DataContextFactory.createCsvDataContext(new File("src/test/resources/employees.csv"), ',', '\"',
-				false);
+		DataContext dc = DataContextFactory.createCsvDataContext(new File("src/test/resources/employees.csv"), ',', '\"');
 
 		assertEquals(2, dc.getDefaultSchema().getTables()[0].getColumnCount());
 
