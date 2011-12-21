@@ -120,7 +120,7 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 		format.setDecimalFormatSymbols(symbols);
 		return transformValue(value, format);
 	}
-
+	
 	public static Number transformValue(Object value, DecimalFormat decimalFormat) {
 		Number n = null;
 		if (value != null) {

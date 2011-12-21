@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,6 +39,8 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FileProperty;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.FileDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastore;
@@ -52,6 +55,7 @@ import org.eobjects.metamodel.create.TableCreationBuilder;
 import org.eobjects.metamodel.csv.CsvDataContext;
 import org.eobjects.metamodel.insert.RowInsertionBuilder;
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.Action;
@@ -112,6 +116,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 	@Description("Additional values to write to error log")
 	InputColumn<?>[] additionalErrorLogValues;
 
+	private Column[] _targetColumns;
 	private WriteBuffer _writeBuffer;
 	private AtomicInteger _writtenRowCount;
 	private AtomicInteger _errorRowCount;
@@ -145,11 +150,11 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		try {
 			final SchemaNavigator schemaNavigator = con.getSchemaNavigator();
 
-			final Column[] columns = schemaNavigator.convertToColumns(
-					schemaName, tableName, columnNames);
+			_targetColumns = schemaNavigator.convertToColumns(schemaName,
+					tableName, columnNames);
 			final List<String> columnsNotFound = new ArrayList<String>();
-			for (int i = 0; i < columns.length; i++) {
-				if (columns[i] == null) {
+			for (int i = 0; i < _targetColumns.length; i++) {
+				if (_targetColumns[i] == null) {
 					columnsNotFound.add(columnNames[i]);
 				}
 			}
@@ -276,12 +281,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 					+ additionalErrorLogValues.length];
 		}
 		for (int i = 0; i < values.length; i++) {
-			Object value = row.getValue(values[i]);
-			rowData[i] = value;
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Value for {} set to: {}", columnNames[i], value);
-			}
+			rowData[i] = row.getValue(values[i]);
 		}
 
 		if (additionalErrorLogValues != null) {
@@ -289,6 +289,25 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 				Object value = row.getValue(additionalErrorLogValues[i]);
 				rowData[values.length + i] = value;
 			}
+		}
+
+		try {
+			// perform conversion in a separate loop, since it might crash and
+			// the
+			// error data will be more complete if first loop finished.
+			for (int i = 0; i < values.length; i++) {
+				rowData[i] = convertType(rowData[i], _targetColumns[i]);
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("Value for {} set to: {}", columnNames[i],
+							rowData[i]);
+				}
+			}
+		} catch (RuntimeException e) {
+			for (int i = 0; i < distinctCount; i++) {
+				errorOccurred(rowData, e);
+			}
+			return;
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -299,6 +318,40 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 		for (int i = 0; i < distinctCount; i++) {
 			_writeBuffer.addToBuffer(rowData);
 		}
+	}
+
+	private Object convertType(final Object value, Column targetColumn)
+			throws IllegalArgumentException {
+		if (value == null) {
+			return null;
+		}
+		Object result = value;
+		ColumnType type = targetColumn.getType();
+		if (type.isLiteral()) {
+			// for strings, only convert some simple cases, since JDBC drivers
+			// typically also do a decent job here (with eg. Clob types, char[]
+			// types etc.)
+			if (value instanceof Number || value instanceof Date) {
+				result = value.toString();
+			}
+		} else if (type.isNumber()) {
+			Number numberValue = ConvertToNumberTransformer
+					.transformValue(value);
+			if (numberValue == null && !"".equals(value)) {
+				throw new IllegalArgumentException("Could not convert " + value
+						+ " to number");
+			}
+			result = numberValue;
+		} else if (type == ColumnType.BOOLEAN) {
+			Boolean booleanValue = ConvertToBooleanTransformer
+					.transformValue(value);
+			if (booleanValue == null && !"".equals(value)) {
+				throw new IllegalArgumentException("Could not convert " + value
+						+ " to boolean");
+			}
+			result = booleanValue;
+		}
+		return result;
 	}
 
 	@Override
@@ -354,53 +407,51 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 							insertBuilder.execute();
 							_writtenRowCount.incrementAndGet();
 						} catch (final RuntimeException e) {
-							_errorRowCount.incrementAndGet();
-							if (errorHandlingOption == ErrorHandlingOption.STOP_JOB) {
-								throw e;
-							} else {
-								logger.warn(
-										"Error occurred while inserting record. Writing to error stream",
-										e);
-								final Object[] rowValues = rowData;
-								_errorDataContext
-										.executeUpdate(new UpdateScript() {
-											@Override
-											public void run(UpdateCallback cb) {
-												RowInsertionBuilder insertBuilder = cb
-														.insertInto(_errorDataContext
-																.getDefaultSchema()
-																.getTables()[0]);
-												for (int i = 0; i < columnNames.length; i++) {
-													insertBuilder = insertBuilder
-															.value(columnNames[i],
-																	rowValues[i]);
-												}
-
-												if (additionalErrorLogValues != null) {
-													for (int i = 0; i < additionalErrorLogValues.length; i++) {
-														String columnName = translateAdditionalErrorLogColumnName(additionalErrorLogValues[i]
-																.getName());
-														Object value = rowValues[columnNames.length
-																+ i];
-														insertBuilder = insertBuilder
-																.value(columnName,
-																		value);
-													}
-												}
-
-												insertBuilder = insertBuilder
-														.value(ERROR_MESSAGE_COLUMN_NAME,
-																e.getMessage());
-												insertBuilder.execute();
-											}
-										});
-							}
+							errorOccurred(rowData, e);
 						}
 					}
 				}
 			});
 		} finally {
 			con.close();
+		}
+	}
+
+	protected void errorOccurred(final Object[] rowData,
+			final RuntimeException e) {
+		_errorRowCount.incrementAndGet();
+		if (errorHandlingOption == ErrorHandlingOption.STOP_JOB) {
+			throw e;
+		} else {
+			logger.warn(
+					"Error occurred while inserting record. Writing to error stream",
+					e);
+			_errorDataContext.executeUpdate(new UpdateScript() {
+				@Override
+				public void run(UpdateCallback cb) {
+					RowInsertionBuilder insertBuilder = cb
+							.insertInto(_errorDataContext.getDefaultSchema()
+									.getTables()[0]);
+					for (int i = 0; i < columnNames.length; i++) {
+						insertBuilder = insertBuilder.value(columnNames[i],
+								rowData[i]);
+					}
+
+					if (additionalErrorLogValues != null) {
+						for (int i = 0; i < additionalErrorLogValues.length; i++) {
+							String columnName = translateAdditionalErrorLogColumnName(additionalErrorLogValues[i]
+									.getName());
+							Object value = rowData[columnNames.length + i];
+							insertBuilder = insertBuilder.value(columnName,
+									value);
+						}
+					}
+
+					insertBuilder = insertBuilder.value(
+							ERROR_MESSAGE_COLUMN_NAME, e.getMessage());
+					insertBuilder.execute();
+				}
+			});
 		}
 	}
 }

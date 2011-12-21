@@ -82,6 +82,10 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 		return new Boolean[] { b };
 	}
 
+	public static Boolean transformValue(final Object value) {
+		return transformValue(value, DEFAULT_TRUE_TOKENS, DEFAULT_FALSE_TOKENS);
+	}
+
 	public static Boolean transformValue(final Object value, final String[] trueTokens, final String[] falseTokens) {
 		Boolean b = null;
 		if (value != null) {
