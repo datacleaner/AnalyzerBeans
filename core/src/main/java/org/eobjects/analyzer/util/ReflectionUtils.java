@@ -21,6 +21,7 @@ package org.eobjects.analyzer.util;
 
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -50,6 +51,13 @@ import com.googlecode.gentyref.GenericTypeReflector;
  */
 public final class ReflectionUtils {
 
+	/**
+	 * A lock used at various points when calling Class.getAnnotation(...) or
+	 * Field.getAnnotation(...), since it seems there is a deadlock issue in the
+	 * Sun JVM when calling this method in a multithreaded environment!
+	 */
+	public static final Object ANNOTATION_REFLECTION_LOCK = new Object();
+
 	private static final Logger logger = LoggerFactory.getLogger(ReflectionUtils.class);
 
 	private ReflectionUtils() {
@@ -75,7 +83,7 @@ public final class ReflectionUtils {
 		if (thisClass == ofThatType) {
 			return true;
 		}
-		
+
 		if (thisClass.isPrimitive() != ofThatType.isPrimitive()) {
 			if (isByte(thisClass) && isByte(ofThatType)) {
 				return true;
@@ -261,7 +269,7 @@ public final class ReflectionUtils {
 		Type typeParameterForBaseInterface = pBaseType.getActualTypeArguments()[parameterIndex];
 		return getSafeClassToUse(typeParameterForBaseInterface);
 	}
-	
+
 	public static Class<?> getTypeParameter(Type genericType, int parameterIndex) {
 		if (genericType instanceof GenericArrayType) {
 			GenericArrayType gaType = (GenericArrayType) genericType;
@@ -378,7 +386,7 @@ public final class ReflectionUtils {
 
 		Method[] methods = getMethods(clazz);
 		for (Method method : methods) {
-			if (method.isAnnotationPresent(withAnnotation)) {
+			if (isAnnotationPresent(method, withAnnotation)) {
 				result.add(method);
 			}
 		}
@@ -391,7 +399,7 @@ public final class ReflectionUtils {
 
 		Field[] fields = getFields(clazz);
 		for (Field field : fields) {
-			if (field.isAnnotationPresent(withAnnotation)) {
+			if (isAnnotationPresent(field, withAnnotation)) {
 				result.add(field);
 			}
 		}
@@ -453,6 +461,18 @@ public final class ReflectionUtils {
 				throw (RuntimeException) e;
 			}
 			throw new IllegalStateException(e);
+		}
+	}
+
+	public static <A extends Annotation> A getAnnotation(AnnotatedElement element, Class<A> annotationClass) {
+		synchronized (ANNOTATION_REFLECTION_LOCK) {
+			return element.getAnnotation(annotationClass);
+		}
+	}
+
+	public static boolean isAnnotationPresent(AnnotatedElement element, Class<? extends Annotation> annotationClass) {
+		synchronized (ANNOTATION_REFLECTION_LOCK) {
+			return element.isAnnotationPresent(annotationClass);
 		}
 	}
 }

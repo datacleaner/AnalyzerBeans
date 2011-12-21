@@ -132,7 +132,7 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 	public Set<ProvidedPropertyDescriptor> getProvidedProperties() {
 		return Collections.unmodifiableSet(_providedProperties);
 	}
-	
+
 	@Override
 	public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls) {
 		Set<ProvidedPropertyDescriptor> result = new HashSet<ProvidedPropertyDescriptor>();
@@ -146,7 +146,7 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return getComponentClass().getAnnotation(annotationClass);
+		return ReflectionUtils.getAnnotation(getComponentClass(), annotationClass);
 	}
 
 	@Override
@@ -174,7 +174,7 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 
 		return result;
 	}
-	
+
 	@Override
 	public String[] getAliases() {
 		Alias alias = getAnnotation(Alias.class);

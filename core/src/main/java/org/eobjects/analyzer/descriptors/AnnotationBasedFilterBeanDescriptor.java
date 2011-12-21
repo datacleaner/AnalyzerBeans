@@ -27,8 +27,8 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends
-		AbstractBeanDescriptor<F> implements FilterBeanDescriptor<F, C> {
+final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends AbstractBeanDescriptor<F>
+		implements FilterBeanDescriptor<F, C> {
 
 	private final String _displayName;
 
@@ -39,7 +39,7 @@ final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends E
 			throw new DescriptorException(filterClass + " does not implement " + Filter.class.getName());
 		}
 
-		FilterBean filterAnnotation = filterClass.getAnnotation(FilterBean.class);
+		FilterBean filterAnnotation = ReflectionUtils.getAnnotation(filterClass, FilterBean.class);
 		if (filterAnnotation == null) {
 			throw new DescriptorException(filterClass + " doesn't implement the FilterBean annotation");
 		}

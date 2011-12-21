@@ -24,8 +24,8 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> extends AbstractBeanDescriptor<T>
-		implements TransformerBeanDescriptor<T> {
+final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> extends AbstractBeanDescriptor<T> implements
+		TransformerBeanDescriptor<T> {
 
 	private final String _displayName;
 
@@ -36,7 +36,7 @@ final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> e
 			throw new DescriptorException(transformerClass + " does not implement " + Transformer.class.getName());
 		}
 
-		TransformerBean transformerAnnotation = transformerClass.getAnnotation(TransformerBean.class);
+		TransformerBean transformerAnnotation = ReflectionUtils.getAnnotation(transformerClass, TransformerBean.class);
 		if (transformerAnnotation == null) {
 			throw new DescriptorException(transformerClass + " doesn't implement the TransformerBean annotation");
 		}
@@ -63,16 +63,16 @@ final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> e
 		}
 		return DataTypeFamily.valueOf(typeParameter);
 
-//		Type[] interfaces = getComponentClass().getGenericInterfaces();
-//		for (Type type : interfaces) {
-//			if (type instanceof ParameterizedType) {
-//				ParameterizedType pType = (ParameterizedType) type;
-//				if (pType.getRawType() == Transformer.class) {
-//					Class<?> typeParameter = ReflectionUtils.getTypeParameter(pType, 0);
-//					return DataTypeFamily.valueOf(typeParameter);
-//				}
-//			}
-//		}
-//		return DataTypeFamily.UNDEFINED;
+		// Type[] interfaces = getComponentClass().getGenericInterfaces();
+		// for (Type type : interfaces) {
+		// if (type instanceof ParameterizedType) {
+		// ParameterizedType pType = (ParameterizedType) type;
+		// if (pType.getRawType() == Transformer.class) {
+		// Class<?> typeParameter = ReflectionUtils.getTypeParameter(pType, 0);
+		// return DataTypeFamily.valueOf(typeParameter);
+		// }
+		// }
+		// }
+		// return DataTypeFamily.UNDEFINED;
 	}
 }

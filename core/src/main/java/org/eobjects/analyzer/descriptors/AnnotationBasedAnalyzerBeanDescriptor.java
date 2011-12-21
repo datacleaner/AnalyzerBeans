@@ -31,7 +31,7 @@ final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends
 	protected AnnotationBasedAnalyzerBeanDescriptor(Class<A> analyzerClass) throws DescriptorException {
 		super(analyzerClass, true);
 
-		AnalyzerBean analyzerAnnotation = analyzerClass.getAnnotation(AnalyzerBean.class);
+		AnalyzerBean analyzerAnnotation = ReflectionUtils.getAnnotation(analyzerClass, AnalyzerBean.class);
 		if (analyzerAnnotation == null) {
 			throw new DescriptorException(analyzerClass + " doesn't implement the AnalyzerBean annotation");
 		}

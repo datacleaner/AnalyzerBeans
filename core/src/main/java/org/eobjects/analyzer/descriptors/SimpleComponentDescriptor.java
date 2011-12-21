@@ -101,15 +101,15 @@ class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements Comp
 
 	@Override
 	protected void visitField(Field field) {
-		Configured configuredAnnotation = field.getAnnotation(Configured.class);
+		Configured configuredAnnotation = ReflectionUtils.getAnnotation(field, Configured.class);
 		if (configuredAnnotation != null) {
-			if (!field.isAnnotationPresent(Inject.class)) {
+			if (!ReflectionUtils.isAnnotationPresent(field, Inject.class)) {
 				logger.debug("No @Inject annotation found for @Configured field: {}", field);
 			}
 			_configuredProperties.add(new ConfiguredPropertyDescriptorImpl(field, this));
 		}
 
-		if (field.isAnnotationPresent(Configured.class)) {
+		if (ReflectionUtils.isAnnotationPresent(field, Configured.class)) {
 			ConfiguredPropertyDescriptor cpd = new ConfiguredPropertyDescriptorImpl(field, this);
 			_configuredProperties.add(cpd);
 		}

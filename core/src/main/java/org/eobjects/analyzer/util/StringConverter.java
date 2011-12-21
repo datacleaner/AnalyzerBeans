@@ -109,7 +109,7 @@ public final class StringConverter {
 		}
 
 		if (o != null) {
-			Convertable convertable = o.getClass().getAnnotation(Convertable.class);
+			Convertable convertable = ReflectionUtils.getAnnotation(o.getClass(), Convertable.class);
 			if (convertable != null) {
 				Class<? extends Converter<?>> converterClass = convertable.value();
 				converterList.add(createConverter(converterClass));
@@ -181,7 +181,7 @@ public final class StringConverter {
 			}
 		}
 
-		Convertable convertable = type.getAnnotation(Convertable.class);
+		Convertable convertable = ReflectionUtils.getAnnotation(type, Convertable.class);
 		if (convertable != null) {
 			Class<? extends Converter<?>> converterClass = convertable.value();
 			converterList.add(createConverter(converterClass));

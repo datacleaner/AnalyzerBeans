@@ -82,21 +82,23 @@ final class BeanClassVisitor implements ClassVisitor {
 
 	public boolean isAnalyzer() {
 		if (_beanClazz != null) {
-			return _beanClazz.isAnnotationPresent(AnalyzerBean.class) && ReflectionUtils.is(_beanClazz, Analyzer.class);
+			return ReflectionUtils.isAnnotationPresent(_beanClazz, AnalyzerBean.class)
+					&& ReflectionUtils.is(_beanClazz, Analyzer.class);
 		}
 		return false;
 	}
 
 	public boolean isExplorer() {
 		if (_beanClazz != null) {
-			return _beanClazz.isAnnotationPresent(AnalyzerBean.class) && ReflectionUtils.is(_beanClazz, Explorer.class);
+			return ReflectionUtils.isAnnotationPresent(_beanClazz, AnalyzerBean.class)
+					&& ReflectionUtils.is(_beanClazz, Explorer.class);
 		}
 		return false;
 	}
 
 	public boolean isTransformer() {
 		if (_beanClazz != null) {
-			return _beanClazz.isAnnotationPresent(TransformerBean.class)
+			return ReflectionUtils.isAnnotationPresent(_beanClazz, TransformerBean.class)
 					&& ReflectionUtils.is(_beanClazz, Transformer.class);
 		}
 		return false;
@@ -104,14 +106,16 @@ final class BeanClassVisitor implements ClassVisitor {
 
 	public boolean isRenderer() {
 		if (_beanClazz != null) {
-			return _beanClazz.isAnnotationPresent(RendererBean.class) && ReflectionUtils.is(_beanClazz, Renderer.class);
+			return ReflectionUtils.isAnnotationPresent(_beanClazz, RendererBean.class)
+					&& ReflectionUtils.is(_beanClazz, Renderer.class);
 		}
 		return false;
 	}
 
 	public boolean isFilter() {
 		if (_beanClazz != null) {
-			return _beanClazz.isAnnotationPresent(FilterBean.class) && ReflectionUtils.is(_beanClazz, Filter.class);
+			return ReflectionUtils.isAnnotationPresent(_beanClazz, FilterBean.class)
+					&& ReflectionUtils.is(_beanClazz, Filter.class);
 		}
 		return false;
 	}

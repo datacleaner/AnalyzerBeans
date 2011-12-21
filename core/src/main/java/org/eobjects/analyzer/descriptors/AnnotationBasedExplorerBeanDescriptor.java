@@ -34,7 +34,7 @@ final class AnnotationBasedExplorerBeanDescriptor<E extends Explorer<?>> extends
 	protected AnnotationBasedExplorerBeanDescriptor(Class<E> explorerClass) throws DescriptorException {
 		super(explorerClass, false);
 
-		AnalyzerBean analyzerAnnotation = explorerClass.getAnnotation(AnalyzerBean.class);
+		AnalyzerBean analyzerAnnotation = ReflectionUtils.getAnnotation(explorerClass, AnalyzerBean.class);
 		if (analyzerAnnotation == null) {
 			throw new DescriptorException(explorerClass + " doesn't implement the AnalyzerBean annotation");
 		}

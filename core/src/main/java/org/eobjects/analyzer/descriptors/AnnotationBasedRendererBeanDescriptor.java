@@ -50,7 +50,7 @@ final class AnnotationBasedRendererBeanDescriptor implements RendererBeanDescrip
 			throw new IllegalArgumentException("beanClass cannot be null");
 		}
 		_componentClass = beanClass;
-		_rendererBeanAnnotation = _componentClass.getAnnotation(RendererBean.class);
+		_rendererBeanAnnotation = ReflectionUtils.getAnnotation(_componentClass, RendererBean.class);
 		if (_rendererBeanAnnotation == null) {
 			throw new DescriptorException(beanClass + " doesn't implement the RendererBean annotation");
 		}
@@ -106,7 +106,7 @@ final class AnnotationBasedRendererBeanDescriptor implements RendererBeanDescrip
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return _componentClass.getAnnotation(annotationClass);
+		return ReflectionUtils.getAnnotation(_componentClass, annotationClass);
 	}
 
 	@Override
