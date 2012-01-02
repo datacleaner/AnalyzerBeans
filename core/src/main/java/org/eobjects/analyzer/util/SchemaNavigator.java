@@ -34,6 +34,10 @@ public final class SchemaNavigator {
 		this.dataContext = dataContext;
 	}
 
+	public void refreshSchemas() {
+		dataContext.refreshSchemas();
+	}
+
 	public Schema convertToSchema(String schemaName) {
 		return dataContext.getSchemaByName(schemaName);
 	}
