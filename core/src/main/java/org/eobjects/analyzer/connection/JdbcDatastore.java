@@ -21,10 +21,8 @@ package org.eobjects.analyzer.connection;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -33,6 +31,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.apache.commons.dbcp.BasicDataSource;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.DataContextFactory;
@@ -134,7 +133,7 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 		return _datasourceJndiUrl;
 	}
 
-	public Connection createConnection() throws IllegalStateException {
+	public DataSource createDataSource() throws IllegalStateException {
 		if (_jdbcUrl == null) {
 			throw new IllegalStateException("JDBC URL is null, cannot create connection!");
 		}
@@ -167,25 +166,24 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 			}
 		}
 
-		try {
-			if (_username == null && _password == null) {
-				return DriverManager.getConnection(_jdbcUrl);
-			} else {
-				return DriverManager.getConnection(_jdbcUrl, _username, _password);
-			}
-		} catch (SQLException e) {
-			throw new IllegalStateException("Could not establish JDBC connection", e);
+		BasicDataSource ds = new BasicDataSource();
+		ds.setDefaultAutoCommit(false);
+		ds.setUrl(_jdbcUrl);
+
+		if (_username != null && _password != null) {
+			ds.setUsername(_username);
+			ds.setPassword(_password);
 		}
+		return ds;
 	}
 
 	@Override
 	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
 		if (StringUtils.isNullOrEmpty(_datasourceJndiUrl)) {
-			Connection connection = createConnection();
+			DataSource ds = createDataSource();
 
-			UpdateableDataContext dataContext = DataContextFactory.createJdbcDataContext(connection);
-			return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this,
-					new CloseableJdbcConnection(connection));
+			UpdateableDataContext dataContext = DataContextFactory.createJdbcDataContext(ds);
+			return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
 		} else {
 			try {
 				Context initialContext = getJndiNamingContext();

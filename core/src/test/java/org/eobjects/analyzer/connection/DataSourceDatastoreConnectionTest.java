@@ -42,7 +42,7 @@ public class DataSourceDatastoreConnectionTest extends TestCase {
 		EasyMock.expect(dataSource.getConnection()).andAnswer(new IAnswer<Connection>() {
 			@Override
 			public Connection answer() throws Throwable {
-				return TestHelper.createSampleDatabaseDatastore("whatever").createConnection();
+				return TestHelper.createSampleDatabaseDatastore("whatever").createDataSource().getConnection();
 			}
 		}).times(4);
 
@@ -63,7 +63,7 @@ public class DataSourceDatastoreConnectionTest extends TestCase {
 		assertEquals("jdbc/mydatasource", datastore.getDatasourceJndiUrl());
 
 		DatastoreConnection con = datastore.openConnection();
-		
+
 		assertEquals("mydatasource", con.getDatastore().getName());
 		SchemaNavigator schemaNavigator = con.getSchemaNavigator();
 		assertNotNull(schemaNavigator);

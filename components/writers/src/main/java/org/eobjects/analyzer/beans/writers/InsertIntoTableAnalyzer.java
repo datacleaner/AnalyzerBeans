@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -34,6 +33,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Categorized;
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FileProperty;
@@ -66,8 +66,9 @@ import org.slf4j.LoggerFactory;
 @AnalyzerBean("Insert into table")
 @Description("Insert records into a table in a registered datastore. This component allows you to map the values available in the flow with the columns of the target table.")
 @Categorized(WriteDataCategory.class)
+@Concurrent(true)
 public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
-		Action<Queue<Object[]>> {
+		Action<Iterable<Object[]>> {
 
 	private static final File TEMP_DIR = FileHelper.getTempDir();
 
@@ -373,8 +374,12 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 				tableName, _errorRowCount.get(), errorDatastore);
 	}
 
+	/**
+	 * Method invoked when flushing the buffer
+	 */
 	@Override
-	public void run(final Queue<Object[]> buffer) throws Exception {
+	public void run(final Iterable<Object[]> buffer) throws Exception {
+
 		UpdateableDatastoreConnection con = datastore.openConnection();
 		try {
 			final Column[] columns = con.getSchemaNavigator().convertToColumns(
@@ -389,8 +394,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 			dc.executeUpdate(new UpdateScript() {
 				@Override
 				public void run(UpdateCallback callback) {
-					for (Object[] rowData = buffer.poll(); rowData != null; rowData = buffer
-							.poll()) {
+					for (Object[] rowData : buffer) {
 						RowInsertionBuilder insertBuilder = callback
 								.insertInto(columns[0].getTable());
 						for (int i = 0; i < columns.length; i++) {
