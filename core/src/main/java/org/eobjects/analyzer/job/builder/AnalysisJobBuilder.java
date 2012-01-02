@@ -78,7 +78,9 @@ public final class AnalysisJobBuilder implements Closeable {
 	private final IdGenerator _transformedColumnIdGenerator;
 
 	// the configurable components
+	private Datastore _datastore;
 	private DatastoreConnection _datastoreConnection;
+
 	private final List<MetaModelInputColumn> _sourceColumns;
 	private final List<FilterJobBuilder<?, ?>> _filterJobBuilders;
 	private final List<TransformerJobBuilder<?>> _transformerJobBuilders;
@@ -136,7 +138,12 @@ public final class AnalysisJobBuilder implements Closeable {
 		return setDatastore(datastore);
 	}
 
+	public Datastore getDatastore() {
+		return _datastore;
+	}
+
 	public AnalysisJobBuilder setDatastore(Datastore datastore) {
+		_datastore = datastore;
 		final DatastoreConnection dataContextProvider;
 		if (datastore == null) {
 			dataContextProvider = null;
@@ -162,7 +169,7 @@ public final class AnalysisJobBuilder implements Closeable {
 		_datastoreConnection = datastoreConnection;
 		return this;
 	}
-	
+
 	/**
 	 * @deprecated use {@link #getDatastoreConnection()} instead.
 	 */
