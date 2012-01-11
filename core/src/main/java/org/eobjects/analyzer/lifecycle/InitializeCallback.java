@@ -21,30 +21,39 @@ package org.eobjects.analyzer.lifecycle;
 
 import java.util.Set;
 
-import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
+import org.eobjects.analyzer.descriptors.ValidateMethodDescriptor;
 
 /**
  * Life cycle callback for the initialize phase.
  * 
  * @author Kasper Sørensen
  */
-public final class InitializeCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
+final class InitializeCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
+	
+	private final boolean _validate;
+	private final boolean _initialize;
 
-	private final InjectionManager _injectionManager;
-
-	public InitializeCallback(InjectionManager injectionManager) {
-		_injectionManager = injectionManager;
+	public InitializeCallback(boolean validate, boolean initialize) {
+		_validate = validate;
+		_initialize = initialize;
 	}
 
 	@Override
-	public void onEvent(LifeCycleState state, Object component, ComponentDescriptor<?> descriptor) {
-		assert state == LifeCycleState.INITIALIZE;
+	public void onEvent(Object component, ComponentDescriptor<?> descriptor) {
+		if (_validate) {
+			Set<ValidateMethodDescriptor> validateDescriptors = descriptor.getValidateMethods();
+			for (ValidateMethodDescriptor validateDescriptor : validateDescriptors) {
+				validateDescriptor.validate(component);
+			}
+		}
 
-		Set<InitializeMethodDescriptor> initializeDescriptors = descriptor.getInitializeMethods();
-		for (InitializeMethodDescriptor initializeDescriptor : initializeDescriptors) {
-			initializeDescriptor.initialize(component, _injectionManager);
+		if (_initialize) {
+			Set<InitializeMethodDescriptor> initializeDescriptors = descriptor.getInitializeMethods();
+			for (InitializeMethodDescriptor initializeDescriptor : initializeDescriptors) {
+				initializeDescriptor.initialize(component);
+			}
 		}
 	}
 

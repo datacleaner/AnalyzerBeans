@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,14 +27,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.inject.Inject;
-
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.ComponentCategory;
-import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 /**
@@ -48,12 +43,10 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  */
 abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> implements BeanDescriptor<B> {
 
-	protected final Set<ProvidedPropertyDescriptor> _providedProperties;
 	private final boolean _requireInputColumns;
 
 	public AbstractBeanDescriptor(Class<B> beanClass, boolean requireInputColumns) {
 		super(beanClass);
-		_providedProperties = new TreeSet<ProvidedPropertyDescriptor>();
 		_requireInputColumns = requireInputColumns;
 	}
 
@@ -78,25 +71,6 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 				throw new DescriptorException(getComponentClass()
 						+ " does not define a @Configured InputColumn or InputColumn-array");
 			}
-		}
-	}
-
-	@Override
-	protected void visitField(Field field) {
-		super.visitField(field);
-
-		Inject injectAnnotation = field.getAnnotation(Inject.class);
-		Configured configuredAnnotation = field.getAnnotation(Configured.class);
-		Provided providedAnnotation = field.getAnnotation(Provided.class);
-
-		if (configuredAnnotation == null && (injectAnnotation != null || providedAnnotation != null)) {
-			// provided properties = @Inject or @Provided, and NOT @Configured
-			_providedProperties.add(new ProvidedPropertyDescriptorImpl(field, this));
-		}
-
-		if (configuredAnnotation != null && providedAnnotation != null) {
-			throw new DescriptorException("The field " + field
-					+ " is annotated with both @Configured and @Provided, which are mutually exclusive.");
 		}
 	}
 
@@ -126,22 +100,6 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 			return null;
 		}
 		return description.value();
-	}
-
-	@Override
-	public Set<ProvidedPropertyDescriptor> getProvidedProperties() {
-		return Collections.unmodifiableSet(_providedProperties);
-	}
-
-	@Override
-	public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls) {
-		Set<ProvidedPropertyDescriptor> result = new HashSet<ProvidedPropertyDescriptor>();
-		for (ProvidedPropertyDescriptor descriptor : _providedProperties) {
-			if (ReflectionUtils.is(descriptor.getType(), cls)) {
-				result.add(descriptor);
-			}
-		}
-		return result;
 	}
 
 	@Override

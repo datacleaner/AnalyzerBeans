@@ -20,15 +20,8 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import junit.framework.TestCase;
-
-import org.eobjects.analyzer.configuration.InjectionManagerImpl;
-import org.eobjects.analyzer.connection.DatastoreCatalog;
-import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
-import org.eobjects.analyzer.reference.DatastoreDictionary;
-import org.eobjects.analyzer.test.TestHelper;
 
 public class InitializeMethodDescriptorImplTest extends TestCase {
 
@@ -38,7 +31,7 @@ public class InitializeMethodDescriptorImplTest extends TestCase {
 		executed = false;
 		Method m = getClass().getDeclaredMethod("doInitialize");
 		InitializeMethodDescriptorImpl initializeMethodDescriptorImpl = new InitializeMethodDescriptorImpl(m);
-		initializeMethodDescriptorImpl.initialize(this, null);
+		initializeMethodDescriptorImpl.initialize(this);
 
 		assertTrue(executed);
 
@@ -47,27 +40,5 @@ public class InitializeMethodDescriptorImplTest extends TestCase {
 
 	public void doInitialize() {
 		executed = true;
-	}
-
-	public void testInitWithCatalogs() throws Exception {
-		ComponentDescriptor<DatastoreDictionary> desc = Descriptors.ofComponent(DatastoreDictionary.class);
-		Set<InitializeMethodDescriptor> initializeMethods = desc.getInitializeMethods();
-		assertEquals(1, initializeMethods.size());
-
-		InitializeMethodDescriptorImpl methodDescriptor = (InitializeMethodDescriptorImpl) initializeMethods.iterator()
-				.next();
-		Class<?>[] parameterTypes = methodDescriptor.getParameterTypes();
-
-		assertEquals(1, parameterTypes.length);
-		assertEquals(DatastoreCatalog.class, parameterTypes[0]);
-
-		DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(TestHelper.createSampleDatabaseDatastore("mydb"));
-
-		DatastoreDictionary dictionary = new DatastoreDictionary("foo", "mydb", "PUBLIC.EMPLOYEES.FIRSTNAME");
-		assertNull(dictionary.getDatastoreCatalog());
-
-		methodDescriptor.initialize(dictionary, new InjectionManagerImpl(datastoreCatalog, null, null));
-
-		assertNotNull(dictionary.getDatastoreCatalog());
 	}
 }

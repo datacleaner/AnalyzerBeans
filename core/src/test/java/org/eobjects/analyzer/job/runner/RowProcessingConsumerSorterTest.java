@@ -48,7 +48,6 @@ import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.eobjects.analyzer.test.mock.MockDatastoreConnection;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
@@ -97,8 +96,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		fjb2.addInputColumn(mergedColumn1);
 
 		// 5: add an analyzer
-		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(mergedColumn1)
-				.setRequirement(fjb2, ValidationCategory.VALID);
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(mergedColumn1).setRequirement(fjb2, ValidationCategory.VALID);
 
 		assertTrue(ajb.isConfigured());
 
@@ -145,10 +143,8 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		// 5 and 6: Analyze VALID and INVALID output of single-word filter
 		// separately (the order of these two are not deterministic because of
 		// the shuffle)
-		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn)
-				.setRequirement(fjb2, ValidationCategory.VALID);
-		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn)
-				.setRequirement(fjb2, ValidationCategory.INVALID);
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn).setRequirement(fjb2, ValidationCategory.VALID);
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn).setRequirement(fjb2, ValidationCategory.INVALID);
 
 		assertTrue(ajb.isConfigured());
 
@@ -228,18 +224,18 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		AnalysisListener listener = null;
 
 		for (AnalyzerJob analyzerJob : analysisJob.getAnalyzerJobs()) {
-			RowProcessingConsumer consumer = new AnalyzerConsumer(analysisJob, BeanInstance.create(analyzerJob
-					.getDescriptor()), analyzerJob, analyzerJob.getInput(), listener);
+			RowProcessingConsumer consumer = new AnalyzerConsumer(analysisJob, analyzerJob.getDescriptor().newInstance(),
+					analyzerJob, analyzerJob.getInput(), listener);
 			consumers.add(consumer);
 		}
 		for (TransformerJob transformerJob : analysisJob.getTransformerJobs()) {
-			RowProcessingConsumer consumer = new TransformerConsumer(analysisJob, BeanInstance.create(transformerJob
-					.getDescriptor()), transformerJob, transformerJob.getInput(), listener);
+			RowProcessingConsumer consumer = new TransformerConsumer(analysisJob, transformerJob.getDescriptor()
+					.newInstance(), transformerJob, transformerJob.getInput(), listener);
 			consumers.add(consumer);
 		}
 		for (FilterJob filterJob : analysisJob.getFilterJobs()) {
-			FilterConsumer consumer = new FilterConsumer(analysisJob, BeanInstance.create(filterJob.getDescriptor()),
-					filterJob, filterJob.getInput(), listener);
+			FilterConsumer consumer = new FilterConsumer(analysisJob, filterJob.getDescriptor().newInstance(), filterJob,
+					filterJob.getInput(), listener);
 			consumers.add(consumer);
 		}
 		for (MergedOutcomeJob mergedOutcomeJob : analysisJob.getMergedOutcomeJobs()) {

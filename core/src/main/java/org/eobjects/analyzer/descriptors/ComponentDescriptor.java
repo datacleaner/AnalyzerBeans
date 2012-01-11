@@ -21,6 +21,12 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Provided;
+import org.eobjects.analyzer.beans.api.Validate;
+
 /**
  * Defines an interface for descriptors of components that support
  * initialization, closing and configuration properties.
@@ -28,6 +34,13 @@ import java.util.Set;
  * @author Kasper Sørensen
  */
 public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?>> {
+
+	/**
+	 * Constructs an instance of this component
+	 * 
+	 * @return a new (uninitialized) instance of the component.
+	 */
+	public B newInstance();
 
 	/**
 	 * Gets the component's class
@@ -39,6 +52,8 @@ public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?
 	/**
 	 * Gets all configuration properties of the component
 	 * 
+	 * @see Configured
+	 * 
 	 * @return a set of all properties
 	 */
 	public Set<ConfiguredPropertyDescriptor> getConfiguredProperties();
@@ -46,6 +61,8 @@ public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?
 	/**
 	 * Gets all configuration properties of a particular type (including
 	 * subtypes)
+	 * 
+	 * @see Configured
 	 * 
 	 * @param type
 	 *            the type of property to look for
@@ -59,6 +76,8 @@ public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?
 	/**
 	 * Gets a configured property by name
 	 * 
+	 * @see Configured
+	 * 
 	 * @param name
 	 *            the name of the property
 	 * @return a configured property, or null if no such property exists
@@ -66,7 +85,18 @@ public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?
 	public ConfiguredPropertyDescriptor getConfiguredProperty(String name);
 
 	/**
+	 * Gets the validation methods of the component
+	 * 
+	 * @see Validate
+	 * 
+	 * @return a set of validate method descriptors
+	 */
+	public Set<ValidateMethodDescriptor> getValidateMethods();
+
+	/**
 	 * Gets the initialize methods of the component
+	 * 
+	 * @see Initialize
 	 * 
 	 * @return a set of initialize method descriptors
 	 */
@@ -75,7 +105,29 @@ public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?
 	/**
 	 * Gets the close methods of the component
 	 * 
+	 * @see Close
+	 * 
 	 * @return a set of close method descriptors
 	 */
 	public Set<CloseMethodDescriptor> getCloseMethods();
+
+	/**
+	 * Gets the provided properties of the component
+	 * 
+	 * @see Provided
+	 * 
+	 * @return a set of provided properties.
+	 */
+	public Set<ProvidedPropertyDescriptor> getProvidedProperties();
+
+	/**
+	 * Gets the provided properties of a particular type in the component
+	 * 
+	 * @see Provided
+	 * 
+	 * @param cls
+	 *            the type of the provided properties
+	 * @return a set of provided properties.
+	 */
+	public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls);
 }

@@ -20,12 +20,11 @@
 package org.eobjects.analyzer.job.tasks;
 
 import org.eobjects.analyzer.beans.api.Explorer;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.eobjects.metamodel.DataContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +33,15 @@ public final class RunExplorerTask implements Task {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunExplorerTask.class);
 
-	private final BeanInstance<? extends Explorer<?>> _beanInstance;
+	private final Explorer<?> _explorer;
 	private final AnalysisJob _job;
 	private final ExplorerJob _explorerJob;
 	private final Datastore _datastore;
 	private final AnalysisListener _analysisListener;
 
-	public RunExplorerTask(BeanInstance<? extends Explorer<?>> beanInstance, AnalysisJob job, ExplorerJob explorerJob,
-			Datastore datastore, AnalysisListener analysisListener) {
-		_beanInstance = beanInstance;
+	public RunExplorerTask(Explorer<?> explorer, AnalysisJob job, ExplorerJob explorerJob, Datastore datastore,
+			AnalysisListener analysisListener) {
+		_explorer = explorer;
 		_job = job;
 		_explorerJob = explorerJob;
 		_datastore = datastore;
@@ -59,7 +58,7 @@ public final class RunExplorerTask implements Task {
 		DatastoreConnection con = _datastore.openConnection();
 		DataContext dc = con.getDataContext();
 		try {
-			_beanInstance.getBean().run(dc);
+			_explorer.run(dc);
 		} finally {
 			con.close();
 		}

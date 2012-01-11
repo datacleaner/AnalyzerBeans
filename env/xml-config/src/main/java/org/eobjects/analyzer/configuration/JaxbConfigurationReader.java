@@ -91,10 +91,10 @@ import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.Descriptors;
-import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.reference.DatastoreDictionary;
 import org.eobjects.analyzer.reference.DatastoreSynonymCatalog;
 import org.eobjects.analyzer.reference.Dictionary;
@@ -994,12 +994,12 @@ public final class JaxbConfigurationReader implements
 			}
 		}
 
+		final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(
+				injectionManager, null);
+		lifeCycleHelper.assignProvidedProperties(descriptor, result);
+
 		if (initialize) {
-			Set<InitializeMethodDescriptor> initializeMethods = descriptor
-					.getInitializeMethods();
-			for (InitializeMethodDescriptor initializeMethod : initializeMethods) {
-				initializeMethod.initialize(result, injectionManager);
-			}
+			lifeCycleHelper.initialize(descriptor, result);
 		}
 
 		return result;

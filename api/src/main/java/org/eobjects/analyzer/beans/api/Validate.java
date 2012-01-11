@@ -27,9 +27,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation that marks method as an initializing method. Use this annotation
- * if you need to initialize the state of a bean before it starts executing a
- * job.
+ * Annotation that marks method as a validation method. Use this annotation if
+ * you want to validate property values before initialization.
  * 
  * The @Initialize annotation can be used on methods in the following component
  * types:
@@ -43,20 +42,19 @@ import java.lang.annotation.Target;
  * <li>StringPattern</li>
  * <li>... and custom configuration elements, such as custom datastores and
  * custom task runners (in which case the semantics are a bit different - they
- * will only be initialized once, just after loading the configuration).</li>
+ * will only be validated once, just after loading the configuration).</li>
  * </ul>
  * 
  * The method is invoked after any @Configured and @Provided methods/fields are
- * invoked/assigned but before any business methods (such as run(...) on an
- * analyzer) are invoked.
+ * invoked/assigned but before initialization and any business methods (such as
+ * run(...) on an analyzer) are invoked.
  * 
- * @Initialize is often used in conjunction with the @Close annotation.
- * 
- * @see Close
+ * Validation methods should be repeatable and rather lightweight, since they
+ * might be called multiple times on any single component.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
 @Inherited
-public @interface Initialize {
+public @interface Validate {
 }

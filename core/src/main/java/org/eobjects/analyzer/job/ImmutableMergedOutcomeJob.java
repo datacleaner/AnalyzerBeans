@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 
 import org.eobjects.metamodel.util.BaseObject;
 
@@ -40,6 +41,12 @@ public final class ImmutableMergedOutcomeJob extends BaseObject implements Merge
 		_mergeInputs = new ArrayList<MergeInput>(input);
 		_output = new ArrayList<MutableInputColumn<?>>(output);
 		_outcome = new ImmutableMergedOutcome(this);
+	}
+
+	@Override
+	public ComponentDescriptor<?> getDescriptor() {
+		// no descriptor for merged outcomes
+		return null;
 	}
 
 	@Override

@@ -26,7 +26,6 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
 
 /**
  * Interface for objects that recieve rows from the RowProcessingPublisher.
@@ -83,12 +82,12 @@ public interface RowProcessingConsumer {
 	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes);
 
 	/**
-	 * @return the bean instance or null if none is available
-	 */
-	public BeanInstance<?> getBeanInstance();
-
-	/**
 	 * @return the componbent job
 	 */
 	public ComponentJob getComponentJob();
+
+	/**
+	 * @return the component instance
+	 */
+	public Object getComponent();
 }

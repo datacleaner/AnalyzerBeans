@@ -20,43 +20,39 @@
 package org.eobjects.analyzer.job.tasks;
 
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
-import org.eobjects.analyzer.job.concurrent.TaskListener;
+import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloseBeanTaskListener implements TaskListener {
+public final class InitializeTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final LifeCycleHelper _lifeCycleHelper;
-	private final ComponentDescriptor<?> _descriptor;
+	private final ComponentDescriptor<?> _componentDescriptor;
 	private final Object _component;
+	private final BeanConfiguration _beanConfiguration;
 
-	public CloseBeanTaskListener(LifeCycleHelper lifeCycleHelper, ComponentDescriptor<?> descriptor, Object component) {
+	public InitializeTask(LifeCycleHelper lifeCycleHelper, ComponentDescriptor<?> componentDescriptor, Object component,
+			BeanConfiguration beanConfiguration) {
 		_lifeCycleHelper = lifeCycleHelper;
-		_descriptor = descriptor;
+		_componentDescriptor = componentDescriptor;
 		_component = component;
+		_beanConfiguration = beanConfiguration;
 	}
 
-	private void cleanup() {
+	@Override
+	public void execute() throws Exception {
 		logger.debug("execute()");
 
-		// close can occur AFTER completion
-		_lifeCycleHelper.close(_descriptor, _component);
+		_lifeCycleHelper.assignConfiguredProperties(_componentDescriptor, _component, _beanConfiguration);
+		_lifeCycleHelper.assignProvidedProperties(_componentDescriptor, _component);
+		_lifeCycleHelper.initialize(_componentDescriptor, _component);
 	}
 
 	@Override
-	public void onBegin(Task task) {
-	}
-
-	@Override
-	public void onComplete(Task task) {
-		cleanup();
-	}
-
-	@Override
-	public void onError(Task task, Throwable throwable) {
-		cleanup();
+	public String toString() {
+		return "AssignCallbacksAndInitializeTasks[" + _component + "]";
 	}
 }

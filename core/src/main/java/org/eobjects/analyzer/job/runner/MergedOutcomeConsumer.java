@@ -27,7 +27,6 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.TransformedInputRow;
 import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +47,12 @@ final class MergedOutcomeConsumer extends AbstractRowProcessingConsumer implemen
 	@Override
 	public boolean isConcurrent() {
 		return true;
+	}
+
+	@Override
+	public Object getComponent() {
+		// no actual component
+		return null;
 	}
 
 	@Override
@@ -95,12 +100,6 @@ final class MergedOutcomeConsumer extends AbstractRowProcessingConsumer implemen
 		outcomes.add(_mergedOutcomeJob.getOutcome());
 
 		return new InputRow[] { result };
-	}
-
-	@Override
-	public BeanInstance<?> getBeanInstance() {
-		// no bean instance available
-		return null;
 	}
 
 	@Override

@@ -28,21 +28,20 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
 
 final class FilterConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
-	private final BeanInstance<? extends Filter<?>> _beanInstance;
+	private final Filter<?> _filter;
 	private final FilterJob _filterJob;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
 	private final boolean _concurrent;
 
-	public FilterConsumer(AnalysisJob job, BeanInstance<? extends Filter<?>> beanInstance, FilterJob filterJob,
-			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
+	public FilterConsumer(AnalysisJob job, Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns,
+			AnalysisListener analysisListener) {
 		super(filterJob, filterJob);
-		_beanInstance = beanInstance;
+		_filter = filter;
 		_filterJob = filterJob;
 		_inputColumns = inputColumns;
 		_job = job;
@@ -68,10 +67,14 @@ final class FilterConsumer extends AbstractRowProcessingConsumer implements RowP
 	}
 
 	@Override
+	public Filter<?> getComponent() {
+		return _filter;
+	}
+
+	@Override
 	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
-		Filter<?> filter = _beanInstance.getBean();
 		try {
-			Enum<?> category = filter.categorize(row);
+			Enum<?> category = _filter.categorize(row);
 			FilterOutcome outcome = new ImmutableFilterOutcome(_filterJob, category);
 			outcomes.add(outcome);
 		} catch (RuntimeException e) {
@@ -81,25 +84,19 @@ final class FilterConsumer extends AbstractRowProcessingConsumer implements RowP
 	}
 
 	@Override
-	public BeanInstance<? extends Filter<?>> getBeanInstance() {
-		return _beanInstance;
-	}
-
-	@Override
 	public FilterJob getComponentJob() {
 		return _filterJob;
 	}
 
 	@Override
 	public String toString() {
-		return "FilterConsumer[" + _beanInstance + "]";
+		return "FilterConsumer[" + _filter + "]";
 	}
 
 	public boolean isQueryOptimizable(FilterOutcome filterOutcome) {
-		Filter<?> filter = _beanInstance.getBean();
-		if (filter instanceof QueryOptimizedFilter) {
+		if (_filter instanceof QueryOptimizedFilter) {
 			@SuppressWarnings("rawtypes")
-			QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) filter;
+			QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) _filter;
 			@SuppressWarnings("unchecked")
 			boolean optimizable = queryOptimizedFilter.isOptimizable(filterOutcome.getCategory());
 			return optimizable;

@@ -19,14 +19,8 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
-import java.util.Collection;
-
-import org.eobjects.analyzer.descriptors.ComponentDescriptor;
-import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
-import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
-import org.eobjects.analyzer.lifecycle.CloseCallback;
-import org.eobjects.analyzer.lifecycle.LifeCycleState;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 
 /**
  * Task listener that calls closing methods for reference data where this is
@@ -36,18 +30,14 @@ import org.eobjects.analyzer.lifecycle.LifeCycleState;
  */
 public final class CloseReferenceDataTaskListener implements TaskListener {
 
-	private final ReferenceDataActivationManager _referenceDataActivationManager;
+	private final LifeCycleHelper _lifeCycleHelper;
 
-	public CloseReferenceDataTaskListener(ReferenceDataActivationManager referenceDataActivationManager) {
-		_referenceDataActivationManager = referenceDataActivationManager;
+	public CloseReferenceDataTaskListener(LifeCycleHelper lifeCycleHelper) {
+		_lifeCycleHelper = lifeCycleHelper;
 	}
 
 	private void cleanup() {
-		Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
-		for (Object object : referenceData) {
-			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(object.getClass());
-			new CloseCallback().onEvent(LifeCycleState.CLOSE, object, descriptor);
-		}
+		_lifeCycleHelper.closeReferenceData();
 	}
 
 	@Override

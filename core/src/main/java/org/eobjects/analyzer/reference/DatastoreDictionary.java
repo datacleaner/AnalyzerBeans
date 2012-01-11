@@ -25,8 +25,11 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.inject.Inject;
+
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -50,12 +53,15 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DatastoreDictionary.class);
-
+	
 	private transient ReferenceValues<String> _cachedRefValues;
-	private transient DatastoreCatalog _datastoreCatalog;
 	private transient BlockingQueue<DatastoreConnection> _dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
+	
+	@Inject
+	@Provided
+	transient DatastoreCatalog _datastoreCatalog;
 
 	public DatastoreDictionary(String name, String datastoreName, String qualifiedColumnName) {
 		super(name);
@@ -89,9 +95,8 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 	 * Initializes a DatastoreConnection, which will keep the connection open
 	 */
 	@Initialize
-	public void init(DatastoreCatalog datastoreCatalog) {
+	public void init() {
 		logger.info("Initializing dictionary: {}", this);
-		setDatastoreCatalog(datastoreCatalog);
 		Datastore datastore = getDatastore();
 		DatastoreConnection con = datastore.openConnection();
 		getDatastoreConnections().add(con);
@@ -120,10 +125,6 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 
 	public DatastoreCatalog getDatastoreCatalog() {
 		return _datastoreCatalog;
-	}
-
-	public void setDatastoreCatalog(DatastoreCatalog datastoreCatalog) {
-		_datastoreCatalog = datastoreCatalog;
 	}
 
 	public String getDatastoreName() {

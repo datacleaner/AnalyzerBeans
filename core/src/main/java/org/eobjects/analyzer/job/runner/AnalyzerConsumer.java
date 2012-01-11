@@ -25,22 +25,21 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
 
 final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
 	private final AnalyzerJob _analyzerJob;
-	private final BeanInstance<? extends Analyzer<?>> _beanInstance;
+	private final Analyzer<?> _analyzer;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
 	private final boolean _concurrent;
 
-	public AnalyzerConsumer(AnalysisJob job, BeanInstance<? extends Analyzer<?>> beanInstance, AnalyzerJob analyzerJob,
+	public AnalyzerConsumer(AnalysisJob job, Analyzer<?> analyzer, AnalyzerJob analyzerJob,
 			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
 		super(analyzerJob, analyzerJob);
 		_job = job;
-		_beanInstance = beanInstance;
+		_analyzer = analyzer;
 		_analyzerJob = analyzerJob;
 		_inputColumns = inputColumns;
 		_analysisListener = analysisListener;
@@ -52,6 +51,11 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
 		} else {
 			_concurrent = concurrent.value();
 		}
+	}
+	
+	@Override
+	public Analyzer<?> getComponent() {
+		return _analyzer;
 	}
 
 	@Override
@@ -66,18 +70,12 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
 
 	@Override
 	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
-		Analyzer<?> analyzer = _beanInstance.getBean();
 		try {
-			analyzer.run(row, distinctCount);
+			_analyzer.run(row, distinctCount);
 		} catch (RuntimeException e) {
 			_analysisListener.errorInAnalyzer(_job, _analyzerJob, row, e);
 		}
 		return null;
-	}
-
-	@Override
-	public BeanInstance<? extends Analyzer<?>> getBeanInstance() {
-		return _beanInstance;
 	}
 
 	@Override
@@ -87,6 +85,6 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
 
 	@Override
 	public String toString() {
-		return "AnalyzerConsumer[" + _beanInstance + "]";
+		return "AnalyzerConsumer[" + _analyzer + "]";
 	}
 }

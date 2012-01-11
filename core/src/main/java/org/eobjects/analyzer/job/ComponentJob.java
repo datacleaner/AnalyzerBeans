@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.metamodel.util.HasName;
 
 /**
@@ -27,6 +28,13 @@ import org.eobjects.metamodel.util.HasName;
  * @author Kasper Sørensen
  */
 public interface ComponentJob extends HasName {
+
+	/**
+	 * Gets the descriptor of this component type.
+	 * 
+	 * @return a descriptor of this component type
+	 */
+	public ComponentDescriptor<?> getDescriptor();
 
 	/**
 	 * Gets the name of this component job

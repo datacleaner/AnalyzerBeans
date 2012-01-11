@@ -167,6 +167,7 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 		}
 
 		BasicDataSource ds = new BasicDataSource();
+		ds.setMaxActive(-1);
 		ds.setDefaultAutoCommit(false);
 		ds.setUrl(_jdbcUrl);
 

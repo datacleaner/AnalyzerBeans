@@ -32,6 +32,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableTransformerJob;
@@ -39,10 +40,7 @@ import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
-import org.eobjects.analyzer.lifecycle.AssignProvidedCallback;
-import org.eobjects.analyzer.lifecycle.InitializeCallback;
-import org.eobjects.analyzer.lifecycle.LifeCycleState;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.util.StringUtils;
 
@@ -75,25 +73,21 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			return Collections.emptyList();
 		}
 
-		final Transformer<?> bean = getConfigurableBean();
-
-		// mimic the configuration of a real transformer bean instance
-		final AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(
-				new ImmutableBeanConfiguration(getConfiguredProperties()), null);
-		assignConfiguredCallback.onEvent(LifeCycleState.ASSIGN_CONFIGURED, bean, getDescriptor());
+		final Transformer<?> component = getConfigurableBean();
+		final TransformerBeanDescriptor<T> descriptor = getDescriptor();
 
 		final InjectionManager injectionManager = new InjectionManagerImpl(null, null, new InMemoryStorageProvider());
+		final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, null);
 
-		final AssignProvidedCallback assignProvidedCallback = new AssignProvidedCallback(injectionManager);
+		// mimic the configuration of a real transformer bean instance
+		final BeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(getConfiguredProperties());
+		lifeCycleHelper.assignConfiguredProperties(descriptor, component, beanConfiguration);
+		lifeCycleHelper.assignProvidedProperties(descriptor, component);
+		lifeCycleHelper.initialize(descriptor, component);
 
-		assignProvidedCallback.onEvent(LifeCycleState.ASSIGN_PROVIDED, bean, getDescriptor());
-
-		final InitializeCallback initializeCallback = new InitializeCallback(injectionManager);
-		initializeCallback.onEvent(LifeCycleState.INITIALIZE, bean, getDescriptor());
-
-		final OutputColumns outputColumns = bean.getOutputColumns();
+		final OutputColumns outputColumns = component.getOutputColumns();
 		if (outputColumns == null) {
-			throw new IllegalStateException("getOutputColumns() returned null on transformer: " + bean);
+			throw new IllegalStateException("getOutputColumns() returned null on transformer: " + component);
 		}
 		boolean changed = false;
 
@@ -108,7 +102,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 					int nextIndex = _outputColumns.size();
 					String name = outputColumns.getColumnName(nextIndex);
 					if (name == null) {
-						name = getDescriptor().getDisplayName() + " (" + (nextIndex + 1) + ")";
+						name = descriptor.getDisplayName() + " (" + (nextIndex + 1) + ")";
 					}
 					_outputColumns.add(new TransformedInputColumn<Object>(name, _idGenerator));
 					_automaticOutputColumnNames.add(name);
@@ -129,7 +123,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			final String proposedName = outputColumns.getColumnName(i);
 			Class<?> dataType = outputColumns.getColumnType(i);
 			if (dataType == null) {
-				dataType = getDescriptor().getOutputDataTypeFamily().getJavaType();
+				dataType = descriptor.getOutputDataTypeFamily().getJavaType();
 			}
 			DataTypeFamily dataTypeFamily = DataTypeFamily.valueOf(dataType);
 

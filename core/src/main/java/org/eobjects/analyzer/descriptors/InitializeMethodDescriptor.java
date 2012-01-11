@@ -23,7 +23,6 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Initialize;
-import org.eobjects.analyzer.configuration.InjectionManager;
 
 /**
  * Descriptor for an initialize method. The most common way of registering an
@@ -38,10 +37,9 @@ public interface InitializeMethodDescriptor {
 	/**
 	 * Invokes the initialize method
 	 * 
-	 * @param bean
-	 * @param injectionManager
+	 * @param component the component to initialize
 	 */
-	public void initialize(Object bean, InjectionManager injectionManager);
+	public void initialize(Object component);
 
 	/**
 	 * Gets the annotations of the method

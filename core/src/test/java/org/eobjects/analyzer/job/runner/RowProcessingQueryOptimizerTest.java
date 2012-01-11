@@ -36,12 +36,15 @@ import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
+import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
@@ -49,13 +52,14 @@ import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
-import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
 
 public class RowProcessingQueryOptimizerTest extends TestCase {
+
+	private final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null);
 
 	private JdbcDatastore datastore;
 	private AnalyzerBeansConfiguration conf;
@@ -214,31 +218,35 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 	private FilterConsumer createConsumer(FilterJobBuilder<?, ?> filterJobBuilder) {
 		FilterJob filterJob = filterJobBuilder.toFilterJob();
-		BeanInstance<? extends Filter<?>> filterBeanInstance = BeanInstance.create(filterJobBuilder.getDescriptor());
-		filterBeanInstance.getAssignConfiguredCallbacks().add(
-				new AssignConfiguredCallback(filterJob.getConfiguration(), null));
-		filterBeanInstance.assignConfigured();
-		FilterConsumer consumer = new FilterConsumer(null, filterBeanInstance, filterJob, filterJobBuilder.getInput(), null);
+		FilterBeanDescriptor<?, ?> descriptor = filterJob.getDescriptor();
+		Filter<?> filter = descriptor.newInstance();
+
+		lifeCycleHelper.assignConfiguredProperties(descriptor, filter, filterJob.getConfiguration());
+
+		FilterConsumer consumer = new FilterConsumer(null, filter, filterJob, filterJobBuilder.getInput(), null);
 		return consumer;
 	}
 
 	private TransformerConsumer createConsumer(TransformerJobBuilder<?> transformerJobBuilder) {
-		BeanInstance<? extends Transformer<?>> beanInstance = BeanInstance.create(transformerJobBuilder.getDescriptor());
 		TransformerJob transformerJob = transformerJobBuilder.toTransformerJob();
-		beanInstance.getAssignConfiguredCallbacks().add(
-				new AssignConfiguredCallback(transformerJob.getConfiguration(), null));
-		beanInstance.assignConfigured();
-		TransformerConsumer consumer = new TransformerConsumer(null, beanInstance, transformerJob,
+		TransformerBeanDescriptor<?> descriptor = transformerJob.getDescriptor();
+		Transformer<?> transformer = descriptor.newInstance();
+
+		lifeCycleHelper.assignConfiguredProperties(descriptor, transformer, transformerJob.getConfiguration());
+
+		TransformerConsumer consumer = new TransformerConsumer(null, transformer, transformerJob,
 				transformerJobBuilder.getInput(), null);
 		return consumer;
 	}
 
 	private AnalyzerConsumer createConsumer(AnalyzerJobBuilder<?> analyzerBuilder) {
-		BeanInstance<? extends Analyzer<?>> beanInstance = BeanInstance.create(analyzerBuilder.getDescriptor());
 		AnalyzerJob analyzerJob = analyzerBuilder.toAnalyzerJob();
-		beanInstance.getAssignConfiguredCallbacks().add(new AssignConfiguredCallback(analyzerJob.getConfiguration(), null));
-		beanInstance.assignConfigured();
-		AnalyzerConsumer consumer = new AnalyzerConsumer(null, beanInstance, analyzerJob, analyzerBuilder.getInput(), null);
+		AnalyzerBeanDescriptor<?> descriptor = analyzerJob.getDescriptor();
+		Analyzer<?> analyzer = descriptor.newInstance();
+
+		lifeCycleHelper.assignConfiguredProperties(descriptor, analyzer, analyzerJob.getConfiguration());
+
+		AnalyzerConsumer consumer = new AnalyzerConsumer(null, analyzer, analyzerJob, analyzerBuilder.getInput(), null);
 		return consumer;
 	}
 }

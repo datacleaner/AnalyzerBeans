@@ -29,7 +29,7 @@ import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class AssignConfiguredCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
+final class AssignConfiguredCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -43,9 +43,7 @@ public final class AssignConfiguredCallback implements LifeCycleCallback<Object,
 	}
 
 	@Override
-	public void onEvent(LifeCycleState state, Object component, ComponentDescriptor<?> descriptor) {
-		assert state == LifeCycleState.ASSIGN_CONFIGURED;
-
+	public void onEvent(Object component, ComponentDescriptor<?> descriptor) {
 		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
 		for (ConfiguredPropertyDescriptor property : configuredProperties) {
 			Object configuredValue = getValue(property);

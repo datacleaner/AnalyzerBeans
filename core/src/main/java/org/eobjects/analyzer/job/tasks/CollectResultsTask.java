@@ -29,7 +29,6 @@ import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.JobAndResult;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.HasAnalyzerResult;
 import org.slf4j.Logger;
@@ -44,15 +43,15 @@ public final class CollectResultsTask implements Task {
 
 	private static final Logger logger = LoggerFactory.getLogger(CollectResultsTask.class);
 
-	private final BeanInstance<? extends HasAnalyzerResult<?>> _beanInstance;
+	private final HasAnalyzerResult<?> _hasResult;
 	private final Collection<JobAndResult> _results;
 	private final AnalysisListener _analysisListener;
 	private final AnalysisJob _job;
 	private final ComponentJob _componentJob;
 
-	public CollectResultsTask(BeanInstance<? extends HasAnalyzerResult<?>> beanInstance,
-			AnalysisJob job, ComponentJob componentJob, Collection<JobAndResult> results, AnalysisListener analysisListener) {
-		_beanInstance = beanInstance;
+	public CollectResultsTask(HasAnalyzerResult<?> hasResult, AnalysisJob job, ComponentJob componentJob,
+			Collection<JobAndResult> results, AnalysisListener analysisListener) {
+		_hasResult = hasResult;
 		_job = job;
 		_componentJob = componentJob;
 		_results = results;
@@ -63,17 +62,16 @@ public final class CollectResultsTask implements Task {
 	public void execute() throws Exception {
 		logger.debug("execute()");
 
-		HasAnalyzerResult<?> hasAnalyzerResult = _beanInstance.getBean();
-		AnalyzerResult result = hasAnalyzerResult.getResult();
+		AnalyzerResult result = _hasResult.getResult();
 		if (result == null) {
-			throw new IllegalStateException("Analyzer result (from " + hasAnalyzerResult + ") was null");
+			throw new IllegalStateException("Analyzer result (from " + _hasResult + ") was null");
 		}
-		if (hasAnalyzerResult instanceof Analyzer) {
+		if (_hasResult instanceof Analyzer) {
 			_analysisListener.analyzerSuccess(_job, (AnalyzerJob) _componentJob, result);
-		} else if (hasAnalyzerResult instanceof Explorer) {
+		} else if (_hasResult instanceof Explorer) {
 			_analysisListener.explorerSuccess(_job, (ExplorerJob) _componentJob, result);
 		} else {
-			throw new UnsupportedOperationException("Unsupported component type: " + hasAnalyzerResult);
+			throw new UnsupportedOperationException("Unsupported component type: " + _hasResult);
 		}
 		_results.add(new JobAndResult(_componentJob, result));
 	}

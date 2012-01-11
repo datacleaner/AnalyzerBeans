@@ -19,11 +19,13 @@
  */
 package org.eobjects.analyzer.lifecycle;
 
-import java.lang.reflect.Array;
+import java.util.Collection;
 
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
+import org.eobjects.analyzer.job.BeanConfiguration;
+import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
 
 /**
  * Utility/convenience class for doing simple lifecycle management and/or
@@ -33,45 +35,67 @@ import org.eobjects.analyzer.descriptors.Descriptors;
  */
 public final class LifeCycleHelper {
 
-	private final InitializeCallback _initializeCallback;
-	private final CloseCallback _closeCallback;
+	private final InjectionManager _injectionManager;
+	private final ReferenceDataActivationManager _referenceDataActivationManager;
 
-	public LifeCycleHelper(InjectionManager injectionManager) {
-		_initializeCallback = new InitializeCallback(injectionManager);
-		_closeCallback = new CloseCallback();
+	public LifeCycleHelper(InjectionManager injectionManager, ReferenceDataActivationManager referenceDataActivationManager) {
+		_injectionManager = injectionManager;
+		_referenceDataActivationManager = referenceDataActivationManager;
 	}
 
-	public void initialize(Object o) {
-		if (o.getClass().isArray()) {
-			int length = Array.getLength(o);
-			for (int i = 0; i < length; i++) {
-				Object object = Array.get(o, i);
-				initialize(object);
-			}
-		} else {
-			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(o.getClass());
-			initialize(descriptor, o);
+	public void assignConfiguredProperties(ComponentDescriptor<?> descriptor, Object component,
+			BeanConfiguration beanConfiguration) {
+		AssignConfiguredCallback callback = new AssignConfiguredCallback(beanConfiguration, _referenceDataActivationManager);
+		callback.onEvent(component, descriptor);
+	}
+
+	public void assignProvidedProperties(ComponentDescriptor<?> descriptor, Object component) {
+		AssignProvidedCallback callback = new AssignProvidedCallback(_injectionManager);
+		callback.onEvent(component, descriptor);
+	}
+
+	public void validate(ComponentDescriptor<?> descriptor, Object component) {
+		InitializeCallback callback = new InitializeCallback(true, false);
+		callback.onEvent(component, descriptor);
+	}
+
+	public void initialize(ComponentDescriptor<?> descriptor, Object component) {
+		InitializeCallback callback = new InitializeCallback(true, true);
+		callback.onEvent(component, descriptor);
+	}
+
+	public void close(ComponentDescriptor<?> descriptor, Object component) {
+		CloseCallback callback = new CloseCallback();
+		callback.onEvent(component, descriptor);
+	}
+
+	/**
+	 * Closes all reference data used in this life cycle helper
+	 */
+	public void closeReferenceData() {
+		if (_referenceDataActivationManager == null) {
+			return;
+		}
+		final Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
+		for (Object object : referenceData) {
+			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(object.getClass());
+			close(descriptor, object);
 		}
 	}
 
-	public void initialize(ComponentDescriptor<?> descriptor, Object bean) {
-		_initializeCallback.onEvent(LifeCycleState.INITIALIZE, bean, descriptor);
-	}
-
-	public void close(Object o) {
-		if (o.getClass().isArray()) {
-			int length = Array.getLength(o);
-			for (int i = 0; i < length; i++) {
-				Object object = Array.get(o, i);
-				close(object);
-			}
-		} else {
-			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(o.getClass());
-			close(descriptor, o);
+	/**
+	 * Initializes all reference data used in this life cycle helper
+	 */
+	public void initializeReferenceData() {
+		if (_referenceDataActivationManager == null) {
+			return;
 		}
-	}
+		final Collection<Object> referenceDataCollection = _referenceDataActivationManager.getAllReferenceData();
+		for (Object referenceData : referenceDataCollection) {
+			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(referenceData.getClass());
 
-	public void close(ComponentDescriptor<?> descriptor, Object bean) {
-		_closeCallback.onEvent(LifeCycleState.CLOSE, bean, descriptor);
+			assignProvidedProperties(descriptor, referenceData);
+			initialize(descriptor, referenceData);
+		}
 	}
 }

@@ -33,10 +33,10 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
-import org.eobjects.analyzer.configuration.InjectionManager;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.BeanConfiguration;
@@ -53,17 +53,14 @@ import org.eobjects.analyzer.job.concurrent.RunNextTaskTaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.job.tasks.AssignCallbacksAndInitializeTask;
 import org.eobjects.analyzer.job.tasks.CloseBeanTaskListener;
 import org.eobjects.analyzer.job.tasks.CollectResultsTask;
 import org.eobjects.analyzer.job.tasks.ConsumeRowTask;
 import org.eobjects.analyzer.job.tasks.InitializeReferenceDataTask;
+import org.eobjects.analyzer.job.tasks.InitializeTask;
 import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
 import org.eobjects.analyzer.job.tasks.Task;
-import org.eobjects.analyzer.lifecycle.AssignConfiguredCallback;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
-import org.eobjects.analyzer.lifecycle.CloseCallback;
-import org.eobjects.analyzer.lifecycle.InitializeCallback;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
@@ -85,11 +82,10 @@ public final class RowProcessingPublisher {
 	private final Table _table;
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
-	private final ReferenceDataActivationManager _referenceDataActivationManager;
-	private final InjectionManager _injectionManager;
+	private final LifeCycleHelper _lifeCycleHelper;
 
 	public RowProcessingPublisher(AnalysisJob job, Table table, TaskRunner taskRunner, AnalysisListener analysisListener,
-			InjectionManager injectionManager, ReferenceDataActivationManager referenceDataActivationManager) {
+			LifeCycleHelper lifeCycleHelper) {
 		if (job == null) {
 			throw new IllegalArgumentException("AnalysisJob cannot be null");
 		}
@@ -106,8 +102,7 @@ public final class RowProcessingPublisher {
 		_table = table;
 		_taskRunner = taskRunner;
 		_analysisListener = analysisListener;
-		_injectionManager = injectionManager;
-		_referenceDataActivationManager = referenceDataActivationManager;
+		_lifeCycleHelper = lifeCycleHelper;
 	}
 
 	public void addPhysicalColumns(Column... columns) {
@@ -218,19 +213,16 @@ public final class RowProcessingPublisher {
 		}
 	}
 
-	public void addRowProcessingAnalyzerBean(BeanInstance<? extends Analyzer<?>> beanInstance, AnalyzerJob analyzerJob,
-			InputColumn<?>[] inputColumns) {
-		addConsumer(new AnalyzerConsumer(_job, beanInstance, analyzerJob, inputColumns, _analysisListener));
+	public void addRowProcessingAnalyzerBean(Analyzer<?> analyzer, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns) {
+		addConsumer(new AnalyzerConsumer(_job, analyzer, analyzerJob, inputColumns, _analysisListener));
 	}
 
-	public void addTransformerBean(BeanInstance<? extends Transformer<?>> beanInstance, TransformerJob transformerJob,
-			InputColumn<?>[] inputColumns) {
-		addConsumer(new TransformerConsumer(_job, beanInstance, transformerJob, inputColumns, _analysisListener));
+	public void addTransformerBean(Transformer<?> transformer, TransformerJob transformerJob, InputColumn<?>[] inputColumns) {
+		addConsumer(new TransformerConsumer(_job, transformer, transformerJob, inputColumns, _analysisListener));
 	}
 
-	public void addFilterBean(BeanInstance<? extends Filter<?>> beanInstance, FilterJob filterJob,
-			InputColumn<?>[] inputColumns) {
-		addConsumer(new FilterConsumer(_job, beanInstance, filterJob, inputColumns, _analysisListener));
+	public void addFilterBean(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns) {
+		addConsumer(new FilterConsumer(_job, filter, filterJob, inputColumns, _analysisListener));
 	}
 
 	public void addMergedOutcomeJob(MergedOutcomeJob mergedOutcomeJob) {
@@ -279,7 +271,8 @@ public final class RowProcessingPublisher {
 			} else {
 				closeTasks.add(new TaskRunnable(closeTask, closeTaskListener));
 			}
-			closeTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(consumer.getBeanInstance())));
+			closeTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(_lifeCycleHelper, consumer.getComponentJob()
+					.getDescriptor(), consumer.getComponent())));
 		}
 
 		final TaskListener runCompletionListener = new ForkTaskListener("run row processing", taskRunner, closeTasks);
@@ -289,16 +282,13 @@ public final class RowProcessingPublisher {
 		final TaskListener referenceDataInitFinishedListener = new ForkTaskListener("Initialize row consumers", taskRunner,
 				Arrays.asList(new TaskRunnable(runTask, runCompletionListener)));
 
-		final InitializeCallback initializeCallback = new InitializeCallback(_injectionManager);
-
 		final RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner,
-				new InitializeReferenceDataTask(_injectionManager, _referenceDataActivationManager),
-				referenceDataInitFinishedListener);
+				new InitializeReferenceDataTask(_lifeCycleHelper), referenceDataInitFinishedListener);
 		final TaskListener initFinishedListener = new JoinTaskListener(numConfigurableConsumers, joinFinishedListener);
 
 		final List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
 		for (RowProcessingConsumer consumer : configurableConsumers) {
-			initTasks.add(createInitTask(consumer, initFinishedListener, resultQueue, initializeCallback));
+			initTasks.add(createInitTask(consumer, initFinishedListener, resultQueue));
 		}
 		return initTasks;
 	}
@@ -308,43 +298,21 @@ public final class RowProcessingPublisher {
 			return null;
 		} else if (consumer instanceof AnalyzerConsumer) {
 			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
-			BeanInstance<? extends Analyzer<?>> beanInstance = analyzerConsumer.getBeanInstance();
-			return new CollectResultsTask(beanInstance, _job, consumer.getComponentJob(), resultQueue, _analysisListener);
+			Analyzer<?> analyzer = analyzerConsumer.getComponent();
+			return new CollectResultsTask(analyzer, _job, consumer.getComponentJob(), resultQueue, _analysisListener);
 		} else {
 			throw new IllegalStateException("Unknown consumer type: " + consumer);
 		}
 	}
 
 	private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener,
-			Queue<JobAndResult> resultQueue, InitializeCallback initializeCallback) {
+			Queue<JobAndResult> resultQueue) {
 		ComponentJob componentJob = consumer.getComponentJob();
+		Object component = consumer.getComponent();
 		BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
+		ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
 
-		AssignConfiguredCallback assignConfiguredCallback = new AssignConfiguredCallback(configuration,
-				_referenceDataActivationManager);
-		CloseCallback closeCallback = new CloseCallback();
-
-		Task task;
-		if (consumer instanceof TransformerConsumer) {
-			TransformerConsumer transformerConsumer = (TransformerConsumer) consumer;
-			BeanInstance<? extends Transformer<?>> transformerBeanInstance = transformerConsumer.getBeanInstance();
-
-			task = new AssignCallbacksAndInitializeTask(transformerBeanInstance, _injectionManager,
-					assignConfiguredCallback, initializeCallback, closeCallback);
-		} else if (consumer instanceof FilterConsumer) {
-			FilterConsumer filterConsumer = (FilterConsumer) consumer;
-			BeanInstance<? extends Filter<?>> filterBeanInstance = filterConsumer.getBeanInstance();
-
-			task = new AssignCallbacksAndInitializeTask(filterBeanInstance, _injectionManager, assignConfiguredCallback,
-					initializeCallback, closeCallback);
-		} else if (consumer instanceof AnalyzerConsumer) {
-			AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
-			BeanInstance<? extends Analyzer<?>> analyzerBeanInstance = analyzerConsumer.getBeanInstance();
-			task = new AssignCallbacksAndInitializeTask(analyzerBeanInstance, _injectionManager, assignConfiguredCallback,
-					initializeCallback, closeCallback);
-		} else {
-			throw new IllegalStateException("Unknown consumer type: " + consumer);
-		}
+		InitializeTask task = new InitializeTask(_lifeCycleHelper, descriptor, component, configuration);
 		return new TaskRunnable(task, listener);
 	}
 

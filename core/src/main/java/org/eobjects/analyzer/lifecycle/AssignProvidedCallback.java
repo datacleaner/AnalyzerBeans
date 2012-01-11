@@ -23,10 +23,10 @@ import java.util.Set;
 
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.configuration.InjectionPoint;
-import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
 
-public final class AssignProvidedCallback implements LifeCycleCallback<Object, BeanDescriptor<?>> {
+final class AssignProvidedCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
 
 	private final InjectionManager _injectionManager;
 
@@ -38,17 +38,14 @@ public final class AssignProvidedCallback implements LifeCycleCallback<Object, B
 	}
 
 	@Override
-	public void onEvent(LifeCycleState state, Object bean, BeanDescriptor<?> descriptor) {
-		assert state == LifeCycleState.ASSIGN_PROVIDED;
-		
+	public void onEvent(Object component, ComponentDescriptor<?> descriptor) {
 		Set<ProvidedPropertyDescriptor> providedDescriptors = descriptor.getProvidedProperties();
 		for (ProvidedPropertyDescriptor providedDescriptor : providedDescriptors) {
-			
-			
-			InjectionPoint<Object> injectionPoint = new PropertyInjectionPoint(providedDescriptor, bean);
+
+			InjectionPoint<Object> injectionPoint = new PropertyInjectionPoint(providedDescriptor, component);
 			Object value = _injectionManager.getInstance(injectionPoint);
-			providedDescriptor.setValue(bean, value);
-			
+			providedDescriptor.setValue(component, value);
+
 		}
 	}
 }

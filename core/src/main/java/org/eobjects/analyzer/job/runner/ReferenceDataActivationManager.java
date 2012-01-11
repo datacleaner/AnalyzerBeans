@@ -66,6 +66,12 @@ public final class ReferenceDataActivationManager {
 		return result;
 	}
 
+	public void clearReferenceData() {
+		_dictionaries.clear();
+		_synonymCatalogs.clear();
+		_stringPatterns.clear();
+	}
+
 	public boolean accepts(Object obj) {
 		if (obj == null) {
 			return false;

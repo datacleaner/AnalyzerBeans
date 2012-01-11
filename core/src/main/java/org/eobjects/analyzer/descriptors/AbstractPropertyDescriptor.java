@@ -87,7 +87,7 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return _field.getAnnotation(annotationClass);
+		return ReflectionUtils.getAnnotation(_field, annotationClass);
 	}
 
 	@Override

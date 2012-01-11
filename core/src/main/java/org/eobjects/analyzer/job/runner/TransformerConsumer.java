@@ -35,22 +35,21 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector.Listener;
-import org.eobjects.analyzer.lifecycle.BeanInstance;
 
 final class TransformerConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
 	private final AnalysisJob _job;
-	private final BeanInstance<? extends Transformer<?>> _beanInstance;
+	private final Transformer<?> _transformer;
 	private final TransformerJob _transformerJob;
 	private final InputColumn<?>[] _inputColumns;
 	private final AnalysisListener _analysisListener;
 	private final boolean _concurrent;
 
-	public TransformerConsumer(AnalysisJob job, BeanInstance<? extends Transformer<?>> beanInstance,
-			TransformerJob transformerJob, InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
+	public TransformerConsumer(AnalysisJob job, Transformer<?> transformer, TransformerJob transformerJob,
+			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
 		super(transformerJob, transformerJob);
 		_job = job;
-		_beanInstance = beanInstance;
+		_transformer = transformer;
 		_transformerJob = transformerJob;
 		_inputColumns = inputColumns;
 		_analysisListener = analysisListener;
@@ -73,12 +72,15 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
 	public InputColumn<?>[] getRequiredInput() {
 		return _inputColumns;
 	}
+	
+	@Override
+	public Transformer<?> getComponent() {
+		return _transformer;
+	}
 
 	@Override
 	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
 		final InputColumn<?>[] outputColumns = _transformerJob.getOutput();
-
-		final Transformer<?> transformer = _beanInstance.getBean();
 
 		final List<Object[]> outputValues = new ArrayList<Object[]>();
 
@@ -89,16 +91,16 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
 			}
 		};
 
-		registerListener(transformer, listener);
+		registerListener(_transformer, listener);
 
 		try {
-			outputValues.add(transformer.transform(row));
+			outputValues.add(_transformer.transform(row));
 		} catch (RuntimeException e) {
 			_analysisListener.errorInTransformer(_job, _transformerJob, row, e);
 			outputValues.add(new Object[outputColumns.length]);
 		}
 
-		unregisterListener(transformer);
+		unregisterListener(_transformer);
 
 		// remove nulls
 		for (Iterator<Object[]> iterator = outputValues.iterator(); iterator.hasNext();) {
@@ -172,17 +174,12 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
 	}
 
 	@Override
-	public BeanInstance<? extends Transformer<?>> getBeanInstance() {
-		return _beanInstance;
-	}
-
-	@Override
 	public TransformerJob getComponentJob() {
 		return _transformerJob;
 	}
 
 	@Override
 	public String toString() {
-		return "TransformerConsumer[" + _beanInstance + "]";
+		return "TransformerConsumer[" + _transformer + "]";
 	}
 }

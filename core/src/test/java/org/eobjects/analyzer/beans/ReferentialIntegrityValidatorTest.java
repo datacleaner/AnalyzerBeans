@@ -87,6 +87,8 @@ public class ReferentialIntegrityValidatorTest extends TestCase {
 		assertFalse(it.hasNext());
 
 		assertEquals("[]", descriptor.getProvidedProperties().toString());
+		
+		assertEquals("[]", descriptor.getValidateMethods().toString());
 
 		assertEquals("[]", descriptor.getInitializeMethods().toString());
 

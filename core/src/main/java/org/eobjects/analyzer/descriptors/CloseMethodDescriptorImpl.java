@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eobjects.analyzer.util.ReflectionUtils;
+
 final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 
 	private final Method _method;
@@ -43,6 +45,8 @@ final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 	public void close(Object analyzerBean) throws IllegalStateException {
 		try {
 			_method.invoke(analyzerBean);
+		} catch (RuntimeException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not invoke closing method " + _method, e);
 		}
@@ -61,6 +65,6 @@ final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return _method.getAnnotation(annotationClass);
+		return ReflectionUtils.getAnnotation(_method, annotationClass);
 	}
 }

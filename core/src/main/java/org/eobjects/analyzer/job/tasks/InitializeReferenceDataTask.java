@@ -19,14 +19,7 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
-import java.util.Collection;
-
-import org.eobjects.analyzer.configuration.InjectionManager;
-import org.eobjects.analyzer.descriptors.ComponentDescriptor;
-import org.eobjects.analyzer.descriptors.Descriptors;
-import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
-import org.eobjects.analyzer.lifecycle.InitializeCallback;
-import org.eobjects.analyzer.lifecycle.LifeCycleState;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 
 /**
  * Task that invokes initializing methods for reference data where this is
@@ -36,22 +29,15 @@ import org.eobjects.analyzer.lifecycle.LifeCycleState;
  */
 public class InitializeReferenceDataTask implements Task {
 
-	private final ReferenceDataActivationManager _referenceDataActivationManager;
-	private final InjectionManager _injectionManager;
+	private final LifeCycleHelper _lifeCycleHelper;
 
-	public InitializeReferenceDataTask(InjectionManager injectionManager,
-			ReferenceDataActivationManager referenceDataActivationManager) {
-		_injectionManager = injectionManager;
-		_referenceDataActivationManager = referenceDataActivationManager;
+	public InitializeReferenceDataTask(LifeCycleHelper lifeCycleHelper) {
+		_lifeCycleHelper = lifeCycleHelper;
 	}
 
 	@Override
 	public void execute() throws Exception {
-		Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
-		for (Object object : referenceData) {
-			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(object.getClass());
-			new InitializeCallback(_injectionManager).onEvent(LifeCycleState.INITIALIZE, object, descriptor);
-		}
+		_lifeCycleHelper.initializeReferenceData();
 	}
 
 }

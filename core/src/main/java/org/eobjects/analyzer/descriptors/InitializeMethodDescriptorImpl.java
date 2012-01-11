@@ -25,39 +25,29 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eobjects.analyzer.configuration.InjectionManager;
-import org.eobjects.analyzer.configuration.InjectionPoint;
-import org.eobjects.analyzer.lifecycle.MemberInjectionPoint;
+import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class InitializeMethodDescriptorImpl implements InitializeMethodDescriptor {
 
 	private final Method _method;
-	private final Class<?>[] _parameterTypes;
 
 	protected InitializeMethodDescriptorImpl(Method method) {
-		_parameterTypes = method.getParameterTypes();
 		if (method.getReturnType() != void.class) {
 			throw new DescriptorException("Initialize methods can only be void");
+		}
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		if (parameterTypes.length > 0) {
+			throw new DescriptorException("Initialize methods cannot have parameters");
 		}
 		_method = method;
 		_method.setAccessible(true);
 	}
 
-	public Class<?>[] getParameterTypes() {
-		return _parameterTypes;
-	}
-
-	public void initialize(Object bean, InjectionManager injectionManager) throws IllegalStateException {
-		Object[] arguments = new Object[_parameterTypes.length];
-		for (int i = 0; i < arguments.length; i++) {
-			@SuppressWarnings({ "rawtypes" })
-			InjectionPoint<?> injectionPoint = new MemberInjectionPoint(_method, i, bean);
-
-			arguments[i] = injectionManager.getInstance(injectionPoint);
-		}
-
+	public void initialize(Object component) throws IllegalStateException {
 		try {
-			_method.invoke(bean, arguments);
+			_method.invoke(component);
+		} catch (RuntimeException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not invoke initializing method " + _method, e);
 		}
@@ -76,6 +66,6 @@ final class InitializeMethodDescriptorImpl implements InitializeMethodDescriptor
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return _method.getAnnotation(annotationClass);
+		return ReflectionUtils.getAnnotation(_method, annotationClass);
 	}
 }

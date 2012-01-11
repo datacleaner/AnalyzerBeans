@@ -29,8 +29,11 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.inject.Inject;
+
 import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.connection.DatastoreConnection;
@@ -59,11 +62,14 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 	private static final Logger logger = LoggerFactory.getLogger(DatastoreSynonymCatalog.class);
 
 	private transient Map<String, String> _masterTermCache;
-	private transient DatastoreCatalog _datastoreCatalog;
 	private transient BlockingQueue<DatastoreConnection> _dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
 	private final String _datastoreName;
 	private final String _masterTermColumnPath;
 	private final String[] _synonymColumnPaths;
+
+	@Inject
+	@Provided
+	transient DatastoreCatalog _datastoreCatalog;
 
 	public DatastoreSynonymCatalog(String name, String datastoreName, String masterTermColumnPath,
 			String[] synonymColumnPaths) {
@@ -76,7 +82,7 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 		ReadObjectBuilder.create(this, DatastoreSynonymCatalog.class).readObject(stream);
 	}
-	
+
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
 		super.decorateIdentity(identifiers);
@@ -85,17 +91,12 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 		identifiers.add(_synonymColumnPaths);
 	}
 
-	public void setDatastoreCatalog(DatastoreCatalog datastoreCatalog) {
-		_datastoreCatalog = datastoreCatalog;
-	}
-
 	/**
 	 * Initializes a DatastoreConnection, which will keep the connection open
 	 */
 	@Initialize
-	public void init(DatastoreCatalog datastoreCatalog) {
+	public void init() {
 		logger.info("Initializing dictionary: {}", this);
-		setDatastoreCatalog(datastoreCatalog);
 		Datastore datastore = getDatastore();
 		DatastoreConnection dataContextProvider = datastore.openConnection();
 		getDatastoreConnections().add(dataContextProvider);

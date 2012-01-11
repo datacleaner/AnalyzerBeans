@@ -35,5 +35,5 @@ import org.eobjects.analyzer.descriptors.ComponentDescriptor;
  */
 public interface LifeCycleCallback<C, D extends ComponentDescriptor<?>> {
 
-	public void onEvent(LifeCycleState state, C component, D descriptor);
+	public void onEvent(C component, D descriptor);
 }

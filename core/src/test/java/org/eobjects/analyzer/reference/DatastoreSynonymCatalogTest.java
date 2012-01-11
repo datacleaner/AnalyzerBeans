@@ -40,7 +40,7 @@ public class DatastoreSynonymCatalogTest {
 		DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(csvDatastore);
 		_dataStoreBasedSynonymCatalog = new DatastoreSynonymCatalog("my synonym catalog", "region datastore", "region",
 				new String[] { "firstsynonym", "secondsynonym", "thirdsynonym" });
-		_dataStoreBasedSynonymCatalog.init(datastoreCatalog);
+		_dataStoreBasedSynonymCatalog._datastoreCatalog = datastoreCatalog;
 	}
 
 	@Test

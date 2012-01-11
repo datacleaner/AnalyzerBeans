@@ -179,8 +179,8 @@ public class RowProcessingQueryOptimizer {
 
 			FilterConsumer consumer = entry.getKey();
 			FilterOutcome outcome = entry.getValue();
+			Filter<?> filter = consumer.getComponent();
 
-			Filter<?> filter = consumer.getBeanInstance().getBean();
 			@SuppressWarnings("rawtypes")
 			QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) filter;
 
