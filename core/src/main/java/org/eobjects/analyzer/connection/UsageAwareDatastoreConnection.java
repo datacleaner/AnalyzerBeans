@@ -116,7 +116,7 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 
 	@Override
 	public String toString() {
-		return "UsageAwareDatastoreConnection[datastore=" + getDatastoreName() + "]";
+		return "UsageAwareDatastoreConnection[datastore=" + getDatastoreName() + ",usage=" + getUsageCount() + "]";
 	}
 
 	@Override

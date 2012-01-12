@@ -77,7 +77,7 @@
 						Select this storage provider to store staging data
 						and intermediary results in memory. This is by far the best
 						performing storage provider but it also brings in the risk of
-						running out of memory for very large jobs.  
+						running out of memory for very large jobs.
 					</documentation>
 				</annotation>
 			</element>
@@ -247,6 +247,19 @@
 				<element name="driver" minOccurs="1" maxOccurs="1" type="string" />
 				<element name="username" minOccurs="0" maxOccurs="1" type="string" />
 				<element name="password" minOccurs="0" maxOccurs="1" type="string" />
+				<element name="multiple-connections" minOccurs="0"
+					maxOccurs="1" type="boolean" default="true">
+					<annotation>
+						<documentation>
+							Indicates whether multiple connections (aka.
+							connection pooling) may be created or not. Connection pooling is
+							preferred for performance reasons, but can safely be disabled if
+							not desired. The max number of connections cannot be configured,
+							but no more connections than the number of threads in the task
+							runner should be expected.
+						</documentation>
+					</annotation>
+				</element>
 			</sequence>
 			<element name="datasource-jndi-url" minOccurs="0" maxOccurs="1"
 				type="string" />
@@ -559,7 +572,7 @@
 						storage. This is optional as H2 will otherwise
 						automatically assign
 						a temporary directory for the purpose.
-				</documentation>
+					</documentation>
 				</annotation>
 			</element>
 		</sequence>
@@ -605,7 +618,7 @@
 						Adds a property to this custom type. Properties are
 						mapped to fields in the corresponding class that are annotated
 						with the @Configured annotation.
-				</documentation>
+					</documentation>
 				</annotation>
 				<complexType>
 					<attribute name="name" use="required" type="string" />

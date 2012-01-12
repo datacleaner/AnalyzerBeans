@@ -77,4 +77,9 @@ public class DatastoreConnectionLease implements DatastoreConnection {
 			logger.warn("Connection is already closed, but close() was invoked!", new Throwable());
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return "DatastoreConnectionLease[" + _delegate + "]";
+	}
 }

@@ -21,8 +21,10 @@ package org.eobjects.analyzer.connection;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -56,28 +58,31 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 	private final String _username;
 	private final String _password;
 	private final String _driverClass;
+	private final boolean _multipleConnections;
 	private final String _datasourceJndiUrl;
 
 	private JdbcDatastore(String name, String jdbcUrl, String driverClass, String username, String password,
-			String datasourceJndiUrl) {
+			String datasourceJndiUrl, boolean multipleConnections) {
 		super(name);
 		_jdbcUrl = jdbcUrl;
 		_driverClass = driverClass;
 		_username = username;
 		_password = password;
 		_datasourceJndiUrl = datasourceJndiUrl;
+		_multipleConnections = multipleConnections;
 	}
 
 	public JdbcDatastore(String name, String jdbcUrl, String driverClass) {
-		this(name, jdbcUrl, driverClass, null, null, null);
+		this(name, jdbcUrl, driverClass, null, null, null, true);
 	}
 
-	public JdbcDatastore(String name, String jdbcUrl, String driverClass, String username, String password) {
-		this(name, jdbcUrl, driverClass, username, password, null);
+	public JdbcDatastore(String name, String jdbcUrl, String driverClass, String username, String password,
+			boolean multipleConnections) {
+		this(name, jdbcUrl, driverClass, username, password, null, multipleConnections);
 	}
 
 	public JdbcDatastore(String name, String datasourceJndiUrl) {
-		this(name, null, null, null, null, datasourceJndiUrl);
+		this(name, null, null, null, null, datasourceJndiUrl, false);
 	}
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -99,7 +104,7 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 	 * @param dc
 	 */
 	public JdbcDatastore(String name, UpdateableDataContext dc) {
-		this(name, null, null, null, null, null);
+		this(name, null, null, null, null, null, false);
 		setDataContextProvider(new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dc, this));
 	}
 
@@ -111,6 +116,11 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 		identifiers.add(_datasourceJndiUrl);
 		identifiers.add(_username);
 		identifiers.add(_password);
+		identifiers.add(_multipleConnections);
+	}
+
+	public boolean isMultipleConnections() {
+		return _multipleConnections;
 	}
 
 	public String getJdbcUrl() {
@@ -133,7 +143,36 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 		return _datasourceJndiUrl;
 	}
 
-	public DataSource createDataSource() throws IllegalStateException {
+	public Connection createConnection() throws IllegalStateException {
+		initializeDriver();
+
+		try {
+			if (_username != null && _password != null) {
+				return DriverManager.getConnection(_jdbcUrl, _username, _password);
+			} else {
+				return DriverManager.getConnection(_jdbcUrl);
+			}
+		} catch (SQLException e) {
+			throw new IllegalStateException("Could not create connection", e);
+		}
+	}
+
+	public DataSource createDataSource() {
+		initializeDriver();
+
+		BasicDataSource ds = new BasicDataSource();
+		ds.setMaxActive(-1);
+		ds.setDefaultAutoCommit(false);
+		ds.setUrl(_jdbcUrl);
+
+		if (_username != null && _password != null) {
+			ds.setUsername(_username);
+			ds.setPassword(_password);
+		}
+		return ds;
+	}
+
+	private void initializeDriver() {
 		if (_jdbcUrl == null) {
 			throw new IllegalStateException("JDBC URL is null, cannot create connection!");
 		}
@@ -165,26 +204,19 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 				throw new IllegalStateException("Could not initialize JDBC driver", e);
 			}
 		}
-
-		BasicDataSource ds = new BasicDataSource();
-		ds.setMaxActive(-1);
-		ds.setDefaultAutoCommit(false);
-		ds.setUrl(_jdbcUrl);
-
-		if (_username != null && _password != null) {
-			ds.setUsername(_username);
-			ds.setPassword(_password);
-		}
-		return ds;
 	}
 
 	@Override
 	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
 		if (StringUtils.isNullOrEmpty(_datasourceJndiUrl)) {
-			DataSource ds = createDataSource();
-
-			UpdateableDataContext dataContext = DataContextFactory.createJdbcDataContext(ds);
-			return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
+			if (isMultipleConnections()) {
+				final DataSource dataSource = createDataSource();
+				return new DataSourceDatastoreConnection(dataSource, this);
+			} else {
+				final Connection connection = createConnection();
+				final UpdateableDataContext dataContext = DataContextFactory.createJdbcDataContext(connection);
+				return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
+			}
 		} else {
 			try {
 				Context initialContext = getJndiNamingContext();

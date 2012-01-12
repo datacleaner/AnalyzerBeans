@@ -704,7 +704,13 @@ public final class JaxbConfigurationReader implements
 				String driver = jdbcDatastoreType.getDriver();
 				String username = jdbcDatastoreType.getUsername();
 				String password = jdbcDatastoreType.getPassword();
-				ds = new JdbcDatastore(name, url, driver, username, password);
+				Boolean multipleConnections = jdbcDatastoreType
+						.isMultipleConnections();
+				if (multipleConnections == null) {
+					multipleConnections = true;
+				}
+				ds = new JdbcDatastore(name, url, driver, username, password,
+						multipleConnections.booleanValue());
 			} else {
 				ds = new JdbcDatastore(name, datasourceJndiUrl);
 			}
