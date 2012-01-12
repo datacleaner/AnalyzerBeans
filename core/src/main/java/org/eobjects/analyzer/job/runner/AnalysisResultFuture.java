@@ -44,7 +44,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 public interface AnalysisResultFuture extends ErrorAware {
 
 	/**
-	 * @return true if the job is still executing
+	 * @return true if the job has finished
 	 */
 	public boolean isDone();
 
@@ -69,7 +69,7 @@ public interface AnalysisResultFuture extends ErrorAware {
 	public void await(long timeout, TimeUnit timeUnit);
 
 	/**
-	 * @return true if the job executed without errors
+	 * @return true if the job has executed without errors
 	 */
 	public boolean isSuccessful();
 
