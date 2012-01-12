@@ -23,7 +23,7 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
-import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
@@ -50,10 +50,10 @@ public class StringValueRangeFilter implements Filter<RangeFilterCategory> {
 		this.highestValue = highestValue;
 	}
 
-	@Initialize
-	public void init() {
+	@Validate
+	public void validate() {
 		if (lowestValue.compareTo(highestValue) > 0) {
-			throw new IllegalStateException("Lowest value is higher than the highest value");
+			throw new IllegalStateException("Lowest value is greater than the highest value");
 		}
 	}
 

@@ -83,7 +83,9 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 		final BeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(getConfiguredProperties());
 		lifeCycleHelper.assignConfiguredProperties(descriptor, component, beanConfiguration);
 		lifeCycleHelper.assignProvidedProperties(descriptor, component);
-		lifeCycleHelper.initialize(descriptor, component);
+		
+		// only validate, don't initialize
+		lifeCycleHelper.validate(descriptor, component);
 
 		final OutputColumns outputColumns = component.getOutputColumns();
 		if (outputColumns == null) {

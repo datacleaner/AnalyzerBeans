@@ -25,6 +25,7 @@ public class NumberRangeFilterTest extends TestCase {
 
 	public void testFilter() throws Exception {
 		NumberRangeFilter filter = new NumberRangeFilter(5d, 10d);
+		filter.validate();
 		assertEquals(RangeFilterCategory.LOWER, filter.categorize((Number) null));
 		assertEquals(RangeFilterCategory.LOWER, filter.categorize(0));
 		assertEquals(RangeFilterCategory.LOWER, filter.categorize(-200));
@@ -39,6 +40,7 @@ public class NumberRangeFilterTest extends TestCase {
 	
 	public void testSameMaxAndMin() throws Exception {
 		NumberRangeFilter filter = new NumberRangeFilter(18d,18d);
+		filter.validate();
 		assertEquals(RangeFilterCategory.VALID, filter.categorize(18));
 		assertEquals(RangeFilterCategory.VALID, filter.categorize(18.0));
 		assertEquals(RangeFilterCategory.VALID, filter.categorize(18.0f));

@@ -23,6 +23,7 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
@@ -45,6 +46,13 @@ public class NumberRangeFilter implements Filter<RangeFilterCategory> {
 	}
 
 	public NumberRangeFilter() {
+	}
+
+	@Validate
+	public void validate() {
+		if (lowestValue.compareTo(highestValue) > 0) {
+			throw new IllegalStateException("Lowest value is greater than the highest value");
+		}
 	}
 
 	@Override

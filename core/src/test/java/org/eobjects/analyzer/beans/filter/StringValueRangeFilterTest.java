@@ -32,7 +32,7 @@ public class StringValueRangeFilterTest extends TestCase {
 
 	public void testCategorize() throws Exception {
 		StringValueRangeFilter f = new StringValueRangeFilter("AAA", "ccc");
-		f.init();
+		f.validate();
 
 		assertEquals(RangeFilterCategory.LOWER, f.categorize((String) null));
 		assertEquals(RangeFilterCategory.LOWER, f.categorize(""));
