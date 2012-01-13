@@ -37,8 +37,6 @@ public final class OutputColumns implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private static OutputColumns singleOutputColumn = new OutputColumns(1);
-
 	/**
 	 * Factory/convenience method for retrieving a single output column
 	 * instance.
@@ -46,7 +44,7 @@ public final class OutputColumns implements Serializable {
 	 * @return a single output column instance.
 	 */
 	public static OutputColumns singleOutputColumn() {
-		return singleOutputColumn;
+		return new OutputColumns(1);
 	}
 
 	private final String[] columnNames;
@@ -105,16 +103,16 @@ public final class OutputColumns implements Serializable {
 	 */
 	public OutputColumns(String[] columnNames, Class<?>[] columnTypes) {
 		if (columnNames == null) {
-			throw new IllegalArgumentException("arguments cannot be null");
+			throw new IllegalArgumentException("Arguments cannot be null");
 		}
 		if (columnNames.length < 1) {
-			throw new IllegalArgumentException("column names length must be 1 or higher");
+			throw new IllegalArgumentException("Column names length must be 1 or higher");
 		}
 		if (columnTypes == null) {
 			columnTypes = new Class[columnNames.length];
 		}
 		if (columnNames.length != columnTypes.length) {
-			throw new IllegalArgumentException("column names and column types must have equal length");
+			throw new IllegalArgumentException("Column names and column types must have equal length");
 		}
 		this.columnNames = columnNames.clone();
 		this.columnTypes = columnTypes.clone();
