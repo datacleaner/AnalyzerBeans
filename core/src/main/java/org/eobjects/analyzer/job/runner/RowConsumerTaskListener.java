@@ -69,7 +69,7 @@ public final class RowConsumerTaskListener implements TaskListener {
 	}
 
 	public void awaitTasks(final int numTasks) {
-		while (numTasks > _counter.get()) {
+		while (numTasks > _counter.get() && !isErrornous()) {
 			_taskRunner.assistExecution();
 		}
 	}
