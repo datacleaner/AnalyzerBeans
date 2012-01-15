@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.io.Serializable;
+
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.metamodel.util.HasName;
 
@@ -27,7 +29,7 @@ import org.eobjects.metamodel.util.HasName;
  * 
  * @author Kasper Sørensen
  */
-public interface ComponentJob extends HasName {
+public interface ComponentJob extends HasName, Serializable {
 
 	/**
 	 * Gets the descriptor of this component type.

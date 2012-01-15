@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -33,7 +34,9 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * 
  * @param <B>
  */
-abstract class AbstractDescriptor<B> {
+public abstract class AbstractDescriptor<B> implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private final Class<B> _componentClass;
 

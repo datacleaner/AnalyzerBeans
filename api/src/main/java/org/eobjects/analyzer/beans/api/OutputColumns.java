@@ -106,7 +106,7 @@ public final class OutputColumns implements Serializable {
 			throw new IllegalArgumentException("Arguments cannot be null");
 		}
 		if (columnNames.length < 1) {
-			throw new IllegalArgumentException("Column names length must be 1 or higher");
+			throw new IllegalArgumentException("Column names length must be 1 or greater");
 		}
 		if (columnTypes == null) {
 			columnTypes = new Class[columnNames.length];

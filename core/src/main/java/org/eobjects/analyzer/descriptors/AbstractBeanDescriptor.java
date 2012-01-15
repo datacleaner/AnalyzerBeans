@@ -43,6 +43,8 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  */
 abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> implements BeanDescriptor<B> {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final boolean _requireInputColumns;
 
 	public AbstractBeanDescriptor(Class<B> beanClass, boolean requireInputColumns) {

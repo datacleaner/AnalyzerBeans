@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ import org.eobjects.analyzer.beans.api.Close;
  * @author Kasper Sørensen
  * 
  */
-public interface CloseMethodDescriptor {
+public interface CloseMethodDescriptor extends Serializable {
 
 	/**
 	 * Invokes the close method

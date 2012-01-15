@@ -19,7 +19,8 @@
  */
 package org.eobjects.analyzer.beans.categories;
 
-
 public class ConversionCategory extends AbstractComponentCategory {
+
+	private static final long serialVersionUID = 1L;
 
 }

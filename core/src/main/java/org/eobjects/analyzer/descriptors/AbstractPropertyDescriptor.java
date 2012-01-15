@@ -37,9 +37,12 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  */
 public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 
-	private final Field _field;
+	private static final long serialVersionUID = 1L;
+
+	private final transient Field _field;
+	private final transient Type _genericType;
+	private final String _name;
 	private final Class<?> _baseType;
-	private final Type _genericType;
 	private final ComponentDescriptor<?> _componentDescriptor;
 
 	public AbstractPropertyDescriptor(Field field, ComponentDescriptor<?> componentDescriptor) {
@@ -48,20 +51,35 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 		}
 		_field = field;
 		_field.setAccessible(true);
+		_name = _field.getName();
 		_baseType = _field.getType();
 		_genericType = _field.getGenericType();
 		_componentDescriptor = componentDescriptor;
 	}
 
+	public Field getField() {
+		if (_field == null) {
+			return ReflectionUtils.getField(_componentDescriptor.getComponentClass(), _name);
+		}
+		return _field;
+	}
+	
+	public Type getGenericType() {
+		if (_genericType == null) {
+			return getField().getGenericType();
+		}
+		return _genericType;
+	}
+
 	@Override
 	public String getName() {
-		return _field.getName();
+		return _name;
 	}
 
 	@Override
 	public void setValue(Object component, Object value) throws IllegalArgumentException {
 		try {
-			_field.set(component, value);
+			getField().set(component, value);
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not assign value '" + value + "' to " + _field, e);
 		}
@@ -73,7 +91,7 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 			throw new IllegalArgumentException("bean cannot be null");
 		}
 		try {
-			return _field.get(bean);
+			return getField().get(bean);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Could not retrieve property '" + getName() + "' from bean: " + bean);
 		}
@@ -81,23 +99,23 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 
 	@Override
 	public Set<Annotation> getAnnotations() {
-		Annotation[] annotations = _field.getAnnotations();
+		Annotation[] annotations = getField().getAnnotations();
 		return new HashSet<Annotation>(Arrays.asList(annotations));
 	}
 
 	@Override
 	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return ReflectionUtils.getAnnotation(_field, annotationClass);
+		return ReflectionUtils.getAnnotation(getField(), annotationClass);
 	}
 
 	@Override
 	public int getTypeArgumentCount() {
-		return ReflectionUtils.getTypeParameterCount(_genericType);
+		return ReflectionUtils.getTypeParameterCount(getGenericType());
 	}
 
 	@Override
 	public Class<?> getTypeArgument(int i) throws IndexOutOfBoundsException {
-		return ReflectionUtils.getTypeParameter(_field, i);
+		return ReflectionUtils.getTypeParameter(getField(), i);
 	}
 
 	@Override
@@ -122,7 +140,7 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((_field == null) ? 0 : _field.hashCode());
+		result = prime * result + ((_name == null) ? 0 : _name.hashCode());
 		return result;
 	}
 
@@ -135,17 +153,17 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractPropertyDescriptor other = (AbstractPropertyDescriptor) obj;
-		if (_field == null) {
-			if (other._field != null)
+		if (_name == null) {
+			if (other._name != null)
 				return false;
-		} else if (!_field.equals(other._field))
+		} else if (!_name.equals(other._name))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[field=" + _field.getName() + ",baseType=" + _baseType + "]";
+		return getClass().getSimpleName() + "[field=" + _name + ",baseType=" + _baseType + "]";
 	}
 
 	@Override

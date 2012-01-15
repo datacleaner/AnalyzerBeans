@@ -40,6 +40,8 @@ import org.eobjects.metamodel.util.BaseObject;
  * 
  */
 public abstract class AbstractFilterOutcome extends BaseObject implements FilterOutcome {
+	
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected final void decorateIdentity(List<Object> identifiers) {

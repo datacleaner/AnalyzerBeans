@@ -30,6 +30,8 @@ import org.eobjects.metamodel.schema.Column;
  * @param <E>
  */
 public class MockInputColumn<E> extends AbstractInputColumn<E> {
+	
+	private static final long serialVersionUID = 1L;
 
 	private String _name;
 	private Class<? extends E> _clazz;

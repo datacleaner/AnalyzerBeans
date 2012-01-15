@@ -21,4 +21,6 @@ package org.eobjects.analyzer.beans.categories;
 
 public class CoalesceCategory extends AbstractComponentCategory {
 
+	private static final long serialVersionUID = 1L;
+
 }

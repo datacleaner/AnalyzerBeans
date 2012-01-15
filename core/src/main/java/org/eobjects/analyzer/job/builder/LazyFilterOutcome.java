@@ -26,6 +26,8 @@ import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableFilterJob;
 
 public final class LazyFilterOutcome extends AbstractFilterOutcome {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final FilterJobBuilder<?, ?> _filterJobBuilder;
 	private final Enum<?> _category;

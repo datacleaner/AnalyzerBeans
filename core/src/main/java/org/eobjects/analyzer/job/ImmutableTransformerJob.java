@@ -34,6 +34,8 @@ import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableTransformerJob extends BaseObject implements TransformerJob {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _name;
 	private final TransformerBeanDescriptor<?> _descriptor;

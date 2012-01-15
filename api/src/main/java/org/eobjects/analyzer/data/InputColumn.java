@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.data;
 
+import java.io.Serializable;
+
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.util.HasName;
 
@@ -36,7 +38,7 @@ import org.eobjects.metamodel.util.HasName;
  *            the data type of the column. See <code>DataTypeFamily</code> for
  *            available values.
  */
-public interface InputColumn<E> extends HasName, Comparable<InputColumn<E>> {
+public interface InputColumn<E> extends HasName, Comparable<InputColumn<E>>, Serializable {
 
 	/**
 	 * @return the name of this column

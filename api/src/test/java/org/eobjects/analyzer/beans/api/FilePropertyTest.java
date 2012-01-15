@@ -25,6 +25,6 @@ public class FilePropertyTest extends TestCase {
 
 	public void testEnumAccess() throws Exception {
 		assertEquals("OPEN", FileProperty.FileAccessMode.OPEN.name());
-		assertEquals("OPEN", FileProperty.FileAccessMode.SAVE.name());
+		assertEquals("SAVE", FileProperty.FileAccessMode.SAVE.name());
 	}
 }

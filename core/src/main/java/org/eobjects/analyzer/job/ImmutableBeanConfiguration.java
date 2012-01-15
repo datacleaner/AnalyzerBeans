@@ -30,6 +30,7 @@ import org.eobjects.metamodel.util.EqualsBuilder;
 
 public final class ImmutableBeanConfiguration implements BeanConfiguration {
 
+	private static final long serialVersionUID = 1L;
 	private final Map<PropertyDescriptor, Object> _properties;
 
 	public ImmutableBeanConfiguration(Map<ConfiguredPropertyDescriptor, Object> properties) {

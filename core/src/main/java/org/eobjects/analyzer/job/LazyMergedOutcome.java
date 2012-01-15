@@ -22,6 +22,8 @@ package org.eobjects.analyzer.job;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 
 public final class LazyMergedOutcome extends AbstractMergedOutcome implements MergedOutcome {
+	
+	private static final long serialVersionUID = 1L;
 
 	private MergedOutcomeJobBuilder _mergedOutcomeJobBuilder;
 

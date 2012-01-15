@@ -19,6 +19,10 @@
  */
 package org.eobjects.analyzer.beans.api;
 
+import java.io.Serializable;
+
+import org.eobjects.metamodel.util.HasName;
+
 /**
  * Represents a category that a component can be applied to. Categories aid the
  * description of the components by building relationships through related
@@ -26,7 +30,7 @@ package org.eobjects.analyzer.beans.api;
  * 
  * @author Kasper Sørensen
  */
-public interface ComponentCategory {
+public interface ComponentCategory extends Serializable, HasName {
 
 	/**
 	 * Gets the name of the category. The name is often used as the primary
@@ -34,5 +38,6 @@ public interface ComponentCategory {
 	 * 
 	 * @return a string name
 	 */
+	@Override
 	public String getName();
 }

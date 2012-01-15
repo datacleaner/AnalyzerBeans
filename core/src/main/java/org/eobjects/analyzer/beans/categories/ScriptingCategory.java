@@ -21,4 +21,5 @@ package org.eobjects.analyzer.beans.categories;
 
 public class ScriptingCategory extends AbstractComponentCategory {
 
+	private static final long serialVersionUID = 1L;
 }

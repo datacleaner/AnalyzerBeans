@@ -44,4 +44,9 @@ public final class ColumnComparisonResult implements AnalyzerResult {
 	public boolean isColumnsEqual() {
 		return columnDifferences.isEmpty();
 	}
+
+	@Override
+	public String toString() {
+		return "ColumnComparisonResult[column=" + columnDifferences + "]";
+	}
 }

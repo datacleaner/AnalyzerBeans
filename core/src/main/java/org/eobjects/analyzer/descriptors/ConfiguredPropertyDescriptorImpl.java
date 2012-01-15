@@ -32,6 +32,8 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
 		ConfiguredPropertyDescriptor {
+	
+	private static final long serialVersionUID = 1L;
 
 	protected ConfiguredPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor)
 			throws DescriptorException {

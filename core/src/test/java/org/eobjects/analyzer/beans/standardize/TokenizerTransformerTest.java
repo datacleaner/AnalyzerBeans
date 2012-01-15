@@ -53,7 +53,7 @@ public class TokenizerTransformerTest extends TestCase {
 			transformer.getOutputColumns();
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
-			assertEquals("column names length must be 1 or higher", e.getMessage());
+			assertEquals("Column names length must be 1 or greater", e.getMessage());
 		}
 	}
 

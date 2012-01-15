@@ -407,6 +407,19 @@ public final class ReflectionUtils {
 		return result.toArray(new Field[result.size()]);
 	}
 
+	public static Method getMethod(Class<?> clazz, String name) {
+		if (clazz == Object.class || clazz == null) {
+			return null;
+		}
+		try {
+			return clazz.getDeclaredMethod(name);
+		} catch (SecurityException e) {
+			throw new IllegalStateException(e);
+		} catch (NoSuchMethodException e) {
+			return getMethod(clazz.getSuperclass(), name);
+		}
+	}
+
 	public static Field getField(Class<?> clazz, String fieldName) {
 		if (clazz == Object.class || clazz == null) {
 			return null;

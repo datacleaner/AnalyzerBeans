@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
@@ -34,14 +35,15 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * When the result is done it may either be successful or errornous. Clients can
  * find out using the isSuccessful() or isErrornous() methods.
  * 
- * If succesful, the results can be retrieved using the getResults() method. If
+ * If succesful, the results can be retrieved like specified in the
+ * {@link AnalysisResult} interface - using the getResults() method. If
  * errornous the error messages can be retrieved using the getErrors() method.
  * If the analysis was only partly errornous, there may be both result and
  * errors, but isSuccesful() will return false.
  * 
  * @author Kasper Sørensen
  */
-public interface AnalysisResultFuture extends ErrorAware {
+public interface AnalysisResultFuture extends ErrorAware, AnalysisResult {
 
 	/**
 	 * @return true if the job has finished
@@ -88,6 +90,7 @@ public interface AnalysisResultFuture extends ErrorAware {
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
+	@Override
 	public List<AnalyzerResult> getResults() throws IllegalStateException;
 
 	/**
@@ -101,6 +104,7 @@ public interface AnalysisResultFuture extends ErrorAware {
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
+	@Override
 	public AnalyzerResult getResult(ComponentJob componentJob) throws IllegalStateException;
 
 	/**
@@ -112,6 +116,7 @@ public interface AnalysisResultFuture extends ErrorAware {
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
+	@Override
 	public Map<ComponentJob, AnalyzerResult> getResultMap() throws IllegalStateException;
 
 	/**

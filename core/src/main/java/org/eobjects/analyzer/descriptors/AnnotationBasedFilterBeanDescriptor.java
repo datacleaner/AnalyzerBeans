@@ -29,6 +29,8 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends AbstractBeanDescriptor<F>
 		implements FilterBeanDescriptor<F, C> {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _displayName;
 

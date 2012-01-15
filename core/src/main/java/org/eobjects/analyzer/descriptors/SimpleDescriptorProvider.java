@@ -126,6 +126,10 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 		_filterBeanDescriptors.add(descriptor);
 	}
 
+	public void addExplorerBeanDescriptor(ExplorerBeanDescriptor<?> descriptor) {
+		_explorerBeanDescriptors.add(descriptor);
+	}
+
 	@Override
 	public List<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
 		return _analyzerBeanDescriptors;
@@ -144,7 +148,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 	public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
 		return _explorerBeanDescriptors;
 	}
-	
+
 	@Override
 	protected <E extends Explorer<?>> ExplorerBeanDescriptor<E> notFoundExplorer(Class<E> explorerClass) {
 		return Descriptors.ofExplorer(explorerClass);

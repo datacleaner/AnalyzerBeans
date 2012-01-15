@@ -55,4 +55,10 @@ public class SchemaComparisonResult implements AnalyzerResult {
 	public boolean isSchemasEqual() {
 		return schemaDifferences.isEmpty() && tableComparisonResults.isEmpty();
 	}
+
+	@Override
+	public String toString() {
+		return "SchemaComparisonResult[differences=" + schemaDifferences + ", table comparison="
+				+ tableComparisonResults + "]";
+	}
 }

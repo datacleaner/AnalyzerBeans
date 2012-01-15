@@ -19,12 +19,17 @@
  */
 package org.eobjects.analyzer.job.builder;
 
+import java.util.List;
+
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
+import org.eobjects.metamodel.util.BaseObject;
 
-public final class ImmutableExplorerJob implements ExplorerJob {
+public final class ImmutableExplorerJob extends BaseObject implements ExplorerJob {
+
+	private static final long serialVersionUID = 1L;
 
 	private final String _name;
 	private final ExplorerBeanDescriptor<?> _descriptor;
@@ -51,4 +56,15 @@ public final class ImmutableExplorerJob implements ExplorerJob {
 		return _name;
 	}
 
+	@Override
+	protected void decorateIdentity(List<Object> identifiers) {
+		identifiers.add(_name);
+		identifiers.add(_configuration);
+		identifiers.add(_descriptor);
+	}
+
+	@Override
+	public String toString() {
+		return "ImmutableExplorerJob[name=" + _name + ",explorer=" + _descriptor.getDisplayName() + "]";
+	}
 }

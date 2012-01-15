@@ -21,6 +21,8 @@ package org.eobjects.analyzer.job;
 
 public final class ImmutableFilterOutcome extends AbstractFilterOutcome {
 
+	private static final long serialVersionUID = 1L;
+
 	private final FilterJob _filterJob;
 	private final Enum<?> _category;
 

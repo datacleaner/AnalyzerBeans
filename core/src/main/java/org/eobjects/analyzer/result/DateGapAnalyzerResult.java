@@ -22,6 +22,7 @@ package org.eobjects.analyzer.result;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 
 import org.eobjects.analyzer.util.TimeInterval;
 
@@ -94,5 +95,10 @@ public class DateGapAnalyzerResult implements AnalyzerResult {
 
 	public String getGroupColumnName() {
 		return _groupColumnName;
+	}
+
+	@Override
+	public String toString() {
+		return "DateGapAnalyzerResult[gaps=" + new TreeMap<String, SortedSet<TimeInterval>>(_gaps) + "]";
 	}
 }

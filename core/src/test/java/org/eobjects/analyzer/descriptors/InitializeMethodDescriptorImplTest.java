@@ -30,7 +30,7 @@ public class InitializeMethodDescriptorImplTest extends TestCase {
 	public void testInitialize() throws Exception {
 		executed = false;
 		Method m = getClass().getDeclaredMethod("doInitialize");
-		InitializeMethodDescriptorImpl initializeMethodDescriptorImpl = new InitializeMethodDescriptorImpl(m);
+		InitializeMethodDescriptorImpl initializeMethodDescriptorImpl = new InitializeMethodDescriptorImpl(m, null);
 		initializeMethodDescriptorImpl.initialize(this);
 
 		assertTrue(executed);

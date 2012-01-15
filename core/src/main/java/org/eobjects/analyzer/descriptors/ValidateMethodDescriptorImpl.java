@@ -19,48 +19,19 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.eobjects.analyzer.util.ReflectionUtils;
+final class ValidateMethodDescriptorImpl extends AbstractMethodDescriptor implements ValidateMethodDescriptor {
 
-final class ValidateMethodDescriptorImpl implements ValidateMethodDescriptor {
+	private static final long serialVersionUID = 1L;
 
-	private final Method _method;
-
-	public ValidateMethodDescriptorImpl(Method method) {
-		_method = method;
+	public ValidateMethodDescriptorImpl(Method method, ComponentDescriptor<?> componentDescriptor) {
+		super(method, componentDescriptor);
 	}
 
 	@Override
 	public void validate(Object component) {
-		try {
-			_method.invoke(component);
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new IllegalStateException("Could not invoke validation method " + _method, e);
-		}
-	}
-
-
-	@Override
-	public String toString() {
-		return "ValidateMethodDescriptorImpl[method=" + _method.getName() + "]";
-	}
-
-	@Override
-	public Set<Annotation> getAnnotations() {
-		Annotation[] annotations = _method.getAnnotations();
-		return new HashSet<Annotation>(Arrays.asList(annotations));
-	}
-
-	@Override
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return ReflectionUtils.getAnnotation(_method, annotationClass);
+		invoke(component);
 	}
 
 }

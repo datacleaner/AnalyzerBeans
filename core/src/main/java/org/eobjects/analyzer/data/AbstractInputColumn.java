@@ -22,6 +22,8 @@ package org.eobjects.analyzer.data;
 import org.eobjects.metamodel.schema.Column;
 
 public abstract class AbstractInputColumn<E> implements InputColumn<E> {
+	
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public boolean isPhysicalColumn() {

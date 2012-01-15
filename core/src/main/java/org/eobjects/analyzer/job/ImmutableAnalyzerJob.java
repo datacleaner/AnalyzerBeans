@@ -30,6 +30,8 @@ import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableAnalyzerJob extends BaseObject implements AnalyzerJob {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _name;
 	private final AnalyzerBeanDescriptor<?> _descriptor;

@@ -22,6 +22,8 @@ package org.eobjects.analyzer.data;
 import org.eobjects.metamodel.schema.Column;
 
 abstract class AbstractExpressionBasedInputColumn<E> extends AbstractInputColumn<E> implements ExpressionBasedInputColumn<E> {
+	
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public final String getName() {

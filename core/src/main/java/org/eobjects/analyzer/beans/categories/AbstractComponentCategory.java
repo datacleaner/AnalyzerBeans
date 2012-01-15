@@ -31,6 +31,8 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  */
 public abstract class AbstractComponentCategory implements ComponentCategory {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public String getName() {
 		String simpleName = getClass().getSimpleName();

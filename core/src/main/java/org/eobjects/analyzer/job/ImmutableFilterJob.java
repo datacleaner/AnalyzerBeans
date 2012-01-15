@@ -32,6 +32,8 @@ import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableFilterJob extends BaseObject implements FilterJob {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _name;
 	private final FilterBeanDescriptor<?, ?> _descriptor;

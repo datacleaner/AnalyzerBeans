@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ import org.eobjects.metamodel.util.HasName;
  * 
  * @author Kasper Sørensen
  */
-public interface PropertyDescriptor extends Comparable<PropertyDescriptor>, HasName {
+public interface PropertyDescriptor extends Comparable<PropertyDescriptor>, Serializable, HasName {
 
 	/**
 	 * Gets the name of the property

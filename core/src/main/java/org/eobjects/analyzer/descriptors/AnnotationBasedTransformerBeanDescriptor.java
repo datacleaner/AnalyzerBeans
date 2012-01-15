@@ -26,6 +26,8 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> extends AbstractBeanDescriptor<T> implements
 		TransformerBeanDescriptor<T> {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _displayName;
 

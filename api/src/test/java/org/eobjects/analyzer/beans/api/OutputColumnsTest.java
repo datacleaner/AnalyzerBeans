@@ -54,7 +54,7 @@ public class OutputColumnsTest extends TestCase {
 			new OutputColumns(new String[0]);
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
-			assertEquals("Column names length must be 1 or higher", e.getMessage());
+			assertEquals("Column names length must be 1 or greater", e.getMessage());
 		}
 	}
 

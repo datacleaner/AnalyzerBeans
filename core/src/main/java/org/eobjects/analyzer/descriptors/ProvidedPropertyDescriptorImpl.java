@@ -29,6 +29,8 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.DataContext;
 
 final class ProvidedPropertyDescriptorImpl extends AbstractPropertyDescriptor implements ProvidedPropertyDescriptor {
+	
+	private static final long serialVersionUID = 1L;
 
 	protected ProvidedPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor)
 			throws DescriptorException {

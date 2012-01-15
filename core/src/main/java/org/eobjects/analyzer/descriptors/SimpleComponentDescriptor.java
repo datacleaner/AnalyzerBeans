@@ -59,6 +59,8 @@ import org.slf4j.LoggerFactory;
  */
 class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements ComponentDescriptor<B> {
 
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = LoggerFactory.getLogger(SimpleComponentDescriptor.class);
 
 	protected final Set<ConfiguredPropertyDescriptor> _configuredProperties;;
@@ -72,11 +74,11 @@ class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements Comp
 	 * 
 	 * @param beanClass
 	 */
-	protected SimpleComponentDescriptor(Class<B> beanClass) {
+	public SimpleComponentDescriptor(Class<B> beanClass) {
 		this(beanClass, false);
 	}
 
-	protected SimpleComponentDescriptor(final Class<B> beanClass, final boolean initialize) {
+	public SimpleComponentDescriptor(final Class<B> beanClass, final boolean initialize) {
 		super(beanClass);
 		_configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>();
 		_providedProperties = new TreeSet<ProvidedPropertyDescriptor>();
@@ -106,7 +108,7 @@ class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements Comp
 		if (ReflectionUtils.isCloseable(getComponentClass())) {
 			try {
 				Method method = getComponentClass().getMethod("close", new Class<?>[0]);
-				CloseMethodDescriptorImpl cmd = new CloseMethodDescriptorImpl(method);
+				CloseMethodDescriptorImpl cmd = new CloseMethodDescriptorImpl(method, this);
 				_closeMethods.add(cmd);
 			} catch (Exception e) {
 				// This should be impossible since all closeable's have a no-arg
@@ -160,15 +162,15 @@ class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements Comp
 		final boolean isValidate = ReflectionUtils.isAnnotationPresent(method, Validate.class);
 
 		if (isInitialize) {
-			_initializeMethods.add(new InitializeMethodDescriptorImpl(method));
+			_initializeMethods.add(new InitializeMethodDescriptorImpl(method, this));
 		}
 
 		if (isValidate) {
-			_validateMethods.add(new ValidateMethodDescriptorImpl(method));
+			_validateMethods.add(new ValidateMethodDescriptorImpl(method, this));
 		}
 
 		if (isClose) {
-			_closeMethods.add(new CloseMethodDescriptorImpl(method));
+			_closeMethods.add(new CloseMethodDescriptorImpl(method, this));
 		}
 	}
 

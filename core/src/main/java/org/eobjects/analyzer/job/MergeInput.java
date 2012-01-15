@@ -19,9 +19,11 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.io.Serializable;
+
 import org.eobjects.analyzer.data.InputColumn;
 
-public interface MergeInput {
+public interface MergeInput extends Serializable {
 
 	public InputColumn<?>[] getInputColumns();
 	

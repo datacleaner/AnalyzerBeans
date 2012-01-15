@@ -28,6 +28,8 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableMergeInput extends BaseObject implements MergeInput {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final List<InputColumn<?>> _inputColumns;
 	private final Outcome _outcome;

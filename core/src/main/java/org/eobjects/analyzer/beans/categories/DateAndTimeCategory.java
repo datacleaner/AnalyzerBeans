@@ -22,4 +22,5 @@ package org.eobjects.analyzer.beans.categories;
 
 public class DateAndTimeCategory extends AbstractComponentCategory {
 
+	private static final long serialVersionUID = 1L;
 }

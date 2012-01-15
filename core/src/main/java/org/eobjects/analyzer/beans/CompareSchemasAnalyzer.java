@@ -40,11 +40,11 @@ import org.eobjects.metamodel.util.EqualsBuilder;
 public class CompareSchemasAnalyzer implements Explorer<SchemaComparisonResult> {
 
 	@Inject
-	@Configured
+	@Configured("First schema")
 	Schema schema1;
 
 	@Inject
-	@Configured
+	@Configured("Second schema")
 	Schema schema2;
 
 	private SchemaComparisonResult result;

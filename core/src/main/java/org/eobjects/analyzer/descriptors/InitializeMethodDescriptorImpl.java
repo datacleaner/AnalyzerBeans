@@ -19,53 +19,17 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.eobjects.analyzer.util.ReflectionUtils;
+final class InitializeMethodDescriptorImpl extends AbstractMethodDescriptor implements InitializeMethodDescriptor {
+	
+	private static final long serialVersionUID = 1L;
 
-final class InitializeMethodDescriptorImpl implements InitializeMethodDescriptor {
-
-	private final Method _method;
-
-	protected InitializeMethodDescriptorImpl(Method method) {
-		if (method.getReturnType() != void.class) {
-			throw new DescriptorException("Initialize methods can only be void");
-		}
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		if (parameterTypes.length > 0) {
-			throw new DescriptorException("Initialize methods cannot have parameters");
-		}
-		_method = method;
-		_method.setAccessible(true);
+	protected InitializeMethodDescriptorImpl(Method method, ComponentDescriptor<?> componentDescriptor) {
+		super(method, componentDescriptor);
 	}
 
 	public void initialize(Object component) throws IllegalStateException {
-		try {
-			_method.invoke(component);
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new IllegalStateException("Could not invoke initializing method " + _method, e);
-		}
-	}
-
-	@Override
-	public String toString() {
-		return "InitializeMethodDescriptorImpl[method=" + _method.getName() + "]";
-	}
-
-	@Override
-	public Set<Annotation> getAnnotations() {
-		Annotation[] annotations = _method.getAnnotations();
-		return new HashSet<Annotation>(Arrays.asList(annotations));
-	}
-
-	@Override
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return ReflectionUtils.getAnnotation(_method, annotationClass);
+		invoke(component);
 	}
 }

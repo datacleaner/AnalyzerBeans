@@ -55,4 +55,12 @@ public final class TableComparisonResult implements AnalyzerResult {
 	public boolean isTablesEqual() {
 		return tableDifferences.isEmpty() && columnComparisonResults.isEmpty();
 	}
+
+	@Override
+	public String toString() {
+		return "TableComparisonResult[differences=" + tableDifferences + ", column comparison="
+				+ columnComparisonResults + "]";
+	}
+	
+	
 }

@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.io.Serializable;
+
 /**
  * Represents the outcome of a filtering flow. An outcome can be used as a
  * requirement for succeeding components in order to make them conditional based
@@ -29,7 +31,7 @@ package org.eobjects.analyzer.job;
  * 
  * @author Kasper Sørensen
  */
-public interface Outcome {
+public interface Outcome extends Serializable {
 
 	/**
 	 * Requests whether or not a specific requirement is satisfied by this

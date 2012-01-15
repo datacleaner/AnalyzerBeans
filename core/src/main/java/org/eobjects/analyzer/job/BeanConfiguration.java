@@ -19,9 +19,11 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.io.Serializable;
+
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 
-public interface BeanConfiguration {
+public interface BeanConfiguration extends Serializable {
 
 	public Object getProperty(ConfiguredPropertyDescriptor propertyDescriptor);
 }

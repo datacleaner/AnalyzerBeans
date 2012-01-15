@@ -28,6 +28,8 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class AnnotationBasedExplorerBeanDescriptor<E extends Explorer<?>> extends AbstractBeanDescriptor<E> implements
 		ExplorerBeanDescriptor<E> {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _displayName;
 

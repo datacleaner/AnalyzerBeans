@@ -19,8 +19,9 @@
  */
 package org.eobjects.analyzer.job;
 
-
 public class ImmutableMergedOutcome extends AbstractMergedOutcome implements MergedOutcome {
+
+	private static final long serialVersionUID = 1L;
 
 	private final MergedOutcomeJob _mergedOutcomeJob;
 

@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
@@ -32,7 +33,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
  * 
  * @author Kasper Sørensen
  */
-public interface InitializeMethodDescriptor {
+public interface InitializeMethodDescriptor extends Serializable {
 
 	/**
 	 * Invokes the initialize method

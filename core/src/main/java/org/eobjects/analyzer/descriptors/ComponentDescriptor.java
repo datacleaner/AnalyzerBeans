@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Close;
@@ -33,7 +34,7 @@ import org.eobjects.analyzer.beans.api.Validate;
  * 
  * @author Kasper Sørensen
  */
-public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?>> {
+public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?>>, Serializable {
 
 	/**
 	 * Constructs an instance of this component

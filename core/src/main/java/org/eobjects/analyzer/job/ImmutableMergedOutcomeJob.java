@@ -30,6 +30,8 @@ import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableMergedOutcomeJob extends BaseObject implements MergedOutcomeJob {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _name;
 	private final List<MergeInput> _mergeInputs;

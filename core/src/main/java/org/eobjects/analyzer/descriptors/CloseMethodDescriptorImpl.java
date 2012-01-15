@@ -19,52 +19,18 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.eobjects.analyzer.util.ReflectionUtils;
+final class CloseMethodDescriptorImpl extends AbstractMethodDescriptor implements CloseMethodDescriptor {
 
-final class CloseMethodDescriptorImpl implements CloseMethodDescriptor {
+	private static final long serialVersionUID = 1L;
 
-	private final Method _method;
-
-	protected CloseMethodDescriptorImpl(Method method) {
-		if (method.getParameterTypes().length != 0) {
-			throw new DescriptorException("Close methods cannot have parameters");
-		}
-		if (method.getReturnType() != void.class) {
-			throw new DescriptorException("Close methods can only be void");
-		}
-		_method = method;
-		_method.setAccessible(true);
-	}
-
-	public void close(Object analyzerBean) throws IllegalStateException {
-		try {
-			_method.invoke(analyzerBean);
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new IllegalStateException("Could not invoke closing method " + _method, e);
-		}
+	protected CloseMethodDescriptorImpl(Method method, ComponentDescriptor<?> componentDescriptor) {
+		super(method, componentDescriptor);
 	}
 
 	@Override
-	public String toString() {
-		return "CloseMethodDescriptorImpl[method=" + _method.getName() + "]";
-	}
-
-	@Override
-	public Set<Annotation> getAnnotations() {
-		Annotation[] annotations = _method.getAnnotations();
-		return new HashSet<Annotation>(Arrays.asList(annotations));
-	}
-
-	@Override
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return ReflectionUtils.getAnnotation(_method, annotationClass);
+	public void close(Object component) throws IllegalStateException {
+		invoke(component);
 	}
 }

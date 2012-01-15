@@ -20,11 +20,12 @@
 package org.eobjects.analyzer.data;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
-
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.ColumnType;
 
 public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final Column _column;
 

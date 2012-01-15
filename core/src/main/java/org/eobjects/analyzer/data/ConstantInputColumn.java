@@ -30,6 +30,8 @@ package org.eobjects.analyzer.data;
  * @author Kasper Sørensen
  */
 public final class ConstantInputColumn extends AbstractExpressionBasedInputColumn<String> {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _value;
 

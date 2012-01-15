@@ -25,9 +25,11 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends AbstractBeanDescriptor<A> implements
 		AnalyzerBeanDescriptor<A> {
+	
+	private static final long serialVersionUID = 1L;
 
 	private final String _displayName;
-
+	
 	protected AnnotationBasedAnalyzerBeanDescriptor(Class<A> analyzerClass) throws DescriptorException {
 		super(analyzerClass, true);
 

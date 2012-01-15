@@ -25,6 +25,8 @@ import java.util.List;
 import org.eobjects.metamodel.util.BaseObject;
 
 public abstract class AbstractMergedOutcome extends BaseObject implements MergedOutcome {
+	
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected final boolean classEquals(BaseObject obj) {
