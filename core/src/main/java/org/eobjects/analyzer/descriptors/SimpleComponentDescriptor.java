@@ -91,6 +91,11 @@ class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements Comp
 	}
 
 	@Override
+	public String getDisplayName() {
+		return getComponentClass().getSimpleName();
+	}
+
+	@Override
 	public B newInstance() {
 		try {
 			return getComponentClass().newInstance();

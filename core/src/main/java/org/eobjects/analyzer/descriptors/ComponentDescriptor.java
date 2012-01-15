@@ -35,6 +35,11 @@ import org.eobjects.analyzer.beans.api.Validate;
  * @author Kasper Sørensen
  */
 public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?>>, Serializable {
+	
+	/**
+	 * @return a humanly readable display name for this bean.
+	 */
+	public String getDisplayName();
 
 	/**
 	 * Constructs an instance of this component

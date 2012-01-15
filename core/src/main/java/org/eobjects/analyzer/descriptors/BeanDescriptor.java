@@ -39,11 +39,6 @@ import org.eobjects.analyzer.util.HasAliases;
 public interface BeanDescriptor<B> extends ComponentDescriptor<B>, HasAliases {
 
 	/**
-	 * @return a humanly readable display name for this bean.
-	 */
-	public String getDisplayName();
-
-	/**
 	 * @return a humanly readable description of the bean.
 	 */
 	public String getDescription();
