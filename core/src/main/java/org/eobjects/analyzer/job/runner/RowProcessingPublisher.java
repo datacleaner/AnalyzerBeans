@@ -101,7 +101,11 @@ public final class RowProcessingPublisher {
 		_analysisListener = analysisListener;
 		_lifeCycleHelper = lifeCycleHelper;
 
-		_queryOptimizerRef = new LazyRef<RowProcessingQueryOptimizer>() {
+		_queryOptimizerRef = createQueryOptimizerRef();
+	}
+
+	private LazyRef<RowProcessingQueryOptimizer> createQueryOptimizerRef() {
+		return new LazyRef<RowProcessingQueryOptimizer>() {
 			@Override
 			protected RowProcessingQueryOptimizer fetch() {
 				final Datastore datastore = _analysisJob.getDatastore();

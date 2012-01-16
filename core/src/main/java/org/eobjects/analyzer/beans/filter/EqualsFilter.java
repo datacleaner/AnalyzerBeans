@@ -65,6 +65,10 @@ public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
 		init();
 	}
 
+	public void setValues(String[] values) {
+		this.values = values;
+	}
+
 	@Initialize
 	public void init() {
 		DataTypeFamily dataTypeFamily = column.getDataTypeFamily();
