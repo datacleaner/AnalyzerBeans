@@ -105,7 +105,7 @@ final class RowProcessingMetricsImpl implements RowProcessingMetrics {
 					}
 				}
 
-				return 0;
+				return expectedRows;
 			}
 		};
 	}
