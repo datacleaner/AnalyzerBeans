@@ -26,7 +26,6 @@ import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.metamodel.schema.Table;
 
 /**
  * Listener interface for analysis execution. Typically the user interface and
@@ -38,9 +37,9 @@ import org.eobjects.metamodel.schema.Table;
  */
 public interface AnalysisListener {
 
-	public void jobBegin(AnalysisJob job);
+	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics);
 
-	public void jobSuccess(AnalysisJob job);
+	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics);
 
 	/**
 	 * 
@@ -50,15 +49,15 @@ public interface AnalysisListener {
 	 *            the amount of rows (may be approximated) in the table or -1 if
 	 *            the count could not be determined.
 	 */
-	public void rowProcessingBegin(AnalysisJob job, Table table, int expectedRows);
+	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics);
 
-	public void rowProcessingProgress(AnalysisJob job, Table table, int currentRow);
+	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow);
 
-	public void rowProcessingSuccess(AnalysisJob job, Table table);
+	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics);
 
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob);
+	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics);
 
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob);
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics);
 
 	public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result);
 

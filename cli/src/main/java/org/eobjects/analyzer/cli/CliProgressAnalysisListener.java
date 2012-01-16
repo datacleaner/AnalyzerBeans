@@ -29,7 +29,11 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
+import org.eobjects.analyzer.job.runner.AnalysisJobMetrics;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
+import org.eobjects.analyzer.job.runner.AnalyzerMetrics;
+import org.eobjects.analyzer.job.runner.ExplorerMetrics;
+import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 import org.eobjects.metamodel.schema.Table;
@@ -39,21 +43,23 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 	private Map<Table, AtomicInteger> rowCounts = new HashMap<Table, AtomicInteger>();
 
 	@Override
-	public void jobBegin(AnalysisJob job) {
+	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
 	}
 
 	@Override
-	public void jobSuccess(AnalysisJob job) {
+	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
 	}
 
 	@Override
-	public void rowProcessingBegin(AnalysisJob job, Table table, int expectedRows) {
-		System.out.println("Analyzing " + expectedRows + " rows from table: " + table.getName());
+	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
+		Table table = metrics.getTable();
+		System.out.println("Analyzing rows from table: " + table.getName());
 		rowCounts.put(table, new AtomicInteger(0));
 	}
 
 	@Override
-	public void rowProcessingProgress(AnalysisJob job, Table table, int currentRow) {
+	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
+		Table table = metrics.getTable();
 		AtomicInteger rowCount = rowCounts.get(table);
 		if (rowCount != null) {
 			int countBefore = rowCount.get();
@@ -67,12 +73,12 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void rowProcessingSuccess(AnalysisJob job, Table table) {
-		System.out.println("Done processing rows from table: " + table.getName());
+	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
+		System.out.println("Done processing rows from table: " + metrics.getTable().getName());
 	}
 
 	@Override
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob) {
+	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
 	}
 
 	@Override
@@ -96,7 +102,7 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob) {
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
 	}
 
 	@Override

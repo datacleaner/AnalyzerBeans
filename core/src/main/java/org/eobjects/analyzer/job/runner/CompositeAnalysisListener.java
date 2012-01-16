@@ -30,8 +30,6 @@ import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
-import org.eobjects.metamodel.schema.Table;
-
 public final class CompositeAnalysisListener implements AnalysisListener {
 
 	private final List<AnalysisListener> _delegates;
@@ -49,51 +47,51 @@ public final class CompositeAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void jobBegin(AnalysisJob job) {
+	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
 		for (AnalysisListener delegate : _delegates) {
-			delegate.jobBegin(job);
+			delegate.jobBegin(job, metrics);
 		}
 	}
 
 	@Override
-	public void jobSuccess(AnalysisJob job) {
+	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
 		for (AnalysisListener delegate : _delegates) {
-			delegate.jobSuccess(job);
+			delegate.jobSuccess(job, metrics);
 		}
 	}
 
 	@Override
-	public void rowProcessingBegin(AnalysisJob job, Table table, int expectedRows) {
+	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
 		for (AnalysisListener delegate : _delegates) {
-			delegate.rowProcessingBegin(job, table, expectedRows);
+			delegate.rowProcessingBegin(job, metrics);
 		}
 	}
 
 	@Override
-	public void rowProcessingProgress(AnalysisJob job, Table table, int currentRow) {
+	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
 		for (AnalysisListener delegate : _delegates) {
-			delegate.rowProcessingProgress(job, table, currentRow);
+			delegate.rowProcessingProgress(job, metrics, currentRow);
 		}
 	}
 
 	@Override
-	public void rowProcessingSuccess(AnalysisJob job, Table table) {
+	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
 		for (AnalysisListener delegate : _delegates) {
-			delegate.rowProcessingSuccess(job, table);
+			delegate.rowProcessingSuccess(job, metrics);
 		}
 	}
 
 	@Override
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob) {
+	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
 		for (AnalysisListener delegate : _delegates) {
-			delegate.analyzerBegin(job, analyzerJob);
+			delegate.analyzerBegin(job, analyzerJob, metrics);
 		}
 	}
 
 	@Override
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob) {
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
 		for (AnalysisListener delegate : _delegates) {
-			delegate.explorerBegin(job, explorerJob);
+			delegate.explorerBegin(job, explorerJob, metrics);
 		}
 	}
 

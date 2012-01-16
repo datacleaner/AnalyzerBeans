@@ -65,7 +65,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
 		ajb.setDatastoreConnection(con);
-		
+
 		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
 		assertNotNull(table);
 
@@ -81,8 +81,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 		TransformerJobBuilder<EmailStandardizerTransformer> emailStd1 = ajb.addTransformer(
 				EmailStandardizerTransformer.class).addInputColumn(emailInputColumn);
 
-		AnalyzerJobBuilder<PatternFinderAnalyzer> pf = ajb
-				.addAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> pf = ajb.addAnalyzer(PatternFinderAnalyzer.class);
 		InputColumn<?> jobtitleInputColumn = ajb.getSourceColumnByName("JOBTITLE");
 		pf.addInputColumn(jobtitleInputColumn);
 		pf.getConfigurableBean().setDiscriminateTextCase(false);

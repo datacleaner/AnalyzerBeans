@@ -21,17 +21,10 @@ package org.eobjects.analyzer.job.runner;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
-import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Explorer;
-import org.eobjects.analyzer.beans.api.Filter;
-import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.connection.Datastore;
@@ -45,7 +38,6 @@ import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
-import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ForkTaskListener;
 import org.eobjects.analyzer.job.concurrent.JobCompletionTaskListener;
@@ -64,8 +56,6 @@ import org.eobjects.analyzer.job.tasks.RunExplorerTask;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.eobjects.metamodel.MetaModelHelper;
-import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +77,6 @@ final class AnalysisRunnerJobDelegate {
 	private final TaskRunner _taskRunner;
 	private final AnalysisListener _analysisListener;
 	private final Queue<JobAndResult> _resultQueue;
-	private final JobCompletionTaskListener _jobCompletionTaskListener;
 	private final ErrorAware _errorAware;
 	private final Datastore _datastore;
 	private final Collection<ExplorerJob> _explorerJobs;
@@ -108,9 +97,6 @@ final class AnalysisRunnerJobDelegate {
 		_sourceColumnFinder = new SourceColumnFinder();
 		_sourceColumnFinder.addSources(_job);
 
-		// A task listener that will register either succesfull executions or
-		// unexpected errors (which will be delegated to the errorListener)
-		_jobCompletionTaskListener = new JobCompletionTaskListener(job, analysisListener, 2);
 		_errorAware = errorAware;
 
 		_datastore = _job.getDatastore();
@@ -128,64 +114,73 @@ final class AnalysisRunnerJobDelegate {
 	 * @return
 	 */
 	public AnalysisResultFuture run() {
-		_analysisListener.jobBegin(_job);
+		try {
+			// the injection manager is job scoped
+			final InjectionManager injectionManager = _configuration.getInjectionManagerFactory().getInjectionManager(_job);
 
-		validateSingleTableInput(_transformerJobs);
-		validateSingleTableInput(_filterJobs);
-		validateSingleTableInputForMergedOutcomes(_mergedOutcomeJobs);
+			final LifeCycleHelper explorerLifeCycleHelper = new LifeCycleHelper(injectionManager,
+					new ReferenceDataActivationManager());
+			final LifeCycleHelper rowProcessingLifeCycleHelper = new LifeCycleHelper(injectionManager,
+					new ReferenceDataActivationManager());
 
-		validateSingleTableInput(_analyzerJobs);
+			final RowProcessingPublishers publishers = new RowProcessingPublishers(_job, _analysisListener, _taskRunner,
+					rowProcessingLifeCycleHelper, _sourceColumnFinder);
 
-		// the injection manager is job scoped
-		final InjectionManager injectionManager = _configuration.getInjectionManagerFactory().getInjectionManager(_job);
+			final AnalysisJobMetrics analysisJobMetrics = new AnalysisJobMetricsImpl(_job, publishers);
 
-		// at this point we are done validating the job, it will run.
-		scheduleExplorers(new LifeCycleHelper(injectionManager, new ReferenceDataActivationManager()));
-		scheduleRowProcessing(new LifeCycleHelper(injectionManager, new ReferenceDataActivationManager()));
+			// A task listener that will register either succesfull executions
+			// or
+			// unexpected errors (which will be delegated to the errorListener)
+			JobCompletionTaskListener jobCompletionTaskListener = new JobCompletionTaskListener(analysisJobMetrics,
+					_analysisListener, 2);
 
-		return new AnalysisResultFutureImpl(_resultQueue, _jobCompletionTaskListener, _errorAware);
+			_analysisListener.jobBegin(_job, analysisJobMetrics);
+
+			validateSingleTableInput(_transformerJobs);
+			validateSingleTableInput(_filterJobs);
+			validateSingleTableInputForMergedOutcomes(_mergedOutcomeJobs);
+			validateSingleTableInput(_analyzerJobs);
+
+			// at this point we are done validating the job, it will run.
+			scheduleExplorers(explorerLifeCycleHelper, jobCompletionTaskListener, analysisJobMetrics);
+			scheduleRowProcessing(publishers, rowProcessingLifeCycleHelper, jobCompletionTaskListener, analysisJobMetrics);
+
+			return new AnalysisResultFutureImpl(_resultQueue, jobCompletionTaskListener, _errorAware);
+		} catch (RuntimeException e) {
+			_analysisListener.errorUknown(_job, e);
+			throw e;
+		}
+
 	}
 
 	/**
 	 * Starts row processing job flows.
 	 * 
+	 * @param publishers
+	 * @param analysisJobMetrics
+	 * 
 	 * @param injectionManager
 	 */
-	private void scheduleRowProcessing(LifeCycleHelper lifeCycleHelper) {
-		final Map<Table, RowProcessingPublisher> rowProcessingPublishers = new HashMap<Table, RowProcessingPublisher>();
-		for (FilterJob filterJob : _filterJobs) {
-			registerRowProcessingPublishers(rowProcessingPublishers, filterJob, _analysisListener, _taskRunner,
-					lifeCycleHelper);
-		}
+	private void scheduleRowProcessing(RowProcessingPublishers publishers, LifeCycleHelper lifeCycleHelper,
+			JobCompletionTaskListener jobCompletionTaskListener, AnalysisJobMetrics analysisJobMetrics) {
 
-		for (MergedOutcomeJob mergedOutcomeJob : _mergedOutcomeJobs) {
-			registerRowProcessingPublishers(rowProcessingPublishers, mergedOutcomeJob);
-		}
-
-		for (TransformerJob transformerJob : _transformerJobs) {
-			registerRowProcessingPublishers(rowProcessingPublishers, transformerJob, _analysisListener, _taskRunner,
-					lifeCycleHelper);
-		}
-		for (AnalyzerJob analyzerJob : _analyzerJobs) {
-			registerRowProcessingPublishers(rowProcessingPublishers, analyzerJob, _analysisListener, _taskRunner,
-					lifeCycleHelper);
-		}
-
-		logger.info("Created {} row processor publishers", rowProcessingPublishers.size());
+		logger.info("Created {} row processor publishers", publishers.size());
 
 		final List<TaskRunnable> finalTasks = new ArrayList<TaskRunnable>(2);
-		finalTasks.add(new TaskRunnable(null, _jobCompletionTaskListener));
+		finalTasks.add(new TaskRunnable(null, jobCompletionTaskListener));
 		finalTasks.add(new TaskRunnable(null, new CloseReferenceDataTaskListener(lifeCycleHelper)));
 
 		final ForkTaskListener finalTaskListener = new ForkTaskListener("All row consumers finished", _taskRunner,
 				finalTasks);
 
-		final TaskListener rowProcessorPublishersDoneCompletionListener = new JoinTaskListener(
-				rowProcessingPublishers.size(), finalTaskListener);
+		final TaskListener rowProcessorPublishersDoneCompletionListener = new JoinTaskListener(publishers.size(),
+				finalTaskListener);
 
-		for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers.values()) {
-			List<TaskRunnable> initTasks = rowProcessingPublisher.createInitialTasks(_taskRunner, _resultQueue,
-					rowProcessorPublishersDoneCompletionListener, _datastore);
+		final Table[] tables = publishers.getTables();
+		for (Table table : tables) {
+			final RowProcessingPublisher rowProcessingPublisher = publishers.getRowProcessingPublisher(table);
+			final List<TaskRunnable> initTasks = rowProcessingPublisher.createInitialTasks(_taskRunner, _resultQueue,
+					rowProcessorPublishersDoneCompletionListener, _datastore, analysisJobMetrics);
 			logger.debug("Scheduling {} tasks for row processing publisher: {}", initTasks.size(), rowProcessingPublisher);
 			for (TaskRunnable taskRunnable : initTasks) {
 				_taskRunner.run(taskRunnable);
@@ -198,15 +193,16 @@ final class AnalysisRunnerJobDelegate {
 	 * 
 	 * @param injectionManager
 	 */
-	private void scheduleExplorers(final LifeCycleHelper lifeCycleHelper) {
+	private void scheduleExplorers(final LifeCycleHelper lifeCycleHelper,
+			final JobCompletionTaskListener jobCompletionTaskListener, final AnalysisJobMetrics analysisJobMetrics) {
 		final int numExplorerJobs = _explorerJobs.size();
 		if (numExplorerJobs == 0) {
-			_jobCompletionTaskListener.onComplete(null);
+			jobCompletionTaskListener.onComplete(null);
 			return;
 		}
 
 		final List<TaskRunnable> finalTasks = new ArrayList<TaskRunnable>();
-		finalTasks.add(new TaskRunnable(null, _jobCompletionTaskListener));
+		finalTasks.add(new TaskRunnable(null, jobCompletionTaskListener));
 		finalTasks.add(new TaskRunnable(null, new CloseReferenceDataTaskListener(lifeCycleHelper)));
 
 		final TaskListener explorersDoneTaskListener = new JoinTaskListener(numExplorerJobs, new ForkTaskListener(
@@ -214,18 +210,21 @@ final class AnalysisRunnerJobDelegate {
 
 		// begin explorer jobs first because they can run independently (
 		for (ExplorerJob explorerJob : _explorerJobs) {
-			final DatastoreConnection dataContextProvider = _datastore.openConnection();
+			final ExplorerMetrics metrics = analysisJobMetrics.getExplorerMetrics(explorerJob);
 
-			ExplorerBeanDescriptor<?> descriptor = explorerJob.getDescriptor();
-			Explorer<?> explorer = descriptor.newInstance();
+			final DatastoreConnection connection = _datastore.openConnection();
 
-			finalTasks.add(new TaskRunnable(null, new CloseResourcesTaskListener(dataContextProvider)));
+			final ExplorerBeanDescriptor<?> descriptor = explorerJob.getDescriptor();
+			final Explorer<?> explorer = descriptor.newInstance();
+
+			finalTasks.add(new TaskRunnable(null, new CloseResourcesTaskListener(connection)));
 			finalTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(lifeCycleHelper, descriptor, explorer)));
 
 			// set up scheduling for the explorers
-			Task closeTask = new CollectResultsTask(explorer, _job, explorerJob, _resultQueue, _analysisListener);
-			TaskListener runFinishedListener = new RunNextTaskTaskListener(_taskRunner, closeTask, explorersDoneTaskListener);
-			Task runTask = new RunExplorerTask(explorer, _job, explorerJob, _datastore, _analysisListener);
+			final Task closeTask = new CollectResultsTask(explorer, _job, explorerJob, _resultQueue, _analysisListener);
+			final TaskListener runFinishedListener = new RunNextTaskTaskListener(_taskRunner, closeTask,
+					explorersDoneTaskListener);
+			final Task runTask = new RunExplorerTask(explorer, metrics, _datastore, _analysisListener);
 
 			TaskListener referenceDataInitFinishedListener = new RunNextTaskTaskListener(_taskRunner, runTask,
 					runFinishedListener);
@@ -296,103 +295,4 @@ final class AnalysisRunnerJobDelegate {
 
 	}
 
-	private void registerRowProcessingPublishers(Map<Table, RowProcessingPublisher> rowProcessingPublishers,
-			MergedOutcomeJob mergedOutcomeJob) {
-
-		Collection<RowProcessingPublisher> publishers = rowProcessingPublishers.values();
-		for (RowProcessingPublisher rowProcessingPublisher : publishers) {
-			boolean prerequisiteOutcomesExist = true;
-			MergeInput[] mergeInputs = mergedOutcomeJob.getMergeInputs();
-			for (MergeInput mergeInput : mergeInputs) {
-				Outcome prerequisiteOutcome = mergeInput.getOutcome();
-				if (!rowProcessingPublisher.containsOutcome(prerequisiteOutcome)) {
-					prerequisiteOutcomesExist = false;
-					break;
-				}
-			}
-
-			if (prerequisiteOutcomesExist) {
-				rowProcessingPublisher.addMergedOutcomeJob(mergedOutcomeJob);
-			}
-		}
-	}
-
-	private void registerRowProcessingPublishers(final Map<Table, RowProcessingPublisher> rowProcessingPublishers,
-			final ConfigurableBeanJob<?> beanJob, final AnalysisListener listener, final TaskRunner taskRunner,
-			final LifeCycleHelper lifeCycleHelper) {
-		final Set<Column> physicalColumns = new HashSet<Column>();
-
-		final InputColumn<?>[] inputColumns = beanJob.getInput();
-		for (InputColumn<?> inputColumn : inputColumns) {
-			physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(inputColumn));
-		}
-		final Outcome[] requirements = beanJob.getRequirements();
-		for (Outcome requirement : requirements) {
-			physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(requirement));
-		}
-
-		final Column[] physicalColumnsArray = physicalColumns.toArray(new Column[physicalColumns.size()]);
-		final Table[] tables;
-		if (physicalColumns.isEmpty()) {
-			// if not dependent on any specific tables, make component available
-			// for all tables
-			Set<Table> allTables = new HashSet<Table>();
-			Collection<InputColumn<?>> allSourceColumns = _job.getSourceColumns();
-			for (InputColumn<?> inputColumn : allSourceColumns) {
-				allTables.add(inputColumn.getPhysicalColumn().getTable());
-			}
-			tables = allTables.toArray(new Table[allTables.size()]);
-		} else {
-			tables = MetaModelHelper.getTables(physicalColumnsArray);
-		}
-
-		for (Table table : tables) {
-			RowProcessingPublisher rowPublisher = rowProcessingPublishers.get(table);
-			if (rowPublisher == null) {
-				rowPublisher = new RowProcessingPublisher(_job, table, taskRunner, listener, lifeCycleHelper);
-				rowProcessingPublishers.put(table, rowPublisher);
-			}
-
-			// register the physical columns needed by this job
-			Column[] tableColumns = MetaModelHelper.getTableColumns(table, physicalColumnsArray);
-			rowPublisher.addPhysicalColumns(tableColumns);
-
-			// find which input columns (both physical or virtual) are needed by
-			// this per-table instance
-			InputColumn<?>[] localInputColumns = getLocalInputColumns(table, inputColumns);
-
-			if (beanJob instanceof AnalyzerJob) {
-				AnalyzerJob analyzerJob = (AnalyzerJob) beanJob;
-				Analyzer<?> analyzer = analyzerJob.getDescriptor().newInstance();
-				rowPublisher.addRowProcessingAnalyzerBean(analyzer, analyzerJob, localInputColumns);
-			} else if (beanJob instanceof TransformerJob) {
-				TransformerJob transformerJob = (TransformerJob) beanJob;
-				Transformer<?> transformer = transformerJob.getDescriptor().newInstance();
-				rowPublisher.addTransformerBean(transformer, transformerJob, localInputColumns);
-			} else if (beanJob instanceof FilterJob) {
-				FilterJob filterJob = (FilterJob) beanJob;
-				Filter<?> filter = filterJob.getDescriptor().newInstance();
-				rowPublisher.addFilterBean(filter, filterJob, localInputColumns);
-			} else {
-				throw new UnsupportedOperationException("Unsupported job type: " + beanJob);
-			}
-		}
-	}
-
-	private InputColumn<?>[] getLocalInputColumns(Table table, InputColumn<?>[] inputColumns) {
-		if (table == null || inputColumns == null || inputColumns.length == 0) {
-			return new InputColumn<?>[0];
-		}
-		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
-		for (InputColumn<?> inputColumn : inputColumns) {
-			Set<Column> sourcePhysicalColumns = _sourceColumnFinder.findOriginatingColumns(inputColumn);
-			for (Column physicalColumn : sourcePhysicalColumns) {
-				if (table.equals(physicalColumn.getTable())) {
-					result.add(inputColumn);
-					break;
-				}
-			}
-		}
-		return result.toArray(new InputColumn<?>[result.size()]);
-	}
 }

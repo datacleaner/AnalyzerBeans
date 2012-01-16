@@ -34,8 +34,6 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eobjects.metamodel.schema.Table;
-
 /**
  * AnalysisListener that will register errors
  * 
@@ -49,11 +47,11 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 	private final AtomicBoolean _cancelled = new AtomicBoolean(false);
 
 	@Override
-	public void jobBegin(AnalysisJob job) {
+	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
 	}
 
 	@Override
-	public void jobSuccess(AnalysisJob job) {
+	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
 	}
 
 	private void storeError(AnalysisJob job, Throwable throwable) {
@@ -112,7 +110,7 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 	}
 
 	@Override
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob) {
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
 	}
 
 	@Override
@@ -120,19 +118,19 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 	}
 
 	@Override
-	public void rowProcessingBegin(AnalysisJob job, Table table, int expectedRows) {
+	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
 	}
 
 	@Override
-	public void rowProcessingProgress(AnalysisJob job, Table table, int currentRow) {
+	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
 	}
 
 	@Override
-	public void rowProcessingSuccess(AnalysisJob job, Table table) {
+	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
 	}
 
 	@Override
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob) {
+	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
 	}
 
 	@Override

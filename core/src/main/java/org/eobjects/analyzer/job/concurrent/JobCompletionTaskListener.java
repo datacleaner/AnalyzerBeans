@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job.concurrent;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.runner.AnalysisJobMetrics;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.slf4j.Logger;
@@ -39,11 +39,12 @@ public final class JobCompletionTaskListener implements StatusAwareTaskListener 
 	private static final Logger logger = LoggerFactory.getLogger(ForkTaskListener.class);
 
 	private final CountDownLatch _countDownLatch;
-	private final AnalysisJob _job;
 	private final AnalysisListener _analysisListener;
+	private final AnalysisJobMetrics _analysisJobMetrics;
 
-	public JobCompletionTaskListener(AnalysisJob job, AnalysisListener analysisListener, int callablesToWaitFor) {
-		_job = job;
+	public JobCompletionTaskListener(AnalysisJobMetrics analysisJobMetrics, AnalysisListener analysisListener,
+			int callablesToWaitFor) {
+		_analysisJobMetrics = analysisJobMetrics;
 		_analysisListener = analysisListener;
 		_countDownLatch = new CountDownLatch(callablesToWaitFor);
 	}
@@ -70,14 +71,14 @@ public final class JobCompletionTaskListener implements StatusAwareTaskListener 
 		logger.debug("onComplete(...)");
 		_countDownLatch.countDown();
 		if (_countDownLatch.getCount() == 0) {
-			_analysisListener.jobSuccess(_job);
+			_analysisListener.jobSuccess(_analysisJobMetrics.getAnalysisJob(), _analysisJobMetrics);
 		}
 	}
 
 	@Override
 	public void onError(Task task, Throwable throwable) {
 		logger.debug("onError(...)");
-		_analysisListener.errorUknown(_job, throwable);
+		_analysisListener.errorUknown(_analysisJobMetrics.getAnalysisJob(), throwable);
 		_countDownLatch.countDown();
 	}
 }

@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job;
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 
 public interface ExplorerJob extends ComponentJob {
-
+	
 	public ExplorerBeanDescriptor<?> getDescriptor();
 
 	public BeanConfiguration getConfiguration();

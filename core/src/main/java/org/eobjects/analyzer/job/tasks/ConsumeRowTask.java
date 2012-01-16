@@ -26,44 +26,46 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
-import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.OutcomeSink;
 import org.eobjects.analyzer.job.runner.OutcomeSinkImpl;
 import org.eobjects.analyzer.job.runner.RowProcessingConsumer;
+import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 import org.eobjects.metamodel.data.Row;
-import org.eobjects.metamodel.schema.Table;
 
+/**
+ * A {@link Task} that dispatches ("consumes") a record to all relevant
+ * {@link RowProcessingConsumer}s (eg. analyzerbeans components).
+ * 
+ * @author Kasper Sørensen
+ */
 public final class ConsumeRowTask implements Task {
 
 	private final Iterable<RowProcessingConsumer> _consumers;
-	private final Table _table;
+	private final RowProcessingMetrics _rowProcessingMetrics;
 	private final Row _row;
 	private final AnalysisListener _analysisListener;
-	private final AnalysisJob _job;
 	private final AtomicInteger _rowCounter;
 	private final Collection<? extends Outcome> _initialOutcomes;
 
 	/**
 	 * 
 	 * @param consumers
-	 * @param table
+	 * @param rowProcessingMetrics
 	 * @param row
 	 * @param rowCounter
-	 * @param job
 	 * @param analysisListener
 	 * @param initialOutcomes
 	 *            the initial list of available outcomes (if non-empty, this
 	 *            will contain query-optimized outcomes)
 	 */
-	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, Table table, Row row, AtomicInteger rowCounter,
-			AnalysisJob job, AnalysisListener analysisListener, Collection<? extends Outcome> initialOutcomes) {
+	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, RowProcessingMetrics rowProcessingMetrics, Row row,
+			AtomicInteger rowCounter, AnalysisListener analysisListener, Collection<? extends Outcome> initialOutcomes) {
 		_consumers = consumers;
-		_table = table;
+		_rowProcessingMetrics = rowProcessingMetrics;
 		_row = row;
 		_rowCounter = rowCounter;
-		_job = job;
 		_analysisListener = analysisListener;
 		_initialOutcomes = initialOutcomes;
 	}
@@ -85,7 +87,8 @@ public final class ConsumeRowTask implements Task {
 				}
 			}
 		}
-		_analysisListener.rowProcessingProgress(_job, _table, rowNumber);
+		_analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
+				_rowProcessingMetrics, rowNumber);
 	}
 
 	private void handleConsumer(OutcomeSink outcomeSink, final int distinctCount, List<InputRow> rows,

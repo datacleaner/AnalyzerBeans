@@ -29,8 +29,6 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eobjects.metamodel.schema.Table;
-
 /**
  * AnalysisListener used for INFO level logging. This listener will log
  * interesting progress information for each thousands rows being processed.
@@ -50,24 +48,24 @@ public class InfoLoggingAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void jobBegin(AnalysisJob job) {
+	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
 		// do nothing
 	}
 
 	@Override
-	public void jobSuccess(AnalysisJob job) {
+	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
 		// do nothing
 	}
 
 	@Override
-	public void rowProcessingBegin(AnalysisJob job, Table table, int expectedRows) {
-		logger.info("Beginning row processing of {} rows in {}", new Object[] { expectedRows, table });
+	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
+		logger.info("Beginning row processing of {}", metrics.getTable());
 	}
 
 	@Override
-	public void rowProcessingProgress(AnalysisJob job, Table table, int currentRow) {
+	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
 		if (currentRow > 0 && currentRow % 1000 == 0) {
-			logger.info("Reading row no. {} in {}", new Object[] { currentRow, table.getName() });
+			logger.info("Reading row no. {} in {}", new Object[] { currentRow, metrics.getTable().getName() });
 		}
 	}
 
@@ -77,7 +75,7 @@ public class InfoLoggingAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob) {
+	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
 		// do nothing
 	}
 
@@ -87,12 +85,12 @@ public class InfoLoggingAnalysisListener implements AnalysisListener {
 	}
 
 	@Override
-	public void rowProcessingSuccess(AnalysisJob job, Table table) {
+	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
 		// do nothing
 	}
 
 	@Override
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob) {
+	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
 		// do nothing
 	}
 

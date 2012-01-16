@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 import org.eobjects.analyzer.job.runner.RowProcessingPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,17 +28,19 @@ public final class RunRowProcessingPublisherTask implements Task {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final RowProcessingPublisher _rowProcessingPublisher;
+	private final RowProcessingPublisher _publisher;
+	private final RowProcessingMetrics _metrics;
 
-	public RunRowProcessingPublisherTask(RowProcessingPublisher rowProcessingPublisher) {
-		_rowProcessingPublisher = rowProcessingPublisher;
+	public RunRowProcessingPublisherTask(RowProcessingPublisher publisher, RowProcessingMetrics metrics) {
+		_publisher = publisher;
+		_metrics = metrics;
 	}
 
 	@Override
 	public void execute() throws Exception {
 		logger.debug("execute()");
 
-		_rowProcessingPublisher.run();
+		_publisher.run(_metrics);
 	}
 
 }
