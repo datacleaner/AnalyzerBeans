@@ -190,6 +190,19 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		}
 	}
 
+	public boolean validateRequirementSource(OutcomeSourceJob outcomeSourceJob) {
+		if (outcomeSourceJob == null) {
+			return true;
+		}
+
+		Outcome[] outcomes = outcomeSourceJob.getOutcomes();
+		if (outcomes == null || outcomes.length == 0) {
+			return true;
+		}
+		
+		return validateRequirementCandidate(outcomes[0]);
+	}
+
 	public boolean validateRequirementCandidate(Outcome requirement) {
 		if (requirement == null) {
 			return true;
