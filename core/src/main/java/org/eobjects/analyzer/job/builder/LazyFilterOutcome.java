@@ -24,9 +24,10 @@ import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableFilterJob;
+import org.eobjects.analyzer.job.OutcomeSourceJob;
 
 public final class LazyFilterOutcome extends AbstractFilterOutcome {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private final FilterJobBuilder<?, ?> _filterJobBuilder;
@@ -35,6 +36,11 @@ public final class LazyFilterOutcome extends AbstractFilterOutcome {
 	protected LazyFilterOutcome(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
 		_filterJobBuilder = filterJobBuilder;
 		_category = category;
+	}
+
+	@Override
+	public OutcomeSourceJob getSourceJob() {
+		return _filterJobBuilder;
 	}
 
 	@Override

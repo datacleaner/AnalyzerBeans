@@ -34,6 +34,7 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
+import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.metamodel.util.CollectionUtils;
 
@@ -179,11 +180,34 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		setRequirement(filterJobBuilder.getOutcome(category));
 	}
 
-	public void setRequirement(Outcome requirement) {
+	public void setRequirement(Outcome requirement) throws IllegalArgumentException {
+		if (!validateRequirementCandidate(requirement)) {
+			throw new IllegalArgumentException("Cyclic dependency detected when setting requirement: " + requirement);
+		}
 		if (_requirement != requirement) {
 			_requirement = requirement;
 			onRequirementChanged();
 		}
+	}
+
+	public boolean validateRequirementCandidate(Outcome requirement) {
+		if (requirement == null) {
+			return true;
+		}
+		OutcomeSourceJob sourceJob = requirement.getSourceJob();
+		if (sourceJob == this) {
+			return false;
+		}
+		if (sourceJob instanceof OutcomeSinkJob) {
+			Outcome[] requirements = ((OutcomeSinkJob) sourceJob).getRequirements();
+			for (Outcome transitiveRequirement : requirements) {
+				boolean transitiveValidation = validateRequirementCandidate(transitiveRequirement);
+				if (!transitiveValidation) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/**

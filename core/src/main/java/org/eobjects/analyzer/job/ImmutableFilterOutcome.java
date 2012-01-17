@@ -30,9 +30,14 @@ public final class ImmutableFilterOutcome extends AbstractFilterOutcome {
 		_filterJob = filterJob;
 		_category = category;
 	}
-
+	
 	@Override
 	public FilterJob getFilterJob() {
+		return _filterJob;
+	}
+
+	@Override
+	public FilterJob getSourceJob() {
 		return _filterJob;
 	}
 

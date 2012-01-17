@@ -646,7 +646,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 					// we added this element during the previous iteration
 					LazyMergedOutcome outcome = (LazyMergedOutcome) outcomeMapping
 							.get(id);
-					MergedOutcomeJobBuilder builder = outcome.getBuilder();
+					MergedOutcomeJobBuilder builder = outcome.getSourceJob();
 
 					// map the input requirements and columns
 					List<MergedOutcomeType.Outcome> mergedOutcomes = ((MergedOutcomeType) o)

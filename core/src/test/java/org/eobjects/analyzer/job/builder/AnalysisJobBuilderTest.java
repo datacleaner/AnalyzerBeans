@@ -38,9 +38,9 @@ import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
@@ -75,6 +75,22 @@ public class AnalysisJobBuilderTest extends TestCase {
 
 		analysisJobBuilder = new AnalysisJobBuilder(configuration);
 		analysisJobBuilder.setDatastore("my db");
+	}
+
+	public void testPreventCyclicFilterDependencies() throws Exception {
+		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
+		FilterJobBuilder<MaxRowsFilter, ValidationCategory> filter1 = analysisJobBuilder.addFilter(MaxRowsFilter.class);
+		FilterJobBuilder<NotNullFilter, ValidationCategory> filter2 = analysisJobBuilder.addFilter(NotNullFilter.class);
+		filter2.addInputColumn(analysisJobBuilder.getSourceColumnByName("reportsto"));
+		filter1.setRequirement(filter2.getOutcome(ValidationCategory.VALID));
+
+		try {
+			filter2.setRequirement(filter1.getOutcome(ValidationCategory.VALID));
+			fail("Exception expected");
+		} catch (IllegalArgumentException e) {
+			assertEquals("Cyclic dependency detected when setting requirement: FilterOutcome[category=VALID]",
+					e.getMessage());
+		}
 	}
 
 	public void testGetDatastore() throws Exception {

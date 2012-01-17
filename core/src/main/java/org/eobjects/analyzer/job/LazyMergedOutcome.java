@@ -22,17 +22,13 @@ package org.eobjects.analyzer.job;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 
 public final class LazyMergedOutcome extends AbstractMergedOutcome implements MergedOutcome {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private MergedOutcomeJobBuilder _mergedOutcomeJobBuilder;
 
 	public LazyMergedOutcome(MergedOutcomeJobBuilder mergedOutcomeJobBuilder) {
 		_mergedOutcomeJobBuilder = mergedOutcomeJobBuilder;
-	}
-	
-	public MergedOutcomeJobBuilder getBuilder() {
-		return _mergedOutcomeJobBuilder;
 	}
 
 	@Override
@@ -43,5 +39,10 @@ public final class LazyMergedOutcome extends AbstractMergedOutcome implements Me
 	@Override
 	public MergedOutcomeJob getMergedOutcomeJob() {
 		return _mergedOutcomeJobBuilder.toMergedOutcomeJob();
+	}
+
+	@Override
+	public MergedOutcomeJobBuilder getSourceJob() {
+		return _mergedOutcomeJobBuilder;
 	}
 }

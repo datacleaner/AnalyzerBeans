@@ -48,4 +48,9 @@ public class ImmutableMergedOutcome extends AbstractMergedOutcome implements Mer
 		}
 		return false;
 	}
+
+	@Override
+	public OutcomeSourceJob getSourceJob() {
+		return _mergedOutcomeJob;
+	}
 }

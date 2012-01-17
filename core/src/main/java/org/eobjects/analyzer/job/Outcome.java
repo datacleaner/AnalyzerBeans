@@ -34,6 +34,13 @@ import java.io.Serializable;
 public interface Outcome extends Serializable {
 
 	/**
+	 * Gets the source job for this outcome
+	 * 
+	 * @return the source job for this outcome
+	 */
+	public OutcomeSourceJob getSourceJob();
+
+	/**
 	 * Requests whether or not a specific requirement is satisfied by this
 	 * outcome
 	 * 

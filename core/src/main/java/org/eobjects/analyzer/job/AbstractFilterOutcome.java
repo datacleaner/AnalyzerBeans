@@ -46,7 +46,7 @@ public abstract class AbstractFilterOutcome extends BaseObject implements Filter
 	@Override
 	protected final void decorateIdentity(List<Object> identifiers) {
 		identifiers.add(getCategory());
-		identifiers.add(getFilterJob());
+		identifiers.add(getSourceJob());
 	}
 
 	@Override
