@@ -99,12 +99,13 @@ public class SourceColumnFinder {
 		for (InputColumnSourceJob source : _inputColumnSources) {
 			InputColumn<?>[] outputColumns = source.getOutput();
 			for (InputColumn<?> col : outputColumns) {
-				DataTypeFamily dtf = col.getDataTypeFamily();
-				if (dtf == dataTypeFamily || dataTypeFamily == DataTypeFamily.UNDEFINED) {
-					if (dataType == null || col.getDataType() == null) {
+				final DataTypeFamily columnFamily = col.getDataTypeFamily();
+				if (columnFamily == dataTypeFamily || dataTypeFamily == DataTypeFamily.UNDEFINED) {
+					final Class<?> columnDataType = col.getDataType();
+					if (dataType == null || columnDataType == null) {
 						result.add(col);
 					} else {
-						if (ReflectionUtils.is(col.getDataType(), dataType)) {
+						if (ReflectionUtils.is(columnDataType, dataType)) {
 							result.add(col);
 						}
 					}

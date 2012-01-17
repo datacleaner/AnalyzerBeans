@@ -22,6 +22,7 @@ package org.eobjects.analyzer.util;
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -76,7 +77,7 @@ public final class ReflectionUtils {
 		Class<?> thisClass = null;
 		if (thisType instanceof Class<?>) {
 			thisClass = (Class<?>) thisType;
-			if (includeArray && thisClass.isArray()) {
+			if (includeArray && thisClass.isArray() && !ofThatType.isArray()) {
 				thisClass = thisClass.getComponentType();
 			}
 		}
@@ -301,6 +302,7 @@ public final class ReflectionUtils {
 		if (someType instanceof GenericArrayType) {
 			GenericArrayType gaType = (GenericArrayType) someType;
 			someType = gaType.getGenericComponentType();
+			return Array.newInstance((Class<?>) someType, 0).getClass();
 		}
 
 		if (someType instanceof WildcardType) {
