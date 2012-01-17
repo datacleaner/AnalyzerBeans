@@ -42,6 +42,16 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		super.tearDown();
 		AnalyzerMock.clearInstances();
 	}
+	
+	public void testInheritedAnalyzer() throws Exception {
+		AnalyzerBeanDescriptor<OneMoreMockAnalyzer> descriptor = Descriptors.ofAnalyzer(OneMoreMockAnalyzer.class);
+		assertEquals("One more mock", descriptor.getDisplayName());
+	}
+	
+	@AnalyzerBean("One more mock")
+	public static class OneMoreMockAnalyzer extends StringAnalyzer {
+		
+	}
 
 	public void testGetConfiguredPropertiesOfType() throws Exception {
 		AnalyzerBeanDescriptor<MatchingAnalyzer> desc = Descriptors.ofAnalyzer(MatchingAnalyzer.class);

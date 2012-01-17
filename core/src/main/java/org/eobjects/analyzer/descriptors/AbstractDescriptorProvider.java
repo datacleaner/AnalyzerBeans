@@ -206,13 +206,15 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 			return null;
 		}
 		for (E descriptor : descriptors) {
-			if (name.equals(descriptor.getDisplayName())) {
+			String displayName = descriptor.getDisplayName();
+			if (name.equals(displayName)) {
 				return descriptor;
 			}
 		}
 
 		for (E descriptor : descriptors) {
-			if (ArrayUtils.contains(descriptor.getAliases(), name)) {
+			String[] aliases = descriptor.getAliases();
+			if (ArrayUtils.contains(aliases, name)) {
 				return descriptor;
 			}
 		}
