@@ -55,7 +55,11 @@ public class NotNullFilter implements QueryOptimizedFilter<ValidationCategory> {
 		this.columns = columns;
 		this.considerEmptyStringAsNull = considerEmptyStringAsNull;
 	}
-
+	
+	public void setConsiderEmptyStringAsNull(boolean considerEmptyStringAsNull) {
+		this.considerEmptyStringAsNull = considerEmptyStringAsNull;
+	}
+	
 	@Override
 	public boolean isOptimizable(ValidationCategory category) {
 		return true;

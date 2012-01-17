@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.NumberAnalyzer;
 import org.eobjects.analyzer.beans.filter.EqualsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
+import org.eobjects.analyzer.beans.filter.NotNullFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
@@ -93,22 +94,27 @@ public class RowProcessingMetricsImplTest extends TestCase {
 		assertEquals(2, getExpectedRowCount());
 	}
 
-//	public void testGetExpectedRowCountMultipleFilters() throws Exception {
-//		AnalysisJobBuilder ajb = createAnalysisJobBuilder();
-//
-//		FilterJobBuilder<EqualsFilter, ValidationCategory> filter1 = ajb.addFilter(EqualsFilter.class);
-//		filter1.addInputColumns(ajb.getSourceColumns());
-//		filter1.getConfigurableBean().setValues(new String[] { "1002", "1165" });
-//
-//		FilterJobBuilder<MaxRowsFilter, ValidationCategory> filter2 = ajb.addFilter(MaxRowsFilter.class);
-//		filter2.getConfigurableBean().setMaxRows(10);
-//		filter2.setRequirement(filter1.getOutcome(ValidationCategory.INVALID));
-//		ajb.setDefaultRequirement(filter2.getOutcome(ValidationCategory.VALID));
-//
-//		job = ajb.toAnalysisJob();
-//
-//		assertEquals(2, getExpectedRowCount());
-//	}
+	public void testGetExpectedRowCountMultipleFilters() throws Exception {
+		AnalysisJobBuilder ajb = createAnalysisJobBuilder();
+
+		// there's 21 records that are not 1056 or 1165
+		FilterJobBuilder<EqualsFilter, ValidationCategory> filter1 = ajb.addFilter(EqualsFilter.class);
+		filter1.addInputColumns(ajb.getSourceColumns());
+		filter1.getConfigurableBean().setValues(new String[] { "1056", "1165" });
+
+		// there's 1 record which has a reportsto value of null.
+		FilterJobBuilder<NotNullFilter, ValidationCategory> filter2 = ajb.addFilter(NotNullFilter.class);
+		ajb.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
+		filter2.addInputColumn(ajb.getSourceColumnByName("reportsto"));
+		filter2.getConfigurableBean().setConsiderEmptyStringAsNull(true);
+		filter2.setRequirement(filter1.getOutcome(ValidationCategory.INVALID));
+
+		ajb.getAnalyzerJobBuilders().get(0).setRequirement(filter2.getOutcome(ValidationCategory.VALID));
+
+		job = ajb.toAnalysisJob();
+
+		assertEquals(21 - 1, getExpectedRowCount());
+	}
 
 	private int getExpectedRowCount() {
 		AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
