@@ -21,6 +21,7 @@ package org.eobjects.analyzer.job.builder;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
@@ -43,9 +44,19 @@ public class AnalyzerJobBuilderTest extends TestCase {
 		ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
 	}
 
+	public void testAddUnnamedColumnToMultiColumnAnalyzer() throws Exception {
+		AnalyzerJobBuilder<DateGapAnalyzer> analyzer = ajb.addAnalyzer(DateGapAnalyzer.class);
+		try {
+			analyzer.addInputColumn(new MockInputColumn<String>("foo", String.class));
+			fail("Exception expected");
+		} catch (Exception e) {
+			assertEquals("There are 2 named input columns in \"Date gap analyzer\", please specify which one to configure",
+					e.getMessage());
+		}
+	}
+
 	public void testBuildMultipleJobsForSingleInputAnalyzer() throws Exception {
-		AnalyzerJobBuilder<PatternFinderAnalyzer> jobBuilder = ajb
-				.addAnalyzer(PatternFinderAnalyzer.class);
+		AnalyzerJobBuilder<PatternFinderAnalyzer> jobBuilder = ajb.addAnalyzer(PatternFinderAnalyzer.class);
 
 		assertFalse(jobBuilder.isConfigured());
 

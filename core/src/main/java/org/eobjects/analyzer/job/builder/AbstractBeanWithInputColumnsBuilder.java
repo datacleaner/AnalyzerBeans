@@ -76,7 +76,8 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 			return addInputColumn(inputColumn, propertyDescriptor);
 		} else {
 			throw new UnsupportedOperationException("There are " + requiredInputProperties.size()
-					+ " named input columns, please specify which one to configure");
+					+ " named input columns in \"" + getDescriptor().getDisplayName()
+					+ "\", please specify which one to configure");
 		}
 	}
 
