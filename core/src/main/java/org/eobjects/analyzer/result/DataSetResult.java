@@ -36,7 +36,7 @@ public class DataSetResult implements TableModelResult, AnalyzerResult {
 
 	// this class uses a list of rows in order to make it serializable (a
 	// DataSet is not serializable)
-	private List<Row> _rows;
+	private final List<Row> _rows;
 
 	public DataSetResult(List<Row> rows) {
 		_rows = rows;

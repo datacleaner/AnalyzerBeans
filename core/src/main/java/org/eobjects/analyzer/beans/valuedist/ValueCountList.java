@@ -19,9 +19,10 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface ValueCountList {
+public interface ValueCountList extends Serializable {
 
 	public List<ValueCount> getValueCounts();
 

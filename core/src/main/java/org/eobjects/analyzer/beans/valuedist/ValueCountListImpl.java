@@ -19,12 +19,11 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-public class ValueCountListImpl implements Serializable, ValueCountList {
+public class ValueCountListImpl implements ValueCountList {
 
 	private static final long serialVersionUID = 1L;
 

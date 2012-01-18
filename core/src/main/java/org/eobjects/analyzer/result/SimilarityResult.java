@@ -29,7 +29,7 @@ public class SimilarityResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<SimilarityGroup> _similarityGroups;
+	private final List<SimilarityGroup> _similarityGroups;
 
 	public SimilarityResult(List<SimilarityGroup> similarityGroups) {
 		_similarityGroups = similarityGroups;

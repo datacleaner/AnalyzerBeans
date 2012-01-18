@@ -36,11 +36,12 @@ public final class WriteDataResultImpl implements WriteDataResult {
 	private static final long serialVersionUID = 1L;
 
 	private final int _writtenRowCount;
-	private final Func<DatastoreCatalog, Datastore> _datastoreFunc;
 	private final String _schemaName;
 	private final String _tableName;
 	private final int _errorRowCount;
-	private final FileDatastore _errorDatastore;
+
+	private final transient Func<DatastoreCatalog, Datastore> _datastoreFunc;
+	private final transient FileDatastore _errorDatastore;
 
 	public WriteDataResultImpl(final int writtenRowCount,
 			final Datastore datastore, final String schemaName,
@@ -116,9 +117,14 @@ public final class WriteDataResultImpl implements WriteDataResult {
 	public String toString() {
 		String message = _writtenRowCount + " records written to table";
 		if (_errorRowCount > 0) {
-			message = message + "\n - WARNING! " + _errorRowCount
-					+ " record failed, written to file: "
-					+ _errorDatastore.getFilename();
+			if (_errorDatastore == null) {
+				message = message + "\n - WARNING! " + _errorRowCount
+						+ " record failed";
+			} else {
+				message = message + "\n - WARNING! " + _errorRowCount
+						+ " record failed, written to file: "
+						+ _errorDatastore.getFilename();
+			}
 		}
 		return message;
 	}

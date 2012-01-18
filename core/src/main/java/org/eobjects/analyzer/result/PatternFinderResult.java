@@ -40,6 +40,7 @@ import org.eobjects.analyzer.data.InputColumn;
 public class PatternFinderResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
+	
 	private final InputColumn<String> _column;
 	private final InputColumn<String> _groupColumn;
 	private final Map<String, Crosstab<?>> _crosstabs;

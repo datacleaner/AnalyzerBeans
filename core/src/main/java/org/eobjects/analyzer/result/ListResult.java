@@ -32,7 +32,7 @@ public class ListResult<E> implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<E> _values;
+	private final List<E> _values;
 
 	public ListResult(List<E> values) {
 		_values = values;
