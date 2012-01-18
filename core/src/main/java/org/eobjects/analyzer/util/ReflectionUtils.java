@@ -478,10 +478,28 @@ public final class ReflectionUtils {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	public static <A extends Annotation> A getAnnotation(Enum<?> enumConstant, Class<A> annotationClass) {
+		try {
+			Field field = enumConstant.getClass().getDeclaredField(enumConstant.name());
+			return getAnnotation(field, annotationClass);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
 	public static <A extends Annotation> A getAnnotation(AnnotatedElement element, Class<A> annotationClass) {
 		synchronized (ANNOTATION_REFLECTION_LOCK) {
 			return element.getAnnotation(annotationClass);
+		}
+	}
+	
+	public static boolean isAnnotationPresent(Enum<?> enumConstant, Class<? extends Annotation> annotationClass) {
+		try {
+			Field field = enumConstant.getClass().getDeclaredField(enumConstant.name());
+			return isAnnotationPresent(field, annotationClass);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 	}
 

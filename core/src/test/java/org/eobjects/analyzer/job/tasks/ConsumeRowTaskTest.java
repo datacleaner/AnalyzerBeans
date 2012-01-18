@@ -24,8 +24,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
-import org.eobjects.analyzer.beans.filter.NotNullFilter;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -120,8 +119,8 @@ public class ConsumeRowTaskTest extends TestCase {
 
 			builder.setDatastore(new CsvDatastore("Names", "src/test/resources/example-name-lengths.csv"));
 			builder.addSourceColumns("name");
-			FilterJobBuilder<NotNullFilter, ValidationCategory> filterJobBuilder = builder.addFilter(
-					NotNullFilter.class);
+			FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filterJobBuilder = builder.addFilter(
+					NullCheckFilter.class);
 			filterJobBuilder.addInputColumn(builder.getSourceColumnByName("name"));
 			filterJobBuilder.setConfiguredProperty("Consider empty string as null", true);
 
@@ -129,7 +128,7 @@ public class ConsumeRowTaskTest extends TestCase {
 					ConvertToNumberTransformer.class).addInputColumn(builder.getSourceColumnByName("name"));
 			MutableInputColumn<?> numberColumn = convertTransformer.getOutputColumns().get(0);
 
-			convertTransformer.setRequirement(filterJobBuilder, ValidationCategory.VALID);
+			convertTransformer.setRequirement(filterJobBuilder, NullCheckFilter.NullCheckCategory.NOT_NULL);
 			builder.addAnalyzer(MockAnalyzer.class).addInputColumns(numberColumn);
 			job = builder.toAnalysisJob();
 		}

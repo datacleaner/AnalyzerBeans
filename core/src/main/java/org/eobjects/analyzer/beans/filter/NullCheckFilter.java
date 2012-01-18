@@ -22,6 +22,7 @@ package org.eobjects.analyzer.beans.filter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FilterBean;
@@ -35,9 +36,18 @@ import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
 
-@FilterBean("Not null")
+@FilterBean("Null check")
+@Alias("Not null")
 @Description("Filter rows that contain null values.")
-public class NotNullFilter implements QueryOptimizedFilter<ValidationCategory> {
+public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.NullCheckCategory> {
+
+	public static enum NullCheckCategory {
+		@Alias("INVALID")
+		NULL,
+
+		@Alias("VALID")
+		NOT_NULL;
+	}
 
 	@Configured
 	@Description("Select columns that should NOT have null values")
@@ -47,27 +57,27 @@ public class NotNullFilter implements QueryOptimizedFilter<ValidationCategory> {
 	@Description("Consider empty strings (\"\") as null also?")
 	boolean considerEmptyStringAsNull = false;
 
-	public NotNullFilter() {
+	public NullCheckFilter() {
 	}
 
-	public NotNullFilter(InputColumn<?>[] columns, boolean considerEmptyStringAsNull) {
+	public NullCheckFilter(InputColumn<?>[] columns, boolean considerEmptyStringAsNull) {
 		this();
 		this.columns = columns;
 		this.considerEmptyStringAsNull = considerEmptyStringAsNull;
 	}
-	
+
 	public void setConsiderEmptyStringAsNull(boolean considerEmptyStringAsNull) {
 		this.considerEmptyStringAsNull = considerEmptyStringAsNull;
 	}
-	
+
 	@Override
-	public boolean isOptimizable(ValidationCategory category) {
+	public boolean isOptimizable(NullCheckCategory category) {
 		return true;
 	}
 
 	@Override
-	public Query optimizeQuery(Query q, ValidationCategory category) {
-		if (category == ValidationCategory.VALID) {
+	public Query optimizeQuery(Query q, NullCheckCategory category) {
+		if (category == NullCheckCategory.NOT_NULL) {
 			for (InputColumn<?> col : columns) {
 				Column column = col.getPhysicalColumn();
 				q.where(column, OperatorType.DIFFERENT_FROM, null);
@@ -76,7 +86,7 @@ public class NotNullFilter implements QueryOptimizedFilter<ValidationCategory> {
 				}
 			}
 		} else {
-			// if INVALID all filter items will be OR'ed.
+			// if NULL all filter items will be OR'ed.
 			List<FilterItem> filterItems = new ArrayList<FilterItem>();
 			for (InputColumn<?> col : columns) {
 				Column column = col.getPhysicalColumn();
@@ -95,17 +105,17 @@ public class NotNullFilter implements QueryOptimizedFilter<ValidationCategory> {
 	}
 
 	@Override
-	public ValidationCategory categorize(InputRow inputRow) {
+	public NullCheckCategory categorize(InputRow inputRow) {
 		for (InputColumn<?> col : columns) {
 			Object value = inputRow.getValue(col);
 			if (value == null) {
-				return ValidationCategory.INVALID;
+				return NullCheckCategory.NULL;
 			}
 
 			if (considerEmptyStringAsNull && "".equals(value)) {
-				return ValidationCategory.INVALID;
+				return NullCheckCategory.NULL;
 			}
 		}
-		return ValidationCategory.VALID;
+		return NullCheckCategory.NOT_NULL;
 	}
 }

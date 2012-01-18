@@ -137,8 +137,8 @@ public class MainTest extends TestCase {
 
 		assertEquals("Filters:", lines[0]);
 
-		assertTrue(out.indexOf("name: Not null") != -1);
-		assertTrue(out.indexOf("- Outcome category: VALID") != -1);
+		assertTrue(out.indexOf("name: Null check") != -1);
+		assertTrue(out.indexOf("- Outcome category: NOT_NULL") != -1);
 	}
 
 	public void testListAnalyzers() throws Throwable {

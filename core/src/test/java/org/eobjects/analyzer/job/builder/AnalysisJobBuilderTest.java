@@ -33,7 +33,8 @@ import org.easymock.IArgumentMatcher;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
-import org.eobjects.analyzer.beans.filter.NotNullFilter;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
@@ -80,9 +81,10 @@ public class AnalysisJobBuilderTest extends TestCase {
 	public void testPreventCyclicFilterDependencies() throws Exception {
 		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
 		FilterJobBuilder<MaxRowsFilter, ValidationCategory> filter1 = analysisJobBuilder.addFilter(MaxRowsFilter.class);
-		FilterJobBuilder<NotNullFilter, ValidationCategory> filter2 = analysisJobBuilder.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filter2 = analysisJobBuilder
+				.addFilter(NullCheckFilter.class);
 		filter2.addInputColumn(analysisJobBuilder.getSourceColumnByName("reportsto"));
-		filter1.setRequirement(filter2.getOutcome(ValidationCategory.VALID));
+		filter1.setRequirement(filter2.getOutcome(NullCheckCategory.NOT_NULL));
 
 		try {
 			filter2.setRequirement(filter1.getOutcome(ValidationCategory.VALID));
@@ -194,7 +196,8 @@ public class AnalysisJobBuilderTest extends TestCase {
 		AnalyzerJobBuilder<StringAnalyzer> saAjb = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
 		saAjb.addInputColumns(analysisJobBuilder.getSourceColumns());
 
-		FilterJobBuilder<NotNullFilter, ValidationCategory> fjb = analysisJobBuilder.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> fjb = analysisJobBuilder
+				.addFilter(NullCheckFilter.class);
 		fjb.addInputColumn(analysisJobBuilder.getSourceColumns().get(0));
 
 		List<AbstractBeanWithInputColumnsBuilder<?, ?, ?>> result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
@@ -209,7 +212,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		assertEquals(result.get(0), saAjb);
 		assertEquals(result.get(1), pfAjb);
 
-		pfAjb.setRequirement(fjb, ValidationCategory.VALID);
+		pfAjb.setRequirement(fjb, NullCheckCategory.NOT_NULL);
 
 		result = analysisJobBuilder.getAvailableUnfilteredBeans(fjb);
 		assertEquals(1, result.size());
@@ -227,10 +230,10 @@ public class AnalysisJobBuilderTest extends TestCase {
 				.addTransformer(EmailStandardizerTransformer.class);
 		assertSame(maxRowsFilter.getOutcome(ValidationCategory.VALID), emailStdTransformer.getRequirement());
 
-		FilterJobBuilder<NotNullFilter, ValidationCategory> notNullFilter = analysisJobBuilder
-				.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> notNullFilter = analysisJobBuilder
+				.addFilter(NullCheckFilter.class);
 		notNullFilter.setRequirement(null);
-		maxRowsFilter.setRequirement(notNullFilter.getOutcome(ValidationCategory.VALID));
+		maxRowsFilter.setRequirement(notNullFilter.getOutcome(NullCheckFilter.NullCheckCategory.NOT_NULL));
 
 		assertNull(notNullFilter.getRequirement());
 
@@ -245,8 +248,8 @@ public class AnalysisJobBuilderTest extends TestCase {
 		analysisJobBuilder.removeFilter(maxRowsFilter);
 
 		assertNull(analysisJobBuilder.getDefaultRequirement());
-		assertSame(notNullFilter.getOutcome(ValidationCategory.VALID), stringAnalyzer.getRequirement());
-		assertSame(notNullFilter.getOutcome(ValidationCategory.VALID), emailStdTransformer.getRequirement());
+		assertSame(notNullFilter.getOutcome(NullCheckCategory.NOT_NULL), stringAnalyzer.getRequirement());
+		assertSame(notNullFilter.getOutcome(NullCheckCategory.NOT_NULL), emailStdTransformer.getRequirement());
 
 		con.close();
 	}

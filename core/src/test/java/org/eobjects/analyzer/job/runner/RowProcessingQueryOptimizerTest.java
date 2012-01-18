@@ -29,7 +29,8 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
-import org.eobjects.analyzer.beans.filter.NotNullFilter;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
@@ -121,8 +122,8 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 		assertTrue(optimizer.isOptimizable());
 
-		FilterJobBuilder<?, ?> fjb = ajb.addFilter(NotNullFilter.class).addInputColumn(lastNameInputColumn);
-		maxRowsBuilder.setRequirement(fjb, ValidationCategory.VALID);
+		FilterJobBuilder<?, ?> fjb = ajb.addFilter(NullCheckFilter.class).addInputColumn(lastNameInputColumn);
+		maxRowsBuilder.setRequirement(fjb, NullCheckCategory.NOT_NULL);
 		consumers.add(0, createConsumer(fjb));
 
 		optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
@@ -181,13 +182,13 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	}
 
 	public void testMultipleOptimizations() throws Exception {
-		FilterJobBuilder<NotNullFilter, ValidationCategory> notNullBuilder = ajb.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> notNullBuilder = ajb.addFilter(NullCheckFilter.class);
 		Column emailColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
 		ajb.addSourceColumn(emailColumn);
 		InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
 		notNullBuilder.addInputColumn(emailInputColumn);
 		notNullBuilder.setRequirement(maxRowsBuilder, ValidationCategory.VALID);
-		stringAnalyzerBuilder.setRequirement(notNullBuilder, ValidationCategory.VALID);
+		stringAnalyzerBuilder.setRequirement(notNullBuilder, NullCheckCategory.NOT_NULL);
 
 		consumers.remove(1);
 		consumers.add(createConsumer(notNullBuilder));

@@ -33,7 +33,8 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.beans.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
-import org.eobjects.analyzer.beans.filter.NotNullFilter;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
 import org.eobjects.analyzer.beans.filter.SingleWordFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
@@ -244,10 +245,10 @@ public class JaxbJobWriterTest extends TestCase {
 		assertMatchesBenchmark(ajb.toAnalysisJob(),
 				"JaxbJobWriterTest-file2.xml");
 
-		FilterJobBuilder<NotNullFilter, ValidationCategory> fjb1 = ajb
-				.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> fjb1 = ajb
+				.addFilter(NullCheckFilter.class);
 		fjb1.addInputColumn(fnCol);
-		strAnalyzer.setRequirement(fjb1, "VALID");
+		strAnalyzer.setRequirement(fjb1, "NOT_NULL");
 
 		assertMatchesBenchmark(ajb.toAnalysisJob(),
 				"JaxbJobWriterTest-file3.xml");
@@ -269,7 +270,7 @@ public class JaxbJobWriterTest extends TestCase {
 
 		MergedOutcomeJobBuilder mergedOutcome = ajb
 				.addMergedOutcomeJobBuilder();
-		mergedOutcome.addMergedOutcome(fjb1, ValidationCategory.INVALID)
+		mergedOutcome.addMergedOutcome(fjb1, NullCheckCategory.NULL)
 				.addInputColumn(fnCol);
 		mergedOutcome.addMergedOutcome(fjb2, ValidationCategory.INVALID)
 				.addInputColumn(usernameColumn);

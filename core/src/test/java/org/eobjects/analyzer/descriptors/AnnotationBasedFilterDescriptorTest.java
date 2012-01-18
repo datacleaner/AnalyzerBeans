@@ -24,22 +24,21 @@ import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.filter.NotNullFilter;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter;
 
 public class AnnotationBasedFilterDescriptorTest extends TestCase {
 
-	private FilterBeanDescriptor<NotNullFilter, ValidationCategory> desc = Descriptors.ofFilter(NotNullFilter.class);
+	private FilterBeanDescriptor<NullCheckFilter, NullCheckFilter.NullCheckCategory> desc = Descriptors.ofFilter(NullCheckFilter.class);
 
 	public void testGetCategoryEnum() throws Exception {
-		Class<ValidationCategory> categoryEnum = desc.getOutcomeCategoryEnum();
+		Class<NullCheckFilter.NullCheckCategory> categoryEnum = desc.getOutcomeCategoryEnum();
 
-		assertEquals(ValidationCategory.class, categoryEnum);
+		assertEquals(NullCheckFilter.NullCheckCategory.class, categoryEnum);
 	}
 
 	public void testGetCategoryNames() throws Exception {
 		Set<String> categoryNames = desc.getOutcomeCategoryNames();
 		categoryNames = new TreeSet<String>(categoryNames);
-		assertEquals("[INVALID, VALID]", categoryNames.toString());
+		assertEquals("[NOT_NULL, NULL]", categoryNames.toString());
 	}
 }

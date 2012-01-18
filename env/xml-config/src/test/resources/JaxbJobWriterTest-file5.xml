@@ -22,13 +22,13 @@
             <output id="col_4" name="Domain"/>
         </transformer>
         <filter>
-            <descriptor ref="Not null"/>
+            <descriptor ref="Null check"/>
             <properties>
                 <property value="false" name="Consider empty string as null"/>
             </properties>
             <input ref="col_0"/>
-            <outcome id="outcome_3" category="VALID"/>
-            <outcome id="outcome_0" category="INVALID"/>
+            <outcome id="outcome_0" category="NULL"/>
+            <outcome id="outcome_3" category="NOT_NULL"/>
         </filter>
         <filter>
             <descriptor ref="Single word"/>

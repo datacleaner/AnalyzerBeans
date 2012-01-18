@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.NumberAnalyzer;
 import org.eobjects.analyzer.beans.filter.EqualsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
-import org.eobjects.analyzer.beans.filter.NotNullFilter;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
@@ -103,13 +103,13 @@ public class RowProcessingMetricsImplTest extends TestCase {
 		filter1.getConfigurableBean().setValues(new String[] { "1056", "1165" });
 
 		// there's 1 record which has a reportsto value of null.
-		FilterJobBuilder<NotNullFilter, ValidationCategory> filter2 = ajb.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filter2 = ajb.addFilter(NullCheckFilter.class);
 		ajb.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
 		filter2.addInputColumn(ajb.getSourceColumnByName("reportsto"));
 		filter2.getConfigurableBean().setConsiderEmptyStringAsNull(true);
 		filter2.setRequirement(filter1.getOutcome(ValidationCategory.INVALID));
 
-		ajb.getAnalyzerJobBuilders().get(0).setRequirement(filter2.getOutcome(ValidationCategory.VALID));
+		ajb.getAnalyzerJobBuilders().get(0).setRequirement(filter2.getOutcome(NullCheckFilter.NullCheckCategory.NOT_NULL));
 
 		job = ajb.toAnalysisJob();
 

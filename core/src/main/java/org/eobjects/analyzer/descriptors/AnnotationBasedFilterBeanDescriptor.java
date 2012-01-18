@@ -23,13 +23,14 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends AbstractBeanDescriptor<F>
 		implements FilterBeanDescriptor<F, C> {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private final String _displayName;
@@ -88,12 +89,29 @@ final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends E
 
 	@Override
 	public Enum<C> getOutcomeCategoryByName(String categoryName) {
+		if (categoryName == null) {
+			return null;
+		}
 		EnumSet<C> categories = getOutcomeCategories();
 		for (Enum<C> c : categories) {
 			if (c.name().equals(categoryName)) {
 				return c;
 			}
 		}
+
+		for (Enum<C> c : categories) {
+			// check aliases
+			Alias aliasAnnotation = ReflectionUtils.getAnnotation(c, Alias.class);
+			if (aliasAnnotation != null) {
+				String[] aliases = aliasAnnotation.value();
+				for (String alias : aliases) {
+					if (categoryName.equals(alias)) {
+						return c;
+					}
+				}
+			}
+		}
+
 		return null;
 	}
 }

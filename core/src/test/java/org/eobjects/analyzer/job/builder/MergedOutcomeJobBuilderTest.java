@@ -24,9 +24,10 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
-import org.eobjects.analyzer.beans.filter.NotNullFilter;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter;
 import org.eobjects.analyzer.beans.filter.SingleWordFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
@@ -58,7 +59,8 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
 		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
 		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.FIRSTNAME");
 
-		FilterJobBuilder<NotNullFilter, ValidationCategory> fjb1 = analysisJobBuilder.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> fjb1 = analysisJobBuilder
+				.addFilter(NullCheckFilter.class);
 		fjb1.addInputColumn(analysisJobBuilder.getSourceColumns().get(0));
 
 		FilterJobBuilder<SingleWordFilter, ValidationCategory> fjb2 = analysisJobBuilder.addFilter(SingleWordFilter.class);
@@ -73,7 +75,7 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
 			assertEquals("Merged outcome jobs need at least 2 merged outcomes, none found", e.getMessage());
 		}
 
-		mergedOutcomeJobBuilder.addMergedOutcome(fjb1, ValidationCategory.VALID);
+		mergedOutcomeJobBuilder.addMergedOutcome(fjb1, NullCheckFilter.NullCheckCategory.NOT_NULL);
 
 		try {
 			mergedOutcomeJobBuilder.toMergedOutcomeJob();
@@ -91,13 +93,12 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
 
 		MergedOutcome outcome = mergedOutcomeJob.getOutcome();
 
-		assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(), ValidationCategory.VALID)));
-		assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(), ValidationCategory.INVALID)));
+		assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(), NullCheckCategory.NOT_NULL)));
+		assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(), NullCheckCategory.NULL)));
 		assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(), ValidationCategory.VALID)));
 		assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(), ValidationCategory.INVALID)));
 
-		AnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder
-				.addAnalyzer(StringAnalyzer.class);
+		AnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
 		ajb.setRequirement(outcome);
 	}
 
@@ -121,12 +122,12 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
 		MutableInputColumn<?> usernameCol = t.getOutputColumnByName("Username");
 		assertNotNull(usernameCol);
 
-		FilterJobBuilder<NotNullFilter, ValidationCategory> f = ajb.addFilter(NotNullFilter.class);
+		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> f = ajb.addFilter(NullCheckFilter.class);
 		f.addInputColumn(usernameCol);
 
 		MergedOutcomeJobBuilder mojb = ajb.addMergedOutcomeJobBuilder();
-		mojb.addMergedOutcome(f, ValidationCategory.VALID).addInputColumn(usernameCol);
-		mojb.addMergedOutcome(f, ValidationCategory.INVALID).addInputColumn(fnCol);
+		mojb.addMergedOutcome(f, NullCheckCategory.NOT_NULL).addInputColumn(usernameCol);
+		mojb.addMergedOutcome(f, NullCheckCategory.NULL).addInputColumn(fnCol);
 
 		MergedOutcomeJob mergedOutcomeJob = mojb.toMergedOutcomeJob();
 		assertNotNull(mergedOutcomeJob);
