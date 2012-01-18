@@ -27,46 +27,6 @@
 			<version>${metamodel.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-mongodb</artifactId>
-			<version>${metamodel.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-jdbc</artifactId>
-			<version>${metamodel.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-openoffice</artifactId>
-			<version>${metamodel.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-dbase</artifactId>
-			<version>${metamodel.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-csv</artifactId>
-			<version>${metamodel.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-excel</artifactId>
-			<version>${metamodel.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-access</artifactId>
-			<version>${metamodel.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
-			<artifactId>MetaModel-xml</artifactId>
-			<version>${metamodel.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.eobjects.sassyreader</groupId>
 			<artifactId>SassyReader</artifactId>
 			<version>0.4</version>
