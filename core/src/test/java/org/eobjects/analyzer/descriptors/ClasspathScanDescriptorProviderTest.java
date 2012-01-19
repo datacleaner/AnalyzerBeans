@@ -91,10 +91,13 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 		Collection<RendererBeanDescriptor> rendererBeanDescriptors = descriptorProvider.scanPackage(
 				"org.eobjects.analyzer.result.renderer", true).getRendererBeanDescriptors();
 		assertEquals(
-				"[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
+				"[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabHtmlRenderer], "
+						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
 						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DateGapTextRenderer], "
 						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer], "
-						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer]]",
+						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.PatternFinderResultHtmlRenderer], "
+						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer], "
+						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.ValueDistributionResultHtmlRenderer]]",
 				new TreeSet<RendererBeanDescriptor>(rendererBeanDescriptors).toString());
 	}
 }
