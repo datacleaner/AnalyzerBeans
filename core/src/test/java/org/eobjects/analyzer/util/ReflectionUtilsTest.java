@@ -130,4 +130,16 @@ public class ReflectionUtilsTest extends TestCase {
 		assertEquals("a", fields[1].getName());
 	}
 
+	public void testIsArrayAnObject() throws Exception {
+		assertTrue(ReflectionUtils.is(byte[].class, Object.class));
+	}
+	
+	public void testIsPrimitiveByteAnObject() throws Exception {
+		assertFalse(ReflectionUtils.is(byte.class, Object.class));
+	}
+	
+	public void testIsByteWrapperAnObject() throws Exception {
+		assertTrue(ReflectionUtils.is(Byte.class, Object.class));
+	}
+
 }

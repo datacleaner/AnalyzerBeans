@@ -78,9 +78,14 @@ public final class ReflectionUtils {
 		if (thisType instanceof Class<?>) {
 			thisClass = (Class<?>) thisType;
 			if (includeArray && thisClass.isArray() && !ofThatType.isArray()) {
+				if (ofThatType == Object.class) {
+					return true;
+				}
+				
 				thisClass = thisClass.getComponentType();
 			}
 		}
+
 		if (thisClass == ofThatType) {
 			return true;
 		}
@@ -478,7 +483,7 @@ public final class ReflectionUtils {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	public static <A extends Annotation> A getAnnotation(Enum<?> enumConstant, Class<A> annotationClass) {
 		try {
 			Field field = enumConstant.getClass().getDeclaredField(enumConstant.name());
@@ -493,7 +498,7 @@ public final class ReflectionUtils {
 			return element.getAnnotation(annotationClass);
 		}
 	}
-	
+
 	public static boolean isAnnotationPresent(Enum<?> enumConstant, Class<? extends Annotation> annotationClass) {
 		try {
 			Field field = enumConstant.getClass().getDeclaredField(enumConstant.name());
