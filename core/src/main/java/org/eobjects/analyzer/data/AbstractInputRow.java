@@ -26,6 +26,8 @@ package org.eobjects.analyzer.data;
  */
 public abstract class AbstractInputRow implements InputRow {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public final <E> E getValue(InputColumn<E> column) {
 		if (column == null) {

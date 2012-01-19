@@ -21,6 +21,8 @@ package org.eobjects.analyzer.storage;
 
 final class RowAnnotationImpl implements RowAnnotation {
 
+	private static final long serialVersionUID = 1L;
+
 	private volatile int _rowCount;
 	
 	protected void incrementRowCount(int increment) {

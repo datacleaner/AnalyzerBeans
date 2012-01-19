@@ -33,6 +33,8 @@ import org.eobjects.metamodel.schema.Column;
 
 public final class MetaModelInputRow extends AbstractInputRow {
 
+	private static final long serialVersionUID = 1L;
+
 	private final Row _row;
 	private final int _rowNumber;
 

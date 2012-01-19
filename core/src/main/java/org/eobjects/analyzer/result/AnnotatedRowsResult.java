@@ -31,6 +31,7 @@ import javax.swing.table.TableModel;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 
@@ -45,10 +46,10 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 	private static final long serialVersionUID = 1L;
 
 	private final transient RowAnnotationFactory _annotationFactory;
-	private final transient RowAnnotation _annotation;
-	private final transient InputColumn<?>[] _highlightedColumns;
-	private transient InputRow[] _rows;
 
+	private final InputColumn<?>[] _highlightedColumns;
+	private final RowAnnotation _annotation;
+	private InputRow[] _rows;
 	private TableModel _tableModel;
 	private List<InputColumn<?>> _inputColumns;
 
@@ -57,6 +58,14 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 		_annotationFactory = annotationFactory;
 		_annotation = annotation;
 		_highlightedColumns = highlightedColumns;
+	}
+
+	private RowAnnotationFactory getAnnotationFactory() {
+		if (_annotationFactory == null) {
+			// only occurs for deserialized instances
+			return new InMemoryRowAnnotationFactory();
+		}
+		return _annotationFactory;
 	}
 
 	public List<InputColumn<?>> getInputColumns() {
@@ -74,7 +83,7 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 
 	public InputRow[] getRows() {
 		if (_rows == null) {
-			_rows = _annotationFactory.getRows(_annotation);
+			_rows = getAnnotationFactory().getRows(getAnnotation());
 			if (_rows == null) {
 				_rows = new InputRow[0];
 			}
@@ -93,7 +102,7 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 	 * @return
 	 */
 	public TableModel toDistinctValuesTableModel(InputColumn<?> inputColumnOfInterest) {
-		Map<Object, Integer> valueCounts = _annotationFactory.getValueCounts(_annotation, inputColumnOfInterest);
+		Map<Object, Integer> valueCounts = getAnnotationFactory().getValueCounts(getAnnotation(), inputColumnOfInterest);
 		DefaultTableModel tableModel = new DefaultTableModel(new String[] { inputColumnOfInterest.getName(),
 				"Count in dataset" }, valueCounts.size());
 
@@ -162,10 +171,14 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 	}
 
 	public RowAnnotation getAnnotation() {
+		if (_annotation == null) {
+			// only occurs for deserialized instances
+			return getAnnotationFactory().createAnnotation();
+		}
 		return _annotation;
 	}
 
 	public int getRowCount() {
-		return _annotation.getRowCount();
+		return getAnnotation().getRowCount();
 	}
 }

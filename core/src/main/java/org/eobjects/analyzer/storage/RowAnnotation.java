@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.storage;
 
+import java.io.Serializable;
+
 /**
  * Represents an annotation (aka a mark, a label or a categorization) of a row.
  * RowAnnotations are used typically by analyzers in order to label rows for
@@ -31,7 +33,7 @@ package org.eobjects.analyzer.storage;
  * 
  * @author Kasper Sørensen
  */
-public interface RowAnnotation {
+public interface RowAnnotation extends Serializable {
 
 	public int getRowCount();
 }

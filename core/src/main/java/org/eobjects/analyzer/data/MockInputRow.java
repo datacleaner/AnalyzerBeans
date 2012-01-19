@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MockInputRow extends AbstractInputRow {
 
+	private static final long serialVersionUID = 1L;
+
 	private static final AtomicInteger _idGenerator = new AtomicInteger(Integer.MIN_VALUE);
 
 	private final Map<InputColumn<?>, Object> _values = new LinkedHashMap<InputColumn<?>, Object>();
@@ -67,7 +69,7 @@ public class MockInputRow extends AbstractInputRow {
 	public List<InputColumn<?>> getInputColumns() {
 		return new ArrayList<InputColumn<?>>(_values.keySet());
 	}
-	
+
 	@Override
 	public boolean containsInputColumn(InputColumn<?> inputColumn) {
 		return _values.containsKey(inputColumn);

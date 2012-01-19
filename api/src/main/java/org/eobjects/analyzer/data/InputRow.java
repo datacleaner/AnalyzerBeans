@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.data;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -38,7 +39,7 @@ import org.eobjects.analyzer.beans.api.Transformer;
  * 
  * @author Kasper Sørensen
  */
-public interface InputRow {
+public interface InputRow extends Serializable {
 
 	/**
 	 * Gets a value from the row on a given column position, or null if no value

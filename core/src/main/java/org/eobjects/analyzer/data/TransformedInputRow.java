@@ -35,7 +35,10 @@ import org.slf4j.LoggerFactory;
  */
 public final class TransformedInputRow extends AbstractInputRow {
 
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = LoggerFactory.getLogger(TransformedInputRow.class);
+	
 	private final InputRow _delegate;
 	private final Map<InputColumn<?>, Object> _values;
 
