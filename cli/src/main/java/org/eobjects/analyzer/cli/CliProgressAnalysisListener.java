@@ -37,8 +37,12 @@ import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class CliProgressAnalysisListener implements AnalysisListener {
+
+	private static final Logger logger = LoggerFactory.getLogger(CliProgressAnalysisListener.class);
 
 	private Map<Table, AtomicInteger> rowCounts = new HashMap<Table, AtomicInteger>();
 
@@ -53,7 +57,7 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 	@Override
 	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
 		Table table = metrics.getTable();
-		System.out.println("Analyzing rows from table: " + table.getName());
+		logger.info("Analyzing rows from table: {}", table.getName());
 		rowCounts.put(table, new AtomicInteger(0));
 	}
 
@@ -74,7 +78,7 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 
 	@Override
 	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
-		System.out.println("Done processing rows from table: " + metrics.getTable().getName());
+		logger.info("Done processing rows from table: {}", metrics.getTable().getName());
 	}
 
 	@Override

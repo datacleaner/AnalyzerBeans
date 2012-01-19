@@ -21,14 +21,14 @@ package org.eobjects.analyzer.cli;
 
 import java.io.PrintWriter;
 
+import org.eobjects.metamodel.util.FileHelper;
+
 /**
  * Main class for the AnalyzerBeans Command-line interface (CLI).
  * 
  * @author Kasper Sørensen
  */
 public final class Main {
-
-	private static PrintWriter out = new PrintWriter(System.out);
 
 	/**
 	 * Main method of the Command-line interface (CLI)
@@ -40,15 +40,20 @@ public final class Main {
 	public static void main(String[] args) throws Throwable {
 		CliArguments arguments = CliArguments.parse(args);
 		if (arguments.isSet() && !arguments.isUsageMode()) {
-			CliRunner runner = new CliRunner(arguments, out);
-			runner.run();
+			CliRunner runner = new CliRunner(arguments);
+			try {
+				runner.run();
+			} finally {
+				runner.close();
+			}
 		} else {
-			CliArguments.printUsage(out);
+			PrintWriter out = new PrintWriter(System.out);
+			printUsage(out);
+			FileHelper.safeClose(out);
 		}
-		out.flush();
 	}
 
-	public static void setOut(PrintWriter out) {
-		Main.out = out;
+	private static void printUsage(PrintWriter out) {
+		CliArguments.printUsage(out);
 	}
 }

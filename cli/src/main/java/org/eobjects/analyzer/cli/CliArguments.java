@@ -92,6 +92,12 @@ public class CliArguments {
 	@Option(name = "-t", aliases = { "-table", "--table-name" }, usage = "Name of table when printing a list of columns")
 	private String tableName;
 
+	@Option(name = "-ot", aliases = { "--output-type" }, usage = "How to represent the result of the job")
+	private CliOutputType outputType;
+
+	@Option(name = "-of", aliases = { "--output-file" }, usage = "File in which to save the result of the job", required = false)
+	private File outputFile;
+
 	@Option(name = "-v", aliases = { "-var", "--variable" }, multiValued = true)
 	private Map<String, String> variableOverrides;
 
@@ -131,6 +137,17 @@ public class CliArguments {
 
 	public Map<String, String> getVariableOverrides() {
 		return variableOverrides;
+	}
+
+	public File getOutputFile() {
+		return outputFile;
+	}
+
+	public CliOutputType getOutputType() {
+		if (outputFile == null) {
+			return CliOutputType.TEXT;
+		}
+		return outputType;
 	}
 
 	/**

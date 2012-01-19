@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.cli;
 
 import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -54,6 +55,7 @@ import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,16 +64,40 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Kasper Sørensen
  */
-public final class CliRunner {
+public final class CliRunner implements Closeable {
 
 	private final static Logger logger = LoggerFactory.getLogger(CliRunner.class);
 
 	private final CliArguments _arguments;
 	private final PrintWriter _out;
+	private final boolean _closeOut;
 
-	public CliRunner(CliArguments arguments, PrintWriter out) {
+	/**
+	 * Alternative constructor that will specifically specifies the output
+	 * writer. Should be used only for testing, since normally the CliArguments
+	 * should be used to decide which outputwriter to use
+	 * 
+	 * @param arguments
+	 * @param out
+	 */
+	protected CliRunner(CliArguments arguments, PrintWriter out) {
 		_arguments = arguments;
-		_out = out;
+		if (out == null) {
+			final File outputFile = arguments.getOutputFile();
+			if (outputFile == null) {
+				_out = new PrintWriter(System.out);
+			} else {
+				_out = new PrintWriter(FileHelper.getWriter(outputFile));
+			}
+			_closeOut = true;
+		} else {
+			_out = out;
+			_closeOut = false;
+		}
+	}
+
+	public CliRunner(CliArguments arguments) {
+		this(arguments, null);
 	}
 
 	public void run() throws Throwable {
@@ -292,7 +318,7 @@ public final class CliRunner {
 				_out.println("------");
 				throwable.printStackTrace(_out);
 			}
-			
+
 			throw errors.get(0);
 		}
 	}
@@ -394,6 +420,13 @@ public final class CliRunner {
 					_out.println(" - Outcome category: " + categoryName);
 				}
 			}
+		}
+	}
+
+	@Override
+	public void close() {
+		if (_closeOut) {
+			FileHelper.safeClose(_out);
 		}
 	}
 }
