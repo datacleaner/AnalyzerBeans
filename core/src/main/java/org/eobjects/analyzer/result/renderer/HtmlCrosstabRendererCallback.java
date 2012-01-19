@@ -36,7 +36,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<St
 	@Override
 	public void beginTable(Crosstab<?> crosstab, List<CrosstabDimension> horizontalDimensions,
 			List<CrosstabDimension> verticalDimensions) {
-		sb.append("<table>");
+		sb.append("<table class=\"crosstabTable\">");
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<St
 			return;
 		}
 		if (width > 1) {
-			sb.append("<td colspan=\"");
+			sb.append("<td class=\"crosstabHorizontalHeader\" colspan=\"");
 			sb.append(width);
 			sb.append("\">");
 		} else if (width == 1) {
@@ -76,7 +76,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<St
 			return;
 		}
 		if (height > 1) {
-			sb.append("<td rowspan=\"");
+			sb.append("<td class=\"crosstabVerticalHeader\" rowspan=\"");
 			sb.append(height);
 			sb.append("\">");
 		} else if (height == 1) {
@@ -89,7 +89,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<St
 	@Override
 	public void valueCell(Object value, ResultProducer drillToDetailResultProducer) {
 		if (value == null) {
-			value = "<null>";
+			value = "&lt;null&gt;";
 		}
 		sb.append("<td>");
 		sb.append(value.toString());
