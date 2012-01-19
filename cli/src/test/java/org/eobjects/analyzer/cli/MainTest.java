@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.cli;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -26,7 +28,10 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.PropertyConfigurator;
+import org.eobjects.analyzer.result.AnalysisResult;
+import org.eobjects.metamodel.util.FileHelper;
 
 public class MainTest extends TestCase {
 
@@ -38,7 +43,7 @@ public class MainTest extends TestCase {
 		_stringWriter = new StringWriter();
 		_originalSysOut = System.out;
 		useAsSystemOut(_stringWriter);
-		
+
 		PropertyConfigurator.configure("src/test/resources/log4j.xml");
 	}
 
@@ -192,5 +197,41 @@ public class MainTest extends TestCase {
 		assertTrue(lines.length < 90);
 
 		assertEquals("SUCCESS!", lines[0]);
+	}
+
+	public void testWriteToFile() throws Throwable {
+		String filename = "target/test_write_to_file.txt";
+		Main.main(("-conf examples/conf.xml -job examples/employees_job.xml -of " + filename).split(" "));
+
+		File file = new File(filename);
+		assertTrue(file.exists());
+		String result = FileHelper.readFileAsString(file);
+		assertEquals("SUCCESS!", result.split("\n")[0].trim());
+
+		assertEquals("", _stringWriter.toString());
+	}
+
+	public void testWriteHtmlToFile() throws Throwable {
+		String filename = "target/test_write_html_to_file.html";
+		Main.main(("-conf examples/conf.xml -job examples/employees_job.xml -of " + filename + " -ot HTML").split(" "));
+
+		File file = new File(filename);
+		assertTrue(file.exists());
+		String result = FileHelper.readFileAsString(file);
+		String[] lines = result.split("\n");
+		
+		assertEquals("<html><body>", lines[0]);
+	}
+	
+	public void testWriteSerializedToFile() throws Throwable {
+		String filename = "target/test_write_serialized_to_file.analysis.result.dat";
+		Main.main(("-conf examples/conf.xml -job examples/employees_job.xml -of " + filename + " -ot SERIALIZED").split(" "));
+
+		File file = new File(filename);
+		assertTrue(file.exists());
+		
+		AnalysisResult result = (AnalysisResult) SerializationUtils.deserialize(new FileInputStream(file));
+		assertNotNull(result);
+		assertEquals(6, result.getResults().size());
 	}
 }

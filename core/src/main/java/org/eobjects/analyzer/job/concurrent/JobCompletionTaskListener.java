@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.concurrent;
 
+import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +42,7 @@ public final class JobCompletionTaskListener implements StatusAwareTaskListener 
 	private final CountDownLatch _countDownLatch;
 	private final AnalysisListener _analysisListener;
 	private final AnalysisJobMetrics _analysisJobMetrics;
+	private Date _completionTime;
 
 	public JobCompletionTaskListener(AnalysisJobMetrics analysisJobMetrics, AnalysisListener analysisListener,
 			int callablesToWaitFor) {
@@ -71,6 +73,7 @@ public final class JobCompletionTaskListener implements StatusAwareTaskListener 
 		logger.debug("onComplete(...)");
 		_countDownLatch.countDown();
 		if (_countDownLatch.getCount() == 0) {
+			_completionTime = new Date();
 			_analysisListener.jobSuccess(_analysisJobMetrics.getAnalysisJob(), _analysisJobMetrics);
 		}
 	}
@@ -80,5 +83,10 @@ public final class JobCompletionTaskListener implements StatusAwareTaskListener 
 		logger.debug("onError(...)");
 		_analysisListener.errorUknown(_analysisJobMetrics.getAnalysisJob(), throwable);
 		_countDownLatch.countDown();
+	}
+
+	@Override
+	public Date getCompletionTime() {
+		return _completionTime;
 	}
 }

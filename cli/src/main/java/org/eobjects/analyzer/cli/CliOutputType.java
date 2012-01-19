@@ -33,13 +33,13 @@ public enum CliOutputType {
 
 	TEXT(TextRenderingFormat.class), HTML(HtmlRenderingFormat.class), SERIALIZED(null);
 
-	private final Class<? extends RenderingFormat<?>> _renderingFormat;
+	private final Class<? extends RenderingFormat<? extends CharSequence>> _renderingFormat;
 
-	private CliOutputType(Class<? extends RenderingFormat<?>> renderingFormat) {
+	private CliOutputType(Class<? extends RenderingFormat<? extends CharSequence>> renderingFormat) {
 		_renderingFormat = renderingFormat;
 	}
 
-	public Class<? extends RenderingFormat<?>> getRenderingFormat() {
+	public Class<? extends RenderingFormat<? extends CharSequence>> getRenderingFormat() {
 		return _renderingFormat;
 	}
 }

@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.concurrent;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,4 +35,6 @@ public interface StatusAwareTaskListener extends TaskListener {
 	public void await() throws InterruptedException;
 
 	public void await(long timeout, TimeUnit timeUnit) throws InterruptedException;
+
+	public Date getCompletionTime();
 }

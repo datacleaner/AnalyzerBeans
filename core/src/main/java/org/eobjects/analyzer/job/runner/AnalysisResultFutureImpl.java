@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,11 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 			_done = _jobTaskListener.isDone();
 		}
 		return _done;
+	}
+	
+	@Override
+	public Date getCreationDate() {
+		return _jobTaskListener.getCompletionTime();
 	}
 
 	@Override

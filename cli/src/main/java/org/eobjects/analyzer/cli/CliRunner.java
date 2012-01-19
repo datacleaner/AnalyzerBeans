@@ -23,19 +23,27 @@ import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
@@ -50,12 +58,15 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.SimpleAnalysisResult;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
-import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.ImmutableRef;
+import org.eobjects.metamodel.util.LazyRef;
+import org.eobjects.metamodel.util.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +80,8 @@ public final class CliRunner implements Closeable {
 	private final static Logger logger = LoggerFactory.getLogger(CliRunner.class);
 
 	private final CliArguments _arguments;
-	private final PrintWriter _out;
+	private final Ref<OutputStream> _outputStreamRef;
+	private final Ref<Writer> _writerRef;
 	private final boolean _closeOut;
 
 	/**
@@ -78,26 +90,49 @@ public final class CliRunner implements Closeable {
 	 * should be used to decide which outputwriter to use
 	 * 
 	 * @param arguments
-	 * @param out
+	 * @param writer
+	 * @param outputStream
 	 */
-	protected CliRunner(CliArguments arguments, PrintWriter out) {
+	protected CliRunner(CliArguments arguments, Writer writer, OutputStream outputStream) {
 		_arguments = arguments;
-		if (out == null) {
+		if (outputStream == null) {
 			final File outputFile = arguments.getOutputFile();
 			if (outputFile == null) {
-				_out = new PrintWriter(System.out);
+				_outputStreamRef = null;
+				_writerRef = new LazyRef<Writer>() {
+					@Override
+					protected Writer fetch() {
+						return new PrintWriter(System.out);
+					}
+				};
 			} else {
-				_out = new PrintWriter(FileHelper.getWriter(outputFile));
+				_writerRef = new LazyRef<Writer>() {
+					@Override
+					protected Writer fetch() {
+						return FileHelper.getWriter(outputFile);
+					}
+				};
+				_outputStreamRef = new LazyRef<OutputStream>() {
+					@Override
+					protected OutputStream fetch() {
+						try {
+							return new FileOutputStream(outputFile);
+						} catch (FileNotFoundException e) {
+							throw new IllegalStateException(e);
+						}
+					}
+				};
 			}
 			_closeOut = true;
 		} else {
-			_out = out;
+			_writerRef = new ImmutableRef<Writer>(writer);
+			_outputStreamRef = new ImmutableRef<OutputStream>(outputStream);
 			_closeOut = false;
 		}
 	}
 
 	public CliRunner(CliArguments arguments) {
-		this(arguments, null);
+		this(arguments, null, null);
 	}
 
 	public void run() throws Throwable {
@@ -179,13 +214,13 @@ public final class CliRunner implements Closeable {
 				} else {
 					Table table = schema.getTableByName(tableName);
 					if (table == null) {
-						_out.println("No such table: " + tableName);
+						write("No such table: " + tableName);
 					} else {
 						String[] columnNames = table.getColumnNames();
-						_out.println("Columns:");
-						_out.println("--------");
+						write("Columns:");
+						write("--------");
 						for (String columnName : columnNames) {
-							_out.println(columnName);
+							write(columnName);
 						}
 					}
 				}
@@ -220,10 +255,10 @@ public final class CliRunner implements Closeable {
 					if (tableNames == null || tableNames.length == 0) {
 						System.err.println("No tables in schema!");
 					} else {
-						_out.println("Tables:");
-						_out.println("-------");
+						write("Tables:");
+						write("-------");
 						for (String tableName : tableNames) {
-							_out.println(tableName);
+							write(tableName);
 						}
 					}
 				}
@@ -245,12 +280,12 @@ public final class CliRunner implements Closeable {
 				DatastoreConnection con = ds.openConnection();
 				String[] schemaNames = con.getDataContext().getSchemaNames();
 				if (schemaNames == null || schemaNames.length == 0) {
-					_out.println("No schemas in datastore!");
+					write("No schemas in datastore!");
 				} else {
-					_out.println("Schemas:");
-					_out.println("--------");
+					write("Schemas:");
+					write("--------");
 					for (String schemaName : schemaNames) {
-						_out.println(schemaName);
+						write(schemaName);
 					}
 				}
 				con.close();
@@ -261,12 +296,12 @@ public final class CliRunner implements Closeable {
 	private void printDatastores(AnalyzerBeansConfiguration configuration) {
 		String[] datastoreNames = configuration.getDatastoreCatalog().getDatastoreNames();
 		if (datastoreNames == null || datastoreNames.length == 0) {
-			_out.println("No datastores configured!");
+			write("No datastores configured!");
 		} else {
-			_out.println("Datastores:");
-			_out.println("-----------");
+			write("Datastores:");
+			write("-----------");
 			for (String datastoreName : datastoreNames) {
-				_out.println(datastoreName);
+				write(datastoreName);
 			}
 		}
 	}
@@ -286,40 +321,87 @@ public final class CliRunner implements Closeable {
 		resultFuture.await();
 
 		if (resultFuture.isSuccessful()) {
-			_out.println("SUCCESS!");
-			final Set<Entry<ComponentJob, AnalyzerResult>> results = resultFuture.getResultMap().entrySet();
+			final CliOutputType outputType = _arguments.getOutputType();
+			if (outputType == CliOutputType.SERIALIZED) {
 
-			final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider(), null);
+				SimpleAnalysisResult result = new SimpleAnalysisResult(resultFuture.getResultMap());
+				SerializationUtils.serialize(result, _outputStreamRef.get());
 
-			for (Entry<ComponentJob, AnalyzerResult> result : results) {
-				final ComponentJob componentJob = result.getKey();
-				final AnalyzerResult analyzerResult = result.getValue();
-				String name = componentJob.getName();
-				if (name == null) {
-					name = componentJob.toString();
+			} else {
+				final Class<? extends RenderingFormat<? extends CharSequence>> renderingFormat = outputType
+						.getRenderingFormat();
+				final Set<Entry<ComponentJob, AnalyzerResult>> results = resultFuture.getResultMap().entrySet();
+				final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider(), null);
+
+				if (outputType == CliOutputType.TEXT) {
+					write("SUCCESS!");
+				} else if (outputType == CliOutputType.HTML) {
+					write("<html><body>");
+					write("<div class\"analysisResultContainer\">");
+					write("<h1 class=\"analysisResultHeader\">Success!</h1>");
 				}
 
-				_out.println("\nRESULT: " + name);
+				for (Entry<ComponentJob, AnalyzerResult> result : results) {
+					final ComponentJob componentJob = result.getKey();
+					final AnalyzerResult analyzerResult = result.getValue();
+					String name = componentJob.getName();
+					if (name == null) {
+						name = componentJob.toString();
+					}
 
-				Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFactory.getRenderer(
-						analyzerResult, TextRenderingFormat.class);
-				CharSequence renderedResult = renderer.render(analyzerResult);
+					if (outputType == CliOutputType.TEXT) {
+						write("\nRESULT: " + name);
+					} else if (outputType == CliOutputType.HTML) {
+						write("<div=\"analyzerResultContainer\"><h2 class=\"analyzerResultHeader\">Result: " + name
+								+ "</h2><div class=\"analyzerResultPanel\">");
+					}
 
-				_out.println(renderedResult);
+					Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFactory.getRenderer(
+							analyzerResult, renderingFormat);
+					if (renderer == null) {
+						writeMissingRendererError(analyzerResult, outputType);
+					} else {
+						CharSequence renderedResult = renderer.render(analyzerResult);
+						write(renderedResult.toString());
+					}
+
+					if (outputType == CliOutputType.HTML) {
+						write("</div></div>");
+					}
+				}
+
+				if (outputType == CliOutputType.HTML) {
+					write("</div>");
+					write("</body></html>");
+				}
 			}
 		} else {
-			_out.println("ERROR!");
-			_out.println("------");
+			write("ERROR!");
+			write("------");
 
 			List<Throwable> errors = resultFuture.getErrors();
-			_out.println(errors.size() + " error(s) occurred while executing the job:");
+			write(errors.size() + " error(s) occurred while executing the job:");
 
 			for (Throwable throwable : errors) {
-				_out.println("------");
-				throwable.printStackTrace(_out);
+				write("------");
+				StringWriter stringWriter = new StringWriter();
+				throwable.printStackTrace(new PrintWriter(stringWriter));
+				write(stringWriter.toString());
 			}
 
 			throw errors.get(0);
+		}
+	}
+
+	private void writeMissingRendererError(AnalyzerResult analyzerResult, CliOutputType outputType) {
+		// we only expect HTML here, since TEXT rendering has a default renderer
+		// for all, and SERIALIZED rendering will have a different loop of
+		// storing the result.
+		assert outputType == CliOutputType.HTML;
+
+		if (outputType == CliOutputType.HTML) {
+			write("<h3 class=\"analyzerResultNoRendererHeader\">Error: Could not find appropriate renderer for result</h3>");
+			write("<pre class=\"analyzerResultNoRendererBody\">" + analyzerResult.toString() + "</pre>");
 		}
 	}
 
@@ -327,10 +409,10 @@ public final class CliRunner implements Closeable {
 		Collection<AnalyzerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
 				.getAnalyzerBeanDescriptors();
 		if (descriptors == null || descriptors.isEmpty()) {
-			_out.println("No analyzers configured!");
+			write("No analyzers configured!");
 		} else {
-			_out.println("Analyzers:");
-			_out.println("----------");
+			write("Analyzers:");
+			write("----------");
 			printBeanDescriptors(descriptors);
 		}
 	}
@@ -339,10 +421,10 @@ public final class CliRunner implements Closeable {
 		Collection<TransformerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
 				.getTransformerBeanDescriptors();
 		if (descriptors == null || descriptors.isEmpty()) {
-			_out.println("No transformers configured!");
+			write("No transformers configured!");
 		} else {
-			_out.println("Transformers:");
-			_out.println("-------------");
+			write("Transformers:");
+			write("-------------");
 			printBeanDescriptors(descriptors);
 		}
 	}
@@ -351,10 +433,10 @@ public final class CliRunner implements Closeable {
 		Collection<FilterBeanDescriptor<?, ?>> descriptors = configuration.getDescriptorProvider()
 				.getFilterBeanDescriptors();
 		if (descriptors == null || descriptors.isEmpty()) {
-			_out.println("No filters configured!");
+			write("No filters configured!");
 		} else {
-			_out.println("Filters:");
-			_out.println("--------");
+			write("Filters:");
+			write("--------");
 			printBeanDescriptors(descriptors);
 		}
 	}
@@ -363,10 +445,10 @@ public final class CliRunner implements Closeable {
 		Collection<ExplorerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
 				.getExplorerBeanDescriptors();
 		if (descriptors == null || descriptors.isEmpty()) {
-			_out.println("No explorers configured!");
+			write("No explorers configured!");
 		} else {
-			_out.println("Explorers:");
-			_out.println("----------");
+			write("Explorers:");
+			write("----------");
 			printBeanDescriptors(descriptors);
 		}
 	}
@@ -374,28 +456,28 @@ public final class CliRunner implements Closeable {
 	protected void printBeanDescriptors(Collection<? extends BeanDescriptor<?>> descriptors) {
 		logger.debug("Printing {} descriptors", descriptors.size());
 		for (BeanDescriptor<?> descriptor : descriptors) {
-			_out.println("name: " + descriptor.getDisplayName());
+			write("name: " + descriptor.getDisplayName());
 
 			Set<ConfiguredPropertyDescriptor> propertiesForInput = descriptor.getConfiguredPropertiesForInput();
 			if (propertiesForInput.size() == 1) {
 				ConfiguredPropertyDescriptor propertyForInput = propertiesForInput.iterator().next();
 				if (propertyForInput != null) {
 					if (propertyForInput.isArray()) {
-						_out.println(" - Consumes multiple input columns (type: "
-								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
+						write(" - Consumes multiple input columns (type: " + propertyForInput.getInputColumnDataTypeFamily()
+								+ ")");
 					} else {
-						_out.println(" - Consumes a single input column (type: "
-								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
+						write(" - Consumes a single input column (type: " + propertyForInput.getInputColumnDataTypeFamily()
+								+ ")");
 					}
 				}
 			} else {
-				_out.println(" - Consumes " + propertiesForInput.size() + " named inputs");
+				write(" - Consumes " + propertiesForInput.size() + " named inputs");
 				for (ConfiguredPropertyDescriptor propertyForInput : propertiesForInput) {
 					if (propertyForInput.isArray()) {
-						_out.println("   Input columns: " + propertyForInput.getName() + " (type: "
+						write("   Input columns: " + propertyForInput.getName() + " (type: "
 								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
 					} else {
-						_out.println("   Input column: " + propertyForInput.getName() + " (type: "
+						write("   Input column: " + propertyForInput.getName() + " (type: "
 								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
 					}
 				}
@@ -404,29 +486,51 @@ public final class CliRunner implements Closeable {
 			Set<ConfiguredPropertyDescriptor> properties = descriptor.getConfiguredProperties();
 			for (ConfiguredPropertyDescriptor property : properties) {
 				if (!property.isInputColumn()) {
-					_out.println(" - Property: name=" + property.getName() + ", type="
-							+ property.getBaseType().getSimpleName() + ", required=" + property.isRequired());
+					write(" - Property: name=" + property.getName() + ", type=" + property.getBaseType().getSimpleName()
+							+ ", required=" + property.isRequired());
 				}
 			}
 
 			if (descriptor instanceof TransformerBeanDescriptor<?>) {
 				DataTypeFamily dataTypeFamily = ((TransformerBeanDescriptor<?>) descriptor).getOutputDataTypeFamily();
-				_out.println(" - Output type is: " + dataTypeFamily);
+				write(" - Output type is: " + dataTypeFamily);
 			}
 
 			if (descriptor instanceof FilterBeanDescriptor<?, ?>) {
 				Set<String> categoryNames = ((FilterBeanDescriptor<?, ?>) descriptor).getOutcomeCategoryNames();
 				for (String categoryName : categoryNames) {
-					_out.println(" - Outcome category: " + categoryName);
+					write(" - Outcome category: " + categoryName);
 				}
 			}
+		}
+	}
+
+	private void write(String str) {
+		try {
+			_writerRef.get().write(str + "\n");
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
 	@Override
 	public void close() {
 		if (_closeOut) {
-			FileHelper.safeClose(_out);
+			close(_writerRef);
+			close(_outputStreamRef);
+		}
+	}
+
+	private void close(Ref<?> ref) {
+		if (ref != null) {
+			if (ref instanceof LazyRef) {
+				LazyRef<?> lazyRef = (LazyRef<?>) ref;
+				if (lazyRef.isFetched()) {
+					FileHelper.safeClose(ref.get());
+				}
+			} else {
+				FileHelper.safeClose(ref.get());
+			}
 		}
 	}
 }

@@ -22,6 +22,7 @@ package org.eobjects.analyzer.result;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -39,9 +40,11 @@ public class SimpleAnalysisResult implements Serializable, AnalysisResult {
 	private static final long serialVersionUID = 1L;
 
 	private final Map<ComponentJob, AnalyzerResult> _results;
+	private final Date _creationDate;
 
 	public SimpleAnalysisResult(Map<ComponentJob, AnalyzerResult> results) {
 		_results = results;
+		_creationDate = new Date();
 	}
 
 	@Override
@@ -57,6 +60,11 @@ public class SimpleAnalysisResult implements Serializable, AnalysisResult {
 	@Override
 	public Map<ComponentJob, AnalyzerResult> getResultMap() {
 		return Collections.unmodifiableMap(_results);
+	}
+
+	@Override
+	public Date getCreationDate() {
+		return _creationDate;
 	}
 
 }

@@ -144,7 +144,7 @@ public class CliArguments {
 	}
 
 	public CliOutputType getOutputType() {
-		if (outputFile == null) {
+		if (outputType == null) {
 			return CliOutputType.TEXT;
 		}
 		return outputType;

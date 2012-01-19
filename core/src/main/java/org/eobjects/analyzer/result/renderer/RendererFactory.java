@@ -91,7 +91,7 @@ public final class RendererFactory {
 	 * @return
 	 */
 	public <I extends Renderable, O> Renderer<? super I, ? extends O> getRenderer(I renderable,
-			Class<? extends RenderingFormat<O>> renderingFormat) {
+			Class<? extends RenderingFormat<? extends O>> renderingFormat) {
 
 		RendererSelection bestMatch = null;
 

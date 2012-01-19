@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.result;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -56,4 +57,11 @@ public interface AnalysisResult {
 	 *         AnalyzerResults.
 	 */
 	public Map<ComponentJob, AnalyzerResult> getResultMap();
+
+	/**
+	 * Gets the time that the results were created
+	 * 
+	 * @return the time that the results were created
+	 */
+	public Date getCreationDate();
 }
