@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-components</artifactId>
-		<version>0.10-SNAPSHOT</version>
+		<version>0.10</version>
 	</parent>
 	<artifactId>AnalyzerBeans-el</artifactId>
 	<description>Provides Expression Language (EL) based scriptable components and expression based columns for AnalyzerBeans</description>
@@ -11,7 +11,7 @@
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-core</artifactId>
-			<version>0.10-SNAPSHOT</version>
+			<version>0.10</version>
 		</dependency>
 		<dependency>
 			<groupId>de.odysseus.juel</groupId>
