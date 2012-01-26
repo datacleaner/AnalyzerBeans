@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 public class ConvertToDateTransformerTest extends TestCase {
 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
+	
 	public void testConvertFromNumber() throws Exception {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 1971);
@@ -62,6 +62,18 @@ public class ConvertToDateTransformerTest extends TestCase {
 
 		Date result = transformer.convertFromString("2008-07-11 14:05:13");
 		assertEquals("2008-07-11 14:05:13", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(result));
+	}
+	
+	public void testConvertSingleHourDigit() throws Exception {
+		ConvertToDateTransformer transformer = new ConvertToDateTransformer();
+		transformer.dateMasks = new String[] {"dd/MM/yyyy HH:mm"};
+		transformer.init();
+		
+		Date date = transformer.convertFromString("29/3/2009 12:55");
+		assertNotNull(date);
+		
+		date = transformer.convertFromString("29/3/2009 3:15");
+		assertNotNull(date);
 	}
 
 	private String format(Date date) {
