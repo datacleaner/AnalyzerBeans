@@ -178,7 +178,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
 		if (_multipleJobsSupported && configuredProperty == _inputProperty) {
 			if (_inputColumns.isEmpty()) {
 				if (throwException) {
-					throw new IllegalStateException("No input columns have been added!");
+					throw new IllegalStateException("No input columns have been added to " + this);
 				} else {
 					return false;
 				}

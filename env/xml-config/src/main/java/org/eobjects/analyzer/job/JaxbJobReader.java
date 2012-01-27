@@ -480,7 +480,13 @@ public class JaxbJobReader implements JobReader<InputStream> {
 						List<OutputType> output = unconfiguredTransformerKey
 								.getOutput();
 
-						assert outputColumns.size() == output.size();
+						if (outputColumns.size() != output.size()) {
+							throw new IllegalStateException("Expected "
+									+ outputColumns.size()
+									+ " output column, but found "
+									+ output.size() + " ("
+									+ transformerJobBuilder + ")");
+						}
 
 						for (int i = 0; i < output.size(); i++) {
 							OutputType o1 = output.get(i);

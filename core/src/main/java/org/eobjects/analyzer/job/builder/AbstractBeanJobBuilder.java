@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.result.renderer.Renderable;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
@@ -43,8 +44,7 @@ import org.slf4j.LoggerFactory;
  *            the concrete job builder type (eg. AnalyzerJobBuilder)
  */
 @SuppressWarnings("unchecked")
-public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
-		implements Renderable {
+public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implements Renderable {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -53,11 +53,9 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 	private volatile String _name;
 	private final AnalysisJobBuilder _analysisJobBuilder;
 
-	public AbstractBeanJobBuilder(AnalysisJobBuilder analysisJobBuilder,
-			D descriptor, Class<?> builderClass) {
+	public AbstractBeanJobBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor, Class<?> builderClass) {
 		if (analysisJobBuilder == null) {
-			throw new IllegalArgumentException(
-					"analysisJobBuilder cannot be null");
+			throw new IllegalArgumentException("analysisJobBuilder cannot be null");
 		}
 		if (descriptor == null) {
 			throw new IllegalArgumentException("descriptor cannot be null");
@@ -68,12 +66,10 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 		_analysisJobBuilder = analysisJobBuilder;
 		_descriptor = descriptor;
 		if (!ReflectionUtils.is(getClass(), builderClass)) {
-			throw new IllegalArgumentException(
-					"Builder class does not correspond to actual class of builder");
+			throw new IllegalArgumentException("Builder class does not correspond to actual class of builder");
 		}
 
-		_configurableBean = ReflectionUtils.newInstance(_descriptor
-				.getComponentClass());
+		_configurableBean = ReflectionUtils.newInstance(_descriptor.getComponentClass());
 	}
 
 	public final AnalysisJobBuilder getAnalysisJobBuilder() {
@@ -88,20 +84,29 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 		return _configurableBean;
 	}
 
-	public final boolean isConfigured(boolean throwException)
-			throws IllegalStateException,
+	public final boolean isConfigured(boolean throwException) throws IllegalStateException,
 			UnconfiguredConfiguredPropertyException {
-		for (ConfiguredPropertyDescriptor configuredProperty : _descriptor
-				.getConfiguredProperties()) {
+		for (ConfiguredPropertyDescriptor configuredProperty : _descriptor.getConfiguredProperties()) {
 			if (!isConfigured(configuredProperty, throwException)) {
 				if (throwException) {
-					throw new UnconfiguredConfiguredPropertyException(this,
-							configuredProperty);
+					throw new UnconfiguredConfiguredPropertyException(this, configuredProperty);
 				} else {
 					return false;
 				}
 			}
 		}
+
+		try {
+			LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null);
+			lifeCycleHelper.validate(getDescriptor(), getConfigurableBean());
+		} catch (RuntimeException e) {
+			if (throwException) {
+				throw e;
+			} else {
+				return false;
+			}
+		}
+
 		return true;
 	}
 
@@ -118,9 +123,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 		return isConfigured(false);
 	}
 
-	public boolean isConfigured(
-			ConfiguredPropertyDescriptor configuredProperty,
-			boolean throwException) {
+	public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty, boolean throwException) {
 		if (configuredProperty.isRequired()) {
 			Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
 			Object value = configuredProperties.get(configuredProperty);
@@ -131,11 +134,9 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 			}
 			if (value == null) {
 				if (throwException) {
-					throw new UnconfiguredConfiguredPropertyException(this,
-							configuredProperty);
+					throw new UnconfiguredConfiguredPropertyException(this, configuredProperty);
 				} else {
-					logger.debug("Configured property is not set: "
-							+ configuredProperty);
+					logger.debug("Configured property is not set: " + configuredProperty);
 					return false;
 				}
 			}
@@ -144,20 +145,16 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 	}
 
 	public B setConfiguredProperty(String configuredName, Object value) {
-		ConfiguredPropertyDescriptor configuredProperty = _descriptor
-				.getConfiguredProperty(configuredName);
+		ConfiguredPropertyDescriptor configuredProperty = _descriptor.getConfiguredProperty(configuredName);
 		if (configuredProperty == null) {
-			throw new IllegalArgumentException("No such configured property: "
-					+ configuredName);
+			throw new IllegalArgumentException("No such configured property: " + configuredName);
 		}
 		return setConfiguredProperty(configuredProperty, value);
 	}
 
-	public B setConfiguredProperty(
-			ConfiguredPropertyDescriptor configuredProperty, Object value) {
+	public B setConfiguredProperty(ConfiguredPropertyDescriptor configuredProperty, Object value) {
 		if (configuredProperty == null) {
-			throw new IllegalArgumentException(
-					"configuredProperty cannot be null");
+			throw new IllegalArgumentException("configuredProperty cannot be null");
 		}
 		if (value != null) {
 			boolean correctType = true;
@@ -167,27 +164,23 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 					for (int i = 0; i < length; i++) {
 						Object valuePart = Array.get(value, i);
 						if (valuePart != null) {
-							if (!ReflectionUtils.is(valuePart.getClass(),
-									configuredProperty.getBaseType())) {
+							if (!ReflectionUtils.is(valuePart.getClass(), configuredProperty.getBaseType())) {
 								correctType = false;
 							}
 						}
 					}
 				} else {
-					if (!ReflectionUtils.is(value.getClass(),
-							configuredProperty.getBaseType())) {
+					if (!ReflectionUtils.is(value.getClass(), configuredProperty.getBaseType())) {
 						correctType = false;
 					}
 				}
 			} else {
-				if (!ReflectionUtils.is(value.getClass(),
-						configuredProperty.getBaseType())) {
+				if (!ReflectionUtils.is(value.getClass(), configuredProperty.getBaseType())) {
 					correctType = false;
 				}
 			}
 			if (!correctType) {
-				throw new IllegalArgumentException("Invalid value type: "
-						+ value.getClass().getName() + ", expected: "
+				throw new IllegalArgumentException("Invalid value type: " + value.getClass().getName() + ", expected: "
 						+ configuredProperty.getBaseType().getName());
 			}
 		}
@@ -199,8 +192,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 
 	public Map<ConfiguredPropertyDescriptor, Object> getConfiguredProperties() {
 		Map<ConfiguredPropertyDescriptor, Object> map = new HashMap<ConfiguredPropertyDescriptor, Object>();
-		Set<ConfiguredPropertyDescriptor> configuredProperties = getDescriptor()
-				.getConfiguredProperties();
+		Set<ConfiguredPropertyDescriptor> configuredProperties = getDescriptor().getConfiguredProperties();
 		for (ConfiguredPropertyDescriptor propertyDescriptor : configuredProperties) {
 			Object value = getConfiguredProperty(propertyDescriptor);
 			if (value != null) {
@@ -217,8 +209,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B>
 	public void onConfigurationChanged() {
 	}
 
-	public Object getConfiguredProperty(
-			ConfiguredPropertyDescriptor propertyDescriptor) {
+	public Object getConfiguredProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
 		return propertyDescriptor.getValue(getConfigurableBean());
 	}
 }

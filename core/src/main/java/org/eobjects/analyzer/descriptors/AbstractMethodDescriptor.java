@@ -21,6 +21,7 @@ package org.eobjects.analyzer.descriptors;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -70,6 +71,12 @@ class AbstractMethodDescriptor extends BaseObject implements Serializable {
 			_method.invoke(component);
 		} catch (RuntimeException e) {
 			throw e;
+		} catch (InvocationTargetException e) {
+			Throwable targetException = e.getTargetException();
+			if (targetException instanceof RuntimeException) {
+				throw (RuntimeException) targetException;
+			}
+			throw new IllegalStateException("Invoked method threw exception", targetException);
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not invoke method " + getMethod(), e);
 		}

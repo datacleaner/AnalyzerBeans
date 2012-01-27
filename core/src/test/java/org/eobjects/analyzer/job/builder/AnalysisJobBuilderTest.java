@@ -30,11 +30,14 @@ import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
+import org.eobjects.analyzer.beans.NumberAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.NullCheckFilter;
 import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
+import org.eobjects.analyzer.beans.filter.NumberRangeFilter;
+import org.eobjects.analyzer.beans.filter.RangeFilterCategory;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
@@ -76,6 +79,25 @@ public class AnalysisJobBuilderTest extends TestCase {
 
 		analysisJobBuilder = new AnalysisJobBuilder(configuration);
 		analysisJobBuilder.setDatastore("my db");
+	}
+
+	public void testValidate() throws Exception {
+		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
+		MetaModelInputColumn reportsToColumn = analysisJobBuilder.getSourceColumns().get(0);
+
+		FilterJobBuilder<NumberRangeFilter, RangeFilterCategory> filter = analysisJobBuilder
+				.addFilter(NumberRangeFilter.class);
+		filter.addInputColumn(reportsToColumn);
+		filter.setConfiguredProperty("Lowest value", 2.0);
+		filter.setConfiguredProperty("Highest value", 1.0);
+		analysisJobBuilder.addAnalyzer(NumberAnalyzer.class).addInputColumn(reportsToColumn);
+
+		try {
+			analysisJobBuilder.isConfigured(true);
+			fail("Exception expected");
+		} catch (Exception e) {
+			assertEquals("Lowest value is greater than the highest value", e.getMessage());
+		}
 	}
 
 	public void testPreventCyclicFilterDependencies() throws Exception {
