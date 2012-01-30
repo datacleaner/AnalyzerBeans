@@ -41,6 +41,8 @@ import de.odysseus.el.util.SimpleContext;
  */
 public class ELInputColumn extends AbstractExpressionBasedInputColumn<String> {
 
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = LoggerFactory.getLogger(ELInputColumn.class);
 
 	private final ExpressionFactory _factory;
