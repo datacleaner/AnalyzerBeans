@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.collection;
+package org.eobjects.analyzer.beans.datastructures;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -25,11 +25,14 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Alias;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.DataStructuresCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.slf4j.Logger;
@@ -42,8 +45,10 @@ import org.slf4j.LoggerFactory;
  * @author Shekhar Gulati
  * @author Saurabh Gupta
  */
-@TransformerBean("Build map")
+@TransformerBean("Build key/value map")
+@Alias("Build map")
 @Description("Transformer capable of building a map of keys and values")
+@Categorized(DataStructuresCategory.class)
 public class BuildMapTransformer implements Transformer<Map<String, ?>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(BuildMapTransformer.class);

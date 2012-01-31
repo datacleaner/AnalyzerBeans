@@ -17,69 +17,73 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.collection;
+package org.eobjects.analyzer.beans.datastructures;
 
-import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Alias;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.OutputColumns;
-import org.eobjects.analyzer.beans.api.OutputRowCollector;
-import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.DataStructuresCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 /**
- * Transformer for extracting elements from lists.
+ * Transformer for extracting values from maps.
  * 
  * @author Kasper Sørensen
  * @author Shekhar Gulati
  * @author Saurabh Gupta
  */
-@TransformerBean("Extract elements from list")
-public class ExtractFromListTransformer implements Transformer<Object> {
+@TransformerBean("Extract values from key/value map")
+@Alias("Extract values from map")
+@Categorized(DataStructuresCategory.class)
+public class ExtractFromMapTransformer implements Transformer<Object> {
 
 	@Inject
 	@Configured
-	InputColumn<List<?>> listColumn;
+	InputColumn<Map<String, ?>> mapColumn;
 
 	@Inject
 	@Configured
-	Class<?> elementType;
+	String[] keys;
+
+	@Inject
+	@Configured
+	Class<?>[] types;
 
 	@Inject
 	@Configured
 	boolean verifyTypes = false;
 
-	@Inject
-	@Provided
-	OutputRowCollector outputRowCollector;
-
 	@Override
 	public OutputColumns getOutputColumns() {
-		String[] columnNames = new String[] { listColumn.getName() + " (element)" };
-		Class<?>[] columnTypes = new Class[] { elementType };
-		return new OutputColumns(columnNames, columnTypes);
+		return new OutputColumns(keys, types);
 	}
 
 	@Override
 	public Object[] transform(InputRow row) {
-		List<?> list = row.getValue(listColumn);
-		if (list == null || list.isEmpty()) {
-			return new Object[1];
+		final Map<String, ?> map = row.getValue(mapColumn);
+		final Object[] result = new Object[keys.length];
+
+		if (map == null) {
+			return result;
 		}
 
-		for (Object value : list) {
+		for (int i = 0; i < keys.length; i++) {
+			Object value = map.get(keys[i]);
 			if (verifyTypes) {
-				value = elementType.cast(value);
+				value = types[i].cast(value);
 			}
-			outputRowCollector.putValues(value);
+			result[i] = value;
 		}
 
-		return null;
+		return result;
 	}
 
 }

@@ -17,68 +17,72 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.collection;
+package org.eobjects.analyzer.beans.datastructures;
 
-import java.util.Map;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.OutputRowCollector;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.DataStructuresCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 /**
- * Transformer for extracting values from maps.
+ * Transformer for extracting elements from lists.
  * 
  * @author Kasper Sørensen
  * @author Shekhar Gulati
  * @author Saurabh Gupta
  */
-@TransformerBean("Extract values from map")
-public class ExtractFromMapTransformer implements Transformer<Object> {
+@TransformerBean("Extract elements from list")
+@Categorized(DataStructuresCategory.class)
+public class ExtractFromListTransformer implements Transformer<Object> {
 
 	@Inject
 	@Configured
-	InputColumn<Map<String, ?>> mapColumn;
+	InputColumn<List<?>> listColumn;
 
 	@Inject
 	@Configured
-	String[] keys;
-
-	@Inject
-	@Configured
-	Class<?>[] types;
+	Class<?> elementType;
 
 	@Inject
 	@Configured
 	boolean verifyTypes = false;
 
+	@Inject
+	@Provided
+	OutputRowCollector outputRowCollector;
+
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(keys, types);
+		String[] columnNames = new String[] { listColumn.getName() + " (element)" };
+		Class<?>[] columnTypes = new Class[] { elementType };
+		return new OutputColumns(columnNames, columnTypes);
 	}
 
 	@Override
 	public Object[] transform(InputRow row) {
-		final Map<String, ?> map = row.getValue(mapColumn);
-		final Object[] result = new Object[keys.length];
-
-		if (map == null) {
-			return result;
+		List<?> list = row.getValue(listColumn);
+		if (list == null || list.isEmpty()) {
+			return new Object[1];
 		}
 
-		for (int i = 0; i < keys.length; i++) {
-			Object value = map.get(keys[i]);
+		for (Object value : list) {
 			if (verifyTypes) {
-				value = types[i].cast(value);
+				value = elementType.cast(value);
 			}
-			result[i] = value;
+			outputRowCollector.putValues(value);
 		}
 
-		return result;
+		return null;
 	}
 
 }
