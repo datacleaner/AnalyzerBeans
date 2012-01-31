@@ -35,6 +35,7 @@ import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceData;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
+@SuppressWarnings("deprecation")
 public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 
 	@Override

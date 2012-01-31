@@ -22,7 +22,6 @@ package org.eobjects.analyzer.descriptors;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.HasAliases;
 
 /**
@@ -51,12 +50,17 @@ public interface ConfiguredPropertyDescriptor extends PropertyDescriptor, HasAli
 	public String getDescription();
 
 	/**
-	 * Gets the {@link DataTypeFamily} of the configured property, if it is an
-	 * input column type property (see {@link #isInputColumn()})
+	 * Gets the {@link org.eobjects.analyzer.data.DataTypeFamily} of the
+	 * configured property, if it is an input column type property (see
+	 * {@link #isInputColumn()})
 	 * 
 	 * @return
+	 * 
+	 * @deprecated use {@link #getType()} and {@link #getTypeArgument(int)}
+	 *             instead
 	 */
-	public DataTypeFamily getInputColumnDataTypeFamily();
+	@Deprecated
+	public org.eobjects.analyzer.data.DataTypeFamily getInputColumnDataTypeFamily();
 
 	/**
 	 * Determines whether or not the configured property is required in order

@@ -22,11 +22,6 @@ package org.eobjects.analyzer.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
-import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
-import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
-import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
-
 import org.eobjects.metamodel.data.Row;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
@@ -78,24 +73,7 @@ public final class MetaModelInputRow extends AbstractInputRow {
 		}
 		Column physicalColumn = column.getPhysicalColumn();
 		Object value = _row.getValue(physicalColumn);
-
-		DataTypeFamily dataTypeFamily = column.getDataTypeFamily();
-		switch (dataTypeFamily) {
-		case DATE:
-			value = ConvertToDateTransformer.getInternalInstance().transformValue(value);
-			break;
-		case BOOLEAN:
-			value = ConvertToBooleanTransformer.transformValue(value, ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS,
-					ConvertToBooleanTransformer.DEFAULT_FALSE_TOKENS);
-			break;
-		case NUMBER:
-			value = ConvertToNumberTransformer.transformValue(value);
-			break;
-		case STRING:
-			value = ConvertToStringTransformer.transformValue(value);
-			break;
-		}
-
+		
 		return (E) value;
 	}
 

@@ -46,7 +46,6 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
@@ -146,7 +145,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		TransformerJobBuilder<ConvertToStringTransformer> transformerJobBuilder = analysisJobBuilder
 				.addTransformer(ConvertToStringTransformer.class);
 
-		Collection<InputColumn<?>> numberColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.NUMBER, null);
+		Collection<InputColumn<?>> numberColumns = analysisJobBuilder.getAvailableInputColumns(Number.class);
 		assertEquals(1, numberColumns.size());
 		assertEquals("[MetaModelInputColumn[PUBLIC.EMPLOYEES.EMPLOYEENUMBER]]", Arrays.toString(numberColumns.toArray()));
 
@@ -158,7 +157,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 
 		AnalyzerJobBuilder<StringAnalyzer> analyzerJobBuilder = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
 
-		List<InputColumn<?>> stringInputColumns = analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING, null);
+		List<InputColumn<?>> stringInputColumns = analysisJobBuilder.getAvailableInputColumns(String.class);
 		Set<String> columnNames = new TreeSet<String>();
 		for (InputColumn<?> inputColumn : stringInputColumns) {
 			columnNames.add(inputColumn.getName());

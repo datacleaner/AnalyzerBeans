@@ -27,7 +27,6 @@ import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.configuration.InjectionManagerImpl;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
@@ -125,18 +124,13 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
 			final String proposedName = outputColumns.getColumnName(i);
 			Class<?> dataType = outputColumns.getColumnType(i);
 			if (dataType == null) {
-				dataType = descriptor.getOutputDataTypeFamily().getJavaType();
+				dataType = descriptor.getOutputDataType();
 			}
-			DataTypeFamily dataTypeFamily = DataTypeFamily.valueOf(dataType);
 
 			TransformedInputColumn<?> col = (TransformedInputColumn<?>) _outputColumns.get(i);
 			col.setInitialName(proposedName);
 			if (dataType != col.getDataType()) {
 				col.setDataType(dataType);
-				changed = true;
-			}
-			if (dataTypeFamily != col.getDataTypeFamily()) {
-				col.setDataTypeFamily(dataTypeFamily);
 				changed = true;
 			}
 

@@ -33,7 +33,6 @@ import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -499,8 +498,10 @@ public final class AnalysisJobBuilder implements Closeable {
 	 * @param dataTypeFamily
 	 *            the {@link DataTypeFamily} to search for
 	 * @return a list of matching InputColumns.
+	 * @deprecated use {@link #getAvailableInputColumns(Class)} instead
 	 */
-	public List<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily) {
+	@Deprecated
+	public List<InputColumn<?>> getAvailableInputColumns(org.eobjects.analyzer.data.DataTypeFamily dataTypeFamily) {
 		return getAvailableInputColumns(dataTypeFamily, null);
 	}
 
@@ -508,15 +509,32 @@ public final class AnalysisJobBuilder implements Closeable {
 	 * Finds the available input columns (source or transformed) that match the
 	 * given data type specification.
 	 * 
+	 * @param dataType
+	 *            the data type to look for
+	 * @return a list of matching input columns
+	 */
+	public List<InputColumn<?>> getAvailableInputColumns(Class<?> dataType) {
+		return getAvailableInputColumns(null, dataType);
+	}
+
+	/**
+	 * Finds the available input columns (source or transformed) that match the
+	 * given data type specification.
+	 * 
 	 * @param dataTypeFamily
-	 *            the {@link DataTypeFamily} to search for
+	 *            the {@link org.eobjects.analyzer.data.DataTypeFamily} to
+	 *            search for
 	 * @param dataType
 	 *            optionally a concrete type to look for, if the
-	 *            {@link DataTypeFamily} is null or
-	 *            {@link DataTypeFamily#UNDEFINED}.
+	 *            {@link org.eobjects.analyzer.data.DataTypeFamily} is null or
+	 *            {@link org.eobjects.analyzer.data.DataTypeFamily#UNDEFINED}.
 	 * @return a list of matching InputColumns.
+	 * 
+	 * @deprecated use {@link #getAvailableInputColumns(Class)} instead
 	 */
-	public List<InputColumn<?>> getAvailableInputColumns(DataTypeFamily dataTypeFamily, Class<?> dataType) {
+	@Deprecated
+	public List<InputColumn<?>> getAvailableInputColumns(org.eobjects.analyzer.data.DataTypeFamily dataTypeFamily,
+			Class<?> dataType) {
 		SourceColumnFinder finder = new SourceColumnFinder();
 		finder.addSources(this);
 		return finder.findInputColumns(dataTypeFamily, dataType);

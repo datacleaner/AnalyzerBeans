@@ -35,12 +35,6 @@ public abstract class AbstractInputColumn<E> implements InputColumn<E> {
 		return getPhysicalColumnInternal() == null;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Class<? extends E> getDataType() {
-		return (Class<? extends E>) getDataTypeFamily().getJavaType();
-	}
-
 	@Override
 	public Column getPhysicalColumn() throws IllegalStateException {
 		if (!isPhysicalColumn()) {
@@ -75,7 +69,7 @@ public abstract class AbstractInputColumn<E> implements InputColumn<E> {
 		}
 		if (obj.getClass() == this.getClass()) {
 			AbstractInputColumn<?> that = (AbstractInputColumn<?>) obj;
-			if (that.getDataTypeFamily() == this.getDataTypeFamily()) {
+			if (that.getDataType() == this.getDataType()) {
 				if (that.isPhysicalColumn() == this.isPhysicalColumn()) {
 					return equalsInternal(that);
 				}

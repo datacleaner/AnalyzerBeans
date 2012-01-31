@@ -43,7 +43,8 @@ public class ELInputColumn extends AbstractExpressionBasedInputColumn<String> {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LoggerFactory.getLogger(ELInputColumn.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(ELInputColumn.class);
 
 	private final ExpressionFactory _factory;
 	private final String _expression;
@@ -60,16 +61,19 @@ public class ELInputColumn extends AbstractExpressionBasedInputColumn<String> {
 		for (InputColumn<?> inputColumn : inputColumns) {
 			if (!(inputColumn instanceof ExpressionBasedInputColumn)) {
 				Object value = row.getValue(inputColumn);
-				Class<?> javaType = inputColumn.getDataTypeFamily().getJavaType();
-				ValueExpression valueExpression = _factory.createValueExpression(value, javaType);
+				Class<?> javaType = inputColumn.getDataType();
+				ValueExpression valueExpression = _factory
+						.createValueExpression(value, javaType);
 				String variableName = inputColumn.getName();
-				variableName = StringUtils.replaceWhitespaces(variableName, "_");
+				variableName = StringUtils
+						.replaceWhitespaces(variableName, "_");
 				context.setVariable(variableName, valueExpression);
 			}
 		}
 
 		try {
-			ValueExpression valueExpression = _factory.createValueExpression(context, _expression, String.class);
+			ValueExpression valueExpression = _factory.createValueExpression(
+					context, _expression, String.class);
 			return (String) valueExpression.getValue(context);
 		} catch (ELException e) {
 			logger.error("Could not evaluate EL expression", e);
@@ -82,9 +86,14 @@ public class ELInputColumn extends AbstractExpressionBasedInputColumn<String> {
 		return _expression;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public DataTypeFamily getDataTypeFamily() {
-		return DataTypeFamily.STRING;
+	public org.eobjects.analyzer.data.DataTypeFamily getDataTypeFamily() {
+		return org.eobjects.analyzer.data.DataTypeFamily.STRING;
 	}
 
+	@Override
+	public Class<? extends String> getDataType() {
+		return String.class;
+	}
 }

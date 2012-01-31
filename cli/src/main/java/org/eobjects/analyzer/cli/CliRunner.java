@@ -44,7 +44,6 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -463,11 +462,11 @@ public final class CliRunner implements Closeable {
 				ConfiguredPropertyDescriptor propertyForInput = propertiesForInput.iterator().next();
 				if (propertyForInput != null) {
 					if (propertyForInput.isArray()) {
-						write(" - Consumes multiple input columns (type: " + propertyForInput.getInputColumnDataTypeFamily()
-								+ ")");
+						write(" - Consumes multiple input columns (type: "
+								+ propertyForInput.getTypeArgument(0).getSimpleName() + ")");
 					} else {
-						write(" - Consumes a single input column (type: " + propertyForInput.getInputColumnDataTypeFamily()
-								+ ")");
+						write(" - Consumes a single input column (type: "
+								+ propertyForInput.getTypeArgument(0).getSimpleName() + ")");
 					}
 				}
 			} else {
@@ -475,10 +474,10 @@ public final class CliRunner implements Closeable {
 				for (ConfiguredPropertyDescriptor propertyForInput : propertiesForInput) {
 					if (propertyForInput.isArray()) {
 						write("   Input columns: " + propertyForInput.getName() + " (type: "
-								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
+								+ propertyForInput.getTypeArgument(0).getSimpleName() + ")");
 					} else {
 						write("   Input column: " + propertyForInput.getName() + " (type: "
-								+ propertyForInput.getInputColumnDataTypeFamily() + ")");
+								+ propertyForInput.getTypeArgument(0).getSimpleName() + ")");
 					}
 				}
 			}
@@ -492,8 +491,8 @@ public final class CliRunner implements Closeable {
 			}
 
 			if (descriptor instanceof TransformerBeanDescriptor<?>) {
-				DataTypeFamily dataTypeFamily = ((TransformerBeanDescriptor<?>) descriptor).getOutputDataTypeFamily();
-				write(" - Output type is: " + dataTypeFamily);
+				Class<?> dataType = ((TransformerBeanDescriptor<?>) descriptor).getOutputDataType();
+				write(" - Output type is: " + dataType.getSimpleName());
 			}
 
 			if (descriptor instanceof FilterBeanDescriptor<?, ?>) {

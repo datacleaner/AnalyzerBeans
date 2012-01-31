@@ -25,6 +25,7 @@ import org.eobjects.metamodel.schema.MutableColumn;
 
 public class MetaModelInputColumnTest extends TestCase {
 
+	@SuppressWarnings("deprecation")
 	public void testGetDataTypeFamily() throws Exception {
 		assertEquals(DataTypeFamily.STRING,
 				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.VARCHAR)).getDataTypeFamily());

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -90,17 +89,25 @@ public class SourceColumnFinder {
 		addSources(job.getAnalyzerJobs());
 	}
 
-	public List<InputColumn<?>> findInputColumns(DataTypeFamily dataTypeFamily, Class<?> dataType) {
+	public List<InputColumn<?>> findInputColumns(Class<?> dataType) {
+		return findInputColumns(null, dataType);
+	}
+
+	/**
+	 * @deprecated use {@link #findInputColumns(Class)} instead.
+	 */
+	@Deprecated
+	public List<InputColumn<?>> findInputColumns(org.eobjects.analyzer.data.DataTypeFamily dataTypeFamily, Class<?> dataType) {
 		if (dataTypeFamily == null) {
-			dataTypeFamily = DataTypeFamily.UNDEFINED;
+			dataTypeFamily = org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED;
 		}
 
 		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
 		for (InputColumnSourceJob source : _inputColumnSources) {
 			InputColumn<?>[] outputColumns = source.getOutput();
 			for (InputColumn<?> col : outputColumns) {
-				final DataTypeFamily columnFamily = col.getDataTypeFamily();
-				if (columnFamily == dataTypeFamily || dataTypeFamily == DataTypeFamily.UNDEFINED) {
+				final org.eobjects.analyzer.data.DataTypeFamily columnFamily = col.getDataTypeFamily();
+				if (columnFamily == dataTypeFamily || dataTypeFamily == org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED) {
 					final Class<?> columnDataType = col.getDataType();
 					if (dataType == null || columnDataType == null) {
 						result.add(col);

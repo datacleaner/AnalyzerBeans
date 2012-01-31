@@ -30,7 +30,7 @@ package org.eobjects.analyzer.data;
  * @author Kasper Sørensen
  */
 public final class ConstantInputColumn extends AbstractExpressionBasedInputColumn<String> {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private final String _value;
@@ -48,13 +48,19 @@ public final class ConstantInputColumn extends AbstractExpressionBasedInputColum
 		return _value;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public DataTypeFamily getDataTypeFamily() {
-		return DataTypeFamily.STRING;
+	public org.eobjects.analyzer.data.DataTypeFamily getDataTypeFamily() {
+		return org.eobjects.analyzer.data.DataTypeFamily.STRING;
 	}
 
 	@Override
 	public String evaluate(InputRow row) {
 		return _value;
+	}
+
+	@Override
+	public Class<? extends String> getDataType() {
+		return String.class;
 	}
 }

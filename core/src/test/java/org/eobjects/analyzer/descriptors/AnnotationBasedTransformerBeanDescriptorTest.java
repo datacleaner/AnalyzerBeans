@@ -21,6 +21,8 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
@@ -29,8 +31,7 @@ import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.job.tasks.MockMultiRowTransformer;
 
-import junit.framework.TestCase;
-
+@SuppressWarnings("deprecation")
 public class AnnotationBasedTransformerBeanDescriptorTest extends TestCase {
 
 	public void testGetDataTypeFamilies() throws Exception {

@@ -147,7 +147,7 @@ public class MainTest extends TestCase {
 		assertEquals("Transformers:", lines[0]);
 
 		assertTrue(out.indexOf("name: Email standardizer") != -1);
-		assertTrue(out.indexOf("Output type is: STRING") != -1);
+		assertTrue(out.indexOf("Output type is: String") != -1);
 	}
 
 	public void testListFilters() throws Throwable {

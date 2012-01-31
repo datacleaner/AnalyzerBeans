@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -36,6 +35,7 @@ import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.util.CollectionUtils2;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.metamodel.util.CollectionUtils;
 
 @SuppressWarnings("unchecked")
@@ -85,12 +85,17 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 	// this is the main "addInputColumn" method that the other similar methods
 	// delegate to
 	public B addInputColumn(InputColumn<?> inputColumn, ConfiguredPropertyDescriptor propertyDescriptor) {
-		DataTypeFamily expectedDataTypeFamily = propertyDescriptor.getInputColumnDataTypeFamily();
-		if (expectedDataTypeFamily != DataTypeFamily.UNDEFINED) {
-			DataTypeFamily actualDataTypeFamily = inputColumn.getDataTypeFamily();
-			if (expectedDataTypeFamily != actualDataTypeFamily) {
-				throw new IllegalArgumentException("Unsupported InputColumn type: " + actualDataTypeFamily + ", expected: "
-						+ expectedDataTypeFamily);
+		if (propertyDescriptor == null || !propertyDescriptor.isInputColumn()) {
+			throw new IllegalArgumentException("Property is not of InputColumn type: " + propertyDescriptor);
+		}
+
+		final Class<?> expectedDataType = propertyDescriptor.getTypeArgument(0);
+		if (expectedDataType != null && expectedDataType != Object.class) {
+			// check input column type parameter compatibility
+			final Class<?> actualDataType = inputColumn.getDataType();
+			if (!ReflectionUtils.is(actualDataType, expectedDataType, false)) {
+				throw new IllegalArgumentException("Unsupported InputColumn type: " + actualDataType + ", expected: "
+						+ expectedDataType);
 			}
 		}
 
@@ -199,7 +204,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 		if (outcomes == null || outcomes.length == 0) {
 			return true;
 		}
-		
+
 		return validateRequirementCandidate(outcomes[0]);
 	}
 

@@ -82,10 +82,10 @@ public class DataStructuresIntegrationTest extends TestCase {
 			assertEquals("List: FIRSTNAME,LASTNAME", listColumn.getName());
 		}
 
-		assertSame(1, ajb.getAvailableInputColumns(null, Map.class).size());
-		assertSame(mapColumn, ajb.getAvailableInputColumns(null, Map.class).get(0));
-		assertSame(1, ajb.getAvailableInputColumns(null, List.class).size());
-		assertSame(listColumn, ajb.getAvailableInputColumns(null, List.class).get(0));
+		assertSame(1, ajb.getAvailableInputColumns(Map.class).size());
+		assertSame(mapColumn, ajb.getAvailableInputColumns(Map.class).get(0));
+		assertSame(1, ajb.getAvailableInputColumns(List.class).size());
+		assertSame(listColumn, ajb.getAvailableInputColumns(List.class).get(0));
 
 		final MutableInputColumn<?> elementColumn;
 		{

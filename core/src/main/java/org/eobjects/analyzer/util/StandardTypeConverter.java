@@ -107,6 +107,13 @@ public class StandardTypeConverter implements Converter<Object> {
 		if (ReflectionUtils.isFloat(type)) {
 			return Float.valueOf(str);
 		}
+		if (ReflectionUtils.is(type, Class.class)) {
+			try {
+				return Class.forName(str);
+			} catch (ClassNotFoundException e) {
+				throw new IllegalArgumentException("Class not found: " + str, e);
+			}
+		}
 		if (type.isEnum()) {
 			try {
 				Object[] enumConstants = type.getEnumConstants();
@@ -153,8 +160,7 @@ public class StandardTypeConverter implements Converter<Object> {
 			byte[] bytes = (byte[]) parentConverter.fromString(byte[].class, str);
 			ChangeAwareObjectInputStream objectInputStream = null;
 			try {
-				objectInputStream = new ChangeAwareObjectInputStream(new ByteArrayInputStream(
-						bytes));
+				objectInputStream = new ChangeAwareObjectInputStream(new ByteArrayInputStream(bytes));
 				objectInputStream.addClassLoader(type.getClassLoader());
 				Object obj = objectInputStream.readObject();
 				return obj;
@@ -191,6 +197,8 @@ public class StandardTypeConverter implements Converter<Object> {
 			result = o.toString();
 		} else if (o instanceof Enum) {
 			return ((Enum<?>) o).name();
+		} else if (o instanceof Class) {
+			result = ((Class<?>) o).getName();
 		} else if (o instanceof Serializable) {
 			logger.info("toString(...): No built-in handling of type: {}, using serialization.", o.getClass().getName());
 			byte[] bytes = SerializationUtils.serialize((Serializable) o);

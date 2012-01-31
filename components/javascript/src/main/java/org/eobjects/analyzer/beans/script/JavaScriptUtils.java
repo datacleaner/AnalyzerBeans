@@ -19,9 +19,9 @@
  */
 package org.eobjects.analyzer.beans.script;
 
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.Scriptable;
@@ -68,9 +68,10 @@ final class JavaScriptUtils {
 			Object value = inputRow.getValue(column);
 
 			if (value != null) {
-				if (column.getDataTypeFamily() == DataTypeFamily.NUMBER) {
+				Class<?> dataType = column.getDataType();
+				if (ReflectionUtils.isNumber(dataType)) {
 					value = Context.toNumber(value);
-				} else if (column.getDataTypeFamily() == DataTypeFamily.BOOLEAN) {
+				} else if (ReflectionUtils.isBoolean(dataType)) {
 					value = Context.toBoolean(value);
 				}
 			}

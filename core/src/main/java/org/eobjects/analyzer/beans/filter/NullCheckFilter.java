@@ -27,7 +27,6 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.query.FilterItem;
@@ -81,7 +80,7 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
 			for (InputColumn<?> col : columns) {
 				Column column = col.getPhysicalColumn();
 				q.where(column, OperatorType.DIFFERENT_FROM, null);
-				if (considerEmptyStringAsNull && col.getDataTypeFamily() == DataTypeFamily.STRING) {
+				if (considerEmptyStringAsNull && col.getDataType() == String.class) {
 					q.where(column, OperatorType.DIFFERENT_FROM, "");
 				}
 			}
@@ -94,7 +93,7 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
 				SelectItem selectItem = new SelectItem(column);
 				FilterItem fi1 = new FilterItem(selectItem, OperatorType.EQUALS_TO, null);
 				filterItems.add(fi1);
-				if (considerEmptyStringAsNull && col.getDataTypeFamily() == DataTypeFamily.STRING) {
+				if (considerEmptyStringAsNull && col.getDataType() == String.class) {
 					FilterItem fi2 = new FilterItem(selectItem, OperatorType.EQUALS_TO, "");
 					filterItems.add(fi2);
 				}

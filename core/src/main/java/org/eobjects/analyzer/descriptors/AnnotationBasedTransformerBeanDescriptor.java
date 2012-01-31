@@ -21,12 +21,11 @@ package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> extends AbstractBeanDescriptor<T> implements
 		TransformerBeanDescriptor<T> {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private final String _displayName;
@@ -58,23 +57,15 @@ final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> e
 	}
 
 	@Override
-	public DataTypeFamily getOutputDataTypeFamily() {
+	public Class<?> getOutputDataType() {
 		Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), Transformer.class, 0);
-		if (typeParameter == null) {
-			throw new IllegalStateException("Could not determine Transformer's output data type");
-		}
-		return DataTypeFamily.valueOf(typeParameter);
+		return typeParameter;
+	}
 
-		// Type[] interfaces = getComponentClass().getGenericInterfaces();
-		// for (Type type : interfaces) {
-		// if (type instanceof ParameterizedType) {
-		// ParameterizedType pType = (ParameterizedType) type;
-		// if (pType.getRawType() == Transformer.class) {
-		// Class<?> typeParameter = ReflectionUtils.getTypeParameter(pType, 0);
-		// return DataTypeFamily.valueOf(typeParameter);
-		// }
-		// }
-		// }
-		// return DataTypeFamily.UNDEFINED;
+	@Override
+	@SuppressWarnings("deprecation")
+	public org.eobjects.analyzer.data.DataTypeFamily getOutputDataTypeFamily() {
+		Class<?> outputDataType = getOutputDataType();
+		return org.eobjects.analyzer.data.DataTypeFamily.valueOf(outputDataType);
 	}
 }

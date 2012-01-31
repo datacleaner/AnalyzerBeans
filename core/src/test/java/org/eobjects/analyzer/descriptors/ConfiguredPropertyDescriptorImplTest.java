@@ -48,18 +48,29 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 	@Configured
 	InputColumn<byte[]> someBytes;
 
+	@Configured
+	InputColumn<String>[] stringColumns;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		_descriptor = Descriptors.ofFilter(MockFilter.class);
 	}
 
-	public void testGetTypeParameterOfArrayType() throws Exception {
+	public void testGetTypeParameterOfArrayType1() throws Exception {
 		ConfiguredPropertyDescriptor descriptor = new ConfiguredPropertyDescriptorImpl(getClass().getDeclaredField(
 				"someBytes"), null);
 		assertEquals(1, descriptor.getTypeArgumentCount());
 		Class<?> typeArgument = descriptor.getTypeArgument(0);
 		assertEquals(byte[].class, typeArgument);
+	}
+
+	public void testGetTypeParameterOfArrayType2() throws Exception {
+		ConfiguredPropertyDescriptor descriptor = new ConfiguredPropertyDescriptorImpl(getClass().getDeclaredField(
+				"stringColumns"), null);
+		assertEquals(1, descriptor.getTypeArgumentCount());
+		Class<?> typeArgument = descriptor.getTypeArgument(0);
+		assertEquals(String.class, typeArgument);
 	}
 
 	public void testCompareTo() throws Exception {

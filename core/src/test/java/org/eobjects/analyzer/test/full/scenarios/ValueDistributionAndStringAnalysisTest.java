@@ -30,7 +30,6 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -87,7 +86,7 @@ public class ValueDistributionAndStringAnalysisTest extends TestCase {
 		}
 
 		AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
-		stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(DataTypeFamily.STRING, null));
+		stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(String.class));
 
 		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
 

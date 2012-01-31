@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.builder;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,7 +33,6 @@ import org.eobjects.analyzer.beans.transform.WhitespaceTrimmerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.ConstantInputColumn;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -115,10 +115,10 @@ public class TransformerJobBuilderTest extends TestCase {
 	}
 
 	public void testGetAvailableInputColumns() throws Exception {
-		assertEquals(2, ajb.getAvailableInputColumns(DataTypeFamily.UNDEFINED, null).size());
-		assertEquals(2, ajb.getAvailableInputColumns(null, null).size());
-		assertEquals(1, ajb.getAvailableInputColumns(DataTypeFamily.STRING, null).size());
-		assertEquals(0, ajb.getAvailableInputColumns(DataTypeFamily.DATE, null).size());
+		assertEquals(2, ajb.getAvailableInputColumns(Object.class).size());
+		assertEquals(2, ajb.getAvailableInputColumns((Class<?>) null).size());
+		assertEquals(1, ajb.getAvailableInputColumns(String.class).size());
+		assertEquals(0, ajb.getAvailableInputColumns(Date.class).size());
 	}
 
 	public void testInvalidInputColumnType() throws Exception {
@@ -129,7 +129,7 @@ public class TransformerJobBuilderTest extends TestCase {
 			tjb.addInputColumn(ajb.getSourceColumns().get(0));
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
-			assertEquals("Unsupported InputColumn type: NUMBER, expected: STRING", e.getMessage());
+			assertEquals("Unsupported InputColumn type: class java.lang.Integer, expected: class java.lang.String", e.getMessage());
 		}
 		assertFalse(tjb.isConfigured());
 

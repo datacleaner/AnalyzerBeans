@@ -27,7 +27,6 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
@@ -77,15 +76,16 @@ final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor 
 		return configured.required();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public DataTypeFamily getInputColumnDataTypeFamily() {
+	public org.eobjects.analyzer.data.DataTypeFamily getInputColumnDataTypeFamily() {
 		if (isInputColumn()) {
 			int count = getTypeArgumentCount();
 			if (count == 0) {
-				return DataTypeFamily.UNDEFINED;
+				return org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED;
 			}
 			Type typeArgument = getTypeArgument(0);
-			return DataTypeFamily.valueOf(typeArgument);
+			return org.eobjects.analyzer.data.DataTypeFamily.valueOf(typeArgument);
 		}
 		return null;
 	}

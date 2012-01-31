@@ -31,9 +31,9 @@ import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.metamodel.query.FilterItem;
 import org.eobjects.metamodel.query.OperatorType;
 import org.eobjects.metamodel.query.Query;
@@ -71,17 +71,17 @@ public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
 
 	@Initialize
 	public void init() {
-		DataTypeFamily dataTypeFamily = column.getDataTypeFamily();
+		Class<?> dataType = column.getDataType();
 		operands = new Object[values.length];
 		for (int i = 0; i < values.length; i++) {
 			final String value = values[i];
 			final Object operand;
-			if (dataTypeFamily == DataTypeFamily.BOOLEAN) {
+			if (ReflectionUtils.isBoolean(dataType)) {
 				operand = ConvertToBooleanTransformer.transformValue(value, ConvertToBooleanTransformer.DEFAULT_TRUE_TOKENS,
 						ConvertToBooleanTransformer.DEFAULT_FALSE_TOKENS);
-			} else if (dataTypeFamily == DataTypeFamily.DATE) {
+			} else if (ReflectionUtils.isDate(dataType)) {
 				operand = ConvertToDateTransformer.getInternalInstance().transformValue(value);
-			} else if (dataTypeFamily == DataTypeFamily.NUMBER) {
+			} else if (ReflectionUtils.isNumber(dataType)) {
 				operand = ConvertToNumberTransformer.transformValue(value);
 				number = true;
 			} else {

@@ -89,6 +89,7 @@ public class StringConverterTest extends TestCase {
 		runTests(false, "false");
 		runTests((short) 12, "12");
 		runTests((byte) 12, "12");
+		runTests(String.class, "java.lang.String");
 		runTests(1337.0, "1337.0");
 		runTests(1337.0f, "1337.0");
 

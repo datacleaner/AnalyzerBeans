@@ -37,7 +37,6 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 	private static final long serialVersionUID = 1L;
 
 	private final String _id;
-	private DataTypeFamily _dataTypeFamily;
 	private Class<?> _dataType;
 	private String _name;
 	private String _initialName;
@@ -76,10 +75,6 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 		_dataType = dataType;
 	}
 
-	public void setDataTypeFamily(DataTypeFamily dataTypeFamily) {
-		_dataTypeFamily = dataTypeFamily;
-	}
-
 	@Override
 	public boolean isPhysicalColumn() {
 		return false;
@@ -90,9 +85,10 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public DataTypeFamily getDataTypeFamily() {
-		return _dataTypeFamily;
+		return DataTypeFamily.valueOf(_dataType);
 	}
 
 	@Override

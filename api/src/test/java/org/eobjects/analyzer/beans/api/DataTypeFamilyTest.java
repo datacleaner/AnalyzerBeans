@@ -21,10 +21,11 @@ package org.eobjects.analyzer.beans.api;
 
 import java.util.Date;
 
-import org.eobjects.analyzer.data.DataTypeFamily;
-
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.data.DataTypeFamily;
+
+@SuppressWarnings("deprecation")
 public class DataTypeFamilyTest extends TestCase {
 
 	public void testEnumAccess() throws Exception {

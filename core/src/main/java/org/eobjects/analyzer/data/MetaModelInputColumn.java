@@ -88,6 +88,7 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public DataTypeFamily getDataTypeFamily() {
 		ColumnType type = _column.getType();
 		if (type == null) {

@@ -26,7 +26,6 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.customcolumn.MockConvertToMonthObjectTransformer;
 import org.eobjects.analyzer.customcolumn.Month;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -39,7 +38,7 @@ public class SourceColumnFinderTest extends TestCase {
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
 		analysisJobBuilder.addTransformer(MockConvertToMonthObjectTransformer.class).addInputColumn(new MockInputColumn<String>("month", String.class));
 		columnFinder.addSources(analysisJobBuilder);
-		List<InputColumn<?>> findInputColumns = columnFinder.findInputColumns(DataTypeFamily.UNDEFINED, Month.class);
+		List<InputColumn<?>> findInputColumns = columnFinder.findInputColumns(Month.class);
 		assertEquals(1, findInputColumns.size());
 	}
 
