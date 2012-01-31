@@ -61,6 +61,22 @@ public class ExtractFromMapTransformer implements Transformer<Object> {
 	@Configured
 	boolean verifyTypes = false;
 
+	public void setKeys(String[] keys) {
+		this.keys = keys;
+	}
+
+	public void setTypes(Class<?>[] types) {
+		this.types = types;
+	}
+
+	public void setMapColumn(InputColumn<Map<String, ?>> mapColumn) {
+		this.mapColumn = mapColumn;
+	}
+
+	public void setVerifyTypes(boolean verifyTypes) {
+		this.verifyTypes = verifyTypes;
+	}
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		return new OutputColumns(keys, types);

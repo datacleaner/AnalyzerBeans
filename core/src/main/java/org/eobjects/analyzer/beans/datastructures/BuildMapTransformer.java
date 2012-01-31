@@ -69,6 +69,22 @@ public class BuildMapTransformer implements Transformer<Map<String, ?>> {
 	@Configured
 	boolean includeNullValues = false;
 
+	public void setIncludeNullValues(boolean includeNullValues) {
+		this.includeNullValues = includeNullValues;
+	}
+
+	public void setKeys(String[] keys) {
+		this.keys = keys;
+	}
+
+	public void setRetainKeyOrder(boolean retainKeyOrder) {
+		this.retainKeyOrder = retainKeyOrder;
+	}
+
+	public void setValues(InputColumn<?>[] values) {
+		this.values = values;
+	}
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		StringBuilder sb = new StringBuilder("Map: ");

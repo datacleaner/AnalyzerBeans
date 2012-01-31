@@ -55,6 +55,14 @@ public class BuildListTransformer implements Transformer<List<?>> {
 	@Inject
 	@Configured
 	boolean includeNullValues;
+	
+	public void setIncludeNullValues(boolean includeNullValues) {
+		this.includeNullValues = includeNullValues;
+	}
+	
+	public void setValues(InputColumn<?>[] values) {
+		this.values = values;
+	}
 
 	@Override
 	public OutputColumns getOutputColumns() {

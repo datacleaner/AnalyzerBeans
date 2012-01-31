@@ -61,6 +61,18 @@ public class ExtractFromListTransformer implements Transformer<Object> {
 	@Provided
 	OutputRowCollector outputRowCollector;
 
+	public void setElementType(Class<?> elementType) {
+		this.elementType = elementType;
+	}
+
+	public void setListColumn(InputColumn<List<?>> listColumn) {
+		this.listColumn = listColumn;
+	}
+
+	public void setVerifyTypes(boolean verifyTypes) {
+		this.verifyTypes = verifyTypes;
+	}
+
 	@Override
 	public OutputColumns getOutputColumns() {
 		String[] columnNames = new String[] { listColumn.getName() + " (element)" };
