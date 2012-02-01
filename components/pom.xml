@@ -14,5 +14,6 @@
 		<module>scala</module>
 		<module>javascript</module>
 		<module>i18n</module>
+		<module>json</module>
 	</modules>
 </project>
