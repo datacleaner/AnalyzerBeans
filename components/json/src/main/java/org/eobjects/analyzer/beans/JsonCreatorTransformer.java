@@ -80,11 +80,11 @@ public class JsonCreatorTransformer implements Transformer<String> {
 		try {
 			json = mapper.writeValueAsString(map);
 		} catch (JsonGenerationException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("Exception while generating Json.");
 		} catch (JsonMappingException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("Exception while Json mapping.");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("IOException while Json mapping.");
 		}
 		return new String[] { json };
 	}

@@ -35,7 +35,7 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-@TransformerBean("Extract values from JSON document")
+@TransformerBean("Parse JSON document")
 @Description("Extract values from a JSON document")
 public class ExtractJsonValuesTransformer implements
 		Transformer<Map<String, ?>> {
@@ -71,14 +71,13 @@ public class ExtractJsonValuesTransformer implements
 		try {
 			jsonMap = mapper.readValue(jsonString, Map.class);
 		} catch (JsonParseException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("Exception while parsing Json.");
 		} catch (JsonMappingException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("Exception while Json mapping.");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("IOException while parsing Json.");
 		}
 		final Map<String, ?>[] result = new Map[] { jsonMap };
 		return result;
 	}
-
 }
