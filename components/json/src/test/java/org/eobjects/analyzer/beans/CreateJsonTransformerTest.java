@@ -36,7 +36,28 @@ public class CreateJsonTransformerTest {
 
 	@Test
 	public void testCreateSimpleJsonOfDataTypes() throws Exception {
+		InputColumn<Object> col = new MockInputColumn<Object>("obj",
+				Object.class);
+		CreateJsonTransformer jsonTransformer = new CreateJsonTransformer(col);
 
+		assertEquals("OutputColumns[obj (as JSON)]", jsonTransformer
+				.getOutputColumns().toString());
+
+		assertEquals("123",
+				jsonTransformer.transform(new MockInputRow().put(col, 123))[0]);
+		assertEquals(
+				"123.0",
+				jsonTransformer.transform(new MockInputRow().put(col, 123.0))[0]);
+
+		assertEquals(
+				"\"str\"",
+				jsonTransformer.transform(new MockInputRow().put(col, "str"))[0]);
+
+		assertEquals("true",
+				jsonTransformer.transform(new MockInputRow().put(col, true))[0]);
+
+		assertEquals("null",
+				jsonTransformer.transform(new MockInputRow().put(col, null))[0]);
 	}
 
 	@Test
