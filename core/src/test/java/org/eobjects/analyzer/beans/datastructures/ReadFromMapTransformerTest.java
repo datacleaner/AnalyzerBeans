@@ -37,7 +37,7 @@ public class ReadFromMapTransformerTest extends TestCase {
 	public void testTransform() throws Exception {
 		final List<Object[]> result = new ArrayList<Object[]>();
 		final ReadFromMapTransformer trans = new ReadFromMapTransformer();
-		final InputColumn<Map<String, ?>> col = new MockInputColumn<Map<String, ?>>("foo", MockInputColumn.MAP_CLASS);
+		final InputColumn<Map<String, ?>> col = new MockInputColumn<Map<String, ?>>("foo");
 		trans.mapColumn = col;
 		trans.valueType = Integer.class;
 		trans.verifyTypes = true;

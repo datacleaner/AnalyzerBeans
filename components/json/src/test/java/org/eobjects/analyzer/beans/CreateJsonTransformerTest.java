@@ -66,8 +66,7 @@ public class CreateJsonTransformerTest {
 		map.put("name", "shekhar");
 		map.put("country", "India");
 
-		InputColumn<Map<?, ?>> col = new MockInputColumn<Map<?, ?>>("map",
-				MockInputColumn.MAP_CLASS);
+		InputColumn<Map<?, ?>> col = new MockInputColumn<Map<?, ?>>("map");
 		CreateJsonTransformer jsonTransformer = new CreateJsonTransformer(col);
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
 
@@ -84,8 +83,7 @@ public class CreateJsonTransformerTest {
 		list.add("hello");
 		list.add("world");
 
-		InputColumn<List<?>> col = new MockInputColumn<List<?>>("list",
-				MockInputColumn.LIST_CLASS);
+		InputColumn<List<?>> col = new MockInputColumn<List<?>>("list");
 
 		CreateJsonTransformer jsonTransformer = new CreateJsonTransformer(col);
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
@@ -122,8 +120,7 @@ public class CreateJsonTransformerTest {
 		map.put("addresses", addresses);
 		map.put("country", "India");
 
-		InputColumn<Map<?, ?>> col = new MockInputColumn<Map<?, ?>>("name",
-				MockInputColumn.MAP_CLASS);
+		InputColumn<Map<?, ?>> col = new MockInputColumn<Map<?, ?>>("name");
 		CreateJsonTransformer jsonTransformer = new CreateJsonTransformer(col);
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
 

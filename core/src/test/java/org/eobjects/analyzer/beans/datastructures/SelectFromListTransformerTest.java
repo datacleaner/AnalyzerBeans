@@ -33,7 +33,7 @@ public class SelectFromListTransformerTest extends TestCase {
 
 	public void testTransform() throws Exception {
 		final SelectFromListTransformer trans = new SelectFromListTransformer();
-		final InputColumn<List<?>> col = new MockInputColumn<List<?>>("foo", MockInputColumn.LIST_CLASS);
+		final InputColumn<List<?>> col = new MockInputColumn<List<?>>("foo");
 		trans.listColumn = col;
 		trans.indices = new Number[] { 0, 3, 50, 1, -1 };
 		trans.elementType = Integer.class;

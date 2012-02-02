@@ -19,9 +19,6 @@
  */
 package org.eobjects.analyzer.data;
 
-import java.util.List;
-import java.util.Map;
-
 import org.eobjects.metamodel.schema.Column;
 
 /**
@@ -36,14 +33,12 @@ public class MockInputColumn<E> extends AbstractInputColumn<E> {
 
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("unchecked")
-	public static final Class<? extends Map<String, ?>> MAP_CLASS = (Class<? extends Map<String, ?>>) Map.class;
-	
-	@SuppressWarnings("unchecked")
-	public static final Class<? extends List<?>> LIST_CLASS = (Class<? extends List<?>>) List.class;
-
 	private String _name;
 	private Class<? extends E> _clazz;
+	
+	public MockInputColumn(String name) {
+		this(name, null);
+	}
 
 	public MockInputColumn(String name, Class<? extends E> clazz) {
 		_name = name;
