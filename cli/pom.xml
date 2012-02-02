@@ -59,7 +59,7 @@
 			<artifactId>AnalyzerBeans-javascript</artifactId>
 			<version>0.11-SNAPSHOT</version>
 		</dependency>
-		<dependency>
+		<dependency> 
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-writers</artifactId>
 			<version>0.11-SNAPSHOT</version>
@@ -72,6 +72,11 @@
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-scala</artifactId>
+			<version>0.11-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-json</artifactId>
 			<version>0.11-SNAPSHOT</version>
 		</dependency>
 		<dependency>
