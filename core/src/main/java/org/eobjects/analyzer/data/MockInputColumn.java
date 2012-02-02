@@ -37,7 +37,7 @@ public class MockInputColumn<E> extends AbstractInputColumn<E> {
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unchecked")
-	public static final Class<? extends Map<?, ?>> MAP_CLASS = (Class<? extends Map<?, ?>>) Map.class;
+	public static final Class<? extends Map<String, ?>> MAP_CLASS = (Class<? extends Map<String, ?>>) Map.class;
 	
 	@SuppressWarnings("unchecked")
 	public static final Class<? extends List<?>> LIST_CLASS = (Class<? extends List<?>>) List.class;

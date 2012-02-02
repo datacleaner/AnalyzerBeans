@@ -89,10 +89,10 @@ public class DataStructuresIntegrationTest extends TestCase {
 
 		final MutableInputColumn<?> elementColumn;
 		{
-			TransformerJobBuilder<ExtractFromListTransformer> extractFromList = ajb
-					.addTransformer(ExtractFromListTransformer.class);
+			TransformerJobBuilder<ReadFromListTransformer> extractFromList = ajb
+					.addTransformer(ReadFromListTransformer.class);
 			extractFromList.addInputColumn(listColumn);
-			ExtractFromListTransformer bean = extractFromList.getConfigurableBean();
+			ReadFromListTransformer bean = extractFromList.getConfigurableBean();
 			bean.setVerifyTypes(true);
 			bean.setElementType(String.class);
 			List<MutableInputColumn<?>> outputColumns = extractFromList.getOutputColumns();
@@ -104,10 +104,10 @@ public class DataStructuresIntegrationTest extends TestCase {
 		final MutableInputColumn<?> valueColumn1;
 		final MutableInputColumn<?> valueColumn2;
 		{
-			TransformerJobBuilder<ExtractFromMapTransformer> extractFromMap = ajb
-					.addTransformer(ExtractFromMapTransformer.class);
+			TransformerJobBuilder<SelectFromMapTransformer> extractFromMap = ajb
+					.addTransformer(SelectFromMapTransformer.class);
 			extractFromMap.addInputColumn(mapColumn);
-			ExtractFromMapTransformer bean = extractFromMap.getConfigurableBean();
+			SelectFromMapTransformer bean = extractFromMap.getConfigurableBean();
 			bean.setKeys(new String[] { "empno", "email_address" });
 			bean.setTypes(new Class[] { Number.class, String.class });
 			bean.setVerifyTypes(true);

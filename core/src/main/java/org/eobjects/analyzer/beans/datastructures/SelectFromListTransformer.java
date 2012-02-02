@@ -19,11 +19,10 @@
  */
 package org.eobjects.analyzer.beans.datastructures;
 
-import java.util.Map;
+import java.util.List;
 
 import javax.inject.Inject;
 
-import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -35,73 +34,59 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 /**
- * Transformer for extracting values from maps.
+ * Transformer for selecting values from maps.
  * 
  * @author Kasper Sørensen
- * @author Shekhar Gulati
- * @author Saurabh Gupta
  */
-@TransformerBean("Extract values from key/value map")
-@Alias("Extract values from map")
+@TransformerBean("Select values from list")
+@Description("Given a specified list of indices, this transformer will select the values from a list and place them as columns within the record")
 @Categorized(DataStructuresCategory.class)
-public class ExtractFromMapTransformer implements Transformer<Object> {
+public class SelectFromListTransformer implements Transformer<Object> {
 
 	@Inject
 	@Configured
-	InputColumn<Map<String, ?>> mapColumn;
+	InputColumn<List<?>> listColumn;
 
 	@Inject
 	@Configured
-	String[] keys;
+	@Description("A list of (0-based) indices to use for fetching values from the list.")
+	Number[] indices = { 0, 1, 2 };
 
 	@Inject
 	@Configured
-	Class<?>[] types;
+	Class<?> elementType;
 
 	@Inject
 	@Configured
-	@Description("Verify that expected type and actual type are the same")
+	@Description("Verify that expected element type and actual type are the same")
 	boolean verifyTypes = false;
-
-	public void setKeys(String[] keys) {
-		this.keys = keys;
-	}
-
-	public void setTypes(Class<?>[] types) {
-		this.types = types;
-	}
-
-	public void setMapColumn(InputColumn<Map<String, ?>> mapColumn) {
-		this.mapColumn = mapColumn;
-	}
-
-	public void setVerifyTypes(boolean verifyTypes) {
-		this.verifyTypes = verifyTypes;
-	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(keys, types);
+		String[] names = new String[indices.length];
+		Class<?>[] types = new Class[indices.length];
+		for (int i = 0; i < indices.length; i++) {
+			names[i] = listColumn.getName() + "[" + indices[i] + "]";
+			types[i] = elementType;
+		}
+		return new OutputColumns(names, types);
 	}
 
 	@Override
 	public Object[] transform(InputRow row) {
-		final Map<String, ?> map = row.getValue(mapColumn);
-		final Object[] result = new Object[keys.length];
+		final Object[] result = new Object[indices.length];
 
-		if (map == null) {
-			return result;
-		}
-
-		for (int i = 0; i < keys.length; i++) {
-			Object value = map.get(keys[i]);
-			if (verifyTypes) {
-				value = types[i].cast(value);
+		List<?> list = row.getValue(listColumn);
+		if (list != null && !list.isEmpty()) {
+			for (int i = 0; i < indices.length; i++) {
+				int index = indices[i].intValue();
+				if (index >= 0 && index < list.size()) {
+					Object value = list.get(index);
+					result[i] = value;
+				}
 			}
-			result[i] = value;
 		}
 
 		return result;
 	}
-
 }
