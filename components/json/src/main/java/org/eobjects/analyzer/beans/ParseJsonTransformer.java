@@ -19,31 +19,37 @@
  */
 package org.eobjects.analyzer.beans;
 
-import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.DataStructuresCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Parse JSON document")
-@Description("Extract values from a JSON document")
-public class ParseJsonTransformer implements
-		Transformer<Map<String, ?>> {
+@Description("Parses a JSON document and materializes the data structure it represents")
+@Categorized(DataStructuresCategory.class)
+public class ParseJsonTransformer implements Transformer<Object> {
 
 	private final ObjectMapper mapper = new ObjectMapper();
 
-	@Configured
-	private InputColumn<String> json;
+	@Inject
+	@Configured(order = 1)
+	@Description("Column containing JSON documents to parse")
+	InputColumn<String> json;
+
+	@Inject
+	@Configured(order = 2)
+	Class<?> dataType = Map.class;
 
 	public ParseJsonTransformer() {
 
@@ -55,29 +61,26 @@ public class ParseJsonTransformer implements
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(json.getName() + " (as Map)");
+		String[] names = new String[] { json.getName() + " (as Map)" };
+		Class<?>[] types = new Class[] { dataType };
+		return new OutputColumns(names, types);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, ?>[] transform(InputRow inputRow) {
+	public Object[] transform(InputRow inputRow) {
 		final String jsonString = inputRow.getValue(json);
-
+		final Object result;
 		if (StringUtils.isBlank(jsonString)) {
-			return new Map[] { Collections.emptyMap() };
+			result = null;
+		} else {
+			try {
+				result = mapper.readValue(jsonString, dataType);
+			} catch (Exception e) {
+				throw new IllegalStateException(
+						"Exception occurred while parsing JSON", e);
+			}
 		}
 
-		Map<String, Object> jsonMap = Collections.emptyMap();
-		try {
-			jsonMap = mapper.readValue(jsonString, Map.class);
-		} catch (JsonParseException e) {
-			throw new IllegalStateException("Exception while parsing Json.");
-		} catch (JsonMappingException e) {
-			throw new IllegalStateException("Exception while Json mapping.");
-		} catch (IOException e) {
-			throw new IllegalStateException("IOException while parsing Json.");
-		}
-		final Map<String, ?>[] result = new Map[] { jsonMap };
-		return result;
+		return new Object[] { result };
 	}
 }

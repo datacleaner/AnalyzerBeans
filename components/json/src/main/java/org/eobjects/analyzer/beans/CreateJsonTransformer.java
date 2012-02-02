@@ -19,20 +19,27 @@
  */
 package org.eobjects.analyzer.beans;
 
+import javax.inject.Inject;
+
 import org.codehaus.jackson.map.ObjectMapper;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.DataStructuresCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Create JSON document")
-@Description("Joins several columns into a single JSON document.")
+@Description("Creates a representation of a data structure as a JSON (JavaScript Object Notation) document")
+@Categorized(DataStructuresCategory.class)
 public class CreateJsonTransformer implements Transformer<String> {
 
+	@Inject
 	@Configured
+	@Description("Column containing data structures to format")
 	InputColumn<?> data;
 
 	private final ObjectMapper mapper = new ObjectMapper();

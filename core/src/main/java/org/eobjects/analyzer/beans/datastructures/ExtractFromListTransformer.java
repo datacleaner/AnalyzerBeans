@@ -25,6 +25,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.api.Provided;
@@ -55,6 +56,7 @@ public class ExtractFromListTransformer implements Transformer<Object> {
 
 	@Inject
 	@Configured
+	@Description("Verify that expected element type and actual type are the same")
 	boolean verifyTypes = false;
 
 	@Inject
