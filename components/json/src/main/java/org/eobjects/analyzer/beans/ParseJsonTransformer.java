@@ -20,10 +20,11 @@
 package org.eobjects.analyzer.beans;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonGenerationException;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eobjects.analyzer.beans.api.Configured;
@@ -34,59 +35,49 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-
-@TransformerBean("Create JSON document")
-@Description("Joins several columns into a single JSON document.")
-public class JsonCreatorTransformer implements Transformer<String> {
-
-	@Configured
-	InputColumn<?>[] columns;
+@TransformerBean("Parse JSON document")
+@Description("Extract values from a JSON document")
+public class ParseJsonTransformer implements
+		Transformer<Map<String, ?>> {
 
 	private final ObjectMapper mapper = new ObjectMapper();
 
-	public JsonCreatorTransformer() {
+	@Configured
+	private InputColumn<String> json;
+
+	public ParseJsonTransformer() {
+
 	}
 
-	public JsonCreatorTransformer(InputColumn<?>... columns) {
-		this.columns = columns;
+	public ParseJsonTransformer(InputColumn<String> json) {
+		this.json = json;
 	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		StringBuilder sb = new StringBuilder("JSON document of ");
-		for (int i = 0; i < columns.length; i++) {
-			if (i != 0) {
-				sb.append(",");
-			}
-			sb.append(columns[i].getName());
-			if (i == 4) {
-				sb.append("...");
-				// only include a preview of columns in the default name
-				break;
-			}
-		}
-		return new OutputColumns(sb.toString());
+		return new OutputColumns(json.getName() + " (as Map)");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public String[] transform(InputRow row) {
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		for (InputColumn<?> inputColumn : columns) {
-			Object value = row.getValue(inputColumn);
-			String key = inputColumn.getName();
-			map.put(key, value);
+	public Map<String, ?>[] transform(InputRow inputRow) {
+		final String jsonString = inputRow.getValue(json);
+
+		if (StringUtils.isBlank(jsonString)) {
+			return new Map[] { Collections.emptyMap() };
 		}
-		String json = null;
+
+		Map<String, Object> jsonMap = Collections.emptyMap();
 		try {
-			json = mapper.writeValueAsString(map);
-		} catch (JsonGenerationException e) {
-			throw new IllegalStateException("Exception while generating Json.");
+			jsonMap = mapper.readValue(jsonString, Map.class);
+		} catch (JsonParseException e) {
+			throw new IllegalStateException("Exception while parsing Json.");
 		} catch (JsonMappingException e) {
 			throw new IllegalStateException("Exception while Json mapping.");
 		} catch (IOException e) {
-			throw new IllegalStateException("IOException while Json mapping.");
+			throw new IllegalStateException("IOException while parsing Json.");
 		}
-		return new String[] { json };
+		final Map<String, ?>[] result = new Map[] { jsonMap };
+		return result;
 	}
-
 }

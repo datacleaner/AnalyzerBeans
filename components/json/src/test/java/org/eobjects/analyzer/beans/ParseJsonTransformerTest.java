@@ -30,13 +30,13 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.junit.Test;
 
-public class ExtractJsonValuesTransformerTest {
+public class ParseJsonTransformerTest {
 
 	@Test
 	public void testExtractJsonValuesTransformerWithoutAnyValidation() {
 		InputColumn<String> col1 = new MockInputColumn<String>("jsonDocument",
 				String.class);
-		ExtractJsonValuesTransformer transformer = new ExtractJsonValuesTransformer(
+		ParseJsonTransformer transformer = new ParseJsonTransformer(
 				col1);
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 
@@ -53,7 +53,7 @@ public class ExtractJsonValuesTransformerTest {
 	public void testExtractJsonNumbersAndBooleans() {
 		InputColumn<String> col1 = new MockInputColumn<String>("jsonDocument",
 				String.class);
-		ExtractJsonValuesTransformer transformer = new ExtractJsonValuesTransformer(
+		ParseJsonTransformer transformer = new ParseJsonTransformer(
 				col1);
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 
@@ -74,7 +74,7 @@ public class ExtractJsonValuesTransformerTest {
 			throws Exception {
 		InputColumn<String> col1 = new MockInputColumn<String>("jsonDocument",
 				String.class);
-		ExtractJsonValuesTransformer transformer = new ExtractJsonValuesTransformer(
+		ParseJsonTransformer transformer = new ParseJsonTransformer(
 				col1);
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 		Map<String, ?>[] values = transformer.transform(new MockInputRow());
@@ -86,7 +86,7 @@ public class ExtractJsonValuesTransformerTest {
 	public void shouldExtractNestedDocumentsAsCollections() throws Exception {
 		InputColumn<String> col1 = new MockInputColumn<String>("jsonDocument",
 				String.class);
-		ExtractJsonValuesTransformer transformer = new ExtractJsonValuesTransformer(
+		ParseJsonTransformer transformer = new ParseJsonTransformer(
 				col1);
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 
@@ -101,7 +101,9 @@ public class ExtractJsonValuesTransformerTest {
 				map.toString());
 
 		assertTrue(map.get("addresses") instanceof List);
-		List addresses = (List) map.get("addresses");
+		
+		List<?> addresses = (List<?>) map.get("addresses");
+		
 		assertTrue(addresses.get(0) instanceof Map);
 		assertTrue(map.get("emails") instanceof List);
 	}
