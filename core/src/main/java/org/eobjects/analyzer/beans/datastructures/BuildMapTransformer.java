@@ -47,85 +47,87 @@ import org.slf4j.LoggerFactory;
  */
 @TransformerBean("Build key/value map")
 @Alias("Build map")
-@Description("Transformer capable of building a map of keys and values")
+@Description("Build a map with a variable amount of keys and values. Adds the capability to store complex structures with named entries within it.")
 @Categorized(DataStructuresCategory.class)
 public class BuildMapTransformer implements Transformer<Map<String, ?>> {
 
-	private static final Logger logger = LoggerFactory.getLogger(BuildMapTransformer.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(BuildMapTransformer.class);
 
-	@Inject
-	@Configured
-	InputColumn<?>[] values;
+    @Inject
+    @Configured
+    InputColumn<?>[] values;
 
-	@Inject
-	@Configured
-	String[] keys;
+    @Inject
+    @Configured
+    String[] keys;
 
-	@Inject
-	@Configured
-	boolean retainKeyOrder = false;
+    @Inject
+    @Configured
+    boolean retainKeyOrder = false;
 
-	@Inject
-	@Configured
-	boolean includeNullValues = false;
+    @Inject
+    @Configured
+    boolean includeNullValues = false;
 
-	public void setIncludeNullValues(boolean includeNullValues) {
-		this.includeNullValues = includeNullValues;
-	}
+    public void setIncludeNullValues(boolean includeNullValues) {
+        this.includeNullValues = includeNullValues;
+    }
 
-	public void setKeys(String[] keys) {
-		this.keys = keys;
-	}
+    public void setKeys(String[] keys) {
+        this.keys = keys;
+    }
 
-	public void setRetainKeyOrder(boolean retainKeyOrder) {
-		this.retainKeyOrder = retainKeyOrder;
-	}
+    public void setRetainKeyOrder(boolean retainKeyOrder) {
+        this.retainKeyOrder = retainKeyOrder;
+    }
 
-	public void setValues(InputColumn<?>[] values) {
-		this.values = values;
-	}
+    public void setValues(InputColumn<?>[] values) {
+        this.values = values;
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		StringBuilder sb = new StringBuilder("Map: ");
-		for (int i = 0; i < keys.length; i++) {
-			String key = keys[i];
-			sb.append(key);
-			if (sb.length() > 30) {
-				sb.append("...");
-				break;
-			}
+    @Override
+    public OutputColumns getOutputColumns() {
+        StringBuilder sb = new StringBuilder("Map: ");
+        for (int i = 0; i < keys.length; i++) {
+            String key = keys[i];
+            sb.append(key);
+            if (sb.length() > 30) {
+                sb.append("...");
+                break;
+            }
 
-			if (i + 1 < keys.length) {
-				sb.append(",");
-			}
-		}
-		OutputColumns outputColumns = new OutputColumns(new String[] { sb.toString() }, new Class[] { Map.class });
-		return outputColumns;
-	}
+            if (i + 1 < keys.length) {
+                sb.append(",");
+            }
+        }
+        OutputColumns outputColumns = new OutputColumns(
+                new String[] { sb.toString() }, new Class[] { Map.class });
+        return outputColumns;
+    }
 
-	@Override
-	public Map<String, ?>[] transform(InputRow row) {
-		final Map<String, Object> map;
-		if (retainKeyOrder) {
-			map = new LinkedHashMap<String, Object>();
-		} else {
-			map = new HashMap<String, Object>();
-		}
-		for (int i = 0; i < keys.length; i++) {
-			final String key = keys[i];
-			final Object value = row.getValue(values[i]);
-			if (value == null && !includeNullValues) {
-				logger.debug("Ignoring null value for {} in row: {}", key, row);
-			} else {
-				map.put(key, value);
-			}
-		}
+    @Override
+    public Map<String, ?>[] transform(InputRow row) {
+        final Map<String, Object> map;
+        if (retainKeyOrder) {
+            map = new LinkedHashMap<String, Object>();
+        } else {
+            map = new HashMap<String, Object>();
+        }
+        for (int i = 0; i < keys.length; i++) {
+            final String key = keys[i];
+            final Object value = row.getValue(values[i]);
+            if (value == null && !includeNullValues) {
+                logger.debug("Ignoring null value for {} in row: {}", key, row);
+            } else {
+                map.put(key, value);
+            }
+        }
 
-		@SuppressWarnings("unchecked")
-		Map<String, ?>[] result = new Map[] { map };
+        @SuppressWarnings("unchecked")
+        Map<String, ?>[] result = new Map[] { map };
 
-		return result;
-	}
+        return result;
+    }
 
 }

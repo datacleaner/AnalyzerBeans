@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -43,60 +44,64 @@ import org.slf4j.LoggerFactory;
  * @author Saurabh Gupta
  */
 @TransformerBean("Build list")
+@Description("Build a list containing a variable amount of elements. Adds the capability to save multiple values in a single field.")
 @Categorized(DataStructuresCategory.class)
 public class BuildListTransformer implements Transformer<List<?>> {
 
-	private static final Logger logger = LoggerFactory.getLogger(BuildMapTransformer.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(BuildMapTransformer.class);
 
-	@Inject
-	@Configured
-	InputColumn<?>[] values;
+    @Inject
+    @Configured
+    InputColumn<?>[] values;
 
-	@Inject
-	@Configured
-	boolean includeNullValues;
-	
-	public void setIncludeNullValues(boolean includeNullValues) {
-		this.includeNullValues = includeNullValues;
-	}
-	
-	public void setValues(InputColumn<?>[] values) {
-		this.values = values;
-	}
+    @Inject
+    @Configured
+    boolean includeNullValues;
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		StringBuilder sb = new StringBuilder("List: ");
-		for (int i = 0; i < values.length; i++) {
-			String key = values[i].getName();
-			sb.append(key);
-			if (sb.length() > 30) {
-				sb.append("...");
-				break;
-			}
+    public void setIncludeNullValues(boolean includeNullValues) {
+        this.includeNullValues = includeNullValues;
+    }
 
-			if (i + 1 < values.length) {
-				sb.append(",");
-			}
-		}
-		OutputColumns outputColumns = new OutputColumns(new String[] { sb.toString() }, new Class[] { List.class });
-		return outputColumns;
-	}
+    public void setValues(InputColumn<?>[] values) {
+        this.values = values;
+    }
 
-	@Override
-	public List<?>[] transform(InputRow row) {
-		final List<Object> list = new ArrayList<Object>(values.length);
-		for (InputColumn<?> column : values) {
-			final Object value = row.getValue(column);
-			if (!includeNullValues && value == null) {
-				logger.debug("Ignoring null value for {} in row: {}", column.getName(), row);
-			} else {
-				list.add(value);
-			}
-		}
+    @Override
+    public OutputColumns getOutputColumns() {
+        StringBuilder sb = new StringBuilder("List: ");
+        for (int i = 0; i < values.length; i++) {
+            String key = values[i].getName();
+            sb.append(key);
+            if (sb.length() > 30) {
+                sb.append("...");
+                break;
+            }
 
-		final List<?>[] result = new List[] { list };
-		return result;
-	}
+            if (i + 1 < values.length) {
+                sb.append(",");
+            }
+        }
+        OutputColumns outputColumns = new OutputColumns(
+                new String[] { sb.toString() }, new Class[] { List.class });
+        return outputColumns;
+    }
+
+    @Override
+    public List<?>[] transform(InputRow row) {
+        final List<Object> list = new ArrayList<Object>(values.length);
+        for (InputColumn<?> column : values) {
+            final Object value = row.getValue(column);
+            if (!includeNullValues && value == null) {
+                logger.debug("Ignoring null value for {} in row: {}",
+                        column.getName(), row);
+            } else {
+                list.add(value);
+            }
+        }
+
+        final List<?>[] result = new List[] { list };
+        return result;
+    }
 
 }
