@@ -32,13 +32,13 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.junit.Test;
 
-public class CreateJsonTransformerTest {
+public class ComposeJsonTransformerTest {
 
 	@Test
 	public void testCreateSimpleJsonOfDataTypes() throws Exception {
 		InputColumn<Object> col = new MockInputColumn<Object>("obj",
 				Object.class);
-		CreateJsonTransformer jsonTransformer = new CreateJsonTransformer(col);
+		ComposeJsonTransformer jsonTransformer = new ComposeJsonTransformer(col);
 
 		assertEquals("OutputColumns[obj (as JSON)]", jsonTransformer
 				.getOutputColumns().toString());
@@ -67,7 +67,7 @@ public class CreateJsonTransformerTest {
 		map.put("country", "India");
 
 		InputColumn<Map<?, ?>> col = new MockInputColumn<Map<?, ?>>("map");
-		CreateJsonTransformer jsonTransformer = new CreateJsonTransformer(col);
+		ComposeJsonTransformer jsonTransformer = new ComposeJsonTransformer(col);
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
 
 		String[] jsonDocs = jsonTransformer.transform(new MockInputRow().put(
@@ -85,7 +85,7 @@ public class CreateJsonTransformerTest {
 
 		InputColumn<List<?>> col = new MockInputColumn<List<?>>("list");
 
-		CreateJsonTransformer jsonTransformer = new CreateJsonTransformer(col);
+		ComposeJsonTransformer jsonTransformer = new ComposeJsonTransformer(col);
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
 
 		String[] jsonDocs = jsonTransformer.transform(new MockInputRow().put(
@@ -121,7 +121,7 @@ public class CreateJsonTransformerTest {
 		map.put("country", "India");
 
 		InputColumn<Map<?, ?>> col = new MockInputColumn<Map<?, ?>>("name");
-		CreateJsonTransformer jsonTransformer = new CreateJsonTransformer(col);
+		ComposeJsonTransformer jsonTransformer = new ComposeJsonTransformer(col);
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
 
 		String[] jsonDocs = jsonTransformer.transform(new MockInputRow().put(

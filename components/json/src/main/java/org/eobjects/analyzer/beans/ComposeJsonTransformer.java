@@ -32,10 +32,10 @@ import org.eobjects.analyzer.beans.categories.DataStructuresCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-@TransformerBean("Create JSON document")
-@Description("Creates a representation of a data structure as a JSON (JavaScript Object Notation) document")
+@TransformerBean("Compose & write JSON document")
+@Description("Creates a string representation of a data structure as a JSON (JavaScript Object Notation) document")
 @Categorized(DataStructuresCategory.class)
-public class CreateJsonTransformer implements Transformer<String> {
+public class ComposeJsonTransformer implements Transformer<String> {
 
 	@Inject
 	@Configured
@@ -44,10 +44,10 @@ public class CreateJsonTransformer implements Transformer<String> {
 
 	private final ObjectMapper mapper = new ObjectMapper();
 
-	public CreateJsonTransformer() {
+	public ComposeJsonTransformer() {
 	}
 
-	public CreateJsonTransformer(InputColumn<?> data) {
+	public ComposeJsonTransformer(InputColumn<?> data) {
 		this.data = data;
 	}
 

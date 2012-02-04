@@ -35,8 +35,8 @@ import org.eobjects.analyzer.beans.categories.DataStructuresCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-@TransformerBean("Parse JSON document")
-@Description("Parses a JSON document and materializes the data structure it represents")
+@TransformerBean("Read & parse JSON document")
+@Description("Parses a JSON document (as a string) and materializes the data structure it represents")
 @Categorized(DataStructuresCategory.class)
 public class ParseJsonTransformer implements Transformer<Object> {
 
