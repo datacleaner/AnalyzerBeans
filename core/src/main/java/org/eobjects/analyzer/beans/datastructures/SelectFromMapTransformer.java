@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans.datastructures;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -80,6 +81,15 @@ public class SelectFromMapTransformer implements Transformer<Object> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
+		String[] keys = this.keys;
+		Class<?>[] types = this.types;
+		if (keys.length != types.length) {
+			// odd case sometimes encountered with invalid configurations or
+			// while building a job
+			final int length = Math.min(keys.length, types.length);
+			keys = Arrays.copyOf(keys, length);
+			types = Arrays.copyOf(types, length);
+		}
 		return new OutputColumns(keys, types);
 	}
 
