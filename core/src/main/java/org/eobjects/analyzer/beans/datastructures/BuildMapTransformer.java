@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans.datastructures;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -70,6 +71,11 @@ public class BuildMapTransformer implements Transformer<Map<String, ?>> {
     @Configured
     boolean includeNullValues = false;
 
+    @Inject
+    @Configured(required = false)
+    @Description("Add key/value pairs to this (optional) existing map")
+    InputColumn<Map<String, Object>> addToExistingMap;
+
     public void setIncludeNullValues(boolean includeNullValues) {
         this.includeNullValues = includeNullValues;
     }
@@ -108,12 +114,20 @@ public class BuildMapTransformer implements Transformer<Map<String, ?>> {
 
     @Override
     public Map<String, ?>[] transform(InputRow row) {
+        final Map<String, Object> existingMap;
+        if (addToExistingMap != null) {
+            existingMap = row.getValue(addToExistingMap);
+        } else {
+            existingMap = Collections.emptyMap();
+        }
+
         final Map<String, Object> map;
         if (retainKeyOrder) {
-            map = new LinkedHashMap<String, Object>();
+            map = new LinkedHashMap<String, Object>(existingMap);
         } else {
-            map = new HashMap<String, Object>();
+            map = new HashMap<String, Object>(existingMap);
         }
+
         for (int i = 0; i < keys.length; i++) {
             final String key = keys[i];
             final Object value = row.getValue(values[i]);

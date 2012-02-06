@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.datastructures;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -59,6 +60,11 @@ public class BuildListTransformer implements Transformer<List<?>> {
     @Configured
     boolean includeNullValues;
 
+    @Inject
+    @Configured(required = false)
+    @Description("Add elements to this (optional) existing list")
+    InputColumn<List<Object>> addToExistingList;
+
     public void setIncludeNullValues(boolean includeNullValues) {
         this.includeNullValues = includeNullValues;
     }
@@ -89,7 +95,15 @@ public class BuildListTransformer implements Transformer<List<?>> {
 
     @Override
     public List<?>[] transform(InputRow row) {
-        final List<Object> list = new ArrayList<Object>(values.length);
+        final List<Object> existingList;
+        if (addToExistingList != null) {
+            existingList = row.getValue(addToExistingList);
+        } else {
+            existingList = Collections.emptyList();
+        }
+
+        final List<Object> list = new ArrayList<Object>(existingList);
+
         for (InputColumn<?> column : values) {
             final Object value = row.getValue(column);
             if (!includeNullValues && value == null) {
