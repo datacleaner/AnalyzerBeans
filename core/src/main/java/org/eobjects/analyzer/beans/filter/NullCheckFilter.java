@@ -23,10 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Alias;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
+import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.query.FilterItem;
@@ -38,6 +40,7 @@ import org.eobjects.metamodel.schema.Column;
 @FilterBean("Null check")
 @Alias("Not null")
 @Description("Filter rows that contain null values.")
+@Categorized(FilterCategory.class)
 public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.NullCheckCategory> {
 
 	public static enum NullCheckCategory {

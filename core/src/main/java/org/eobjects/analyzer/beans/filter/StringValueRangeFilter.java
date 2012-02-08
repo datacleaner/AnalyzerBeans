@@ -19,16 +19,19 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Validate;
+import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @FilterBean("String value range")
 @Description("A filter that filters out values outside a specified value range")
+@Categorized(FilterCategory.class)
 public class StringValueRangeFilter implements Filter<RangeFilterCategory> {
 
 	@Configured(order = 1)

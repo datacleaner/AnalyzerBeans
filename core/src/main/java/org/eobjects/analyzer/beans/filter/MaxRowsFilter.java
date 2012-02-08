@@ -21,15 +21,18 @@ package org.eobjects.analyzer.beans.filter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
+import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.query.Query;
 
 @FilterBean("Max rows")
 @Description("Sets a maximum of rows to process.")
+@Categorized(FilterCategory.class)
 public class MaxRowsFilter implements QueryOptimizedFilter<ValidationCategory> {
 
 	@Configured

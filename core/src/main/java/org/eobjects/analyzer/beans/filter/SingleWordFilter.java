@@ -19,14 +19,19 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.CharIterator;
 
 @FilterBean("Single word")
+@Description("Filters single word values from multiple word values.")
+@Categorized(FilterCategory.class)
 public class SingleWordFilter implements Filter<ValidationCategory> {
 
 	@Configured

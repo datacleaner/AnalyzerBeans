@@ -22,11 +22,13 @@ package org.eobjects.analyzer.beans.filter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
+import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
@@ -42,6 +44,7 @@ import org.eobjects.metamodel.schema.Column;
 
 @FilterBean("Equals")
 @Description("A filter that excludes values that are not equal (=) to specific set of valid values")
+@Categorized(FilterCategory.class)
 public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
 
 	@Configured
