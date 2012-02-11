@@ -21,6 +21,7 @@ package org.eobjects.analyzer.result;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.CharacterSetDistributionAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
@@ -38,11 +39,11 @@ public class CharacterSetDistributionResult extends CrosstabResult {
 	private final InputColumn<String>[] _columns;
 	private final Set<String> _unicodeSetNames;
 
-	public CharacterSetDistributionResult(InputColumn<String>[] columns, Set<String> unicodeSetNames,
-			Crosstab<Number> crosstab) {
+	public CharacterSetDistributionResult(InputColumn<String>[] columns,
+			Set<String> unicodeSetNames, Crosstab<Number> crosstab) {
 		super(crosstab);
 		_columns = columns;
-		_unicodeSetNames = unicodeSetNames;
+		_unicodeSetNames = new TreeSet<String>(unicodeSetNames);
 	}
 
 	/**
