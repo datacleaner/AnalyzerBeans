@@ -33,8 +33,8 @@ public class MockInputColumn<E> extends AbstractInputColumn<E> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String _name;
-	private Class<? extends E> _clazz;
+	private final String _name;
+	private final Class<? extends E> _clazz;
 	
 	public MockInputColumn(String name) {
 		this(name, null);

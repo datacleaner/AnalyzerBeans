@@ -23,7 +23,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
@@ -34,53 +33,58 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.beans.categories.DataStructuresCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.StringUtils;
 
 @TransformerBean("Read & parse JSON document")
 @Description("Parses a JSON document (as a string) and materializes the data structure it represents")
 @Categorized(DataStructuresCategory.class)
 public class ParseJsonTransformer implements Transformer<Object> {
 
-	private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-	@Inject
-	@Configured(order = 1)
-	@Description("Column containing JSON documents to parse")
-	InputColumn<String> json;
+    @Inject
+    @Configured(order = 1)
+    @Description("Column containing JSON documents to parse")
+    InputColumn<String> json;
 
-	@Inject
-	@Configured(order = 2)
-	Class<?> dataType = Map.class;
+    @Inject
+    @Configured(order = 2)
+    Class<?> dataType = Map.class;
 
-	public ParseJsonTransformer() {
+    public ParseJsonTransformer() {
 
-	}
+    }
 
-	public ParseJsonTransformer(InputColumn<String> json) {
-		this.json = json;
-	}
+    public ParseJsonTransformer(InputColumn<String> json) {
+        this.json = json;
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		String[] names = new String[] { json.getName() + " (as Map)" };
-		Class<?>[] types = new Class[] { dataType };
-		return new OutputColumns(names, types);
-	}
+    @Override
+    public OutputColumns getOutputColumns() {
+        String[] names = new String[] { json.getName() + " (as Map)" };
+        Class<?>[] types = new Class[] { dataType };
+        return new OutputColumns(names, types);
+    }
 
-	@Override
-	public Object[] transform(InputRow inputRow) {
-		final String jsonString = inputRow.getValue(json);
-		final Object result;
-		if (StringUtils.isBlank(jsonString)) {
-			result = null;
-		} else {
-			try {
-				result = mapper.readValue(jsonString, dataType);
-			} catch (Exception e) {
-				throw new IllegalStateException(
-						"Exception occurred while parsing JSON", e);
-			}
-		}
+    @Override
+    public Object[] transform(InputRow inputRow) {
+        final String jsonString = inputRow.getValue(json);
+        final Object result = parse(jsonString, dataType, mapper);
 
-		return new Object[] { result };
-	}
+        return new Object[] { result };
+    }
+
+    public static <E> E parse(final String jsonString, final Class<E> dataType,
+            final ObjectMapper objectMapper) {
+        if (StringUtils.isNullOrEmpty(jsonString)) {
+            return null;
+        } else {
+            try {
+                return objectMapper.readValue(jsonString, dataType);
+            } catch (Exception e) {
+                throw new IllegalStateException(
+                        "Exception occurred while parsing JSON", e);
+            }
+        }
+    }
 }
