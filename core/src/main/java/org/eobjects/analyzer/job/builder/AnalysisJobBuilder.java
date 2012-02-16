@@ -832,7 +832,9 @@ public final class AnalysisJobBuilder implements Closeable {
 
 			for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
 				if (fjb != sourceFilterJobBuilder && fjb.getRequirement() == null) {
-					fjb.setRequirement(defaultRequirement);
+					if (fjb.validateRequirementCandidate(defaultRequirement)) {
+						fjb.setRequirement(defaultRequirement);
+					}
 				}
 			}
 		}
