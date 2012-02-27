@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.result.ValueDistributionResult;
@@ -31,75 +32,108 @@ import org.eobjects.metamodel.schema.MutableColumn;
 public class ValueDistributionAnalyzerTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		AnalyzerBeanDescriptor<?> desc = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
+		AnalyzerBeanDescriptor<?> desc = Descriptors
+				.ofAnalyzer(ValueDistributionAnalyzer.class);
 		assertEquals(0, desc.getInitializeMethods().size());
-		assertEquals(5, desc.getConfiguredProperties().size());
-		assertEquals(1, desc.getProvidedProperties().size());
+		assertEquals(6, desc.getConfiguredProperties().size());
+		assertEquals(2, desc.getProvidedProperties().size());
 		assertEquals("Value distribution", desc.getDisplayName());
 	}
 
 	public void testGetCounts() throws Exception {
-		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(new MetaModelInputColumn(new MutableColumn("col")),
-				true, null, null);
+		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
+				new MetaModelInputColumn(new MutableColumn("col")), true, null,
+				null);
 
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getNullCount());
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getTotalCount());
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getNullCount());
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getDistinctCount());
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getTotalCount());
 
-		vd.runInternal("hello", 1);
-		assertEquals(1, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(1, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
-		assertEquals(1, vd.getResult().getSingleValueDistributionResult().getTotalCount());
+		vd.runInternal(new MockInputRow(), "hello", 1);
+		assertEquals(1, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals(1, vd.getResult().getSingleValueDistributionResult()
+				.getDistinctCount());
+		assertEquals(1, vd.getResult().getSingleValueDistributionResult()
+				.getTotalCount());
 
-		vd.runInternal("world", 1);
-		assertEquals(2, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(2, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
-		assertEquals(2, vd.getResult().getSingleValueDistributionResult().getTotalCount());
+		vd.runInternal(new MockInputRow(), "world", 1);
+		assertEquals(2, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals(2, vd.getResult().getSingleValueDistributionResult()
+				.getDistinctCount());
+		assertEquals(2, vd.getResult().getSingleValueDistributionResult()
+				.getTotalCount());
 
-		vd.runInternal("foobar", 2);
-		assertEquals(2, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(3, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
-		assertEquals(4, vd.getResult().getSingleValueDistributionResult().getTotalCount());
+		vd.runInternal(new MockInputRow(), "foobar", 2);
+		assertEquals(2, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals(3, vd.getResult().getSingleValueDistributionResult()
+				.getDistinctCount());
+		assertEquals(4, vd.getResult().getSingleValueDistributionResult()
+				.getTotalCount());
 
-		vd.runInternal("world", 1);
-		assertEquals(1, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(3, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
-		assertEquals(5, vd.getResult().getSingleValueDistributionResult().getTotalCount());
+		vd.runInternal(new MockInputRow(), "world", 1);
+		assertEquals(1, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals(3, vd.getResult().getSingleValueDistributionResult()
+				.getDistinctCount());
+		assertEquals(5, vd.getResult().getSingleValueDistributionResult()
+				.getTotalCount());
 
-		vd.runInternal("hello", 3);
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(3, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
-		assertEquals(8, vd.getResult().getSingleValueDistributionResult().getTotalCount());
+		vd.runInternal(new MockInputRow(), "hello", 3);
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals(3, vd.getResult().getSingleValueDistributionResult()
+				.getDistinctCount());
+		assertEquals(8, vd.getResult().getSingleValueDistributionResult()
+				.getTotalCount());
 
-		vd.runInternal(null, 1);
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(1, vd.getResult().getSingleValueDistributionResult().getNullCount());
-		assertEquals(4, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
-		assertEquals(9, vd.getResult().getSingleValueDistributionResult().getTotalCount());
+		vd.runInternal(new MockInputRow(), null, 1);
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals(1, vd.getResult().getSingleValueDistributionResult()
+				.getNullCount());
+		assertEquals(4, vd.getResult().getSingleValueDistributionResult()
+				.getDistinctCount());
+		assertEquals(9, vd.getResult().getSingleValueDistributionResult()
+				.getTotalCount());
 
-		vd.runInternal(null, 3);
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(4, vd.getResult().getSingleValueDistributionResult().getNullCount());
-		assertEquals(4, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
-		assertEquals(12, vd.getResult().getSingleValueDistributionResult().getTotalCount());
+		vd.runInternal(new MockInputRow(), null, 3);
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
+		assertEquals(4, vd.getResult().getSingleValueDistributionResult()
+				.getNullCount());
+		assertEquals(4, vd.getResult().getSingleValueDistributionResult()
+				.getDistinctCount());
+		assertEquals(12, vd.getResult().getSingleValueDistributionResult()
+				.getTotalCount());
 	}
 
 	public void testGetValueDistribution() throws Exception {
-		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(new MetaModelInputColumn(new MutableColumn("col")),
-				true, null, null);
+		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
+				new MetaModelInputColumn(new MutableColumn("col")), true, null,
+				null);
 
-		vd.runInternal("hello", 1);
-		vd.runInternal("hello", 1);
-		vd.runInternal("world", 3);
+		vd.runInternal(new MockInputRow(), "hello", 1);
+		vd.runInternal(new MockInputRow(), "hello", 1);
+		vd.runInternal(new MockInputRow(), "world", 3);
 
-		ValueCountList topValues = vd.getResult().getSingleValueDistributionResult().getTopValues();
+		ValueCountList topValues = vd.getResult()
+				.getSingleValueDistributionResult().getTopValues();
 		assertEquals(2, topValues.getActualSize());
 		assertEquals("[world->3]", topValues.getValueCounts().get(0).toString());
 		assertEquals("[hello->2]", topValues.getValueCounts().get(1).toString());
 
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getNullCount());
-		assertEquals(0, vd.getResult().getSingleValueDistributionResult().getUniqueCount());
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getNullCount());
+		assertEquals(0, vd.getResult().getSingleValueDistributionResult()
+				.getUniqueCount());
 
 		String[] resultLines = vd.getResult().toString().split("\n");
 		assertEquals(6, resultLines.length);
@@ -112,22 +146,24 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 	}
 
 	public void testGroupedRun() throws Exception {
-		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(new MockInputColumn<String>("foo", String.class),
-				new MockInputColumn<String>("bar", String.class), true, null, null);
+		ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
+				new MockInputColumn<String>("foo", String.class),
+				new MockInputColumn<String>("bar", String.class), true, null,
+				null);
 
-		vd.runInternal("Copenhagen N", "2200", 3);
-		vd.runInternal("Copenhagen E", "2100", 2);
-		vd.runInternal("Copenhagen", "1732", 4);
-		vd.runInternal("Coppenhagen", "1732", 3);
-		
+		vd.runInternal(new MockInputRow(), "Copenhagen N", "2200", 3);
+		vd.runInternal(new MockInputRow(), "Copenhagen E", "2100", 2);
+		vd.runInternal(new MockInputRow(), "Copenhagen", "1732", 4);
+		vd.runInternal(new MockInputRow(), "Coppenhagen", "1732", 3);
+
 		ValueDistributionResult result = vd.getResult();
 		assertTrue(result.isGroupingEnabled());
-		
+
 		String resultString = result.toString();
 		System.out.println(resultString);
 		String[] resultLines = resultString.split("\n");
 		assertEquals(20, resultLines.length);
-		
+
 		assertEquals("Value distribution for column: foo", resultLines[0]);
 		assertEquals("", resultLines[1]);
 		assertEquals("Group: 1732", resultLines[2]);

@@ -38,7 +38,9 @@ import org.eobjects.analyzer.result.ValueDistributionGroupResult;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.storage.CollectionFactoryImpl;
+import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.InMemoryStorageProvider;
+import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.NullTolerableComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +48,11 @@ import org.slf4j.LoggerFactory;
 @AnalyzerBean("Value distribution")
 @Description("Gets the distributions of values that occur in a dataset.\nOften used as an initial way to see if a lot of repeated values are to be expected, if nulls occur and if a few un-repeated values add exceptions to the typical usage-pattern.")
 @Concurrent(true)
-public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResult> {
+public class ValueDistributionAnalyzer implements
+		Analyzer<ValueDistributionResult> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ValueDistributionAnalyzer.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(ValueDistributionAnalyzer.class);
 
 	@Inject
 	@Configured(value = "Column", order = 1)
@@ -63,16 +67,25 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
 	boolean _recordUniqueValues = true;
 
 	@Inject
-	@Configured(value = "Top n most frequent values", required = false, order = 4)
+	@Configured(value = "Record drill-down information", required = false, order = 4)
+	@Description("Record extra information to allow drilling to the records that represent a particular value in the distribution")
+	boolean _recordDrillDownInformation = true;
+
+	@Inject
+	@Configured(value = "Top n most frequent values", required = false, order = 5)
 	Integer _topFrequentValues;
 
 	@Inject
-	@Configured(value = "Bottom n most frequent values", required = false, order = 5)
+	@Configured(value = "Bottom n most frequent values", required = false, order = 6)
 	Integer _bottomFrequentValues;
 
 	@Inject
 	@Provided
 	CollectionFactory _collectionFactory;
+
+	@Inject
+	@Provided
+	RowAnnotationFactory _annotationFactory;
 
 	private final Map<String, ValueDistributionGroup> _valueDistributionGroups;
 
@@ -84,9 +97,11 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
 	 * @param topFrequentValues
 	 * @param bottomFrequentValues
 	 */
-	public ValueDistributionAnalyzer(InputColumn<?> column, boolean recordUniqueValues, Integer topFrequentValues,
+	public ValueDistributionAnalyzer(InputColumn<?> column,
+			boolean recordUniqueValues, Integer topFrequentValues,
 			Integer bottomFrequentValues) {
-		this(column, null, recordUniqueValues, topFrequentValues, bottomFrequentValues);
+		this(column, null, recordUniqueValues, topFrequentValues,
+				bottomFrequentValues);
 	}
 
 	/**
@@ -98,7 +113,8 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
 	 * @param topFrequentValues
 	 * @param bottomFrequentValues
 	 */
-	public ValueDistributionAnalyzer(InputColumn<?> column, InputColumn<String> groupColumn, boolean recordUniqueValues,
+	public ValueDistributionAnalyzer(InputColumn<?> column,
+			InputColumn<String> groupColumn, boolean recordUniqueValues,
 			Integer topFrequentValues, Integer bottomFrequentValues) {
 		this();
 		_column = column;
@@ -106,32 +122,36 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
 		_recordUniqueValues = recordUniqueValues;
 		_topFrequentValues = topFrequentValues;
 		_bottomFrequentValues = bottomFrequentValues;
-		_collectionFactory = new CollectionFactoryImpl(new InMemoryStorageProvider());
+		_collectionFactory = new CollectionFactoryImpl(
+				new InMemoryStorageProvider());
+		_annotationFactory = new InMemoryRowAnnotationFactory();
 	}
 
 	/**
 	 * Main constructor
 	 */
 	public ValueDistributionAnalyzer() {
-		_valueDistributionGroups = new TreeMap<String, ValueDistributionGroup>(NullTolerableComparator.get(String.class));
+		_valueDistributionGroups = new TreeMap<String, ValueDistributionGroup>(
+				NullTolerableComparator.get(String.class));
 	}
 
 	@Override
 	public void run(InputRow row, int distinctCount) {
 		final Object value = row.getValue(_column);
 		if (_groupColumn == null) {
-			runInternal(value, distinctCount);
+			runInternal(row, value, distinctCount);
 		} else {
 			final String group = row.getValue(_groupColumn);
-			runInternal(value, group, distinctCount);
+			runInternal(row, value, group, distinctCount);
 		}
 	}
 
-	public void runInternal(Object value, int distinctCount) {
-		runInternal(value, null, distinctCount);
+	public void runInternal(InputRow row, Object value, int distinctCount) {
+		runInternal(row, value, null, distinctCount);
 	}
 
-	public void runInternal(Object value, String group, int distinctCount) {
+	public void runInternal(InputRow row, Object value, String group,
+			int distinctCount) {
 		final ValueDistributionGroup valueDistributionGroup = getValueDistributionGroup(group);
 		final String stringValue;
 		if (value == null) {
@@ -140,16 +160,19 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
 		} else {
 			stringValue = value.toString();
 		}
-		valueDistributionGroup.run(stringValue, distinctCount);
+		valueDistributionGroup.run(row, stringValue, distinctCount);
 	}
 
 	private ValueDistributionGroup getValueDistributionGroup(String group) {
-		ValueDistributionGroup valueDistributionGroup = _valueDistributionGroups.get(group);
+		ValueDistributionGroup valueDistributionGroup = _valueDistributionGroups
+				.get(group);
 		if (valueDistributionGroup == null) {
 			synchronized (this) {
 				valueDistributionGroup = _valueDistributionGroups.get(group);
 				if (valueDistributionGroup == null) {
-					valueDistributionGroup = new ValueDistributionGroup(group, _collectionFactory);
+					valueDistributionGroup = new ValueDistributionGroup(group,
+							_collectionFactory, _annotationFactory,
+							_recordDrillDownInformation);
 					_valueDistributionGroups.put(group, valueDistributionGroup);
 				}
 			}
@@ -162,20 +185,24 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
 		if (_groupColumn == null) {
 			logger.info("getResult() invoked, processing single group");
 			final ValueDistributionGroup valueDistributionGroup = getValueDistributionGroup(null);
-			final ValueDistributionGroupResult ungroupedResult = valueDistributionGroup.createResult(_topFrequentValues,
-					_bottomFrequentValues, _recordUniqueValues);
+			final ValueDistributionGroupResult ungroupedResult = valueDistributionGroup
+					.createResult(_topFrequentValues, _bottomFrequentValues,
+							_recordUniqueValues);
 			return new ValueDistributionResult(_column, ungroupedResult);
 		} else {
-			logger.info("getResult() invoked, processing {} groups", _valueDistributionGroups.size());
+			logger.info("getResult() invoked, processing {} groups",
+					_valueDistributionGroups.size());
 
 			final SortedSet<ValueDistributionGroupResult> groupedResults = new TreeSet<ValueDistributionGroupResult>();
 			for (String group : _valueDistributionGroups.keySet()) {
 				final ValueDistributionGroup valueDistributibutionGroup = getValueDistributionGroup(group);
-				final ValueDistributionGroupResult result = valueDistributibutionGroup.createResult(_topFrequentValues,
-						_bottomFrequentValues, _recordUniqueValues);
+				final ValueDistributionGroupResult result = valueDistributibutionGroup
+						.createResult(_topFrequentValues,
+								_bottomFrequentValues, _recordUniqueValues);
 				groupedResults.add(result);
 			}
-			return new ValueDistributionResult(_column, _groupColumn, groupedResults);
+			return new ValueDistributionResult(_column, _groupColumn,
+					groupedResults);
 		}
 	}
 }

@@ -23,13 +23,16 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eobjects.analyzer.beans.valuedist.ValueCount;
 import org.eobjects.analyzer.beans.valuedist.ValueCountList;
 import org.eobjects.analyzer.beans.valuedist.ValueCountListImpl;
+import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.util.NullTolerableComparator;
 
-public class ValueDistributionGroupResult implements Serializable, Comparable<ValueDistributionGroupResult> {
+public class ValueDistributionGroupResult implements Serializable,
+		Comparable<ValueDistributionGroupResult> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,13 +40,17 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
 	private final ValueCountList _bottomValues;
 	private final int _nullCount;
 	private final Collection<String> _uniqueValues;
+	private final Map<String, RowAnnotation> _annotations;
 	private final int _uniqueValueCount;
 	private final String _groupName;
 	private final int _totalCount;
 	private final int _distinctCount;
 
-	public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, Collection<String> uniqueValues, int uniqueValueCount, int distinctCount, int totalCount) {
+	public ValueDistributionGroupResult(String groupName,
+			ValueCountList topValues, ValueCountList bottomValues,
+			int nullCount, Collection<String> uniqueValues,
+			int uniqueValueCount, int distinctCount, int totalCount,
+			Map<String, RowAnnotation> annotations) {
 		_groupName = groupName;
 		_topValues = topValues;
 		_bottomValues = bottomValues;
@@ -52,11 +59,26 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
 		_uniqueValueCount = uniqueValueCount;
 		_totalCount = totalCount;
 		_distinctCount = distinctCount;
+		_annotations = annotations;
 	}
 
-	public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, int uniqueValueCount, int distinctCount, int totalCount) {
-		this(groupName, topValues, bottomValues, nullCount, null, uniqueValueCount, distinctCount, totalCount);
+	public ValueDistributionGroupResult(String groupName,
+			ValueCountList topValues, ValueCountList bottomValues,
+			int nullCount, int uniqueValueCount, int distinctCount,
+			int totalCount, Map<String, RowAnnotation> annotations) {
+		this(groupName, topValues, bottomValues, nullCount, null,
+				uniqueValueCount, distinctCount, totalCount, annotations);
+	}
+
+	public boolean isAnnotationsEnabled() {
+		return _annotations != null;
+	}
+
+	public RowAnnotation getAnnotation(String value) {
+		if (_annotations == null) {
+			return null;
+		}
+		return _annotations.get(value);
 	}
 
 	public ValueCountList getTopValues() {
@@ -200,7 +222,7 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
 	public int getDistinctCount() {
 		return _distinctCount;
 	}
-	
+
 	public int getTotalCount() {
 		return _totalCount;
 	}
@@ -215,6 +237,7 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
 
 	@Override
 	public int compareTo(ValueDistributionGroupResult o) {
-		return NullTolerableComparator.get(String.class).compare(getGroupName(), o.getGroupName());
+		return NullTolerableComparator.get(String.class).compare(
+				getGroupName(), o.getGroupName());
 	}
 }

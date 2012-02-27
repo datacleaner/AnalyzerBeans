@@ -279,7 +279,7 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 				result.toString());
 	}
 
-	public void testMultiThreadedRunNoColumnNames() throws Exception {
+	public void testMultiThreadedRunNoColumnNames() throws Throwable {
 		final CsvDatastore datastoreIn = new CsvDatastore("in",
 				"src/test/resources/datastorewriter-in.csv");
 		final CsvDatastore datastoreOut = new CsvDatastore("out",
@@ -355,6 +355,9 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 			AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 			AnalysisResultFuture resultFuture = runner.run(ajb.toAnalysisJob());
 
+			if (resultFuture.isErrornous()) {
+				throw resultFuture.getErrors().get(0);
+			}
 			assertTrue(resultFuture.isSuccessful());
 		}
 
