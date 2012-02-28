@@ -170,9 +170,16 @@ public class ValueDistributionAnalyzer implements
 			synchronized (this) {
 				valueDistributionGroup = _valueDistributionGroups.get(group);
 				if (valueDistributionGroup == null) {
+					final InputColumn<?>[] inputColumns;
+					if (_groupColumn == null) {
+						inputColumns = new InputColumn[] { _column };
+					} else {
+						inputColumns = new InputColumn[] { _column,
+								_groupColumn };
+					}
 					valueDistributionGroup = new ValueDistributionGroup(group,
 							_collectionFactory, _annotationFactory,
-							_recordDrillDownInformation);
+							_recordDrillDownInformation, inputColumns);
 					_valueDistributionGroups.put(group, valueDistributionGroup);
 				}
 			}

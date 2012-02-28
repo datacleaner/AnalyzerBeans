@@ -28,7 +28,9 @@ import java.util.Map;
 import org.eobjects.analyzer.beans.valuedist.ValueCount;
 import org.eobjects.analyzer.beans.valuedist.ValueCountList;
 import org.eobjects.analyzer.beans.valuedist.ValueCountListImpl;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.storage.RowAnnotation;
+import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.NullTolerableComparator;
 
 public class ValueDistributionGroupResult implements Serializable,
@@ -41,6 +43,8 @@ public class ValueDistributionGroupResult implements Serializable,
 	private final int _nullCount;
 	private final Collection<String> _uniqueValues;
 	private final Map<String, RowAnnotation> _annotations;
+	private final InputColumn<?>[] _highlightedColumns;
+	private final RowAnnotationFactory _annotationFactory;
 	private final int _uniqueValueCount;
 	private final String _groupName;
 	private final int _totalCount;
@@ -50,7 +54,9 @@ public class ValueDistributionGroupResult implements Serializable,
 			ValueCountList topValues, ValueCountList bottomValues,
 			int nullCount, Collection<String> uniqueValues,
 			int uniqueValueCount, int distinctCount, int totalCount,
-			Map<String, RowAnnotation> annotations) {
+			Map<String, RowAnnotation> annotations,
+			RowAnnotationFactory annotationFactory,
+			InputColumn<?>[] highlightedColumns) {
 		_groupName = groupName;
 		_topValues = topValues;
 		_bottomValues = bottomValues;
@@ -60,25 +66,36 @@ public class ValueDistributionGroupResult implements Serializable,
 		_totalCount = totalCount;
 		_distinctCount = distinctCount;
 		_annotations = annotations;
+		_annotationFactory = annotationFactory;
+		_highlightedColumns = highlightedColumns;
 	}
 
 	public ValueDistributionGroupResult(String groupName,
 			ValueCountList topValues, ValueCountList bottomValues,
 			int nullCount, int uniqueValueCount, int distinctCount,
-			int totalCount, Map<String, RowAnnotation> annotations) {
+			int totalCount, Map<String, RowAnnotation> annotations,
+			RowAnnotationFactory annotationFactory,
+			InputColumn<?>[] highlightedColumns) {
 		this(groupName, topValues, bottomValues, nullCount, null,
-				uniqueValueCount, distinctCount, totalCount, annotations);
+				uniqueValueCount, distinctCount, totalCount, annotations,
+				annotationFactory, highlightedColumns);
 	}
 
 	public boolean isAnnotationsEnabled() {
 		return _annotations != null;
 	}
 
-	public RowAnnotation getAnnotation(String value) {
+	public AnnotatedRowsResult getAnnotatedRows(String value) {
 		if (_annotations == null) {
 			return null;
 		}
-		return _annotations.get(value);
+		RowAnnotation annotation = _annotations.get(value);
+		if (annotation == null) {
+			return null;
+		}
+
+		return new AnnotatedRowsResult(annotation, _annotationFactory,
+				_highlightedColumns);
 	}
 
 	public ValueCountList getTopValues() {

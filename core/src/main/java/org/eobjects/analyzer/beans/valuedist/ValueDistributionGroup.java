@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.ValueDistributionGroupResult;
 import org.eobjects.analyzer.storage.CollectionFactory;
@@ -51,15 +52,18 @@ class ValueDistributionGroup {
 	private final RowAnnotationFactory _annotationFactory;
 	private final String _groupName;
 	private final boolean _recordAnnotations;
+	private final InputColumn<?>[] _inputColumns;
 	private int _nullCount;
 	private int _totalCount;
 
 	public ValueDistributionGroup(String groupName,
 			CollectionFactory collectionFactory,
-			RowAnnotationFactory annotationFactory, boolean recordAnnotations) {
+			RowAnnotationFactory annotationFactory, boolean recordAnnotations,
+			InputColumn<?>[] inputColumns) {
 		_groupName = groupName;
 		_annotationFactory = annotationFactory;
 		_recordAnnotations = recordAnnotations;
+		_inputColumns = inputColumns;
 		if (recordAnnotations) {
 			_annotationMap = new HashMap<String, RowAnnotation>();
 			_counterMap = null;
@@ -165,11 +169,12 @@ class ValueDistributionGroup {
 		if (recordUniqueValues) {
 			return new ValueDistributionGroupResult(_groupName, topValues,
 					bottomValues, _nullCount, uniqueValues, uniqueCount,
-					distinctCount, _totalCount, annotations);
+					distinctCount, _totalCount, annotations,
+					_annotationFactory, _inputColumns);
 		} else {
 			return new ValueDistributionGroupResult(_groupName, topValues,
 					bottomValues, _nullCount, uniqueCount, distinctCount,
-					_totalCount, annotations);
+					_totalCount, annotations, _annotationFactory, _inputColumns);
 		}
 	}
 
