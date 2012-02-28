@@ -44,7 +44,7 @@ public class ValueDistributionGroupResult implements Serializable,
 	private final Collection<String> _uniqueValues;
 	private final Map<String, RowAnnotation> _annotations;
 	private final InputColumn<?>[] _highlightedColumns;
-	private final RowAnnotationFactory _annotationFactory;
+	private final transient RowAnnotationFactory _annotationFactory;
 	private final int _uniqueValueCount;
 	private final String _groupName;
 	private final int _totalCount;
