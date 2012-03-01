@@ -22,7 +22,6 @@ package org.eobjects.analyzer.job.tasks;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
@@ -44,9 +43,9 @@ public final class ConsumeRowTask implements Task {
 
 	private final Iterable<RowProcessingConsumer> _consumers;
 	private final RowProcessingMetrics _rowProcessingMetrics;
+	private final int _rowNumber;
 	private final Row _row;
 	private final AnalysisListener _analysisListener;
-	private final AtomicInteger _rowCounter;
 	private final Collection<? extends Outcome> _initialOutcomes;
 
 	/**
@@ -61,11 +60,11 @@ public final class ConsumeRowTask implements Task {
 	 *            will contain query-optimized outcomes)
 	 */
 	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, RowProcessingMetrics rowProcessingMetrics, Row row,
-			AtomicInteger rowCounter, AnalysisListener analysisListener, Collection<? extends Outcome> initialOutcomes) {
+			int rowNumber, AnalysisListener analysisListener, Collection<? extends Outcome> initialOutcomes) {
 		_consumers = consumers;
 		_rowProcessingMetrics = rowProcessingMetrics;
 		_row = row;
-		_rowCounter = rowCounter;
+		_rowNumber = rowNumber;
 		_analysisListener = analysisListener;
 		_initialOutcomes = initialOutcomes;
 	}
@@ -75,9 +74,8 @@ public final class ConsumeRowTask implements Task {
 		OutcomeSink outcomeSink = new OutcomeSinkImpl(_initialOutcomes);
 
 		final int distinctCount = 1;
-		int rowNumber = _rowCounter.addAndGet(distinctCount);
 		List<InputRow> inputRows = new ArrayList<InputRow>();
-		inputRows.add(new MetaModelInputRow(rowNumber, _row));
+		inputRows.add(new MetaModelInputRow(_rowNumber, _row));
 		for (RowProcessingConsumer consumer : _consumers) {
 			if (consumer.isConcurrent()) {
 				handleConsumer(outcomeSink, distinctCount, inputRows, consumer);
@@ -88,7 +86,7 @@ public final class ConsumeRowTask implements Task {
 			}
 		}
 		_analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
-				_rowProcessingMetrics, rowNumber);
+				_rowProcessingMetrics, _rowNumber);
 	}
 
 	private void handleConsumer(OutcomeSink outcomeSink, final int distinctCount, List<InputRow> rows,

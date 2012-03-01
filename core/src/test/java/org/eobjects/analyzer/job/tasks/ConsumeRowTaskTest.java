@@ -19,7 +19,9 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -43,114 +45,123 @@ import org.eobjects.analyzer.test.MockAnalyzer;
 
 public class ConsumeRowTaskTest extends TestCase {
 
-	@SuppressWarnings("unchecked")
-	public void testMultiRowTransformer() throws Throwable {
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl();
+    @SuppressWarnings("unchecked")
+    public void testMultiRowTransformer() throws Throwable {
+        AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl();
 
-		final InputColumn<?> countingColumn;
-		final AnalysisJob job;
+        final InputColumn<?> countingColumn;
+        final AnalysisJob job;
 
-		// build example job
-		{
-			AnalysisJobBuilder builder = new AnalysisJobBuilder(configuration);
+        // build example job
+        {
+            AnalysisJobBuilder builder = new AnalysisJobBuilder(configuration);
 
-			// number_col,string_col
-			// 3,foo
-			// 10,bar
-			// 0,baz
+            // number_col,string_col
+            // 3,foo
+            // 10,bar
+            // 0,baz
 
-			builder.setDatastore(new CsvDatastore("foo", "src/test/resources/multi_row_transformer_test.csv"));
-			builder.addSourceColumns("number_col");
+            builder.setDatastore(new CsvDatastore("foo", "src/test/resources/multi_row_transformer_test.csv"));
+            builder.addSourceColumns("number_col");
 
-			TransformerJobBuilder<ConvertToNumberTransformer> convertTransformer = builder.addTransformer(
-					ConvertToNumberTransformer.class).addInputColumn(builder.getSourceColumnByName("number_col"));
-			MutableInputColumn<?> numberColumn = convertTransformer.getOutputColumns().get(0);
+            TransformerJobBuilder<ConvertToNumberTransformer> convertTransformer = builder.addTransformer(
+                    ConvertToNumberTransformer.class).addInputColumn(builder.getSourceColumnByName("number_col"));
+            MutableInputColumn<?> numberColumn = convertTransformer.getOutputColumns().get(0);
 
-			TransformerJobBuilder<MockMultiRowTransformer> multiRowTransformer = builder.addTransformer(
-					MockMultiRowTransformer.class).addInputColumn(numberColumn);
+            TransformerJobBuilder<MockMultiRowTransformer> multiRowTransformer = builder.addTransformer(
+                    MockMultiRowTransformer.class).addInputColumn(numberColumn);
 
-			List<MutableInputColumn<?>> mockTransformerColumns = multiRowTransformer.getOutputColumns();
-			countingColumn = mockTransformerColumns.get(0);
-			assertEquals("Mock multi row transformer (1)", countingColumn.getName());
-			builder.addAnalyzer(MockAnalyzer.class).addInputColumns(mockTransformerColumns);
+            List<MutableInputColumn<?>> mockTransformerColumns = multiRowTransformer.getOutputColumns();
+            countingColumn = mockTransformerColumns.get(0);
+            assertEquals("Mock multi row transformer (1)", countingColumn.getName());
+            builder.addAnalyzer(MockAnalyzer.class).addInputColumns(mockTransformerColumns);
 
-			job = builder.toAnalysisJob();
-		}
+            job = builder.toAnalysisJob();
+        }
 
-		ListResult<InputRow> result;
+        ListResult<InputRow> result;
 
-		// run job
-		{
-			AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
-			AnalysisResultFuture resultFuture = runner.run(job);
-			if (resultFuture.isErrornous()) {
-				throw resultFuture.getErrors().get(0);
-			}
-			result = (ListResult<InputRow>) resultFuture.getResults().get(0);
-		}
+        // run job
+        {
+            AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+            AnalysisResultFuture resultFuture = runner.run(job);
+            if (resultFuture.isErrornous()) {
+                throw resultFuture.getErrors().get(0);
+            }
+            result = (ListResult<InputRow>) resultFuture.getResults().get(0);
+        }
 
-		List<InputRow> list = result.getValues();
+        List<InputRow> list = result.getValues();
 
-		// we expect 13 rows (3 + 10 + 0)
-		assertEquals(13, list.size());
+        // we expect 13 rows (3 + 10 + 0)
+        assertEquals(13, list.size());
 
-		assertEquals(1, list.get(0).getValue(countingColumn));
-		assertEquals(2, list.get(1).getValue(countingColumn));
-		assertEquals(3, list.get(2).getValue(countingColumn));
-		assertEquals(1, list.get(3).getValue(countingColumn));
-		assertEquals(2, list.get(4).getValue(countingColumn));
-		assertEquals(3, list.get(5).getValue(countingColumn));
-		assertEquals(4, list.get(6).getValue(countingColumn));
-		assertEquals(5, list.get(7).getValue(countingColumn));
-		assertEquals(6, list.get(8).getValue(countingColumn));
-		assertEquals(7, list.get(9).getValue(countingColumn));
-		assertEquals(8, list.get(10).getValue(countingColumn));
-		assertEquals(9, list.get(11).getValue(countingColumn));
-		assertEquals(10, list.get(12).getValue(countingColumn));
-	}
+        assertEquals(1, list.get(0).getValue(countingColumn));
+        assertEquals(2, list.get(1).getValue(countingColumn));
+        assertEquals(3, list.get(2).getValue(countingColumn));
+        assertEquals(1, list.get(3).getValue(countingColumn));
+        assertEquals(2, list.get(4).getValue(countingColumn));
+        assertEquals(3, list.get(5).getValue(countingColumn));
+        assertEquals(4, list.get(6).getValue(countingColumn));
+        assertEquals(5, list.get(7).getValue(countingColumn));
+        assertEquals(6, list.get(8).getValue(countingColumn));
+        assertEquals(7, list.get(9).getValue(countingColumn));
+        assertEquals(8, list.get(10).getValue(countingColumn));
+        assertEquals(9, list.get(11).getValue(countingColumn));
+        assertEquals(10, list.get(12).getValue(countingColumn));
 
-	@SuppressWarnings("unchecked")
-	public void testConsumeRowTaskForComplexJob() throws Throwable {
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl();
-		final AnalysisJob job;
-		// build example job
-		{
-			AnalysisJobBuilder builder = new AnalysisJobBuilder(configuration);
+        // assert that all generated rows have unique ids
+        Set<Integer> ids = new HashSet<Integer>();
+        for (InputRow row : list) {
+            int id = row.getId();
+            if (ids.contains(id)) {
+                fail("Multiple rows with id " + id);
+            }
+            ids.add(id);
+        }
+    }
 
-			builder.setDatastore(new CsvDatastore("Names", "src/test/resources/example-name-lengths.csv"));
-			builder.addSourceColumns("name");
-			FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filterJobBuilder = builder.addFilter(
-					NullCheckFilter.class);
-			filterJobBuilder.addInputColumn(builder.getSourceColumnByName("name"));
-			filterJobBuilder.setConfiguredProperty("Consider empty string as null", true);
+    @SuppressWarnings("unchecked")
+    public void testConsumeRowTaskForComplexJob() throws Throwable {
+        AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl();
+        final AnalysisJob job;
+        // build example job
+        {
+            AnalysisJobBuilder builder = new AnalysisJobBuilder(configuration);
 
-			TransformerJobBuilder<ConvertToNumberTransformer> convertTransformer = builder.addTransformer(
-					ConvertToNumberTransformer.class).addInputColumn(builder.getSourceColumnByName("name"));
-			MutableInputColumn<?> numberColumn = convertTransformer.getOutputColumns().get(0);
+            builder.setDatastore(new CsvDatastore("Names", "src/test/resources/example-name-lengths.csv"));
+            builder.addSourceColumns("name");
+            FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filterJobBuilder = builder
+                    .addFilter(NullCheckFilter.class);
+            filterJobBuilder.addInputColumn(builder.getSourceColumnByName("name"));
+            filterJobBuilder.setConfiguredProperty("Consider empty string as null", true);
 
-			convertTransformer.setRequirement(filterJobBuilder, NullCheckFilter.NullCheckCategory.NOT_NULL);
-			builder.addAnalyzer(MockAnalyzer.class).addInputColumns(numberColumn);
-			job = builder.toAnalysisJob();
-		}
+            TransformerJobBuilder<ConvertToNumberTransformer> convertTransformer = builder.addTransformer(
+                    ConvertToNumberTransformer.class).addInputColumn(builder.getSourceColumnByName("name"));
+            MutableInputColumn<?> numberColumn = convertTransformer.getOutputColumns().get(0);
 
-		ListResult<InputRow> result;
+            convertTransformer.setRequirement(filterJobBuilder, NullCheckFilter.NullCheckCategory.NOT_NULL);
+            builder.addAnalyzer(MockAnalyzer.class).addInputColumns(numberColumn);
+            job = builder.toAnalysisJob();
+        }
 
-		// run job
-		{
-			AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
-			AnalysisResultFuture resultFuture = runner.run(job);
-			if (resultFuture.isErrornous()) {
-				throw resultFuture.getErrors().get(0);
-			}
-			result = (ListResult<InputRow>) resultFuture.getResults().get(0);
-		}
+        ListResult<InputRow> result;
 
-		List<InputRow> list = result.getValues();
-		
+        // run job
+        {
+            AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+            AnalysisResultFuture resultFuture = runner.run(job);
+            if (resultFuture.isErrornous()) {
+                throw resultFuture.getErrors().get(0);
+            }
+            result = (ListResult<InputRow>) resultFuture.getResults().get(0);
+        }
 
-		assertEquals(12, list.size());
+        List<InputRow> list = result.getValues();
 
-		//assertEquals(1, list.get(0).getValue(countingColumn));
-	}
+        assertEquals(12, list.size());
+
+        // assertEquals(1, list.get(0).getValue(countingColumn));
+    }
 
 }

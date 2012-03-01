@@ -84,6 +84,14 @@ public class ValueDistributionGroupResult implements Serializable,
 	public boolean isAnnotationsEnabled() {
 		return _annotations != null;
 	}
+	
+	public boolean hasAnnotation(String value) {
+	    if (_annotations == null) {
+	        return false;
+	    }
+	    
+	    return _annotations.containsKey(value);
+	}
 
 	public AnnotatedRowsResult getAnnotatedRows(String value) {
 		if (_annotations == null) {

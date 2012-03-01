@@ -34,60 +34,60 @@ import org.eobjects.analyzer.job.Outcome;
  */
 public interface RowProcessingConsumer {
 
-	/**
-	 * @return true if this consumer is thread-safe and can thusly be invoked by
-	 *         several threads at the same time.
-	 * 
-	 * @see Concurrent
-	 */
-	public boolean isConcurrent();
+    /**
+     * @return true if this consumer is thread-safe and can thusly be invoked by
+     *         several threads at the same time.
+     * 
+     * @see Concurrent
+     */
+    public boolean isConcurrent();
 
-	/**
-	 * @return the required input columns for this consumer
-	 */
-	public InputColumn<?>[] getRequiredInput();
+    /**
+     * @return the required input columns for this consumer
+     */
+    public InputColumn<?>[] getRequiredInput();
 
-	/**
-	 * @param availableOutcomesInFlow
-	 *            a collection of all outcomes that <i>can</i> be available to
-	 *            the consumer given the proposed flow order.
-	 * @return whether or not the requirements (in terms of required outcomes)
-	 *         are sufficient for adding this consumer into the execution flow.
-	 *         If false the ordering mechanism will try to move the consumer to
-	 *         a later stage in the flow.
-	 */
-	public boolean satisfiedForFlowOrdering(Collection<Outcome> availableOutcomesInFlow);
+    /**
+     * @param availableOutcomesInFlow
+     *            a collection of all outcomes that <i>can</i> be available to
+     *            the consumer given the proposed flow order.
+     * @return whether or not the requirements (in terms of required outcomes)
+     *         are sufficient for adding this consumer into the execution flow.
+     *         If false the ordering mechanism will try to move the consumer to
+     *         a later stage in the flow.
+     */
+    public boolean satisfiedForFlowOrdering(Collection<Outcome> availableOutcomesInFlow);
 
-	/**
-	 * @param outcomes
-	 *            the current available outcomes in the processing of the
-	 *            particular row.
-	 * @return whether or not the requirements (in terms of required outcomes)
-	 *         are sufficient for including this component for a particular
-	 *         row's processing. If false, this component will be skipped.
-	 */
-	public boolean satisfiedForConsume(Outcome[] outcomes, InputRow inputRow);
+    /**
+     * @param outcomes
+     *            the current available outcomes in the processing of the
+     *            particular row.
+     * @return whether or not the requirements (in terms of required outcomes)
+     *         are sufficient for including this component for a particular
+     *         row's processing. If false, this component will be skipped.
+     */
+    public boolean satisfiedForConsume(Outcome[] outcomes, InputRow inputRow);
 
-	/**
-	 * Main method of the consumer. Recieves the input row, dispatches it to the
-	 * bean that needs to process it and returns the row for the next component
-	 * in the chain to process (often the same row).
-	 * 
-	 * @param row
-	 * @param distinctCount
-	 * @param outcomes
-	 * @return a new set of rows to pass into the processing flow, or null if
-	 *         the rows are unmodified
-	 */
-	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes);
+    /**
+     * Main method of the consumer. Recieves the input row, dispatches it to the
+     * bean that needs to process it and returns the row for the next component
+     * in the chain to process (often the same row).
+     * 
+     * @param row
+     * @param distinctCount
+     * @param outcomes
+     * @return a new set of rows to pass into the processing flow, or null if
+     *         the rows are unmodified
+     */
+    public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes);
 
-	/**
-	 * @return the componbent job
-	 */
-	public ComponentJob getComponentJob();
+    /**
+     * @return the componbent job
+     */
+    public ComponentJob getComponentJob();
 
-	/**
-	 * @return the component instance
-	 */
-	public Object getComponent();
+    /**
+     * @return the component instance
+     */
+    public Object getComponent();
 }

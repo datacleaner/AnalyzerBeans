@@ -19,7 +19,11 @@
  */
 package org.eobjects.analyzer.job;
 
+/**
+ * Interface for components that generate ID's for items in an
+ * {@link AnalysisJob}.
+ */
 public interface IdGenerator {
 
-	public String nextId();
+    public String nextId();
 }

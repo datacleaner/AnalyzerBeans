@@ -35,71 +35,81 @@ import org.slf4j.LoggerFactory;
  */
 public final class TransformedInputRow extends AbstractInputRow {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LoggerFactory.getLogger(TransformedInputRow.class);
-	
-	private final InputRow _delegate;
-	private final Map<InputColumn<?>, Object> _values;
+    private static final Logger logger = LoggerFactory.getLogger(TransformedInputRow.class);
 
-	public TransformedInputRow(InputRow delegate) {
-		if (delegate == null) {
-			throw new IllegalArgumentException("Delegate cannot be null");
-		}
-		_delegate = delegate;
-		_values = new LinkedHashMap<InputColumn<?>, Object>();
-	}
+    private final InputRow _delegate;
+    private final Map<InputColumn<?>, Object> _values;
+    private final int _rowId;
 
-	@Override
-	public int getId() {
-		return _delegate.getId();
-	}
+    public TransformedInputRow(InputRow delegate) {
+        this(delegate, null);
+    }
 
-	@Override
-	public boolean containsInputColumn(InputColumn<?> inputColumn) {
-		if (inputColumn.isVirtualColumn() && _values.containsKey(inputColumn)) {
-			return true;
-		}
-		return _delegate.containsInputColumn(inputColumn);
-	}
+    public TransformedInputRow(InputRow delegate, Integer rowId) {
+        if (delegate == null) {
+            throw new IllegalArgumentException("Delegate cannot be null");
+        }
+        _delegate = delegate;
+        if (rowId == null) {
+            _rowId = delegate.getId();
+        } else {
+            _rowId = rowId;
+        }
+        _values = new LinkedHashMap<InputColumn<?>, Object>();
+    }
 
-	public void addValue(InputColumn<?> inputColumn, Object value) {
-		if (inputColumn.isPhysicalColumn()) {
-			throw new IllegalArgumentException("Cannot add physical column values to transformed InputRow.");
-		}
-		_values.put(inputColumn, value);
-	}
+    @Override
+    public int getId() {
+        return _rowId;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E> E getValueInternal(InputColumn<E> column) {
-		if (column.isPhysicalColumn()) {
-			logger.debug("Column is physical, delegating.");
-			return _delegate.getValue(column);
-		}
-		if (_values.containsKey(column)) {
-			return (E) _values.get(column);
-		}
-		return _delegate.getValue(column);
-	}
+    @Override
+    public boolean containsInputColumn(InputColumn<?> inputColumn) {
+        if (inputColumn.isVirtualColumn() && _values.containsKey(inputColumn)) {
+            return true;
+        }
+        return _delegate.containsInputColumn(inputColumn);
+    }
 
-	public InputRow getDelegate() {
-		return _delegate;
-	}
+    public void addValue(InputColumn<?> inputColumn, Object value) {
+        if (inputColumn.isPhysicalColumn()) {
+            throw new IllegalArgumentException("Cannot add physical column values to transformed InputRow.");
+        }
+        _values.put(inputColumn, value);
+    }
 
-	@Override
-	public List<InputColumn<?>> getInputColumns() {
-		List<InputColumn<?>> inputColumns = _delegate.getInputColumns();
-		inputColumns.addAll(_values.keySet());
-		return inputColumns;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E> E getValueInternal(InputColumn<E> column) {
+        if (column.isPhysicalColumn()) {
+            logger.debug("Column is physical, delegating.");
+            return _delegate.getValue(column);
+        }
+        if (_values.containsKey(column)) {
+            return (E) _values.get(column);
+        }
+        return _delegate.getValue(column);
+    }
 
-	public Set<InputColumn<?>> getTransformedInputColumns() {
-		return _values.keySet();
-	}
+    public InputRow getDelegate() {
+        return _delegate;
+    }
 
-	@Override
-	public String toString() {
-		return "TransformedInputRow[values=" + _values + ",delegate=" + _delegate + "]";
-	}
+    @Override
+    public List<InputColumn<?>> getInputColumns() {
+        List<InputColumn<?>> inputColumns = _delegate.getInputColumns();
+        inputColumns.addAll(_values.keySet());
+        return inputColumns;
+    }
+
+    public Set<InputColumn<?>> getTransformedInputColumns() {
+        return _values.keySet();
+    }
+
+    @Override
+    public String toString() {
+        return "TransformedInputRow[values=" + _values + ",delegate=" + _delegate + "]";
+    }
 }
