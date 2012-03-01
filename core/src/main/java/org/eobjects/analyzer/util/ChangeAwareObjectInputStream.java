@@ -54,138 +54,161 @@ import org.slf4j.LoggerFactory;
  */
 public class ChangeAwareObjectInputStream extends ObjectInputStream {
 
-	private static final Logger logger = LoggerFactory.getLogger(ChangeAwareObjectInputStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChangeAwareObjectInputStream.class);
 
-	private static final Comparator<String> comparator = new Comparator<String>() {
-		@Override
-		public int compare(String o1, String o2) {
-			if (EqualsBuilder.equals(o1, o2)) {
-				return 0;
-			}
-			// use length as the primary differentiator, to make sure long
-			// packages are placed before short ones.
-			int diff = o1.length() - o2.length();
-			if (diff == 0) {
-				diff = o1.compareTo(o2);
-			}
-			return diff;
-		}
-	};
+    /**
+     * Table mapping primitive type names to corresponding class objects. As
+     * defined in {@link ObjectInputStream}.
+     */
+    private static final Map<String, Class<?>> PRIMITIVE_CLASSES = new HashMap<String, Class<?>>(8, 1.0F);
 
-	private final List<ClassLoader> additionalClassLoaders;
-	private final Map<String, String> renamedPackages;
-	private final Map<String, String> renamedClasses;
+    static {
+        PRIMITIVE_CLASSES.put("boolean", boolean.class);
+        PRIMITIVE_CLASSES.put("byte", byte.class);
+        PRIMITIVE_CLASSES.put("char", char.class);
+        PRIMITIVE_CLASSES.put("short", short.class);
+        PRIMITIVE_CLASSES.put("int", int.class);
+        PRIMITIVE_CLASSES.put("long", long.class);
+        PRIMITIVE_CLASSES.put("float", float.class);
+        PRIMITIVE_CLASSES.put("double", double.class);
+        PRIMITIVE_CLASSES.put("void", void.class);
+    }
 
-	public ChangeAwareObjectInputStream(InputStream in) throws IOException {
-		super(in);
-		renamedPackages = new TreeMap<String, String>(comparator);
-		renamedClasses = new HashMap<String, String>();
-		additionalClassLoaders = new ArrayList<ClassLoader>();
+    private static final Comparator<String> comparator = new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+            if (EqualsBuilder.equals(o1, o2)) {
+                return 0;
+            }
+            // use length as the primary differentiator, to make sure long
+            // packages are placed before short ones.
+            int diff = o1.length() - o2.length();
+            if (diff == 0) {
+                diff = o1.compareTo(o2);
+            }
+            return diff;
+        }
+    };
 
-		// add analyzerbeans' own renamed classes
-		addRenamedClass("org.eobjects.analyzer.reference.TextBasedDictionary", TextFileDictionary.class);
-		addRenamedClass("org.eobjects.analyzer.reference.TextBasedSynonymCatalog", TextFileSynonymCatalog.class);
-	}
+    private final List<ClassLoader> additionalClassLoaders;
+    private final Map<String, String> renamedPackages;
+    private final Map<String, String> renamedClasses;
 
-	public void addClassLoader(ClassLoader classLoader) {
-		additionalClassLoaders.add(classLoader);
-	}
+    public ChangeAwareObjectInputStream(InputStream in) throws IOException {
+        super(in);
+        renamedPackages = new TreeMap<String, String>(comparator);
+        renamedClasses = new HashMap<String, String>();
+        additionalClassLoaders = new ArrayList<ClassLoader>();
 
-	public void addRenamedPackage(String originalPackageName, String newPackageName) {
-		renamedPackages.put(originalPackageName, newPackageName);
-	}
+        // add analyzerbeans' own renamed classes
+        addRenamedClass("org.eobjects.analyzer.reference.TextBasedDictionary", TextFileDictionary.class);
+        addRenamedClass("org.eobjects.analyzer.reference.TextBasedSynonymCatalog", TextFileSynonymCatalog.class);
+    }
 
-	public void addRenamedClass(String originalClassName, Class<?> newClass) {
-		addRenamedClass(originalClassName, newClass.getName());
-	}
+    public void addClassLoader(ClassLoader classLoader) {
+        additionalClassLoaders.add(classLoader);
+    }
 
-	public void addRenamedClass(String originalClassName, String newClassName) {
-		renamedClasses.put(originalClassName, newClassName);
-	}
+    public void addRenamedPackage(String originalPackageName, String newPackageName) {
+        renamedPackages.put(originalPackageName, newPackageName);
+    }
 
-	@Override
-	protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
-		final ObjectStreamClass resultClassDescriptor = super.readClassDescriptor();
+    public void addRenamedClass(String originalClassName, Class<?> newClass) {
+        addRenamedClass(originalClassName, newClass.getName());
+    }
 
-		final String originalClassName = resultClassDescriptor.getName();
-		if (renamedClasses.containsKey(originalClassName)) {
-			final String className = renamedClasses.get(originalClassName);
-			logger.info("Class '{}' was encountered. Returning class descriptor of new class name: '{}'", originalClassName,
-					className);
-			return getClassDescriptor(className, resultClassDescriptor);
-		} else {
-			final Set<Entry<String, String>> entrySet = renamedPackages.entrySet();
-			for (Entry<String, String> entry : entrySet) {
-				final String legacyPackage = entry.getKey();
-				if (originalClassName.startsWith(legacyPackage)) {
-					final String className = originalClassName.replaceFirst(legacyPackage, entry.getValue());
-					logger.info("Class '{}' was encountered. Returning class descriptor of new class name: '{}'",
-							originalClassName, className);
-					return getClassDescriptor(className, resultClassDescriptor);
-				}
-			}
-		}
+    public void addRenamedClass(String originalClassName, String newClassName) {
+        renamedClasses.put(originalClassName, newClassName);
+    }
 
-		return resultClassDescriptor;
-	}
+    @Override
+    protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
+        final ObjectStreamClass resultClassDescriptor = super.readClassDescriptor();
 
-	private ObjectStreamClass getClassDescriptor(final String className, final ObjectStreamClass originalClassDescriptor)
-			throws ClassNotFoundException {
-		final ObjectStreamClass newClassDescriptor = ObjectStreamClass.lookup(resolveClass(className));
-		final String[] newFieldNames = getFieldNames(newClassDescriptor);
-		final String[] originalFieldNames = getFieldNames(originalClassDescriptor);
-		if (!EqualsBuilder.equals(originalFieldNames, newFieldNames)) {
-			logger.warn("Field names of original and new class ({}) does not correspond!", className);
+        final String originalClassName = resultClassDescriptor.getName();
+        if (renamedClasses.containsKey(originalClassName)) {
+            final String className = renamedClasses.get(originalClassName);
+            logger.info("Class '{}' was encountered. Returning class descriptor of new class name: '{}'",
+                    originalClassName, className);
+            return getClassDescriptor(className, resultClassDescriptor);
+        } else {
+            final Set<Entry<String, String>> entrySet = renamedPackages.entrySet();
+            for (Entry<String, String> entry : entrySet) {
+                final String legacyPackage = entry.getKey();
+                if (originalClassName.startsWith(legacyPackage)) {
+                    final String className = originalClassName.replaceFirst(legacyPackage, entry.getValue());
+                    logger.info("Class '{}' was encountered. Returning class descriptor of new class name: '{}'",
+                            originalClassName, className);
+                    return getClassDescriptor(className, resultClassDescriptor);
+                }
+            }
+        }
 
-			// try to hack our way out of it by changing the value of the "name"
-			// field in the ORIGINAL descriptor
-			try {
-				Field field = ObjectStreamClass.class.getDeclaredField("name");
-				assert field != null;
-				assert field.getType() == String.class;
-				field.setAccessible(true);
-				field.set(originalClassDescriptor, className);
-				return originalClassDescriptor;
-			} catch (Exception e) {
-				logger.error("Unsuccesful attempt at changing the name of the original class descriptor");
-				if (e instanceof RuntimeException) {
-					throw (RuntimeException) e;
-				}
-				throw new IllegalStateException(e);
-			}
-		}
-		return newClassDescriptor;
-	}
-	
-	@Override
-	protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-		return resolveClass(desc.getName());
-	}
+        return resultClassDescriptor;
+    }
 
-	private Class<?> resolveClass(String className) throws ClassNotFoundException {
-		logger.debug("Resolving class '{}'", className);
-		try {
-			return Class.forName(className);
-		} catch (ClassNotFoundException e) {
-			logger.info("Class '{}' was not resolved in main class loader.", className);
-			for (ClassLoader classLoader : additionalClassLoaders) {
-				try {
-					return classLoader.loadClass(className);
-				} catch (ClassNotFoundException minorException) {
-					logger.info("Class '{}' was not resolved in additional class loader '{}'", className, classLoader);
-				}
-			}
-			logger.warn("Could not resolve class of name '{}'", className);
-			throw e;
-		}
-	}
+    private ObjectStreamClass getClassDescriptor(final String className, final ObjectStreamClass originalClassDescriptor)
+            throws ClassNotFoundException {
+        final ObjectStreamClass newClassDescriptor = ObjectStreamClass.lookup(resolveClass(className));
+        final String[] newFieldNames = getFieldNames(newClassDescriptor);
+        final String[] originalFieldNames = getFieldNames(originalClassDescriptor);
+        if (!EqualsBuilder.equals(originalFieldNames, newFieldNames)) {
+            logger.warn("Field names of original and new class ({}) does not correspond!", className);
 
-	private String[] getFieldNames(ObjectStreamClass classDescriptor) {
-		ObjectStreamField[] fields = classDescriptor.getFields();
-		String[] fieldNames = new String[fields.length];
-		for (int i = 0; i < fieldNames.length; i++) {
-			fieldNames[i] = fields[i].getName();
-		}
-		return fieldNames;
-	}
+            // try to hack our way out of it by changing the value of the "name"
+            // field in the ORIGINAL descriptor
+            try {
+                Field field = ObjectStreamClass.class.getDeclaredField("name");
+                assert field != null;
+                assert field.getType() == String.class;
+                field.setAccessible(true);
+                field.set(originalClassDescriptor, className);
+                return originalClassDescriptor;
+            } catch (Exception e) {
+                logger.error("Unsuccesful attempt at changing the name of the original class descriptor");
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new IllegalStateException(e);
+            }
+        }
+        return newClassDescriptor;
+    }
+
+    @Override
+    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+        return resolveClass(desc.getName());
+    }
+
+    private Class<?> resolveClass(String className) throws ClassNotFoundException {
+        logger.debug("Resolving class '{}'", className);
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            Class<?> primitiveClass = PRIMITIVE_CLASSES.get(className);
+            if (primitiveClass != null) {
+                return primitiveClass;
+            }
+
+            logger.info("Class '{}' was not resolved in main class loader.", className);
+            for (ClassLoader classLoader : additionalClassLoaders) {
+                try {
+                    return classLoader.loadClass(className);
+                } catch (ClassNotFoundException minorException) {
+                    logger.info("Class '{}' was not resolved in additional class loader '{}'", className, classLoader);
+                }
+            }
+            logger.warn("Could not resolve class of name '{}'", className);
+            throw e;
+        }
+    }
+
+    private String[] getFieldNames(ObjectStreamClass classDescriptor) {
+        ObjectStreamField[] fields = classDescriptor.getFields();
+        String[] fieldNames = new String[fields.length];
+        for (int i = 0; i < fieldNames.length; i++) {
+            fieldNames[i] = fields[i].getName();
+        }
+        return fieldNames;
+    }
 }
