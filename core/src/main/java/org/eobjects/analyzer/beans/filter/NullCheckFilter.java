@@ -43,81 +43,87 @@ import org.eobjects.metamodel.schema.Column;
 @Categorized(FilterCategory.class)
 public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.NullCheckCategory> {
 
-	public static enum NullCheckCategory {
-		@Alias("INVALID")
-		NULL,
+    public static enum NullCheckCategory {
+        @Alias("INVALID")
+        NULL,
 
-		@Alias("VALID")
-		NOT_NULL;
-	}
+        @Alias("VALID")
+        NOT_NULL;
+    }
 
-	@Configured
-	@Description("Select columns that should NOT have null values")
-	InputColumn<?>[] columns;
+    @Configured
+    @Description("Select columns that should NOT have null values")
+    InputColumn<?>[] columns;
 
-	@Configured
-	@Description("Consider empty strings (\"\") as null also?")
-	boolean considerEmptyStringAsNull = false;
+    @Configured
+    @Description("Consider empty strings (\"\") as null also?")
+    boolean considerEmptyStringAsNull = false;
 
-	public NullCheckFilter() {
-	}
+    public NullCheckFilter() {
+    }
 
-	public NullCheckFilter(InputColumn<?>[] columns, boolean considerEmptyStringAsNull) {
-		this();
-		this.columns = columns;
-		this.considerEmptyStringAsNull = considerEmptyStringAsNull;
-	}
+    public NullCheckFilter(InputColumn<?>[] columns, boolean considerEmptyStringAsNull) {
+        this();
+        this.columns = columns;
+        this.considerEmptyStringAsNull = considerEmptyStringAsNull;
+    }
 
-	public void setConsiderEmptyStringAsNull(boolean considerEmptyStringAsNull) {
-		this.considerEmptyStringAsNull = considerEmptyStringAsNull;
-	}
+    public void setConsiderEmptyStringAsNull(boolean considerEmptyStringAsNull) {
+        this.considerEmptyStringAsNull = considerEmptyStringAsNull;
+    }
 
-	@Override
-	public boolean isOptimizable(NullCheckCategory category) {
-		return true;
-	}
+    @Override
+    public boolean isOptimizable(NullCheckCategory category) {
+        return true;
+    }
 
-	@Override
-	public Query optimizeQuery(Query q, NullCheckCategory category) {
-		if (category == NullCheckCategory.NOT_NULL) {
-			for (InputColumn<?> col : columns) {
-				Column column = col.getPhysicalColumn();
-				q.where(column, OperatorType.DIFFERENT_FROM, null);
-				if (considerEmptyStringAsNull && col.getDataType() == String.class) {
-					q.where(column, OperatorType.DIFFERENT_FROM, "");
-				}
-			}
-		} else {
-			// if NULL all filter items will be OR'ed.
-			List<FilterItem> filterItems = new ArrayList<FilterItem>();
-			for (InputColumn<?> col : columns) {
-				Column column = col.getPhysicalColumn();
+    @Override
+    public Query optimizeQuery(Query q, NullCheckCategory category) {
+        if (category == NullCheckCategory.NOT_NULL) {
+            for (InputColumn<?> col : columns) {
+                Column column = col.getPhysicalColumn();
+                if (column == null) {
+                    throw new IllegalStateException("Cannot optimize on non-physical column: " + col);
+                }
+                q.where(column, OperatorType.DIFFERENT_FROM, null);
+                if (considerEmptyStringAsNull && col.getDataType() == String.class) {
+                    q.where(column, OperatorType.DIFFERENT_FROM, "");
+                }
+            }
+        } else {
+            // if NULL all filter items will be OR'ed.
+            List<FilterItem> filterItems = new ArrayList<FilterItem>();
+            for (InputColumn<?> col : columns) {
+                Column column = col.getPhysicalColumn();
+                if (column == null) {
+                    throw new IllegalStateException("Cannot optimize on non-physical column: " + col);
+                }
 
-				SelectItem selectItem = new SelectItem(column);
-				FilterItem fi1 = new FilterItem(selectItem, OperatorType.EQUALS_TO, null);
-				filterItems.add(fi1);
-				if (considerEmptyStringAsNull && col.getDataType() == String.class) {
-					FilterItem fi2 = new FilterItem(selectItem, OperatorType.EQUALS_TO, "");
-					filterItems.add(fi2);
-				}
-			}
-			q.where(new FilterItem(filterItems.toArray(new FilterItem[filterItems.size()])));
-		}
-		return q;
-	}
+                SelectItem selectItem = new SelectItem(column);
+                FilterItem fi1 = new FilterItem(selectItem, OperatorType.EQUALS_TO, null);
+                filterItems.add(fi1);
+                if (considerEmptyStringAsNull && col.getDataType() == String.class) {
+                    FilterItem fi2 = new FilterItem(selectItem, OperatorType.EQUALS_TO, "");
+                    filterItems.add(fi2);
+                }
+            }
+            q.where(new FilterItem(filterItems.toArray(new FilterItem[filterItems.size()])));
+        }
+        return q;
+    }
 
-	@Override
-	public NullCheckCategory categorize(InputRow inputRow) {
-		for (InputColumn<?> col : columns) {
-			Object value = inputRow.getValue(col);
-			if (value == null) {
-				return NullCheckCategory.NULL;
-			}
+    @Override
+    public NullCheckCategory categorize(InputRow inputRow) {
+        for (InputColumn<?> col : columns) {
+            Object value = inputRow.getValue(col);
+            if (value == null) {
+                return NullCheckCategory.NULL;
+            }
 
-			if (considerEmptyStringAsNull && "".equals(value)) {
-				return NullCheckCategory.NULL;
-			}
-		}
-		return NullCheckCategory.NOT_NULL;
-	}
+            if (considerEmptyStringAsNull && "".equals(value)) {
+                return NullCheckCategory.NULL;
+            }
+        }
+        return NullCheckCategory.NOT_NULL;
+    }
 }

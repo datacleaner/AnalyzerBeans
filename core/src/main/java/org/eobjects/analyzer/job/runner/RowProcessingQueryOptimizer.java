@@ -34,6 +34,7 @@ import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
@@ -51,160 +52,183 @@ import org.eobjects.metamodel.query.Query;
  */
 public class RowProcessingQueryOptimizer {
 
-	private static final Class<?>[] ALWAYS_OPTIMIZABLE = new Class[] { MaxRowsFilter.class };
-	private final Datastore _datastore;
-	private final Query _baseQuery;
-	private final List<RowProcessingConsumer> _consumers;
-	private final Map<FilterConsumer, FilterOutcome> _optimizedFilters;
+    private static final Class<?>[] ALWAYS_OPTIMIZABLE = new Class[] { MaxRowsFilter.class };
+    private final Datastore _datastore;
+    private final Query _baseQuery;
+    private final List<RowProcessingConsumer> _consumers;
+    private final Map<FilterConsumer, FilterOutcome> _optimizedFilters;
 
-	public RowProcessingQueryOptimizer(Datastore datastore, List<RowProcessingConsumer> consumers, Query baseQuery) {
-		_datastore = datastore;
-		_consumers = consumers;
-		_baseQuery = baseQuery;
-		_optimizedFilters = new HashMap<FilterConsumer, FilterOutcome>();
+    public RowProcessingQueryOptimizer(Datastore datastore, List<RowProcessingConsumer> consumers, Query baseQuery) {
+        _datastore = datastore;
+        _consumers = consumers;
+        _baseQuery = baseQuery;
+        _optimizedFilters = new HashMap<FilterConsumer, FilterOutcome>();
 
-		init();
-	}
+        init();
+    }
 
-	private void init() {
-		int consumerIndex = 0;
-		for (RowProcessingConsumer consumer : _consumers) {
-			if (consumer instanceof FilterConsumer) {
-				FilterConsumer filterConsumer = (FilterConsumer) consumer;
-				FilterOutcome[] outcomes = filterConsumer.getComponentJob().getOutcomes();
-				FilterOutcome optimizableOutcome = null;
+    private void init() {
+        int consumerIndex = 0;
+        for (RowProcessingConsumer consumer : _consumers) {
+            if (consumer instanceof FilterConsumer) {
+                FilterConsumer filterConsumer = (FilterConsumer) consumer;
 
-				for (FilterOutcome outcome : outcomes) {
-					boolean optimizable = isOptimizable(filterConsumer, outcome, consumerIndex);
-					if (optimizable) {
-						if (optimizableOutcome != null) {
-							// cannot have multiple optimizable outcomes for a
-							// single filter
-							break;
-						}
-						optimizableOutcome = outcome;
-					}
-				}
+                if (!isOptimizable(filterConsumer)) {
+                    // if it can be established that the filter is not
+                    // optimizable at all (either because it is not an
+                    // QueryOptimizableFilter or because input is not physical
+                    // columns), then abort.
+                    break;
+                }
 
-				if (optimizableOutcome == null) {
-					break;
-				}
+                FilterOutcome[] outcomes = filterConsumer.getComponentJob().getOutcomes();
+                FilterOutcome optimizableOutcome = null;
 
-				_optimizedFilters.put(filterConsumer, optimizableOutcome);
-			}
-			consumerIndex++;
-		}
-	}
+                for (FilterOutcome outcome : outcomes) {
+                    boolean optimizable = isOptimizable(filterConsumer, outcome, consumerIndex);
+                    if (optimizable) {
+                        if (optimizableOutcome != null) {
+                            // cannot have multiple optimizable outcomes for a
+                            // single filter
+                            break;
+                        }
+                        optimizableOutcome = outcome;
+                    }
+                }
 
-	private boolean isOptimizable(final FilterConsumer filterConsumer, final FilterOutcome filterOutcome,
-			final int consumerIndex) {
-		if (!filterConsumer.isQueryOptimizable(filterOutcome)) {
-			// the filter is not optimizable
-			return false;
-		}
+                if (optimizableOutcome == null) {
+                    break;
+                }
 
-		if (!_datastore.getPerformanceCharacteristics().isQueryOptimizationPreferred()) {
-			// the datastore doesn't prefer query optimization
-			Class<?> filterClass = filterConsumer.getComponentJob().getDescriptor().getComponentClass();
-			if (!ArrayUtils.contains(ALWAYS_OPTIMIZABLE, filterClass)) {
-				// the filter is not in the "always optimizable" set.
-				return false;
-			}
-		}
+                _optimizedFilters.put(filterConsumer, optimizableOutcome);
+            }
+            consumerIndex++;
+        }
+    }
 
-		Set<InputColumn<?>> satisfiedColumns = new HashSet<InputColumn<?>>();
-		Set<Outcome> satisfiedRequirements = new HashSet<Outcome>();
-		satisfiedRequirements.add(filterOutcome);
+    private boolean isOptimizable(FilterConsumer filterConsumer) {
+        final FilterBeanDescriptor<?, ?> descriptor = filterConsumer.getComponentJob().getDescriptor();
+        if (!descriptor.isQueryOptimizable()) {
+            return false;
+        }
+        final InputColumn<?>[] input = filterConsumer.getRequiredInput();
+        for (InputColumn<?> inputColumn : input) {
+            if (inputColumn.isVirtualColumn()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-		for (int i = consumerIndex + 1; i < _consumers.size(); i++) {
-			boolean independentComponent = true;
+    private boolean isOptimizable(final FilterConsumer filterConsumer, final FilterOutcome filterOutcome,
+            final int consumerIndex) {
+        if (!filterConsumer.isQueryOptimizable(filterOutcome)) {
+            // the filter is not optimizable
+            return false;
+        }
 
-			RowProcessingConsumer nextConsumer = _consumers.get(i);
-			ComponentJob componentJob = nextConsumer.getComponentJob();
-			if (componentJob instanceof OutcomeSinkJob) {
-				Outcome[] requirements = ((OutcomeSinkJob) componentJob).getRequirements();
-				for (Outcome requirement : requirements) {
-					if (!satisfiedRequirements.contains(requirement)) {
-						return false;
-					} else {
-						independentComponent = false;
-					}
-				}
-			}
+        if (!_datastore.getPerformanceCharacteristics().isQueryOptimizationPreferred()) {
+            // the datastore doesn't prefer query optimization
+            Class<?> filterClass = filterConsumer.getComponentJob().getDescriptor().getComponentClass();
+            if (!ArrayUtils.contains(ALWAYS_OPTIMIZABLE, filterClass)) {
+                // the filter is not in the "always optimizable" set.
+                return false;
+            }
+        }
 
-			if (componentJob instanceof InputColumnSinkJob) {
-				InputColumn<?>[] requiredColumns = ((InputColumnSinkJob) componentJob).getInput();
-				for (InputColumn<?> column : requiredColumns) {
-					if (column.isVirtualColumn()) {
-						if (!satisfiedColumns.contains(column)) {
-							return false;
-						} else {
-							independentComponent = false;
-						}
-					}
-				}
-			}
+        Set<InputColumn<?>> satisfiedColumns = new HashSet<InputColumn<?>>();
+        Set<Outcome> satisfiedRequirements = new HashSet<Outcome>();
+        satisfiedRequirements.add(filterOutcome);
 
-			if (independentComponent) {
-				// totally independent components prohibit optimization
-				return false;
-			}
+        for (int i = consumerIndex + 1; i < _consumers.size(); i++) {
+            boolean independentComponent = true;
 
-			// this component is accepted now, add it's outcomes to the
-			// satisfied requirements
-			if (componentJob instanceof OutcomeSourceJob) {
-				Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
-				for (Outcome outcome : outcomes) {
-					satisfiedRequirements.add(outcome);
-				}
-			}
+            final RowProcessingConsumer nextConsumer = _consumers.get(i);
+            ComponentJob componentJob = nextConsumer.getComponentJob();
+            if (componentJob instanceof OutcomeSinkJob) {
+                Outcome[] requirements = ((OutcomeSinkJob) componentJob).getRequirements();
+                for (Outcome requirement : requirements) {
+                    if (!satisfiedRequirements.contains(requirement)) {
+                        return false;
+                    } else {
+                        independentComponent = false;
+                    }
+                }
+            }
 
-			if (componentJob instanceof InputColumnSourceJob) {
-				InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();
-				for (InputColumn<?> column : output) {
-					satisfiedColumns.add(column);
-				}
-			}
-		}
+            if (componentJob instanceof InputColumnSinkJob) {
+                InputColumn<?>[] requiredColumns = ((InputColumnSinkJob) componentJob).getInput();
+                for (InputColumn<?> column : requiredColumns) {
+                    if (column.isVirtualColumn()) {
+                        if (!satisfiedColumns.contains(column)) {
+                            return false;
+                        } else {
+                            independentComponent = false;
+                        }
+                    }
+                }
+            }
 
-		return true;
-	}
+            if (independentComponent) {
+                // totally independent components prohibit optimization
+                return false;
+            }
 
-	public Query getOptimizedQuery() {
-		// create a copy/clone of the original query
-		Query q = _baseQuery.clone();
+            // this component is accepted now, add it's outcomes to the
+            // satisfied requirements
+            if (componentJob instanceof OutcomeSourceJob) {
+                Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
+                for (Outcome outcome : outcomes) {
+                    satisfiedRequirements.add(outcome);
+                }
+            }
 
-		Set<Entry<FilterConsumer, FilterOutcome>> entries = _optimizedFilters.entrySet();
-		for (Entry<FilterConsumer, FilterOutcome> entry : entries) {
+            if (componentJob instanceof InputColumnSourceJob) {
+                InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();
+                for (InputColumn<?> column : output) {
+                    satisfiedColumns.add(column);
+                }
+            }
+        }
 
-			FilterConsumer consumer = entry.getKey();
-			FilterOutcome outcome = entry.getValue();
-			Filter<?> filter = consumer.getComponent();
+        return true;
+    }
 
-			@SuppressWarnings("rawtypes")
-			QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) filter;
+    public Query getOptimizedQuery() {
+        // create a copy/clone of the original query
+        Query q = _baseQuery.clone();
 
-			@SuppressWarnings("unchecked")
-			Query newQuery = queryOptimizedFilter.optimizeQuery(q, outcome.getCategory());
-			q = newQuery;
-		}
-		return q;
-	}
+        Set<Entry<FilterConsumer, FilterOutcome>> entries = _optimizedFilters.entrySet();
+        for (Entry<FilterConsumer, FilterOutcome> entry : entries) {
 
-	public List<RowProcessingConsumer> getOptimizedConsumers() {
-		List<RowProcessingConsumer> result = new ArrayList<RowProcessingConsumer>(_consumers);
-		for (FilterConsumer filterConsumer : _optimizedFilters.keySet()) {
-			result.remove(filterConsumer);
-		}
-		return result;
-	}
+            FilterConsumer consumer = entry.getKey();
+            FilterOutcome outcome = entry.getValue();
+            Filter<?> filter = consumer.getComponent();
 
-	public Collection<? extends Outcome> getOptimizedAvailableOutcomes() {
-		return _optimizedFilters.values();
-	}
+            @SuppressWarnings("rawtypes")
+            QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) filter;
 
-	public boolean isOptimizable() {
-		return !_optimizedFilters.isEmpty();
-	}
+            @SuppressWarnings("unchecked")
+            Query newQuery = queryOptimizedFilter.optimizeQuery(q, outcome.getCategory());
+            q = newQuery;
+        }
+        return q;
+    }
+
+    public List<RowProcessingConsumer> getOptimizedConsumers() {
+        List<RowProcessingConsumer> result = new ArrayList<RowProcessingConsumer>(_consumers);
+        for (FilterConsumer filterConsumer : _optimizedFilters.keySet()) {
+            result.remove(filterConsumer);
+        }
+        return result;
+    }
+
+    public Collection<? extends Outcome> getOptimizedAvailableOutcomes() {
+        return _optimizedFilters.values();
+    }
+
+    public boolean isOptimizable() {
+        return !_optimizedFilters.isEmpty();
+    }
 
 }

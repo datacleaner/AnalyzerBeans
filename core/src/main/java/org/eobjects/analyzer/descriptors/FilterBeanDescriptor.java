@@ -40,4 +40,6 @@ public interface FilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> ex
 	public Set<String> getOutcomeCategoryNames();
 
 	public Enum<C> getOutcomeCategoryByName(String category);
+
+    public boolean isQueryOptimizable();
 }

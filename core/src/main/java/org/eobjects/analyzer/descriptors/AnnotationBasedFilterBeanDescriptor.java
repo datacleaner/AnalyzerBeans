@@ -26,92 +26,98 @@ import java.util.Set;
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends AbstractBeanDescriptor<F>
-		implements FilterBeanDescriptor<F, C> {
+final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends
+        AbstractBeanDescriptor<F> implements FilterBeanDescriptor<F, C> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final String _displayName;
+    private final String _displayName;
 
-	protected AnnotationBasedFilterBeanDescriptor(Class<F> filterClass) throws DescriptorException {
-		super(filterClass, false);
+    protected AnnotationBasedFilterBeanDescriptor(Class<F> filterClass) throws DescriptorException {
+        super(filterClass, false);
 
-		if (!ReflectionUtils.is(filterClass, Filter.class)) {
-			throw new DescriptorException(filterClass + " does not implement " + Filter.class.getName());
-		}
+        if (!ReflectionUtils.is(filterClass, Filter.class)) {
+            throw new DescriptorException(filterClass + " does not implement " + Filter.class.getName());
+        }
 
-		FilterBean filterAnnotation = ReflectionUtils.getAnnotation(filterClass, FilterBean.class);
-		if (filterAnnotation == null) {
-			throw new DescriptorException(filterClass + " doesn't implement the FilterBean annotation");
-		}
+        FilterBean filterAnnotation = ReflectionUtils.getAnnotation(filterClass, FilterBean.class);
+        if (filterAnnotation == null) {
+            throw new DescriptorException(filterClass + " doesn't implement the FilterBean annotation");
+        }
 
-		String displayName = filterAnnotation.value();
-		if (displayName == null || displayName.trim().length() == 0) {
-			displayName = ReflectionUtils.explodeCamelCase(filterClass.getSimpleName(), false);
-		}
-		_displayName = displayName;
+        String displayName = filterAnnotation.value();
+        if (displayName == null || displayName.trim().length() == 0) {
+            displayName = ReflectionUtils.explodeCamelCase(filterClass.getSimpleName(), false);
+        }
+        _displayName = displayName;
 
-		visitClass();
-	}
+        visitClass();
+    }
 
-	@Override
-	public String getDisplayName() {
-		return _displayName;
-	}
+    @Override
+    public String getDisplayName() {
+        return _displayName;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Class<C> getOutcomeCategoryEnum() {
-		Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), Filter.class, 0);
-		if (typeParameter == null) {
-			throw new IllegalStateException("Could not determine Filter's category enum type");
-		}
-		return (Class<C>) typeParameter;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Class<C> getOutcomeCategoryEnum() {
+        Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), Filter.class, 0);
+        if (typeParameter == null) {
+            throw new IllegalStateException("Could not determine Filter's category enum type");
+        }
+        return (Class<C>) typeParameter;
+    }
 
-	@Override
-	public EnumSet<C> getOutcomeCategories() {
-		Class<C> categoryEnum = getOutcomeCategoryEnum();
-		return EnumSet.allOf(categoryEnum);
-	}
+    @Override
+    public EnumSet<C> getOutcomeCategories() {
+        Class<C> categoryEnum = getOutcomeCategoryEnum();
+        return EnumSet.allOf(categoryEnum);
+    }
 
-	@Override
-	public Set<String> getOutcomeCategoryNames() {
-		EnumSet<C> enumSet = getOutcomeCategories();
-		Set<String> result = new HashSet<String>();
-		for (Enum<C> category : enumSet) {
-			result.add(category.name());
-		}
-		return result;
-	}
+    @Override
+    public Set<String> getOutcomeCategoryNames() {
+        EnumSet<C> enumSet = getOutcomeCategories();
+        Set<String> result = new HashSet<String>();
+        for (Enum<C> category : enumSet) {
+            result.add(category.name());
+        }
+        return result;
+    }
 
-	@Override
-	public Enum<C> getOutcomeCategoryByName(String categoryName) {
-		if (categoryName == null) {
-			return null;
-		}
-		EnumSet<C> categories = getOutcomeCategories();
-		for (Enum<C> c : categories) {
-			if (c.name().equals(categoryName)) {
-				return c;
-			}
-		}
+    @Override
+    public Enum<C> getOutcomeCategoryByName(String categoryName) {
+        if (categoryName == null) {
+            return null;
+        }
+        EnumSet<C> categories = getOutcomeCategories();
+        for (Enum<C> c : categories) {
+            if (c.name().equals(categoryName)) {
+                return c;
+            }
+        }
 
-		for (Enum<C> c : categories) {
-			// check aliases
-			Alias aliasAnnotation = ReflectionUtils.getAnnotation(c, Alias.class);
-			if (aliasAnnotation != null) {
-				String[] aliases = aliasAnnotation.value();
-				for (String alias : aliases) {
-					if (categoryName.equals(alias)) {
-						return c;
-					}
-				}
-			}
-		}
+        for (Enum<C> c : categories) {
+            // check aliases
+            Alias aliasAnnotation = ReflectionUtils.getAnnotation(c, Alias.class);
+            if (aliasAnnotation != null) {
+                String[] aliases = aliasAnnotation.value();
+                for (String alias : aliases) {
+                    if (categoryName.equals(alias)) {
+                        return c;
+                    }
+                }
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
+
+    @Override
+    public boolean isQueryOptimizable() {
+        return ReflectionUtils.is(getComponentClass(), QueryOptimizedFilter.class);
+    }
 }
