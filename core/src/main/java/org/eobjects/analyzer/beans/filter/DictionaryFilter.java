@@ -19,54 +19,44 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import org.eobjects.analyzer.beans.api.Alias;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.reference.StringPattern;
+import org.eobjects.analyzer.reference.Dictionary;
 
-@FilterBean("String pattern match")
-@Description("Filters values that matches and does not match string patterns")
-public class StringPatternMatchFilter implements Filter<ValidationCategory> {
+@FilterBean("Validate in dictionary")
+@Alias("Dictionary lookup")
+@Description("Filters values based on their existence in a dictionary")
+@Categorized(FilterCategory.class)
+public class DictionaryFilter implements Filter<ValidationCategory> {
 
 	@Configured
 	InputColumn<String> column;
 
 	@Configured
-	StringPattern[] stringPatterns;
-
-	@Configured
-	@Description("Require values to match all or just any of the string patterns?")
-	MatchFilterCriteria matchCriteria = MatchFilterCriteria.ANY;
-
-	public StringPatternMatchFilter(InputColumn<String> column, StringPattern[] stringPatterns,
-			MatchFilterCriteria matchCriteria) {
+	Dictionary dictionary;
+	
+	public DictionaryFilter() {
+	}
+	
+	public DictionaryFilter(InputColumn<String> column, Dictionary dictionary) {
 		this();
 		this.column = column;
-		this.stringPatterns = stringPatterns;
-		this.matchCriteria = matchCriteria;
-	}
-
-	public StringPatternMatchFilter() {
+		this.dictionary = dictionary;
 	}
 
 	@Override
 	public ValidationCategory categorize(InputRow inputRow) {
 		String value = inputRow.getValue(column);
 		if (value != null) {
-			int matches = 0;
-			for (StringPattern stringPattern : stringPatterns) {
-				if (stringPattern.matches(value)) {
-					matches++;
-					if (matchCriteria == MatchFilterCriteria.ANY) {
-						return ValidationCategory.VALID;
-					}
-				}
-			}
-			if (matchCriteria == MatchFilterCriteria.ALL) {
-				return ValidationCategory.valueOf(matches == stringPatterns.length);
+			if (dictionary.containsValue(value)) {
+				return ValidationCategory.VALID;
 			}
 		}
 		return ValidationCategory.INVALID;

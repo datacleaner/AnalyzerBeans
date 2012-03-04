@@ -33,7 +33,7 @@ public class DictionaryLookupFilterTest extends TestCase {
 		InputColumn<String> column = new MockInputColumn<String>("col", String.class);
 		Dictionary dictionary = new SimpleDictionary("my dictionary", "foo", "bar", "baz");
 		
-		DictionaryLookupFilter filter = new DictionaryLookupFilter(column, dictionary);
+		DictionaryFilter filter = new DictionaryFilter(column, dictionary);
 		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "foo")));
 		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "foo ")));
 		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "foo bar")));

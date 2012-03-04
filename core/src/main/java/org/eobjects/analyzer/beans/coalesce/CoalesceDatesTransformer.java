@@ -27,14 +27,15 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
-import org.eobjects.analyzer.beans.categories.CoalesceCategory;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Coalesce dates")
-@Description("Returns the first non-null date.")
-@Categorized({ CoalesceCategory.class, DateAndTimeCategory.class })
+@Description("Returns the first non-null date out of a set of dates. "
+		+ "Use it to identify relative dates such as 'latest activity' date "
+		+ "if multiple stages in a process may have been recorded in different columns.")
+@Categorized({ DateAndTimeCategory.class })
 public class CoalesceDatesTransformer implements Transformer<Date> {
 
 	@Configured

@@ -25,8 +25,7 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
-import org.eobjects.analyzer.beans.categories.ConversionCategory;
-import org.eobjects.analyzer.beans.categories.MatchingAndStandardizationCategory;
+import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
@@ -34,7 +33,7 @@ import com.ibm.icu.text.Transliterator;
 
 @TransformerBean("Transliterate")
 @Description("Converts non-latin characters to latin (or even ASCII) characters.")
-@Categorized({ MatchingAndStandardizationCategory.class, ConversionCategory.class })
+@Categorized(StringManipulationCategory.class)
 public class TransliterateTransformer implements Transformer<String> {
 
 	@Configured

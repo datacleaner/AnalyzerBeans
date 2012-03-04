@@ -17,7 +17,10 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.coalesce;
+package org.eobjects.analyzer.beans.numbers;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
@@ -25,52 +28,50 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
-import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
+import org.eobjects.analyzer.beans.categories.NumbersCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-@TransformerBean("Coalesce strings")
-@Description("Returns the first non-null string. Use it to identify the most "
-		+ "accurate or most recent observation, if multiple entries "
-		+ "have been recorded in separate columns.")
-@Categorized({ StringManipulationCategory.class })
-public class CoalesceStringsTransformer implements Transformer<String> {
+/**
+ * Simple transformer for incrementing a number
+ */
+@TransformerBean("Increment number")
+@Description("Increment an id, a version or any other number.")
+@Categorized(NumbersCategory.class)
+public class IncrementNumberTransformer implements Transformer<Number> {
 
 	@Configured
-	InputColumn<String>[] input;
+	InputColumn<Number> _number;
 
 	@Configured
-	@Description("Consider empty strings (\"\") as null also?")
-	boolean considerEmptyStringAsNull = true;
-
-	public CoalesceStringsTransformer() {
-	}
-
-	public CoalesceStringsTransformer(InputColumn<String>... input) {
-		this();
-		this.input = input;
-	}
+	int _increment = 1;
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns("Coalesced string");
+		return new OutputColumns(_number.getName() + " (incremented)");
 	}
 
 	@Override
-	public String[] transform(InputRow inputRow) {
-		for (InputColumn<String> column : input) {
-			String value = inputRow.getValue(column);
-			if (value != null) {
-				if (considerEmptyStringAsNull) {
-					if (!"".equals(value)) {
-						return new String[] { value };
-					}
-				} else {
-					return new String[] { value };
-				}
+	public Number[] transform(InputRow row) {
+		Number number = row.getValue(_number);
+		if (number != null) {
+			if (number instanceof Integer || number instanceof Short
+					|| number instanceof Byte) {
+				number = number.intValue() + _increment;
+			} else if (number instanceof Long) {
+				number = number.longValue() + _increment;
+			} else if (number instanceof Float) {
+				number = number.floatValue() + _increment;
+			} else if (number instanceof BigDecimal) {
+				number = ((BigDecimal) number).add(new BigDecimal(_increment));
+			} else if (number instanceof BigInteger) {
+				number = ((BigInteger) number).add(new BigInteger(""
+						+ _increment));
+			} else {
+				number = number.doubleValue() + _increment;
 			}
 		}
-		return new String[1];
+		return new Number[] { number };
 	}
 
 }

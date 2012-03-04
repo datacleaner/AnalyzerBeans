@@ -32,6 +32,7 @@ import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.beans.categories.ConversionCategory;
+import org.eobjects.analyzer.beans.categories.NumbersCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.Percentage;
@@ -44,8 +45,8 @@ import org.slf4j.LoggerFactory;
  * @author Kasper Sørensen
  */
 @TransformerBean("Convert to number")
-@Description("Converts anything to a number (or null).")
-@Categorized({ ConversionCategory.class })
+@Description("Converts anything to a number (or null if not possible).")
+@Categorized({ ConversionCategory.class, NumbersCategory.class })
 public class ConvertToNumberTransformer implements Transformer<Number> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConvertToNumberTransformer.class);

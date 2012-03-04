@@ -19,39 +19,60 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import org.eobjects.analyzer.beans.api.Alias;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.reference.Dictionary;
+import org.eobjects.analyzer.reference.StringPattern;
 
-@FilterBean("Dictionary lookup")
-@Description("Filters values based on their existence in a dictionary")
-public class DictionaryLookupFilter implements Filter<ValidationCategory> {
+@FilterBean("Validate with string pattern")
+@Alias("String pattern match")
+@Description("Filters values that matches and does not match string patterns")
+@Categorized(FilterCategory.class)
+public class StringPatternFilter implements Filter<ValidationCategory> {
 
 	@Configured
 	InputColumn<String> column;
 
 	@Configured
-	Dictionary dictionary;
-	
-	public DictionaryLookupFilter() {
-	}
-	
-	public DictionaryLookupFilter(InputColumn<String> column, Dictionary dictionary) {
+	StringPattern[] stringPatterns;
+
+	@Configured
+	@Description("Require values to match all or just any of the string patterns?")
+	MatchFilterCriteria matchCriteria = MatchFilterCriteria.ANY;
+
+	public StringPatternFilter(InputColumn<String> column,
+			StringPattern[] stringPatterns, MatchFilterCriteria matchCriteria) {
 		this();
 		this.column = column;
-		this.dictionary = dictionary;
+		this.stringPatterns = stringPatterns;
+		this.matchCriteria = matchCriteria;
+	}
+
+	public StringPatternFilter() {
 	}
 
 	@Override
 	public ValidationCategory categorize(InputRow inputRow) {
 		String value = inputRow.getValue(column);
 		if (value != null) {
-			if (dictionary.containsValue(value)) {
-				return ValidationCategory.VALID;
+			int matches = 0;
+			for (StringPattern stringPattern : stringPatterns) {
+				if (stringPattern.matches(value)) {
+					matches++;
+					if (matchCriteria == MatchFilterCriteria.ANY) {
+						return ValidationCategory.VALID;
+					}
+				}
+			}
+			if (matchCriteria == MatchFilterCriteria.ALL) {
+				return ValidationCategory
+						.valueOf(matches == stringPatterns.length);
 			}
 		}
 		return ValidationCategory.INVALID;

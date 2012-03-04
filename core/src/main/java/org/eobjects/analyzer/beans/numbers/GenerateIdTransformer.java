@@ -17,60 +17,55 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.coalesce;
+package org.eobjects.analyzer.beans.numbers;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
-import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
+import org.eobjects.analyzer.beans.categories.NumbersCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-@TransformerBean("Coalesce strings")
-@Description("Returns the first non-null string. Use it to identify the most "
-		+ "accurate or most recent observation, if multiple entries "
-		+ "have been recorded in separate columns.")
-@Categorized({ StringManipulationCategory.class })
-public class CoalesceStringsTransformer implements Transformer<String> {
+@TransformerBean("Generate ID")
+@Description("Generates a unique and sequential record ID")
+@Categorized(NumbersCategory.class)
+public class GenerateIdTransformer implements Transformer<Integer> {
 
 	@Configured
-	InputColumn<String>[] input;
+	@Description("A column which represent the scope for which the ID will be generated. "
+			+ "If eg. a source column is selected, an ID will be generated for each source record. "
+			+ "If a transformed column is selected, an ID will be generated for each record generated that has this column.")
+	InputColumn<?> columnInScope;
 
 	@Configured
-	@Description("Consider empty strings (\"\") as null also?")
-	boolean considerEmptyStringAsNull = true;
+	int offset = 0;
 
-	public CoalesceStringsTransformer() {
+	private final AtomicInteger _counter;
+
+	public GenerateIdTransformer() {
+		_counter = new AtomicInteger();
 	}
 
-	public CoalesceStringsTransformer(InputColumn<String>... input) {
-		this();
-		this.input = input;
+	@Initialize
+	public void init() {
+		_counter.set(offset);
 	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns("Coalesced string");
+		return new OutputColumns("Generated ID");
 	}
 
 	@Override
-	public String[] transform(InputRow inputRow) {
-		for (InputColumn<String> column : input) {
-			String value = inputRow.getValue(column);
-			if (value != null) {
-				if (considerEmptyStringAsNull) {
-					if (!"".equals(value)) {
-						return new String[] { value };
-					}
-				} else {
-					return new String[] { value };
-				}
-			}
-		}
-		return new String[1];
+	public Integer[] transform(InputRow inputRow) {
+		int id = _counter.incrementAndGet();
+		return new Integer[] { id };
 	}
 
 }

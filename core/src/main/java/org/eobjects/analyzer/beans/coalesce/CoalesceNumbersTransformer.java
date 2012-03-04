@@ -25,13 +25,14 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
-import org.eobjects.analyzer.beans.categories.CoalesceCategory;
+import org.eobjects.analyzer.beans.categories.NumbersCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Coalesce numbers")
-@Description("Returns the first non-null number.")
-@Categorized({ CoalesceCategory.class })
+@Description("Returns the first non-null number. Use it to identify the most "
+		+ "accurate or most recent number if multiple observations have been recorded in columns.")
+@Categorized({ NumbersCategory.class })
 public class CoalesceNumbersTransformer implements Transformer<Number> {
 
 	@Configured
