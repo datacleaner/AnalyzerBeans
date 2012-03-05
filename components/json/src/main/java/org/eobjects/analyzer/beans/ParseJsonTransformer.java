@@ -87,4 +87,12 @@ public class ParseJsonTransformer implements Transformer<Object> {
             }
         }
     }
+    
+    public void setDataType(Class<?> dataType) {
+        this.dataType = dataType;
+    }
+    
+    public void setJson(InputColumn<String> json) {
+        this.json = json;
+    }
 }
