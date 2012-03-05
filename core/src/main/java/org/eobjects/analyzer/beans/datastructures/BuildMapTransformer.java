@@ -48,12 +48,12 @@ import org.slf4j.LoggerFactory;
  */
 @TransformerBean("Build key/value map")
 @Alias("Build map")
-@Description("Build a map with a variable amount of keys and values. Adds the capability to store complex structures with named entries within it.")
+@Description("Build a map with a variable amount of keys and values. "
+        + "Adds the capability to store complex structures with named entries within it.")
 @Categorized(DataStructuresCategory.class)
 public class BuildMapTransformer implements Transformer<Map<String, ?>> {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(BuildMapTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(BuildMapTransformer.class);
 
     @Inject
     @Configured
@@ -107,8 +107,7 @@ public class BuildMapTransformer implements Transformer<Map<String, ?>> {
                 sb.append(",");
             }
         }
-        OutputColumns outputColumns = new OutputColumns(
-                new String[] { sb.toString() }, new Class[] { Map.class });
+        OutputColumns outputColumns = new OutputColumns(new String[] { sb.toString() }, new Class[] { Map.class });
         return outputColumns;
     }
 
