@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-env</artifactId>
-		<version>0.11</version>
+		<version>0.12-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-xml-config</artifactId>
 	<description>Reader of XML based configuration and job files</description>
@@ -26,30 +26,30 @@
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-core</artifactId>
-			<version>0.11</version>
+			<version>0.12-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-i18n</artifactId>
-			<version>0.11</version>
+			<version>0.12-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-h2</artifactId>
-			<version>0.11</version>
+			<version>0.12-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-berkeleydb</artifactId>
-			<version>0.11</version>
+			<version>0.12-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-el</artifactId>
-			<version>0.11</version>
+			<version>0.12-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
