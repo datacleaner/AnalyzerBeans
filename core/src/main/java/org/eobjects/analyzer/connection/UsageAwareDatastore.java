@@ -66,7 +66,7 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final String getName() {
+	public String getName() {
 		return _name;
 	}
 
@@ -140,7 +140,7 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 
 	@Override
 	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_name);
+		identifiers.add(getName());
 		identifiers.add(_description);
 	}
 
