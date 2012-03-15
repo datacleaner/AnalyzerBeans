@@ -24,7 +24,7 @@ package org.eobjects.analyzer.connection;
  * 
  * @author Kasper Sørensen
  */
-final class PerformanceCharacteristicsImpl implements PerformanceCharacteristics {
+public final class PerformanceCharacteristicsImpl implements PerformanceCharacteristics {
 
 	private final boolean _queryOptimizationPreferred;
 
