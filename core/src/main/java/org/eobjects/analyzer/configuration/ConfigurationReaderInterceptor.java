@@ -27,8 +27,29 @@ package org.eobjects.analyzer.configuration;
  */
 public interface ConfigurationReaderInterceptor {
 
-	String createFilename(String filename);
+    /**
+     * Intercepts a filename, allowing for eg. replacing variables or changing
+     * relative paths to absolute paths.
+     * 
+     * @param filename
+     * @return
+     */
+    public String createFilename(String filename);
 
-	String getTemporaryStorageDirectory();
+    /**
+     * Gets a temporary storage directory
+     * 
+     * @return
+     */
+    public String getTemporaryStorageDirectory();
+
+    /**
+     * Loads a class
+     * 
+     * @param className
+     * @return
+     * @throws ClassNotFoundException
+     */
+    public Class<?> loadClass(String className) throws ClassNotFoundException;
 
 }

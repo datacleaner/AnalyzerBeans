@@ -40,4 +40,8 @@ public class DefaultConfigurationReaderInterceptor implements ConfigurationReade
 		return FileHelper.getTempDir().getAbsolutePath();
 	}
 
+	@Override
+	public Class<?> loadClass(String className) throws ClassNotFoundException {
+	    return Class.forName(className);
+	}
 }
