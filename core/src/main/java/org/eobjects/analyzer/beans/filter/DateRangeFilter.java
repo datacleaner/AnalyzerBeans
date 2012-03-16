@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import java.util.Date;
+
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -29,27 +31,27 @@ import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
-@FilterBean("Number range")
+@FilterBean("Date range")
 @Description("A filter that filters out rows where a number value is outside a specified range")
 @Categorized(FilterCategory.class)
-public class NumberRangeFilter implements Filter<RangeFilterCategory> {
+public class DateRangeFilter implements Filter<RangeFilterCategory> {
 
 	@Configured
-	InputColumn<Number> column;
+	InputColumn<Date> column;
 
 	@Configured(order = 1)
-	Double lowestValue;
+	Date lowestValue;
 
 	@Configured(order = 2)
-	Double highestValue;
+	Date highestValue;
 
-	public NumberRangeFilter(double lowestValue, double highestValue) {
+	public DateRangeFilter(Date lowestValue, Date highestValue) {
 		this.lowestValue = lowestValue;
 		this.highestValue = highestValue;
 	}
 
-	public NumberRangeFilter() {
-	    this(0d, 10d);
+	public DateRangeFilter() {
+	    this(null, null);
 	}
 
 	@Validate
@@ -61,19 +63,18 @@ public class NumberRangeFilter implements Filter<RangeFilterCategory> {
 
 	@Override
 	public RangeFilterCategory categorize(InputRow inputRow) {
-		Number value = inputRow.getValue(column);
+	    Date value = inputRow.getValue(column);
 		return categorize(value);
 	}
 
-	protected RangeFilterCategory categorize(Number value) {
+	protected RangeFilterCategory categorize(Date value) {
 		if (value == null) {
 			return RangeFilterCategory.LOWER;
 		}
-		double doubleValue = value.doubleValue();
-		if (doubleValue < lowestValue.doubleValue()) {
+		if (value.compareTo(lowestValue) < 0) {
 			return RangeFilterCategory.LOWER;
 		}
-		if (doubleValue > highestValue.doubleValue()) {
+		if (value.compareTo(highestValue) > 0) {
 			return RangeFilterCategory.HIGHER;
 		}
 
