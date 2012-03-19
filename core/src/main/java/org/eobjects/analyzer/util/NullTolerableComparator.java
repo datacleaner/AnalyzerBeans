@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -30,9 +31,11 @@ import java.util.Comparator;
  * @param <E>
  *            any comparable type
  */
-public class NullTolerableComparator<E extends Comparable<? super E>> implements Comparator<E> {
+public class NullTolerableComparator<E extends Comparable<? super E>> implements Comparator<E>, Serializable {
 
-	public static <E extends Comparable<? super E>> Comparator<E> get(Class<E> clazz) {
+    private static final long serialVersionUID = 1L;
+
+    public static <E extends Comparable<? super E>> Comparator<E> get(Class<E> clazz) {
 		return new NullTolerableComparator<E>();
 	}
 
