@@ -23,7 +23,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,6 +143,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
     private final JAXBContext _jaxbContext;
     private final ConfigurationReaderInterceptor _interceptor;
+    private final Deque<String> _variablePathBuilder;
 
     public JaxbConfigurationReader() {
         this(null);
@@ -151,6 +154,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             configurationReaderCallback = new DefaultConfigurationReaderInterceptor();
         }
         _interceptor = configurationReaderCallback;
+        _variablePathBuilder = new ArrayDeque<String>(4);
         try {
             _jaxbContext = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName(),
                     ObjectFactory.class.getClassLoader());
@@ -205,14 +209,20 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         InjectionManager injectionManager = new InjectionManagerImpl(null, null, null);
 
         TaskRunner taskRunner = createTaskRunner(configuration, injectionManager);
+
         DescriptorProvider descriptorProvider = createDescriptorProvider(configuration, taskRunner);
+
+        addVariablePath("datastoreCatalog");
         DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog(),
                 injectionManager);
+        removeVariablePath();
 
         injectionManager = new InjectionManagerImpl(datastoreCatalog, null, null);
 
+        addVariablePath("referenceDataCatalog");
         ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(configuration.getReferenceDataCatalog(),
                 injectionManager);
+        removeVariablePath();
 
         injectionManager = new InjectionManagerImpl(datastoreCatalog, referenceDataCatalog, null);
 
@@ -338,27 +348,37 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                         String name = ddt.getName();
                         checkName(name, Dictionary.class, dictionaryList);
 
-                        String dsName = ddt.getDatastoreName();
-                        String columnPath = ddt.getColumnPath();
+                        addVariablePath(name);
+
+                        String dsName = getStringVariable("datastoreName", ddt.getDatastoreName());
+                        String columnPath = getStringVariable("columnPath", ddt.getColumnPath());
 
                         DatastoreDictionary dict = new DatastoreDictionary(name, dsName, columnPath);
                         dict.setDescription(ddt.getDescription());
 
                         dictionaryList.add(dict);
+
+                        removeVariablePath();
+
                     } else if (dictionaryType instanceof TextFileDictionaryType) {
                         TextFileDictionaryType tfdt = (TextFileDictionaryType) dictionaryType;
 
                         String name = tfdt.getName();
                         checkName(name, Dictionary.class, dictionaryList);
 
-                        String filename = _interceptor.createFilename(tfdt.getFilename());
-                        String encoding = tfdt.getEncoding();
+                        addVariablePath(name);
+
+                        String filenamePath = getStringVariable("filename", tfdt.getFilename());
+                        String filename = _interceptor.createFilename(filenamePath);
+                        String encoding = getStringVariable("encoding", tfdt.getEncoding());
                         if (encoding == null) {
                             encoding = FileHelper.UTF_8_ENCODING;
                         }
                         TextFileDictionary dict = new TextFileDictionary(name, filename, encoding);
                         dict.setDescription(tfdt.getDescription());
                         dictionaryList.add(dict);
+
+                        removeVariablePath();
                     } else if (dictionaryType instanceof ValueListDictionaryType) {
                         ValueListDictionaryType vldt = (ValueListDictionaryType) dictionaryType;
 
@@ -390,12 +410,15 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                         String name = tfsct.getName();
                         checkName(name, SynonymCatalog.class, synonymCatalogList);
 
-                        String filename = _interceptor.createFilename(tfsct.getFilename());
-                        String encoding = tfsct.getEncoding();
+                        addVariablePath(name);
+
+                        String filenamePath = getStringVariable("filename", tfsct.getFilename());
+                        String filename = _interceptor.createFilename(filenamePath);
+                        String encoding = getStringVariable("encoding", tfsct.getEncoding());
                         if (encoding == null) {
                             encoding = FileHelper.UTF_8_ENCODING;
                         }
-                        Boolean caseSensitive = tfsct.isCaseSensitive();
+                        Boolean caseSensitive = getBooleanVariable("caseSensitive", tfsct.isCaseSensitive());
                         if (caseSensitive == null) {
                             caseSensitive = true;
                         }
@@ -403,6 +426,9 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                                 caseSensitive.booleanValue(), encoding);
                         sc.setDescription(tfsct.getDescription());
                         synonymCatalogList.add(sc);
+
+                        removeVariablePath();
+
                     } else if (synonymCatalogType instanceof CustomElementType) {
                         SynonymCatalog customSynonymCatalog = createCustomElement(
                                 (CustomElementType) synonymCatalogType, SynonymCatalog.class, injectionManager, false);
@@ -414,8 +440,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                         String name = datastoreSynonymCatalogType.getName();
                         checkName(name, SynonymCatalog.class, synonymCatalogList);
 
-                        String dataStoreName = datastoreSynonymCatalogType.getDatastoreName();
-                        String masterTermColumnPath = datastoreSynonymCatalogType.getMasterTermColumnPath();
+                        addVariablePath(name);
+
+                        String dataStoreName = getStringVariable("datastoreName",
+                                datastoreSynonymCatalogType.getDatastoreName());
+                        String masterTermColumnPath = getStringVariable("masterTermColumnPath",
+                                datastoreSynonymCatalogType.getMasterTermColumnPath());
 
                         String[] synonymColumnPaths = datastoreSynonymCatalogType.getSynonymColumnPath().toArray(
                                 new String[0]);
@@ -423,6 +453,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                                 masterTermColumnPath, synonymColumnPaths);
                         sc.setDescription(datastoreSynonymCatalogType.getDescription());
                         synonymCatalogList.add(sc);
+
+                        removeVariablePath();
                     } else {
                         throw new IllegalStateException("Unsupported synonym catalog type: " + synonymCatalogType);
                     }
@@ -438,21 +470,30 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                         String name = regexPatternType.getName();
                         checkName(name, StringPattern.class, stringPatterns);
 
-                        String expression = regexPatternType.getExpression();
-                        boolean matchEntireString = regexPatternType.isMatchEntireString();
+                        addVariablePath(name);
+
+                        String expression = getStringVariable("expression", regexPatternType.getExpression());
+                        boolean matchEntireString = getBooleanVariable("matchEntireString",
+                                regexPatternType.isMatchEntireString());
                         RegexStringPattern sp = new RegexStringPattern(name, expression, matchEntireString);
                         sp.setDescription(regexPatternType.getDescription());
                         stringPatterns.add(sp);
+
+                        removeVariablePath();
                     } else if (obj instanceof SimplePatternType) {
                         SimplePatternType simplePatternType = (SimplePatternType) obj;
 
                         String name = simplePatternType.getName();
                         checkName(name, StringPattern.class, stringPatterns);
 
-                        String expression = simplePatternType.getExpression();
+                        addVariablePath(name);
+
+                        String expression = getStringVariable("expression", simplePatternType.getExpression());
                         SimpleStringPattern sp = new SimpleStringPattern(name, expression);
                         sp.setDescription(simplePatternType.getDescription());
                         stringPatterns.add(sp);
+
+                        removeVariablePath();
                     } else {
                         throw new IllegalStateException("Unsupported string pattern type: " + obj);
                     }
@@ -474,10 +515,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             String name = csvDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
 
-            String filename = _interceptor.createFilename(csvDatastoreType.getFilename());
-            String quoteCharString = csvDatastoreType.getQuoteChar();
+            addVariablePath(name);
+
+            String filename = _interceptor
+                    .createFilename(getStringVariable("filename", csvDatastoreType.getFilename()));
+            String quoteCharString = getStringVariable("quoteChar", csvDatastoreType.getQuoteChar());
             Character quoteChar = null;
-            String separatorCharString = csvDatastoreType.getSeparatorChar();
+            String separatorCharString = getStringVariable("separatorChar", csvDatastoreType.getSeparatorChar());
             Character separatorChar = null;
 
             if (!StringUtils.isNullOrEmpty(separatorCharString)) {
@@ -490,17 +534,18 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 quoteChar = quoteCharString.charAt(0);
             }
 
-            String encoding = csvDatastoreType.getEncoding();
+            String encoding = getStringVariable("encoding", csvDatastoreType.getEncoding());
             if (StringUtils.isNullOrEmpty(encoding)) {
                 encoding = FileHelper.UTF_8_ENCODING;
             }
 
-            Boolean failOnInconsistencies = csvDatastoreType.isFailOnInconsistencies();
+            Boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
+                    csvDatastoreType.isFailOnInconsistencies());
             if (failOnInconsistencies == null) {
                 failOnInconsistencies = true;
             }
 
-            Integer headerLineNumber = csvDatastoreType.getHeaderLineNumber();
+            Integer headerLineNumber = getIntegerVariable("headerLineNumber", csvDatastoreType.getHeaderLineNumber());
             if (headerLineNumber == null) {
                 headerLineNumber = CsvConfiguration.DEFAULT_COLUMN_NAME_LINE;
             }
@@ -509,6 +554,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                     failOnInconsistencies, headerLineNumber);
             ds.setDescription(csvDatastoreType.getDescription());
             datastores.put(name, ds);
+
+            removeVariablePath();
         }
 
         List<FixedWidthDatastoreType> fixedWidthDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
@@ -517,24 +564,29 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             String name = fixedWidthDatastore.getName();
             checkName(name, Datastore.class, datastores);
 
-            String filename = _interceptor.createFilename(fixedWidthDatastore.getFilename());
-            String encoding = fixedWidthDatastore.getEncoding();
+            addVariablePath(name);
+
+            String filename = _interceptor.createFilename(getStringVariable("filename",
+                    fixedWidthDatastore.getFilename()));
+            String encoding = getStringVariable("encoding", fixedWidthDatastore.getEncoding());
             if (!StringUtils.isNullOrEmpty(encoding)) {
                 encoding = FileHelper.UTF_8_ENCODING;
             }
 
-            Boolean failOnInconsistencies = fixedWidthDatastore.isFailOnInconsistencies();
+            Boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
+                    fixedWidthDatastore.isFailOnInconsistencies());
             if (failOnInconsistencies == null) {
                 failOnInconsistencies = true;
             }
 
-            Integer headerLineNumber = fixedWidthDatastore.getHeaderLineNumber();
+            Integer headerLineNumber = getIntegerVariable("headerLineNumber", fixedWidthDatastore.getHeaderLineNumber());
             if (headerLineNumber == null) {
                 headerLineNumber = FixedWidthConfiguration.DEFAULT_COLUMN_NAME_LINE;
             }
 
             final FixedWidthDatastore ds;
-            final Integer fixedValueWidth = fixedWidthDatastore.getFixedValueWidth();
+            final Integer fixedValueWidth = getIntegerVariable("fixedValueWidth",
+                    fixedWidthDatastore.getFixedValueWidth());
             if (fixedValueWidth == null) {
                 final List<Integer> valueWidthsBoxed = fixedWidthDatastore.getValueWidth();
                 int[] valueWidths = new int[valueWidthsBoxed.size()];
@@ -549,16 +601,21 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             }
             ds.setDescription(fixedWidthDatastore.getDescription());
             datastores.put(name, ds);
+
+            removeVariablePath();
         }
 
         List<SasDatastoreType> sasDatastores = CollectionUtils2.filterOnClass(datastoreTypes, SasDatastoreType.class);
         for (SasDatastoreType sasDatastoreType : sasDatastores) {
             final String name = sasDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
-            final File directory = new File(sasDatastoreType.getDirectory());
+            addVariablePath(name);
+            String directoryPath = getStringVariable("directory", sasDatastoreType.getDirectory());
+            final File directory = new File(directoryPath);
             final SasDatastore ds = new SasDatastore(name, directory);
             ds.setDescription(sasDatastoreType.getDescription());
             datastores.put(name, ds);
+            removeVariablePath();
         }
 
         List<AccessDatastoreType> accessDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
@@ -566,17 +623,22 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         for (AccessDatastoreType accessDatastoreType : accessDatastores) {
             String name = accessDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
-            String filename = _interceptor.createFilename(accessDatastoreType.getFilename());
+            addVariablePath(name);
+            String filenamePath = getStringVariable("filename", accessDatastoreType.getFilename());
+            String filename = _interceptor.createFilename(filenamePath);
             AccessDatastore ds = new AccessDatastore(name, filename);
             ds.setDescription(accessDatastoreType.getDescription());
             datastores.put(name, ds);
+            removeVariablePath();
         }
 
         List<XmlDatastoreType> xmlDatastores = CollectionUtils2.filterOnClass(datastoreTypes, XmlDatastoreType.class);
         for (XmlDatastoreType xmlDatastoreType : xmlDatastores) {
             String name = xmlDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
-            String filename = _interceptor.createFilename(xmlDatastoreType.getFilename());
+            addVariablePath(name);
+            String filenamePath = getStringVariable("filename", xmlDatastoreType.getFilename());
+            String filename = _interceptor.createFilename(filenamePath);
             List<TableDef> tableDefList = xmlDatastoreType.getTableDef();
             final XmlSaxTableDef[] tableDefs;
             if (tableDefList.isEmpty()) {
@@ -593,6 +655,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             XmlDatastore ds = new XmlDatastore(name, filename, tableDefs);
             ds.setDescription(xmlDatastoreType.getDescription());
             datastores.put(name, ds);
+            removeVariablePath();
         }
 
         List<ExcelDatastoreType> excelDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
@@ -600,10 +663,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         for (ExcelDatastoreType excelDatastoreType : excelDatastores) {
             String name = excelDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
-            String filename = _interceptor.createFilename(excelDatastoreType.getFilename());
+            addVariablePath(name);
+            String filenamePath = getStringVariable("filename", excelDatastoreType.getFilename());
+            String filename = _interceptor.createFilename(filenamePath);
             ExcelDatastore ds = new ExcelDatastore(name, filename);
             ds.setDescription(excelDatastoreType.getDescription());
             datastores.put(name, ds);
+            removeVariablePath();
         }
 
         List<JdbcDatastoreType> jdbcDatastores = CollectionUtils2
@@ -612,15 +678,18 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             String name = jdbcDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
 
+            addVariablePath(name);
+
             JdbcDatastore ds;
 
-            String datasourceJndiUrl = jdbcDatastoreType.getDatasourceJndiUrl();
+            String datasourceJndiUrl = getStringVariable("jndiUrl", jdbcDatastoreType.getDatasourceJndiUrl());
             if (datasourceJndiUrl == null) {
-                String url = jdbcDatastoreType.getUrl();
-                String driver = jdbcDatastoreType.getDriver();
-                String username = jdbcDatastoreType.getUsername();
-                String password = jdbcDatastoreType.getPassword();
-                Boolean multipleConnections = jdbcDatastoreType.isMultipleConnections();
+                String url = getStringVariable("url", jdbcDatastoreType.getUrl());
+                String driver = getStringVariable("driver", jdbcDatastoreType.getDriver());
+                String username = getStringVariable("username", jdbcDatastoreType.getUsername());
+                String password = getStringVariable("password", jdbcDatastoreType.getPassword());
+                Boolean multipleConnections = getBooleanVariable("multipleConnections",
+                        jdbcDatastoreType.isMultipleConnections());
                 if (multipleConnections == null) {
                     multipleConnections = true;
                 }
@@ -632,6 +701,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             ds.setDescription(jdbcDatastoreType.getDescription());
 
             datastores.put(name, ds);
+
+            removeVariablePath();
         }
 
         List<DbaseDatastoreType> dbaseDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
@@ -640,12 +711,17 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             String name = dbaseDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
 
-            String filename = _interceptor.createFilename(dbaseDatastoreType.getFilename());
+            addVariablePath(name);
+
+            String filenamePath = getStringVariable("filename", dbaseDatastoreType.getFilename());
+            String filename = _interceptor.createFilename(filenamePath);
             DbaseDatastore ds = new DbaseDatastore(name, filename);
 
             ds.setDescription(dbaseDatastoreType.getDescription());
 
             datastores.put(name, ds);
+
+            removeVariablePath();
         }
 
         List<OpenOfficeDatabaseDatastoreType> odbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
@@ -654,10 +730,15 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             String name = odbDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
 
-            String filename = _interceptor.createFilename(odbDatastoreType.getFilename());
+            addVariablePath(name);
+
+            String filenamePath = getStringVariable("filename", odbDatastoreType.getFilename());
+            String filename = _interceptor.createFilename(filenamePath);
             OdbDatastore ds = new OdbDatastore(name, filename);
             ds.setDescription(odbDatastoreType.getDescription());
             datastores.put(name, ds);
+
+            removeVariablePath();
         }
 
         List<MongodbDatastoreType> mongoDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
@@ -665,11 +746,14 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         for (MongodbDatastoreType mongodbDatastoreType : mongoDbDatastores) {
             String name = mongodbDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
-            String hostname = mongodbDatastoreType.getHostname();
-            Integer port = mongodbDatastoreType.getPort();
-            String databaseName = mongodbDatastoreType.getDatabaseName();
-            String username = mongodbDatastoreType.getUsername();
-            String password = mongodbDatastoreType.getPassword();
+
+            addVariablePath(name);
+
+            String hostname = getStringVariable("hostname", mongodbDatastoreType.getHostname());
+            Integer port = getIntegerVariable("port", mongodbDatastoreType.getPort());
+            String databaseName = getStringVariable("databaseName", mongodbDatastoreType.getDatabaseName());
+            String username = getStringVariable("username", mongodbDatastoreType.getUsername());
+            String password = getStringVariable("password", mongodbDatastoreType.getPassword());
 
             List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef> tableDefList = mongodbDatastoreType
                     .getTableDef();
@@ -707,6 +791,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                     tableDefs);
             ds.setDescription(mongodbDatastoreType.getDescription());
             datastores.put(name, ds);
+
+            removeVariablePath();
         }
 
         List<CustomElementType> customDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
@@ -742,6 +828,51 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
         DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
         return result;
+    }
+
+    private void addVariablePath(String name) {
+        name = StringUtils.toCamelCase(name);
+        _variablePathBuilder.add(name);
+    }
+
+    private void removeVariablePath() {
+        _variablePathBuilder.pollLast();
+    }
+
+    private String getStringVariable(String key, String valueIfNull) {
+        final StringBuilder sb = new StringBuilder();
+        for (final String keyElement : _variablePathBuilder) {
+            if (sb.length() > 0) {
+                sb.append('.');
+            }
+            sb.append(keyElement);
+        }
+        sb.append('.');
+        sb.append(key);
+
+        final String variablePath = sb.toString();
+        final String value = _interceptor.getPropertyOverride(variablePath);
+        if (value == null) {
+            return valueIfNull;
+        }
+        logger.info("Overriding variable '{}' with value: {}", variablePath, value);
+        return value;
+    }
+
+    public Integer getIntegerVariable(String key, Integer valueIfNull) {
+        String value = getStringVariable(key, null);
+        if (value == null) {
+            return valueIfNull;
+        }
+        return Integer.parseInt(value);
+    }
+
+    private Boolean getBooleanVariable(String key, Boolean valueIfNull) {
+        String value = getStringVariable(key, null);
+        if (value == null) {
+            return valueIfNull;
+        }
+        return Boolean.parseBoolean(value);
     }
 
     /**

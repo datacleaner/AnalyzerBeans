@@ -44,4 +44,10 @@ public class DefaultConfigurationReaderInterceptor implements ConfigurationReade
 	public Class<?> loadClass(String className) throws ClassNotFoundException {
 	    return Class.forName(className);
 	}
+	
+	@Override
+	public String getPropertyOverride(String variablePath) {
+	    String result = System.getProperty(variablePath);
+        return result;
+	}
 }

@@ -52,4 +52,14 @@ public interface ConfigurationReaderInterceptor {
      */
     public Class<?> loadClass(String className) throws ClassNotFoundException;
 
+    /**
+     * Gets an optional override of properties in the configuration.
+     * 
+     * @param variablePath
+     *            the path of a variable, eg. "datastoreCatalog.orderdb.url" or
+     *            "referenceDataCatalog.my_dictionary.filename".
+     * @return a variable override, or null if the variable is not overridden.
+     */
+    public String getPropertyOverride(String variablePath);
+
 }
