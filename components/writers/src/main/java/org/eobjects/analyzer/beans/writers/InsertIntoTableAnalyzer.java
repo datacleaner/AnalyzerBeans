@@ -101,6 +101,10 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 	@Configured(required = false)
 	@Description("Table to target (insert into)")
 	String tableName;
+	
+	@Inject
+	@Configured("Buffer size")
+	WriteBufferSizeOption bufferSizeOption = WriteBufferSizeOption.LARGE;
 
 	@Inject
 	@Configured(value = "How to handle insertion errors?")
@@ -136,16 +140,10 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>,
 			_errorDataContext = createErrorDataContext();
 		}
 
-		final int maxObjectsInBuffer = 100000;
-
-		// add one, because there is a small "per record" overhead
-		final int objectsPerRow = values.length + 1;
-
-		final int bufferSize = maxObjectsInBuffer / objectsPerRow;
-
+		int bufferSize = bufferSizeOption.calculateBufferSize(values.length);
 		logger.info("Row buffer size set to {}", bufferSize);
 
-		_writeBuffer = new WriteBuffer(bufferSize, this);
+        _writeBuffer = new WriteBuffer(bufferSize, this);
 
 		final UpdateableDatastoreConnection con = datastore.openConnection();
 		try {
