@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -68,7 +68,12 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 
 	@Override
 	public List<Throwable> getErrors() {
-		return Collections.synchronizedList(Collections.unmodifiableList(_errors));
+	    // create a copy to avoid mutations or concurrent modifications
+	    final List<Throwable> result;
+	    synchronized (_errors) {
+	        result = new ArrayList<Throwable>(_errors);
+	    }
+		return result;
 	}
 
 	@Override
