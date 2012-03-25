@@ -24,7 +24,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.MatchingAnalyzer;
+import org.eobjects.analyzer.beans.ReferenceDataMatcherAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
@@ -55,7 +55,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 	}
 
 	public void testGetConfiguredPropertiesOfType() throws Exception {
-		AnalyzerBeanDescriptor<MatchingAnalyzer> desc = Descriptors.ofAnalyzer(MatchingAnalyzer.class);
+		AnalyzerBeanDescriptor<ReferenceDataMatcherAnalyzer> desc = Descriptors.ofAnalyzer(ReferenceDataMatcherAnalyzer.class);
 
 		Set<ConfiguredPropertyDescriptor> properties = desc.getConfiguredPropertiesByType(Number.class, false);
 		assertEquals(0, properties.size());
