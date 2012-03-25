@@ -44,8 +44,8 @@ import org.eobjects.analyzer.result.BooleanAnalyzerResult;
 
 @AnalyzerBean("Reference data matcher")
 @Alias("Matching analyzer")
-@Description("Match your data values against multiple forms of reference data in one simple analyzer step.\n"
-		+ "This analyzer provides a handy shortcut for doing matching with dictionaries, synonyms or string patterns as well as retrieving matching matrices for all matches.")
+@Description("Check your data values against multiple forms of reference data in one simple analyzer step.\n"
+		+ "This analyzer provides a handy shortcut for doing matching with dictionaries, synonym lookups or string patterns matching, retrieving matching matrices for all matches.")
 public class ReferenceDataMatcherAnalyzer implements Analyzer<BooleanAnalyzerResult> {
 
 	@Configured(order = 1)
