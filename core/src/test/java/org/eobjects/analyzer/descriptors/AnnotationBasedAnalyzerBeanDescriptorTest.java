@@ -73,7 +73,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 		assertEquals(0, properties.size());
 
 		properties = desc.getConfiguredPropertiesByType(ReferenceData.class, true);
-		assertEquals(2, properties.size());
+		assertEquals(3, properties.size());
 	}
 
 	public void testRowProcessingType() throws Exception {
