@@ -19,7 +19,11 @@
  */
 package org.eobjects.analyzer.util;
 
+/**
+ * Defines an interface for tokens within a {@link NamedPattern} who can define
+ * it's own group literal (regex).
+ */
 public interface HasGroupLiteral {
 
-	public String getGroupLiteral();
+    public String getGroupLiteral();
 }
