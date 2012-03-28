@@ -38,6 +38,8 @@ import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.SourceColumns;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for traversing dependencies between virtual and physical
@@ -47,214 +49,226 @@ import org.eobjects.metamodel.schema.Table;
  */
 public class SourceColumnFinder {
 
-	private Set<InputColumnSinkJob> _inputColumnSinks = new HashSet<InputColumnSinkJob>();
-	private Set<InputColumnSourceJob> _inputColumnSources = new HashSet<InputColumnSourceJob>();
-	private Set<OutcomeSourceJob> _outcomeSources = new HashSet<OutcomeSourceJob>();
-	private Set<OutcomeSinkJob> _outcomeSinks = new HashSet<OutcomeSinkJob>();
+    private static final Logger logger = LoggerFactory.getLogger(SourceColumnFinder.class);
 
-	private void addSources(Object... sources) {
-		for (Object source : sources) {
-			if (source instanceof InputColumnSinkJob) {
-				_inputColumnSinks.add((InputColumnSinkJob) source);
-			}
-			if (source instanceof InputColumnSourceJob) {
-				_inputColumnSources.add((InputColumnSourceJob) source);
-			}
-			if (source instanceof OutcomeSourceJob) {
-				_outcomeSources.add((OutcomeSourceJob) source);
-			}
-			if (source instanceof OutcomeSinkJob) {
-				_outcomeSinks.add((OutcomeSinkJob) source);
-			}
-		}
-	}
+    private Set<InputColumnSinkJob> _inputColumnSinks = new HashSet<InputColumnSinkJob>();
+    private Set<InputColumnSourceJob> _inputColumnSources = new HashSet<InputColumnSourceJob>();
+    private Set<OutcomeSourceJob> _outcomeSources = new HashSet<OutcomeSourceJob>();
+    private Set<OutcomeSinkJob> _outcomeSinks = new HashSet<OutcomeSinkJob>();
 
-	private void addSources(Collection<?> sources) {
-		addSources(sources.toArray());
-	}
+    private void addSources(Object... sources) {
+        for (Object source : sources) {
+            if (source instanceof InputColumnSinkJob) {
+                _inputColumnSinks.add((InputColumnSinkJob) source);
+            }
+            if (source instanceof InputColumnSourceJob) {
+                _inputColumnSources.add((InputColumnSourceJob) source);
+            }
+            if (source instanceof OutcomeSourceJob) {
+                _outcomeSources.add((OutcomeSourceJob) source);
+            }
+            if (source instanceof OutcomeSinkJob) {
+                _outcomeSinks.add((OutcomeSinkJob) source);
+            }
+        }
+    }
 
-	public void addSources(AnalysisJobBuilder job) {
-		addSources(new SourceColumns(job.getSourceColumns()));
-		addSources(job.getFilterJobBuilders());
-		addSources(job.getTransformerJobBuilders());
-		addSources(job.getMergedOutcomeJobBuilders());
-		addSources(job.getAnalyzerJobBuilders());
-	}
+    private void addSources(Collection<?> sources) {
+        addSources(sources.toArray());
+    }
 
-	public void addSources(AnalysisJob job) {
-		addSources(new SourceColumns(job.getSourceColumns()));
-		addSources(job.getFilterJobs());
-		addSources(job.getTransformerJobs());
-		addSources(job.getMergedOutcomeJobs());
-		addSources(job.getAnalyzerJobs());
-	}
+    public void addSources(AnalysisJobBuilder job) {
+        addSources(new SourceColumns(job.getSourceColumns()));
+        addSources(job.getFilterJobBuilders());
+        addSources(job.getTransformerJobBuilders());
+        addSources(job.getMergedOutcomeJobBuilders());
+        addSources(job.getAnalyzerJobBuilders());
+    }
 
-	public List<InputColumn<?>> findInputColumns(Class<?> dataType) {
-		return findInputColumns(null, dataType);
-	}
+    public void addSources(AnalysisJob job) {
+        addSources(new SourceColumns(job.getSourceColumns()));
+        addSources(job.getFilterJobs());
+        addSources(job.getTransformerJobs());
+        addSources(job.getMergedOutcomeJobs());
+        addSources(job.getAnalyzerJobs());
+    }
 
-	/**
-	 * @deprecated use {@link #findInputColumns(Class)} instead.
-	 */
-	@Deprecated
-	public List<InputColumn<?>> findInputColumns(org.eobjects.analyzer.data.DataTypeFamily dataTypeFamily, Class<?> dataType) {
-		if (dataTypeFamily == null) {
-			dataTypeFamily = org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED;
-		}
+    public List<InputColumn<?>> findInputColumns(Class<?> dataType) {
+        return findInputColumns(null, dataType);
+    }
 
-		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
-		for (InputColumnSourceJob source : _inputColumnSources) {
-			InputColumn<?>[] outputColumns = source.getOutput();
-			for (InputColumn<?> col : outputColumns) {
-				final org.eobjects.analyzer.data.DataTypeFamily columnFamily = col.getDataTypeFamily();
-				if (columnFamily == dataTypeFamily || dataTypeFamily == org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED) {
-					final Class<?> columnDataType = col.getDataType();
-					if (dataType == null || columnDataType == null) {
-						result.add(col);
-					} else {
-						if (ReflectionUtils.is(columnDataType, dataType)) {
-							result.add(col);
-						}
-					}
-				}
-			}
-		}
+    /**
+     * @deprecated use {@link #findInputColumns(Class)} instead.
+     */
+    @Deprecated
+    public List<InputColumn<?>> findInputColumns(org.eobjects.analyzer.data.DataTypeFamily dataTypeFamily,
+            Class<?> dataType) {
+        if (dataTypeFamily == null) {
+            dataTypeFamily = org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED;
+        }
 
-		return result;
-	}
+        List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
+        for (InputColumnSourceJob source : _inputColumnSources) {
+            InputColumn<?>[] outputColumns = source.getOutput();
+            for (InputColumn<?> col : outputColumns) {
+                final org.eobjects.analyzer.data.DataTypeFamily columnFamily = col.getDataTypeFamily();
+                if (columnFamily == dataTypeFamily
+                        || dataTypeFamily == org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED) {
+                    final Class<?> columnDataType = col.getDataType();
+                    if (dataType == null || columnDataType == null) {
+                        result.add(col);
+                    } else {
+                        if (ReflectionUtils.is(columnDataType, dataType)) {
+                            result.add(col);
+                        }
+                    }
+                }
+            }
+        }
 
-	public InputColumnSourceJob findInputColumnSource(InputColumn<?> inputColumn) {
-		if (inputColumn instanceof ExpressionBasedInputColumn) {
-			return null;
-		}
-		for (InputColumnSourceJob source : _inputColumnSources) {
-			InputColumn<?>[] output = source.getOutput();
-			for (InputColumn<?> column : output) {
-				if (inputColumn.equals(column)) {
-					return source;
-				}
-			}
-		}
-		return null;
-	}
+        return result;
+    }
 
-	public OutcomeSourceJob findOutcomeSource(Outcome requirement) {
-		for (OutcomeSourceJob source : _outcomeSources) {
-			Outcome[] outcomes = source.getOutcomes();
-			for (Outcome outcome : outcomes) {
-				if (requirement.equals(outcome)) {
-					return source;
-				}
-			}
-		}
-		return null;
-	}
+    public InputColumnSourceJob findInputColumnSource(InputColumn<?> inputColumn) {
+        if (inputColumn instanceof ExpressionBasedInputColumn) {
+            return null;
+        }
+        for (InputColumnSourceJob source : _inputColumnSources) {
+            InputColumn<?>[] output = source.getOutput();
+            for (InputColumn<?> column : output) {
+                if (inputColumn.equals(column)) {
+                    return source;
+                }
+            }
+        }
+        return null;
+    }
 
-	public Set<Column> findOriginatingColumns(Outcome requirement) {
-		OutcomeSourceJob source = findOutcomeSource(requirement);
+    public OutcomeSourceJob findOutcomeSource(Outcome requirement) {
+        for (OutcomeSourceJob source : _outcomeSources) {
+            Outcome[] outcomes = source.getOutcomes();
+            for (Outcome outcome : outcomes) {
+                if (requirement.equals(outcome)) {
+                    return source;
+                }
+            }
+        }
+        return null;
+    }
 
-		HashSet<Column> result = new HashSet<Column>();
-		findOriginatingColumnsOfSource(source, result);
-		return result;
-	}
+    public Set<Column> findOriginatingColumns(Outcome requirement) {
+        OutcomeSourceJob source = findOutcomeSource(requirement);
 
-	public Table findOriginatingTable(Outcome requirement) {
-		OutcomeSourceJob source = findOutcomeSource(requirement);
-		return findOriginatingTableOfSource(source);
-	}
+        HashSet<Column> result = new HashSet<Column>();
+        findOriginatingColumnsOfSource(source, result);
+        return result;
+    }
 
-	public Table findOriginatingTable(InputColumn<?> inputColumn) {
-		if (inputColumn.isPhysicalColumn()) {
-			return inputColumn.getPhysicalColumn().getTable();
-		}
-		return findOriginatingTableOfSource(findInputColumnSource(inputColumn));
-	}
+    public Table findOriginatingTable(Outcome requirement) {
+        OutcomeSourceJob source = findOutcomeSource(requirement);
+        return findOriginatingTableOfSource(source);
+    }
 
-	private Table findOriginatingTableOfSource(Object source) {
-		Set<Table> result = new TreeSet<Table>();
-		if (source instanceof InputColumnSinkJob) {
-			InputColumn<?>[] input = ((InputColumnSinkJob) source).getInput();
-			if (input != null) {
-				for (InputColumn<?> col : input) {
-					Table table = findOriginatingTable(col);
-					if (table != null) {
-						result.add(table);
-					}
-				}
-			}
-		}
-		if (source instanceof OutcomeSinkJob) {
-			Outcome[] requirements = ((OutcomeSinkJob) source).getRequirements();
-			if (requirements != null) {
-				for (Outcome outcome : requirements) {
-					Table table = findOriginatingTable(outcome);
-					if (table != null) {
-						result.add(table);
-					}
-				}
-			}
-		}
+    public Table findOriginatingTable(InputColumn<?> inputColumn) {
+        if (inputColumn == null) {
+            logger.warn("InputColumn was null, no originating table found");
+            return null;
+        }
+        if (inputColumn.isPhysicalColumn()) {
+            return inputColumn.getPhysicalColumn().getTable();
+        }
+        return findOriginatingTableOfSource(findInputColumnSource(inputColumn));
+    }
 
-		if (result.isEmpty()) {
-			return null;
-		}
-		if (result.size() == 1) {
-			return result.iterator().next();
-		}
-		StringBuilder sb = new StringBuilder();
-		for (Table table : result) {
-			if (sb.length() != 0) {
-				sb.append(", ");
-			}
-			sb.append(table.getName());
-		}
-		throw new IllegalStateException("Multiple originating tables (" + sb + ") found for source: " + source);
-	}
+    private Table findOriginatingTableOfSource(Object source) {
+        Set<Table> result = new TreeSet<Table>();
+        if (source instanceof InputColumnSinkJob) {
+            InputColumn<?>[] input = ((InputColumnSinkJob) source).getInput();
+            if (input != null) {
+                for (InputColumn<?> col : input) {
+                    if (col == null) {
+                        logger.warn("InputColumn sink had a null-column element!");
+                    } else {
+                        Table table = findOriginatingTable(col);
+                        if (table != null) {
+                            result.add(table);
+                        }
+                    }
+                }
+            }
+        }
+        if (source instanceof OutcomeSinkJob) {
+            Outcome[] requirements = ((OutcomeSinkJob) source).getRequirements();
+            if (requirements != null) {
+                for (Outcome outcome : requirements) {
+                    Table table = findOriginatingTable(outcome);
+                    if (table != null) {
+                        result.add(table);
+                    }
+                }
+            }
+        }
 
-	private void findOriginatingColumnsOfInputColumn(InputColumn<?> inputColumn, Set<Column> result) {
-		if (inputColumn == null) {
-			return;
-		}
-		if (inputColumn.isPhysicalColumn()) {
-			result.add(inputColumn.getPhysicalColumn());
-		} else {
-			InputColumnSourceJob source = findInputColumnSource(inputColumn);
-			findOriginatingColumnsOfSource(source, result);
-		}
-	}
+        if (result.isEmpty()) {
+            return null;
+        }
+        if (result.size() == 1) {
+            return result.iterator().next();
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Table table : result) {
+            if (sb.length() != 0) {
+                sb.append(", ");
+            }
+            sb.append(table.getName());
+        }
+        throw new IllegalStateException("Multiple originating tables (" + sb + ") found for source: " + source);
+    }
 
-	private void findOriginatingColumnsOfOutcome(Outcome requirement, Set<Column> result) {
-		OutcomeSourceJob source = findOutcomeSource(requirement);
-		findOriginatingColumnsOfSource(source, result);
-	}
+    private void findOriginatingColumnsOfInputColumn(InputColumn<?> inputColumn, Set<Column> result) {
+        if (inputColumn == null) {
+            return;
+        }
+        if (inputColumn.isPhysicalColumn()) {
+            result.add(inputColumn.getPhysicalColumn());
+        } else {
+            InputColumnSourceJob source = findInputColumnSource(inputColumn);
+            findOriginatingColumnsOfSource(source, result);
+        }
+    }
 
-	private void findOriginatingColumnsOfSource(Object source, Set<Column> result) {
-		if (source == null) {
-			return;
-		}
-		if (source instanceof InputColumnSinkJob) {
-			InputColumn<?>[] input = ((InputColumnSinkJob) source).getInput();
-			if (input != null) {
-				for (InputColumn<?> inputColumn : input) {
-					findOriginatingColumnsOfInputColumn(inputColumn, result);
-				}
-			}
-		}
-		if (source instanceof OutcomeSinkJob) {
-			Outcome[] requirements = ((OutcomeSinkJob) source).getRequirements();
-			for (Outcome outcome : requirements) {
-				findOriginatingColumnsOfOutcome(outcome, result);
-			}
-		}
-	}
+    private void findOriginatingColumnsOfOutcome(Outcome requirement, Set<Column> result) {
+        OutcomeSourceJob source = findOutcomeSource(requirement);
+        findOriginatingColumnsOfSource(source, result);
+    }
 
-	public Set<Column> findOriginatingColumns(InputColumn<?> inputColumn) {
-		Set<Column> result = new HashSet<Column>();
+    private void findOriginatingColumnsOfSource(Object source, Set<Column> result) {
+        if (source == null) {
+            return;
+        }
+        if (source instanceof InputColumnSinkJob) {
+            InputColumn<?>[] input = ((InputColumnSinkJob) source).getInput();
+            if (input != null) {
+                for (InputColumn<?> inputColumn : input) {
+                    findOriginatingColumnsOfInputColumn(inputColumn, result);
+                }
+            }
+        }
+        if (source instanceof OutcomeSinkJob) {
+            Outcome[] requirements = ((OutcomeSinkJob) source).getRequirements();
+            for (Outcome outcome : requirements) {
+                findOriginatingColumnsOfOutcome(outcome, result);
+            }
+        }
+    }
 
-		// TODO: Detect cyclic dependencies between transformers (A depends on
-		// B, B depends on A)
+    public Set<Column> findOriginatingColumns(InputColumn<?> inputColumn) {
+        Set<Column> result = new HashSet<Column>();
 
-		findOriginatingColumnsOfInputColumn(inputColumn, result);
-		return result;
-	}
+        // TODO: Detect cyclic dependencies between transformers (A depends on
+        // B, B depends on A)
+
+        findOriginatingColumnsOfInputColumn(inputColumn, result);
+        return result;
+    }
 }

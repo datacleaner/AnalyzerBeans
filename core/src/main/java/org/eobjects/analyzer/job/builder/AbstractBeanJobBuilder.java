@@ -46,170 +46,173 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implements Renderable {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final D _descriptor;
-	private final E _configurableBean;
-	private volatile String _name;
-	private final AnalysisJobBuilder _analysisJobBuilder;
+    private final D _descriptor;
+    private final E _configurableBean;
+    private volatile String _name;
+    private final AnalysisJobBuilder _analysisJobBuilder;
 
-	public AbstractBeanJobBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor, Class<?> builderClass) {
-		if (analysisJobBuilder == null) {
-			throw new IllegalArgumentException("analysisJobBuilder cannot be null");
-		}
-		if (descriptor == null) {
-			throw new IllegalArgumentException("descriptor cannot be null");
-		}
-		if (builderClass == null) {
-			throw new IllegalArgumentException("builderClass cannot be null");
-		}
-		_analysisJobBuilder = analysisJobBuilder;
-		_descriptor = descriptor;
-		if (!ReflectionUtils.is(getClass(), builderClass)) {
-			throw new IllegalArgumentException("Builder class does not correspond to actual class of builder");
-		}
+    public AbstractBeanJobBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor, Class<?> builderClass) {
+        if (analysisJobBuilder == null) {
+            throw new IllegalArgumentException("analysisJobBuilder cannot be null");
+        }
+        if (descriptor == null) {
+            throw new IllegalArgumentException("descriptor cannot be null");
+        }
+        if (builderClass == null) {
+            throw new IllegalArgumentException("builderClass cannot be null");
+        }
+        _analysisJobBuilder = analysisJobBuilder;
+        _descriptor = descriptor;
+        if (!ReflectionUtils.is(getClass(), builderClass)) {
+            throw new IllegalArgumentException("Builder class does not correspond to actual class of builder");
+        }
 
-		_configurableBean = ReflectionUtils.newInstance(_descriptor.getComponentClass());
-	}
+        _configurableBean = ReflectionUtils.newInstance(_descriptor.getComponentClass());
+    }
 
-	public final AnalysisJobBuilder getAnalysisJobBuilder() {
-		return _analysisJobBuilder;
-	}
+    public final AnalysisJobBuilder getAnalysisJobBuilder() {
+        return _analysisJobBuilder;
+    }
 
-	public final D getDescriptor() {
-		return _descriptor;
-	}
+    public final D getDescriptor() {
+        return _descriptor;
+    }
 
-	public final E getConfigurableBean() {
-		return _configurableBean;
-	}
+    public final E getConfigurableBean() {
+        return _configurableBean;
+    }
 
-	public final boolean isConfigured(boolean throwException) throws IllegalStateException,
-			UnconfiguredConfiguredPropertyException {
-		for (ConfiguredPropertyDescriptor configuredProperty : _descriptor.getConfiguredProperties()) {
-			if (!isConfigured(configuredProperty, throwException)) {
-				if (throwException) {
-					throw new UnconfiguredConfiguredPropertyException(this, configuredProperty);
-				} else {
-					return false;
-				}
-			}
-		}
+    public final boolean isConfigured(boolean throwException) throws IllegalStateException,
+            UnconfiguredConfiguredPropertyException {
+        for (ConfiguredPropertyDescriptor configuredProperty : _descriptor.getConfiguredProperties()) {
+            if (!isConfigured(configuredProperty, throwException)) {
+                if (throwException) {
+                    throw new UnconfiguredConfiguredPropertyException(this, configuredProperty);
+                } else {
+                    return false;
+                }
+            }
+        }
 
-		try {
-			LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null);
-			lifeCycleHelper.validate(getDescriptor(), getConfigurableBean());
-		} catch (RuntimeException e) {
-			if (throwException) {
-				throw e;
-			} else {
-				return false;
-			}
-		}
+        try {
+            LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null);
+            lifeCycleHelper.validate(getDescriptor(), getConfigurableBean());
+        } catch (RuntimeException e) {
+            if (throwException) {
+                throw e;
+            } else {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	public String getName() {
-		return _name;
-	}
+    public String getName() {
+        return _name;
+    }
 
-	public B setName(String name) {
-		_name = name;
-		return (B) this;
-	}
+    public B setName(String name) {
+        _name = name;
+        return (B) this;
+    }
 
-	public boolean isConfigured() {
-		return isConfigured(false);
-	}
+    public boolean isConfigured() {
+        return isConfigured(false);
+    }
 
-	public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty, boolean throwException) {
-		if (configuredProperty.isRequired()) {
-			Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
-			Object value = configuredProperties.get(configuredProperty);
-			if (configuredProperty.isArray() && value != null) {
-				if (Array.getLength(value) == 0) {
-					value = null;
-				}
-			}
-			if (value == null) {
-				if (throwException) {
-					throw new UnconfiguredConfiguredPropertyException(this, configuredProperty);
-				} else {
-					logger.debug("Configured property is not set: " + configuredProperty);
-					return false;
-				}
-			}
-		}
-		return true;
-	}
+    public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty, boolean throwException) {
+        if (configuredProperty.isRequired()) {
+            Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
+            Object value = configuredProperties.get(configuredProperty);
+            if (configuredProperty.isArray() && value != null) {
+                if (Array.getLength(value) == 0) {
+                    value = null;
+                }
+            }
+            if (value == null) {
+                if (throwException) {
+                    throw new UnconfiguredConfiguredPropertyException(this, configuredProperty);
+                } else {
+                    logger.debug("Configured property is not set: " + configuredProperty);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
-	public B setConfiguredProperty(String configuredName, Object value) {
-		ConfiguredPropertyDescriptor configuredProperty = _descriptor.getConfiguredProperty(configuredName);
-		if (configuredProperty == null) {
-			throw new IllegalArgumentException("No such configured property: " + configuredName);
-		}
-		return setConfiguredProperty(configuredProperty, value);
-	}
+    public B setConfiguredProperty(String configuredName, Object value) {
+        ConfiguredPropertyDescriptor configuredProperty = _descriptor.getConfiguredProperty(configuredName);
+        if (configuredProperty == null) {
+            throw new IllegalArgumentException("No such configured property: " + configuredName);
+        }
+        return setConfiguredProperty(configuredProperty, value);
+    }
 
-	public B setConfiguredProperty(ConfiguredPropertyDescriptor configuredProperty, Object value) {
-		if (configuredProperty == null) {
-			throw new IllegalArgumentException("configuredProperty cannot be null");
-		}
-		if (value != null) {
-			boolean correctType = true;
-			if (configuredProperty.isArray()) {
-				if (value.getClass().isArray()) {
-					int length = Array.getLength(value);
-					for (int i = 0; i < length; i++) {
-						Object valuePart = Array.get(value, i);
-						if (valuePart != null) {
-							if (!ReflectionUtils.is(valuePart.getClass(), configuredProperty.getBaseType())) {
-								correctType = false;
-							}
-						}
-					}
-				} else {
-					if (!ReflectionUtils.is(value.getClass(), configuredProperty.getBaseType())) {
-						correctType = false;
-					}
-				}
-			} else {
-				if (!ReflectionUtils.is(value.getClass(), configuredProperty.getBaseType())) {
-					correctType = false;
-				}
-			}
-			if (!correctType) {
-				throw new IllegalArgumentException("Invalid value type: " + value.getClass().getName() + ", expected: "
-						+ configuredProperty.getBaseType().getName());
-			}
-		}
+    public B setConfiguredProperty(ConfiguredPropertyDescriptor configuredProperty, Object value) {
+        if (configuredProperty == null) {
+            throw new IllegalArgumentException("configuredProperty cannot be null");
+        }
+        if (value != null) {
+            boolean correctType = true;
+            if (configuredProperty.isArray()) {
+                if (value.getClass().isArray()) {
+                    int length = Array.getLength(value);
+                    for (int i = 0; i < length; i++) {
+                        Object valuePart = Array.get(value, i);
+                        if (valuePart == null) {
+                            logger.warn("Element no. {} in array (size {}) is null! Value passed to {}", new Object[] {
+                                    i, length, configuredProperty });
+                        } else {
+                            if (!ReflectionUtils.is(valuePart.getClass(), configuredProperty.getBaseType())) {
+                                correctType = false;
+                            }
+                        }
+                    }
+                } else {
+                    if (!ReflectionUtils.is(value.getClass(), configuredProperty.getBaseType())) {
+                        correctType = false;
+                    }
+                }
+            } else {
+                if (!ReflectionUtils.is(value.getClass(), configuredProperty.getBaseType())) {
+                    correctType = false;
+                }
+            }
+            if (!correctType) {
+                throw new IllegalArgumentException("Invalid value type: " + value.getClass().getName() + ", expected: "
+                        + configuredProperty.getBaseType().getName());
+            }
+        }
 
-		configuredProperty.setValue(_configurableBean, value);
-		onConfigurationChanged();
-		return (B) this;
-	}
+        configuredProperty.setValue(_configurableBean, value);
+        onConfigurationChanged();
+        return (B) this;
+    }
 
-	public Map<ConfiguredPropertyDescriptor, Object> getConfiguredProperties() {
-		Map<ConfiguredPropertyDescriptor, Object> map = new HashMap<ConfiguredPropertyDescriptor, Object>();
-		Set<ConfiguredPropertyDescriptor> configuredProperties = getDescriptor().getConfiguredProperties();
-		for (ConfiguredPropertyDescriptor propertyDescriptor : configuredProperties) {
-			Object value = getConfiguredProperty(propertyDescriptor);
-			if (value != null) {
-				map.put(propertyDescriptor, value);
-			}
-		}
-		return Collections.unmodifiableMap(map);
-	}
+    public Map<ConfiguredPropertyDescriptor, Object> getConfiguredProperties() {
+        Map<ConfiguredPropertyDescriptor, Object> map = new HashMap<ConfiguredPropertyDescriptor, Object>();
+        Set<ConfiguredPropertyDescriptor> configuredProperties = getDescriptor().getConfiguredProperties();
+        for (ConfiguredPropertyDescriptor propertyDescriptor : configuredProperties) {
+            Object value = getConfiguredProperty(propertyDescriptor);
+            if (value != null) {
+                map.put(propertyDescriptor, value);
+            }
+        }
+        return Collections.unmodifiableMap(map);
+    }
 
-	/**
-	 * method that can be used by sub-classes to add callback logic when the
-	 * configuration of the bean changes
-	 */
-	public void onConfigurationChanged() {
-	}
+    /**
+     * method that can be used by sub-classes to add callback logic when the
+     * configuration of the bean changes
+     */
+    public void onConfigurationChanged() {
+    }
 
-	public Object getConfiguredProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
-		return propertyDescriptor.getValue(getConfigurableBean());
-	}
+    public Object getConfiguredProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
+        return propertyDescriptor.getValue(getConfigurableBean());
+    }
 }
