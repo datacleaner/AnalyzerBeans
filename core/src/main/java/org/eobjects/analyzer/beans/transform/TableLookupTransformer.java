@@ -35,6 +35,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
@@ -119,10 +120,14 @@ public class TableLookupTransformer implements Transformer<Object> {
 		}
 		return queryOutputColumns;
 	}
-
+	
 	@Initialize
 	public void init() {
 		cache.clear();
+	}
+
+	@Validate
+	public void validate() {
 		resetColumns();
 		Column[] queryConditionColumns = getQueryConditionColumns();
 		final List<String> columnsNotFound = new ArrayList<String>();
