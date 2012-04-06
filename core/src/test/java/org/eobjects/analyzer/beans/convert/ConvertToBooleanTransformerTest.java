@@ -27,7 +27,8 @@ import junit.framework.TestCase;
 public class ConvertToBooleanTransformerTest extends TestCase {
 
 	public void testGetOutputColumns() throws Exception {
-		ConvertToBooleanTransformer t = new ConvertToBooleanTransformer(new MockInputColumn<String>("my col", String.class));
+		ConvertToBooleanTransformer t = new ConvertToBooleanTransformer();
+		t.setInput(new MockInputColumn<String>("my col", String.class));
 		OutputColumns outputColumns = t.getOutputColumns();
 		
 		assertEquals(1, outputColumns.getColumnCount());

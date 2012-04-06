@@ -51,7 +51,7 @@ public class ConvertToStringTransformer implements Transformer<String> {
 
 	@Inject
 	@Configured
-	InputColumn<?> input;
+	InputColumn<?>[] input;
 
 	@StringProperty(multiline = true)
 	@Configured(required = false)
@@ -59,17 +59,25 @@ public class ConvertToStringTransformer implements Transformer<String> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(input.getName() + " (as string)");
+		String[] names = new String[input.length];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = input[i].getName() + " (as string)";
+		}
+		return new OutputColumns(names);
 	}
 
 	@Override
 	public String[] transform(InputRow inputRow) {
-		Object value = inputRow.getValue(input);
-		String stringValue = transformValue(value);
-		if (stringValue == null) {
-			stringValue = nullReplacement;
+		String[] result = new String[input.length];
+		for (int i = 0; i < input.length; i++) {
+			Object value = inputRow.getValue(input[i]);
+			String stringValue = transformValue(value);
+			if (stringValue == null) {
+				stringValue = nullReplacement;
+			}
+			result[i]  = stringValue;
 		}
-		return new String[] { stringValue };
+		return result;
 	}
 
 	public static String transformValue(Object value) {
@@ -107,5 +115,13 @@ public class ConvertToStringTransformer implements Transformer<String> {
 			}
 		}
 		return stringValue;
+	}
+	
+	public void setInput(InputColumn<?>[] input) {
+		this.input = input;
+	}
+	
+	public void setNullReplacement(String nullReplacement) {
+		this.nullReplacement = nullReplacement;
 	}
 }

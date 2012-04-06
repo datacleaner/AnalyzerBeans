@@ -53,7 +53,7 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 
 	@Inject
 	@Configured
-	InputColumn<?> input;
+	InputColumn<?>[] input;
 
 	@Inject
 	@Configured
@@ -94,17 +94,25 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(input.getName() + " (as number)");
+		String[] names = new String[input.length];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = input[i].getName() + " (as number)";
+		}
+		return new OutputColumns(names);
 	}
 
 	@Override
 	public Number[] transform(InputRow inputRow) {
-		Object value = inputRow.getValue(input);
-		Number n = transform(value);
-		if (n == null) {
-			n = nullReplacement;
+		Number[] result = new Number[input.length];
+		for (int i = 0; i < input.length; i++) {
+			Object value = inputRow.getValue(input[i]);
+			Number n = transform(value);
+			if (n == null) {
+				n = nullReplacement;
+			}
+			result[i] = n;
 		}
-		return new Number[] { n };
+		return result;
 	}
 
 	protected Number transform(Object value) {
@@ -159,7 +167,23 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 		return n;
 	}
 
-	public void setInput(InputColumn<String> input) {
+	public void setInput(InputColumn<?> ... input) {
 		this.input = input;
+	}
+	
+	public void setNullReplacement(Number nullReplacement) {
+		this.nullReplacement = nullReplacement;
+	}
+	
+	public void setDecimalSeparator(char decimalSeparator) {
+		this.decimalSeparator = decimalSeparator;
+	}
+	
+	public void setMinusSign(char minusSign) {
+		this.minusSign = minusSign;
+	}
+	
+	public void setThousandSeparator(char thousandSeparator) {
+		this.thousandSeparator = thousandSeparator;
 	}
 }

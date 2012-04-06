@@ -59,7 +59,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 
 	@Inject
 	@Configured(order = 1)
-	InputColumn<?> input;
+	InputColumn<?>[] input;
 
 	@Inject
 	@Configured(required = false, order = 2)
@@ -97,17 +97,25 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(input.getName() + " (as date)");
+		String[] names = new String[input.length];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = input[i].getName() + " (as date)";
+		}
+		return new OutputColumns(names);
 	}
 
 	@Override
 	public Date[] transform(InputRow inputRow) {
-		Object value = inputRow.getValue(input);
-		Date d = transformValue(value);
-		if (d == null) {
-			d = nullReplacement;
+		Date[] result = new Date[input.length];
+		for (int i = 0; i < input.length; i++) {
+			Object value = inputRow.getValue(input[i]);
+			Date d = transformValue(value);
+			if (d == null) {
+				d = nullReplacement;
+			}
+			result[i] = d;
 		}
-		return new Date[] { d };
+		return result;
 	}
 
 	public Date transformValue(Object value) {
@@ -204,5 +212,9 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 	
 	public Date getNullReplacement() {
 		return nullReplacement;
+	}
+	
+	public void setNullReplacement(Date nullReplacement) {
+		this.nullReplacement = nullReplacement;
 	}
 }

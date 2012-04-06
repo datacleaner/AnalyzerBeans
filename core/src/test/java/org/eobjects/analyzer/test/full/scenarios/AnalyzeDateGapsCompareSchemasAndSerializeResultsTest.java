@@ -91,7 +91,7 @@ public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCa
 
 			TransformerJobBuilder<ConvertToStringTransformer> convertToNumber = analysisJobBuilder
 					.addTransformer(ConvertToStringTransformer.class);
-			convertToNumber.setConfiguredProperty("Input", analysisJobBuilder.getSourceColumnByName("customernumber"));
+			convertToNumber.addInputColumn(analysisJobBuilder.getSourceColumnByName("customernumber"));
 			InputColumn<String> customer_no = (InputColumn<String>) convertToNumber.getOutputColumns().get(0);
 
 			AnalyzerJobBuilder<DateGapAnalyzer> dateGap = analysisJobBuilder.addAnalyzer(DateGapAnalyzer.class);

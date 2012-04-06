@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans.convert;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -46,7 +47,8 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 
 	@Inject
 	@Configured
-	InputColumn<?> column;
+	@Alias("Column")
+	InputColumn<?>[] input;
 
 	@Configured(required = false)
 	Boolean nullReplacement;
@@ -59,27 +61,35 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 	@Description("Text tokens that will translate to 'false'")
 	String[] _falseTokens = DEFAULT_FALSE_TOKENS;
 
-	public ConvertToBooleanTransformer(InputColumn<?> column) {
-		this();
-		this.column = column;
+	public ConvertToBooleanTransformer(InputColumn<?>[] input) {
+		this.input = input;
 	}
 
 	public ConvertToBooleanTransformer() {
+		this(null);
 	}
 
 	@Override
 	public OutputColumns getOutputColumns() {
-		return new OutputColumns(column.getName() + " (as boolean)");
+		String[] names = new String[input.length];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = input[i].getName() + " (as boolean)";
+		}
+		return new OutputColumns(names);
 	}
 
 	@Override
 	public Boolean[] transform(InputRow inputRow) {
-		Object value = inputRow.getValue(column);
-		Boolean b = transformValue(value, _trueTokens, _falseTokens);
-		if (b == null) {
-			b = nullReplacement;
+		Boolean[] result = new Boolean[input.length];
+		for (int i = 0; i < input.length; i++) {
+			Object value = inputRow.getValue(input[i]);
+			Boolean b = transformValue(value, _trueTokens, _falseTokens);
+			if (b == null) {
+				b = nullReplacement;
+			}
+			result[i] = b;
 		}
-		return new Boolean[] { b };
+		return result;
 	}
 
 	public static Boolean transformValue(final Object value) {
@@ -119,6 +129,38 @@ public class ConvertToBooleanTransformer implements Transformer<Boolean> {
 			}
 		}
 		return b;
+	}
+
+	public void setFalseTokens(String[] falseTokens) {
+		_falseTokens = falseTokens;
+	}
+
+	public String[] getFalseTokens() {
+		return _falseTokens;
+	}
+
+	public void setInput(InputColumn<?>... input) {
+		this.input = input;
+	}
+
+	public InputColumn<?>[] getInput() {
+		return input;
+	}
+
+	public void setNullReplacement(Boolean nullReplacement) {
+		this.nullReplacement = nullReplacement;
+	}
+
+	public Boolean getNullReplacement() {
+		return nullReplacement;
+	}
+
+	public void setTrueTokens(String[] trueTokens) {
+		_trueTokens = trueTokens;
+	}
+
+	public String[] getTrueTokens() {
+		return _trueTokens;
 	}
 
 }
