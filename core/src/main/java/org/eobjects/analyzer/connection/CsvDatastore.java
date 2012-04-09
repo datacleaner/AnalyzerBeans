@@ -51,6 +51,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 	private final String _filename;
 	private final Character _quoteChar;
 	private final Character _separatorChar;
+	private final Character _escapeChar;
 	private final String _encoding;
 	private final boolean _failOnInconsistencies;
 	private final int _headerLineNumber;
@@ -71,16 +72,23 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 
 	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
 			boolean failOnInconsistencies, int headerLineNumber) {
+		this(name, filename, quoteChar, separatorChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, encoding, failOnInconsistencies, headerLineNumber);
+	}
+	
+	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, Character escapeChar, String encoding,
+			boolean failOnInconsistencies, int headerLineNumber) {
 		super(name);
 		_filename = filename;
 		_quoteChar = quoteChar;
 		_separatorChar = separatorChar;
+		_escapeChar = escapeChar;
 		_encoding = encoding;
 		_failOnInconsistencies = failOnInconsistencies;
 		if (headerLineNumber < 0) {
 			headerLineNumber = CsvConfiguration.NO_COLUMN_NAME_LINE;
 		}
 		_headerLineNumber = headerLineNumber;
+		
 	}
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -99,6 +107,10 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 	public Character getQuoteChar() {
 		return _quoteChar;
 	}
+	
+	public Character getEscapeChar() {
+		return _escapeChar;
+	}
 
 	public Character getSeparatorChar() {
 		return _separatorChar;
@@ -112,9 +124,10 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 		} else {
 			final char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
 			final char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
+			final char escapeChar = _escapeChar == null ? CsvConfiguration.DEFAULT_ESCAPE_CHAR : _escapeChar;
 			final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
 			final CsvConfiguration configuration = new CsvConfiguration(_headerLineNumber, encoding, separatorChar,
-					quoteChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, _failOnInconsistencies);
+					quoteChar, escapeChar, _failOnInconsistencies);
 			dataContext = DataContextFactory.createCsvDataContext(new File(_filename), configuration);
 		}
 		return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
@@ -145,6 +158,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 		identifiers.add(_filename);
 		identifiers.add(_encoding);
 		identifiers.add(_quoteChar);
+		identifiers.add(_escapeChar);
 		identifiers.add(_separatorChar);
 		identifiers.add(_failOnInconsistencies);
 		identifiers.add(_headerLineNumber);

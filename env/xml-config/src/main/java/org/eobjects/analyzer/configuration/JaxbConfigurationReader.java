@@ -519,10 +519,15 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
             String filename = _interceptor
                     .createFilename(getStringVariable("filename", csvDatastoreType.getFilename()));
+            
             String quoteCharString = getStringVariable("quoteChar", csvDatastoreType.getQuoteChar());
             Character quoteChar = null;
+            
             String separatorCharString = getStringVariable("separatorChar", csvDatastoreType.getSeparatorChar());
             Character separatorChar = null;
+            
+            String escapeCharString = getStringVariable("escapeChar", csvDatastoreType.getEscapeChar());
+            Character escapeChar = null;
 
             if (!StringUtils.isNullOrEmpty(separatorCharString)) {
                 assert separatorCharString.length() == 1;
@@ -532,6 +537,11 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             if (!StringUtils.isNullOrEmpty(quoteCharString)) {
                 assert quoteCharString.length() == 1;
                 quoteChar = quoteCharString.charAt(0);
+            }
+            
+            if (!StringUtils.isNullOrEmpty(escapeCharString)) {
+                assert escapeCharString.length() == 1;
+                escapeChar = escapeCharString.charAt(0);
             }
 
             String encoding = getStringVariable("encoding", csvDatastoreType.getEncoding());
@@ -550,7 +560,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 headerLineNumber = CsvConfiguration.DEFAULT_COLUMN_NAME_LINE;
             }
 
-            CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, encoding,
+            CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, escapeChar, encoding,
                     failOnInconsistencies, headerLineNumber);
             ds.setDescription(csvDatastoreType.getDescription());
             datastores.put(name, ds);
