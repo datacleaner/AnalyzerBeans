@@ -43,6 +43,7 @@ public class TableLookupTransformerTest extends TestCase {
 		assertEquals("OutputColumns[name (lookup)]", outputColumns.toString());
 		assertEquals(String.class, outputColumns.getColumnType(0));
 		
+		trans.validate();
 		trans.init();
 		
 		assertEquals("[Jane Doe]", Arrays.toString(trans.transform(new MockInputRow().put(col1, "jane.doe@company.com"))));
@@ -50,4 +51,30 @@ public class TableLookupTransformerTest extends TestCase {
 		
 		trans.close();
 	}
+	
+	public void testGetOutputColumnsClearCache() throws Exception {
+	    TableLookupTransformer trans = new TableLookupTransformer();
+        trans.datastore = new CsvDatastore("my ds", "src/test/resources/employees.csv");
+        trans.outputColumns = new String[] { "name","email" };
+        trans.conditionColumns = new String[] { "email" };
+        
+        assertEquals("OutputColumns[name (lookup), email (lookup)]", trans.getOutputColumns().toString());
+        
+        trans.outputColumns = new String[] { "name" };
+        
+        assertEquals("OutputColumns[name (lookup)]", trans.getOutputColumns().toString());
+        
+        // check cache reuse by removing the datastore (that would be used when re-fetching the columns)
+        trans.datastore = null;
+        assertEquals("OutputColumns[name (lookup)]", trans.getOutputColumns().toString());
+        
+        // confirm the above assumption by creating a NPE when no datastore is set.
+        trans.outputColumns = new String[] { "name","email" };
+        try {
+            trans.getOutputColumns();
+            fail("Exception expected");
+        } catch (NullPointerException e) {
+            // OK!
+        }
+    }
 }

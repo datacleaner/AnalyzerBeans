@@ -60,167 +60,203 @@ import org.slf4j.LoggerFactory;
 @Concurrent(true)
 public class TableLookupTransformer implements Transformer<Object> {
 
-	private static final Logger logger = LoggerFactory.getLogger(TableLookupTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(TableLookupTransformer.class);
 
-	@Inject
-	@Configured
-	Datastore datastore;
+    @Inject
+    @Configured
+    Datastore datastore;
 
-	@Inject
-	@Configured
-	InputColumn<?>[] conditionValues;
+    @Inject
+    @Configured
+    InputColumn<?>[] conditionValues;
 
-	@Inject
-	@Configured
-	String[] conditionColumns;
+    @Inject
+    @Configured
+    String[] conditionColumns;
 
-	@Inject
-	@Configured
-	String[] outputColumns;
+    @Inject
+    @Configured
+    String[] outputColumns;
 
-	@Inject
-	@Configured(required = false)
-	@Alias("Schema")
-	String schemaName;
+    @Inject
+    @Configured(required = false)
+    @Alias("Schema")
+    String schemaName;
 
-	@Inject
-	@Configured(required = false)
-	@Alias("Table")
-	String tableName;
+    @Inject
+    @Configured(required = false)
+    @Alias("Table")
+    String tableName;
 
-	private final Map<List<Object>, Object[]> cache = CollectionUtils2.createCacheMap();
-	private Column[] queryOutputColumns;
-	private Column[] queryConditionColumns;
+    private final Map<List<Object>, Object[]> cache = CollectionUtils2.createCacheMap();
+    private Column[] queryOutputColumns;
+    private Column[] queryConditionColumns;
 
-	private void resetColumns() {
-		queryOutputColumns = null;
-		queryConditionColumns = null;
-	}
+    private void resetCachedColumns() {
+        queryOutputColumns = null;
+        queryConditionColumns = null;
+    }
 
-	private Column[] getQueryConditionColumns() {
-		if (queryConditionColumns == null) {
-			final DatastoreConnection con = datastore.openConnection();
-			try {
-				queryConditionColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName, conditionColumns);
-			} finally {
-				con.close();
-			}
-		}
-		return queryConditionColumns;
-	}
+    private Column[] getQueryConditionColumns() {
+        if (queryConditionColumns == null) {
+            final DatastoreConnection con = datastore.openConnection();
+            try {
+                queryConditionColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName,
+                        conditionColumns);
+            } finally {
+                con.close();
+            }
+        }
+        return queryConditionColumns;
+    }
 
-	private Column[] getQueryOutputColumns() {
-		if (queryOutputColumns == null) {
-			final DatastoreConnection con = datastore.openConnection();
-			try {
-				queryOutputColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName, outputColumns);
-			} finally {
-				con.close();
-			}
-		}
-		return queryOutputColumns;
-	}
-	
-	@Initialize
-	public void init() {
-		cache.clear();
-	}
+    /**
+     * Gets the output columns of the lookup query
+     * 
+     * @param checkNames
+     *            whether to check/validate/adjust the names of these columns
+     * @return
+     */
+    private Column[] getQueryOutputColumns(boolean checkNames) {
+        if (queryOutputColumns == null) {
+            final DatastoreConnection con = datastore.openConnection();
+            try {
+                queryOutputColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName, outputColumns);
+            } finally {
+                con.close();
+            }
+        } else if (checkNames) {
+            if (!isQueryOutputColumnsUpdated()) {
+                queryOutputColumns = null;
+                return getQueryOutputColumns(false);
+            }
+        }
+        return queryOutputColumns;
+    }
 
-	@Validate
-	public void validate() {
-		resetColumns();
-		Column[] queryConditionColumns = getQueryConditionColumns();
-		final List<String> columnsNotFound = new ArrayList<String>();
-		for (int i = 0; i < queryConditionColumns.length; i++) {
-			if (queryConditionColumns[i] == null) {
-				columnsNotFound.add(conditionColumns[i]);
-			}
-		}
+    /**
+     * Checks the validity of the current (cached) output columns array.
+     * 
+     * @return true if the current columns are valid
+     */
+    private boolean isQueryOutputColumnsUpdated() {
+        if (queryOutputColumns.length != outputColumns.length) {
+            return false;
+        }
+        for (int i = 0; i < queryOutputColumns.length; i++) {
+            Column outputColumn = queryOutputColumns[i];
+            String expectedName = outputColumns[i];
+            if (!expectedName.equals(outputColumn.getName())) {
+                return false;
+            }
+            if (tableName != null && !tableName.equals(outputColumn.getTable().getName())) {
+                return false;
+            }
+        }
 
-		if (!columnsNotFound.isEmpty()) {
-			throw new IllegalArgumentException("Could not find column(s): " + columnsNotFound);
-		}
-	}
+        return true;
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		Column[] queryOutputColumns = getQueryOutputColumns();
-		String[] names = new String[queryOutputColumns.length];
-		Class<?>[] types = new Class[queryOutputColumns.length];
-		for (int i = 0; i < queryOutputColumns.length; i++) {
-			Column column = queryOutputColumns[i];
-			if (column == null) {
-				throw new IllegalArgumentException("Could not find column: " + outputColumns[i]);
-			}
-			names[i] = column.getName() + " (lookup)";
-			types[i] = column.getType().getJavaEquivalentClass();
-		}
-		return new OutputColumns(names, types);
-	}
+    @Initialize
+    public void init() {
+        resetCachedColumns();
+        cache.clear();
+    }
 
-	@Override
-	public Object[] transform(InputRow inputRow) {
-		List<Object> queryInput = new ArrayList<Object>(conditionValues.length);
-		for (InputColumn<?> inputColumn : conditionValues) {
-			Object value = inputRow.getValue(inputColumn);
-			queryInput.add(value);
-		}
+    @Validate
+    public void validate() {
+        Column[] queryConditionColumns = getQueryConditionColumns();
+        final List<String> columnsNotFound = new ArrayList<String>();
+        for (int i = 0; i < queryConditionColumns.length; i++) {
+            if (queryConditionColumns[i] == null) {
+                columnsNotFound.add(conditionColumns[i]);
+            }
+        }
 
-		logger.info("Looking up based on condition values: {}", queryInput);
+        if (!columnsNotFound.isEmpty()) {
+            throw new IllegalArgumentException("Could not find column(s): " + columnsNotFound);
+        }
+    }
 
-		Object[] result;
-		synchronized (cache) {
-			result = cache.get(queryInput);
-			if (result == null) {
-				result = performQuery(queryInput);
-				cache.put(queryInput, result);
-			} else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Returning cached lookup result: {}", Arrays.toString(result));
-				}
-			}
-		}
+    @Override
+    public OutputColumns getOutputColumns() {
+        Column[] queryOutputColumns = getQueryOutputColumns(true);
+        String[] names = new String[queryOutputColumns.length];
+        Class<?>[] types = new Class[queryOutputColumns.length];
+        for (int i = 0; i < queryOutputColumns.length; i++) {
+            Column column = queryOutputColumns[i];
+            if (column == null) {
+                throw new IllegalArgumentException("Could not find column: " + outputColumns[i]);
+            }
+            names[i] = column.getName() + " (lookup)";
+            types[i] = column.getType().getJavaEquivalentClass();
+        }
+        return new OutputColumns(names, types);
+    }
 
-		return result;
-	}
+    @Override
+    public Object[] transform(InputRow inputRow) {
+        List<Object> queryInput = new ArrayList<Object>(conditionValues.length);
+        for (InputColumn<?> inputColumn : conditionValues) {
+            Object value = inputRow.getValue(inputColumn);
+            queryInput.add(value);
+        }
 
-	private Object[] performQuery(List<Object> queryInput) {
-		final Object[] result;
+        logger.info("Looking up based on condition values: {}", queryInput);
 
-		final DatastoreConnection con = datastore.openConnection();
-		try {
-			Column[] queryOutputColumns = getQueryOutputColumns();
-			Column[] queryConditionColumns = getQueryConditionColumns();
+        Object[] result;
+        synchronized (cache) {
+            result = cache.get(queryInput);
+            if (result == null) {
+                result = performQuery(queryInput);
+                cache.put(queryInput, result);
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Returning cached lookup result: {}", Arrays.toString(result));
+                }
+            }
+        }
 
-			Query query = new Query().from(queryOutputColumns[0].getTable()).select(queryOutputColumns);
-			for (int i = 0; i < queryConditionColumns.length; i++) {
-				query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, queryInput.get(i));
-			}
-			query = query.setMaxRows(1);
-			final DataSet dataSet = con.getDataContext().executeQuery(query);
-			if (dataSet.next()) {
-				result = dataSet.getRow().getValues();
-				if (logger.isInfoEnabled()) {
-					logger.info("Result of lookup: " + Arrays.toString(result));
-				}
-			} else {
-				logger.warn("Result of lookup: None!");
-				result = new Object[outputColumns.length];
-			}
-			dataSet.close();
-			return result;
-		} catch (RuntimeException e) {
-			logger.error("Error occurred while looking up based on conditions: " + queryInput, e);
-			throw e;
-		} finally {
-			con.close();
-		}
-	}
+        return result;
+    }
 
-	@Close
-	public void close() {
-		cache.clear();
-		queryOutputColumns = null;
-		queryConditionColumns = null;
-	}
+    private Object[] performQuery(List<Object> queryInput) {
+        final Object[] result;
+
+        final DatastoreConnection con = datastore.openConnection();
+        try {
+            Column[] queryOutputColumns = getQueryOutputColumns(false);
+            Column[] queryConditionColumns = getQueryConditionColumns();
+
+            Query query = new Query().from(queryOutputColumns[0].getTable()).select(queryOutputColumns);
+            for (int i = 0; i < queryConditionColumns.length; i++) {
+                query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, queryInput.get(i));
+            }
+            query = query.setMaxRows(1);
+            final DataSet dataSet = con.getDataContext().executeQuery(query);
+            if (dataSet.next()) {
+                result = dataSet.getRow().getValues();
+                if (logger.isInfoEnabled()) {
+                    logger.info("Result of lookup: " + Arrays.toString(result));
+                }
+            } else {
+                logger.warn("Result of lookup: None!");
+                result = new Object[outputColumns.length];
+            }
+            dataSet.close();
+            return result;
+        } catch (RuntimeException e) {
+            logger.error("Error occurred while looking up based on conditions: " + queryInput, e);
+            throw e;
+        } finally {
+            con.close();
+        }
+    }
+
+    @Close
+    public void close() {
+        cache.clear();
+        queryOutputColumns = null;
+        queryConditionColumns = null;
+    }
 }
