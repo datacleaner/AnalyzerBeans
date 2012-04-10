@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.builder;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -164,8 +165,8 @@ public class TransformerJobBuilderTest extends TestCase {
 
 		assertTrue(builder.isConfigured());
 		ConfiguredPropertyDescriptor propertyDescriptor = descriptor.getConfiguredPropertiesForInput().iterator().next();
-		Object object = builder.getConfiguredProperties().get(propertyDescriptor);
-		assertEquals("MockInputColumn[name=foo]", object.toString());
+		InputColumn<?>[] value = (InputColumn<?>[]) builder.getConfiguredProperties().get(propertyDescriptor);
+		assertEquals("[MockInputColumn[name=foo]]", Arrays.toString(value));
 	}
 
 	public void testReplaceAutomaticOutputColumnNames() throws Exception {

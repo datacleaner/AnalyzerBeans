@@ -123,9 +123,9 @@ import org.eobjects.analyzer.util.StringConverter;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
-import org.eobjects.metamodel.mongodb.MongoDbTableDef;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.SimpleTableDef;
 import org.eobjects.metamodel.xml.XmlSaxTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -767,11 +767,11 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
             List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef> tableDefList = mongodbDatastoreType
                     .getTableDef();
-            final MongoDbTableDef[] tableDefs;
+            final SimpleTableDef[] tableDefs;
             if (tableDefList.isEmpty()) {
                 tableDefs = null;
             } else {
-                tableDefs = new MongoDbTableDef[tableDefList.size()];
+                tableDefs = new SimpleTableDef[tableDefList.size()];
                 for (int i = 0; i < tableDefs.length; i++) {
                     org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef tableDef = tableDefList
                             .get(i);
@@ -793,7 +793,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                         columnTypes[i] = propertyType;
                     }
 
-                    tableDefs[i] = new MongoDbTableDef(collectionName, propertyNames, columnTypes);
+                    tableDefs[i] = new SimpleTableDef(collectionName, propertyNames, columnTypes);
                 }
             }
 

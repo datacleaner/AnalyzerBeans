@@ -25,9 +25,9 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
@@ -44,7 +44,7 @@ import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.mongodb.MongoDbTableDef;
+import org.eobjects.metamodel.util.SimpleTableDef;
 import org.junit.Assert;
 
 public class JaxbConfigurationReaderTest extends TestCase {
@@ -124,9 +124,9 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("analyzerbeans_test", mongoDbDatastore.getDatabaseName());
         assertEquals("localhost", mongoDbDatastore.getHostname());
         assertEquals(27017, mongoDbDatastore.getPort());
-        MongoDbTableDef[] tableDefs = mongoDbDatastore.getTableDefs();
+        SimpleTableDef[] tableDefs = mongoDbDatastore.getTableDefs();
         assertEquals(
-                "[MongoDbTableDef[collectionName=my_col_1,propertyNames=[foo, null, null],columnTypes=[VARCHAR, null, null]]]",
+                "[SimpleDbTableDef[name=my_col_1,columnNames=[foo, null, null],columnTypes=[VARCHAR, null, null]]]",
                 Arrays.toString(tableDefs));
 
         XmlDatastore xmlDatastore = (XmlDatastore) datastoreCatalog.getDatastore("my_sax_xml");
