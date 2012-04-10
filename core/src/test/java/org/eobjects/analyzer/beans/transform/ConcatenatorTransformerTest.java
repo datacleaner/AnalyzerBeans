@@ -40,9 +40,13 @@ public class ConcatenatorTransformerTest extends TestCase {
 		assertEquals(1, result.length);
 		assertEquals("hello + true", result[0]);
 		
-		result = t.transform(new MockInputRow().put(col1, "hi").put(col2, null));
+		result = t.transform(new MockInputRow().put(col1, "hi").put(col2, ""));
 		assertEquals(1, result.length);
 		assertEquals("hi", result[0]);
+		
+		result = t.transform(new MockInputRow().put(col1, "hi").put(col2, null));
+        assertEquals(1, result.length);
+        assertEquals("hi", result[0]);
 		
 		result = t.transform(new MockInputRow().put(col1, null).put(col2, true));
 		assertEquals(1, result.length);

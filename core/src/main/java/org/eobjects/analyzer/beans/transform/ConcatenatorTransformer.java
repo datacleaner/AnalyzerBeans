@@ -78,7 +78,7 @@ public class ConcatenatorTransformer implements Transformer<String> {
 		for (int i = 0; i < columns.length; i++) {
 			InputColumn<?> column = columns[i];
 			Object value = inputRow.getValue(column);
-			if (value != null) {
+			if (value != null && !"".equals(value)) {
 				if (!first && separator != null) {
 					sb.append(separator);
 				}
