@@ -94,6 +94,28 @@
 				</property>
 			</table-def>
 		</mongodb-datastore>
+		
+		<couchdb-datastore name="my couch">
+			<hostname>localhost</hostname>
+			<username>user</username>
+			<password>pass</password>
+			<ssl>true</ssl>
+			<table-def>
+				<database>foobar</database>
+				<field>
+					<name>foo</name>
+					<type>MAP</type>
+				</field>
+				<field>
+					<name>bar</name>
+					<type>INTEGER</type>
+				</field>
+				<field>
+					<name>baz</name>
+					<type>VARCHAR</type>
+				</field>
+			</table-def>
+		</couchdb-datastore>
 
 		<custom-datastore
 			class-name="org.eobjects.analyzer.configuration.SampleCustomDatastore">

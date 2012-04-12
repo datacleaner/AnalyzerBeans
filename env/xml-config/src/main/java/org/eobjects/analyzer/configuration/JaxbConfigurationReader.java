@@ -43,6 +43,7 @@ import org.eobjects.analyzer.configuration.jaxb.CombinedStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.CompositeDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.Configuration;
 import org.eobjects.analyzer.configuration.jaxb.ConfigurationMetadataType;
+import org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.CsvDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.CustomElementType;
 import org.eobjects.analyzer.configuration.jaxb.CustomElementType.Property;
@@ -76,6 +77,7 @@ import org.eobjects.analyzer.configuration.jaxb.XmlDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.XmlDatastoreType.TableDef;
 import org.eobjects.analyzer.connection.AccessDatastore;
 import org.eobjects.analyzer.connection.CompositeDatastore;
+import org.eobjects.analyzer.connection.CouchDbDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -519,13 +521,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
             String filename = _interceptor
                     .createFilename(getStringVariable("filename", csvDatastoreType.getFilename()));
-            
+
             String quoteCharString = getStringVariable("quoteChar", csvDatastoreType.getQuoteChar());
             Character quoteChar = null;
-            
+
             String separatorCharString = getStringVariable("separatorChar", csvDatastoreType.getSeparatorChar());
             Character separatorChar = null;
-            
+
             String escapeCharString = getStringVariable("escapeChar", csvDatastoreType.getEscapeChar());
             Character escapeChar = null;
 
@@ -538,7 +540,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 assert quoteCharString.length() == 1;
                 quoteChar = quoteCharString.charAt(0);
             }
-            
+
             if (!StringUtils.isNullOrEmpty(escapeCharString)) {
                 assert escapeCharString.length() == 1;
                 escapeChar = escapeCharString.charAt(0);
@@ -751,6 +753,59 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
+        List<CouchdbDatastoreType> couchDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+                CouchdbDatastoreType.class);
+        for (CouchdbDatastoreType couchdbDatastoreType : couchDbDatastores) {
+            String name = couchdbDatastoreType.getName();
+            checkName(name, Datastore.class, datastores);
+
+            addVariablePath(name);
+
+            String hostname = getStringVariable("hostname", couchdbDatastoreType.getHostname());
+            Integer port = getIntegerVariable("port", couchdbDatastoreType.getPort());
+            String username = getStringVariable("username", couchdbDatastoreType.getUsername());
+            String password = getStringVariable("password", couchdbDatastoreType.getPassword());
+            Boolean sslEnabled = getBooleanVariable("ssl", couchdbDatastoreType.isSsl());
+
+            List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef> tableDefList = couchdbDatastoreType
+                    .getTableDef();
+            final SimpleTableDef[] tableDefs;
+            if (tableDefList.isEmpty()) {
+                tableDefs = null;
+            } else {
+                tableDefs = new SimpleTableDef[tableDefList.size()];
+                for (int i = 0; i < tableDefs.length; i++) {
+                    org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef tableDef = tableDefList
+                            .get(i);
+                    String databaseName = tableDef.getDatabase();
+                    List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef.Field> fieldList = tableDef
+                            .getField();
+                    String[] propertyNames = new String[fieldList.size()];
+                    ColumnType[] columnTypes = new ColumnType[fieldList.size()];
+                    for (int j = 0; j < columnTypes.length; j++) {
+                        String propertyName = fieldList.get(j).getName();
+                        String propertyTypeName = fieldList.get(j).getType();
+                        final ColumnType propertyType;
+                        if (StringUtils.isNullOrEmpty(propertyTypeName)) {
+                            propertyType = ColumnType.VARCHAR;
+                        } else {
+                            propertyType = ColumnType.valueOf(propertyTypeName);
+                        }
+                        propertyNames[j] = propertyName;
+                        columnTypes[j] = propertyType;
+                    }
+
+                    tableDefs[i] = new SimpleTableDef(databaseName, propertyNames, columnTypes);
+                }
+            }
+
+            CouchDbDatastore ds = new CouchDbDatastore(name, hostname, port, username, password, sslEnabled, tableDefs);
+            ds.setDescription(couchdbDatastoreType.getDescription());
+            datastores.put(name, ds);
+
+            removeVariablePath();
+        }
+
         List<MongodbDatastoreType> mongoDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 MongodbDatastoreType.class);
         for (MongodbDatastoreType mongodbDatastoreType : mongoDbDatastores) {
@@ -781,16 +836,16 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                     String[] propertyNames = new String[propertyList.size()];
                     ColumnType[] columnTypes = new ColumnType[propertyList.size()];
                     for (int j = 0; j < columnTypes.length; j++) {
-                        String propertyName = propertyList.get(i).getName();
-                        String propertyTypeName = propertyList.get(i).getType();
+                        String propertyName = propertyList.get(j).getName();
+                        String propertyTypeName = propertyList.get(j).getType();
                         final ColumnType propertyType;
                         if (StringUtils.isNullOrEmpty(propertyTypeName)) {
-                            propertyType = ColumnType.valueOf(propertyTypeName);
-                        } else {
                             propertyType = ColumnType.VARCHAR;
+                        } else {
+                            propertyType = ColumnType.valueOf(propertyTypeName);
                         }
-                        propertyNames[i] = propertyName;
-                        columnTypes[i] = propertyType;
+                        propertyNames[j] = propertyName;
+                        columnTypes[j] = propertyType;
                     }
 
                     tableDefs[i] = new SimpleTableDef(collectionName, propertyNames, columnTypes);

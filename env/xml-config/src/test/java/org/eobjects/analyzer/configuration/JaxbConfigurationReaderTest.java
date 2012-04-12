@@ -24,6 +24,7 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.connection.CouchDbDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -61,13 +62,13 @@ public class JaxbConfigurationReaderTest extends TestCase {
                     "src/test/resources/example-configuration-valid.xml"));
             Datastore datastore = configuration.getDatastoreCatalog().getDatastore("my database");
             assertTrue(datastore instanceof JdbcDatastore);
-            
+
             String username = ((JdbcDatastore) datastore).getUsername();
             assertEquals("foobar", username);
-            
+
             datastore = configuration.getDatastoreCatalog().getDatastore("persons_csv");
             assertTrue(datastore instanceof CsvDatastore);
-            
+
             String filename = ((CsvDatastore) datastore).getFilename();
             assertEquals("foo/bar.csv", filename);
         } finally {
@@ -103,7 +104,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
         String[] datastoreNames = datastoreCatalog.getDatastoreNames();
         assertEquals(
-                "[my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_sas, my_sax_xml]",
+                "[my couch, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_sas, my_sax_xml]",
                 Arrays.toString(datastoreNames));
 
         assertEquals("a mongo db based datastore", datastoreCatalog.getDatastore("my mongo").getDescription());
@@ -120,13 +121,22 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
         assertEquals("folder of sas7bdat files", datastoreCatalog.getDatastore("my_sas").getDescription());
 
+        CouchDbDatastore couchDbDatastore = (CouchDbDatastore) datastoreCatalog.getDatastore("my couch");
+        assertEquals("localhost", couchDbDatastore.getHostname());
+        assertEquals("user", couchDbDatastore.getUsername());
+        assertEquals("pass", couchDbDatastore.getPassword());
+        assertEquals(true, couchDbDatastore.isSslEnabled());
+        assertEquals(1, couchDbDatastore.getTableDefs().length);
+        assertEquals("SimpleDbTableDef[name=foobar,columnNames=[foo, bar, baz],columnTypes=[MAP, INTEGER, VARCHAR]]",
+                couchDbDatastore.getTableDefs()[0].toString());
+
         MongoDbDatastore mongoDbDatastore = (MongoDbDatastore) datastoreCatalog.getDatastore("my mongo");
         assertEquals("analyzerbeans_test", mongoDbDatastore.getDatabaseName());
         assertEquals("localhost", mongoDbDatastore.getHostname());
         assertEquals(27017, mongoDbDatastore.getPort());
         SimpleTableDef[] tableDefs = mongoDbDatastore.getTableDefs();
         assertEquals(
-                "[SimpleDbTableDef[name=my_col_1,columnNames=[foo, null, null],columnTypes=[VARCHAR, null, null]]]",
+                "[SimpleDbTableDef[name=my_col_1,columnNames=[foo, bar, baz],columnTypes=[VARCHAR, INTEGER, DATE]]]",
                 Arrays.toString(tableDefs));
 
         XmlDatastore xmlDatastore = (XmlDatastore) datastoreCatalog.getDatastore("my_sax_xml");
@@ -146,9 +156,9 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals(0, ds.getHeaderLineNumber());
 
         for (String name : datastoreNames) {
-            // test that all connections, except the JNDI- and MongoDB-based on
-            // will work
-            if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name)) {
+            // test that all connections, except the JNDI-, MongoDB- and
+            // CouchDB-based on will work
+            if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name) && !"my couch".equals(name)) {
                 Datastore datastore = datastoreCatalog.getDatastore(name);
                 DataContext dc = datastore.openConnection().getDataContext();
                 assertNotNull(dc);
