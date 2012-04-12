@@ -29,6 +29,8 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
 
     private static final long serialVersionUID = 1L;
 
+    public static final int DEFAULT_PORT = 5984;
+
     private final String _hostname;
     private final Integer _port;
     private final String _username;
@@ -78,7 +80,7 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
         } else {
             dataContext = new CouchDbDataContext(httpClient);
         }
-        return new DatastoreConnectionImpl<CouchDbDataContext>(dataContext, this);
+        return new UpdateableDatastoreConnectionImpl<CouchDbDataContext>(dataContext, this);
     }
 
     public String getHostname() {
@@ -86,6 +88,9 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
     }
 
     public int getPort() {
+        if (_port == null) {
+            return DEFAULT_PORT;
+        }
         return _port;
     }
 
