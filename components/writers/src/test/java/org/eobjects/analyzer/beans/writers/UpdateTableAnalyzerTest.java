@@ -1,0 +1,130 @@
+/**
+ * eobjects.org AnalyzerBeans
+ * Copyright (C) 2010 eobjects.org
+ *
+ * This copyrighted material is made available to anyone wishing to use, modify,
+ * copy, or redistribute it subject to the terms and conditions of the GNU
+ * Lesser General Public License, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this distribution; if not, write to:
+ * Free Software Foundation, Inc.
+ * 51 Franklin Street, Fifth Floor
+ * Boston, MA  02110-1301  USA
+ */
+package org.eobjects.analyzer.beans.writers;
+
+import java.io.File;
+
+import junit.framework.TestCase;
+
+import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
+import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.UpdateCallback;
+import org.eobjects.metamodel.UpdateScript;
+import org.eobjects.metamodel.UpdateableDataContext;
+import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.Table;
+
+public class UpdateTableAnalyzerTest extends TestCase {
+
+    private JdbcDatastore jdbcDatastore;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        if (jdbcDatastore == null) {
+            jdbcDatastore = new JdbcDatastore("my datastore", "jdbc:hsqldb:mem:UpdateTable_testErrorHandlingOption",
+                    "org.hsqldb.jdbcDriver");
+            final UpdateableDatastoreConnection con = jdbcDatastore.openConnection();
+            final UpdateableDataContext dc = con.getUpdateableDataContext();
+            if (dc.getDefaultSchema().getTableByName("test_table") == null) {
+                dc.executeUpdate(new UpdateScript() {
+                    @Override
+                    public void run(UpdateCallback cb) {
+                        Table table = cb.createTable(dc.getDefaultSchema(), "test_table").withColumn("foo")
+                                .ofType(ColumnType.VARCHAR).withColumn("bar").ofType(ColumnType.INTEGER)
+                                .withColumn("baz").ofType(ColumnType.VARCHAR).execute();
+
+                        cb.insertInto(table).value("foo", "a").value("bar", 1).value("baz", "lorem").execute();
+                        cb.insertInto(table).value("foo", "b").value("bar", 2).value("baz", "ipsum").execute();
+                        cb.insertInto(table).value("foo", "c").value("bar", 3).value("baz", "dolor").execute();
+                        cb.insertInto(table).value("foo", "d").value("bar", 4).value("baz", "sit").execute();
+                        cb.insertInto(table).value("foo", "e").value("bar", 5).value("baz", "amet").execute();
+                    }
+                });
+            }
+            con.close();
+        }
+    }
+
+    public void testErrorHandlingToInvalidFile() throws Exception {
+        final UpdateTableAnalyzer updateTableAnalyzer = new UpdateTableAnalyzer();
+        updateTableAnalyzer.datastore = jdbcDatastore;
+        updateTableAnalyzer.tableName = "test_table";
+        updateTableAnalyzer.columnNames = new String[] { "foo", "bar" };
+        updateTableAnalyzer.errorHandlingOption = ErrorHandlingOption.SAVE_TO_FILE;
+        updateTableAnalyzer.errorLogFile = new File("src/test/resources/invalid-error-handling-file.csv");
+
+        InputColumn<Object> col1 = new MockInputColumn<Object>("in1", Object.class);
+        InputColumn<Object> col2 = new MockInputColumn<Object>("in2", Object.class);
+
+        updateTableAnalyzer.values = new InputColumn[] { col1, col2 };
+
+        try {
+            updateTableAnalyzer.init();
+            fail("Exception expected");
+        } catch (IllegalStateException e) {
+            assertEquals("Error log file does not have required column header: foo", e.getMessage());
+        }
+    }
+
+    public void testVanillaScenario() throws Exception {
+        InputColumn<Object> col1 = new MockInputColumn<Object>("in1", Object.class);
+        InputColumn<Object> col2 = new MockInputColumn<Object>("in2", Object.class);
+        InputColumn<Object> col3 = new MockInputColumn<Object>("in3", Object.class);
+
+        final UpdateTableAnalyzer updateTableAnalyzer = new UpdateTableAnalyzer();
+        updateTableAnalyzer.datastore = jdbcDatastore;
+        updateTableAnalyzer.tableName = "test_table";
+        updateTableAnalyzer.columnNames = new String[] { "baz", "foo" };
+        updateTableAnalyzer.values = new InputColumn<?>[] { col3, col1 };
+        updateTableAnalyzer.conditionColumnNames = new String[] { "bar" };
+        updateTableAnalyzer.conditionValues = new InputColumn<?>[] { col2 };
+        updateTableAnalyzer.validate();
+        updateTableAnalyzer.init();
+        updateTableAnalyzer.run(new MockInputRow().put(col1, "aaa").put(col2, 1).put(col3, "hello"), 1);
+        updateTableAnalyzer.run(new MockInputRow().put(col1, "bbb").put(col2, 2).put(col3, "world"), 1);
+        WriteDataResult result = updateTableAnalyzer.getResult();
+
+        assertEquals(0, result.getErrorRowCount());
+        assertEquals(0, result.getWrittenRowCount());
+        assertEquals(2, result.getUpdatedRowCount());
+
+        UpdateableDatastoreConnection con = jdbcDatastore.openConnection();
+        DataContext dc = con.getDataContext();
+        DataSet ds = dc.query().from("test_table").select("foo", "bar", "baz").orderBy("bar").execute();
+        assertTrue(ds.next());
+        assertEquals("Row[values=[aaa, 1, hello]]", ds.getRow().toString());
+        assertTrue(ds.next());
+        assertEquals("Row[values=[bbb, 2, world]]", ds.getRow().toString());
+        assertTrue(ds.next());
+        assertEquals("Row[values=[c, 3, dolor]]", ds.getRow().toString());
+        assertTrue(ds.next());
+        assertEquals("Row[values=[d, 4, sit]]", ds.getRow().toString());
+        assertTrue(ds.next());
+        assertEquals("Row[values=[e, 5, amet]]", ds.getRow().toString());
+        assertFalse(ds.next());
+        ds.close();
+    }
+}

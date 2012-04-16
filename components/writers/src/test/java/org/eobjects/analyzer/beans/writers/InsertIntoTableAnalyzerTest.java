@@ -62,7 +62,7 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 		super.setUp();
 		if (jdbcDatastore == null) {
 			jdbcDatastore = new JdbcDatastore("my datastore",
-					"jdbc:hsqldb:mem:testErrorHandlingOption",
+					"jdbc:hsqldb:mem:InsertIntoTable_testErrorHandlingOption",
 					"org.hsqldb.jdbcDriver");
 			final UpdateableDatastoreConnection con = jdbcDatastore
 					.openConnection();

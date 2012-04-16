@@ -38,6 +38,11 @@ public interface WriteDataResult extends AnalyzerResult {
 	 * @return the amount of rows that was written.
 	 */
 	public int getWrittenRowCount();
+	
+	/**
+	 * @return the amount of rows that was updated.
+	 */
+	public int getUpdatedRowCount();
 
 	/**
 	 * Gets the amount of rows that was errornuosly not written. This will only

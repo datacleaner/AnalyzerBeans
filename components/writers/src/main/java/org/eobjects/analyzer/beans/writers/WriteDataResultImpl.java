@@ -33,99 +33,110 @@ import org.eobjects.metamodel.util.Func;
  */
 public final class WriteDataResultImpl implements WriteDataResult {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final int _writtenRowCount;
-	private final String _schemaName;
-	private final String _tableName;
-	private final int _errorRowCount;
+    private final int _writtenRowCount;
+    private final int _updatedRowCount;
+    private final String _schemaName;
+    private final String _tableName;
+    private final int _errorRowCount;
 
-	private final transient Func<DatastoreCatalog, Datastore> _datastoreFunc;
-	private final transient FileDatastore _errorDatastore;
+    private final transient Func<DatastoreCatalog, Datastore> _datastoreFunc;
+    private final transient FileDatastore _errorDatastore;
 
-	public WriteDataResultImpl(final int writtenRowCount,
-			final Datastore datastore, final String schemaName,
-			final String tableName) {
-		this(writtenRowCount, datastore, schemaName, tableName, 0, null);
-	}
+    public WriteDataResultImpl(final int writtenRowCount, final Datastore datastore, final String schemaName,
+            final String tableName) {
+        this(writtenRowCount, datastore, schemaName, tableName, 0, null);
+    }
 
-	public WriteDataResultImpl(final int writtenRowCount,
-			final Datastore datastore, final String schemaName,
-			final String tableName, final int errorRowCount,
-			final FileDatastore errorDatastore) {
-		_writtenRowCount = writtenRowCount;
-		_schemaName = schemaName;
-		_tableName = tableName;
-		_datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
-			@Override
-			public Datastore eval(DatastoreCatalog catalog) {
-				return datastore;
-			}
-		};
-		_errorRowCount = errorRowCount;
-		_errorDatastore = errorDatastore;
-	}
+    public WriteDataResultImpl(final int writtenRowCount, final Datastore datastore, final String schemaName,
+            final String tableName, final int errorRowCount, final FileDatastore errorDatastore) {
+        this(writtenRowCount, 0, datastore, schemaName, tableName, errorRowCount, errorDatastore);
+    }
 
-	public WriteDataResultImpl(final int writtenRowCount,
-			final String datastoreName, final String schemaName,
-			final String tableName) {
-		_writtenRowCount = writtenRowCount;
-		_schemaName = schemaName;
-		_tableName = tableName;
-		_datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
-			@Override
-			public Datastore eval(DatastoreCatalog catalog) {
-				return catalog.getDatastore(datastoreName);
-			}
-		};
-		_errorRowCount = 0;
-		_errorDatastore = null;
-	}
+    public WriteDataResultImpl(final int writtenRowCount, final int updatedRowCount, final Datastore datastore,
+            final String schemaName, final String tableName, final int errorRowCount, final FileDatastore errorDatastore) {
+        _writtenRowCount = writtenRowCount;
+        _updatedRowCount = updatedRowCount;
+        _schemaName = schemaName;
+        _tableName = tableName;
+        _datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
+            @Override
+            public Datastore eval(DatastoreCatalog catalog) {
+                return datastore;
+            }
+        };
+        _errorRowCount = errorRowCount;
+        _errorDatastore = errorDatastore;
+    }
 
-	@Override
-	public FileDatastore getErrorDatastore() {
-		return _errorDatastore;
-	}
+    public WriteDataResultImpl(final int writtenRowCount, final String datastoreName, final String schemaName,
+            final String tableName) {
+        this(writtenRowCount, 0, datastoreName, schemaName, tableName);
+    }
 
-	@Override
-	public int getErrorRowCount() {
-		return _errorRowCount;
-	}
+    public WriteDataResultImpl(final int writtenRowCount, final int updatedRowCount, final String datastoreName,
+            final String schemaName, final String tableName) {
+        _writtenRowCount = writtenRowCount;
+        _updatedRowCount = updatedRowCount;
+        _schemaName = schemaName;
+        _tableName = tableName;
+        _datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
+            @Override
+            public Datastore eval(DatastoreCatalog catalog) {
+                return catalog.getDatastore(datastoreName);
+            }
+        };
+        _errorRowCount = 0;
+        _errorDatastore = null;
+    }
 
-	@Override
-	public int getWrittenRowCount() {
-		return _writtenRowCount;
-	}
+    @Override
+    public FileDatastore getErrorDatastore() {
+        return _errorDatastore;
+    }
 
-	@Override
-	public Datastore getDatastore(DatastoreCatalog datastoreCatalog) {
-		return _datastoreFunc.eval(datastoreCatalog);
-	}
+    @Override
+    public int getUpdatedRowCount() {
+        return _updatedRowCount;
+    }
 
-	@Override
-	public Table getPreviewTable(Datastore datastore) {
-		DatastoreConnection con = datastore.openConnection();
-		try {
-			return con.getSchemaNavigator().convertToTable(_schemaName,
-					_tableName);
-		} finally {
-			con.close();
-		}
-	}
+    @Override
+    public int getErrorRowCount() {
+        return _errorRowCount;
+    }
 
-	@Override
-	public String toString() {
-		String message = _writtenRowCount + " records written to table";
-		if (_errorRowCount > 0) {
-			if (_errorDatastore == null) {
-				message = message + "\n - WARNING! " + _errorRowCount
-						+ " record failed";
-			} else {
-				message = message + "\n - WARNING! " + _errorRowCount
-						+ " record failed, written to file: "
-						+ _errorDatastore.getFilename();
-			}
-		}
-		return message;
-	}
+    @Override
+    public int getWrittenRowCount() {
+        return _writtenRowCount;
+    }
+
+    @Override
+    public Datastore getDatastore(DatastoreCatalog datastoreCatalog) {
+        return _datastoreFunc.eval(datastoreCatalog);
+    }
+
+    @Override
+    public Table getPreviewTable(Datastore datastore) {
+        DatastoreConnection con = datastore.openConnection();
+        try {
+            return con.getSchemaNavigator().convertToTable(_schemaName, _tableName);
+        } finally {
+            con.close();
+        }
+    }
+
+    @Override
+    public String toString() {
+        String message = _writtenRowCount + " records written to table";
+        if (_errorRowCount > 0) {
+            if (_errorDatastore == null) {
+                message = message + "\n - WARNING! " + _errorRowCount + " record failed";
+            } else {
+                message = message + "\n - WARNING! " + _errorRowCount + " record failed, written to file: "
+                        + _errorDatastore.getFilename();
+            }
+        }
+        return message;
+    }
 }
