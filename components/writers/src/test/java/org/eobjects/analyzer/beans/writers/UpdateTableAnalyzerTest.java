@@ -23,6 +23,7 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
@@ -34,7 +35,9 @@ import org.eobjects.metamodel.UpdateScript;
 import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.FileHelper;
 
 public class UpdateTableAnalyzerTest extends TestCase {
 
@@ -126,5 +129,58 @@ public class UpdateTableAnalyzerTest extends TestCase {
         assertEquals("Row[values=[e, 5, amet]]", ds.getRow().toString());
         assertFalse(ds.next());
         ds.close();
+    }
+
+    public void testUpdateCSV() throws Exception {
+        final File file = new File("target/example_updated.csv");
+        FileHelper.copy(new File("src/test/resources/example_updated.csv"), file);
+
+        final CsvDatastore datastore = new CsvDatastore("example", file.getPath(), null, ',', "UTF8");
+        final UpdateableDatastoreConnection connection = datastore.openConnection();
+        final DataContext dataContext = connection.getDataContext();
+        final Schema schema = dataContext.getDefaultSchema();
+        final Table table = schema.getTable(0);
+
+        final UpdateTableAnalyzer updateTableAnalyzer = new UpdateTableAnalyzer();
+        updateTableAnalyzer.datastore = datastore;
+        updateTableAnalyzer.schemaName = schema.getName();
+        updateTableAnalyzer.tableName = table.getName();
+        updateTableAnalyzer.columnNames = new String[] { "name" };
+        updateTableAnalyzer.conditionColumnNames = new String[] { "id" };
+        updateTableAnalyzer.errorHandlingOption = ErrorHandlingOption.SAVE_TO_FILE;
+
+        InputColumn<Object> inputId = new MockInputColumn<Object>("id", Object.class);
+        InputColumn<Object> inputNewName = new MockInputColumn<Object>("new_name", Object.class);
+        updateTableAnalyzer.values = new InputColumn[] { inputNewName };
+        updateTableAnalyzer.conditionValues = new InputColumn[] { inputId };
+
+        updateTableAnalyzer.validate();
+        updateTableAnalyzer.init();
+
+        updateTableAnalyzer.run(new MockInputRow().put(inputId, 1).put(inputNewName, "foo"), 1);
+        updateTableAnalyzer.run(new MockInputRow().put(inputId, "2").put(inputNewName, "bar"), 1);
+        updateTableAnalyzer.run(new MockInputRow().put(inputId, 3).put(inputNewName, "baz"), 1);
+
+        WriteDataResult result = updateTableAnalyzer.getResult();
+        assertEquals(0, result.getErrorRowCount());
+        assertEquals(0, result.getWrittenRowCount());
+        assertEquals(3, result.getUpdatesCount());
+
+        DataSet dataSet = dataContext.query().from(table).select("id", "name").execute();
+        assertTrue(dataSet.next());
+        assertEquals("Row[values=[4, hans]]", dataSet.getRow().toString());
+        assertTrue(dataSet.next());
+        assertEquals("Row[values=[5, manuel]]", dataSet.getRow().toString());
+        assertTrue(dataSet.next());
+        assertEquals("Row[values=[6, ankit]]", dataSet.getRow().toString());
+        assertTrue(dataSet.next());
+        assertEquals("Row[values=[1, foo]]", dataSet.getRow().toString());
+        assertTrue(dataSet.next());
+        assertEquals("Row[values=[2, bar]]", dataSet.getRow().toString());
+        assertTrue(dataSet.next());
+        assertEquals("Row[values=[3, baz]]", dataSet.getRow().toString());
+        assertFalse(dataSet.next());
+
+        connection.close();
     }
 }
