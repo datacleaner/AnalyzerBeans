@@ -109,7 +109,7 @@ public class UpdateTableAnalyzerTest extends TestCase {
 
         assertEquals(0, result.getErrorRowCount());
         assertEquals(0, result.getWrittenRowCount());
-        assertEquals(2, result.getUpdatedRowCount());
+        assertEquals(2, result.getUpdatesCount());
 
         UpdateableDatastoreConnection con = jdbcDatastore.openConnection();
         DataContext dc = con.getDataContext();

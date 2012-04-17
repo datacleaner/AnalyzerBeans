@@ -36,7 +36,7 @@ public final class WriteDataResultImpl implements WriteDataResult {
     private static final long serialVersionUID = 1L;
 
     private final int _writtenRowCount;
-    private final int _updatedRowCount;
+    private final int _updatesCount;
     private final String _schemaName;
     private final String _tableName;
     private final int _errorRowCount;
@@ -54,10 +54,10 @@ public final class WriteDataResultImpl implements WriteDataResult {
         this(writtenRowCount, 0, datastore, schemaName, tableName, errorRowCount, errorDatastore);
     }
 
-    public WriteDataResultImpl(final int writtenRowCount, final int updatedRowCount, final Datastore datastore,
+    public WriteDataResultImpl(final int writtenRowCount, final int updatesCount, final Datastore datastore,
             final String schemaName, final String tableName, final int errorRowCount, final FileDatastore errorDatastore) {
         _writtenRowCount = writtenRowCount;
-        _updatedRowCount = updatedRowCount;
+        _updatesCount = updatesCount;
         _schemaName = schemaName;
         _tableName = tableName;
         _datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
@@ -75,10 +75,10 @@ public final class WriteDataResultImpl implements WriteDataResult {
         this(writtenRowCount, 0, datastoreName, schemaName, tableName);
     }
 
-    public WriteDataResultImpl(final int writtenRowCount, final int updatedRowCount, final String datastoreName,
+    public WriteDataResultImpl(final int writtenRowCount, final int updatesCount, final String datastoreName,
             final String schemaName, final String tableName) {
         _writtenRowCount = writtenRowCount;
-        _updatedRowCount = updatedRowCount;
+        _updatesCount = updatesCount;
         _schemaName = schemaName;
         _tableName = tableName;
         _datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
@@ -97,8 +97,8 @@ public final class WriteDataResultImpl implements WriteDataResult {
     }
 
     @Override
-    public int getUpdatedRowCount() {
-        return _updatedRowCount;
+    public int getUpdatesCount() {
+        return _updatesCount;
     }
 
     @Override

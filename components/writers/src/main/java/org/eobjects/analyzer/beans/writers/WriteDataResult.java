@@ -34,48 +34,48 @@ import org.eobjects.metamodel.schema.Table;
  */
 public interface WriteDataResult extends AnalyzerResult {
 
-	/**
-	 * @return the amount of rows that was written.
-	 */
-	public int getWrittenRowCount();
-	
-	/**
-	 * @return the amount of rows that was updated.
-	 */
-	public int getUpdatedRowCount();
+    /**
+     * @return the amount of rows that was written.
+     */
+    public int getWrittenRowCount();
 
-	/**
-	 * Gets the amount of rows that was errornuosly not written. This will only
-	 * be non-zero if a error handling strategy has been specified, typically
-	 * using {@link ErrorHandlingOption}.
-	 * 
-	 * @return the amount of rows that was not written.
-	 */
-	public int getErrorRowCount();
+    /**
+     * @return the amount of updates that was executed.
+     */
+    public int getUpdatesCount();
 
-	/**
-	 * Gets a reference to a datastore containing error records. Note that the
-	 * datastore is not nescesarily registered in the {@link DatastoreCatalog}.
-	 * 
-	 * @return a {@link FileDatastore} reference or null if no errors occurred.
-	 */
-	public FileDatastore getErrorDatastore();
+    /**
+     * Gets the amount of rows that was errornuosly not written. This will only
+     * be non-zero if a error handling strategy has been specified, typically
+     * using {@link ErrorHandlingOption}.
+     * 
+     * @return the amount of rows that was not written.
+     */
+    public int getErrorRowCount();
 
-	/**
-	 * @param datastoreCatalog
-	 *            the datastore catalog that the user has configured.
-	 * @return a datastore that can be used to access the target destination, or
-	 *         null of it is not available (eg. destination not reachable or no
-	 *         rows written).
-	 */
-	public Datastore getDatastore(DatastoreCatalog datastoreCatalog);
+    /**
+     * Gets a reference to a datastore containing error records. Note that the
+     * datastore is not nescesarily registered in the {@link DatastoreCatalog}.
+     * 
+     * @return a {@link FileDatastore} reference or null if no errors occurred.
+     */
+    public FileDatastore getErrorDatastore();
 
-	/**
-	 * @param datastore
-	 *            the datastore that was returned by
-	 *            {@link #getDatastore(DatastoreCatalog)}.
-	 * @return a table that can be used for previewing the data written.
-	 */
-	public Table getPreviewTable(Datastore datastore);
+    /**
+     * @param datastoreCatalog
+     *            the datastore catalog that the user has configured.
+     * @return a datastore that can be used to access the target destination, or
+     *         null of it is not available (eg. destination not reachable or no
+     *         rows written).
+     */
+    public Datastore getDatastore(DatastoreCatalog datastoreCatalog);
+
+    /**
+     * @param datastore
+     *            the datastore that was returned by
+     *            {@link #getDatastore(DatastoreCatalog)}.
+     * @return a table that can be used for previewing the data written.
+     */
+    public Table getPreviewTable(Datastore datastore);
 
 }
