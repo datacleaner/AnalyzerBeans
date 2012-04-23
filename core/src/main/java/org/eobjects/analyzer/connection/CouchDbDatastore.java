@@ -29,7 +29,7 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
 
     private static final long serialVersionUID = 1L;
 
-    public static final int DEFAULT_PORT = 5984;
+    public static final int DEFAULT_PORT = CouchDbDataContext.DEFAULT_PORT;
 
     private final String _hostname;
     private final Integer _port;
