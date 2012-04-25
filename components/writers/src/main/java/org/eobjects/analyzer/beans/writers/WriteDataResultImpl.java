@@ -113,6 +113,9 @@ public final class WriteDataResultImpl implements WriteDataResult {
 
     @Override
     public Datastore getDatastore(DatastoreCatalog datastoreCatalog) {
+        if (_datastoreFunc == null) {
+            return null;
+        }
         return _datastoreFunc.eval(datastoreCatalog);
     }
 
