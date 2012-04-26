@@ -19,11 +19,20 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.io.Serializable;
 import java.util.Map.Entry;
 
-public final class ImmutableEntry<K, V> implements Entry<K, V> {
+/**
+ * An immutable entry implementation
+ *
+ * @param <K>
+ * @param <V>
+ */
+public final class ImmutableEntry<K, V> implements Entry<K, V>, Serializable {
 
-	private final K _key;
+    private static final long serialVersionUID = 1L;
+
+    private final K _key;
 	private final V _value;
 
 	public ImmutableEntry(K key, V value) {
