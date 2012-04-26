@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.storage;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -34,11 +35,13 @@ import org.eobjects.analyzer.util.CollectionUtils2;
  * @author Kasper Sørensen
  * 
  */
-public abstract class AbstractRowAnnotationFactory implements RowAnnotationFactory {
+public abstract class AbstractRowAnnotationFactory implements RowAnnotationFactory, Serializable {
 
-	private final Map<RowAnnotationImpl, AtomicInteger> _rowCounts = new IdentityHashMap<RowAnnotationImpl, AtomicInteger>();
-	private final Map<Integer, Boolean> _cachedRows = CollectionUtils2.createCacheMap();
+    private static final long serialVersionUID = 1L;
+
+    private final Map<RowAnnotationImpl, AtomicInteger> _rowCounts = new IdentityHashMap<RowAnnotationImpl, AtomicInteger>();
 	private final Integer _storedRowsThreshold;
+	private final transient Map<Integer, Boolean> _cachedRows = CollectionUtils2.createCacheMap();
 
 	public AbstractRowAnnotationFactory(Integer storedRowsThreshold) {
 		if (storedRowsThreshold == null) {
@@ -72,11 +75,13 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 
 		if (storeRow) {
 			int rowId = row.getId();
-			synchronized (_cachedRows) {
-				if (_cachedRows.get(rowId) == null) {
-					storeRowValues(rowId, row, distinctCount);
-					_cachedRows.put(rowId, Boolean.TRUE);
-				}
+			if (_cachedRows != null) {
+			    synchronized (_cachedRows) {
+			        if (_cachedRows.get(rowId) == null) {
+			            storeRowValues(rowId, row, distinctCount);
+			            _cachedRows.put(rowId, Boolean.TRUE);
+			        }
+			    }
 			}
 			storeRowAnnotation(rowId, annotation);
 		}

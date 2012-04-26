@@ -27,67 +27,73 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.ImmutableEntry;
 
+/**
+ * Default {@link RowAnnotationFactory} instance. Stores up to 1000 rows in an
+ * in memory annotation.
+ */
 public class InMemoryRowAnnotationFactory extends AbstractRowAnnotationFactory implements RowAnnotationFactory {
 
-	// contains annotations, mapped to row-ids
-	private final Map<RowAnnotation, Set<Integer>> _annotatedRows = new LinkedHashMap<RowAnnotation, Set<Integer>>();
+    private static final long serialVersionUID = 1L;
 
-	// contains row id's mapped to rows mapped to distinct counts
-	private final Map<Integer, Map.Entry<InputRow, Integer>> _distinctCounts = new LinkedHashMap<Integer, Map.Entry<InputRow, Integer>>();
+    // contains annotations, mapped to row-ids
+    private final Map<RowAnnotation, Set<Integer>> _annotatedRows = new LinkedHashMap<RowAnnotation, Set<Integer>>();
 
-	public InMemoryRowAnnotationFactory() {
-		this(1000);
-	}
-	
-	public InMemoryRowAnnotationFactory(int storedRowsThreshold) {
-		super(storedRowsThreshold);
-	}
+    // contains row id's mapped to rows mapped to distinct counts
+    private final Map<Integer, Map.Entry<InputRow, Integer>> _distinctCounts = new LinkedHashMap<Integer, Map.Entry<InputRow, Integer>>();
 
-	protected int getInMemoryRowCount(RowAnnotation annotation) {
-		Set<Integer> rows = _annotatedRows.get(annotation);
-		if (rows == null) {
-			return 0;
-		}
-		return rows.size();
-	}
+    public InMemoryRowAnnotationFactory() {
+        this(1000);
+    }
 
-	@Override
-	protected void resetRows(RowAnnotation annotation) {
-		_annotatedRows.remove(annotation);
-	}
+    public InMemoryRowAnnotationFactory(int storedRowsThreshold) {
+        super(storedRowsThreshold);
+    }
 
-	@Override
-	protected int getDistinctCount(InputRow row) {
-		return _distinctCounts.get(row.getId()).getValue();
-	}
+    protected int getInMemoryRowCount(RowAnnotation annotation) {
+        Set<Integer> rows = _annotatedRows.get(annotation);
+        if (rows == null) {
+            return 0;
+        }
+        return rows.size();
+    }
 
-	@Override
-	protected void storeRowAnnotation(int rowId, RowAnnotation annotation) {
-		Set<Integer> rowIds = _annotatedRows.get(annotation);
-		if (rowIds == null) {
-			rowIds = new LinkedHashSet<Integer>();
-			_annotatedRows.put(annotation, rowIds);
-		}
-		rowIds.add(rowId);
-	}
+    @Override
+    protected void resetRows(RowAnnotation annotation) {
+        _annotatedRows.remove(annotation);
+    }
 
-	@Override
-	protected void storeRowValues(int rowId, InputRow row, int distinctCount) {
-		_distinctCounts.put(rowId, new ImmutableEntry<InputRow, Integer>(row, distinctCount));
-	}
+    @Override
+    protected int getDistinctCount(InputRow row) {
+        return _distinctCounts.get(row.getId()).getValue();
+    }
 
-	@Override
-	public InputRow[] getRows(RowAnnotation annotation) {
-		Set<Integer> rowIds = _annotatedRows.get(annotation);
-		if (rowIds == null) {
-			return new InputRow[0];
-		}
-		InputRow[] rows = new InputRow[rowIds.size()];
-		int i = 0;
-		for (Integer rowId : rowIds) {
-			rows[i] = _distinctCounts.get(rowId).getKey();
-			i++;
-		}
-		return rows;
-	}
+    @Override
+    protected void storeRowAnnotation(int rowId, RowAnnotation annotation) {
+        Set<Integer> rowIds = _annotatedRows.get(annotation);
+        if (rowIds == null) {
+            rowIds = new LinkedHashSet<Integer>();
+            _annotatedRows.put(annotation, rowIds);
+        }
+        rowIds.add(rowId);
+    }
+
+    @Override
+    protected void storeRowValues(int rowId, InputRow row, int distinctCount) {
+        _distinctCounts.put(rowId, new ImmutableEntry<InputRow, Integer>(row, distinctCount));
+    }
+
+    @Override
+    public InputRow[] getRows(RowAnnotation annotation) {
+        Set<Integer> rowIds = _annotatedRows.get(annotation);
+        if (rowIds == null) {
+            return new InputRow[0];
+        }
+        InputRow[] rows = new InputRow[rowIds.size()];
+        int i = 0;
+        for (Integer rowId : rowIds) {
+            rows[i] = _distinctCounts.get(rowId).getKey();
+            i++;
+        }
+        return rows;
+    }
 }

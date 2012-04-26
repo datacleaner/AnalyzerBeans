@@ -32,237 +32,232 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.NullTolerableComparator;
+import org.eobjects.analyzer.util.SerializableRef;
+import org.eobjects.metamodel.util.Ref;
 
-public class ValueDistributionGroupResult implements Serializable,
-		Comparable<ValueDistributionGroupResult> {
+public class ValueDistributionGroupResult implements Serializable, Comparable<ValueDistributionGroupResult> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final ValueCountList _topValues;
-	private final ValueCountList _bottomValues;
-	private final int _nullCount;
-	private final Collection<String> _uniqueValues;
-	private final Map<String, RowAnnotation> _annotations;
-	private final InputColumn<?>[] _highlightedColumns;
-	private final transient RowAnnotationFactory _annotationFactory;
-	private final int _uniqueValueCount;
-	private final String _groupName;
-	private final int _totalCount;
-	private final int _distinctCount;
+    private final ValueCountList _topValues;
+    private final ValueCountList _bottomValues;
+    private final int _nullCount;
+    private final Collection<String> _uniqueValues;
+    private final Map<String, RowAnnotation> _annotations;
+    private final InputColumn<?>[] _highlightedColumns;
+    private final int _uniqueValueCount;
+    private final String _groupName;
+    private final int _totalCount;
+    private final int _distinctCount;
 
-	public ValueDistributionGroupResult(String groupName,
-			ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, Collection<String> uniqueValues,
-			int uniqueValueCount, int distinctCount, int totalCount,
-			Map<String, RowAnnotation> annotations,
-			RowAnnotationFactory annotationFactory,
-			InputColumn<?>[] highlightedColumns) {
-		_groupName = groupName;
-		_topValues = topValues;
-		_bottomValues = bottomValues;
-		_nullCount = nullCount;
-		_uniqueValues = uniqueValues;
-		_uniqueValueCount = uniqueValueCount;
-		_totalCount = totalCount;
-		_distinctCount = distinctCount;
-		_annotations = annotations;
-		_annotationFactory = annotationFactory;
-		_highlightedColumns = highlightedColumns;
-	}
+    private final Ref<RowAnnotationFactory> _annotationFactoryRef;
 
-	public ValueDistributionGroupResult(String groupName,
-			ValueCountList topValues, ValueCountList bottomValues,
-			int nullCount, int uniqueValueCount, int distinctCount,
-			int totalCount, Map<String, RowAnnotation> annotations,
-			RowAnnotationFactory annotationFactory,
-			InputColumn<?>[] highlightedColumns) {
-		this(groupName, topValues, bottomValues, nullCount, null,
-				uniqueValueCount, distinctCount, totalCount, annotations,
-				annotationFactory, highlightedColumns);
-	}
+    public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
+            int nullCount, Collection<String> uniqueValues, int uniqueValueCount, int distinctCount, int totalCount,
+            Map<String, RowAnnotation> annotations, RowAnnotationFactory annotationFactory,
+            InputColumn<?>[] highlightedColumns) {
+        _groupName = groupName;
+        _topValues = topValues;
+        _bottomValues = bottomValues;
+        _nullCount = nullCount;
+        _uniqueValues = uniqueValues;
+        _uniqueValueCount = uniqueValueCount;
+        _totalCount = totalCount;
+        _distinctCount = distinctCount;
+        _annotations = annotations;
+        _annotationFactoryRef = new SerializableRef<RowAnnotationFactory>(annotationFactory);
+        _highlightedColumns = highlightedColumns;
+    }
 
-	public boolean isAnnotationsEnabled() {
-		return _annotations != null;
-	}
-	
-	public boolean hasAnnotation(String value) {
-	    if (_annotations == null) {
-	        return false;
-	    }
-	    
-	    return _annotations.containsKey(value);
-	}
+    public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
+            int nullCount, int uniqueValueCount, int distinctCount, int totalCount,
+            Map<String, RowAnnotation> annotations, RowAnnotationFactory annotationFactory,
+            InputColumn<?>[] highlightedColumns) {
+        this(groupName, topValues, bottomValues, nullCount, null, uniqueValueCount, distinctCount, totalCount,
+                annotations, annotationFactory, highlightedColumns);
+    }
 
-	public AnnotatedRowsResult getAnnotatedRows(String value) {
-		if (_annotations == null) {
-			return null;
-		}
-		RowAnnotation annotation = _annotations.get(value);
-		if (annotation == null) {
-			return null;
-		}
+    public boolean isAnnotationsEnabled() {
+        return _annotations != null;
+    }
 
-		return new AnnotatedRowsResult(annotation, _annotationFactory,
-				_highlightedColumns);
-	}
+    public boolean hasAnnotation(String value) {
+        if (_annotations == null) {
+            return false;
+        }
 
-	public ValueCountList getTopValues() {
-		if (_topValues == null) {
-			return ValueCountListImpl.emptyList();
-		}
-		return _topValues;
-	}
+        return _annotations.containsKey(value);
+    }
 
-	public ValueCountList getBottomValues() {
-		if (_bottomValues == null) {
-			return ValueCountListImpl.emptyList();
-		}
-		return _bottomValues;
-	}
+    public AnnotatedRowsResult getAnnotatedRows(String value) {
+        RowAnnotationFactory annotationFactory = _annotationFactoryRef.get();
+        if (_annotations == null || annotationFactory == null) {
+            return null;
+        }
+        RowAnnotation annotation = _annotations.get(value);
+        if (annotation == null) {
+            return null;
+        }
 
-	public int getNullCount() {
-		return _nullCount;
-	}
+        return new AnnotatedRowsResult(annotation, annotationFactory, _highlightedColumns);
+    }
 
-	public int getUniqueCount() {
-		if (_uniqueValues != null) {
-			return _uniqueValues.size();
-		}
-		return _uniqueValueCount;
-	}
+    public ValueCountList getTopValues() {
+        if (_topValues == null) {
+            return ValueCountListImpl.emptyList();
+        }
+        return _topValues;
+    }
 
-	public Collection<String> getUniqueValues() {
-		if (_uniqueValues == null) {
-			return Collections.emptyList();
-		}
-		return Collections.unmodifiableCollection(_uniqueValues);
-	}
+    public ValueCountList getBottomValues() {
+        if (_bottomValues == null) {
+            return ValueCountListImpl.emptyList();
+        }
+        return _bottomValues;
+    }
 
-	public String getGroupName() {
-		return _groupName;
-	}
+    public int getNullCount() {
+        return _nullCount;
+    }
 
-	/**
-	 * Appends a string representation with a maximum amount of entries
-	 * 
-	 * @param sb
-	 *            the StringBuilder to append to
-	 * 
-	 * @param maxEntries
-	 * @return
-	 */
-	public void appendToString(StringBuilder sb, int maxEntries) {
-		if (maxEntries != 0) {
-			if (_topValues != null && _topValues.getActualSize() > 0) {
-				sb.append("\nTop values:");
-				List<ValueCount> valueCounts = _topValues.getValueCounts();
-				for (ValueCount valueCount : valueCounts) {
-					sb.append("\n - ");
-					sb.append(valueCount.getValue());
-					sb.append(": ");
-					sb.append(valueCount.getCount());
+    public int getUniqueCount() {
+        if (_uniqueValues != null) {
+            return _uniqueValues.size();
+        }
+        return _uniqueValueCount;
+    }
 
-					maxEntries--;
-					if (maxEntries == 0) {
-						sb.append("\n ...");
-						break;
-					}
-				}
-			}
-		}
+    public Collection<String> getUniqueValues() {
+        if (_uniqueValues == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableCollection(_uniqueValues);
+    }
 
-		if (maxEntries != 0) {
-			if (_bottomValues != null && _bottomValues.getActualSize() > 0) {
-				sb.append("\nBottom values:");
-				List<ValueCount> valueCounts = _bottomValues.getValueCounts();
-				for (ValueCount valueCount : valueCounts) {
-					sb.append("\n - ");
-					sb.append(valueCount.getValue());
-					sb.append(": ");
-					sb.append(valueCount.getCount());
+    public String getGroupName() {
+        return _groupName;
+    }
 
-					maxEntries--;
-					if (maxEntries == 0) {
-						sb.append("\n ...");
-						break;
-					}
-				}
-			}
-		}
+    /**
+     * Appends a string representation with a maximum amount of entries
+     * 
+     * @param sb
+     *            the StringBuilder to append to
+     * 
+     * @param maxEntries
+     * @return
+     */
+    public void appendToString(StringBuilder sb, int maxEntries) {
+        if (maxEntries != 0) {
+            if (_topValues != null && _topValues.getActualSize() > 0) {
+                sb.append("\nTop values:");
+                List<ValueCount> valueCounts = _topValues.getValueCounts();
+                for (ValueCount valueCount : valueCounts) {
+                    sb.append("\n - ");
+                    sb.append(valueCount.getValue());
+                    sb.append(": ");
+                    sb.append(valueCount.getCount());
 
-		sb.append("\nNull count: ");
-		sb.append(_nullCount);
+                    maxEntries--;
+                    if (maxEntries == 0) {
+                        sb.append("\n ...");
+                        break;
+                    }
+                }
+            }
+        }
 
-		sb.append("\nUnique values: ");
-		if (_uniqueValues == null) {
-			sb.append(_uniqueValueCount);
-		} else if (_uniqueValues.isEmpty()) {
-			sb.append("0");
-		} else {
-			for (String value : _uniqueValues) {
-				sb.append("\n - ");
-				sb.append(value);
+        if (maxEntries != 0) {
+            if (_bottomValues != null && _bottomValues.getActualSize() > 0) {
+                sb.append("\nBottom values:");
+                List<ValueCount> valueCounts = _bottomValues.getValueCounts();
+                for (ValueCount valueCount : valueCounts) {
+                    sb.append("\n - ");
+                    sb.append(valueCount.getValue());
+                    sb.append(": ");
+                    sb.append(valueCount.getCount());
 
-				maxEntries--;
-				if (maxEntries == 0) {
-					sb.append("\n ...");
-					break;
-				}
-			}
-		}
-	}
+                    maxEntries--;
+                    if (maxEntries == 0) {
+                        sb.append("\n ...");
+                        break;
+                    }
+                }
+            }
+        }
 
-	public Integer getCount(final String value) {
-		if (value == null) {
-			return _nullCount;
-		}
+        sb.append("\nNull count: ");
+        sb.append(_nullCount);
 
-		if (_topValues != null) {
-			List<ValueCount> valueCounts = _topValues.getValueCounts();
-			for (ValueCount valueCount : valueCounts) {
-				if (value.equals(valueCount.getValue())) {
-					return valueCount.getCount();
-				}
-			}
-		}
+        sb.append("\nUnique values: ");
+        if (_uniqueValues == null) {
+            sb.append(_uniqueValueCount);
+        } else if (_uniqueValues.isEmpty()) {
+            sb.append("0");
+        } else {
+            for (String value : _uniqueValues) {
+                sb.append("\n - ");
+                sb.append(value);
 
-		if (_bottomValues != null) {
-			List<ValueCount> valueCounts = _bottomValues.getValueCounts();
-			for (ValueCount valueCount : valueCounts) {
-				if (value.equals(valueCount.getValue())) {
-					return valueCount.getCount();
-				}
-			}
-		}
+                maxEntries--;
+                if (maxEntries == 0) {
+                    sb.append("\n ...");
+                    break;
+                }
+            }
+        }
+    }
 
-		if (_uniqueValues != null) {
-			if (_uniqueValues.contains(value)) {
-				return 1;
-			}
-		}
+    public Integer getCount(final String value) {
+        if (value == null) {
+            return _nullCount;
+        }
 
-		return null;
-	}
+        if (_topValues != null) {
+            List<ValueCount> valueCounts = _topValues.getValueCounts();
+            for (ValueCount valueCount : valueCounts) {
+                if (value.equals(valueCount.getValue())) {
+                    return valueCount.getCount();
+                }
+            }
+        }
 
-	public int getDistinctCount() {
-		return _distinctCount;
-	}
+        if (_bottomValues != null) {
+            List<ValueCount> valueCounts = _bottomValues.getValueCounts();
+            for (ValueCount valueCount : valueCounts) {
+                if (value.equals(valueCount.getValue())) {
+                    return valueCount.getCount();
+                }
+            }
+        }
 
-	public int getTotalCount() {
-		return _totalCount;
-	}
+        if (_uniqueValues != null) {
+            if (_uniqueValues.contains(value)) {
+                return 1;
+            }
+        }
 
-	@Override
-	public int hashCode() {
-		if (_groupName == null) {
-			return -1;
-		}
-		return _groupName.hashCode();
-	}
+        return null;
+    }
 
-	@Override
-	public int compareTo(ValueDistributionGroupResult o) {
-		return NullTolerableComparator.get(String.class).compare(
-				getGroupName(), o.getGroupName());
-	}
+    public int getDistinctCount() {
+        return _distinctCount;
+    }
+
+    public int getTotalCount() {
+        return _totalCount;
+    }
+
+    @Override
+    public int hashCode() {
+        if (_groupName == null) {
+            return -1;
+        }
+        return _groupName.hashCode();
+    }
+
+    @Override
+    public int compareTo(ValueDistributionGroupResult o) {
+        return NullTolerableComparator.get(String.class).compare(getGroupName(), o.getGroupName());
+    }
 }
