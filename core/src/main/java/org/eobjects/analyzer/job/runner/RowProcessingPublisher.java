@@ -117,16 +117,7 @@ public final class RowProcessingPublisher {
 
                     logger.debug("Base query for row processing: {}", baseQuery);
 
-                    final RowProcessingConsumerSorter sorter = new RowProcessingConsumerSorter(_consumers);
-                    final List<RowProcessingConsumer> sortedConsumers = sorter.createProcessOrderedConsumerList();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Row processing order ({} consumers):", sortedConsumers.size());
-                        int i = 1;
-                        for (RowProcessingConsumer rowProcessingConsumer : sortedConsumers) {
-                            logger.debug(" {}) {}", i, rowProcessingConsumer);
-                            i++;
-                        }
-                    }
+                    final List<RowProcessingConsumer> sortedConsumers = sortConsumers(_consumers);
 
                     final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore,
                             sortedConsumers, baseQuery);
@@ -136,6 +127,25 @@ public final class RowProcessingPublisher {
                 }
             }
         };
+    }
+
+    /**
+     * Sorts a list of consumers into their execution order
+     * @param consumers
+     * @return
+     */
+    public static List<RowProcessingConsumer> sortConsumers(List<RowProcessingConsumer> consumers) {
+        final RowProcessingConsumerSorter sorter = new RowProcessingConsumerSorter(consumers);
+        final List<RowProcessingConsumer> sortedConsumers = sorter.createProcessOrderedConsumerList();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Row processing order ({} consumers):", sortedConsumers.size());
+            int i = 1;
+            for (RowProcessingConsumer rowProcessingConsumer : sortedConsumers) {
+                logger.debug(" {}) {}", i, rowProcessingConsumer);
+                i++;
+            }
+        }
+        return sortedConsumers;
     }
 
     public void initialize() {
@@ -228,7 +238,7 @@ public final class RowProcessingPublisher {
         }
     }
 
-    public void addRowProcessingAnalyzerBean(Analyzer<?> analyzer, AnalyzerJob analyzerJob,
+    public void addAnalyzerBean(Analyzer<?> analyzer, AnalyzerJob analyzerJob,
             InputColumn<?>[] inputColumns) {
         addConsumer(new AnalyzerConsumer(_analysisJob, analyzer, analyzerJob, inputColumns, _analysisListener));
     }

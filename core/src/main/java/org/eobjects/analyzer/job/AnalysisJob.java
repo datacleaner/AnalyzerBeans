@@ -23,7 +23,16 @@ import java.util.Collection;
 
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.runner.AnalysisRunner;
 
+/**
+ * Defines a job to be executed by AnalyzerBeans.
+ * 
+ * Building jobs is usually done using the {@link AnalysisJobBuilder} class.
+ * 
+ * Executing jobs is usually done using the {@link AnalysisRunner} interface.
+ */
 public interface AnalysisJob {
 
 	public Datastore getDatastore();

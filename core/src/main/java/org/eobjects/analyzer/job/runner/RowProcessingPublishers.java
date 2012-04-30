@@ -159,7 +159,7 @@ final class RowProcessingPublishers {
 			if (componentJob instanceof AnalyzerJob) {
 				final AnalyzerJob analyzerJob = (AnalyzerJob) componentJob;
 				final Analyzer<?> analyzer = analyzerJob.getDescriptor().newInstance();
-				rowPublisher.addRowProcessingAnalyzerBean(analyzer, analyzerJob, localInputColumns);
+				rowPublisher.addAnalyzerBean(analyzer, analyzerJob, localInputColumns);
 			} else if (componentJob instanceof TransformerJob) {
 				final TransformerJob transformerJob = (TransformerJob) componentJob;
 				final Transformer<?> transformer = transformerJob.getDescriptor().newInstance();
