@@ -32,8 +32,8 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.NullTolerableComparator;
-import org.eobjects.analyzer.util.SerializableRef;
 import org.eobjects.metamodel.util.Ref;
+import org.eobjects.metamodel.util.SerializableRef;
 
 public class ValueDistributionGroupResult implements Serializable, Comparable<ValueDistributionGroupResult> {
 
