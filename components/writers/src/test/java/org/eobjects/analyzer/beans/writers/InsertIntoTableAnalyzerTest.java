@@ -246,7 +246,7 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
         errorCon.close();
 
         String filename = errorDatastore.getFilename();
-        assertEquals("4 records written to table\n" + " - WARNING! 1 record failed, written to file: " + filename,
+        assertEquals("4 inserts executed\n" + " - WARNING! 1 record failed, written to file: " + filename,
                 result.toString());
     }
 
