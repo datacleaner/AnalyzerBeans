@@ -23,7 +23,7 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends AbstractBeanDescriptor<A> implements
+final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends AbstractHasAnalyzerResultBeanDescriptor<A> implements
 		AnalyzerBeanDescriptor<A> {
 	
 	private static final long serialVersionUID = 1L;

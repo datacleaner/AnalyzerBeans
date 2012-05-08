@@ -28,6 +28,6 @@ import org.eobjects.analyzer.beans.api.Analyzer;
  * 
  * @param <B>
  */
-public interface AnalyzerBeanDescriptor<B extends Analyzer<?>> extends BeanDescriptor<B> {
+public interface AnalyzerBeanDescriptor<B extends Analyzer<?>> extends HasAnalyzerResultBeanDescriptor<B>, BeanDescriptor<B> {
 
 }

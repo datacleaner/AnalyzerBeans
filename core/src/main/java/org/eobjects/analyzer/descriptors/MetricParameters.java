@@ -19,15 +19,39 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import org.eobjects.analyzer.beans.api.Explorer;
+import org.eobjects.analyzer.data.InputColumn;
 
 /**
- * Descriptor interface for {@link Explorer}s.
- * 
- * @author Kasper Sørensen
- * 
- * @param <B>
+ * Container class for metric parameters.
  */
-public interface ExplorerBeanDescriptor<B extends Explorer<?>> extends HasAnalyzerResultBeanDescriptor<B>, BeanDescriptor<B> {
+public class MetricParameters {
 
+    private final String _queryString;
+    private final InputColumn<?> _queryInputColumn;
+
+    public MetricParameters() {
+        this(null, null);
+    }
+
+    public MetricParameters(InputColumn<?> queryInputColumn) {
+        this(null, queryInputColumn);
+    }
+
+    public MetricParameters(String queryString) {
+        this(queryString, null);
+
+    }
+
+    public MetricParameters(String queryString, InputColumn<?> queryInputColumn) {
+        _queryString = queryString;
+        _queryInputColumn = queryInputColumn;
+    }
+
+    public InputColumn<?> getQueryInputColumn() {
+        return _queryInputColumn;
+    }
+
+    public String getQueryString() {
+        return _queryString;
+    }
 }

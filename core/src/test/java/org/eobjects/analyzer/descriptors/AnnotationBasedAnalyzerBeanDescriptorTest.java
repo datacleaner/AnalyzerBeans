@@ -21,6 +21,7 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
@@ -34,95 +35,106 @@ import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceData;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.ValueDistributionResult;
 
 @SuppressWarnings("deprecation")
 public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		AnalyzerMock.clearInstances();
-	}
-	
-	public void testInheritedAnalyzer() throws Exception {
-		AnalyzerBeanDescriptor<OneMoreMockAnalyzer> descriptor = Descriptors.ofAnalyzer(OneMoreMockAnalyzer.class);
-		assertEquals("One more mock", descriptor.getDisplayName());
-	}
-	
-	@AnalyzerBean("One more mock")
-	public static class OneMoreMockAnalyzer extends StringAnalyzer {
-		
-	}
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        AnalyzerMock.clearInstances();
+    }
 
-	public void testGetConfiguredPropertiesOfType() throws Exception {
-		AnalyzerBeanDescriptor<ReferenceDataMatcherAnalyzer> desc = Descriptors.ofAnalyzer(ReferenceDataMatcherAnalyzer.class);
+    public void testInheritedAnalyzer() throws Exception {
+        AnalyzerBeanDescriptor<OneMoreMockAnalyzer> descriptor = Descriptors.ofAnalyzer(OneMoreMockAnalyzer.class);
+        assertEquals("One more mock", descriptor.getDisplayName());
+    }
 
-		Set<ConfiguredPropertyDescriptor> properties = desc.getConfiguredPropertiesByType(Number.class, false);
-		assertEquals(0, properties.size());
+    @AnalyzerBean("One more mock")
+    public static class OneMoreMockAnalyzer extends StringAnalyzer {
 
-		properties = desc.getConfiguredPropertiesByType(Number.class, true);
-		assertEquals(0, properties.size());
+    }
 
-		properties = desc.getConfiguredPropertiesByType(Dictionary.class, false);
-		assertEquals(0, properties.size());
+    public void testGetConfiguredPropertiesOfType() throws Exception {
+        AnalyzerBeanDescriptor<ReferenceDataMatcherAnalyzer> desc = Descriptors
+                .ofAnalyzer(ReferenceDataMatcherAnalyzer.class);
 
-		properties = desc.getConfiguredPropertiesByType(Dictionary.class, true);
-		assertEquals(1, properties.size());
+        Set<ConfiguredPropertyDescriptor> properties = desc.getConfiguredPropertiesByType(Number.class, false);
+        assertEquals(0, properties.size());
 
-		properties = desc.getConfiguredPropertiesByType(ReferenceData.class, false);
-		assertEquals(0, properties.size());
+        properties = desc.getConfiguredPropertiesByType(Number.class, true);
+        assertEquals(0, properties.size());
 
-		properties = desc.getConfiguredPropertiesByType(ReferenceData.class, true);
-		assertEquals(3, properties.size());
-	}
+        properties = desc.getConfiguredPropertiesByType(Dictionary.class, false);
+        assertEquals(0, properties.size());
 
-	public void testRowProcessingType() throws Exception {
-		AnalyzerBeanDescriptor<AnalyzerMock> descriptor = Descriptors
-				.ofAnalyzer(AnalyzerMock.class);
+        properties = desc.getConfiguredPropertiesByType(Dictionary.class, true);
+        assertEquals(1, properties.size());
 
-		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
-		Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
-		assertTrue(it.hasNext());
-		assertEquals("Columns", it.next().getName());
-		assertTrue(it.hasNext());
-		assertEquals("Configured1", it.next().getName());
-		assertTrue(it.hasNext());
-		assertEquals("Configured2", it.next().getName());
-		assertFalse(it.hasNext());
+        properties = desc.getConfiguredPropertiesByType(ReferenceData.class, false);
+        assertEquals(0, properties.size());
 
-		AnalyzerMock analyzerBean = new AnalyzerMock();
-		ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty("Configured1");
-		configuredProperty.setValue(analyzerBean, "foobar");
-		assertEquals("foobar", analyzerBean.getConfigured1());
-	}
+        properties = desc.getConfiguredPropertiesByType(ReferenceData.class, true);
+        assertEquals(3, properties.size());
+    }
 
-	public void testGetInputDataTypeFamily() throws Exception {
-		AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(StringAnalyzer.class);
-		Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
-		assertEquals(1, configuredProperties.size());
-		ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
+    public void testRowProcessingType() throws Exception {
+        AnalyzerBeanDescriptor<AnalyzerMock> descriptor = Descriptors.ofAnalyzer(AnalyzerMock.class);
 
-		assertEquals(DataTypeFamily.STRING, propertyDescriptor.getInputColumnDataTypeFamily());
+        Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredProperties();
+        Iterator<ConfiguredPropertyDescriptor> it = configuredProperties.iterator();
+        assertTrue(it.hasNext());
+        assertEquals("Columns", it.next().getName());
+        assertTrue(it.hasNext());
+        assertEquals("Configured1", it.next().getName());
+        assertTrue(it.hasNext());
+        assertEquals("Configured2", it.next().getName());
+        assertFalse(it.hasNext());
 
-		descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
-		configuredProperties = descriptor.getConfiguredPropertiesForInput(false);
-		assertEquals(1, configuredProperties.size());
-		propertyDescriptor = configuredProperties.iterator().next();
-		assertEquals(DataTypeFamily.UNDEFINED, propertyDescriptor.getInputColumnDataTypeFamily());
-	}
+        AnalyzerMock analyzerBean = new AnalyzerMock();
+        ConfiguredPropertyDescriptor configuredProperty = descriptor.getConfiguredProperty("Configured1");
+        configuredProperty.setValue(analyzerBean, "foobar");
+        assertEquals("foobar", analyzerBean.getConfigured1());
+    }
 
-	public void testAbstractBeanClass() throws Exception {
-		try {
-			Descriptors.ofComponent(InvalidAnalyzer.class);
-			fail("Exception expected");
-		} catch (DescriptorException e) {
-			assertEquals(
-					"Bean (class org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptorTest$InvalidAnalyzer) is not a non-abstract class",
-					e.getMessage());
-		}
-	}
+    public void testGetInputDataTypeFamily() throws Exception {
+        AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(StringAnalyzer.class);
+        Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
+        assertEquals(1, configuredProperties.size());
+        ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
 
-	@AnalyzerBean("invalid analyzer")
-	public abstract class InvalidAnalyzer implements Analyzer<AnalyzerResult> {
-	}
+        assertEquals(DataTypeFamily.STRING, propertyDescriptor.getInputColumnDataTypeFamily());
+
+        descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
+        configuredProperties = descriptor.getConfiguredPropertiesForInput(false);
+        assertEquals(1, configuredProperties.size());
+        propertyDescriptor = configuredProperties.iterator().next();
+        assertEquals(DataTypeFamily.UNDEFINED, propertyDescriptor.getInputColumnDataTypeFamily());
+    }
+
+    public void testGetResultMetrics() throws Exception {
+        AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
+        assertEquals(ValueDistributionResult.class, descriptor.getResultClass());
+
+        Set<MetricDescriptor> resultMetrics = new TreeSet<MetricDescriptor>(descriptor.getResultMetrics());
+        assertEquals("[MetricDescriptorImpl[name=Distinct count], " + "MetricDescriptorImpl[name=Null count], "
+                + "MetricDescriptorImpl[name=Unique count], " + "MetricDescriptorImpl[name=Value count]]",
+                resultMetrics.toString());
+    }
+
+    public void testAbstractBeanClass() throws Exception {
+        try {
+            Descriptors.ofComponent(InvalidAnalyzer.class);
+            fail("Exception expected");
+        } catch (DescriptorException e) {
+            assertEquals(
+                    "Bean (class org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptorTest$InvalidAnalyzer) is not a non-abstract class",
+                    e.getMessage());
+        }
+    }
+
+    @AnalyzerBean("invalid analyzer")
+    public abstract class InvalidAnalyzer implements Analyzer<AnalyzerResult> {
+    }
 }

@@ -26,37 +26,37 @@ import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-final class AnnotationBasedExplorerBeanDescriptor<E extends Explorer<?>> extends AbstractBeanDescriptor<E> implements
-		ExplorerBeanDescriptor<E> {
-	
-	private static final long serialVersionUID = 1L;
+final class AnnotationBasedExplorerBeanDescriptor<E extends Explorer<?>> extends
+        AbstractHasAnalyzerResultBeanDescriptor<E> implements ExplorerBeanDescriptor<E> {
 
-	private final String _displayName;
+    private static final long serialVersionUID = 1L;
 
-	protected AnnotationBasedExplorerBeanDescriptor(Class<E> explorerClass) throws DescriptorException {
-		super(explorerClass, false);
+    private final String _displayName;
 
-		AnalyzerBean analyzerAnnotation = ReflectionUtils.getAnnotation(explorerClass, AnalyzerBean.class);
-		if (analyzerAnnotation == null) {
-			throw new DescriptorException(explorerClass + " doesn't implement the AnalyzerBean annotation");
-		}
+    protected AnnotationBasedExplorerBeanDescriptor(Class<E> explorerClass) throws DescriptorException {
+        super(explorerClass, false);
 
-		String displayName = analyzerAnnotation.value();
-		if (displayName == null || displayName.trim().length() == 0) {
-			displayName = ReflectionUtils.explodeCamelCase(explorerClass.getSimpleName(), false);
-		}
-		_displayName = displayName;
+        AnalyzerBean analyzerAnnotation = ReflectionUtils.getAnnotation(explorerClass, AnalyzerBean.class);
+        if (analyzerAnnotation == null) {
+            throw new DescriptorException(explorerClass + " doesn't implement the AnalyzerBean annotation");
+        }
 
-		visitClass();
-	}
+        String displayName = analyzerAnnotation.value();
+        if (displayName == null || displayName.trim().length() == 0) {
+            displayName = ReflectionUtils.explodeCamelCase(explorerClass.getSimpleName(), false);
+        }
+        _displayName = displayName;
 
-	@Override
-	public String getDisplayName() {
-		return _displayName;
-	}
+        visitClass();
+    }
 
-	@Override
-	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
-		return Collections.emptySet();
-	}
+    @Override
+    public String getDisplayName() {
+        return _displayName;
+    }
+
+    @Override
+    public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
+        return Collections.emptySet();
+    }
 }

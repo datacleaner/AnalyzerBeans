@@ -75,6 +75,26 @@ public class ValueDistributionResult implements AnalyzerResult {
 	public boolean isGroupingEnabled() {
 		return _groupColumn != null;
 	}
+	
+	@Metric("Distinct count")
+	public int getDistinctCount() {
+	    return getSingleValueDistributionResult().getDistinctCount();
+	}
+	
+	@Metric("Null count")
+	public int getNullCount() {
+	    return getSingleValueDistributionResult().getNullCount();
+	}
+	
+	@Metric("Value count")
+	public Integer getCount(String value) {
+	    return getSingleValueDistributionResult().getCount(value);
+	}
+	
+	@Metric("Unique count")
+	public int getUniqueCount() {
+	    return getSingleValueDistributionResult().getUniqueCount();
+	}
 
 	public Set<ValueDistributionGroupResult> getGroupedValueDistributionResults() {
 		if (!isGroupingEnabled()) {

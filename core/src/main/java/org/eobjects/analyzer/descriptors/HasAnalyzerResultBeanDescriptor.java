@@ -19,15 +19,20 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import org.eobjects.analyzer.beans.api.Explorer;
+import java.util.Set;
+
+import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.HasAnalyzerResult;
 
 /**
- * Descriptor interface for {@link Explorer}s.
- * 
- * @author Kasper Sørensen
+ * Descriptor interface for beans that produce {@link AnalyzerResult}s.
  * 
  * @param <B>
  */
-public interface ExplorerBeanDescriptor<B extends Explorer<?>> extends HasAnalyzerResultBeanDescriptor<B>, BeanDescriptor<B> {
+public interface HasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResult<?>> extends
+        BeanDescriptor<B> {
 
+    public Class<? extends AnalyzerResult> getResultClass();
+    
+    public Set<MetricDescriptor> getResultMetrics();
 }

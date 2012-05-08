@@ -21,10 +21,19 @@ package org.eobjects.analyzer.result;
 
 import java.io.Serializable;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.result.renderer.Renderable;
 
 /**
- * An AnalysisResult represents the result of an analysis execution.
+ * An {@link AnalyzerResult} represents the result of an {@link Analyzer}s or
+ * {@link Explorer}s execution.
+ * 
+ * It is advised that {@link AnalyzerResult} implementations expose a number of
+ * result metrics. This is done by having getter methods annotated with the
+ * {@link Metric} annotation.
+ * 
+ * @see Metric
  */
 public interface AnalyzerResult extends Renderable, Serializable {
 
