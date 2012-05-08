@@ -53,10 +53,10 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
         Class<? extends AnalyzerResult> resultClass = (Class<? extends AnalyzerResult>) typeParameter;
         _resultClass = resultClass;
 
-        Method[] metricMethods = ReflectionUtils.getMethods(_resultClass, Metric.class);
+        Method[] metricMethods = ReflectionUtils.getMethods(resultClass, Metric.class);
         _metrics = new TreeSet<MetricDescriptor>();
         for (Method method : metricMethods) {
-            MetricDescriptor metric = new MetricDescriptorImpl(method);
+            MetricDescriptor metric = new MetricDescriptorImpl(resultClass, method);
             _metrics.add(metric);
         }
     }

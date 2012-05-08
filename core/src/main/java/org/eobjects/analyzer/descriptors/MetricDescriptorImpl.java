@@ -34,21 +34,35 @@ final class MetricDescriptorImpl implements MetricDescriptor {
 
     private static final long serialVersionUID = 1L;
 
-    private final Method _method;
+    private final transient Method _method;
 
-    public MetricDescriptorImpl(Method method) {
+    private final String _name;
+    private final Class<? extends AnalyzerResult> _resultClass;
+    private final String _methodName;
+
+    public MetricDescriptorImpl(Class<? extends AnalyzerResult> resultClass, Method method) {
         _method = method;
         _method.setAccessible(true);
+
+        _name = ReflectionUtils.getAnnotation(_method, Metric.class).value();
+        _methodName = _method.getName();
+        _resultClass = resultClass;
     }
 
     public Method getMethod() {
+        if (_method == null) {
+            return ReflectionUtils.getMethod(_resultClass, _methodName);
+        }
         return _method;
     }
 
     @Override
     public String getName() {
-        Metric metric = getAnnotation(Metric.class);
-        return metric.value();
+        return _name;
+    }
+    
+    public Class<? extends AnalyzerResult> getResultClass() {
+        return _resultClass;
     }
 
     @Override
@@ -73,7 +87,7 @@ final class MetricDescriptorImpl implements MetricDescriptor {
     public Number getValue(AnalyzerResult result, MetricParameters metricParameters) {
         Object[] methodParameters = createMethodParameters(metricParameters);
         try {
-            Object returnValue = _method.invoke(result, methodParameters);
+            Object returnValue = getMethod().invoke(result, methodParameters);
             return (Number) returnValue;
         } catch (Exception e) {
             throw new IllegalStateException("Could not invoke metric getter " + _method, e);
@@ -93,7 +107,7 @@ final class MetricDescriptorImpl implements MetricDescriptor {
 
     @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-        return ReflectionUtils.getAnnotation(_method, annotationClass);
+        return ReflectionUtils.getAnnotation(getMethod(), annotationClass);
     }
 
     @Override
@@ -109,7 +123,8 @@ final class MetricDescriptorImpl implements MetricDescriptor {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((_method == null) ? 0 : _method.hashCode());
+        result = prime * result + ((_resultClass == null) ? 0 : _resultClass.hashCode());
+        result = prime * result + ((_methodName == null) ? 0 : _methodName.hashCode());
         return result;
     }
 
@@ -122,10 +137,15 @@ final class MetricDescriptorImpl implements MetricDescriptor {
         if (getClass() != obj.getClass())
             return false;
         MetricDescriptorImpl other = (MetricDescriptorImpl) obj;
-        if (_method == null) {
-            if (other._method != null)
+        if (_resultClass == null) {
+            if (other._resultClass != null)
                 return false;
-        } else if (!_method.equals(other._method))
+        } else if (!_resultClass.equals(other._resultClass))
+            return false;
+        if (_methodName == null) {
+            if (other._methodName != null)
+                return false;
+        } else if (!_methodName.equals(other._methodName))
             return false;
         return true;
     }
