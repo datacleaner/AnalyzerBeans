@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Metric;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -60,7 +61,7 @@ final class MetricDescriptorImpl implements MetricDescriptor {
     public String getName() {
         return _name;
     }
-    
+
     public Class<? extends AnalyzerResult> getResultClass() {
         return _resultClass;
     }
@@ -88,8 +89,8 @@ final class MetricDescriptorImpl implements MetricDescriptor {
         if (result == null) {
             throw new IllegalArgumentException("AnalyzerResult cannot be null");
         }
-        Object[] methodParameters = createMethodParameters(metricParameters);
         Method method = getMethod();
+        Object[] methodParameters = createMethodParameters(method, metricParameters);
         try {
             Object returnValue = method.invoke(result, methodParameters);
             return (Number) returnValue;
@@ -98,9 +99,25 @@ final class MetricDescriptorImpl implements MetricDescriptor {
         }
     }
 
-    private Object[] createMethodParameters(MetricParameters metricParameters) {
-        // TODO Auto-generated method stub
-        return null;
+    private Object[] createMethodParameters(Method method, MetricParameters metricParameters) {
+        final Class<?>[] parameterTypes = _method.getParameterTypes();
+        if (parameterTypes == null || parameterTypes.length == 0) {
+            return null;
+        }
+
+        final Object[] result = new Object[parameterTypes.length];
+
+        for (int i = 0; i < parameterTypes.length; i++) {
+            if (String.class == parameterTypes[i]) {
+                result[i] = metricParameters.getQueryString();
+            } else if (InputColumn.class == parameterTypes[i]) {
+                result[i] = metricParameters.getQueryInputColumn();
+            } else {
+                throw new IllegalStateException("Unsupported metric parameter type: " + parameterTypes[i]);
+            }
+        }
+
+        return result;
     }
 
     @Override
