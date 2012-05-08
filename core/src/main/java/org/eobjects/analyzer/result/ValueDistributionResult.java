@@ -88,7 +88,11 @@ public class ValueDistributionResult implements AnalyzerResult {
 	
 	@Metric("Value count")
 	public Integer getCount(String value) {
-	    return getSingleValueDistributionResult().getCount(value);
+	    Integer count = getSingleValueDistributionResult().getCount(value);
+	    if (count == null) {
+	        return 0;
+	    }
+        return count;
 	}
 	
 	@Metric("Unique count")
