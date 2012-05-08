@@ -43,7 +43,7 @@ public final class CollectionUtils2 {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <E> List<E> filterOnClass(List<?> superTypeList, Class<E> subType) {
+	public static <E> List<E> filterOnClass(Collection<?> superTypeList, Class<E> subType) {
 		final List<E> result = new ArrayList<E>();
 		for (Object object : superTypeList) {
 			if (object != null) {

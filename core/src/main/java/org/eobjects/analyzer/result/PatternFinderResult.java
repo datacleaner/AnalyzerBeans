@@ -39,49 +39,54 @@ import org.eobjects.analyzer.data.InputColumn;
  */
 public class PatternFinderResult implements AnalyzerResult {
 
-	private static final long serialVersionUID = 1L;
-	
-	private final InputColumn<String> _column;
-	private final InputColumn<String> _groupColumn;
-	private final Map<String, Crosstab<?>> _crosstabs;
+    private static final long serialVersionUID = 1L;
 
-	public PatternFinderResult(InputColumn<String> column, Crosstab<?> crosstab) {
-		_column = column;
-		_groupColumn = null;
-		_crosstabs = new HashMap<String, Crosstab<?>>();
-		_crosstabs.put(null, crosstab);
-	}
+    private final InputColumn<String> _column;
+    private final InputColumn<String> _groupColumn;
+    private final Map<String, Crosstab<?>> _crosstabs;
 
-	public PatternFinderResult(InputColumn<String> column, InputColumn<String> groupColumn,
-			Map<String, Crosstab<?>> crosstabs) {
-		_column = column;
-		_groupColumn = groupColumn;
-		_crosstabs = crosstabs;
-	}
+    public PatternFinderResult(InputColumn<String> column, Crosstab<?> crosstab) {
+        _column = column;
+        _groupColumn = null;
+        _crosstabs = new HashMap<String, Crosstab<?>>();
+        _crosstabs.put(null, crosstab);
+    }
 
-	public InputColumn<String> getColumn() {
-		return _column;
-	}
+    public PatternFinderResult(InputColumn<String> column, InputColumn<String> groupColumn,
+            Map<String, Crosstab<?>> crosstabs) {
+        _column = column;
+        _groupColumn = groupColumn;
+        _crosstabs = crosstabs;
+    }
 
-	public InputColumn<String> getGroupColumn() {
-		return _groupColumn;
-	}
+    public InputColumn<String> getColumn() {
+        return _column;
+    }
 
-	public Map<String, Crosstab<?>> getGroupedCrosstabs() {
-		if (!isGroupingEnabled()) {
-			throw new IllegalStateException("This result is not a grouped crosstab based Pattern Finder result");
-		}
-		return _crosstabs;
-	}
+    public InputColumn<String> getGroupColumn() {
+        return _groupColumn;
+    }
 
-	public Crosstab<?> getSingleCrosstab() {
-		if (isGroupingEnabled()) {
-			throw new IllegalStateException("This result is not a single crosstab based Pattern Finder result");
-		}
-		return _crosstabs.get(null);
-	}
+    public Map<String, Crosstab<?>> getGroupedCrosstabs() {
+        if (!isGroupingEnabled()) {
+            throw new IllegalStateException("This result is not a grouped crosstab based Pattern Finder result");
+        }
+        return _crosstabs;
+    }
 
-	public boolean isGroupingEnabled() {
-		return _groupColumn != null;
-	}
+    public Crosstab<?> getSingleCrosstab() {
+        if (isGroupingEnabled()) {
+            throw new IllegalStateException("This result is not a single crosstab based Pattern Finder result");
+        }
+        return _crosstabs.get(null);
+    }
+
+    public boolean isGroupingEnabled() {
+        return _groupColumn != null;
+    }
+
+    @Metric("Pattern count")
+    public int getPatternCount() {
+        return getSingleCrosstab().getDimension(PatternFinderAnalyzer.DIMENSION_NAME_PATTERN).getCategoryCount();
+    }
 }

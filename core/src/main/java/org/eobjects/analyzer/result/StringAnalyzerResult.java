@@ -42,8 +42,15 @@ public class StringAnalyzerResult extends CrosstabResult {
 		return _columns;
 	}
 
+	@Metric("Row count")
 	public int getRowCount(InputColumn<?> col) {
 		return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
 				.where(StringAnalyzer.DIMENSION_MEASURES, StringAnalyzer.MEASURE_ROW_COUNT).get();
+	}
+	
+	@Metric("Digit chars")
+	public int getDigitCount(InputColumn<?> col) {
+	    return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(StringAnalyzer.DIMENSION_MEASURES, StringAnalyzer.MEASURE_DIGIT_CHARS).get();
 	}
 }

@@ -41,12 +41,12 @@ final class MetricDescriptorImpl implements MetricDescriptor {
     private final String _methodName;
 
     public MetricDescriptorImpl(Class<? extends AnalyzerResult> resultClass, Method method) {
+        _resultClass = resultClass;
         _method = method;
         _method.setAccessible(true);
 
         _name = ReflectionUtils.getAnnotation(_method, Metric.class).value();
         _methodName = _method.getName();
-        _resultClass = resultClass;
     }
 
     public Method getMethod() {
@@ -85,9 +85,13 @@ final class MetricDescriptorImpl implements MetricDescriptor {
 
     @Override
     public Number getValue(AnalyzerResult result, MetricParameters metricParameters) {
+        if (result == null) {
+            throw new IllegalArgumentException("AnalyzerResult cannot be null");
+        }
         Object[] methodParameters = createMethodParameters(metricParameters);
+        Method method = getMethod();
         try {
-            Object returnValue = getMethod().invoke(result, methodParameters);
+            Object returnValue = method.invoke(result, methodParameters);
             return (Number) returnValue;
         } catch (Exception e) {
             throw new IllegalStateException("Could not invoke metric getter " + _method, e);
