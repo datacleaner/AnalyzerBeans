@@ -447,7 +447,7 @@ public final class ReflectionUtils {
 	 * @return
 	 */
 	public static Method[] getMethods(Class<?> clazz) {
-		if (clazz == Object.class) {
+		if (clazz == Object.class || clazz == null) {
 			return new Method[0];
 		}
 		Method[] m = clazz.getDeclaredMethods();
