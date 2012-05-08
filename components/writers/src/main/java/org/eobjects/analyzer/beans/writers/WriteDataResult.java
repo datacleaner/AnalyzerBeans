@@ -23,6 +23,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.FileDatastore;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.Metric;
 import org.eobjects.metamodel.schema.Table;
 
 /**
@@ -37,11 +38,13 @@ public interface WriteDataResult extends AnalyzerResult {
     /**
      * @return the amount of rows that was written.
      */
+    @Metric("Inserts")
     public int getWrittenRowCount();
 
     /**
      * @return the amount of updates that was executed.
      */
+    @Metric("Updates")
     public int getUpdatesCount();
 
     /**
@@ -51,6 +54,7 @@ public interface WriteDataResult extends AnalyzerResult {
      * 
      * @return the amount of rows that was not written.
      */
+    @Metric("Errornous rows")
     public int getErrorRowCount();
 
     /**

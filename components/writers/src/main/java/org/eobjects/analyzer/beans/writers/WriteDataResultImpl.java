@@ -131,7 +131,12 @@ public final class WriteDataResultImpl implements WriteDataResult {
 
     @Override
     public String toString() {
-        String message = _writtenRowCount + " records written to table";
+        String message = _writtenRowCount + " inserts executed";
+
+        if (_updatesCount > 0) {
+            message = message + "\n" + _updatesCount + " updates executed";
+        }
+
         if (_errorRowCount > 0) {
             if (_errorDatastore == null) {
                 message = message + "\n - WARNING! " + _errorRowCount + " record failed";
