@@ -121,6 +121,38 @@ final class MetricDescriptorImpl implements MetricDescriptor {
     }
 
     @Override
+    public boolean isParameterizedByInputColumn() {
+        final Class<?>[] parameterTypes = _method.getParameterTypes();
+        if (parameterTypes == null || parameterTypes.length == 0) {
+            return false;
+        }
+
+        for (Class<?> parameterType : parameterTypes) {
+            if (InputColumn.class == parameterType) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean isParameterizedByString() {
+        final Class<?>[] parameterTypes = _method.getParameterTypes();
+        if (parameterTypes == null || parameterTypes.length == 0) {
+            return false;
+        }
+
+        for (Class<?> parameterType : parameterTypes) {
+            if (String.class == parameterType) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     public Set<Annotation> getAnnotations() {
         Annotation[] annotations = getMethod().getAnnotations();
         return new HashSet<Annotation>(Arrays.asList(annotations));

@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.metamodel.util.HasName;
 
@@ -63,4 +64,21 @@ public interface MetricDescriptor extends Serializable, HasName, Comparable<Metr
      * @return a particular annotation for the metric, if available.
      */
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+
+    /**
+     * Determines whether this metric is parameterized with an
+     * {@link InputColumn}.
+     * 
+     * @return true if this metric is parameterized with an {@link InputColumn},
+     *         or false if not.
+     */
+    public boolean isParameterizedByInputColumn();
+
+    /**
+     * Determines whether this metric is parameterized with an {@link String}.
+     * 
+     * @return true if this metric is parameterized with an {@link String}, or
+     *         false if not.
+     */
+    public boolean isParameterizedByString();
 }
