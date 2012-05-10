@@ -43,14 +43,14 @@ public class StringAnalyzerResult extends CrosstabResult {
     }
 
     @Metric(StringAnalyzer.MEASURE_AVG_CHARS)
-    public int getAvgChars(InputColumn<?> col) {
-        return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
+    public double getAvgChars(InputColumn<?> col) {
+        return (Double) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(StringAnalyzer.DIMENSION_MEASURES, StringAnalyzer.MEASURE_AVG_CHARS).get();
     }
 
     @Metric(StringAnalyzer.MEASURE_AVG_WHITE_SPACES)
-    public int getAvgWhitespaces(InputColumn<?> col) {
-        return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
+    public double getAvgWhitespaces(InputColumn<?> col) {
+        return (Double) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(StringAnalyzer.DIMENSION_MEASURES, StringAnalyzer.MEASURE_AVG_WHITE_SPACES).get();
     }
 
