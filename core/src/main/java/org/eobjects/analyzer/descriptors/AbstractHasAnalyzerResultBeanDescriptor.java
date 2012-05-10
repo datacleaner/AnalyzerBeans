@@ -20,8 +20,7 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,7 +43,7 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
     private static final long serialVersionUID = 1L;
 
     private final Class<? extends AnalyzerResult> _resultClass;
-    private final Map<String, MetricDescriptor> _metrics;
+    private final Set<MetricDescriptor> _metrics;
 
     public AbstractHasAnalyzerResultBeanDescriptor(Class<B> beanClass, boolean requireInputColumns) {
         super(beanClass, requireInputColumns);
@@ -56,10 +55,10 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
         _resultClass = resultClass;
 
         Method[] metricMethods = ReflectionUtils.getMethods(resultClass, Metric.class);
-        _metrics = new HashMap<String, MetricDescriptor>();
+        _metrics = new TreeSet<MetricDescriptor>();
         for (Method method : metricMethods) {
             MetricDescriptor metric = new MetricDescriptorImpl(resultClass, method);
-            _metrics.put(metric.getName(), metric);
+            _metrics.add(metric);
         }
     }
 
@@ -70,11 +69,27 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
     
     @Override
     public MetricDescriptor getResultMetric(String name) {
-        return _metrics.get(name);
+        if (name == null) {
+            return null;
+        }
+        
+        for (MetricDescriptor metric : _metrics) {
+            if (name.equals(metric.getName())) {
+                return metric;
+            }
+        }
+        
+        // second try - case insensitive
+        for (MetricDescriptor metric : _metrics) {
+            if (name.equalsIgnoreCase(metric.getName())) {
+                return metric;
+            }
+        }
+        return null;
     }
 
     @Override
     public Set<MetricDescriptor> getResultMetrics() {
-        return new TreeSet<MetricDescriptor>(_metrics.values());
+        return Collections.unmodifiableSet(_metrics);
     }
 }

@@ -126,7 +126,8 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
         assertFalse(metric.isParameterizedByInputColumn());
         assertFalse(metric.isParameterizedByString());
 
-        metric = descriptor.getResultMetric("Value count");
+        metric = descriptor.getResultMetric("value count");
+        assertNotNull(metric);
         assertEquals("MetricDescriptorImpl[name=Value count]", metric.toString());
         assertFalse(metric.isParameterizedByInputColumn());
         assertTrue(metric.isParameterizedByString());
