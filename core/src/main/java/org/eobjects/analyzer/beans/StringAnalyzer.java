@@ -55,6 +55,7 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 
 	public static final String DIMENSION_MEASURES = "Measures";
 	public static final String DIMENSION_COLUMN = "Column";
+	
 	public static final String MEASURE_MIN_WORDS = "Min words";
 	public static final String MEASURE_MAX_WORDS = "Max words";
 	public static final String MEASURE_WORD_COUNT = "Word count";

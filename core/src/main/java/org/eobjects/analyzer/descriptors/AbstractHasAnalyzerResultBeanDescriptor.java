@@ -20,6 +20,8 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -42,7 +44,7 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
     private static final long serialVersionUID = 1L;
 
     private final Class<? extends AnalyzerResult> _resultClass;
-    private final Set<MetricDescriptor> _metrics;
+    private final Map<String, MetricDescriptor> _metrics;
 
     public AbstractHasAnalyzerResultBeanDescriptor(Class<B> beanClass, boolean requireInputColumns) {
         super(beanClass, requireInputColumns);
@@ -54,10 +56,10 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
         _resultClass = resultClass;
 
         Method[] metricMethods = ReflectionUtils.getMethods(resultClass, Metric.class);
-        _metrics = new TreeSet<MetricDescriptor>();
+        _metrics = new HashMap<String, MetricDescriptor>();
         for (Method method : metricMethods) {
             MetricDescriptor metric = new MetricDescriptorImpl(resultClass, method);
-            _metrics.add(metric);
+            _metrics.put(metric.getName(), metric);
         }
     }
 
@@ -65,9 +67,14 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
     public Class<? extends AnalyzerResult> getResultClass() {
         return _resultClass;
     }
+    
+    @Override
+    public MetricDescriptor getResultMetric(String name) {
+        return _metrics.get(name);
+    }
 
     @Override
     public Set<MetricDescriptor> getResultMetrics() {
-        return _metrics;
+        return new TreeSet<MetricDescriptor>(_metrics.values());
     }
 }

@@ -29,10 +29,29 @@ import org.eobjects.analyzer.result.HasAnalyzerResult;
  * 
  * @param <B>
  */
-public interface HasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResult<?>> extends
-        BeanDescriptor<B> {
+public interface HasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResult<?>> extends BeanDescriptor<B> {
 
+    /**
+     * Gets the result class of this component.
+     * 
+     * @return the result class of this component.
+     */
     public Class<? extends AnalyzerResult> getResultClass();
-    
+
+    /**
+     * Gets a result metric by name
+     * 
+     * @param name
+     *            the name of the result metric
+     * @return the result metric with the given name, or null if no such metric
+     *         exist.
+     */
+    public MetricDescriptor getResultMetric(String name);
+
+    /**
+     * Gets the result metrics of this component's result
+     * 
+     * @return the result metrics of this component's result
+     */
     public Set<MetricDescriptor> getResultMetrics();
 }

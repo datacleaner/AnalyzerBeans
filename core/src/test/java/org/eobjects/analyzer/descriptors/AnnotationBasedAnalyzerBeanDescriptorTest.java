@@ -21,7 +21,6 @@ package org.eobjects.analyzer.descriptors;
 
 import java.util.Iterator;
 import java.util.Set;
-import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
@@ -117,10 +116,26 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
         AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
         assertEquals(ValueDistributionResult.class, descriptor.getResultClass());
 
-        Set<MetricDescriptor> resultMetrics = new TreeSet<MetricDescriptor>(descriptor.getResultMetrics());
+        Set<MetricDescriptor> resultMetrics = descriptor.getResultMetrics();
         assertEquals("[MetricDescriptorImpl[name=Distinct count], " + "MetricDescriptorImpl[name=Null count], "
                 + "MetricDescriptorImpl[name=Unique count], " + "MetricDescriptorImpl[name=Value count]]",
                 resultMetrics.toString());
+
+        MetricDescriptor metric = descriptor.getResultMetric("Unique count");
+        assertEquals("MetricDescriptorImpl[name=Unique count]", metric.toString());
+        assertFalse(metric.isParameterizedByInputColumn());
+        assertFalse(metric.isParameterizedByString());
+
+        metric = descriptor.getResultMetric("Value count");
+        assertEquals("MetricDescriptorImpl[name=Value count]", metric.toString());
+        assertFalse(metric.isParameterizedByInputColumn());
+        assertTrue(metric.isParameterizedByString());
+
+        descriptor = Descriptors.ofAnalyzer(StringAnalyzer.class);
+        metric = descriptor.getResultMetric(StringAnalyzer.MEASURE_ENTIRELY_LOWERCASE_COUNT);
+        assertEquals("MetricDescriptorImpl[name=Entirely lowercase count]", metric.toString());
+        assertTrue(metric.isParameterizedByInputColumn());
+        assertFalse(metric.isParameterizedByString());
     }
 
     public void testAbstractBeanClass() throws Exception {
