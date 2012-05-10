@@ -88,6 +88,11 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
         assertEquals(
                 "[MetricDescriptorImpl[name=Errornous rows], MetricDescriptorImpl[name=Inserts], MetricDescriptorImpl[name=Updates]]",
                 metrics.toString());
+
+        WriteDataResult result = new WriteDataResultImpl(10, 5, null, null, null);
+        assertEquals(10, descriptor.getResultMetric("Inserts").getValue(result, null).intValue());
+        assertEquals(5, descriptor.getResultMetric("Updates").getValue(result, null).intValue());
+        assertEquals(0, descriptor.getResultMetric("Errornous rows").getValue(result, null).intValue());
     }
 
     public void testErrorHandlingToInvalidFile() throws Exception {
