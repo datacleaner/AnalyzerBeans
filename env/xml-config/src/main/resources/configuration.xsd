@@ -30,9 +30,23 @@
 				</element>
 				<choice minOccurs="0" maxOccurs="1">
 					<element name="multithreaded-taskrunner" type="ab:multithreadedTaskrunnerType"
-						minOccurs="1" maxOccurs="1" />
+						minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>
+								Defines a multi-threaded task runner, enabling
+								processing of records in parallel.
+							</documentation>
+						</annotation>
+					</element>
 					<element name="singlethreaded-taskrunner" type="ab:singlethreadedTaskrunnerType"
-						minOccurs="1" maxOccurs="1" />
+						minOccurs="1" maxOccurs="1">
+						<annotation>
+							<documentation>
+								Defines a single-threaded task runner, which means
+								all records will be processed sequentially, in the same thread.
+							</documentation>
+						</annotation>
+					</element>
 					<element name="custom-taskrunner" type="ab:customElementType"
 						minOccurs="1" maxOccurs="1" />
 				</choice>
