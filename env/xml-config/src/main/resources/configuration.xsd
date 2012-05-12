@@ -38,15 +38,19 @@
 				</choice>
 				<element name="storage-provider" type="ab:storageProviderType"
 					minOccurs="0" maxOccurs="1" />
-				<element name="classpath-scanner" minOccurs="0" maxOccurs="1"
-					type="ab:classpathScannerType">
-					<annotation>
-						<documentation>
-							Defines which java packages should be scanned for
-							components to use in AnalyzerBeans.
-						</documentation>
-					</annotation>
-				</element>
+				<choice minOccurs="0" maxOccurs="1">
+					<element name="classpath-scanner" minOccurs="1" maxOccurs="1"
+						type="ab:classpathScannerType">
+						<annotation>
+							<documentation>
+								Defines which java packages should be scanned for
+								components to use in AnalyzerBeans.
+							</documentation>
+						</annotation>
+					</element>
+					<element name="custom-descriptor-provider" type="ab:customElementType"
+						minOccurs="1" maxOccurs="1" />
+				</choice>
 			</sequence>
 		</complexType>
 	</element>
@@ -328,7 +332,7 @@
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />
 	</complexType>
-	
+
 	<complexType name="couchdbDatastoreType">
 		<sequence>
 			<element name="hostname" minOccurs="0" maxOccurs="1" type="string" />
@@ -339,8 +343,7 @@
 			<element name="table-def" minOccurs="0" maxOccurs="unbounded">
 				<complexType>
 					<sequence>
-						<element name="database" minOccurs="1" maxOccurs="1"
-							type="string" />
+						<element name="database" minOccurs="1" maxOccurs="1" type="string" />
 						<element name="field" minOccurs="1" maxOccurs="unbounded">
 							<complexType>
 								<sequence>

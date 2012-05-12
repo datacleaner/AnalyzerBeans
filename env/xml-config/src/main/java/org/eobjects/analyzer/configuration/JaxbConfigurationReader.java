@@ -212,7 +212,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
         TaskRunner taskRunner = createTaskRunner(configuration, injectionManager);
 
-        DescriptorProvider descriptorProvider = createDescriptorProvider(configuration, taskRunner);
+        DescriptorProvider descriptorProvider = createDescriptorProvider(configuration, taskRunner, injectionManager);
 
         addVariablePath("datastoreCatalog");
         DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog(),
@@ -234,23 +234,33 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 taskRunner, storageProvider);
     }
 
-    private DescriptorProvider createDescriptorProvider(Configuration configuration, TaskRunner taskRunner) {
-        ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
-        ClasspathScannerType classpathScanner = configuration.getClasspathScanner();
-        if (classpathScanner != null) {
-            List<Package> packages = classpathScanner.getPackage();
-            for (Package pkg : packages) {
-                String packageName = pkg.getValue();
-                if (packageName != null) {
-                    packageName = packageName.trim();
-                    Boolean recursive = pkg.isRecursive();
-                    if (recursive == null) {
-                        recursive = true;
+    private DescriptorProvider createDescriptorProvider(Configuration configuration, TaskRunner taskRunner,
+            InjectionManager injectionManager) {
+        final DescriptorProvider descriptorProvider;
+        final CustomElementType customDescriptorProviderElement = configuration.getCustomDescriptorProvider();
+        final ClasspathScannerType classpathScannerElement = configuration.getClasspathScanner();
+        if (customDescriptorProviderElement != null) {
+            descriptorProvider = createCustomElement(customDescriptorProviderElement, DescriptorProvider.class,
+                    injectionManager, true);
+        } else {
+            final ClasspathScanDescriptorProvider classpathScanner = new ClasspathScanDescriptorProvider(taskRunner);
+            if (classpathScannerElement != null) {
+                final List<Package> packages = classpathScannerElement.getPackage();
+                for (Package pkg : packages) {
+                    String packageName = pkg.getValue();
+                    if (packageName != null) {
+                        packageName = packageName.trim();
+                        Boolean recursive = pkg.isRecursive();
+                        if (recursive == null) {
+                            recursive = true;
+                        }
+                        classpathScanner.scanPackage(packageName, recursive);
                     }
-                    descriptorProvider.scanPackage(packageName, recursive);
                 }
             }
+            descriptorProvider = classpathScanner;
         }
+
         return descriptorProvider;
     }
 
