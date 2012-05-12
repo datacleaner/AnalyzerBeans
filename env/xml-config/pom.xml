@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
@@ -20,7 +21,108 @@
 					</instrumentation>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>com.sun.tools.xjc.maven2</groupId>
+				<artifactId>maven-jaxb-plugin</artifactId>
+				<version>1.1.1</version>
+				<configuration>
+					<includeBindings>
+						<includeBinding>*.xjb</includeBinding>
+					</includeBindings>
+					<forceRegenerate>false</forceRegenerate>
+					<removeOldOutput>true</removeOldOutput>
+					<strict>true</strict>
+					<verbose>true</verbose>
+				</configuration>
+				<executions>
+					<execution>
+						<id>configuration-source</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>generate-sources</phase>
+						<configuration>
+							<generateDirectory>${project.build.directory}/generated/configuration-src</generateDirectory>
+							<generatePackage>org.eobjects.analyzer.configuration.jaxb</generatePackage>
+							<includeSchemas>
+								<includeSchema>**/configuration.xsd</includeSchema>
+							</includeSchemas>
+						</configuration>
+					</execution>
+					<execution>
+						<id>job-source</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>generate-sources</phase>
+						<configuration>
+							<generateDirectory>${project.build.directory}/generated/job-src</generateDirectory>
+							<generatePackage>org.eobjects.analyzer.job.jaxb</generatePackage>
+							<includeSchemas>
+								<includeSchema>**/job.xsd</includeSchema>
+							</includeSchemas>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated/configuration-src</source>
+								<source>${project.build.directory}/generated/job-src</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.sun.tools.xjc.maven2
+										</groupId>
+										<artifactId>
+											maven-jaxb-plugin
+										</artifactId>
+										<versionRange>
+											[1.1.1,)
+										</versionRange>
+										<goals>
+											<goal>generate</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 	<dependencies>
 		<dependency>
