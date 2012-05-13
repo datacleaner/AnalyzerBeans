@@ -22,17 +22,21 @@ package org.eobjects.analyzer.result.renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.html.HtmlFragment;
+import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
 
 @RendererBean(HtmlRenderingFormat.class)
-public class CrosstabHtmlRenderer extends AbstractRenderer<CrosstabResult, String> {
+public class CrosstabHtmlRenderer extends AbstractRenderer<CrosstabResult, HtmlFragment> {
 
-	@Override
-	public String render(CrosstabResult result) {
-		return render(result.getCrosstab());
-	}
+    @Override
+    public HtmlFragment render(CrosstabResult result) {
+        return render(result.getCrosstab());
+    }
 
-	public String render(Crosstab<?> crosstab) {
-		return new CrosstabRenderer(crosstab).render(new HtmlCrosstabRendererCallback());
-	}
+    public HtmlFragment render(Crosstab<?> crosstab) {
+        CrosstabRenderer crosstabRenderer = new CrosstabRenderer(crosstab);
+        String html = crosstabRenderer.render(new HtmlCrosstabRendererCallback());
+        return new SimpleHtmlFragment().addBodyElement(html);
+    }
 
 }

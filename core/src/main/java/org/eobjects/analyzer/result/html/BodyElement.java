@@ -17,15 +17,13 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.result.html;
 
-import org.eobjects.analyzer.beans.api.RenderingFormat;
-import org.eobjects.analyzer.result.html.HtmlFragment;
+/**
+ * Represents a part of a {@link HtmlFragment} that should be included in the
+ * HTML body section.
+ */
+public interface BodyElement {
 
-public class HtmlRenderingFormat implements RenderingFormat<HtmlFragment> {
-
-	@Override
-	public Class<HtmlFragment> getOutputClass() {
-		return HtmlFragment.class;
-	}
+    public String toHtml();
 }

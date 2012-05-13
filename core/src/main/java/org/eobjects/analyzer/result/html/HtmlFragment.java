@@ -17,15 +17,16 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.result.html;
 
-import org.eobjects.analyzer.beans.api.RenderingFormat;
-import org.eobjects.analyzer.result.html.HtmlFragment;
+import java.util.List;
 
-public class HtmlRenderingFormat implements RenderingFormat<HtmlFragment> {
+/**
+ * Represents a fragment of HTML to be inserted into a HTML page.
+ */
+public interface HtmlFragment {
 
-	@Override
-	public Class<HtmlFragment> getOutputClass() {
-		return HtmlFragment.class;
-	}
+    public List<HeadElement> getHeadElements();
+
+    public List<BodyElement> getBodyElements();
 }

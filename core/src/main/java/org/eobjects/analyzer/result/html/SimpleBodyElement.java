@@ -17,15 +17,23 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.result.html;
 
-import org.eobjects.analyzer.beans.api.RenderingFormat;
-import org.eobjects.analyzer.result.html.HtmlFragment;
+public class SimpleBodyElement implements BodyElement {
 
-public class HtmlRenderingFormat implements RenderingFormat<HtmlFragment> {
+    private final String _html;
 
-	@Override
-	public Class<HtmlFragment> getOutputClass() {
-		return HtmlFragment.class;
-	}
+    public SimpleBodyElement(String html) {
+        _html = html;
+    }
+
+    @Override
+    public String toHtml() {
+        return _html;
+    }
+
+    @Override
+    public String toString() {
+        return toHtml();
+    }
 }

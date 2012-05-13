@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -26,19 +27,24 @@ import java.util.Set;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.PatternFinderResult;
+import org.eobjects.analyzer.result.html.BodyElement;
+import org.eobjects.analyzer.result.html.HeadElement;
+import org.eobjects.analyzer.result.html.HtmlFragment;
+import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
 
 @RendererBean(HtmlRenderingFormat.class)
-public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFinderResult, String> {
+public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFinderResult, HtmlFragment> {
 
 	@Override
-	public String render(PatternFinderResult result) {
+	public HtmlFragment render(PatternFinderResult result) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<div class=\"patternFinderResultContainer\">");
-		final CrosstabHtmlRenderer crosstabHtmlRenderer = new CrosstabHtmlRenderer();
-		if (result.isGroupingEnabled()) {
+		final SimpleHtmlFragment htmlFragment = new SimpleHtmlFragment();
+        if (result.isGroupingEnabled()) {
 			Map<String, Crosstab<?>> crosstabs = result.getGroupedCrosstabs();
 			if (crosstabs.isEmpty()) {
-				return "<p>No patterns found</p>";
+			    htmlFragment.addBodyElement("<p>No patterns found</p>");
+				return htmlFragment;
 			}
 			Set<Entry<String, Crosstab<?>>> crosstabEntries = crosstabs.entrySet();
 			for (Entry<String, Crosstab<?>> entry : crosstabEntries) {
@@ -52,17 +58,36 @@ public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFin
 				sb.append(group);
 				sb.append("</h3>");
 				sb.append("<div class=\"patternFinderResultPanel\">");
-				sb.append(crosstabHtmlRenderer.render(crosstab));
+				append(sb,htmlFragment, crosstab);
 				sb.append("</div>");
 			}
 		} else {
 			Crosstab<?> crosstab = result.getSingleCrosstab();
 			sb.append("<div class=\"patternFinderResultPanel\">");
-			sb.append(crosstabHtmlRenderer.render(crosstab));
+			append(sb,htmlFragment, crosstab);
 			sb.append("</div>");
 		}
 		sb.append("</div>");
-		return sb.toString();
+		htmlFragment.addBodyElement(sb.toString());
+		return htmlFragment;
 	}
+
+    private void append(StringBuilder sb, SimpleHtmlFragment htmlFragment, Crosstab<?> crosstab) {
+        final CrosstabHtmlRenderer crosstabHtmlRenderer = new CrosstabHtmlRenderer();
+        
+        final HtmlFragment renderedResult = crosstabHtmlRenderer.render(crosstab);
+        
+        final List<BodyElement> bodyElements = renderedResult.getBodyElements();
+        assert 1 == bodyElements.size();
+        for (BodyElement bodyElement : bodyElements) {
+            sb.append(bodyElement.toHtml());
+        }
+        
+        final List<HeadElement> headElements = renderedResult.getHeadElements();
+        assert headElements.isEmpty();
+        for (HeadElement headElement : headElements) {
+            htmlFragment.addHeadElement(headElement);
+        }
+    }
 
 }

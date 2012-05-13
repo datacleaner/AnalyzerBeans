@@ -17,15 +17,21 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.cli;
 
-import org.eobjects.analyzer.beans.api.RenderingFormat;
-import org.eobjects.analyzer.result.html.HtmlFragment;
+import java.io.OutputStream;
+import java.io.Writer;
 
-public class HtmlRenderingFormat implements RenderingFormat<HtmlFragment> {
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.result.AnalysisResult;
+import org.eobjects.metamodel.util.Ref;
 
-	@Override
-	public Class<HtmlFragment> getOutputClass() {
-		return HtmlFragment.class;
-	}
+/**
+ * Defines the interface for components that write an {@link AnalysisResult},
+ * typically to a file or {@link System#out}.
+ */
+public interface AnalysisResultWriter {
+
+    public void write(AnalysisResult result, AnalyzerBeansConfiguration configuration, Ref<Writer> writerRef,
+            Ref<OutputStream> outputStreamRef) throws Exception;
 }

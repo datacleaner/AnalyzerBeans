@@ -34,12 +34,8 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.lang.SerializationUtils;
-import org.eobjects.analyzer.beans.api.Renderer;
-import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
 import org.eobjects.analyzer.connection.Datastore;
@@ -50,15 +46,11 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
-import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.SimpleAnalysisResult;
-import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
@@ -321,59 +313,8 @@ public final class CliRunner implements Closeable {
 
 		if (resultFuture.isSuccessful()) {
 			final CliOutputType outputType = _arguments.getOutputType();
-			if (outputType == CliOutputType.SERIALIZED) {
-
-				SimpleAnalysisResult result = new SimpleAnalysisResult(resultFuture.getResultMap());
-				SerializationUtils.serialize(result, _outputStreamRef.get());
-
-			} else {
-				final Class<? extends RenderingFormat<? extends CharSequence>> renderingFormat = outputType
-						.getRenderingFormat();
-				final Set<Entry<ComponentJob, AnalyzerResult>> results = resultFuture.getResultMap().entrySet();
-				final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider(), null);
-
-				if (outputType == CliOutputType.TEXT) {
-					write("SUCCESS!");
-				} else if (outputType == CliOutputType.HTML) {
-					write("<html><body>");
-					write("<div class\"analysisResultContainer\">");
-					write("<h1 class=\"analysisResultHeader\">Success!</h1>");
-				}
-
-				for (Entry<ComponentJob, AnalyzerResult> result : results) {
-					final ComponentJob componentJob = result.getKey();
-					final AnalyzerResult analyzerResult = result.getValue();
-					String name = componentJob.getName();
-					if (name == null) {
-						name = componentJob.toString();
-					}
-
-					if (outputType == CliOutputType.TEXT) {
-						write("\nRESULT: " + name);
-					} else if (outputType == CliOutputType.HTML) {
-						write("<div=\"analyzerResultContainer\"><h2 class=\"analyzerResultHeader\">Result: " + name
-								+ "</h2><div class=\"analyzerResultPanel\">");
-					}
-
-					Renderer<? super AnalyzerResult, ? extends CharSequence> renderer = rendererFactory.getRenderer(
-							analyzerResult, renderingFormat);
-					if (renderer == null) {
-						writeMissingRendererError(analyzerResult, outputType);
-					} else {
-						CharSequence renderedResult = renderer.render(analyzerResult);
-						write(renderedResult.toString());
-					}
-
-					if (outputType == CliOutputType.HTML) {
-						write("</div></div>");
-					}
-				}
-
-				if (outputType == CliOutputType.HTML) {
-					write("</div>");
-					write("</body></html>");
-				}
-			}
+			AnalysisResultWriter writer = outputType.createWriter();
+			writer.write(resultFuture, configuration, _writerRef, _outputStreamRef);
 		} else {
 			write("ERROR!");
 			write("------");
@@ -389,18 +330,6 @@ public final class CliRunner implements Closeable {
 			}
 
 			throw errors.get(0);
-		}
-	}
-
-	private void writeMissingRendererError(AnalyzerResult analyzerResult, CliOutputType outputType) {
-		// we only expect HTML here, since TEXT rendering has a default renderer
-		// for all, and SERIALIZED rendering will have a different loop of
-		// storing the result.
-		assert outputType == CliOutputType.HTML;
-
-		if (outputType == CliOutputType.HTML) {
-			write("<h3 class=\"analyzerResultNoRendererHeader\">Error: Could not find appropriate renderer for result</h3>");
-			write("<pre class=\"analyzerResultNoRendererBody\">" + analyzerResult.toString() + "</pre>");
 		}
 	}
 

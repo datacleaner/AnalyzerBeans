@@ -28,6 +28,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.result.PatternFinderResult;
+import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
@@ -50,7 +51,10 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
 
 		PatternFinderResult result = analyzer.getResult();
 
-		String html = new PatternFinderResultHtmlRenderer().render(result);
+		HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer().render(result);
+		assertEquals("SimpleHtmlFragment[headElements=0,bodyElements=1]", htmlFragment.toString());
+		
+        String html = htmlFragment.getBodyElements().get(0).toHtml();
 		assertEquals(
 				FileHelper.readFileAsString(new File("src/test/resources/pattern_finder_result_html_renderer_single.html")),
 				html);
@@ -75,7 +79,10 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
 
 		PatternFinderResult result = analyzer.getResult();
 
-		String html = new PatternFinderResultHtmlRenderer().render(result);
+		HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer().render(result);
+		assertEquals("SimpleHtmlFragment[headElements=0,bodyElements=1]", htmlFragment.toString());
+		
+        String html = htmlFragment.getBodyElements().get(0).toHtml();
 		assertEquals(FileHelper.readFileAsString(new File(
 				"src/test/resources/pattern_finder_result_html_renderer_multiple.html")), html);
 	}

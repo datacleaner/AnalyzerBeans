@@ -26,6 +26,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -220,7 +222,9 @@ public class MainTest extends TestCase {
 		String result = FileHelper.readFileAsString(file);
 		String[] lines = result.split("\n");
 		
-		assertEquals("<html><body>", lines[0]);
+		assertEquals("<html>", lines[0]);
+		
+		DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
 	}
 	
 	public void testWriteSerializedToFile() throws Throwable {
