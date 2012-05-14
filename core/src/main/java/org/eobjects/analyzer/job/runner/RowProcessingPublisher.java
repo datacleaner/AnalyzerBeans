@@ -65,6 +65,7 @@ import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.CollectionUtils;
+import org.eobjects.metamodel.util.Func;
 import org.eobjects.metamodel.util.LazyRef;
 import org.eobjects.metamodel.util.Predicate;
 import org.slf4j.Logger;
@@ -103,6 +104,41 @@ public final class RowProcessingPublisher {
         _queryOptimizerRef = createQueryOptimizerRef();
     }
 
+    /**
+     * Inspects the row processed tables primary keys. If all primary keys are
+     * in the source columns of the AnalysisJob, they will be added to the
+     * physically queried columns.
+     * 
+     * Adding the primary keys to the query is a trade-off: It helps a lot in
+     * making eg. annotated rows referenceable to the source table, but it may
+     * also potentially make the job heavier to execute since a lot of (unique)
+     * values will be retrieved.
+     */
+    public void addPrimaryKeysIfSourced() {
+        Column[] primaryKeyColumns = _table.getPrimaryKeys();
+        if (primaryKeyColumns == null || primaryKeyColumns.length == 0) {
+            logger.info("No primary keys defined for table {}, not pre-selecting primary keys", _table.getName());
+            return;
+        }
+
+        final Collection<InputColumn<?>> sourceInputColumns = _analysisJob.getSourceColumns();
+        final List<Column> sourceColumns = CollectionUtils.map(sourceInputColumns, new Func<InputColumn<?>, Column>() {
+            @Override
+            public Column eval(InputColumn<?> inputColumn) {
+                return inputColumn.getPhysicalColumn();
+            }
+        });
+
+        for (Column primaryKeyColumn : primaryKeyColumns) {
+            if (!sourceColumns.contains(primaryKeyColumn)) {
+                logger.info("Primary key column {} not added to source columns, not pre-selecting primary keys");
+                return;
+            }
+        }
+        
+        addPhysicalColumns(primaryKeyColumns);
+    }
+
     private LazyRef<RowProcessingQueryOptimizer> createQueryOptimizerRef() {
         return new LazyRef<RowProcessingQueryOptimizer>() {
             @Override
@@ -131,6 +167,7 @@ public final class RowProcessingPublisher {
 
     /**
      * Sorts a list of consumers into their execution order
+     * 
      * @param consumers
      * @return
      */
@@ -238,8 +275,7 @@ public final class RowProcessingPublisher {
         }
     }
 
-    public void addAnalyzerBean(Analyzer<?> analyzer, AnalyzerJob analyzerJob,
-            InputColumn<?>[] inputColumns) {
+    public void addAnalyzerBean(Analyzer<?> analyzer, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns) {
         addConsumer(new AnalyzerConsumer(_analysisJob, analyzer, analyzerJob, inputColumns, _analysisListener));
     }
 

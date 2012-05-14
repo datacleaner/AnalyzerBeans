@@ -140,12 +140,14 @@ final class RowProcessingPublishers {
 	private void registerRowProcessingPublishers(ConfigurableBeanJob<?> componentJob) {
 		final Column[] physicalColumns = getPhysicalColumns(componentJob);
 		final Table[] tables = getTables(componentJob, physicalColumns);
+		
 
 		for (Table table : tables) {
 			RowProcessingPublisher rowPublisher = _rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
 				rowPublisher = new RowProcessingPublisher(_analysisJob, table, _taskRunner, _analysisListener,
 						_lifeCycleHelper);
+				rowPublisher.addPrimaryKeysIfSourced();
 				_rowProcessingPublishers.put(table, rowPublisher);
 			}
 
