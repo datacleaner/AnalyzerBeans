@@ -27,7 +27,6 @@ import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
-import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.job.tasks.MockMultiRowTransformer;
 
@@ -53,12 +52,6 @@ public class AnnotationBasedTransformerBeanDescriptorTest extends TestCase {
 		assertEquals(1, configuredProperties.size());
 		ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
 		return propertyDescriptor.getInputColumnDataTypeFamily();
-	}
-
-	public void testConcatenator() throws Exception {
-		TransformerBeanDescriptor<?> descriptor = Descriptors.ofTransformer(ConcatenatorTransformer.class);
-		assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));
-		assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
 	}
 
 	public void testGetProvidedPropertiesOfType() throws Exception {

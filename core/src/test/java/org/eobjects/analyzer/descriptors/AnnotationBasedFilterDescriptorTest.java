@@ -39,6 +39,6 @@ public class AnnotationBasedFilterDescriptorTest extends TestCase {
 	public void testGetCategoryNames() throws Exception {
 		Set<String> categoryNames = desc.getOutcomeCategoryNames();
 		categoryNames = new TreeSet<String>(categoryNames);
-		assertEquals("[VALID, INVALID]", categoryNames.toString());
+		assertEquals("[INVALID, VALID]", categoryNames.toString());
 	}
 }

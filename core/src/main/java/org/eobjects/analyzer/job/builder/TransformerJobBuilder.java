@@ -50,181 +50,186 @@ import org.eobjects.analyzer.util.StringUtils;
  *            the transformer type being configured
  */
 public final class TransformerJobBuilder<T extends Transformer<?>> extends
-		AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> implements
-		InputColumnSourceJob, InputColumnSinkJob, OutcomeSinkJob {
+        AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> implements
+        InputColumnSourceJob, InputColumnSinkJob, OutcomeSinkJob {
 
-	private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
-	private final List<String> _automaticOutputColumnNames = new ArrayList<String>();
-	private final IdGenerator _idGenerator;
-	private final List<TransformerChangeListener> _transformerChangeListeners;
+    private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
+    private final List<String> _automaticOutputColumnNames = new ArrayList<String>();
+    private final IdGenerator _idGenerator;
+    private final List<TransformerChangeListener> _transformerChangeListeners;
 
-	public TransformerJobBuilder(AnalysisJobBuilder analysisJobBuilder, TransformerBeanDescriptor<T> descriptor,
-			IdGenerator idGenerator, List<TransformerChangeListener> transformerChangeListeners) {
-		super(analysisJobBuilder, descriptor, TransformerJobBuilder.class);
-		_idGenerator = idGenerator;
-		_transformerChangeListeners = transformerChangeListeners;
-	}
+    public TransformerJobBuilder(AnalysisJobBuilder analysisJobBuilder, TransformerBeanDescriptor<T> descriptor,
+            IdGenerator idGenerator, List<TransformerChangeListener> transformerChangeListeners) {
+        super(analysisJobBuilder, descriptor, TransformerJobBuilder.class);
+        _idGenerator = idGenerator;
+        _transformerChangeListeners = transformerChangeListeners;
+    }
 
-	public List<MutableInputColumn<?>> getOutputColumns() {
-		if (!isConfigured()) {
-			// as long as the transformer is not configured, just return an
-			// empty list
-			return Collections.emptyList();
-		}
+    public List<MutableInputColumn<?>> getOutputColumns() {
+        if (!isConfigured()) {
+            // as long as the transformer is not configured, just return an
+            // empty list
+            return Collections.emptyList();
+        }
 
-		final Transformer<?> component = getConfigurableBean();
-		final TransformerBeanDescriptor<T> descriptor = getDescriptor();
+        final Transformer<?> component = getConfigurableBean();
+        final TransformerBeanDescriptor<T> descriptor = getDescriptor();
 
-		final InjectionManager injectionManager = new InjectionManagerImpl(null, null, new InMemoryStorageProvider());
-		final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, null);
+        final InjectionManager injectionManager = new InjectionManagerImpl(null, null, new InMemoryStorageProvider());
+        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, null);
 
-		// mimic the configuration of a real transformer bean instance
-		final BeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(getConfiguredProperties());
-		lifeCycleHelper.assignConfiguredProperties(descriptor, component, beanConfiguration);
-		lifeCycleHelper.assignProvidedProperties(descriptor, component);
-		
-		// only validate, don't initialize
-		lifeCycleHelper.validate(descriptor, component);
+        // mimic the configuration of a real transformer bean instance
+        final BeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(getConfiguredProperties());
+        lifeCycleHelper.assignConfiguredProperties(descriptor, component, beanConfiguration);
+        lifeCycleHelper.assignProvidedProperties(descriptor, component);
 
-		final OutputColumns outputColumns = component.getOutputColumns();
-		if (outputColumns == null) {
-			throw new IllegalStateException("getOutputColumns() returned null on transformer: " + component);
-		}
-		boolean changed = false;
+        // only validate, don't initialize
+        lifeCycleHelper.validate(descriptor, component);
 
-		// adjust the amount of output columns
-		int expectedCols = outputColumns.getColumnCount();
-		int existingCols = _outputColumns.size();
-		if (expectedCols != existingCols) {
-			changed = true;
-			int colDiff = expectedCols - existingCols;
-			if (colDiff > 0) {
-				for (int i = 0; i < colDiff; i++) {
-					int nextIndex = _outputColumns.size();
-					String name = outputColumns.getColumnName(nextIndex);
-					if (name == null) {
-						name = descriptor.getDisplayName() + " (" + (nextIndex + 1) + ")";
-					}
-					_outputColumns.add(new TransformedInputColumn<Object>(name, _idGenerator));
-					_automaticOutputColumnNames.add(name);
-				}
-			} else if (colDiff < 0) {
-				for (int i = 0; i < Math.abs(colDiff); i++) {
-					// remove from the tail
-					_outputColumns.remove(_outputColumns.size() - 1);
-					_automaticOutputColumnNames.remove(_automaticOutputColumnNames.size() - 1);
-				}
-			}
-		}
+        final OutputColumns outputColumns = component.getOutputColumns();
+        if (outputColumns == null) {
+            throw new IllegalStateException("getOutputColumns() returned null on transformer: " + component);
+        }
+        boolean changed = false;
 
-		// automatically update names and types of columns if they have not been
-		// manually
-		// set
-		for (int i = 0; i < expectedCols; i++) {
-			final String proposedName = outputColumns.getColumnName(i);
-			Class<?> dataType = outputColumns.getColumnType(i);
-			if (dataType == null) {
-				dataType = descriptor.getOutputDataType();
-			}
+        // adjust the amount of output columns
+        int expectedCols = outputColumns.getColumnCount();
+        int existingCols = _outputColumns.size();
+        if (expectedCols != existingCols) {
+            changed = true;
+            int colDiff = expectedCols - existingCols;
+            if (colDiff > 0) {
+                for (int i = 0; i < colDiff; i++) {
+                    int nextIndex = _outputColumns.size();
+                    final String name = getColumnName(outputColumns, nextIndex);
+                    _outputColumns.add(new TransformedInputColumn<Object>(name, _idGenerator));
+                    _automaticOutputColumnNames.add(name);
+                }
+            } else if (colDiff < 0) {
+                for (int i = 0; i < Math.abs(colDiff); i++) {
+                    // remove from the tail
+                    _outputColumns.remove(_outputColumns.size() - 1);
+                    _automaticOutputColumnNames.remove(_automaticOutputColumnNames.size() - 1);
+                }
+            }
+        }
 
-			TransformedInputColumn<?> col = (TransformedInputColumn<?>) _outputColumns.get(i);
-			col.setInitialName(proposedName);
-			if (dataType != col.getDataType()) {
-				col.setDataType(dataType);
-				changed = true;
-			}
+        // automatically update names and types of columns if they have not been
+        // manually
+        // set
+        for (int i = 0; i < expectedCols; i++) {
+            final String proposedName = getColumnName(outputColumns, i);
+            Class<?> dataType = outputColumns.getColumnType(i);
+            if (dataType == null) {
+                dataType = descriptor.getOutputDataType();
+            }
 
-			String automaticName = _automaticOutputColumnNames.get(i);
-			String columnName = col.getName();
-			if (StringUtils.isNullOrEmpty(columnName) || automaticName.equals(columnName)) {
-				if (proposedName != null) {
-					col.setName(proposedName);
-					_automaticOutputColumnNames.set(i, proposedName);
-				}
-			}
-		}
+            TransformedInputColumn<?> col = (TransformedInputColumn<?>) _outputColumns.get(i);
+            col.setInitialName(proposedName);
+            if (dataType != col.getDataType()) {
+                col.setDataType(dataType);
+                changed = true;
+            }
 
-		if (changed) {
-			// notify listeners
-			onOutputChanged();
-		}
+            String automaticName = _automaticOutputColumnNames.get(i);
+            String columnName = col.getName();
+            if (StringUtils.isNullOrEmpty(columnName) || automaticName.equals(columnName)) {
+                if (proposedName != null) {
+                    col.setName(proposedName);
+                    _automaticOutputColumnNames.set(i, proposedName);
+                }
+            }
+        }
 
-		return Collections.unmodifiableList(_outputColumns);
-	}
+        if (changed) {
+            // notify listeners
+            onOutputChanged();
+        }
 
-	public void onOutputChanged() {
+        return Collections.unmodifiableList(_outputColumns);
+    }
 
-		// notify listeners
-		for (TransformerChangeListener listener : _transformerChangeListeners) {
-			listener.onOutputChanged(this, _outputColumns);
-		}
-	}
+    private String getColumnName(OutputColumns outputColumns, int index) {
+        String name = outputColumns.getColumnName(index);
+        if (name == null) {
+            name = getDescriptor().getDisplayName() + " (" + (index + 1) + ")";
+        }
+        return name;
+    }
 
-	public TransformerJob toTransformerJob() throws IllegalStateException {
-		return toTransformerJob(true);
-	}
+    public void onOutputChanged() {
 
-	public TransformerJob toTransformerJob(boolean validate) {
-		if (!isConfigured()) {
-			throw new IllegalStateException("Transformer job is not correctly configured");
-		}
+        // notify listeners
+        for (TransformerChangeListener listener : _transformerChangeListeners) {
+            listener.onOutputChanged(this, _outputColumns);
+        }
+    }
 
-		return new ImmutableTransformerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-				getConfiguredProperties()), getOutputColumns(), getRequirement());
-	}
+    public TransformerJob toTransformerJob() throws IllegalStateException {
+        return toTransformerJob(true);
+    }
 
-	@Override
-	public String toString() {
-		return "TransformerJobBuilder[transformer=" + getDescriptor().getDisplayName() + ",inputColumns="
-				+ getInputColumns() + "]";
-	}
+    public TransformerJob toTransformerJob(boolean validate) {
+        if (!isConfigured()) {
+            throw new IllegalStateException("Transformer job is not correctly configured");
+        }
 
-	public MutableInputColumn<?> getOutputColumnByName(String name) {
-		if (name != null) {
-			List<MutableInputColumn<?>> outputColumns = getOutputColumns();
-			for (MutableInputColumn<?> inputColumn : outputColumns) {
-				if (name.equals(inputColumn.getName())) {
-					return inputColumn;
-				}
-			}
-		}
-		return null;
-	}
+        return new ImmutableTransformerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
+                getConfiguredProperties()), getOutputColumns(), getRequirement());
+    }
 
-	@Override
-	public void onConfigurationChanged() {
-		super.onConfigurationChanged();
+    @Override
+    public String toString() {
+        return "TransformerJobBuilder[transformer=" + getDescriptor().getDisplayName() + ",inputColumns="
+                + getInputColumns() + "]";
+    }
 
-		// trigger getOutputColumns which will notify consumers in the case of
-		// output changes
-		if (isConfigured()) {
-			getOutputColumns();
-		}
+    public MutableInputColumn<?> getOutputColumnByName(String name) {
+        if (name != null) {
+            List<MutableInputColumn<?>> outputColumns = getOutputColumns();
+            for (MutableInputColumn<?> inputColumn : outputColumns) {
+                if (name.equals(inputColumn.getName())) {
+                    return inputColumn;
+                }
+            }
+        }
+        return null;
+    }
 
-		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(getAnalysisJobBuilder()
-				.getTransformerChangeListeners());
-		for (TransformerChangeListener listener : listeners) {
-			listener.onConfigurationChanged(this);
-		}
-	}
+    @Override
+    public void onConfigurationChanged() {
+        super.onConfigurationChanged();
 
-	@Override
-	public void onRequirementChanged() {
-		super.onRequirementChanged();
-		List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(getAnalysisJobBuilder()
-				.getTransformerChangeListeners());
-		for (TransformerChangeListener listener : listeners) {
-			listener.onRequirementChanged(this);
-		}
-	}
+        // trigger getOutputColumns which will notify consumers in the case of
+        // output changes
+        if (isConfigured()) {
+            getOutputColumns();
+        }
 
-	@Override
-	public InputColumn<?>[] getInput() {
-		return getInputColumns().toArray(new InputColumn<?>[0]);
-	}
+        List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(getAnalysisJobBuilder()
+                .getTransformerChangeListeners());
+        for (TransformerChangeListener listener : listeners) {
+            listener.onConfigurationChanged(this);
+        }
+    }
 
-	@Override
-	public MutableInputColumn<?>[] getOutput() {
-		return getOutputColumns().toArray(new MutableInputColumn<?>[0]);
-	}
+    @Override
+    public void onRequirementChanged() {
+        super.onRequirementChanged();
+        List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(getAnalysisJobBuilder()
+                .getTransformerChangeListeners());
+        for (TransformerChangeListener listener : listeners) {
+            listener.onRequirementChanged(this);
+        }
+    }
+
+    @Override
+    public InputColumn<?>[] getInput() {
+        return getInputColumns().toArray(new InputColumn<?>[0]);
+    }
+
+    @Override
+    public MutableInputColumn<?>[] getOutput() {
+        return getOutputColumns().toArray(new MutableInputColumn<?>[0]);
+    }
 }

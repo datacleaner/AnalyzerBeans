@@ -32,23 +32,25 @@ import org.eobjects.analyzer.data.InputRow;
 @TransformerBean("Transformer mock")
 public class TransformerMock implements Transformer<Integer> {
 
-	@Configured
-	InputColumn<?> input;
+    @Configured
+    InputColumn<?>[] input;
 
-	private AtomicInteger i;
+    private AtomicInteger i;
 
-	@Initialize
-	public void init() {
-		i = new AtomicInteger(0);
-	}
+    @Initialize
+    public void init() {
+        i = new AtomicInteger(0);
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		return OutputColumns.singleOutputColumn();
-	}
+    @Override
+    public OutputColumns getOutputColumns() {
+        return new OutputColumns(input.length);
+    }
 
-	@Override
-	public Integer[] transform(InputRow inputRow) {
-		return new Integer[] { i.incrementAndGet() };
-	}
+    @Override
+    public Integer[] transform(InputRow inputRow) {
+        Integer[] res = new Integer[input.length];
+        res[0] = i.incrementAndGet();
+        return res;
+    }
 }

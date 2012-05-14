@@ -30,7 +30,6 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
-import org.eobjects.analyzer.beans.transform.WhitespaceTrimmerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -79,9 +78,10 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		fjb1.setName("fjb1");
 
 		// 2: trim (depends on filter)
-		TransformerJobBuilder<WhitespaceTrimmerTransformer> tjb1 = ajb.addTransformer(WhitespaceTrimmerTransformer.class);
+		TransformerJobBuilder<TransformerMock> tjb1 = ajb.addTransformer(TransformerMock.class);
 		tjb1.addInputColumn(inputColumn);
 		tjb1.setRequirement(fjb1, MockFilter.Category.VALID);
+		tjb1.setName("tjb1");
 
 		// 3: merge either the null or the trimmed value
 		MergedOutcomeJobBuilder mojb = ajb.addMergedOutcomeJobBuilder();
@@ -106,7 +106,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		assertEquals(5, consumers.size());
 
 		assertEquals("ImmutableFilterJob[name=fjb1,filter=Mock filter]", consumers.get(0).getComponentJob().toString());
-		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
+		assertEquals("ImmutableTransformerJob[name=tjb1,transformer=Transformer mock]", consumers.get(1).getComponentJob()
 				.toString());
 		assertEquals(
 				"ImmutableMergedOutcomeJob[name=null,mergeInputs=[ImmutableMergeInput[FilterOutcome[category=VALID]], ImmutableMergeInput[FilterOutcome[category=INVALID]]]]",
@@ -128,13 +128,15 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		fjb1.setName("fjb1");
 
 		// 2: trim (depends on filter)
-		TransformerJobBuilder<WhitespaceTrimmerTransformer> tjb1 = ajb.addTransformer(WhitespaceTrimmerTransformer.class);
+		TransformerJobBuilder<TransformerMock> tjb1 = ajb.addTransformer(TransformerMock.class);
 		tjb1.addInputColumn(inputColumn);
 		tjb1.setRequirement(fjb1, MockFilter.Category.VALID);
+		tjb1.setName("tjb1");
 
 		// 3: trim again, just to examplify (depends on first trim output)
-		TransformerJobBuilder<WhitespaceTrimmerTransformer> tjb2 = ajb.addTransformer(WhitespaceTrimmerTransformer.class);
+		TransformerJobBuilder<TransformerMock> tjb2 = ajb.addTransformer(TransformerMock.class);
 		tjb2.addInputColumn(tjb1.getOutputColumns().get(0));
+		tjb2.setName("tjb2");
 
 		// 4: add a single word filter (depends on second trim)
 		FilterJobBuilder<MockFilter, MockFilter.Category> fjb2 = ajb.addFilter(MockFilter.class);
@@ -156,9 +158,9 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		consumers = new RowProcessingConsumerSorter(consumers).createProcessOrderedConsumerList();
 
 		assertEquals("ImmutableFilterJob[name=fjb1,filter=Mock filter]", consumers.get(0).getComponentJob().toString());
-		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
+		assertEquals("ImmutableTransformerJob[name=tjb1,transformer=Transformer mock]", consumers.get(1).getComponentJob()
 				.toString());
-		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(2).getComponentJob()
+		assertEquals("ImmutableTransformerJob[name=tjb2,transformer=Transformer mock]", consumers.get(2).getComponentJob()
 				.toString());
 		assertEquals("ImmutableFilterJob[name=fjb2,filter=Mock filter]", consumers.get(3).getComponentJob().toString());
 	}
