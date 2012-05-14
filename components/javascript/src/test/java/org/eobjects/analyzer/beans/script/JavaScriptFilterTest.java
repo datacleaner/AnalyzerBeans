@@ -19,12 +19,11 @@
  */
 package org.eobjects.analyzer.beans.script;
 
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-
-import junit.framework.TestCase;
 
 public class JavaScriptFilterTest extends TestCase {
 
@@ -35,10 +34,10 @@ public class JavaScriptFilterTest extends TestCase {
 		filter.setColumns(new InputColumn[] { myCol });
 		filter.init();
 
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(myCol, "hi")));
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(myCol, "")));
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(myCol, " ")));
-		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(myCol, null)));
+		assertEquals(JavaScriptFilter.Category.VALID, filter.categorize(new MockInputRow().put(myCol, "hi")));
+		assertEquals(JavaScriptFilter.Category.VALID, filter.categorize(new MockInputRow().put(myCol, "")));
+		assertEquals(JavaScriptFilter.Category.VALID, filter.categorize(new MockInputRow().put(myCol, " ")));
+		assertEquals(JavaScriptFilter.Category.INVALID, filter.categorize(new MockInputRow().put(myCol, null)));
 	}
 
 	public void testNotNullFilteringNumber() throws Exception {
@@ -48,9 +47,9 @@ public class JavaScriptFilterTest extends TestCase {
 		filter.setColumns(new InputColumn[] { myCol });
 		filter.init();
 
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(myCol, 1)));
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(myCol, -1)));
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(myCol, 0)));
-		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(myCol, null)));
+		assertEquals(JavaScriptFilter.Category.VALID, filter.categorize(new MockInputRow().put(myCol, 1)));
+		assertEquals(JavaScriptFilter.Category.VALID, filter.categorize(new MockInputRow().put(myCol, -1)));
+		assertEquals(JavaScriptFilter.Category.VALID, filter.categorize(new MockInputRow().put(myCol, 0)));
+		assertEquals(JavaScriptFilter.Category.INVALID, filter.categorize(new MockInputRow().put(myCol, null)));
 	}
 }

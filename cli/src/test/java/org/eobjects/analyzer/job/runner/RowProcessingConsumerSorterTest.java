@@ -29,7 +29,6 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
-import org.eobjects.analyzer.beans.mock.TransformerMock;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -44,7 +43,6 @@ import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
-import org.eobjects.analyzer.test.mock.MockDatastoreConnection;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableTable;

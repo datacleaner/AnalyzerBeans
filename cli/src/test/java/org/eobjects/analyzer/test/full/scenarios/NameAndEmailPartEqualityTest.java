@@ -24,7 +24,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.script.JavaScriptFilter;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.standardize.NameStandardizerTransformer;
@@ -125,7 +124,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 			assertTrue(analyzerJobBuilder.isConfigured());
 		}
 
-		FilterJobBuilder<JavaScriptFilter, ValidationCategory> fjb = analysisJobBuilder
+		FilterJobBuilder<JavaScriptFilter, JavaScriptFilter.Category> fjb = analysisJobBuilder
 				.addFilter(JavaScriptFilter.class);
 		fjb.addInputColumn(nameTransformerJobBuilder
 				.getOutputColumnByName("Firstname"));
@@ -138,12 +137,12 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 				.addAnalyzer(StringAnalyzer.class)
 				.addInputColumn(
 						analysisJobBuilder.getSourceColumnByName("email"))
-				.setRequirement(fjb, ValidationCategory.VALID);
+				.setRequirement(fjb, JavaScriptFilter.Category.VALID);
 		analysisJobBuilder
 				.addAnalyzer(StringAnalyzer.class)
 				.addInputColumn(
 						analysisJobBuilder.getSourceColumnByName("email"))
-				.setRequirement(fjb, ValidationCategory.INVALID);
+				.setRequirement(fjb, JavaScriptFilter.Category.INVALID);
 
 		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder
 				.toAnalysisJob());

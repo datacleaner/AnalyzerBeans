@@ -27,7 +27,6 @@ import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.StringProperty;
 import org.eobjects.analyzer.beans.categories.ScriptingCategory;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.mozilla.javascript.Context;
@@ -40,68 +39,75 @@ import org.slf4j.LoggerFactory;
 
 @FilterBean("JavaScript filter")
 @Description("Supply your own piece of JavaScript that evaluates whether rows should be included or excluded from processing.")
-@Categorized({ScriptingCategory.class})
-public class JavaScriptFilter implements Filter<ValidationCategory> {
+@Categorized({ ScriptingCategory.class })
+public class JavaScriptFilter implements Filter<JavaScriptFilter.Category> {
 
-	private static final Logger logger = LoggerFactory.getLogger(JavaScriptFilter.class);
+    public static enum Category {
+        VALID, INVALID;
+    }
 
-	@Configured
-	InputColumn<?>[] columns;
+    private static final Logger logger = LoggerFactory.getLogger(JavaScriptFilter.class);
 
-	@Configured
-	@Description("Available variables:\nvalues[0..]: Array of values\nvalues[\"my_col\"]: Map of values\nmy_col: Each column value has it's own variable\nout: Print to console using out.println('hello')\nlogger: Print to log using log.info(...), log.warn(...), log.error(...)")
-	@StringProperty(multiline = true, mimeType = { "text/javascript", "application/x-javascript" })
-	String sourceCode = "function eval() {\n  return values[0] != null;\n}\n\neval();";
+    @Configured
+    InputColumn<?>[] columns;
 
-	private ContextFactory _contextFactory;
-	private Script _script;
+    @Configured
+    @Description("Available variables:\nvalues[0..]: Array of values\nvalues[\"my_col\"]: Map of values\nmy_col: Each column value has it's own variable\nout: Print to console using out.println('hello')\nlogger: Print to log using log.info(...), log.warn(...), log.error(...)")
+    @StringProperty(multiline = true, mimeType = { "text/javascript", "application/x-javascript" })
+    String sourceCode = "function eval() {\n  return values[0] != null;\n}\n\neval();";
 
-	// this scope is shared between all threads
-	private ScriptableObject _sharedScope;
+    private ContextFactory _contextFactory;
+    private Script _script;
 
-	@Initialize
-	public void init() {
-		_contextFactory = new ContextFactory();
-		Context context = _contextFactory.enterContext();
+    // this scope is shared between all threads
+    private ScriptableObject _sharedScope;
 
-		try {
-			_script = context.compileString(sourceCode, this.getClass().getSimpleName(), 1, null);
-			_sharedScope = context.initStandardObjects();
+    @Initialize
+    public void init() {
+        _contextFactory = new ContextFactory();
+        Context context = _contextFactory.enterContext();
 
-			JavaScriptUtils.addToScope(_sharedScope, logger, "logger", "log");
-			JavaScriptUtils.addToScope(_sharedScope, System.out, "out");
-		} finally {
-			Context.exit();
-		}
-	}
+        try {
+            _script = context.compileString(sourceCode, this.getClass().getSimpleName(), 1, null);
+            _sharedScope = context.initStandardObjects();
 
-	@Override
-	public ValidationCategory categorize(InputRow inputRow) {
-		Context context = _contextFactory.enterContext();
+            JavaScriptUtils.addToScope(_sharedScope, logger, "logger", "log");
+            JavaScriptUtils.addToScope(_sharedScope, System.out, "out");
+        } finally {
+            Context.exit();
+        }
+    }
 
-		try {
+    @Override
+    public Category categorize(InputRow inputRow) {
+        Context context = _contextFactory.enterContext();
 
-			// this scope is local to the execution of a single row
-			Scriptable scope = context.newObject(_sharedScope);
-			scope.setPrototype(_sharedScope);
-			scope.setParentScope(null);
+        try {
 
-			JavaScriptUtils.addToScope(scope, inputRow, columns, "values");
+            // this scope is local to the execution of a single row
+            Scriptable scope = context.newObject(_sharedScope);
+            scope.setPrototype(_sharedScope);
+            scope.setParentScope(null);
 
-			Object result = _script.exec(context, scope);
-			boolean booleanResult = Context.toBoolean(result);
+            JavaScriptUtils.addToScope(scope, inputRow, columns, "values");
 
-			return ValidationCategory.valueOf(booleanResult);
-		} finally {
-			Context.exit();
-		}
-	}
+            Object result = _script.exec(context, scope);
+            boolean booleanResult = Context.toBoolean(result);
 
-	public void setSourceCode(String sourceCode) {
-		this.sourceCode = sourceCode;
-	}
+            if (booleanResult) {
+                return JavaScriptFilter.Category.VALID;
+            }
+            return JavaScriptFilter.Category.INVALID;
+        } finally {
+            Context.exit();
+        }
+    }
 
-	public void setColumns(InputColumn<?>[] columns) {
-		this.columns = columns;
-	}
+    public void setSourceCode(String sourceCode) {
+        this.sourceCode = sourceCode;
+    }
+
+    public void setColumns(InputColumn<?>[] columns) {
+        this.columns = columns;
+    }
 }
