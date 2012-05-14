@@ -5,8 +5,8 @@
 		<artifactId>AnalyzerBeans-components</artifactId>
 		<version>0.16-SNAPSHOT</version>
 	</parent>
-	<artifactId>AnalyzerBeans-basic-transformers</artifactId>
-	<description>Basic transformers for AnalyzerBeans</description>
+	<artifactId>AnalyzerBeans-basic-analyzers</artifactId>
+	<description>Basic analyzers for AnalyzerBeans</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
