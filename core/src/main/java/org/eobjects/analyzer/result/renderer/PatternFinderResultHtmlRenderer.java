@@ -88,7 +88,6 @@ public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFin
         final HtmlFragment renderedResult = crosstabHtmlRenderer.render(crosstab);
 
         final List<BodyElement> bodyElements = renderedResult.getBodyElements();
-        assert 1 == bodyElements.size();
         for (BodyElement bodyElement : bodyElements) {
             sb.append(bodyElement.toHtml());
         }
