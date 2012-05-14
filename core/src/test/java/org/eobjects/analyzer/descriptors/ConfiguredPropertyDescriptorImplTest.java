@@ -31,13 +31,12 @@ import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 
-	private FilterBeanDescriptor<MockFilter, ValidationCategory> _descriptor;
+	private FilterBeanDescriptor<MockFilter, MockFilter.Category> _descriptor;
 
 	@Configured
 	String str1;
@@ -108,8 +107,8 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 
 		MockFilter filter = new MockFilter();
 		assertNull(filter.getSomeEnum());
-		cp.setValue(filter, ValidationCategory.VALID);
-		assertEquals(ValidationCategory.VALID, filter.getSomeEnum());
+		cp.setValue(filter, MockFilter.Category.VALID);
+		assertEquals(MockFilter.Category.VALID, filter.getSomeEnum());
 	}
 
 	public void testFile() throws Exception {
@@ -130,25 +129,29 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 	}
 
 	@FilterBean("Mock filter")
-	private class MockFilter implements Filter<ValidationCategory> {
+	private static class MockFilter implements Filter<MockFilter.Category> {
+	    
+	    public static enum Category {
+	        VALID, INVALID
+	    }
 
 		@Configured
 		@Alias("a file")
 		File someFile;
 
 		@Configured
-		ValidationCategory someEnum;
+		Category someEnum;
 
 		@SuppressWarnings("unused")
 		@Configured
 		InputColumn<?> input;
 
 		@Override
-		public ValidationCategory categorize(InputRow inputRow) {
+		public MockFilter.Category categorize(InputRow inputRow) {
 			return someEnum;
 		}
 
-		public ValidationCategory getSomeEnum() {
+		public MockFilter.Category getSomeEnum() {
 			return someEnum;
 		}
 

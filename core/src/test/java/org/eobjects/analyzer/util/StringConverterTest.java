@@ -29,7 +29,7 @@ import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
+import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.configuration.InjectionManagerImpl;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
@@ -146,17 +146,17 @@ public class StringConverterTest extends TestCase {
 	}
 
 	public void testEnum() throws Exception {
-		String serialized = stringConverter.serialize(ValidationCategory.VALID);
+		String serialized = stringConverter.serialize(MaxRowsFilter.Category.VALID);
 		assertEquals("VALID", serialized);
 
-		Object deserialized = stringConverter.deserialize(serialized, ValidationCategory.class);
-		assertEquals(ValidationCategory.VALID, deserialized);
+		Object deserialized = stringConverter.deserialize(serialized, MaxRowsFilter.Category.class);
+		assertEquals(MaxRowsFilter.Category.VALID, deserialized);
 
-		ValidationCategory[] array = new ValidationCategory[] { ValidationCategory.VALID, ValidationCategory.INVALID };
+		MaxRowsFilter.Category[] array = new MaxRowsFilter.Category[] { MaxRowsFilter.Category.VALID, MaxRowsFilter.Category.INVALID };
 		serialized = stringConverter.serialize(array);
 		assertEquals("[VALID,INVALID]", serialized);
 
-		deserialized = stringConverter.deserialize(serialized, ValidationCategory[].class);
+		deserialized = stringConverter.deserialize(serialized, MaxRowsFilter.Category[].class);
 		assertTrue(EqualsBuilder.equals(array, deserialized));
 	}
 

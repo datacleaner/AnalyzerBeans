@@ -26,6 +26,7 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
+import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.query.Query;
@@ -58,6 +59,13 @@ public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Categor
 
     public int getMaxRows() {
         return maxRows;
+    }
+    
+    @Validate
+    public void validate() {
+        if (maxRows <= 0) {
+            throw new IllegalStateException("Max rows value must be a positive integer");
+        }
     }
 
     @Override

@@ -34,32 +34,36 @@ import org.eobjects.analyzer.reference.Dictionary;
 @Alias("Dictionary lookup")
 @Description("Filters values based on their existence in a dictionary")
 @Categorized(FilterCategory.class)
-public class DictionaryFilter implements Filter<ValidationCategory> {
+public class DictionaryFilter implements Filter<DictionaryFilter.Category> {
 
-	@Configured
-	InputColumn<String> column;
+    public static enum Category {
+        VALID, INVALID;
+    }
 
-	@Configured
-	Dictionary dictionary;
-	
-	public DictionaryFilter() {
-	}
-	
-	public DictionaryFilter(InputColumn<String> column, Dictionary dictionary) {
-		this();
-		this.column = column;
-		this.dictionary = dictionary;
-	}
+    @Configured
+    InputColumn<String> column;
 
-	@Override
-	public ValidationCategory categorize(InputRow inputRow) {
-		String value = inputRow.getValue(column);
-		if (value != null) {
-			if (dictionary.containsValue(value)) {
-				return ValidationCategory.VALID;
-			}
-		}
-		return ValidationCategory.INVALID;
-	}
+    @Configured
+    Dictionary dictionary;
+
+    public DictionaryFilter() {
+    }
+
+    public DictionaryFilter(InputColumn<String> column, Dictionary dictionary) {
+        this();
+        this.column = column;
+        this.dictionary = dictionary;
+    }
+
+    @Override
+    public Category categorize(InputRow inputRow) {
+        String value = inputRow.getValue(column);
+        if (value != null) {
+            if (dictionary.containsValue(value)) {
+                return Category.VALID;
+            }
+        }
+        return Category.INVALID;
+    }
 
 }

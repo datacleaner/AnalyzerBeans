@@ -26,7 +26,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
-import org.eobjects.analyzer.beans.filter.NullCheckFilter;
+import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -131,16 +131,15 @@ public class ConsumeRowTaskTest extends TestCase {
 
             builder.setDatastore(new CsvDatastore("Names", "src/test/resources/example-name-lengths.csv"));
             builder.addSourceColumns("name");
-            FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filterJobBuilder = builder
-                    .addFilter(NullCheckFilter.class);
-            filterJobBuilder.addInputColumn(builder.getSourceColumnByName("name"));
-            filterJobBuilder.setConfiguredProperty("Consider empty string as null", true);
+            FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filterJobBuilder = builder
+                    .addFilter(MaxRowsFilter.class);
+            filterJobBuilder.setConfiguredProperty("Max rows", 10);
 
             TransformerJobBuilder<ConvertToNumberTransformer> convertTransformer = builder.addTransformer(
                     ConvertToNumberTransformer.class).addInputColumn(builder.getSourceColumnByName("name"));
             MutableInputColumn<?> numberColumn = convertTransformer.getOutputColumns().get(0);
 
-            convertTransformer.setRequirement(filterJobBuilder, NullCheckFilter.NullCheckCategory.NOT_NULL);
+            convertTransformer.setRequirement(filterJobBuilder, MaxRowsFilter.Category.VALID);
             builder.addAnalyzer(MockAnalyzer.class).addInputColumns(numberColumn);
             job = builder.toAnalysisJob();
         }
@@ -159,7 +158,7 @@ public class ConsumeRowTaskTest extends TestCase {
 
         List<InputRow> list = result.getValues();
 
-        assertEquals(12, list.size());
+        assertEquals(10, list.size());
 
         // assertEquals(1, list.get(0).getValue(countingColumn));
     }

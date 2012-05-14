@@ -23,7 +23,7 @@ import java.util.HashMap;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.filter.SingleWordFilter;
+import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
@@ -31,7 +31,7 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 public class ImmutableFilterJobTest extends TestCase {
 
 	public void testGetOutcomes() throws Exception {
-		FilterBeanDescriptor<?, ?> descriptor = Descriptors.ofFilter(SingleWordFilter.class);
+		FilterBeanDescriptor<?, ?> descriptor = Descriptors.ofFilter(MaxRowsFilter.class);
 		BeanConfiguration configuration = new ImmutableBeanConfiguration(new HashMap<ConfiguredPropertyDescriptor, Object>());
 
 		ImmutableFilterJob job = new ImmutableFilterJob("foo", descriptor, configuration, null);

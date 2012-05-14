@@ -29,10 +29,6 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
-import org.eobjects.analyzer.beans.filter.NullCheckFilter;
-import org.eobjects.analyzer.beans.filter.SingleWordFilter;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
-import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
 import org.eobjects.analyzer.beans.transform.WhitespaceTrimmerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
@@ -77,27 +73,29 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
 
-		// 1: add a not-null filter
-		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> fjb1 = ajb.addFilter(NullCheckFilter.class);
+		// 1: add a filter
+		FilterJobBuilder<MockFilter, MockFilter.Category> fjb1 = ajb.addFilter(MockFilter.class);
 		fjb1.addInputColumn(inputColumn);
+		fjb1.setName("fjb1");
 
-		// 2: trim (depends on not-null)
+		// 2: trim (depends on filter)
 		TransformerJobBuilder<WhitespaceTrimmerTransformer> tjb1 = ajb.addTransformer(WhitespaceTrimmerTransformer.class);
 		tjb1.addInputColumn(inputColumn);
-		tjb1.setRequirement(fjb1, NullCheckFilter.NullCheckCategory.NOT_NULL);
+		tjb1.setRequirement(fjb1, MockFilter.Category.VALID);
 
 		// 3: merge either the null or the trimmed value
 		MergedOutcomeJobBuilder mojb = ajb.addMergedOutcomeJobBuilder();
-		mojb.addMergedOutcome(fjb1, NullCheckCategory.NOT_NULL).addInputColumn(tjb1.getOutputColumns().get(0));
-		mojb.addMergedOutcome(fjb1, NullCheckCategory.NULL).addInputColumn(inputColumn);
+		mojb.addMergedOutcome(fjb1, MockFilter.Category.VALID).addInputColumn(tjb1.getOutputColumns().get(0));
+		mojb.addMergedOutcome(fjb1, MockFilter.Category.INVALID).addInputColumn(inputColumn);
 		MutableInputColumn<?> mergedColumn1 = mojb.getOutputColumns().get(0);
 
-		// 4: add a single word filter (depends on merged output)
-		FilterJobBuilder<SingleWordFilter, ValidationCategory> fjb2 = ajb.addFilter(SingleWordFilter.class);
+		// 4: add another filter (depends on merged output)
+		FilterJobBuilder<MockFilter, MockFilter.Category> fjb2 = ajb.addFilter(MockFilter.class);
 		fjb2.addInputColumn(mergedColumn1);
+		fjb2.setName("fjb2");
 
 		// 5: add an analyzer
-		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(mergedColumn1).setRequirement(fjb2, ValidationCategory.VALID);
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(mergedColumn1).setRequirement(fjb2, MockFilter.Category.VALID);
 
 		assertTrue(ajb.isConfigured());
 
@@ -107,13 +105,13 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 
 		assertEquals(5, consumers.size());
 
-		assertEquals("ImmutableFilterJob[name=null,filter=Null check]", consumers.get(0).getComponentJob().toString());
+		assertEquals("ImmutableFilterJob[name=fjb1,filter=Mock filter]", consumers.get(0).getComponentJob().toString());
 		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
 				.toString());
 		assertEquals(
-				"ImmutableMergedOutcomeJob[name=null,mergeInputs=[ImmutableMergeInput[FilterOutcome[category=NOT_NULL]], ImmutableMergeInput[FilterOutcome[category=NULL]]]]",
+				"ImmutableMergedOutcomeJob[name=null,mergeInputs=[ImmutableMergeInput[FilterOutcome[category=VALID]], ImmutableMergeInput[FilterOutcome[category=INVALID]]]]",
 				consumers.get(2).getComponentJob().toString());
-		assertEquals("ImmutableFilterJob[name=null,filter=Single word]", consumers.get(3).getComponentJob().toString());
+		assertEquals("ImmutableFilterJob[name=fjb2,filter=Mock filter]", consumers.get(3).getComponentJob().toString());
 		assertEquals("ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", consumers.get(4).getComponentJob()
 				.toString());
 	}
@@ -124,28 +122,30 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 		ajb.addSourceColumn(physicalColumn);
 		MetaModelInputColumn inputColumn = ajb.getSourceColumns().get(0);
 
-		// 1: add a not-null filter
-		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> fjb1 = ajb.addFilter(NullCheckFilter.class);
+		// 1: add a filter
+		FilterJobBuilder<MockFilter, MockFilter.Category> fjb1 = ajb.addFilter(MockFilter.class);
 		fjb1.addInputColumn(inputColumn);
+		fjb1.setName("fjb1");
 
-		// 2: trim (depends on not-null)
+		// 2: trim (depends on filter)
 		TransformerJobBuilder<WhitespaceTrimmerTransformer> tjb1 = ajb.addTransformer(WhitespaceTrimmerTransformer.class);
 		tjb1.addInputColumn(inputColumn);
-		tjb1.setRequirement(fjb1, NullCheckCategory.NOT_NULL);
+		tjb1.setRequirement(fjb1, MockFilter.Category.VALID);
 
 		// 3: trim again, just to examplify (depends on first trim output)
 		TransformerJobBuilder<WhitespaceTrimmerTransformer> tjb2 = ajb.addTransformer(WhitespaceTrimmerTransformer.class);
 		tjb2.addInputColumn(tjb1.getOutputColumns().get(0));
 
 		// 4: add a single word filter (depends on second trim)
-		FilterJobBuilder<SingleWordFilter, ValidationCategory> fjb2 = ajb.addFilter(SingleWordFilter.class);
+		FilterJobBuilder<MockFilter, MockFilter.Category> fjb2 = ajb.addFilter(MockFilter.class);
 		fjb2.addInputColumn(tjb2.getOutputColumns().get(0));
+		fjb2.setName("fjb2");
 
 		// 5 and 6: Analyze VALID and INVALID output of single-word filter
 		// separately (the order of these two are not deterministic because of
 		// the shuffle)
-		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn).setRequirement(fjb2, ValidationCategory.VALID);
-		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn).setRequirement(fjb2, ValidationCategory.INVALID);
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn).setRequirement(fjb2, MockFilter.Category.VALID);
+		ajb.addAnalyzer(StringAnalyzer.class).addInputColumn(inputColumn).setRequirement(fjb2, MockFilter.Category.INVALID);
 
 		assertTrue(ajb.isConfigured());
 
@@ -155,12 +155,12 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 
 		consumers = new RowProcessingConsumerSorter(consumers).createProcessOrderedConsumerList();
 
-		assertEquals("ImmutableFilterJob[name=null,filter=Null check]", consumers.get(0).getComponentJob().toString());
+		assertEquals("ImmutableFilterJob[name=fjb1,filter=Mock filter]", consumers.get(0).getComponentJob().toString());
 		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(1).getComponentJob()
 				.toString());
 		assertEquals("ImmutableTransformerJob[name=null,transformer=Whitespace trimmer]", consumers.get(2).getComponentJob()
 				.toString());
-		assertEquals("ImmutableFilterJob[name=null,filter=Single word]", consumers.get(3).getComponentJob().toString());
+		assertEquals("ImmutableFilterJob[name=fjb2,filter=Mock filter]", consumers.get(3).getComponentJob().toString());
 	}
 
 	public void testCreateProcessOrderedConsumerListChainedTransformers() throws Exception {

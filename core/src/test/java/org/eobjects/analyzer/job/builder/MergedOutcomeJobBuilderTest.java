@@ -24,10 +24,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
-import org.eobjects.analyzer.beans.filter.NullCheckFilter;
-import org.eobjects.analyzer.beans.filter.SingleWordFilter;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
-import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
+import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
@@ -50,121 +47,124 @@ import org.eobjects.analyzer.test.TestHelper;
 
 public class MergedOutcomeJobBuilderTest extends TestCase {
 
-	public void testSimpleBuildNoColumnMerge() throws Exception {
-		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("mydb");
-		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
-				new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds)));
+    public void testSimpleBuildNoColumnMerge() throws Exception {
+        JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("mydb");
+        AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
+                new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds)));
 
-		analysisJobBuilder.setDatastore("mydb");
-		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
-		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.FIRSTNAME");
+        analysisJobBuilder.setDatastore("mydb");
+        analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
+        analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.FIRSTNAME");
 
-		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> fjb1 = analysisJobBuilder
-				.addFilter(NullCheckFilter.class);
-		fjb1.addInputColumn(analysisJobBuilder.getSourceColumns().get(0));
+        FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> fjb1 = analysisJobBuilder
+                .addFilter(MaxRowsFilter.class);
 
-		FilterJobBuilder<SingleWordFilter, ValidationCategory> fjb2 = analysisJobBuilder.addFilter(SingleWordFilter.class);
-		fjb2.addInputColumn(analysisJobBuilder.getSourceColumns().get(1));
+        FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> fjb2 = analysisJobBuilder
+                .addFilter(MaxRowsFilter.class);
 
-		MergedOutcomeJobBuilder mergedOutcomeJobBuilder = analysisJobBuilder.addMergedOutcomeJobBuilder();
+        MergedOutcomeJobBuilder mergedOutcomeJobBuilder = analysisJobBuilder.addMergedOutcomeJobBuilder();
 
-		try {
-			mergedOutcomeJobBuilder.toMergedOutcomeJob();
-			fail("Exception expected");
-		} catch (IllegalStateException e) {
-			assertEquals("Merged outcome jobs need at least 2 merged outcomes, none found", e.getMessage());
-		}
+        try {
+            mergedOutcomeJobBuilder.toMergedOutcomeJob();
+            fail("Exception expected");
+        } catch (IllegalStateException e) {
+            assertEquals("Merged outcome jobs need at least 2 merged outcomes, none found", e.getMessage());
+        }
 
-		mergedOutcomeJobBuilder.addMergedOutcome(fjb1, NullCheckFilter.NullCheckCategory.NOT_NULL);
+        mergedOutcomeJobBuilder.addMergedOutcome(fjb1, MaxRowsFilter.Category.VALID);
 
-		try {
-			mergedOutcomeJobBuilder.toMergedOutcomeJob();
-			fail("Exception expected");
-		} catch (IllegalStateException e) {
-			assertEquals("Merged outcome jobs need at least 2 merged outcomes, only 1 found", e.getMessage());
-		}
+        try {
+            mergedOutcomeJobBuilder.toMergedOutcomeJob();
+            fail("Exception expected");
+        } catch (IllegalStateException e) {
+            assertEquals("Merged outcome jobs need at least 2 merged outcomes, only 1 found", e.getMessage());
+        }
 
-		mergedOutcomeJobBuilder.addMergedOutcome(fjb2, ValidationCategory.VALID);
+        mergedOutcomeJobBuilder.addMergedOutcome(fjb2, MaxRowsFilter.Category.VALID);
 
-		MergedOutcomeJob mergedOutcomeJob = mergedOutcomeJobBuilder.toMergedOutcomeJob();
+        MergedOutcomeJob mergedOutcomeJob = mergedOutcomeJobBuilder.toMergedOutcomeJob();
 
-		assertEquals(2, mergedOutcomeJob.getMergeInputs().length);
-		assertEquals(0, mergedOutcomeJob.getOutput().length);
+        assertEquals(2, mergedOutcomeJob.getMergeInputs().length);
+        assertEquals(0, mergedOutcomeJob.getOutput().length);
 
-		MergedOutcome outcome = mergedOutcomeJob.getOutcome();
+        MergedOutcome outcome = mergedOutcomeJob.getOutcome();
 
-		assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(), NullCheckCategory.NOT_NULL)));
-		assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(), NullCheckCategory.NULL)));
-		assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(), ValidationCategory.VALID)));
-		assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(), ValidationCategory.INVALID)));
+        assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(),
+                MaxRowsFilter.Category.VALID)));
+        assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(),
+                MaxRowsFilter.Category.INVALID)));
+        assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(),
+                MaxRowsFilter.Category.VALID)));
+        assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(),
+                MaxRowsFilter.Category.INVALID)));
 
-		AnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
-		ajb.setRequirement(outcome);
-	}
+        AnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
+        ajb.setRequirement(outcome);
+    }
 
-	public void testRunAnalysis() throws Throwable {
-		CsvDatastore ds = new CsvDatastore("mydb", "src/test/resources/employees-missing-values.csv");
-		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds));
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
+    public void testRunAnalysis() throws Throwable {
+        CsvDatastore ds = new CsvDatastore("mydb", "src/test/resources/employees-missing-values.csv");
+        AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds));
+        AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 
-		ajb.setDatastore("mydb");
-		ajb.addSourceColumns("name");
-		ajb.addSourceColumns("email");
+        ajb.setDatastore("mydb");
+        ajb.addSourceColumns("name");
+        ajb.addSourceColumns("email");
 
-		InputColumn<?> fnCol = ajb.getSourceColumnByName("name");
-		assertNotNull(fnCol);
-		InputColumn<?> emailCol = ajb.getSourceColumnByName("email");
-		assertNotNull(emailCol);
+        InputColumn<?> fnCol = ajb.getSourceColumnByName("name");
+        assertNotNull(fnCol);
+        InputColumn<?> emailCol = ajb.getSourceColumnByName("email");
+        assertNotNull(emailCol);
 
-		TransformerJobBuilder<EmailStandardizerTransformer> t = ajb.addTransformer(EmailStandardizerTransformer.class);
-		t.addInputColumn(emailCol);
+        TransformerJobBuilder<EmailStandardizerTransformer> t = ajb.addTransformer(EmailStandardizerTransformer.class);
+        t.addInputColumn(emailCol);
 
-		MutableInputColumn<?> usernameCol = t.getOutputColumnByName("Username");
-		assertNotNull(usernameCol);
+        MutableInputColumn<?> usernameCol = t.getOutputColumnByName("Username");
+        assertNotNull(usernameCol);
 
-		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> f = ajb.addFilter(NullCheckFilter.class);
-		f.addInputColumn(usernameCol);
+        FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> f = ajb.addFilter(MaxRowsFilter.class);
+        f.setConfiguredProperty("Max rows", 3);
 
-		MergedOutcomeJobBuilder mojb = ajb.addMergedOutcomeJobBuilder();
-		mojb.addMergedOutcome(f, NullCheckCategory.NOT_NULL).addInputColumn(usernameCol);
-		mojb.addMergedOutcome(f, NullCheckCategory.NULL).addInputColumn(fnCol);
+        MergedOutcomeJobBuilder mojb = ajb.addMergedOutcomeJobBuilder();
+        mojb.addMergedOutcome(f, MaxRowsFilter.Category.VALID).addInputColumn(usernameCol);
+        mojb.addMergedOutcome(f, MaxRowsFilter.Category.INVALID).addInputColumn(fnCol);
 
-		MergedOutcomeJob mergedOutcomeJob = mojb.toMergedOutcomeJob();
-		assertNotNull(mergedOutcomeJob);
+        MergedOutcomeJob mergedOutcomeJob = mojb.toMergedOutcomeJob();
+        assertNotNull(mergedOutcomeJob);
 
-		InputColumn<?>[] output = mergedOutcomeJob.getOutput();
-		assertEquals(1, output.length);
-		InputColumn<?> outputColumn = output[0];
-		assertTrue(outputColumn.isVirtualColumn());
-		assertEquals("Merged column 1", outputColumn.getName());
+        InputColumn<?>[] output = mergedOutcomeJob.getOutput();
+        assertEquals(1, output.length);
+        InputColumn<?> outputColumn = output[0];
+        assertTrue(outputColumn.isVirtualColumn());
+        assertEquals("Merged column 1", outputColumn.getName());
 
-		AnalyzerJobBuilder<PatternFinderAnalyzer> a = ajb.addAnalyzer(PatternFinderAnalyzer.class);
-		a.addInputColumn(outputColumn);
+        AnalyzerJobBuilder<PatternFinderAnalyzer> a = ajb.addAnalyzer(PatternFinderAnalyzer.class);
+        a.addInputColumn(outputColumn);
 
-		AnalysisJob analysisJob = ajb.toAnalysisJob();
+        AnalysisJob analysisJob = ajb.toAnalysisJob();
 
-		AnalysisRunnerImpl runner = new AnalysisRunnerImpl(conf);
+        AnalysisRunnerImpl runner = new AnalysisRunnerImpl(conf);
 
-		AnalysisResultFuture resultFuture = runner.run(analysisJob);
+        AnalysisResultFuture resultFuture = runner.run(analysisJob);
 
-		if (resultFuture.isErrornous()) {
-			List<Throwable> errors = resultFuture.getErrors();
-			for (Throwable throwable : errors) {
-				throwable.printStackTrace();
-			}
-			throw errors.get(0);
-		}
+        if (resultFuture.isErrornous()) {
+            List<Throwable> errors = resultFuture.getErrors();
+            for (Throwable throwable : errors) {
+                throwable.printStackTrace();
+            }
+            throw errors.get(0);
+        }
 
-		List<AnalyzerResult> results = resultFuture.getResults();
-		assertEquals(1, results.size());
+        List<AnalyzerResult> results = resultFuture.getResults();
+        assertEquals(1, results.size());
 
-		PatternFinderResult result = (PatternFinderResult) results.get(0);
-		String[] resultLines = new PatternFinderResultTextRenderer().render(result).split("\n");
-		assertEquals("                Match count Sample      ", resultLines[0]);
-		assertEquals("aaaa.aaa                  3 john.doe    ", resultLines[1]);
-		assertEquals("Aaa. Aaaaaa Aaa           1 Mrs. Foobar Foo ", resultLines[2]);
-		assertEquals("Aaaaaaa Aaaaa             1 Asbjørn Leeth ", resultLines[3]);
-		assertEquals("aaaaaa                    1 kasper      ", resultLines[4]);
-		assertEquals(5, resultLines.length);
-	}
+        PatternFinderResult result = (PatternFinderResult) results.get(0);
+        String[] resultLines = new PatternFinderResultTextRenderer().render(result).split("\n");
+        assertEquals("                 Match count Sample      ", resultLines[0]);
+        assertEquals("aaaa.aaa                   3 john.doe    ", resultLines[1]);
+        assertEquals("Aaa. Aaaaaa Aaa            1 Mrs. Foobar Foo ", resultLines[2]);
+        assertEquals("Aaaaaaa Aaaaa              1 Asbjørn Leeth ", resultLines[3]);
+        assertEquals("Aaaaaaaa, Aaaaaa           1 Sørensen, Kasper ", resultLines[4]);
+        assertEquals(5, resultLines.length);
+    }
 }
