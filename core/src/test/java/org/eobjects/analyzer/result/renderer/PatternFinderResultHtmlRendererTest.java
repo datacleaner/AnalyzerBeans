@@ -52,7 +52,7 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
 		PatternFinderResult result = analyzer.getResult();
 
 		HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer().render(result);
-		assertEquals("SimpleHtmlFragment[headElements=0,bodyElements=1]", htmlFragment.toString());
+		assertEquals("SimpleHtmlFragment[headElements=3,bodyElements=1]", htmlFragment.toString());
 		
         String html = htmlFragment.getBodyElements().get(0).toHtml();
 		assertEquals(
@@ -80,7 +80,7 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
 		PatternFinderResult result = analyzer.getResult();
 
 		HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer().render(result);
-		assertEquals("SimpleHtmlFragment[headElements=0,bodyElements=1]", htmlFragment.toString());
+		assertEquals("SimpleHtmlFragment[headElements=6,bodyElements=1]", htmlFragment.toString());
 		
         String html = htmlFragment.getBodyElements().get(0).toHtml();
 		assertEquals(FileHelper.readFileAsString(new File(

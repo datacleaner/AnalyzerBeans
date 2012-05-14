@@ -19,14 +19,27 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
+import javax.inject.Inject;
+
 import org.eobjects.analyzer.beans.api.RendererBean;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.html.HtmlFragment;
-import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
 
 @RendererBean(HtmlRenderingFormat.class)
 public class CrosstabHtmlRenderer extends AbstractRenderer<CrosstabResult, HtmlFragment> {
+
+    @Inject
+    DescriptorProvider descriptorProvider;
+
+    public CrosstabHtmlRenderer() {
+        this(null);
+    }
+
+    public CrosstabHtmlRenderer(DescriptorProvider descriptorProvider) {
+        this.descriptorProvider = descriptorProvider;
+    }
 
     @Override
     public HtmlFragment render(CrosstabResult result) {
@@ -35,8 +48,8 @@ public class CrosstabHtmlRenderer extends AbstractRenderer<CrosstabResult, HtmlF
 
     public HtmlFragment render(Crosstab<?> crosstab) {
         CrosstabRenderer crosstabRenderer = new CrosstabRenderer(crosstab);
-        String html = crosstabRenderer.render(new HtmlCrosstabRendererCallback());
-        return new SimpleHtmlFragment().addBodyElement(html);
+        HtmlFragment htmlFragment = crosstabRenderer.render(new HtmlCrosstabRendererCallback(descriptorProvider));
+        return htmlFragment;
     }
 
 }

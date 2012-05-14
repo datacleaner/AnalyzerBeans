@@ -24,7 +24,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.eobjects.analyzer.beans.api.RendererBean;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.result.html.BodyElement;
@@ -35,54 +38,57 @@ import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
 @RendererBean(HtmlRenderingFormat.class)
 public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFinderResult, HtmlFragment> {
 
-	@Override
-	public HtmlFragment render(PatternFinderResult result) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<div class=\"patternFinderResultContainer\">");
-		final SimpleHtmlFragment htmlFragment = new SimpleHtmlFragment();
-        if (result.isGroupingEnabled()) {
-			Map<String, Crosstab<?>> crosstabs = result.getGroupedCrosstabs();
-			if (crosstabs.isEmpty()) {
-			    htmlFragment.addBodyElement("<p>No patterns found</p>");
-				return htmlFragment;
-			}
-			Set<Entry<String, Crosstab<?>>> crosstabEntries = crosstabs.entrySet();
-			for (Entry<String, Crosstab<?>> entry : crosstabEntries) {
-				String group = entry.getKey();
-				Crosstab<?> crosstab = entry.getValue();
-				if (sb.length() != 0) {
-					sb.append("\n");
-				}
+    @Inject
+    DescriptorProvider descriptorProvider;
 
-				sb.append("<h3>Patterns for group: ");
-				sb.append(group);
-				sb.append("</h3>");
-				sb.append("<div class=\"patternFinderResultPanel\">");
-				append(sb,htmlFragment, crosstab);
-				sb.append("</div>");
-			}
-		} else {
-			Crosstab<?> crosstab = result.getSingleCrosstab();
-			sb.append("<div class=\"patternFinderResultPanel\">");
-			append(sb,htmlFragment, crosstab);
-			sb.append("</div>");
-		}
-		sb.append("</div>");
-		htmlFragment.addBodyElement(sb.toString());
-		return htmlFragment;
-	}
+    @Override
+    public HtmlFragment render(PatternFinderResult result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<div class=\"patternFinderResultContainer\">");
+        final SimpleHtmlFragment htmlFragment = new SimpleHtmlFragment();
+        if (result.isGroupingEnabled()) {
+            Map<String, Crosstab<?>> crosstabs = result.getGroupedCrosstabs();
+            if (crosstabs.isEmpty()) {
+                htmlFragment.addBodyElement("<p>No patterns found</p>");
+                return htmlFragment;
+            }
+            Set<Entry<String, Crosstab<?>>> crosstabEntries = crosstabs.entrySet();
+            for (Entry<String, Crosstab<?>> entry : crosstabEntries) {
+                String group = entry.getKey();
+                Crosstab<?> crosstab = entry.getValue();
+                if (sb.length() != 0) {
+                    sb.append("\n");
+                }
+
+                sb.append("<h3>Patterns for group: ");
+                sb.append(group);
+                sb.append("</h3>");
+                sb.append("<div class=\"patternFinderResultPanel\">");
+                append(sb, htmlFragment, crosstab);
+                sb.append("</div>");
+            }
+        } else {
+            Crosstab<?> crosstab = result.getSingleCrosstab();
+            sb.append("<div class=\"patternFinderResultPanel\">");
+            append(sb, htmlFragment, crosstab);
+            sb.append("</div>");
+        }
+        sb.append("</div>");
+        htmlFragment.addBodyElement(sb.toString());
+        return htmlFragment;
+    }
 
     private void append(StringBuilder sb, SimpleHtmlFragment htmlFragment, Crosstab<?> crosstab) {
-        final CrosstabHtmlRenderer crosstabHtmlRenderer = new CrosstabHtmlRenderer();
-        
+        final CrosstabHtmlRenderer crosstabHtmlRenderer = new CrosstabHtmlRenderer(descriptorProvider);
+
         final HtmlFragment renderedResult = crosstabHtmlRenderer.render(crosstab);
-        
+
         final List<BodyElement> bodyElements = renderedResult.getBodyElements();
         assert 1 == bodyElements.size();
         for (BodyElement bodyElement : bodyElements) {
             sb.append(bodyElement.toHtml());
         }
-        
+
         final List<HeadElement> headElements = renderedResult.getHeadElements();
         assert headElements.isEmpty();
         for (HeadElement headElement : headElements) {

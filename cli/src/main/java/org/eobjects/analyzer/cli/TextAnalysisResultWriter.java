@@ -40,7 +40,7 @@ public class TextAnalysisResultWriter implements AnalysisResultWriter {
         final Writer writer = writerRef.get();
         writer.write("SUCCESS!\n");
 
-        final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider(), null);
+        final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider());
         for (Entry<ComponentJob, AnalyzerResult> entry : result.getResultMap().entrySet()) {
             final ComponentJob componentJob = entry.getKey();
             final AnalyzerResult analyzerResult = entry.getValue();

@@ -19,11 +19,14 @@
  */
 package org.eobjects.analyzer.cli;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -47,7 +50,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             Ref<OutputStream> outputStreamRef) throws Exception {
         final Writer writer = writerRef.get();
 
-        final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider(), null);
+        final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider());
         final Map<ComponentJob, HtmlFragment> htmlFragments = new LinkedHashMap<ComponentJob, HtmlFragment>();
         for (Entry<ComponentJob, AnalyzerResult> entry : result.getResultMap().entrySet()) {
             final ComponentJob componentJob = entry.getKey();
@@ -61,16 +64,34 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             htmlFragments.put(componentJob, htmlFragment);
         }
 
+        writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
         writer.write("<html>\n");
+        writeHead(writer, htmlFragments);
+        writeBody(writer, htmlFragments);
+        writer.write("</html>");
+    }
+
+    private void writeHead(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments) throws IOException {
+        final Set<HeadElement> allHeadElements = new HashSet<HeadElement>();
+        
         writer.write("<head>\n");
+        writer.write("<title>Analysis result</title>");
+       
         for (HtmlFragment htmlFragment : htmlFragments.values()) {
             final List<HeadElement> headElements = htmlFragment.getHeadElements();
             for (HeadElement headElement : headElements) {
-                writer.write(headElement.toHtml());
-                writer.write('\n');
+                if (!allHeadElements.contains(headElement)) {
+                    writer.write(headElement.toHtml());
+                    writer.write('\n');
+                    allHeadElements.add(headElement);
+                }
             }
         }
+        
         writer.write("</head>\n");
+    }
+
+    private void writeBody(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments) throws IOException {
         writer.write("<body>\n");
         writer.write("<div class=\"analysisResultContainer\">\n");
         writer.write("<h1 class=\"analysisResultHeader\">Success!</h1>\n");
@@ -96,7 +117,6 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         }
         writer.write("</div>\n");
         writer.write("</body>\n");
-        writer.write("</html>");
     }
 
     private String getLabel(ComponentJob componentJob) {
