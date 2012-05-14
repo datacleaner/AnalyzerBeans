@@ -93,7 +93,6 @@ public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFin
         }
 
         final List<HeadElement> headElements = renderedResult.getHeadElements();
-        assert headElements.isEmpty();
         for (HeadElement headElement : headElements) {
             htmlFragment.addHeadElement(headElement);
         }
