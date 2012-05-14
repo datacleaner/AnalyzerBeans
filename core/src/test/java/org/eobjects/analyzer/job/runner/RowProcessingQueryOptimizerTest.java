@@ -31,7 +31,6 @@ import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.NullCheckFilter;
 import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
@@ -65,7 +64,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	private JdbcDatastore datastore;
 	private AnalyzerBeansConfiguration conf;
 	private AnalysisJobBuilder ajb;
-	private FilterJobBuilder<MaxRowsFilter, ValidationCategory> maxRowsBuilder;
+	private FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRowsBuilder;
 	private AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerBuilder;
 	private DatastoreConnection con;
 	private Column lastnameColumn;
@@ -85,7 +84,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		ajb.setDatastore(datastore);
 		maxRowsBuilder = ajb.addFilter(MaxRowsFilter.class);
 		stringAnalyzerBuilder = ajb.addAnalyzer(StringAnalyzer.class);
-		stringAnalyzerBuilder.setRequirement(maxRowsBuilder, ValidationCategory.VALID);
+		stringAnalyzerBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
 		con = conf.getDatastoreCatalog().getDatastore("mydb").openConnection();
 		lastnameColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.LASTNAME");
 		ajb.addSourceColumn(lastnameColumn);
@@ -155,7 +154,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 		consumers.remove(2);
 		consumers.remove(1);
-		emailStdBuilder.setRequirement(maxRowsBuilder, ValidationCategory.VALID);
+		emailStdBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
 		consumers.add(createConsumer(emailStdBuilder));
 		consumers.add(createConsumer(stringAnalyzerBuilder));
 
@@ -187,7 +186,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 		ajb.addSourceColumn(emailColumn);
 		InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
 		notNullBuilder.addInputColumn(emailInputColumn);
-		notNullBuilder.setRequirement(maxRowsBuilder, ValidationCategory.VALID);
+		notNullBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
 		stringAnalyzerBuilder.setRequirement(notNullBuilder, NullCheckCategory.NOT_NULL);
 
 		consumers.remove(1);
@@ -210,7 +209,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 	public void testMultipleOutcomesUsed() throws Exception {
 		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb.addAnalyzer(PatternFinderAnalyzer.class);
 		patternFinderBuilder.addInputColumn(lastNameInputColumn);
-		patternFinderBuilder.setRequirement(maxRowsBuilder, ValidationCategory.INVALID);
+		patternFinderBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.INVALID);
 		consumers.add(createConsumer(patternFinderBuilder));
 
 		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);

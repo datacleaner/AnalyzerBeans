@@ -101,14 +101,14 @@ public class AnalysisJobBuilderTest extends TestCase {
 
 	public void testPreventCyclicFilterDependencies() throws Exception {
 		analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
-		FilterJobBuilder<MaxRowsFilter, ValidationCategory> filter1 = analysisJobBuilder.addFilter(MaxRowsFilter.class);
+		FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filter1 = analysisJobBuilder.addFilter(MaxRowsFilter.class);
 		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filter2 = analysisJobBuilder
 				.addFilter(NullCheckFilter.class);
 		filter2.addInputColumn(analysisJobBuilder.getSourceColumnByName("reportsto"));
 		filter1.setRequirement(filter2.getOutcome(NullCheckCategory.NOT_NULL));
 
 		try {
-			filter2.setRequirement(filter1.getOutcome(ValidationCategory.VALID));
+			filter2.setRequirement(filter1.getOutcome(MaxRowsFilter.Category.VALID));
 			fail("Exception expected");
 		} catch (IllegalArgumentException e) {
 			assertEquals("Cyclic dependency detected when setting requirement: FilterOutcome[category=VALID]",
@@ -243,13 +243,13 @@ public class AnalysisJobBuilderTest extends TestCase {
 	public void testRemoveFilter() throws Exception {
 		DatastoreConnection con = datastore.openConnection();
 
-		FilterJobBuilder<MaxRowsFilter, ValidationCategory> maxRowsFilter = analysisJobBuilder
+		FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRowsFilter = analysisJobBuilder
 				.addFilter(MaxRowsFilter.class);
-		analysisJobBuilder.setDefaultRequirement(maxRowsFilter, ValidationCategory.VALID);
+		analysisJobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
 
 		TransformerJobBuilder<EmailStandardizerTransformer> emailStdTransformer = analysisJobBuilder
 				.addTransformer(EmailStandardizerTransformer.class);
-		assertSame(maxRowsFilter.getOutcome(ValidationCategory.VALID), emailStdTransformer.getRequirement());
+		assertSame(maxRowsFilter.getOutcome(MaxRowsFilter.Category.VALID), emailStdTransformer.getRequirement());
 
 		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> notNullFilter = analysisJobBuilder
 				.addFilter(NullCheckFilter.class);

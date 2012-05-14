@@ -71,9 +71,9 @@ public class RowProcessingMetricsImplTest extends TestCase {
 	public void testGetExpectedRowCountMaxRows() throws Exception {
 		AnalysisJobBuilder ajb = createAnalysisJobBuilder();
 
-		FilterJobBuilder<MaxRowsFilter, ValidationCategory> filter = ajb.addFilter(MaxRowsFilter.class);
+		FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filter = ajb.addFilter(MaxRowsFilter.class);
 		filter.getConfigurableBean().setMaxRows(10);
-		ajb.setDefaultRequirement(filter.getOutcome(ValidationCategory.VALID));
+		ajb.setDefaultRequirement(filter.getOutcome(MaxRowsFilter.Category.VALID));
 
 		job = ajb.toAnalysisJob();
 

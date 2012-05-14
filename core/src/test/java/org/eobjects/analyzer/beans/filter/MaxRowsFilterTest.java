@@ -28,16 +28,16 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 public class MaxRowsFilterTest extends TestCase {
 
 	public void testDescriptor() throws Exception {
-		FilterBeanDescriptor<MaxRowsFilter, ValidationCategory> desc = Descriptors.ofFilter(MaxRowsFilter.class);
+		FilterBeanDescriptor<MaxRowsFilter, MaxRowsFilter.Category> desc = Descriptors.ofFilter(MaxRowsFilter.class);
 
 		assertEquals("Max rows", desc.getDisplayName());
 	}
 
 	public void testCounter() throws Exception {
 		MaxRowsFilter f = new MaxRowsFilter(3);
-		assertEquals(ValidationCategory.VALID, f.categorize(new MockInputRow()));
-		assertEquals(ValidationCategory.VALID, f.categorize(new MockInputRow()));
-		assertEquals(ValidationCategory.VALID, f.categorize(new MockInputRow()));
-		assertEquals(ValidationCategory.INVALID, f.categorize(new MockInputRow()));
+		assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
+		assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
+		assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
+		assertEquals(MaxRowsFilter.Category.INVALID, f.categorize(new MockInputRow()));
 	}
 }

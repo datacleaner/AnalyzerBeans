@@ -33,52 +33,56 @@ import org.eobjects.metamodel.query.Query;
 @FilterBean("Max rows")
 @Description("Sets a maximum of rows to process.")
 @Categorized(FilterCategory.class)
-public class MaxRowsFilter implements QueryOptimizedFilter<ValidationCategory> {
+public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Category> {
 
-	@Configured
-	int maxRows = 1000;
+    public static enum Category {
+        VALID, INVALID
+    }
 
-	private final AtomicInteger counter = new AtomicInteger();
+    @Configured
+    int maxRows = 1000;
 
-	public MaxRowsFilter() {
-	}
+    private final AtomicInteger counter = new AtomicInteger();
 
-	public MaxRowsFilter(int maxRows) {
-		this();
-		this.maxRows = maxRows;
-	}
-	
-	public void setMaxRows(int maxRows) {
-		this.maxRows = maxRows;
-	}
-	
-	public int getMaxRows() {
-		return maxRows;
-	}
+    public MaxRowsFilter() {
+    }
 
-	@Override
-	public ValidationCategory categorize(InputRow inputRow) {
-		int count = counter.incrementAndGet();
-		if (count > maxRows) {
-			return ValidationCategory.INVALID;
-		}
-		return ValidationCategory.VALID;
-	}
+    public MaxRowsFilter(int maxRows) {
+        this();
+        this.maxRows = maxRows;
+    }
 
-	@Override
-	public boolean isOptimizable(ValidationCategory category) {
-		// can only optimize the valid records
-		return category == ValidationCategory.VALID;
-	}
+    public void setMaxRows(int maxRows) {
+        this.maxRows = maxRows;
+    }
 
-	@Override
-	public Query optimizeQuery(Query q, ValidationCategory category) {
-		if (category == ValidationCategory.VALID) {
-			q.setMaxRows(maxRows);
-		} else {
-			throw new IllegalStateException("Can only optimize the VALID max rows category");
-		}
-		return q;
-	}
+    public int getMaxRows() {
+        return maxRows;
+    }
+
+    @Override
+    public Category categorize(InputRow inputRow) {
+        int count = counter.incrementAndGet();
+        if (count > maxRows) {
+            return Category.INVALID;
+        }
+        return Category.VALID;
+    }
+
+    @Override
+    public boolean isOptimizable(Category category) {
+        // can only optimize the valid records
+        return category == Category.VALID;
+    }
+
+    @Override
+    public Query optimizeQuery(Query q, Category category) {
+        if (category == Category.VALID) {
+            q.setMaxRows(maxRows);
+        } else {
+            throw new IllegalStateException("Can only optimize the VALID max rows category");
+        }
+        return q;
+    }
 
 }
