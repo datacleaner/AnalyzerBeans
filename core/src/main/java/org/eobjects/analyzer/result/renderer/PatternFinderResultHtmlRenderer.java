@@ -41,6 +41,10 @@ public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFin
     @Inject
     DescriptorProvider descriptorProvider;
 
+    public PatternFinderResultHtmlRenderer(DescriptorProvider descriptorProvider) {
+        this.descriptorProvider = descriptorProvider;
+    }
+
     @Override
     public HtmlFragment render(PatternFinderResult result) {
         StringBuilder sb = new StringBuilder();

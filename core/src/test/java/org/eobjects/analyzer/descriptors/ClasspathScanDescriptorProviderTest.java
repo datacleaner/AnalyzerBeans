@@ -31,73 +31,74 @@ import junit.framework.TestCase;
 
 public class ClasspathScanDescriptorProviderTest extends TestCase {
 
-	private MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(2);
+    private MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(2);
 
-	public void testScanOnlySingleJar() throws Exception {
+    public void testScanOnlySingleJar() throws Exception {
 
-		// File that only contains the XML decoder transformer
-		File pluginFile1 = new File("src/test/resources/plugin-only-xml-transformer.jar");
-		// File that only contains the Datastore writer analyzer
-		File pluginFile2 = new File("src/test/resources/plugin-only-datastore-writer.jar");
+        // File that only contains the XML decoder transformer
+        File pluginFile1 = new File("src/test/resources/plugin-only-xml-transformer.jar");
+        // File that only contains the Datastore writer analyzer
+        File pluginFile2 = new File("src/test/resources/plugin-only-datastore-writer.jar");
 
-		ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
-		assertEquals(0, provider.getAnalyzerBeanDescriptors().size());
-		assertEquals(0, provider.getTransformerBeanDescriptors().size());
-		File[] files = new File[] { pluginFile1, pluginFile2 };
-		provider = provider.scanPackage("org.eobjects", true, ClassLoaderUtils.createClassLoader(files), false, files);
-		assertEquals(1, provider.getAnalyzerBeanDescriptors().size());
-		assertEquals(1, provider.getTransformerBeanDescriptors().size());
+        ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
+        assertEquals(0, provider.getAnalyzerBeanDescriptors().size());
+        assertEquals(0, provider.getTransformerBeanDescriptors().size());
+        File[] files = new File[] { pluginFile1, pluginFile2 };
+        provider = provider.scanPackage("org.eobjects", true, ClassLoaderUtils.createClassLoader(files), false, files);
+        assertEquals(1, provider.getAnalyzerBeanDescriptors().size());
+        assertEquals(1, provider.getTransformerBeanDescriptors().size());
 
-		assertEquals("org.eobjects.analyzer.beans.writers.WriteToDatastoreAnalyzer", provider.getAnalyzerBeanDescriptors()
-				.iterator().next().getComponentClass().getName());
-		assertEquals("org.eobjects.analyzer.beans.transform.XmlDecoderTransformer", provider.getTransformerBeanDescriptors()
-				.iterator().next().getComponentClass().getName());
-	}
+        assertEquals("org.eobjects.analyzer.beans.writers.WriteToDatastoreAnalyzer", provider
+                .getAnalyzerBeanDescriptors().iterator().next().getComponentClass().getName());
+        assertEquals("org.eobjects.analyzer.beans.transform.XmlDecoderTransformer", provider
+                .getTransformerBeanDescriptors().iterator().next().getComponentClass().getName());
+    }
 
-	public void testScanNonExistingPackage() throws Exception {
-		ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
-		Collection<AnalyzerBeanDescriptor<?>> analyzerDescriptors = provider.scanPackage(
-				"org.eobjects.analyzer.nonexistingbeans", true).getAnalyzerBeanDescriptors();
-		assertEquals("[]", Arrays.toString(analyzerDescriptors.toArray()));
+    public void testScanNonExistingPackage() throws Exception {
+        ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
+        Collection<AnalyzerBeanDescriptor<?>> analyzerDescriptors = provider.scanPackage(
+                "org.eobjects.analyzer.nonexistingbeans", true).getAnalyzerBeanDescriptors();
+        assertEquals("[]", Arrays.toString(analyzerDescriptors.toArray()));
 
-		assertEquals("[]", provider.getTransformerBeanDescriptors().toString());
-		assertEquals("[]", provider.getRendererBeanDescriptors().toString());
-	}
+        assertEquals("[]", provider.getTransformerBeanDescriptors().toString());
+        assertEquals("[]", provider.getRendererBeanDescriptors().toString());
+    }
 
-	public void testScanPackageRecursive() throws Exception {
-		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
-		Collection<AnalyzerBeanDescriptor<?>> analyzerDescriptors = descriptorProvider.scanPackage(
-				"org.eobjects.analyzer.beans.mock", true).getAnalyzerBeanDescriptors();
-		Object[] array = analyzerDescriptors.toArray();
-		assertEquals("[AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.mock.AnalyzerMock]]",
-				Arrays.toString(array));
+    public void testScanPackageRecursive() throws Exception {
+        ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
+        Collection<AnalyzerBeanDescriptor<?>> analyzerDescriptors = descriptorProvider.scanPackage(
+                "org.eobjects.analyzer.beans.mock", true).getAnalyzerBeanDescriptors();
+        Object[] array = analyzerDescriptors.toArray();
+        assertEquals("[AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.mock.AnalyzerMock]]",
+                Arrays.toString(array));
 
-		array = descriptorProvider.getExplorerBeanDescriptors().toArray();
-		assertEquals("[AnnotationBasedExplorerBeanDescriptor[org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock]]",
-				Arrays.toString(array));
+        array = descriptorProvider.getExplorerBeanDescriptors().toArray();
+        assertEquals("[AnnotationBasedExplorerBeanDescriptor[org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock]]",
+                Arrays.toString(array));
 
-		Collection<TransformerBeanDescriptor<?>> transformerBeanDescriptors = descriptorProvider
-				.getTransformerBeanDescriptors();
-		assertEquals("[AnnotationBasedTransformerBeanDescriptor[org.eobjects.analyzer.beans.mock.TransformerMock]]",
-				Arrays.toString(transformerBeanDescriptors.toArray()));
+        Collection<TransformerBeanDescriptor<?>> transformerBeanDescriptors = descriptorProvider
+                .getTransformerBeanDescriptors();
+        assertEquals("[AnnotationBasedTransformerBeanDescriptor[org.eobjects.analyzer.beans.mock.TransformerMock]]",
+                Arrays.toString(transformerBeanDescriptors.toArray()));
 
-		analyzerDescriptors = new ClasspathScanDescriptorProvider(taskRunner).scanPackage("org.eobjects.analyzer.job", true)
-				.getAnalyzerBeanDescriptors();
-		assertEquals(0, analyzerDescriptors.size());
-	}
+        analyzerDescriptors = new ClasspathScanDescriptorProvider(taskRunner).scanPackage("org.eobjects.analyzer.job",
+                true).getAnalyzerBeanDescriptors();
+        assertEquals(0, analyzerDescriptors.size());
+    }
 
-	public void testScanRenderers() throws Exception {
-		ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
-		Collection<RendererBeanDescriptor> rendererBeanDescriptors = descriptorProvider.scanPackage(
-				"org.eobjects.analyzer.result.renderer", true).getRendererBeanDescriptors();
-		assertEquals(
-				"[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabHtmlRenderer], "
-						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
-						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DateGapTextRenderer], "
-						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer], "
-						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.PatternFinderResultHtmlRenderer], "
-						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer], "
-						+ "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.ValueDistributionResultHtmlRenderer]]",
-				new TreeSet<RendererBeanDescriptor>(rendererBeanDescriptors).toString());
-	}
+    public void testScanRenderers() throws Exception {
+        ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
+        Collection<RendererBeanDescriptor> rendererBeanDescriptors = descriptorProvider.scanPackage(
+                "org.eobjects.analyzer.result.renderer", true).getRendererBeanDescriptors();
+        assertEquals(
+                "[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.AnnotatedRowsHtmlRenderer], "
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabHtmlRenderer], "
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DateGapTextRenderer], "
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer], "
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.PatternFinderResultHtmlRenderer], "
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer], "
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.ValueDistributionResultHtmlRenderer]]",
+                new TreeSet<RendererBeanDescriptor>(rendererBeanDescriptors).toString());
+    }
 }

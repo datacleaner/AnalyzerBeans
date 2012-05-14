@@ -42,6 +42,11 @@ public final class HtmlUtils {
         return counter;
     }
 
+    public static void resetIds() {
+        threadLocalFunctionCounter.remove();
+        threadLocalElementIdCounter.remove();
+    }
+
     public static String createFunctionName() {
         return "analysisResult.callback" + getFunctionCounter(threadLocalFunctionCounter).incrementAndGet();
     }
