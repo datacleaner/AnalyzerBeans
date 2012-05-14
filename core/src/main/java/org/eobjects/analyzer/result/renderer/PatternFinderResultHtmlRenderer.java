@@ -40,6 +40,10 @@ public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFin
 
     @Inject
     DescriptorProvider descriptorProvider;
+    
+    public PatternFinderResultHtmlRenderer() {
+        this(null);
+    }
 
     public PatternFinderResultHtmlRenderer(DescriptorProvider descriptorProvider) {
         this.descriptorProvider = descriptorProvider;
