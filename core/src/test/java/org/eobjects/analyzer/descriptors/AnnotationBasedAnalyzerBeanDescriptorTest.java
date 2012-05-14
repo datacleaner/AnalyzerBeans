@@ -51,26 +51,25 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
     }
 
     public void testGetConfiguredPropertiesOfType() throws Exception {
-        AnalyzerBeanDescriptor<AnalyzerMock> desc = Descriptors
-                .ofAnalyzer(AnalyzerMock.class);
+        AnalyzerBeanDescriptor<AnalyzerMock> desc = Descriptors.ofAnalyzer(AnalyzerMock.class);
 
         Set<ConfiguredPropertyDescriptor> properties = desc.getConfiguredPropertiesByType(Number.class, false);
-        assertEquals(0, properties.size());
+        assertEquals(1, properties.size());
 
         properties = desc.getConfiguredPropertiesByType(Number.class, true);
-        assertEquals(0, properties.size());
+        assertEquals(1, properties.size());
 
         properties = desc.getConfiguredPropertiesByType(Dictionary.class, false);
         assertEquals(0, properties.size());
 
         properties = desc.getConfiguredPropertiesByType(String.class, true);
-        assertEquals(1, properties.size());
+        assertEquals(2, properties.size());
 
         properties = desc.getConfiguredPropertiesByType(CharSequence.class, false);
-        assertEquals(0, properties.size());
+        assertEquals(1, properties.size());
 
         properties = desc.getConfiguredPropertiesByType(CharSequence.class, true);
-        assertEquals(1, properties.size());
+        assertEquals(2, properties.size());
     }
 
     public void testRowProcessingType() throws Exception {
@@ -84,6 +83,8 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
         assertEquals("Configured1", it.next().getName());
         assertTrue(it.hasNext());
         assertEquals("Configured2", it.next().getName());
+        assertTrue(it.hasNext());
+        assertEquals("Some string property", it.next().getName());
         assertFalse(it.hasNext());
 
         AnalyzerMock analyzerBean = new AnalyzerMock();

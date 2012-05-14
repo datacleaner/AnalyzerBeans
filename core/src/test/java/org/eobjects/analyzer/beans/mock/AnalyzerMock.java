@@ -38,122 +38,122 @@ import org.eobjects.analyzer.result.NumberResult;
 @AnalyzerBean("Row-processing mock")
 public class AnalyzerMock implements Analyzer<NumberResult> {
 
-	private static List<AnalyzerMock> instances = new LinkedList<AnalyzerMock>();
+    private static List<AnalyzerMock> instances = new LinkedList<AnalyzerMock>();
 
-	public static List<AnalyzerMock> getInstances() {
-		return instances;
-	}
+    public static List<AnalyzerMock> getInstances() {
+        return instances;
+    }
 
-	public static void clearInstances() {
-		instances.clear();
-	}
+    public static void clearInstances() {
+        instances.clear();
+    }
 
-	public AnalyzerMock() {
-		instances.add(this);
-	}
+    public AnalyzerMock() {
+        instances.add(this);
+    }
 
-	@Configured
-	InputColumn<?>[] columns;
-	
-	@Configured
-	String someStringProperty = "foobar";
+    @Configured
+    InputColumn<?>[] columns;
 
-	public InputColumn<?>[] getColumns() {
-		return columns;
-	}
+    @Configured
+    String[] someStringProperty = new String[] { "foobar" };
 
-	// A field-level @Configured property
-	@Configured
-	private String configured1;
+    public InputColumn<?>[] getColumns() {
+        return columns;
+    }
 
-	public String getConfigured1() {
-		return configured1;
-	}
+    // A field-level @Configured property
+    @Configured
+    private String configured1;
 
-	@Configured
-	private Integer configured2;
+    public String getConfigured1() {
+        return configured1;
+    }
 
-	public Integer getConfigured2() {
-		return configured2;
-	}
+    @Configured
+    private Integer configured2;
 
-	// A field-level @Provided property
-	@Provided
-	private Map<String, Long> providedMap;
+    public Integer getConfigured2() {
+        return configured2;
+    }
 
-	public Map<String, Long> getProvidedMap() {
-		return providedMap;
-	}
+    // A field-level @Provided property
+    @Provided
+    private Map<String, Long> providedMap;
 
-	@Provided
-	private List<Boolean> providedList;
+    public Map<String, Long> getProvidedMap() {
+        return providedMap;
+    }
 
-	public List<Boolean> getProvidedList() {
-		return providedList;
-	}
+    @Provided
+    private List<Boolean> providedList;
 
-	private boolean init1 = false;
-	private boolean init2 = false;
+    public List<Boolean> getProvidedList() {
+        return providedList;
+    }
 
-	@Initialize
-	public void init1() {
-		this.init1 = true;
-	}
+    private boolean init1 = false;
+    private boolean init2 = false;
 
-	public boolean isInit1() {
-		return init1;
-	}
+    @Initialize
+    public void init1() {
+        this.init1 = true;
+    }
 
-	@Initialize
-	public void init2() {
-		this.init2 = true;
-	}
+    public boolean isInit1() {
+        return init1;
+    }
 
-	public boolean isInit2() {
-		return init2;
-	}
+    @Initialize
+    public void init2() {
+        this.init2 = true;
+    }
 
-	private int runCount;
-	private long rowCount;
+    public boolean isInit2() {
+        return init2;
+    }
 
-	@Override
-	public void run(InputRow row, int count) {
-		TestCase.assertNotNull(row);
-		TestCase.assertNotNull(count);
-		this.runCount++;
-		this.rowCount += count;
-	}
+    private int runCount;
+    private long rowCount;
 
-	public long getRowCount() {
-		return rowCount;
-	}
+    @Override
+    public void run(InputRow row, int count) {
+        TestCase.assertNotNull(row);
+        TestCase.assertNotNull(count);
+        this.runCount++;
+        this.rowCount += count;
+    }
 
-	public int getRunCount() {
-		return runCount;
-	}
+    public long getRowCount() {
+        return rowCount;
+    }
 
-	private boolean close1 = false;
-	private boolean close2 = false;
+    public int getRunCount() {
+        return runCount;
+    }
 
-	@Close
-	public void close1() {
-		this.close1 = true;
-	}
+    private boolean close1 = false;
+    private boolean close2 = false;
 
-	public boolean isClose1() {
-		return close1;
-	}
+    @Close
+    public void close1() {
+        this.close1 = true;
+    }
 
-	@Close
-	public void close2() {
-		this.close2 = true;
-	}
+    public boolean isClose1() {
+        return close1;
+    }
 
-	public boolean isClose2() {
-		return close2;
-	}
+    @Close
+    public void close2() {
+        this.close2 = true;
+    }
 
-	public NumberResult getResult() {
-		return new NumberResult(rowCount);
-	}
+    public boolean isClose2() {
+        return close2;
+    }
+
+    public NumberResult getResult() {
+        return new NumberResult(rowCount);
+    }
 }
