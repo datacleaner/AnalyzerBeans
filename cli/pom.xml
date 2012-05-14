@@ -57,6 +57,26 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-transformers</artifactId>
+			<version>0.16-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-filters</artifactId>
+			<version>0.16-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-analyzers</artifactId>
+			<version>0.16-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-explorers</artifactId>
+			<version>0.16-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-javascript</artifactId>
 			<version>0.16-SNAPSHOT</version>
 		</dependency>
