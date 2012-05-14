@@ -29,7 +29,6 @@ import org.eobjects.analyzer.beans.CompareSchemasAnalyzer;
 import org.eobjects.analyzer.beans.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
-import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
@@ -85,9 +84,9 @@ public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCa
 					"PUBLIC.ORDERS.CUSTOMERNUMBER");
 			assertEquals(3, analysisJobBuilder.getSourceColumns().size());
 
-			FilterJobBuilder<MaxRowsFilter, ValidationCategory> maxRows = analysisJobBuilder.addFilter(MaxRowsFilter.class);
+			FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRows = analysisJobBuilder.addFilter(MaxRowsFilter.class);
 			maxRows.getConfigurableBean().setMaxRows(5);
-			analysisJobBuilder.setDefaultRequirement(maxRows.getOutcome(ValidationCategory.VALID));
+			analysisJobBuilder.setDefaultRequirement(maxRows.getOutcome(MaxRowsFilter.Category.VALID));
 
 			TransformerJobBuilder<ConvertToStringTransformer> convertToNumber = analysisJobBuilder
 					.addTransformer(ConvertToStringTransformer.class);

@@ -23,10 +23,10 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
-import org.eobjects.analyzer.beans.transform.SynonymLookupTransformer;
+import org.eobjects.analyzer.beans.mock.AnalyzerMock;
+import org.eobjects.analyzer.beans.mock.TransformerMock;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 
 public class SimpleDescriptorProviderTest extends TestCase {
@@ -38,7 +38,7 @@ public class SimpleDescriptorProviderTest extends TestCase {
 		assertNull(descriptorProvider.getTransformerBeanDescriptorForClass(ConvertToBooleanTransformer.class));
 
 		descriptorProvider.setAnalyzerClassNames(Arrays.asList(ValueDistributionAnalyzer.class.getName(),
-				StringAnalyzer.class.getName()));
+				AnalyzerMock.class.getName()));
 
 		assertEquals(2, descriptorProvider.getAnalyzerBeanDescriptors().size());
 
@@ -62,12 +62,12 @@ public class SimpleDescriptorProviderTest extends TestCase {
 
 	public void testGetBeanByAlias() throws Exception {
 		SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider(false);
-		descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(SynonymLookupTransformer.class));
+		descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(TransformerMock.class));
 
 		TransformerBeanDescriptor<?> descriptor1 = descriptorProvider
-				.getTransformerBeanDescriptorByDisplayName("Synonym lookup");
+				.getTransformerBeanDescriptorByDisplayName("Transformer mock");
 		TransformerBeanDescriptor<?> descriptor2 = descriptorProvider
-				.getTransformerBeanDescriptorByDisplayName("Synonym replacement");
+				.getTransformerBeanDescriptorByDisplayName("Mock transformer");
 
 		assertSame(descriptor1, descriptor2);
 	}

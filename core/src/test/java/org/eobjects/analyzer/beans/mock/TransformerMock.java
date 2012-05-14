@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans.mock;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
@@ -30,6 +31,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
 @TransformerBean("Transformer mock")
+@Alias("Mock transformer")
 public class TransformerMock implements Transformer<Integer> {
 
     @Configured

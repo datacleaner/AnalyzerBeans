@@ -34,13 +34,13 @@ public class DictionaryLookupFilterTest extends TestCase {
 		Dictionary dictionary = new SimpleDictionary("my dictionary", "foo", "bar", "baz");
 		
 		DictionaryFilter filter = new DictionaryFilter(column, dictionary);
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "foo")));
-		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "foo ")));
-		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "foo bar")));
-		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "foobar")));
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "bar")));
-		assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, "baz")));
-		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, null)));
-		assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, "")));
+		assertEquals(DictionaryFilter.Category.VALID, filter.categorize(new MockInputRow().put(column, "foo")));
+		assertEquals(DictionaryFilter.Category.INVALID, filter.categorize(new MockInputRow().put(column, "foo ")));
+		assertEquals(DictionaryFilter.Category.INVALID, filter.categorize(new MockInputRow().put(column, "foo bar")));
+		assertEquals(DictionaryFilter.Category.INVALID, filter.categorize(new MockInputRow().put(column, "foobar")));
+		assertEquals(DictionaryFilter.Category.VALID, filter.categorize(new MockInputRow().put(column, "bar")));
+		assertEquals(DictionaryFilter.Category.VALID, filter.categorize(new MockInputRow().put(column, "baz")));
+		assertEquals(DictionaryFilter.Category.INVALID, filter.categorize(new MockInputRow().put(column, null)));
+		assertEquals(DictionaryFilter.Category.INVALID, filter.categorize(new MockInputRow().put(column, "")));
 	}
 }

@@ -132,6 +132,30 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-transformers</artifactId>
+			<version>0.16-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-filters</artifactId>
+			<version>0.16-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-analyzers</artifactId>
+			<version>0.16-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-reference-data</artifactId>
+			<version>0.16-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-i18n</artifactId>
 			<version>0.16-SNAPSHOT</version>
 			<optional>true</optional>

@@ -13,5 +13,10 @@
 			<artifactId>AnalyzerBeans-core</artifactId>
 			<version>0.16-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-analyzers</artifactId>
+			<version>0.16-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>

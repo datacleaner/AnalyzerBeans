@@ -53,7 +53,10 @@ public class AnalyzerMock implements Analyzer<NumberResult> {
 	}
 
 	@Configured
-	private InputColumn<?>[] columns;
+	InputColumn<?>[] columns;
+	
+	@Configured
+	String someStringProperty = "foobar";
 
 	public InputColumn<?>[] getColumns() {
 		return columns;

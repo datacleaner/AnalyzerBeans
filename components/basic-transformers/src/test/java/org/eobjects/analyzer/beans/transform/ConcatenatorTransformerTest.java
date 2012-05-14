@@ -31,6 +31,7 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
+@SuppressWarnings("deprecation")
 public class ConcatenatorTransformerTest extends TestCase {
 
     public void testConcat() throws Exception {
@@ -63,7 +64,6 @@ public class ConcatenatorTransformerTest extends TestCase {
         assertEquals("", result[0]);
     }
 
-    @SuppressWarnings("deprecation")
     private DataTypeFamily getDataTypeFamily(TransformerBeanDescriptor<?> descriptor) {
         Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
         assertEquals(1, configuredProperties.size());
@@ -71,7 +71,6 @@ public class ConcatenatorTransformerTest extends TestCase {
         return propertyDescriptor.getInputColumnDataTypeFamily();
     }
 
-    @SuppressWarnings("deprecation")
     public void testDescriptor() throws Exception {
         TransformerBeanDescriptor<?> descriptor = Descriptors.ofTransformer(ConcatenatorTransformer.class);
         assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));

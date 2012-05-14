@@ -27,7 +27,6 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.PatternFinderResult;
-import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.util.ReflectionUtilTestHelpClass.ClassA;
 import org.eobjects.analyzer.util.ReflectionUtilTestHelpClass.ClassB;
 
@@ -110,7 +109,6 @@ public class ReflectionUtilsTest extends TestCase {
 		assertEquals(1, ReflectionUtils.getHierarchyDistance(Integer.class, Number.class));
 
 		assertEquals(1, ReflectionUtils.getHierarchyDistance(CrosstabResult.class, AnalyzerResult.class));
-		assertEquals(2, ReflectionUtils.getHierarchyDistance(StringAnalyzerResult.class, AnalyzerResult.class));
 		assertEquals(1, ReflectionUtils.getHierarchyDistance(PatternFinderResult.class, AnalyzerResult.class));
 	}
 
