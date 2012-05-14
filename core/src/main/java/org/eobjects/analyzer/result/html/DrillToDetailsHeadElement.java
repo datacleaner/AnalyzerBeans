@@ -20,8 +20,8 @@
 package org.eobjects.analyzer.result.html;
 
 /**
- * {@link HeadElement} which adds scripts that execute when the user clicks a
- * "drill to detail" button.
+ * Head element to be included when facilitating "Drill to detail" behaviour.
+ * Use this in conjunction with the {@link DrillToDetailsBodyElement}.
  */
 public class DrillToDetailsHeadElement extends AbstractScriptHeadElement implements HeadElement {
 

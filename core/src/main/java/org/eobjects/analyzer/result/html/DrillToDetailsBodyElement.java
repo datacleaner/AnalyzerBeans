@@ -27,6 +27,10 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 
+/**
+ * Body element to be included when facilitating "Drill to detail" behaviour.
+ * Use this in conjunction with the {@link DrillToDetailsHeadElement}.
+ */
 public class DrillToDetailsBodyElement implements BodyElement {
 
     private final DescriptorProvider _descriptorProvider;

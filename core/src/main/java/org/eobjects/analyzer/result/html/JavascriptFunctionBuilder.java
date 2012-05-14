@@ -19,6 +19,11 @@
  */
 package org.eobjects.analyzer.result.html;
 
+/**
+ * Helper class for building javascript elements to be included in a
+ * {@link HtmlFragment}, typically a subclass of
+ * {@link AbstractScriptHeadElement}.
+ */
 public class JavascriptFunctionBuilder {
 
     private final String _functionName;
