@@ -17,11 +17,11 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer;
+package org.eobjects.analyzer.beans.dategap;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.DateGapAnalyzer;
+import org.eobjects.analyzer.beans.dategap.DateGapAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;

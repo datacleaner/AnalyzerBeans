@@ -17,10 +17,12 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util;
+package org.eobjects.analyzer.beans.dategap;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import org.eobjects.analyzer.util.CompareUtils;
 
 /**
  * Represents an interval consisting of two points in time. Either points (from

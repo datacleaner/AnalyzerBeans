@@ -17,14 +17,14 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result;
+package org.eobjects.analyzer.beans.dategap;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import org.eobjects.analyzer.util.TimeInterval;
+import org.eobjects.analyzer.result.AnalyzerResult;
 
 public class DateGapAnalyzerResult implements AnalyzerResult {
 

@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.dategap.DateGapAnalyzer;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 

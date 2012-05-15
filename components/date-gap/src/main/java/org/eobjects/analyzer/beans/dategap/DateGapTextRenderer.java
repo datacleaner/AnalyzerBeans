@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.beans.dategap;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,9 +25,9 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import org.eobjects.analyzer.beans.api.RendererBean;
-import org.eobjects.analyzer.result.DateGapAnalyzerResult;
+import org.eobjects.analyzer.result.renderer.AbstractRenderer;
+import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 import org.eobjects.analyzer.util.StringUtils;
-import org.eobjects.analyzer.util.TimeInterval;
 
 @RendererBean(TextRenderingFormat.class)
 public class DateGapTextRenderer extends AbstractRenderer<DateGapAnalyzerResult, String> {

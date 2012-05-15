@@ -26,8 +26,8 @@ import junit.framework.TestCase;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.eobjects.analyzer.beans.CompareSchemasAnalyzer;
-import org.eobjects.analyzer.beans.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
+import org.eobjects.analyzer.beans.dategap.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;

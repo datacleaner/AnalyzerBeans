@@ -17,9 +17,12 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util;
+package org.eobjects.analyzer.beans.dategap;
 
 import java.util.SortedSet;
+
+import org.eobjects.analyzer.beans.dategap.TimeInterval;
+import org.eobjects.analyzer.beans.dategap.TimeLine;
 
 import junit.framework.TestCase;
 

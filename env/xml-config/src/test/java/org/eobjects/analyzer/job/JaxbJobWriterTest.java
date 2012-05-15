@@ -31,8 +31,8 @@ import javax.xml.datatype.DatatypeFactory;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
-import org.eobjects.analyzer.beans.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzer;
+import org.eobjects.analyzer.beans.dategap.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.filter.NullCheckFilter;
 import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
 import org.eobjects.analyzer.beans.filter.SingleWordFilter;

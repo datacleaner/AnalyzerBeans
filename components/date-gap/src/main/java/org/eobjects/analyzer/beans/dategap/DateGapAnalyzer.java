@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans;
+package org.eobjects.analyzer.beans.dategap;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -31,9 +31,6 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.result.DateGapAnalyzerResult;
-import org.eobjects.analyzer.util.TimeInterval;
-import org.eobjects.analyzer.util.TimeLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
