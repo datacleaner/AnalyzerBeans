@@ -29,8 +29,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.StringAnalyzerResult;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.transform.DateMaskMatcherTransformer;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
@@ -53,10 +55,8 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DateGapAnalyzerResult;
-import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.result.TableComparisonResult;
 import org.eobjects.analyzer.result.TableDifference;
-import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.result.renderer.DateGapTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;

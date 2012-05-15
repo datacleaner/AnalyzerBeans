@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -34,7 +35,6 @@ import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
-import org.eobjects.analyzer.result.ValueDistributionResult;
 
 public class MergeAndExpressionBasedInputColumnsTest extends TestCase {
 
