@@ -27,6 +27,8 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.transform.TokenizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionGroupResult;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
@@ -43,8 +45,6 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.ValueDistributionGroupResult;
-import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Column;

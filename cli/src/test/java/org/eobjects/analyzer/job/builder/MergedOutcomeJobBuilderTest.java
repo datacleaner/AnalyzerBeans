@@ -27,6 +27,8 @@ import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
+import org.eobjects.analyzer.beans.stringpattern.PatternFinderResult;
+import org.eobjects.analyzer.beans.stringpattern.PatternFinderResultTextRenderer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -41,8 +43,6 @@ import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.PatternFinderResult;
-import org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class MergedOutcomeJobBuilderTest extends TestCase {
