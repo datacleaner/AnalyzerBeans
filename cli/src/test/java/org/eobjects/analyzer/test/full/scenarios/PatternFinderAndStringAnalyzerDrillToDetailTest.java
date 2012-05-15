@@ -28,8 +28,8 @@ import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -59,7 +59,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
 
-		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
+		Datastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
 		DatastoreConnection con = datastore.openConnection();
 		DataContext dc = con.getDataContext();
 

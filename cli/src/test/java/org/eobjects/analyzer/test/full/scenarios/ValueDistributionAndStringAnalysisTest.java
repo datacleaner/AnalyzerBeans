@@ -28,8 +28,8 @@ import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -62,7 +62,7 @@ public class ValueDistributionAndStringAnalysisTest extends TestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
+		Datastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
 		DatastoreConnection con = datastore.openConnection();
 		DataContext dc = con.getDataContext();
 

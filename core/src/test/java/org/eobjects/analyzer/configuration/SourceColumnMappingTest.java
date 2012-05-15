@@ -19,12 +19,12 @@
  */
 package org.eobjects.analyzer.configuration;
 
-import org.eobjects.analyzer.connection.JdbcDatastore;
+import junit.framework.TestCase;
+
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.test.mock.MockDatastore;
-
 import org.eobjects.metamodel.schema.MutableColumn;
-import junit.framework.TestCase;
 
 public class SourceColumnMappingTest extends TestCase {
 
@@ -45,7 +45,7 @@ public class SourceColumnMappingTest extends TestCase {
 	}
 
 	public void testAutoMapAllMatches() throws Exception {
-		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("testdb");
+		Datastore datastore = TestHelper.createSampleDatabaseDatastore("testdb");
 
 		SourceColumnMapping columnMapping = new SourceColumnMapping("PUBLIC.EMPLOYEES.FIRSTNAME",
 				"PUBLIC.EMPLOYEES.LASTNAME");
@@ -56,7 +56,7 @@ public class SourceColumnMappingTest extends TestCase {
 	}
 
 	public void testAutoMapPartialMatches() throws Exception {
-		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("testdb");
+		Datastore datastore = TestHelper.createSampleDatabaseDatastore("testdb");
 
 		SourceColumnMapping columnMapping = new SourceColumnMapping("PUBLIC.EMPLOYEES.FIRSTNAME", "foo.bar.col1",
 				"PUBLIC.EMPLOYEES.LASTNAME", "foo.bar.col2");

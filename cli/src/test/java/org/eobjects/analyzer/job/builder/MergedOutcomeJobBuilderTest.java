@@ -30,8 +30,8 @@ import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -48,7 +48,7 @@ import org.eobjects.analyzer.test.TestHelper;
 public class MergedOutcomeJobBuilderTest extends TestCase {
 
     public void testSimpleBuildNoColumnMerge() throws Exception {
-        JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("mydb");
+        Datastore ds = TestHelper.createSampleDatabaseDatastore("mydb");
         AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
                 new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds)));
 

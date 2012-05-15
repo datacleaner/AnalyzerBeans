@@ -30,8 +30,8 @@ import org.eobjects.analyzer.beans.filter.NullCheckFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -47,7 +47,7 @@ import org.eobjects.metamodel.util.Ref;
 
 public class RowProcessingMetricsImplTest extends TestCase {
 
-	private JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("orderdb");
+	private Datastore datastore = TestHelper.createSampleDatabaseDatastore("orderdb");
 	private AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
 			.replace(new DatastoreCatalogImpl(datastore));
 	private AnalysisJob job;

@@ -30,8 +30,8 @@ import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.transform.DictionaryMatcherTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -58,7 +58,7 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 		dictionaries.add(dict2);
 		dictionaries.add(dict3);
 
-		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("db");
+		Datastore datastore = TestHelper.createSampleDatabaseDatastore("db");
 
 		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
 				datastore));

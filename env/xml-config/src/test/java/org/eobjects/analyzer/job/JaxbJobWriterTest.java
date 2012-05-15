@@ -43,7 +43,6 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -85,7 +84,7 @@ public class JaxbJobWriterTest extends TestCase {
 
 	@SuppressWarnings("unchecked")
 	public void testNullColumnProperty() throws Exception {
-		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("db");
+		Datastore ds = TestHelper.createSampleDatabaseDatastore("db");
 		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl()
 				.replace(new DatastoreCatalogImpl(ds));
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
@@ -215,7 +214,7 @@ public class JaxbJobWriterTest extends TestCase {
 	}
 
 	public void testCompareWithBenchmarkFiles() throws Exception {
-		JdbcDatastore datastore = TestHelper
+		Datastore datastore = TestHelper
 				.createSampleDatabaseDatastore("my db");
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(
 				new AnalyzerBeansConfigurationImpl()

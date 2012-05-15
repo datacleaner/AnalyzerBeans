@@ -50,11 +50,6 @@ public class SampleCustomDatastore implements Datastore, PerformanceCharacterist
 	}
 
 	@Override
-	public DatastoreConnection getDataContextProvider() {
-		throw new IllegalStateException();
-	}
-	
-	@Override
 	public DatastoreConnection openConnection() {
 		DataContext dc = DataContextFactory.createXmlDataContext(xmlFile, false);
 		return new DatastoreConnectionImpl<DataContext>(dc, this);

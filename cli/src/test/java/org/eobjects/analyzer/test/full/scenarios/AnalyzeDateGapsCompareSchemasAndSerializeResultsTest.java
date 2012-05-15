@@ -34,7 +34,6 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
@@ -69,7 +68,7 @@ public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCa
 			descriptorProvider.addExplorerBeanDescriptor(Descriptors.ofExplorer(CompareSchemasAnalyzer.class));
 			descriptorProvider.addFilterBeanDescriptor(Descriptors.ofFilter(MaxRowsFilter.class));
 			descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(ConvertToStringTransformer.class));
-			JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("orderdb");
+			Datastore datastore = TestHelper.createSampleDatabaseDatastore("orderdb");
 			configuration = new AnalyzerBeansConfigurationImpl().replace(descriptorProvider).replace(
 					new DatastoreCatalogImpl(datastore));
 		}

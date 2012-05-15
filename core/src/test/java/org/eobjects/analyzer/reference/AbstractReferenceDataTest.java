@@ -25,7 +25,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class AbstractReferenceDataTest extends TestCase {
@@ -37,7 +37,7 @@ public class AbstractReferenceDataTest extends TestCase {
 		super.setUp();
 
 		if (referenceDataCatalog == null) {
-			JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("my_jdbc_connection");
+			Datastore ds = TestHelper.createSampleDatabaseDatastore("my_jdbc_connection");
 
 			List<Dictionary> dictionaries = new ArrayList<Dictionary>();
 			dictionaries.add(new DatastoreDictionary("datastore_dict", "my_jdbc_connection", "EMPLOYEES.LASTNAME"));

@@ -26,8 +26,8 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
@@ -68,7 +68,7 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("foobar");
+		Datastore ds = TestHelper.createSampleDatabaseDatastore("foobar");
 		DatastoreConnection con = ds.openConnection();
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
@@ -117,12 +117,8 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 		assertTrue("largestPoolSize was: " + largestPoolSize, largestPoolSize > 5);
 		assertEquals(0, executorService.getActiveCount());
 
-		assertTrue(ds.isDatastoreConnectionOpen());
-
 		con.close();
 		analysisJobBuilder.close();
-
-		assertFalse(ds.isDatastoreConnectionOpen());
 
 		taskRunner.shutdown();
 	}

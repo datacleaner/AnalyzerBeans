@@ -35,10 +35,10 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.configuration.SourceColumnMapping;
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.eobjects.analyzer.connection.DatastoreConnection;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
-import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
@@ -368,7 +368,7 @@ public class JaxbJobReaderTest extends TestCase {
 	}
 
 	public void testUsingSourceColumnMapping() throws Throwable {
-		JdbcDatastore datastore = TestHelper
+		Datastore datastore = TestHelper
 				.createSampleDatabaseDatastore("another datastore name");
 		JobReader<InputStream> reader = new JaxbJobReader(conf);
 

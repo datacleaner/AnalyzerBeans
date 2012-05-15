@@ -39,7 +39,6 @@ import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
@@ -61,7 +60,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 	private final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null);
 
-	private JdbcDatastore datastore;
+	private Datastore datastore;
 	private AnalyzerBeansConfiguration conf;
 	private AnalysisJobBuilder ajb;
 	private FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRowsBuilder;

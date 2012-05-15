@@ -42,11 +42,6 @@ public class MockDatastore implements Datastore, PerformanceCharacteristics {
 	}
 
 	@Override
-	public DatastoreConnection getDataContextProvider() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public DatastoreConnection openConnection() {
 		return new MockDatastoreConnection();
 	}
