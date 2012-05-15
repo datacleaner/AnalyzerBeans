@@ -26,11 +26,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.mock.AnalyzerMock;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
@@ -73,20 +73,18 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 	}
 
 	public void testCompareTo() throws Exception {
-		Set<ConfiguredPropertyDescriptor> properties = Descriptors.ofAnalyzer(DateGapAnalyzer.class)
+		Set<ConfiguredPropertyDescriptor> properties = Descriptors.ofAnalyzer(AnalyzerMock.class)
 				.getConfiguredProperties();
-		assertEquals(5, properties.size());
+		assertEquals(4, properties.size());
 		Iterator<ConfiguredPropertyDescriptor> it = properties.iterator();
 		assertTrue(it.hasNext());
-		assertEquals("From column", it.next().getName());
+		assertEquals("Columns", it.next().getName());
 		assertTrue(it.hasNext());
-		assertEquals("To column", it.next().getName());
+		assertEquals("Configured1", it.next().getName());
 		assertTrue(it.hasNext());
-		assertEquals("Group column", it.next().getName());
+		assertEquals("Configured2", it.next().getName());
 		assertTrue(it.hasNext());
-		assertEquals("Count intersecting from and to dates as overlaps", it.next().getName());
-		assertTrue(it.hasNext());
-		assertEquals("Fault tolerant switch from/to dates", it.next().getName());
+		assertEquals("Some string property", it.next().getName());
 		assertFalse(it.hasNext());
 
 		Field f1 = getClass().getDeclaredField("str1");
