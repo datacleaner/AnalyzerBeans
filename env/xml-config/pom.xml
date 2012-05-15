@@ -150,6 +150,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-explorers</artifactId>
+			<version>0.16-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-reference-data</artifactId>
 			<version>0.16-SNAPSHOT</version>
 			<optional>true</optional>
