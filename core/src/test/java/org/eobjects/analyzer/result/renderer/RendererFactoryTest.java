@@ -28,7 +28,6 @@ import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.DataSetResult;
 import org.eobjects.analyzer.result.NumberResult;
-import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.test.mock.MockRenderers.BarPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.ConditionalPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.FooPrecedenceRenderer;
@@ -46,9 +45,6 @@ public class RendererFactoryTest extends TestCase {
 
 		r = rendererFactory.getRenderer(new CrosstabResult(null), TextRenderingFormat.class);
 		assertEquals(CrosstabTextRenderer.class, r.getClass());
-
-		r = rendererFactory.getRenderer(new PatternFinderResult(null, null), TextRenderingFormat.class);
-		assertEquals(PatternFinderResultTextRenderer.class, r.getClass());
 
 		r = rendererFactory.getRenderer(new DataSetResult(new LinkedList<Row>()), TextRenderingFormat.class);
 		assertEquals(DefaultTextRenderer.class, r.getClass());

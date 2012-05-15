@@ -52,7 +52,6 @@ public class AbstractReferenceDataTest extends TestCase {
 
 			List<StringPattern> stringPatterns = new ArrayList<StringPattern>();
 			stringPatterns.add(new RegexStringPattern("regex danish mail", "[a-z]+@[a-z]+\\.dk", true));
-			stringPatterns.add(new SimpleStringPattern("simple email", "aaaa@aaaaa.aa"));
 
 			referenceDataCatalog = new ReferenceDataCatalogImpl(dictionaries, synonymCatalogs, stringPatterns);
 		}
