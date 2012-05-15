@@ -24,6 +24,9 @@ import org.easymock.IArgumentMatcher;
 import org.eobjects.metamodel.query.Query;
 import org.junit.Assert;
 
+/**
+ * An EasyMock matcher for checking that a {@link Query} matches a certain string.
+ */
 public class QueryMatcher implements IArgumentMatcher {
 
 	private String queryToString;
