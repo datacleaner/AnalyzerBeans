@@ -152,15 +152,6 @@ public final class AnalysisJobBuilder implements Closeable {
 		return setDatastoreConnection(dataContextProvider);
 	}
 
-	/**
-	 * @deprecated use {@link #setDatastoreConnection(DatastoreConnection)}
-	 *             instead.
-	 */
-	@Deprecated
-	public AnalysisJobBuilder setDataContextProvider(org.eobjects.analyzer.connection.DataContextProvider dataContextProvider) {
-		return setDatastoreConnection((DatastoreConnection) dataContextProvider);
-	}
-
 	public AnalysisJobBuilder setDatastoreConnection(DatastoreConnection datastoreConnection) {
 		if (_datastoreConnection != null) {
 			_datastoreConnection.close();

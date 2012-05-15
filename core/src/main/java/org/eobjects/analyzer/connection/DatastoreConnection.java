@@ -35,14 +35,12 @@ import org.eobjects.metamodel.DataContext;
  * 
  * @author Kasper Sørensen
  */
-@SuppressWarnings("deprecation")
-public interface DatastoreConnection extends DataContextProvider, Closeable {
+public interface DatastoreConnection extends Closeable {
 
 	/**
 	 * Gets a {@link DataContext} object which provides access to both exploring
 	 * schema structure and querying data.
 	 */
-	@Override
 	public DataContext getDataContext();
 
 	/**
@@ -50,13 +48,11 @@ public interface DatastoreConnection extends DataContextProvider, Closeable {
 	 * exploration. Note that the schema navigator is preferred over
 	 * {@link #getDataContext()} if only schema data is needed.
 	 */
-	@Override
 	public SchemaNavigator getSchemaNavigator();
 
 	/**
 	 * Gets the {@link Datastore} that this is a connection to.
 	 */
-	@Override
 	public Datastore getDatastore();
 
 	/**
