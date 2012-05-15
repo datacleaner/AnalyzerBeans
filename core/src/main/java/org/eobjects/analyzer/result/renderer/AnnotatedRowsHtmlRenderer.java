@@ -37,7 +37,7 @@ public class AnnotatedRowsHtmlRenderer implements Renderer<AnnotatedRowsResult, 
     @Override
     public HtmlFragment render(final AnnotatedRowsResult result) {
         SimpleHtmlFragment htmlFragment = new SimpleHtmlFragment();
-        htmlFragment.addBodyElement(new AnnotatedRowsBodyElement(result));
+        htmlFragment.addBodyElement(new TableBodyElement(result.toTableModel(), "annotatedRowsTable"));
         return htmlFragment;
     }
 

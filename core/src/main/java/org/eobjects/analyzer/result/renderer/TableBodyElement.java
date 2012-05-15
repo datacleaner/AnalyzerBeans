@@ -22,39 +22,55 @@ package org.eobjects.analyzer.result.renderer;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.html.BodyElement;
 
-public class AnnotatedRowsBodyElement implements BodyElement {
+/**
+ * Body element that renders a HTML table based on a {@link TableModel}.
+ */
+public class TableBodyElement implements BodyElement {
 
-    private final AnnotatedRowsResult _result;
+    private final TableModel _tableModel;
+    private final String _tableClassName;
 
-    public AnnotatedRowsBodyElement(AnnotatedRowsResult result) {
-        _result = result;
+    /**
+     * Constructs a table body element.
+     * 
+     * @param tableModel
+     *            the table model to render
+     * @param tableClassName
+     *            a CSS class name to to set to the table
+     */
+    public TableBodyElement(TableModel tableModel, String tableClassName) {
+        _tableModel = tableModel;
+        _tableClassName = tableClassName;
     }
 
     @Override
     public String toHtml() {
-        final TableModel tableModel = _result.toTableModel();
-        final int columnCount = tableModel.getColumnCount();
+        final int columnCount = _tableModel.getColumnCount();
 
         final StringBuilder sb = new StringBuilder();
-        sb.append("<table class=\"annotatedRowsTable\">");
+        
+        if (_tableClassName == null) {
+            sb.append("<table>");
+        } else {
+            sb.append("<table class=\"" + _tableClassName + "\">");
+        }
 
         sb.append("<tr>");
         for (int col = 0; col < columnCount; col++) {
-            String columnName = tableModel.getColumnName(col);
+            String columnName = _tableModel.getColumnName(col);
             sb.append("<th>");
             sb.append(StringEscapeUtils.escapeHtml(columnName));
             sb.append("</th>");
         }
         sb.append("</tr>");
 
-        int rowCount = tableModel.getRowCount();
+        int rowCount = _tableModel.getRowCount();
         for (int row = 0; row < rowCount; row++) {
             sb.append("<tr>");
             for (int col = 0; col < columnCount; col++) {
-                Object value = tableModel.getValueAt(row, col);
+                Object value = _tableModel.getValueAt(row, col);
                 if (value == null) {
                     value = "<null>";
                 }
