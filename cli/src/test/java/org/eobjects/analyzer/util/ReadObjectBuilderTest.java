@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.reference.ReferenceData;
 
 public class ReadObjectBuilderTest extends TestCase {
-
+	
 	public void testDeserializeLegacyReferenceData() throws Exception {
 		ChangeAwareObjectInputStream objectInputStream = new ChangeAwareObjectInputStream(new FileInputStream(
 				"src/test/resources/analyzerbeans-0.4-reference-data.dat"));
