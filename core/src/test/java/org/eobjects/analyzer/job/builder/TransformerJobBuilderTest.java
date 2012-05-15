@@ -29,7 +29,6 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
-import org.eobjects.analyzer.beans.standardize.TokenizerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.ConstantInputColumn;
@@ -61,30 +60,32 @@ public class TransformerJobBuilderTest extends TestCase {
     }
 
     public void testSetInvalidPropertyType() throws Exception {
-        TransformerJobBuilder<TokenizerTransformer> tjb = ajb.addTransformer(TokenizerTransformer.class);
+        TransformerJobBuilder<TransformerMock> tjb = ajb.addTransformer(TransformerMock.class);
         try {
-            tjb.setConfiguredProperty("Number of tokens", "hello");
+            tjb.setConfiguredProperty("Input", "hello");
             fail("Exception expected");
         } catch (IllegalArgumentException e) {
-            assertEquals("Invalid value type: java.lang.String, expected: java.lang.Integer", e.getMessage());
+            assertEquals("Invalid value type: java.lang.String, expected: org.eobjects.analyzer.data.InputColumn", e.getMessage());
         }
     }
 
     public void testIsConfigured() throws Exception {
-        TransformerJobBuilder<TokenizerTransformer> tjb = ajb.addTransformer(TokenizerTransformer.class);
+        TransformerJobBuilder<TransformerMock> tjb = ajb.addTransformer(TransformerMock.class);
         assertFalse(tjb.isConfigured());
+        
+        tjb.setConfiguredProperty("Some integer", null);
 
         tjb.addInputColumn(ajb.getSourceColumns().get(1));
         assertFalse(tjb.isConfigured());
-
+        
         try {
             tjb.isConfigured(true);
             fail("Exception occurred");
         } catch (UnconfiguredConfiguredPropertyException e) {
-            assertEquals("Property 'Number of tokens' is not properly configured", e.getMessage());
+            assertEquals("Property 'Some integer' is not properly configured", e.getMessage());
         }
 
-        tjb.setConfiguredProperty("Number of tokens", 10);
+        tjb.setConfiguredProperty("Some integer", 10);
         assertTrue(tjb.isConfigured());
 
         tjb.removeInputColumn(ajb.getSourceColumns().get(1));

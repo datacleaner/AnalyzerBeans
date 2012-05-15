@@ -35,7 +35,10 @@ import org.eobjects.analyzer.data.InputRow;
 public class TransformerMock implements Transformer<Integer> {
 
     @Configured
-    InputColumn<?>[] input;
+    InputColumn<String>[] input;
+    
+    @Configured
+    Integer someInteger = 1;
 
     private AtomicInteger i;
 

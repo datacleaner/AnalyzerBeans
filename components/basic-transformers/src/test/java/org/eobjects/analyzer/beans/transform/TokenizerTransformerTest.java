@@ -17,14 +17,14 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.standardize;
+package org.eobjects.analyzer.beans.transform;
 
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
-import org.eobjects.analyzer.beans.standardize.TokenizerTransformer.TokenTarget;
+import org.eobjects.analyzer.beans.transform.TokenizerTransformer.TokenTarget;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
