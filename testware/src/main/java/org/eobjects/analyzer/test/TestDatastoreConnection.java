@@ -19,28 +19,20 @@
  */
 package org.eobjects.analyzer.test;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.UpdateableDataContext;
-import org.eobjects.metamodel.util.FileHelper;
 
-public class TestDatastoreConnection implements DatastoreConnection {
+final class TestDatastoreConnection implements DatastoreConnection {
 
-    private final Connection _connection;
-    private final UpdateableDataContext _dataContext;
+    private final DataContext _dataContext;
     private final Datastore _datastore;
 
-    public TestDatastoreConnection(Datastore datastore) throws Exception {
+    public TestDatastoreConnection(TestDatastore datastore) throws Exception {
         _datastore = datastore;
-        Class.forName("org.hsqldb.jdbcDriver");
-        _connection = DriverManager.getConnection("jdbc:hsqldb:res:orderdb;readonly=true");
-        _dataContext = DataContextFactory.createJdbcDataContext(_connection);
+        _dataContext = DataContextFactory.createJdbcDataContext(datastore.getDataSource());
     }
 
     @Override
@@ -60,7 +52,6 @@ public class TestDatastoreConnection implements DatastoreConnection {
 
     @Override
     public void close() {
-        FileHelper.safeClose(_connection);
     }
 
 }

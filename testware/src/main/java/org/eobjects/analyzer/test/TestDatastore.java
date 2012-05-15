@@ -19,23 +19,31 @@
  */
 package org.eobjects.analyzer.test;
 
+import javax.sql.DataSource;
+
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.PerformanceCharacteristics;
 
-public class TestDatastore implements Datastore, PerformanceCharacteristics {
+final class TestDatastore implements Datastore, PerformanceCharacteristics {
 
     private static final long serialVersionUID = 1L;
     private final String _name;
+    private final DataSource _dataSource;
     private String _description;
 
-    public TestDatastore(String name) {
+    public TestDatastore(String name, DataSource dataSource) {
         _name = name;
+        _dataSource = dataSource;
     }
 
     @Override
     public String getName() {
         return _name;
+    }
+
+    public DataSource getDataSource() {
+        return _dataSource;
     }
 
     @Override

@@ -36,42 +36,42 @@ import org.springframework.mock.jndi.SimpleNamingContext;
 
 public class DataSourceDatastoreConnectionTest extends TestCase {
 
-	public void testConstruction() throws Exception {
-		DataSource dataSource = EasyMock.createMock(DataSource.class);
+    public void testConstruction() throws Exception {
+        DataSource dataSource = EasyMock.createMock(DataSource.class);
 
-		EasyMock.expect(dataSource.getConnection()).andAnswer(new IAnswer<Connection>() {
-			@Override
-			public Connection answer() throws Throwable {
-				return TestHelper.createSampleDatabaseDatastore("whatever").createDataSource().getConnection();
-			}
-		}).times(4);
+        EasyMock.expect(dataSource.getConnection()).andAnswer(new IAnswer<Connection>() {
+            @Override
+            public Connection answer() throws Throwable {
+                return TestHelper.createSampleDatabaseDataSource().getConnection();
+            }
+        }).times(4);
 
-		EasyMock.replay(dataSource);
+        EasyMock.replay(dataSource);
 
-		final SimpleNamingContext context = new SimpleNamingContext();
-		context.bind("jdbc/mydatasource", dataSource);
+        final SimpleNamingContext context = new SimpleNamingContext();
+        context.bind("jdbc/mydatasource", dataSource);
 
-		JdbcDatastore datastore = new JdbcDatastore("mydatasource", "jdbc/mydatasource") {
-			private static final long serialVersionUID = 1L;
+        JdbcDatastore datastore = new JdbcDatastore("mydatasource", "jdbc/mydatasource") {
+            private static final long serialVersionUID = 1L;
 
-			@Override
-			protected Context getJndiNamingContext() throws NamingException {
-				return context;
-			}
-		};
+            @Override
+            protected Context getJndiNamingContext() throws NamingException {
+                return context;
+            }
+        };
 
-		assertEquals("jdbc/mydatasource", datastore.getDatasourceJndiUrl());
+        assertEquals("jdbc/mydatasource", datastore.getDatasourceJndiUrl());
 
-		DatastoreConnection con = datastore.openConnection();
+        DatastoreConnection con = datastore.openConnection();
 
-		assertEquals("mydatasource", con.getDatastore().getName());
-		SchemaNavigator schemaNavigator = con.getSchemaNavigator();
-		assertNotNull(schemaNavigator);
-		assertEquals("PUBLIC", con.getDataContext().getDefaultSchema().getName());
-		Table table = schemaNavigator.convertToTable("PUBLIC.EMPLOYEES");
-		assertNotNull(table);
-		assertEquals("EMPLOYEES", table.getName());
+        assertEquals("mydatasource", con.getDatastore().getName());
+        SchemaNavigator schemaNavigator = con.getSchemaNavigator();
+        assertNotNull(schemaNavigator);
+        assertEquals("PUBLIC", con.getDataContext().getDefaultSchema().getName());
+        Table table = schemaNavigator.convertToTable("PUBLIC.EMPLOYEES");
+        assertNotNull(table);
+        assertEquals("EMPLOYEES", table.getName());
 
-		EasyMock.verify(dataSource);
-	}
+        EasyMock.verify(dataSource);
+    }
 }

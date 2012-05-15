@@ -19,12 +19,23 @@
  */
 package org.eobjects.analyzer.test;
 
-import org.eobjects.analyzer.connection.Datastore;
+import javax.sql.DataSource;
 
+import org.apache.commons.dbcp.BasicDataSource;
+import org.eobjects.analyzer.connection.Datastore;
 
 public class TestHelper {
 
+    public static DataSource createSampleDatabaseDataSource() {
+        BasicDataSource _dataSource = new BasicDataSource();
+        _dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
+        _dataSource.setUrl("jdbc:hsqldb:res:orderdb;readonly=true");
+        _dataSource.setMaxActive(-1);
+        _dataSource.setDefaultAutoCommit(false);
+        return _dataSource;
+    }
+
     public static Datastore createSampleDatabaseDatastore(String name) {
-        return new TestDatastore(name);
+        return new TestDatastore(name, createSampleDatabaseDataSource());
     }
 }
