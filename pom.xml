@@ -8,7 +8,7 @@
 		<easymock.version>3.1</easymock.version>
 		<metamodel.version>3.0-beta6</metamodel.version>
 		<sshwagon.version>2.0</sshwagon.version>
-		<scala.version>2.9.1</scala.version>
+		<scala.version>2.9.2</scala.version>
 	</properties>
 	<parent>
 		<!-- Uses the OSS sonatype nexus repository for distribution -->
@@ -232,7 +232,7 @@
 									<pluginExecutionFilter>
 										<groupId>org.scala-tools</groupId>
 										<artifactId>maven-scala-plugin</artifactId>
-										<versionRange>[1.0,)</versionRange>
+										<versionRange>[2.0,)</versionRange>
 										<goals>
 											<goal>add-source</goal>
 											<goal>compile</goal>
@@ -280,6 +280,15 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>scala-tools.org</id>
+			<name>Scala-tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<reporting>
 		<plugins>
 			<plugin>
