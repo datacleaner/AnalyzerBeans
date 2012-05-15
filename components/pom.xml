@@ -15,6 +15,7 @@
 		<module>basic-analyzers</module>
 		<module>basic-explorers</module>
 		<module>data-structures</module>
+		<module>json</module>
 		<module>standardizers</module>
 		<module>pattern-finder</module>
 		<module>reference-data</module>
@@ -23,7 +24,6 @@
 		<module>scala</module>
 		<module>javascript</module>
 		<module>i18n</module>
-		<module>json</module>
 	</modules>
 
 	<dependencies>
