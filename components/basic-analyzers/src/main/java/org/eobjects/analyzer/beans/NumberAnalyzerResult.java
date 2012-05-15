@@ -17,25 +17,24 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result;
+package org.eobjects.analyzer.beans;
 
-public class BooleanAnalyzerResult implements AnalyzerResult {
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.result.Crosstab;
+import org.eobjects.analyzer.result.CrosstabResult;
+
+public class NumberAnalyzerResult extends CrosstabResult {
 
 	private static final long serialVersionUID = 1L;
-	
-	private final Crosstab<Number> _columnStatisticsCrosstab;
-	private final Crosstab<Number> _valueCombinationCrosstab;
 
-	public BooleanAnalyzerResult(Crosstab<Number> columnStatisticsCrosstab, Crosstab<Number> valueCombinationCrosstab) {
-		_columnStatisticsCrosstab = columnStatisticsCrosstab;
-		_valueCombinationCrosstab = valueCombinationCrosstab;
+	private final InputColumn<? extends Number>[] _columns;
+
+	public NumberAnalyzerResult(InputColumn<? extends Number>[] columns, Crosstab<?> crosstab) {
+		super(crosstab);
+		_columns = columns;
 	}
 
-	public Crosstab<Number> getColumnStatisticsCrosstab() {
-		return _columnStatisticsCrosstab;
-	}
-
-	public Crosstab<Number> getValueCombinationCrosstab() {
-		return _valueCombinationCrosstab;
+	public InputColumn<? extends Number>[] getColumns() {
+		return _columns;
 	}
 }

@@ -17,10 +17,12 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result;
+package org.eobjects.analyzer.beans;
 
-import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.result.Crosstab;
+import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.Metric;
 
 /**
  * Result type of the StringAnalyzer

@@ -35,7 +35,6 @@ import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.CrosstabNavigator;
-import org.eobjects.analyzer.result.DateAndTimeAnalyzerResult;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;

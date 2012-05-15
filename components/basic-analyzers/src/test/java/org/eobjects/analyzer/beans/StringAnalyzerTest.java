@@ -35,7 +35,6 @@ import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.MetricDescriptor;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.StringAnalyzerResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 
 @SuppressWarnings("deprecation")

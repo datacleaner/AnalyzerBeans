@@ -17,22 +17,21 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result;
+package org.eobjects.analyzer.beans;
 
-import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.result.Crosstab;
+import org.eobjects.analyzer.result.CrosstabResult;
 
-public class NumberAnalyzerResult extends CrosstabResult {
+/**
+ * Represents the result of a Date and Time Analyzer.
+ * 
+ * @author Kasper Sørensen
+ */
+public class DateAndTimeAnalyzerResult extends CrosstabResult {
 
 	private static final long serialVersionUID = 1L;
 
-	private final InputColumn<? extends Number>[] _columns;
-
-	public NumberAnalyzerResult(InputColumn<? extends Number>[] columns, Crosstab<?> crosstab) {
+	public DateAndTimeAnalyzerResult(Crosstab<?> crosstab) {
 		super(crosstab);
-		_columns = columns;
-	}
-
-	public InputColumn<? extends Number>[] getColumns() {
-		return _columns;
 	}
 }

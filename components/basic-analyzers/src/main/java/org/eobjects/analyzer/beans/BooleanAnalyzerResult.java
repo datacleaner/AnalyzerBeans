@@ -17,18 +17,28 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result;
+package org.eobjects.analyzer.beans;
 
-/**
- * Represents the result of a Date and Time Analyzer.
- * 
- * @author Kasper Sørensen
- */
-public class DateAndTimeAnalyzerResult extends CrosstabResult {
+import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.Crosstab;
+
+public class BooleanAnalyzerResult implements AnalyzerResult {
 
 	private static final long serialVersionUID = 1L;
+	
+	private final Crosstab<Number> _columnStatisticsCrosstab;
+	private final Crosstab<Number> _valueCombinationCrosstab;
 
-	public DateAndTimeAnalyzerResult(Crosstab<?> crosstab) {
-		super(crosstab);
+	public BooleanAnalyzerResult(Crosstab<Number> columnStatisticsCrosstab, Crosstab<Number> valueCombinationCrosstab) {
+		_columnStatisticsCrosstab = columnStatisticsCrosstab;
+		_valueCombinationCrosstab = valueCombinationCrosstab;
+	}
+
+	public Crosstab<Number> getColumnStatisticsCrosstab() {
+		return _columnStatisticsCrosstab;
+	}
+
+	public Crosstab<Number> getValueCombinationCrosstab() {
+		return _valueCombinationCrosstab;
 	}
 }
