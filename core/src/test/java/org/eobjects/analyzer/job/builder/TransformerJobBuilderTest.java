@@ -28,7 +28,6 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
-import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.ConstantInputColumn;
@@ -105,8 +104,8 @@ public class TransformerJobBuilderTest extends TestCase {
     }
 
     public void testClearInputColumnsSingle() throws Exception {
-        TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb
-                .addTransformer(EmailStandardizerTransformer.class);
+        TransformerJobBuilder<SingleInputColumnTransformer> tjb = ajb
+                .addTransformer(SingleInputColumnTransformer.class);
         tjb.addInputColumn(ajb.getSourceColumns().get(1));
 
         assertEquals(1, tjb.getInputColumns().size());
@@ -124,8 +123,8 @@ public class TransformerJobBuilderTest extends TestCase {
     }
 
     public void testInvalidInputColumnType() throws Exception {
-        TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb
-                .addTransformer(EmailStandardizerTransformer.class);
+        TransformerJobBuilder<SingleInputColumnTransformer> tjb = ajb
+                .addTransformer(SingleInputColumnTransformer.class);
         assertEquals(0, tjb.getInputColumns().size());
         assertFalse(tjb.isConfigured());
         try {
@@ -143,13 +142,13 @@ public class TransformerJobBuilderTest extends TestCase {
     }
 
     public void testNoOutputWhenNotConfigured() throws Exception {
-        TransformerJobBuilder<EmailStandardizerTransformer> tjb = ajb
-                .addTransformer(EmailStandardizerTransformer.class);
+        TransformerJobBuilder<SingleInputColumnTransformer> tjb = ajb
+                .addTransformer(SingleInputColumnTransformer.class);
 
         // not yet configured
         assertEquals(0, tjb.getOutputColumns().size());
 
-        tjb.getConfigurableBean().setInputColumn(new MockInputColumn<String>("email", String.class));
+        tjb.addInputColumn(new MockInputColumn<String>("email", String.class));
 
         assertEquals(2, tjb.getOutputColumns().size());
     }
