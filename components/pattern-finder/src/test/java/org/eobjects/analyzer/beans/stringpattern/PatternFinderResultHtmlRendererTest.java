@@ -17,21 +17,23 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.beans.stringpattern;
 
 import java.io.File;
 
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
+import org.eobjects.analyzer.beans.stringpattern.PatternFinderResult;
+import org.eobjects.analyzer.beans.stringpattern.PatternFinderResultHtmlRenderer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
-import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.html.HtmlUtils;
+import org.eobjects.analyzer.result.renderer.AnnotatedRowsHtmlRenderer;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.metamodel.util.FileHelper;
 

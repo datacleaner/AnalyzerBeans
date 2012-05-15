@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.beans.stringpattern;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,7 +25,9 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.result.Crosstab;
-import org.eobjects.analyzer.result.PatternFinderResult;
+import org.eobjects.analyzer.result.renderer.AbstractRenderer;
+import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
+import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 
 /**
  * Text renderer for {@link PatternFinderResult}s

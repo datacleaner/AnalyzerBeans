@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.beans.stringpattern;
 
 import java.util.List;
 import java.util.Map;
@@ -29,11 +29,13 @@ import javax.inject.Inject;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.result.Crosstab;
-import org.eobjects.analyzer.result.PatternFinderResult;
 import org.eobjects.analyzer.result.html.BodyElement;
 import org.eobjects.analyzer.result.html.HeadElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
+import org.eobjects.analyzer.result.renderer.AbstractRenderer;
+import org.eobjects.analyzer.result.renderer.CrosstabHtmlRenderer;
+import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 
 @RendererBean(HtmlRenderingFormat.class)
 public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFinderResult, HtmlFragment> {

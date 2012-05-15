@@ -17,13 +17,15 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result;
+package org.eobjects.analyzer.beans.stringpattern;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.Crosstab;
+import org.eobjects.analyzer.result.Metric;
 
 /**
  * Represents the result of the {@link PatternFinderAnalyzer}.

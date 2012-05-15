@@ -25,7 +25,6 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
-import org.eobjects.analyzer.result.renderer.PatternFinderResultTextRenderer;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 
 public class PatternFinderAnalyzerTest extends TestCase {
