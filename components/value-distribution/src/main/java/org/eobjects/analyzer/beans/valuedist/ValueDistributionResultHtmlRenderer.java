@@ -17,18 +17,16 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.beans.valuedist;
 
 import java.util.List;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.RendererBean;
-import org.eobjects.analyzer.beans.valuedist.ValueCount;
-import org.eobjects.analyzer.beans.valuedist.ValueCountList;
-import org.eobjects.analyzer.result.ValueDistributionGroupResult;
-import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
+import org.eobjects.analyzer.result.renderer.AbstractRenderer;
+import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 
 @RendererBean(HtmlRenderingFormat.class)
 public class ValueDistributionResultHtmlRenderer extends AbstractRenderer<ValueDistributionResult, HtmlFragment> {

@@ -29,7 +29,6 @@ import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
-import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.metamodel.schema.MutableColumn;
 
 public class ValueDistributionAnalyzerTest extends TestCase {

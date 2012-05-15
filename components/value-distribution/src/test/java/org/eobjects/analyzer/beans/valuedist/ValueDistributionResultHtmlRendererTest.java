@@ -17,17 +17,18 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.renderer;
+package org.eobjects.analyzer.beans.valuedist;
 
 import java.io.File;
 
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionResultHtmlRenderer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.metamodel.util.FileHelper;
 

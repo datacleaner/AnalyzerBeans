@@ -17,15 +17,16 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result;
+package org.eobjects.analyzer.beans.valuedist;
 
 import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.Metric;
 
 /**
  * Represents the result of the {@link ValueDistributionAnalyzer}.

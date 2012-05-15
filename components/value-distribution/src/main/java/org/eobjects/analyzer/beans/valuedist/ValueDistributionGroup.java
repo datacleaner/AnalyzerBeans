@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.result.ValueDistributionGroupResult;
 import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;

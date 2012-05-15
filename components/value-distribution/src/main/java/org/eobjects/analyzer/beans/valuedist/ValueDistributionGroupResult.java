@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result;
+package org.eobjects.analyzer.beans.valuedist;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -25,10 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.eobjects.analyzer.beans.valuedist.ValueCount;
-import org.eobjects.analyzer.beans.valuedist.ValueCountList;
-import org.eobjects.analyzer.beans.valuedist.ValueCountListImpl;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.NullTolerableComparator;

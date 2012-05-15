@@ -34,8 +34,6 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.result.ValueDistributionGroupResult;
-import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.storage.CollectionFactoryImpl;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
