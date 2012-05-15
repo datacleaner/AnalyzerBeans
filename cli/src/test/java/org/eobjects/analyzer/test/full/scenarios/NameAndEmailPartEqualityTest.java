@@ -60,7 +60,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
 		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
 		CsvDatastore ds = new CsvDatastore("data.csv",
-				"../../core/src/test/resources/NameAndEmailPartEqualityTest-data.csv");
+				"src/test/resources/NameAndEmailPartEqualityTest-data.csv");
 
 		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
 				configuration);
