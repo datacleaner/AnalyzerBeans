@@ -42,83 +42,83 @@ import org.eobjects.analyzer.test.TestHelper;
 
 public class ReferenceDataActivationManagerTest extends TestCase {
 
-	public void testInvocationThroughAnalysisRunner() throws Throwable {
-		MockMonitoredDictionary dict1 = new MockMonitoredDictionary();
-		MockMonitoredDictionary dict2 = new MockMonitoredDictionary();
-		MockMonitoredDictionary dict3 = new MockMonitoredDictionary();
-		assertEquals(0, dict1.getInitCount());
-		assertEquals(0, dict1.getCloseCount());
-		assertEquals(0, dict2.getInitCount());
-		assertEquals(0, dict2.getCloseCount());
-		assertEquals(0, dict3.getInitCount());
-		assertEquals(0, dict3.getCloseCount());
+    public void testInvocationThroughAnalysisRunner() throws Throwable {
+        MockMonitoredDictionary dict1 = new MockMonitoredDictionary();
+        MockMonitoredDictionary dict2 = new MockMonitoredDictionary();
+        MockMonitoredDictionary dict3 = new MockMonitoredDictionary();
+        assertEquals(0, dict1.getInitCount());
+        assertEquals(0, dict1.getCloseCount());
+        assertEquals(0, dict2.getInitCount());
+        assertEquals(0, dict2.getCloseCount());
+        assertEquals(0, dict3.getInitCount());
+        assertEquals(0, dict3.getCloseCount());
 
-		Collection<Dictionary> dictionaries = new ArrayList<Dictionary>();
-		dictionaries.add(dict1);
-		dictionaries.add(dict2);
-		dictionaries.add(dict3);
+        Collection<Dictionary> dictionaries = new ArrayList<Dictionary>();
+        dictionaries.add(dict1);
+        dictionaries.add(dict2);
+        dictionaries.add(dict3);
 
-		Datastore datastore = TestHelper.createSampleDatabaseDatastore("db");
+        Datastore datastore = TestHelper.createSampleDatabaseDatastore("db");
 
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
-				datastore));
+        AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
+                .replace(new DatastoreCatalogImpl(datastore));
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+        AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		// build a job
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
-		ajb.setDatastore(datastore);
-		ajb.addSourceColumn(datastore.openConnection().getSchemaNavigator()
-				.convertToColumn("PUBLIC.EMPLOYEES.EMAIL"));
+        // build a job
+        AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
+        ajb.setDatastore(datastore);
+        ajb.addSourceColumn(datastore.openConnection().getSchemaNavigator().convertToColumn("PUBLIC.EMPLOYEES.EMAIL"));
 
-		InputColumn<?> emailColumn = ajb.getSourceColumnByName("email");
-		assertNotNull(emailColumn);
+        InputColumn<?> emailColumn = ajb.getSourceColumnByName("email");
+        assertNotNull(emailColumn);
 
-		MutableInputColumn<?> usernameColumn = ajb.addTransformer(EmailStandardizerTransformer.class)
-				.addInputColumn(emailColumn).getOutputColumnByName("Username");
-		assertNotNull(usernameColumn);
+        MutableInputColumn<?> usernameColumn = ajb.addTransformer(EmailStandardizerTransformer.class)
+                .addInputColumn(emailColumn).getOutputColumnByName("Username");
+        assertNotNull(usernameColumn);
 
-		TransformerJobBuilder<DictionaryMatcherTransformer> tjb = ajb.addTransformer(DictionaryMatcherTransformer.class);
-		DictionaryMatcherTransformer transformer = tjb.getConfigurableBean();
-		transformer.setDictionaries(new Dictionary[] { dict1, dict2, dict3 });
-		tjb.addInputColumn(usernameColumn);
-		List<MutableInputColumn<?>> outputColumns = tjb.getOutputColumns();
+        TransformerJobBuilder<DictionaryMatcherTransformer> tjb = ajb
+                .addTransformer(DictionaryMatcherTransformer.class);
+        DictionaryMatcherTransformer transformer = tjb.getConfigurableBean();
+        transformer.setDictionaries(new Dictionary[] { dict1, dict2, dict3 });
+        tjb.addInputColumn(usernameColumn);
+        List<MutableInputColumn<?>> outputColumns = tjb.getOutputColumns();
 
-		ajb.addAnalyzer(BooleanAnalyzer.class).addInputColumns(outputColumns);
-		AnalysisJob job = ajb.toAnalysisJob();
+        ajb.addAnalyzer(BooleanAnalyzer.class).addInputColumns(outputColumns);
+        AnalysisJob job = ajb.toAnalysisJob();
 
-		AnalysisResultFuture result = runner.run(job);
+        AnalysisResultFuture result = runner.run(job);
 
-		if (!result.isSuccessful()) {
-			throw result.getErrors().get(0);
-		}
+        if (!result.isSuccessful()) {
+            throw result.getErrors().get(0);
+        }
 
-		// sleep to ensure that close is invoked (happens after results are
-		// returned)
-		Thread.sleep(700);
+        // sleep to ensure that close is invoked (happens after results are
+        // returned)
+        Thread.sleep(700);
 
-		assertEquals(1, dict1.getInitCount());
-		assertEquals(1, dict1.getCloseCount());
-		assertEquals(1, dict2.getInitCount());
-		assertEquals(1, dict2.getCloseCount());
-		assertEquals(1, dict3.getInitCount());
-		assertEquals(1, dict3.getCloseCount());
+        assertEquals(1, dict1.getInitCount());
+        assertEquals(1, dict1.getCloseCount());
+        assertEquals(1, dict2.getInitCount());
+        assertEquals(1, dict2.getCloseCount());
+        assertEquals(1, dict3.getInitCount());
+        assertEquals(1, dict3.getCloseCount());
 
-		result = runner.run(job);
+        result = runner.run(job);
 
-		if (!result.isSuccessful()) {
-			throw result.getErrors().get(0);
-		}
+        if (!result.isSuccessful()) {
+            throw result.getErrors().get(0);
+        }
 
-		// sleep to ensure that close is invoked (happens after results are
-		// returned)
-		Thread.sleep(700);
+        // sleep to ensure that close is invoked (happens after results are
+        // returned)
+        Thread.sleep(700);
 
-		assertEquals(2, dict1.getInitCount());
-		assertEquals(2, dict1.getCloseCount());
-		assertEquals(2, dict2.getInitCount());
-		assertEquals(2, dict2.getCloseCount());
-		assertEquals(2, dict3.getInitCount());
-		assertEquals(2, dict3.getCloseCount());
-	}
+        assertEquals(2, dict1.getInitCount());
+        assertEquals(2, dict1.getCloseCount());
+        assertEquals(2, dict2.getInitCount());
+        assertEquals(2, dict2.getCloseCount());
+        assertEquals(2, dict3.getInitCount());
+        assertEquals(2, dict3.getCloseCount());
+    }
 }

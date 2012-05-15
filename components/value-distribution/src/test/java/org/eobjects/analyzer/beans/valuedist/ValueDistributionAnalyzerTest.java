@@ -19,12 +19,15 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
+import java.util.Set;
+
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.result.ValueDistributionResult;
 import org.eobjects.metamodel.schema.MutableColumn;
@@ -185,4 +188,13 @@ public class ValueDistributionAnalyzerTest extends TestCase {
 		assertEquals("Null count: 0", resultLines[18]);
 		assertEquals("Unique values: 0", resultLines[19]);
 	}
+	
+	 @SuppressWarnings("deprecation")
+    public void testDataTypeFamilyDescriptor() throws Exception {
+	        AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
+	        Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput(false);
+	        assertEquals(1, configuredProperties.size());
+	        ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
+	        assertEquals(org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED, propertyDescriptor.getInputColumnDataTypeFamily());
+	    }
 }

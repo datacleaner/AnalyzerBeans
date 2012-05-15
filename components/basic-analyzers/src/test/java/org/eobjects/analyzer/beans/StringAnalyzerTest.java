@@ -25,7 +25,6 @@ import javax.swing.table.TableModel;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
@@ -210,11 +209,5 @@ public class StringAnalyzerTest extends TestCase {
         ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
 
         assertEquals(DataTypeFamily.STRING, propertyDescriptor.getInputColumnDataTypeFamily());
-
-        descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
-        configuredProperties = descriptor.getConfiguredPropertiesForInput(false);
-        assertEquals(1, configuredProperties.size());
-        propertyDescriptor = configuredProperties.iterator().next();
-        assertEquals(DataTypeFamily.UNDEFINED, propertyDescriptor.getInputColumnDataTypeFamily());
     }
 }
