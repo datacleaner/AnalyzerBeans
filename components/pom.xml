@@ -34,6 +34,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-core</artifactId>
+			<version>0.16-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-testware</artifactId>
 			<version>0.16-SNAPSHOT</version>
 			<scope>test</scope>
