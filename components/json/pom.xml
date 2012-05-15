@@ -10,12 +10,6 @@
 	<description>Provides Transformers to extract values from Json and create Json from values.</description>
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-api</artifactId>
 			<version>0.16-SNAPSHOT</version>
@@ -30,6 +24,5 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.9.4</version>
 		</dependency>
-		
 	</dependencies>
 </project>
