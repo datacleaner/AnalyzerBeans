@@ -27,8 +27,8 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
-import org.eobjects.analyzer.beans.transform.DictionaryMatcherTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
@@ -47,7 +47,6 @@ import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.ValueDistributionResult;
 
 public class DictionaryMatcherTransformerTest extends TestCase {
 

@@ -40,7 +40,6 @@ import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
-import org.eobjects.analyzer.result.BooleanAnalyzerResult;
 
 @AnalyzerBean("Reference data matcher")
 @Alias("Matching analyzer")

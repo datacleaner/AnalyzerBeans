@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
@@ -29,10 +31,7 @@ import org.eobjects.analyzer.reference.SimpleSynonym;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
-import org.eobjects.analyzer.result.BooleanAnalyzerResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
-
-import junit.framework.TestCase;
 
 public class ReferenceDataMatcherAnalyzerTest extends TestCase {
 
