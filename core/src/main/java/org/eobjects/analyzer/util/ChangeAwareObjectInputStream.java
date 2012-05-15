@@ -103,6 +103,17 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
         // add analyzerbeans' own renamed classes
         addRenamedClass("org.eobjects.analyzer.reference.TextBasedDictionary", TextFileDictionary.class);
         addRenamedClass("org.eobjects.analyzer.reference.TextBasedSynonymCatalog", TextFileSynonymCatalog.class);
+        
+        // analyzer results moved as of ticket #843
+        addRenamedClass("org.eobjects.analyzer.result.ValueDistributionResult", "org.eobjects.analyzer.beans.valuedist.ValueDistributionResult");
+        addRenamedClass("org.eobjects.analyzer.result.ValueDistributionGroupResult", "org.eobjects.analyzer.beans.valuedist.ValueDistributionGroupResult");
+        addRenamedClass("org.eobjects.analyzer.result.PatternFinderResult", "org.eobjects.analyzer.beans.stringpattern.PatternFinderResult");
+        addRenamedClass("org.eobjects.analyzer.result.DateGapAnalyzerResult", "org.eobjects.analyzer.beans.dategap.DateGapAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.util.TimeInterval", "org.eobjects.analyzer.beans.dategap.TimeInterval");
+        addRenamedClass("org.eobjects.analyzer.result.StringAnalyzerResult", "org.eobjects.analyzer.beans.StringAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.result.NumberAnalyzerResult", "org.eobjects.analyzer.beans.NumberAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.result.BooleanAnalyzerResult", "org.eobjects.analyzer.beans.BooleanAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.result.DateAndTimeAnalyzerResult", "org.eobjects.analyzer.beans.DateAndTimeAnalyzerResult");
     }
 
     public void addClassLoader(ClassLoader classLoader) {

@@ -23,10 +23,10 @@ import java.io.FileInputStream;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.SerializationUtils;
-import org.eobjects.analyzer.job.ComponentJob;
-
 import junit.framework.TestCase;
+
+import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.util.ChangeAwareObjectInputStream;
 
 public class SimpleAnalysisResultTest extends TestCase {
 
@@ -43,7 +43,9 @@ public class SimpleAnalysisResultTest extends TestCase {
 
         for (int i = 0; i < analysisResults.length; i++) {
             String filename = "src/test/resources/resultfiles/out" + (i + 1) + ".analysis.result.dat";
-            analysisResults[i] = (AnalysisResult) SerializationUtils.deserialize(new FileInputStream(filename));
+            
+            ChangeAwareObjectInputStream in = new ChangeAwareObjectInputStream(new FileInputStream(filename));
+            analysisResults[i] = (AnalysisResult) in.readObject();
             assertNotNull(analysisResults[i]);
             assertTrue(analysisResults[i] instanceof SimpleAnalysisResult);
         }
