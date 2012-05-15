@@ -24,29 +24,31 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.reference.ReferenceData;
+import org.eobjects.analyzer.connection.Datastore;
 
 public class ReadObjectBuilderTest extends TestCase {
 
-	public void testDeserializeLegacyReferenceData() throws Exception {
-		ChangeAwareObjectInputStream objectInputStream = new ChangeAwareObjectInputStream(new FileInputStream(
-				"src/test/resources/analyzerbeans-0.4-reference-data.dat"));
-		Object deserializedObject = objectInputStream.readObject();
-		objectInputStream.close();
-		assertTrue(deserializedObject instanceof List);
+    public void testDeserializeLegacyDatastores() throws Exception {
+        ChangeAwareObjectInputStream objectInputStream = new ChangeAwareObjectInputStream(new FileInputStream(
+                "src/test/resources/analyzerbeans-0.4-datastores.dat"));
+        Object deserializedObject = objectInputStream.readObject();
+        objectInputStream.close();
+        assertTrue(deserializedObject instanceof List);
 
-		@SuppressWarnings("unchecked")
-		List<ReferenceData> list = (List<ReferenceData>) deserializedObject;
-		assertEquals(6, list.size());
+        @SuppressWarnings("unchecked")
+        List<Datastore> list = (List<Datastore>) deserializedObject;
+        assertEquals(8, list.size());
 
-		assertEquals("DatastoreDictionary[name=datastore_dict]", list.get(0).toString());
-		assertEquals("TextFileDictionary[name=textfile_dict, filename=src/test/resources/lastnames.txt, encoding=UTF-8]",
-				list.get(1).toString());
-		assertEquals("SimpleDictionary[name=valuelist_dict]", list.get(2).toString());
-		assertEquals(
-				"TextFileSynonymCatalog[name=textfile_syn, filename=src/test/resources/synonym-countries.txt, caseSensitive=false, encoding=UTF-8]",
-				list.get(3).toString());
-		assertEquals("RegexStringPattern[name=regex danish email, expression=[a-z]+@[a-z]+\\.dk, matchEntireString=true]", list.get(4).toString());
-		assertEquals("SimpleStringPattern[name=simple email, expression=aaaa@aaaaa.aa]", list.get(5).toString());
-	}
+        assertEquals("JdbcDatastore[name=my_jdbc_connection,url=jdbc:hsqldb:res:metamodel]", list.get(0).toString());
+        assertEquals("DbaseDatastore[name=my_dbase]", list.get(1).toString());
+        assertEquals(
+                "CsvDatastore[name=my_csv, filename=src/test/resources/employees.csv, quoteChar='\"', separatorChar=',', encoding=null, headerLineNumber=0]",
+                list.get(2).toString());
+        assertEquals("ExcelDatastore[name=my_xml]", list.get(3).toString());
+        assertEquals("OdbDatastore[name=my_odb]", list.get(4).toString());
+        assertEquals("ExcelDatastore[name=my_excel_2003]", list.get(5).toString());
+        assertEquals("CompositeDatastore[name=my_composite]", list.get(6).toString());
+        assertEquals("AccessDatastore[name=my_access]", list.get(7).toString());
+    }
+
 }
