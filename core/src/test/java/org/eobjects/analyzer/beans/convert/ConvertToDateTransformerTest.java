@@ -29,55 +29,69 @@ import junit.framework.TestCase;
 
 public class ConvertToDateTransformerTest extends TestCase {
 
-	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	
-	public void testConvertFromNumber() throws Exception {
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.YEAR, 1971);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DATE, 1);
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-		assertTrue(cal.getTime().getTime() > 5000000);
+    public void testConvertFromNumber() throws Exception {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, 1971);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DATE, 1);
 
-		ConvertToDateTransformer transformer = new ConvertToDateTransformer();
-		transformer.init();
+        assertTrue(cal.getTime().getTime() > 5000000);
 
-		assertEquals("1971-01-01", format(transformer.transformValue(cal)));
-		assertEquals("1971-01-01", format(transformer.transformValue(cal.getTime())));
+        ConvertToDateTransformer transformer = new ConvertToDateTransformer();
+        transformer.init();
 
-		assertEquals("1970-04-03", format(transformer.convertFromNumber(8000000000l)));
-		assertEquals("1997-05-19", format(transformer.convertFromNumber(10000)));
-		assertEquals("1997-05-19", format(transformer.convertFromNumber(19970519)));
-		assertEquals("1997-05-19", format(transformer.convertFromNumber(970519)));
-	}
+        assertEquals("1971-01-01", format(transformer.transformValue(cal)));
+        assertEquals("1971-01-01", format(transformer.transformValue(cal.getTime())));
 
-	public void testConvertFromString() throws Exception {
-		ConvertToDateTransformer transformer = new ConvertToDateTransformer();
-		transformer.init();
+        assertEquals("1970-04-03", format(transformer.convertFromNumber(8000000000l)));
+        assertEquals("1997-05-19", format(transformer.convertFromNumber(10000)));
+        assertEquals("1997-05-19", format(transformer.convertFromNumber(19970519)));
+        assertEquals("1997-05-19", format(transformer.convertFromNumber(970519)));
+    }
 
-		assertEquals("1999-04-20", format(transformer.convertFromString("1999-04-20")));
-		assertEquals("1999-04-20", format(transformer.convertFromString("04/20/1999")));
-		assertEquals("1999-04-20", format(transformer.convertFromString("1999/04/20")));
-		assertEquals("2008-07-11", format(transformer.convertFromString("2008-07-11 00:00:00")));
+    public void testConvertFromString() throws Exception {
+        ConvertToDateTransformer transformer = new ConvertToDateTransformer();
+        transformer.init();
 
-		Date result = transformer.convertFromString("2008-07-11 14:05:13");
-		assertEquals("2008-07-11 14:05:13", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(result));
-	}
-	
-	public void testConvertSingleHourDigit() throws Exception {
-		ConvertToDateTransformer transformer = new ConvertToDateTransformer();
-		transformer.dateMasks = new String[] {"dd/MM/yyyy HH:mm"};
-		transformer.init();
-		
-		Date date = transformer.convertFromString("29/3/2009 12:55");
-		assertNotNull(date);
-		
-		date = transformer.convertFromString("29/3/2009 3:15");
-		assertNotNull(date);
-	}
+        assertEquals("1999-04-20", format(transformer.convertFromString("1999-04-20")));
+        assertEquals("1999-04-20", format(transformer.convertFromString("04/20/1999")));
+        assertEquals("1999-04-20", format(transformer.convertFromString("1999/04/20")));
+        assertEquals("2008-07-11", format(transformer.convertFromString("2008-07-11 00:00:00")));
 
-	private String format(Date date) {
-		assertNotNull("date is null", date);
-		return dateFormat.format(date);
-	}
+        Date result = transformer.convertFromString("2008-07-11 14:05:13");
+        assertEquals("2008-07-11 14:05:13", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(result));
+    }
+
+    public void testConvertFromExpression() throws Exception {
+        ConvertToDateTransformer transformer = new ConvertToDateTransformer();
+        transformer.init();
+
+        final Date now = new Date();
+
+        assertEquals(format(now), format(transformer.convertFromString("TODAY()")));
+        assertEquals(format(now), format(transformer.convertFromString("NOW()")));
+
+        final Date yesterDay = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+        assertEquals(format(yesterDay), format(transformer.convertFromString("YESTERDAY()")));
+    }
+
+    public void testConvertSingleHourDigit() throws Exception {
+        ConvertToDateTransformer transformer = new ConvertToDateTransformer();
+        transformer.dateMasks = new String[] { "dd/MM/yyyy HH:mm" };
+        transformer.init();
+
+        Date date = transformer.convertFromString("29/3/2009 12:55");
+        assertNotNull(date);
+
+        date = transformer.convertFromString("29/3/2009 3:15");
+        assertNotNull(date);
+    }
+
+    private String format(Date date) {
+        assertNotNull("date is null", date);
+        return dateFormat.format(date);
+    }
 }

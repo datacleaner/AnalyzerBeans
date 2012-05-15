@@ -50,171 +50,195 @@ import org.joda.time.format.DateTimeFormatter;
 @Categorized({ ConversionCategory.class, DateAndTimeCategory.class })
 public class ConvertToDateTransformer implements Transformer<Date> {
 
-	private static final String[] prototypePatterns = { "yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy" };
+    private static final String[] prototypePatterns = { "yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy" };
 
-	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_LONG = DateTimeFormat.forPattern("yyyyMMdd");
-	private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_SHORT = DateTimeFormat.forPattern("yyMMdd");
+    private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_LONG = DateTimeFormat.forPattern("yyyyMMdd");
+    private static final DateTimeFormatter NUMBER_BASED_DATE_FORMAT_SHORT = DateTimeFormat.forPattern("yyMMdd");
 
-	private static ConvertToDateTransformer internalInstance;
+    private static ConvertToDateTransformer internalInstance;
 
-	@Inject
-	@Configured(order = 1)
-	InputColumn<?>[] input;
+    @Inject
+    @Configured(order = 1)
+    InputColumn<?>[] input;
 
-	@Inject
-	@Configured(required = false, order = 2)
-	Date nullReplacement;
+    @Inject
+    @Configured(required = false, order = 2)
+    Date nullReplacement;
 
-	@Inject
-	@Configured(required = false, order = 3)
-	String[] dateMasks;
+    @Inject
+    @Configured(required = false, order = 3)
+    String[] dateMasks;
 
-	private DateTimeFormatter[] _dateTimeFormatters;
+    private DateTimeFormatter[] _dateTimeFormatters;
 
-	public static ConvertToDateTransformer getInternalInstance() {
-		if (internalInstance == null) {
-			internalInstance = new ConvertToDateTransformer();
-			internalInstance.init();
-		}
-		return internalInstance;
-	}
+    public static ConvertToDateTransformer getInternalInstance() {
+        if (internalInstance == null) {
+            internalInstance = new ConvertToDateTransformer();
+            internalInstance.init();
+        }
+        return internalInstance;
+    }
 
-	public ConvertToDateTransformer() {
-		dateMasks = getDefaultDateMasks();
-	}
+    public ConvertToDateTransformer() {
+        dateMasks = getDefaultDateMasks();
+    }
 
-	@Initialize
-	public void init() {
-		if (dateMasks == null) {
-			dateMasks = getDefaultDateMasks();
-		}
-		_dateTimeFormatters = new DateTimeFormatter[dateMasks.length];
-		for (int i = 0; i < dateMasks.length; i++) {
-			String dateMask = dateMasks[i];
-			_dateTimeFormatters[i] = DateTimeFormat.forPattern(dateMask);
-		}
-	}
+    @Initialize
+    public void init() {
+        if (dateMasks == null) {
+            dateMasks = getDefaultDateMasks();
+        }
+        _dateTimeFormatters = new DateTimeFormatter[dateMasks.length];
+        for (int i = 0; i < dateMasks.length; i++) {
+            String dateMask = dateMasks[i];
+            _dateTimeFormatters[i] = DateTimeFormat.forPattern(dateMask);
+        }
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		String[] names = new String[input.length];
-		for (int i = 0; i < names.length; i++) {
-			names[i] = input[i].getName() + " (as date)";
-		}
-		return new OutputColumns(names);
-	}
+    @Override
+    public OutputColumns getOutputColumns() {
+        String[] names = new String[input.length];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = input[i].getName() + " (as date)";
+        }
+        return new OutputColumns(names);
+    }
 
-	@Override
-	public Date[] transform(InputRow inputRow) {
-		Date[] result = new Date[input.length];
-		for (int i = 0; i < input.length; i++) {
-			Object value = inputRow.getValue(input[i]);
-			Date d = transformValue(value);
-			if (d == null) {
-				d = nullReplacement;
-			}
-			result[i] = d;
-		}
-		return result;
-	}
+    @Override
+    public Date[] transform(InputRow inputRow) {
+        Date[] result = new Date[input.length];
+        for (int i = 0; i < input.length; i++) {
+            Object value = inputRow.getValue(input[i]);
+            Date d = transformValue(value);
+            if (d == null) {
+                d = nullReplacement;
+            }
+            result[i] = d;
+        }
+        return result;
+    }
 
-	public Date transformValue(Object value) {
-		Date d = null;
-		if (value != null) {
-			if (value instanceof Date) {
-				d = (Date) value;
-			} else if (value instanceof Calendar) {
-				d = ((Calendar) value).getTime();
-			} else if (value instanceof String) {
-				d = convertFromString((String) value);
-			} else if (value instanceof Number) {
-				d = convertFromNumber((Number) value);
-			}
-		}
-		return d;
-	}
+    public Date transformValue(Object value) {
+        Date d = null;
+        if (value != null) {
+            if (value instanceof Date) {
+                d = (Date) value;
+            } else if (value instanceof Calendar) {
+                d = ((Calendar) value).getTime();
+            } else if (value instanceof String) {
+                d = convertFromString((String) value);
+            } else if (value instanceof Number) {
+                d = convertFromNumber((Number) value);
+            }
+        }
+        return d;
+    }
 
-	protected Date convertFromString(String value) {
-		try {
-			long longValue = Long.parseLong(value);
-			return convertFromNumber(longValue);
-		} catch (NumberFormatException e) {
-			// do nothing, proceed to dateFormat parsing
-		}
+    protected Date convertFromString(String value) {
+        try {
+            long longValue = Long.parseLong(value);
+            return convertFromNumber(longValue);
+        } catch (NumberFormatException e) {
+            // do nothing, proceed to dateFormat parsing
+        }
 
-		for (DateTimeFormatter formatter : _dateTimeFormatters) {
-			try {
-				return formatter.parseDateTime(value).toDate();
-			} catch (Exception e) {
-				// proceed to next formatter
-			}
-		}
+        if ("now()".equalsIgnoreCase(value)) {
+            return new Date();
+        }
+        if ("today()".equalsIgnoreCase(value)) {
+            Calendar cal = Calendar.getInstance();
+            // set time to 00:00:00.000
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            return cal.getTime();
+        }
+        if ("yesterday()".equalsIgnoreCase(value)) {
+            Calendar cal = Calendar.getInstance();
+            // set time to 00:00:00.000
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            // subtract one day
+            cal.add(Calendar.DATE, -1);
+            return cal.getTime();
+        }
 
-		return null;
-	}
+        for (DateTimeFormatter formatter : _dateTimeFormatters) {
+            try {
+                return formatter.parseDateTime(value).toDate();
+            } catch (Exception e) {
+                // proceed to next formatter
+            }
+        }
 
-	protected Date convertFromNumber(Number value) {
-		Number numberValue = (Number) value;
-		long longValue = numberValue.longValue();
+        return null;
+    }
 
-		String stringValue = Long.toString(longValue);
-		// test if the number is actually a format of the type yyyyMMdd
-		if (stringValue.length() == 8 && (stringValue.startsWith("1") || stringValue.startsWith("2"))) {
-			try {
-				return NUMBER_BASED_DATE_FORMAT_LONG.parseDateTime(stringValue).toDate();
-			} catch (Exception e) {
-				// do nothing, proceed to next method of conversion
-			}
-		}
+    protected Date convertFromNumber(Number value) {
+        Number numberValue = (Number) value;
+        long longValue = numberValue.longValue();
 
-		// test if the number is actually a format of the type yyMMdd
-		if (stringValue.length() == 6) {
-			try {
-				return NUMBER_BASED_DATE_FORMAT_SHORT.parseDateTime(stringValue).toDate();
-			} catch (Exception e) {
-				// do nothing, proceed to next method of conversion
-			}
-		}
+        String stringValue = Long.toString(longValue);
+        // test if the number is actually a format of the type yyyyMMdd
+        if (stringValue.length() == 8 && (stringValue.startsWith("1") || stringValue.startsWith("2"))) {
+            try {
+                return NUMBER_BASED_DATE_FORMAT_LONG.parseDateTime(stringValue).toDate();
+            } catch (Exception e) {
+                // do nothing, proceed to next method of conversion
+            }
+        }
 
-		if (longValue > 5000000) {
-			// this number is most probably amount of milliseconds since
-			// 1970
-			return new Date(longValue);
-		} else {
-			// this number is most probably the amount of days since
-			// 1970
-			return new Date(longValue * 1000 * 60 * 60 * 24);
-		}
-	}
+        // test if the number is actually a format of the type yyMMdd
+        if (stringValue.length() == 6) {
+            try {
+                return NUMBER_BASED_DATE_FORMAT_SHORT.parseDateTime(stringValue).toDate();
+            } catch (Exception e) {
+                // do nothing, proceed to next method of conversion
+            }
+        }
 
-	private String[] getDefaultDateMasks() {
-		final List<String> defaultDateMasks = new ArrayList<String>();
+        if (longValue > 5000000) {
+            // this number is most probably amount of milliseconds since
+            // 1970
+            return new Date(longValue);
+        } else {
+            // this number is most probably the amount of days since
+            // 1970
+            return new Date(longValue * 1000 * 60 * 60 * 24);
+        }
+    }
 
-		defaultDateMasks.add("yyyy-MM-dd HH:mm:ss.S");
-		defaultDateMasks.add("yyyy-MM-dd HH:mm:ss");
-		defaultDateMasks.add("yyyyMMddHHmmssZ");
-		defaultDateMasks.add("yyMMddHHmmssZ");
+    private String[] getDefaultDateMasks() {
+        final List<String> defaultDateMasks = new ArrayList<String>();
 
-		for (String string : prototypePatterns) {
-			defaultDateMasks.add(string);
-			string = string.replaceAll("\\-", "\\.");
-			defaultDateMasks.add(string);
-			string = string.replaceAll("\\.", "\\/");
-			defaultDateMasks.add(string);
-		}
+        defaultDateMasks.add("yyyy-MM-dd HH:mm:ss.S");
+        defaultDateMasks.add("yyyy-MM-dd HH:mm:ss");
+        defaultDateMasks.add("yyyyMMddHHmmssZ");
+        defaultDateMasks.add("yyMMddHHmmssZ");
 
-		return defaultDateMasks.toArray(new String[defaultDateMasks.size()]);
-	}
-	
-	public String[] getDateMasks() {
-		return dateMasks;
-	}
-	
-	public Date getNullReplacement() {
-		return nullReplacement;
-	}
-	
-	public void setNullReplacement(Date nullReplacement) {
-		this.nullReplacement = nullReplacement;
-	}
+        for (String string : prototypePatterns) {
+            defaultDateMasks.add(string);
+            string = string.replaceAll("\\-", "\\.");
+            defaultDateMasks.add(string);
+            string = string.replaceAll("\\.", "\\/");
+            defaultDateMasks.add(string);
+        }
+
+        return defaultDateMasks.toArray(new String[defaultDateMasks.size()]);
+    }
+
+    public String[] getDateMasks() {
+        return dateMasks;
+    }
+
+    public Date getNullReplacement() {
+        return nullReplacement;
+    }
+
+    public void setNullReplacement(Date nullReplacement) {
+        this.nullReplacement = nullReplacement;
+    }
 }
