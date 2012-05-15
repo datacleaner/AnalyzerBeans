@@ -40,7 +40,6 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
@@ -58,7 +57,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 
 	private AnalysisJobBuilder analysisJobBuilder;
 	private AnalyzerBeansConfigurationImpl configuration;
-	private JdbcDatastore datastore;
+	private Datastore datastore;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -267,7 +266,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 	}
 
 	public void testSourceColumnListeners() throws Exception {
-		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("mydb");
+		Datastore datastore = TestHelper.createSampleDatabaseDatastore("mydb");
 		AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
 		ajb.setDatastore(datastore);
 

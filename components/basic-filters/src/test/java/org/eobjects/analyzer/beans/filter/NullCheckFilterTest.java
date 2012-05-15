@@ -21,8 +21,8 @@ package org.eobjects.analyzer.beans.filter;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
@@ -88,7 +88,7 @@ public class NullCheckFilterTest extends TestCase {
 	}
 
 	public void testOptimizeQuery() throws Exception {
-		JdbcDatastore datastore = TestHelper.createSampleDatabaseDatastore("mydb");
+		Datastore datastore = TestHelper.createSampleDatabaseDatastore("mydb");
 		DatastoreConnection con = datastore.openConnection();
 		SchemaNavigator nav = con.getSchemaNavigator();
 

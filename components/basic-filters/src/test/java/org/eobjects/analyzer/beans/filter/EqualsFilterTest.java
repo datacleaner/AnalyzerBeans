@@ -19,16 +19,16 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
+import junit.framework.TestCase;
+
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
-
-import junit.framework.TestCase;
 
 public class EqualsFilterTest extends TestCase {
 
@@ -69,7 +69,7 @@ public class EqualsFilterTest extends TestCase {
 	}
 
 	public void testOptimizeQuery() throws Exception {
-		JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("ds");
+		Datastore ds = TestHelper.createSampleDatabaseDatastore("ds");
 		DatastoreConnection con = ds.openConnection();
 		Column column = con.getSchemaNavigator().convertToColumn("PUBLIC.EMPLOYEES.FIRSTNAME");
 		InputColumn<?> inputColumn = new MetaModelInputColumn(column);
