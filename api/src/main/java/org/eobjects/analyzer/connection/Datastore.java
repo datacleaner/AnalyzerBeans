@@ -21,7 +21,6 @@ package org.eobjects.analyzer.connection;
 
 import java.io.Serializable;
 
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.metamodel.util.HasName;
 
 /**

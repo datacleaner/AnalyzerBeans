@@ -21,13 +21,11 @@ package org.eobjects.analyzer.util;
 
 import java.io.File;
 
-import org.eobjects.analyzer.connection.CsvDatastore;
-
 import junit.framework.TestCase;
+
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
 
 public class SchemaNavigatorTest extends TestCase {
 
@@ -42,17 +40,5 @@ public class SchemaNavigatorTest extends TestCase {
 		assertEquals(
 				"Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,indexed=false,nativeType=null,columnSize=null]",
 				column.toString());
-	}
-
-	public void testConvertToColumnWithNoSchema() throws Exception {
-		CsvDatastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
-		SchemaNavigator schemaNavigator = datastore.openConnection().getSchemaNavigator();
-		Column col = schemaNavigator.convertToColumn("product");
-		assertNotNull(col);
-
-		Table table = datastore.openConnection().getDataContext().getDefaultSchema().getTables()[0];
-		assertEquals("projects", table.getName());
-		col = schemaNavigator.convertToColumn("projects.product");
-		assertNotNull(col);
 	}
 }

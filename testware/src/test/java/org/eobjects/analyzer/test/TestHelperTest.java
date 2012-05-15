@@ -21,18 +21,18 @@ package org.eobjects.analyzer.test;
 
 import java.util.Arrays;
 
-import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
-
 import junit.framework.TestCase;
+
+import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 
 public class TestHelperTest extends TestCase {
 
     public void testCreateSampleDatabaseDatastore() throws Exception {
-        JdbcDatastore ds = TestHelper.createSampleDatabaseDatastore("foo");
+        Datastore ds = TestHelper.createSampleDatabaseDatastore("foo");
         assertEquals("foo", ds.getName());
 
-        UpdateableDatastoreConnection con = ds.openConnection();
+        DatastoreConnection con = ds.openConnection();
         String[] tableNames = con.getSchemaNavigator().getDefaultSchema().getTableNames();
         assertEquals(
                 "[CUSTOMERS, CUSTOMER_W_TER, DEPARTMENT_MANAGERS, DIM_TIME, EMPLOYEES, "

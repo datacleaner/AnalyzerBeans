@@ -35,5 +35,11 @@
 			<version>4.8.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel</groupId>
+			<artifactId>MetaModel-full</artifactId>
+			<version>${metamodel.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

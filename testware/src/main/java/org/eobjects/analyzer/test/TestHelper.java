@@ -19,11 +19,12 @@
  */
 package org.eobjects.analyzer.test;
 
-import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.Datastore;
+
 
 public class TestHelper {
 
-    public static JdbcDatastore createSampleDatabaseDatastore(String name) {
-        return new JdbcDatastore(name, "jdbc:hsqldb:res:orderdb;readonly=true", "org.hsqldb.jdbcDriver");
+    public static Datastore createSampleDatabaseDatastore(String name) {
+        return new TestDatastore(name);
     }
 }
