@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<properties>
 		<javadoc.version>2.8</javadoc.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -7,6 +8,7 @@
 		<easymock.version>3.1</easymock.version>
 		<metamodel.version>3.0-beta6</metamodel.version>
 		<sshwagon.version>2.0</sshwagon.version>
+		<scala.version>2.9.1</scala.version>
 	</properties>
 	<parent>
 		<!-- Uses the OSS sonatype nexus repository for distribution -->
@@ -179,7 +181,6 @@
 					</links>
 				</configuration>
 			</plugin>
-
 		</plugins>
 
 		<extensions>
@@ -244,6 +245,36 @@
 								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.scala-tools</groupId>
+					<artifactId>maven-scala-plugin</artifactId>
+					<version>2.15.2</version>
+					<executions>
+						<execution>
+							<id>scala-compile-first</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>add-source</goal>
+								<goal>compile</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>scala-test-compile</id>
+							<phase>process-test-resources</phase>
+							<goals>
+								<goal>testCompile</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<args>
+							<arg>-unchecked</arg>
+							<arg>-deprecation</arg>
+							<arg>-explaintypes</arg>
+						</args>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -328,4 +359,14 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-library</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
