@@ -64,61 +64,101 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             htmlFragments.put(componentJob, htmlFragment);
         }
 
-        writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
-        writer.write("<html>\n");
+        writeHtmlBegin(writer);
         writeHead(writer, htmlFragments);
         writeBody(writer, htmlFragments);
+        writeHtmlEnd(writer);
+    }
+
+    protected void writeHtmlBegin(Writer writer) throws IOException {
+        writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
+        writer.write("<html>\n");
+    }
+
+    protected void writeHtmlEnd(Writer writer) throws IOException {
         writer.write("</html>");
     }
 
-    private void writeHead(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments) throws IOException {
+    protected void writeHead(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments)
+            throws IOException {
         final Set<HeadElement> allHeadElements = new HashSet<HeadElement>();
-        
-        writer.write("<head>\n");
-        writer.write("<title>Analysis result</title>");
-       
+
+        writeHeadBegin(writer);
+
         for (HtmlFragment htmlFragment : htmlFragments.values()) {
             final List<HeadElement> headElements = htmlFragment.getHeadElements();
             for (HeadElement headElement : headElements) {
                 if (!allHeadElements.contains(headElement)) {
-                    writer.write(headElement.toHtml());
-                    writer.write('\n');
+                    writeHeadElement(writer, headElement);
                     allHeadElements.add(headElement);
                 }
             }
         }
-        
-        writer.write("</head>\n");
+
+        writeHeadEnd(writer);
     }
 
-    private void writeBody(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments) throws IOException {
-        writer.write("<body>\n");
-        writer.write("<div class=\"analysisResultContainer\">\n");
+    protected void writeHeadBegin(Writer writer) throws IOException {
+        writer.write("<head>\n");
+        writer.write("  <title>Analysis result</title>");
+    }
+
+    protected void writeHeadEnd(Writer writer) throws IOException {
+        writer.write("</head>");
+    }
+
+    protected void writeHeadElement(Writer writer, HeadElement headElement) throws IOException {
+        writer.write("  ");
+        writer.write(headElement.toHtml());
+        writer.write('\n');
+    }
+
+    protected void writeBody(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments)
+            throws IOException {
+        writeBodyBegin(writer);
 
         for (Entry<ComponentJob, HtmlFragment> entry : htmlFragments.entrySet()) {
             final ComponentJob componentJob = entry.getKey();
             final HtmlFragment htmlFragment = entry.getValue();
-            writer.write("<div class=\"analyzerResultContainer\">\n");
             {
-                writer.write("<h2 class=\"analyzerResultHeader\">Result: "
-                        + StringEscapeUtils.escapeHtml(getLabel(componentJob)) + "</h2>");
-                writer.write("<div class=\"analyzerResultPanel\">\n");
-
-                final List<BodyElement> bodyElements = htmlFragment.getBodyElements();
-                for (BodyElement bodyElement : bodyElements) {
-                    writer.write(bodyElement.toHtml());
-                    writer.write('\n');
-                }
-
-                writer.write("</div>\n");
+                writeBodyHtmlFragment(writer, componentJob, htmlFragment);
             }
-            writer.write("</div>\n");
         }
-        writer.write("</div>\n");
-        writer.write("</body>\n");
+        writeBodyEnd(writer);
     }
 
-    private String getLabel(ComponentJob componentJob) {
+    protected void writeBodyBegin(Writer writer) throws IOException {
+        writer.write("<body>\n");
+        writer.write("<div class=\"analysisResultContainer\">\n");
+    }
+
+    protected void writeBodyEnd(Writer writer) throws IOException {
+        writer.write("</div>\n");
+        writer.write("</body>");
+    }
+
+    protected void writeBodyHtmlFragment(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment)
+            throws IOException {
+        writer.write("<h2 class=\"analyzerResultHeader\">Result: "
+                + StringEscapeUtils.escapeHtml(getLabel(componentJob)) + "</h2>");
+        writer.write("<div class=\"analyzerResultPanel\">\n");
+
+        final List<BodyElement> bodyElements = htmlFragment.getBodyElements();
+        for (BodyElement bodyElement : bodyElements) {
+            writeBodyElement(writer, componentJob, htmlFragment, bodyElement);
+        }
+
+        writer.write("</div>\n");
+    }
+
+    protected void writeBodyElement(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment,
+            BodyElement bodyElement) throws IOException {
+        writer.write("  ");
+        writer.write(bodyElement.toHtml());
+        writer.write('\n');
+    }
+
+    protected String getLabel(ComponentJob componentJob) {
         String label = componentJob.getName();
         if (label == null) {
             ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
