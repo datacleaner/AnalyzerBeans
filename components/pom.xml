@@ -18,6 +18,8 @@
 		<module>json</module>
 		<module>standardizers</module>
 		<module>pattern-finder</module>
+		<module>value-distribution</module>
+		<module>date-gap</module>
 		<module>reference-data</module>
 		<module>writers</module>
 		<module>el</module>
