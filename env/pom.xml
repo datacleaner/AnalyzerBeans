@@ -15,4 +15,13 @@
 		<module>ejb</module>
 		<module>xml-config</module>
 	</modules>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-testware</artifactId>
+			<version>0.16-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>

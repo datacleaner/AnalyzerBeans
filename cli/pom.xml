@@ -135,5 +135,11 @@
 			<version>r938</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-testware</artifactId>
+			<version>0.16-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
