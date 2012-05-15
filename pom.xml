@@ -25,6 +25,7 @@
 	<modules>
 		<module>api</module>
 		<module>core</module>
+		<module>testware</module>
 		<module>components</module>
 		<module>env</module>
 		<module>cli</module>
