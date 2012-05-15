@@ -95,8 +95,7 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
                         + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabHtmlRenderer], "
                         + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
                         + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DateGapTextRenderer], "
-                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer], "
-                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.ValueDistributionResultHtmlRenderer]]",
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
                 new TreeSet<RendererBeanDescriptor>(rendererBeanDescriptors).toString());
     }
 }

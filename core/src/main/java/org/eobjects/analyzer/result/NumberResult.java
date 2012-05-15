@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.result;
 
+import org.eobjects.analyzer.beans.api.Alias;
+
 /**
  * Very simple result type for analyzers that simply return a number (maybe a
  * KPI or something like that).
@@ -37,6 +39,7 @@ public class NumberResult implements AnalyzerResult {
 	}
 
 	@Metric("Number")
+	@Alias("Some number")
 	public Number getNumber() {
 		return number;
 	}

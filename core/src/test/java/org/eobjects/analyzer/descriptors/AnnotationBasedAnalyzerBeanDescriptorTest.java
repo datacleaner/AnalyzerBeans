@@ -97,20 +97,20 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
         assertEquals(NumberResult.class, descriptor.getResultClass());
 
         Set<MetricDescriptor> resultMetrics = descriptor.getResultMetrics();
-        assertEquals("[MetricDescriptorImpl[name=Distinct count], " + "MetricDescriptorImpl[name=Null count], "
-                + "MetricDescriptorImpl[name=Unique count], " + "MetricDescriptorImpl[name=Value count]]",
+        assertEquals("[MetricDescriptorImpl[name=Number]]",
                 resultMetrics.toString());
 
         MetricDescriptor metric = descriptor.getResultMetric("Number");
         assertEquals("MetricDescriptorImpl[name=Number]", metric.toString());
         assertFalse(metric.isParameterizedByInputColumn());
         assertFalse(metric.isParameterizedByString());
+        
 
-        metric = descriptor.getResultMetric("value count");
-        assertNotNull(metric);
-        assertEquals("MetricDescriptorImpl[name=Value count]", metric.toString());
-        assertFalse(metric.isParameterizedByInputColumn());
-        assertTrue(metric.isParameterizedByString());
+        metric = descriptor.getResultMetric("Foo bar");
+        assertNull(metric);
+        
+        MetricDescriptor metric2 = descriptor.getResultMetric("Some nUMBer");
+        assertSame(metric, metric2);
     }
 
     public void testAbstractBeanClass() throws Exception {
