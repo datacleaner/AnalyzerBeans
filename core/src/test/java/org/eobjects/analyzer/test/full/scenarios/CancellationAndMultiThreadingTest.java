@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import org.eobjects.analyzer.beans.mock.AnalyzerMock;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
@@ -81,7 +81,7 @@ public class CancellationAndMultiThreadingTest extends TestCase {
 		Column commentsColumn = table.getColumnByName("COMMENTS");
 
 		analysisJobBuilder.addSourceColumns(statusColumn, commentsColumn);
-		analysisJobBuilder.addAnalyzer(ValueDistributionAnalyzer.class).addInputColumns(
+		analysisJobBuilder.addAnalyzer(AnalyzerMock.class).addInputColumns(
 				analysisJobBuilder.getSourceColumns());
 
 		AnalysisJob job = analysisJobBuilder.toAnalysisJob();

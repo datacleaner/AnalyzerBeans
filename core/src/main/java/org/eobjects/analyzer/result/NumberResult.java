@@ -36,6 +36,7 @@ public class NumberResult implements AnalyzerResult {
 		this.number = number;
 	}
 
+	@Metric("Number")
 	public Number getNumber() {
 		return number;
 	}

@@ -27,18 +27,19 @@ import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.mock.AnalyzerMock;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
+import org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptorTest.OneMoreMockAnalyzer;
 
 public class SimpleDescriptorProviderTest extends TestCase {
 
 	public void testSetBeanClassNames() throws Exception {
 		SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider(false);
 
-		assertNull(descriptorProvider.getAnalyzerBeanDescriptorForClass(ValueDistributionAnalyzer.class));
+		assertNull(descriptorProvider.getAnalyzerBeanDescriptorForClass(AnalyzerMock.class));
+		assertNull(descriptorProvider.getAnalyzerBeanDescriptorForClass(OneMoreMockAnalyzer.class));
 		assertNull(descriptorProvider.getTransformerBeanDescriptorForClass(ConvertToBooleanTransformer.class));
 
-		descriptorProvider.setAnalyzerClassNames(Arrays.asList(ValueDistributionAnalyzer.class.getName(),
-				AnalyzerMock.class.getName()));
+		descriptorProvider.setAnalyzerClassNames(Arrays.asList(
+				AnalyzerMock.class.getName(), OneMoreMockAnalyzer.class.getName()));
 
 		assertEquals(2, descriptorProvider.getAnalyzerBeanDescriptors().size());
 
@@ -52,8 +53,8 @@ public class SimpleDescriptorProviderTest extends TestCase {
 		assertEquals(2, descriptorProvider.getTransformerBeanDescriptors().size());
 
 		assertEquals(
-				"AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer]",
-				descriptorProvider.getAnalyzerBeanDescriptorForClass(ValueDistributionAnalyzer.class).toString());
+				"AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.mock.AnalyzerMock]",
+				descriptorProvider.getAnalyzerBeanDescriptorForClass(AnalyzerMock.class).toString());
 
 		assertEquals(
 				"AnnotationBasedTransformerBeanDescriptor[org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer]",

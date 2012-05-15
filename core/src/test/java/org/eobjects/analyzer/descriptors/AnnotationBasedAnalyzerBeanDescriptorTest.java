@@ -27,10 +27,9 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.mock.AnalyzerMock;
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.ValueDistributionResult;
+import org.eobjects.analyzer.result.NumberResult;
 
 public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
 
@@ -94,16 +93,16 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
     }
 
     public void testGetResultMetrics() throws Exception {
-        AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
-        assertEquals(ValueDistributionResult.class, descriptor.getResultClass());
+        AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(AnalyzerMock.class);
+        assertEquals(NumberResult.class, descriptor.getResultClass());
 
         Set<MetricDescriptor> resultMetrics = descriptor.getResultMetrics();
         assertEquals("[MetricDescriptorImpl[name=Distinct count], " + "MetricDescriptorImpl[name=Null count], "
                 + "MetricDescriptorImpl[name=Unique count], " + "MetricDescriptorImpl[name=Value count]]",
                 resultMetrics.toString());
 
-        MetricDescriptor metric = descriptor.getResultMetric("Unique count");
-        assertEquals("MetricDescriptorImpl[name=Unique count]", metric.toString());
+        MetricDescriptor metric = descriptor.getResultMetric("Number");
+        assertEquals("MetricDescriptorImpl[name=Number]", metric.toString());
         assertFalse(metric.isParameterizedByInputColumn());
         assertFalse(metric.isParameterizedByString());
 
