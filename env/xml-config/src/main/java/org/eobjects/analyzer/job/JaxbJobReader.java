@@ -121,14 +121,22 @@ public class JaxbJobReader implements JobReader<InputStream> {
 	public AnalysisJob read(InputStream inputStream)
 			throws NoSuchDatastoreException {
 		AnalysisJobBuilder ajb = create(inputStream);
-		return ajb.toAnalysisJob();
+		try {
+		    return ajb.toAnalysisJob();
+		} finally {
+		    ajb.close();
+		}
 	}
 
 	@Override
 	public AnalysisJob read(InputStream inputStream,
 			SourceColumnMapping sourceColumnMapping) {
 		AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping);
-		return ajb.toAnalysisJob();
+		try {
+		    return ajb.toAnalysisJob();
+		} finally {
+		    ajb.close();
+		}
 	}
 
 	public AnalysisJobMetadata readMetadata(File file) {
