@@ -5,7 +5,7 @@
 		<artifactId>AnalyzerBeans-components</artifactId>
 		<version>0.16-SNAPSHOT</version>
 	</parent>
-	<artifactId>AnalyzerBeans-value-distribution</artifactId>
+	<artifactId>AnalyzerBeans-date-gap</artifactId>
 	<description>Date gap analysis component for AnalyzerBeans</description>
 	<dependencies>
 		<dependency>
