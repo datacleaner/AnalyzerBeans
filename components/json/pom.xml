@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
-			<artifactId>AnalyzerBeans-core</artifactId>
+			<artifactId>AnalyzerBeans-api</artifactId>
 			<version>0.16-SNAPSHOT</version>
 		</dependency>
 		<dependency>
