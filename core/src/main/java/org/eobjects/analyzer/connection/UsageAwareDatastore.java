@@ -101,8 +101,7 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
-	public synchronized final UsageAwareDatastoreConnection<E> getDataContextProvider() {
+	private synchronized final UsageAwareDatastoreConnection<E> getDatastoreConnection() {
 		if (_dataContextProvider != null) {
 			return _dataContextProvider;
 		}
@@ -128,7 +127,7 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 
 	@Override
 	public DatastoreConnection openConnection() {
-		UsageAwareDatastoreConnection<E> connection = getDataContextProvider();
+		UsageAwareDatastoreConnection<E> connection = getDatastoreConnection();
 		if (connection instanceof UpdateableDatastoreConnection) {
 			return new UpdateableDatastoreConnectionLease((UpdateableDatastoreConnection) connection);
 		} else {

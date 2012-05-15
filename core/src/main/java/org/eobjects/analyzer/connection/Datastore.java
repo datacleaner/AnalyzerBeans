@@ -58,18 +58,6 @@ public interface Datastore extends Serializable, HasName {
 	public void setDescription(String description);
 
 	/**
-	 * Gets a DataContextProvider, which is to be treated as a "connection" to
-	 * the datastore - a handle that allows you to query and explore the
-	 * datastore.
-	 * 
-	 * @return a DataContextProvider for this datastore.
-	 * 
-	 * @deprecated use {@link #open()} instead.
-	 */
-	@Deprecated
-	public DatastoreConnection getDataContextProvider();
-
-	/**
 	 * Opens up the connection to the datastore. If the datastore is already
 	 * opened, most times this method will simply share the existing connection.
 	 * 
