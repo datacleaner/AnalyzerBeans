@@ -94,7 +94,6 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     private void writeBody(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments) throws IOException {
         writer.write("<body>\n");
         writer.write("<div class=\"analysisResultContainer\">\n");
-        writer.write("<h1 class=\"analysisResultHeader\">Success!</h1>\n");
 
         for (Entry<ComponentJob, HtmlFragment> entry : htmlFragments.entrySet()) {
             final ComponentJob componentJob = entry.getKey();
