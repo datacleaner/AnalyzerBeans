@@ -7,7 +7,7 @@
 		<version>0.16-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-scala</artifactId>
-	<description>A set of AnalyzerBeans components written in the Scala programming language</description>
+	<description>A set of AnalyzerBeans components and utilities written in the Scala programming language</description>
 
 	<build>
 		<plugins>

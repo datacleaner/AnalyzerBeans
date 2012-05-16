@@ -55,8 +55,9 @@
 			<version>0.16-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
+			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-scala</artifactId>
+			<version>0.16-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

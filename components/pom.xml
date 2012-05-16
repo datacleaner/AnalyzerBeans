@@ -10,6 +10,7 @@
 	<description>Parent for all additional components to AnalyzerBeans. Child modules represent optional components that typically require additional dependencies, which is why they have been separated for the sake of dependency mangement and flexibility in application composition.</description>
 	<packaging>pom</packaging>
 	<modules>
+		<module>scala</module>
 		<module>basic-transformers</module>
 		<module>basic-filters</module>
 		<module>basic-analyzers</module>
@@ -23,7 +24,6 @@
 		<module>reference-data</module>
 		<module>writers</module>
 		<module>el</module>
-		<module>scala</module>
 		<module>javascript</module>
 		<module>i18n</module>
 	</modules>
