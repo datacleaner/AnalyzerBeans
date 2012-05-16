@@ -5,7 +5,10 @@ import org.eobjects.analyzer.result.html.HtmlRenderer
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment
 import scala.xml.PrettyPrinter
 import javax.xml.transform.Transformer
+import org.eobjects.analyzer.beans.api.RendererBean
+import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat
 
+@RendererBean(classOf[HtmlRenderingFormat])
 class WriteDataResultHtmlRenderer extends HtmlRenderer[WriteDataResult] {
 
   def handleFragment(frag: SimpleHtmlFragment, r: WriteDataResult) = {
@@ -18,7 +21,7 @@ class WriteDataResultHtmlRenderer extends HtmlRenderer[WriteDataResult] {
                  { if (updates > 0) { <p>Executed { updates } updates</p> } }
                  { if (errors > 0) { <p>{ errors } Errornous records</p> } }
                </div>;
-               
+
     frag.addBodyElement(html.toString());
   }
 }

@@ -18,6 +18,6 @@ class WriteDataResultHtmlRendererTest extends AssertionsForJUnit {
                  <p>Executed 2 inserts</p>
                  <p>Executed 3 updates</p>
                  
-               </div>""", htmlFragment.getBodyElements().get(0).toHtml());
+               </div>""".replaceAll("\r\n","\n"), htmlFragment.getBodyElements().get(0).toHtml().replaceAll("\r\n","\n"));
   }
 }
