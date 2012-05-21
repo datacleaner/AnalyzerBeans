@@ -54,5 +54,10 @@ public final class HtmlUtils {
     public static String createElementId() {
         return "analysisResultElement" + getFunctionCounter(threadLocalElementIdCounter).incrementAndGet();
     }
+    
+    public static String escapeToJsonString(String str) {
+        // TODO: Escape 
+        return str;
+    }
 
 }

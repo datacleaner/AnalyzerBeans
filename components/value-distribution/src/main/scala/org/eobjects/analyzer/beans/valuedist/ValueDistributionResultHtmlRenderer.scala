@@ -5,21 +5,29 @@ import org.eobjects.analyzer.result.html.SimpleHtmlFragment
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat
 import scala.collection.JavaConversions._
 import scala.xml.Node
+import org.eobjects.analyzer.result.html.GoogleChartHeadElement
+import org.eobjects.analyzer.result.html.HtmlUtils
 
 @RendererBean(classOf[HtmlRenderingFormat])
-class ValueDistributionResultHtmlRenderer extends HtmlRenderer[ValueDistributionResult] {
+class ValueDistributionResultHtmlRenderer(includeChart: Boolean) extends HtmlRenderer[ValueDistributionResult] {
+
+  def this() = this(true)
 
   def handleFragment(frag: SimpleHtmlFragment, result: ValueDistributionResult) = {
+
+    if (includeChart) {
+      frag.addHeadElement(GoogleChartHeadElement);
+    }
 
     val html = <div class="valueDistributionResultContainer">
                  {
                    if (result.isGroupingEnabled()) {
                      result.getGroupedValueDistributionResults().map(r => {
-                       renderGroupResult(r)
+                       renderGroupResult(r, frag)
                      })
                    } else {
                      val r = result.getSingleValueDistributionResult();
-                     renderGroupResult(r);
+                     renderGroupResult(r, frag);
                    }
                  }
                </div>;
@@ -27,11 +35,21 @@ class ValueDistributionResultHtmlRenderer extends HtmlRenderer[ValueDistribution
     frag.addBodyElement(html.toString())
   }
 
-  def renderGroupResult(result: ValueDistributionGroupResult): Node = {
+  def renderGroupResult(result: ValueDistributionGroupResult, frag: SimpleHtmlFragment): Node = {
+    val chartElementId: String = if (includeChart) HtmlUtils.createElementId() else "";
+    
+    frag.addHeadElement(new ValueDistributionChartScriptHeadElement(result, chartElementId));
+
     return <div class="valueDistributionGroupPanel">
              {
                if (result.getGroupName() != null) {
                  <h3>Group: { result.getGroupName() }</h3>
+               }
+             }
+             {
+               if (includeChart) {
+                 <div class="valueDistributionChart" id={chartElementId}>
+                 </div>
                }
              }
              {
