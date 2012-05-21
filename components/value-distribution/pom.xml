@@ -61,7 +61,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
-			<artifactId>AnalyzerBeans-scala</artifactId>
+			<artifactId>AnalyzerBeans-html-rendering</artifactId>
 			<version>0.16-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
