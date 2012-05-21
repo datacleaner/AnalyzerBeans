@@ -39,10 +39,10 @@ val         result2 = crosstabRenderer.render(new HtmlCrosstabRendererCallback(n
         val nativeValues = Array[String]("Yes", "No, immigrant", "No, second-generation");
 
         var i = 0;
-        for (val gender <- genderValues) {
-            for (val region <- regionValues) {
-                for (val ageGroup <- ageGroupValues) {
-                    for (val nativeValue <- nativeValues) {
+        for (gender <- genderValues) {
+            for (region <- regionValues) {
+                for (ageGroup <- ageGroupValues) {
+                    for (nativeValue <- nativeValues) {
                         c.where("Region", region).where("Age-group", ageGroup).where("Gender", gender)
                                 .where("Native", nativeValue).put(i, true);
                         i = i+1;
