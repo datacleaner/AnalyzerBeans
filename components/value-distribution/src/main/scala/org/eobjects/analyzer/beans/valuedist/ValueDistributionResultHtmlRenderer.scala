@@ -29,24 +29,30 @@ class ValueDistributionResultHtmlRenderer extends HtmlRenderer[ValueDistribution
 
   def renderGroupResult(result: ValueDistributionGroupResult): Node = {
     return <div class="valueDistributionGroupPanel">
-             { if (result.getGroupName() != null) {
+             {
+               if (result.getGroupName() != null) {
                  <h3>Group: { result.getGroupName() }</h3>
-             } }
-             <table class="valueDistributionValueTable">
-               {
-                 result.getTopValues().getValueCounts().map(vc => {
-                   <tr><td>{ vc.getValue() }</td><td>{ vc.getCount() }</td></tr>
-                 })
                }
-               {
-                 result.getBottomValues().getValueCounts().map(vc => {
-                   <tr><td>{ vc.getValue() }</td><td>{ vc.getCount() }</td></tr>
-                 })
+             }
+             {
+               if (result.getTopValues().getActualSize() + result.getBottomValues().getActualSize() > 0) {
+                 <table class="valueDistributionValueTable">
+                   {
+                     result.getTopValues().getValueCounts().map(vc => {
+                       <tr><td>{ vc.getValue() }</td><td>{ vc.getCount() }</td></tr>
+                     })
+                   }
+                   {
+                     result.getBottomValues().getValueCounts().map(vc => {
+                       <tr><td>{ vc.getValue() }</td><td>{ vc.getCount() }</td></tr>
+                     })
+                   }
+                 </table>
                }
-             </table>
+             }
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>{ result.getTotalCount() }</td></tr>
-               <tr><td>Distrinct count</td><td>{ result.getDistinctCount() }</td></tr>
+               <tr><td>Distinct count</td><td>{ result.getDistinctCount() }</td></tr>
                <tr><td>Unique count</td><td>{ result.getUniqueCount() }</td></tr>
                <tr><td>Null count</td><td>{ result.getNullCount() }</td></tr>
              </table>
