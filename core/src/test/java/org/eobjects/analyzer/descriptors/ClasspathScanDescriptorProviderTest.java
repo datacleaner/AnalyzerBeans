@@ -90,11 +90,8 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
         ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
         Collection<RendererBeanDescriptor> rendererBeanDescriptors = descriptorProvider.scanPackage(
                 "org.eobjects.analyzer.result.renderer", true).getRendererBeanDescriptors();
-        assertEquals(
-                "[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.AnnotatedRowsHtmlRenderer], "
-                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabHtmlRenderer], "
-                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
-                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
+        assertEquals("[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
+                + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
                 new TreeSet<RendererBeanDescriptor>(rendererBeanDescriptors).toString());
     }
 }
