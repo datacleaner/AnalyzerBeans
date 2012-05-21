@@ -12,6 +12,7 @@ import org.eobjects.analyzer.job.AnalyzerJob
 import org.eobjects.analyzer.data.InputColumn
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor
 import org.eobjects.analyzer.descriptors.MetricParameters
+import org.eobjects.analyzer.beans.api.Provided
 
 /**
  * The default HTML renderer for any AnalyzerResult.
@@ -19,10 +20,14 @@ import org.eobjects.analyzer.descriptors.MetricParameters
 @RendererBean(classOf[HtmlRenderingFormat])
 class DefaultAnalyzerResultHtmlRenderer(desc: AnalyzerBeanDescriptor[_], job: AnalyzerJob) extends HtmlRenderer[AnalyzerResult] {
 
+  // TODO: Currently not injectable
   @Inject
+  @Provided
   var descriptor = desc;
 
+  // TODO: Currently not injectable
   @Inject
+  @Provided
   var analyzerJob = job;
 
   def this() = this(null, null)

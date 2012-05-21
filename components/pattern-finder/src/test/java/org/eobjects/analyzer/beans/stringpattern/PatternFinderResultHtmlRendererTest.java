@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderResult;
 import org.eobjects.analyzer.beans.stringpattern.PatternFinderResultHtmlRenderer;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
@@ -34,13 +35,17 @@ import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.html.HtmlUtils;
 import org.eobjects.analyzer.result.renderer.AnnotatedRowsHtmlRenderer;
+import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.metamodel.util.FileHelper;
 
 public class PatternFinderResultHtmlRendererTest extends TestCase {
 
     private final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
-    
+    private final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl()
+            .replace(descriptorProvider);
+    private final RendererFactory rendererFactory = new RendererFactory(conf);
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -65,7 +70,7 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
 
         PatternFinderResult result = analyzer.getResult();
 
-        HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer(descriptorProvider).render(result);
+        HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer(rendererFactory).render(result);
         assertEquals("SimpleHtmlFragment[headElements=3,bodyElements=1]", htmlFragment.toString());
 
         String html = htmlFragment.getBodyElements().get(0).toHtml();
@@ -92,7 +97,7 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
 
         PatternFinderResult result = analyzer.getResult();
 
-        HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer(descriptorProvider).render(result);
+        HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer(rendererFactory).render(result);
         assertEquals("SimpleHtmlFragment[headElements=6,bodyElements=1]", htmlFragment.toString());
 
         String html = htmlFragment.getBodyElements().get(0).toHtml();

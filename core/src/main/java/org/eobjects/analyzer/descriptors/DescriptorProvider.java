@@ -35,36 +35,37 @@ import org.eobjects.analyzer.beans.api.Transformer;
  */
 public interface DescriptorProvider {
 
-	public Collection<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors();
+    public Collection<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors();
 
-	public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(Class<A> analyzerClass);
+    public <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> getAnalyzerBeanDescriptorForClass(Class<A> analyzerClass);
 
-	public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name);
-	
-	public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors();
+    public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name);
 
-	public <E extends Explorer<?>> ExplorerBeanDescriptor<E> getExplorerBeanDescriptorForClass(Class<E> explorerClass);
+    public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors();
 
-	public ExplorerBeanDescriptor<?> getExplorerBeanDescriptorByDisplayName(String name);
+    public <E extends Explorer<?>> ExplorerBeanDescriptor<E> getExplorerBeanDescriptorForClass(Class<E> explorerClass);
 
-	public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors();
+    public ExplorerBeanDescriptor<?> getExplorerBeanDescriptorByDisplayName(String name);
 
-	public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
-			Class<T> transformerClass);
+    public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors();
 
-	public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(String name);
+    public <T extends Transformer<?>> TransformerBeanDescriptor<T> getTransformerBeanDescriptorForClass(
+            Class<T> transformerClass);
 
-	public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors();
+    public TransformerBeanDescriptor<?> getTransformerBeanDescriptorByDisplayName(String name);
 
-	public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(
-			Class<F> filterClass);
+    public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors();
 
-	public FilterBeanDescriptor<?, ?> getFilterBeanDescriptorByDisplayName(String name);
+    public <F extends Filter<C>, C extends Enum<C>> FilterBeanDescriptor<F, C> getFilterBeanDescriptorForClass(
+            Class<F> filterClass);
 
-	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors();
+    public FilterBeanDescriptor<?, ?> getFilterBeanDescriptorByDisplayName(String name);
 
-	public RendererBeanDescriptor getRendererBeanDescriptorForClass(Class<? extends Renderer<?, ?>> rendererBeanClass);
+    public Collection<RendererBeanDescriptor<?>> getRendererBeanDescriptors();
 
-	public Collection<RendererBeanDescriptor> getRendererBeanDescriptorsForRenderingFormat(
-			Class<? extends RenderingFormat<?>> renderingFormat);
+    public <R extends Renderer<?, ?>> RendererBeanDescriptor<R> getRendererBeanDescriptorForClass(
+            Class<R> rendererBeanClass);
+
+    public Collection<RendererBeanDescriptor<?>> getRendererBeanDescriptorsForRenderingFormat(
+            Class<? extends RenderingFormat<?>> renderingFormat);
 }

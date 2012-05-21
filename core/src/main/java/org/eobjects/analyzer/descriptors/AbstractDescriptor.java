@@ -42,10 +42,10 @@ public abstract class AbstractDescriptor<B> implements Serializable {
 
 	public AbstractDescriptor(Class<B> componentClass) {
 		if (componentClass == null) {
-			throw new IllegalArgumentException("beanClass cannot be null");
+			throw new IllegalArgumentException("Component class cannot be null");
 		}
 		if (componentClass.isInterface() || Modifier.isAbstract(componentClass.getModifiers())) {
-			throw new DescriptorException("Bean (" + componentClass + ") is not a non-abstract class");
+			throw new DescriptorException("Component (" + componentClass + ") is not a non-abstract class");
 		}
 
 		_componentClass = componentClass;

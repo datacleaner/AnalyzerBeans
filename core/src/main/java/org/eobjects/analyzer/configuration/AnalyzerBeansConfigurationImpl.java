@@ -23,6 +23,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
+import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
@@ -32,144 +33,144 @@ import org.eobjects.analyzer.storage.StorageProvider;
 
 public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfiguration {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final transient DescriptorProvider _descriptorProvider;
-	private final transient StorageProvider _storageProvider;
-	private final transient TaskRunner _taskRunner;
-	private final DatastoreCatalog _datastoreCatalog;
-	private final ReferenceDataCatalog _referenceDataCatalog;
-	private final InjectionManagerFactory _injectionManagerFactory;
+    private final transient DescriptorProvider _descriptorProvider;
+    private final transient StorageProvider _storageProvider;
+    private final transient TaskRunner _taskRunner;
+    private final DatastoreCatalog _datastoreCatalog;
+    private final ReferenceDataCatalog _referenceDataCatalog;
+    private final InjectionManagerFactory _injectionManagerFactory;
 
-	private static StorageProvider defaultStorageProvider() {
-		return new InMemoryStorageProvider();
-	}
+    private static StorageProvider defaultStorageProvider() {
+        return new InMemoryStorageProvider();
+    }
 
-	private static TaskRunner defaultTaskRunner() {
-		return new SingleThreadedTaskRunner();
-	}
+    private static TaskRunner defaultTaskRunner() {
+        return new SingleThreadedTaskRunner();
+    }
 
-	private static DescriptorProvider defaultDescriptorProvider() {
-		return new SimpleDescriptorProvider();
-	}
+    private static DescriptorProvider defaultDescriptorProvider() {
+        return new SimpleDescriptorProvider();
+    }
 
-	private static ReferenceDataCatalog defaultReferenceDataCatalog() {
-		return new ReferenceDataCatalogImpl();
-	}
+    private static ReferenceDataCatalog defaultReferenceDataCatalog() {
+        return new ReferenceDataCatalogImpl();
+    }
 
-	private static DatastoreCatalog defaultDatastoreCatalog() {
-		return new DatastoreCatalogImpl();
-	}
+    private static DatastoreCatalog defaultDatastoreCatalog() {
+        return new DatastoreCatalogImpl();
+    }
 
-	/**
-	 * Creates a minimalistic configuration object, mostly suitable for stubbing
-	 * and testing
-	 */
-	public AnalyzerBeansConfigurationImpl() {
-		this(defaultDatastoreCatalog(), defaultReferenceDataCatalog(), defaultDescriptorProvider(), defaultTaskRunner(),
-				defaultStorageProvider());
-	}
+    /**
+     * Creates a minimalistic configuration object, mostly suitable for stubbing
+     * and testing
+     */
+    public AnalyzerBeansConfigurationImpl() {
+        this(defaultDatastoreCatalog(), defaultReferenceDataCatalog(), defaultDescriptorProvider(),
+                defaultTaskRunner(), defaultStorageProvider());
+    }
 
-	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
-			DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider) {
-		this(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner, storageProvider, null);
-	}
+    public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
+            DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider) {
+        this(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner, storageProvider, null);
+    }
 
-	public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
-			DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider,
-			InjectionManagerFactory injectionManagerFactory) {
-		if (datastoreCatalog == null) {
-			throw new IllegalArgumentException("datastoreCatalog cannot be null");
-		}
-		if (referenceDataCatalog == null) {
-			throw new IllegalArgumentException("referenceDataCatalog cannot be null");
-		}
-		if (descriptorProvider == null) {
-			throw new IllegalArgumentException("descriptorProvider cannot be null");
-		}
-		if (taskRunner == null) {
-			throw new IllegalArgumentException("taskRunner cannot be null");
-		}
-		if (storageProvider == null) {
-			throw new IllegalArgumentException("storageProvider cannot be null");
-		}
-		_datastoreCatalog = datastoreCatalog;
-		_referenceDataCatalog = referenceDataCatalog;
-		_descriptorProvider = descriptorProvider;
-		_taskRunner = taskRunner;
-		_storageProvider = storageProvider;
+    public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
+            DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider,
+            InjectionManagerFactory injectionManagerFactory) {
+        if (datastoreCatalog == null) {
+            throw new IllegalArgumentException("datastoreCatalog cannot be null");
+        }
+        if (referenceDataCatalog == null) {
+            throw new IllegalArgumentException("referenceDataCatalog cannot be null");
+        }
+        if (descriptorProvider == null) {
+            throw new IllegalArgumentException("descriptorProvider cannot be null");
+        }
+        if (taskRunner == null) {
+            throw new IllegalArgumentException("taskRunner cannot be null");
+        }
+        if (storageProvider == null) {
+            throw new IllegalArgumentException("storageProvider cannot be null");
+        }
+        _datastoreCatalog = datastoreCatalog;
+        _referenceDataCatalog = referenceDataCatalog;
+        _descriptorProvider = descriptorProvider;
+        _taskRunner = taskRunner;
+        _storageProvider = storageProvider;
 
-		if (injectionManagerFactory == null) {
-			injectionManagerFactory = new InjectionManagerFactoryImpl(this);
-		}
-		_injectionManagerFactory = injectionManagerFactory;
-	}
+        if (injectionManagerFactory == null) {
+            injectionManagerFactory = new InjectionManagerFactoryImpl();
+        }
+        _injectionManagerFactory = injectionManagerFactory;
+    }
 
-	/**
-	 * Creates a new {@link AnalyzerBeansConfiguration} with a different
-	 * {@link TaskRunner}
-	 * 
-	 * @param taskRunner
-	 * @return
-	 */
-	public AnalyzerBeansConfigurationImpl replace(TaskRunner taskRunner) {
-		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider, taskRunner,
-				_storageProvider);
-	}
+    /**
+     * Creates a new {@link AnalyzerBeansConfiguration} with a different
+     * {@link TaskRunner}
+     * 
+     * @param taskRunner
+     * @return
+     */
+    public AnalyzerBeansConfigurationImpl replace(TaskRunner taskRunner) {
+        return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
+                taskRunner, _storageProvider);
+    }
 
-	public AnalyzerBeansConfigurationImpl replace(DescriptorProvider descriptorProvider) {
-		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, descriptorProvider, _taskRunner,
-				_storageProvider);
-	}
+    public AnalyzerBeansConfigurationImpl replace(DescriptorProvider descriptorProvider) {
+        return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, descriptorProvider,
+                _taskRunner, _storageProvider);
+    }
 
-	public AnalyzerBeansConfigurationImpl replace(DatastoreCatalog datastoreCatalog) {
-		return new AnalyzerBeansConfigurationImpl(datastoreCatalog, _referenceDataCatalog, _descriptorProvider, _taskRunner,
-				_storageProvider);
-	}
+    public AnalyzerBeansConfigurationImpl replace(DatastoreCatalog datastoreCatalog) {
+        return new AnalyzerBeansConfigurationImpl(datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
+                _taskRunner, _storageProvider);
+    }
 
-	public AnalyzerBeansConfigurationImpl replace(ReferenceDataCatalog referenceDataCatalog) {
-		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, referenceDataCatalog, _descriptorProvider, _taskRunner,
-				_storageProvider);
-	}
+    public AnalyzerBeansConfigurationImpl replace(ReferenceDataCatalog referenceDataCatalog) {
+        return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, referenceDataCatalog, _descriptorProvider,
+                _taskRunner, _storageProvider);
+    }
 
-	public AnalyzerBeansConfigurationImpl replace(StorageProvider storageProvider) {
-		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
-				_taskRunner, storageProvider);
-	}
-	
-	public AnalyzerBeansConfigurationImpl replace(InjectionManagerFactory injectionManagerFactory) {
-		return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
-				_taskRunner, _storageProvider, injectionManagerFactory);
-	}
+    public AnalyzerBeansConfigurationImpl replace(StorageProvider storageProvider) {
+        return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
+                _taskRunner, storageProvider);
+    }
 
-	@Override
-	public InjectionManagerFactory getInjectionManagerFactory() {
-		return _injectionManagerFactory;
-	}
+    public AnalyzerBeansConfigurationImpl replace(InjectionManagerFactory injectionManagerFactory) {
+        return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
+                _taskRunner, _storageProvider, injectionManagerFactory);
+    }
 
-	@Override
-	public DatastoreCatalog getDatastoreCatalog() {
-		return _datastoreCatalog;
-	}
+    @Override
+    public DatastoreCatalog getDatastoreCatalog() {
+        return _datastoreCatalog;
+    }
 
-	@Override
-	public ReferenceDataCatalog getReferenceDataCatalog() {
-		return _referenceDataCatalog;
-	}
+    @Override
+    public ReferenceDataCatalog getReferenceDataCatalog() {
+        return _referenceDataCatalog;
+    }
 
-	@Override
-	public DescriptorProvider getDescriptorProvider() {
-		return _descriptorProvider;
-	}
+    @Override
+    public DescriptorProvider getDescriptorProvider() {
+        return _descriptorProvider;
+    }
 
-	@Override
-	public StorageProvider getStorageProvider() {
-		return _storageProvider;
-	}
+    @Override
+    public StorageProvider getStorageProvider() {
+        return _storageProvider;
+    }
 
-	@Override
-	public TaskRunner getTaskRunner() {
-		return _taskRunner;
-	}
+    @Override
+    public TaskRunner getTaskRunner() {
+        return _taskRunner;
+    }
+
+    @Override
+    public InjectionManager getInjectionManager(AnalysisJob job) {
+        return _injectionManagerFactory.getInjectionManager(this, job);
+    }
 
 }

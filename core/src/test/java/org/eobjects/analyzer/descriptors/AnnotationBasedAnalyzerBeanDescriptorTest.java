@@ -119,7 +119,7 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
             fail("Exception expected");
         } catch (DescriptorException e) {
             assertEquals(
-                    "Bean (class org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptorTest$InvalidAnalyzer) is not a non-abstract class",
+                    "Component (class org.eobjects.analyzer.descriptors.AnnotationBasedAnalyzerBeanDescriptorTest$InvalidAnalyzer) is not a non-abstract class",
                     e.getMessage());
         }
     }

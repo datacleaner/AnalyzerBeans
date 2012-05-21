@@ -47,104 +47,106 @@ import org.eobjects.metamodel.util.Ref;
 
 public class RowProcessingMetricsImplTest extends TestCase {
 
-	private Datastore datastore = TestHelper.createSampleDatabaseDatastore("orderdb");
-	private AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
-			.replace(new DatastoreCatalogImpl(datastore));
-	private AnalysisJob job;
+    private Datastore datastore = TestHelper.createSampleDatabaseDatastore("orderdb");
+    private AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
+            .replace(new DatastoreCatalogImpl(datastore));
+    private AnalysisJob job;
 
-	public void testGetExpectedRowCountNoFilter() throws Exception {
-		AnalysisJobBuilder ajb = createAnalysisJobBuilder();
+    public void testGetExpectedRowCountNoFilter() throws Exception {
+        AnalysisJobBuilder ajb = createAnalysisJobBuilder();
 
-		job = ajb.toAnalysisJob();
+        job = ajb.toAnalysisJob();
 
-		assertEquals(23, getExpectedRowCount());
-	}
+        assertEquals(23, getExpectedRowCount());
+    }
 
-	private AnalysisJobBuilder createAnalysisJobBuilder() {
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
-		ajb.setDatastore(datastore);
-		ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
-		ajb.addAnalyzer(NumberAnalyzer.class).addInputColumns(ajb.getSourceColumns());
-		return ajb;
-	}
+    private AnalysisJobBuilder createAnalysisJobBuilder() {
+        AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
+        ajb.setDatastore(datastore);
+        ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
+        ajb.addAnalyzer(NumberAnalyzer.class).addInputColumns(ajb.getSourceColumns());
+        return ajb;
+    }
 
-	public void testGetExpectedRowCountMaxRows() throws Exception {
-		AnalysisJobBuilder ajb = createAnalysisJobBuilder();
+    public void testGetExpectedRowCountMaxRows() throws Exception {
+        AnalysisJobBuilder ajb = createAnalysisJobBuilder();
 
-		FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filter = ajb.addFilter(MaxRowsFilter.class);
-		filter.getConfigurableBean().setMaxRows(10);
-		ajb.setDefaultRequirement(filter.getOutcome(MaxRowsFilter.Category.VALID));
+        FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filter = ajb.addFilter(MaxRowsFilter.class);
+        filter.getConfigurableBean().setMaxRows(10);
+        ajb.setDefaultRequirement(filter.getOutcome(MaxRowsFilter.Category.VALID));
 
-		job = ajb.toAnalysisJob();
+        job = ajb.toAnalysisJob();
 
-		assertEquals(10, getExpectedRowCount());
-	}
+        assertEquals(10, getExpectedRowCount());
+    }
 
-	public void testGetExpectedRowCountEquals() throws Exception {
-		AnalysisJobBuilder ajb = createAnalysisJobBuilder();
+    public void testGetExpectedRowCountEquals() throws Exception {
+        AnalysisJobBuilder ajb = createAnalysisJobBuilder();
 
-		FilterJobBuilder<EqualsFilter, ValidationCategory> filter = ajb.addFilter(EqualsFilter.class);
-		filter.addInputColumns(ajb.getSourceColumns());
-		filter.getConfigurableBean().setValues(new String[] { "1002", "1165" });
+        FilterJobBuilder<EqualsFilter, ValidationCategory> filter = ajb.addFilter(EqualsFilter.class);
+        filter.addInputColumns(ajb.getSourceColumns());
+        filter.getConfigurableBean().setValues(new String[] { "1002", "1165" });
 
-		ajb.setDefaultRequirement(filter.getOutcome(ValidationCategory.VALID));
+        ajb.setDefaultRequirement(filter.getOutcome(ValidationCategory.VALID));
 
-		job = ajb.toAnalysisJob();
+        job = ajb.toAnalysisJob();
 
-		assertEquals(2, getExpectedRowCount());
-	}
+        assertEquals(2, getExpectedRowCount());
+    }
 
-	public void testGetExpectedRowCountMultipleFilters() throws Exception {
-		AnalysisJobBuilder ajb = createAnalysisJobBuilder();
+    public void testGetExpectedRowCountMultipleFilters() throws Exception {
+        AnalysisJobBuilder ajb = createAnalysisJobBuilder();
 
-		// there's 21 records that are not 1056 or 1165
-		FilterJobBuilder<EqualsFilter, ValidationCategory> filter1 = ajb.addFilter(EqualsFilter.class);
-		filter1.addInputColumns(ajb.getSourceColumns());
-		filter1.getConfigurableBean().setValues(new String[] { "1056", "1165" });
+        // there's 21 records that are not 1056 or 1165
+        FilterJobBuilder<EqualsFilter, ValidationCategory> filter1 = ajb.addFilter(EqualsFilter.class);
+        filter1.addInputColumns(ajb.getSourceColumns());
+        filter1.getConfigurableBean().setValues(new String[] { "1056", "1165" });
 
-		// there's 1 record which has a reportsto value of null.
-		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filter2 = ajb.addFilter(NullCheckFilter.class);
-		ajb.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
-		filter2.addInputColumn(ajb.getSourceColumnByName("reportsto"));
-		filter2.getConfigurableBean().setConsiderEmptyStringAsNull(true);
-		filter2.setRequirement(filter1.getOutcome(ValidationCategory.INVALID));
+        // there's 1 record which has a reportsto value of null.
+        FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filter2 = ajb
+                .addFilter(NullCheckFilter.class);
+        ajb.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
+        filter2.addInputColumn(ajb.getSourceColumnByName("reportsto"));
+        filter2.getConfigurableBean().setConsiderEmptyStringAsNull(true);
+        filter2.setRequirement(filter1.getOutcome(ValidationCategory.INVALID));
 
-		ajb.getAnalyzerJobBuilders().get(0).setRequirement(filter2.getOutcome(NullCheckFilter.NullCheckCategory.NOT_NULL));
+        ajb.getAnalyzerJobBuilders().get(0)
+                .setRequirement(filter2.getOutcome(NullCheckFilter.NullCheckCategory.NOT_NULL));
 
-		job = ajb.toAnalysisJob();
+        job = ajb.toAnalysisJob();
 
-		assertEquals(21 - 1, getExpectedRowCount());
-	}
+        assertEquals(21 - 1, getExpectedRowCount());
+    }
 
-	private int getExpectedRowCount() {
-		AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
-		TaskRunner taskRunner = configuration.getTaskRunner();
+    private int getExpectedRowCount() {
+        AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
+        TaskRunner taskRunner = configuration.getTaskRunner();
 
-		LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(configuration.getInjectionManagerFactory()
-				.getInjectionManager(job), null);
-		SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
-		sourceColumnFinder.addSources(job);
+        LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(configuration.getInjectionManager(job), null);
+        SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
+        sourceColumnFinder.addSources(job);
 
-		final RowProcessingPublishers publishers = new RowProcessingPublishers(job, analysisListener, taskRunner,
-				lifeCycleHelper, sourceColumnFinder);
-		final AnalysisJobMetrics analysisJobMetrics = new AnalysisJobMetricsImpl(job, publishers);
-		final RowProcessingPublisher publisher = publishers.getRowProcessingPublisher(publishers.getTables()[0]);
-		List<TaskRunnable> tasks = publisher.createInitialTasks(taskRunner, null, null, datastore, analysisJobMetrics);
-		for (TaskRunnable taskRunnable : tasks) {
-			taskRunner.run(taskRunnable);
-		}
+        final RowProcessingPublishers publishers = new RowProcessingPublishers(job, analysisListener, taskRunner,
+                lifeCycleHelper, sourceColumnFinder);
+        final AnalysisJobMetrics analysisJobMetrics = new AnalysisJobMetricsImpl(job, publishers);
+        final RowProcessingPublisher publisher = publishers.getRowProcessingPublisher(publishers.getTables()[0]);
+        List<TaskRunnable> tasks = publisher.createInitialTasks(taskRunner, null, null, datastore, analysisJobMetrics);
+        for (TaskRunnable taskRunnable : tasks) {
+            taskRunner.run(taskRunnable);
+        }
 
-		Table table = null;
-		AnalyzerJob[] analyzerJobs = null;
-		Ref<Query> queryRef = new Ref<Query>() {
-			@Override
-			public Query get() {
-				return publisher.getQuery();
-			}
-		};
+        Table table = null;
+        AnalyzerJob[] analyzerJobs = null;
+        Ref<Query> queryRef = new Ref<Query>() {
+            @Override
+            public Query get() {
+                return publisher.getQuery();
+            }
+        };
 
-		RowProcessingMetricsImpl metrics = new RowProcessingMetricsImpl(analysisJobMetrics, table, analyzerJobs, queryRef);
+        RowProcessingMetricsImpl metrics = new RowProcessingMetricsImpl(analysisJobMetrics, table, analyzerJobs,
+                queryRef);
 
-		return metrics.getExpectedRows();
-	}
+        return metrics.getExpectedRows();
+    }
 }

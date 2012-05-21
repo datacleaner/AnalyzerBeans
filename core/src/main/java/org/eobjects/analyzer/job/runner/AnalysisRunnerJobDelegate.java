@@ -116,7 +116,7 @@ final class AnalysisRunnerJobDelegate {
 	public AnalysisResultFuture run() {
 		try {
 			// the injection manager is job scoped
-			final InjectionManager injectionManager = _configuration.getInjectionManagerFactory().getInjectionManager(_job);
+			final InjectionManager injectionManager = _configuration.getInjectionManager(_job);
 
 			final LifeCycleHelper explorerLifeCycleHelper = new LifeCycleHelper(injectionManager,
 					new ReferenceDataActivationManager());

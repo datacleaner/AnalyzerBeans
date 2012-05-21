@@ -19,38 +19,39 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
-import java.lang.reflect.Field;
-
-import javax.inject.Inject;
+import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Renderer;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.util.ReflectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.InjectionManager;
+import org.eobjects.analyzer.configuration.InjectionPoint;
+import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
+import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
+import org.eobjects.analyzer.lifecycle.PropertyInjectionPoint;
 
+/**
+ * Default renderer initializer which uses an {@link InjectionManager} to
+ * initialize renderers.
+ */
 public class DefaultRendererInitializer implements RendererInitializer {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultRendererInitializer.class);
+    private final InjectionManager _injectionManager;
 
-    private final DescriptorProvider _descriptorProvider;
+    public DefaultRendererInitializer(AnalyzerBeansConfiguration configuration) {
+        this(configuration.getInjectionManager(null));
+    }
 
-    public DefaultRendererInitializer(DescriptorProvider descriptorProvider) {
-        _descriptorProvider = descriptorProvider;
+    public DefaultRendererInitializer(InjectionManager injectionManager) {
+        _injectionManager = injectionManager;
     }
 
     @Override
-    public void initialize(Renderer<?, ?> renderer) {
-        Field[] injectFields = ReflectionUtils.getFields(renderer.getClass(), Inject.class);
-        for (Field injectField : injectFields) {
-            if (injectField.getType() == DescriptorProvider.class) {
-                injectField.setAccessible(true);
-                try {
-                    injectField.set(renderer, _descriptorProvider);
-                } catch (Exception e) {
-                    logger.warn("Failed to inject RendererFactory into field: {}", injectField);
-                }
-            }
+    public void initialize(RendererBeanDescriptor<?> descriptor, Renderer<?, ?> renderer) {
+        Set<ProvidedPropertyDescriptor> providedProperties = descriptor.getProvidedProperties();
+        for (ProvidedPropertyDescriptor providedPropertyDescriptor : providedProperties) {
+            InjectionPoint<?> injectionPoint = new PropertyInjectionPoint(providedPropertyDescriptor, renderer);
+            Object value = _injectionManager.getInstance(injectionPoint);
+            providedPropertyDescriptor.setValue(renderer, value);
         }
     }
 

@@ -19,9 +19,6 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
@@ -37,17 +34,11 @@ import org.eobjects.analyzer.result.renderer.Renderable;
  * @param <B>
  *            the Bean type
  */
-public interface RendererBeanDescriptor extends Comparable<RendererBeanDescriptor> {
+public interface RendererBeanDescriptor<R extends Renderer<?, ?>> extends ComponentDescriptor<R> {
 
-	public Class<? extends Renderer<?, ?>> getComponentClass();
+    public Class<? extends RenderingFormat<?>> getRenderingFormat();
 
-	public Class<? extends RenderingFormat<?>> getRenderingFormat();
+    public Class<? extends Renderable> getRenderableType();
 
-	public Set<Annotation> getAnnotations();
-
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
-
-	public Class<? extends Renderable> getRenderableType();
-
-	boolean isOutputApplicableFor(Class<?> requiredClass);
+    boolean isOutputApplicableFor(Class<?> requiredClass);
 }

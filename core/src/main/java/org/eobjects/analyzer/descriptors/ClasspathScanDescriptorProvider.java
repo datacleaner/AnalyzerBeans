@@ -82,7 +82,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	private final Map<String, AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new HashMap<String, AnalyzerBeanDescriptor<?>>();
 	private final Map<String, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<String, FilterBeanDescriptor<?, ?>>();
 	private final Map<String, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<String, TransformerBeanDescriptor<?>>();
-	private final Map<String, RendererBeanDescriptor> _rendererBeanDescriptors = new HashMap<String, RendererBeanDescriptor>();
+	private final Map<String, RendererBeanDescriptor<?>> _rendererBeanDescriptors = new HashMap<String, RendererBeanDescriptor<?>>();
 	private final Map<String, ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new HashMap<String, ExplorerBeanDescriptor<?>>();
 	private final TaskRunner _taskRunner;
 	private final AtomicInteger _tasksPending;
@@ -432,7 +432,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	}
 
 	public ClasspathScanDescriptorProvider addRendererClass(Class<? extends Renderer<?, ?>> clazz) {
-		RendererBeanDescriptor descriptor = _rendererBeanDescriptors.get(clazz.getName());
+		RendererBeanDescriptor<?> descriptor = _rendererBeanDescriptors.get(clazz.getName());
 		if (descriptor == null) {
 			try {
 				descriptor = Descriptors.ofRenderer(clazz);
@@ -491,7 +491,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 	}
 
 	@Override
-	public Collection<RendererBeanDescriptor> getRendererBeanDescriptors() {
+	public Collection<RendererBeanDescriptor<?>> getRendererBeanDescriptors() {
 		awaitTasks();
 		return Collections.unmodifiableCollection(_rendererBeanDescriptors.values());
 	}

@@ -34,8 +34,9 @@ public interface InjectionManagerFactory {
 	 * Gets an {@link InjectionManager} (typically new) for the execution of an
 	 * {@link AnalysisJob}
 	 * 
+	 * @param configuration
 	 * @param job
 	 * @return
 	 */
-	public InjectionManager getInjectionManager(AnalysisJob job);
+	public InjectionManager getInjectionManager(AnalyzerBeansConfiguration configuration, AnalysisJob job);
 }

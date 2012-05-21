@@ -88,10 +88,11 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 
     public void testScanRenderers() throws Exception {
         ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider(taskRunner);
-        Collection<RendererBeanDescriptor> rendererBeanDescriptors = descriptorProvider.scanPackage(
+        Collection<RendererBeanDescriptor<?>> rendererBeanDescriptors = descriptorProvider.scanPackage(
                 "org.eobjects.analyzer.result.renderer", true).getRendererBeanDescriptors();
-        assertEquals("[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
-                + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
-                new TreeSet<RendererBeanDescriptor>(rendererBeanDescriptors).toString());
+        assertEquals(
+                "[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
+                        + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
+                new TreeSet<RendererBeanDescriptor<?>>(rendererBeanDescriptors).toString());
     }
 }

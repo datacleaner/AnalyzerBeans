@@ -24,6 +24,7 @@ import java.util.Collection;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererPrecedence;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -75,8 +76,8 @@ public final class RendererFactory {
     private final DescriptorProvider _descriptorProvider;
     private final RendererInitializer _rendererInitializer;
 
-    public RendererFactory(DescriptorProvider descriptorProvider) {
-        this(descriptorProvider, new DefaultRendererInitializer(descriptorProvider));
+    public RendererFactory(AnalyzerBeansConfiguration configuration) {
+        this(configuration.getDescriptorProvider(), new DefaultRendererInitializer(configuration));
     }
 
     public RendererFactory(DescriptorProvider descriptorProvider, RendererInitializer rendererInitializer) {
@@ -99,9 +100,9 @@ public final class RendererFactory {
 
         RendererSelection bestMatch = null;
 
-        Collection<RendererBeanDescriptor> descriptors = _descriptorProvider
+        Collection<RendererBeanDescriptor<?>> descriptors = _descriptorProvider
                 .getRendererBeanDescriptorsForRenderingFormat(renderingFormat);
-        for (RendererBeanDescriptor descriptor : descriptors) {
+        for (RendererBeanDescriptor<?> descriptor : descriptors) {
             RendererSelection rendererMatch = isRendererMatch(descriptor, renderable, bestMatch);
             if (rendererMatch != null) {
                 bestMatch = rendererMatch;
@@ -138,7 +139,7 @@ public final class RendererFactory {
      * @return a {@link RendererSelection} object if the renderer is a match, or
      *         null if not.
      */
-    private RendererSelection isRendererMatch(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
+    private RendererSelection isRendererMatch(RendererBeanDescriptor<?> rendererDescriptor, Renderable renderable,
             RendererSelection bestMatch) {
         final Class<? extends Renderable> renderableType = rendererDescriptor.getRenderableType();
         if (ReflectionUtils.is(renderable.getClass(), renderableType)) {
@@ -161,12 +162,12 @@ public final class RendererFactory {
         return null;
     }
 
-    private RendererSelection isRendererCapable(RendererBeanDescriptor rendererDescriptor, Renderable renderable,
+    private RendererSelection isRendererCapable(RendererBeanDescriptor<?> rendererDescriptor, Renderable renderable,
             RendererSelection bestMatch) {
         final Renderer<Renderable, ?> renderer = instantiate(rendererDescriptor);
 
         if (_rendererInitializer != null) {
-            _rendererInitializer.initialize(renderer);
+            _rendererInitializer.initialize(rendererDescriptor, renderer);
         }
 
         RendererPrecedence precedence;
@@ -202,7 +203,7 @@ public final class RendererFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <I extends Renderable, O> Renderer<I, O> instantiate(RendererBeanDescriptor descriptor) {
+    private static <I extends Renderable, O> Renderer<I, O> instantiate(RendererBeanDescriptor<?> descriptor) {
         final Class<? extends Renderer<?, ?>> componentClass = descriptor.getComponentClass();
         final Renderer<?, ?> renderer = ReflectionUtils.newInstance(componentClass);
         return (Renderer<I, O>) renderer;

@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.result.renderer;
 
 import org.eobjects.analyzer.beans.api.Renderer;
+import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
 
 /**
  * Callback interface allowing to initialize renderers before any actions are
@@ -29,5 +30,5 @@ import org.eobjects.analyzer.beans.api.Renderer;
  */
 public interface RendererInitializer {
 
-	public void initialize(Renderer<?, ?> renderer);
+    public void initialize(RendererBeanDescriptor<?> descriptor, Renderer<?, ?> renderer);
 }

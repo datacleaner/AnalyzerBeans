@@ -78,7 +78,7 @@ public class InjectionManagerFactoryTest extends TestCase {
 
 		final InjectionManagerFactory injectionManagerFactory = new InjectionManagerFactory() {
 			@Override
-			public InjectionManager getInjectionManager(AnalysisJob job) {
+			public InjectionManager getInjectionManager(AnalyzerBeansConfiguration conf, AnalysisJob job) {
 				return injectionManager;
 			}
 		};

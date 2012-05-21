@@ -21,7 +21,6 @@ package org.eobjects.analyzer.result.renderer;
 
 import java.util.List;
 
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
@@ -37,10 +36,10 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
 
     private final StringBuilder sb;
     private final SimpleHtmlFragment htmlFragtment;
-    private final DescriptorProvider descriptorProvider;
+    private final RendererFactory rendererFactory;
 
-    public HtmlCrosstabRendererCallback(DescriptorProvider descriptorProvider) {
-        this.descriptorProvider = descriptorProvider;
+    public HtmlCrosstabRendererCallback(RendererFactory rendererFactory) {
+        this.rendererFactory = rendererFactory;
         sb = new StringBuilder();
         htmlFragtment = new SimpleHtmlFragment();
         htmlFragtment.addHeadElement(BaseHeadElement.get());
@@ -116,7 +115,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
         final DrillToDetailsHeadElement drillHeadElement = new DrillToDetailsHeadElement(drillElementId);
         htmlFragtment.addHeadElement(drillHeadElement);
         
-        final DrillToDetailsBodyElement drillBodyElement = new DrillToDetailsBodyElement(drillElementId, descriptorProvider, drillResult);
+        final DrillToDetailsBodyElement drillBodyElement = new DrillToDetailsBodyElement(drillElementId, rendererFactory, drillResult);
         htmlFragtment.addBodyElement(drillBodyElement);
 
         final String invocation = drillHeadElement.toJavaScriptInvocation();

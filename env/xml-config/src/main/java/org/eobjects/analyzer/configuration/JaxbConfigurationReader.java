@@ -206,32 +206,42 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             logger.info("Updated date: {}", metadata.getUpdatedDate());
         }
 
+        AnalyzerBeansConfigurationImpl analyzerBeansConfiguration = new AnalyzerBeansConfigurationImpl();
+        
         // injection manager will be used throughout building the configuration.
         // It will be used to host dependencies as they appear
-        InjectionManager injectionManager = new InjectionManagerImpl(null, null, null);
-
+        InjectionManager injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
+        
         TaskRunner taskRunner = createTaskRunner(configuration, injectionManager);
+        
+        analyzerBeansConfiguration = analyzerBeansConfiguration.replace(taskRunner);
+        injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
         DescriptorProvider descriptorProvider = createDescriptorProvider(configuration, taskRunner, injectionManager);
+        
+        analyzerBeansConfiguration =  analyzerBeansConfiguration.replace(descriptorProvider);
+        injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
         addVariablePath("datastoreCatalog");
         DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog(),
                 injectionManager);
         removeVariablePath();
 
-        injectionManager = new InjectionManagerImpl(datastoreCatalog, null, null);
+        analyzerBeansConfiguration = analyzerBeansConfiguration.replace(datastoreCatalog);
+        injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
         addVariablePath("referenceDataCatalog");
         ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(configuration.getReferenceDataCatalog(),
                 injectionManager);
         removeVariablePath();
 
-        injectionManager = new InjectionManagerImpl(datastoreCatalog, referenceDataCatalog, null);
+        analyzerBeansConfiguration = analyzerBeansConfiguration.replace(referenceDataCatalog);
+        injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
         StorageProvider storageProvider = createStorageProvider(configuration.getStorageProvider(), injectionManager);
+        analyzerBeansConfiguration = analyzerBeansConfiguration.replace(storageProvider);
 
-        return new AnalyzerBeansConfigurationImpl(datastoreCatalog, referenceDataCatalog, descriptorProvider,
-                taskRunner, storageProvider);
+        return analyzerBeansConfiguration;
     }
 
     private DescriptorProvider createDescriptorProvider(Configuration configuration, TaskRunner taskRunner,

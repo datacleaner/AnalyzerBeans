@@ -19,31 +19,15 @@
  */
 package org.eobjects.analyzer.configuration;
 
-import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.reference.ReferenceDataCatalog;
-import org.eobjects.analyzer.storage.StorageProvider;
 
+/**
+ * Default {@link InjectionManagerFactory} implementation
+ */
 public class InjectionManagerFactoryImpl implements InjectionManagerFactory {
 
-	private final DatastoreCatalog _datastoreCatalog;
-	private final ReferenceDataCatalog _referenceDataCatalog;
-	private final StorageProvider _storageProvider;
-
-	public InjectionManagerFactoryImpl(AnalyzerBeansConfiguration configuration) {
-		this(configuration.getDatastoreCatalog(), configuration.getReferenceDataCatalog(), configuration
-				.getStorageProvider());
-	}
-
-	public InjectionManagerFactoryImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
-			StorageProvider storageProvider) {
-		_datastoreCatalog = datastoreCatalog;
-		_referenceDataCatalog = referenceDataCatalog;
-		_storageProvider = storageProvider;
-	}
-
-	@Override
-	public InjectionManager getInjectionManager(AnalysisJob job) {
-		return new InjectionManagerImpl(_datastoreCatalog, _referenceDataCatalog, _storageProvider, job);
-	}
+    @Override
+    public InjectionManager getInjectionManager(AnalyzerBeansConfiguration configuration, AnalysisJob job) {
+        return new InjectionManagerImpl(configuration, job);
+    }
 }

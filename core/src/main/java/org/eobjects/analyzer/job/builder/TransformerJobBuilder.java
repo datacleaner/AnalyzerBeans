@@ -26,7 +26,6 @@ import java.util.List;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.InjectionManager;
-import org.eobjects.analyzer.configuration.InjectionManagerImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
@@ -40,7 +39,6 @@ import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
-import org.eobjects.analyzer.storage.InMemoryStorageProvider;
 import org.eobjects.analyzer.util.StringUtils;
 
 /**
@@ -71,11 +69,11 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
             // empty list
             return Collections.emptyList();
         }
-
+        
         final Transformer<?> component = getConfigurableBean();
         final TransformerBeanDescriptor<T> descriptor = getDescriptor();
 
-        final InjectionManager injectionManager = new InjectionManagerImpl(null, null, new InMemoryStorageProvider());
+        final InjectionManager injectionManager = getAnalysisJobBuilder().getConfiguration().getInjectionManager(null);
         final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, null);
 
         // mimic the configuration of a real transformer bean instance

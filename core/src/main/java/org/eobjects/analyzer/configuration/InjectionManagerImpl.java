@@ -25,16 +25,16 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
+import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.storage.CollectionFactoryImpl;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.util.LazyRef;
@@ -52,9 +52,7 @@ public class InjectionManagerImpl implements InjectionManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(InjectionManagerImpl.class);
 
-	private final DatastoreCatalog _datastoreCatalog;
-	private final ReferenceDataCatalog _referenceDataCatalog;
-	private final StorageProvider _storageProvider;
+	private final AnalyzerBeansConfiguration _configuration;
 	private final AnalysisJob _job;
 	private final Ref<RowAnnotationFactory> _rowAnntationFactoryRef;
 
@@ -66,29 +64,9 @@ public class InjectionManagerImpl implements InjectionManager {
 	 * @param job
 	 */
 	public InjectionManagerImpl(AnalyzerBeansConfiguration configuration, AnalysisJob job) {
-		_datastoreCatalog = configuration.getDatastoreCatalog();
-		_referenceDataCatalog = configuration.getReferenceDataCatalog();
-		_storageProvider = configuration.getStorageProvider();
+	    _configuration = configuration;
 		_job = job;
 		_rowAnntationFactoryRef = createRowAnnotationFactoryRef();
-	}
-
-	/**
-	 * Constructs an {@link InjectionManager} for use within the scope of a job
-	 * execution.
-	 * 
-	 * @param datastoreCatalog
-	 * @param referenceDataCatalog
-	 * @param storageProvider
-	 * @param job
-	 */
-	public InjectionManagerImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
-			StorageProvider storageProvider, AnalysisJob job) {
-		_datastoreCatalog = datastoreCatalog;
-		_referenceDataCatalog = referenceDataCatalog;
-		_storageProvider = storageProvider;
-		_rowAnntationFactoryRef = createRowAnnotationFactoryRef();
-		_job = job;
 	}
 
 	/**
@@ -99,26 +77,7 @@ public class InjectionManagerImpl implements InjectionManager {
 	 * @param configuration
 	 */
 	public InjectionManagerImpl(AnalyzerBeansConfiguration configuration) {
-		this(configuration.getDatastoreCatalog(), configuration.getReferenceDataCatalog(), configuration
-				.getStorageProvider());
-	}
-
-	/**
-	 * Creates a new {@link InjectionManager} without any job-context.
-	 * Convenient for use outside of an actual job, mimicing a job situation
-	 * etc.
-	 * 
-	 * @param datastoreCatalog
-	 * @param referenceDataCatalog
-	 * @param storageProvider
-	 */
-	public InjectionManagerImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
-			StorageProvider storageProvider) {
-		_datastoreCatalog = datastoreCatalog;
-		_referenceDataCatalog = referenceDataCatalog;
-		_storageProvider = storageProvider;
-		_rowAnntationFactoryRef = createRowAnnotationFactoryRef();
-		_job = null;
+		this(configuration, null);
 	}
 
 	private Ref<RowAnnotationFactory> createRowAnnotationFactoryRef() {
@@ -126,7 +85,7 @@ public class InjectionManagerImpl implements InjectionManager {
 			@Override
 			protected RowAnnotationFactory fetch() {
 				logger.info("Creating RowAnnotationFactory for job: {}", _job);
-				RowAnnotationFactory rowAnnotationFactory = _storageProvider.createRowAnnotationFactory();
+				RowAnnotationFactory rowAnnotationFactory = _configuration.getStorageProvider().createRowAnnotationFactory();
 				if (rowAnnotationFactory == null) {
 					throw new IllegalStateException("Storage provider returned null RowAnnotationFactory!");
 				}
@@ -140,15 +99,21 @@ public class InjectionManagerImpl implements InjectionManager {
 	public <E> E getInstance(InjectionPoint<E> injectionPoint) {
 		final Class<E> baseType = injectionPoint.getBaseType();
 		if (baseType == ReferenceDataCatalog.class) {
-			return (E) _referenceDataCatalog;
+			return (E) _configuration.getReferenceDataCatalog();
 		} else if (baseType == OutputRowCollector.class) {
 			return (E) new ThreadLocalOutputRowCollector();
 		} else if (baseType == DatastoreCatalog.class) {
-			return (E) _datastoreCatalog;
+			return (E) _configuration.getDatastoreCatalog();
 		} else if (baseType == CollectionFactory.class) {
-			return (E) new CollectionFactoryImpl(_storageProvider);
+			return (E) new CollectionFactoryImpl(_configuration.getStorageProvider());
+		} else if (baseType == RendererFactory.class) {
+		    return (E) new RendererFactory(_configuration);
 		} else if (baseType == RowAnnotationFactory.class) {
 			return (E) _rowAnntationFactoryRef.get();
+		} else if (baseType == AnalyzerBeansConfiguration.class) {
+		    return (E) _configuration;
+		} else if (baseType == AnalysisJob.class) {
+		    return (E) _job;
 		} else if (baseType == RowAnnotation.class) {
 			return (E) _rowAnntationFactoryRef.get().createAnnotation();
 		} else if (baseType == DatastoreConnection.class && _job != null) {
@@ -162,14 +127,14 @@ public class InjectionManagerImpl implements InjectionManager {
 			if (injectionPoint.getAnnotation(Provided.class) != null && injectionPoint.isGenericType()) {
 				final Class<?> clazz1 = injectionPoint.getGenericTypeArgument(0);
 				if (baseType == List.class) {
-					List<?> list = _storageProvider.createList(clazz1);
+					List<?> list = _configuration.getStorageProvider().createList(clazz1);
 					return (E) list;
 				} else if (baseType == Set.class) {
-					Set<?> set = _storageProvider.createSet(clazz1);
+					Set<?> set = _configuration.getStorageProvider().createSet(clazz1);
 					return (E) set;
 				} else if (baseType == Map.class) {
 					Class<?> clazz2 = (Class<?>) injectionPoint.getGenericTypeArgument(1);
-					Map<?, ?> map = _storageProvider.createMap(clazz1, clazz2);
+					Map<?, ?> map = _configuration.getStorageProvider().createMap(clazz1, clazz2);
 					return (E) map;
 				} else {
 					logger.warn("Could not handle @Provided injection for injection point: {}", injectionPoint);

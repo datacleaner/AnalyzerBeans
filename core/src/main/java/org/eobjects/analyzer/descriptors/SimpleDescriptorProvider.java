@@ -62,164 +62,164 @@ import org.eobjects.analyzer.beans.api.Transformer;
  */
 public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 
-	private List<AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new ArrayList<AnalyzerBeanDescriptor<?>>();
-	private List<ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new ArrayList<ExplorerBeanDescriptor<?>>();
-	private List<TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new ArrayList<TransformerBeanDescriptor<?>>();
-	private List<RendererBeanDescriptor> _rendererBeanDescriptors = new ArrayList<RendererBeanDescriptor>();
-	private List<FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new ArrayList<FilterBeanDescriptor<?, ?>>();
+    private List<AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new ArrayList<AnalyzerBeanDescriptor<?>>();
+    private List<ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new ArrayList<ExplorerBeanDescriptor<?>>();
+    private List<TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new ArrayList<TransformerBeanDescriptor<?>>();
+    private List<RendererBeanDescriptor<?>> _rendererBeanDescriptors = new ArrayList<RendererBeanDescriptor<?>>();
+    private List<FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new ArrayList<FilterBeanDescriptor<?, ?>>();
 
-	private final boolean _autoDiscover;
+    private final boolean _autoDiscover;
 
-	public SimpleDescriptorProvider() {
-		this(true);
-	}
+    public SimpleDescriptorProvider() {
+        this(true);
+    }
 
-	public SimpleDescriptorProvider(boolean autoDiscover) {
-		_autoDiscover = autoDiscover;
-	}
+    public SimpleDescriptorProvider(boolean autoDiscover) {
+        _autoDiscover = autoDiscover;
+    }
 
-	@Override
-	protected <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> notFoundAnalyzer(Class<A> analyzerClass) {
-		if (!_autoDiscover) {
-			return null;
-		}
-		return Descriptors.ofAnalyzer(analyzerClass);
-	}
+    @Override
+    protected <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> notFoundAnalyzer(Class<A> analyzerClass) {
+        if (!_autoDiscover) {
+            return null;
+        }
+        return Descriptors.ofAnalyzer(analyzerClass);
+    }
 
-	@Override
-	protected FilterBeanDescriptor<?, ?> notFoundFilter(Class<?> filterClass) {
-		if (!_autoDiscover) {
-			return null;
-		}
-		return Descriptors.ofFilterUnbound(filterClass);
-	}
+    @Override
+    protected FilterBeanDescriptor<?, ?> notFoundFilter(Class<?> filterClass) {
+        if (!_autoDiscover) {
+            return null;
+        }
+        return Descriptors.ofFilterUnbound(filterClass);
+    }
 
-	@Override
-	protected RendererBeanDescriptor notFoundRenderer(Class<? extends Renderer<?, ?>> rendererClass) {
-		if (!_autoDiscover) {
-			return null;
-		}
-		return Descriptors.ofRenderer(rendererClass);
-	}
+    @Override
+    protected <R extends Renderer<?, ?>> RendererBeanDescriptor<R> notFoundRenderer(Class<R> rendererClass) {
+        if (!_autoDiscover) {
+            return null;
+        }
+        return Descriptors.ofRenderer(rendererClass);
+    }
 
-	@Override
-	protected <A extends Transformer<?>> TransformerBeanDescriptor<A> notFoundTransformer(Class<A> transformerClass) {
-		if (!_autoDiscover) {
-			return null;
-		}
-		return Descriptors.ofTransformer(transformerClass);
-	}
+    @Override
+    protected <A extends Transformer<?>> TransformerBeanDescriptor<A> notFoundTransformer(Class<A> transformerClass) {
+        if (!_autoDiscover) {
+            return null;
+        }
+        return Descriptors.ofTransformer(transformerClass);
+    }
 
-	public void addAnalyzerBeanDescriptor(AnalyzerBeanDescriptor<?> analyzerBeanDescriptor) {
-		_analyzerBeanDescriptors.add(analyzerBeanDescriptor);
-	}
+    public void addAnalyzerBeanDescriptor(AnalyzerBeanDescriptor<?> analyzerBeanDescriptor) {
+        _analyzerBeanDescriptors.add(analyzerBeanDescriptor);
+    }
 
-	public void addTransformerBeanDescriptor(TransformerBeanDescriptor<?> transformerBeanDescriptor) {
-		_transformerBeanDescriptors.add(transformerBeanDescriptor);
-	}
+    public void addTransformerBeanDescriptor(TransformerBeanDescriptor<?> transformerBeanDescriptor) {
+        _transformerBeanDescriptors.add(transformerBeanDescriptor);
+    }
 
-	public void addRendererBeanDescriptor(RendererBeanDescriptor rendererBeanDescriptor) {
-		_rendererBeanDescriptors.add(rendererBeanDescriptor);
-	}
+    public void addRendererBeanDescriptor(RendererBeanDescriptor<?> rendererBeanDescriptor) {
+        _rendererBeanDescriptors.add(rendererBeanDescriptor);
+    }
 
-	public void addFilterBeanDescriptor(FilterBeanDescriptor<?, ?> descriptor) {
-		_filterBeanDescriptors.add(descriptor);
-	}
+    public void addFilterBeanDescriptor(FilterBeanDescriptor<?, ?> descriptor) {
+        _filterBeanDescriptors.add(descriptor);
+    }
 
-	public void addExplorerBeanDescriptor(ExplorerBeanDescriptor<?> descriptor) {
-		_explorerBeanDescriptors.add(descriptor);
-	}
+    public void addExplorerBeanDescriptor(ExplorerBeanDescriptor<?> descriptor) {
+        _explorerBeanDescriptors.add(descriptor);
+    }
 
-	@Override
-	public List<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
-		return _analyzerBeanDescriptors;
-	}
+    @Override
+    public List<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
+        return _analyzerBeanDescriptors;
+    }
 
-	public void setAnalyzerBeanDescriptors(List<AnalyzerBeanDescriptor<?>> descriptors) {
-		_analyzerBeanDescriptors = descriptors;
-	}
+    public void setAnalyzerBeanDescriptors(List<AnalyzerBeanDescriptor<?>> descriptors) {
+        _analyzerBeanDescriptors = descriptors;
+    }
 
-	@Override
-	public List<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
-		return _transformerBeanDescriptors;
-	}
+    @Override
+    public List<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
+        return _transformerBeanDescriptors;
+    }
 
-	@Override
-	public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
-		return _explorerBeanDescriptors;
-	}
+    @Override
+    public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
+        return _explorerBeanDescriptors;
+    }
 
-	@Override
-	protected <E extends Explorer<?>> ExplorerBeanDescriptor<E> notFoundExplorer(Class<E> explorerClass) {
-		return Descriptors.ofExplorer(explorerClass);
-	}
+    @Override
+    protected <E extends Explorer<?>> ExplorerBeanDescriptor<E> notFoundExplorer(Class<E> explorerClass) {
+        return Descriptors.ofExplorer(explorerClass);
+    }
 
-	public void setTransformerBeanDescriptors(List<TransformerBeanDescriptor<?>> transformerBeanDescriptors) {
-		_transformerBeanDescriptors = transformerBeanDescriptors;
-	}
+    public void setTransformerBeanDescriptors(List<TransformerBeanDescriptor<?>> transformerBeanDescriptors) {
+        _transformerBeanDescriptors = transformerBeanDescriptors;
+    }
 
-	@Override
-	public List<RendererBeanDescriptor> getRendererBeanDescriptors() {
-		return _rendererBeanDescriptors;
-	}
+    @Override
+    public List<RendererBeanDescriptor<?>> getRendererBeanDescriptors() {
+        return _rendererBeanDescriptors;
+    }
 
-	public void setRendererBeanDescriptors(List<RendererBeanDescriptor> rendererBeanDescriptors) {
-		_rendererBeanDescriptors = rendererBeanDescriptors;
-	}
+    public void setRendererBeanDescriptors(List<RendererBeanDescriptor<?>> rendererBeanDescriptors) {
+        _rendererBeanDescriptors = rendererBeanDescriptors;
+    }
 
-	@Override
-	public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors() {
-		return _filterBeanDescriptors;
-	}
+    @Override
+    public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors() {
+        return _filterBeanDescriptors;
+    }
 
-	public void setFilterBeanDescriptors(List<FilterBeanDescriptor<?, ?>> filterBeanDescriptors) {
-		_filterBeanDescriptors = filterBeanDescriptors;
-	}
+    public void setFilterBeanDescriptors(List<FilterBeanDescriptor<?, ?>> filterBeanDescriptors) {
+        _filterBeanDescriptors = filterBeanDescriptors;
+    }
 
-	public void setAnalyzerClassNames(Collection<String> classNames) throws ClassNotFoundException {
-		for (String className : classNames) {
-			@SuppressWarnings("unchecked")
-			Class<? extends Analyzer<?>> c = (Class<? extends Analyzer<?>>) Class.forName(className);
-			AnalyzerBeanDescriptor<?> descriptor = getAnalyzerBeanDescriptorForClass(c);
-			if (descriptor == null) {
-				addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(c));
-			}
-		}
-	}
+    public void setAnalyzerClassNames(Collection<String> classNames) throws ClassNotFoundException {
+        for (String className : classNames) {
+            @SuppressWarnings("unchecked")
+            Class<? extends Analyzer<?>> c = (Class<? extends Analyzer<?>>) Class.forName(className);
+            AnalyzerBeanDescriptor<?> descriptor = getAnalyzerBeanDescriptorForClass(c);
+            if (descriptor == null) {
+                addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(c));
+            }
+        }
+    }
 
-	public void setTransformerClassNames(Collection<String> classNames) throws ClassNotFoundException {
-		for (String className : classNames) {
-			@SuppressWarnings("unchecked")
-			Class<? extends Transformer<?>> c = (Class<? extends Transformer<?>>) Class.forName(className);
-			TransformerBeanDescriptor<?> descriptor = getTransformerBeanDescriptorForClass(c);
-			if (descriptor == null) {
-				addTransformerBeanDescriptor(Descriptors.ofTransformer(c));
-			}
-		}
-	}
+    public void setTransformerClassNames(Collection<String> classNames) throws ClassNotFoundException {
+        for (String className : classNames) {
+            @SuppressWarnings("unchecked")
+            Class<? extends Transformer<?>> c = (Class<? extends Transformer<?>>) Class.forName(className);
+            TransformerBeanDescriptor<?> descriptor = getTransformerBeanDescriptorForClass(c);
+            if (descriptor == null) {
+                addTransformerBeanDescriptor(Descriptors.ofTransformer(c));
+            }
+        }
+    }
 
-	public void setRendererClassNames(Collection<String> classNames) throws ClassNotFoundException {
-		for (String className : classNames) {
-			@SuppressWarnings("unchecked")
-			Class<? extends Renderer<?, ?>> c = (Class<? extends Renderer<?, ?>>) Class.forName(className);
-			RendererBeanDescriptor descriptor = getRendererBeanDescriptorForClass(c);
-			if (descriptor == null) {
-				addRendererBeanDescriptor(Descriptors.ofRenderer(c));
-			}
-		}
-	}
+    public void setRendererClassNames(Collection<String> classNames) throws ClassNotFoundException {
+        for (String className : classNames) {
+            @SuppressWarnings("unchecked")
+            Class<? extends Renderer<?, ?>> c = (Class<? extends Renderer<?, ?>>) Class.forName(className);
+            RendererBeanDescriptor<?> descriptor = getRendererBeanDescriptorForClass(c);
+            if (descriptor == null) {
+                addRendererBeanDescriptor(Descriptors.ofRenderer(c));
+            }
+        }
+    }
 
-	public void setFilterClassNames(Collection<String> classNames) throws ClassNotFoundException {
-		for (String className : classNames) {
-			@SuppressWarnings("unchecked")
-			Class<? extends Filter<?>> c = (Class<? extends Filter<?>>) Class.forName(className);
+    public void setFilterClassNames(Collection<String> classNames) throws ClassNotFoundException {
+        for (String className : classNames) {
+            @SuppressWarnings("unchecked")
+            Class<? extends Filter<?>> c = (Class<? extends Filter<?>>) Class.forName(className);
 
-			FilterBeanDescriptor<?, ?> descriptor = getFilterBeanDescriptorForClassUnbounded(c);
+            FilterBeanDescriptor<?, ?> descriptor = getFilterBeanDescriptorForClassUnbounded(c);
 
-			if (descriptor == null) {
-				addFilterBeanDescriptor(Descriptors.ofFilterUnbound(c));
-			}
-		}
-	}
+            if (descriptor == null) {
+                addFilterBeanDescriptor(Descriptors.ofFilterUnbound(c));
+            }
+        }
+    }
 
 }

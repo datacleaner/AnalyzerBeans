@@ -22,7 +22,6 @@ package org.eobjects.analyzer.result.html;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Renderer;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
@@ -33,26 +32,25 @@ import org.eobjects.analyzer.result.renderer.RendererFactory;
  */
 public class DrillToDetailsBodyElement implements BodyElement {
 
-    private final DescriptorProvider _descriptorProvider;
     private final AnalyzerResult _result;
     private final String _elementId;
+    private final RendererFactory _rendererFactory;
 
-    public DrillToDetailsBodyElement(String elementId, DescriptorProvider descriptorProvider, AnalyzerResult result) {
-        if (descriptorProvider == null) {
-            throw new IllegalArgumentException("DescriptorProvider cannot be null");
+    public DrillToDetailsBodyElement(String elementId, RendererFactory rendererFactory, AnalyzerResult result) {
+        if (rendererFactory == null) {
+            throw new IllegalArgumentException("RendererFactory cannot be null");
         }
         if (result == null) {
             throw new IllegalArgumentException("AnalyzerResult cannot be null");
         }
         _elementId = elementId;
-        _descriptorProvider = descriptorProvider;
+        _rendererFactory = rendererFactory;
         _result = result;
     }
 
     @Override
     public String toHtml() {
-        final RendererFactory rendererFactory = new RendererFactory(_descriptorProvider);
-        final Renderer<? super AnalyzerResult, ? extends HtmlFragment> renderer = rendererFactory.getRenderer(_result,
+        final Renderer<? super AnalyzerResult, ? extends HtmlFragment> renderer = _rendererFactory.getRenderer(_result,
                 HtmlRenderingFormat.class);
         if (renderer == null) {
             throw new IllegalStateException("No renderer found for: " + _result);

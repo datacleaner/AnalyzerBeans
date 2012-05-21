@@ -23,6 +23,7 @@ import java.io.Serializable;
 
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
+import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.storage.StorageProvider;
@@ -36,39 +37,39 @@ import org.eobjects.analyzer.storage.StorageProvider;
  */
 public interface AnalyzerBeansConfiguration extends Serializable {
 
-	/**
-	 * @see DatastoreCatalog
-	 * @return the datastore catalog defined in this configuration
-	 */
-	public DatastoreCatalog getDatastoreCatalog();
+    /**
+     * @see DatastoreCatalog
+     * @return the datastore catalog defined in this configuration
+     */
+    public DatastoreCatalog getDatastoreCatalog();
 
-	/**
-	 * @see ReferenceDataCatalog
-	 * @return the reference data catalog defined in this configuration
-	 */
-	public ReferenceDataCatalog getReferenceDataCatalog();
+    /**
+     * @see ReferenceDataCatalog
+     * @return the reference data catalog defined in this configuration
+     */
+    public ReferenceDataCatalog getReferenceDataCatalog();
 
-	/**
-	 * @see DescriptorProvider
-	 * @return the descriptor provider defined in this configuration
-	 */
-	public DescriptorProvider getDescriptorProvider();
+    /**
+     * @see DescriptorProvider
+     * @return the descriptor provider defined in this configuration
+     */
+    public DescriptorProvider getDescriptorProvider();
 
-	/**
-	 * @see StorageProvider
-	 * @return the storage provider defined in this configuration
-	 */
-	public StorageProvider getStorageProvider();
+    /**
+     * @see StorageProvider
+     * @return the storage provider defined in this configuration
+     */
+    public StorageProvider getStorageProvider();
 
-	/**
-	 * @see InjectionManagerFactory
-	 * @return the injection manager factory defined in this configuration
-	 */
-	public InjectionManagerFactory getInjectionManagerFactory();
+    /**
+     * @see InjectionManager
+     * @return an injection manager for the job
+     */
+    public InjectionManager getInjectionManager(AnalysisJob job);
 
-	/**
-	 * @see TaskRunner
-	 * @return the task runner defined in this configuration
-	 */
-	public TaskRunner getTaskRunner();
+    /**
+     * @see TaskRunner
+     * @return the task runner defined in this configuration
+     */
+    public TaskRunner getTaskRunner();
 }

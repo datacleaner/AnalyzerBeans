@@ -26,8 +26,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.RendererBean;
-import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.html.BodyElement;
 import org.eobjects.analyzer.result.html.HeadElement;
@@ -36,19 +36,21 @@ import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
 import org.eobjects.analyzer.result.renderer.AbstractRenderer;
 import org.eobjects.analyzer.result.renderer.CrosstabHtmlRenderer;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
+import org.eobjects.analyzer.result.renderer.RendererFactory;
 
 @RendererBean(HtmlRenderingFormat.class)
 public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFinderResult, HtmlFragment> {
 
     @Inject
-    DescriptorProvider descriptorProvider;
+    @Provided
+    RendererFactory rendererFactory;
     
     public PatternFinderResultHtmlRenderer() {
         this(null);
     }
 
-    public PatternFinderResultHtmlRenderer(DescriptorProvider descriptorProvider) {
-        this.descriptorProvider = descriptorProvider;
+    public PatternFinderResultHtmlRenderer(RendererFactory rendererFactory) {
+        this.rendererFactory = rendererFactory;
     }
 
     @Override
@@ -89,7 +91,7 @@ public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFin
     }
 
     private void append(StringBuilder sb, SimpleHtmlFragment htmlFragment, Crosstab<?> crosstab) {
-        final CrosstabHtmlRenderer crosstabHtmlRenderer = new CrosstabHtmlRenderer(descriptorProvider);
+        final CrosstabHtmlRenderer crosstabHtmlRenderer = new CrosstabHtmlRenderer(rendererFactory);
 
         final HtmlFragment renderedResult = crosstabHtmlRenderer.render(crosstab);
 

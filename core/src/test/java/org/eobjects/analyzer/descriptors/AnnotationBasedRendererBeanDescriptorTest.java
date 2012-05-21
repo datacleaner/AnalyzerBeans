@@ -34,7 +34,7 @@ import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer4;
 
 public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 
-	private RendererBeanDescriptor descriptor = Descriptors.ofRenderer(DefaultTextRenderer.class);
+	private RendererBeanDescriptor<DefaultTextRenderer> descriptor = Descriptors.ofRenderer(DefaultTextRenderer.class);
 
 	public void testGetRenderingFormat() throws Exception {
 		assertEquals(TextRenderingFormat.class, descriptor.getRenderingFormat());
@@ -44,7 +44,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 		Class<? extends Renderable> renderableType = descriptor.getRenderableType();
 		assertEquals(AnalyzerResult.class, renderableType);
 
-		RendererBeanDescriptor desc2 = Descriptors.ofRenderer(CrosstabTextRenderer.class);
+		RendererBeanDescriptor<CrosstabTextRenderer> desc2 = Descriptors.ofRenderer(CrosstabTextRenderer.class);
 		assertEquals(CrosstabResult.class, desc2.getRenderableType());
 	}
 
@@ -55,7 +55,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 		assertFalse(descriptor.isOutputApplicableFor(Number.class));
 		assertFalse(descriptor.isOutputApplicableFor(StringBuilder.class));
 	}
-
+	
 	public void testInvalidRendererAnnotations() throws Exception {
 		try {
 			Descriptors.ofRenderer(InvalidRenderer1.class);
@@ -79,7 +79,7 @@ public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 			fail("Exception expected");
 		} catch (DescriptorException e) {
 			assertEquals(
-					"Renderer (interface org.eobjects.analyzer.test.mock.MockRenderers$InvalidRenderer3) is not a non-abstract class",
+			        "Component (interface org.eobjects.analyzer.test.mock.MockRenderers$InvalidRenderer3) is not a non-abstract class",
 					e.getMessage());
 		}
 

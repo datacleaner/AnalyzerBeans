@@ -119,7 +119,7 @@ public class Descriptors {
 	 * @param rendererClass
 	 * @return
 	 */
-	public static <R extends Renderer<?, ?>> RendererBeanDescriptor ofRenderer(Class<R> rendererClass) {
-		return new AnnotationBasedRendererBeanDescriptor(rendererClass);
+	public static <R extends Renderer<?, ?>> RendererBeanDescriptor<R> ofRenderer(Class<R> rendererClass) {
+		return new AnnotationBasedRendererBeanDescriptor<R>(rendererClass);
 	}
 }

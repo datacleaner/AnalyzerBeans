@@ -176,8 +176,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 			final Map<ExplorerJob, ExplorerType> explorerMappings) {
 
 		final StringConverter stringConverter = new StringConverter(
-				_configuration.getInjectionManagerFactory()
-						.getInjectionManager(analysisJob));
+				_configuration.getInjectionManager(analysisJob));
 
 		// configure transformers
 		for (Entry<TransformerJob, TransformerType> entry : transformerMappings

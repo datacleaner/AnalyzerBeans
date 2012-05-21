@@ -50,7 +50,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             Ref<OutputStream> outputStreamRef) throws Exception {
         final Writer writer = writerRef.get();
 
-        final RendererFactory rendererFactory = new RendererFactory(configuration.getDescriptorProvider());
+        final RendererFactory rendererFactory = new RendererFactory(configuration);
         final Map<ComponentJob, HtmlFragment> htmlFragments = new LinkedHashMap<ComponentJob, HtmlFragment>();
         for (Entry<ComponentJob, AnalyzerResult> entry : result.getResultMap().entrySet()) {
             final ComponentJob componentJob = entry.getKey();
