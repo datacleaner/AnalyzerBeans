@@ -11,6 +11,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>scala</module>
+		<module>html-rendering</module>
 		<module>basic-transformers</module>
 		<module>basic-filters</module>
 		<module>basic-analyzers</module>
