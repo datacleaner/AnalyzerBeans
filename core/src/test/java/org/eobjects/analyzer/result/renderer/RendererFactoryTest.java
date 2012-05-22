@@ -38,8 +38,10 @@ import org.eobjects.metamodel.data.Row;
 public class RendererFactoryTest extends TestCase {
 
     public void testGetRendererByHierarchyDistance() throws Exception {
-        RendererFactory rendererFactory = new RendererFactory(new ClasspathScanDescriptorProvider().scanPackage(
-                "org.eobjects.analyzer.result.renderer", true), null);
+        ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage(
+                "org.eobjects.analyzer.result.renderer", true);
+        RendererFactory rendererFactory = new RendererFactory(
+                new AnalyzerBeansConfigurationImpl().replace(descriptorProvider));
         Renderer<?, ? extends CharSequence> r;
 
         r = rendererFactory.getRenderer(new NumberResult(1), TextRenderingFormat.class);
@@ -56,7 +58,7 @@ public class RendererFactoryTest extends TestCase {
         ClasspathScanDescriptorProvider descriptorProvider = new ClasspathScanDescriptorProvider();
         descriptorProvider.addRendererClass(FooPrecedenceRenderer.class);
         descriptorProvider.addRendererClass(BarPrecedenceRenderer.class);
-        
+
         AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl().replace(descriptorProvider);
 
         RendererFactory factory = new RendererFactory(conf);

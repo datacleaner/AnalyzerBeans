@@ -27,6 +27,7 @@ import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
+import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,10 +77,28 @@ public final class RendererFactory {
     private final DescriptorProvider _descriptorProvider;
     private final RendererInitializer _rendererInitializer;
 
+    /**
+     * Constructs a renderer factory
+     * 
+     * @param configuration
+     * @param job
+     *            optionally a job which the instantiated renderers pertain to.
+     */
     public RendererFactory(AnalyzerBeansConfiguration configuration) {
         this(configuration.getDescriptorProvider(), new DefaultRendererInitializer(configuration));
     }
 
+    /**
+     * Constructs a renderer factory
+     * 
+     * @param descriptorProvider
+     * @param rendererInitializer
+     * 
+     * @deprecated use
+     *             {@link #RendererFactory(AnalyzerBeansConfiguration, AnalysisJob)}
+     *             instead.
+     */
+    @Deprecated
     public RendererFactory(DescriptorProvider descriptorProvider, RendererInitializer rendererInitializer) {
         _descriptorProvider = descriptorProvider;
         _rendererInitializer = rendererInitializer;

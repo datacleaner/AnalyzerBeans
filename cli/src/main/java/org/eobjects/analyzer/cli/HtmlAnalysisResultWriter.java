@@ -21,13 +21,14 @@ package org.eobjects.analyzer.cli;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.beans.api.Renderer;
@@ -42,12 +43,17 @@ import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.metamodel.util.Ref;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
+
+    private static final Logger logger = LoggerFactory.getLogger(HtmlAnalysisResultWriter.class);
 
     @Override
     public void write(AnalysisResult result, AnalyzerBeansConfiguration configuration, Ref<Writer> writerRef,
             Ref<OutputStream> outputStreamRef) throws Exception {
+
         final Writer writer = writerRef.get();
 
         final RendererFactory rendererFactory = new RendererFactory(configuration);
@@ -60,14 +66,43 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             if (renderer == null) {
                 throw new IllegalStateException("No HTML renderer found for result: " + analyzerResult);
             }
-            final HtmlFragment htmlFragment = renderer.render(analyzerResult);
-            htmlFragments.put(componentJob, htmlFragment);
+
+            try {
+                final HtmlFragment htmlFragment = renderer.render(analyzerResult);
+                htmlFragments.put(componentJob, htmlFragment);
+            } catch (Exception e) {
+                logger.error("Error while rendering analyzer result: " + analyzerResult, e);
+                writeRenderingError(writer, componentJob, analyzerResult, e);
+            }
         }
 
         writeHtmlBegin(writer);
         writeHead(writer, htmlFragments);
         writeBody(writer, htmlFragments);
         writeHtmlEnd(writer);
+    }
+
+    private void writeMaterializationError(Writer writer, ComponentJob componentJob, Exception e) throws IOException {
+        writeGenericError(writer, componentJob, null, e);
+    }
+
+    private void writeRenderingError(Writer writer, ComponentJob componentJob, AnalyzerResult analyzerResult,
+            Exception e) throws IOException {
+        writeGenericError(writer, componentJob, analyzerResult, e);
+    }
+
+    private void writeGenericError(Writer writer, ComponentJob componentJob, AnalyzerResult analyzerResult, Exception e)
+            throws IOException {
+        writer.write("<div class=\"renderingError\">");
+        writer.write("<p>Component job: " + componentJob + "</p>");
+        if (analyzerResult != null) {
+            writer.write("<p>Analyzer result: " + analyzerResult + "</p>");
+        }
+        writer.write("<pre>");
+        PrintWriter printWriter = new PrintWriter(writer);
+        e.printStackTrace(printWriter);
+        writer.write("</pre>");
+        writer.write("</div>");
     }
 
     protected void writeHtmlBegin(Writer writer) throws IOException {
@@ -85,11 +120,13 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
         writeHeadBegin(writer);
 
-        for (HtmlFragment htmlFragment : htmlFragments.values()) {
+        for (Entry<ComponentJob, HtmlFragment> entry : htmlFragments.entrySet()) {
+            final HtmlFragment htmlFragment = entry.getValue();
             final List<HeadElement> headElements = htmlFragment.getHeadElements();
             for (HeadElement headElement : headElements) {
                 if (!allHeadElements.contains(headElement)) {
-                    writeHeadElement(writer, headElement);
+                    final ComponentJob componentJob = entry.getKey();
+                    writeHeadElement(writer, componentJob, headElement);
                     allHeadElements.add(headElement);
                 }
             }
@@ -107,9 +144,15 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         writer.write("</head>");
     }
 
-    protected void writeHeadElement(Writer writer, HeadElement headElement) throws IOException {
+    protected void writeHeadElement(Writer writer, ComponentJob componentJob, HeadElement headElement)
+            throws IOException {
         writer.write("  ");
-        writer.write(headElement.toHtml());
+        try {
+            String html = headElement.toHtml();
+            writer.write(html);
+        } catch (Exception e) {
+            writeMaterializationError(writer, componentJob, e);
+        }
         writer.write('\n');
     }
 
@@ -154,7 +197,12 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     protected void writeBodyElement(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment,
             BodyElement bodyElement) throws IOException {
         writer.write("  ");
-        writer.write(bodyElement.toHtml());
+        try {
+            String html = bodyElement.toHtml();
+            writer.write(html);
+        } catch (Exception e) {
+            writeMaterializationError(writer, componentJob, e);
+        }
         writer.write('\n');
     }
 

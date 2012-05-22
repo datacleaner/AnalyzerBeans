@@ -33,35 +33,35 @@ import org.eobjects.analyzer.job.ComponentJob;
  */
 public interface AnalysisResult {
 
-	/**
-	 * Gets the the results of this analysis.
-	 * 
-	 * @return the results from the Analyzers in the executed job
-	 */
-	public List<AnalyzerResult> getResults();
+    /**
+     * Gets the the results of this analysis.
+     * 
+     * @return the results from the Analyzers in the executed job
+     */
+    public List<AnalyzerResult> getResults();
 
-	/**
-	 * Gets the results of a single Analyzer.
-	 * 
-	 * @param componentJob
-	 *            the component (either analyzer or explorer) job to find the
-	 *            result for
-	 * @return the result for a given component job
-	 */
-	public AnalyzerResult getResult(ComponentJob componentJob);
+    /**
+     * Gets the results of a single Analyzer.
+     * 
+     * @param componentJob
+     *            the component (either analyzer or explorer) job to find the
+     *            result for
+     * @return the result for a given component job
+     */
+    public AnalyzerResult getResult(ComponentJob componentJob);
 
-	/**
-	 * Gets the results mapped to the Component jobs
-	 * 
-	 * @return a map with ComponentJobs as keys to the corresponding
-	 *         AnalyzerResults.
-	 */
-	public Map<ComponentJob, AnalyzerResult> getResultMap();
+    /**
+     * Gets the results mapped to the Component jobs
+     * 
+     * @return a map with ComponentJobs as keys to the corresponding
+     *         AnalyzerResults.
+     */
+    public Map<ComponentJob, AnalyzerResult> getResultMap();
 
-	/**
-	 * Gets the time that the results were created
-	 * 
-	 * @return the time that the results were created
-	 */
-	public Date getCreationDate();
+    /**
+     * Gets the time that the results were created
+     * 
+     * @return the time that the results were created
+     */
+    public Date getCreationDate();
 }
