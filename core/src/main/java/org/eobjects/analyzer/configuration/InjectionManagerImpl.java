@@ -50,102 +50,107 @@ import org.slf4j.LoggerFactory;
  */
 public class InjectionManagerImpl implements InjectionManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(InjectionManagerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(InjectionManagerImpl.class);
 
-	private final AnalyzerBeansConfiguration _configuration;
-	private final AnalysisJob _job;
-	private final Ref<RowAnnotationFactory> _rowAnntationFactoryRef;
+    private final AnalyzerBeansConfiguration _configuration;
+    private final AnalysisJob _job;
+    private final Ref<RowAnnotationFactory> _rowAnntationFactoryRef;
 
-	/**
-	 * Constructs an {@link InjectionManager} for use within the scope of a job
-	 * execution.
-	 * 
-	 * @param configuration
-	 * @param job
-	 */
-	public InjectionManagerImpl(AnalyzerBeansConfiguration configuration, AnalysisJob job) {
-	    _configuration = configuration;
-		_job = job;
-		_rowAnntationFactoryRef = createRowAnnotationFactoryRef();
-	}
+    /**
+     * Constructs an {@link InjectionManager} for use within the scope of a job
+     * execution.
+     * 
+     * @param configuration
+     * @param job
+     */
+    public InjectionManagerImpl(AnalyzerBeansConfiguration configuration, AnalysisJob job) {
+        _configuration = configuration;
+        _job = job;
+        _rowAnntationFactoryRef = createRowAnnotationFactoryRef();
+    }
 
-	/**
-	 * Creates a new {@link InjectionManager} without any job-context.
-	 * Convenient for use outside of an actual job, mimicing a job situation
-	 * etc.
-	 * 
-	 * @param configuration
-	 */
-	public InjectionManagerImpl(AnalyzerBeansConfiguration configuration) {
-		this(configuration, null);
-	}
+    /**
+     * Creates a new {@link InjectionManager} without any job-context.
+     * Convenient for use outside of an actual job, mimicing a job situation
+     * etc.
+     * 
+     * @param configuration
+     */
+    public InjectionManagerImpl(AnalyzerBeansConfiguration configuration) {
+        this(configuration, null);
+    }
 
-	private Ref<RowAnnotationFactory> createRowAnnotationFactoryRef() {
-		return new LazyRef<RowAnnotationFactory>() {
-			@Override
-			protected RowAnnotationFactory fetch() {
-				logger.info("Creating RowAnnotationFactory for job: {}", _job);
-				RowAnnotationFactory rowAnnotationFactory = _configuration.getStorageProvider().createRowAnnotationFactory();
-				if (rowAnnotationFactory == null) {
-					throw new IllegalStateException("Storage provider returned null RowAnnotationFactory!");
-				}
-				return rowAnnotationFactory;
-			}
-		};
-	}
+    private Ref<RowAnnotationFactory> createRowAnnotationFactoryRef() {
+        return new LazyRef<RowAnnotationFactory>() {
+            @Override
+            protected RowAnnotationFactory fetch() {
+                logger.info("Creating RowAnnotationFactory for job: {}", _job);
+                RowAnnotationFactory rowAnnotationFactory = _configuration.getStorageProvider()
+                        .createRowAnnotationFactory();
+                if (rowAnnotationFactory == null) {
+                    throw new IllegalStateException("Storage provider returned null RowAnnotationFactory!");
+                }
+                return rowAnnotationFactory;
+            }
+        };
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E> E getInstance(InjectionPoint<E> injectionPoint) {
-		final Class<E> baseType = injectionPoint.getBaseType();
-		if (baseType == ReferenceDataCatalog.class) {
-			return (E) _configuration.getReferenceDataCatalog();
-		} else if (baseType == OutputRowCollector.class) {
-			return (E) new ThreadLocalOutputRowCollector();
-		} else if (baseType == DatastoreCatalog.class) {
-			return (E) _configuration.getDatastoreCatalog();
-		} else if (baseType == CollectionFactory.class) {
-			return (E) new CollectionFactoryImpl(_configuration.getStorageProvider());
-		} else if (baseType == RendererFactory.class) {
-		    return (E) new RendererFactory(_configuration);
-		} else if (baseType == RowAnnotationFactory.class) {
-			return (E) _rowAnntationFactoryRef.get();
-		} else if (baseType == AnalyzerBeansConfiguration.class) {
-		    return (E) _configuration;
-		} else if (baseType == AnalysisJob.class) {
-		    return (E) _job;
-		} else if (baseType == RowAnnotation.class) {
-			return (E) _rowAnntationFactoryRef.get().createAnnotation();
-		} else if (baseType == DatastoreConnection.class && _job != null) {
-			return (E) _job.getDatastore().openConnection();
-		} else if (baseType == DataContext.class && _job != null) {
-			return (E) _job.getDatastore().openConnection().getDataContext();
-		} else if (baseType == SchemaNavigator.class && _job != null) {
-			return (E) _job.getDatastore().openConnection().getSchemaNavigator();
-		} else {
-			// only inject persistent lists, sets, maps into @Provided fields.
-			if (injectionPoint.getAnnotation(Provided.class) != null && injectionPoint.isGenericType()) {
-				final Class<?> clazz1 = injectionPoint.getGenericTypeArgument(0);
-				if (baseType == List.class) {
-					List<?> list = _configuration.getStorageProvider().createList(clazz1);
-					return (E) list;
-				} else if (baseType == Set.class) {
-					Set<?> set = _configuration.getStorageProvider().createSet(clazz1);
-					return (E) set;
-				} else if (baseType == Map.class) {
-					Class<?> clazz2 = (Class<?>) injectionPoint.getGenericTypeArgument(1);
-					Map<?, ?> map = _configuration.getStorageProvider().createMap(clazz1, clazz2);
-					return (E) map;
-				} else {
-					logger.warn("Could not handle @Provided injection for injection point: {}", injectionPoint);
-				}
-			} else {
-				logger.warn("Could not handle injection for injection point: {}", injectionPoint);
-			}
-		}
+    @SuppressWarnings("unchecked")
+    @Override
+    public final <E> E getInstance(InjectionPoint<E> injectionPoint) {
+        Object instance = getInstanceInternal(injectionPoint);
+        if (instance == null) {
+            logger.warn("Could not handle injection for injection point: {}", injectionPoint);
+        }
+        return (E) instance;
+    }
 
-		// unsupported injection type
-		return null;
-	}
+    protected Object getInstanceInternal(InjectionPoint<?> injectionPoint) {
+        final Class<?> baseType = injectionPoint.getBaseType();
+        if (baseType == ReferenceDataCatalog.class) {
+            return _configuration.getReferenceDataCatalog();
+        } else if (baseType == OutputRowCollector.class) {
+            return new ThreadLocalOutputRowCollector();
+        } else if (baseType == DatastoreCatalog.class) {
+            return _configuration.getDatastoreCatalog();
+        } else if (baseType == CollectionFactory.class) {
+            return new CollectionFactoryImpl(_configuration.getStorageProvider());
+        } else if (baseType == RendererFactory.class) {
+            return new RendererFactory(_configuration);
+        } else if (baseType == RowAnnotationFactory.class) {
+            return _rowAnntationFactoryRef.get();
+        } else if (baseType == AnalyzerBeansConfiguration.class) {
+            return _configuration;
+        } else if (baseType == AnalysisJob.class) {
+            return _job;
+        } else if (baseType == RowAnnotation.class) {
+            return _rowAnntationFactoryRef.get().createAnnotation();
+        } else if (baseType == DatastoreConnection.class && _job != null) {
+            return _job.getDatastore().openConnection();
+        } else if (baseType == DataContext.class && _job != null) {
+            return _job.getDatastore().openConnection().getDataContext();
+        } else if (baseType == SchemaNavigator.class && _job != null) {
+            return _job.getDatastore().openConnection().getSchemaNavigator();
+        } else {
+            // only inject persistent lists, sets, maps into @Provided fields.
+            if (injectionPoint.getAnnotation(Provided.class) != null && injectionPoint.isGenericType()) {
+                final Class<?> clazz1 = injectionPoint.getGenericTypeArgument(0);
+                if (baseType == List.class) {
+                    List<?> list = _configuration.getStorageProvider().createList(clazz1);
+                    return list;
+                } else if (baseType == Set.class) {
+                    Set<?> set = _configuration.getStorageProvider().createSet(clazz1);
+                    return set;
+                } else if (baseType == Map.class) {
+                    Class<?> clazz2 = (Class<?>) injectionPoint.getGenericTypeArgument(1);
+                    Map<?, ?> map = _configuration.getStorageProvider().createMap(clazz1, clazz2);
+                    return map;
+                }
+            }
+        }
+
+        // unsupported injection type
+        return null;
+    }
 
 }

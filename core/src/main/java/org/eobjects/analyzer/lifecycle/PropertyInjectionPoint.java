@@ -70,4 +70,8 @@ public final class PropertyInjectionPoint implements InjectionPoint<Object> {
 		return _descriptor.getTypeArgument(i);
 	}
 
+	@Override
+	public String toString() {
+	    return "PropertyInjectionPoint[" + _descriptor + "]";
+	}
 }
