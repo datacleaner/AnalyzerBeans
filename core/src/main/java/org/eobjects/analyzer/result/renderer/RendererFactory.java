@@ -172,7 +172,7 @@ public final class RendererFactory {
                     return isRendererCapable(rendererDescriptor, renderable, bestMatch);
                 }
 
-                if (hierarchyDistance < bestMatch.getHierarchyDistance()) {
+                if (hierarchyDistance <= bestMatch.getHierarchyDistance()) {
                     // lower hierarchy distance than best match
                     return isRendererCapable(rendererDescriptor, renderable, bestMatch);
                 }

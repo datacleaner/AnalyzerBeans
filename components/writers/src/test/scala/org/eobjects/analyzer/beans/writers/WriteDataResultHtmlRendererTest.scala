@@ -1,7 +1,13 @@
 package org.eobjects.analyzer.beans.writers
 import org.scalatest.junit.AssertionsForJUnit
+
+import scala.collection.JavaConversions._
 import org.junit.Test
 import org.junit.Assert
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl
+import org.eobjects.analyzer.result.renderer.RendererFactory
+import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat
 
 class WriteDataResultHtmlRendererTest extends AssertionsForJUnit {
 
@@ -18,6 +24,22 @@ class WriteDataResultHtmlRendererTest extends AssertionsForJUnit {
                  <p>Executed 2 inserts</p>
                  <p>Executed 3 updates</p>
                  
-               </div>""".replaceAll("\r\n","\n"), htmlFragment.getBodyElements().get(0).toHtml().replaceAll("\r\n","\n"));
+               </div>""".replaceAll("\r\n", "\n"), htmlFragment.getBodyElements().get(0).toHtml().replaceAll("\r\n", "\n"));
+  }
+
+  @Test
+  def testClasspathDiscovery = {
+    val descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage("org.eobjects.analyzer.beans", true);
+
+    val htmlRenderers = descriptorProvider.getRendererBeanDescriptorsForRenderingFormat(classOf[HtmlRenderingFormat]);
+    Assert.assertEquals("AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.beans.DefaultAnalyzerResultHtmlRenderer]," +
+      "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.beans.writers.WriteDataResultHtmlRenderer]", htmlRenderers.mkString(","))
+
+    val conf = new AnalyzerBeansConfigurationImpl().replace(descriptorProvider);
+    val rendererFactory = new RendererFactory(conf);
+
+    val renderer = rendererFactory.getRenderer(new WriteDataResultImpl(2, 3, "datastore", "schema", "table"), classOf[HtmlRenderingFormat])
+
+    Assert.assertEquals(classOf[WriteDataResultHtmlRenderer], renderer.getClass());
   }
 }
