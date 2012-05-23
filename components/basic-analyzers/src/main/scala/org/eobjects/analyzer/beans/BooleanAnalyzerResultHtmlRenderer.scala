@@ -10,7 +10,10 @@ import org.eobjects.analyzer.result.html.CompositeBodyElement
 import org.eobjects.analyzer.result.html.BodyElement
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
+import org.eobjects.analyzer.beans.api.RendererBean
+import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat
 
+@RendererBean(classOf[HtmlRenderingFormat])
 class BooleanAnalyzerResultHtmlRenderer(rf: RendererFactory) extends HtmlRenderer[BooleanAnalyzerResult] {
 
   @Inject
