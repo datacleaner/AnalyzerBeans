@@ -24,61 +24,50 @@ import java.util.Date;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
-import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.InputRow;
 
 @FilterBean("Date range")
 @Description("A filter that filters out rows where a number value is outside a specified range")
 @Categorized(FilterCategory.class)
-public class DateRangeFilter implements Filter<RangeFilterCategory> {
+public class DateRangeFilter extends AbstractQueryOptimizedRangeFilter<Date> {
 
-	@Configured
-	InputColumn<Date> column;
+    @Configured(order = 0)
+    InputColumn<Date> column;
 
-	@Configured(order = 1)
-	Date lowestValue;
+    @Configured(order = 1)
+    Date lowestValue;
 
-	@Configured(order = 2)
-	Date highestValue;
+    @Configured(order = 2)
+    Date highestValue;
 
-	public DateRangeFilter(Date lowestValue, Date highestValue) {
-		this.lowestValue = lowestValue;
-		this.highestValue = highestValue;
-	}
+    public DateRangeFilter(Date lowestValue, Date highestValue) {
+        this.lowestValue = lowestValue;
+        this.highestValue = highestValue;
+    }
 
-	public DateRangeFilter() {
-	    this(null, null);
-	}
+    public DateRangeFilter() {
+        this(null, null);
+    }
 
-	@Validate
-	public void validate() {
-		if (lowestValue.compareTo(highestValue) > 0) {
-			throw new IllegalStateException("Lowest value is greater than the highest value");
-		}
-	}
+    @Override
+    public Date getHighestValue() {
+        return highestValue;
+    }
 
-	@Override
-	public RangeFilterCategory categorize(InputRow inputRow) {
-	    Date value = inputRow.getValue(column);
-		return categorize(value);
-	}
+    @Override
+    public Date getLowestValue() {
+        return lowestValue;
+    }
 
-	protected RangeFilterCategory categorize(Date value) {
-		if (value == null) {
-			return RangeFilterCategory.LOWER;
-		}
-		if (value.compareTo(lowestValue) < 0) {
-			return RangeFilterCategory.LOWER;
-		}
-		if (value.compareTo(highestValue) > 0) {
-			return RangeFilterCategory.HIGHER;
-		}
+    @Override
+    public InputColumn<Date> getColumn() {
+        return column;
+    }
 
-		return RangeFilterCategory.VALID;
-	}
-
+    @Override
+    public int compare(Date o1, Date o2) {
+        return o1.compareTo(o2);
+    }
 }

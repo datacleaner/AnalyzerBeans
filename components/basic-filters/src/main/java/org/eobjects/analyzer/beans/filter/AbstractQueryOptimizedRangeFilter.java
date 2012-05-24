@@ -1,0 +1,103 @@
+package org.eobjects.analyzer.beans.filter;
+
+import java.util.Comparator;
+
+import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
+import org.eobjects.analyzer.beans.api.Validate;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.metamodel.query.FilterItem;
+import org.eobjects.metamodel.query.OperatorType;
+import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.query.SelectItem;
+import org.eobjects.metamodel.schema.Column;
+
+/**
+ * Abstract {@link QueryOptimizedFilter} which implementation for range filters
+ * which demarcate valid value bounds.
+ */
+abstract class AbstractQueryOptimizedRangeFilter<E> implements QueryOptimizedFilter<RangeFilterCategory>, Comparator<E> {
+
+    @Validate
+    public void validate() {
+        if (compare(getLowestValue(), getHighestValue()) > 0) {
+            throw new IllegalStateException("Lowest value is greater than the highest value");
+        }
+    }
+
+    public abstract InputColumn<? extends E> getColumn();
+
+    public abstract E getHighestValue();
+
+    public abstract E getLowestValue();
+
+    @Override
+    public RangeFilterCategory categorize(InputRow inputRow) {
+        E value = inputRow.getValue(getColumn());
+        return categorize(value);
+    }
+
+    protected RangeFilterCategory categorize(E value) {
+        if (value == null) {
+            return RangeFilterCategory.LOWER;
+        }
+        if (compare(value, getLowestValue()) < 0) {
+            return RangeFilterCategory.LOWER;
+        }
+        if (compare(value, getHighestValue()) > 0) {
+            return RangeFilterCategory.HIGHER;
+        }
+
+        return RangeFilterCategory.VALID;
+    }
+
+    @Override
+    public boolean isOptimizable(RangeFilterCategory category) {
+        return true;
+    }
+
+    @Override
+    public Query optimizeQuery(Query q, RangeFilterCategory category) {
+        final Column col = getColumn().getPhysicalColumn();
+        final SelectItem selectItem = new SelectItem(col);
+        switch (category) {
+        case LOWER:
+            // special case, null is also considered "lower"
+            final FilterItem isNullFilter = new FilterItem(selectItem, OperatorType.EQUALS_TO, null);
+            final FilterItem isLowerThanFilter = new FilterItem(selectItem, OperatorType.LESS_THAN, getLowestValue());
+            q.where(new FilterItem(isNullFilter, isLowerThanFilter));
+            return q;
+        case HIGHER:
+            q.where(selectItem, OperatorType.GREATER_THAN, getHighestValue());
+            return q;
+        case VALID:
+            final E lowestValue = getLowestValue();
+            final E highestValue = getHighestValue();
+            if (compare(lowestValue, highestValue) == 0) {
+                // special case where highest and lowest value are equal
+                q.where(col, OperatorType.EQUALS_TO, lowestValue);
+                return q;
+            }
+
+            final FilterItem orFilter1;
+            {
+                final FilterItem f1 = new FilterItem(selectItem, OperatorType.GREATER_THAN, lowestValue);
+                final FilterItem f2 = new FilterItem(selectItem, OperatorType.EQUALS_TO, lowestValue);
+                orFilter1 = new FilterItem(f1, f2);
+            }
+
+            final FilterItem orFilter2;
+            {
+                final FilterItem f3 = new FilterItem(selectItem, OperatorType.LESS_THAN, highestValue);
+                final FilterItem f4 = new FilterItem(selectItem, OperatorType.EQUALS_TO, highestValue);
+                orFilter2 = new FilterItem(f3, f4);
+            }
+
+            q.where(orFilter1);
+            q.where(orFilter2);
+            return q;
+        default:
+            throw new UnsupportedOperationException();
+        }
+    }
+}

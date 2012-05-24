@@ -22,62 +22,57 @@ package org.eobjects.analyzer.beans.filter;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
-import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.InputRow;
 
 @FilterBean("Number range")
 @Description("A filter that filters out rows where a number value is outside a specified range")
 @Categorized(FilterCategory.class)
-public class NumberRangeFilter implements Filter<RangeFilterCategory> {
+public class NumberRangeFilter extends AbstractQueryOptimizedRangeFilter<Number> {
 
-	@Configured
-	InputColumn<Number> column;
+    @Configured(order = 0)
+    InputColumn<Double> column;
 
-	@Configured(order = 1)
-	Double lowestValue;
+    @Configured(order = 1)
+    Double lowestValue;
 
-	@Configured(order = 2)
-	Double highestValue;
+    @Configured(order = 2)
+    Double highestValue;
 
-	public NumberRangeFilter(double lowestValue, double highestValue) {
-		this.lowestValue = lowestValue;
-		this.highestValue = highestValue;
-	}
+    public NumberRangeFilter(double lowestValue, double highestValue) {
+        this.lowestValue = lowestValue;
+        this.highestValue = highestValue;
+    }
 
-	public NumberRangeFilter() {
-	    this(0d, 10d);
-	}
+    public NumberRangeFilter() {
+        this(0d, 10d);
+    }
 
-	@Validate
-	public void validate() {
-		if (lowestValue.compareTo(highestValue) > 0) {
-			throw new IllegalStateException("Lowest value is greater than the highest value");
-		}
-	}
+    @Override
+    public Double getHighestValue() {
+        return highestValue;
+    }
 
-	@Override
-	public RangeFilterCategory categorize(InputRow inputRow) {
-		Number value = inputRow.getValue(column);
-		return categorize(value);
-	}
+    @Override
+    public Double getLowestValue() {
+        return lowestValue;
+    }
 
-	protected RangeFilterCategory categorize(Number value) {
-		if (value == null) {
-			return RangeFilterCategory.LOWER;
-		}
-		double doubleValue = value.doubleValue();
-		if (doubleValue < lowestValue.doubleValue()) {
-			return RangeFilterCategory.LOWER;
-		}
-		if (doubleValue > highestValue.doubleValue()) {
-			return RangeFilterCategory.HIGHER;
-		}
+    @Override
+    public InputColumn<? extends Number> getColumn() {
+        return column;
+    }
 
-		return RangeFilterCategory.VALID;
-	}
-
+    @Override
+    public int compare(Number o1, Number o2) {
+        double diff = o1.doubleValue() - o2.doubleValue();
+        if (diff == 0) {
+            return 0;
+        } else if (diff > 0) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
 }
