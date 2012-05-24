@@ -76,13 +76,16 @@ public final class SourceColumnMapping {
 	public void autoMap(Datastore datastore) {
 		setDatastore(datastore);
 		DatastoreConnection con = datastore.openConnection();
-		for (Entry<String, Column> entry : _map.entrySet()) {
-			if (entry.getValue() == null) {
-				String path = entry.getKey();
-				entry.setValue(con.getSchemaNavigator().convertToColumn(path));
-			}
+		try {
+		    for (Entry<String, Column> entry : _map.entrySet()) {
+		        if (entry.getValue() == null) {
+		            String path = entry.getKey();
+		            entry.setValue(con.getSchemaNavigator().convertToColumn(path));
+		        }
+		    }
+		} finally {
+		    con.close();
 		}
-		con.close();
 	}
 
 	public boolean isSatisfied() {

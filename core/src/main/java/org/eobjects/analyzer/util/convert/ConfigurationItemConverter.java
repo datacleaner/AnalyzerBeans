@@ -19,23 +19,22 @@
  */
 package org.eobjects.analyzer.util.convert;
 
+import static org.eobjects.analyzer.util.ReflectionUtils.is;
+import static org.eobjects.analyzer.util.ReflectionUtils.isColumn;
+import static org.eobjects.analyzer.util.ReflectionUtils.isSchema;
+import static org.eobjects.analyzer.util.ReflectionUtils.isTable;
+
 import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Converter;
-
-import static org.eobjects.analyzer.util.ReflectionUtils.is;
-import static org.eobjects.analyzer.util.ReflectionUtils.isSchema;
-import static org.eobjects.analyzer.util.ReflectionUtils.isTable;
-import static org.eobjects.analyzer.util.ReflectionUtils.isColumn;
-
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
@@ -61,100 +60,115 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigurationItemConverter implements Converter<Object> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ConfigurationItemConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationItemConverter.class);
 
-	@Inject
-	DatastoreCatalog datastoreCatalog;
-	
-	@Inject
-	ReferenceDataCatalog referenceDataCatalog;
-	
-	@Inject
-	SchemaNavigator schemaNavigator;
+    @Inject
+    DatastoreCatalog datastoreCatalog;
 
-	@Override
-	public Object fromString(Class<?> type, String str) {
-		if (ReflectionUtils.isColumn(type)) {
-			Column column = schemaNavigator.convertToColumn(str);
-			if (column == null) {
-				throw new IllegalArgumentException("Column not found: " + str);
-			}
-			return column;
-		}
-		if (ReflectionUtils.isTable(type)) {
-			Table table = schemaNavigator.convertToTable(str);
-			if (table == null) {
-				throw new IllegalArgumentException("Table not found: " + str);
-			}
-			return table;
-		}
-		if (ReflectionUtils.isSchema(type)) {
-			Schema schema = schemaNavigator.convertToSchema(str);
-			if (schema == null) {
-				throw new IllegalArgumentException("Schema not found: " + str);
-			}
-			return schema;
-		}
-		if (ReflectionUtils.is(type, Dictionary.class)) {
-			Dictionary dictionary = referenceDataCatalog.getDictionary(str);
-			if (dictionary == null) {
-				throw new IllegalArgumentException("Dictionary not found: " + str);
-			}
-			return dictionary;
-		}
-		if (ReflectionUtils.is(type, SynonymCatalog.class)) {
-			SynonymCatalog synonymCatalog = referenceDataCatalog.getSynonymCatalog(str);
-			if (synonymCatalog == null) {
-				throw new IllegalArgumentException("Synonym catalog not found: " + str);
-			}
-			return synonymCatalog;
-		}
-		if (ReflectionUtils.is(type, StringPattern.class)) {
-			StringPattern stringPattern = referenceDataCatalog.getStringPattern(str);
-			if (stringPattern == null) {
-				throw new IllegalArgumentException("String pattern not found: " + str);
-			}
-			return stringPattern;
-		}
-		if (ReflectionUtils.is(type, Datastore.class)) {
-			if (null != datastoreCatalog) {
-				Datastore datastore = datastoreCatalog.getDatastore(str);
-				if (datastore == null) {
-					throw new IllegalArgumentException("Datastore not found: " + str);
-				}
-				return datastore;
-			}
-		}
-		throw new IllegalArgumentException("Could not convert to type: " + type.getName());
-	}
+    @Inject
+    ReferenceDataCatalog referenceDataCatalog;
 
-	@Override
-	public String toString(Object o) {
-		final String result;
-		if (o instanceof Schema) {
-			result = ((Schema) o).getName();
-		} else if (o instanceof Table) {
-			result = ((Table) o).getQualifiedLabel();
-		} else if (o instanceof Column) {
-			result = ((Column) o).getQualifiedLabel();
-		} else if (o instanceof Dictionary) {
-			result = ((Dictionary) o).getName();
-		} else if (o instanceof SynonymCatalog) {
-			result = ((SynonymCatalog) o).getName();
-		} else if (o instanceof StringPattern) {
-			result = ((StringPattern) o).getName();
-		} else if (o instanceof Datastore) {
-			result = ((Datastore) o).getName();
-		} else {
-			logger.warn("Could not convert type: {}", o.getClass().getName());
-			result = o.toString();
-		}
-		return result;
-	}
+    @Inject
+    Datastore datastore;
 
-	@Override
-	public boolean isConvertable(Class<?> type) {
-		return isSchema(type) || isTable(type) || isColumn(type) || is(type, Dictionary.class)
-				|| is(type, SynonymCatalog.class) || is(type, StringPattern.class) || is(type, Datastore.class);
-	}
+    @Override
+    public Object fromString(Class<?> type, String str) {
+        if (ReflectionUtils.isColumn(type)) {
+            DatastoreConnection connection = datastore.openConnection();
+            try {
+                Column column = connection.getSchemaNavigator().convertToColumn(str);
+                if (column == null) {
+                    throw new IllegalArgumentException("Column not found: " + str);
+                }
+                return column;
+            } finally {
+                connection.close();
+            }
+        }
+        if (ReflectionUtils.isTable(type)) {
+            DatastoreConnection connection = datastore.openConnection();
+            try {
+                Table table = connection.getSchemaNavigator().convertToTable(str);
+                if (table == null) {
+                    throw new IllegalArgumentException("Table not found: " + str);
+                }
+                return table;
+            } finally {
+                connection.close();
+            }
+        }
+        if (ReflectionUtils.isSchema(type)) {
+            DatastoreConnection connection = datastore.openConnection();
+            try {
+                Schema schema = connection.getSchemaNavigator().convertToSchema(str);
+                if (schema == null) {
+                    throw new IllegalArgumentException("Schema not found: " + str);
+                }
+                return schema;
+            } finally {
+                connection.close();
+            }
+        }
+        if (ReflectionUtils.is(type, Dictionary.class)) {
+            Dictionary dictionary = referenceDataCatalog.getDictionary(str);
+            if (dictionary == null) {
+                throw new IllegalArgumentException("Dictionary not found: " + str);
+            }
+            return dictionary;
+        }
+        if (ReflectionUtils.is(type, SynonymCatalog.class)) {
+            SynonymCatalog synonymCatalog = referenceDataCatalog.getSynonymCatalog(str);
+            if (synonymCatalog == null) {
+                throw new IllegalArgumentException("Synonym catalog not found: " + str);
+            }
+            return synonymCatalog;
+        }
+        if (ReflectionUtils.is(type, StringPattern.class)) {
+            StringPattern stringPattern = referenceDataCatalog.getStringPattern(str);
+            if (stringPattern == null) {
+                throw new IllegalArgumentException("String pattern not found: " + str);
+            }
+            return stringPattern;
+        }
+        if (ReflectionUtils.is(type, Datastore.class)) {
+            if (null != datastoreCatalog) {
+                Datastore datastore = datastoreCatalog.getDatastore(str);
+                if (datastore == null) {
+                    throw new IllegalArgumentException("Datastore not found: " + str);
+                }
+                return datastore;
+            }
+        }
+        throw new IllegalArgumentException("Could not convert to type: " + type.getName());
+    }
+
+    @Override
+    public String toString(Object o) {
+        final String result;
+        if (o instanceof Schema) {
+            result = ((Schema) o).getName();
+        } else if (o instanceof Table) {
+            result = ((Table) o).getQualifiedLabel();
+        } else if (o instanceof Column) {
+            result = ((Column) o).getQualifiedLabel();
+        } else if (o instanceof Dictionary) {
+            result = ((Dictionary) o).getName();
+        } else if (o instanceof SynonymCatalog) {
+            result = ((SynonymCatalog) o).getName();
+        } else if (o instanceof StringPattern) {
+            result = ((StringPattern) o).getName();
+        } else if (o instanceof Datastore) {
+            result = ((Datastore) o).getName();
+        } else {
+            logger.warn("Could not convert type: {}", o.getClass().getName());
+            result = o.toString();
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isConvertable(Class<?> type) {
+        return isSchema(type) || isTable(type) || isColumn(type) || is(type, Dictionary.class)
+                || is(type, SynonymCatalog.class) || is(type, StringPattern.class) || is(type, Datastore.class);
+    }
 }
