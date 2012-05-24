@@ -22,10 +22,13 @@ package org.eobjects.analyzer.descriptors;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Metric;
@@ -85,6 +88,23 @@ final class MetricDescriptorImpl implements MetricDescriptor {
     }
 
     @Override
+    public Collection<String> getMetricParameterSuggestions(AnalyzerResult result) {
+        Method method = getMethod();
+        final Class<?> returnType = method.getReturnType();
+        if (ReflectionUtils.is(returnType, ParameterizableMetric.class)) {
+            final Object[] methodParameters = createMethodParameters(method, null);
+            try {
+                final Object returnValue = method.invoke(result, methodParameters);
+                final ParameterizableMetric parameterizableMetric = (ParameterizableMetric) returnValue;
+                return parameterizableMetric.getParameterSuggestions();
+            } catch (Exception e) {
+                throw new IllegalStateException("Could not invoke metric getter " + _method, e);
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
     public Number getValue(AnalyzerResult result, MetricParameters metricParameters) {
         if (result == null) {
             throw new IllegalArgumentException("AnalyzerResult cannot be null");
@@ -92,8 +112,15 @@ final class MetricDescriptorImpl implements MetricDescriptor {
         Method method = getMethod();
         Object[] methodParameters = createMethodParameters(method, metricParameters);
         try {
-            Object returnValue = method.invoke(result, methodParameters);
-            return (Number) returnValue;
+            final Object returnValue = method.invoke(result, methodParameters);
+            final Number number;
+            if (returnValue instanceof ParameterizableMetric) {
+                final ParameterizableMetric parameterizableMetric = (ParameterizableMetric) returnValue;
+                number = parameterizableMetric.getValue(metricParameters.getQueryString());
+            } else {
+                number = (Number) returnValue;
+            }
+            return number;
         } catch (Exception e) {
             throw new IllegalStateException("Could not invoke metric getter " + _method, e);
         }

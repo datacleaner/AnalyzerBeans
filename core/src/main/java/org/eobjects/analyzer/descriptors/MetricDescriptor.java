@@ -21,6 +21,7 @@ package org.eobjects.analyzer.descriptors;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
@@ -42,6 +43,16 @@ public interface MetricDescriptor extends Serializable, HasName, Comparable<Metr
      * @return the metric value of the particular {@link AnalyzerResult}.
      */
     public Number getValue(AnalyzerResult result, MetricParameters metricParameters);
+
+    /**
+     * Gets a collection of suggested metric parameters. How these suggestions
+     * are created depends upon the AnalyzerResult's data and capabilities, so
+     * therefore the quality or extensiveness of the suggestions is not
+     * guaranteed and should be considered a sample more than a direction.
+     * 
+     * @return a collection of suggested metric parameters.
+     */
+    public Collection<String> getMetricParameterSuggestions(AnalyzerResult result);
 
     /**
      * Gets the optional description of the metric

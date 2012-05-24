@@ -26,6 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.data.InputColumn;
 
 /**
@@ -40,7 +41,9 @@ import org.eobjects.analyzer.data.InputColumn;
  * restrictions:
  * <ul>
  * <li>The return type must be a {@link Number} or a subtype of {@link Number},
- * including primitive/unboxed types.</li>
+ * including primitive/unboxed types. Alternatively it is possible to return an
+ * {@link ParameterizableMetric} instance which allow the consumer to get more
+ * metadata about the metrics parameter values.</li>
  * <li>The method can optionally have an {@link InputColumn} parameter, if the
  * metric contains different values for different analyzed columns.</li>
  * <li>The method can optionally have a String parameter, if the metric
