@@ -49,93 +49,101 @@ import org.joda.time.LocalTime;
 @Concurrent(true)
 public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> {
 
-	private Map<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate> _delegates = new HashMap<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate>();
+    private Map<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate> _delegates = new HashMap<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate>();
 
-	@Inject
-	@Configured
-	InputColumn<Date>[] _columns;
+    @Inject
+    @Configured
+    InputColumn<Date>[] _columns;
 
-	@Inject
-	@Provided
-	RowAnnotationFactory _annotationFactory;
+    @Inject
+    @Provided
+    RowAnnotationFactory _annotationFactory;
 
-	@Initialize
-	public void init() {
-		for (InputColumn<Date> col : _columns) {
-			_delegates.put(col, new DateAndTimeAnalyzerColumnDelegate(_annotationFactory));
-		}
-	}
+    @Initialize
+    public void init() {
+        for (InputColumn<Date> col : _columns) {
+            _delegates.put(col, new DateAndTimeAnalyzerColumnDelegate(_annotationFactory));
+        }
+    }
 
-	@Override
-	public void run(InputRow row, int distinctCount) {
-		for (InputColumn<Date> col : _columns) {
-			Date value = row.getValue(col);
-			DateAndTimeAnalyzerColumnDelegate delegate = _delegates.get(col);
-			delegate.run(value, row, distinctCount);
-		}
-	}
+    @Override
+    public void run(InputRow row, int distinctCount) {
+        for (InputColumn<Date> col : _columns) {
+            Date value = row.getValue(col);
+            DateAndTimeAnalyzerColumnDelegate delegate = _delegates.get(col);
+            delegate.run(value, row, distinctCount);
+        }
+    }
 
-	@Override
-	public DateAndTimeAnalyzerResult getResult() {
-		CrosstabDimension measureDimension = new CrosstabDimension("Measure");
-		measureDimension.addCategory("Row count");
-		measureDimension.addCategory("Null count");
+    @Override
+    public DateAndTimeAnalyzerResult getResult() {
+        CrosstabDimension measureDimension = new CrosstabDimension("Measure");
+        measureDimension.addCategory("Row count");
+        measureDimension.addCategory("Null count");
 
-		measureDimension.addCategory("Highest date");
-		measureDimension.addCategory("Lowest date");
-		measureDimension.addCategory("Highest time");
-		measureDimension.addCategory("Lowest time");
+        measureDimension.addCategory("Highest date");
+        measureDimension.addCategory("Lowest date");
+        measureDimension.addCategory("Highest time");
+        measureDimension.addCategory("Lowest time");
 
-		CrosstabDimension columnDimension = new CrosstabDimension("Column");
-		for (InputColumn<Date> column : _columns) {
-			columnDimension.addCategory(column.getName());
-		}
+        CrosstabDimension columnDimension = new CrosstabDimension("Column");
+        for (InputColumn<Date> column : _columns) {
+            columnDimension.addCategory(column.getName());
+        }
 
-		Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, columnDimension, measureDimension);
-		CrosstabNavigator<Serializable> nav = crosstab.navigate();
-		for (InputColumn<Date> column : _columns) {
-			DateAndTimeAnalyzerColumnDelegate delegate = _delegates.get(column);
+        Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, columnDimension,
+                measureDimension);
+        CrosstabNavigator<Serializable> nav = crosstab.navigate();
+        for (InputColumn<Date> column : _columns) {
+            DateAndTimeAnalyzerColumnDelegate delegate = _delegates.get(column);
 
-			nav.where(columnDimension, column.getName());
+            nav.where(columnDimension, column.getName());
 
-			nav.where(measureDimension, "Row count").put(delegate.getNumRows());
+            nav.where(measureDimension, "Row count").put(delegate.getNumRows());
 
-			int numNull = delegate.getNumNull();
-			nav.where(measureDimension, "Null count").put(numNull);
-			if (numNull > 0) {
-				nav.attach(new AnnotatedRowsResult(delegate.getNullAnnotation(), _annotationFactory, column));
-			}
+            int numNull = delegate.getNumNull();
+            nav.where(measureDimension, "Null count").put(numNull);
+            if (numNull > 0) {
+                nav.attach(new AnnotatedRowsResult(delegate.getNullAnnotation(), _annotationFactory, column));
+            }
 
-			LocalDate maxDate = delegate.getMaxDate();
-			nav.where(measureDimension, "Highest date").put(maxDate.toString());
-			RowAnnotation annotation = delegate.getMaxDateAnnotation();
-			if (annotation.getRowCount() > 0) {
-				nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
-			}
+            LocalDate maxDate = delegate.getMaxDate();
+            nav.where(measureDimension, "Highest date").put(toString(maxDate));
+            RowAnnotation annotation = delegate.getMaxDateAnnotation();
+            if (annotation.getRowCount() > 0) {
+                nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
+            }
 
-			LocalDate minDate = delegate.getMinDate();
-			nav.where(measureDimension, "Lowest date").put(minDate.toString());
-			annotation = delegate.getMinDateAnnotation();
-			if (annotation.getRowCount() > 0) {
-				nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
-			}
+            LocalDate minDate = delegate.getMinDate();
+            nav.where(measureDimension, "Lowest date").put(toString(minDate));
+            annotation = delegate.getMinDateAnnotation();
+            if (annotation.getRowCount() > 0) {
+                nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
+            }
 
-			LocalTime maxTime = delegate.getMaxTime();
-			nav.where(measureDimension, "Highest time").put(maxTime.toString());
-			annotation = delegate.getMaxTimeAnnotation();
-			if (annotation.getRowCount() > 0) {
-				nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
-			}
+            LocalTime maxTime = delegate.getMaxTime();
+            nav.where(measureDimension, "Highest time").put(toString(maxTime));
+            annotation = delegate.getMaxTimeAnnotation();
+            if (annotation.getRowCount() > 0) {
+                nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
+            }
 
-			LocalTime minTime = delegate.getMinTime();
-			nav.where(measureDimension, "Lowest time").put(minTime.toString());
-			annotation = delegate.getMinTimeAnnotation();
-			if (annotation.getRowCount() > 0) {
-				nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
-			}
-		}
+            LocalTime minTime = delegate.getMinTime();
+            nav.where(measureDimension, "Lowest time").put(toString(minTime));
+            annotation = delegate.getMinTimeAnnotation();
+            if (annotation.getRowCount() > 0) {
+                nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
+            }
+        }
 
-		return new DateAndTimeAnalyzerResult(crosstab);
-	}
+        return new DateAndTimeAnalyzerResult(crosstab);
+    }
+
+    private String toString(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        return obj.toString();
+    }
 
 }
