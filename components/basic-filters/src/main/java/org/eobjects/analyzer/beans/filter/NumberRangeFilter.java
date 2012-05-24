@@ -32,7 +32,7 @@ import org.eobjects.analyzer.data.InputColumn;
 public class NumberRangeFilter extends AbstractQueryOptimizedRangeFilter<Number> {
 
     @Configured(order = 0)
-    InputColumn<Double> column;
+    InputColumn<Number> column;
 
     @Configured(order = 1)
     Double lowestValue;
