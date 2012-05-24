@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util;
+package org.eobjects.analyzer.util.convert;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -36,6 +36,8 @@ import org.apache.commons.lang.SerializationUtils;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
+import org.eobjects.analyzer.util.ChangeAwareObjectInputStream;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

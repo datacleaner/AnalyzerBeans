@@ -17,13 +17,14 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util;
+package org.eobjects.analyzer.util.convert;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Converter;
+import org.eobjects.analyzer.util.CharIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

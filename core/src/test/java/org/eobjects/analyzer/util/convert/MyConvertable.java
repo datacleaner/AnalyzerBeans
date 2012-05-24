@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util;
+package org.eobjects.analyzer.util.convert;
 
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;

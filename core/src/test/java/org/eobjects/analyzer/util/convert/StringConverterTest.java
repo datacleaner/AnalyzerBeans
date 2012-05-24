@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util;
+package org.eobjects.analyzer.util.convert;
 
 import java.io.File;
 import java.io.Serializable;
@@ -37,7 +37,10 @@ import org.eobjects.analyzer.reference.SimpleDictionary;
 import org.eobjects.analyzer.reference.SimpleSynonymCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
-import org.eobjects.analyzer.util.MyConvertable.SecondaryConverter;
+import org.eobjects.analyzer.util.Percentage;
+import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.convert.StringConverter;
+import org.eobjects.analyzer.util.convert.MyConvertable.SecondaryConverter;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableSchema;
 import org.eobjects.metamodel.schema.MutableTable;

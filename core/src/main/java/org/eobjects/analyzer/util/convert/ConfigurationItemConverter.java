@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util;
+package org.eobjects.analyzer.util.convert;
 
 import javax.inject.Inject;
 
@@ -34,6 +34,8 @@ import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;

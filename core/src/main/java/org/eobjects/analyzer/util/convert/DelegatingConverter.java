@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util;
+package org.eobjects.analyzer.util.convert;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -30,6 +30,7 @@ import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.configuration.InjectionPoint;
 import org.eobjects.analyzer.lifecycle.MemberInjectionPoint;
+import org.eobjects.analyzer.util.ReflectionUtils;
 
 /**
  * Main converter used by {@link StringConverter}. This converter will delegate
