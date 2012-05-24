@@ -39,7 +39,5 @@ public interface ParameterizableMetric {
 
     public Collection<String> getParameterSuggestions();
 
-    public boolean supportsInClause();
-
     public Number getValue(String parameter);
 }

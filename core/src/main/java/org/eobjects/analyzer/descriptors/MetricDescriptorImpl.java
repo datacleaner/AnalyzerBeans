@@ -165,6 +165,12 @@ final class MetricDescriptorImpl implements MetricDescriptor {
 
     @Override
     public boolean isParameterizedByString() {
+        Method method = getMethod();
+        final Class<?> returnType = method.getReturnType();
+        if (ReflectionUtils.is(returnType, ParameterizableMetric.class)) {
+            return true;
+        }
+
         final Class<?>[] parameterTypes = _method.getParameterTypes();
         if (parameterTypes == null || parameterTypes.length == 0) {
             return false;

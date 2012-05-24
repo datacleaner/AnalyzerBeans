@@ -94,11 +94,6 @@ public class ValueDistributionResult implements AnalyzerResult {
     @Metric("Value count")
     public ParameterizableMetric getValueCount() {
         return new ParameterizableMetric() {
-            @Override
-            public boolean supportsInClause() {
-                // TODO: Not implemented yet
-                return false;
-            }
 
             @Override
             public Number getValue(String parameter) {

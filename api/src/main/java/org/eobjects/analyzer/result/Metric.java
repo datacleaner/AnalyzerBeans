@@ -75,5 +75,13 @@ public @interface Metric {
      *         result type. A low order will place the metric before higher
      *         order metric.
      */
-    int order() default Integer.MAX_VALUE;
+    public int order() default Integer.MAX_VALUE;
+
+    /**
+     * Defines if the string parameter of this metric (if any) supports IN and
+     * NOT INT expressions.
+     * 
+     * @return
+     */
+    public boolean supportsInClause() default false;
 }
