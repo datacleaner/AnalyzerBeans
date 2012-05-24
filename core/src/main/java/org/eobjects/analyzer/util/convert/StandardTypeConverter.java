@@ -72,163 +72,168 @@ import org.slf4j.LoggerFactory;
  */
 public class StandardTypeConverter implements Converter<Object> {
 
-	private static final Logger logger = LoggerFactory.getLogger(StandardTypeConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(StandardTypeConverter.class);
 
-	// ISO 8601
-	private static final String dateFormatString = "yyyy-MM-dd'T'HH:mm:ss S";
+    // ISO 8601
+    private static final String dateFormatString = "yyyy-MM-dd'T'HH:mm:ss S";
 
-	@Inject
-	Converter<Object> parentConverter;
+    @Inject
+    Converter<Object> parentConverter;
 
-	@Override
-	public Object fromString(Class<?> type, String str) {
-		if (ReflectionUtils.isString(type)) {
-			return str;
-		}
-		if (ReflectionUtils.isBoolean(type)) {
-			return Boolean.valueOf(str);
-		}
-		if (ReflectionUtils.isCharacter(type)) {
-			return Character.valueOf(str.charAt(0));
-		}
-		if (ReflectionUtils.isInteger(type)) {
-			return Integer.valueOf(str);
-		}
-		if (ReflectionUtils.isLong(type)) {
-			return Long.valueOf(str);
-		}
-		if (ReflectionUtils.isByte(type)) {
-			return Byte.valueOf(str);
-		}
-		if (ReflectionUtils.isShort(type)) {
-			return Short.valueOf(str);
-		}
-		if (ReflectionUtils.isDouble(type)) {
-			return Double.valueOf(str);
-		}
-		if (ReflectionUtils.isFloat(type)) {
-			return Float.valueOf(str);
-		}
-		if (ReflectionUtils.is(type, Class.class)) {
-			try {
-				return Class.forName(str);
-			} catch (ClassNotFoundException e) {
-				throw new IllegalArgumentException("Class not found: " + str, e);
-			}
-		}
-		if (type.isEnum()) {
-			try {
-				Object[] enumConstants = type.getEnumConstants();
-				Method nameMethod = Enum.class.getMethod("name");
-				for (Object e : enumConstants) {
-					String name = (String) nameMethod.invoke(e);
-					if (name.equals(str)) {
-						return e;
-					}
-				}
-			} catch (Exception e) {
-				throw new IllegalStateException("Unexpected error occurred while examining enum", e);
-			}
-			throw new IllegalArgumentException("No such enum '" + str + "' in enum class: " + type.getName());
-		}
-		if (ReflectionUtils.isDate(type)) {
-			return toDate(str);
-		}
-		if (ReflectionUtils.is(type, File.class)) {
-			return new File(str);
-		}
-		if (ReflectionUtils.is(type, Calendar.class)) {
-			Date date = toDate(str);
-			Calendar c = Calendar.getInstance();
-			c.setTime(date);
-			return c;
-		}
-		if (ReflectionUtils.is(type, Pattern.class)) {
-			try {
-				return Pattern.compile(str);
-			} catch (PatternSyntaxException e) {
-				throw new IllegalArgumentException("Invalid regular expression syntax in '" + str + "'.", e);
-			}
-		}
-		if (ReflectionUtils.is(type, java.sql.Date.class)) {
-			Date date = toDate(str);
-			return new java.sql.Date(date.getTime());
-		}
-		if (ReflectionUtils.isNumber(type)) {
-			return ConvertToNumberTransformer.transformValue(str);
-		}
-		if (ReflectionUtils.is(type, Serializable.class)) {
-			logger.warn("fromString(...): No built-in handling of type: {}, using deserialization", type.getName());
-			byte[] bytes = (byte[]) parentConverter.fromString(byte[].class, str);
-			ChangeAwareObjectInputStream objectInputStream = null;
-			try {
-				objectInputStream = new ChangeAwareObjectInputStream(new ByteArrayInputStream(bytes));
-				objectInputStream.addClassLoader(type.getClassLoader());
-				Object obj = objectInputStream.readObject();
-				return obj;
-			} catch (Exception e) {
-				throw new IllegalStateException("Could not deserialize to " + type + ".", e);
-			} finally {
-				FileHelper.safeClose(objectInputStream);
-			}
-		}
+    @Override
+    public Object fromString(Class<?> type, String str) {
+        if (ReflectionUtils.isString(type)) {
+            return str;
+        }
+        if (ReflectionUtils.isBoolean(type)) {
+            return Boolean.valueOf(str);
+        }
+        if (ReflectionUtils.isCharacter(type)) {
+            return Character.valueOf(str.charAt(0));
+        }
+        if (ReflectionUtils.isInteger(type)) {
+            return Integer.valueOf(str);
+        }
+        if (ReflectionUtils.isLong(type)) {
+            return Long.valueOf(str);
+        }
+        if (ReflectionUtils.isByte(type)) {
+            return Byte.valueOf(str);
+        }
+        if (ReflectionUtils.isShort(type)) {
+            return Short.valueOf(str);
+        }
+        if (ReflectionUtils.isDouble(type)) {
+            return Double.valueOf(str);
+        }
+        if (ReflectionUtils.isFloat(type)) {
+            return Float.valueOf(str);
+        }
+        if (ReflectionUtils.is(type, Class.class)) {
+            try {
+                return Class.forName(str);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Class not found: " + str, e);
+            }
+        }
+        if (type.isEnum()) {
+            try {
+                Object[] enumConstants = type.getEnumConstants();
+                Method nameMethod = Enum.class.getMethod("name");
+                for (Object e : enumConstants) {
+                    String name = (String) nameMethod.invoke(e);
+                    if (name.equals(str)) {
+                        return e;
+                    }
+                }
+            } catch (Exception e) {
+                throw new IllegalStateException("Unexpected error occurred while examining enum", e);
+            }
+            throw new IllegalArgumentException("No such enum '" + str + "' in enum class: " + type.getName());
+        }
+        if (ReflectionUtils.isDate(type)) {
+            return toDate(str);
+        }
+        if (ReflectionUtils.is(type, File.class)) {
+            return new File(str);
+        }
+        if (ReflectionUtils.is(type, Calendar.class)) {
+            Date date = toDate(str);
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+            return c;
+        }
+        if (ReflectionUtils.is(type, Pattern.class)) {
+            try {
+                return Pattern.compile(str);
+            } catch (PatternSyntaxException e) {
+                throw new IllegalArgumentException("Invalid regular expression syntax in '" + str + "'.", e);
+            }
+        }
+        if (ReflectionUtils.is(type, java.sql.Date.class)) {
+            Date date = toDate(str);
+            return new java.sql.Date(date.getTime());
+        }
+        if (ReflectionUtils.isNumber(type)) {
+            return ConvertToNumberTransformer.transformValue(str);
+        }
+        if (ReflectionUtils.is(type, Serializable.class)) {
+            logger.warn("fromString(...): No built-in handling of type: {}, using deserialization", type.getName());
+            byte[] bytes = (byte[]) parentConverter.fromString(byte[].class, str);
+            ChangeAwareObjectInputStream objectInputStream = null;
+            try {
+                objectInputStream = new ChangeAwareObjectInputStream(new ByteArrayInputStream(bytes));
+                objectInputStream.addClassLoader(type.getClassLoader());
+                Object obj = objectInputStream.readObject();
+                return obj;
+            } catch (Exception e) {
+                throw new IllegalStateException("Could not deserialize to " + type + ".", e);
+            } finally {
+                FileHelper.safeClose(objectInputStream);
+            }
+        }
 
-		throw new IllegalArgumentException("Could not convert to type: " + type.getName());
-	}
+        throw new IllegalArgumentException("Could not convert to type: " + type.getName());
+    }
 
-	@Override
-	public String toString(Object o) {
-		if (o instanceof Calendar) {
-			// will now be picked up by the date conversion
-			o = ((Calendar) o).getTime();
-		}
+    @Override
+    public String toString(Object o) {
+        if (o instanceof Calendar) {
+            // will now be picked up by the date conversion
+            o = ((Calendar) o).getTime();
+        }
 
-		final String result;
-		if (o instanceof Boolean || o instanceof Number || o instanceof String || o instanceof Character) {
-			result = o.toString();
-		} else if (o instanceof File) {
-			File file = (File) o;
-			if (file.isAbsolute()) {
-				result = file.getAbsolutePath();
-			} else {
-				result = file.getPath();
-			}
-		} else if (o instanceof Date) {
-			result = new SimpleDateFormat(dateFormatString).format((Date) o);
-		} else if (o instanceof Pattern) {
-			result = o.toString();
-		} else if (o instanceof Enum) {
-			return ((Enum<?>) o).name();
-		} else if (o instanceof Class) {
-			result = ((Class<?>) o).getName();
-		} else if (o instanceof Serializable) {
-			logger.info("toString(...): No built-in handling of type: {}, using serialization.", o.getClass().getName());
-			byte[] bytes = SerializationUtils.serialize((Serializable) o);
-			result = parentConverter.toString(bytes);
-		} else {
-			logger.warn("toString(...): Could not convert type: {}", o.getClass().getName());
-			result = o.toString();
-		}
-		return result;
-	}
+        final String result;
+        if (o instanceof Boolean || o instanceof Number || o instanceof String || o instanceof Character) {
+            result = o.toString();
+        } else if (o instanceof File) {
+            File file = (File) o;
+            if (file.isAbsolute()) {
+                result = file.getAbsolutePath();
+            } else {
+                result = file.getPath();
+            }
+        } else if (o instanceof Date) {
+            if (o instanceof ExpressionDate) {
+                // preserve the expression if it is an ExpressionDate
+                result = ((ExpressionDate) o).getExpression();
+            } else {
+                result = new SimpleDateFormat(dateFormatString).format((Date) o);
+            }
+        } else if (o instanceof Pattern) {
+            result = o.toString();
+        } else if (o instanceof Enum) {
+            return ((Enum<?>) o).name();
+        } else if (o instanceof Class) {
+            result = ((Class<?>) o).getName();
+        } else if (o instanceof Serializable) {
+            logger.info("toString(...): No built-in handling of type: {}, using serialization.", o.getClass().getName());
+            byte[] bytes = SerializationUtils.serialize((Serializable) o);
+            result = parentConverter.toString(bytes);
+        } else {
+            logger.warn("toString(...): Could not convert type: {}", o.getClass().getName());
+            result = o.toString();
+        }
+        return result;
+    }
 
-	private static final Date toDate(String str) {
-		try {
-			return new SimpleDateFormat(dateFormatString).parse(str);
-		} catch (ParseException e) {
+    private static final Date toDate(String str) {
+        try {
+            return new SimpleDateFormat(dateFormatString).parse(str);
+        } catch (ParseException e) {
 
-			Date date = ConvertToDateTransformer.getInternalInstance().transformValue(str);
-			if (date == null) {
-				logger.error("Could not parse date: " + str, e);
-				throw new IllegalArgumentException(e);
-			} else {
-				return date;
-			}
-		}
-	}
+            Date date = ConvertToDateTransformer.getInternalInstance().transformValue(str);
+            if (date == null) {
+                logger.error("Could not parse date: " + str, e);
+                throw new IllegalArgumentException(e);
+            } else {
+                return date;
+            }
+        }
+    }
 
-	@Override
-	public boolean isConvertable(Class<?> type) {
-		return ReflectionUtils.is(type, Serializable.class) || type.isPrimitive();
-	}
+    @Override
+    public boolean isConvertable(Class<?> type) {
+        return ReflectionUtils.is(type, Serializable.class) || type.isPrimitive();
+    }
 }

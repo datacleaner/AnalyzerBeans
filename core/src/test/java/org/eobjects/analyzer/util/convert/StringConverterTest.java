@@ -134,6 +134,12 @@ public class StringConverterTest extends TestCase {
             return myString;
         }
     }
+    
+    public void testConvertExpressionDates() throws Exception {
+        runTests(new TodayDate(), "today()");
+        runTests(new NowDate(), "now()");
+        runTests(new YesterdayDate(), "yesterday()");
+    }
 
     public void testConvertSerializable() throws Exception {
         String serialized = stringConverter.serialize(new MySerializable("foobar", 1337));

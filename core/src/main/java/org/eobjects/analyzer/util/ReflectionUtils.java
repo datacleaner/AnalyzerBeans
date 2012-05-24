@@ -184,7 +184,7 @@ public final class ReflectionUtils {
 	}
 
 	public static boolean isDate(Type type) {
-		return type == Date.class;
+	    return is(type, Date.class, false);
 	}
 
 	public static boolean isNumber(Type type) {

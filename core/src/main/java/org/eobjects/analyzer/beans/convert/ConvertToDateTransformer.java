@@ -37,6 +37,9 @@ import org.eobjects.analyzer.beans.categories.ConversionCategory;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.convert.NowDate;
+import org.eobjects.analyzer.util.convert.TodayDate;
+import org.eobjects.analyzer.util.convert.YesterdayDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -143,27 +146,13 @@ public class ConvertToDateTransformer implements Transformer<Date> {
         }
 
         if ("now()".equalsIgnoreCase(value)) {
-            return new Date();
+            return new NowDate();
         }
         if ("today()".equalsIgnoreCase(value)) {
-            Calendar cal = Calendar.getInstance();
-            // set time to 00:00:00.000
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            return cal.getTime();
+            return new TodayDate();
         }
         if ("yesterday()".equalsIgnoreCase(value)) {
-            Calendar cal = Calendar.getInstance();
-            // set time to 00:00:00.000
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            // subtract one day
-            cal.add(Calendar.DATE, -1);
-            return cal.getTime();
+            return new YesterdayDate();
         }
 
         for (DateTimeFormatter formatter : _dateTimeFormatters) {
