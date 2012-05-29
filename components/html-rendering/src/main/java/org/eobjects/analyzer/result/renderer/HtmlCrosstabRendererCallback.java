@@ -119,14 +119,14 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
 
         sb.append("<td>");
         sb.append("<a class=\"drillToDetailsLink\" href=\"#\" onclick=\"" + invocation + "\">");
-        sb.append(LabelUtils.getValueLabel(value));
+        sb.append(HtmlUtils.escapeToSafeHtml(LabelUtils.getValueLabel(value)));
         sb.append("</a>");
         sb.append("</td>");
     }
 
     private void simpleValueCell(Object value) {
         sb.append("<td>");
-        sb.append(LabelUtils.getValueLabel(value));
+        sb.append(HtmlUtils.escapeToSafeHtml(LabelUtils.getValueLabel(value)));
         sb.append("</td>");
     }
 

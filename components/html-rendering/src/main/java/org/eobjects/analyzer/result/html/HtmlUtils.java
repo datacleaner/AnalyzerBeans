@@ -55,6 +55,10 @@ public final class HtmlUtils {
         return "analysisResultElement" + getFunctionCounter(threadLocalElementIdCounter).incrementAndGet();
     }
     
+    public static String escapeToSafeHtml(String str) {
+        return str.replaceAll("<", "&lt;").replaceAll(">","&gt;");
+    }
+    
     public static String escapeToJsonString(String str) {
         // TODO: Escape 
         return str;

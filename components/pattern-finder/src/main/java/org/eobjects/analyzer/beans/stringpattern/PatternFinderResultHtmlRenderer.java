@@ -32,6 +32,7 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.html.BodyElement;
 import org.eobjects.analyzer.result.html.HeadElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
+import org.eobjects.analyzer.result.html.HtmlUtils;
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
 import org.eobjects.analyzer.result.renderer.AbstractRenderer;
 import org.eobjects.analyzer.result.renderer.CrosstabHtmlRenderer;
@@ -73,7 +74,7 @@ public class PatternFinderResultHtmlRenderer extends AbstractRenderer<PatternFin
                 }
 
                 sb.append("<h3>Patterns for group: ");
-                sb.append(group);
+                sb.append(HtmlUtils.escapeToSafeHtml(group));
                 sb.append("</h3>");
                 sb.append("<div class=\"patternFinderResultPanel\">");
                 append(sb, htmlFragment, crosstab);
