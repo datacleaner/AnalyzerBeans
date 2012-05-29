@@ -31,6 +31,7 @@ import org.eobjects.analyzer.result.html.DrillToDetailsHeadElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.html.HtmlUtils;
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
+import org.eobjects.analyzer.util.LabelUtils;
 
 public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<HtmlFragment> {
 
@@ -76,7 +77,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
             sb.append(width);
             sb.append("\">");
         } else if (width == 1) {
-            sb.append("<td>");
+            sb.append("<td class=\"crosstabHorizontalHeader\">");
         }
         sb.append(category);
         sb.append("</td>");
@@ -92,7 +93,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
             sb.append(height);
             sb.append("\">");
         } else if (height == 1) {
-            sb.append("<td>");
+            sb.append("<td class=\"crosstabVerticalHeader\">");
         }
         sb.append(category);
         sb.append("</td>");
@@ -100,10 +101,6 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
 
     @Override
     public void valueCell(Object value, ResultProducer drillToDetailResultProducer) {
-        if (value == null) {
-            value = "&lt;null&gt;";
-        }
-
         if (drillToDetailResultProducer == null) {
             simpleValueCell(value);
             return;
@@ -122,14 +119,14 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
 
         sb.append("<td>");
         sb.append("<a class=\"drillToDetailsLink\" href=\"#\" onclick=\"" + invocation + "\">");
-        sb.append(value.toString());
+        sb.append(LabelUtils.getValueLabel(value));
         sb.append("</a>");
         sb.append("</td>");
     }
 
     private void simpleValueCell(Object value) {
         sb.append("<td>");
-        sb.append(value.toString());
+        sb.append(LabelUtils.getValueLabel(value));
         sb.append("</td>");
     }
 

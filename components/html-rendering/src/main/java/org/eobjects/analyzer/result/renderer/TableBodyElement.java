@@ -23,6 +23,7 @@ import javax.swing.table.TableModel;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.result.html.BodyElement;
+import org.eobjects.analyzer.util.LabelUtils;
 
 /**
  * Body element that renders a HTML table based on a {@link TableModel}.
@@ -71,11 +72,9 @@ public class TableBodyElement implements BodyElement {
             sb.append("<tr>");
             for (int col = 0; col < columnCount; col++) {
                 Object value = _tableModel.getValueAt(row, col);
-                if (value == null) {
-                    value = "<null>";
-                }
+                String stringValue = LabelUtils.getValueLabel(value);
                 sb.append("<td>");
-                sb.append(StringEscapeUtils.escapeHtml(value.toString()));
+                sb.append(StringEscapeUtils.escapeHtml(stringValue));
                 sb.append("</td>");
             }
             sb.append("</tr>");

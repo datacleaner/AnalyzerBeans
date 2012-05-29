@@ -33,7 +33,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -42,6 +41,7 @@ import org.eobjects.analyzer.result.html.HeadElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
+import org.eobjects.analyzer.util.LabelUtils;
 import org.eobjects.metamodel.util.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +94,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     private void writeGenericError(Writer writer, ComponentJob componentJob, AnalyzerResult analyzerResult, Exception e)
             throws IOException {
         writer.write("<div class=\"renderingError\">");
-        writer.write("<p>Component job: " + componentJob + "</p>");
+        writer.write("<p>Component job: " + LabelUtils.getLabel(componentJob) + "</p>");
         if (analyzerResult != null) {
             writer.write("<p>Analyzer result: " + analyzerResult + "</p>");
         }
@@ -182,8 +182,8 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     protected void writeBodyHtmlFragment(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment)
             throws IOException {
-        writer.write("<h2 class=\"analyzerResultHeader\">Result: "
-                + StringEscapeUtils.escapeHtml(getLabel(componentJob)) + "</h2>");
+        writer.write("<h2 class=\"analyzerResultHeader\">"
+                + StringEscapeUtils.escapeHtml(LabelUtils.getLabel(componentJob)) + "</h2>");
         writer.write("<div class=\"analyzerResultPanel\">\n");
 
         final List<BodyElement> bodyElements = htmlFragment.getBodyElements();
@@ -205,14 +205,4 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         }
         writer.write('\n');
     }
-
-    protected String getLabel(ComponentJob componentJob) {
-        String label = componentJob.getName();
-        if (label == null) {
-            ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
-            label = descriptor.getDisplayName();
-        }
-        return label;
-    }
-
 }

@@ -36,7 +36,7 @@ public final class BaseHeadElement implements HeadElement {
         return "<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-1.7.2.min.js\"></script>\n"
                 + "<script type=\"text/javascript\" src=\"http://code.jquery.com/ui/1.8.20/jquery-ui.min.js\"></script>\n"
                 + "<link rel=\"stylesheet\" type=\"text/css\" href=\"http://code.jquery.com/ui/1.8.20/themes/base/jquery-ui.css\" />\n"
-                + "<style type=\"text/css\">\n" + "  .ui-widget-overlay {background:black; opacity: 0.3;}\n" + "</style>\n"
+                + "<link rel=\"stylesheet\" type=\"text/css\" href=\"analysis-result.css\" />\n"
                 + "<script type=\"text/javascript\">\n" + "  var analysisResult = {};\n" + "</script>";
     }
 

@@ -1,0 +1,152 @@
+body {
+	background-color: #fafafa;
+	margin: 4px;
+	font-size: 13px;
+	text-align: center;
+}
+
+div.analysisResultContainer {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+	width: 90%;
+}
+
+p,div,span,ul,ol,li,table,tr,td,th,h1,h2,h3,h4,h5,a {
+	margin: 0;
+	padding: 0;
+	line-height: normal;
+	font-size: 1em;
+	font-weight: normal;
+	font-style: normal;
+}
+
+h1 {
+	font-size: 1.8em;
+}
+
+h2 {
+	font-size: 1.6em;
+}
+
+h3 {
+	font-size: 1.4em;
+}
+
+h4 {
+	font-size: 1.2em;
+}
+
+h5 {
+	font-size: 1.1em;
+}
+
+table {
+	border: none;
+	border-spacing: 0;
+}
+
+p,div,span,ul,ol,li,table,td,a {
+	font-family: 'Trebuchet MS', sans-serif;
+	color: black;
+}
+
+h1,h2,h3,h4,h5 {
+	font-family: 'Trebuchet MS', sans-serif;
+	color: #377FCF;
+}
+
+a {
+	color: #377FCF;
+	text-decoration: none;
+}
+a:hover {
+	color: #377FCF;
+	text-decoration: underline;
+}
+
+div.analyzerResultPanel {
+	background-color: white;
+	padding: 4px;
+	border: 1px solid #eee;
+	clear: both;
+	margin-top: 4px;
+	margin-bottom: 20px;
+}
+
+table td,table th {
+	padding: 2px;
+	padding-left: 6px;
+	padding-right: 6px;
+	text-align: center;
+	white-space: nowrap;
+}
+
+table th {
+	background-color: #333;
+	color: white;
+}
+
+/*
+ * JQuery UI overrides
+ */
+.ui-widget {
+	font-size: 1em;
+}
+
+.ui-widget-overlay {
+	background: black;
+	opacity: 0.3;
+}
+
+/*
+ * Crosstab tables
+ */
+table.crosstabTable td.crosstabHorizontalHeader {
+	background-color: #333;
+	color: white;
+}
+
+table.crosstabTable td.crosstabVerticalHeader {
+	background-color: #333;
+	color: white;
+}
+
+a.drillToDetailsLink {
+	padding-right: 16px;
+	background-image: url("drill-to-detail.png");
+	background-position: right;
+	background-repeat: no-repeat;
+	min-height: 16px;
+	text-decoration: none;
+	color: #666;
+}
+
+a.drillToDetailsLink:hover {
+	color: #377FCF;
+	text-decoration: underline;
+}
+
+/*
+ * Value distribution result
+ */
+div.valueDistributionChart {
+	width: 400px;
+	height: 330px;
+	float: left;
+}
+
+table.valueDistributionValueTable {
+	float: right;
+}
+
+table.valueDistributionSummaryTable {
+	clear: both;
+}
+
+/*
+ * Annotated rows
+ */
+table.annotatedRowsTable {
+	
+}
