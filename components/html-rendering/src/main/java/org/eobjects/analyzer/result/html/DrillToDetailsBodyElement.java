@@ -59,7 +59,7 @@ public class DrillToDetailsBodyElement implements BodyElement {
         final HtmlFragment htmlFragment = renderer.render(_result);
 
         final StringBuilder sb = new StringBuilder();
-        sb.append("<div id=\"" + _elementId + "\" style=\"display:none;\">\n");
+        sb.append("<div id=\"" + _elementId + "\" class=\"drillToDetailsPanel\" style=\"display:none;\">\n");
 
         // Append head elements inline (because we cannot reach the head
         // elements from here)

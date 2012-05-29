@@ -34,7 +34,7 @@ public class DrillToDetailsHeadElement extends AbstractScriptHeadElement impleme
 
     @Override
     protected void buildFunction(JavascriptFunctionBuilder fb) {
-        fb.append("$('#" + _elementId + "').dialog({modal:true, width:500})");
+        fb.append("$('#" + _elementId + "').dialog({modal:true, width:700})");
     }
 
 }

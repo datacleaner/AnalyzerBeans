@@ -7,6 +7,10 @@ import org.eobjects.analyzer.data.MockInputRow
 import org.junit.Assert
 import org.eobjects.analyzer.result.html.HtmlUtils
 import org.eobjects.analyzer.result.html.GoogleChartHeadElement
+import org.eobjects.analyzer.result.renderer.RendererFactory
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider
+import org.eobjects.analyzer.result.html.DrillToDetailsHeadElement
 
 class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
 
@@ -29,20 +33,31 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
 
     val result = analyzer.getResult();
 
-    val htmlFragment = new ValueDistributionResultHtmlRenderer().render(result);
-    Assert.assertEquals("SimpleHtmlFragment[headElements=3,bodyElements=1]", htmlFragment.toString());
+    val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
+    Assert.assertEquals("SimpleHtmlFragment[headElements=5,bodyElements=3]", htmlFragment.toString());
 
-    Assert.assertEquals(1, htmlFragment.getBodyElements().size());
-    Assert.assertEquals(3, htmlFragment.getHeadElements().size());
+    Assert.assertEquals(3, htmlFragment.getBodyElements().size());
+    Assert.assertEquals(5, htmlFragment.getHeadElements().size());
 
-    val html = htmlFragment.getBodyElements().get(0).toHtml();
+    val html = htmlFragment.getBodyElements().get(2).toHtml();
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
+             <h3>Group: humaninference.com</h3>
+             <div class="valueDistributionChart" id="analysisResultElement4">
+               </div>
+             
+             <table class="valueDistributionSummaryTable">
+               <tr><td>Total count</td><td>3</td></tr>
+               <tr><td>Distinct count</td><td>3</td></tr>
+               <tr><td>Unique count</td><td>3</td></tr>
+               <tr><td>Null count</td><td>0</td></tr>
+             </table>
+           </div><div class="valueDistributionGroupPanel">
              <h3>Group: eobjects.dk</h3>
              <div class="valueDistributionChart" id="analysisResultElement1">
-                 </div>
+               </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td>4</td></tr><tr><td>kasper.sorensen</td><td>2</td></tr>
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="analysisResult.callback1();return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="analysisResult.callback2();return false;" href="#">2</a></td></tr>
                    
                  </table>
              <table class="valueDistributionSummaryTable">
@@ -50,17 +65,6 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                <tr><td>Distinct count</td><td>4</td></tr>
                <tr><td>Unique count</td><td>1</td></tr>
                <tr><td>Null count</td><td>1</td></tr>
-             </table>
-           </div><div class="valueDistributionGroupPanel">
-             <h3>Group: humaninference.com</h3>
-             <div class="valueDistributionChart" id="analysisResultElement2">
-                 </div>
-             
-             <table class="valueDistributionSummaryTable">
-               <tr><td>Total count</td><td>3</td></tr>
-               <tr><td>Distinct count</td><td>3</td></tr>
-               <tr><td>Unique count</td><td>3</td></tr>
-               <tr><td>Null count</td><td>0</td></tr>
              </table>
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
@@ -81,9 +85,12 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                    });
                </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml().replaceAll("\r\n", "\n"))
 
+    Assert.assertEquals(classOf[DrillToDetailsHeadElement], htmlFragment.getHeadElements().get(2).getClass())
+    Assert.assertEquals(classOf[DrillToDetailsHeadElement], htmlFragment.getHeadElements().get(3).getClass())
+               
     Assert.assertEquals("""<script type="text/javascript">
                    google.setOnLoadCallback(function() {
-                     var elem = document.getElementById("analysisResultElement2");
+                     var elem = document.getElementById("analysisResultElement4");
                      var options = {};
                      
                      var data = google.visualization.arrayToDataTable([
@@ -94,7 +101,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                      chart.draw(data, options);
                      
                    });
-               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(2).toHtml().replaceAll("\r\n", "\n"))
+               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(4).toHtml().replaceAll("\r\n", "\n"))
   }
 
   @Test
@@ -112,20 +119,30 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
 
     val result = analyzer.getResult();
 
-    val htmlFragment = new ValueDistributionResultHtmlRenderer().render(result);
-    Assert.assertEquals("SimpleHtmlFragment[headElements=2,bodyElements=1]", htmlFragment.toString());
+    val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
+    Assert.assertEquals("SimpleHtmlFragment[headElements=4,bodyElements=3]", htmlFragment.toString());
 
-    Assert.assertEquals(1, htmlFragment.getBodyElements().size());
-    Assert.assertEquals(2, htmlFragment.getHeadElements().size());
+    Assert.assertEquals(3, htmlFragment.getBodyElements().size());
+    Assert.assertEquals(4, htmlFragment.getHeadElements().size());
 
-    val html = htmlFragment.getBodyElements().get(0).toHtml();
+    var html = htmlFragment.getBodyElements().get(0).toHtml();
+    Assert.assertEquals("""<div id="analysisResultElement2" class="drillToDetailsPanel" style="display:none;">
+<table class="annotatedRowsTable"><tr><th>email username</th></tr><tr><td>kasper</td></tr><tr><td>kasper</td></tr></table>
+</div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
+
+    html = htmlFragment.getBodyElements().get(1).toHtml();
+    Assert.assertEquals("""<div id="analysisResultElement3" class="drillToDetailsPanel" style="display:none;">
+<table class="annotatedRowsTable"><tr><th>email username</th></tr><tr><td>kasper.sorensen</td></tr></table>
+</div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
+
+    html = htmlFragment.getBodyElements().get(2).toHtml();
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
              <div class="valueDistributionChart" id="analysisResultElement1">
-                 </div>
+               </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td>9</td></tr><tr><td>kasper.sorensen</td><td>3</td></tr>
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="analysisResult.callback1();return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="analysisResult.callback2();return false;" href="#">3</a></td></tr>
                    
                  </table>
              <table class="valueDistributionSummaryTable">
@@ -152,5 +169,11 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                      
                    });
                </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml().replaceAll("\r\n", "\n"))
+  }
+
+  def createRendererFactory(): RendererFactory = {
+    val descriptorProvider = new ClasspathScanDescriptorProvider().scanPackage("org.eobjects.analyzer.beans", true).scanPackage("org.eobjects.analyzer.result.renderer", false);
+    val conf = new AnalyzerBeansConfigurationImpl().replace(descriptorProvider);
+    return new RendererFactory(conf);
   }
 }

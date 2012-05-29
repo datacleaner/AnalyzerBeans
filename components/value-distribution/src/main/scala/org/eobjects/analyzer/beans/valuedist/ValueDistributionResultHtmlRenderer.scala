@@ -7,17 +7,24 @@ import scala.collection.JavaConversions._
 import scala.xml.Node
 import org.eobjects.analyzer.result.html.GoogleChartHeadElement
 import org.eobjects.analyzer.result.html.HtmlUtils
+import org.eobjects.analyzer.result.html.DrillToDetailsBodyElement
+import org.eobjects.analyzer.result.html.DrillToDetailsHeadElement
+import org.eobjects.analyzer.result.renderer.RendererFactory
+import javax.inject.Inject
+import org.eobjects.analyzer.beans.api.Provided
 
 @RendererBean(classOf[HtmlRenderingFormat])
-class ValueDistributionResultHtmlRenderer(includeChart: Boolean) extends HtmlRenderer[ValueDistributionResult] {
+class ValueDistributionResultHtmlRenderer(rf: RendererFactory) extends HtmlRenderer[ValueDistributionResult] {
 
-  def this() = this(true)
+  @Inject
+  @Provided
+  var rendererFactory: RendererFactory = rf;
+
+  def this() = this(null)
 
   def handleFragment(frag: SimpleHtmlFragment, result: ValueDistributionResult) = {
 
-    if (includeChart) {
-      frag.addHeadElement(GoogleChartHeadElement);
-    }
+    frag.addHeadElement(GoogleChartHeadElement);
 
     val html = <div class="valueDistributionResultContainer">
                  {
@@ -36,8 +43,8 @@ class ValueDistributionResultHtmlRenderer(includeChart: Boolean) extends HtmlRen
   }
 
   def renderGroupResult(result: ValueDistributionGroupResult, frag: SimpleHtmlFragment): Node = {
-    val chartElementId: String = if (includeChart) HtmlUtils.createElementId() else "";
-    
+    val chartElementId: String = HtmlUtils.createElementId();
+
     frag.addHeadElement(new ValueDistributionChartScriptHeadElement(result, chartElementId));
 
     return <div class="valueDistributionGroupPanel">
@@ -47,22 +54,20 @@ class ValueDistributionResultHtmlRenderer(includeChart: Boolean) extends HtmlRen
                }
              }
              {
-               if (includeChart) {
-                 <div class="valueDistributionChart" id={chartElementId}>
-                 </div>
-               }
+               <div class="valueDistributionChart" id={ chartElementId }>
+               </div>
              }
              {
                if (result.getTopValues().getActualSize() + result.getBottomValues().getActualSize() > 0) {
                  <table class="valueDistributionValueTable">
                    {
                      result.getTopValues().getValueCounts().map(vc => {
-                       <tr><td>{ vc.getValue() }</td><td>{ vc.getCount() }</td></tr>
+                       <tr><td>{ vc.getValue() }</td><td>{ getCount(result, vc, frag) }</td></tr>
                      })
                    }
                    {
                      result.getBottomValues().getValueCounts().map(vc => {
-                       <tr><td>{ vc.getValue() }</td><td>{ vc.getCount() }</td></tr>
+                       <tr><td>{ vc.getValue() }</td><td>{ getCount(result, vc, frag) }</td></tr>
                      })
                    }
                  </table>
@@ -75,5 +80,25 @@ class ValueDistributionResultHtmlRenderer(includeChart: Boolean) extends HtmlRen
                <tr><td>Null count</td><td>{ result.getNullCount() }</td></tr>
              </table>
            </div>;
+  }
+
+  def getCount(result: ValueDistributionGroupResult, vc: ValueCount, frag: SimpleHtmlFragment): Node = {
+    val annotatedRowsResult = result.getAnnotatedRows(vc.getValue());
+
+    if (annotatedRowsResult == null) {
+      return <span>{ vc.getCount() }</span>;
+    } else {
+      val elementId = HtmlUtils.createElementId();
+
+      val headElement = new DrillToDetailsHeadElement(elementId)
+      frag.addHeadElement(headElement);
+
+      val bodyElement = new DrillToDetailsBodyElement(elementId, rendererFactory, annotatedRowsResult);
+      frag.addBodyElement(bodyElement);
+
+      val invocation = headElement.toJavaScriptInvocation()
+
+      return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
+    }
   }
 }

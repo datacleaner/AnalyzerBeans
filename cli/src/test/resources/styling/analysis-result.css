@@ -60,6 +60,7 @@ a {
 	color: #377FCF;
 	text-decoration: none;
 }
+
 a:hover {
 	color: #377FCF;
 	text-decoration: underline;
@@ -100,16 +101,10 @@ table th {
 }
 
 /*
- * Crosstab tables
+ * Drill to details links and panels
  */
-table.crosstabTable td.crosstabHorizontalHeader {
-	background-color: #333;
-	color: white;
-}
-
-table.crosstabTable td.crosstabVerticalHeader {
-	background-color: #333;
-	color: white;
+div.drillToDetailsPanel {
+	
 }
 
 a.drillToDetailsLink {
@@ -125,6 +120,19 @@ a.drillToDetailsLink {
 a.drillToDetailsLink:hover {
 	color: #377FCF;
 	text-decoration: underline;
+}
+
+/*
+ * Crosstab tables
+ */
+table.crosstabTable td.crosstabHorizontalHeader {
+	background-color: #333;
+	color: white;
+}
+
+table.crosstabTable td.crosstabVerticalHeader {
+	background-color: #333;
+	color: white;
 }
 
 /*
