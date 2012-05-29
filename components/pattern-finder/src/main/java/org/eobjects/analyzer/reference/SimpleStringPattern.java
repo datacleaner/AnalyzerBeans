@@ -47,10 +47,15 @@ public final class SimpleStringPattern extends AbstractReferenceData implements 
 	private transient TokenPatternImpl _tokenPattern;
 	private transient DefaultTokenizer _tokenizer;
 	private transient TokenizerConfiguration _configuration;
-
+	
 	public SimpleStringPattern(String name, String expression) {
+	    this(name, expression, new TokenizerConfiguration());
+	}
+
+	public SimpleStringPattern(String name, String expression, TokenizerConfiguration configuration) {
 		super(name);
 		_expression = expression;
+		_configuration = configuration;
 	}
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

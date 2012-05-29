@@ -19,12 +19,17 @@
  */
 package org.eobjects.analyzer.beans.stringpattern;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.reference.SimpleStringPattern;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Crosstab;
+import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.Metric;
 
 /**
@@ -46,19 +51,23 @@ public class PatternFinderResult implements AnalyzerResult {
     private final InputColumn<String> _column;
     private final InputColumn<String> _groupColumn;
     private final Map<String, Crosstab<?>> _crosstabs;
+    private final TokenizerConfiguration _tokenizerConfiguration;
 
-    public PatternFinderResult(InputColumn<String> column, Crosstab<?> crosstab) {
+    public PatternFinderResult(InputColumn<String> column, Crosstab<?> crosstab,
+            TokenizerConfiguration tokenizerConfiguration) {
         _column = column;
         _groupColumn = null;
         _crosstabs = new HashMap<String, Crosstab<?>>();
         _crosstabs.put(null, crosstab);
+        _tokenizerConfiguration = tokenizerConfiguration;
     }
 
     public PatternFinderResult(InputColumn<String> column, InputColumn<String> groupColumn,
-            Map<String, Crosstab<?>> crosstabs) {
+            Map<String, Crosstab<?>> crosstabs, TokenizerConfiguration tokenizerConfiguration) {
         _column = column;
         _groupColumn = groupColumn;
         _crosstabs = crosstabs;
+        _tokenizerConfiguration = tokenizerConfiguration;
     }
 
     public InputColumn<String> getColumn() {
@@ -85,6 +94,44 @@ public class PatternFinderResult implements AnalyzerResult {
 
     public boolean isGroupingEnabled() {
         return _groupColumn != null;
+    }
+
+    @Metric(value = "Match count")
+    public ParameterizableMetric getMatchCount() {
+        return new ParameterizableMetric() {
+            @Override
+            public Number getValue(String parameter) {
+                return getMatchCount(parameter);
+            }
+
+            @Override
+            public Collection<String> getParameterSuggestions() {
+                Crosstab<?> crosstab = getSingleCrosstab();
+                CrosstabDimension patternDimension = crosstab
+                        .getDimension(PatternFinderAnalyzer.DIMENSION_NAME_PATTERN);
+                List<String> categories = patternDimension.getCategories();
+                return categories;
+            }
+        };
+    }
+
+    public int getMatchCount(String pattern) {
+        Crosstab<?> crosstab = getSingleCrosstab();
+        CrosstabDimension patternDimension = crosstab.getDimension(PatternFinderAnalyzer.DIMENSION_NAME_PATTERN);
+        List<String> categories = patternDimension.getCategories();
+        for (String category : categories) {
+            SimpleStringPattern stringPattern = new SimpleStringPattern(category, category, _tokenizerConfiguration);
+            if (stringPattern.matches(pattern)) {
+                Object value = crosstab
+                        .where(patternDimension, category)
+                        .where(PatternFinderAnalyzer.DIMENSION_NAME_MEASURES, PatternFinderAnalyzer.MEASURE_MATCH_COUNT)
+                        .get();
+                if (value instanceof Number) {
+                    return ((Number) value).intValue();
+                }
+            }
+        }
+        return 0;
     }
 
     @Metric("Pattern count")

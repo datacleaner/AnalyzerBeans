@@ -53,271 +53,274 @@ import org.slf4j.LoggerFactory;
 @Description("The Pattern Finder will inspect your String values and generate and match string patterns that suit your data.\nIt can be used for a lot of purposes but is excellent for verifying or getting ideas about the format of the string-values in a column.")
 @Concurrent(true)
 public class PatternFinderAnalyzer implements Analyzer<PatternFinderResult> {
-	
-	private static final Logger logger = LoggerFactory.getLogger(PatternFinderAnalyzer.class);
 
-	public static final String DIMENSION_NAME_MEASURES = "Measures";
-	public static final String DIMENSION_NAME_PATTERN = "Pattern";
+    private static final Logger logger = LoggerFactory.getLogger(PatternFinderAnalyzer.class);
 
-	@Configured(order = 1)
-	InputColumn<String> column;
+    public static final String MEASURE_SAMPLE = "Sample";
+    public static final String MEASURE_MATCH_COUNT = "Match count";
+    public static final String DIMENSION_NAME_MEASURES = "Measures";
+    public static final String DIMENSION_NAME_PATTERN = "Pattern";
 
-	@Configured(required = false, order = 2)
-	@Description("Optional column to group patterns by")
-	InputColumn<String> groupColumn;
+    @Configured(order = 1)
+    InputColumn<String> column;
 
-	@Configured(required = false, order = 3)
-	@Description("Separate text tokens based on case")
-	Boolean discriminateTextCase = true;
+    @Configured(required = false, order = 2)
+    @Description("Optional column to group patterns by")
+    InputColumn<String> groupColumn;
 
-	@Configured(required = false, order = 4)
-	@Description("Separate number tokens based on negativity")
-	Boolean discriminateNegativeNumbers = false;
+    @Configured(required = false, order = 3)
+    @Description("Separate text tokens based on case")
+    Boolean discriminateTextCase = true;
 
-	@Configured(required = false, order = 5)
-	@Description("Separate number tokens for decimals")
-	Boolean discriminateDecimals = true;
+    @Configured(required = false, order = 4)
+    @Description("Separate number tokens based on negativity")
+    Boolean discriminateNegativeNumbers = false;
 
-	@Configured(required = false, order = 6)
-	@Description("Use '?'-tokens for mixed text and numbers")
-	Boolean enableMixedTokens = true;
+    @Configured(required = false, order = 5)
+    @Description("Separate number tokens for decimals")
+    Boolean discriminateDecimals = true;
 
-	@Configured(required = false, order = 7)
-	@Description("Ignore whitespace differences")
-	Boolean ignoreRepeatedSpaces = false;
+    @Configured(required = false, order = 6)
+    @Description("Use '?'-tokens for mixed text and numbers")
+    Boolean enableMixedTokens = true;
 
-	@Configured(required = false, value = "Upper case patterns expand in size", order = 8)
-	@Description("Auto-adjust/expand uppercase text tokens")
-	boolean upperCaseExpandable = false;
+    @Configured(required = false, order = 7)
+    @Description("Ignore whitespace differences")
+    Boolean ignoreRepeatedSpaces = false;
 
-	@Configured(required = false, value = "Lower case patterns expand in size", order = 9)
-	@Description("Auto-adjust/expand lowercase text tokens")
-	boolean lowerCaseExpandable = true;
+    @Configured(required = false, value = "Upper case patterns expand in size", order = 8)
+    @Description("Auto-adjust/expand uppercase text tokens")
+    boolean upperCaseExpandable = false;
 
-	@Configured(required = false, value = "Predefined token name", order = 10)
-	String predefinedTokenName;
+    @Configured(required = false, value = "Lower case patterns expand in size", order = 9)
+    @Description("Auto-adjust/expand lowercase text tokens")
+    boolean lowerCaseExpandable = true;
 
-	@Configured(required = false, value = "Predefined token regexes", order = 11)
-	String[] predefinedTokenPatterns;
+    @Configured(required = false, value = "Predefined token name", order = 10)
+    String predefinedTokenName;
 
-	@Configured(required = false, order = 12)
-	Character decimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
+    @Configured(required = false, value = "Predefined token regexes", order = 11)
+    String[] predefinedTokenPatterns;
 
-	@Configured(required = false, order = 13)
-	Character thousandsSeparator = DecimalFormatSymbols.getInstance().getGroupingSeparator();
+    @Configured(required = false, order = 12)
+    Character decimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
 
-	@Configured(required = false, order = 14)
-	Character minusSign = DecimalFormatSymbols.getInstance().getMinusSign();
+    @Configured(required = false, order = 13)
+    Character thousandsSeparator = DecimalFormatSymbols.getInstance().getGroupingSeparator();
 
-	private Map<String, DefaultPatternFinder> _patternFinders;
-	private TokenizerConfiguration _configuration;
+    @Configured(required = false, order = 14)
+    Character minusSign = DecimalFormatSymbols.getInstance().getMinusSign();
 
-	@Provided
-	RowAnnotationFactory _rowAnnotationFactory;
+    private Map<String, DefaultPatternFinder> _patternFinders;
+    private TokenizerConfiguration _configuration;
 
-	@Initialize
-	public void init() {
-		if (enableMixedTokens != null) {
-			_configuration = new TokenizerConfiguration(enableMixedTokens);
-		} else {
-			_configuration = new TokenizerConfiguration();
-		}
+    @Provided
+    RowAnnotationFactory _rowAnnotationFactory;
 
-		_configuration.setUpperCaseExpandable(upperCaseExpandable);
-		_configuration.setLowerCaseExpandable(lowerCaseExpandable);
+    @Initialize
+    public void init() {
+        if (enableMixedTokens != null) {
+            _configuration = new TokenizerConfiguration(enableMixedTokens);
+        } else {
+            _configuration = new TokenizerConfiguration();
+        }
 
-		if (discriminateNegativeNumbers != null) {
-			_configuration.setDiscriminateNegativeNumbers(discriminateNegativeNumbers);
-		}
+        _configuration.setUpperCaseExpandable(upperCaseExpandable);
+        _configuration.setLowerCaseExpandable(lowerCaseExpandable);
 
-		if (discriminateDecimals != null) {
-			_configuration.setDiscriminateDecimalNumbers(discriminateDecimals);
-		}
+        if (discriminateNegativeNumbers != null) {
+            _configuration.setDiscriminateNegativeNumbers(discriminateNegativeNumbers);
+        }
 
-		if (discriminateTextCase != null) {
-			_configuration.setDiscriminateTextCase(discriminateTextCase);
-		}
+        if (discriminateDecimals != null) {
+            _configuration.setDiscriminateDecimalNumbers(discriminateDecimals);
+        }
 
-		if (ignoreRepeatedSpaces != null) {
-			boolean ignoreSpacesLength = ignoreRepeatedSpaces.booleanValue();
-			_configuration.setDistriminateTokenLength(TokenType.WHITESPACE, !ignoreSpacesLength);
-		}
+        if (discriminateTextCase != null) {
+            _configuration.setDiscriminateTextCase(discriminateTextCase);
+        }
 
-		if (decimalSeparator != null) {
-			_configuration.setDecimalSeparator(decimalSeparator);
-		}
+        if (ignoreRepeatedSpaces != null) {
+            boolean ignoreSpacesLength = ignoreRepeatedSpaces.booleanValue();
+            _configuration.setDistriminateTokenLength(TokenType.WHITESPACE, !ignoreSpacesLength);
+        }
 
-		if (thousandsSeparator != null) {
-			_configuration.setThousandsSeparator(thousandsSeparator);
-		}
+        if (decimalSeparator != null) {
+            _configuration.setDecimalSeparator(decimalSeparator);
+        }
 
-		if (minusSign != null) {
-			_configuration.setMinusSign(minusSign);
-		}
+        if (thousandsSeparator != null) {
+            _configuration.setThousandsSeparator(thousandsSeparator);
+        }
 
-		if (predefinedTokenName != null && predefinedTokenPatterns != null) {
-			Set<String> tokenRegexes = new HashSet<String>();
-			for (String predefinedTokenPattern : predefinedTokenPatterns) {
-				tokenRegexes.add(predefinedTokenPattern);
-			}
-			_configuration.getPredefinedTokens().add(new PredefinedTokenDefinition(predefinedTokenName, tokenRegexes));
-		}
+        if (minusSign != null) {
+            _configuration.setMinusSign(minusSign);
+        }
 
-		_patternFinders = new HashMap<String, DefaultPatternFinder>();
-	}
+        if (predefinedTokenName != null && predefinedTokenPatterns != null) {
+            Set<String> tokenRegexes = new HashSet<String>();
+            for (String predefinedTokenPattern : predefinedTokenPatterns) {
+                tokenRegexes.add(predefinedTokenPattern);
+            }
+            _configuration.getPredefinedTokens().add(new PredefinedTokenDefinition(predefinedTokenName, tokenRegexes));
+        }
 
-	@Override
-	public void run(InputRow row, int distinctCount) {
-		final String group;
-		if (groupColumn == null) {
-			group = null;
-		} else {
-			group = row.getValue(groupColumn);
-		}
-		final String value = row.getValue(column);
+        _patternFinders = new HashMap<String, DefaultPatternFinder>();
+    }
 
-		run(group, value, row, distinctCount);
-	}
+    @Override
+    public void run(InputRow row, int distinctCount) {
+        final String group;
+        if (groupColumn == null) {
+            group = null;
+        } else {
+            group = row.getValue(groupColumn);
+        }
+        final String value = row.getValue(column);
 
-	private void run(String group, String value, InputRow row, int distinctCount) {
-		if (value == null) {
-			return;
-		}
-		DefaultPatternFinder patternFinder = getPatternFinderForGroup(group);
-		patternFinder.run(row, value, distinctCount);
-	}
+        run(group, value, row, distinctCount);
+    }
 
-	private DefaultPatternFinder getPatternFinderForGroup(String group) {
-		DefaultPatternFinder patternFinder = _patternFinders.get(group);
-		if (patternFinder == null) {
-			synchronized (this) {
-				patternFinder = _patternFinders.get(group);
-				if (patternFinder == null) {
-					patternFinder = new DefaultPatternFinder(_configuration, _rowAnnotationFactory);
-					_patternFinders.put(group, patternFinder);
-				}
-			}
-		}
-		return patternFinder;
-	}
+    private void run(String group, String value, InputRow row, int distinctCount) {
+        if (value == null) {
+            return;
+        }
+        DefaultPatternFinder patternFinder = getPatternFinderForGroup(group);
+        patternFinder.run(row, value, distinctCount);
+    }
 
-	@Override
-	public PatternFinderResult getResult() {
-		if (groupColumn == null) {
-			Crosstab<?> crosstab = createCrosstab(getPatternFinderForGroup(null));
-			return new PatternFinderResult(column, crosstab);
-		} else {
-			final Map<String, Crosstab<?>> crosstabs = new TreeMap<String, Crosstab<?>>(
-					NullTolerableComparator.get(String.class));
-			final Set<Entry<String, DefaultPatternFinder>> patternFinderEntries = _patternFinders.entrySet();
-			for (Entry<String, DefaultPatternFinder> entry : patternFinderEntries) {
-				final DefaultPatternFinder patternFinder = entry.getValue();
-				final Crosstab<Serializable> crosstab = createCrosstab(patternFinder);
-				crosstabs.put(entry.getKey(), crosstab);
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Grouped result contains {} groups", crosstabs.size());
-			}
-			return new PatternFinderResult(column, groupColumn, crosstabs);
-		}
-	}
+    private DefaultPatternFinder getPatternFinderForGroup(String group) {
+        DefaultPatternFinder patternFinder = _patternFinders.get(group);
+        if (patternFinder == null) {
+            synchronized (this) {
+                patternFinder = _patternFinders.get(group);
+                if (patternFinder == null) {
+                    patternFinder = new DefaultPatternFinder(_configuration, _rowAnnotationFactory);
+                    _patternFinders.put(group, patternFinder);
+                }
+            }
+        }
+        return patternFinder;
+    }
 
-	private Crosstab<Serializable> createCrosstab(DefaultPatternFinder patternFinder) {
-		CrosstabDimension measuresDimension = new CrosstabDimension(DIMENSION_NAME_MEASURES);
-		measuresDimension.addCategory("Match count");
-		CrosstabDimension patternDimension = new CrosstabDimension(DIMENSION_NAME_PATTERN);
-		Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, measuresDimension, patternDimension);
+    @Override
+    public PatternFinderResult getResult() {
+        if (groupColumn == null) {
+            Crosstab<?> crosstab = createCrosstab(getPatternFinderForGroup(null));
+            return new PatternFinderResult(column, crosstab, _configuration);
+        } else {
+            final Map<String, Crosstab<?>> crosstabs = new TreeMap<String, Crosstab<?>>(
+                    NullTolerableComparator.get(String.class));
+            final Set<Entry<String, DefaultPatternFinder>> patternFinderEntries = _patternFinders.entrySet();
+            for (Entry<String, DefaultPatternFinder> entry : patternFinderEntries) {
+                final DefaultPatternFinder patternFinder = entry.getValue();
+                final Crosstab<Serializable> crosstab = createCrosstab(patternFinder);
+                crosstabs.put(entry.getKey(), crosstab);
+            }
+            if (logger.isInfoEnabled()) {
+                logger.info("Grouped result contains {} groups", crosstabs.size());
+            }
+            return new PatternFinderResult(column, groupColumn, crosstabs, _configuration);
+        }
+    }
 
-		Set<Entry<TokenPattern, RowAnnotation>> entrySet = patternFinder.getAnnotations().entrySet();
+    private Crosstab<Serializable> createCrosstab(DefaultPatternFinder patternFinder) {
+        CrosstabDimension measuresDimension = new CrosstabDimension(DIMENSION_NAME_MEASURES);
+        measuresDimension.addCategory(MEASURE_MATCH_COUNT);
+        CrosstabDimension patternDimension = new CrosstabDimension(DIMENSION_NAME_PATTERN);
+        Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, measuresDimension,
+                patternDimension);
 
-		// sort the entries so that the ones with the highest amount of
-		// matches are at the top
-		Set<Entry<TokenPattern, RowAnnotation>> sortedEntrySet = new TreeSet<Entry<TokenPattern, RowAnnotation>>(
-				new Comparator<Entry<TokenPattern, RowAnnotation>>() {
-					public int compare(Entry<TokenPattern, RowAnnotation> o1, Entry<TokenPattern, RowAnnotation> o2) {
-						int result = o2.getValue().getRowCount() - o1.getValue().getRowCount();
-						if (result == 0) {
-							result = o1.getKey().toSymbolicString().compareTo(o2.getKey().toSymbolicString());
-						}
-						return result;
-					}
-				});
-		sortedEntrySet.addAll(entrySet);
+        Set<Entry<TokenPattern, RowAnnotation>> entrySet = patternFinder.getAnnotations().entrySet();
 
-		for (Entry<TokenPattern, RowAnnotation> entry : sortedEntrySet) {
-			CrosstabNavigator<Serializable> nav = crosstab.where(patternDimension, entry.getKey().toSymbolicString());
+        // sort the entries so that the ones with the highest amount of
+        // matches are at the top
+        Set<Entry<TokenPattern, RowAnnotation>> sortedEntrySet = new TreeSet<Entry<TokenPattern, RowAnnotation>>(
+                new Comparator<Entry<TokenPattern, RowAnnotation>>() {
+                    public int compare(Entry<TokenPattern, RowAnnotation> o1, Entry<TokenPattern, RowAnnotation> o2) {
+                        int result = o2.getValue().getRowCount() - o1.getValue().getRowCount();
+                        if (result == 0) {
+                            result = o1.getKey().toSymbolicString().compareTo(o2.getKey().toSymbolicString());
+                        }
+                        return result;
+                    }
+                });
+        sortedEntrySet.addAll(entrySet);
 
-			nav.where(measuresDimension, "Match count");
-			nav.where(patternDimension, entry.getKey().toSymbolicString());
-			RowAnnotation annotation = entry.getValue();
-			int size = annotation.getRowCount();
-			nav.put(size, true);
-			nav.attach(new AnnotatedRowsResult(annotation, _rowAnnotationFactory, column));
+        for (Entry<TokenPattern, RowAnnotation> entry : sortedEntrySet) {
+            CrosstabNavigator<Serializable> nav = crosstab.where(patternDimension, entry.getKey().toSymbolicString());
 
-			nav.where(measuresDimension, "Sample");
-			nav.put(entry.getKey().getSampleString(), true);
-		}
-		return crosstab;
-	}
+            nav.where(measuresDimension, MEASURE_MATCH_COUNT);
+            nav.where(patternDimension, entry.getKey().toSymbolicString());
+            RowAnnotation annotation = entry.getValue();
+            int size = annotation.getRowCount();
+            nav.put(size, true);
+            nav.attach(new AnnotatedRowsResult(annotation, _rowAnnotationFactory, column));
 
-	// setter methods for unittesting purposes
-	public void setRowAnnotationFactory(RowAnnotationFactory rowAnnotationFactory) {
-		_rowAnnotationFactory = rowAnnotationFactory;
-	}
+            nav.where(measuresDimension, MEASURE_SAMPLE);
+            nav.put(entry.getKey().getSampleString(), true);
+        }
+        return crosstab;
+    }
 
-	public void setColumn(InputColumn<String> column) {
-		this.column = column;
-	}
+    // setter methods for unittesting purposes
+    public void setRowAnnotationFactory(RowAnnotationFactory rowAnnotationFactory) {
+        _rowAnnotationFactory = rowAnnotationFactory;
+    }
 
-	public void setPredefinedTokenName(String predefinedTokenName) {
-		this.predefinedTokenName = predefinedTokenName;
-	}
+    public void setColumn(InputColumn<String> column) {
+        this.column = column;
+    }
 
-	public void setPredefinedTokenPatterns(String[] predefinedTokenPatterns) {
-		this.predefinedTokenPatterns = predefinedTokenPatterns;
-	}
+    public void setPredefinedTokenName(String predefinedTokenName) {
+        this.predefinedTokenName = predefinedTokenName;
+    }
 
-	public void setDiscriminateTextCase(Boolean discriminateTextCase) {
-		this.discriminateTextCase = discriminateTextCase;
-	}
+    public void setPredefinedTokenPatterns(String[] predefinedTokenPatterns) {
+        this.predefinedTokenPatterns = predefinedTokenPatterns;
+    }
 
-	public void setDiscriminateNegativeNumbers(Boolean discriminateNegativeNumbers) {
-		this.discriminateNegativeNumbers = discriminateNegativeNumbers;
-	}
+    public void setDiscriminateTextCase(Boolean discriminateTextCase) {
+        this.discriminateTextCase = discriminateTextCase;
+    }
 
-	public void setDiscriminateDecimals(Boolean discriminateDecimals) {
-		this.discriminateDecimals = discriminateDecimals;
-	}
+    public void setDiscriminateNegativeNumbers(Boolean discriminateNegativeNumbers) {
+        this.discriminateNegativeNumbers = discriminateNegativeNumbers;
+    }
 
-	public void setEnableMixedTokens(Boolean enableMixedTokens) {
-		this.enableMixedTokens = enableMixedTokens;
-	}
+    public void setDiscriminateDecimals(Boolean discriminateDecimals) {
+        this.discriminateDecimals = discriminateDecimals;
+    }
 
-	public void setUpperCaseExpandable(boolean upperCaseExpandable) {
-		this.upperCaseExpandable = upperCaseExpandable;
-	}
+    public void setEnableMixedTokens(Boolean enableMixedTokens) {
+        this.enableMixedTokens = enableMixedTokens;
+    }
 
-	public void setLowerCaseExpandable(boolean lowerCaseExpandable) {
-		this.lowerCaseExpandable = lowerCaseExpandable;
-	}
+    public void setUpperCaseExpandable(boolean upperCaseExpandable) {
+        this.upperCaseExpandable = upperCaseExpandable;
+    }
 
-	public void setDecimalSeparator(Character decimalSeparator) {
-		this.decimalSeparator = decimalSeparator;
-	}
+    public void setLowerCaseExpandable(boolean lowerCaseExpandable) {
+        this.lowerCaseExpandable = lowerCaseExpandable;
+    }
 
-	public void setIgnoreRepeatedSpaces(Boolean ignoreRepeatedSpaces) {
-		this.ignoreRepeatedSpaces = ignoreRepeatedSpaces;
-	}
+    public void setDecimalSeparator(Character decimalSeparator) {
+        this.decimalSeparator = decimalSeparator;
+    }
 
-	public void setMinusSign(Character minusSign) {
-		this.minusSign = minusSign;
-	}
+    public void setIgnoreRepeatedSpaces(Boolean ignoreRepeatedSpaces) {
+        this.ignoreRepeatedSpaces = ignoreRepeatedSpaces;
+    }
 
-	public void setThousandsSeparator(Character thousandsSeparator) {
-		this.thousandsSeparator = thousandsSeparator;
-	}
+    public void setMinusSign(Character minusSign) {
+        this.minusSign = minusSign;
+    }
 
-	public void setGroupColumn(InputColumn<String> groupColumn) {
-		this.groupColumn = groupColumn;
-	}
+    public void setThousandsSeparator(Character thousandsSeparator) {
+        this.thousandsSeparator = thousandsSeparator;
+    }
+
+    public void setGroupColumn(InputColumn<String> groupColumn) {
+        this.groupColumn = groupColumn;
+    }
 }
