@@ -25,6 +25,6 @@ class BooleanAnalyzerResultHtmlRendererTest extends AssertionsForJUnit {
 
     assert(1 == htmlFragment.getBodyElements().size())
 
-    Assert.assertEquals("""<div class="booleanAnalyzerResult"><table class="crosstabTable"><tr><td></td><td>my bool</td></tr><tr><td>Row count</td><td>0</td></tr><tr><td>Null count</td><td>0</td></tr><tr><td>True count</td><td>0</td></tr><tr><td>False count</td><td>0</td></tr></table></div>""", htmlFragment.getBodyElements().get(0).toHtml);
+    Assert.assertEquals("""<div class="booleanAnalyzerResult"><table class="crosstabTable"><tr><td></td><td class="crosstabHorizontalHeader">my bool</td></tr><tr><td class="crosstabVerticalHeader">Row count</td><td>0</td></tr><tr><td class="crosstabVerticalHeader">Null count</td><td>0</td></tr><tr><td class="crosstabVerticalHeader">True count</td><td>0</td></tr><tr><td class="crosstabVerticalHeader">False count</td><td>0</td></tr></table></div>""", htmlFragment.getBodyElements().get(0).toHtml);
   }
 }
