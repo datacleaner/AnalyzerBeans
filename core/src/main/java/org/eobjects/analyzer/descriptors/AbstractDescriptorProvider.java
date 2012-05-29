@@ -19,9 +19,9 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Analyzer;
@@ -194,7 +194,7 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
     @Override
     public final Collection<RendererBeanDescriptor<?>> getRendererBeanDescriptorsForRenderingFormat(
             Class<? extends RenderingFormat<?>> renderingFormat) {
-        Set<RendererBeanDescriptor<?>> result = new HashSet<RendererBeanDescriptor<?>>();
+        List<RendererBeanDescriptor<?>> result = new ArrayList<RendererBeanDescriptor<?>>();
         Collection<RendererBeanDescriptor<?>> descriptors = getRendererBeanDescriptors();
         for (RendererBeanDescriptor<?> descriptor : descriptors) {
             Class<? extends RenderingFormat<?>> descriptorsRenderingFormat = descriptor.getRenderingFormat();
