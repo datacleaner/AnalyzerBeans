@@ -197,7 +197,7 @@ public class MainTest extends TestCase {
 
         assertTrue(out.indexOf("Top values:\n" + " - company.com: 4\n" + " - eobjects.org: 2") != -1);
 
-        assertTrue("lines length was: " + lines.length, lines.length > 80);
+        assertTrue("lines length was: " + lines.length, lines.length > 60);
         assertTrue("lines length was: " + lines.length, lines.length < 90);
 
         assertEquals("SUCCESS!", lines[0]);
