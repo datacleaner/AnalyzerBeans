@@ -23,6 +23,7 @@ import javax.swing.table.TableModel;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.result.html.BodyElement;
+import org.eobjects.analyzer.result.html.HtmlUtils;
 import org.eobjects.analyzer.util.LabelUtils;
 
 /**
@@ -65,7 +66,7 @@ public class TableBodyElement implements BodyElement {
         for (int col = 0; col < columnCount; col++) {
             String columnName = _tableModel.getColumnName(col);
             sb.append("<th>");
-            sb.append(StringEscapeUtils.escapeHtml(columnName));
+            sb.append(HtmlUtils.escapeToSafeHtml(columnName));
             sb.append("</th>");
         }
         sb.append("</tr>");

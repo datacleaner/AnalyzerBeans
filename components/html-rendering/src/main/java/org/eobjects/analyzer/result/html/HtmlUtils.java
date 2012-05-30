@@ -21,6 +21,8 @@ package org.eobjects.analyzer.result.html;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * Provides
  */
@@ -47,21 +49,28 @@ public final class HtmlUtils {
         threadLocalElementIdCounter.remove();
     }
 
-    public static String createFunctionName() {
-        return "analysisResult.callback" + getFunctionCounter(threadLocalFunctionCounter).incrementAndGet();
-    }
-
     public static String createElementId() {
         return "analysisResultElement" + getFunctionCounter(threadLocalElementIdCounter).incrementAndGet();
     }
-    
+
+    /**
+     * Escapes a string to be safe for HTML usage
+     * 
+     * @param str
+     * @return
+     */
     public static String escapeToSafeHtml(String str) {
-        return str.replaceAll("<", "&lt;").replaceAll(">","&gt;");
+        return StringEscapeUtils.escapeHtml(str);
     }
-    
+
+    /**
+     * Escapes a string to be safe for JSON usage
+     * 
+     * @param str
+     * @return
+     */
     public static String escapeToJsonString(String str) {
-        // TODO: Escape 
-        return str;
+        return StringEscapeUtils.escapeJavaScript(str);
     }
 
 }

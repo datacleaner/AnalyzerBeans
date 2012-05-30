@@ -29,16 +29,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.html.BodyElement;
 import org.eobjects.analyzer.result.html.HeadElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
+import org.eobjects.analyzer.result.html.HtmlUtils;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.util.LabelUtils;
@@ -47,6 +49,9 @@ import org.eobjects.metamodel.util.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * {@link AnalysisResultWriter} which writes an analysis result as a HTML page.
+ */
 public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(HtmlAnalysisResultWriter.class);
@@ -59,7 +64,11 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
         final RendererFactory rendererFactory = new RendererFactory(configuration);
         final Map<ComponentJob, HtmlFragment> htmlFragments = new LinkedHashMap<ComponentJob, HtmlFragment>();
-        for (Entry<ComponentJob, AnalyzerResult> entry : result.getResultMap().entrySet()) {
+        final Map<ComponentJob, AnalyzerResult> resultMap = new TreeMap<ComponentJob, AnalyzerResult>(
+                new ComponentJobComparator());
+        resultMap.putAll(result.getResultMap());
+
+        for (Entry<ComponentJob, AnalyzerResult> entry : resultMap.entrySet()) {
             final ComponentJob componentJob = entry.getKey();
             final AnalyzerResult analyzerResult = entry.getValue();
             final Renderer<? super AnalyzerResult, ? extends HtmlFragment> renderer = rendererFactory.getRenderer(
@@ -159,13 +168,61 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     protected void writeBody(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments)
             throws IOException {
+        final Set<Entry<ComponentJob, HtmlFragment>> htmlFragmentSet = htmlFragments.entrySet();
+
         writeBodyBegin(writer);
 
-        for (Entry<ComponentJob, HtmlFragment> entry : htmlFragments.entrySet()) {
-            final ComponentJob componentJob = entry.getKey();
-            final HtmlFragment htmlFragment = entry.getValue();
-            writeBodyHtmlFragment(writer, componentJob, htmlFragment);
+        // write a <ul> with all descriptors in it (a TOC)
+        {
+            writer.write("<ul class=\"analysisResultToc\">");
+            ComponentDescriptor<?> lastDescriptor = null;
+            for (Entry<ComponentJob, HtmlFragment> entry : htmlFragmentSet) {
+                final ComponentJob componentJob = entry.getKey();
+                final ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
+                if (!descriptor.equals(lastDescriptor)) {
+                    final String styleName = toStyleName(descriptor.getDisplayName());
+                    writer.write("<li class=\"" + styleName + "\"><a href=\"#analysisResultDescriptorGroup_"
+                            + styleName + "\">");
+                    writer.write(HtmlUtils.escapeToSafeHtml(descriptor.getDisplayName()));
+                    writer.write("</a></li>");
+
+                    lastDescriptor = descriptor;
+                }
+            }
+            writer.write("</ul>");
         }
+
+        // write all descriptor groups
+        {
+            boolean descriptorGroupBegin = false;
+            ComponentDescriptor<?> lastDescriptor = null;
+            for (Entry<ComponentJob, HtmlFragment> entry : htmlFragmentSet) {
+                final ComponentJob componentJob = entry.getKey();
+                final ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
+                final HtmlFragment htmlFragment = entry.getValue();
+
+                if (!descriptor.equals(lastDescriptor)) {
+                    if (descriptorGroupBegin) {
+                        writer.write("</div>\n");
+                    }
+
+                    final String styleName = toStyleName(descriptor.getDisplayName());
+                    writer.write("<div id=\"analysisResultDescriptorGroup_" + styleName
+                            + "\" class=\"analysisResultDescriptorGroup " + toStyleName(descriptor.getDisplayName())
+                            + "\">");
+
+                    lastDescriptor = descriptor;
+                    descriptorGroupBegin = true;
+                }
+
+                writeBodyHtmlFragment(writer, componentJob, htmlFragment);
+            }
+
+            if (descriptorGroupBegin) {
+                writer.write("</div>\n");
+            }
+        }
+
         writeBodyEnd(writer);
     }
 
@@ -186,7 +243,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
         writer.write("<div class=\"analyzerResult " + styleName + "\">");
         writer.write("<div class=\"analyzerResultHeader\">");
-        writer.write("<h2>" + StringEscapeUtils.escapeHtml(LabelUtils.getLabel(componentJob)) + "</h2>");
+        writer.write("<h2>" + HtmlUtils.escapeToSafeHtml(LabelUtils.getLabel(componentJob)) + "</h2>");
         writer.write("</div>");
         writer.write("<div class=\"analyzerResultContent\">\n");
 

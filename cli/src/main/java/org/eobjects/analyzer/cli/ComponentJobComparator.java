@@ -17,24 +17,31 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.result.html;
+package org.eobjects.analyzer.cli;
+
+import java.util.Comparator;
+
+import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.metamodel.util.ToStringComparator;
 
 /**
- * Head element to be included when facilitating "Drill to detail" behaviour.
- * Use this in conjunction with the {@link DrillToDetailsBodyElement}.
+ * Compares and orders {@link ComponentJob}s for visual presentation
  */
-public class DrillToDetailsHeadElement extends AbstractScriptHeadElement implements HeadElement {
-
-    private final String _elementId;
-
-    public DrillToDetailsHeadElement(String elementId) {
-        super();
-        _elementId = elementId;
-    }
+public class ComponentJobComparator implements Comparator<ComponentJob> {
 
     @Override
-    protected void buildFunction(JavascriptFunctionBuilder fb) {
-        fb.append("$('#" + _elementId + "').dialog({modal:true, width:700})");
+    public int compare(ComponentJob o1, ComponentJob o2) {
+        int diff = o1.getDescriptor().compareTo(o2.getDescriptor());
+        if (diff == 0) {
+            diff = ToStringComparator.getComparator().compare(o1.getName(), o2.getName());
+        }
+        if (diff == 0) {
+            diff = ToStringComparator.getComparator().compare(o1, o2);
+        }
+        if (diff == 0) {
+            diff = o1.hashCode() - o2.hashCode();
+        }
+        return diff;
     }
 
 }

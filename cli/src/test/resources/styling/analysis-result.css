@@ -77,48 +77,43 @@ div.analyzerResultContent {
 	overflow: auto;
 }
 
-div.analyzerResult:hover div.analyzerResultHeader {
-	background-position: left center;
+ul.analysisResultToc li {
+	min-height: 32px;
+	padding-left: 30px !important;
+	background-image : url("analyzer.png");
+	background-position: left !important;
+	background-repeat: no-repeat !important;
 }
 
-div.analyzerResultHeader {
-	margin-left: -36px;
-	padding-left: 36px;
-	min-height: 32px; background-image : url("analyzer.png");
-	background-position: -32px 0;
-	background-repeat: no-repeat;
-	background-image: url("analyzer.png");
-}
-
-div.analyzerResult.PatternFinder div.analyzerResultHeader {
+ul.analysisResultToc li.PatternFinder {
 	background-image: url("type_pattern_finder.png");
 }
 
-div.analyzerResult.ValueDistribution div.analyzerResultHeader {
+ul.analysisResultToc li.ValueDistribution {
 	background-image: url("type_value_distribution.png");
 }
 
-div.analyzerResult.StringAnalyzer div.analyzerResultHeader {
+ul.analysisResultToc li.StringAnalyzer  {
 	background-image: url("type_string_analyzer.png");
 }
 
-div.analyzerResult.DateGapAnalyzer div.analyzerResultHeader {
+ul.analysisResultToc li.DateGapAnalyzer {
 	background-image: url("type_date_gap_analyzer.png");
 }
 
-div.analyzerResult.Date_timeAnalyzer div.analyzerResultHeader {
+ul.analysisResultToc li.Date_timeAnalyzer {
 	background-image: url("type_date_time_analyzer.png");
 }
 
-div.analyzerResult.ReferenceDataMatcher div.analyzerResultHeader {
+ul.analysisResultToc li.ReferenceDataMatcher {
 	background-image: url("type_match.png");
 }
 
-div.analyzerResult.NumberAnalyzer div.analyzerResultHeader {
+ul.analysisResultToc li.NumberAnalyzer {
 	background-image: url("type_number.png");
 }
 
-div.analyzerResult.WeekdayDistribution div.analyzerResultHeader {
+ul.analysisResultToc li.WeekdayDistribution {
 	background-image: url("type_weekday_distribution.png");
 }
 
@@ -168,6 +163,21 @@ table tr.odd td {
 	background-color: transparent;
 	border: none;
 	background-image: none;
+}
+
+div.ui-tabs {
+	padding-left: 0;
+	padding-right: 0;
+	padding-top: 0;
+}
+
+.ui-tabs .ui-tabs-nav {
+	background-color: #333;
+	border-radius: 0px !important;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected {
+	padding-bottom: 0px;
 }
 
 /*

@@ -28,7 +28,6 @@ import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.result.html.BaseHeadElement;
 import org.eobjects.analyzer.result.html.DrillToDetailsBodyElement;
-import org.eobjects.analyzer.result.html.DrillToDetailsHeadElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.html.HtmlUtils;
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
@@ -117,14 +116,12 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
         final AnalyzerResult drillResult = drillToDetailResultProducer.getResult();
 
         final String drillElementId = HtmlUtils.createElementId();
-        final DrillToDetailsHeadElement drillHeadElement = new DrillToDetailsHeadElement(drillElementId);
-        htmlFragtment.addHeadElement(drillHeadElement);
 
         final DrillToDetailsBodyElement drillBodyElement = new DrillToDetailsBodyElement(drillElementId,
                 rendererFactory, drillResult);
         htmlFragtment.addBodyElement(drillBodyElement);
 
-        final String invocation = drillHeadElement.toJavaScriptInvocation();
+        final String invocation = drillBodyElement.toJavaScriptInvocation();
 
         sb.append("<td class=\"value\">");
         sb.append("<a class=\"drillToDetailsLink\" href=\"#\" onclick=\"" + invocation + "\">");

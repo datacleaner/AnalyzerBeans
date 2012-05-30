@@ -8,7 +8,6 @@ import scala.xml.Node
 import org.eobjects.analyzer.result.html.GoogleChartHeadElement
 import org.eobjects.analyzer.result.html.HtmlUtils
 import org.eobjects.analyzer.result.html.DrillToDetailsBodyElement
-import org.eobjects.analyzer.result.html.DrillToDetailsHeadElement
 import org.eobjects.analyzer.result.renderer.RendererFactory
 import javax.inject.Inject
 import org.eobjects.analyzer.beans.api.Provided
@@ -90,13 +89,10 @@ class ValueDistributionResultHtmlRenderer(rf: RendererFactory) extends HtmlRende
     } else {
       val elementId = HtmlUtils.createElementId();
 
-      val headElement = new DrillToDetailsHeadElement(elementId)
-      frag.addHeadElement(headElement);
-
       val bodyElement = new DrillToDetailsBodyElement(elementId, rendererFactory, annotatedRowsResult);
       frag.addBodyElement(bodyElement);
 
-      val invocation = headElement.toJavaScriptInvocation()
+      val invocation = bodyElement.toJavaScriptInvocation()
 
       return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
     }

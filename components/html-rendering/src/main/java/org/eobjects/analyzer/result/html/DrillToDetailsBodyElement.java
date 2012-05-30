@@ -80,4 +80,8 @@ public class DrillToDetailsBodyElement implements BodyElement {
         return sb.toString();
     }
 
+    public String toJavaScriptInvocation() {
+        return "drillToDetails('" + _elementId + "'); return false;";
+    }
+
 }
