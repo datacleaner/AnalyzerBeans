@@ -263,5 +263,9 @@ table.valueDistributionSummaryTable {
  * Annotated rows
  */
 table.annotatedRowsTable {
-	
+}
+
+table.annotatedRowsTable td.highlighted {
+	background-color: #377FCF;
+	color: white;
 }

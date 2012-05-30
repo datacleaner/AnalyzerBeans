@@ -21,6 +21,7 @@ package org.eobjects.analyzer.result.renderer;
 
 import javax.swing.table.TableModel;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.result.html.BodyElement;
 import org.eobjects.analyzer.result.html.HtmlUtils;
@@ -33,6 +34,7 @@ public class TableBodyElement implements BodyElement {
 
     private final TableModel _tableModel;
     private final String _tableClassName;
+    private final int[] _highlightedColumns;
 
     /**
      * Constructs a table body element.
@@ -41,10 +43,14 @@ public class TableBodyElement implements BodyElement {
      *            the table model to render
      * @param tableClassName
      *            a CSS class name to to set to the table
+     * @param highlightedColumns
+     *            an optional array of column indexes that should be
+     *            highlighted
      */
-    public TableBodyElement(TableModel tableModel, String tableClassName) {
+    public TableBodyElement(TableModel tableModel, String tableClassName, int[] highlightedColumns) {
         _tableModel = tableModel;
         _tableClassName = tableClassName;
+        _highlightedColumns = highlightedColumns;
     }
 
     @Override
@@ -78,7 +84,11 @@ public class TableBodyElement implements BodyElement {
             for (int col = 0; col < columnCount; col++) {
                 Object value = _tableModel.getValueAt(row, col);
                 String stringValue = LabelUtils.getValueLabel(value);
-                sb.append("<td>");
+                if (ArrayUtils.indexOf(_highlightedColumns, col) == -1) {
+                    sb.append("<td>");
+                } else {
+                    sb.append("<td class=\"highlighted\">");
+                }
                 sb.append(StringEscapeUtils.escapeHtml(stringValue));
                 sb.append("</td>");
             }

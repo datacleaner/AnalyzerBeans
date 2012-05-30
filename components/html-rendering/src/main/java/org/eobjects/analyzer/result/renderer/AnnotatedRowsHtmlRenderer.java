@@ -22,6 +22,7 @@ package org.eobjects.analyzer.result.renderer;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.RendererPrecedence;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
@@ -37,7 +38,15 @@ public class AnnotatedRowsHtmlRenderer implements Renderer<AnnotatedRowsResult, 
     @Override
     public HtmlFragment render(final AnnotatedRowsResult result) {
         SimpleHtmlFragment htmlFragment = new SimpleHtmlFragment();
-        htmlFragment.addBodyElement(new TableBodyElement(result.toTableModel(), "annotatedRowsTable"));
+
+        InputColumn<?>[] highlightedColumns = result.getHighlightedColumns();
+        int[] highlightedIndexes = new int[highlightedColumns.length];
+        for (int i = 0; i < highlightedColumns.length; i++) {
+            highlightedIndexes[i] = result.getColumnIndex(highlightedColumns[i]);
+        }
+
+        htmlFragment.addBodyElement(new TableBodyElement(result.toTableModel(), "annotatedRowsTable",
+                highlightedIndexes));
         return htmlFragment;
     }
 
