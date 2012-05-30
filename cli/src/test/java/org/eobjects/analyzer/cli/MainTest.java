@@ -197,8 +197,8 @@ public class MainTest extends TestCase {
 
         assertTrue(out.indexOf("Top values:\n" + " - company.com: 4\n" + " - eobjects.org: 2") != -1);
 
-        assertTrue(lines.length > 80);
-        assertTrue(lines.length < 90);
+        assertTrue("lines length was: " + lines.length, lines.length > 80);
+        assertTrue("lines length was: " + lines.length, lines.length < 90);
 
         assertEquals("SUCCESS!", lines[0]);
     }
@@ -228,6 +228,7 @@ public class MainTest extends TestCase {
 
         Tidy tidy = new Tidy();
         StringWriter writer = new StringWriter();
+        tidy.setTrimEmptyElements(false);
         tidy.setErrout(new PrintWriter(writer));
         tidy.parse(FileHelper.getReader(file), System.out);
 

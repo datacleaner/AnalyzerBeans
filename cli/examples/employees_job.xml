@@ -77,17 +77,7 @@
 
 		<analyzer>
 			<descriptor ref="Value distribution" />
-			<input ref="col_firstname" />
-		</analyzer>
-
-		<analyzer>
-			<descriptor ref="Value distribution" />
 			<input ref="col_lastname" />
-		</analyzer>
-
-		<analyzer>
-			<descriptor ref="Value distribution" />
-			<input ref="col_username" />
 		</analyzer>
 
 		<analyzer>
@@ -99,6 +89,16 @@
 			<descriptor ref="Number analyzer" />
 			<input ref="col_age_in_days" />
 			<input ref="col_age_in_years" />
+		</analyzer>
+		
+		<analyzer name="First name patterns">
+			<descriptor ref="Pattern finder"/>
+			<input ref="col_firstname"/>
+		</analyzer>
+		
+		<analyzer name="Full name patterns">
+			<descriptor ref="Pattern finder"/>
+			<input ref="col_name"/>
 		</analyzer>
 	</analysis>
 

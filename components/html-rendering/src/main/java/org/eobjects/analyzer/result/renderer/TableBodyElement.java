@@ -51,14 +51,17 @@ public class TableBodyElement implements BodyElement {
         final int columnCount = _tableModel.getColumnCount();
 
         final StringBuilder sb = new StringBuilder();
-        
+
         if (_tableClassName == null) {
             sb.append("<table>");
         } else {
             sb.append("<table class=\"" + _tableClassName + "\">");
         }
 
-        sb.append("<tr>");
+        int rowNumber = 0;
+        rowNumber++;
+
+        sb.append("<tr class=\"" + (rowNumber % 2 == 0 ? "even" : "odd") + "\">");
         for (int col = 0; col < columnCount; col++) {
             String columnName = _tableModel.getColumnName(col);
             sb.append("<th>");
@@ -69,7 +72,8 @@ public class TableBodyElement implements BodyElement {
 
         int rowCount = _tableModel.getRowCount();
         for (int row = 0; row < rowCount; row++) {
-            sb.append("<tr>");
+            rowNumber++;
+            sb.append("<tr class=\"" + (rowNumber % 2 == 0 ? "even" : "odd") + "\">");
             for (int col = 0; col < columnCount; col++) {
                 Object value = _tableModel.getValueAt(row, col);
                 String stringValue = LabelUtils.getValueLabel(value);

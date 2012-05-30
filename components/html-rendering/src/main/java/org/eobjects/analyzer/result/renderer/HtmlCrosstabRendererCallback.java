@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -35,6 +36,7 @@ import org.eobjects.analyzer.util.LabelUtils;
 
 public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<HtmlFragment> {
 
+    private int rowNumber;
     private final StringBuilder sb;
     private final SimpleHtmlFragment htmlFragtment;
     private final RendererFactory rendererFactory;
@@ -42,6 +44,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
     public HtmlCrosstabRendererCallback(RendererFactory rendererFactory) {
         this.rendererFactory = rendererFactory;
         sb = new StringBuilder();
+        rowNumber = 0;
         htmlFragtment = new SimpleHtmlFragment();
         htmlFragtment.addHeadElement(BaseHeadElement.get());
     }
@@ -59,7 +62,12 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
 
     @Override
     public void beginRow() {
-        sb.append("<tr>");
+        rowNumber++;
+        if (rowNumber % 2 == 0) {
+            sb.append("<tr class=\"even\">");
+        } else {
+            sb.append("<tr class=\"odd\">");
+        }
     }
 
     @Override
@@ -111,28 +119,46 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
         final String drillElementId = HtmlUtils.createElementId();
         final DrillToDetailsHeadElement drillHeadElement = new DrillToDetailsHeadElement(drillElementId);
         htmlFragtment.addHeadElement(drillHeadElement);
-        
-        final DrillToDetailsBodyElement drillBodyElement = new DrillToDetailsBodyElement(drillElementId, rendererFactory, drillResult);
+
+        final DrillToDetailsBodyElement drillBodyElement = new DrillToDetailsBodyElement(drillElementId,
+                rendererFactory, drillResult);
         htmlFragtment.addBodyElement(drillBodyElement);
 
         final String invocation = drillHeadElement.toJavaScriptInvocation();
 
-        sb.append("<td>");
+        sb.append("<td class=\"value\">");
         sb.append("<a class=\"drillToDetailsLink\" href=\"#\" onclick=\"" + invocation + "\">");
-        sb.append(HtmlUtils.escapeToSafeHtml(LabelUtils.getValueLabel(value)));
+        sb.append(toHtml(LabelUtils.getValueLabel(value)));
         sb.append("</a>");
         sb.append("</td>");
     }
 
     private void simpleValueCell(Object value) {
-        sb.append("<td>");
-        sb.append(HtmlUtils.escapeToSafeHtml(LabelUtils.getValueLabel(value)));
+        sb.append("<td class=\"value\">");
+        sb.append(toHtml(value));
         sb.append("</td>");
+    }
+
+    public String toHtml(Object value) {
+        String valueLabel = LabelUtils.getValueLabel(value);
+        valueLabel = HtmlUtils.escapeToSafeHtml(valueLabel);
+        if (value instanceof Number) {
+            // mark the decimal point
+            DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
+            char decimalSeparator = decimalFormatSymbols.getDecimalSeparator();
+            int indexOfDecimalSeparator = valueLabel.lastIndexOf(decimalSeparator);
+            if (indexOfDecimalSeparator != -1) {
+                // add a <span class="decimal"></span> around the decimal part.
+                valueLabel = valueLabel.substring(0, indexOfDecimalSeparator) + "<span class=\"decimal\">"
+                        + valueLabel.substring(indexOfDecimalSeparator) + "</span>";
+            }
+        }
+        return valueLabel;
     }
 
     @Override
     public void emptyHeader(CrosstabDimension verticalDimension, CrosstabDimension horizontalDimension) {
-        sb.append("<td></td>");
+        sb.append("<td class=\"empty\"></td>");
     }
 
     @Override

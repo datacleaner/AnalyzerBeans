@@ -1,5 +1,5 @@
 body {
-	background-color: #fafafa;
+	background-color: #f2f2f2;
 	margin: 4px;
 	font-size: 13px;
 	text-align: center;
@@ -66,13 +66,69 @@ a:hover {
 	text-decoration: underline;
 }
 
-div.analyzerResultPanel {
+div.analyzerResultContent {
 	background-color: white;
 	padding: 4px;
-	border: 1px solid #eee;
+	border: 2px solid #eee;
+	border-radius: 6px;
 	clear: both;
 	margin-top: 4px;
 	margin-bottom: 20px;
+	overflow: auto;
+}
+
+div.analyzerResult:hover div.analyzerResultHeader {
+	background-position: left center;
+}
+
+div.analyzerResultHeader {
+	margin-left: -36px;
+	padding-left: 36px;
+	min-height: 32px; background-image : url("analyzer.png");
+	background-position: -32px 0;
+	background-repeat: no-repeat;
+	background-image: url("analyzer.png");
+}
+
+div.analyzerResult.PatternFinder div.analyzerResultHeader {
+	background-image: url("type_pattern_finder.png");
+}
+
+div.analyzerResult.ValueDistribution div.analyzerResultHeader {
+	background-image: url("type_value_distribution.png");
+}
+
+div.analyzerResult.StringAnalyzer div.analyzerResultHeader {
+	background-image: url("type_string_analyzer.png");
+}
+
+div.analyzerResult.DateGapAnalyzer div.analyzerResultHeader {
+	background-image: url("type_date_gap_analyzer.png");
+}
+
+div.analyzerResult.Date_timeAnalyzer div.analyzerResultHeader {
+	background-image: url("type_date_time_analyzer.png");
+}
+
+div.analyzerResult.ReferenceDataMatcher div.analyzerResultHeader {
+	background-image: url("type_match.png");
+}
+
+div.analyzerResult.NumberAnalyzer div.analyzerResultHeader {
+	background-image: url("type_number.png");
+}
+
+div.analyzerResult.WeekdayDistribution div.analyzerResultHeader {
+	background-image: url("type_weekday_distribution.png");
+}
+
+div.analyzerResultFooter {
+	clear: both;
+}
+
+table {
+	border-top: 1px solid #eee;
+	border-left: 1px solid #eee;
 }
 
 table td,table th {
@@ -81,11 +137,19 @@ table td,table th {
 	padding-right: 6px;
 	text-align: center;
 	white-space: nowrap;
+	border-bottom: 1px solid #eee;
+	border-right: 1px solid #eee;
 }
 
 table th {
 	background-color: #333;
+	border-bottom: 1px solid #333;
+	border-right: 1px solid #333;
 	color: white;
+}
+
+table tr.odd td {
+	background-color: #f2f2f2;
 }
 
 /*
@@ -100,11 +164,52 @@ table th {
 	opacity: 0.3;
 }
 
+.ui-widget-header {
+	background-color: transparent;
+	border: none;
+	background-image: none;
+}
+
 /*
- * Drill to details links and panels
+ * Crosstab tables
  */
-div.drillToDetailsPanel {
-	
+.drillToDetailsPanel {
+	max-height: 500px;
+	overflow: auto;
+}
+
+table.crosstabTable {
+	border-top-left-radius: 6px;
+}
+
+table.crosstabTable td.empty {
+	background-color: #eee;
+	border-bottom: 1px solid #eee;
+	border-right: 1px solid #eee;
+	border-top-left-radius: 6px;
+}
+
+table.crosstabTable td.value .decimal {
+	font-size: 0.9em;
+	color: #666;
+	display: none;
+}
+
+table.crosstabTable td.value:hover .decimal {
+	display: inline;
+}
+
+table.crosstabTable td.crosstabVerticalHeader {
+	width: 200px;
+	white-space: normal;
+}
+
+table.crosstabTable td.crosstabHorizontalHeader,table.crosstabTable td.crosstabVerticalHeader
+	{
+	background-color: #333;
+	color: white;
+	border-bottom: 1px solid #333;
+	border-right: 1px solid #333;
 }
 
 a.drillToDetailsLink {
@@ -123,33 +228,25 @@ a.drillToDetailsLink:hover {
 }
 
 /*
- * Crosstab tables
- */
-table.crosstabTable td.crosstabHorizontalHeader {
-	background-color: #333;
-	color: white;
-}
-
-table.crosstabTable td.crosstabVerticalHeader {
-	background-color: #333;
-	color: white;
-}
-
-/*
  * Value distribution result
  */
 div.valueDistributionChart {
 	width: 400px;
 	height: 330px;
 	float: left;
+	border: 1px solid #eee;
 }
 
 table.valueDistributionValueTable {
-	float: right;
+	min-width: 200px; float : left;
+	margin-left: 10px;
+	float: left;
 }
 
 table.valueDistributionSummaryTable {
-	clear: both;
+	min-width: 200px;
+	float: left;
+	margin-left: 10px;
 }
 
 /*

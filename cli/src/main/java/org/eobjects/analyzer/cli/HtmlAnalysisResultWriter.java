@@ -42,6 +42,7 @@ import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.util.LabelUtils;
+import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.util.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,9 +164,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         for (Entry<ComponentJob, HtmlFragment> entry : htmlFragments.entrySet()) {
             final ComponentJob componentJob = entry.getKey();
             final HtmlFragment htmlFragment = entry.getValue();
-            {
-                writeBodyHtmlFragment(writer, componentJob, htmlFragment);
-            }
+            writeBodyHtmlFragment(writer, componentJob, htmlFragment);
         }
         writeBodyEnd(writer);
     }
@@ -182,16 +181,29 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     protected void writeBodyHtmlFragment(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment)
             throws IOException {
-        writer.write("<h2 class=\"analyzerResultHeader\">"
-                + StringEscapeUtils.escapeHtml(LabelUtils.getLabel(componentJob)) + "</h2>");
-        writer.write("<div class=\"analyzerResultPanel\">\n");
+        final String displayName = componentJob.getDescriptor().getDisplayName();
+        final String styleName = toStyleName(displayName);
+
+        writer.write("<div class=\"analyzerResult " + styleName + "\">");
+        writer.write("<div class=\"analyzerResultHeader\">");
+        writer.write("<h2>" + StringEscapeUtils.escapeHtml(LabelUtils.getLabel(componentJob)) + "</h2>");
+        writer.write("</div>");
+        writer.write("<div class=\"analyzerResultContent\">\n");
 
         final List<BodyElement> bodyElements = htmlFragment.getBodyElements();
         for (BodyElement bodyElement : bodyElements) {
             writeBodyElement(writer, componentJob, htmlFragment, bodyElement);
         }
 
+        writer.write("</div>");
+        writer.write("<div class=\"analyzerResultFooter\"></div>");
         writer.write("</div>\n");
+    }
+
+    protected String toStyleName(String displayName) {
+        final String camelCase = StringUtils.toCamelCase(displayName);
+        final String cleaned = camelCase.replaceAll("/", "_").replaceAll("&", "_");
+        return cleaned;
     }
 
     protected void writeBodyElement(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment,
