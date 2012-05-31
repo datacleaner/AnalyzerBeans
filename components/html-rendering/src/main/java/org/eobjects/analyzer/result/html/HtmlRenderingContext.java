@@ -19,6 +19,10 @@
  */
 package org.eobjects.analyzer.result.html;
 
+import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.result.AnalyzerResult;
+
 /**
  * Represents the context of generating/rendering HTML results. This interface
  * provides access to utilities commonly used while generating HTML elements,
@@ -48,4 +52,12 @@ public interface HtmlRenderingContext {
      * @return
      */
     public String createElementId();
+
+    /**
+     * Gets the component job (if determinable), typically an
+     * {@link AnalyzerJob}, which generated the currently rendered
+     * {@link AnalyzerResult}. This method may return null if eg. a job is not
+     * determinable by the orchestrating code.
+     */
+    public ComponentJob getComponentJob();
 }

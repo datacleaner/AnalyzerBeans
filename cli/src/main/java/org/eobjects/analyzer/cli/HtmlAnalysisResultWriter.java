@@ -39,6 +39,7 @@ import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.html.BaseHeadElement;
 import org.eobjects.analyzer.result.html.BodyElement;
+import org.eobjects.analyzer.result.html.ComponentHtmlRenderingContext;
 import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext;
 import org.eobjects.analyzer.result.html.HeadElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
@@ -60,11 +61,14 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     @Override
     public void write(AnalysisResult result, AnalyzerBeansConfiguration configuration, Ref<Writer> writerRef,
-            Ref<OutputStream> outputStreamRef) throws Exception {
-
-        final HtmlRenderingContext context = new DefaultHtmlRenderingContext();
-
+            Ref<OutputStream> outputStreamRef) throws IOException {
         final Writer writer = writerRef.get();
+        write(result, configuration, writer);
+    }
+
+    public void write(AnalysisResult result, AnalyzerBeansConfiguration configuration, Writer writer)
+            throws IOException {
+        final HtmlRenderingContext context = new DefaultHtmlRenderingContext();
 
         final RendererFactory rendererFactory = new RendererFactory(configuration);
         final Map<ComponentJob, HtmlFragment> htmlFragments = new LinkedHashMap<ComponentJob, HtmlFragment>();
@@ -80,10 +84,12 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             if (renderer == null) {
                 throw new IllegalStateException("No HTML renderer found for result: " + analyzerResult);
             }
+            
+            final HtmlRenderingContext localContext = new ComponentHtmlRenderingContext(context, componentJob);
 
             try {
                 final HtmlFragment htmlFragment = renderer.render(analyzerResult);
-                htmlFragment.initialize(context);
+                htmlFragment.initialize(localContext);
                 htmlFragments.put(componentJob, htmlFragment);
             } catch (Exception e) {
                 logger.error("Error while rendering analyzer result: " + analyzerResult, e);
@@ -132,7 +138,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     protected void writeHead(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments,
             HtmlRenderingContext context) throws IOException {
         final Set<HeadElement> allHeadElements = new HashSet<HeadElement>();
-        
+
         writeHeadBegin(writer);
 
         // add base element no matter what
@@ -167,9 +173,11 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     protected void writeHeadElement(Writer writer, ComponentJob componentJob, HeadElement headElement,
             HtmlRenderingContext context) throws IOException {
+        final HtmlRenderingContext localContext = new ComponentHtmlRenderingContext(context, componentJob);
+        
         writer.write("  ");
         try {
-            String html = headElement.toHtml(context);
+            String html = headElement.toHtml(localContext);
             writer.write(html);
         } catch (Exception e) {
             writeMaterializationError(writer, componentJob, e);
@@ -276,9 +284,11 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     protected void writeBodyElement(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment,
             BodyElement bodyElement, final HtmlRenderingContext context) throws IOException {
+        final HtmlRenderingContext localContext = new ComponentHtmlRenderingContext(context, componentJob);
+        
         writer.write("  ");
         try {
-            String html = bodyElement.toHtml(context);
+            String html = bodyElement.toHtml(localContext);
             writer.write(html);
         } catch (Exception e) {
             writeMaterializationError(writer, componentJob, e);

@@ -14,6 +14,7 @@ import org.eobjects.analyzer.result.AnalyzerResult
 import org.junit.Test
 import org.junit.Assert
 import org.scalatest.junit.AssertionsForJUnit
+import org.eobjects.analyzer.result.html.ComponentHtmlRenderingContext
 
 class DefaultAnalyzerResultHtmlRendererTest extends AssertionsForJUnit {
 
@@ -40,9 +41,12 @@ class DefaultAnalyzerResultHtmlRendererTest extends AssertionsForJUnit {
     val job = new ImmutableAnalyzerJob(null, descriptor, new ImmutableBeanConfiguration(null),
       null)
 
-    val renderer = new DefaultAnalyzerResultHtmlRenderer(descriptor, job);
+    val renderer = new DefaultAnalyzerResultHtmlRenderer();
 
     val html = renderer.render(new ExampleResult())
+    val context = new ComponentHtmlRenderingContext(new DefaultHtmlRenderingContext(), job);
+    
+    html.initialize(context);
 
     Assert.assertEquals("""<div class="analyzerResultMetrics"><div class="metric">
               <span class="metricName">Elite</span>
@@ -50,7 +54,7 @@ class DefaultAnalyzerResultHtmlRendererTest extends AssertionsForJUnit {
             </div><div class="metric">
               <span class="metricName">Foo</span>
               <span class="metricValue">500</span>
-            </div></div>""".replaceAll("\r\n", "\n"), html.getBodyElements().get(0).toHtml(new DefaultHtmlRenderingContext()).replaceAll("\r\n", "\n"));
+            </div></div>""".replaceAll("\r\n", "\n"), html.getBodyElements().get(0).toHtml(context).replaceAll("\r\n", "\n"));
 
   }
 }

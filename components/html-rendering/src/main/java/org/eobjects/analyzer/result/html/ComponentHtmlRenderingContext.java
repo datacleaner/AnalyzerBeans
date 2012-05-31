@@ -19,42 +19,35 @@
  */
 package org.eobjects.analyzer.result.html;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.job.ComponentJob;
-import org.eobjects.analyzer.job.ConfigurableBeanJob;
 
-/**
- * Default implementation of {@link HtmlRenderingContext}
- */
-public class DefaultHtmlRenderingContext implements HtmlRenderingContext {
+public class ComponentHtmlRenderingContext implements HtmlRenderingContext {
 
-    private final AtomicInteger _elementCounter;
+    private final HtmlRenderingContext _delegate;
+    private final ComponentJob _componentJob;
 
-    public DefaultHtmlRenderingContext() {
-        _elementCounter = new AtomicInteger(0);
-    }
-
-    @Override
-    public String escapeHtml(String str) {
-        return StringEscapeUtils.escapeHtml(str);
-    }
-
-    @Override
-    public String escapeJson(String str) {
-        return StringEscapeUtils.escapeJavaScript(str);
-    }
-
-    @Override
-    public String createElementId() {
-        return "analysisResultElement" + _elementCounter.incrementAndGet();
+    public ComponentHtmlRenderingContext(HtmlRenderingContext delegate, ComponentJob componentJob) {
+        _delegate = delegate;
+        _componentJob = componentJob;
     }
 
     @Override
     public ComponentJob getComponentJob() {
-        // not implemented, use an overriding implementation to provide this.
-        return null;
+        return _componentJob;
     }
 
+    @Override
+    public String escapeHtml(String str) {
+        return _delegate.escapeHtml(str);
+    }
+
+    @Override
+    public String escapeJson(String str) {
+        return _delegate.escapeJson(str);
+    }
+
+    @Override
+    public String createElementId() {
+        return _delegate.createElementId();
+    }
 }
