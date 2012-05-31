@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.job.ComponentJob;
-import org.eobjects.analyzer.job.ConfigurableBeanJob;
 
 /**
  * Default implementation of {@link HtmlRenderingContext}
