@@ -19,12 +19,15 @@
  */
 package org.eobjects.analyzer.beans.dategap;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
+import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.Metric;
 
 public class DateGapAnalyzerResult implements AnalyzerResult {
 
@@ -54,6 +57,35 @@ public class DateGapAnalyzerResult implements AnalyzerResult {
 	 */
 	public Set<String> getGroupNames() {
 		return _gaps.keySet();
+	}
+	
+	@Metric("Total date gap count")
+	public int getTotalGapCount() {
+	    int count=0;
+	    Collection<SortedSet<TimeInterval>> gapSets = _gaps.values();
+	    for (SortedSet<TimeInterval> gapSet : gapSets) {
+            count += gapSet.size();
+        }
+	    return count;
+	}
+	
+	@Metric("Date gap count")
+	public ParameterizableMetric getGapCount() {
+	    return new ParameterizableMetric() {
+            @Override
+            public Number getValue(String parameter) {
+                SortedSet<TimeInterval> gapSet = _gaps.get(parameter);
+                if (gapSet == null) {
+                    return 0;
+                }
+                return gapSet.size();
+            }
+            
+            @Override
+            public Collection<String> getParameterSuggestions() {
+                return _gaps.keySet();
+            }
+        };
 	}
 
 	/**
