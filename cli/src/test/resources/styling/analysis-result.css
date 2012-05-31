@@ -1,15 +1,9 @@
 body {
-	background-color: #f2f2f2;
-	margin: 4px;
+	margin: 0px;
 	font-size: 13px;
-	text-align: center;
 }
 
 div.analysisResultContainer {
-	margin-left: auto;
-	margin-right: auto;
-	text-align: left;
-	width: 90%;
 }
 
 p,div,span,ul,ol,li,table,tr,td,th,h1,h2,h3,h4,h5,a {
@@ -78,15 +72,32 @@ div.analyzerResultContent {
 }
 
 ul.analysisResultToc li {
-	min-height: 32px;
+	min-height: 33px;
 	padding-left: 30px !important;
 	background-image : url("analyzer.png");
-	background-position: left !important;
+	background-position:  4px 1px !important;
 	background-repeat: no-repeat !important;
 }
 
 ul.analysisResultToc li.PatternFinder {
 	background-image: url("type_pattern_finder.png");
+}
+
+
+ul.analysisResultToc li.BooleanAnalyzer {
+	background-image: url("type_boolean.png");
+}
+
+ul.analysisResultToc li.CharacterSetDistribution {
+	background-image: url("type_charset.png");
+}
+
+ul.analysisResultToc li.InsertIntoTable {
+	background-image: url("type_insert.png");
+}
+
+ul.analysisResultToc li.UpdateTable {
+	background-image: url("type_update.png");
 }
 
 ul.analysisResultToc li.ValueDistribution {
@@ -169,11 +180,19 @@ div.ui-tabs {
 	padding-left: 0;
 	padding-right: 0;
 	padding-top: 0;
+	border-radius: 0px !important;
+	border: none;
 }
 
 .ui-tabs .ui-tabs-nav {
+	padding-top: 40px;
+	padding-left: 20px;
 	background-color: #333;
 	border-radius: 0px !important;
+}
+
+.ui-tabs .ui-tabs-panel {
+	padding: 20px;
 }
 
 .ui-tabs .ui-tabs-nav li.ui-tabs-selected {
