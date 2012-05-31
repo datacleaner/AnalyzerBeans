@@ -57,6 +57,7 @@ public class DrillToDetailsBodyElement implements BodyElement {
         }
 
         final HtmlFragment htmlFragment = renderer.render(_result);
+        htmlFragment.initialize(context);
 
         final StringBuilder sb = new StringBuilder();
         sb.append("<div id=\"" + _elementId + "\" class=\"drillToDetailsPanel\" style=\"display:none;\">\n");

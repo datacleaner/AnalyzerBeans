@@ -37,6 +37,7 @@ import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.html.BaseHeadElement;
 import org.eobjects.analyzer.result.html.BodyElement;
 import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext;
 import org.eobjects.analyzer.result.html.HeadElement;
@@ -82,6 +83,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
             try {
                 final HtmlFragment htmlFragment = renderer.render(analyzerResult);
+                htmlFragment.initialize(context);
                 htmlFragments.put(componentJob, htmlFragment);
             } catch (Exception e) {
                 logger.error("Error while rendering analyzer result: " + analyzerResult, e);
@@ -130,8 +132,14 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     protected void writeHead(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments,
             HtmlRenderingContext context) throws IOException {
         final Set<HeadElement> allHeadElements = new HashSet<HeadElement>();
-
+        
         writeHeadBegin(writer);
+
+        // add base element no matter what
+        {
+            writeHeadElement(writer, null, BaseHeadElement.get(), context);
+            allHeadElements.add(BaseHeadElement.get());
+        }
 
         for (Entry<ComponentJob, HtmlFragment> entry : htmlFragments.entrySet()) {
             final HtmlFragment htmlFragment = entry.getValue();
