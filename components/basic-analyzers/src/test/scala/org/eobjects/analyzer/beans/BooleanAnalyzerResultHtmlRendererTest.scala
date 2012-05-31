@@ -23,6 +23,8 @@ class BooleanAnalyzerResultHtmlRendererTest extends AssertionsForJUnit {
     val analyzer = new BooleanAnalyzer(Array(column));
     analyzer.init();
     val htmlFragment = renderer.render(analyzer.getResult())
+    
+    htmlFragment.initialize(new DefaultHtmlRenderingContext());
 
     assert(1 == htmlFragment.getBodyElements().size())
 

@@ -12,6 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
 import org.eobjects.analyzer.beans.api.RendererBean
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat
+import org.eobjects.analyzer.result.html.HtmlRenderingContext
 
 @RendererBean(classOf[HtmlRenderingFormat])
 class BooleanAnalyzerResultHtmlRenderer(rf: RendererFactory) extends HtmlRenderer[BooleanAnalyzerResult] {
@@ -32,11 +33,16 @@ class BooleanAnalyzerResultHtmlRenderer(rf: RendererFactory) extends HtmlRendere
     val valueCombinationCrosstab = result.getValueCombinationCrosstab()
     val valueCombinationHtmlFragment = if (valueCombinationCrosstab == null) null else crosstabRenderer.render(valueCombinationCrosstab)
 
+    // TODO: Should happen in a initialization method
+    val context: HtmlRenderingContext = null;
+    
     // add all head elements to the html fragment
     if (columnStatisticsHtmlFragment != null) {
+        columnStatisticsHtmlFragment.initialize(context)
         columnStatisticsHtmlFragment.getHeadElements().foreach(frag.addHeadElement(_))
     }
     if (valueCombinationHtmlFragment != null) {
+        valueCombinationHtmlFragment.initialize(context)
         valueCombinationHtmlFragment.getHeadElements().foreach(frag.addHeadElement(_))
     }
 
