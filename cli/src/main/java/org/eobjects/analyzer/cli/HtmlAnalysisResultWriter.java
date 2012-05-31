@@ -38,9 +38,10 @@ import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.html.BodyElement;
+import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext;
 import org.eobjects.analyzer.result.html.HeadElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
-import org.eobjects.analyzer.result.html.HtmlUtils;
+import org.eobjects.analyzer.result.html.HtmlRenderingContext;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.util.LabelUtils;
@@ -59,6 +60,8 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     @Override
     public void write(AnalysisResult result, AnalyzerBeansConfiguration configuration, Ref<Writer> writerRef,
             Ref<OutputStream> outputStreamRef) throws Exception {
+
+        final HtmlRenderingContext context = new DefaultHtmlRenderingContext();
 
         final Writer writer = writerRef.get();
 
@@ -86,10 +89,10 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             }
         }
 
-        writeHtmlBegin(writer);
-        writeHead(writer, htmlFragments);
-        writeBody(writer, htmlFragments);
-        writeHtmlEnd(writer);
+        writeHtmlBegin(writer, context);
+        writeHead(writer, htmlFragments, context);
+        writeBody(writer, htmlFragments, context);
+        writeHtmlEnd(writer, context);
     }
 
     private void writeMaterializationError(Writer writer, ComponentJob componentJob, Exception e) throws IOException {
@@ -115,17 +118,17 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         writer.write("</div>");
     }
 
-    protected void writeHtmlBegin(Writer writer) throws IOException {
+    protected void writeHtmlBegin(Writer writer, HtmlRenderingContext context) throws IOException {
         writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
         writer.write("<html>\n");
     }
 
-    protected void writeHtmlEnd(Writer writer) throws IOException {
+    protected void writeHtmlEnd(Writer writer, HtmlRenderingContext context) throws IOException {
         writer.write("</html>");
     }
 
-    protected void writeHead(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments)
-            throws IOException {
+    protected void writeHead(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments,
+            HtmlRenderingContext context) throws IOException {
         final Set<HeadElement> allHeadElements = new HashSet<HeadElement>();
 
         writeHeadBegin(writer);
@@ -136,7 +139,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             for (HeadElement headElement : headElements) {
                 if (!allHeadElements.contains(headElement)) {
                     final ComponentJob componentJob = entry.getKey();
-                    writeHeadElement(writer, componentJob, headElement);
+                    writeHeadElement(writer, componentJob, headElement, context);
                     allHeadElements.add(headElement);
                 }
             }
@@ -154,11 +157,11 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         writer.write("</head>");
     }
 
-    protected void writeHeadElement(Writer writer, ComponentJob componentJob, HeadElement headElement)
-            throws IOException {
+    protected void writeHeadElement(Writer writer, ComponentJob componentJob, HeadElement headElement,
+            HtmlRenderingContext context) throws IOException {
         writer.write("  ");
         try {
-            String html = headElement.toHtml();
+            String html = headElement.toHtml(context);
             writer.write(html);
         } catch (Exception e) {
             writeMaterializationError(writer, componentJob, e);
@@ -166,11 +169,11 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         writer.write('\n');
     }
 
-    protected void writeBody(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments)
-            throws IOException {
+    protected void writeBody(final Writer writer, final Map<ComponentJob, HtmlFragment> htmlFragments,
+            final HtmlRenderingContext context) throws IOException {
         final Set<Entry<ComponentJob, HtmlFragment>> htmlFragmentSet = htmlFragments.entrySet();
 
-        writeBodyBegin(writer);
+        writeBodyBegin(writer, context);
 
         // write a <ul> with all descriptors in it (a TOC)
         {
@@ -183,7 +186,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
                     final String styleName = toStyleName(descriptor.getDisplayName());
                     writer.write("<li class=\"" + styleName + "\"><a href=\"#analysisResultDescriptorGroup_"
                             + styleName + "\">");
-                    writer.write(HtmlUtils.escapeToSafeHtml(descriptor.getDisplayName()));
+                    writer.write(context.escapeHtml(descriptor.getDisplayName()));
                     writer.write("</a></li>");
 
                     lastDescriptor = descriptor;
@@ -215,7 +218,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
                     descriptorGroupBegin = true;
                 }
 
-                writeBodyHtmlFragment(writer, componentJob, htmlFragment);
+                writeBodyHtmlFragment(writer, componentJob, htmlFragment, context);
             }
 
             if (descriptorGroupBegin) {
@@ -223,33 +226,33 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             }
         }
 
-        writeBodyEnd(writer);
+        writeBodyEnd(writer, context);
     }
 
-    protected void writeBodyBegin(Writer writer) throws IOException {
+    protected void writeBodyBegin(Writer writer, HtmlRenderingContext context) throws IOException {
         writer.write("<body>\n");
         writer.write("<div class=\"analysisResultContainer\">\n");
     }
 
-    protected void writeBodyEnd(Writer writer) throws IOException {
+    protected void writeBodyEnd(Writer writer, HtmlRenderingContext context) throws IOException {
         writer.write("</div>\n");
         writer.write("</body>");
     }
 
-    protected void writeBodyHtmlFragment(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment)
-            throws IOException {
+    protected void writeBodyHtmlFragment(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment,
+            final HtmlRenderingContext context) throws IOException {
         final String displayName = componentJob.getDescriptor().getDisplayName();
         final String styleName = toStyleName(displayName);
 
         writer.write("<div class=\"analyzerResult " + styleName + "\">");
         writer.write("<div class=\"analyzerResultHeader\">");
-        writer.write("<h2>" + HtmlUtils.escapeToSafeHtml(LabelUtils.getLabel(componentJob)) + "</h2>");
+        writer.write("<h2>" + context.escapeHtml(LabelUtils.getLabel(componentJob)) + "</h2>");
         writer.write("</div>");
         writer.write("<div class=\"analyzerResultContent\">\n");
 
         final List<BodyElement> bodyElements = htmlFragment.getBodyElements();
         for (BodyElement bodyElement : bodyElements) {
-            writeBodyElement(writer, componentJob, htmlFragment, bodyElement);
+            writeBodyElement(writer, componentJob, htmlFragment, bodyElement, context);
         }
 
         writer.write("</div>");
@@ -264,10 +267,10 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     }
 
     protected void writeBodyElement(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment,
-            BodyElement bodyElement) throws IOException {
+            BodyElement bodyElement, final HtmlRenderingContext context) throws IOException {
         writer.write("  ");
         try {
-            String html = bodyElement.toHtml();
+            String html = bodyElement.toHtml(context);
             writer.write(html);
         } catch (Exception e) {
             writeMaterializationError(writer, componentJob, e);
