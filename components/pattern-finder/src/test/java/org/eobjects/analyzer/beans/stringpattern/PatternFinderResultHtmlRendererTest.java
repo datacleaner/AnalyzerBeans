@@ -23,17 +23,15 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
-import org.eobjects.analyzer.beans.stringpattern.PatternFinderResult;
-import org.eobjects.analyzer.beans.stringpattern.PatternFinderResultHtmlRenderer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
+import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext;
 import org.eobjects.analyzer.result.html.HtmlFragment;
-import org.eobjects.analyzer.result.html.HtmlUtils;
+import org.eobjects.analyzer.result.html.HtmlRenderingContext;
 import org.eobjects.analyzer.result.renderer.AnnotatedRowsHtmlRenderer;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
@@ -45,12 +43,13 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
     private final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl()
             .replace(descriptorProvider);
     private final RendererFactory rendererFactory = new RendererFactory(conf);
+    private HtmlRenderingContext context;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        HtmlUtils.resetIds();
         descriptorProvider.addRendererBeanDescriptor(Descriptors.ofRenderer(AnnotatedRowsHtmlRenderer.class));
+        context = new DefaultHtmlRenderingContext();
     }
 
     public void testSinglePatterns() throws Exception {
@@ -71,9 +70,11 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
         PatternFinderResult result = analyzer.getResult();
 
         HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer(rendererFactory).render(result);
-        assertEquals("SimpleHtmlFragment[headElements=1,bodyElements=1]", htmlFragment.toString());
+        htmlFragment.initialize(context);
+        assertEquals(0, htmlFragment.getHeadElements().size());
+        assertEquals(1, htmlFragment.getBodyElements().size());
 
-        String html = htmlFragment.getBodyElements().get(0).toHtml();
+        String html = htmlFragment.getBodyElements().get(0).toHtml(context);
         assertEquals(FileHelper.readFileAsString(new File(
                 "src/test/resources/pattern_finder_result_html_renderer_single.html")), html);
     }
@@ -98,9 +99,11 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
         PatternFinderResult result = analyzer.getResult();
 
         HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer(rendererFactory).render(result);
-        assertEquals("SimpleHtmlFragment[headElements=2,bodyElements=1]", htmlFragment.toString());
+        htmlFragment.initialize(context);
+        assertEquals(0, htmlFragment.getHeadElements().size());
+        assertEquals(1, htmlFragment.getBodyElements().size());
 
-        String html = htmlFragment.getBodyElements().get(0).toHtml();
+        String html = htmlFragment.getBodyElements().get(0).toHtml(context);
         assertEquals(FileHelper.readFileAsString(new File(
                 "src/test/resources/pattern_finder_result_html_renderer_multiple.html")), html);
     }

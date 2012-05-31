@@ -1,18 +1,19 @@
 package org.eobjects.analyzer.beans
 import org.eobjects.analyzer.beans.api.Analyzer
 import org.eobjects.analyzer.beans.api.AnalyzerBean
-import org.eobjects.analyzer.data.InputRow
-import org.eobjects.analyzer.result.AnalyzerResult
-import org.eobjects.analyzer.result.Metric
-import org.scalatest.junit.AssertionsForJUnit
+import org.eobjects.analyzer.beans.api.Configured
+import org.eobjects.analyzer.beans.api.RendererBean
 import org.eobjects.analyzer.data.InputColumn
+import org.eobjects.analyzer.data.InputRow
 import org.eobjects.analyzer.descriptors.Descriptors
-import org.eobjects.analyzer.job.AnalyzerJob
 import org.eobjects.analyzer.job.ImmutableAnalyzerJob
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration
-import org.junit.Assert
+import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext
+import org.eobjects.analyzer.result.Metric
+import org.eobjects.analyzer.result.AnalyzerResult
 import org.junit.Test
-import org.eobjects.analyzer.beans.api.Configured
+import org.junit.Assert
+import org.scalatest.junit.AssertionsForJUnit
 
 class DefaultAnalyzerResultHtmlRendererTest extends AssertionsForJUnit {
 
@@ -49,7 +50,7 @@ class DefaultAnalyzerResultHtmlRendererTest extends AssertionsForJUnit {
             </div><div class="metric">
               <span class="metricName">Foo</span>
               <span class="metricValue">500</span>
-            </div></div>""".replaceAll("\r\n", "\n"), html.getBodyElements().get(0).toHtml().replaceAll("\r\n", "\n"));
+            </div></div>""".replaceAll("\r\n", "\n"), html.getBodyElements().get(0).toHtml(new DefaultHtmlRenderingContext()).replaceAll("\r\n", "\n"));
 
   }
 }

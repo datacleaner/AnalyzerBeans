@@ -28,13 +28,13 @@ public class SimpleHeadElement implements HeadElement {
     }
 
     @Override
-    public String toHtml() {
+    public String toHtml(HtmlRenderingContext context) {
         return _html;
     }
 
     @Override
     public String toString() {
-        return toHtml();
+        return _html;
     }
 
     @Override

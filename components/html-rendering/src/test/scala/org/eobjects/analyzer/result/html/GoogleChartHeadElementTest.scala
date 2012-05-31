@@ -1,13 +1,13 @@
 package org.eobjects.analyzer.result.html
-import org.scalatest.junit.AssertionsForJUnit
 import org.junit.Test
 import org.junit.Assert
+import org.scalatest.junit.AssertionsForJUnit
 
 class GoogleChartHeadElementTest extends AssertionsForJUnit {
 
   @Test
   def testToHtml = {
-    val html = GoogleChartHeadElement.toHtml()
+    val html = GoogleChartHeadElement.toHtml(new DefaultHtmlRenderingContext());
     Assert.assertEquals("""<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
       <!--

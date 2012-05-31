@@ -19,11 +19,34 @@
  */
 package org.eobjects.analyzer.result.html;
 
-/**
- * Represents a part of a {@link HtmlFragment} that should be included in the
- * HTML head section.
- */
-public interface HeadElement {
+import java.util.concurrent.atomic.AtomicInteger;
 
-    public String toHtml(HtmlRenderingContext context);
+import org.apache.commons.lang.StringEscapeUtils;
+
+/**
+ * Default implementation of {@link HtmlRenderingContext}
+ */
+public class DefaultHtmlRenderingContext implements HtmlRenderingContext {
+
+    private final AtomicInteger _elementCounter;
+
+    public DefaultHtmlRenderingContext() {
+        _elementCounter = new AtomicInteger(0);
+    }
+
+    @Override
+    public String escapeHtml(String str) {
+        return StringEscapeUtils.escapeHtml(str);
+    }
+
+    @Override
+    public String escapeJson(String str) {
+        return StringEscapeUtils.escapeJavaScript(str);
+    }
+
+    @Override
+    public String createElementId() {
+        return "analysisResultElement" + _elementCounter.incrementAndGet();
+    }
+
 }

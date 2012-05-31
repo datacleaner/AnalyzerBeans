@@ -48,9 +48,7 @@ public class CrosstabHtmlRenderer extends AbstractRenderer<CrosstabResult, HtmlF
     }
 
     public HtmlFragment render(Crosstab<?> crosstab) {
-        CrosstabRenderer crosstabRenderer = new CrosstabRenderer(crosstab);
-        HtmlFragment htmlFragment = crosstabRenderer.render(new HtmlCrosstabRendererCallback(rendererFactory));
-        return htmlFragment;
-    }
+        return new CrosstabHtmlFragment(crosstab, rendererFactory);
 
+    }
 }

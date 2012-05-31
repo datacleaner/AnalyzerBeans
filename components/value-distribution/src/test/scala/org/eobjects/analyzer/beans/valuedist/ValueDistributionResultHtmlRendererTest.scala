@@ -1,21 +1,21 @@
 package org.eobjects.analyzer.beans.valuedist
-import org.scalatest.junit.AssertionsForJUnit
-import org.junit.Test
-import org.eobjects.analyzer.data.InputColumn
+import org.eobjects.analyzer.beans.api.RendererBean
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl
 import org.eobjects.analyzer.data.MockInputColumn
 import org.eobjects.analyzer.data.MockInputRow
-import org.junit.Assert
-import org.eobjects.analyzer.result.html.HtmlUtils
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider
+import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext
 import org.eobjects.analyzer.result.html.GoogleChartHeadElement
 import org.eobjects.analyzer.result.renderer.RendererFactory
-import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl
-import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider
+import org.junit.Test
+import org.junit.Assert
+import org.scalatest.junit.AssertionsForJUnit
 
 class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
 
   @Test
   def testRenderMultipleGroups = {
-    HtmlUtils.resetIds();
+    val context = new DefaultHtmlRenderingContext();
 
     val col1 = new MockInputColumn[String]("email username", classOf[String]);
     val col2 = new MockInputColumn[String]("email domain", classOf[String]);
@@ -33,12 +33,12 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     val result = analyzer.getResult();
 
     val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
-    Assert.assertEquals("SimpleHtmlFragment[headElements=3,bodyElements=3]", htmlFragment.toString());
+    htmlFragment.initialize(context);
 
     Assert.assertEquals(3, htmlFragment.getBodyElements().size());
     Assert.assertEquals(3, htmlFragment.getHeadElements().size());
 
-    val html = htmlFragment.getBodyElements().get(2).toHtml();
+    val html = htmlFragment.getBodyElements().get(2).toHtml(context);
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              <h3>Group: humaninference.com</h3>
@@ -82,7 +82,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                      chart.draw(data, options);
                      
                    });
-               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml().replaceAll("\r\n", "\n"))
+               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
 
     Assert.assertEquals("""<script type="text/javascript">
                    google.setOnLoadCallback(function() {
@@ -97,12 +97,12 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                      chart.draw(data, options);
                      
                    });
-               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(2).toHtml().replaceAll("\r\n", "\n"))
+               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(2).toHtml(context).replaceAll("\r\n", "\n"))
   }
 
   @Test
   def testRenderSingleGroups = {
-    HtmlUtils.resetIds();
+    val context = new DefaultHtmlRenderingContext();
 
     val col1 = new MockInputColumn[String]("email username", classOf[String]);
 
@@ -116,22 +116,22 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     val result = analyzer.getResult();
 
     val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
-    Assert.assertEquals("SimpleHtmlFragment[headElements=2,bodyElements=3]", htmlFragment.toString());
+    htmlFragment.initialize(context);
 
     Assert.assertEquals(3, htmlFragment.getBodyElements().size());
     Assert.assertEquals(2, htmlFragment.getHeadElements().size());
 
-    var html = htmlFragment.getBodyElements().get(0).toHtml();
+    var html = htmlFragment.getBodyElements().get(0).toHtml(context);
     Assert.assertEquals("""<div id="analysisResultElement2" class="drillToDetailsPanel" style="display:none;">
-<table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td>kasper</td></tr><tr class="odd"><td>kasper</td></tr></table>
+<table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td class="highlighted">kasper</td></tr><tr class="odd"><td class="highlighted">kasper</td></tr></table>
 </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    html = htmlFragment.getBodyElements().get(1).toHtml();
+    html = htmlFragment.getBodyElements().get(1).toHtml(context);
     Assert.assertEquals("""<div id="analysisResultElement3" class="drillToDetailsPanel" style="display:none;">
-<table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td>kasper.sorensen</td></tr></table>
+<table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td class="highlighted">kasper.sorensen</td></tr></table>
 </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    html = htmlFragment.getBodyElements().get(2).toHtml();
+    html = htmlFragment.getBodyElements().get(2).toHtml(context);
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
@@ -164,7 +164,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                      chart.draw(data, options);
                      
                    });
-               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml().replaceAll("\r\n", "\n"))
+               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
   }
 
   def createRendererFactory(): RendererFactory = {

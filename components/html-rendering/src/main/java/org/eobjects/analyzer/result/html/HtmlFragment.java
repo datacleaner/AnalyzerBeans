@@ -26,7 +26,26 @@ import java.util.List;
  */
 public interface HtmlFragment {
 
+    /**
+     * Initializes the {@link HtmlFragment}. This happens immediately before
+     * invoking {@link #getHeadElements()} and {@link #getBodyElements()}
+     * 
+     * @param context
+     */
+    public void initialize(HtmlRenderingContext context);
+
+    /**
+     * Gets elements to be inserted into the <head> section of the HTML.
+     * 
+     * @param context
+     * @return
+     */
     public List<HeadElement> getHeadElements();
 
+    /**
+     * Gets elements to be inserted into the <body> section of the HTML.
+     * 
+     * @return
+     */
     public List<BodyElement> getBodyElements();
 }

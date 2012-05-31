@@ -25,5 +25,5 @@ package org.eobjects.analyzer.result.html;
  */
 public interface BodyElement {
 
-    public String toHtml();
+    public String toHtml(HtmlRenderingContext context);
 }

@@ -20,10 +20,32 @@
 package org.eobjects.analyzer.result.html;
 
 /**
- * Represents a part of a {@link HtmlFragment} that should be included in the
- * HTML head section.
+ * Represents the context of generating/rendering HTML results. This interface
+ * provides access to utilities commonly used while generating HTML elements,
+ * scripts etc.
  */
-public interface HeadElement {
+public interface HtmlRenderingContext {
 
-    public String toHtml(HtmlRenderingContext context);
+    /**
+     * Escapes a string to make it ready for safely inserting into HTML
+     * 
+     * @param str
+     * @return
+     */
+    public String escapeHtml(String str);
+
+    /**
+     * Escapes a string to make it ready for safely inserting into JSON
+     * 
+     * @param str
+     * @return
+     */
+    public String escapeJson(String str);
+
+    /**
+     * Generates a new unique element ID for this rendering context.
+     * 
+     * @return
+     */
+    public String createElementId();
 }

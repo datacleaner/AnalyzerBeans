@@ -24,7 +24,7 @@ import javax.swing.table.TableModel;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.result.html.BodyElement;
-import org.eobjects.analyzer.result.html.HtmlUtils;
+import org.eobjects.analyzer.result.html.HtmlRenderingContext;
 import org.eobjects.analyzer.util.LabelUtils;
 
 /**
@@ -54,7 +54,7 @@ public class TableBodyElement implements BodyElement {
     }
 
     @Override
-    public String toHtml() {
+    public String toHtml(HtmlRenderingContext context) {
         final int columnCount = _tableModel.getColumnCount();
 
         final StringBuilder sb = new StringBuilder();
@@ -72,7 +72,7 @@ public class TableBodyElement implements BodyElement {
         for (int col = 0; col < columnCount; col++) {
             String columnName = _tableModel.getColumnName(col);
             sb.append("<th>");
-            sb.append(HtmlUtils.escapeToSafeHtml(columnName));
+            sb.append(context.escapeHtml(columnName));
             sb.append("</th>");
         }
         sb.append("</tr>");

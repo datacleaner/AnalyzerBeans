@@ -26,26 +26,27 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.ResultProducer;
-import org.eobjects.analyzer.result.html.BaseHeadElement;
 import org.eobjects.analyzer.result.html.DrillToDetailsBodyElement;
 import org.eobjects.analyzer.result.html.HtmlFragment;
-import org.eobjects.analyzer.result.html.HtmlUtils;
+import org.eobjects.analyzer.result.html.HtmlRenderingContext;
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
 import org.eobjects.analyzer.util.LabelUtils;
 
 public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<HtmlFragment> {
 
-    private int rowNumber;
     private final StringBuilder sb;
     private final SimpleHtmlFragment htmlFragtment;
     private final RendererFactory rendererFactory;
+    private final HtmlRenderingContext htmlRenderingContext;
 
-    public HtmlCrosstabRendererCallback(RendererFactory rendererFactory) {
+    private int rowNumber;
+
+    public HtmlCrosstabRendererCallback(RendererFactory rendererFactory, HtmlRenderingContext htmlRenderingContext) {
         this.rendererFactory = rendererFactory;
+        this.htmlRenderingContext = htmlRenderingContext;
         sb = new StringBuilder();
         rowNumber = 0;
         htmlFragtment = new SimpleHtmlFragment();
-        htmlFragtment.addHeadElement(BaseHeadElement.get());
     }
 
     @Override
@@ -115,7 +116,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
 
         final AnalyzerResult drillResult = drillToDetailResultProducer.getResult();
 
-        final String drillElementId = HtmlUtils.createElementId();
+        final String drillElementId = htmlRenderingContext.createElementId();
 
         final DrillToDetailsBodyElement drillBodyElement = new DrillToDetailsBodyElement(drillElementId,
                 rendererFactory, drillResult);
@@ -138,7 +139,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
 
     public String toHtml(Object value) {
         String valueLabel = LabelUtils.getValueLabel(value);
-        valueLabel = HtmlUtils.escapeToSafeHtml(valueLabel);
+        valueLabel = htmlRenderingContext.escapeHtml(valueLabel);
         if (value instanceof Number) {
             // mark the decimal point
             DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();

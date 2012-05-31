@@ -28,12 +28,12 @@ public class SimpleBodyElement implements BodyElement {
     }
 
     @Override
-    public String toHtml() {
+    public String toHtml(HtmlRenderingContext renderingContext) {
         return _html;
     }
 
     @Override
     public String toString() {
-        return toHtml();
+        return _html;
     }
 }

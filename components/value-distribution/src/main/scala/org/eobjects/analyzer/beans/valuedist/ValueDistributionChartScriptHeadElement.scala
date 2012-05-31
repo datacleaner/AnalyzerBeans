@@ -1,11 +1,13 @@
 package org.eobjects.analyzer.beans.valuedist
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.bufferAsJavaList
+
 import org.eobjects.analyzer.result.html.HeadElement
-import scala.collection.JavaConversions._
-import org.eobjects.analyzer.result.html.HtmlUtils
+import org.eobjects.analyzer.result.html.HtmlRenderingContext
 
 class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResult, chartElementId: String) extends HeadElement {
 
-  def toHtml: String = {
+  override def toHtml(context: HtmlRenderingContext): String = {
     val valueCounts = result.getTopValues().getValueCounts() ++ result.getBottomValues().getValueCounts()
     if (result.getNullCount() > 0) {
       valueCounts.add(new ValueCount("<null>", result.getNullCount()));
@@ -13,8 +15,7 @@ class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResu
     if (result.getUniqueCount() > 0) {
       valueCounts.add(new ValueCount("<unique>", result.getUniqueCount()));
     }
-    
-    
+
     return """<script type="text/javascript">
                    google.setOnLoadCallback(function() {
                      var elem = document.getElementById("""" + chartElementId + """");
@@ -22,7 +23,9 @@ class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResu
                      
                      var data = google.visualization.arrayToDataTable([
                          ['Value', 'Count'],""" +
-      valueCounts.map(valueCountMapper).mkString(",") + """
+      valueCounts.map(vc => {
+        "['" + context.escapeJson(vc.getValue()) + "', " + vc.getCount() + "]";
+      }).mkString(",") + """
                      ]);
                      
                      var chart = new google.visualization.PieChart(elem);
@@ -30,9 +33,5 @@ class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResu
                      
                    });
                </script>"""
-  }
-
-  def valueCountMapper(vc: ValueCount) = {
-    "['" + HtmlUtils.escapeToJsonString(vc.getValue()) + "', " + vc.getCount() + "]";
   }
 }

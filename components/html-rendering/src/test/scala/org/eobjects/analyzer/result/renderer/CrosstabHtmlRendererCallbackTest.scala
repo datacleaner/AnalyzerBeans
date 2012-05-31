@@ -1,11 +1,16 @@
 package org.eobjects.analyzer.result.renderer
-import org.scalatest.junit.AssertionsForJUnit
-import org.junit.Test
+
+import java.lang.Integer
+
+import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext
 import org.eobjects.analyzer.result.Crosstab
+import org.junit.Test
 import org.junit.Assert
-import java.util.Arrays
+import org.scalatest.junit.AssertionsForJUnit
 
 class CrosstabHtmlRendererCallbackTest extends AssertionsForJUnit {
+  
+  val renderingContext = new DefaultHtmlRenderingContext();
 
   @Test
   def testOneDimension() = {
@@ -15,11 +20,11 @@ class CrosstabHtmlRendererCallbackTest extends AssertionsForJUnit {
     c.where("Region", "Asia").put(3, true);
 
     val crosstabRenderer = new CrosstabRenderer(c);
-    val result1 = crosstabRenderer.render(new HtmlCrosstabRendererCallback(null)).getBodyElements().get(0).toHtml();
+    val result1 = crosstabRenderer.render(new HtmlCrosstabRendererCallback(null,renderingContext)).getBodyElements().get(0).toHtml(renderingContext);
     Assert.assertEquals("<table class='crosstabTable'><tr class='odd'><td class='crosstabHorizontalHeader'>EU</td><td class='crosstabHorizontalHeader'>USA</td><td class='crosstabHorizontalHeader'>Asia</td></tr><tr class='even'><td class='value'>1</td><td class='value'>2</td><td class='value'>3</td></tr></table>", result1.replaceAll("\"", "'"));
  
     crosstabRenderer.makeVertical(c.getDimension(0));
-    val result2 = crosstabRenderer.render(new HtmlCrosstabRendererCallback(null)).getBodyElements().get(0).toHtml();
+    val result2 = crosstabRenderer.render(new HtmlCrosstabRendererCallback(null,renderingContext)).getBodyElements().get(0).toHtml(renderingContext);
     Assert.assertEquals("<table class='crosstabTable'><tr class='odd'><td class='crosstabVerticalHeader'>EU</td><td class='value'>1</td></tr><tr class='even'><td class='crosstabVerticalHeader'>USA</td><td class='value'>2</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Asia</td><td class='value'>3</td></tr></table>", result2.replaceAll("\"", "'"));
   }
 
@@ -57,7 +62,7 @@ class CrosstabHtmlRendererCallbackTest extends AssertionsForJUnit {
     // auto-assigned axises
     Assert.assertEquals(
       "<table class='crosstabTable'><tr class='odd'><td class='empty'></td><td class='empty'></td><td class='crosstabHorizontalHeader' colspan='3'>EU</td><td class='crosstabHorizontalHeader' colspan='3'>USA</td></tr><tr class='even'><td class='empty'></td><td class='empty'></td><td class='crosstabHorizontalHeader'>Child</td><td class='crosstabHorizontalHeader'>Teenager</td><td class='crosstabHorizontalHeader'>Adult</td><td class='crosstabHorizontalHeader'>Child</td><td class='crosstabHorizontalHeader'>Teenager</td><td class='crosstabHorizontalHeader'>Adult</td></tr><tr class='odd'><td class='crosstabVerticalHeader' rowspan='3'>Male</td><td class='crosstabVerticalHeader'>Yes</td><td class='value'>0</td><td class='value'>3</td><td class='value'>6</td><td class='value'>9</td><td class='value'>12</td><td class='value'>15</td></tr><tr class='even'><td class='crosstabVerticalHeader'>No, immigrant</td><td class='value'>1</td><td class='value'>4</td><td class='value'>7</td><td class='value'>10</td><td class='value'>13</td><td class='value'>16</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>No, second-generation</td><td class='value'>2</td><td class='value'>5</td><td class='value'>8</td><td class='value'>11</td><td class='value'>14</td><td class='value'>17</td></tr><tr class='even'><td class='crosstabVerticalHeader' rowspan='3'>Female</td><td class='crosstabVerticalHeader'>Yes</td><td class='value'>18</td><td class='value'>21</td><td class='value'>24</td><td class='value'>27</td><td class='value'>30</td><td class='value'>33</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>No, immigrant</td><td class='value'>19</td><td class='value'>22</td><td class='value'>25</td><td class='value'>28</td><td class='value'>31</td><td class='value'>34</td></tr><tr class='even'><td class='crosstabVerticalHeader'>No, second-generation</td><td class='value'>20</td><td class='value'>23</td><td class='value'>26</td><td class='value'>29</td><td class='value'>32</td><td class='value'>35</td></tr></table>",
-      crosstabRenderer.render(new HtmlCrosstabRendererCallback(null)).getBodyElements().get(0).toHtml()
+      crosstabRenderer.render(new HtmlCrosstabRendererCallback(null,renderingContext)).getBodyElements().get(0).toHtml(renderingContext)
         .replaceAll("\"", "'"));
 
     // try all vertical
@@ -67,7 +72,7 @@ class CrosstabHtmlRendererCallbackTest extends AssertionsForJUnit {
     crosstabRenderer.makeVertical(c.getDimension(3));
     Assert.assertEquals(
       "<table class='crosstabTable'><tr class='odd'><td class='crosstabVerticalHeader' rowspan='18'>Male</td><td class='crosstabVerticalHeader' rowspan='6'>Yes</td><td class='crosstabVerticalHeader' rowspan='3'>EU</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>0</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>3</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>6</td></tr><tr class='even'><td class='crosstabVerticalHeader' rowspan='3'>USA</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>9</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>12</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>15</td></tr><tr class='odd'><td class='crosstabVerticalHeader' rowspan='6'>No, immigrant</td><td class='crosstabVerticalHeader' rowspan='3'>EU</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>1</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>4</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>7</td></tr><tr class='even'><td class='crosstabVerticalHeader' rowspan='3'>USA</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>10</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>13</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>16</td></tr><tr class='odd'><td class='crosstabVerticalHeader' rowspan='6'>No, second-generation</td><td class='crosstabVerticalHeader' rowspan='3'>EU</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>2</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>5</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>8</td></tr><tr class='even'><td class='crosstabVerticalHeader' rowspan='3'>USA</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>11</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>14</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>17</td></tr><tr class='odd'><td class='crosstabVerticalHeader' rowspan='18'>Female</td><td class='crosstabVerticalHeader' rowspan='6'>Yes</td><td class='crosstabVerticalHeader' rowspan='3'>EU</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>18</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>21</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>24</td></tr><tr class='even'><td class='crosstabVerticalHeader' rowspan='3'>USA</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>27</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>30</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>33</td></tr><tr class='odd'><td class='crosstabVerticalHeader' rowspan='6'>No, immigrant</td><td class='crosstabVerticalHeader' rowspan='3'>EU</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>19</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>22</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>25</td></tr><tr class='even'><td class='crosstabVerticalHeader' rowspan='3'>USA</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>28</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>31</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>34</td></tr><tr class='odd'><td class='crosstabVerticalHeader' rowspan='6'>No, second-generation</td><td class='crosstabVerticalHeader' rowspan='3'>EU</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>20</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>23</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>26</td></tr><tr class='even'><td class='crosstabVerticalHeader' rowspan='3'>USA</td><td class='crosstabVerticalHeader'>Child</td><td class='value'>29</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Teenager</td><td class='value'>32</td></tr><tr class='even'><td class='crosstabVerticalHeader'>Adult</td><td class='value'>35</td></tr></table>",
-      crosstabRenderer.render(new HtmlCrosstabRendererCallback(null)).getBodyElements().get(0).toHtml()
+      crosstabRenderer.render(new HtmlCrosstabRendererCallback(null,renderingContext)).getBodyElements().get(0).toHtml(renderingContext)
         .replaceAll("\"", "'"));
   }
 }

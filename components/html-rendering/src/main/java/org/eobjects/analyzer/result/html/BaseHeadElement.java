@@ -32,7 +32,7 @@ public final class BaseHeadElement implements HeadElement {
     }
 
     @Override
-    public String toHtml() {
+    public String toHtml(HtmlRenderingContext context) {
         final String resourcesDirectory;
         if (System.getProperty("HtmlAnalysisResultWriter.resourcesDirectory") == null) {
             // default hosted resources

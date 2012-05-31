@@ -22,6 +22,10 @@ package org.eobjects.analyzer.result.html;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Simple {@link HtmlFragment} implementation which function just as a simple
+ * collection of {@link HeadElement}s and {@link BodyElement}s.
+ */
 public class SimpleHtmlFragment implements HtmlFragment {
 
     private final List<HeadElement> _headElements;
@@ -30,6 +34,11 @@ public class SimpleHtmlFragment implements HtmlFragment {
     public SimpleHtmlFragment() {
         _headElements = new ArrayList<HeadElement>();
         _bodyElements = new ArrayList<BodyElement>();
+    }
+
+    @Override
+    public void initialize(HtmlRenderingContext context) {
+        // do nothing
     }
 
     public SimpleHtmlFragment addBodyElement(String html) {

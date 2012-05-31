@@ -49,7 +49,7 @@ public class DrillToDetailsBodyElement implements BodyElement {
     }
 
     @Override
-    public String toHtml() {
+    public String toHtml(HtmlRenderingContext context) {
         final Renderer<? super AnalyzerResult, ? extends HtmlFragment> renderer = _rendererFactory.getRenderer(_result,
                 HtmlRenderingFormat.class);
         if (renderer == null) {
@@ -72,7 +72,7 @@ public class DrillToDetailsBodyElement implements BodyElement {
         // Append body elements
         final List<BodyElement> bodyElements = htmlFragment.getBodyElements();
         for (BodyElement bodyElement : bodyElements) {
-            sb.append(bodyElement.toHtml());
+            sb.append(bodyElement.toHtml(context));
             sb.append('\n');
         }
 
