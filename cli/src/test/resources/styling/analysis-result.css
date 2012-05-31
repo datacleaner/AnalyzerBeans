@@ -72,10 +72,10 @@ div.analyzerResultContent {
 }
 
 ul.analysisResultToc li {
-	min-height: 33px;
-	padding-left: 30px !important;
+	min-height: 23px;
+	padding-left: 20px !important;
 	background-image : url("analyzer.png");
-	background-position:  4px 1px !important;
+	background-position:  4px center !important;
 	background-repeat: no-repeat !important;
 }
 
