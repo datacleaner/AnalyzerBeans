@@ -1,6 +1,8 @@
 body {
 	margin: 0px;
 	font-size: 13px;
+	font-family: 'Trebuchet MS', sans-serif;
+	color: black;
 }
 
 div.analysisResultHeader {
@@ -15,8 +17,6 @@ p,div,span,ul,ol,li,table,tr,td,th,h1,h2,h3,h4,h5,a {
 	padding: 0;
 	line-height: normal;
 	font-size: 1em;
-	font-weight: normal;
-	font-style: normal;
 }
 
 h1 {
@@ -45,13 +45,13 @@ table {
 }
 
 p,div,span,ul,ol,li,table,td,a {
-	font-family: 'Trebuchet MS', sans-serif;
-	color: black;
 }
 
 h1,h2,h3,h4,h5 {
 	font-family: 'Trebuchet MS', sans-serif;
 	color: #377FCF;
+	font-weight: normal;
+	font-style: normal;
 }
 
 a {
@@ -181,6 +181,7 @@ table tr.odd td {
 }
 
 .ui-tabs {
+	font-family: 'Arial Unicode MS', Arial, sans-serif;
 	padding-left: 0;
 	padding-right: 0;
 	padding-top: 0;
@@ -198,13 +199,19 @@ table tr.odd td {
 }
 
 .ui-tabs .ui-tabs-nav li {
+	top: 0;
 	display: inline-block;
 	float: none;
 	margin-bottom: 0px;
+	margin-right: 4px;
+	border: none;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	min-height: 26px;
 }
 
 .ui-tabs .ui-tabs-nav li a {
-	padding: 3px;
+	padding: 4px;
 }
 
 .ui-tabs .ui-tabs-panel {
@@ -214,10 +221,20 @@ table tr.odd td {
 .ui-tabs .ui-tabs-nav li.ui-state-default.ui-tabs-selected {
 	padding-bottom: 0px;
 	background-color: white;
+	font-weight: bold;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-state-default.ui-tabs-selected a {
+	color: #333;
 }
 
 .ui-tabs .ui-tabs-nav li.ui-state-default {
-	background-color: #eee;
+	background-color: #8E8E8E;
+	color: white;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-state-default a {
+	color: white;
 }
 
 /*
