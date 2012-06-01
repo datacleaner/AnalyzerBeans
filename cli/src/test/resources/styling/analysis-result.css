@@ -3,6 +3,10 @@ body {
 	font-size: 13px;
 }
 
+div.analysisResultHeader {
+	background-color: #333;
+}
+
 div.analysisResultContainer {
 }
 
@@ -73,7 +77,7 @@ div.analyzerResultContent {
 
 ul.analysisResultToc li {
 	min-height: 23px;
-	padding-left: 20px !important;
+	padding-left: 26px !important;
 	background-image : url("analyzer.png");
 	background-position:  4px center !important;
 	background-repeat: no-repeat !important;
@@ -176,7 +180,7 @@ table tr.odd td {
 	background-image: none;
 }
 
-div.ui-tabs {
+.ui-tabs {
 	padding-left: 0;
 	padding-right: 0;
 	padding-top: 0;
@@ -185,18 +189,35 @@ div.ui-tabs {
 }
 
 .ui-tabs .ui-tabs-nav {
+	display: inline-block;
 	padding-top: 40px;
 	padding-left: 20px;
 	background-color: #333;
 	border-radius: 0px !important;
+	white-space: nowrap;
+}
+
+.ui-tabs .ui-tabs-nav li {
+	display: inline-block;
+	float: none;
+	margin-bottom: 0px;
+}
+
+.ui-tabs .ui-tabs-nav li a {
+	padding: 3px;
 }
 
 .ui-tabs .ui-tabs-panel {
 	padding: 20px;
 }
 
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected {
+.ui-tabs .ui-tabs-nav li.ui-state-default.ui-tabs-selected {
 	padding-bottom: 0px;
+	background-color: white;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-state-default {
+	background-color: #eee;
 }
 
 /*
@@ -208,6 +229,7 @@ div.ui-tabs {
 }
 
 table.crosstabTable {
+	margin-bottom: 4px;
 	border-top-left-radius: 6px;
 }
 

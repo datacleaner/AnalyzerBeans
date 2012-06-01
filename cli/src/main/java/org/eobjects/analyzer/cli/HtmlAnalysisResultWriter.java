@@ -190,6 +190,8 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         final Set<Entry<ComponentJob, HtmlFragment>> htmlFragmentSet = htmlFragments.entrySet();
 
         writeBodyBegin(writer, context);
+        
+        writer.write("<div class=\"analysisResultHeader\">");
 
         // write a <ul> with all descriptors in it (a TOC)
         {
@@ -210,6 +212,8 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
             }
             writer.write("</ul>");
         }
+        
+        writer.write("</div>");
 
         // write all descriptor groups
         {
