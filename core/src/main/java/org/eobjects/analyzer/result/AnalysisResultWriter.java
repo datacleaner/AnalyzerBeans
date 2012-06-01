@@ -17,13 +17,12 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.cli;
+package org.eobjects.analyzer.result;
 
 import java.io.OutputStream;
 import java.io.Writer;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.metamodel.util.Ref;
 
 /**

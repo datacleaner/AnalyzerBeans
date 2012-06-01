@@ -25,6 +25,7 @@ import java.io.Writer;
 import org.apache.commons.lang.SerializationUtils;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.result.AnalysisResult;
+import org.eobjects.analyzer.result.AnalysisResultWriter;
 import org.eobjects.analyzer.result.SimpleAnalysisResult;
 import org.eobjects.metamodel.util.Ref;
 

@@ -27,6 +27,7 @@ import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalysisResult;
+import org.eobjects.analyzer.result.AnalysisResultWriter;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;

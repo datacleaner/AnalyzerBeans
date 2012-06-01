@@ -19,39 +19,40 @@
  */
 package org.eobjects.analyzer.result.html;
 
+/**
+ * The obligatory head element which includes required stylesheets, scripts etc.
+ */
 public final class BaseHeadElement implements HeadElement {
 
-    private static BaseHeadElement _singleton = new BaseHeadElement();
+    private final String _resourcesDirectory;
 
-    public static BaseHeadElement get() {
-        return _singleton;
+    /**
+     * Constructs a {@link BaseHeadElement} with the default (hosted) resources
+     * directory.
+     */
+    public BaseHeadElement() {
+        this("http://eobjects.org/resources/datacleaner-html-rendering");
     }
 
-    private BaseHeadElement() {
-        // prevent instantiation
+    /**
+     * Constructs a {@link BaseHeadElement}.
+     * 
+     * @param resourcesDirectory
+     */
+    public BaseHeadElement(String resourcesDirectory) {
+        _resourcesDirectory = resourcesDirectory;
     }
 
     @Override
     public String toHtml(HtmlRenderingContext context) {
-        final String resourcesDirectory;
-        if (System.getProperty("HtmlAnalysisResultWriter.resourcesDirectory") == null) {
-            // default hosted resources
-            resourcesDirectory = "http://eobjects.org/resources/datacleaner-html-rendering";
-        } else {
-            resourcesDirectory = System.getProperty("HtmlAnalysisResultWriter.resourcesDirectory");
-        }
-
         return "<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-1.7.2.min.js\"></script>\n"
                 + "<script type=\"text/javascript\" src=\"http://code.jquery.com/ui/1.8.20/jquery-ui.min.js\"></script>\n"
                 + "<link rel=\"stylesheet\" type=\"text/css\" href=\"http://code.jquery.com/ui/1.8.20/themes/base/jquery-ui.css\" />\n"
-                + "<link rel=\"stylesheet\" type=\"text/css\" href=\""
-                + resourcesDirectory
-                + "/analysis-result.css\" />\n"
-                + "<script type=\"text/javascript\" src=\""
-                + resourcesDirectory
-                + "/analysis-result.js\"></script>\n"
-                + "<link rel=\"shortcut icon\" href=\"http://eobjects.org/resources/datacleaner-html-rendering/linechart-icon.png\" />"
-                + "<script type=\"text/javascript\">\n" + "  var analysisResult = {};\n" + "</script>";
+                + "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + _resourcesDirectory
+                + "/analysis-result.css\" />\n" + "<script type=\"text/javascript\" src=\"" + _resourcesDirectory
+                + "/analysis-result.js\"></script>\n" + "<link rel=\"shortcut icon\" href=\"" + _resourcesDirectory
+                + "/analysis-result-icon.png\" />" + "<script type=\"text/javascript\">\n"
+                + "  var analysisResult = {};\n" + "</script>";
     }
 
 }

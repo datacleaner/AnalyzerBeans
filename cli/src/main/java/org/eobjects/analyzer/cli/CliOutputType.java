@@ -20,6 +20,8 @@
 package org.eobjects.analyzer.cli;
 
 import org.eobjects.analyzer.beans.api.RenderingFormat;
+import org.eobjects.analyzer.result.AnalysisResultWriter;
+import org.eobjects.analyzer.result.html.HtmlAnalysisResultWriter;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 

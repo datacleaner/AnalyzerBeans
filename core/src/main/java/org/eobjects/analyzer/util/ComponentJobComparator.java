@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.cli;
+package org.eobjects.analyzer.util;
 
 import java.util.Comparator;
 
@@ -25,7 +25,7 @@ import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.metamodel.util.ToStringComparator;
 
 /**
- * Compares and orders {@link ComponentJob}s for visual presentation
+ * Compares and sorts {@link ComponentJob}s for visual presentation
  */
 public class ComponentJobComparator implements Comparator<ComponentJob> {
 

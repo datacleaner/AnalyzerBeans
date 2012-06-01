@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.cli;
+package org.eobjects.analyzer.result.html;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,19 +36,16 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalysisResult;
+import org.eobjects.analyzer.result.AnalysisResultWriter;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.html.BaseHeadElement;
-import org.eobjects.analyzer.result.html.BodyElement;
-import org.eobjects.analyzer.result.html.ComponentHtmlRenderingContext;
-import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext;
-import org.eobjects.analyzer.result.html.HeadElement;
-import org.eobjects.analyzer.result.html.HtmlFragment;
-import org.eobjects.analyzer.result.html.HtmlRenderingContext;
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
+import org.eobjects.analyzer.util.ComponentJobComparator;
 import org.eobjects.analyzer.util.LabelUtils;
 import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.metamodel.util.Predicate;
 import org.eobjects.metamodel.util.Ref;
+import org.eobjects.metamodel.util.TruePredicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +55,18 @@ import org.slf4j.LoggerFactory;
 public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(HtmlAnalysisResultWriter.class);
+
+    private final boolean _tabs;
+    private final Predicate<Entry<ComponentJob, AnalyzerResult>> _jobInclusionPredicate;
+
+    public HtmlAnalysisResultWriter() {
+        this(true, new TruePredicate<Entry<ComponentJob, AnalyzerResult>>());
+    }
+
+    public HtmlAnalysisResultWriter(boolean tabs, Predicate<Entry<ComponentJob, AnalyzerResult>> jobInclusionPredicate) {
+        _tabs = tabs;
+        _jobInclusionPredicate = jobInclusionPredicate;
+    }
 
     @Override
     public void write(AnalysisResult result, AnalyzerBeansConfiguration configuration, Ref<Writer> writerRef,
@@ -79,21 +88,27 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         for (Entry<ComponentJob, AnalyzerResult> entry : resultMap.entrySet()) {
             final ComponentJob componentJob = entry.getKey();
             final AnalyzerResult analyzerResult = entry.getValue();
-            final Renderer<? super AnalyzerResult, ? extends HtmlFragment> renderer = rendererFactory.getRenderer(
-                    analyzerResult, HtmlRenderingFormat.class);
-            if (renderer == null) {
-                throw new IllegalStateException("No HTML renderer found for result: " + analyzerResult);
-            }
-            
-            final HtmlRenderingContext localContext = new ComponentHtmlRenderingContext(context, componentJob);
 
-            try {
-                final HtmlFragment htmlFragment = renderer.render(analyzerResult);
-                htmlFragment.initialize(localContext);
-                htmlFragments.put(componentJob, htmlFragment);
-            } catch (Exception e) {
-                logger.error("Error while rendering analyzer result: " + analyzerResult, e);
-                writeRenderingError(writer, componentJob, analyzerResult, e);
+            if (_jobInclusionPredicate.eval(entry)) {
+                final Renderer<? super AnalyzerResult, ? extends HtmlFragment> renderer = rendererFactory.getRenderer(
+                        analyzerResult, HtmlRenderingFormat.class);
+                if (renderer == null) {
+                    throw new IllegalStateException("No HTML renderer found for result: " + analyzerResult);
+                }
+
+                final HtmlRenderingContext localContext = new ComponentHtmlRenderingContext(context, componentJob);
+
+                try {
+                    final HtmlFragment htmlFragment = renderer.render(analyzerResult);
+                    htmlFragment.initialize(localContext);
+                    htmlFragments.put(componentJob, htmlFragment);
+                } catch (Exception e) {
+                    logger.error("Error while rendering analyzer result: " + analyzerResult, e);
+                    writeRenderingError(writer, componentJob, analyzerResult, e);
+                }
+            } else {
+                logger.debug("Skipping job {} / result {} because predicate evaluated false", componentJob,
+                        analyzerResult);
             }
         }
 
@@ -143,8 +158,9 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
         // add base element no matter what
         {
-            writeHeadElement(writer, null, BaseHeadElement.get(), context);
-            allHeadElements.add(BaseHeadElement.get());
+            HeadElement baseHeadElement = new BaseHeadElement();
+            writeHeadElement(writer, null, baseHeadElement, context);
+            allHeadElements.add(baseHeadElement);
         }
 
         for (Entry<ComponentJob, HtmlFragment> entry : htmlFragments.entrySet()) {
@@ -174,7 +190,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     protected void writeHeadElement(Writer writer, ComponentJob componentJob, HeadElement headElement,
             HtmlRenderingContext context) throws IOException {
         final HtmlRenderingContext localContext = new ComponentHtmlRenderingContext(context, componentJob);
-        
+
         writer.write("  ");
         try {
             String html = headElement.toHtml(localContext);
@@ -190,29 +206,31 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         final Set<Entry<ComponentJob, HtmlFragment>> htmlFragmentSet = htmlFragments.entrySet();
 
         writeBodyBegin(writer, context);
-        
+
         writer.write("<div class=\"analysisResultHeader\">");
 
-        // write a <ul> with all descriptors in it (a TOC)
-        {
-            writer.write("<ul class=\"analysisResultToc\">");
-            ComponentDescriptor<?> lastDescriptor = null;
-            for (Entry<ComponentJob, HtmlFragment> entry : htmlFragmentSet) {
-                final ComponentJob componentJob = entry.getKey();
-                final ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
-                if (!descriptor.equals(lastDescriptor)) {
-                    final String styleName = toStyleName(descriptor.getDisplayName());
-                    writer.write("<li class=\"" + styleName + "\"><a href=\"#analysisResultDescriptorGroup_"
-                            + styleName + "\">");
-                    writer.write(context.escapeHtml(descriptor.getDisplayName()));
-                    writer.write("</a></li>");
+        if (_tabs) {
+            // write a <ul> with all descriptors in it (a TOC)
+            {
+                writer.write("<ul class=\"analysisResultToc\">");
+                ComponentDescriptor<?> lastDescriptor = null;
+                for (Entry<ComponentJob, HtmlFragment> entry : htmlFragmentSet) {
+                    final ComponentJob componentJob = entry.getKey();
+                    final ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
+                    if (!descriptor.equals(lastDescriptor)) {
+                        final String styleName = toStyleName(descriptor.getDisplayName());
+                        writer.write("<li class=\"" + styleName + "\"><a href=\"#analysisResultDescriptorGroup_"
+                                + styleName + "\">");
+                        writer.write(context.escapeHtml(descriptor.getDisplayName()));
+                        writer.write("</a></li>");
 
-                    lastDescriptor = descriptor;
+                        lastDescriptor = descriptor;
+                    }
                 }
+                writer.write("</ul>");
             }
-            writer.write("</ul>");
         }
-        
+
         writer.write("</div>");
 
         // write all descriptor groups
@@ -289,7 +307,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     protected void writeBodyElement(Writer writer, ComponentJob componentJob, HtmlFragment htmlFragment,
             BodyElement bodyElement, final HtmlRenderingContext context) throws IOException {
         final HtmlRenderingContext localContext = new ComponentHtmlRenderingContext(context, componentJob);
-        
+
         writer.write("  ");
         try {
             String html = bodyElement.toHtml(localContext);
