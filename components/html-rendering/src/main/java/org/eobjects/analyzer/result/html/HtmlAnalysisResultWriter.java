@@ -60,7 +60,11 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     private final Predicate<Entry<ComponentJob, AnalyzerResult>> _jobInclusionPredicate;
 
     public HtmlAnalysisResultWriter() {
-        this(true, new TruePredicate<Entry<ComponentJob, AnalyzerResult>>());
+        this(true);
+    }
+    
+    public HtmlAnalysisResultWriter(boolean tabs) {
+        this(tabs, new TruePredicate<Entry<ComponentJob, AnalyzerResult>>());
     }
 
     public HtmlAnalysisResultWriter(boolean tabs, Predicate<Entry<ComponentJob, AnalyzerResult>> jobInclusionPredicate) {
