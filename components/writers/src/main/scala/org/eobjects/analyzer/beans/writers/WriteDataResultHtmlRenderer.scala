@@ -7,11 +7,14 @@ import scala.xml.PrettyPrinter
 import javax.xml.transform.Transformer
 import org.eobjects.analyzer.beans.api.RendererBean
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat
+import org.eobjects.analyzer.beans.api.RendererPrecedence
 
 @RendererBean(classOf[HtmlRenderingFormat])
-class WriteDataResultHtmlRenderer extends HtmlRenderer[WriteDataResult] {
+class WriteDataResultHtmlRenderer extends Renderer[WriteDataResult, HtmlFragment] {
+  
+  override def getPrecedence(renderable: WriteDataResult) = RendererPrecedence.MEDIUM;
 
-  def handleFragment(frag: SimpleHtmlFragment, r: WriteDataResult) = {
+  override def render(r: WriteDataResult): HtmlFragment = {
     val inserts = r.getWrittenRowCount()
     val updates = r.getUpdatesCount()
     val errors = r.getErrorRowCount()
@@ -22,6 +25,8 @@ class WriteDataResultHtmlRenderer extends HtmlRenderer[WriteDataResult] {
                  { if (errors > 0) { <p>{ errors } Errornous records</p> } }
                </div>;
 
+    val frag = new SimpleHtmlFragment();
     frag.addBodyElement(html.toString());
+    return frag;
   }
 }
