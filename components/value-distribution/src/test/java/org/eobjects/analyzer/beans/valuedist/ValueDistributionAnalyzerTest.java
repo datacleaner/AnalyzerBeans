@@ -31,6 +31,7 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.MetricDescriptor;
+import org.eobjects.analyzer.descriptors.MetricParameters;
 import org.eobjects.metamodel.schema.MutableColumn;
 
 public class ValueDistributionAnalyzerTest extends TestCase {
@@ -89,10 +90,30 @@ public class ValueDistributionAnalyzerTest extends TestCase {
         assertEquals(4, vd.getResult().getSingleValueDistributionResult().getDistinctCount());
         assertEquals(12, vd.getResult().getSingleValueDistributionResult().getTotalCount());
 
-        AnalyzerBeanDescriptor<?> desc = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
-        MetricDescriptor metric = desc.getResultMetric("Value count");
-        Collection<String> suggestions = metric.getMetricParameterSuggestions(vd.getResult());
+    }
+
+    public void testGetValueCountMetric() throws Exception {
+        ValueDistributionAnalyzer vd = new ValueDistributionAnalyzer(
+                new MetaModelInputColumn(new MutableColumn("col")), true, null, null);
+        vd.runInternal(new MockInputRow(), "hello", 1);
+        vd.runInternal(new MockInputRow(), "world", 1);
+        vd.runInternal(new MockInputRow(), "foobar", 2);
+        vd.runInternal(new MockInputRow(), "world", 1);
+        vd.runInternal(new MockInputRow(), "hello", 3);
+        vd.runInternal(new MockInputRow(), null, 1);
+        vd.runInternal(new MockInputRow(), null, 3);
+
+        final ValueDistributionResult result = vd.getResult();
+
+        final AnalyzerBeanDescriptor<?> desc = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
+        final MetricDescriptor metric = desc.getResultMetric("Value count");
+        Collection<String> suggestions = metric.getMetricParameterSuggestions(result);
         assertEquals("[hello, foobar, world]", suggestions.toString());
+
+        assertEquals(4, metric.getValue(result, new MetricParameters("hello")));
+        assertEquals(2, metric.getValue(result, new MetricParameters("world")));
+        assertEquals(6, metric.getValue(result, new MetricParameters("IN [hello,world]")));
+        assertEquals(8, metric.getValue(result, new MetricParameters("NOT IN [foobar,world]")));
     }
 
     public void testGetValueDistribution() throws Exception {
