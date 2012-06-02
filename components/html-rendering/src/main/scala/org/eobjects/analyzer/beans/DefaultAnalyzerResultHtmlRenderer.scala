@@ -13,18 +13,20 @@ import org.eobjects.analyzer.data.InputColumn
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor
 import org.eobjects.analyzer.descriptors.MetricParameters
 import org.eobjects.analyzer.beans.api.Provided
+import org.eobjects.analyzer.beans.api.Renderer
+import org.eobjects.analyzer.result.html.HtmlFragment
 
 /**
  * The default HTML renderer for any AnalyzerResult.
  */
 @RendererBean(classOf[HtmlRenderingFormat])
-class DefaultAnalyzerResultHtmlRenderer() extends HtmlRenderer[AnalyzerResult] {
+class DefaultAnalyzerResultHtmlRenderer extends Renderer[AnalyzerResult, HtmlFragment] {
 
-  override def getPrecedence(renderable: AnalyzerResult): RendererPrecedence = {
-    return RendererPrecedence.LOWEST;
-  }
+  override def getPrecedence(renderable: AnalyzerResult) = RendererPrecedence.LOWEST;
 
-  def handleFragment(frag: SimpleHtmlFragment, result: AnalyzerResult) = {
+  override def render(result: AnalyzerResult): HtmlFragment = {
+    val frag = new SimpleHtmlFragment();
     frag.addBodyElement(new MetricListBodyElement(result));
+    return frag;
   }
 }
