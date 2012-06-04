@@ -41,18 +41,23 @@ public class PatternFinderResultTest extends TestCase {
 
         ParameterizableMetric matchCount = patternFinderResult.getMatchCount();
         assertEquals("[aaaa, Aaaaa, 9999]", matchCount.getParameterSuggestions().toString());
-        
+
         // exact matches
         assertEquals(3, matchCount.getValue("aaaa").intValue());
         assertEquals(2, matchCount.getValue("Aaaaa").intValue());
         assertEquals(1, matchCount.getValue("9999").intValue());
-        
+
         // expanded matches
         assertEquals(3, matchCount.getValue("aaa").intValue());
         assertEquals(2, matchCount.getValue("Aaaaaaaaaa").intValue());
         assertEquals(1, matchCount.getValue("9").intValue());
-        
+
         // non matches
         assertEquals(0, matchCount.getValue("AAaaaa").intValue());
+
+        // IN expressions
+        assertEquals(5, matchCount.getValue("IN [aaa,Aaa]").intValue());
+        assertEquals(3, matchCount.getValue("IN [9999,Aaa]").intValue());
+        assertEquals(1, matchCount.getValue("NOT IN [aaa,Aaa]").intValue());
     }
 }

@@ -26,14 +26,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Metric;
-import org.eobjects.analyzer.util.convert.StringConverter;
+import org.eobjects.analyzer.result.QueryParameterizableMetric;
 
 /**
  * Represents the result of the {@link ValueDistributionAnalyzer}.
@@ -93,50 +90,35 @@ public class ValueDistributionResult implements AnalyzerResult {
     public int getNullCount() {
         return getSingleValueDistributionResult().getNullCount();
     }
-    
+
     @Metric("Total count")
     public int getTotalCount() {
         return getSingleValueDistributionResult().getTotalCount();
     }
 
     @Metric(value = "Value count", supportsInClause = true)
-    public ParameterizableMetric getValueCount() {
-        return new ParameterizableMetric() {
-
-            @Override
-            public Number getValue(String parameter) {
-                return getValueCount(parameter);
-            }
+    public QueryParameterizableMetric getValueCount() {
+        return new QueryParameterizableMetric() {
 
             @Override
             public Collection<String> getParameterSuggestions() {
                 return getValueCountSuggestions();
             }
-        };
-    }
 
-    private int getValueCount(String parameter) {
-        Matcher matcher = Pattern.compile("(NOT )?IN (\\[.+\\])").matcher(parameter);
-        if (matcher.matches()) {
-            String group = matcher.group(2);
-            StringConverter conv = new StringConverter(null);
-            String[] values = conv.deserialize(group, String[].class);
-            int sum = 0;
-            for (String value : values) {
-                sum += getValueCount(value);
+            @Override
+            public int getTotalCount() {
+                return ValueDistributionResult.this.getTotalCount();
             }
-            if (parameter.startsWith("NOT IN")) {
-                return getTotalCount() - sum;
-            } else {
-                return sum;
+
+            @Override
+            public int getInstanceCount(String instance) {
+                Integer count = getSingleValueDistributionResult().getCount(instance);
+                if (count == null) {
+                    return 0;
+                }
+                return count;
             }
-        }
-        
-        Integer count = getSingleValueDistributionResult().getCount(parameter);
-        if (count == null) {
-            return 0;
-        }
-        return count;
+        };
     }
 
     public Collection<String> getValueCountSuggestions() {

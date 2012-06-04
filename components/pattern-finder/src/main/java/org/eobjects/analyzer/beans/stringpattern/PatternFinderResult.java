@@ -24,13 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.reference.SimpleStringPattern;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.Metric;
+import org.eobjects.analyzer.result.QueryParameterizableMetric;
 
 /**
  * Represents the result of the {@link PatternFinderAnalyzer}.
@@ -97,11 +97,17 @@ public class PatternFinderResult implements AnalyzerResult {
     }
 
     @Metric(value = "Match count")
-    public ParameterizableMetric getMatchCount() {
-        return new ParameterizableMetric() {
+    public QueryParameterizableMetric getMatchCount() {
+        return new QueryParameterizableMetric() {
+
             @Override
-            public Number getValue(String parameter) {
-                return getMatchCount(parameter);
+            protected int getInstanceCount(String instance) {
+                return getMatchCount(instance);
+            }
+
+            @Override
+            protected int getTotalCount() {
+                return PatternFinderResult.this.getTotalCount();
             }
 
             @Override
@@ -113,6 +119,23 @@ public class PatternFinderResult implements AnalyzerResult {
                 return categories;
             }
         };
+    }
+
+    private int getTotalCount() {
+        int sum = 0;
+
+        Crosstab<?> crosstab = getSingleCrosstab();
+        CrosstabDimension patternDimension = crosstab.getDimension(PatternFinderAnalyzer.DIMENSION_NAME_PATTERN);
+        List<String> categories = patternDimension.getCategories();
+        for (String category : categories) {
+            Object value = crosstab.where(patternDimension, category)
+                    .where(PatternFinderAnalyzer.DIMENSION_NAME_MEASURES, PatternFinderAnalyzer.MEASURE_MATCH_COUNT)
+                    .get();
+            if (value instanceof Number) {
+                sum += ((Number) value).intValue();
+            }
+        }
+        return sum;
     }
 
     public int getMatchCount(String pattern) {
