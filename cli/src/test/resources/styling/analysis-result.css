@@ -5,6 +5,10 @@ body {
 	color: black;
 }
 
+div.analyzerResult {
+	font-family: 'Trebuchet MS', sans-serif;
+}
+
 div.analysisResultHeader {
 	background-color: #333;
 }
