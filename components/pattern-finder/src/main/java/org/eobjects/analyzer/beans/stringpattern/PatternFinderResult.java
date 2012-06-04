@@ -96,7 +96,7 @@ public class PatternFinderResult implements AnalyzerResult {
         return _groupColumn != null;
     }
 
-    @Metric(value = "Match count")
+    @Metric(value = "Match count", supportsInClause = true)
     public QueryParameterizableMetric getMatchCount() {
         return new QueryParameterizableMetric() {
 
