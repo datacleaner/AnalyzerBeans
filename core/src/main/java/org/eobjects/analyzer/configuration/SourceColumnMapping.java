@@ -121,4 +121,9 @@ public final class SourceColumnMapping {
 		}
 		return result;
 	}
+
+    @Override
+    public String toString() {
+        return "SourceColumnMapping[datastore=" + _datastore + ",map=" + _map + "]";
+    }
 }
