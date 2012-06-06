@@ -350,6 +350,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                 }
                 Column physicalColumn = sourceColumnMapping.getColumn(path);
                 if (physicalColumn == null) {
+                    logger.error("Column {} not found in {}", path, sourceColumnMapping);
                     throw new IllegalStateException("No such column: " + path);
                 }
                 MetaModelInputColumn inputColumn = new MetaModelInputColumn(physicalColumn);
