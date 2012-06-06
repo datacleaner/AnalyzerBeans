@@ -47,6 +47,16 @@ import org.eobjects.analyzer.util.ValueCombination;
 @Description("Inspect your boolean values. How is the distribution of true/false? Are there null values?")
 public class BooleanAnalyzer implements Analyzer<BooleanAnalyzerResult> {
 
+    public static final String MEASURE_LEAST_FREQUENT = "Least frequent";
+    public static final String MEASURE_MOST_FREQUENT = "Most frequent";
+    public static final String VALUE_COMBINATION_COLUMN_FREQUENCY = "Frequency";
+    public static final String MEASURE_FALSE_COUNT = "False count";
+    public static final String MEASURE_TRUE_COUNT = "True count";
+    public static final String MEASURE_NULL_COUNT = "Null count";
+    public static final String MEASURE_ROW_COUNT = "Row count";
+    public static final String DIMENSION_COLUMN = "Column";
+    public static final String DIMENSION_MEASURE = "Measure";
+
     // comparator used to sort entries, getting the most frequent value
     // combinations to the top
     private static final Comparator<Map.Entry<ValueCombination<Boolean>, RowAnnotation>> frequentValueCombinationComparator = new Comparator<Map.Entry<ValueCombination<Boolean>, RowAnnotation>>() {
@@ -110,13 +120,13 @@ public class BooleanAnalyzer implements Analyzer<BooleanAnalyzerResult> {
 
     @Override
     public BooleanAnalyzerResult getResult() {
-        CrosstabDimension measureDimension = new CrosstabDimension("Measure");
-        measureDimension.addCategory("Row count");
-        measureDimension.addCategory("Null count");
-        measureDimension.addCategory("True count");
-        measureDimension.addCategory("False count");
+        CrosstabDimension measureDimension = new CrosstabDimension(DIMENSION_MEASURE);
+        measureDimension.addCategory(MEASURE_ROW_COUNT);
+        measureDimension.addCategory(MEASURE_NULL_COUNT);
+        measureDimension.addCategory(MEASURE_TRUE_COUNT);
+        measureDimension.addCategory(MEASURE_FALSE_COUNT);
 
-        CrosstabDimension columnDimension = new CrosstabDimension("Column");
+        CrosstabDimension columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
         for (InputColumn<Boolean> column : _columns) {
             columnDimension.addCategory(column.getName());
         }
@@ -126,22 +136,22 @@ public class BooleanAnalyzer implements Analyzer<BooleanAnalyzerResult> {
             CrosstabNavigator<Number> nav = crosstab.navigate().where(columnDimension, column.getName());
             BooleanAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 
-            nav.where(measureDimension, "Row count").put(delegate.getRowCount());
+            nav.where(measureDimension, MEASURE_ROW_COUNT).put(delegate.getRowCount());
 
             int nullCount = delegate.getNullCount();
-            nav.where(measureDimension, "Null count").put(nullCount);
+            nav.where(measureDimension, MEASURE_NULL_COUNT).put(nullCount);
             if (nullCount > 0) {
                 nav.attach(new AnnotatedRowsResult(delegate.getNullAnnotation(), _annotationFactory, column));
             }
 
             RowAnnotation annotation = delegate.getTrueAnnotation();
-            nav.where(measureDimension, "True count").put(annotation.getRowCount());
+            nav.where(measureDimension, MEASURE_TRUE_COUNT).put(annotation.getRowCount());
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
 
             annotation = delegate.getFalseAnnotation();
-            nav.where(measureDimension, "False count").put(annotation.getRowCount());
+            nav.where(measureDimension, MEASURE_FALSE_COUNT).put(annotation.getRowCount());
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
@@ -150,13 +160,13 @@ public class BooleanAnalyzer implements Analyzer<BooleanAnalyzerResult> {
         Crosstab<Number> valueCombinationCrosstab;
 
         if (_columns.length > 1) {
-            measureDimension = new CrosstabDimension("Measure");
+            measureDimension = new CrosstabDimension(DIMENSION_MEASURE);
 
-            columnDimension = new CrosstabDimension("Column");
+            columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
             for (InputColumn<Boolean> column : _columns) {
                 columnDimension.addCategory(column.getName());
             }
-            columnDimension.addCategory("Frequency");
+            columnDimension.addCategory(VALUE_COMBINATION_COLUMN_FREQUENCY);
 
             valueCombinationCrosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
 
@@ -169,9 +179,9 @@ public class BooleanAnalyzer implements Analyzer<BooleanAnalyzerResult> {
 
                 String measureName;
                 if (row == 0) {
-                    measureName = "Most frequent";
+                    measureName = MEASURE_MOST_FREQUENT;
                 } else if (row + 1 == entries.size()) {
-                    measureName = "Least frequent";
+                    measureName = MEASURE_LEAST_FREQUENT;
                 } else {
                     measureName = "Combination " + row;
                 }
@@ -182,7 +192,7 @@ public class BooleanAnalyzer implements Analyzer<BooleanAnalyzerResult> {
                 ValueCombination<Boolean> valueCombination = entry.getKey();
                 RowAnnotation annotation = entry.getValue();
 
-                nav.where(columnDimension, "Frequency");
+                nav.where(columnDimension, VALUE_COMBINATION_COLUMN_FREQUENCY);
                 nav.put(annotation.getRowCount());
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, _columns));
 

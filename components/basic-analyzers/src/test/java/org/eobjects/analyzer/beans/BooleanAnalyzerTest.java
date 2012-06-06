@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans;
 
+import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
@@ -28,34 +29,69 @@ import junit.framework.TestCase;
 
 public class BooleanAnalyzerTest extends TestCase {
 
-	public void testSimpleScenario() throws Exception {
-		@SuppressWarnings("unchecked")
-		InputColumn<Boolean>[] c = new InputColumn[2];
-		c[0] = new MockInputColumn<Boolean>("b1", Boolean.class);
-		c[1] = new MockInputColumn<Boolean>("b2", Boolean.class);
+    public void testSimpleScenario() throws Exception {
+        @SuppressWarnings("unchecked")
+        final InputColumn<Boolean>[] c = new InputColumn[2];
+        c[0] = new MockInputColumn<Boolean>("b1", Boolean.class);
+        c[1] = new MockInputColumn<Boolean>("b2", Boolean.class);
 
-		BooleanAnalyzer ba = new BooleanAnalyzer(c);
-		ba.init();
+        final BooleanAnalyzer ba = new BooleanAnalyzer(c);
+        ba.init();
 
-		ba.run(new MockInputRow().put(c[0], true).put(c[1], true), 3);
-		ba.run(new MockInputRow().put(c[0], true).put(c[1], true), 1);
-		ba.run(new MockInputRow().put(c[0], true).put(c[1], false), 1);
-		ba.run(new MockInputRow().put(c[0], false).put(c[1], true), 1);
-		ba.run(new MockInputRow().put(c[0], false).put(c[1], true), 1);
+        ba.run(new MockInputRow().put(c[0], true).put(c[1], true), 3);
+        ba.run(new MockInputRow().put(c[0], true).put(c[1], true), 1);
+        ba.run(new MockInputRow().put(c[0], true).put(c[1], false), 1);
+        ba.run(new MockInputRow().put(c[0], false).put(c[1], true), 1);
+        ba.run(new MockInputRow().put(c[0], false).put(c[1], true), 1);
 
-		String[] resultLines = new CrosstabTextRenderer().render(ba.getResult().getColumnStatisticsCrosstab()).split("\n");
-		assertEquals(5, resultLines.length);
-		assertEquals("                b1     b2 ", resultLines[0]);
-		assertEquals("Row count        7      7 ", resultLines[1]);
-		assertEquals("Null count       0      0 ", resultLines[2]);
-		assertEquals("True count       5      6 ", resultLines[3]);
-		assertEquals("False count      2      1 ", resultLines[4]);
+        final BooleanAnalyzerResult result = ba.getResult();
 
-		resultLines = new CrosstabTextRenderer().render(ba.getResult().getValueCombinationCrosstab()).split("\n");
-		assertEquals(4, resultLines.length);
-		assertEquals("                      b1        b2 Frequency ", resultLines[0]);
-		assertEquals("Most frequent          1         1         4 ", resultLines[1]);
-		assertEquals("Combination 1          0         1         2 ", resultLines[2]);
-		assertEquals("Least frequent         1         0         1 ", resultLines[3]);
-	}
+        String[] resultLines = new CrosstabTextRenderer().render(result.getColumnStatisticsCrosstab()).split("\n");
+        assertEquals(5, resultLines.length);
+        assertEquals("                b1     b2 ", resultLines[0]);
+        assertEquals("Row count        7      7 ", resultLines[1]);
+        assertEquals("Null count       0      0 ", resultLines[2]);
+        assertEquals("True count       5      6 ", resultLines[3]);
+        assertEquals("False count      2      1 ", resultLines[4]);
+
+        resultLines = new CrosstabTextRenderer().render(result.getValueCombinationCrosstab()).split("\n");
+        assertEquals(4, resultLines.length);
+        assertEquals("                      b1        b2 Frequency ", resultLines[0]);
+        assertEquals("Most frequent          1         1         4 ", resultLines[1]);
+        assertEquals("Combination 1          0         1         2 ", resultLines[2]);
+        assertEquals("Least frequent         1         0         1 ", resultLines[3]);
+    }
+
+    public void testGetMetrics() throws Exception {
+        @SuppressWarnings("unchecked")
+        final InputColumn<Boolean>[] c = new InputColumn[2];
+        c[0] = new MockInputColumn<Boolean>("b1", Boolean.class);
+        c[1] = new MockInputColumn<Boolean>("b2", Boolean.class);
+
+        final BooleanAnalyzer ba = new BooleanAnalyzer(c);
+        ba.init();
+
+        ba.run(new MockInputRow().put(c[0], true).put(c[1], true), 3);
+        ba.run(new MockInputRow().put(c[0], true).put(c[1], true), 1);
+        ba.run(new MockInputRow().put(c[0], true).put(c[1], false), 1);
+        ba.run(new MockInputRow().put(c[0], false).put(c[1], true), 1);
+        ba.run(new MockInputRow().put(c[0], false).put(c[1], true), 1);
+
+        final BooleanAnalyzerResult result = ba.getResult();
+
+        ParameterizableMetric metric = result.getCombinationCount();
+        assertEquals("[Most frequent, Least frequent, true,true, false,true, true,false]", metric.getParameterSuggestions().toString());
+
+        assertEquals(4, metric.getValue("Most frequent").intValue());
+        assertEquals(2, metric.getValue("Combination 1").intValue());
+        assertEquals(1, metric.getValue("Least frequent").intValue());
+        assertEquals(0, metric.getValue("foobar").intValue());
+
+        assertEquals(4, metric.getValue("true,true").intValue());
+        assertEquals(2, metric.getValue("false,true").intValue());
+        assertEquals(1, metric.getValue(" true , false ").intValue());
+        assertEquals(0, metric.getValue("false,false").intValue());
+        
+        assertEquals(0, metric.getValue("false,foobar").intValue());
+    }
 }
