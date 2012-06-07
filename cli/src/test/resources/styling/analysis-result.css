@@ -225,7 +225,7 @@ table tr.odd td {
 .ui-tabs .ui-tabs-nav li.ui-state-default.ui-tabs-selected {
 	padding-bottom: 0px;
 	background-color: white;
-	font-weight: bold;
+	font-weight: normal;
 }
 
 .ui-tabs .ui-tabs-nav li.ui-state-default.ui-tabs-selected a {
