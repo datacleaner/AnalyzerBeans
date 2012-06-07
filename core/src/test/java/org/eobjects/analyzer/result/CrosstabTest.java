@@ -49,4 +49,22 @@ public class CrosstabTest extends TestCase {
 		}
 
 	}
+	
+	public void testGetAndSafeGet() throws Exception {
+	    Crosstab<String> c1 = new Crosstab<String>(String.class, "foo", "bar");
+        CrosstabNavigator<String> nav = c1.where("foo", "a").where("bar", "b");
+        nav.put("yes", true);
+        
+        assertEquals("yes", nav.get());
+        assertEquals("yes", nav.safeGet("hello world"));
+        
+        nav = nav.where("foo", "b");
+        
+        try {
+            nav.get();
+        } catch (IllegalArgumentException e) {
+            assertEquals("Unknown category [b] for dimension [foo]", e.getMessage());
+        }
+        assertEquals("hello world", nav.safeGet("hello world"));
+    }
 }
