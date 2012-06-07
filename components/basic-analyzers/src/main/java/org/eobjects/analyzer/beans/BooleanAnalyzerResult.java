@@ -19,10 +19,14 @@
  */
 package org.eobjects.analyzer.beans;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Crosstab;
+import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.Metric;
 
 public class BooleanAnalyzerResult implements AnalyzerResult {
@@ -45,7 +49,81 @@ public class BooleanAnalyzerResult implements AnalyzerResult {
         return _valueCombinationCrosstab;
     }
 
-    @Metric("Total combination count")
+    /**
+     * Because the {@link BooleanAnalyzer} is also wrapped by other analyzers
+     * which internally create transformed columns, we need to expose the
+     * metrics here based on string names instead of {@link InputColumn}
+     * objects. This method is used to provide suggestions for all these string
+     * column names.
+     * 
+     * @return
+     */
+    private List<String> getColumnNameSuggestions() {
+        final CrosstabDimension columnDimension = _columnStatisticsCrosstab
+                .getDimension(BooleanAnalyzer.DIMENSION_COLUMN);
+        return columnDimension.getCategories();
+    }
+
+    @Metric(order = 1, value = "Row count")
+    public Number getRowCount() {
+        final CrosstabDimension columnDimension = _columnStatisticsCrosstab
+                .getDimension(BooleanAnalyzer.DIMENSION_COLUMN);
+        return _columnStatisticsCrosstab.where(BooleanAnalyzer.DIMENSION_MEASURE, BooleanAnalyzer.MEASURE_ROW_COUNT)
+                .where(columnDimension, columnDimension.getCategories().get(0)).get();
+    }
+
+    @Metric(order = 2, value = "Null count")
+    public ParameterizableMetric getNullCount() {
+        return new ParameterizableMetric() {
+            @Override
+            public Number getValue(String parameter) {
+                return _columnStatisticsCrosstab
+                        .where(BooleanAnalyzer.DIMENSION_MEASURE, BooleanAnalyzer.MEASURE_NULL_COUNT)
+                        .where(BooleanAnalyzer.DIMENSION_COLUMN, parameter).safeGet(0);
+            }
+
+            @Override
+            public Collection<String> getParameterSuggestions() {
+                return getColumnNameSuggestions();
+            }
+        };
+    }
+
+    @Metric(order = 3, value = "True count")
+    public ParameterizableMetric getTrueCount() {
+        return new ParameterizableMetric() {
+            @Override
+            public Number getValue(String parameter) {
+                return _columnStatisticsCrosstab
+                        .where(BooleanAnalyzer.DIMENSION_MEASURE, BooleanAnalyzer.MEASURE_TRUE_COUNT)
+                        .where(BooleanAnalyzer.DIMENSION_COLUMN, parameter).safeGet(0);
+            }
+
+            @Override
+            public Collection<String> getParameterSuggestions() {
+                return getColumnNameSuggestions();
+            }
+        };
+    }
+
+    @Metric(order = 4, value = "False count")
+    public ParameterizableMetric getFalseCount() {
+        return new ParameterizableMetric() {
+            @Override
+            public Number getValue(String parameter) {
+                return _columnStatisticsCrosstab
+                        .where(BooleanAnalyzer.DIMENSION_MEASURE, BooleanAnalyzer.MEASURE_FALSE_COUNT)
+                        .where(BooleanAnalyzer.DIMENSION_COLUMN, parameter).safeGet(0);
+            }
+
+            @Override
+            public Collection<String> getParameterSuggestions() {
+                return getColumnNameSuggestions();
+            }
+        };
+    }
+
+    @Metric(order = 5, value = "Total combination count")
     public int getTotalCombinationCount() {
         if (_valueCombinationCrosstab == null) {
             return 0;
@@ -53,32 +131,8 @@ public class BooleanAnalyzerResult implements AnalyzerResult {
         return _valueCombinationCrosstab.getDimension(BooleanAnalyzer.DIMENSION_MEASURE).getCategoryCount();
     }
 
-    @Metric("Combination count")
+    @Metric(order = 6, value = "Combination count")
     public ParameterizableMetric getCombinationCount() {
         return new BooleanAnalyzerCombinationMetric(_valueCombinationCrosstab);
-    }
-
-    @Metric("Row count")
-    public Number getRowCount(InputColumn<?> column) {
-        return _columnStatisticsCrosstab.where(BooleanAnalyzer.DIMENSION_MEASURE, BooleanAnalyzer.MEASURE_ROW_COUNT)
-                .where(BooleanAnalyzer.DIMENSION_COLUMN, column.getName()).get();
-    }
-
-    @Metric("Null count")
-    public Number getNullCount(InputColumn<?> column) {
-        return _columnStatisticsCrosstab.where(BooleanAnalyzer.DIMENSION_MEASURE, BooleanAnalyzer.MEASURE_NULL_COUNT)
-                .where(BooleanAnalyzer.DIMENSION_COLUMN, column.getName()).get();
-    }
-
-    @Metric("True count")
-    public Number getTrueCount(InputColumn<?> column) {
-        return _columnStatisticsCrosstab.where(BooleanAnalyzer.DIMENSION_MEASURE, BooleanAnalyzer.MEASURE_TRUE_COUNT)
-                .where(BooleanAnalyzer.DIMENSION_COLUMN, column.getName()).get();
-    }
-
-    @Metric("False count")
-    public Number getFalseCount(InputColumn<?> column) {
-        return _columnStatisticsCrosstab.where(BooleanAnalyzer.DIMENSION_MEASURE, BooleanAnalyzer.MEASURE_FALSE_COUNT)
-                .where(BooleanAnalyzer.DIMENSION_COLUMN, column.getName()).get();
     }
 }
