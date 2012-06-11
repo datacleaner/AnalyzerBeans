@@ -22,19 +22,74 @@ package org.eobjects.analyzer.beans;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.Metric;
 
 public class NumberAnalyzerResult extends CrosstabResult {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final InputColumn<? extends Number>[] _columns;
+    private final InputColumn<? extends Number>[] _columns;
 
-	public NumberAnalyzerResult(InputColumn<? extends Number>[] columns, Crosstab<?> crosstab) {
-		super(crosstab);
-		_columns = columns;
-	}
+    public NumberAnalyzerResult(InputColumn<? extends Number>[] columns, Crosstab<?> crosstab) {
+        super(crosstab);
+        _columns = columns;
+    }
 
-	public InputColumn<? extends Number>[] getColumns() {
-		return _columns;
-	}
+    public InputColumn<? extends Number>[] getColumns() {
+        return _columns;
+    }
+
+    @Metric(NumberAnalyzer.MEASURE_ROW_COUNT)
+    public Number getRowCount(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_ROW_COUNT).get();
+    }
+    
+    @Metric(NumberAnalyzer.MEASURE_NULL_COUNT)
+    public Number getNullCount(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_NULL_COUNT).get();
+    }
+    
+    @Metric(NumberAnalyzer.MEASURE_HIGHEST_VALUE)
+    public Number getHighestValue(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_HIGHEST_VALUE).get();
+    }
+    
+    @Metric(NumberAnalyzer.MEASURE_LOWEST_VALUE)
+    public Number getLowestValue(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_LOWEST_VALUE).get();
+    }
+    
+    @Metric(NumberAnalyzer.MEASURE_SUM)
+    public Number getSum(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_SUM).get();
+    }
+    
+    @Metric(NumberAnalyzer.MEASURE_MEAN)
+    public Number getMean(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_MEAN).get();
+    }
+    
+    @Metric(NumberAnalyzer.MEASURE_GEOMETRIC_MEAN)
+    public Number getGeometricMean(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_GEOMETRIC_MEAN).get();
+    }
+    
+    @Metric(NumberAnalyzer.MEASURE_STANDARD_DEVIATION)
+    public Number getStandardDeviation(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_STANDARD_DEVIATION).get();
+    }
+    
+    @Metric(NumberAnalyzer.MEASURE_VARIANCE)
+    public Number getVariance(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_VARIANCE).get();
+    }
 }
