@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans;
 
+import java.util.Date;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -27,6 +28,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
@@ -41,69 +43,80 @@ import org.eobjects.analyzer.test.TestHelper;
 
 public class DateAndTimeAnalyzerTest extends TestCase {
 
-	public void testOrderFactTable() throws Throwable {
-		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(TestHelper
-				.createSampleDatabaseDatastore("orderdb")));
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
+    public void testOrderFactTable() throws Throwable {
+        AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
+                TestHelper.createSampleDatabaseDatastore("orderdb")));
+        AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
 
-		ajb.setDatastore("orderdb");
+        ajb.setDatastore("orderdb");
 
-		ajb.addSourceColumns("ORDERFACT.ORDERDATE", "ORDERFACT.REQUIREDDATE", "ORDERFACT.SHIPPEDDATE");
+        ajb.addSourceColumns("ORDERFACT.ORDERDATE", "ORDERFACT.REQUIREDDATE", "ORDERFACT.SHIPPEDDATE");
 
-		AnalyzerJobBuilder<DateAndTimeAnalyzer> analyzer = ajb
-				.addAnalyzer(DateAndTimeAnalyzer.class);
-		analyzer.addInputColumns(ajb.getSourceColumns());
+        AnalyzerJobBuilder<DateAndTimeAnalyzer> analyzer = ajb.addAnalyzer(DateAndTimeAnalyzer.class);
+        analyzer.addInputColumns(ajb.getSourceColumns());
 
-		AnalysisJob job = ajb.toAnalysisJob();
+        AnalysisJob job = ajb.toAnalysisJob();
 
-		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(job);
-		resultFuture.await();
+        AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(job);
+        resultFuture.await();
 
-		if (!resultFuture.isSuccessful()) {
-			throw resultFuture.getErrors().get(0);
-		}
-		assertTrue(resultFuture.isSuccessful());
+        if (!resultFuture.isSuccessful()) {
+            throw resultFuture.getErrors().get(0);
+        }
+        assertTrue(resultFuture.isSuccessful());
 
-		List<AnalyzerResult> results = resultFuture.getResults();
-		assertEquals(1, results.size());
+        List<AnalyzerResult> results = resultFuture.getResults();
+        assertEquals(1, results.size());
 
-		DateAndTimeAnalyzerResult result = (DateAndTimeAnalyzerResult) results.get(0);
+        DateAndTimeAnalyzerResult result = (DateAndTimeAnalyzerResult) results.get(0);
 
-		String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
-		assertEquals(7, resultLines.length);
+        String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
+        assertEquals(7, resultLines.length);
 
-		assertEquals("             ORDERDATE    REQUIREDDATE SHIPPEDDATE  ", resultLines[0]);
-		assertEquals("Row count            2996         2996         2996 ", resultLines[1]);
-		assertEquals("Null count              0            0          141 ", resultLines[2]);
-		assertEquals("Highest date 2005-05-31   2005-06-11   2005-05-20   ", resultLines[3]);
-		assertEquals("Lowest date  2003-01-06   2003-01-13   2003-01-10   ", resultLines[4]);
-		assertEquals("Highest time 00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[5]);
-		assertEquals("Lowest time  00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[6]);
+        assertEquals("             ORDERDATE    REQUIREDDATE SHIPPEDDATE  ", resultLines[0]);
+        assertEquals("Row count            2996         2996         2996 ", resultLines[1]);
+        assertEquals("Null count              0            0          141 ", resultLines[2]);
+        assertEquals("Highest date 2005-05-31   2005-06-11   2005-05-20   ", resultLines[3]);
+        assertEquals("Lowest date  2003-01-06   2003-01-13   2003-01-10   ", resultLines[4]);
+        assertEquals("Highest time 00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[5]);
+        assertEquals("Lowest time  00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[6]);
 
-		CrosstabNavigator<?> nav = result.getCrosstab().where("Column", "ORDERDATE");
-		InputColumn<?> column = ajb.getSourceColumnByName("ORDERDATE");
+        CrosstabNavigator<?> nav = result.getCrosstab().where("Column", "ORDERDATE");
+        InputColumn<?> column = ajb.getSourceColumnByName("ORDERDATE");
 
-		ResultProducer resultProducer = nav.where("Measure", "Highest date").explore();
-		testAnnotatedRowResult(resultProducer.getResult(), column, 19, 19);
+        ResultProducer resultProducer = nav.where("Measure", "Highest date").explore();
+        testAnnotatedRowResult(resultProducer.getResult(), column, 19, 19);
 
-		resultProducer = nav.where("Measure", "Lowest date").explore();
-		testAnnotatedRowResult(resultProducer.getResult(), column, 4, 4);
+        resultProducer = nav.where("Measure", "Lowest date").explore();
+        testAnnotatedRowResult(resultProducer.getResult(), column, 4, 4);
 
-		resultProducer = nav.where("Measure", "Highest time").explore();
-		testAnnotatedRowResult(resultProducer.getResult(), column, 2996, 1000);
+        resultProducer = nav.where("Measure", "Highest time").explore();
+        testAnnotatedRowResult(resultProducer.getResult(), column, 2996, 1000);
 
-		resultProducer = nav.where("Measure", "Lowest time").explore();
-		testAnnotatedRowResult(resultProducer.getResult(), column, 2996, 1000);
-	}
+        resultProducer = nav.where("Measure", "Lowest time").explore();
+        testAnnotatedRowResult(resultProducer.getResult(), column, 2996, 1000);
 
-	private void testAnnotatedRowResult(AnalyzerResult result, InputColumn<?> col, int rowCount, int distinctRowCount) {
-		assertTrue("Unexpected result type: " + result.getClass(), result instanceof AnnotatedRowsResult);
-		AnnotatedRowsResult res = (AnnotatedRowsResult) result;
-		InputColumn<?>[] highlightedColumns = res.getHighlightedColumns();
-		assertEquals(1, highlightedColumns.length);
-		assertEquals(col, highlightedColumns[0]);
+        assertEquals(2996, result.getRowCount(new MockInputColumn<Date>("ORDERDATE")));
+        assertEquals(0, result.getNullCount(new MockInputColumn<Date>("ORDERDATE")));
+        assertEquals(12934, result.getHighestDate(new MockInputColumn<Date>("ORDERDATE")));
+        assertEquals(12058, result.getLowestDate(new MockInputColumn<Date>("ORDERDATE")));
+    }
 
-		assertEquals(rowCount, res.getRowCount());
-		assertEquals(distinctRowCount, res.getRows().length);
-	}
+    public void testResultConvertToDaysFromEpoch() throws Exception {
+        assertEquals(0, DateAndTimeAnalyzerResult.convertToDaysSinceEpoch("1970-01-01"));
+        assertEquals(1, DateAndTimeAnalyzerResult.convertToDaysSinceEpoch("1970-01-02"));
+        assertEquals(31, DateAndTimeAnalyzerResult.convertToDaysSinceEpoch("1970-02-01"));
+        assertEquals(12934, DateAndTimeAnalyzerResult.convertToDaysSinceEpoch("2005-05-31"));
+    }
+
+    private void testAnnotatedRowResult(AnalyzerResult result, InputColumn<?> col, int rowCount, int distinctRowCount) {
+        assertTrue("Unexpected result type: " + result.getClass(), result instanceof AnnotatedRowsResult);
+        AnnotatedRowsResult res = (AnnotatedRowsResult) result;
+        InputColumn<?>[] highlightedColumns = res.getHighlightedColumns();
+        assertEquals(1, highlightedColumns.length);
+        assertEquals(col, highlightedColumns[0]);
+
+        assertEquals(rowCount, res.getRowCount());
+        assertEquals(distinctRowCount, res.getRows().length);
+    }
 }

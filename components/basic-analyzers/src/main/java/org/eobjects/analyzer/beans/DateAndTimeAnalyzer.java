@@ -49,6 +49,15 @@ import org.joda.time.LocalTime;
 @Concurrent(true)
 public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> {
 
+    public static final String MEASURE_LOWEST_TIME = "Lowest time";
+    public static final String MEASURE_HIGHEST_TIME = "Highest time";
+    public static final String MEASURE_LOWEST_DATE = "Lowest date";
+    public static final String MEASURE_HIGHEST_DATE = "Highest date";
+    public static final String MEASURE_NULL_COUNT = "Null count";
+    public static final String MEASURE_ROW_COUNT = "Row count";
+    public static final String DIMENSION_MEASURE = "Measure";
+    public static final String DIMENSION_COLUMN = "Column";
+
     private Map<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate> _delegates = new HashMap<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate>();
 
     @Inject
@@ -77,16 +86,15 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
 
     @Override
     public DateAndTimeAnalyzerResult getResult() {
-        CrosstabDimension measureDimension = new CrosstabDimension("Measure");
-        measureDimension.addCategory("Row count");
-        measureDimension.addCategory("Null count");
+        CrosstabDimension measureDimension = new CrosstabDimension(DIMENSION_MEASURE);
+        measureDimension.addCategory(MEASURE_ROW_COUNT);
+        measureDimension.addCategory(MEASURE_NULL_COUNT);
+        measureDimension.addCategory(MEASURE_HIGHEST_DATE);
+        measureDimension.addCategory(MEASURE_LOWEST_DATE);
+        measureDimension.addCategory(MEASURE_HIGHEST_TIME);
+        measureDimension.addCategory(MEASURE_LOWEST_TIME);
 
-        measureDimension.addCategory("Highest date");
-        measureDimension.addCategory("Lowest date");
-        measureDimension.addCategory("Highest time");
-        measureDimension.addCategory("Lowest time");
-
-        CrosstabDimension columnDimension = new CrosstabDimension("Column");
+        CrosstabDimension columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
         for (InputColumn<Date> column : _columns) {
             columnDimension.addCategory(column.getName());
         }
@@ -99,37 +107,37 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
 
             nav.where(columnDimension, column.getName());
 
-            nav.where(measureDimension, "Row count").put(delegate.getNumRows());
+            nav.where(measureDimension, MEASURE_ROW_COUNT).put(delegate.getNumRows());
 
             int numNull = delegate.getNumNull();
-            nav.where(measureDimension, "Null count").put(numNull);
+            nav.where(measureDimension, MEASURE_NULL_COUNT).put(numNull);
             if (numNull > 0) {
                 nav.attach(new AnnotatedRowsResult(delegate.getNullAnnotation(), _annotationFactory, column));
             }
 
             LocalDate maxDate = delegate.getMaxDate();
-            nav.where(measureDimension, "Highest date").put(toString(maxDate));
+            nav.where(measureDimension, MEASURE_HIGHEST_DATE).put(toString(maxDate));
             RowAnnotation annotation = delegate.getMaxDateAnnotation();
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
 
             LocalDate minDate = delegate.getMinDate();
-            nav.where(measureDimension, "Lowest date").put(toString(minDate));
+            nav.where(measureDimension, MEASURE_LOWEST_DATE).put(toString(minDate));
             annotation = delegate.getMinDateAnnotation();
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
 
             LocalTime maxTime = delegate.getMaxTime();
-            nav.where(measureDimension, "Highest time").put(toString(maxTime));
+            nav.where(measureDimension, MEASURE_HIGHEST_TIME).put(toString(maxTime));
             annotation = delegate.getMaxTimeAnnotation();
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
 
             LocalTime minTime = delegate.getMinTime();
-            nav.where(measureDimension, "Lowest time").put(toString(minTime));
+            nav.where(measureDimension, MEASURE_LOWEST_TIME).put(toString(minTime));
             annotation = delegate.getMinTimeAnnotation();
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));

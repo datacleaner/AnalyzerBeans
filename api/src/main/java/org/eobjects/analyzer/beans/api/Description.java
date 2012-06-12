@@ -33,15 +33,15 @@ import java.lang.annotation.Target;
  * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD })
+@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.METHOD })
 @Documented
 @Inherited
 public @interface Description {
 
-	/**
-	 * Determines the description of the annotated element
-	 * 
-	 * @return a String representing the description of the annotated element
-	 */
-	String value();
+    /**
+     * Determines the description of the annotated element
+     * 
+     * @return a String representing the description of the annotated element
+     */
+    String value();
 }

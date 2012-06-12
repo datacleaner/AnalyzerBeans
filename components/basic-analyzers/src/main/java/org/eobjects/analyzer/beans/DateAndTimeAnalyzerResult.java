@@ -19,8 +19,13 @@
  */
 package org.eobjects.analyzer.beans;
 
+import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.analyzer.result.Metric;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
 
 /**
  * Represents the result of a Date and Time Analyzer.
@@ -29,9 +34,52 @@ import org.eobjects.analyzer.result.CrosstabResult;
  */
 public class DateAndTimeAnalyzerResult extends CrosstabResult {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public DateAndTimeAnalyzerResult(Crosstab<?> crosstab) {
-		super(crosstab);
-	}
+    public DateAndTimeAnalyzerResult(Crosstab<?> crosstab) {
+        super(crosstab);
+    }
+
+    @Metric(order = 1, value = DateAndTimeAnalyzer.MEASURE_ROW_COUNT)
+    public int getRowCount(InputColumn<?> col) {
+        Number n = (Number) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_ROW_COUNT).get();
+        return n.intValue();
+    }
+
+    @Metric(order = 2, value = DateAndTimeAnalyzer.MEASURE_NULL_COUNT)
+    public int getNullCount(InputColumn<?> col) {
+        Number n = (Number) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_NULL_COUNT).get();
+        return n.intValue();
+    }
+
+    @Metric(order = 3, value = DateAndTimeAnalyzer.MEASURE_HIGHEST_DATE)
+    @Description("The highest date value for the given column. The value is measured in number of days since 1970-01-01.")
+    public Number getHighestDate(InputColumn<?> col) {
+        String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_HIGHEST_DATE).get();
+        return convertToDaysSinceEpoch(s);
+    }
+
+    @Metric(order = 3, value = DateAndTimeAnalyzer.MEASURE_LOWEST_DATE)
+    @Description("The lowest date value for the given column. The value is measured in number of days since 1970-01-01.")
+    public Number getLowestDate(InputColumn<?> col) {
+        String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_LOWEST_DATE).get();
+        return convertToDaysSinceEpoch(s);
+    }
+
+    protected static Number convertToDaysSinceEpoch(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        final LocalDate epoch = new LocalDate(1970, 1, 1);
+
+        final LocalDate date = LocalDate.parse(s);
+        int days = Days.daysBetween(epoch, date).getDays();
+
+        return days;
+    }
 }
