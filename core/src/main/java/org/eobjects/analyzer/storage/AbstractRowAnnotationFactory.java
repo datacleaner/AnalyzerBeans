@@ -21,8 +21,9 @@ package org.eobjects.analyzer.storage;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.data.InputColumn;
@@ -39,113 +40,128 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 
     private static final long serialVersionUID = 1L;
 
-    private final Map<RowAnnotationImpl, AtomicInteger> _rowCounts = new IdentityHashMap<RowAnnotationImpl, AtomicInteger>();
-	private final Integer _storedRowsThreshold;
-	private final transient Map<Integer, Boolean> _cachedRows = CollectionUtils2.createCacheMap();
+    private final Map<RowAnnotationImpl, AtomicInteger> _rowCounts = new ConcurrentHashMap<RowAnnotationImpl, AtomicInteger>();
+    private final Integer _storedRowsThreshold;
+    private final transient Map<Integer, Boolean> _cachedRows = CollectionUtils2.createCacheMap();
 
-	public AbstractRowAnnotationFactory(Integer storedRowsThreshold) {
-		if (storedRowsThreshold == null) {
-			_storedRowsThreshold = Integer.MAX_VALUE;
-		} else {
-			_storedRowsThreshold = storedRowsThreshold;
-		}
-	}
+    public AbstractRowAnnotationFactory(Integer storedRowsThreshold) {
+        if (storedRowsThreshold == null) {
+            _storedRowsThreshold = Integer.MAX_VALUE;
+        } else {
+            _storedRowsThreshold = storedRowsThreshold;
+        }
+    }
 
-	@Override
-	public final void annotate(InputRow row, int distinctCount, RowAnnotation annotation) {
-		final RowAnnotationImpl ann = (RowAnnotationImpl) annotation;
+    @Override
+    public final void annotate(InputRow row, int distinctCount, RowAnnotation annotation) {
+        final RowAnnotationImpl ann = (RowAnnotationImpl) annotation;
 
-		AtomicInteger count = _rowCounts.get(ann);
-		if (count == null) {
-			synchronized (_rowCounts) {
-				count = _rowCounts.get(ann);
-				if (count == null) {
-					count = new AtomicInteger();
-					_rowCounts.put(ann, count);
-				}
-			}
-		}
+        final AtomicInteger count = getCounter(ann);
 
-		boolean storeRow = true;
-		if (_storedRowsThreshold != null) {
-			if (count.getAndIncrement() >= _storedRowsThreshold.intValue()) {
-				storeRow = false;
-			}
-		}
+        boolean storeRow = true;
+        if (_storedRowsThreshold != null) {
+            if (count.getAndIncrement() >= _storedRowsThreshold.intValue()) {
+                storeRow = false;
+            }
+        }
 
-		if (storeRow) {
-			int rowId = row.getId();
-			if (_cachedRows != null) {
-			    synchronized (_cachedRows) {
-			        if (_cachedRows.get(rowId) == null) {
-			            storeRowValues(rowId, row, distinctCount);
-			            _cachedRows.put(rowId, Boolean.TRUE);
-			        }
-			    }
-			}
-			storeRowAnnotation(rowId, annotation);
-		}
+        if (storeRow) {
+            int rowId = row.getId();
+            if (_cachedRows != null) {
+                synchronized (_cachedRows) {
+                    if (_cachedRows.get(rowId) == null) {
+                        storeRowValues(rowId, row, distinctCount);
+                        _cachedRows.put(rowId, Boolean.TRUE);
+                    }
+                }
+            }
+            storeRowAnnotation(rowId, annotation);
+        }
 
-		ann.incrementRowCount(distinctCount);
-	}
+        ann.incrementRowCount(distinctCount);
+    }
 
-	@Override
-	public final void reset(RowAnnotation annotation) {
-		RowAnnotationImpl ann = (RowAnnotationImpl) annotation;
-		ann.resetRowCount();
-		_rowCounts.remove(annotation);
-		resetRows(annotation);
-	}
+    private AtomicInteger getCounter(RowAnnotationImpl ann) {
+        AtomicInteger count = _rowCounts.get(ann);
+        if (count == null) {
+            if (_rowCounts instanceof ConcurrentMap) {
+                AtomicInteger newCounter = new AtomicInteger();
+                ConcurrentMap<RowAnnotationImpl, AtomicInteger> concurrentMap = (ConcurrentMap<RowAnnotationImpl, AtomicInteger>) _rowCounts;
+                count = concurrentMap.putIfAbsent(ann, newCounter);
+                if (count == null) {
+                    count = newCounter;
+                }
+            } else {
+                // for backwards compatibility we also need to support (deserialized) hash maps
+                synchronized (_rowCounts) {
+                    count = _rowCounts.get(ann);
+                    if (count == null) {
+                        count = new AtomicInteger();
+                        _rowCounts.put(ann, count);
+                    }
+                }
+            }
+        }
+        return count;
+    }
 
-	@Override
-	public final RowAnnotation createAnnotation() {
-		RowAnnotationImpl ann = new RowAnnotationImpl();
-		return ann;
-	}
+    @Override
+    public final void reset(RowAnnotation annotation) {
+        RowAnnotationImpl ann = (RowAnnotationImpl) annotation;
+        ann.resetRowCount();
+        _rowCounts.remove(annotation);
+        resetRows(annotation);
+    }
 
-	@Override
-	public final Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn) {
-		HashMap<Object, Integer> map = new HashMap<Object, Integer>();
+    @Override
+    public final RowAnnotation createAnnotation() {
+        RowAnnotationImpl ann = new RowAnnotationImpl();
+        return ann;
+    }
 
-		InputRow[] rows = getRows(annotation);
+    @Override
+    public final Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn) {
+        HashMap<Object, Integer> map = new HashMap<Object, Integer>();
 
-		if (rows == null || rows.length == 0) {
-			return map;
-		}
+        InputRow[] rows = getRows(annotation);
 
-		for (InputRow row : rows) {
-			Object value = row.getValue(inputColumn);
-			Integer count = map.get(value);
-			if (count == null) {
-				count = 0;
-			}
-			count = count.intValue() + getDistinctCount(row);
-			map.put(value, count);
-		}
-		return map;
-	}
+        if (rows == null || rows.length == 0) {
+            return map;
+        }
 
-	/**
-	 * Removes the annotation from any rows that has been annotated with it.
-	 * 
-	 * @param annotation
-	 */
-	protected abstract void resetRows(RowAnnotation annotation);
+        for (InputRow row : rows) {
+            Object value = row.getValue(inputColumn);
+            Integer count = map.get(value);
+            if (count == null) {
+                count = 0;
+            }
+            count = count.intValue() + getDistinctCount(row);
+            map.put(value, count);
+        }
+        return map;
+    }
 
-	/**
-	 * Gets the distinct count from a row that has been stored and retried using
-	 * the getRows(...) method.
-	 * 
-	 * @param row
-	 * @return
-	 */
-	protected abstract int getDistinctCount(InputRow row);
+    /**
+     * Removes the annotation from any rows that has been annotated with it.
+     * 
+     * @param annotation
+     */
+    protected abstract void resetRows(RowAnnotation annotation);
 
-	protected abstract void storeRowAnnotation(int rowId, RowAnnotation annotation);
+    /**
+     * Gets the distinct count from a row that has been stored and retried using
+     * the getRows(...) method.
+     * 
+     * @param row
+     * @return
+     */
+    protected abstract int getDistinctCount(InputRow row);
 
-	protected abstract void storeRowValues(int rowId, InputRow row, int distinctCount);
+    protected abstract void storeRowAnnotation(int rowId, RowAnnotation annotation);
 
-	public final Integer getStoredRowsThreshold() {
-		return _storedRowsThreshold;
-	}
+    protected abstract void storeRowValues(int rowId, InputRow row, int distinctCount);
+
+    public final Integer getStoredRowsThreshold() {
+        return _storedRowsThreshold;
+    }
 }

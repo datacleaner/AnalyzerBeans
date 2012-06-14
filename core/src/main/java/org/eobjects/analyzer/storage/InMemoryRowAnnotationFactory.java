@@ -19,10 +19,11 @@
  */
 package org.eobjects.analyzer.storage;
 
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.ImmutableEntry;
@@ -36,10 +37,10 @@ public class InMemoryRowAnnotationFactory extends AbstractRowAnnotationFactory i
     private static final long serialVersionUID = 1L;
 
     // contains annotations, mapped to row-ids
-    private final Map<RowAnnotation, Set<Integer>> _annotatedRows = new LinkedHashMap<RowAnnotation, Set<Integer>>();
+    private final Map<RowAnnotation, Set<Integer>> _annotatedRows = new ConcurrentHashMap<RowAnnotation, Set<Integer>>();
 
     // contains row id's mapped to rows mapped to distinct counts
-    private final Map<Integer, Map.Entry<InputRow, Integer>> _distinctCounts = new LinkedHashMap<Integer, Map.Entry<InputRow, Integer>>();
+    private final Map<Integer, Map.Entry<InputRow, Integer>> _distinctCounts = new ConcurrentHashMap<Integer, Map.Entry<InputRow, Integer>>();
 
     public InMemoryRowAnnotationFactory() {
         this(1000);
@@ -71,7 +72,7 @@ public class InMemoryRowAnnotationFactory extends AbstractRowAnnotationFactory i
     protected void storeRowAnnotation(int rowId, RowAnnotation annotation) {
         Set<Integer> rowIds = _annotatedRows.get(annotation);
         if (rowIds == null) {
-            rowIds = new LinkedHashSet<Integer>();
+            rowIds = Collections.synchronizedSet(new LinkedHashSet<Integer>());
             _annotatedRows.put(annotation, rowIds);
         }
         rowIds.add(rowId);
