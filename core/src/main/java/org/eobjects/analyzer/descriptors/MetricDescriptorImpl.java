@@ -98,7 +98,7 @@ final class MetricDescriptorImpl implements MetricDescriptor {
                 final ParameterizableMetric parameterizableMetric = (ParameterizableMetric) returnValue;
                 return parameterizableMetric.getParameterSuggestions();
             } catch (Exception e) {
-                throw new IllegalStateException("Could not invoke metric getter " + _method, e);
+                throw new IllegalStateException("Could not invoke metric getter " + _methodName, e);
             }
         }
         return Collections.emptyList();
@@ -122,12 +122,12 @@ final class MetricDescriptorImpl implements MetricDescriptor {
             }
             return number;
         } catch (Exception e) {
-            throw new IllegalStateException("Could not invoke metric getter " + _method, e);
+            throw new IllegalStateException("Could not invoke metric getter " + _methodName, e);
         }
     }
 
     private Object[] createMethodParameters(Method method, MetricParameters metricParameters) {
-        final Class<?>[] parameterTypes = _method.getParameterTypes();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes == null || parameterTypes.length == 0) {
             return null;
         }
@@ -149,7 +149,8 @@ final class MetricDescriptorImpl implements MetricDescriptor {
 
     @Override
     public boolean isParameterizedByInputColumn() {
-        final Class<?>[] parameterTypes = _method.getParameterTypes();
+        Method method = getMethod();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes == null || parameterTypes.length == 0) {
             return false;
         }
@@ -171,7 +172,7 @@ final class MetricDescriptorImpl implements MetricDescriptor {
             return true;
         }
 
-        final Class<?>[] parameterTypes = _method.getParameterTypes();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes == null || parameterTypes.length == 0) {
             return false;
         }
