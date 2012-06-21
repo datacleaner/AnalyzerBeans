@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.cli;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,9 +34,7 @@ import java.util.Set;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
 import org.eobjects.analyzer.connection.Datastore;
@@ -54,6 +51,7 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalysisResultWriter;
+import org.eobjects.analyzer.util.VFSUtils;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
@@ -103,7 +101,7 @@ public final class CliRunner implements Closeable {
 
                 final FileObject outputFile;
                 try {
-                    outputFile = getFileSystemManager().resolveFile(outputFilePath);
+                    outputFile = VFSUtils.getFileSystemManager().resolveFile(outputFilePath);
                 } catch (FileSystemException e) {
                     throw new IllegalStateException(e);
                 }
@@ -138,27 +136,13 @@ public final class CliRunner implements Closeable {
         }
     }
 
-    private FileSystemManager getFileSystemManager() {
-        try {
-            final FileSystemManager manager = VFS.getManager();
-            if (manager.getBaseFile() == null) {
-                // if no base file exists, set the working directory to base
-                // dir.
-                ((DefaultFileSystemManager) manager).setBaseFile(new File("."));
-            }
-            return manager;
-        } catch (FileSystemException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     public CliRunner(CliArguments arguments) {
         this(arguments, null, null);
     }
 
     public void run() throws Throwable {
         final String configurationFilePath = _arguments.getConfigurationFile();
-        final FileObject configurationFile = getFileSystemManager().resolveFile(configurationFilePath);
+        final FileObject configurationFile = VFSUtils.getFileSystemManager().resolveFile(configurationFilePath);
         final InputStream inputStream = configurationFile.getContent().getInputStream();
         try {
             run(new JaxbConfigurationReader().create(inputStream));

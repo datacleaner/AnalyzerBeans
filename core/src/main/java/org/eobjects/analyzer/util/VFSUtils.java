@@ -23,9 +23,35 @@ import java.io.File;
 import java.lang.reflect.Method;
 
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs2.provider.local.LocalFile;
 
+/**
+ * Convenience methods for commons VFS.
+ */
 public class VFSUtils {
+
+    /**
+     * Gets the file system manager to use in typical scenarios.
+     * 
+     * @return
+     */
+    public static FileSystemManager getFileSystemManager() {
+        try {
+            final FileSystemManager manager = VFS.getManager();
+            if (manager.getBaseFile() == null) {
+                // if no base file exists, set the working directory to base
+                // dir.
+                ((DefaultFileSystemManager) manager).setBaseFile(new File("."));
+            }
+            return manager;
+        } catch (FileSystemException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     /**
      * Converts (if possible) a {@link FileObject} to a {@link File}. Use with
