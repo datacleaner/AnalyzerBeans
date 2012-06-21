@@ -23,6 +23,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +41,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.api.Explorer;
@@ -94,6 +97,7 @@ import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.convert.StringConverter;
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,12 +138,27 @@ public class JaxbJobReader implements JobReader<InputStream> {
         }
     }
 
-    public AnalysisJobMetadata readMetadata(File file) {
+    public AnalysisJobMetadata readMetadata(FileObject file) {
+        InputStream inputStream = null;
         try {
-            BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+            inputStream = file.getContent().getInputStream();
+            return readMetadata(inputStream);
+        } catch (FileSystemException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            FileHelper.safeClose(inputStream);
+        }
+    }
+
+    public AnalysisJobMetadata readMetadata(File file) {
+        InputStream inputStream = null;
+        try {
+            inputStream = new BufferedInputStream(new FileInputStream(file));
             return readMetadata(inputStream);
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException(e);
+        } finally {
+            FileHelper.safeClose(inputStream);
         }
     }
 
@@ -229,12 +248,27 @@ public class JaxbJobReader implements JobReader<InputStream> {
         return paths;
     }
 
-    public AnalysisJobBuilder create(File file) {
+    public AnalysisJobBuilder create(FileObject file) {
+        InputStream inputStream = null;
         try {
-            BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+            inputStream = file.getContent().getInputStream();
             return create(inputStream);
-        } catch (FileNotFoundException e) {
+        } catch (FileSystemException e) {
             throw new IllegalArgumentException(e);
+        } finally {
+            FileHelper.safeClose(inputStream);
+        }
+    }
+
+    public AnalysisJobBuilder create(File file) {
+        InputStream inputStream = null;
+        try {
+            inputStream = new BufferedInputStream(new FileInputStream(file));
+            return create(inputStream);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            FileHelper.safeClose(inputStream);
         }
     }
 

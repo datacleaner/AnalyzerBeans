@@ -19,15 +19,12 @@
  */
 package org.eobjects.analyzer.cli;
 
-import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -36,6 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.JaxbConfigurationReader;
 import org.eobjects.analyzer.connection.Datastore;
@@ -69,397 +71,438 @@ import org.slf4j.LoggerFactory;
  */
 public final class CliRunner implements Closeable {
 
-	private final static Logger logger = LoggerFactory.getLogger(CliRunner.class);
+    private final static Logger logger = LoggerFactory.getLogger(CliRunner.class);
 
-	private final CliArguments _arguments;
-	private final Ref<OutputStream> _outputStreamRef;
-	private final Ref<Writer> _writerRef;
-	private final boolean _closeOut;
+    private final CliArguments _arguments;
+    private final Ref<OutputStream> _outputStreamRef;
+    private final Ref<Writer> _writerRef;
+    private final boolean _closeOut;
 
-	/**
-	 * Alternative constructor that will specifically specifies the output
-	 * writer. Should be used only for testing, since normally the CliArguments
-	 * should be used to decide which outputwriter to use
-	 * 
-	 * @param arguments
-	 * @param writer
-	 * @param outputStream
-	 */
-	protected CliRunner(CliArguments arguments, Writer writer, OutputStream outputStream) {
-		_arguments = arguments;
-		if (outputStream == null) {
-			final File outputFile = arguments.getOutputFile();
-			if (outputFile == null) {
-				_outputStreamRef = null;
-				_writerRef = new LazyRef<Writer>() {
-					@Override
-					protected Writer fetch() {
-						return new PrintWriter(System.out);
-					}
-				};
-			} else {
-				_writerRef = new LazyRef<Writer>() {
-					@Override
-					protected Writer fetch() {
-						return FileHelper.getWriter(outputFile);
-					}
-				};
-				_outputStreamRef = new LazyRef<OutputStream>() {
-					@Override
-					protected OutputStream fetch() {
-						try {
-							return new FileOutputStream(outputFile);
-						} catch (FileNotFoundException e) {
-							throw new IllegalStateException(e);
-						}
-					}
-				};
-			}
-			_closeOut = true;
-		} else {
-			_writerRef = new ImmutableRef<Writer>(writer);
-			_outputStreamRef = new ImmutableRef<OutputStream>(outputStream);
-			_closeOut = false;
-		}
-	}
+    /**
+     * Alternative constructor that will specifically specifies the output
+     * writer. Should be used only for testing, since normally the CliArguments
+     * should be used to decide which outputwriter to use
+     * 
+     * @param arguments
+     * @param writer
+     * @param outputStream
+     */
+    protected CliRunner(CliArguments arguments, Writer writer, OutputStream outputStream) {
+        _arguments = arguments;
+        if (outputStream == null) {
+            final String outputFilePath = arguments.getOutputFile();
+            if (outputFilePath == null) {
+                _outputStreamRef = null;
+                _writerRef = new LazyRef<Writer>() {
+                    @Override
+                    protected Writer fetch() {
+                        return new PrintWriter(System.out);
+                    }
+                };
+            } else {
 
-	public CliRunner(CliArguments arguments) {
-		this(arguments, null, null);
-	}
+                final FileObject outputFile;
+                try {
+                    outputFile = getFileSystemManager().resolveFile(outputFilePath);
+                } catch (FileSystemException e) {
+                    throw new IllegalStateException(e);
+                }
 
-	public void run() throws Throwable {
-		run(new JaxbConfigurationReader().create(_arguments.getConfigurationFile()));
-	}
+                _writerRef = new LazyRef<Writer>() {
+                    @Override
+                    protected Writer fetch() {
+                        try {
+                            OutputStream out = outputFile.getContent().getOutputStream();
+                            return new OutputStreamWriter(out, FileHelper.DEFAULT_ENCODING);
+                        } catch (Exception e) {
+                            throw new IllegalStateException(e);
+                        }
+                    }
+                };
+                _outputStreamRef = new LazyRef<OutputStream>() {
+                    @Override
+                    protected OutputStream fetch() {
+                        try {
+                            return outputFile.getContent().getOutputStream();
+                        } catch (FileSystemException e) {
+                            throw new IllegalStateException(e);
+                        }
+                    }
+                };
+            }
+            _closeOut = true;
+        } else {
+            _writerRef = new ImmutableRef<Writer>(writer);
+            _outputStreamRef = new ImmutableRef<OutputStream>(outputStream);
+            _closeOut = false;
+        }
+    }
 
-	public void run(AnalyzerBeansConfiguration configuration) throws Throwable {
-		File jobFile = _arguments.getJobFile();
-		CliListType listType = _arguments.getListType();
-		try {
-			if (jobFile != null) {
-				runJob(configuration);
-			} else if (listType != null) {
-				switch (listType) {
-				case ANALYZERS:
-					printAnalyzers(configuration);
-					break;
-				case TRANSFORMERS:
-					printTransformers(configuration);
-					break;
-				case FILTERS:
-					printFilters(configuration);
-					break;
-				case EXPLORERS:
-					printExplorers(configuration);
-					break;
-				case DATASTORES:
-					printDatastores(configuration);
-					break;
-				case SCHEMAS:
-					printSchemas(configuration);
-					break;
-				case TABLES:
-					printTables(configuration);
-					break;
-				case COLUMNS:
-					printColumns(configuration);
-					break;
-				default:
-					throw new IllegalArgumentException("Unknown list type: " + listType);
-				}
-			} else {
-				throw new IllegalArgumentException(
-						"Neither --job-file nor --list-type is specified. Try running with -usage to see usage help.");
-			}
-		} catch (Exception e) {
-			logger.error("Exception thrown in {}", e, this);
-			System.err.println("Error:");
-			e.printStackTrace(System.err);
-		} finally {
-			configuration.getTaskRunner().shutdown();
-		}
-	}
+    private FileSystemManager getFileSystemManager() {
+        try {
+            final FileSystemManager manager = VFS.getManager();
+            if (manager.getBaseFile() == null) {
+                // if no base file exists, set the working directory to base
+                // dir.
+                ((DefaultFileSystemManager) manager).setBaseFile(new File("."));
+            }
+            return manager;
+        } catch (FileSystemException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-	private void printColumns(AnalyzerBeansConfiguration configuration) {
-		String datastoreName = _arguments.getDatastoreName();
-		String tableName = _arguments.getTableName();
-		String schemaName = _arguments.getSchemaName();
+    public CliRunner(CliArguments arguments) {
+        this(arguments, null, null);
+    }
 
-		if (datastoreName == null) {
-			System.err.println("You need to specify the datastore name!");
-		} else if (tableName == null) {
-			System.err.println("You need to specify a table name!");
-		} else {
-			Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
-			if (ds == null) {
-				System.err.println("No such datastore: " + datastoreName);
-			} else {
-				DatastoreConnection con = ds.openConnection();
-				DataContext dc = con.getDataContext();
-				Schema schema;
-				if (schemaName == null) {
-					schema = dc.getDefaultSchema();
-				} else {
-					schema = dc.getSchemaByName(schemaName);
-				}
-				if (schema == null) {
-					System.err.println("No such schema: " + schemaName);
-				} else {
-					Table table = schema.getTableByName(tableName);
-					if (table == null) {
-						write("No such table: " + tableName);
-					} else {
-						String[] columnNames = table.getColumnNames();
-						write("Columns:");
-						write("--------");
-						for (String columnName : columnNames) {
-							write(columnName);
-						}
-					}
-				}
-				con.close();
-			}
-		}
-	}
+    public void run() throws Throwable {
+        final String configurationFilePath = _arguments.getConfigurationFile();
+        final FileObject configurationFile = getFileSystemManager().resolveFile(configurationFilePath);
+        final InputStream inputStream = configurationFile.getContent().getInputStream();
+        try {
+            run(new JaxbConfigurationReader().create(inputStream));
+        } finally {
+            FileHelper.safeClose(inputStream);
+        }
+    }
 
-	private void printTables(AnalyzerBeansConfiguration configuration) {
-		String datastoreName = _arguments.getDatastoreName();
-		String schemaName = _arguments.getSchemaName();
+    public void run(AnalyzerBeansConfiguration configuration) throws Throwable {
+        final String jobFilePath = _arguments.getJobFile();
+        final CliListType listType = _arguments.getListType();
+        try {
+            if (jobFilePath != null) {
+                runJob(configuration);
+            } else if (listType != null) {
+                switch (listType) {
+                case ANALYZERS:
+                    printAnalyzers(configuration);
+                    break;
+                case TRANSFORMERS:
+                    printTransformers(configuration);
+                    break;
+                case FILTERS:
+                    printFilters(configuration);
+                    break;
+                case EXPLORERS:
+                    printExplorers(configuration);
+                    break;
+                case DATASTORES:
+                    printDatastores(configuration);
+                    break;
+                case SCHEMAS:
+                    printSchemas(configuration);
+                    break;
+                case TABLES:
+                    printTables(configuration);
+                    break;
+                case COLUMNS:
+                    printColumns(configuration);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown list type: " + listType);
+                }
+            } else {
+                throw new IllegalArgumentException(
+                        "Neither --job-file nor --list-type is specified. Try running with -usage to see usage help.");
+            }
+        } catch (Exception e) {
+            logger.error("Exception thrown in {}", e, this);
+            System.err.println("Error:");
+            e.printStackTrace(System.err);
+        } finally {
+            configuration.getTaskRunner().shutdown();
+        }
+    }
 
-		if (datastoreName == null) {
-			System.err.println("You need to specify the datastore name!");
-		} else {
-			Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
-			if (ds == null) {
-				System.err.println("No such datastore: " + datastoreName);
-			} else {
-				DatastoreConnection con = ds.openConnection();
-				DataContext dc = con.getDataContext();
-				Schema schema;
-				if (schemaName == null) {
-					schema = dc.getDefaultSchema();
-				} else {
-					schema = dc.getSchemaByName(schemaName);
-				}
-				if (schema == null) {
-					System.err.println("No such schema: " + schemaName);
-				} else {
-					String[] tableNames = schema.getTableNames();
-					if (tableNames == null || tableNames.length == 0) {
-						System.err.println("No tables in schema!");
-					} else {
-						write("Tables:");
-						write("-------");
-						for (String tableName : tableNames) {
-							write(tableName);
-						}
-					}
-				}
-				con.close();
-			}
-		}
-	}
+    private void printColumns(AnalyzerBeansConfiguration configuration) {
+        String datastoreName = _arguments.getDatastoreName();
+        String tableName = _arguments.getTableName();
+        String schemaName = _arguments.getSchemaName();
 
-	private void printSchemas(AnalyzerBeansConfiguration configuration) {
-		String datastoreName = _arguments.getDatastoreName();
+        if (datastoreName == null) {
+            System.err.println("You need to specify the datastore name!");
+        } else if (tableName == null) {
+            System.err.println("You need to specify a table name!");
+        } else {
+            Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
+            if (ds == null) {
+                System.err.println("No such datastore: " + datastoreName);
+            } else {
+                DatastoreConnection con = ds.openConnection();
+                DataContext dc = con.getDataContext();
+                Schema schema;
+                if (schemaName == null) {
+                    schema = dc.getDefaultSchema();
+                } else {
+                    schema = dc.getSchemaByName(schemaName);
+                }
+                if (schema == null) {
+                    System.err.println("No such schema: " + schemaName);
+                } else {
+                    Table table = schema.getTableByName(tableName);
+                    if (table == null) {
+                        write("No such table: " + tableName);
+                    } else {
+                        String[] columnNames = table.getColumnNames();
+                        write("Columns:");
+                        write("--------");
+                        for (String columnName : columnNames) {
+                            write(columnName);
+                        }
+                    }
+                }
+                con.close();
+            }
+        }
+    }
 
-		if (datastoreName == null) {
-			System.err.println("You need to specify the datastore name!");
-		} else {
-			Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
-			if (ds == null) {
-				System.err.println("No such datastore: " + datastoreName);
-			} else {
-				DatastoreConnection con = ds.openConnection();
-				String[] schemaNames = con.getDataContext().getSchemaNames();
-				if (schemaNames == null || schemaNames.length == 0) {
-					write("No schemas in datastore!");
-				} else {
-					write("Schemas:");
-					write("--------");
-					for (String schemaName : schemaNames) {
-						write(schemaName);
-					}
-				}
-				con.close();
-			}
-		}
-	}
+    private void printTables(AnalyzerBeansConfiguration configuration) {
+        String datastoreName = _arguments.getDatastoreName();
+        String schemaName = _arguments.getSchemaName();
 
-	private void printDatastores(AnalyzerBeansConfiguration configuration) {
-		String[] datastoreNames = configuration.getDatastoreCatalog().getDatastoreNames();
-		if (datastoreNames == null || datastoreNames.length == 0) {
-			write("No datastores configured!");
-		} else {
-			write("Datastores:");
-			write("-----------");
-			for (String datastoreName : datastoreNames) {
-				write(datastoreName);
-			}
-		}
-	}
+        if (datastoreName == null) {
+            System.err.println("You need to specify the datastore name!");
+        } else {
+            Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
+            if (ds == null) {
+                System.err.println("No such datastore: " + datastoreName);
+            } else {
+                DatastoreConnection con = ds.openConnection();
+                DataContext dc = con.getDataContext();
+                Schema schema;
+                if (schemaName == null) {
+                    schema = dc.getDefaultSchema();
+                } else {
+                    schema = dc.getSchemaByName(schemaName);
+                }
+                if (schema == null) {
+                    System.err.println("No such schema: " + schemaName);
+                } else {
+                    String[] tableNames = schema.getTableNames();
+                    if (tableNames == null || tableNames.length == 0) {
+                        System.err.println("No tables in schema!");
+                    } else {
+                        write("Tables:");
+                        write("-------");
+                        for (String tableName : tableNames) {
+                            write(tableName);
+                        }
+                    }
+                }
+                con.close();
+            }
+        }
+    }
 
-	protected void runJob(AnalyzerBeansConfiguration configuration) throws Throwable {
-		final File jobFile = _arguments.getJobFile();
-		final InputStream inputStream = new BufferedInputStream(new FileInputStream(jobFile));
+    private void printSchemas(AnalyzerBeansConfiguration configuration) {
+        String datastoreName = _arguments.getDatastoreName();
 
-		final JaxbJobReader jobReader = new JaxbJobReader(configuration);
+        if (datastoreName == null) {
+            System.err.println("You need to specify the datastore name!");
+        } else {
+            Datastore ds = configuration.getDatastoreCatalog().getDatastore(datastoreName);
+            if (ds == null) {
+                System.err.println("No such datastore: " + datastoreName);
+            } else {
+                DatastoreConnection con = ds.openConnection();
+                String[] schemaNames = con.getDataContext().getSchemaNames();
+                if (schemaNames == null || schemaNames.length == 0) {
+                    write("No schemas in datastore!");
+                } else {
+                    write("Schemas:");
+                    write("--------");
+                    for (String schemaName : schemaNames) {
+                        write(schemaName);
+                    }
+                }
+                con.close();
+            }
+        }
+    }
 
-		final Map<String, String> variableOverrides = _arguments.getVariableOverrides();
-		final AnalysisJobBuilder analysisJobBuilder = jobReader.create(inputStream, variableOverrides);
+    private void printDatastores(AnalyzerBeansConfiguration configuration) {
+        String[] datastoreNames = configuration.getDatastoreCatalog().getDatastoreNames();
+        if (datastoreNames == null || datastoreNames.length == 0) {
+            write("No datastores configured!");
+        } else {
+            write("Datastores:");
+            write("-----------");
+            for (String datastoreName : datastoreNames) {
+                write(datastoreName);
+            }
+        }
+    }
 
-		final AnalysisRunner runner = new AnalysisRunnerImpl(configuration, new CliProgressAnalysisListener());
-		final AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
+    protected void runJob(AnalyzerBeansConfiguration configuration) throws Throwable {
+        final JaxbJobReader jobReader = new JaxbJobReader(configuration);
 
-		resultFuture.await();
+        final String jobFilePath = _arguments.getJobFile();
+        final FileObject jobFile = VFS.getManager().resolveFile(jobFilePath);
+        final Map<String, String> variableOverrides = _arguments.getVariableOverrides();
 
-		if (resultFuture.isSuccessful()) {
-			final CliOutputType outputType = _arguments.getOutputType();
-			AnalysisResultWriter writer = outputType.createWriter();
-			writer.write(resultFuture, configuration, _writerRef, _outputStreamRef);
-		} else {
-			write("ERROR!");
-			write("------");
+        final InputStream inputStream = jobFile.getContent().getInputStream();
 
-			List<Throwable> errors = resultFuture.getErrors();
-			write(errors.size() + " error(s) occurred while executing the job:");
+        final AnalysisJobBuilder analysisJobBuilder;
+        try {
+            analysisJobBuilder = jobReader.create(inputStream, variableOverrides);
+        } finally {
+            FileHelper.safeClose(inputStream);
+        }
 
-			for (Throwable throwable : errors) {
-				write("------");
-				StringWriter stringWriter = new StringWriter();
-				throwable.printStackTrace(new PrintWriter(stringWriter));
-				write(stringWriter.toString());
-			}
+        final AnalysisRunner runner = new AnalysisRunnerImpl(configuration, new CliProgressAnalysisListener());
+        final AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
 
-			throw errors.get(0);
-		}
-	}
+        resultFuture.await();
 
-	protected void printAnalyzers(AnalyzerBeansConfiguration configuration) {
-		Collection<AnalyzerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
-				.getAnalyzerBeanDescriptors();
-		if (descriptors == null || descriptors.isEmpty()) {
-			write("No analyzers configured!");
-		} else {
-			write("Analyzers:");
-			write("----------");
-			printBeanDescriptors(descriptors);
-		}
-	}
+        if (resultFuture.isSuccessful()) {
+            final CliOutputType outputType = _arguments.getOutputType();
+            AnalysisResultWriter writer = outputType.createWriter();
+            writer.write(resultFuture, configuration, _writerRef, _outputStreamRef);
+        } else {
+            write("ERROR!");
+            write("------");
 
-	private void printTransformers(AnalyzerBeansConfiguration configuration) {
-		Collection<TransformerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
-				.getTransformerBeanDescriptors();
-		if (descriptors == null || descriptors.isEmpty()) {
-			write("No transformers configured!");
-		} else {
-			write("Transformers:");
-			write("-------------");
-			printBeanDescriptors(descriptors);
-		}
-	}
+            List<Throwable> errors = resultFuture.getErrors();
+            write(errors.size() + " error(s) occurred while executing the job:");
 
-	private void printFilters(AnalyzerBeansConfiguration configuration) {
-		Collection<FilterBeanDescriptor<?, ?>> descriptors = configuration.getDescriptorProvider()
-				.getFilterBeanDescriptors();
-		if (descriptors == null || descriptors.isEmpty()) {
-			write("No filters configured!");
-		} else {
-			write("Filters:");
-			write("--------");
-			printBeanDescriptors(descriptors);
-		}
-	}
+            for (Throwable throwable : errors) {
+                write("------");
+                StringWriter stringWriter = new StringWriter();
+                throwable.printStackTrace(new PrintWriter(stringWriter));
+                write(stringWriter.toString());
+            }
 
-	private void printExplorers(AnalyzerBeansConfiguration configuration) {
-		Collection<ExplorerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
-				.getExplorerBeanDescriptors();
-		if (descriptors == null || descriptors.isEmpty()) {
-			write("No explorers configured!");
-		} else {
-			write("Explorers:");
-			write("----------");
-			printBeanDescriptors(descriptors);
-		}
-	}
+            throw errors.get(0);
+        }
+    }
 
-	protected void printBeanDescriptors(Collection<? extends BeanDescriptor<?>> descriptors) {
-		logger.debug("Printing {} descriptors", descriptors.size());
-		for (BeanDescriptor<?> descriptor : descriptors) {
-			write("name: " + descriptor.getDisplayName());
+    protected void printAnalyzers(AnalyzerBeansConfiguration configuration) {
+        Collection<AnalyzerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
+                .getAnalyzerBeanDescriptors();
+        if (descriptors == null || descriptors.isEmpty()) {
+            write("No analyzers configured!");
+        } else {
+            write("Analyzers:");
+            write("----------");
+            printBeanDescriptors(descriptors);
+        }
+    }
 
-			Set<ConfiguredPropertyDescriptor> propertiesForInput = descriptor.getConfiguredPropertiesForInput();
-			if (propertiesForInput.size() == 1) {
-				ConfiguredPropertyDescriptor propertyForInput = propertiesForInput.iterator().next();
-				if (propertyForInput != null) {
-					if (propertyForInput.isArray()) {
-						write(" - Consumes multiple input columns (type: "
-								+ propertyForInput.getTypeArgument(0).getSimpleName() + ")");
-					} else {
-						write(" - Consumes a single input column (type: "
-								+ propertyForInput.getTypeArgument(0).getSimpleName() + ")");
-					}
-				}
-			} else {
-				write(" - Consumes " + propertiesForInput.size() + " named inputs");
-				for (ConfiguredPropertyDescriptor propertyForInput : propertiesForInput) {
-					if (propertyForInput.isArray()) {
-						write("   Input columns: " + propertyForInput.getName() + " (type: "
-								+ propertyForInput.getTypeArgument(0).getSimpleName() + ")");
-					} else {
-						write("   Input column: " + propertyForInput.getName() + " (type: "
-								+ propertyForInput.getTypeArgument(0).getSimpleName() + ")");
-					}
-				}
-			}
+    private void printTransformers(AnalyzerBeansConfiguration configuration) {
+        Collection<TransformerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
+                .getTransformerBeanDescriptors();
+        if (descriptors == null || descriptors.isEmpty()) {
+            write("No transformers configured!");
+        } else {
+            write("Transformers:");
+            write("-------------");
+            printBeanDescriptors(descriptors);
+        }
+    }
 
-			Set<ConfiguredPropertyDescriptor> properties = descriptor.getConfiguredProperties();
-			for (ConfiguredPropertyDescriptor property : properties) {
-				if (!property.isInputColumn()) {
-					write(" - Property: name=" + property.getName() + ", type=" + property.getBaseType().getSimpleName()
-							+ ", required=" + property.isRequired());
-				}
-			}
+    private void printFilters(AnalyzerBeansConfiguration configuration) {
+        Collection<FilterBeanDescriptor<?, ?>> descriptors = configuration.getDescriptorProvider()
+                .getFilterBeanDescriptors();
+        if (descriptors == null || descriptors.isEmpty()) {
+            write("No filters configured!");
+        } else {
+            write("Filters:");
+            write("--------");
+            printBeanDescriptors(descriptors);
+        }
+    }
 
-			if (descriptor instanceof TransformerBeanDescriptor<?>) {
-				Class<?> dataType = ((TransformerBeanDescriptor<?>) descriptor).getOutputDataType();
-				write(" - Output type is: " + dataType.getSimpleName());
-			}
+    private void printExplorers(AnalyzerBeansConfiguration configuration) {
+        Collection<ExplorerBeanDescriptor<?>> descriptors = configuration.getDescriptorProvider()
+                .getExplorerBeanDescriptors();
+        if (descriptors == null || descriptors.isEmpty()) {
+            write("No explorers configured!");
+        } else {
+            write("Explorers:");
+            write("----------");
+            printBeanDescriptors(descriptors);
+        }
+    }
 
-			if (descriptor instanceof FilterBeanDescriptor<?, ?>) {
-				Set<String> categoryNames = ((FilterBeanDescriptor<?, ?>) descriptor).getOutcomeCategoryNames();
-				for (String categoryName : categoryNames) {
-					write(" - Outcome category: " + categoryName);
-				}
-			}
-		}
-	}
+    protected void printBeanDescriptors(Collection<? extends BeanDescriptor<?>> descriptors) {
+        logger.debug("Printing {} descriptors", descriptors.size());
+        for (BeanDescriptor<?> descriptor : descriptors) {
+            write("name: " + descriptor.getDisplayName());
 
-	private void write(String str) {
-		try {
-			_writerRef.get().write(str + "\n");
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+            Set<ConfiguredPropertyDescriptor> propertiesForInput = descriptor.getConfiguredPropertiesForInput();
+            if (propertiesForInput.size() == 1) {
+                ConfiguredPropertyDescriptor propertyForInput = propertiesForInput.iterator().next();
+                if (propertyForInput != null) {
+                    if (propertyForInput.isArray()) {
+                        write(" - Consumes multiple input columns (type: "
+                                + propertyForInput.getTypeArgument(0).getSimpleName() + ")");
+                    } else {
+                        write(" - Consumes a single input column (type: "
+                                + propertyForInput.getTypeArgument(0).getSimpleName() + ")");
+                    }
+                }
+            } else {
+                write(" - Consumes " + propertiesForInput.size() + " named inputs");
+                for (ConfiguredPropertyDescriptor propertyForInput : propertiesForInput) {
+                    if (propertyForInput.isArray()) {
+                        write("   Input columns: " + propertyForInput.getName() + " (type: "
+                                + propertyForInput.getTypeArgument(0).getSimpleName() + ")");
+                    } else {
+                        write("   Input column: " + propertyForInput.getName() + " (type: "
+                                + propertyForInput.getTypeArgument(0).getSimpleName() + ")");
+                    }
+                }
+            }
 
-	@Override
-	public void close() {
-		if (_closeOut) {
-			close(_writerRef);
-			close(_outputStreamRef);
-		}
-	}
+            Set<ConfiguredPropertyDescriptor> properties = descriptor.getConfiguredProperties();
+            for (ConfiguredPropertyDescriptor property : properties) {
+                if (!property.isInputColumn()) {
+                    write(" - Property: name=" + property.getName() + ", type="
+                            + property.getBaseType().getSimpleName() + ", required=" + property.isRequired());
+                }
+            }
 
-	private void close(Ref<?> ref) {
-		if (ref != null) {
-			if (ref instanceof LazyRef) {
-				LazyRef<?> lazyRef = (LazyRef<?>) ref;
-				if (lazyRef.isFetched()) {
-					FileHelper.safeClose(ref.get());
-				}
-			} else {
-				FileHelper.safeClose(ref.get());
-			}
-		}
-	}
+            if (descriptor instanceof TransformerBeanDescriptor<?>) {
+                Class<?> dataType = ((TransformerBeanDescriptor<?>) descriptor).getOutputDataType();
+                write(" - Output type is: " + dataType.getSimpleName());
+            }
+
+            if (descriptor instanceof FilterBeanDescriptor<?, ?>) {
+                Set<String> categoryNames = ((FilterBeanDescriptor<?, ?>) descriptor).getOutcomeCategoryNames();
+                for (String categoryName : categoryNames) {
+                    write(" - Outcome category: " + categoryName);
+                }
+            }
+        }
+    }
+
+    private void write(String str) {
+        try {
+            _writerRef.get().write(str + "\n");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public void close() {
+        if (_closeOut) {
+            close(_writerRef);
+            close(_outputStreamRef);
+        }
+    }
+
+    private void close(Ref<?> ref) {
+        if (ref != null) {
+            if (ref instanceof LazyRef) {
+                LazyRef<?> lazyRef = (LazyRef<?>) ref;
+                if (lazyRef.isFetched()) {
+                    FileHelper.safeClose(ref.get());
+                }
+            } else {
+                FileHelper.safeClose(ref.get());
+            }
+        }
+    }
 }

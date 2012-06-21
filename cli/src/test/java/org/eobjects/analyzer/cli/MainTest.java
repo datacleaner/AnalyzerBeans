@@ -72,34 +72,35 @@ public class MainTest extends TestCase {
 
         String[] lines = out1.split("\n");
 
-        assertEquals(10, lines.length);
+        assertEquals(11, lines.length);
 
         assertEquals(
-                "-conf (-configuration, --configuration-file) FILE          : XML file describing the configuration of AnalyzerBeans",
+                "-conf (-configuration, --configuration-file) PATH          : Path to an XML file describing the configuration of",
                 lines[0].trim());
+        assertEquals("AnalyzerBeans", lines[1].trim());
         assertEquals(
                 "-ds (-datastore, --datastore-name) VAL                     : Name of datastore when printing a list of schemas, tables",
-                lines[1].trim());
-        assertEquals("or columns", lines[2].trim());
+                lines[2].trim());
+        assertEquals("or columns", lines[3].trim());
         assertEquals(
-                "-job (--job-file) FILE                                     : An analysis job XML file to execute",
-                lines[3].trim());
+                "-job (--job-file) PATH                                     : Path to an analysis job XML file to execute",
+                lines[4].trim());
         assertEquals(
                 "-list [ANALYZERS | TRANSFORMERS | FILTERS | EXPLORERS |    : Used to print a list of various elements available in the",
-                lines[4].trim());
-        assertEquals("DATASTORES | SCHEMAS | TABLES | COLUMNS]                   : configuration", lines[5].trim());
+                lines[5].trim());
+        assertEquals("DATASTORES | SCHEMAS | TABLES | COLUMNS]                   : configuration", lines[6].trim());
         assertEquals(
-                "-of (--output-file) FILE                                   : File in which to save the result of the job",
-                lines[6].trim());
-        assertEquals(
-                "-ot (--output-type) [TEXT | HTML | SERIALIZED]             : How to represent the result of the job",
+                "-of (--output-file) PATH                                   : Path to file in which to save the result of the job",
                 lines[7].trim());
         assertEquals(
-                "-s (-schema, --schema-name) VAL                            : Name of schema when printing a list of tables or columns",
+                "-ot (--output-type) [TEXT | HTML | SERIALIZED]             : How to represent the result of the job",
                 lines[8].trim());
         assertEquals(
-                "-t (-table, --table-name) VAL                              : Name of table when printing a list of columns",
+                "-s (-schema, --schema-name) VAL                            : Name of schema when printing a list of tables or columns",
                 lines[9].trim());
+        assertEquals(
+                "-t (-table, --table-name) VAL                              : Name of table when printing a list of columns",
+                lines[10].trim());
 
         // again without the -usage flag
         _stringWriter = new StringWriter();

@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,6 +36,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
 import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.BerkeleyDbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType;
@@ -170,11 +173,27 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         return create(input);
     }
 
-    public AnalyzerBeansConfiguration create(File file) {
+    public AnalyzerBeansConfiguration create(FileObject file) {
+        InputStream inputStream = null;
         try {
-            return create(new FileInputStream(file));
+            inputStream = file.getContent().getInputStream();
+            return create(inputStream);
+        } catch (FileSystemException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            FileHelper.safeClose(inputStream);
+        }
+    }
+
+    public AnalyzerBeansConfiguration create(File file) {
+        InputStream inputStream = null;
+        try {
+            inputStream = new BufferedInputStream(new FileInputStream(file));
+            return create(inputStream);
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException(e);
+        } finally {
+            FileHelper.safeClose(inputStream);
         }
     }
 
@@ -207,19 +226,19 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         }
 
         AnalyzerBeansConfigurationImpl analyzerBeansConfiguration = new AnalyzerBeansConfigurationImpl();
-        
+
         // injection manager will be used throughout building the configuration.
         // It will be used to host dependencies as they appear
         InjectionManager injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
-        
+
         TaskRunner taskRunner = createTaskRunner(configuration, injectionManager);
-        
+
         analyzerBeansConfiguration = analyzerBeansConfiguration.replace(taskRunner);
         injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
         DescriptorProvider descriptorProvider = createDescriptorProvider(configuration, taskRunner, injectionManager);
-        
-        analyzerBeansConfiguration =  analyzerBeansConfiguration.replace(descriptorProvider);
+
+        analyzerBeansConfiguration = analyzerBeansConfiguration.replace(descriptorProvider);
         injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
         addVariablePath("datastoreCatalog");
