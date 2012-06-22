@@ -216,6 +216,29 @@ public class MainTest extends TestCase {
         assertEquals("", _stringWriter.toString());
     }
 
+    public void testRunFromUrlJobAndConf() throws Throwable {
+        String filename = "target/test_run_from_url_job_and_conf.html";
+        Main.main(("-ot HTML -of " + filename + " -job http://eobjects.org/resources/example_repo/DC/jobs/random_number_generation.analysis.xml -conf http://eobjects.org/resources/example_repo/DC/conf.xml")
+                .split(" "));
+        
+        File file = new File(filename);
+        assertTrue(file.exists());
+        String result = FileHelper.readFileAsString(file);
+        String[] lines = result.split("\n");
+
+        assertEquals("<html>", lines[1]);
+
+        Tidy tidy = new Tidy();
+        StringWriter writer = new StringWriter();
+        tidy.setTrimEmptyElements(false);
+        tidy.setErrout(new PrintWriter(writer));
+        tidy.parse(FileHelper.getReader(file), System.out);
+
+        String parserOutput = writer.toString();
+        assertTrue("Parser output was:\n" + parserOutput,
+                parserOutput.indexOf("no warnings or errors were found") != -1);
+    }
+
     public void testWriteHtmlToFile() throws Throwable {
         String filename = "target/test_write_html_to_file.html";
         Main.main(("-conf examples/conf.xml -job examples/employees_job.xml -of " + filename + " -ot HTML").split(" "));
