@@ -19,7 +19,10 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
 
@@ -57,5 +60,17 @@ public class VFSUtilsTest extends TestCase {
         assertNotNull(javaFolderFile);
         assertTrue(javaFolderFile.exists());
         assertTrue(javaFolderFile.isDirectory());
+    }
+    
+    public void testHttpAccess() throws Exception {
+        FileObject file = VFSUtils.getFileSystemManager().resolveFile("http://eobjects.org");
+        InputStream in = file.getContent().getInputStream();
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String readLine = reader.readLine();
+            assertNotNull(readLine);
+        } finally {
+            in.close();
+        }
     }
 }

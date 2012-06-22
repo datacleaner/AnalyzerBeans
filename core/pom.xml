@@ -63,6 +63,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- HTTP client needed for VFS support of HTTP. Hopefully it will be replaced 
+			by HTTP components (4.x) at some point. -->
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.collections</groupId>
 			<artifactId>collections-generic</artifactId>
