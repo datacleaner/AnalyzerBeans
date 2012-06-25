@@ -57,19 +57,26 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     private static final Logger logger = LoggerFactory.getLogger(HtmlAnalysisResultWriter.class);
 
     private final boolean _tabs;
+    private final boolean _headers;
     private final Predicate<Entry<ComponentJob, AnalyzerResult>> _jobInclusionPredicate;
 
     public HtmlAnalysisResultWriter() {
         this(true);
     }
-    
+
     public HtmlAnalysisResultWriter(boolean tabs) {
         this(tabs, new TruePredicate<Entry<ComponentJob, AnalyzerResult>>());
     }
-
+    
     public HtmlAnalysisResultWriter(boolean tabs, Predicate<Entry<ComponentJob, AnalyzerResult>> jobInclusionPredicate) {
+        this(tabs, jobInclusionPredicate, true);
+    }
+
+    public HtmlAnalysisResultWriter(boolean tabs, Predicate<Entry<ComponentJob, AnalyzerResult>> jobInclusionPredicate,
+            boolean headers) {
         _tabs = tabs;
         _jobInclusionPredicate = jobInclusionPredicate;
+        _headers = headers;
     }
 
     @Override
@@ -287,9 +294,9 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         final String styleName = toStyleName(displayName);
 
         writer.write("<div class=\"analyzerResult " + styleName + "\">");
-        writer.write("<div class=\"analyzerResultHeader\">");
-        writer.write("<h2>" + context.escapeHtml(LabelUtils.getLabel(componentJob)) + "</h2>");
-        writer.write("</div>");
+        if (_headers) {
+            writeHeader(writer, componentJob, context, htmlFragment);
+        }
         writer.write("<div class=\"analyzerResultContent\">\n");
 
         final List<BodyElement> bodyElements = htmlFragment.getBodyElements();
@@ -300,6 +307,14 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         writer.write("</div>");
         writer.write("<div class=\"analyzerResultFooter\"></div>");
         writer.write("</div>\n");
+    }
+
+    protected void writeHeader(Writer writer, ComponentJob componentJob, HtmlRenderingContext context,
+            HtmlFragment htmlFragment) throws IOException {
+        final String label = LabelUtils.getLabel(componentJob);
+        writer.write("<div class=\"analyzerResultHeader\">");
+        writer.write("<h2>" + context.escapeHtml(label) + "</h2>");
+        writer.write("</div>");
     }
 
     protected String toStyleName(String displayName) {
