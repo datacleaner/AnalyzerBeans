@@ -133,26 +133,44 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
         return tableModel;
     }
 
+    /**
+     * 
+     * @param maxRows
+     * @return
+     */
+    public TableModel toTableModel(int maxRows) {
+        if (maxRows < 0) {
+            maxRows = Integer.MAX_VALUE;
+        }
+
+        final InputRow[] rows = getRows();
+        final List<InputColumn<?>> inputColumns = getInputColumns();
+        final String[] headers = new String[inputColumns.size()];
+        for (int i = 0; i < headers.length; i++) {
+            headers[i] = inputColumns.get(i).getName();
+        }
+
+        final int actualRows = Math.min(maxRows, rows.length);
+        final TableModel tableModel = new DefaultTableModel(headers, actualRows);
+        int row = 0;
+        for (InputRow inputRow : rows) {
+            if (actualRows == row) {
+                break;
+            }
+            for (int i = 0; i < inputColumns.size(); i++) {
+                InputColumn<?> inputColumn = inputColumns.get(i);
+                Object value = inputRow.getValue(inputColumn);
+                tableModel.setValueAt(value, row, i);
+            }
+            row++;
+        }
+        return tableModel;
+    }
+
     @Override
     public TableModel toTableModel() {
         if (_tableModel == null) {
-            InputRow[] rows = getRows();
-            List<InputColumn<?>> inputColumns = getInputColumns();
-            String[] headers = new String[inputColumns.size()];
-            for (int i = 0; i < headers.length; i++) {
-                headers[i] = inputColumns.get(i).getName();
-            }
-
-            _tableModel = new DefaultTableModel(headers, rows.length);
-            int row = 0;
-            for (InputRow inputRow : rows) {
-                for (int i = 0; i < inputColumns.size(); i++) {
-                    InputColumn<?> inputColumn = inputColumns.get(i);
-                    Object value = inputRow.getValue(inputColumn);
-                    _tableModel.setValueAt(value, row, i);
-                }
-                row++;
-            }
+            _tableModel = toTableModel(-1);
         }
         return _tableModel;
     }

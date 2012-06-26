@@ -21,7 +21,11 @@ package org.eobjects.analyzer.result;
 
 import javax.swing.table.TableModel;
 
+/**
+ * Interface for all AnalyzerResults that can be represented/visualized as a
+ * {@link TableModel}.
+ */
 public interface TableModelResult extends AnalyzerResult {
 
-	public TableModel toTableModel();
+    public TableModel toTableModel();
 }

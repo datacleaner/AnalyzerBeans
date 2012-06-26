@@ -6,9 +6,9 @@ import scala.xml.XML
  */
 class CompositeBodyElement(cssClassName: String, children: Seq[BodyElement]) extends BodyElement {
 
-  override def toHtml(context: HtmlRenderingContext) = <div class={ cssClassName }>{
-    children.map(elem => {
-      XML.loadString(elem.toHtml(context))
-    })
-  }</div>.toString
+  override def toHtml(context: HtmlRenderingContext): String = {
+    val innerHtml = children.map(_.toHtml(context)).mkString(" ");
+    return "<div class=\"" + cssClassName + "\">" + innerHtml + "</div>";
+  }
+
 }

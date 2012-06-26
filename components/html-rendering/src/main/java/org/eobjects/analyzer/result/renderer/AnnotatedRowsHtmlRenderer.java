@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
+import javax.swing.table.TableModel;
+
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.RendererPrecedence;
@@ -29,6 +31,13 @@ import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
 
 @RendererBean(HtmlRenderingFormat.class)
 public class AnnotatedRowsHtmlRenderer implements Renderer<AnnotatedRowsResult, HtmlFragment> {
+
+    /**
+     * Defines a max number of rows to render in the HTML. Since annotated rows
+     * are considered "samples" we put a rather low maximum here to avoid
+     * creating massive-size HTML renderings.
+     */
+    private static final int MAX_ROWS = 100;
 
     @Override
     public RendererPrecedence getPrecedence(AnnotatedRowsResult renderable) {
@@ -45,8 +54,9 @@ public class AnnotatedRowsHtmlRenderer implements Renderer<AnnotatedRowsResult, 
             highlightedIndexes[i] = result.getColumnIndex(highlightedColumns[i]);
         }
 
-        htmlFragment.addBodyElement(new TableBodyElement(result.toTableModel(), "annotatedRowsTable",
-                highlightedIndexes));
+        final TableModel tableModel = result.toTableModel(MAX_ROWS);
+
+        htmlFragment.addBodyElement(new TableBodyElement(tableModel, "annotatedRowsTable", highlightedIndexes));
         return htmlFragment;
     }
 
