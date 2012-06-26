@@ -31,21 +31,24 @@ import org.eobjects.analyzer.descriptors.Descriptors;
 
 public class ImmutableBeanConfigurationTest extends TestCase {
 
-	@Configured
-	String[] conf;
+    @Configured
+    String[] conf;
 
-	public void testEqualsArrayValue() throws Exception {
-		ComponentDescriptor<? extends ImmutableBeanConfigurationTest> componentDescriptor = Descriptors
-				.ofComponent(getClass());
-		ConfiguredPropertyDescriptor propertyDescriptor = componentDescriptor.getConfiguredProperty("Conf");
-		assertNotNull(propertyDescriptor);
+    public void testEqualsArrayValue() throws Exception {
+        ComponentDescriptor<? extends ImmutableBeanConfigurationTest> componentDescriptor = Descriptors
+                .ofComponent(getClass());
+        ConfiguredPropertyDescriptor propertyDescriptor = componentDescriptor.getConfiguredProperty("Conf");
+        assertNotNull(propertyDescriptor);
 
-		Map<ConfiguredPropertyDescriptor, Object> properties1 = new HashMap<ConfiguredPropertyDescriptor, Object>();
-		properties1.put(propertyDescriptor, new String[] { "hello", "world" });
+        Map<ConfiguredPropertyDescriptor, Object> properties1 = new HashMap<ConfiguredPropertyDescriptor, Object>();
+        properties1.put(propertyDescriptor, new String[] { "hello", "world" });
 
-		Map<ConfiguredPropertyDescriptor, Object> properties2 = new HashMap<ConfiguredPropertyDescriptor, Object>();
-		properties2.put(propertyDescriptor, new String[] { "hello", "world" });
+        Map<ConfiguredPropertyDescriptor, Object> properties2 = new HashMap<ConfiguredPropertyDescriptor, Object>();
+        properties2.put(propertyDescriptor, new String[] { "hello", "world" });
 
-		assertEquals(new ImmutableBeanConfiguration(properties1), new ImmutableBeanConfiguration(properties2));
-	}
+        ImmutableBeanConfiguration conf1 = new ImmutableBeanConfiguration(properties1);
+        ImmutableBeanConfiguration conf2 = new ImmutableBeanConfiguration(properties2);
+        assertEquals(conf1.hashCode(), conf2.hashCode());
+        assertEquals(conf1, conf2);
+    }
 }

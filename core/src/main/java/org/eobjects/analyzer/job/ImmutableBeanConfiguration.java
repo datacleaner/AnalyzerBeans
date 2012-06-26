@@ -68,25 +68,41 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((_properties == null) ? 0 : _properties.hashCode());
-        return result;
+        return prime + _properties.size() + _properties.keySet().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        ImmutableBeanConfiguration other = (ImmutableBeanConfiguration) obj;
-        if (_properties == null) {
-            if (other._properties != null)
+        }
+
+        final ImmutableBeanConfiguration other = (ImmutableBeanConfiguration) obj;
+
+        // since map comparison does not use deep equals for arrays, we need to
+        // do this ourselves!
+
+        final Map<PropertyDescriptor, Object> otherProperties = other._properties;
+        final Set<PropertyDescriptor> configredProperties = _properties.keySet();
+        if (!configredProperties.equals(otherProperties.keySet())) {
+            return false;
+        }
+
+        for (final PropertyDescriptor propertyDescriptor : configredProperties) {
+            final Object value1 = _properties.get(propertyDescriptor);
+            final Object value2 = otherProperties.get(propertyDescriptor);
+            final boolean equals = EqualsBuilder.equals(value1, value2);
+            if (!equals) {
                 return false;
-        } else if (!_properties.equals(other._properties))
-            return false;
+            }
+        }
+
         return true;
     }
 }
