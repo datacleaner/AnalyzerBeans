@@ -88,11 +88,12 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
     }
 
     public AnnotatedRowsResult getAnnotatedRows(String value) {
-        RowAnnotationFactory annotationFactory = _annotationFactoryRef.get();
+        final RowAnnotationFactory annotationFactory = _annotationFactoryRef.get();
         if (_annotations == null || annotationFactory == null) {
             return null;
         }
-        RowAnnotation annotation = _annotations.get(value);
+
+        final RowAnnotation annotation = _annotations.get(value);
         if (annotation == null) {
             return null;
         }
@@ -149,7 +150,7 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
         if (maxEntries != 0) {
             if (_topValues != null && _topValues.getActualSize() > 0) {
                 sb.append("\nTop values:");
-                List<ValueCount> valueCounts = _topValues.getValueCounts();
+                final List<ValueCount> valueCounts = _topValues.getValueCounts();
                 for (ValueCount valueCount : valueCounts) {
                     sb.append("\n - ");
                     sb.append(valueCount.getValue());
@@ -168,7 +169,7 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
         if (maxEntries != 0) {
             if (_bottomValues != null && _bottomValues.getActualSize() > 0) {
                 sb.append("\nBottom values:");
-                List<ValueCount> valueCounts = _bottomValues.getValueCounts();
+                final List<ValueCount> valueCounts = _bottomValues.getValueCounts();
                 for (ValueCount valueCount : valueCounts) {
                     sb.append("\n - ");
                     sb.append(valueCount.getValue());

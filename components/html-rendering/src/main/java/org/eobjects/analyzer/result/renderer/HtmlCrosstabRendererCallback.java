@@ -44,9 +44,9 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
     public HtmlCrosstabRendererCallback(RendererFactory rendererFactory, HtmlRenderingContext htmlRenderingContext) {
         this.rendererFactory = rendererFactory;
         this.htmlRenderingContext = htmlRenderingContext;
-        sb = new StringBuilder();
-        rowNumber = 0;
-        htmlFragtment = new SimpleHtmlFragment();
+        this.sb = new StringBuilder();
+        this.rowNumber = 0;
+        this.htmlFragtment = new SimpleHtmlFragment();
     }
 
     @Override
@@ -87,7 +87,7 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
         } else if (width == 1) {
             sb.append("<td class=\"crosstabHorizontalHeader\">");
         }
-        sb.append(category);
+        sb.append(toHtml(category));
         sb.append("</td>");
     }
 
@@ -103,7 +103,8 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
         } else if (height == 1) {
             sb.append("<td class=\"crosstabVerticalHeader\">");
         }
-        sb.append(category);
+        
+        sb.append(toHtml(category));
         sb.append("</td>");
     }
 

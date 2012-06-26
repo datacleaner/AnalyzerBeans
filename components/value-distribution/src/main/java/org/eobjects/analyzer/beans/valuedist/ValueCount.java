@@ -22,36 +22,51 @@ package org.eobjects.analyzer.beans.valuedist;
 import java.io.Serializable;
 import java.util.List;
 
+import org.eobjects.analyzer.util.NullTolerableComparator;
 import org.eobjects.metamodel.util.BaseObject;
 
-public final class ValueCount extends BaseObject implements Serializable {
+/**
+ * Represents a simple value and count pair, used by the
+ * {@link ValueDistributionAnalyzer} to represent which values occur at what
+ * frequencies.
+ */
+public final class ValueCount extends BaseObject implements Serializable, Comparable<ValueCount> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final String _value;
-	private final int _count;
+    private final String _value;
+    private final int _count;
 
-	public ValueCount(String value, int count) {
-		_value = value;
-		_count = count;
-	}
+    public ValueCount(String value, int count) {
+        _value = value;
+        _count = count;
+    }
 
-	public String getValue() {
-		return _value;
-	}
+    public String getValue() {
+        return _value;
+    }
 
-	public int getCount() {
-		return _count;
-	}
+    public int getCount() {
+        return _count;
+    }
 
-	@Override
-	public String toString() {
-		return "[" + _value + "->" + _count + "]";
-	}
+    @Override
+    public String toString() {
+        return "[" + _value + "->" + _count + "]";
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_value);
-		identifiers.add(_count);
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(_value);
+        identifiers.add(_count);
+    }
+
+    @Override
+    public int compareTo(ValueCount o) {
+        int diff = o.getCount() - getCount();
+        if (diff == 0) {
+            diff = NullTolerableComparator.get(String.class).compare(getValue(), o.getValue());
+        }
+        return diff;
+    }
 }

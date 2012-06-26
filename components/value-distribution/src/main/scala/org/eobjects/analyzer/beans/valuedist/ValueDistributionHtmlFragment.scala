@@ -8,6 +8,9 @@ import org.eobjects.analyzer.result.html.DrillToDetailsBodyElement
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment
 import scala.collection.JavaConversions._
 import org.eobjects.analyzer.result.html.GoogleChartHeadElement
+import java.util.TreeSet
+import org.eobjects.analyzer.util.LabelUtils
+import java.util.Collections
 
 class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFactory: RendererFactory) extends HtmlFragment {
 
@@ -45,6 +48,19 @@ class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFac
 
     frag.addHeadElement(new ValueDistributionChartScriptHeadElement(groupResult, chartElementId));
 
+    // create a big sorted set of value counts.
+    val valueCounts = new TreeSet[ValueCount]();
+    valueCounts.addAll(groupResult.getTopValues().getValueCounts());
+    valueCounts.addAll(groupResult.getBottomValues().getValueCounts());
+
+    if (groupResult.getUniqueCount() > 0) {
+      valueCounts.add(new ValueCount(LabelUtils.UNIQUE_LABEL, groupResult.getUniqueCount()));
+    }
+
+    if (groupResult.getNullCount() > 0) {
+      valueCounts.add(new ValueCount(null, groupResult.getNullCount()));
+    }
+
     return <div class="valueDistributionGroupPanel">
              {
                if (groupResult.getGroupName() != null) {
@@ -56,16 +72,11 @@ class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFac
                </div>
              }
              {
-               if (groupResult.getTopValues().getActualSize() + groupResult.getBottomValues().getActualSize() > 0) {
+               if (!valueCounts.isEmpty()) {
                  <table class="valueDistributionValueTable">
                    {
-                     groupResult.getTopValues().getValueCounts().map(vc => {
-                       <tr><td>{ vc.getValue() }</td><td>{ getCount(groupResult, vc, context) }</td></tr>
-                     })
-                   }
-                   {
-                     groupResult.getBottomValues().getValueCounts().map(vc => {
-                       <tr><td>{ vc.getValue() }</td><td>{ getCount(groupResult, vc, context) }</td></tr>
+                     valueCounts.iterator().map(vc => {
+                       <tr><td>{ LabelUtils.getLabel(vc.getValue()) }</td><td>{ getCount(groupResult, vc, context) }</td></tr>
                      })
                    }
                  </table>
@@ -74,8 +85,6 @@ class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFac
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>{ groupResult.getTotalCount() }</td></tr>
                <tr><td>Distinct count</td><td>{ groupResult.getDistinctCount() }</td></tr>
-               <tr><td>Unique count</td><td>{ groupResult.getUniqueCount() }</td></tr>
-               <tr><td>Null count</td><td>{ groupResult.getNullCount() }</td></tr>
              </table>
            </div>;
   }

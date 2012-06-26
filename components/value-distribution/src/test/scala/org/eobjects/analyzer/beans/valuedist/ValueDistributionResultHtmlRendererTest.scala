@@ -44,26 +44,23 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
              <h3>Group: humaninference.com</h3>
              <div class="valueDistributionChart" id="analysisResultElement4">
                </div>
-             
+             <table class="valueDistributionValueTable">
+                   <tr><td>&lt;unique&gt;</td><td><span>3</span></td></tr>
+                 </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>3</td></tr>
                <tr><td>Distinct count</td><td>3</td></tr>
-               <tr><td>Unique count</td><td>3</td></tr>
-               <tr><td>Null count</td><td>0</td></tr>
              </table>
            </div><div class="valueDistributionGroupPanel">
              <h3>Group: eobjects.dk</h3>
              <div class="valueDistributionChart" id="analysisResultElement1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement3'); return false;" href="#">2</a></td></tr>
-                   
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><span>1</span></td></tr><tr><td>&lt;unique&gt;</td><td><span>1</span></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>8</td></tr>
                <tr><td>Distinct count</td><td>4</td></tr>
-               <tr><td>Unique count</td><td>1</td></tr>
-               <tr><td>Null count</td><td>1</td></tr>
              </table>
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
@@ -121,7 +118,9 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals(3, htmlFragment.getBodyElements().size());
     Assert.assertEquals(2, htmlFragment.getHeadElements().size());
 
-    var html = htmlFragment.getBodyElements().get(0).toHtml(context);
+    var html: String = null;
+    
+    html = htmlFragment.getBodyElements().get(0).toHtml(context);
     Assert.assertEquals("""<div id="analysisResultElement2" class="drillToDetailsPanel" style="display:none;">
 <table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td class="highlighted">kasper</td></tr><tr class="odd"><td class="highlighted">kasper</td></tr></table>
 </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
@@ -138,14 +137,11 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
              <div class="valueDistributionChart" id="analysisResultElement1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement3'); return false;" href="#">3</a></td></tr>
-                   
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement3'); return false;" href="#">3</a></td></tr><tr><td>&lt;unique&gt;</td><td><span>1</span></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>13</td></tr>
                <tr><td>Distinct count</td><td>3</td></tr>
-               <tr><td>Unique count</td><td>1</td></tr>
-               <tr><td>Null count</td><td>0</td></tr>
              </table>
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
