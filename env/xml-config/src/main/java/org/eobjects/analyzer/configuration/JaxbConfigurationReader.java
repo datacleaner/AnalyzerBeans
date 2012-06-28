@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,10 @@ import org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.OpenOfficeDatabaseDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.PojoDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.PojoTableType;
+import org.eobjects.analyzer.configuration.jaxb.PojoTableType.Columns.Column;
+import org.eobjects.analyzer.configuration.jaxb.PojoTableType.Rows.Row;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.StringPatterns;
@@ -91,6 +96,7 @@ import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
+import org.eobjects.analyzer.connection.PojoDatastore;
 import org.eobjects.analyzer.connection.SasDatastore;
 import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
@@ -125,9 +131,12 @@ import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.analyzer.util.convert.StandardTypeConverter;
 import org.eobjects.analyzer.util.convert.StringConverter;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
+import org.eobjects.metamodel.pojo.ArrayTableDataProvider;
+import org.eobjects.metamodel.pojo.TableDataProvider;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.util.FileHelper;
 import org.eobjects.metamodel.util.SimpleTableDef;
@@ -547,11 +556,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
     private DatastoreCatalog createDatastoreCatalog(DatastoreCatalogType datastoreCatalogType,
             InjectionManager injectionManager) {
-        Map<String, Datastore> datastores = new HashMap<String, Datastore>();
+        final Map<String, Datastore> datastores = new HashMap<String, Datastore>();
 
-        List<Object> datastoreTypes = datastoreCatalogType.getJdbcDatastoreOrAccessDatastoreOrCsvDatastore();
+        final List<Object> datastoreTypes = datastoreCatalogType.getJdbcDatastoreOrAccessDatastoreOrCsvDatastore();
 
-        List<CsvDatastoreType> csvDatastores = CollectionUtils2.filterOnClass(datastoreTypes, CsvDatastoreType.class);
+        final List<CsvDatastoreType> csvDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+                CsvDatastoreType.class);
         for (CsvDatastoreType csvDatastoreType : csvDatastores) {
             String name = csvDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
@@ -609,7 +619,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<FixedWidthDatastoreType> fixedWidthDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<FixedWidthDatastoreType> fixedWidthDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 FixedWidthDatastoreType.class);
         for (FixedWidthDatastoreType fixedWidthDatastore : fixedWidthDatastores) {
             String name = fixedWidthDatastore.getName();
@@ -656,7 +666,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<SasDatastoreType> sasDatastores = CollectionUtils2.filterOnClass(datastoreTypes, SasDatastoreType.class);
+        final List<SasDatastoreType> sasDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+                SasDatastoreType.class);
         for (SasDatastoreType sasDatastoreType : sasDatastores) {
             final String name = sasDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
@@ -669,7 +680,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<AccessDatastoreType> accessDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<AccessDatastoreType> accessDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 AccessDatastoreType.class);
         for (AccessDatastoreType accessDatastoreType : accessDatastores) {
             String name = accessDatastoreType.getName();
@@ -683,7 +694,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<XmlDatastoreType> xmlDatastores = CollectionUtils2.filterOnClass(datastoreTypes, XmlDatastoreType.class);
+        final List<XmlDatastoreType> xmlDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+                XmlDatastoreType.class);
         for (XmlDatastoreType xmlDatastoreType : xmlDatastores) {
             String name = xmlDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
@@ -709,7 +721,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<ExcelDatastoreType> excelDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<ExcelDatastoreType> excelDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 ExcelDatastoreType.class);
         for (ExcelDatastoreType excelDatastoreType : excelDatastores) {
             String name = excelDatastoreType.getName();
@@ -723,8 +735,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<JdbcDatastoreType> jdbcDatastores = CollectionUtils2
-                .filterOnClass(datastoreTypes, JdbcDatastoreType.class);
+        final List<JdbcDatastoreType> jdbcDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+                JdbcDatastoreType.class);
         for (JdbcDatastoreType jdbcDatastoreType : jdbcDatastores) {
             String name = jdbcDatastoreType.getName();
             checkName(name, Datastore.class, datastores);
@@ -756,7 +768,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<DbaseDatastoreType> dbaseDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<DbaseDatastoreType> dbaseDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 DbaseDatastoreType.class);
         for (DbaseDatastoreType dbaseDatastoreType : dbaseDatastores) {
             String name = dbaseDatastoreType.getName();
@@ -775,7 +787,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<OpenOfficeDatabaseDatastoreType> odbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<OpenOfficeDatabaseDatastoreType> odbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 OpenOfficeDatabaseDatastoreType.class);
         for (OpenOfficeDatabaseDatastoreType odbDatastoreType : odbDatastores) {
             String name = odbDatastoreType.getName();
@@ -792,7 +804,71 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<CouchdbDatastoreType> couchDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<PojoDatastoreType> pojoDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+                PojoDatastoreType.class);
+        for (PojoDatastoreType pojoDatastore : pojoDatastores) {
+            final String name = pojoDatastore.getName();
+            checkName(name, Datastore.class, datastores);
+
+            addVariablePath(name);
+
+            final String schemaName = (pojoDatastore.getSchemaName() == null ? name : pojoDatastore.getSchemaName());
+
+            final List<TableDataProvider<?>> tableDataProviders = new ArrayList<TableDataProvider<?>>();
+            final List<PojoTableType> tables = pojoDatastore.getTable();
+            for (PojoTableType table : tables) {
+                final String tableName = table.getName();
+
+                final List<Column> columns = table.getColumns().getColumn();
+                final int columnCount = columns.size();
+                final String[] columnNames = new String[columnCount];
+                final ColumnType[] columnTypes = new ColumnType[columnCount];
+
+                for (int i = 0; i < columnCount; i++) {
+                    final Column column = columns.get(i);
+                    columnNames[i] = column.getName();
+                    columnTypes[i] = ColumnType.valueOf(column.getType());
+                }
+
+                final SimpleTableDef tableDef = new SimpleTableDef(tableName, columnNames, columnTypes);
+
+                final Collection<Object[]> arrays = new ArrayList<Object[]>();
+                final List<Row> rows = table.getRows().getRow();
+                for (Row row : rows) {
+                    final List<String> values = row.getV();
+                    if (values.size() != columnCount) {
+                        throw new IllegalStateException("Row value count is not equal to column count in datastore '"
+                                + name + "'. Expected " + columnCount + " values, found " + values.size());
+                    }
+                    final Object[] array = new Object[columnCount];
+                    for (int i = 0; i < array.length; i++) {
+                        final StandardTypeConverter converter = new StandardTypeConverter();
+                        final Class<?> expectedClass = columnTypes[i].getJavaEquivalentClass();
+                        final String stringValue = values.get(i);
+                        final Object value;
+                        if (StringUtils.isNullOrEmpty(stringValue)) {
+                            value = null;
+                        } else {
+                            value = converter.fromString(expectedClass, stringValue);
+                        }
+                        array[i] = value;
+                    }
+                    arrays.add(array);
+                }
+
+                final TableDataProvider<?> tableDataProvider = new ArrayTableDataProvider(tableDef, arrays);
+                tableDataProviders.add(tableDataProvider);
+            }
+
+            final PojoDatastore ds = new PojoDatastore(name, schemaName, tableDataProviders);
+            ds.setDescription(pojoDatastore.getDescription());
+
+            datastores.put(name, ds);
+
+            removeVariablePath();
+        }
+
+        final List<CouchdbDatastoreType> couchDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 CouchdbDatastoreType.class);
         for (CouchdbDatastoreType couchdbDatastoreType : couchDbDatastores) {
             String name = couchdbDatastoreType.getName();
@@ -845,7 +921,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<MongodbDatastoreType> mongoDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<MongodbDatastoreType> mongoDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 MongodbDatastoreType.class);
         for (MongodbDatastoreType mongodbDatastoreType : mongoDbDatastores) {
             String name = mongodbDatastoreType.getName();
@@ -899,7 +975,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             removeVariablePath();
         }
 
-        List<CustomElementType> customDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<CustomElementType> customDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 CustomElementType.class);
         for (CustomElementType customElementType : customDatastores) {
             Datastore ds = createCustomElement(customElementType, Datastore.class, injectionManager, true);
@@ -908,7 +984,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             datastores.put(name, ds);
         }
 
-        List<CompositeDatastoreType> compositeDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
+        final List<CompositeDatastoreType> compositeDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 CompositeDatastoreType.class);
         for (CompositeDatastoreType compositeDatastoreType : compositeDatastores) {
             String name = compositeDatastoreType.getName();

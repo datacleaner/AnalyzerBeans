@@ -32,6 +32,8 @@ import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
+import org.eobjects.analyzer.connection.PojoDatastore;
+import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -45,6 +47,8 @@ import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.util.SimpleTableDef;
 import org.junit.Assert;
 
@@ -104,7 +108,8 @@ public class JaxbConfigurationReaderTest extends TestCase {
         DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
         String[] datastoreNames = datastoreCatalog.getDatastoreNames();
         assertEquals(
-                "[my couch, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_sas, my_sax_xml]",
+                "[my couch, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, "
+                        + "my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_pojo, my_sas, my_sax_xml]",
                 Arrays.toString(datastoreNames));
 
         assertEquals("a mongo db based datastore", datastoreCatalog.getDatastore("my mongo").getDescription());
@@ -120,6 +125,46 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("comp", datastoreCatalog.getDatastore("my_composite").getDescription());
         assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
         assertEquals("folder of sas7bdat files", datastoreCatalog.getDatastore("my_sas").getDescription());
+        assertEquals("A datastore based on plain values", datastoreCatalog.getDatastore("my_pojo").getDescription());
+
+        PojoDatastore pojoDatastore = (PojoDatastore) datastoreCatalog.getDatastore("my_pojo");
+        {
+            UpdateableDatastoreConnection con = pojoDatastore.openConnection();
+            try {
+                DataContext dc = con.getDataContext();
+                Schema schema = dc.getDefaultSchema();
+                assertEquals("my_schema", schema.getName());
+                assertEquals(2, schema.getTableCount());
+                assertEquals("[table1, table2]", Arrays.toString(schema.getTableNames()));
+
+                assertEquals(
+                        "[Column[name=Foo,columnNumber=0,type=VARCHAR,nullable=true,indexed=false,nativeType=null,columnSize=null], "
+                                + "Column[name=Bar,columnNumber=1,type=INTEGER,nullable=true,indexed=false,nativeType=null,columnSize=null]]",
+                        Arrays.toString(schema.getTable(0).getColumns()));
+                assertEquals(
+                        "[Column[name=Baz,columnNumber=0,type=BOOLEAN,nullable=true,indexed=false,nativeType=null,columnSize=null]]",
+                        Arrays.toString(schema.getTable(1).getColumns()));
+                
+                DataSet ds = dc.query().from("table1").select("Foo","Bar").execute();
+                assertTrue(ds.next());
+                assertEquals("Row[values=[Hello, 1]]", ds.getRow().toString());
+                assertEquals(String.class, ds.getRow().getValue(0).getClass());
+                assertEquals(Integer.class, ds.getRow().getValue(1).getClass());
+                
+                assertTrue(ds.next());
+                assertEquals("Row[values=[There, null]]", ds.getRow().toString());
+                assertNull(ds.getRow().getValue(1));
+                
+                ds.close();
+                
+                ds = dc.query().from("table2").select("Baz").execute();
+                assertTrue(ds.next());
+                assertEquals("Row[values=[true]]", ds.getRow().toString());
+                assertEquals(Boolean.class, ds.getRow().getValue(0).getClass());
+            } finally {
+                con.close();
+            }
+        }
 
         CouchDbDatastore couchDbDatastore = (CouchDbDatastore) datastoreCatalog.getDatastore("my couch");
         assertEquals("localhost", couchDbDatastore.getHostname());
@@ -166,13 +211,18 @@ public class JaxbConfigurationReaderTest extends TestCase {
         }
 
         Datastore compositeDatastore = datastoreCatalog.getDatastore("my_composite");
-        DatastoreConnection con = compositeDatastore.openConnection();
-        DataContext dataContext = con.getDataContext();
-        String[] schemaNames = dataContext.getSchemaNames();
-        assertEquals(
-                "[INFORMATION_SCHEMA, PUBLIC, Spreadsheet2003.xls, developers.mdb, employees.csv, information_schema]",
-                Arrays.toString(schemaNames));
-        con.close();
+        {
+            DatastoreConnection con = compositeDatastore.openConnection();
+            try {
+                DataContext dataContext = con.getDataContext();
+                String[] schemaNames = dataContext.getSchemaNames();
+                assertEquals(
+                        "[INFORMATION_SCHEMA, PUBLIC, Spreadsheet2003.xls, developers.mdb, employees.csv, information_schema]",
+                        Arrays.toString(schemaNames));
+            } finally {
+                con.close();
+            }
+        }
     }
 
     private AnalyzerBeansConfiguration getConfiguration() {
@@ -192,8 +242,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         String[] dictionaryNames = referenceDataCatalog.getDictionaryNames();
         assertEquals("[custom_dict, datastore_dict, textfile_dict, valuelist_dict]", Arrays.toString(dictionaryNames));
 
-        LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf.getInjectionManager(
-                null), null);
+        LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf.getInjectionManager(null), null);
 
         Dictionary d = referenceDataCatalog.getDictionary("datastore_dict");
         assertEquals("dict_ds", d.getDescription());

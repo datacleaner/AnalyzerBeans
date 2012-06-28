@@ -94,7 +94,7 @@
 				</property>
 			</table-def>
 		</mongodb-datastore>
-		
+
 		<couchdb-datastore name="my couch">
 			<hostname>localhost</hostname>
 			<username>user</username>
@@ -123,6 +123,55 @@
 			<property name="Xml file" value="pom.xml" />
 			<property name="Description" value="custom" />
 		</custom-datastore>
+
+		<pojo-datastore name="my_pojo"
+			description="A datastore based on plain values">
+			<schema-name>my_schema</schema-name>
+			<table>
+				<name>table1</name>
+				<columns>
+					<column>
+						<name>Foo</name>
+						<type>VARCHAR</type>
+					</column>
+					<column>
+						<name>Bar</name>
+						<type>INTEGER</type>
+					</column>
+				</columns>
+				<rows>
+					<row>
+						<v>Hello</v>
+						<v>1</v>
+					</row>
+					<row>
+						<v>There</v>
+						<v />
+					</row>
+					<row>
+						<v>World</v>
+						<v>3</v>
+					</row>
+				</rows>
+			</table>
+			<table>
+				<name>table2</name>
+				<columns>
+					<column>
+						<name>Baz</name>
+						<type>BOOLEAN</type>
+					</column>
+				</columns>
+				<rows>
+					<row>
+						<v>true</v>
+					</row>
+					<row>
+						<v>false</v>
+					</row>
+				</rows>
+			</table>
+		</pojo-datastore>
 
 		<composite-datastore name="my_composite"
 			description="comp">

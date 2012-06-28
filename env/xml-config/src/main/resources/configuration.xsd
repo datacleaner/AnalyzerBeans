@@ -254,6 +254,15 @@
 					</documentation>
 				</annotation>
 			</element>
+			<element name="pojo-datastore" type="ab:pojoDatastoreType"
+				minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						Defines an in-memory datastore based on Plain Old
+						Java Objects (POJOs).
+					</documentation>
+				</annotation>
+			</element>
 			<element name="composite-datastore" type="ab:compositeDatastoreType"
 				minOccurs="0" maxOccurs="unbounded">
 				<annotation>
@@ -316,6 +325,50 @@
 		</sequence>
 		<attribute name="name" type="string" use="required" />
 		<attribute name="description" type="string" use="optional" />
+	</complexType>
+
+	<complexType name="pojoDatastoreType">
+		<sequence>
+			<element name="schema-name" minOccurs="0" maxOccurs="1" type="string" />
+			<element name="table" minOccurs="0" maxOccurs="unbounded"
+				type="ab:pojoTableType" />
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+		<attribute name="description" type="string" use="optional" />
+	</complexType>
+
+	<complexType name="pojoTableType">
+		<sequence>
+			<element name="name" minOccurs="1" maxOccurs="1" type="string" />
+			<element name="columns" minOccurs="1" maxOccurs="1">
+				<complexType>
+					<sequence>
+						<element name="column" minOccurs="1" maxOccurs="unbounded">
+							<complexType>
+								<sequence>
+									<element name="name" minOccurs="1" maxOccurs="1" type="string" />
+									<element name="type" minOccurs="1" maxOccurs="1" type="string" />
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="rows" minOccurs="1" maxOccurs="1">
+				<complexType>
+					<sequence>
+						<element name="row" minOccurs="1" maxOccurs="unbounded">
+							<complexType>
+								<sequence>
+									<element name="v" minOccurs="1" maxOccurs="unbounded"
+										type="string" />
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
 	</complexType>
 
 	<complexType name="mongodbDatastoreType">
