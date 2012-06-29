@@ -753,7 +753,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 final List<String> values = row.getV();
                 if (values.size() != columnCount) {
                     throw new IllegalStateException("Row value count is not equal to column count in datastore '"
-                            + name + "'. Expected " + columnCount + " values, found " + values.size());
+                            + name + "'. Expected " + columnCount + " values, found " + values.size() + " (table "
+                            + tableName + ", row no. " + arrays.size() + ")");
                 }
                 final Object[] array = new Object[columnCount];
                 for (int i = 0; i < array.length; i++) {

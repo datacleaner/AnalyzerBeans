@@ -371,7 +371,7 @@
 							<complexType>
 								<sequence>
 									<element name="v" minOccurs="1" maxOccurs="unbounded"
-										type="string" />
+										type="string" nillable="true" />
 								</sequence>
 							</complexType>
 						</element>
