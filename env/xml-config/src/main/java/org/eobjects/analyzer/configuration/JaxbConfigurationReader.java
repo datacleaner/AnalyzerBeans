@@ -39,6 +39,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.eobjects.analyzer.configuration.jaxb.AbstractDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.BerkeleyDbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType;
@@ -558,425 +559,55 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             InjectionManager injectionManager) {
         final Map<String, Datastore> datastores = new HashMap<String, Datastore>();
 
-        final List<Object> datastoreTypes = datastoreCatalogType.getJdbcDatastoreOrAccessDatastoreOrCsvDatastore();
-
-        final List<CsvDatastoreType> csvDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                CsvDatastoreType.class);
-        for (CsvDatastoreType csvDatastoreType : csvDatastores) {
-            String name = csvDatastoreType.getName();
+        // read all single, non-custom datastores
+        final List<AbstractDatastoreType> datastoreTypes = datastoreCatalogType
+                .getJdbcDatastoreOrAccessDatastoreOrCsvDatastore();
+        for (AbstractDatastoreType datastoreType : datastoreTypes) {
+            final String name = datastoreType.getName();
             checkName(name, Datastore.class, datastores);
-
             addVariablePath(name);
 
-            String filename = _interceptor
-                    .createFilename(getStringVariable("filename", csvDatastoreType.getFilename()));
-
-            String quoteCharString = getStringVariable("quoteChar", csvDatastoreType.getQuoteChar());
-            Character quoteChar = null;
-
-            String separatorCharString = getStringVariable("separatorChar", csvDatastoreType.getSeparatorChar());
-            Character separatorChar = null;
-
-            String escapeCharString = getStringVariable("escapeChar", csvDatastoreType.getEscapeChar());
-            Character escapeChar = null;
-
-            if (!StringUtils.isNullOrEmpty(separatorCharString)) {
-                assert separatorCharString.length() == 1;
-                separatorChar = separatorCharString.charAt(0);
-            }
-
-            if (!StringUtils.isNullOrEmpty(quoteCharString)) {
-                assert quoteCharString.length() == 1;
-                quoteChar = quoteCharString.charAt(0);
-            }
-
-            if (!StringUtils.isNullOrEmpty(escapeCharString)) {
-                assert escapeCharString.length() == 1;
-                escapeChar = escapeCharString.charAt(0);
-            }
-
-            String encoding = getStringVariable("encoding", csvDatastoreType.getEncoding());
-            if (StringUtils.isNullOrEmpty(encoding)) {
-                encoding = FileHelper.UTF_8_ENCODING;
-            }
-
-            Boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
-                    csvDatastoreType.isFailOnInconsistencies());
-            if (failOnInconsistencies == null) {
-                failOnInconsistencies = true;
-            }
-
-            Integer headerLineNumber = getIntegerVariable("headerLineNumber", csvDatastoreType.getHeaderLineNumber());
-            if (headerLineNumber == null) {
-                headerLineNumber = CsvConfiguration.DEFAULT_COLUMN_NAME_LINE;
-            }
-
-            CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, escapeChar, encoding,
-                    failOnInconsistencies, headerLineNumber);
-            ds.setDescription(csvDatastoreType.getDescription());
-            datastores.put(name, ds);
-
-            removeVariablePath();
-        }
-
-        final List<FixedWidthDatastoreType> fixedWidthDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                FixedWidthDatastoreType.class);
-        for (FixedWidthDatastoreType fixedWidthDatastore : fixedWidthDatastores) {
-            String name = fixedWidthDatastore.getName();
-            checkName(name, Datastore.class, datastores);
-
-            addVariablePath(name);
-
-            String filename = _interceptor.createFilename(getStringVariable("filename",
-                    fixedWidthDatastore.getFilename()));
-            String encoding = getStringVariable("encoding", fixedWidthDatastore.getEncoding());
-            if (!StringUtils.isNullOrEmpty(encoding)) {
-                encoding = FileHelper.UTF_8_ENCODING;
-            }
-
-            Boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
-                    fixedWidthDatastore.isFailOnInconsistencies());
-            if (failOnInconsistencies == null) {
-                failOnInconsistencies = true;
-            }
-
-            Integer headerLineNumber = getIntegerVariable("headerLineNumber", fixedWidthDatastore.getHeaderLineNumber());
-            if (headerLineNumber == null) {
-                headerLineNumber = FixedWidthConfiguration.DEFAULT_COLUMN_NAME_LINE;
-            }
-
-            final FixedWidthDatastore ds;
-            final Integer fixedValueWidth = getIntegerVariable("fixedValueWidth",
-                    fixedWidthDatastore.getFixedValueWidth());
-            if (fixedValueWidth == null) {
-                final List<Integer> valueWidthsBoxed = fixedWidthDatastore.getValueWidth();
-                int[] valueWidths = new int[valueWidthsBoxed.size()];
-                for (int i = 0; i < valueWidths.length; i++) {
-                    valueWidths[i] = valueWidthsBoxed.get(i).intValue();
-                }
-                ds = new FixedWidthDatastore(name, filename, encoding, valueWidths, failOnInconsistencies,
-                        headerLineNumber.intValue());
+            final Datastore ds;
+            if (datastoreType instanceof CsvDatastoreType) {
+                ds = createDatastore(name, (CsvDatastoreType) datastoreType);
+            } else if (datastoreType instanceof JdbcDatastoreType) {
+                ds = createDatastore(name, (JdbcDatastoreType) datastoreType);
+            } else if (datastoreType instanceof FixedWidthDatastoreType) {
+                ds = createDatastore(name, (FixedWidthDatastoreType) datastoreType);
+            } else if (datastoreType instanceof SasDatastoreType) {
+                ds = createDatastore(name, (SasDatastoreType) datastoreType);
+            } else if (datastoreType instanceof AccessDatastoreType) {
+                ds = createDatastore(name, (AccessDatastoreType) datastoreType);
+            } else if (datastoreType instanceof XmlDatastoreType) {
+                ds = createDatastore(name, (XmlDatastoreType) datastoreType);
+            } else if (datastoreType instanceof ExcelDatastoreType) {
+                ds = createDatastore(name, (ExcelDatastoreType) datastoreType);
+            } else if (datastoreType instanceof DbaseDatastoreType) {
+                ds = createDatastore(name, (DbaseDatastoreType) datastoreType);
+            } else if (datastoreType instanceof OpenOfficeDatabaseDatastoreType) {
+                ds = createDatastore(name, (OpenOfficeDatabaseDatastoreType) datastoreType);
+            } else if (datastoreType instanceof PojoDatastoreType) {
+                ds = createDatastore(name, (PojoDatastoreType) datastoreType);
+            } else if (datastoreType instanceof CouchdbDatastoreType) {
+                ds = createDatastore(name, (CouchdbDatastoreType) datastoreType);
+            } else if (datastoreType instanceof MongodbDatastoreType) {
+                ds = createDatastore(name, (MongodbDatastoreType) datastoreType);
+            } else if (datastoreType instanceof CompositeDatastoreType) {
+                // skip composite datastores at this point
+                continue;
             } else {
-                ds = new FixedWidthDatastore(name, filename, encoding, fixedValueWidth, failOnInconsistencies,
-                        headerLineNumber.intValue());
-            }
-            ds.setDescription(fixedWidthDatastore.getDescription());
-            datastores.put(name, ds);
-
-            removeVariablePath();
-        }
-
-        final List<SasDatastoreType> sasDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                SasDatastoreType.class);
-        for (SasDatastoreType sasDatastoreType : sasDatastores) {
-            final String name = sasDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-            addVariablePath(name);
-            String directoryPath = getStringVariable("directory", sasDatastoreType.getDirectory());
-            final File directory = new File(directoryPath);
-            final SasDatastore ds = new SasDatastore(name, directory);
-            ds.setDescription(sasDatastoreType.getDescription());
-            datastores.put(name, ds);
-            removeVariablePath();
-        }
-
-        final List<AccessDatastoreType> accessDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                AccessDatastoreType.class);
-        for (AccessDatastoreType accessDatastoreType : accessDatastores) {
-            String name = accessDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-            addVariablePath(name);
-            String filenamePath = getStringVariable("filename", accessDatastoreType.getFilename());
-            String filename = _interceptor.createFilename(filenamePath);
-            AccessDatastore ds = new AccessDatastore(name, filename);
-            ds.setDescription(accessDatastoreType.getDescription());
-            datastores.put(name, ds);
-            removeVariablePath();
-        }
-
-        final List<XmlDatastoreType> xmlDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                XmlDatastoreType.class);
-        for (XmlDatastoreType xmlDatastoreType : xmlDatastores) {
-            String name = xmlDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-            addVariablePath(name);
-            String filenamePath = getStringVariable("filename", xmlDatastoreType.getFilename());
-            String filename = _interceptor.createFilename(filenamePath);
-            List<TableDef> tableDefList = xmlDatastoreType.getTableDef();
-            final XmlSaxTableDef[] tableDefs;
-            if (tableDefList.isEmpty()) {
-                tableDefs = null;
-            } else {
-                tableDefs = new XmlSaxTableDef[tableDefList.size()];
-                for (int i = 0; i < tableDefs.length; i++) {
-                    String rowXpath = tableDefList.get(i).getRowXpath();
-                    String[] valueXpaths = tableDefList.get(i).getValueXpath().toArray(new String[0]);
-                    tableDefs[i] = new XmlSaxTableDef(rowXpath, valueXpaths);
-                }
+                throw new UnsupportedOperationException("Unsupported datastore type: " + datastoreType);
             }
 
-            XmlDatastore ds = new XmlDatastore(name, filename, tableDefs);
-            ds.setDescription(xmlDatastoreType.getDescription());
-            datastores.put(name, ds);
-            removeVariablePath();
-        }
-
-        final List<ExcelDatastoreType> excelDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                ExcelDatastoreType.class);
-        for (ExcelDatastoreType excelDatastoreType : excelDatastores) {
-            String name = excelDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-            addVariablePath(name);
-            String filenamePath = getStringVariable("filename", excelDatastoreType.getFilename());
-            String filename = _interceptor.createFilename(filenamePath);
-            ExcelDatastore ds = new ExcelDatastore(name, filename);
-            ds.setDescription(excelDatastoreType.getDescription());
-            datastores.put(name, ds);
-            removeVariablePath();
-        }
-
-        final List<JdbcDatastoreType> jdbcDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                JdbcDatastoreType.class);
-        for (JdbcDatastoreType jdbcDatastoreType : jdbcDatastores) {
-            String name = jdbcDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-
-            addVariablePath(name);
-
-            JdbcDatastore ds;
-
-            String datasourceJndiUrl = getStringVariable("jndiUrl", jdbcDatastoreType.getDatasourceJndiUrl());
-            if (datasourceJndiUrl == null) {
-                String url = getStringVariable("url", jdbcDatastoreType.getUrl());
-                String driver = getStringVariable("driver", jdbcDatastoreType.getDriver());
-                String username = getStringVariable("username", jdbcDatastoreType.getUsername());
-                String password = getStringVariable("password", jdbcDatastoreType.getPassword());
-                Boolean multipleConnections = getBooleanVariable("multipleConnections",
-                        jdbcDatastoreType.isMultipleConnections());
-                if (multipleConnections == null) {
-                    multipleConnections = true;
-                }
-                ds = new JdbcDatastore(name, url, driver, username, password, multipleConnections.booleanValue());
-            } else {
-                ds = new JdbcDatastore(name, datasourceJndiUrl);
-            }
-
-            ds.setDescription(jdbcDatastoreType.getDescription());
-
-            datastores.put(name, ds);
+            final String datastoreDescription = datastoreType.getDescription();
+            ds.setDescription(datastoreDescription);
 
             removeVariablePath();
-        }
-
-        final List<DbaseDatastoreType> dbaseDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                DbaseDatastoreType.class);
-        for (DbaseDatastoreType dbaseDatastoreType : dbaseDatastores) {
-            String name = dbaseDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-
-            addVariablePath(name);
-
-            String filenamePath = getStringVariable("filename", dbaseDatastoreType.getFilename());
-            String filename = _interceptor.createFilename(filenamePath);
-            DbaseDatastore ds = new DbaseDatastore(name, filename);
-
-            ds.setDescription(dbaseDatastoreType.getDescription());
-
             datastores.put(name, ds);
-
-            removeVariablePath();
         }
 
-        final List<OpenOfficeDatabaseDatastoreType> odbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                OpenOfficeDatabaseDatastoreType.class);
-        for (OpenOfficeDatabaseDatastoreType odbDatastoreType : odbDatastores) {
-            String name = odbDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-
-            addVariablePath(name);
-
-            String filenamePath = getStringVariable("filename", odbDatastoreType.getFilename());
-            String filename = _interceptor.createFilename(filenamePath);
-            OdbDatastore ds = new OdbDatastore(name, filename);
-            ds.setDescription(odbDatastoreType.getDescription());
-            datastores.put(name, ds);
-
-            removeVariablePath();
-        }
-
-        final List<PojoDatastoreType> pojoDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                PojoDatastoreType.class);
-        for (PojoDatastoreType pojoDatastore : pojoDatastores) {
-            final String name = pojoDatastore.getName();
-            checkName(name, Datastore.class, datastores);
-
-            addVariablePath(name);
-
-            final String schemaName = (pojoDatastore.getSchemaName() == null ? name : pojoDatastore.getSchemaName());
-
-            final List<TableDataProvider<?>> tableDataProviders = new ArrayList<TableDataProvider<?>>();
-            final List<PojoTableType> tables = pojoDatastore.getTable();
-            for (PojoTableType table : tables) {
-                final String tableName = table.getName();
-
-                final List<Column> columns = table.getColumns().getColumn();
-                final int columnCount = columns.size();
-                final String[] columnNames = new String[columnCount];
-                final ColumnType[] columnTypes = new ColumnType[columnCount];
-
-                for (int i = 0; i < columnCount; i++) {
-                    final Column column = columns.get(i);
-                    columnNames[i] = column.getName();
-                    columnTypes[i] = ColumnType.valueOf(column.getType());
-                }
-
-                final SimpleTableDef tableDef = new SimpleTableDef(tableName, columnNames, columnTypes);
-
-                final Collection<Object[]> arrays = new ArrayList<Object[]>();
-                final List<Row> rows = table.getRows().getRow();
-                for (Row row : rows) {
-                    final List<String> values = row.getV();
-                    if (values.size() != columnCount) {
-                        throw new IllegalStateException("Row value count is not equal to column count in datastore '"
-                                + name + "'. Expected " + columnCount + " values, found " + values.size());
-                    }
-                    final Object[] array = new Object[columnCount];
-                    for (int i = 0; i < array.length; i++) {
-                        final StandardTypeConverter converter = new StandardTypeConverter();
-                        final Class<?> expectedClass = columnTypes[i].getJavaEquivalentClass();
-                        final String stringValue = values.get(i);
-                        final Object value;
-                        if (StringUtils.isNullOrEmpty(stringValue)) {
-                            value = null;
-                        } else {
-                            value = converter.fromString(expectedClass, stringValue);
-                        }
-                        array[i] = value;
-                    }
-                    arrays.add(array);
-                }
-
-                final TableDataProvider<?> tableDataProvider = new ArrayTableDataProvider(tableDef, arrays);
-                tableDataProviders.add(tableDataProvider);
-            }
-
-            final PojoDatastore ds = new PojoDatastore(name, schemaName, tableDataProviders);
-            ds.setDescription(pojoDatastore.getDescription());
-
-            datastores.put(name, ds);
-
-            removeVariablePath();
-        }
-
-        final List<CouchdbDatastoreType> couchDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                CouchdbDatastoreType.class);
-        for (CouchdbDatastoreType couchdbDatastoreType : couchDbDatastores) {
-            String name = couchdbDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-
-            addVariablePath(name);
-
-            String hostname = getStringVariable("hostname", couchdbDatastoreType.getHostname());
-            Integer port = getIntegerVariable("port", couchdbDatastoreType.getPort());
-            String username = getStringVariable("username", couchdbDatastoreType.getUsername());
-            String password = getStringVariable("password", couchdbDatastoreType.getPassword());
-            Boolean sslEnabled = getBooleanVariable("ssl", couchdbDatastoreType.isSsl());
-
-            List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef> tableDefList = couchdbDatastoreType
-                    .getTableDef();
-            final SimpleTableDef[] tableDefs;
-            if (tableDefList.isEmpty()) {
-                tableDefs = null;
-            } else {
-                tableDefs = new SimpleTableDef[tableDefList.size()];
-                for (int i = 0; i < tableDefs.length; i++) {
-                    org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef tableDef = tableDefList
-                            .get(i);
-                    String databaseName = tableDef.getDatabase();
-                    List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef.Field> fieldList = tableDef
-                            .getField();
-                    String[] propertyNames = new String[fieldList.size()];
-                    ColumnType[] columnTypes = new ColumnType[fieldList.size()];
-                    for (int j = 0; j < columnTypes.length; j++) {
-                        String propertyName = fieldList.get(j).getName();
-                        String propertyTypeName = fieldList.get(j).getType();
-                        final ColumnType propertyType;
-                        if (StringUtils.isNullOrEmpty(propertyTypeName)) {
-                            propertyType = ColumnType.VARCHAR;
-                        } else {
-                            propertyType = ColumnType.valueOf(propertyTypeName);
-                        }
-                        propertyNames[j] = propertyName;
-                        columnTypes[j] = propertyType;
-                    }
-
-                    tableDefs[i] = new SimpleTableDef(databaseName, propertyNames, columnTypes);
-                }
-            }
-
-            CouchDbDatastore ds = new CouchDbDatastore(name, hostname, port, username, password, sslEnabled, tableDefs);
-            ds.setDescription(couchdbDatastoreType.getDescription());
-            datastores.put(name, ds);
-
-            removeVariablePath();
-        }
-
-        final List<MongodbDatastoreType> mongoDbDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                MongodbDatastoreType.class);
-        for (MongodbDatastoreType mongodbDatastoreType : mongoDbDatastores) {
-            String name = mongodbDatastoreType.getName();
-            checkName(name, Datastore.class, datastores);
-
-            addVariablePath(name);
-
-            String hostname = getStringVariable("hostname", mongodbDatastoreType.getHostname());
-            Integer port = getIntegerVariable("port", mongodbDatastoreType.getPort());
-            String databaseName = getStringVariable("databaseName", mongodbDatastoreType.getDatabaseName());
-            String username = getStringVariable("username", mongodbDatastoreType.getUsername());
-            String password = getStringVariable("password", mongodbDatastoreType.getPassword());
-
-            List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef> tableDefList = mongodbDatastoreType
-                    .getTableDef();
-            final SimpleTableDef[] tableDefs;
-            if (tableDefList.isEmpty()) {
-                tableDefs = null;
-            } else {
-                tableDefs = new SimpleTableDef[tableDefList.size()];
-                for (int i = 0; i < tableDefs.length; i++) {
-                    org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef tableDef = tableDefList
-                            .get(i);
-                    String collectionName = tableDef.getCollection();
-                    List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef.Property> propertyList = tableDef
-                            .getProperty();
-                    String[] propertyNames = new String[propertyList.size()];
-                    ColumnType[] columnTypes = new ColumnType[propertyList.size()];
-                    for (int j = 0; j < columnTypes.length; j++) {
-                        String propertyName = propertyList.get(j).getName();
-                        String propertyTypeName = propertyList.get(j).getType();
-                        final ColumnType propertyType;
-                        if (StringUtils.isNullOrEmpty(propertyTypeName)) {
-                            propertyType = ColumnType.VARCHAR;
-                        } else {
-                            propertyType = ColumnType.valueOf(propertyTypeName);
-                        }
-                        propertyNames[j] = propertyName;
-                        columnTypes[j] = propertyType;
-                    }
-
-                    tableDefs[i] = new SimpleTableDef(collectionName, propertyNames, columnTypes);
-                }
-            }
-
-            MongoDbDatastore ds = new MongoDbDatastore(name, hostname, port, databaseName, username, password,
-                    tableDefs);
-            ds.setDescription(mongodbDatastoreType.getDescription());
-            datastores.put(name, ds);
-
-            removeVariablePath();
-        }
-
-        final List<CustomElementType> customDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
-                CustomElementType.class);
+        // create custom datastores
+        final List<CustomElementType> customDatastores = datastoreCatalogType.getCustomDatastore();
         for (CustomElementType customElementType : customDatastores) {
             Datastore ds = createCustomElement(customElementType, Datastore.class, injectionManager, true);
             String name = ds.getName();
@@ -984,6 +615,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             datastores.put(name, ds);
         }
 
+        // create composite datastores as the last step
         final List<CompositeDatastoreType> compositeDatastores = CollectionUtils2.filterOnClass(datastoreTypes,
                 CompositeDatastoreType.class);
         for (CompositeDatastoreType compositeDatastoreType : compositeDatastores) {
@@ -1006,8 +638,304 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             datastores.put(name, ds);
         }
 
-        DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
+        final DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
         return result;
+    }
+
+    private Datastore createDatastore(String name, MongodbDatastoreType mongodbDatastoreType) {
+        String hostname = getStringVariable("hostname", mongodbDatastoreType.getHostname());
+        Integer port = getIntegerVariable("port", mongodbDatastoreType.getPort());
+        String databaseName = getStringVariable("databaseName", mongodbDatastoreType.getDatabaseName());
+        String username = getStringVariable("username", mongodbDatastoreType.getUsername());
+        String password = getStringVariable("password", mongodbDatastoreType.getPassword());
+
+        List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef> tableDefList = mongodbDatastoreType
+                .getTableDef();
+        final SimpleTableDef[] tableDefs;
+        if (tableDefList.isEmpty()) {
+            tableDefs = null;
+        } else {
+            tableDefs = new SimpleTableDef[tableDefList.size()];
+            for (int i = 0; i < tableDefs.length; i++) {
+                org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef tableDef = tableDefList.get(i);
+                String collectionName = tableDef.getCollection();
+                List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef.Property> propertyList = tableDef
+                        .getProperty();
+                String[] propertyNames = new String[propertyList.size()];
+                ColumnType[] columnTypes = new ColumnType[propertyList.size()];
+                for (int j = 0; j < columnTypes.length; j++) {
+                    String propertyName = propertyList.get(j).getName();
+                    String propertyTypeName = propertyList.get(j).getType();
+                    final ColumnType propertyType;
+                    if (StringUtils.isNullOrEmpty(propertyTypeName)) {
+                        propertyType = ColumnType.VARCHAR;
+                    } else {
+                        propertyType = ColumnType.valueOf(propertyTypeName);
+                    }
+                    propertyNames[j] = propertyName;
+                    columnTypes[j] = propertyType;
+                }
+
+                tableDefs[i] = new SimpleTableDef(collectionName, propertyNames, columnTypes);
+            }
+        }
+
+        MongoDbDatastore ds = new MongoDbDatastore(name, hostname, port, databaseName, username, password, tableDefs);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, CouchdbDatastoreType couchdbDatastoreType) {
+        String hostname = getStringVariable("hostname", couchdbDatastoreType.getHostname());
+        Integer port = getIntegerVariable("port", couchdbDatastoreType.getPort());
+        String username = getStringVariable("username", couchdbDatastoreType.getUsername());
+        String password = getStringVariable("password", couchdbDatastoreType.getPassword());
+        Boolean sslEnabled = getBooleanVariable("ssl", couchdbDatastoreType.isSsl());
+
+        List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef> tableDefList = couchdbDatastoreType
+                .getTableDef();
+        final SimpleTableDef[] tableDefs;
+        if (tableDefList.isEmpty()) {
+            tableDefs = null;
+        } else {
+            tableDefs = new SimpleTableDef[tableDefList.size()];
+            for (int i = 0; i < tableDefs.length; i++) {
+                org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef tableDef = tableDefList.get(i);
+                String databaseName = tableDef.getDatabase();
+                List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef.Field> fieldList = tableDef
+                        .getField();
+                String[] propertyNames = new String[fieldList.size()];
+                ColumnType[] columnTypes = new ColumnType[fieldList.size()];
+                for (int j = 0; j < columnTypes.length; j++) {
+                    String propertyName = fieldList.get(j).getName();
+                    String propertyTypeName = fieldList.get(j).getType();
+                    final ColumnType propertyType;
+                    if (StringUtils.isNullOrEmpty(propertyTypeName)) {
+                        propertyType = ColumnType.VARCHAR;
+                    } else {
+                        propertyType = ColumnType.valueOf(propertyTypeName);
+                    }
+                    propertyNames[j] = propertyName;
+                    columnTypes[j] = propertyType;
+                }
+
+                tableDefs[i] = new SimpleTableDef(databaseName, propertyNames, columnTypes);
+            }
+        }
+
+        CouchDbDatastore ds = new CouchDbDatastore(name, hostname, port, username, password, sslEnabled, tableDefs);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, PojoDatastoreType pojoDatastore) {
+        final String schemaName = (pojoDatastore.getSchemaName() == null ? name : pojoDatastore.getSchemaName());
+
+        final List<TableDataProvider<?>> tableDataProviders = new ArrayList<TableDataProvider<?>>();
+        final List<PojoTableType> tables = pojoDatastore.getTable();
+        for (PojoTableType table : tables) {
+            final String tableName = table.getName();
+
+            final List<Column> columns = table.getColumns().getColumn();
+            final int columnCount = columns.size();
+            final String[] columnNames = new String[columnCount];
+            final ColumnType[] columnTypes = new ColumnType[columnCount];
+
+            for (int i = 0; i < columnCount; i++) {
+                final Column column = columns.get(i);
+                columnNames[i] = column.getName();
+                columnTypes[i] = ColumnType.valueOf(column.getType());
+            }
+
+            final SimpleTableDef tableDef = new SimpleTableDef(tableName, columnNames, columnTypes);
+
+            final Collection<Object[]> arrays = new ArrayList<Object[]>();
+            final List<Row> rows = table.getRows().getRow();
+            for (Row row : rows) {
+                final List<String> values = row.getV();
+                if (values.size() != columnCount) {
+                    throw new IllegalStateException("Row value count is not equal to column count in datastore '"
+                            + name + "'. Expected " + columnCount + " values, found " + values.size());
+                }
+                final Object[] array = new Object[columnCount];
+                for (int i = 0; i < array.length; i++) {
+                    final StandardTypeConverter converter = new StandardTypeConverter();
+                    final Class<?> expectedClass = columnTypes[i].getJavaEquivalentClass();
+                    final String stringValue = values.get(i);
+                    final Object value;
+                    if (StringUtils.isNullOrEmpty(stringValue)) {
+                        value = null;
+                    } else {
+                        value = converter.fromString(expectedClass, stringValue);
+                    }
+                    array[i] = value;
+                }
+                arrays.add(array);
+            }
+
+            final TableDataProvider<?> tableDataProvider = new ArrayTableDataProvider(tableDef, arrays);
+            tableDataProviders.add(tableDataProvider);
+        }
+
+        final PojoDatastore ds = new PojoDatastore(name, schemaName, tableDataProviders);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, OpenOfficeDatabaseDatastoreType odbDatastoreType) {
+        String filenamePath = getStringVariable("filename", odbDatastoreType.getFilename());
+        String filename = _interceptor.createFilename(filenamePath);
+        OdbDatastore ds = new OdbDatastore(name, filename);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, DbaseDatastoreType dbaseDatastoreType) {
+        String filenamePath = getStringVariable("filename", dbaseDatastoreType.getFilename());
+        String filename = _interceptor.createFilename(filenamePath);
+        DbaseDatastore ds = new DbaseDatastore(name, filename);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, ExcelDatastoreType excelDatastoreType) {
+        String filenamePath = getStringVariable("filename", excelDatastoreType.getFilename());
+        String filename = _interceptor.createFilename(filenamePath);
+        ExcelDatastore ds = new ExcelDatastore(name, filename);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, XmlDatastoreType xmlDatastoreType) {
+        String filenamePath = getStringVariable("filename", xmlDatastoreType.getFilename());
+        String filename = _interceptor.createFilename(filenamePath);
+        List<TableDef> tableDefList = xmlDatastoreType.getTableDef();
+        final XmlSaxTableDef[] tableDefs;
+        if (tableDefList.isEmpty()) {
+            tableDefs = null;
+        } else {
+            tableDefs = new XmlSaxTableDef[tableDefList.size()];
+            for (int i = 0; i < tableDefs.length; i++) {
+                String rowXpath = tableDefList.get(i).getRowXpath();
+                String[] valueXpaths = tableDefList.get(i).getValueXpath().toArray(new String[0]);
+                tableDefs[i] = new XmlSaxTableDef(rowXpath, valueXpaths);
+            }
+        }
+
+        XmlDatastore ds = new XmlDatastore(name, filename, tableDefs);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, AccessDatastoreType accessDatastoreType) {
+        String filenamePath = getStringVariable("filename", accessDatastoreType.getFilename());
+        String filename = _interceptor.createFilename(filenamePath);
+        AccessDatastore ds = new AccessDatastore(name, filename);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, SasDatastoreType sasDatastoreType) {
+        final String directoryPath = getStringVariable("directory", sasDatastoreType.getDirectory());
+        final File directory = new File(directoryPath);
+        final SasDatastore ds = new SasDatastore(name, directory);
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, FixedWidthDatastoreType fixedWidthDatastore) {
+        String filename = _interceptor.createFilename(getStringVariable("filename", fixedWidthDatastore.getFilename()));
+        String encoding = getStringVariable("encoding", fixedWidthDatastore.getEncoding());
+        if (!StringUtils.isNullOrEmpty(encoding)) {
+            encoding = FileHelper.UTF_8_ENCODING;
+        }
+
+        Boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
+                fixedWidthDatastore.isFailOnInconsistencies());
+        if (failOnInconsistencies == null) {
+            failOnInconsistencies = true;
+        }
+
+        Integer headerLineNumber = getIntegerVariable("headerLineNumber", fixedWidthDatastore.getHeaderLineNumber());
+        if (headerLineNumber == null) {
+            headerLineNumber = FixedWidthConfiguration.DEFAULT_COLUMN_NAME_LINE;
+        }
+
+        final FixedWidthDatastore ds;
+        final Integer fixedValueWidth = getIntegerVariable("fixedValueWidth", fixedWidthDatastore.getFixedValueWidth());
+        if (fixedValueWidth == null) {
+            final List<Integer> valueWidthsBoxed = fixedWidthDatastore.getValueWidth();
+            int[] valueWidths = new int[valueWidthsBoxed.size()];
+            for (int i = 0; i < valueWidths.length; i++) {
+                valueWidths[i] = valueWidthsBoxed.get(i).intValue();
+            }
+            ds = new FixedWidthDatastore(name, filename, encoding, valueWidths, failOnInconsistencies,
+                    headerLineNumber.intValue());
+        } else {
+            ds = new FixedWidthDatastore(name, filename, encoding, fixedValueWidth, failOnInconsistencies,
+                    headerLineNumber.intValue());
+        }
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, JdbcDatastoreType jdbcDatastoreType) {
+        JdbcDatastore ds;
+
+        String datasourceJndiUrl = getStringVariable("jndiUrl", jdbcDatastoreType.getDatasourceJndiUrl());
+        if (datasourceJndiUrl == null) {
+            String url = getStringVariable("url", jdbcDatastoreType.getUrl());
+            String driver = getStringVariable("driver", jdbcDatastoreType.getDriver());
+            String username = getStringVariable("username", jdbcDatastoreType.getUsername());
+            String password = getStringVariable("password", jdbcDatastoreType.getPassword());
+            Boolean multipleConnections = getBooleanVariable("multipleConnections",
+                    jdbcDatastoreType.isMultipleConnections());
+            if (multipleConnections == null) {
+                multipleConnections = true;
+            }
+            ds = new JdbcDatastore(name, url, driver, username, password, multipleConnections.booleanValue());
+        } else {
+            ds = new JdbcDatastore(name, datasourceJndiUrl);
+        }
+        return ds;
+    }
+
+    private Datastore createDatastore(String name, CsvDatastoreType csvDatastoreType) {
+        String filename = _interceptor.createFilename(getStringVariable("filename", csvDatastoreType.getFilename()));
+
+        String quoteCharString = getStringVariable("quoteChar", csvDatastoreType.getQuoteChar());
+        Character quoteChar = null;
+
+        String separatorCharString = getStringVariable("separatorChar", csvDatastoreType.getSeparatorChar());
+        Character separatorChar = null;
+
+        String escapeCharString = getStringVariable("escapeChar", csvDatastoreType.getEscapeChar());
+        Character escapeChar = null;
+
+        if (!StringUtils.isNullOrEmpty(separatorCharString)) {
+            assert separatorCharString.length() == 1;
+            separatorChar = separatorCharString.charAt(0);
+        }
+
+        if (!StringUtils.isNullOrEmpty(quoteCharString)) {
+            assert quoteCharString.length() == 1;
+            quoteChar = quoteCharString.charAt(0);
+        }
+
+        if (!StringUtils.isNullOrEmpty(escapeCharString)) {
+            assert escapeCharString.length() == 1;
+            escapeChar = escapeCharString.charAt(0);
+        }
+
+        String encoding = getStringVariable("encoding", csvDatastoreType.getEncoding());
+        if (StringUtils.isNullOrEmpty(encoding)) {
+            encoding = FileHelper.UTF_8_ENCODING;
+        }
+
+        Boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
+                csvDatastoreType.isFailOnInconsistencies());
+        if (failOnInconsistencies == null) {
+            failOnInconsistencies = true;
+        }
+
+        Integer headerLineNumber = getIntegerVariable("headerLineNumber", csvDatastoreType.getHeaderLineNumber());
+        if (headerLineNumber == null) {
+            headerLineNumber = CsvConfiguration.DEFAULT_COLUMN_NAME_LINE;
+        }
+
+        CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, escapeChar, encoding,
+                failOnInconsistencies, headerLineNumber);
+        return ds;
     }
 
     private void addVariablePath(String name) {
