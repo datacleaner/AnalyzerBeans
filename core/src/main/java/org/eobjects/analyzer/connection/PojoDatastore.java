@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.eobjects.metamodel.UpdateableDataContext;
@@ -28,7 +29,7 @@ import org.eobjects.metamodel.pojo.TableDataProvider;
 /**
  * A {@link Datastore} that works entirely on in-memory Java objects.
  */
-public class PojoDatastore implements UpdateableDatastore {
+public class PojoDatastore implements UpdateableDatastore, Serializable {
 
     private static final long serialVersionUID = 1L;
 
