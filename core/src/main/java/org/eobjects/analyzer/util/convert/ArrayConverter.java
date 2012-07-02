@@ -25,8 +25,11 @@ import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.util.CharIterator;
+import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import scala.actors.threadpool.Arrays;
 
 /**
  * A {@link Converter} implementation for array types.
@@ -35,162 +38,182 @@ import org.slf4j.LoggerFactory;
  */
 public class ArrayConverter implements Converter<Object> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ArrayConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ArrayConverter.class);
 
-	private final Converter<Object> _parentConvert;
+    private final Converter<Object> _parentConvert;
 
-	public ArrayConverter(Converter<Object> parentConverter) {
-		_parentConvert = parentConverter;
-	}
+    public ArrayConverter(Converter<Object> parentConverter) {
+        _parentConvert = parentConverter;
+    }
 
-	@Override
-	public Object fromString(Class<?> type, String str) {
-		assert type.isArray();
+    @Override
+    public Object fromString(Class<?> type, String str) {
+        final boolean isList = ReflectionUtils.is(type, List.class);
+        if (isList) {
+            // Warning: We only support string lists, since component type is
+            // not determinable from List.class.
+            type = String[].class;
+        }
 
-		Class<?> componentType = type.getComponentType();
+        Object result = fromStringInternal(type, str);
 
-		if ("[]".equals(str)) {
-			logger.debug("found [], returning empty array");
-			return Array.newInstance(componentType, 0);
-		}
+        if (isList) {
+            String[] array = (String[]) result;
+            result = Arrays.asList(array);
+        }
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("deserializeArray(\"{}\")", str);
-			logger.debug("component type is: {}", componentType);
+        return result;
+    }
 
-			int beginningBrackets = 0;
-			int endingBrackets = 0;
+    public Object fromStringInternal(Class<?> type, String str) {
 
-			CharIterator it = new CharIterator(str);
-			while (it.hasNext()) {
-				it.next();
-				if (it.is('[')) {
-					beginningBrackets++;
-				} else if (it.is(']')) {
-					endingBrackets++;
-				}
-			}
-			it.reset();
-			logger.debug("brackets statistics: beginning={}, ending={}", beginningBrackets, endingBrackets);
-			if (beginningBrackets != endingBrackets) {
-				logger.warn("Unbalanced beginning and ending brackets!");
-			}
-		}
+        assert type.isArray();
 
-		if (!str.startsWith("[") || !str.endsWith("]")) {
-			if (str.indexOf(',') == -1) {
-				Object result = Array.newInstance(componentType, 1);
-				Object singleItem = _parentConvert.fromString(componentType, str);
+        final Class<?> componentType = type.getComponentType();
 
-				Array.set(result, 0, singleItem);
-				return result;
-			}
-			throw new IllegalArgumentException(
-					"Cannot parse string as array, bracket encapsulation and comma delimitors expected. Found: " + str);
-		}
+        if ("[]".equals(str)) {
+            logger.debug("found [], returning empty array");
+            return Array.newInstance(componentType, 0);
+        }
 
-		final String innerString = str.substring(1, str.length() - 1);
-		logger.debug("innerString: {}", innerString);
+        if (logger.isDebugEnabled()) {
+            logger.debug("deserializeArray(\"{}\")", str);
+            logger.debug("component type is: {}", componentType);
 
-		List<Object> objects = new ArrayList<Object>();
-		int offset = 0;
-		while (offset < innerString.length()) {
-			logger.debug("offset: {}", offset);
-			final int commaIndex = innerString.indexOf(',', offset);
-			logger.debug("commaIndex: {}", commaIndex);
-			final int bracketBeginIndex = innerString.indexOf('[', offset);
-			logger.debug("bracketBeginIndex: {}", bracketBeginIndex);
+            int beginningBrackets = 0;
+            int endingBrackets = 0;
 
-			if (commaIndex == -1) {
-				logger.debug("no comma found");
-				String s = innerString.substring(offset);
-				Object item = _parentConvert.fromString(componentType, s);
-				objects.add(item);
-				offset = innerString.length();
-			} else if (bracketBeginIndex == -1 || commaIndex < bracketBeginIndex) {
-				String s = innerString.substring(offset, commaIndex);
-				if ("".equals(s)) {
-					offset++;
-				} else {
-					logger.debug("no brackets in next element: \"{}\"", s);
-					Object item = _parentConvert.fromString(componentType, s);
-					objects.add(item);
-					offset = commaIndex + 1;
-				}
-			} else {
+            CharIterator it = new CharIterator(str);
+            while (it.hasNext()) {
+                it.next();
+                if (it.is('[')) {
+                    beginningBrackets++;
+                } else if (it.is(']')) {
+                    endingBrackets++;
+                }
+            }
+            it.reset();
+            logger.debug("brackets statistics: beginning={}, ending={}", beginningBrackets, endingBrackets);
+            if (beginningBrackets != endingBrackets) {
+                logger.warn("Unbalanced beginning and ending brackets!");
+            }
+        }
 
-				String s = innerString.substring(bracketBeginIndex);
-				int nextBracket = 0;
-				int depth = 1;
-				logger.debug("substring with nested array: {}", s);
+        if (!str.startsWith("[") || !str.endsWith("]")) {
+            if (str.indexOf(',') == -1) {
+                Object result = Array.newInstance(componentType, 1);
+                Object singleItem = _parentConvert.fromString(componentType, str);
 
-				while (depth > 0) {
-					final int searchOffset = nextBracket + 1;
-					int nextEndBracket = s.indexOf(']', searchOffset);
-					if (nextEndBracket == -1) {
-						throw new IllegalStateException("No ending bracket in array string: " + s.substring(searchOffset));
-					}
-					int nextBeginBracket = s.indexOf('[', searchOffset);
-					if (nextBeginBracket == -1) {
-						nextBeginBracket = s.length();
-					}
+                Array.set(result, 0, singleItem);
+                return result;
+            }
+            throw new IllegalArgumentException(
+                    "Cannot parse string as array, bracket encapsulation and comma delimitors expected. Found: " + str);
+        }
 
-					nextBracket = Math.min(nextEndBracket, nextBeginBracket);
-					char c = s.charAt(nextBracket);
-					logger.debug("nextBracket: {} ({})", nextBracket, c);
+        final String innerString = str.substring(1, str.length() - 1);
+        logger.debug("innerString: {}", innerString);
 
-					if (c == '[') {
-						depth++;
-					} else if (c == ']') {
-						depth--;
-					} else {
-						throw new IllegalStateException("Unexpected char: " + c);
-					}
-					logger.debug("depth: {}", depth);
-					if (depth == 0) {
-						s = s.substring(0, nextBracket + 1);
-						logger.debug("identified array: {}", s);
-					}
-				}
+        List<Object> objects = new ArrayList<Object>();
+        int offset = 0;
+        while (offset < innerString.length()) {
+            logger.debug("offset: {}", offset);
+            final int commaIndex = innerString.indexOf(',', offset);
+            logger.debug("commaIndex: {}", commaIndex);
+            final int bracketBeginIndex = innerString.indexOf('[', offset);
+            logger.debug("bracketBeginIndex: {}", bracketBeginIndex);
 
-				logger.debug("recursing to nested array: {}", s);
+            if (commaIndex == -1) {
+                logger.debug("no comma found");
+                String s = innerString.substring(offset);
+                Object item = _parentConvert.fromString(componentType, s);
+                objects.add(item);
+                offset = innerString.length();
+            } else if (bracketBeginIndex == -1 || commaIndex < bracketBeginIndex) {
+                String s = innerString.substring(offset, commaIndex);
+                if ("".equals(s)) {
+                    offset++;
+                } else {
+                    logger.debug("no brackets in next element: \"{}\"", s);
+                    Object item = _parentConvert.fromString(componentType, s);
+                    objects.add(item);
+                    offset = commaIndex + 1;
+                }
+            } else {
 
-				logger.debug("inner array string: " + s);
-				Object item = _parentConvert.fromString(componentType, s);
-				objects.add(item);
+                String s = innerString.substring(bracketBeginIndex);
+                int nextBracket = 0;
+                int depth = 1;
+                logger.debug("substring with nested array: {}", s);
 
-				offset = bracketBeginIndex + s.length();
-			}
-		}
+                while (depth > 0) {
+                    final int searchOffset = nextBracket + 1;
+                    int nextEndBracket = s.indexOf(']', searchOffset);
+                    if (nextEndBracket == -1) {
+                        throw new IllegalStateException("No ending bracket in array string: "
+                                + s.substring(searchOffset));
+                    }
+                    int nextBeginBracket = s.indexOf('[', searchOffset);
+                    if (nextBeginBracket == -1) {
+                        nextBeginBracket = s.length();
+                    }
 
-		Object result = Array.newInstance(componentType, objects.size());
-		for (int i = 0; i < objects.size(); i++) {
-			Array.set(result, i, objects.get(i));
-		}
-		return result;
-	}
+                    nextBracket = Math.min(nextEndBracket, nextBeginBracket);
+                    char c = s.charAt(nextBracket);
+                    logger.debug("nextBracket: {} ({})", nextBracket, c);
 
-	@Override
-	public String toString(Object o) {
-		assert o != null;
-		assert o.getClass().isArray();
+                    if (c == '[') {
+                        depth++;
+                    } else if (c == ']') {
+                        depth--;
+                    } else {
+                        throw new IllegalStateException("Unexpected char: " + c);
+                    }
+                    logger.debug("depth: {}", depth);
+                    if (depth == 0) {
+                        s = s.substring(0, nextBracket + 1);
+                        logger.debug("identified array: {}", s);
+                    }
+                }
 
-		StringBuilder sb = new StringBuilder();
-		int length = Array.getLength(o);
-		sb.append('[');
-		for (int i = 0; i < length; i++) {
-			Object obj = Array.get(o, i);
-			if (i != 0) {
-				sb.append(',');
-			}
-			sb.append(_parentConvert.toString(obj));
-		}
-		sb.append(']');
-		return sb.toString();
-	}
+                logger.debug("recursing to nested array: {}", s);
 
-	@Override
-	public boolean isConvertable(Class<?> type) {
-		return type.isArray();
-	}
+                logger.debug("inner array string: " + s);
+                Object item = _parentConvert.fromString(componentType, s);
+                objects.add(item);
+
+                offset = bracketBeginIndex + s.length();
+            }
+        }
+
+        Object result = Array.newInstance(componentType, objects.size());
+        for (int i = 0; i < objects.size(); i++) {
+            Array.set(result, i, objects.get(i));
+        }
+        return result;
+    }
+
+    @Override
+    public String toString(Object o) {
+        assert o != null;
+        assert o.getClass().isArray();
+
+        StringBuilder sb = new StringBuilder();
+        int length = Array.getLength(o);
+        sb.append('[');
+        for (int i = 0; i < length; i++) {
+            Object obj = Array.get(o, i);
+            if (i != 0) {
+                sb.append(',');
+            }
+            sb.append(_parentConvert.toString(obj));
+        }
+        sb.append(']');
+        return sb.toString();
+    }
+
+    @Override
+    public boolean isConvertable(Class<?> type) {
+        return type.isArray() || ReflectionUtils.is(type, List.class);
+    }
 }

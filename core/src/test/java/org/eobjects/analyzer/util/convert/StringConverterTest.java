@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
@@ -133,6 +134,13 @@ public class StringConverterTest extends TestCase {
         public String getMyString() {
             return myString;
         }
+    }
+    
+    public void testConvertList() throws Exception {
+        List<?> list = stringConverter.deserialize("[foo,bar]", List.class);
+        assertEquals(2, list.size());
+        assertEquals(String.class, list.get(0).getClass());
+        assertEquals(String.class, list.get(1).getClass());
     }
     
     public void testConvertExpressionDates() throws Exception {

@@ -132,7 +132,6 @@ import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
-import org.eobjects.analyzer.util.convert.StandardTypeConverter;
 import org.eobjects.analyzer.util.convert.StringConverter;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
@@ -747,6 +746,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
             final SimpleTableDef tableDef = new SimpleTableDef(tableName, columnNames, columnTypes);
 
+            final StringConverter converter = new StringConverter(null);
             final Collection<Object[]> arrays = new ArrayList<Object[]>();
             final List<Row> rows = table.getRows().getRow();
             for (Row row : rows) {
@@ -758,14 +758,15 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 }
                 final Object[] array = new Object[columnCount];
                 for (int i = 0; i < array.length; i++) {
-                    final StandardTypeConverter converter = new StandardTypeConverter();
+
                     final Class<?> expectedClass = columnTypes[i].getJavaEquivalentClass();
+
                     final String stringValue = values.get(i);
                     final Object value;
                     if (StringUtils.isNullOrEmpty(stringValue)) {
                         value = null;
                     } else {
-                        value = converter.fromString(expectedClass, stringValue);
+                        value = converter.deserialize(stringValue, expectedClass);
                     }
                     array[i] = value;
                 }

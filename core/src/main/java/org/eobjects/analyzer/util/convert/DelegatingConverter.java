@@ -87,6 +87,11 @@ public class DelegatingConverter implements Converter<Object> {
 				return result;
 			}
 		}
+		
+		if (ReflectionUtils.is(type, List.class)) {
+		    return _arrayConverter.fromString(type, serializedForm);
+		}
+		
 		throw new IllegalStateException("Could not find matching converter for type: " + type);
 	}
 
