@@ -21,6 +21,9 @@ package org.eobjects.analyzer.connection;
 
 import java.io.Serializable;
 
+/**
+ * Represents a collection of datastores, referenceable and usable by jobs.
+ */
 public interface DatastoreCatalog extends Serializable {
 
 	public String[] getDatastoreNames();

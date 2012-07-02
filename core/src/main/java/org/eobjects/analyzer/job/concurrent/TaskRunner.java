@@ -21,13 +21,19 @@ package org.eobjects.analyzer.job.concurrent;
 
 import org.eobjects.analyzer.job.tasks.Task;
 
+/**
+ * Interface for the execution engine in AnalyzerBeans. The {@link TaskRunner}
+ * is responsible for executing tasks, typically of rather small sizes. A task
+ * runner is an abstraction over such execution details as thread pools, timer
+ * services and clustering environments.
+ */
 public interface TaskRunner {
 
-	public void run(Task task, TaskListener listener);
+    public void run(Task task, TaskListener listener);
 
-	public void run(TaskRunnable taskRunnable);
+    public void run(TaskRunnable taskRunnable);
 
-	public void shutdown();
+    public void shutdown();
 
-	public void assistExecution();
+    public void assistExecution();
 }
