@@ -45,6 +45,14 @@ public class StringUtilsTest extends TestCase {
         assertEquals("hello", " hello \t ".trim());
     }
 
+    public void testGetLongestCommonToken() throws Exception {
+        assertEquals("foo.bar", StringUtils.getLongestCommonToken("foo.bar.analyzer", "foo.bar.transformer", '.'));
+        assertEquals("", StringUtils.getLongestCommonToken("hello", "world", '.'));
+        assertEquals("", StringUtils.getLongestCommonToken("bfoo.bar.analyzer", "foo.bar.transformer", '.'));
+        assertEquals("hello.world", StringUtils.getLongestCommonToken("hello.world", "hello.world", '.'));
+        assertEquals("hello", StringUtils.getLongestCommonToken("hello.world", "hello.brave.world", '.'));
+    }
+
     public void testIsLatin() throws Exception {
         assertTrue(StringUtils.isLatin('a'));
         assertTrue(StringUtils.isLatin('z'));

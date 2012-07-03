@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -102,5 +103,37 @@ public final class StringUtils {
         name = substring1 + substring2;
 
         return toCamelCase(name);
+    }
+    
+    public static String getLongestCommonToken(Iterable<String> iterable, char tokenSeparatorChar) {
+        Iterator<String> it = iterable.iterator();
+        String commonToken = it.next();
+        while (it.hasNext()) {
+            if (commonToken == "") {
+                return null;
+            }
+            String name = it.next();
+            if (!name.startsWith(commonToken)) {
+                commonToken = getLongestCommonToken(commonToken, name, tokenSeparatorChar);
+            }
+        }
+        return commonToken;
+    }
+    
+    public static String getLongestCommonToken(String str1, String str2,
+            char tokenSeparatorChar) {
+        StringBuilder result = new StringBuilder();
+        String[] tokens1 = str1.split("\\" + tokenSeparatorChar);
+        String[] tokens2 = str2.split("\\" + tokenSeparatorChar);
+        for (int i = 0; i < Math.min(tokens1.length, tokens2.length); i++) {
+            if (!tokens1[i].equals(tokens2[i])) {
+                break;
+            }
+            if (i != 0) {
+                result.append(tokenSeparatorChar);
+            }
+            result.append(tokens1[i]);
+        }
+        return result.toString();
     }
 }
