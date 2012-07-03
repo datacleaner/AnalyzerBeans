@@ -20,7 +20,9 @@
 package org.eobjects.analyzer.util.convert;
 
 import java.lang.reflect.Array;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Converter;
@@ -28,8 +30,6 @@ import org.eobjects.analyzer.util.CharIterator;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import scala.actors.threadpool.Arrays;
 
 /**
  * A {@link Converter} implementation for array types.
