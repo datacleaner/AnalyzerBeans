@@ -49,6 +49,8 @@
                 <property value="false" name="Ignore repeated spaces"/>
                 <property value="false" name="Upper case patterns expand in size"/>
                 <property value="true" name="Lower case patterns expand in size"/>
+                <property value="&lt;null&gt;" name="Predefined token name"/>
+                <property value="&lt;null&gt;" name="Predefined token regexes"/>
                 <property value="." name="Decimal separator"/>
                 <property value="&amp;#44;" name="Thousands separator"/>
                 <property value="-" name="Minus sign"/>
@@ -65,6 +67,8 @@
                 <property value="false" name="Ignore repeated spaces"/>
                 <property value="false" name="Upper case patterns expand in size"/>
                 <property value="true" name="Lower case patterns expand in size"/>
+                <property value="&lt;null&gt;" name="Predefined token name"/>
+                <property value="&lt;null&gt;" name="Predefined token regexes"/>
                 <property value="." name="Decimal separator"/>
                 <property value="&amp;#44;" name="Thousands separator"/>
                 <property value="-" name="Minus sign"/>
