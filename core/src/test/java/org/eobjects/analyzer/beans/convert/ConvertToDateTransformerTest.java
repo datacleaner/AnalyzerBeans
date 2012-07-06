@@ -23,8 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
-
 import junit.framework.TestCase;
 
 public class ConvertToDateTransformerTest extends TestCase {
@@ -50,15 +48,16 @@ public class ConvertToDateTransformerTest extends TestCase {
         assertEquals("1997-05-19", format(transformer.convertFromNumber(19970519)));
         assertEquals("1997-05-19", format(transformer.convertFromNumber(970519)));
     }
-
+    
     public void testConvertFromString() throws Exception {
         ConvertToDateTransformer transformer = new ConvertToDateTransformer();
         transformer.init();
-
+        
         assertEquals("1999-04-20", format(transformer.convertFromString("1999-04-20")));
         assertEquals("1999-04-20", format(transformer.convertFromString("04/20/1999")));
         assertEquals("1999-04-20", format(transformer.convertFromString("1999/04/20")));
         assertEquals("2008-07-11", format(transformer.convertFromString("2008-07-11 00:00:00")));
+        assertEquals("2012-04-26", format(transformer.convertFromString("2012-04-26 19:12:19.792012")));
 
         Date result = transformer.convertFromString("2008-07-11 14:05:13");
         assertEquals("2008-07-11 14:05:13", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(result));

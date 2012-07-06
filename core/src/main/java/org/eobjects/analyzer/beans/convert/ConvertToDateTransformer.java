@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans.convert;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -91,9 +93,10 @@ public class ConvertToDateTransformer implements Transformer<Date> {
         if (dateMasks == null) {
             dateMasks = getDefaultDateMasks();
         }
+
         _dateTimeFormatters = new DateTimeFormatter[dateMasks.length];
         for (int i = 0; i < dateMasks.length; i++) {
-            String dateMask = dateMasks[i];
+            final String dateMask = dateMasks[i];
             _dateTimeFormatters[i] = DateTimeFormat.forPattern(dateMask);
         }
     }
@@ -137,7 +140,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
         return d;
     }
 
-    protected Date convertFromString(String value) {
+    protected Date convertFromString(final String value) {
         try {
             long longValue = Long.parseLong(value);
             return convertFromNumber(longValue);
@@ -161,6 +164,15 @@ public class ConvertToDateTransformer implements Transformer<Date> {
             } catch (Exception e) {
                 // proceed to next formatter
             }
+        }
+
+        // try also with SimpleDateFormat since it is more fault tolerant in
+        // millisecond parsing
+        final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.S");
+        try {
+            return format.parse(value);
+        } catch (ParseException e) {
+            // do nothing
         }
 
         return null;
