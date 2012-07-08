@@ -53,6 +53,7 @@ import org.eobjects.metamodel.UpdateScript;
 import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.create.TableCreationBuilder;
 import org.eobjects.metamodel.csv.CsvDataContext;
+import org.eobjects.metamodel.delete.RowDeletionBuilder;
 import org.eobjects.metamodel.insert.RowInsertionBuilder;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.ColumnType;
@@ -99,6 +100,11 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     @Configured(required = false)
     @Description("Table to target (insert into)")
     String tableName;
+
+    @Inject
+    @Configured
+    @Description("Truncate table before inserting?")
+    boolean truncateTable = false;
 
     @Inject
     @Configured("Buffer size")
@@ -157,6 +163,22 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
 
             if (!columnsNotFound.isEmpty()) {
                 throw new IllegalArgumentException("Could not find column(s): " + columnsNotFound);
+            }
+
+            final Table table = schemaNavigator.convertToTable(schemaName, tableName);
+
+            if (truncateTable) {
+                UpdateableDataContext dc = con.getUpdateableDataContext();
+                dc.executeUpdate(new UpdateScript() {
+                    @Override
+                    public void run(UpdateCallback callback) {
+                        final RowDeletionBuilder delete = callback.deleteFrom(table);
+                        if (logger.isInfoEnabled()) {
+                            logger.info("Executing truncating DELETE operation: {}", delete.toSql());
+                        }
+                        delete.execute();
+                    }
+                });
             }
         } finally {
             con.close();
