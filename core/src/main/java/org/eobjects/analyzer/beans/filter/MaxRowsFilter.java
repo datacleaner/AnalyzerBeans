@@ -107,7 +107,10 @@ public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Categor
     public Query optimizeQuery(Query q, Category category) {
         if (category == Category.VALID) {
             q.setMaxRows(maxRows);
-            q.setFirstRow(firstRow);
+            
+            // metamodel uses 0-based first row...
+            final int metaModelFirstRow = firstRow - 1;
+            q.setFirstRow(metaModelFirstRow);
         } else {
             throw new IllegalStateException("Can only optimize the VALID max rows category");
         }
