@@ -33,11 +33,20 @@ public class MaxRowsFilterTest extends TestCase {
 		assertEquals("Max rows", desc.getDisplayName());
 	}
 
-	public void testCounter() throws Exception {
-		MaxRowsFilter f = new MaxRowsFilter(3);
+	public void testCounter1() throws Exception {
+		MaxRowsFilter f = new MaxRowsFilter(1, 3);
 		assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
 		assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
 		assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
 		assertEquals(MaxRowsFilter.Category.INVALID, f.categorize(new MockInputRow()));
 	}
+	
+	public void testCounter2() throws Exception {
+        MaxRowsFilter f = new MaxRowsFilter(2, 3);
+        assertEquals(MaxRowsFilter.Category.INVALID, f.categorize(new MockInputRow()));
+        assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
+        assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
+        assertEquals(MaxRowsFilter.Category.VALID, f.categorize(new MockInputRow()));
+        assertEquals(MaxRowsFilter.Category.INVALID, f.categorize(new MockInputRow()));
+    }
 }

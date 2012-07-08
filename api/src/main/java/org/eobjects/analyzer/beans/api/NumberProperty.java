@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 /**
- * Annotation containing supplementary metadata about a string property. This
+ * Annotation containing supplementary metadata about a number property. This
  * metadata can be used as a way to give hints to the UI as to how the content
  * should be presented.
  */
@@ -40,22 +40,21 @@ import javax.inject.Qualifier;
 @Documented
 @Inherited
 @Qualifier
-public @interface StringProperty {
+public @interface NumberProperty {
 
     /**
-     * @return true if the input field is multiline
+     * @return true if this number may be a negative number.
      */
-    public boolean multiline() default false;
+    public boolean positive() default true;
 
     /**
-     * @return the mime type (and optionally aliases/alternative mime types) of
-     *         the property
+     * @return true if this number may be a positive number.
      */
-    public String[] mimeType() default {};
+    public boolean negative() default true;
 
     /**
-     * @return true if the input field represents a password (or other similar
-     *         security token), not shown literally to the user.
+     * @return true if this number may be zero.
      */
-    public boolean password() default false;
+    public boolean zero() default true;
+
 }

@@ -25,6 +25,7 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.api.NumberProperty;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
@@ -32,7 +33,7 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.query.Query;
 
 @FilterBean("Max rows")
-@Description("Sets a maximum of rows to process.")
+@Description("Sets a maximum number of rows to process.")
 @Categorized(FilterCategory.class)
 public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Category> {
 
@@ -41,15 +42,23 @@ public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Categor
     }
 
     @Configured
+    @NumberProperty(negative = false, zero = false)
+    @Description("The maximum number of rows to process.")
     int maxRows = 1000;
+
+    @Configured
+    @NumberProperty(negative = false, zero = false)
+    @Description("The first row (aka 'offset') to process.")
+    int firstRow = 1;
 
     private final AtomicInteger counter = new AtomicInteger();
 
     public MaxRowsFilter() {
     }
 
-    public MaxRowsFilter(int maxRows) {
+    public MaxRowsFilter(int firstRow, int maxRows) {
         this();
+        this.firstRow = firstRow;
         this.maxRows = maxRows;
     }
 
@@ -61,17 +70,28 @@ public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Categor
         return maxRows;
     }
     
+    public int getFirstRow() {
+        return firstRow;
+    }
+    
+    public void setFirstRow(int firstRow) {
+        this.firstRow = firstRow;
+    }
+
     @Validate
     public void validate() {
         if (maxRows <= 0) {
             throw new IllegalStateException("Max rows value must be a positive integer");
+        }
+        if (firstRow <= 0) {
+            throw new IllegalStateException("First row value must be a positive integer");
         }
     }
 
     @Override
     public Category categorize(InputRow inputRow) {
         int count = counter.incrementAndGet();
-        if (count > maxRows) {
+        if (count < firstRow || count >= maxRows + firstRow) {
             return Category.INVALID;
         }
         return Category.VALID;
@@ -87,6 +107,7 @@ public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Categor
     public Query optimizeQuery(Query q, Category category) {
         if (category == Category.VALID) {
             q.setMaxRows(maxRows);
+            q.setFirstRow(firstRow);
         } else {
             throw new IllegalStateException("Can only optimize the VALID max rows category");
         }
