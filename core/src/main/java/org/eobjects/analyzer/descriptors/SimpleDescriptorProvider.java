@@ -181,7 +181,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
             @SuppressWarnings("unchecked")
             Class<? extends Analyzer<?>> c = (Class<? extends Analyzer<?>>) Class.forName(className);
             AnalyzerBeanDescriptor<?> descriptor = getAnalyzerBeanDescriptorForClass(c);
-            if (descriptor == null) {
+            if (descriptor == null || !_analyzerBeanDescriptors.contains(descriptor)) {
                 addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(c));
             }
         }
@@ -192,7 +192,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
             @SuppressWarnings("unchecked")
             Class<? extends Transformer<?>> c = (Class<? extends Transformer<?>>) Class.forName(className);
             TransformerBeanDescriptor<?> descriptor = getTransformerBeanDescriptorForClass(c);
-            if (descriptor == null) {
+            if (descriptor == null || !_transformerBeanDescriptors.contains(descriptor)) {
                 addTransformerBeanDescriptor(Descriptors.ofTransformer(c));
             }
         }
@@ -203,7 +203,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
             @SuppressWarnings("unchecked")
             Class<? extends Renderer<?, ?>> c = (Class<? extends Renderer<?, ?>>) Class.forName(className);
             RendererBeanDescriptor<?> descriptor = getRendererBeanDescriptorForClass(c);
-            if (descriptor == null) {
+            if (descriptor == null || !_rendererBeanDescriptors.contains(descriptor)) {
                 addRendererBeanDescriptor(Descriptors.ofRenderer(c));
             }
         }
@@ -216,7 +216,7 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 
             FilterBeanDescriptor<?, ?> descriptor = getFilterBeanDescriptorForClassUnbounded(c);
 
-            if (descriptor == null) {
+            if (descriptor == null || !_filterBeanDescriptors.contains(descriptor)) {
                 addFilterBeanDescriptor(Descriptors.ofFilterUnbound(c));
             }
         }
