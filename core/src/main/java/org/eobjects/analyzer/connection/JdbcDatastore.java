@@ -36,8 +36,8 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
-import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.UpdateableDataContext;
+import org.eobjects.metamodel.jdbc.JdbcDataContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,7 +214,7 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 				return new DataSourceDatastoreConnection(dataSource, this);
 			} else {
 				final Connection connection = createConnection();
-				final UpdateableDataContext dataContext = DataContextFactory.createJdbcDataContext(connection);
+				final UpdateableDataContext dataContext = new JdbcDataContext(connection);
 				return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
 			}
 		} else {

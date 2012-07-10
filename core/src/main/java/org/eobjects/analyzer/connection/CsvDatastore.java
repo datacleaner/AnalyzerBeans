@@ -25,9 +25,9 @@ import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.csv.CsvConfiguration;
+import org.eobjects.metamodel.csv.CsvDataContext;
 import org.eobjects.metamodel.util.FileHelper;
 
 /**
@@ -46,7 +46,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 	public static final char NOT_A_CHAR = '\uFFFF';
 
 	public static final char DEFAULT_QUOTE_CHAR = NOT_A_CHAR;
-	public static final char DEFAULT_SEPARATOR_CHAR = DataContextFactory.DEFAULT_CSV_SEPARATOR_CHAR;
+	public static final char DEFAULT_SEPARATOR_CHAR = CsvConfiguration.DEFAULT_SEPARATOR_CHAR;
 
 	private final String _filename;
 	private final Character _quoteChar;
@@ -120,7 +120,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
 		UpdateableDataContext dataContext;
 		if (_quoteChar == null && _separatorChar == null) {
-			dataContext = DataContextFactory.createCsvDataContext(new File(_filename));
+			dataContext = new CsvDataContext(new File(_filename));
 		} else {
 			final char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
 			final char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
@@ -128,7 +128,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 			final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
 			final CsvConfiguration configuration = new CsvConfiguration(_headerLineNumber, encoding, separatorChar,
 					quoteChar, escapeChar, _failOnInconsistencies);
-			dataContext = DataContextFactory.createCsvDataContext(new File(_filename), configuration);
+			dataContext = new CsvDataContext(new File(_filename), configuration);
 		}
 		return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
 	}

@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.access.AccessDataContext;
 
 /**
  * Datastore implementation for MS Access databases.
@@ -53,7 +53,7 @@ public final class AccessDatastore extends UsageAwareDatastore<DataContext> impl
 
 	@Override
 	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
-		DataContext dc = DataContextFactory.createAccessDataContext(_filename);
+		DataContext dc = new AccessDataContext(_filename);
 		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}
 

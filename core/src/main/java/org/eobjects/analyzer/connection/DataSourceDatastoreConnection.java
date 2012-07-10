@@ -22,8 +22,8 @@ package org.eobjects.analyzer.connection;
 import javax.sql.DataSource;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.UpdateableDataContext;
+import org.eobjects.metamodel.jdbc.JdbcDataContext;
 
 public class DataSourceDatastoreConnection extends UsageAwareDatastoreConnection<UpdateableDataContext> implements
 		UpdateableDatastoreConnection {
@@ -33,7 +33,7 @@ public class DataSourceDatastoreConnection extends UsageAwareDatastoreConnection
 
 	public DataSourceDatastoreConnection(DataSource ds, Datastore datastore) {
 		super(datastore);
-		_dataContext = DataContextFactory.createJdbcDataContext(ds);
+		_dataContext = new JdbcDataContext(ds);
 		_schemaNavigator = new SchemaNavigator(_dataContext);
 	}
 

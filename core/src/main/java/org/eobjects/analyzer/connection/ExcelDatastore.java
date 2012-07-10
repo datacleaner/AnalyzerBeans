@@ -25,8 +25,8 @@ import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.DataContextFactory;
 import org.eobjects.metamodel.UpdateableDataContext;
+import org.eobjects.metamodel.excel.ExcelDataContext;
 
 /**
  * Datastore implementation for Excel spreadsheets.
@@ -55,7 +55,7 @@ public final class ExcelDatastore extends UsageAwareDatastore<UpdateableDataCont
 
 	@Override
 	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
-		UpdateableDataContext dc = DataContextFactory.createExcelDataContext(new File(_filename));
+		UpdateableDataContext dc = new ExcelDataContext(new File(_filename));
 		return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dc, this);
 	}
 
