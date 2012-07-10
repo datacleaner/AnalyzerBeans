@@ -24,6 +24,7 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
+import org.eobjects.analyzer.beans.api.NumberProperty;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -37,9 +38,11 @@ public class StringLengthRangeFilter implements Filter<RangeFilterCategory> {
 	InputColumn<String> column;
 
 	@Configured(order = 2)
+	@NumberProperty(negative = false)
 	int minimumLength = 0;
 
 	@Configured(order = 3)
+	@NumberProperty(negative = false)
 	int maximumLength = 10;
 
 	@Override
