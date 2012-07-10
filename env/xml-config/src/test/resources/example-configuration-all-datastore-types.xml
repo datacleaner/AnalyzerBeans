@@ -61,7 +61,7 @@
 			<filename>../../core/src/test/resources/employees-fixed-width.txt</filename>
 			<fixed-value-width>19</fixed-value-width>
 			<encoding>UTF-8</encoding>
-			<header-line-number>-1</header-line-number>
+			<header-line-number>0</header-line-number>
 			<fail-on-inconsistencies>true</fail-on-inconsistencies>
 		</fixed-width-datastore>
 

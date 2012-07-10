@@ -193,12 +193,12 @@ public class JaxbConfigurationReaderTest extends TestCase {
         FixedWidthDatastore ds = (FixedWidthDatastore) datastoreCatalog.getDatastore("my_fixed_width_1");
         assertEquals(19, ds.getFixedValueWidth());
         assertEquals("[]", Arrays.toString(ds.getValueWidths()));
-        assertEquals(-1, ds.getHeaderLineNumber());
+        assertEquals(0, ds.getHeaderLineNumber());
 
         ds = (FixedWidthDatastore) datastoreCatalog.getDatastore("my_fixed_width_2");
         assertEquals(-1, ds.getFixedValueWidth());
         assertEquals("[4, 17, 19]", Arrays.toString(ds.getValueWidths()));
-        assertEquals(0, ds.getHeaderLineNumber());
+        assertEquals(1, ds.getHeaderLineNumber());
 
         for (String name : datastoreNames) {
             // test that all connections, except the JNDI-, MongoDB- and

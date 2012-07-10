@@ -25,6 +25,7 @@ import java.util.List;
 import javax.swing.table.TableModel;
 
 import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.data.DataSetTableModel;
 import org.eobjects.metamodel.data.InMemoryDataSet;
 import org.eobjects.metamodel.data.Row;
 
@@ -63,6 +64,6 @@ public class DataSetResult implements TableModelResult, AnalyzerResult {
 
 	@Override
 	public TableModel toTableModel() {
-		return getDataSet().toTableModel();
+		return new DataSetTableModel(getDataSet());
 	}
 }

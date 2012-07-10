@@ -320,12 +320,11 @@
 					<element name="fail-on-inconsistencies" minOccurs="0"
 						maxOccurs="1" type="boolean" />
 					<element name="header-line-number" minOccurs="0" maxOccurs="1"
-						type="int" default="0">
+						type="int" default="1">
 						<annotation>
 							<documentation>
-								The index (0-based) of the header line number. If
-								no
-								header line is present, use -1.
+								The row number (1-based) of the header line. If
+								no header line is present, use 0.
 							</documentation>
 						</annotation>
 					</element>
@@ -461,12 +460,11 @@
 					</choice>
 					<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
 					<element name="header-line-number" minOccurs="0" maxOccurs="1"
-						type="int" default="0">
+						type="int" default="1">
 						<annotation>
 							<documentation>
-								The index (0-based) of the header line number. If
-								no
-								header line is present, use -1.
+								The index (1-based) of the header line. If
+								no header line is present, use 0.
 							</documentation>
 						</annotation>
 					</element>
