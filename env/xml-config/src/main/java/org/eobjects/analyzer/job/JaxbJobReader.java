@@ -376,21 +376,31 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
         final ColumnsType columnsType = source.getColumns();
         if (columnsType != null) {
-            List<ColumnType> columns = columnsType.getColumn();
+            final List<ColumnType> columns = columnsType.getColumn();
             for (ColumnType column : columns) {
-                String path = column.getPath();
+                final String path = column.getPath();
                 if (StringUtils.isNullOrEmpty(path)) {
                     throw new IllegalStateException("Column path cannot be null");
                 }
-                Column physicalColumn = sourceColumnMapping.getColumn(path);
+                final Column physicalColumn = sourceColumnMapping.getColumn(path);
                 if (physicalColumn == null) {
                     logger.error("Column {} not found in {}", path, sourceColumnMapping);
                     throw new IllegalStateException("No such column: " + path);
                 }
-                MetaModelInputColumn inputColumn = new MetaModelInputColumn(physicalColumn);
-                String id = column.getId();
+
+                final MetaModelInputColumn inputColumn = new MetaModelInputColumn(physicalColumn);
+                final String id = column.getId();
                 if (StringUtils.isNullOrEmpty(id)) {
                     throw new IllegalStateException("Source column id cannot be null");
+                }
+
+                final String expectedType = column.getType();
+                if (expectedType != null) {
+                    org.eobjects.metamodel.schema.ColumnType actualType = physicalColumn.getType();
+                    if (actualType != null && !expectedType.equals(actualType.toString())) {
+                        logger.warn("Column '{}' had type '{}', but '{}' was expected.", new Object[] { path,
+                                actualType, expectedType });
+                    }
                 }
 
                 registerInputColumn(inputColumns, id, inputColumn);

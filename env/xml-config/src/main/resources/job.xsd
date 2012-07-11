@@ -88,6 +88,7 @@
 				</documentation>
 			</annotation>
 		</attribute>
+		<attribute name="type" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="variablesType">

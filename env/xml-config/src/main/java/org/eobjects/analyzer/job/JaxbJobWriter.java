@@ -62,6 +62,7 @@ import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.util.convert.StringConverter;
+import org.eobjects.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,10 +128,17 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         // register alle source columns
         final Collection<InputColumn<?>> sourceColumns = analysisJob.getSourceColumns();
         for (InputColumn<?> inputColumn : sourceColumns) {
-            ColumnType columnType = new ColumnType();
-            columnType.setPath(inputColumn.getPhysicalColumn().getQualifiedLabel());
-            columnType.setId(getId(inputColumn, columnMappings));
-            sourceType.getColumns().getColumn().add(columnType);
+            final ColumnType jaxbColumn = new ColumnType();
+            final Column physicalColumn = inputColumn.getPhysicalColumn();
+            jaxbColumn.setPath(physicalColumn.getQualifiedLabel());
+            jaxbColumn.setId(getId(inputColumn, columnMappings));
+            
+            final org.eobjects.metamodel.schema.ColumnType columnType = physicalColumn.getType();
+            if (columnType != null) {
+                jaxbColumn.setType(columnType.toString());
+            }
+
+            sourceType.getColumns().getColumn().add(jaxbColumn);
         }
 
         // adds all components to the job and their corresponding mappings
