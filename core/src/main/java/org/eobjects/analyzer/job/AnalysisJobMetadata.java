@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.eobjects.metamodel.schema.ColumnType;
+
 /**
  * Defines the metadata of a job. This metadata type can be used to present
  * basic information about a job to the user before he/she decides to open the
@@ -50,6 +52,8 @@ public interface AnalysisJobMetadata {
 	public String getDatastoreName();
 
 	public List<String> getSourceColumnPaths();
+	
+	public List<ColumnType> getSourceColumnTypes();
 
 	public Map<String, String> getVariables();
 }

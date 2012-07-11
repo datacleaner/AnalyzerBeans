@@ -26,100 +26,115 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.util.BaseObject;
 
+/**
+ * Immutable implementation of {@link AnalysisJobMetadata}.
+ */
 public class ImmutableAnalysisJobMetadata extends BaseObject implements AnalysisJobMetadata {
 
-	private final String _jobName;
-	private final String _jobVersion;
-	private final String _jobDescription;
-	private final String _author;
-	private final Date _createdDate;
-	private final Date _updatedDate;
-	private final String _datastoreName;
-	private final List<String> _sourceColumnPaths;
-	private final Map<String, String> _variables;
+    private final String _jobName;
+    private final String _jobVersion;
+    private final String _jobDescription;
+    private final String _author;
+    private final Date _createdDate;
+    private final Date _updatedDate;
+    private final String _datastoreName;
+    private final List<String> _sourceColumnPaths;
+    private final Map<String, String> _variables;
+    private final List<ColumnType> _sourceColumnTypes;
 
-	public ImmutableAnalysisJobMetadata(String jobName, String jobVersion, String jobDescription, String author,
-			Date createdDate, Date updatedDate, String datastoreName, List<String> sourceColumnPaths,
-			Map<String, String> variables) {
-		_jobName = jobName;
-		_jobVersion = jobVersion;
-		_jobDescription = jobDescription;
-		_author = author;
-		_createdDate = createdDate;
-		_updatedDate = updatedDate;
-		_datastoreName = datastoreName;
-		if (sourceColumnPaths == null) {
-			sourceColumnPaths = Collections.emptyList();
-		} else {
-			sourceColumnPaths = new ArrayList<String>(sourceColumnPaths);
-		}
-		_sourceColumnPaths = Collections.unmodifiableList(sourceColumnPaths);
+    public ImmutableAnalysisJobMetadata(String jobName, String jobVersion, String jobDescription, String author,
+            Date createdDate, Date updatedDate, String datastoreName, List<String> sourceColumnPaths,
+            List<ColumnType> sourceColumnTypes, Map<String, String> variables) {
+        _jobName = jobName;
+        _jobVersion = jobVersion;
+        _jobDescription = jobDescription;
+        _author = author;
+        _createdDate = createdDate;
+        _updatedDate = updatedDate;
+        _datastoreName = datastoreName;
+        if (sourceColumnPaths == null) {
+            sourceColumnPaths = Collections.emptyList();
+        } else {
+            sourceColumnPaths = new ArrayList<String>(sourceColumnPaths);
+        }
+        _sourceColumnPaths = Collections.unmodifiableList(sourceColumnPaths);
+        if (sourceColumnTypes == null) {
+            _sourceColumnTypes = new ArrayList<ColumnType>(sourceColumnPaths.size());
+        } else {
+            _sourceColumnTypes = Collections.unmodifiableList(sourceColumnTypes);
+        }
 
-		if (variables == null) {
-			variables = Collections.emptyMap();
-		} else {
-			variables = new HashMap<String, String>(variables);
-		}
-		_variables = Collections.unmodifiableMap(variables);
-	}
+        if (variables == null) {
+            variables = Collections.emptyMap();
+        } else {
+            variables = new HashMap<String, String>(variables);
+        }
+        _variables = Collections.unmodifiableMap(variables);
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_jobName);
-		identifiers.add(_jobVersion);
-		identifiers.add(_jobDescription);
-		identifiers.add(_author);
-		identifiers.add(_createdDate);
-		identifiers.add(_updatedDate);
-		identifiers.add(_datastoreName);
-		identifiers.add(_sourceColumnPaths);
-		identifiers.add(_variables);
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(_jobName);
+        identifiers.add(_jobVersion);
+        identifiers.add(_jobDescription);
+        identifiers.add(_author);
+        identifiers.add(_createdDate);
+        identifiers.add(_updatedDate);
+        identifiers.add(_datastoreName);
+        identifiers.add(_sourceColumnPaths);
+        identifiers.add(_variables);
+    }
 
-	@Override
-	public String getJobName() {
-		return _jobName;
-	}
+    @Override
+    public String getJobName() {
+        return _jobName;
+    }
 
-	@Override
-	public String getJobVersion() {
-		return _jobVersion;
-	}
+    @Override
+    public String getJobVersion() {
+        return _jobVersion;
+    }
 
-	@Override
-	public String getJobDescription() {
-		return _jobDescription;
-	}
+    @Override
+    public String getJobDescription() {
+        return _jobDescription;
+    }
 
-	@Override
-	public String getAuthor() {
-		return _author;
-	}
+    @Override
+    public String getAuthor() {
+        return _author;
+    }
 
-	@Override
-	public Date getCreatedDate() {
-		return _createdDate;
-	}
+    @Override
+    public Date getCreatedDate() {
+        return _createdDate;
+    }
 
-	@Override
-	public Date getUpdatedDate() {
-		return _updatedDate;
-	}
+    @Override
+    public Date getUpdatedDate() {
+        return _updatedDate;
+    }
 
-	@Override
-	public String getDatastoreName() {
-		return _datastoreName;
-	}
+    @Override
+    public String getDatastoreName() {
+        return _datastoreName;
+    }
 
-	@Override
-	public List<String> getSourceColumnPaths() {
-		return _sourceColumnPaths;
-	}
+    @Override
+    public List<String> getSourceColumnPaths() {
+        return _sourceColumnPaths;
+    }
 
-	@Override
-	public Map<String, String> getVariables() {
-		return _variables;
-	}
+    @Override
+    public Map<String, String> getVariables() {
+        return _variables;
+    }
+
+    @Override
+    public List<ColumnType> getSourceColumnTypes() {
+        return _sourceColumnTypes;
+    }
 }

@@ -171,6 +171,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
     public AnalysisJobMetadata readMetadata(Job job) {
         final String datastoreName = job.getSource().getDataContext().getRef();
         final List<String> sourceColumnPaths = getSourceColumnPaths(job);
+        final List<org.eobjects.metamodel.schema.ColumnType> sourceColumnTypes = getSourceColumnTypes(job);
         final Map<String, String> variables = getVariables(job);
 
         final String jobName;
@@ -212,7 +213,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         }
 
         return new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author, createdDate, updatedDate,
-                datastoreName, sourceColumnPaths, variables);
+                datastoreName, sourceColumnPaths, sourceColumnTypes, variables);
     }
 
     public Map<String, String> getVariables(Job job) {
@@ -246,6 +247,28 @@ public class JaxbJobReader implements JobReader<InputStream> {
             paths = Collections.emptyList();
         }
         return paths;
+    }
+    
+    private List<org.eobjects.metamodel.schema.ColumnType> getSourceColumnTypes(Job job) {
+        final List<org.eobjects.metamodel.schema.ColumnType> types;
+
+        final ColumnsType columnsType = job.getSource().getColumns();
+        if (columnsType != null) {
+            final List<ColumnType> columns = columnsType.getColumn();
+            types = new ArrayList<org.eobjects.metamodel.schema.ColumnType>(columns.size());
+            for (ColumnType columnType : columns) {
+                final String typeName = columnType.getType();
+                if (StringUtils.isNullOrEmpty(typeName)) {
+                    types.add(null);
+                } else {
+                    final org.eobjects.metamodel.schema.ColumnType type = org.eobjects.metamodel.schema.ColumnType.valueOf(typeName);
+                    types.add(type);
+                }
+            }
+        } else {
+            types = Collections.emptyList();
+        }
+        return types;
     }
 
     public AnalysisJobBuilder create(FileObject file) {
