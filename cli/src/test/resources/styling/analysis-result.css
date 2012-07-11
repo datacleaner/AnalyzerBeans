@@ -1,12 +1,14 @@
+@import url(http://fonts.googleapis.com/css?family=Ubuntu|Open+Sans);
+
 body {
 	margin: 0px;
 	font-size: 13px;
-	font-family: 'Trebuchet MS', sans-serif;
+	font-family: 'Open Sans', sans-serif;
 	color: black;
 }
 
 div.analyzerResult {
-	font-family: 'Trebuchet MS', sans-serif;
+	font-family: 'Open Sans', sans-serif;
 }
 
 div.analysisResultHeader {
@@ -52,7 +54,7 @@ p,div,span,ul,ol,li,table,td,a {
 }
 
 h1,h2,h3,h4,h5 {
-	font-family: 'Trebuchet MS', sans-serif;
+	font-family: 'Ubuntu', sans-serif;
 	color: #377FCF;
 	font-weight: normal;
 	font-style: normal;
@@ -185,7 +187,7 @@ table tr.odd td {
 }
 
 .ui-tabs {
-	font-family: 'Arial Unicode MS', Arial, sans-serif;
+	font-family: 'Open Sans', sans-serif;
 	padding-left: 0;
 	padding-right: 0;
 	padding-top: 0;
