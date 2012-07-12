@@ -59,7 +59,9 @@
 
 		<fixed-width-datastore name="my_fixed_width_1">
 			<filename>../../core/src/test/resources/employees-fixed-width.txt</filename>
-			<fixed-value-width>19</fixed-value-width>
+			<width-specification>
+				<fixed-value-width>19</fixed-value-width>
+			</width-specification>
 			<encoding>UTF-8</encoding>
 			<header-line-number>0</header-line-number>
 			<fail-on-inconsistencies>true</fail-on-inconsistencies>
@@ -67,9 +69,11 @@
 
 		<fixed-width-datastore name="my_fixed_width_2">
 			<filename>../../core/src/test/resources/employees-fixed-width-variable-columns.txt</filename>
-			<value-width>4</value-width>
-			<value-width>17</value-width>
-			<value-width>19</value-width>
+			<width-specification>
+				<value-width>4</value-width>
+				<value-width>17</value-width>
+				<value-width>19</value-width>
+			</width-specification>
 			<encoding>UTF-8</encoding>
 			<fail-on-inconsistencies>true</fail-on-inconsistencies>
 		</fixed-width-datastore>
@@ -116,13 +120,6 @@
 				</field>
 			</table-def>
 		</couchdb-datastore>
-
-		<custom-datastore
-			class-name="org.eobjects.analyzer.configuration.SampleCustomDatastore">
-			<property name="Name" value="my_custom" />
-			<property name="Xml file" value="pom.xml" />
-			<property name="Description" value="custom" />
-		</custom-datastore>
 
 		<pojo-datastore name="my_pojo"
 			description="A datastore based on plain values">
@@ -180,6 +177,13 @@
 			<datastore-name>my_excel_2003</datastore-name>
 			<datastore-name>my_access</datastore-name>
 		</composite-datastore>
+
+		<custom-datastore
+			class-name="org.eobjects.analyzer.configuration.SampleCustomDatastore">
+			<property name="Name" value="my_custom" />
+			<property name="Xml file" value="pom.xml" />
+			<property name="Description" value="custom" />
+		</custom-datastore>
 	</datastore-catalog>
 
 	<multithreaded-taskrunner />

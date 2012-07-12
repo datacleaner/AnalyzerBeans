@@ -308,27 +308,26 @@
 	<complexType name="csvDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">
-				<sequence>
-					<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
-					<element name="quote-char" minOccurs="0" maxOccurs="1"
-						type="token" />
-					<element name="separator-char" minOccurs="0" maxOccurs="1"
-						type="token" />
-					<element name="escape-char" minOccurs="0" maxOccurs="1"
-						type="token" />
-					<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
-					<element name="fail-on-inconsistencies" minOccurs="0"
-						maxOccurs="1" type="boolean" />
-					<element name="header-line-number" minOccurs="0" maxOccurs="1"
-						type="int" default="1">
+				<all>
+					<element name="filename" type="string" minOccurs="1"
+						maxOccurs="1" />
+					<element name="quote-char" type="token" minOccurs="0" />
+					<element name="separator-char" type="token" minOccurs="0" />
+					<element name="escape-char" type="token" minOccurs="0" />
+					<element name="encoding" type="token" minOccurs="0" />
+					<element name="fail-on-inconsistencies" type="boolean"
+						minOccurs="0" />
+					<element name="header-line-number" type="int" default="1"
+						minOccurs="0">
 						<annotation>
 							<documentation>
 								The row number (1-based) of the header line. If
-								no header line is present, use 0.
+								no
+								header line is present, use 0.
 							</documentation>
 						</annotation>
 					</element>
-				</sequence>
+				</all>
 			</extension>
 		</complexContent>
 	</complexType>
@@ -355,8 +354,10 @@
 						<element name="column" minOccurs="1" maxOccurs="unbounded">
 							<complexType>
 								<sequence>
-									<element name="name" minOccurs="1" maxOccurs="1" type="normalizedString" />
-									<element name="type" minOccurs="1" maxOccurs="1" type="normalizedString" />
+									<element name="name" minOccurs="1" maxOccurs="1"
+										type="normalizedString" />
+									<element name="type" minOccurs="1" maxOccurs="1"
+										type="normalizedString" />
 								</sequence>
 							</complexType>
 						</element>
@@ -448,29 +449,32 @@
 	<complexType name="fixedWidthDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">
-				<sequence>
-					<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
-					<choice>
-						<element name="fixed-value-width" minOccurs="1" maxOccurs="1"
-							type="int" default="10" />
-						<sequence>
-							<element name="value-width" minOccurs="1" maxOccurs="unbounded"
-								type="int" default="5" />
-						</sequence>
-					</choice>
-					<element name="encoding" minOccurs="0" maxOccurs="1" type="token" />
-					<element name="header-line-number" minOccurs="0" maxOccurs="1"
-						type="int" default="1">
+				<all>
+					<element name="filename" type="string" minOccurs="1"
+						maxOccurs="1" />
+					<element name="width-specification" minOccurs="1" maxOccurs="1">
+						<complexType>
+							<choice>
+								<element name="fixed-value-width" type="int" default="10"
+									minOccurs="1" />
+								<element name="value-width" minOccurs="1" maxOccurs="unbounded"
+									type="int" default="5" />
+							</choice>
+						</complexType>
+					</element>
+					<element name="encoding" type="token" minOccurs="0" />
+					<element name="header-line-number" type="int" default="1"
+						minOccurs="0">
 						<annotation>
 							<documentation>
-								The index (1-based) of the header line. If
-								no header line is present, use 0.
+								The index (1-based) of the header line. If no
+								header line is present, use 0.
 							</documentation>
 						</annotation>
 					</element>
-					<element name="fail-on-inconsistencies" minOccurs="0"
-						maxOccurs="1" type="boolean" />
-				</sequence>
+					<element name="fail-on-inconsistencies" type="boolean"
+						minOccurs="0" />
+				</all>
 			</extension>
 		</complexContent>
 	</complexType>

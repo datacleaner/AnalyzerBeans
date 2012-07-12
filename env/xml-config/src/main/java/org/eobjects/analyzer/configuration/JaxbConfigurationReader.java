@@ -58,6 +58,7 @@ import org.eobjects.analyzer.configuration.jaxb.DatastoreSynonymCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.DbaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ExcelDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.FixedWidthDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.FixedWidthDatastoreType.WidthSpecification;
 import org.eobjects.analyzer.configuration.jaxb.H2StorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.HsqldbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.InMemoryStorageProviderType;
@@ -854,10 +855,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             headerLineNumber = FixedWidthConfiguration.DEFAULT_COLUMN_NAME_LINE;
         }
 
+        final WidthSpecification widthSpecification = fixedWidthDatastore.getWidthSpecification();
+
         final FixedWidthDatastore ds;
-        final Integer fixedValueWidth = getIntegerVariable("fixedValueWidth", fixedWidthDatastore.getFixedValueWidth());
+        final Integer fixedValueWidth = getIntegerVariable("fixedValueWidth", widthSpecification.getFixedValueWidth());
         if (fixedValueWidth == null) {
-            final List<Integer> valueWidthsBoxed = fixedWidthDatastore.getValueWidth();
+            final List<Integer> valueWidthsBoxed = widthSpecification.getValueWidth();
             int[] valueWidths = new int[valueWidthsBoxed.size()];
             for (int i = 0; i < valueWidths.length; i++) {
                 valueWidths[i] = valueWidthsBoxed.get(i).intValue();
