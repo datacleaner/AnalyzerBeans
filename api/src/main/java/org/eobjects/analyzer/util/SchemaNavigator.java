@@ -70,7 +70,7 @@ public final class SchemaNavigator {
         }
 
         if (schema == null) {
-            throw new IllegalArgumentException("Schema not found. Available schemas names are: "
+            throw new IllegalArgumentException("Schema " + schemaName + " not found. Available schemas names are: "
                     + Arrays.toString(dataContext.getSchemaNames()));
         }
 

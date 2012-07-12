@@ -21,9 +21,8 @@ package org.eobjects.analyzer.job;
 
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 
-public interface ConfigurableBeanJob<E extends BeanDescriptor<?>> extends ComponentJob, InputColumnSinkJob, OutcomeSinkJob {
+public interface ConfigurableBeanJob<E extends BeanDescriptor<?>> extends ComponentJob, HasBeanConfiguration,
+        InputColumnSinkJob, OutcomeSinkJob {
 
-	public E getDescriptor();
-
-	public BeanConfiguration getConfiguration();
+    public E getDescriptor();
 }

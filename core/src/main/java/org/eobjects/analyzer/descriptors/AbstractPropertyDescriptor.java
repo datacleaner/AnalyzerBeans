@@ -91,9 +91,13 @@ public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 			throw new IllegalArgumentException("bean cannot be null");
 		}
 		try {
-			return getField().get(bean);
+			Field field = getField();
+            return field.get(bean);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not retrieve property '" + getName() + "' from bean: " + bean);
+		    if (e instanceof RuntimeException) {
+		        throw (RuntimeException) e;
+		    }
+			throw new IllegalArgumentException("Could not retrieve property '" + getName() + "' from bean: " + bean, e);
 		}
 	}
 

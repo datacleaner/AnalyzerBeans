@@ -35,139 +35,136 @@ import org.eobjects.metamodel.util.FileHelper;
  * 
  * @author Kasper Sørensen
  */
-public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore, UpdateableDatastore {
+public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore,
+        UpdateableDatastore {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * The value is '\\uFFFF', the "not a character" value which should not
-	 * occur in any valid Unicode string.
-	 */
-	public static final char NOT_A_CHAR = '\uFFFF';
+    /**
+     * The value is '\\uFFFF', the "not a character" value which should not
+     * occur in any valid Unicode string.
+     */
+    public static final char NOT_A_CHAR = '\uFFFF';
 
-	public static final char DEFAULT_QUOTE_CHAR = NOT_A_CHAR;
-	public static final char DEFAULT_SEPARATOR_CHAR = CsvConfiguration.DEFAULT_SEPARATOR_CHAR;
+    public static final char DEFAULT_QUOTE_CHAR = NOT_A_CHAR;
+    public static final char DEFAULT_SEPARATOR_CHAR = CsvConfiguration.DEFAULT_SEPARATOR_CHAR;
 
-	private final String _filename;
-	private final Character _quoteChar;
-	private final Character _separatorChar;
-	private final Character _escapeChar;
-	private final String _encoding;
-	private final boolean _failOnInconsistencies;
-	private final int _headerLineNumber;
+    private final String _filename;
+    private final Character _quoteChar;
+    private final Character _separatorChar;
+    private final Character _escapeChar;
+    private final String _encoding;
+    private final boolean _failOnInconsistencies;
+    private final int _headerLineNumber;
 
-	public CsvDatastore(String name, String filename) {
-		this(name, filename, null, null, null);
-	}
+    public CsvDatastore(String name, String filename) {
+        this(name, filename, null, null, null);
+    }
 
-	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding) {
-		this(name, filename, quoteChar, separatorChar, encoding, true);
-	}
+    public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding) {
+        this(name, filename, quoteChar, separatorChar, encoding, true);
+    }
 
-	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
-			boolean failOnInconsistencies) {
-		this(name, filename, quoteChar, separatorChar, encoding, failOnInconsistencies,
-				CsvConfiguration.DEFAULT_COLUMN_NAME_LINE);
-	}
+    public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
+            boolean failOnInconsistencies) {
+        this(name, filename, quoteChar, separatorChar, encoding, failOnInconsistencies,
+                CsvConfiguration.DEFAULT_COLUMN_NAME_LINE);
+    }
 
-	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
-			boolean failOnInconsistencies, int headerLineNumber) {
-		this(name, filename, quoteChar, separatorChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, encoding, failOnInconsistencies, headerLineNumber);
-	}
-	
-	public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, Character escapeChar, String encoding,
-			boolean failOnInconsistencies, int headerLineNumber) {
-		super(name);
-		_filename = filename;
-		_quoteChar = quoteChar;
-		_separatorChar = separatorChar;
-		_escapeChar = escapeChar;
-		_encoding = encoding;
-		_failOnInconsistencies = failOnInconsistencies;
-		if (headerLineNumber < 0) {
-			headerLineNumber = CsvConfiguration.NO_COLUMN_NAME_LINE;
-		}
-		_headerLineNumber = headerLineNumber;
-		
-	}
+    public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
+            boolean failOnInconsistencies, int headerLineNumber) {
+        this(name, filename, quoteChar, separatorChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, encoding,
+                failOnInconsistencies, headerLineNumber);
+    }
 
-	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-		ReadObjectBuilder.create(this, CsvDatastore.class).readObject(stream);
-	}
+    public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar,
+            Character escapeChar, String encoding, boolean failOnInconsistencies, int headerLineNumber) {
+        super(name);
+        _filename = filename;
+        _quoteChar = quoteChar;
+        _separatorChar = separatorChar;
+        _escapeChar = escapeChar;
+        _encoding = encoding;
+        _failOnInconsistencies = failOnInconsistencies;
+        if (headerLineNumber < 0) {
+            headerLineNumber = CsvConfiguration.NO_COLUMN_NAME_LINE;
+        }
+        _headerLineNumber = headerLineNumber;
 
-	public String getEncoding() {
-		return _encoding;
-	}
+    }
 
-	@Override
-	public String getFilename() {
-		return _filename;
-	}
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        ReadObjectBuilder.create(this, CsvDatastore.class).readObject(stream);
+    }
 
-	public Character getQuoteChar() {
-		return _quoteChar;
-	}
-	
-	public Character getEscapeChar() {
-		return _escapeChar;
-	}
+    public String getEncoding() {
+        return _encoding;
+    }
 
-	public Character getSeparatorChar() {
-		return _separatorChar;
-	}
+    @Override
+    public String getFilename() {
+        return _filename;
+    }
 
-	@Override
-	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
-		UpdateableDataContext dataContext;
-		if (_quoteChar == null && _separatorChar == null) {
-			dataContext = new CsvDataContext(new File(_filename));
-		} else {
-			final char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
-			final char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
-			final char escapeChar = _escapeChar == null ? CsvConfiguration.DEFAULT_ESCAPE_CHAR : _escapeChar;
-			final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
-			final CsvConfiguration configuration = new CsvConfiguration(_headerLineNumber, encoding, separatorChar,
-					quoteChar, escapeChar, _failOnInconsistencies);
-			dataContext = new CsvDataContext(new File(_filename), configuration);
-		}
-		return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
-	}
-	
-	@Override
-	public UpdateableDatastoreConnection openConnection() {
-		DatastoreConnection connection = super.openConnection();
-		return (UpdateableDatastoreConnection) connection;
-	}
-	
-	@Override
-	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
-	}
+    public Character getQuoteChar() {
+        return _quoteChar;
+    }
 
-	public boolean isFailOnInconsistencies() {
-		return _failOnInconsistencies;
-	}
+    public Character getEscapeChar() {
+        return _escapeChar;
+    }
 
-	public int getHeaderLineNumber() {
-		return _headerLineNumber;
-	}
+    public Character getSeparatorChar() {
+        return _separatorChar;
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		super.decorateIdentity(identifiers);
-		identifiers.add(_filename);
-		identifiers.add(_encoding);
-		identifiers.add(_quoteChar);
-		identifiers.add(_escapeChar);
-		identifiers.add(_separatorChar);
-		identifiers.add(_failOnInconsistencies);
-		identifiers.add(_headerLineNumber);
-	}
+    @Override
+    protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
+        final char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
+        final char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
+        final char escapeChar = _escapeChar == null ? CsvConfiguration.DEFAULT_ESCAPE_CHAR : _escapeChar;
+        final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
+        final CsvConfiguration configuration = new CsvConfiguration(_headerLineNumber, encoding, separatorChar,
+                quoteChar, escapeChar, _failOnInconsistencies);
+        final UpdateableDataContext dataContext = new CsvDataContext(new File(_filename), configuration);
+        return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
+    }
 
-	@Override
-	public String toString() {
-		return "CsvDatastore[name=" + getName() + ", filename=" + _filename + ", quoteChar='" + _quoteChar
-				+ "', separatorChar='" + _separatorChar + "', encoding=" + _encoding + ", headerLineNumber="
-				+ _headerLineNumber + "]";
-	}
+    @Override
+    public UpdateableDatastoreConnection openConnection() {
+        DatastoreConnection connection = super.openConnection();
+        return (UpdateableDatastoreConnection) connection;
+    }
+
+    @Override
+    public PerformanceCharacteristics getPerformanceCharacteristics() {
+        return new PerformanceCharacteristicsImpl(false);
+    }
+
+    public boolean isFailOnInconsistencies() {
+        return _failOnInconsistencies;
+    }
+
+    public int getHeaderLineNumber() {
+        return _headerLineNumber;
+    }
+
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        super.decorateIdentity(identifiers);
+        identifiers.add(_filename);
+        identifiers.add(_encoding);
+        identifiers.add(_quoteChar);
+        identifiers.add(_escapeChar);
+        identifiers.add(_separatorChar);
+        identifiers.add(_failOnInconsistencies);
+        identifiers.add(_headerLineNumber);
+    }
+
+    @Override
+    public String toString() {
+        return "CsvDatastore[name=" + getName() + ", filename=" + _filename + ", quoteChar='" + _quoteChar
+                + "', separatorChar='" + _separatorChar + "', encoding=" + _encoding + ", headerLineNumber="
+                + _headerLineNumber + "]";
+    }
 }

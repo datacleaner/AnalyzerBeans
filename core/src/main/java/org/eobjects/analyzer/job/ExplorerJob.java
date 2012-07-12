@@ -21,9 +21,8 @@ package org.eobjects.analyzer.job;
 
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 
-public interface ExplorerJob extends ComponentJob {
+public interface ExplorerJob extends ComponentJob, HasBeanConfiguration {
 	
 	public ExplorerBeanDescriptor<?> getDescriptor();
 
-	public BeanConfiguration getConfiguration();
 }
