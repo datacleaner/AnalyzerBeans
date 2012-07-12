@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.io.Closeable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -59,209 +60,222 @@ import org.slf4j.LoggerFactory;
  */
 class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements ComponentDescriptor<B> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LoggerFactory.getLogger(SimpleComponentDescriptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleComponentDescriptor.class);
 
-	protected final Set<ConfiguredPropertyDescriptor> _configuredProperties;;
-	protected final Set<ProvidedPropertyDescriptor> _providedProperties;
-	protected final Set<InitializeMethodDescriptor> _initializeMethods;
-	protected final Set<ValidateMethodDescriptor> _validateMethods;
-	protected final Set<CloseMethodDescriptor> _closeMethods;
+    protected final Set<ConfiguredPropertyDescriptor> _configuredProperties;;
+    protected final Set<ProvidedPropertyDescriptor> _providedProperties;
+    protected final Set<InitializeMethodDescriptor> _initializeMethods;
+    protected final Set<ValidateMethodDescriptor> _validateMethods;
+    protected final Set<CloseMethodDescriptor> _closeMethods;
 
-	/**
-	 * Constructor for inheriting from SimpleComponentDescriptor
-	 * 
-	 * @param beanClass
-	 */
-	public SimpleComponentDescriptor(Class<B> beanClass) {
-		this(beanClass, false);
-	}
+    /**
+     * Constructor for inheriting from SimpleComponentDescriptor
+     * 
+     * @param beanClass
+     */
+    public SimpleComponentDescriptor(Class<B> beanClass) {
+        this(beanClass, false);
+    }
 
-	public SimpleComponentDescriptor(final Class<B> beanClass, final boolean initialize) {
-		super(beanClass);
-		_configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>();
-		_providedProperties = new TreeSet<ProvidedPropertyDescriptor>();
-		_validateMethods = new HashSet<ValidateMethodDescriptor>();
-		_initializeMethods = new HashSet<InitializeMethodDescriptor>();
-		_closeMethods = new HashSet<CloseMethodDescriptor>();
-		if (initialize) {
-			visitClass();
-		}
-	}
+    public SimpleComponentDescriptor(final Class<B> beanClass, final boolean initialize) {
+        super(beanClass);
+        _configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>();
+        _providedProperties = new TreeSet<ProvidedPropertyDescriptor>();
+        _validateMethods = new HashSet<ValidateMethodDescriptor>();
+        _initializeMethods = new HashSet<InitializeMethodDescriptor>();
+        _closeMethods = new HashSet<CloseMethodDescriptor>();
+        if (initialize) {
+            visitClass();
+        }
+    }
 
-	@Override
-	public String getDisplayName() {
-		return getComponentClass().getSimpleName();
-	}
+    @Override
+    public String getDisplayName() {
+        return getComponentClass().getSimpleName();
+    }
 
-	@Override
-	public B newInstance() {
-		try {
-			return getComponentClass().newInstance();
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new IllegalStateException("Could not construct new instance of " + getComponentClass(), e);
-		}
-	}
+    @Override
+    public B newInstance() {
+        try {
+            return getComponentClass().newInstance();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not construct new instance of " + getComponentClass(), e);
+        }
+    }
 
-	@Override
-	protected void visitClass() {
-		super.visitClass();
+    @Override
+    protected void visitClass() {
+        super.visitClass();
 
-		if (ReflectionUtils.isCloseable(getComponentClass())) {
-			try {
-				Method method = getComponentClass().getMethod("close", new Class<?>[0]);
-				CloseMethodDescriptorImpl cmd = new CloseMethodDescriptorImpl(method, this);
-				_closeMethods.add(cmd);
-			} catch (Exception e) {
-				// This should be impossible since all closeable's have a no-arg
-				// close() method
-				logger.error("Unexpected exception while getting close() method from Closeable", e);
-				assert false;
-			}
-		}
-	}
+        if (ReflectionUtils.isCloseable(getComponentClass())) {
+            try {
+                Method method = getComponentClass().getMethod("close", new Class<?>[0]);
+                CloseMethodDescriptorImpl cmd = new CloseMethodDescriptorImpl(method, this);
+                _closeMethods.add(cmd);
+            } catch (Exception e) {
+                // This should be impossible since all closeable's have a no-arg
+                // close() method
+                logger.error("Unexpected exception while getting close() method from Closeable", e);
+                assert false;
+            }
+        }
+    }
 
-	@Override
-	protected void visitField(Field field) {
-		final boolean isInject = ReflectionUtils.isAnnotationPresent(field, Inject.class);
-		final boolean isConfigured = ReflectionUtils.isAnnotationPresent(field, Configured.class);
-		final boolean isProvided = ReflectionUtils.isAnnotationPresent(field, Provided.class);
+    @Override
+    protected void visitField(Field field) {
+        final boolean isInject = ReflectionUtils.isAnnotationPresent(field, Inject.class);
+        final boolean isConfigured = ReflectionUtils.isAnnotationPresent(field, Configured.class);
+        final boolean isProvided = ReflectionUtils.isAnnotationPresent(field, Provided.class);
 
-		if (isConfigured && isProvided) {
-			throw new DescriptorException("The field " + field
-					+ " is annotated with both @Configured and @Provided, which are mutually exclusive.");
-		}
+        if (isConfigured && isProvided) {
+            throw new DescriptorException("The field " + field
+                    + " is annotated with both @Configured and @Provided, which are mutually exclusive.");
+        }
 
-		if (!isConfigured && (isInject || isProvided)) {
-			// provided properties = @Inject or @Provided, and NOT @Configured
-			_providedProperties.add(new ProvidedPropertyDescriptorImpl(field, this));
-		} else if (isConfigured) {
-			if (!isInject) {
-				logger.debug("No @Inject annotation found for @Configured field: {}", field);
-			}
-			ConfiguredPropertyDescriptor cpd = new ConfiguredPropertyDescriptorImpl(field, this);
-			_configuredProperties.add(cpd);
-		}
-	}
+        if (!isConfigured && (isInject || isProvided)) {
+            // provided properties = @Inject or @Provided, and NOT @Configured
+            _providedProperties.add(new ProvidedPropertyDescriptorImpl(field, this));
+        } else if (isConfigured) {
+            if (!isInject) {
+                logger.debug("No @Inject annotation found for @Configured field: {}", field);
+            }
+            ConfiguredPropertyDescriptor cpd = new ConfiguredPropertyDescriptorImpl(field, this);
+            _configuredProperties.add(cpd);
+        }
+    }
 
-	@Override
-	protected void visitMethod(Method method) {
-		final boolean isInitialize;
-		{
-			final boolean isInitializeAnnotationPresent = ReflectionUtils.isAnnotationPresent(method, Initialize.class);
-			final boolean isPostConstructAnnotationPresent = ReflectionUtils
-					.isAnnotationPresent(method, PostConstruct.class);
-			// @PostConstruct is a valid substitution for @Initialize
-			isInitialize = isInitializeAnnotationPresent || isPostConstructAnnotationPresent;
-		}
-		final boolean isClose;
-		{
-			final boolean isPreDestroyAnnotationPresent = ReflectionUtils.isAnnotationPresent(method, PreDestroy.class);
-			final boolean isCloseAnnotationPresent = ReflectionUtils.isAnnotationPresent(method, Close.class);
-			// @PreDestroy is a valid substitution for @Close
-			isClose = isCloseAnnotationPresent || isPreDestroyAnnotationPresent;
-		}
-		final boolean isValidate = ReflectionUtils.isAnnotationPresent(method, Validate.class);
+    @Override
+    protected void visitMethod(Method method) {
+        final boolean isInitialize;
+        {
+            final boolean isInitializeAnnotationPresent = ReflectionUtils.isAnnotationPresent(method, Initialize.class);
+            final boolean isPostConstructAnnotationPresent = ReflectionUtils.isAnnotationPresent(method,
+                    PostConstruct.class);
+            // @PostConstruct is a valid substitution for @Initialize
+            isInitialize = isInitializeAnnotationPresent || isPostConstructAnnotationPresent;
+        }
+        final boolean isClose;
+        {
+            final boolean isPreDestroyAnnotationPresent = ReflectionUtils.isAnnotationPresent(method, PreDestroy.class);
+            final boolean isCloseAnnotationPresent = ReflectionUtils.isAnnotationPresent(method, Close.class);
+            // @PreDestroy is a valid substitution for @Close
+            isClose = isCloseAnnotationPresent || isPreDestroyAnnotationPresent;
+        }
+        final boolean isValidate = ReflectionUtils.isAnnotationPresent(method, Validate.class);
 
-		if (isInitialize) {
-			_initializeMethods.add(new InitializeMethodDescriptorImpl(method, this));
-		}
+        if (isInitialize) {
+            _initializeMethods.add(new InitializeMethodDescriptorImpl(method, this));
+        }
 
-		if (isValidate) {
-			_validateMethods.add(new ValidateMethodDescriptorImpl(method, this));
-		}
+        if (isValidate) {
+            _validateMethods.add(new ValidateMethodDescriptorImpl(method, this));
+        }
 
-		if (isClose) {
-			_closeMethods.add(new CloseMethodDescriptorImpl(method, this));
-		}
-	}
+        if (isClose) {
+            _closeMethods.add(new CloseMethodDescriptorImpl(method, this));
+        }
+    }
 
-	public Set<InitializeMethodDescriptor> getInitializeMethods() {
-		return Collections.unmodifiableSet(_initializeMethods);
-	}
+    public Set<InitializeMethodDescriptor> getInitializeMethods() {
+        return Collections.unmodifiableSet(_initializeMethods);
+    }
 
-	public Set<ConfiguredPropertyDescriptor> getConfiguredProperties() {
-		return Collections.unmodifiableSet(_configuredProperties);
-	}
+    public Set<ConfiguredPropertyDescriptor> getConfiguredProperties() {
+        return Collections.unmodifiableSet(_configuredProperties);
+    }
 
-	public Set<CloseMethodDescriptor> getCloseMethods() {
-		return Collections.unmodifiableSet(_closeMethods);
-	}
+    public Set<CloseMethodDescriptor> getCloseMethods() {
+        return Collections.unmodifiableSet(_closeMethods);
+    }
 
-	@Override
-	public Set<ValidateMethodDescriptor> getValidateMethods() {
-		return Collections.unmodifiableSet(_validateMethods);
-	}
+    @Override
+    public Set<ValidateMethodDescriptor> getValidateMethods() {
+        return Collections.unmodifiableSet(_validateMethods);
+    }
 
-	@Override
-	public Set<ProvidedPropertyDescriptor> getProvidedProperties() {
-		return Collections.unmodifiableSet(_providedProperties);
-	}
+    @Override
+    public Set<ProvidedPropertyDescriptor> getProvidedProperties() {
+        return Collections.unmodifiableSet(_providedProperties);
+    }
 
-	@Override
-	public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls) {
-		Set<ProvidedPropertyDescriptor> result = new HashSet<ProvidedPropertyDescriptor>();
-		for (ProvidedPropertyDescriptor descriptor : _providedProperties) {
-			if (ReflectionUtils.is(descriptor.getType(), cls)) {
-				result.add(descriptor);
-			}
-		}
-		return result;
-	}
+    @Override
+    public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls) {
+        Set<ProvidedPropertyDescriptor> result = new HashSet<ProvidedPropertyDescriptor>();
+        for (ProvidedPropertyDescriptor descriptor : _providedProperties) {
+            if (ReflectionUtils.is(descriptor.getType(), cls)) {
+                result.add(descriptor);
+            }
+        }
+        return result;
+    }
 
-	@Override
-	public ConfiguredPropertyDescriptor getConfiguredProperty(String configuredName) {
-		for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
-			if (configuredName.equals(configuredDescriptor.getName())) {
-				return configuredDescriptor;
-			}
-		}
+    @Override
+    public ConfiguredPropertyDescriptor getConfiguredProperty(String configuredName) {
+        for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
+            if (configuredName.equals(configuredDescriptor.getName())) {
+                return configuredDescriptor;
+            }
+        }
 
-		for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
-			String[] aliases = configuredDescriptor.getAliases();
-			if (ArrayUtils.contains(aliases, configuredName)) {
-				return configuredDescriptor;
-			}
-		}
-		return null;
-	}
+        for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
+            String[] aliases = configuredDescriptor.getAliases();
+            if (ArrayUtils.contains(aliases, configuredName)) {
+                return configuredDescriptor;
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesByType(Class<?> type, boolean includeArrays) {
-		Set<ConfiguredPropertyDescriptor> set = new TreeSet<ConfiguredPropertyDescriptor>();
-		for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
-			final boolean include;
-			if (includeArrays) {
-				include = ReflectionUtils.is(configuredDescriptor.getBaseType(), type);
-			} else {
-				Class<?> baseType = configuredDescriptor.getType();
-				if (baseType.isArray() == type.isArray()) {
-					include = ReflectionUtils.is(baseType, type);
-				} else {
-					include = false;
-				}
-			}
-			if (include) {
-				set.add(configuredDescriptor);
-			}
-		}
-		return set;
-	}
+    @Override
+    public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesByAnnotation(
+            Class<? extends Annotation> annotationClass) {
+        Set<ConfiguredPropertyDescriptor> set = new TreeSet<ConfiguredPropertyDescriptor>();
+        for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
+            Annotation annotation = configuredDescriptor.getAnnotation(annotationClass);
+            if (annotation != null) {
+                set.add(configuredDescriptor);
+            }
+        }
+        return set;
+    }
 
-	@Override
-	public int compareTo(ComponentDescriptor<?> o) {
-		if (o == null) {
-			return 1;
-		}
-		Class<?> otherBeanClass = o.getComponentClass();
-		if (otherBeanClass == null) {
-			return 1;
-		}
-		String thisBeanClassName = this.getComponentClass().toString();
-		String thatBeanClassName = otherBeanClass.toString();
-		return thisBeanClassName.compareTo(thatBeanClassName);
-	}
+    @Override
+    public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesByType(Class<?> type, boolean includeArrays) {
+        Set<ConfiguredPropertyDescriptor> set = new TreeSet<ConfiguredPropertyDescriptor>();
+        for (ConfiguredPropertyDescriptor configuredDescriptor : _configuredProperties) {
+            final boolean include;
+            if (includeArrays) {
+                include = ReflectionUtils.is(configuredDescriptor.getBaseType(), type);
+            } else {
+                Class<?> baseType = configuredDescriptor.getType();
+                if (baseType.isArray() == type.isArray()) {
+                    include = ReflectionUtils.is(baseType, type);
+                } else {
+                    include = false;
+                }
+            }
+            if (include) {
+                set.add(configuredDescriptor);
+            }
+        }
+        return set;
+    }
+
+    @Override
+    public int compareTo(ComponentDescriptor<?> o) {
+        if (o == null) {
+            return 1;
+        }
+        Class<?> otherBeanClass = o.getComponentClass();
+        if (otherBeanClass == null) {
+            return 1;
+        }
+        String thisBeanClassName = this.getComponentClass().toString();
+        String thatBeanClassName = otherBeanClass.toString();
+        return thisBeanClassName.compareTo(thatBeanClassName);
+    }
 }

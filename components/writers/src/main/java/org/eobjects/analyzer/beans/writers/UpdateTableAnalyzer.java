@@ -33,10 +33,13 @@ import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Categorized;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FileProperty;
+import org.eobjects.analyzer.beans.api.SchemaProperty;
+import org.eobjects.analyzer.beans.api.TableProperty;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Validate;
@@ -88,6 +91,7 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
     @Inject
     @Configured
     @Description("Names of columns in the target table, on which the values will be updated.")
+    @ColumnProperty
     String[] columnNames;
 
     @Inject
@@ -98,6 +102,7 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
     @Inject
     @Configured
     @Description("Names of columns in the target table, which form the conditions of the update.")
+    @ColumnProperty
     String[] conditionColumnNames;
 
     @Inject
@@ -108,11 +113,13 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
     @Inject
     @Configured(required = false)
     @Description("Schema name of target table")
+    @SchemaProperty
     String schemaName;
 
     @Inject
     @Configured(required = false)
     @Description("Table to target (update)")
+    @TableProperty
     String tableName;
 
     @Inject
@@ -435,8 +442,9 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
                         for (int i = 0; i < whereColumns.length; i++) {
                             final Object value = rowData[i + updateColumns.length];
                             final Column whereColumn = whereColumns[i];
-                            final FilterItem filterItem = new FilterItem(new SelectItem(whereColumn), OperatorType.EQUALS_TO, value);
-                            
+                            final FilterItem filterItem = new FilterItem(new SelectItem(whereColumn),
+                                    OperatorType.EQUALS_TO, value);
+
                             updationBuilder = updationBuilder.where(filterItem);
                         }
 

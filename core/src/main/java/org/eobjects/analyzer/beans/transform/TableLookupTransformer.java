@@ -28,11 +28,14 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.SchemaProperty;
+import org.eobjects.analyzer.beans.api.TableProperty;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.beans.api.Validate;
@@ -72,20 +75,24 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     @Inject
     @Configured
+    @ColumnProperty
     String[] conditionColumns;
 
     @Inject
     @Configured
+    @ColumnProperty
     String[] outputColumns;
 
     @Inject
     @Configured(required = false)
     @Alias("Schema")
+    @SchemaProperty
     String schemaName;
 
     @Inject
     @Configured(required = false)
     @Alias("Table")
+    @TableProperty
     String tableName;
 
     private final Map<List<Object>, Object[]> cache = CollectionUtils2.createCacheMap();

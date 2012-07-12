@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Close;
@@ -35,105 +36,114 @@ import org.eobjects.analyzer.beans.api.Validate;
  * @author Kasper Sørensen
  */
 public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?>>, Serializable {
-	
-	/**
-	 * @return a humanly readable display name for this bean.
-	 */
-	public String getDisplayName();
 
-	/**
-	 * Constructs an instance of this component
-	 * 
-	 * @return a new (uninitialized) instance of the component.
-	 */
-	public B newInstance();
+    /**
+     * @return a humanly readable display name for this bean.
+     */
+    public String getDisplayName();
 
-	/**
-	 * Gets the component's class
-	 * 
-	 * @return the component's class
-	 */
-	public Class<B> getComponentClass();
+    /**
+     * Constructs an instance of this component
+     * 
+     * @return a new (uninitialized) instance of the component.
+     */
+    public B newInstance();
 
-	/**
-	 * Gets all configuration properties of the component
-	 * 
-	 * @see Configured
-	 * 
-	 * @return a set of all properties
-	 */
-	public Set<ConfiguredPropertyDescriptor> getConfiguredProperties();
+    /**
+     * Gets the component's class
+     * 
+     * @return the component's class
+     */
+    public Class<B> getComponentClass();
 
-	/**
-	 * Gets all configuration properties of a particular type (including
-	 * subtypes)
-	 * 
-	 * @see Configured
-	 * 
-	 * @param type
-	 *            the type of property to look for
-	 * @param includeArrays
-	 *            a boolean indicating whether or not configuration properties
-	 *            that are arrays of the provided type should be included
-	 * @return a set of properties that match the specified type query
-	 */
-	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesByType(Class<?> type, boolean includeArrays);
+    /**
+     * Gets all configuration properties of the component
+     * 
+     * @see Configured
+     * 
+     * @return a set of all properties
+     */
+    public Set<ConfiguredPropertyDescriptor> getConfiguredProperties();
 
-	/**
-	 * Gets a configured property by name
-	 * 
-	 * @see Configured
-	 * 
-	 * @param name
-	 *            the name of the property
-	 * @return a configured property, or null if no such property exists
-	 */
-	public ConfiguredPropertyDescriptor getConfiguredProperty(String name);
+    /**
+     * Gets all configuration properties with a particular annotation.
+     * 
+     * @param annotation
+     *            the annotation type to look for.
+     * @return a set of properties that match the specified annotation query
+     */
+    public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesByAnnotation(Class<? extends Annotation> annotation);
 
-	/**
-	 * Gets the validation methods of the component
-	 * 
-	 * @see Validate
-	 * 
-	 * @return a set of validate method descriptors
-	 */
-	public Set<ValidateMethodDescriptor> getValidateMethods();
+    /**
+     * Gets all configuration properties of a particular type (including
+     * subtypes)
+     * 
+     * @see Configured
+     * 
+     * @param type
+     *            the type of property to look for
+     * @param includeArrays
+     *            a boolean indicating whether or not configuration properties
+     *            that are arrays of the provided type should be included
+     * @return a set of properties that match the specified type query
+     */
+    public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesByType(Class<?> type, boolean includeArrays);
 
-	/**
-	 * Gets the initialize methods of the component
-	 * 
-	 * @see Initialize
-	 * 
-	 * @return a set of initialize method descriptors
-	 */
-	public Set<InitializeMethodDescriptor> getInitializeMethods();
+    /**
+     * Gets a configured property by name
+     * 
+     * @see Configured
+     * 
+     * @param name
+     *            the name of the property
+     * @return a configured property, or null if no such property exists
+     */
+    public ConfiguredPropertyDescriptor getConfiguredProperty(String name);
 
-	/**
-	 * Gets the close methods of the component
-	 * 
-	 * @see Close
-	 * 
-	 * @return a set of close method descriptors
-	 */
-	public Set<CloseMethodDescriptor> getCloseMethods();
+    /**
+     * Gets the validation methods of the component
+     * 
+     * @see Validate
+     * 
+     * @return a set of validate method descriptors
+     */
+    public Set<ValidateMethodDescriptor> getValidateMethods();
 
-	/**
-	 * Gets the provided properties of the component
-	 * 
-	 * @see Provided
-	 * 
-	 * @return a set of provided properties.
-	 */
-	public Set<ProvidedPropertyDescriptor> getProvidedProperties();
+    /**
+     * Gets the initialize methods of the component
+     * 
+     * @see Initialize
+     * 
+     * @return a set of initialize method descriptors
+     */
+    public Set<InitializeMethodDescriptor> getInitializeMethods();
 
-	/**
-	 * Gets the provided properties of a particular type in the component
-	 * 
-	 * @see Provided
-	 * 
-	 * @param cls
-	 *            the type of the provided properties
-	 * @return a set of provided properties.
-	 */
-	public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls);
+    /**
+     * Gets the close methods of the component
+     * 
+     * @see Close
+     * 
+     * @return a set of close method descriptors
+     */
+    public Set<CloseMethodDescriptor> getCloseMethods();
+
+    /**
+     * Gets the provided properties of the component
+     * 
+     * @see Provided
+     * 
+     * @return a set of provided properties.
+     */
+    public Set<ProvidedPropertyDescriptor> getProvidedProperties();
+
+    /**
+     * Gets the provided properties of a particular type in the component
+     * 
+     * @see Provided
+     * 
+     * @param cls
+     *            the type of the provided properties
+     * @return a set of provided properties.
+     */
+    public Set<ProvidedPropertyDescriptor> getProvidedPropertiesByType(Class<?> cls);
 }

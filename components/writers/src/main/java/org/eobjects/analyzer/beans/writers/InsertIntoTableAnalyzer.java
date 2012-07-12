@@ -33,10 +33,13 @@ import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Categorized;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FileProperty;
+import org.eobjects.analyzer.beans.api.SchemaProperty;
+import org.eobjects.analyzer.beans.api.TableProperty;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
@@ -84,6 +87,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     @Inject
     @Configured
     @Description("Names of columns in the target table.")
+    @ColumnProperty
     String[] columnNames;
 
     @Inject
@@ -94,11 +98,13 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     @Inject
     @Configured(required = false)
     @Description("Schema name of target table")
+    @SchemaProperty
     String schemaName;
 
     @Inject
     @Configured(required = false)
     @Description("Table to target (insert into)")
+    @TableProperty
     String tableName;
 
     @Inject
