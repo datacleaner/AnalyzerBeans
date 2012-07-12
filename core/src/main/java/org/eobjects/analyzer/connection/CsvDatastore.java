@@ -58,7 +58,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
     private final int _headerLineNumber;
 
     public CsvDatastore(String name, String filename) {
-        this(name, filename, null, null, null);
+        this(name, filename, CsvConfiguration.DEFAULT_QUOTE_CHAR, CsvConfiguration.DEFAULT_SEPARATOR_CHAR, FileHelper.DEFAULT_ENCODING);
     }
 
     public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding) {
