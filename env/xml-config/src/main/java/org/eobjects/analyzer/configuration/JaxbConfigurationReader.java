@@ -63,6 +63,7 @@ import org.eobjects.analyzer.configuration.jaxb.H2StorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.HsqldbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.InMemoryStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType.TableTypes;
 import org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
@@ -80,6 +81,7 @@ import org.eobjects.analyzer.configuration.jaxb.SasDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.SimplePatternType;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.StorageProviderType;
+import org.eobjects.analyzer.configuration.jaxb.TableTypeEnum;
 import org.eobjects.analyzer.configuration.jaxb.TextFileDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.TextFileSynonymCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ValueListDictionaryType;
@@ -139,6 +141,7 @@ import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
 import org.eobjects.metamodel.pojo.ArrayTableDataProvider;
 import org.eobjects.metamodel.pojo.TableDataProvider;
 import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.TableType;
 import org.eobjects.metamodel.util.FileHelper;
 import org.eobjects.metamodel.util.SimpleTableDef;
 import org.eobjects.metamodel.xml.XmlSaxTableDef;
@@ -241,18 +244,19 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         // It will be used to host dependencies as they appear
         InjectionManager injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
-        TaskRunner taskRunner = createTaskRunner(configuration, injectionManager);
+        final TaskRunner taskRunner = createTaskRunner(configuration, injectionManager);
 
         analyzerBeansConfiguration = analyzerBeansConfiguration.replace(taskRunner);
         injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
-        DescriptorProvider descriptorProvider = createDescriptorProvider(configuration, taskRunner, injectionManager);
+        final DescriptorProvider descriptorProvider = createDescriptorProvider(configuration, taskRunner,
+                injectionManager);
 
         analyzerBeansConfiguration = analyzerBeansConfiguration.replace(descriptorProvider);
         injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
         addVariablePath("datastoreCatalog");
-        DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog(),
+        final DatastoreCatalog datastoreCatalog = createDatastoreCatalog(configuration.getDatastoreCatalog(),
                 injectionManager);
         removeVariablePath();
 
@@ -260,14 +264,15 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
         addVariablePath("referenceDataCatalog");
-        ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(configuration.getReferenceDataCatalog(),
-                injectionManager);
+        final ReferenceDataCatalog referenceDataCatalog = createReferenceDataCatalog(
+                configuration.getReferenceDataCatalog(), injectionManager);
         removeVariablePath();
 
         analyzerBeansConfiguration = analyzerBeansConfiguration.replace(referenceDataCatalog);
         injectionManager = analyzerBeansConfiguration.getInjectionManager(null);
 
-        StorageProvider storageProvider = createStorageProvider(configuration.getStorageProvider(), injectionManager);
+        final StorageProvider storageProvider = createStorageProvider(configuration.getStorageProvider(),
+                injectionManager);
         analyzerBeansConfiguration = analyzerBeansConfiguration.replace(storageProvider);
 
         return analyzerBeansConfiguration;
@@ -877,20 +882,37 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     private Datastore createDatastore(String name, JdbcDatastoreType jdbcDatastoreType) {
         JdbcDatastore ds;
 
-        String datasourceJndiUrl = getStringVariable("jndiUrl", jdbcDatastoreType.getDatasourceJndiUrl());
+        final TableTypes jaxbTableTypes = jdbcDatastoreType.getTableTypes();
+        final TableType[] tableTypes;
+        if (jaxbTableTypes == null) {
+            tableTypes = null;
+        } else {
+            final List<TableTypeEnum> jaxbTableTypeList = jaxbTableTypes.getTableType();
+            tableTypes = new TableType[jaxbTableTypeList.size()];
+            for (int i = 0; i < tableTypes.length; i++) {
+                final TableTypeEnum tableTypeEnum = jaxbTableTypeList.get(i);
+                tableTypes[i] = TableType.valueOf(tableTypeEnum.toString());
+            }
+        }
+        
+        final String catalogName = getStringVariable("catalogName", jdbcDatastoreType.getCatalogName());
+
+        final String datasourceJndiUrl = getStringVariable("jndiUrl", jdbcDatastoreType.getDatasourceJndiUrl());
         if (datasourceJndiUrl == null) {
-            String url = getStringVariable("url", jdbcDatastoreType.getUrl());
-            String driver = getStringVariable("driver", jdbcDatastoreType.getDriver());
-            String username = getStringVariable("username", jdbcDatastoreType.getUsername());
-            String password = getStringVariable("password", jdbcDatastoreType.getPassword());
+            final String url = getStringVariable("url", jdbcDatastoreType.getUrl());
+            final String driver = getStringVariable("driver", jdbcDatastoreType.getDriver());
+            final String username = getStringVariable("username", jdbcDatastoreType.getUsername());
+            final String password = getStringVariable("password", jdbcDatastoreType.getPassword());
             Boolean multipleConnections = getBooleanVariable("multipleConnections",
                     jdbcDatastoreType.isMultipleConnections());
             if (multipleConnections == null) {
                 multipleConnections = true;
             }
-            ds = new JdbcDatastore(name, url, driver, username, password, multipleConnections.booleanValue());
+
+            ds = new JdbcDatastore(name, url, driver, username, password, multipleConnections.booleanValue(),
+                    tableTypes, catalogName);
         } else {
-            ds = new JdbcDatastore(name, datasourceJndiUrl);
+            ds = new JdbcDatastore(name, datasourceJndiUrl, tableTypes, catalogName);
         }
         return ds;
     }

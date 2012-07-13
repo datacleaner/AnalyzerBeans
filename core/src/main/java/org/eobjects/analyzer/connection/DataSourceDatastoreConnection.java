@@ -24,37 +24,45 @@ import javax.sql.DataSource;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.jdbc.JdbcDataContext;
+import org.eobjects.metamodel.schema.TableType;
 
+/**
+ * A {@link DatastoreConnection} based on a {@link DataSource}.
+ */
 public class DataSourceDatastoreConnection extends UsageAwareDatastoreConnection<UpdateableDataContext> implements
-		UpdateableDatastoreConnection {
+        UpdateableDatastoreConnection {
 
-	private final UpdateableDataContext _dataContext;
-	private final SchemaNavigator _schemaNavigator;
+    private final UpdateableDataContext _dataContext;
+    private final SchemaNavigator _schemaNavigator;
 
-	public DataSourceDatastoreConnection(DataSource ds, Datastore datastore) {
-		super(datastore);
-		_dataContext = new JdbcDataContext(ds);
-		_schemaNavigator = new SchemaNavigator(_dataContext);
-	}
+    public DataSourceDatastoreConnection(DataSource ds, Datastore datastore) {
+        this(ds, TableType.DEFAULT_TABLE_TYPES, null, datastore);
+    }
 
-	@Override
-	public UpdateableDataContext getDataContext() {
-		return _dataContext;
-	}
-	
-	@Override
-	public UpdateableDataContext getUpdateableDataContext() {
-		return _dataContext;
-	}
+    public DataSourceDatastoreConnection(DataSource ds, TableType[] tableTypes, String catalogName, Datastore datastore) {
+        super(datastore);
+        _dataContext = new JdbcDataContext(ds, tableTypes, catalogName);
+        _schemaNavigator = new SchemaNavigator(_dataContext);
+    }
 
-	@Override
-	public SchemaNavigator getSchemaNavigator() {
-		return _schemaNavigator;
-	}
+    @Override
+    public UpdateableDataContext getDataContext() {
+        return _dataContext;
+    }
 
-	@Override
-	protected void closeInternal() {
-		// do nothing, the JdbcDataContext will automatically close pooled
-		// connections in the datasource
-	}
+    @Override
+    public UpdateableDataContext getUpdateableDataContext() {
+        return _dataContext;
+    }
+
+    @Override
+    public SchemaNavigator getSchemaNavigator() {
+        return _schemaNavigator;
+    }
+
+    @Override
+    protected void closeInternal() {
+        // do nothing, the JdbcDataContext will automatically close pooled
+        // connections in the datasource
+    }
 }

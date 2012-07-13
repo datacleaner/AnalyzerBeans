@@ -274,36 +274,59 @@
 	<complexType name="jdbcDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">
-				<choice>
-					<sequence>
-						<element name="url" minOccurs="1" maxOccurs="1" type="string" />
-						<element name="driver" minOccurs="1" maxOccurs="1" type="string" />
-						<element name="username" minOccurs="0" maxOccurs="1" type="string" />
-						<element name="password" minOccurs="0" maxOccurs="1" type="string" />
-						<element name="multiple-connections" minOccurs="0"
-							maxOccurs="1" type="boolean" default="true">
-							<annotation>
-								<documentation>
-									Indicates whether multiple connections (aka.
-									connection pooling) may be created or not. Connection pooling
-									is
-									preferred for performance reasons, but can safely be disabled
-									if
-									not desired. The max number of connections cannot be
-									configured,
-									but no more connections than the number of threads
-									in the task
-									runner should be expected.
-								</documentation>
-							</annotation>
-						</element>
-					</sequence>
-					<element name="datasource-jndi-url" minOccurs="0"
-						maxOccurs="1" type="string" />
-				</choice>
+				<sequence>
+					<choice>
+						<sequence>
+							<element name="url" minOccurs="1" maxOccurs="1" type="string" />
+							<element name="driver" minOccurs="1" maxOccurs="1" type="string" />
+							<element name="username" minOccurs="0" maxOccurs="1"
+								type="string" />
+							<element name="password" minOccurs="0" maxOccurs="1"
+								type="string" />
+							<element name="multiple-connections" minOccurs="0"
+								maxOccurs="1" type="boolean" default="true">
+								<annotation>
+									<documentation>
+										Indicates whether multiple connections (aka.
+										connection pooling) may be created or not. Connection pooling
+										is preferred for performance reasons, but can safely be
+										disabled if not desired. The max number of connections cannot
+										be configured, but no more connections than the number of
+										threads in the task runner should be expected.
+									</documentation>
+								</annotation>
+							</element>
+						</sequence>
+						<element name="datasource-jndi-url" minOccurs="0"
+							maxOccurs="1" type="string" />
+					</choice>
+					<element name="table-types" minOccurs="0" maxOccurs="1">
+						<complexType>
+							<sequence>
+								<element name="table-type" minOccurs="1" maxOccurs="unbounded"
+									type="ab:tableTypeEnum" />
+							</sequence>
+						</complexType>
+					</element>
+					<element name="catalog-name" minOccurs="0" maxOccurs="1"
+						type="string" />
+				</sequence>
 			</extension>
 		</complexContent>
 	</complexType>
+
+	<simpleType name="tableTypeEnum">
+		<restriction base="string">
+			<enumeration value="TABLE" />
+			<enumeration value="VIEW" />
+			<enumeration value="SYSTEM_TABLE" />
+			<enumeration value="GLOBAL_TEMPORARY" />
+			<enumeration value="LOCAL_TEMPORARY" />
+			<enumeration value="ALIAS" />
+			<enumeration value="SYNONYM" />
+			<enumeration value="OTHER" />
+		</restriction>
+	</simpleType>
 
 	<complexType name="csvDatastoreType">
 		<complexContent>
@@ -452,7 +475,8 @@
 				<all>
 					<element name="filename" type="string" minOccurs="1"
 						maxOccurs="1" />
-					<element name="width-specification" minOccurs="1" maxOccurs="1">
+					<element name="width-specification" minOccurs="1"
+						maxOccurs="1">
 						<complexType>
 							<choice>
 								<element name="fixed-value-width" type="int" default="10"
