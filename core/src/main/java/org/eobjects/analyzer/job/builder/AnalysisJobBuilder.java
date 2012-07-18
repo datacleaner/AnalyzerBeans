@@ -192,6 +192,13 @@ public final class AnalysisJobBuilder implements Closeable {
 		}
 		return this;
 	}
+	
+	public AnalysisJobBuilder addSourceColumns(Collection<Column>  columns) {
+	    for (Column column : columns) {
+            addSourceColumn(column);
+        }
+        return this;
+	}
 
 	public AnalysisJobBuilder addSourceColumns(Column... columns) {
 		for (Column column : columns) {
