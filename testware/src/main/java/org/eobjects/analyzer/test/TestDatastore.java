@@ -21,11 +21,11 @@ package org.eobjects.analyzer.test;
 
 import javax.sql.DataSource;
 
-import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.PerformanceCharacteristics;
+import org.eobjects.analyzer.connection.UpdateableDatastore;
+import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 
-final class TestDatastore implements Datastore, PerformanceCharacteristics {
+final class TestDatastore implements UpdateableDatastore, PerformanceCharacteristics {
 
     private static final long serialVersionUID = 1L;
     private final String _name;
@@ -57,7 +57,7 @@ final class TestDatastore implements Datastore, PerformanceCharacteristics {
     }
 
     @Override
-    public DatastoreConnection openConnection() {
+    public UpdateableDatastoreConnection openConnection() {
         try {
             return new TestDatastoreConnection(this);
         } catch (Exception e) {

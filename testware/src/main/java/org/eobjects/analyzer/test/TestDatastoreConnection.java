@@ -20,14 +20,15 @@
 package org.eobjects.analyzer.test;
 
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.connection.DatastoreConnection;
+import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.UpdateableDataContext;
 
-final class TestDatastoreConnection implements DatastoreConnection {
+final class TestDatastoreConnection implements UpdateableDatastoreConnection {
 
-    private final DataContext _dataContext;
+    private final UpdateableDataContext _dataContext;
     private final Datastore _datastore;
 
     public TestDatastoreConnection(TestDatastore datastore) throws Exception {
@@ -52,6 +53,11 @@ final class TestDatastoreConnection implements DatastoreConnection {
 
     @Override
     public void close() {
+    }
+
+    @Override
+    public UpdateableDataContext getUpdateableDataContext() {
+        return _dataContext;
     }
 
 }
