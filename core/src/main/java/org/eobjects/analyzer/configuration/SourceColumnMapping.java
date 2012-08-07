@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.job.AnalysisJobMetadata;
+import org.eobjects.analyzer.util.SchemaNavigator;
 
 import org.eobjects.metamodel.schema.Column;
 
@@ -42,85 +43,87 @@ import org.eobjects.metamodel.schema.Column;
  */
 public final class SourceColumnMapping {
 
-	private final Map<String, Column> _map;
-	private Datastore _datastore;
-	
-	public SourceColumnMapping(AnalysisJobMetadata metadata) {
-		this(metadata.getSourceColumnPaths());
-	}
+    private final Map<String, Column> _map;
+    private Datastore _datastore;
 
-	public SourceColumnMapping(String... originalColumnPaths) {
-		_map = new TreeMap<String, Column>();
-		for (String path : originalColumnPaths) {
-			_map.put(path, null);
-		}
-	}
+    public SourceColumnMapping(AnalysisJobMetadata metadata) {
+        this(metadata.getSourceColumnPaths());
+    }
 
-	public SourceColumnMapping(List<String> sourceColumnPaths) {
-		this(sourceColumnPaths.toArray(new String[sourceColumnPaths.size()]));
-	}
+    public SourceColumnMapping(String... originalColumnPaths) {
+        _map = new TreeMap<String, Column>();
+        for (String path : originalColumnPaths) {
+            _map.put(path, null);
+        }
+    }
 
-	public void setDatastore(Datastore datastore) {
-		_datastore = datastore;
-	}
+    public SourceColumnMapping(List<String> sourceColumnPaths) {
+        this(sourceColumnPaths.toArray(new String[sourceColumnPaths.size()]));
+    }
 
-	public Datastore getDatastore() {
-		return _datastore;
-	}
+    public void setDatastore(Datastore datastore) {
+        _datastore = datastore;
+    }
 
-	/**
-	 * Automatically maps all unmapped paths by looking them up in a datastore.
-	 * 
-	 * @param schemaNavigator
-	 */
-	public void autoMap(Datastore datastore) {
-		setDatastore(datastore);
-		DatastoreConnection con = datastore.openConnection();
-		try {
-		    for (Entry<String, Column> entry : _map.entrySet()) {
-		        if (entry.getValue() == null) {
-		            String path = entry.getKey();
-		            entry.setValue(con.getSchemaNavigator().convertToColumn(path));
-		        }
-		    }
-		} finally {
-		    con.close();
-		}
-	}
+    public Datastore getDatastore() {
+        return _datastore;
+    }
 
-	public boolean isSatisfied() {
-		if (_datastore == null) {
-			return false;
-		}
-		for (Entry<String, Column> entry : _map.entrySet()) {
-			if (entry.getValue() == null) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * Automatically maps all unmapped paths by looking them up in a datastore.
+     * 
+     * @param schemaNavigator
+     */
+    public void autoMap(Datastore datastore) {
+        setDatastore(datastore);
+        final DatastoreConnection con = datastore.openConnection();
+        try {
+            final SchemaNavigator schemaNavigator = con.getSchemaNavigator();
+            for (final Entry<String, Column> entry : _map.entrySet()) {
+                if (entry.getValue() == null) {
+                    final String path = entry.getKey();
+                    final Column column = schemaNavigator.convertToColumn(path);
+                    entry.setValue(column);
+                }
+            }
+        } finally {
+            con.close();
+        }
+    }
 
-	public Column getColumn(String path) {
-		return _map.get(path);
-	}
+    public boolean isSatisfied() {
+        if (_datastore == null) {
+            return false;
+        }
+        for (Entry<String, Column> entry : _map.entrySet()) {
+            if (entry.getValue() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	public void setColumn(String path, Column column) {
-		_map.put(path, column);
-	}
+    public Column getColumn(String path) {
+        return _map.get(path);
+    }
 
-	public Set<String> getPaths() {
-		return _map.keySet();
-	}
+    public void setColumn(String path, Column column) {
+        _map.put(path, column);
+    }
 
-	public Set<String> getUnmappedPaths() {
-		Set<String> result = new TreeSet<String>();
-		for (Entry<String, Column> entry : _map.entrySet()) {
-			if (entry.getValue() == null) {
-				result.add(entry.getKey());
-			}
-		}
-		return result;
-	}
+    public Set<String> getPaths() {
+        return _map.keySet();
+    }
+
+    public Set<String> getUnmappedPaths() {
+        Set<String> result = new TreeSet<String>();
+        for (Entry<String, Column> entry : _map.entrySet()) {
+            if (entry.getValue() == null) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
 
     @Override
     public String toString() {

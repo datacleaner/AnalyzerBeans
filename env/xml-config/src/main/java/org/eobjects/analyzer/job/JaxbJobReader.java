@@ -365,7 +365,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
         String ref;
         final Datastore datastore;
-        final DatastoreConnection dataContextProvider;
+        final DatastoreConnection datastoreConnection;
 
         final SourceType source = job.getSource();
 
@@ -381,14 +381,14 @@ public class JaxbJobReader implements JobReader<InputStream> {
             if (datastore == null) {
                 throw new NoSuchDatastoreException(ref);
             }
-            dataContextProvider = datastore.openConnection();
+            datastoreConnection = datastore.openConnection();
 
             List<String> sourceColumnPaths = getSourceColumnPaths(job);
             sourceColumnMapping = new SourceColumnMapping(sourceColumnPaths);
             sourceColumnMapping.autoMap(datastore);
         } else {
             datastore = sourceColumnMapping.getDatastore();
-            dataContextProvider = datastore.openConnection();
+            datastoreConnection = datastore.openConnection();
         }
 
         // map column id's to input columns
@@ -825,7 +825,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
             applyProperties(explorerJobBuilder, explorerType.getProperties(), stringConverter, variables);
         }
 
-        dataContextProvider.close();
+        datastoreConnection.close();
 
         return analysisJobBuilder;
     }
