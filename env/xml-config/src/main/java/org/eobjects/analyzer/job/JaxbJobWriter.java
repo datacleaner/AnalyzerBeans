@@ -132,7 +132,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             final Column physicalColumn = inputColumn.getPhysicalColumn();
             jaxbColumn.setPath(physicalColumn.getQualifiedLabel());
             jaxbColumn.setId(getId(inputColumn, columnMappings));
-            
+
             final org.eobjects.metamodel.schema.ColumnType columnType = physicalColumn.getType();
             if (columnType != null) {
                 jaxbColumn.setType(columnType.toString());
@@ -239,33 +239,36 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         // sort the properties in order to make the result deterministic
         configuredProperties = new TreeSet<ConfiguredPropertyDescriptor>(configuredProperties);
 
-        int numInputProperties = configuredProperties.size();
-        List<InputType> result = new ArrayList<InputType>();
+        final int numInputProperties = configuredProperties.size();
+        final List<InputType> result = new ArrayList<InputType>();
         for (ConfiguredPropertyDescriptor property : configuredProperties) {
             if (property.isInputColumn()) {
-                Object value = configuration.getProperty(property);
-                InputColumn<?>[] columns;
-                if (property.isArray()) {
-                    columns = (InputColumn<?>[]) value;
-                } else {
-                    columns = new InputColumn<?>[1];
-                    columns[0] = (InputColumn<?>) value;
-                }
+                final Object value = configuration.getProperty(property);
+                if (value != null) {
+                    final InputColumn<?>[] columns;
+                    if (property.isArray()) {
+                        columns = (InputColumn<?>[]) value;
+                    } else {
+                        columns = new InputColumn<?>[1];
+                        columns[0] = (InputColumn<?>) value;
+                    }
 
-                for (InputColumn<?> inputColumn : columns) {
-                    if (inputColumn != null) {
-                        InputType inputType = new InputType();
-                        if (inputColumn instanceof ExpressionBasedInputColumn) {
-                            ExpressionBasedInputColumn<?> expressionBasedInputColumn = (ExpressionBasedInputColumn<?>) inputColumn;
-                            Object columnValue = expressionBasedInputColumn.getExpression();
-                            inputType.setValue(stringConverter.serialize(columnValue, property.getCustomConverter()));
-                        } else {
-                            inputType.setRef(getId(inputColumn, columnMappings));
+                    for (final InputColumn<?> inputColumn : columns) {
+                        if (inputColumn != null) {
+                            final InputType inputType = new InputType();
+                            if (inputColumn instanceof ExpressionBasedInputColumn) {
+                                ExpressionBasedInputColumn<?> expressionBasedInputColumn = (ExpressionBasedInputColumn<?>) inputColumn;
+                                Object columnValue = expressionBasedInputColumn.getExpression();
+                                inputType
+                                        .setValue(stringConverter.serialize(columnValue, property.getCustomConverter()));
+                            } else {
+                                inputType.setRef(getId(inputColumn, columnMappings));
+                            }
+                            if (numInputProperties != 1) {
+                                inputType.setName(property.getName());
+                            }
+                            result.add(inputType);
                         }
-                        if (numInputProperties != 1) {
-                            inputType.setName(property.getName());
-                        }
-                        result.add(inputType);
                     }
                 }
             }
