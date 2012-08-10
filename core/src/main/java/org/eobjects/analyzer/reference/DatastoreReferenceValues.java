@@ -70,7 +70,7 @@ public final class DatastoreReferenceValues extends BaseObject implements Refere
 					result = false;
 					DatastoreConnection con = _datastore.openConnection();
 					DataContext dataContext = con.getDataContext();
-					Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).equals(value)
+					Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).eq(value)
 							.toQuery();
 					DataSet dataSet = dataContext.executeQuery(q);
 					if (dataSet.next()) {
