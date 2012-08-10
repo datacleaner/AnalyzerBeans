@@ -1,5 +1,5 @@
 /**
- * eobjects.org DataCleaner
+ * eobjects.org AnalyzerBeans
  * Copyright (C) 2010 eobjects.org
  *
  * This copyrighted material is made available to anyone wishing to use, modify,
