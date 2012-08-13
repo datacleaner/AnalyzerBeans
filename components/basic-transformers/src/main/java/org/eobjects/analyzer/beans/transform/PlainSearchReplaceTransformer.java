@@ -43,6 +43,10 @@ public class PlainSearchReplaceTransformer implements Transformer<String> {
     @Configured(order = 3)
     String replacementString;
 
+    @Configured(order = 4)
+    @Description("Replace the entire string when the search string is found.")
+    boolean replaceEntireString = false;
+
     @Override
     public OutputColumns getOutputColumns() {
         return new OutputColumns(valueColumn.getName() + " (replaced '" + searchString + "')");
@@ -55,13 +59,23 @@ public class PlainSearchReplaceTransformer implements Transformer<String> {
         if (value == null) {
             return result;
         }
-        
-        while (value.indexOf(searchString) != -1) {
-            value = value.replace(searchString, replacementString);
+
+        if (replaceEntireString) {
+            if (matchesSearchString(value)) {
+                value = replacementString;
+            }
+        } else {
+            while (matchesSearchString(value)) {
+                value = value.replace(searchString, replacementString);
+            }
         }
         result[0] = value;
 
         return result;
+    }
+
+    private boolean matchesSearchString(String value) {
+        return value.indexOf(searchString) != -1;
     }
 
 }
