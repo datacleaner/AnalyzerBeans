@@ -25,11 +25,13 @@ import java.util.List;
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Validate;
+import org.eobjects.analyzer.beans.categories.ValidationCategory;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.beans.transform.DictionaryMatcherTransformer;
 import org.eobjects.analyzer.beans.transform.StringPatternMatcherTransformer;
@@ -45,6 +47,7 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
 @Alias("Matching analyzer")
 @Description("Check your data values against multiple forms of reference data in one simple analyzer step.\n"
 		+ "This analyzer provides a handy shortcut for doing matching with dictionaries, synonym lookups or string patterns matching, retrieving matching matrices for all matches.")
+@Categorized(ValidationCategory.class)
 public class ReferenceDataMatcherAnalyzer implements Analyzer<BooleanAnalyzerResult> {
 
 	@Configured(order = 1)

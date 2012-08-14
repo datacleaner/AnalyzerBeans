@@ -25,10 +25,12 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
+import org.eobjects.analyzer.beans.categories.ValidationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.RowAnnotation;
@@ -38,6 +40,7 @@ import org.eobjects.metamodel.util.HasName;
 
 @AnalyzerBean("Completeness analyzer")
 @Description("Asserts the completeness of your data by ensuring that all required fields are filled.")
+@Categorized(ValidationCategory.class)
 public class CompletenessAnalyzer implements Analyzer<CompletenessAnalyzerResult> {
 
     public static enum Condition implements HasName {
