@@ -93,6 +93,9 @@ ul.analysisResultToc li.PatternFinder {
 	background-image: url("type_pattern_finder.png");
 }
 
+ul.analysisResultToc li.DuplicateDetection {
+	background-image: url("type_duplicate_detection.png");
+}
 
 ul.analysisResultToc li.BooleanAnalyzer {
 	background-image: url("type_boolean.png");
@@ -197,7 +200,7 @@ table tr.odd td {
 
 .ui-tabs .ui-tabs-nav {
 	display: inline-block;
-	padding-top: 40px;
+	padding-top: 20px;
 	padding-left: 20px;
 	background-color: #333;
 	border-radius: 0px !important;
@@ -235,7 +238,7 @@ table tr.odd td {
 }
 
 .ui-tabs .ui-tabs-nav li.ui-state-default {
-	background-color: #8E8E8E;
+	background-color: #555;
 	color: white;
 }
 
@@ -321,6 +324,26 @@ table.valueDistributionSummaryTable {
 	min-width: 200px;
 	float: left;
 	margin-left: 10px;
+}
+
+/**
+ * Duplicate detection
+ */
+div.duplicateGroup {
+	clear: both;
+	min-height: 200px;
+}
+ 
+div.duplicateGroupTable {
+	float: left;
+}
+ 
+div.duplicateGroupGraph {
+	width: 300px;
+	height: 200px;
+	float: right;
+	border: 1px solid #eee;
+	background-color: #f2f2f2;
 }
 
 /*
