@@ -152,6 +152,16 @@ div.analyzerResultFooter {
 	clear: both;
 }
 
+pre {
+	background-color: white;
+	margin: 10px;
+	border: 2px solid #eee;
+	border-radius: 6px;
+	padding: 10px;
+	max-height: 200px;
+	overflow: auto;
+}
+
 table {
 	border-top: 1px solid #eee;
 	border-left: 1px solid #eee;
@@ -175,7 +185,7 @@ table th {
 }
 
 table tr.odd td {
-	background-color: #f2f2f2;
+	background-color: #f6f6f6;
 }
 
 /*
@@ -250,6 +260,35 @@ table tr.odd td {
 
 .ui-tabs .ui-tabs-nav li.ui-state-default a {
 	color: white;
+}
+
+/**
+ * A few common/reusable styles
+ */
+.warning {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 4px;
+	padding-left: 36px;
+	min-height: 40px;
+	background-image: url("warning.png");
+	background-repeat: no-repeat;
+	background-position: 0px 4px;
+	background-color: #f4f4d3;
+	border: 1px solid #a0a0a0;
+}
+
+.error {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 4px;
+	padding-left: 36px;
+	min-height: 40px;
+	background-image: url("error.png");
+	background-repeat: no-repeat;
+	background-position: 0px 4px;
+	background-color: #f4f4d3;
+	border: 1px solid #a0a0a0;
 }
 
 /*
@@ -349,7 +388,7 @@ div.duplicateGroupGraph {
 	height: 200px;
 	float: right;
 	border: 1px solid #eee;
-	background-color: #f2f2f2;
+	background-color: #f6f6f6;
 }
 
 /*
