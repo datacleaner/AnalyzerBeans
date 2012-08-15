@@ -140,7 +140,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
     private void writeGenericError(Writer writer, ComponentJob componentJob, AnalyzerResult analyzerResult, Exception e)
             throws IOException {
-        writer.write("<div class=\"renderingError\">");
+        writer.write("<div class=\"error\">");
         writer.write("<p>Component job: " + LabelUtils.getLabel(componentJob) + "</p>");
         if (analyzerResult != null) {
             writer.write("<p>Analyzer result: " + analyzerResult + "</p>");
