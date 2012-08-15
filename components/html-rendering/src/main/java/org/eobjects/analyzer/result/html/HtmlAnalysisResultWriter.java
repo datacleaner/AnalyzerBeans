@@ -153,7 +153,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     }
 
     protected void writeHtmlBegin(Writer writer, HtmlRenderingContext context) throws IOException {
-        writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
+        writer.write("<!DOCTYPE html>\n");
         writer.write("<html>\n");
     }
 
