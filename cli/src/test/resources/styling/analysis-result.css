@@ -13,6 +13,8 @@ div.analyzerResult {
 
 div.analysisResultHeader {
 	background-color: #333;
+	margin: 0px;
+	padding: 0px;
 }
 
 div.analysisResultContainer {
@@ -81,8 +83,13 @@ div.analyzerResultContent {
 	overflow: auto;
 }
 
+ul.analysisResultToc {
+	padding: 0px;
+	margin: 0px;
+	border: none;
+}
+
 ul.analysisResultToc li {
-	min-height: 23px;
 	padding-left: 26px !important;
 	background-image : url("analyzer.png");
 	background-position:  4px center !important;
@@ -200,15 +207,15 @@ table tr.odd td {
 
 .ui-tabs .ui-tabs-nav {
 	display: inline-block;
-	padding-top: 20px;
 	padding-left: 20px;
+	padding-bottom: 0px;
 	background-color: #333;
 	border-radius: 0px !important;
 	white-space: nowrap;
 }
 
 .ui-tabs .ui-tabs-nav li {
-	top: 0;
+	top: 4px;
 	display: inline-block;
 	float: none;
 	margin-bottom: 0px;
@@ -216,7 +223,6 @@ table tr.odd td {
 	border: none;
 	border-top-left-radius: 3px;
 	border-top-right-radius: 3px;
-	min-height: 26px;
 }
 
 .ui-tabs .ui-tabs-nav li a {
