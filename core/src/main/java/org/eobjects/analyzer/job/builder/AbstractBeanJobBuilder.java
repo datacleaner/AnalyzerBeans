@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implements Renderable {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger logger = LoggerFactory.getLogger(AbstractBeanJobBuilder.class);
 
     private final D _descriptor;
     private final E _configurableBean;
