@@ -8,20 +8,13 @@
 	</parent>
 	<artifactId>AnalyzerBeans-core</artifactId>
 	<description>Core module of AnalyzerBeans, provides a bare-bones engine for composing and executing AnalyzerBeans jobs</description>
-	<repositories>
-		<repository>
-			<id>repository.jboss.org</id>
-			<name>JBoss Repository</name>
-			<url>http://repository.jboss.org/maven2</url>
-		</repository>
-	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-api</artifactId>
 			<version>0.17-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.eobjects.metamodel</groupId>
 			<artifactId>MetaModel-full</artifactId>
