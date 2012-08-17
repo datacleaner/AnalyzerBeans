@@ -55,7 +55,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         super(analysisJobBuilder, descriptor, AnalyzerJobBuilder.class);
 
         Set<ConfiguredPropertyDescriptor> inputProperties = descriptor.getConfiguredPropertiesForInput(false);
-        if (inputProperties.size() == 1 && !inputProperties.iterator().next().isArray()) {
+        if (inputProperties.size() == 1) {
             _multipleJobsSupported = true;
             _inputColumns = new ArrayList<InputColumn<?>>();
             _inputProperty = inputProperties.iterator().next();
@@ -232,7 +232,13 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
             }
 
             if (configuredProperty.isArray()) {
-                return super.setConfiguredProperty(configuredProperty, new InputColumn[] { dummyValue });
+                final InputColumn<?>[] inputColumsArray;
+                if (dummyValue == null) {
+                    inputColumsArray = new InputColumn[0];
+                } else {
+                    inputColumsArray = new InputColumn[] { dummyValue };
+                }
+                return super.setConfiguredProperty(configuredProperty, inputColumsArray);
             } else {
                 return super.setConfiguredProperty(configuredProperty, dummyValue);
             }
