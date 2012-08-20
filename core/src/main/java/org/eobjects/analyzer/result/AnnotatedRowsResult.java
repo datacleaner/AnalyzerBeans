@@ -51,9 +51,9 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
     private final Ref<RowAnnotationFactory> _annotationFactoryRef;
     private final InputColumn<?>[] _highlightedColumns;
     private final RowAnnotation _annotation;
-    private InputRow[] _rows;
-    private TableModel _tableModel;
-    private List<InputColumn<?>> _inputColumns;
+    private transient InputRow[] _rows;
+    private transient TableModel _tableModel;
+    private transient List<InputColumn<?>> _inputColumns;
 
     public AnnotatedRowsResult(RowAnnotation annotation, RowAnnotationFactory annotationFactory,
             InputColumn<?>... highlightedColumns) {
