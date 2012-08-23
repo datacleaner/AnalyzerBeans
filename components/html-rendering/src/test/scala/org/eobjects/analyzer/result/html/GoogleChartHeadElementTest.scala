@@ -9,11 +9,9 @@ class GoogleChartHeadElementTest extends AssertionsForJUnit {
   def testToHtml = {
     val html = GoogleChartHeadElement.toHtml(new DefaultHtmlRenderingContext());
     Assert.assertEquals("""<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-      <!--
-                      google.load("visualization", "1", {packages:["corechart"]});
-                  -->
-    </script>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
+<script type="text/javascript"><!--
+      google.load("visualization", "1", {packages:["corechart"]});
+    --></script>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
   }
 
 }

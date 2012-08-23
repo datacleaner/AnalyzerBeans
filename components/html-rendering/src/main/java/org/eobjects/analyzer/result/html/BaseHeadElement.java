@@ -51,8 +51,8 @@ public final class BaseHeadElement implements HeadElement {
                 + "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + _resourcesDirectory
                 + "/analysis-result.css\" />\n" + "<script type=\"text/javascript\" src=\"" + _resourcesDirectory
                 + "/analysis-result.js\"></script>\n" + "<link rel=\"shortcut icon\" href=\"" + _resourcesDirectory
-                + "/analysis-result-icon.png\" />" + "<script type=\"text/javascript\">\n"
-                + "  var analysisResult = {};\n" + "</script>";
+                + "/analysis-result-icon.png\" />" + "<script type=\"text/javascript\"><!--\n"
+                + "  var analysisResult = {};\n" + "--></script>";
     }
 
 }

@@ -29,9 +29,9 @@ class HtmlAnalysisResultWriterTest extends AssertionsForJUnit {
 <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.8.20/themes/base/jquery-ui.css" />
 <link rel="stylesheet" type="text/css" href="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result.css" />
 <script type="text/javascript" src="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result.js"></script>
-<link rel="shortcut icon" href="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result-icon.png" /><script type="text/javascript">
+<link rel="shortcut icon" href="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result-icon.png" /><script type="text/javascript"><!--
   var analysisResult = {};
-</script>
+--></script>
 </head><body>
 <div class="analysisResultContainer">
 <div class="analysisResultHeader"><ul class="analysisResultToc"></ul></div></div>

@@ -42,7 +42,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              <h3>Group: humaninference.com</h3>
-             <div class="valueDistributionChart" id="analysisResultElement4">
+             <div class="valueDistributionChart" id="reselem_4">
                </div>
              <table class="valueDistributionValueTable">
                    <tr><td>&lt;unique&gt;</td><td><span>3</span></td></tr>
@@ -53,10 +53,10 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
              </table>
            </div><div class="valueDistributionGroupPanel">
              <h3>Group: eobjects.dk</h3>
-             <div class="valueDistributionChart" id="analysisResultElement1">
+             <div class="valueDistributionChart" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><span>1</span></td></tr><tr><td>&lt;unique&gt;</td><td><span>1</span></td></tr>
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><span>1</span></td></tr><tr><td>&lt;unique&gt;</td><td><span>1</span></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>8</td></tr>
@@ -66,35 +66,29 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
     Assert.assertEquals(GoogleChartHeadElement, htmlFragment.getHeadElements().get(0))
-    Assert.assertEquals("""<script type="text/javascript">
-                   google.setOnLoadCallback(function() {
-                     var elem = document.getElementById("analysisResultElement1");
-                     var options = {};
-                     
-                     var data = google.visualization.arrayToDataTable([
-                         ['Value', 'Count'],['kasper', 4],['kasper.sorensen', 2],['<null>', 1],['<unique>', 1]
-                     ]);
-                     
-                     var chart = new google.visualization.PieChart(elem);
-                     chart.draw(data, options);
-                     
-                   });
-               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
+    Assert.assertEquals("""<script type="text/javascript"><!--
+   google.setOnLoadCallback(function() {
+     var elem = document.getElementById("reselem_1");
+     var data = google.visualization.arrayToDataTable([
+     ['Value', 'Count'],['kasper', 4],['kasper.sorensen', 2],['<null>', 1],['<unique>', 1]
+     ]);
+     
+     var chart = new google.visualization.PieChart(elem);
+     chart.draw(data, {});
+   });
+--></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
 
-    Assert.assertEquals("""<script type="text/javascript">
-                   google.setOnLoadCallback(function() {
-                     var elem = document.getElementById("analysisResultElement4");
-                     var options = {};
-                     
-                     var data = google.visualization.arrayToDataTable([
-                         ['Value', 'Count'],['<unique>', 3]
-                     ]);
-                     
-                     var chart = new google.visualization.PieChart(elem);
-                     chart.draw(data, options);
-                     
-                   });
-               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(2).toHtml(context).replaceAll("\r\n", "\n"))
+    Assert.assertEquals("""<script type="text/javascript"><!--
+   google.setOnLoadCallback(function() {
+     var elem = document.getElementById("reselem_4");
+     var data = google.visualization.arrayToDataTable([
+     ['Value', 'Count'],['<unique>', 3]
+     ]);
+     
+     var chart = new google.visualization.PieChart(elem);
+     chart.draw(data, {});
+   });
+--></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(2).toHtml(context).replaceAll("\r\n", "\n"))
   }
 
   @Test
@@ -121,12 +115,12 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     var html: String = null;
     
     html = htmlFragment.getBodyElements().get(0).toHtml(context);
-    Assert.assertEquals("""<div id="analysisResultElement2" class="drillToDetailsPanel" style="display:none;">
+    Assert.assertEquals("""<div id="reselem_2" class="drillToDetailsPanel" style="display:none;">
 <table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td class="highlighted">kasper</td></tr><tr class="odd"><td class="highlighted">kasper</td></tr></table>
 </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
     html = htmlFragment.getBodyElements().get(1).toHtml(context);
-    Assert.assertEquals("""<div id="analysisResultElement3" class="drillToDetailsPanel" style="display:none;">
+    Assert.assertEquals("""<div id="reselem_3" class="drillToDetailsPanel" style="display:none;">
 <table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td class="highlighted">kasper.sorensen</td></tr></table>
 </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
@@ -134,10 +128,10 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
-             <div class="valueDistributionChart" id="analysisResultElement1">
+             <div class="valueDistributionChart" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('analysisResultElement3'); return false;" href="#">3</a></td></tr><tr><td>&lt;unique&gt;</td><td><span>1</span></td></tr>
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">3</a></td></tr><tr><td>&lt;unique&gt;</td><td><span>1</span></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>13</td></tr>
@@ -147,20 +141,17 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
     Assert.assertEquals(GoogleChartHeadElement, htmlFragment.getHeadElements().get(0))
-    Assert.assertEquals("""<script type="text/javascript">
-                   google.setOnLoadCallback(function() {
-                     var elem = document.getElementById("analysisResultElement1");
-                     var options = {};
-                     
-                     var data = google.visualization.arrayToDataTable([
-                         ['Value', 'Count'],['kasper', 9],['kasper.sorensen', 3],['<unique>', 1]
-                     ]);
-                     
-                     var chart = new google.visualization.PieChart(elem);
-                     chart.draw(data, options);
-                     
-                   });
-               </script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
+    Assert.assertEquals("""<script type="text/javascript"><!--
+   google.setOnLoadCallback(function() {
+     var elem = document.getElementById("reselem_1");
+     var data = google.visualization.arrayToDataTable([
+     ['Value', 'Count'],['kasper', 9],['kasper.sorensen', 3],['<unique>', 1]
+     ]);
+     
+     var chart = new google.visualization.PieChart(elem);
+     chart.draw(data, {});
+   });
+--></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
   }
 
   def createRendererFactory(): RendererFactory = {

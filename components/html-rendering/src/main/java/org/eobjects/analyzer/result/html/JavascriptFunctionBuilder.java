@@ -36,7 +36,7 @@ public class JavascriptFunctionBuilder {
 
     public String toHeadElementHtml() {
         StringBuilder sb = new StringBuilder();
-        sb.append("<script type=\"text/javascript\">\n");
+        sb.append("<script type=\"text/javascript\"><!--\n");
         if (_functionName.indexOf('.') == -1) {
             sb.append("function ");
             sb.append(_functionName);
@@ -47,7 +47,7 @@ public class JavascriptFunctionBuilder {
         }
         sb.append(createFunctionBody());
         sb.append("}\n");
-        sb.append("</script>");
+        sb.append("--></script>");
         return sb.toString();
     }
 

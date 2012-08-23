@@ -22,10 +22,15 @@ package org.eobjects.analyzer.cli;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import junit.framework.TestCase;
 
@@ -34,6 +39,9 @@ import org.apache.log4j.PropertyConfigurator;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.metamodel.util.FileHelper;
 import org.w3c.tidy.Tidy;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 public class MainTest extends TestCase {
 
@@ -220,7 +228,7 @@ public class MainTest extends TestCase {
         String filename = "target/test_run_from_url_job_and_conf.html";
         Main.main(("-ot HTML -of " + filename + " -job http://eobjects.org/resources/example_repo/DC/jobs/random_number_generation.analysis.xml -conf http://eobjects.org/resources/example_repo/DC/conf.xml")
                 .split(" "));
-        
+
         File file = new File(filename);
         assertTrue(file.exists());
         String result = FileHelper.readFileAsString(file);
@@ -250,6 +258,7 @@ public class MainTest extends TestCase {
 
         assertEquals("<html>", lines[1]);
 
+        // parse it with tidy for HTML correctness
         Tidy tidy = new Tidy();
         StringWriter writer = new StringWriter();
         tidy.setTrimEmptyElements(false);
@@ -259,6 +268,30 @@ public class MainTest extends TestCase {
         String parserOutput = writer.toString();
         assertTrue("Parser output was:\n" + parserOutput,
                 parserOutput.indexOf("no warnings or errors were found") != -1);
+
+        // parse it with SAX for XML correctnes. Takes a long time, but useful
+        // for the occasional verification.
+        final boolean verifyWithParsing = false;
+        if (verifyWithParsing) {
+            SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+            parserFactory.setNamespaceAware(false);
+            parserFactory.setValidating(false);
+            SAXParser parser = parserFactory.newSAXParser();
+            final AtomicInteger elementCounter = new AtomicInteger();
+            final InputStream in = FileHelper.getInputStream(file);
+            parser.parse(in, new DefaultHandler() {
+                @Override
+                public void startElement(String uri, String localName, String qName, Attributes attributes)
+                        throws SAXException {
+                    elementCounter.incrementAndGet();
+                }
+            });
+            in.close();
+
+            // the output has approx 3600 XML elements
+            assertTrue(elementCounter.get() > 3000);
+            assertTrue(elementCounter.get() < 5000);
+        }
     }
 
     public void testWriteSerializedToFile() throws Throwable {

@@ -21,6 +21,10 @@ package org.eobjects.analyzer.result.html;
 
 import org.eobjects.analyzer.job.ComponentJob;
 
+/**
+ * {@link HtmlRenderingContext} which is aware of the component it is rendering
+ * for. Wraps an underlying implementation for escaping and element id creation.
+ */
 public class ComponentHtmlRenderingContext implements HtmlRenderingContext {
 
     private final HtmlRenderingContext _delegate;

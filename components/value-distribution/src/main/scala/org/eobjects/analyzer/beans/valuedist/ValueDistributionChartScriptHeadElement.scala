@@ -16,22 +16,19 @@ class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResu
       valueCounts.add(new ValueCount("<unique>", result.getUniqueCount()));
     }
 
-    return """<script type="text/javascript">
-                   google.setOnLoadCallback(function() {
-                     var elem = document.getElementById("""" + chartElementId + """");
-                     var options = {};
-                     
-                     var data = google.visualization.arrayToDataTable([
-                         ['Value', 'Count'],""" +
+    return """<script type="text/javascript"><!--
+   google.setOnLoadCallback(function() {
+     var elem = document.getElementById("""" + chartElementId + """");
+     var data = google.visualization.arrayToDataTable([
+     ['Value', 'Count'],""" +
       valueCounts.map(vc => {
         "['" + context.escapeJson(vc.getValue()) + "', " + vc.getCount() + "]";
       }).mkString(",") + """
-                     ]);
-                     
-                     var chart = new google.visualization.PieChart(elem);
-                     chart.draw(data, options);
-                     
-                   });
-               </script>"""
+     ]);
+     
+     var chart = new google.visualization.PieChart(elem);
+     chart.draw(data, {});
+   });
+--></script>"""
   }
 }

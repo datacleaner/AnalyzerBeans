@@ -22,7 +22,6 @@ package org.eobjects.analyzer.result.renderer;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.result.html.BodyElement;
 import org.eobjects.analyzer.result.html.HtmlRenderingContext;
 import org.eobjects.analyzer.util.LabelUtils;
@@ -89,7 +88,7 @@ public class TableBodyElement implements BodyElement {
                 } else {
                     sb.append("<td class=\"highlighted\">");
                 }
-                sb.append(StringEscapeUtils.escapeHtml(stringValue));
+                sb.append(context.escapeHtml(stringValue));
                 sb.append("</td>");
             }
             sb.append("</tr>");

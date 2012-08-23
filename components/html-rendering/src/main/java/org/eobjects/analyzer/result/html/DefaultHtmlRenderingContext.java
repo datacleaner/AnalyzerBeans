@@ -47,7 +47,7 @@ public class DefaultHtmlRenderingContext implements HtmlRenderingContext {
 
     @Override
     public String createElementId() {
-        return "analysisResultElement" + _elementCounter.incrementAndGet();
+        return "reselem_" + _elementCounter.incrementAndGet();
     }
 
     @Override
