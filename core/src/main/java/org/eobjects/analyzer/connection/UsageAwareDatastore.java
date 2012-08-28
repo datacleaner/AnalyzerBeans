@@ -111,7 +111,7 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 			datastoreConnection = _datastoreConnectionRef.get();
 			if (datastoreConnection != null && datastoreConnection.requestUsage()) {
 				// reuse existing data context provider
-				logger.info("Reusing existing DatastoreConnection: {}", datastoreConnection);
+				logger.debug("Reusing existing DatastoreConnection: {}", datastoreConnection);
 				return datastoreConnection;
 			}
 		}

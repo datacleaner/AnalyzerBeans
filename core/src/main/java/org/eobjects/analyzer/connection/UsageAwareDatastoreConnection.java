@@ -53,7 +53,7 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 
 	public synchronized final boolean requestUsage() {
 		if (isClosed()) {
-			logger.info("Connection is closed, request for more usage refused");
+			logger.debug("Connection is closed, request for more usage refused");
 			return false;
 		}
 
@@ -89,7 +89,7 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
 		_usageCount--;
 		logger.debug("Method close() invoked, usage decremented to {} for {}", _usageCount, this);
 		if (_usageCount == 0) {
-			logger.info("Closing {}", this);
+			logger.debug("Closing {}", this);
 			closeInternal();
 		}
 	}
