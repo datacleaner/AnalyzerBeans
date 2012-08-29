@@ -138,11 +138,11 @@ public class JaxbConfigurationReaderTest extends TestCase {
                 assertEquals("[table1, table2]", Arrays.toString(schema.getTableNames()));
 
                 assertEquals(
-                        "[Column[name=Foo,columnNumber=0,type=VARCHAR,nullable=true,indexed=false,nativeType=null,columnSize=null], "
-                                + "Column[name=Bar,columnNumber=1,type=INTEGER,nullable=true,indexed=false,nativeType=null,columnSize=null]]",
+                        "[Column[name=Foo,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], "
+                                + "Column[name=Bar,columnNumber=1,type=INTEGER,nullable=true,nativeType=null,columnSize=null]]",
                         Arrays.toString(schema.getTable(0).getColumns()));
                 assertEquals(
-                        "[Column[name=Baz,columnNumber=0,type=BOOLEAN,nullable=true,indexed=false,nativeType=null,columnSize=null]]",
+                        "[Column[name=Baz,columnNumber=0,type=BOOLEAN,nullable=true,nativeType=null,columnSize=null]]",
                         Arrays.toString(schema.getTable(1).getColumns()));
                 
                 DataSet ds = dc.query().from("table1").select("Foo","Bar").execute();

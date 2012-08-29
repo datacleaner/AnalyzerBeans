@@ -38,7 +38,7 @@ public class SchemaNavigatorTest extends TestCase {
 
 		Column column = sn.convertToColumn("employees.csv.employees.email");
 		assertEquals(
-				"Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,indexed=false,nativeType=null,columnSize=null]",
+				"Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]",
 				column.toString());
 	}
 }

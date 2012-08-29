@@ -58,6 +58,6 @@ public class PojoDatastoreTest extends TestCase {
 
         final Column col = con.getSchemaNavigator().convertToColumn("foo.col1");
         assertEquals("Column[name=col1,columnNumber=0,type=VARCHAR,nullable=true,"
-                + "indexed=false,nativeType=null,columnSize=null]", col.toString());
+                + "nativeType=null,columnSize=null]", col.toString());
     }
 }
