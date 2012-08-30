@@ -47,20 +47,20 @@ public class CompletenessAnalyzerTest extends TestCase {
         analyzer.run(new MockInputRow(1001).put(col1, null).put(col2, null).put(col3, null), 1);
         analyzer.run(new MockInputRow(1002).put(col1, "").put(col2, "").put(col3, ""), 1);
 
-        assertEquals(2, analyzer.getResult().getAnnotatedRowCount());
+        assertEquals(2, analyzer.getResult().getTotalRowCount());
         assertEquals(0, analyzer.getResult().getValidRowCount());
         assertEquals(2, analyzer.getResult().getInvalidRowCount());
 
         analyzer.run(new MockInputRow(1002).put(col1, "").put(col2, "not blank").put(col3, ""), 1);
         analyzer.run(new MockInputRow(1002).put(col1, "not blank").put(col2, "not blank").put(col3, "not blank"), 1);
 
-        assertEquals(4, analyzer.getResult().getAnnotatedRowCount());
+        assertEquals(4, analyzer.getResult().getTotalRowCount());
         assertEquals(2, analyzer.getResult().getValidRowCount());
         assertEquals(2, analyzer.getResult().getInvalidRowCount());
 
         analyzer.run(new MockInputRow(1002).put(col1, null).put(col2, "not blank").put(col3, ""), 1);
 
-        assertEquals(5, analyzer.getResult().getAnnotatedRowCount());
+        assertEquals(5, analyzer.getResult().getTotalRowCount());
         assertEquals(2, analyzer.getResult().getValidRowCount());
         assertEquals(3, analyzer.getResult().getInvalidRowCount());
     }
