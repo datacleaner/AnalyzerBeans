@@ -112,7 +112,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 			assertEquals(AnnotatedRowsResult.class, result2.getClass());
 
 			AnnotatedRowsResult annotatedRowsResult = (AnnotatedRowsResult) result2;
-			assertEquals(19, annotatedRowsResult.getRowCount());
+			assertEquals(19, annotatedRowsResult.getAnnotatedRowCount());
 			InputRow[] rows = annotatedRowsResult.getRows();
 			assertEquals(19, rows.length);
 
