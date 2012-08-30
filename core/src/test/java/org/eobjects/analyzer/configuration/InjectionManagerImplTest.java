@@ -103,7 +103,7 @@ public class InjectionManagerImplTest extends TestCase {
 		assertTrue(result.isSuccessful());
 
 		AnnotatedRowsResult res = (AnnotatedRowsResult) result.getResults().get(0);
-		assertEquals(13, res.getRowCount());
+		assertEquals(13, res.getAnnotatedRowCount());
 		assertNotNull(listRef.get());
 		assertEquals(10, listRef.get().size());
 	}

@@ -21,6 +21,7 @@ package org.eobjects.analyzer.result.renderer;
 
 import javax.swing.table.TableModel;
 
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.RendererPrecedence;
@@ -28,6 +29,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.html.HtmlFragment;
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment;
+import org.eobjects.analyzer.util.ReflectionUtils;
 
 @RendererBean(HtmlRenderingFormat.class)
 public class AnnotatedRowsHtmlRenderer implements Renderer<AnnotatedRowsResult, HtmlFragment> {
@@ -56,8 +58,23 @@ public class AnnotatedRowsHtmlRenderer implements Renderer<AnnotatedRowsResult, 
 
         final TableModel tableModel = result.toTableModel(MAX_ROWS);
 
-        htmlFragment.addBodyElement(new TableBodyElement(tableModel, "annotatedRowsTable", highlightedIndexes));
+        final Description description = ReflectionUtils.getAnnotation(result.getClass(), Description.class);
+        final String descriptionText;
+        if (description != null) {
+            descriptionText = description.value();
+        } else {
+            descriptionText = "Records";
+        }
+        final int rowCount = result.getAnnotatedRowCount();
+        htmlFragment.addBodyElement(new SectionHeaderBodyElement(descriptionText + " (" + rowCount
+                + ")"));
+
+        if (rowCount == 0) {
+            htmlFragment.addBodyElement("<p>No records to display.</p>");
+        } else {
+            htmlFragment.addBodyElement(new TableBodyElement(tableModel, "annotatedRowsTable", highlightedIndexes));
+        }
+
         return htmlFragment;
     }
-
 }

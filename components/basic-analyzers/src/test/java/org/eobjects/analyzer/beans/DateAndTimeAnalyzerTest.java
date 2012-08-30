@@ -116,7 +116,7 @@ public class DateAndTimeAnalyzerTest extends TestCase {
         assertEquals(1, highlightedColumns.length);
         assertEquals(col, highlightedColumns[0]);
 
-        assertEquals(rowCount, res.getRowCount());
+        assertEquals(rowCount, res.getAnnotatedRowCount());
         assertEquals(distinctRowCount, res.getRows().length);
     }
 }

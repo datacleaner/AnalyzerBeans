@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans;
 
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
@@ -29,6 +30,7 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 /**
  * {@link AnalyzerResult} class for {@link CompletenessAnalyzer}.
  */
+@Description("Incomplete records")
 public class CompletenessAnalyzerResult extends AnnotatedRowsResult implements AnalyzerResult {
 
     private static final long serialVersionUID = 1L;
@@ -41,7 +43,7 @@ public class CompletenessAnalyzerResult extends AnnotatedRowsResult implements A
     }
 
     @Metric(order = 1, value = "Row count")
-    public int getRowCount() {
+    public int getTotalRowCount() {
         return _rowCount;
     }
 

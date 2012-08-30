@@ -53,7 +53,7 @@ public class AnnotatedRowResultTest extends TestCase {
 	}
 
 	private void performAssertions(AnnotatedRowsResult result) {
-		assertEquals(2, result.getRowCount());
+		assertEquals(2, result.getAnnotatedRowCount());
 		assertEquals("[MockInputColumn[name=foo], MockInputColumn[name=bar]]", result.getInputColumns().toString());
 		assertEquals("[MockInputColumn[name=foo]]", Arrays.toString(result.getHighlightedColumns()));
 		assertNotNull(result.getRows());

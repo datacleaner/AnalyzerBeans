@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
@@ -40,7 +41,11 @@ import org.eobjects.metamodel.util.SerializableRef;
 
 /**
  * Represents a typical "drill to detail" result consisting of a set of
- * annotated rows
+ * annotated rows.
+ * 
+ * Furthermore, if classes inherit from {@link AnnotatedRowsResult}, they can be
+ * annotated with the {@link Description} annotation to provide a labeling
+ * description, used often in rendering.
  * 
  * @author Kasper Sørensen
  */
@@ -199,7 +204,7 @@ public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
         return _annotation;
     }
 
-    public int getRowCount() {
+    public int getAnnotatedRowCount() {
         return getAnnotation().getRowCount();
     }
 }
