@@ -116,11 +116,13 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     
     html = htmlFragment.getBodyElements().get(0).toHtml(context);
     Assert.assertEquals("""<div id="reselem_2" class="drillToDetailsPanel" style="display:none;">
+<h3>Records (9)</h3>
 <table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td class="highlighted">kasper</td></tr><tr class="odd"><td class="highlighted">kasper</td></tr></table>
 </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
     html = htmlFragment.getBodyElements().get(1).toHtml(context);
     Assert.assertEquals("""<div id="reselem_3" class="drillToDetailsPanel" style="display:none;">
+<h3>Records (3)</h3>
 <table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td class="highlighted">kasper.sorensen</td></tr></table>
 </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
