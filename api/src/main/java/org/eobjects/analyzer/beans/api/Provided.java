@@ -26,8 +26,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.inject.Qualifier;
-
 /**
  * Methods and fields with the @Provided annotation are used to let
  * AnalyzerBeans, TransformerBeans and FilterBeans retrieve service-objects such
@@ -73,6 +71,5 @@ import javax.inject.Qualifier;
 @Target({ ElementType.FIELD })
 @Documented
 @Inherited
-@Qualifier
 public @interface Provided {
 }
