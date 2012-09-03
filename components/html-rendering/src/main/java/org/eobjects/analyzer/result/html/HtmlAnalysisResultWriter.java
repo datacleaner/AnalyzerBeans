@@ -67,7 +67,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
     public HtmlAnalysisResultWriter(boolean tabs) {
         this(tabs, new TruePredicate<Entry<ComponentJob, AnalyzerResult>>());
     }
-    
+
     public HtmlAnalysisResultWriter(boolean tabs, Predicate<Entry<ComponentJob, AnalyzerResult>> jobInclusionPredicate) {
         this(tabs, jobInclusionPredicate, true);
     }
@@ -169,7 +169,7 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
 
         // add base element no matter what
         {
-            HeadElement baseHeadElement = new BaseHeadElement();
+            final HeadElement baseHeadElement = createBaseHeadElement();
             writeHeadElement(writer, null, baseHeadElement, context);
             allHeadElements.add(baseHeadElement);
         }
@@ -187,6 +187,10 @@ public class HtmlAnalysisResultWriter implements AnalysisResultWriter {
         }
 
         writeHeadEnd(writer);
+    }
+
+    protected HeadElement createBaseHeadElement() {
+        return new BaseHeadElement();
     }
 
     protected void writeHeadBegin(Writer writer) throws IOException {
