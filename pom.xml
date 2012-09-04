@@ -83,12 +83,12 @@
 	<distributionManagement>
 		<snapshotRepository>
 			<id>eobjects-snapshot-repo</id>
-			<url>scp://eobjects.org/var/www/repo</url>
+			<url>scp://192.168.3.110/var/www/repo</url>
 		</snapshotRepository>
 		<site>
 			<id>analyzerbeans.eobjects.org</id>
 			<name>AnalyzerBeans website</name>
-			<url>scp://eobjects.org/var/www/analyzerbeans</url>
+			<url>scp://192.168.3.110/var/www/analyzerbeans</url>
 		</site>
 	</distributionManagement>
 	<build>
