@@ -180,7 +180,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             throw new IllegalStateException(e);
         }
     }
-
+    
     @Override
     public AnalyzerBeansConfiguration read(InputStream input) {
         return create(input);
@@ -238,7 +238,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             logger.info("Updated date: {}", metadata.getUpdatedDate());
         }
 
-        AnalyzerBeansConfigurationImpl analyzerBeansConfiguration = new AnalyzerBeansConfigurationImpl();
+        AnalyzerBeansConfigurationImpl analyzerBeansConfiguration = _interceptor.createBaseConfiguration();
 
         // injection manager will be used throughout building the configuration.
         // It will be used to host dependencies as they appear

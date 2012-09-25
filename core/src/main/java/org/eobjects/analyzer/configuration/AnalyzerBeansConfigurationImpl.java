@@ -64,18 +64,49 @@ public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfig
 
     /**
      * Creates a minimalistic configuration object, mostly suitable for stubbing
-     * and testing
+     * and testing.
      */
     public AnalyzerBeansConfigurationImpl() {
         this(defaultDatastoreCatalog(), defaultReferenceDataCatalog(), defaultDescriptorProvider(),
                 defaultTaskRunner(), defaultStorageProvider());
     }
 
+    /**
+     * Creates a minimalistic configuration object with a specific
+     * {@link InjectionManagerFactory}, mostly suitable for stubbing and testing.
+     * 
+     * @param injectionManagerFactory
+     */
+    public AnalyzerBeansConfigurationImpl(InjectionManagerFactory injectionManagerFactory) {
+        this(defaultDatastoreCatalog(), defaultReferenceDataCatalog(), defaultDescriptorProvider(),
+                defaultTaskRunner(), defaultStorageProvider(), injectionManagerFactory);
+    }
+
+    /**
+     * Creates a fully specified configuration object (with a default
+     * {@link InjectionManagerFactory}).
+     * 
+     * @param datastoreCatalog
+     * @param referenceDataCatalog
+     * @param descriptorProvider
+     * @param taskRunner
+     * @param storageProvider
+     */
     public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
             DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider) {
         this(datastoreCatalog, referenceDataCatalog, descriptorProvider, taskRunner, storageProvider, null);
     }
 
+    /**
+     * Creates a fully specified configuration object.
+     * 
+     * @param datastoreCatalog
+     * @param referenceDataCatalog
+     * @param descriptorProvider
+     * @param taskRunner
+     * @param storageProvider
+     * @param injectionManagerFactory
+     */
     public AnalyzerBeansConfigurationImpl(DatastoreCatalog datastoreCatalog, ReferenceDataCatalog referenceDataCatalog,
             DescriptorProvider descriptorProvider, TaskRunner taskRunner, StorageProvider storageProvider,
             InjectionManagerFactory injectionManagerFactory) {

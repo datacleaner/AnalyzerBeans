@@ -50,4 +50,9 @@ public class DefaultConfigurationReaderInterceptor implements ConfigurationReade
 	    String result = System.getProperty(variablePath);
         return result;
 	}
+
+    @Override
+    public AnalyzerBeansConfigurationImpl createBaseConfiguration() {
+        return new AnalyzerBeansConfigurationImpl();
+    }
 }

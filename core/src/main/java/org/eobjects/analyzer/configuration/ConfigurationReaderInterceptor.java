@@ -62,4 +62,15 @@ public interface ConfigurationReaderInterceptor {
      */
     public String getPropertyOverride(String variablePath);
 
+    /**
+     * Creates a base {@link AnalyzerBeansConfigurationImpl} object for initial
+     * building of the resulting configuration. This method allows to bootstrap
+     * the base configuration used, eg. by providing a specific injection
+     * manager.
+     * 
+     * @return a base {@link AnalyzerBeansConfiguration} for further building of
+     *         the configuration.
+     */
+    public AnalyzerBeansConfigurationImpl createBaseConfiguration();
+
 }
