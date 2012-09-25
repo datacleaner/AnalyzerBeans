@@ -24,14 +24,11 @@ class HtmlAnalysisResultWriterTest extends AssertionsForJUnit {
     Assert.assertEquals("""<!DOCTYPE html>
 <html>
 <head>
-  <title>Analysis result</title>  <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="http://code.jquery.com/ui/1.8.20/jquery-ui.min.js"></script>
-<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.8.20/themes/base/jquery-ui.css" />
-<link rel="stylesheet" type="text/css" href="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result.css" />
-<script type="text/javascript" src="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result.js"></script>
-<link rel="shortcut icon" href="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result-icon.png" /><script type="text/javascript"><!--
+  <title>Analysis result</title>  <script type="text/javascript" src="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result.js"></script>
+<link rel="shortcut icon" href="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result-icon.png" />
+<script type="text/javascript">//<![CDATA[
   var analysisResult = {};
---></script>
+//]]></script>
 </head><body>
 <div class="analysisResultContainer">
 <div class="analysisResultHeader"><ul class="analysisResultToc"></ul></div></div>

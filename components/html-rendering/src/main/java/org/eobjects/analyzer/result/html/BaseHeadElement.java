@@ -45,14 +45,9 @@ public final class BaseHeadElement implements HeadElement {
 
     @Override
     public String toHtml(HtmlRenderingContext context) {
-        return "<script type=\"text/javascript\" src=\"http://code.jquery.com/jquery-1.7.2.min.js\"></script>\n"
-                + "<script type=\"text/javascript\" src=\"http://code.jquery.com/ui/1.8.20/jquery-ui.min.js\"></script>\n"
-                + "<link rel=\"stylesheet\" type=\"text/css\" href=\"http://code.jquery.com/ui/1.8.20/themes/base/jquery-ui.css\" />\n"
-                + "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + _resourcesDirectory
-                + "/analysis-result.css\" />\n" + "<script type=\"text/javascript\" src=\"" + _resourcesDirectory
-                + "/analysis-result.js\"></script>\n" + "<link rel=\"shortcut icon\" href=\"" + _resourcesDirectory
-                + "/analysis-result-icon.png\" />" + "<script type=\"text/javascript\"><!--\n"
-                + "  var analysisResult = {};\n" + "--></script>";
+        return "<script type=\"text/javascript\" src=\"" + _resourcesDirectory + "/analysis-result.js\"></script>\n"
+                + "<link rel=\"shortcut icon\" href=\"" + _resourcesDirectory + "/analysis-result-icon.png\" />\n"
+                + "<script type=\"text/javascript\">//<![CDATA[\n" + "  var analysisResult = {};\n" + "//]]></script>";
     }
 
 }
