@@ -71,11 +71,25 @@ function wait_for_script_load(look_for, callback) {
 		cdnBaseUrl = "http://ajax.googleapis.com/ajax/libs/";
 	}
 	
+	var relativeBaseUrl = "http://eobjects.org/resources/datacleaner-html-rendering/";
+	var existingScripts = document.getElementsByTagName('script');
+	for (i=0; i < existingScripts.length; i++) {
+		var existingSrc = existingScripts[i].getAttribute('src');
+		if (existingSrc != null) {
+			var offset = existingSrc.length - 'analysis-result.js'.length;
+			if (existingSrc.indexOf('analysis-result.js', offset) !== -1) {
+				// script src ends with 'analysis-result.js'
+				relativeBaseUrl = existingSrc.substring(0, offset);
+				break;
+			}
+		}
+	}
+	
 	importJS(cdnBaseUrl + "jquery/1.7.2/jquery.min.js", 'jQuery', function() {
 		importCSS(cdnBaseUrl + "jqueryui/1.8.20/themes/base/jquery-ui.css");
 		importJS(cdnBaseUrl + "jqueryui/1.8.20/jquery-ui.min.js", 'jQuery.ui', function() {
 			loadTabs();
-			importCSS("analysis-result.css?load=script");
+			importCSS(relativeBaseUrl + "analysis-result.css?load=script");
 		});
 	});
 })();
