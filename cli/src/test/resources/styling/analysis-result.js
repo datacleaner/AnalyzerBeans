@@ -1,4 +1,16 @@
 function importJS(src, look_for, onload) {
+	var existingScripts = document.getElementsByTagName('script');
+	for (i=0; i < existingScripts.length; i++) {
+		var existingSrc = existingScripts[i].getAttribute('src');
+		if (src == existingSrc) {
+			// script is already loaded
+			if (onload) {
+				onload();
+			}
+			return;
+		}
+	}
+	
 	var s = document.createElement('script');
 	s.setAttribute('type', 'text/javascript');
 	s.setAttribute('src', src);
@@ -14,6 +26,18 @@ function importJS(src, look_for, onload) {
 }
 
 function importCSS(href, look_for, onload) {
+	var existingLinks = document.getElementsByTagName('link');
+	for (i=0; i < existingLinks.length; i++) {
+		var existingHref = existingLinks[i].getAttribute('href');
+		if (href == existingHref) {
+			// stylesheet is already loaded
+			if (onload) {
+				onload();
+			}
+			return;
+		}
+	}
+	
 	var s = document.createElement('link');
 	s.setAttribute('rel', 'stylesheet');
 	s.setAttribute('type', 'text/css');
@@ -51,7 +75,7 @@ function wait_for_script_load(look_for, callback) {
 		importCSS(cdnBaseUrl + "jqueryui/1.8.20/themes/base/jquery-ui.css");
 		importJS(cdnBaseUrl + "jqueryui/1.8.20/jquery-ui.min.js", 'jQuery.ui', function() {
 			loadTabs();
-			importCSS("analysis-result.css");
+			importCSS("analysis-result.css?load=script");
 		});
 	});
 })();
