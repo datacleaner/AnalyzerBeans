@@ -77,7 +77,7 @@ function wait_for_script_load(look_for, callback) {
 		var existingSrc = existingScripts[i].getAttribute('src');
 		if (existingSrc != null) {
 			var offset = existingSrc.length - 'analysis-result.js'.length;
-			if (existingSrc.indexOf('analysis-result.js', offset) !== -1) {
+			if (existingSrc > 0 && existingSrc.indexOf('analysis-result.js', offset) !== -1) {
 				// script src ends with 'analysis-result.js'
 				relativeBaseUrl = existingSrc.substring(0, offset);
 				break;
