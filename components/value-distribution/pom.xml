@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-components</artifactId>
-		<version>0.20</version>
+		<version>0.21-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-value-distribution</artifactId>
 	<description>Value distribution (aka Frequency analysis) component for AnalyzerBeans</description>
@@ -51,17 +51,17 @@
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-core</artifactId>
-			<version>0.20</version>
+			<version>0.21-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-basic-analyzers</artifactId>
-			<version>0.20</version>
+			<version>0.21-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-html-rendering</artifactId>
-			<version>0.20</version>
+			<version>0.21-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
