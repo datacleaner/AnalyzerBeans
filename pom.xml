@@ -19,7 +19,7 @@
 	</parent>
 	<groupId>org.eobjects.analyzerbeans</groupId>
 	<artifactId>AnalyzerBeans</artifactId>
-	<version>0.20-SNAPSHOT</version>
+	<version>0.20</version>
 	<name>AnalyzerBeans</name>
 	<description>A framework for processing and analyzing data in a database, spreadsheet or other data source. AnalyzerBeans is widely based on a simple annotation-based development model where plugin/component development is very easy while it still supports reuse of business logic, configurability, type-safety and super-fast execution.</description>
 	<packaging>pom</packaging>
@@ -71,13 +71,13 @@
 	</licenses>
 	<scm>
 		<connection>
-			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
+			scm:svn:http://eobjects.org/svn/AnalyzerBeans/tags/AnalyzerBeans-0.20
 		</connection>
 		<developerConnection>
-			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
+			scm:svn:http://eobjects.org/svn/AnalyzerBeans/tags/AnalyzerBeans-0.20
 		</developerConnection>
 		<url>
-			http://eobjects.org/svn/AnalyzerBeans/trunk/ 
+			http://eobjects.org/svn/AnalyzerBeans/tags/AnalyzerBeans-0.20 
 		</url>
 	</scm>
 	<distributionManagement>

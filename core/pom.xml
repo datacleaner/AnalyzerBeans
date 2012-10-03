@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans</artifactId>
-		<version>0.20-SNAPSHOT</version>
+		<version>0.20</version>
 	</parent>
 	<artifactId>AnalyzerBeans-core</artifactId>
 	<description>Core module of AnalyzerBeans, provides a bare-bones engine for composing and executing AnalyzerBeans jobs</description>
@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-api</artifactId>
-			<version>0.20-SNAPSHOT</version>
+			<version>0.20</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.metamodel</groupId>
@@ -121,7 +121,7 @@
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-testware</artifactId>
-			<version>0.20-SNAPSHOT</version>
+			<version>0.20</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
