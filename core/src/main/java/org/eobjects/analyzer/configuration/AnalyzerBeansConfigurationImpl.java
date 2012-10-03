@@ -146,27 +146,27 @@ public final class AnalyzerBeansConfigurationImpl implements AnalyzerBeansConfig
      */
     public AnalyzerBeansConfigurationImpl replace(TaskRunner taskRunner) {
         return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
-                taskRunner, _storageProvider);
+                taskRunner, _storageProvider, _injectionManagerFactory);
     }
 
     public AnalyzerBeansConfigurationImpl replace(DescriptorProvider descriptorProvider) {
         return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, descriptorProvider,
-                _taskRunner, _storageProvider);
+                _taskRunner, _storageProvider, _injectionManagerFactory);
     }
 
     public AnalyzerBeansConfigurationImpl replace(DatastoreCatalog datastoreCatalog) {
         return new AnalyzerBeansConfigurationImpl(datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
-                _taskRunner, _storageProvider);
+                _taskRunner, _storageProvider, _injectionManagerFactory);
     }
 
     public AnalyzerBeansConfigurationImpl replace(ReferenceDataCatalog referenceDataCatalog) {
         return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, referenceDataCatalog, _descriptorProvider,
-                _taskRunner, _storageProvider);
+                _taskRunner, _storageProvider, _injectionManagerFactory);
     }
 
     public AnalyzerBeansConfigurationImpl replace(StorageProvider storageProvider) {
         return new AnalyzerBeansConfigurationImpl(_datastoreCatalog, _referenceDataCatalog, _descriptorProvider,
-                _taskRunner, storageProvider);
+                _taskRunner, storageProvider, _injectionManagerFactory);
     }
 
     public AnalyzerBeansConfigurationImpl replace(InjectionManagerFactory injectionManagerFactory) {
