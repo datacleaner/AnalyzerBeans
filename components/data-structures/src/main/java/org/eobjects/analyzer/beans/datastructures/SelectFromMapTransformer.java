@@ -46,71 +46,89 @@ import org.eobjects.analyzer.data.InputRow;
 @Categorized(DataStructuresCategory.class)
 public class SelectFromMapTransformer implements Transformer<Object> {
 
-	@Inject
-	@Configured
-	InputColumn<Map<String, ?>> mapColumn;
+    @Inject
+    @Configured
+    InputColumn<Map<String, ?>> mapColumn;
 
-	@Inject
-	@Configured
-	String[] keys;
+    @Inject
+    @Configured
+    String[] keys;
 
-	@Inject
-	@Configured
-	Class<?>[] types;
+    @Inject
+    @Configured
+    Class<?>[] types;
 
-	@Inject
-	@Configured
-	@Description("Verify that expected type and actual type are the same")
-	boolean verifyTypes = false;
+    @Inject
+    @Configured
+    @Description("Verify that expected type and actual type are the same")
+    boolean verifyTypes = false;
 
-	public void setKeys(String[] keys) {
-		this.keys = keys;
-	}
+    public void setKeys(String[] keys) {
+        this.keys = keys;
+    }
 
-	public void setTypes(Class<?>[] types) {
-		this.types = types;
-	}
+    public void setTypes(Class<?>[] types) {
+        this.types = types;
+    }
 
-	public void setMapColumn(InputColumn<Map<String, ?>> mapColumn) {
-		this.mapColumn = mapColumn;
-	}
+    public void setMapColumn(InputColumn<Map<String, ?>> mapColumn) {
+        this.mapColumn = mapColumn;
+    }
 
-	public void setVerifyTypes(boolean verifyTypes) {
-		this.verifyTypes = verifyTypes;
-	}
+    public void setVerifyTypes(boolean verifyTypes) {
+        this.verifyTypes = verifyTypes;
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		String[] keys = this.keys;
-		Class<?>[] types = this.types;
-		if (keys.length != types.length) {
-			// odd case sometimes encountered with invalid configurations or
-			// while building a job
-			final int length = Math.min(keys.length, types.length);
-			keys = Arrays.copyOf(keys, length);
-			types = Arrays.copyOf(types, length);
-		}
-		return new OutputColumns(keys, types);
-	}
+    @Override
+    public OutputColumns getOutputColumns() {
+        String[] keys = this.keys;
+        Class<?>[] types = this.types;
+        if (keys.length != types.length) {
+            // odd case sometimes encountered with invalid configurations or
+            // while building a job
+            final int length = Math.min(keys.length, types.length);
+            keys = Arrays.copyOf(keys, length);
+            types = Arrays.copyOf(types, length);
+        }
+        return new OutputColumns(keys, types);
+    }
 
-	@Override
-	public Object[] transform(InputRow row) {
-		final Map<String, ?> map = row.getValue(mapColumn);
-		final Object[] result = new Object[keys.length];
+    @Override
+    public Object[] transform(InputRow row) {
+        final Map<String, ?> map = row.getValue(mapColumn);
+        final Object[] result = new Object[keys.length];
 
-		if (map == null) {
-			return result;
-		}
+        if (map == null) {
+            return result;
+        }
 
-		for (int i = 0; i < keys.length; i++) {
-			Object value = map.get(keys[i]);
-			if (verifyTypes) {
-				value = types[i].cast(value);
-			}
-			result[i] = value;
-		}
+        for (int i = 0; i < keys.length; i++) {
+            Object value = find(map, keys[i]);
+            if (verifyTypes) {
+                value = types[i].cast(value);
+            }
+            result[i] = value;
+        }
 
-		return result;
-	}
+        return result;
+    }
+
+    private Object find(Map<String, ?> map, String key) {
+        final Object result = map.get(key);
+        if (result == null) {
+            final int indexOfDot = key.indexOf('.');
+            if (indexOfDot != -1) {
+                final String prefix = key.substring(0, indexOfDot);
+                final Object nestedObject = map.get(prefix);
+                if (nestedObject instanceof Map) {
+                    final String remainingPart = key.substring(indexOfDot + 1);
+                    @SuppressWarnings("unchecked")
+                    final Map<String, ?> nestedMap = (Map<String, ?>) nestedObject;
+                    return find(nestedMap, remainingPart);
+                }
+            }
+        }
+        return result;
+    }
 
 }
