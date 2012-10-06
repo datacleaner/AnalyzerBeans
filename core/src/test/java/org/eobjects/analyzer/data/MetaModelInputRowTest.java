@@ -21,7 +21,9 @@ package org.eobjects.analyzer.data;
 
 import junit.framework.TestCase;
 
+import org.eobjects.metamodel.data.DataSetHeader;
 import org.eobjects.metamodel.data.DefaultRow;
+import org.eobjects.metamodel.data.SimpleDataSetHeader;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.MutableColumn;
 
@@ -32,7 +34,8 @@ public class MetaModelInputRowTest extends TestCase {
 				new SelectItem(new MutableColumn("bar")) };
 		Object[] values = new Object[] { "baz", null };
 
-		MetaModelInputRow row = new MetaModelInputRow(1, new DefaultRow(items, values));
+		DataSetHeader header = new SimpleDataSetHeader(items);
+        MetaModelInputRow row = new MetaModelInputRow(1, new DefaultRow(header, values));
 
 		assertTrue(row.containsInputColumn(new MetaModelInputColumn(new MutableColumn("foo"))));
 		assertTrue(row.containsInputColumn(new MetaModelInputColumn(new MutableColumn("bar"))));

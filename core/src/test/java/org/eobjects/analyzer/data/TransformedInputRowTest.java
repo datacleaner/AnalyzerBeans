@@ -21,7 +21,9 @@ package org.eobjects.analyzer.data;
 
 import junit.framework.TestCase;
 
+import org.eobjects.metamodel.data.DataSetHeader;
 import org.eobjects.metamodel.data.DefaultRow;
+import org.eobjects.metamodel.data.SimpleDataSetHeader;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.MutableColumn;
@@ -58,7 +60,8 @@ public class TransformedInputRowTest extends TestCase {
 
 		SelectItem[] selectItems = new SelectItem[] { new SelectItem(col1), new SelectItem(col2) };
 		Object[] values = new Object[] { 1234, 4567 };
-		TransformedInputRow row = new TransformedInputRow(new MetaModelInputRow(0, new DefaultRow(selectItems, values)));
+		DataSetHeader header = new SimpleDataSetHeader(selectItems);
+		TransformedInputRow row = new TransformedInputRow(new MetaModelInputRow(0, new DefaultRow(header, values)));
 
 		assertEquals(1234, row.getValue(inputColumn1));
 		assertEquals(4567, row.getValue(inputColumn2));
