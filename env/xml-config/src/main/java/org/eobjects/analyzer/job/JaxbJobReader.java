@@ -119,7 +119,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
     }
 
     @Override
-    public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException {
+    public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException, NoSuchColumnException {
         AnalysisJobBuilder ajb = create(inputStream);
         try {
             return ajb.toAnalysisJob();
@@ -248,7 +248,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         }
         return paths;
     }
-    
+
     private List<org.eobjects.metamodel.schema.ColumnType> getSourceColumnTypes(Job job) {
         final List<org.eobjects.metamodel.schema.ColumnType> types;
 
@@ -261,7 +261,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
                 if (StringUtils.isNullOrEmpty(typeName)) {
                     types.add(null);
                 } else {
-                    final org.eobjects.metamodel.schema.ColumnType type = org.eobjects.metamodel.schema.ColumnType.valueOf(typeName);
+                    final org.eobjects.metamodel.schema.ColumnType type = org.eobjects.metamodel.schema.ColumnType
+                            .valueOf(typeName);
                     types.add(type);
                 }
             }
@@ -408,7 +409,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                 final Column physicalColumn = sourceColumnMapping.getColumn(path);
                 if (physicalColumn == null) {
                     logger.error("Column {} not found in {}", path, sourceColumnMapping);
-                    throw new IllegalStateException("No such column: " + path);
+                    throw new NoSuchColumnException(path);
                 }
 
                 final MetaModelInputColumn inputColumn = new MetaModelInputColumn(physicalColumn);
