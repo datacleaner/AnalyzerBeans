@@ -6,7 +6,7 @@
 		<javadoc.version>2.8.1</javadoc.version>
 		<slf4j.version>1.6.6</slf4j.version>
 		<junit.version>4.10</junit.version>
-		<metamodel.version>3.1.3-SNAPSHOT</metamodel.version>
+		<metamodel.version>3.2</metamodel.version>
 		<easymock.version>3.1</easymock.version>
 		<scala.version>2.9.2</scala.version>
 	</properties>

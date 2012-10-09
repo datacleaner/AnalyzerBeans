@@ -38,6 +38,7 @@ import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DefaultRow;
 import org.eobjects.metamodel.data.InMemoryDataSet;
 import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.data.SimpleDataSetHeader;
 import org.eobjects.metamodel.query.FromItem;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.query.SelectItem;
@@ -148,18 +149,17 @@ public class ReferentialIntegrityValidatorTest extends TestCase {
         SelectItem primaryKeySelectItem = new SelectItem(rightOn, rightSide);
         SelectItem foreignKeySelectItem = new SelectItem(leftOn, leftSide);
 
+        final SelectItem[] items = new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem };
+        final SimpleDataSetHeader header = new SimpleDataSetHeader(items);
+
         // An valid row
-        rows.add(new DefaultRow(new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem }, new Object[] { "foo",
-                "foo" }));
+        rows.add(new DefaultRow(header, new Object[] { "foo", "foo" }));
         // An invalid row
-        rows.add(new DefaultRow(new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem }, new Object[] { "bar",
-                null }));
+        rows.add(new DefaultRow(header, new Object[] { "bar", null }));
         // Simulate an (impossible?) error in the join
-        rows.add(new DefaultRow(new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem }, new Object[] {
-                "foobar", "foo" }));
+        rows.add(new DefaultRow(header, new Object[] { "foobar", "foo" }));
         // Another valid row
-        rows.add(new DefaultRow(new SelectItem[] { foreignKeySelectItem, primaryKeySelectItem }, new Object[] { "foo",
-                "foo" }));
+        rows.add(new DefaultRow(header, new Object[] { "foo", "foo" }));
 
         EasyMock.reportMatcher(new QueryMatcher("SELECT b.contributor_id, a.contributor_id, a.project_id, a.name "
                 + "FROM (SELECT role.contributor_id, role.project_id, role.name FROM projects.role) a "
