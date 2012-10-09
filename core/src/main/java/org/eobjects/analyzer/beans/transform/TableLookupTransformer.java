@@ -45,8 +45,10 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.query.CompiledQuery;
 import org.eobjects.metamodel.query.OperatorType;
 import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.query.QueryParameter;
 import org.eobjects.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +100,8 @@ public class TableLookupTransformer implements Transformer<Object> {
     private final Map<List<Object>, Object[]> cache = CollectionUtils2.createCacheMap();
     private Column[] queryOutputColumns;
     private Column[] queryConditionColumns;
+    private DatastoreConnection datastoreConnection;
+    private CompiledQuery lookupQuery;
 
     private void resetCachedColumns() {
         queryOutputColumns = null;
@@ -166,8 +170,29 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     @Initialize
     public void init() {
+        datastoreConnection = datastore.openConnection();
         resetCachedColumns();
         cache.clear();
+        compileLookupQuery();
+    }
+
+    private void compileLookupQuery() {
+        try {
+            Column[] queryOutputColumns = getQueryOutputColumns(false);
+            Column[] queryConditionColumns = getQueryConditionColumns();
+
+            Query query = new Query().from(queryOutputColumns[0].getTable()).select(queryOutputColumns);
+            for (int i = 0; i < queryConditionColumns.length; i++) {
+                query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, new QueryParameter());
+            }
+            query = query.setMaxRows(1);
+
+            lookupQuery = datastoreConnection.getDataContext().compileQuery(query);
+            
+        } catch (RuntimeException e) {
+            logger.error("Error occurred while compiling lookup query", e);
+            throw e;
+        }
     }
 
     @Validate
@@ -203,7 +228,7 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     @Override
     public Object[] transform(InputRow inputRow) {
-        List<Object> queryInput = new ArrayList<Object>(conditionValues.length);
+        final List<Object> queryInput = new ArrayList<Object>(conditionValues.length);
         for (InputColumn<?> inputColumn : conditionValues) {
             Object value = inputRow.getValue(inputColumn);
             queryInput.add(value);
@@ -230,38 +255,39 @@ public class TableLookupTransformer implements Transformer<Object> {
     private Object[] performQuery(List<Object> queryInput) {
         final Object[] result;
 
-        final DatastoreConnection con = datastore.openConnection();
         try {
-            Column[] queryOutputColumns = getQueryOutputColumns(false);
-            Column[] queryConditionColumns = getQueryConditionColumns();
+            final Column[] queryConditionColumns = getQueryConditionColumns();
 
-            Query query = new Query().from(queryOutputColumns[0].getTable()).select(queryOutputColumns);
+            final Object[] parameterValues = new Object[queryConditionColumns.length];
             for (int i = 0; i < queryConditionColumns.length; i++) {
-                query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, queryInput.get(i));
+                parameterValues[i] = queryInput.get(i);
             }
-            query = query.setMaxRows(1);
-            final DataSet dataSet = con.getDataContext().executeQuery(query);
-            if (dataSet.next()) {
-                result = dataSet.getRow().getValues();
-                if (logger.isInfoEnabled()) {
-                    logger.info("Result of lookup: " + Arrays.toString(result));
+
+            final DataSet dataSet = datastoreConnection.getDataContext().executeQuery(lookupQuery, parameterValues);
+            try {
+                if (dataSet.next()) {
+                    result = dataSet.getRow().getValues();
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Result of lookup: " + Arrays.toString(result));
+                    }
+                } else {
+                    logger.warn("Result of lookup: None!");
+                    result = new Object[outputColumns.length];
                 }
-            } else {
-                logger.warn("Result of lookup: None!");
-                result = new Object[outputColumns.length];
+                return result;
+            } finally {
+                dataSet.close();
             }
-            dataSet.close();
-            return result;
         } catch (RuntimeException e) {
             logger.error("Error occurred while looking up based on conditions: " + queryInput, e);
             throw e;
-        } finally {
-            con.close();
         }
     }
 
     @Close
     public void close() {
+        lookupQuery.close();
+        datastoreConnection.close();
         cache.clear();
         queryOutputColumns = null;
         queryConditionColumns = null;
