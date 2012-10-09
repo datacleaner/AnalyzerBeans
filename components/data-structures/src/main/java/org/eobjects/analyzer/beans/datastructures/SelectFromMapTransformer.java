@@ -19,7 +19,9 @@
  */
 package org.eobjects.analyzer.beans.datastructures;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -117,14 +119,69 @@ public class SelectFromMapTransformer implements Transformer<Object> {
         final Object result = map.get(key);
         if (result == null) {
             final int indexOfDot = key.indexOf('.');
-            if (indexOfDot != -1) {
+            final int indexOfBracket = key.indexOf('[');
+            int indexOfEndBracket = -1;
+            int arrayIndex = -1;
+
+            boolean hasDot = indexOfDot != -1;
+            boolean hasBracket = indexOfBracket != -1;
+
+            if (hasBracket) {
+                // also check that there is an end-bracket
+                indexOfEndBracket = key.indexOf("].", indexOfBracket);
+                hasBracket = indexOfEndBracket != -1;
+                if (hasBracket) {
+                    final String indexString = key.substring(indexOfBracket +1, indexOfEndBracket);
+                    try {
+                        arrayIndex = Integer.parseInt(indexString);
+                    } catch (NumberFormatException e) {
+                        // not a valid array/list index
+                        hasBracket = false;
+                    }
+                }
+            }
+
+            if (hasDot && hasBracket) {
+                if (indexOfDot > indexOfBracket) {
+                    hasDot = false;
+                } else {
+                    hasBracket = false;
+                }
+            }
+
+            if (hasDot) {
                 final String prefix = key.substring(0, indexOfDot);
                 final Object nestedObject = map.get(prefix);
+                if (nestedObject == null) {
+                    return null;
+                }
                 if (nestedObject instanceof Map) {
                     final String remainingPart = key.substring(indexOfDot + 1);
                     @SuppressWarnings("unchecked")
                     final Map<String, ?> nestedMap = (Map<String, ?>) nestedObject;
                     return find(nestedMap, remainingPart);
+                }
+            }
+
+            if (hasBracket) {
+                final String prefix = key.substring(0, indexOfBracket);
+                final Object nestedObject = map.get(prefix);
+                if (nestedObject == null) {
+                    return null;
+                }
+                final String remainingPart = key.substring(indexOfEndBracket + 2);
+                try {
+                    if (nestedObject instanceof List) {
+                        @SuppressWarnings("unchecked")
+                        final Map<String, ?> nestedMap = ((List<Map<String, ?>>) nestedObject).get(arrayIndex);
+                        return find(nestedMap, remainingPart);
+                    } else if (nestedObject.getClass().isArray()) {
+                        @SuppressWarnings("unchecked")
+                        final Map<String, ?> nestedMap = (Map<String, ?>) Array.get(nestedObject, arrayIndex);
+                        return find(nestedMap, remainingPart);
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return null;
                 }
             }
         }

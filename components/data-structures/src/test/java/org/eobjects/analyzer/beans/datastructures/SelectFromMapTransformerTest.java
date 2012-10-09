@@ -19,8 +19,10 @@
  */
 package org.eobjects.analyzer.beans.datastructures;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -36,12 +38,12 @@ public class SelectFromMapTransformerTest extends TestCase {
         final InputColumn<Map<String, ?>> col = new MockInputColumn<Map<String, ?>>("foo");
         trans.mapColumn = col;
         trans.keys = new String[] { "id", "Name.GivenName", "email.address", "Name.FamilyName",
-                "Name.Something.That.Does.Not.Exist" };
-        trans.types = new Class[] { Integer.class, String.class, String.class, String.class, String.class };
+                "Name.Something.That.Does.Not.Exist", "Addresses[1].street" };
+        trans.types = new Class[] { Integer.class, String.class, String.class, String.class, String.class, String.class };
         trans.verifyTypes = true;
 
         assertEquals(
-                "OutputColumns[id, Name.GivenName, email.address, Name.FamilyName, Name.Something.That.Does.Not.Exist]",
+                "OutputColumns[id, Name.GivenName, email.address, Name.FamilyName, Name.Something.That.Does.Not.Exist, Addresses[1].street]",
                 trans.getOutputColumns().toString());
 
         final Map<String, Object> map = new HashMap<String, Object>();
@@ -52,12 +54,27 @@ public class SelectFromMapTransformerTest extends TestCase {
         nestedMap.put("GivenName", "John");
         nestedMap.put("FamilyName", "Doe");
         nestedMap.put("Titulation", "Mr");
-
         map.put("Name", nestedMap);
+
+        final List<Map<String, Object>> nestedList = new ArrayList<Map<String, Object>>();
+        final Map<String, Object> address1 = new HashMap<String, Object>();
+        address1.put("street","Warwick Avenue");
+        nestedList.add(address1);
+        final Map<String, Object> address2 = new HashMap<String, Object>();
+        address2.put("street","Fifth Avenue");
+        nestedList.add(address2);
+        map.put("Addresses", nestedList);
 
         Object[] result = trans.transform(new MockInputRow().put(col, map));
 
-        assertEquals(5, result.length);
-        assertEquals("[1001, John, foo@bar.com, Doe, null]", Arrays.toString(result));
+        assertEquals(6, result.length);
+        assertEquals("[1001, John, foo@bar.com, Doe, null, Fifth Avenue]", Arrays.toString(result));
+        
+        nestedList.remove(0);
+        
+        result = trans.transform(new MockInputRow().put(col, map));
+
+        assertEquals(6, result.length);
+        assertEquals("[1001, John, foo@bar.com, Doe, null, null]", Arrays.toString(result));
     }
 }
