@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
+import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,109 +43,125 @@ import org.slf4j.LoggerFactory;
  */
 final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 
-	private static final Logger logger = LoggerFactory.getLogger(ErrorAwareAnalysisListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(ErrorAwareAnalysisListener.class);
 
-	private final List<Throwable> _errors = new LinkedList<Throwable>();
-	private final AtomicBoolean _cancelled = new AtomicBoolean(false);
+    private final List<Throwable> _errors = new LinkedList<Throwable>();
+    private final AtomicBoolean _cancelled = new AtomicBoolean(false);
 
-	@Override
-	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
-	}
+    @Override
+    public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
+    }
 
-	@Override
-	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
-	}
+    @Override
+    public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
+    }
 
-	private void storeError(AnalysisJob job, Throwable throwable) {
-		if (throwable instanceof AnalysisJobCancellation) {
-			_cancelled.set(true);
-		}
-		synchronized (_errors) {
-			if (!_errors.contains(throwable)) {
-				_errors.add(throwable);
-			}
+    protected void handleError(AnalysisJob job, Throwable throwable) {
+        if (throwable instanceof AnalysisJobCancellation) {
+            _cancelled.set(true);
+        }
 
-		}
-	}
+        if (!(throwable instanceof PreviousErrorsExistException)) {
+            logger.warn("Exception stack trace:", throwable);
+        }
 
-	@Override
-	public List<Throwable> getErrors() {
-	    // create a copy to avoid mutations or concurrent modifications
-	    final List<Throwable> result;
-	    synchronized (_errors) {
-	        result = new ArrayList<Throwable>(_errors);
-	    }
-		return result;
-	}
+        synchronized (_errors) {
+            if (!_errors.contains(throwable)) {
+                _errors.add(throwable);
+            }
+        }
 
-	@Override
-	public boolean isErrornous() {
-		synchronized (_errors) {
-			return !_errors.isEmpty();
-		}
-	}
+        // check for SQLException.getNextException() which is particularly
+        // important and unfortunately NOT included by default in stack traces.
+        Throwable t = throwable;
+        while (t != null) {
+            if (t instanceof SQLException) {
+                SQLException nextException = ((SQLException) t).getNextException();
+                if (nextException != null) {
+                    logger.warn("SQLException.getNextException() stack trace:", nextException);
+                }
+            }
+            t = t.getCause();
+        }
+    }
 
-	@Override
-	public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
-		logger.warn("errorInFilter({},{},{},{})", new Object[] { job, filterJob, row, throwable });
-		storeError(job, throwable);
-	}
+    @Override
+    public List<Throwable> getErrors() {
+        // create a copy to avoid mutations or concurrent modifications
+        final List<Throwable> result;
+        synchronized (_errors) {
+            result = new ArrayList<Throwable>(_errors);
+        }
+        return result;
+    }
 
-	@Override
-	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
-		logger.warn("errorInTransformer({},{},{},{})", new Object[] { job, transformerJob, row, throwable });
-		storeError(job, throwable);
-	}
+    @Override
+    public boolean isErrornous() {
+        synchronized (_errors) {
+            return !_errors.isEmpty();
+        }
+    }
 
-	@Override
-	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
-		logger.warn("errorInAnalyzer({},{},{},{})", new Object[] { job, analyzerJob, row, throwable });
-		storeError(job, throwable);
-	}
+    @Override
+    public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
+        logger.warn("errorInFilter({},{},{},{})", new Object[] { job, filterJob, row, throwable });
+        handleError(job, throwable);
+    }
 
-	@Override
-	public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
-		logger.warn("errorInExplorer({},{},{})", new Object[] { job, explorerJob, throwable });
-		storeError(job, throwable);
-	}
+    @Override
+    public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
+        logger.warn("errorInTransformer({},{},{},{})", new Object[] { job, transformerJob, row, throwable });
+        handleError(job, throwable);
+    }
 
-	@Override
-	public void errorUknown(AnalysisJob job, Throwable throwable) {
-		logger.warn("errorUnknown({},{})", new Object[] { job, throwable });
-		logger.warn("Exception stack trace:", throwable);
-		storeError(job, throwable);
-	}
+    @Override
+    public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
+        logger.warn("errorInAnalyzer({},{},{},{})", new Object[] { job, analyzerJob, row, throwable });
+        handleError(job, throwable);
+    }
 
-	@Override
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
-	}
+    @Override
+    public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
+        logger.warn("errorInExplorer({},{},{})", new Object[] { job, explorerJob, throwable });
+        handleError(job, throwable);
+    }
 
-	@Override
-	public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
-	}
+    @Override
+    public void errorUknown(AnalysisJob job, Throwable throwable) {
+        logger.warn("errorUnknown({},{})", new Object[] { job, throwable });
+        handleError(job, throwable);
+    }
 
-	@Override
-	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
-	}
+    @Override
+    public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
+    }
 
-	@Override
-	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
-	}
+    @Override
+    public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
+    }
 
-	@Override
-	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
-	}
+    @Override
+    public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
+    }
 
-	@Override
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
-	}
+    @Override
+    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
+    }
 
-	@Override
-	public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
-	}
+    @Override
+    public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return _cancelled.get();
-	}
+    @Override
+    public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
+    }
+
+    @Override
+    public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return _cancelled.get();
+    }
 }
