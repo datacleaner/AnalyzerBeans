@@ -20,16 +20,15 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.sql.SQLException;
+
+import junit.framework.TestCase;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.eobjects.metamodel.MetaModelException;
 import org.eobjects.metamodel.util.FileHelper;
-
-import junit.framework.TestCase;
 
 public class ErrorAwareAnalysisListenerTest extends TestCase {
 
