@@ -43,6 +43,8 @@ import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.metamodel.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Optimizer that will apply possible optimizations coming from
@@ -51,6 +53,8 @@ import org.eobjects.metamodel.query.Query;
  * @author Kasper Sørensen
  */
 public class RowProcessingQueryOptimizer {
+
+    private static final Logger logger = LoggerFactory.getLogger(RowProcessingQueryOptimizer.class);
 
     private static final Class<?>[] ALWAYS_OPTIMIZABLE = new Class[] { MaxRowsFilter.class };
     private final Datastore _datastore;
@@ -74,6 +78,8 @@ public class RowProcessingQueryOptimizer {
                 FilterConsumer filterConsumer = (FilterConsumer) consumer;
 
                 if (!isOptimizable(filterConsumer)) {
+                    logger.debug("Breaking optimization. Not optimizable: {}", filterConsumer);
+
                     // if it can be established that the filter is not
                     // optimizable at all (either because it is not an
                     // QueryOptimizableFilter or because input is not physical
@@ -109,11 +115,14 @@ public class RowProcessingQueryOptimizer {
     private boolean isOptimizable(FilterConsumer filterConsumer) {
         final FilterBeanDescriptor<?, ?> descriptor = filterConsumer.getComponentJob().getDescriptor();
         if (!descriptor.isQueryOptimizable()) {
+            logger.debug("FilterBeanDescriptor not optimizable: {}", descriptor);
             return false;
         }
         final InputColumn<?>[] input = filterConsumer.getRequiredInput();
         for (InputColumn<?> inputColumn : input) {
             if (inputColumn.isVirtualColumn()) {
+                logger.debug("InputColumn is virtual: {}, so filter is not optimizable: {}", inputColumn,
+                        filterConsumer);
                 return false;
             }
         }
@@ -131,6 +140,10 @@ public class RowProcessingQueryOptimizer {
             // the datastore doesn't prefer query optimization
             Class<?> filterClass = filterConsumer.getComponentJob().getDescriptor().getComponentClass();
             if (!ArrayUtils.contains(ALWAYS_OPTIMIZABLE, filterClass)) {
+                logger.debug(
+                        "Datastore performance characteristics indicate that query optimization will not improve performance for {}, stopping",
+                        filterConsumer);
+
                 // the filter is not in the "always optimizable" set.
                 return false;
             }
@@ -149,6 +162,7 @@ public class RowProcessingQueryOptimizer {
                 Outcome[] requirements = ((OutcomeSinkJob) componentJob).getRequirements();
                 for (Outcome requirement : requirements) {
                     if (!satisfiedRequirements.contains(requirement)) {
+                        logger.debug("Requirement {} is not met using query optimization of {}", requirement, filterConsumer);
                         return false;
                     } else {
                         independentComponent = false;
@@ -161,6 +175,7 @@ public class RowProcessingQueryOptimizer {
                 for (InputColumn<?> column : requiredColumns) {
                     if (column.isVirtualColumn()) {
                         if (!satisfiedColumns.contains(column)) {
+                            logger.debug("InputColumn {} is available at query time, and therefore not satisfied for query optimization of {}", column, filterConsumer);
                             return false;
                         } else {
                             independentComponent = false;
@@ -171,6 +186,7 @@ public class RowProcessingQueryOptimizer {
 
             if (independentComponent) {
                 // totally independent components prohibit optimization
+                logger.debug("Component {} is completely independent. Position in chain is not determinable, so optimization cannot be done.", filterConsumer);
                 return false;
             }
 
