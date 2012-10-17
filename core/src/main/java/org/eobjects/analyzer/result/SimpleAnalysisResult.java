@@ -41,10 +41,14 @@ public class SimpleAnalysisResult implements Serializable, AnalysisResult {
 
 	private final Map<ComponentJob, AnalyzerResult> _results;
 	private final Date _creationDate;
-
+	
 	public SimpleAnalysisResult(Map<ComponentJob, AnalyzerResult> results) {
+	    this(results, new Date());
+	}
+
+	public SimpleAnalysisResult(Map<ComponentJob, AnalyzerResult> results, Date creationDate) {
 		_results = results;
-		_creationDate = new Date();
+		_creationDate = creationDate;
 	}
 
 	@Override
