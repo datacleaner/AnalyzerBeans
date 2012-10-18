@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans.transform;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -97,7 +98,13 @@ public class TableLookupTransformer implements Transformer<Object> {
     @TableProperty
     String tableName;
 
-    private final Map<List<Object>, Object[]> cache = CollectionUtils2.createCacheMap();
+    @Inject
+    @Configured
+    @Description("Use a client-side cache to avoid looking up multiple times with same inputs.")
+    boolean cacheLookups = true;
+
+    private final Map<List<Object>, Object[]> cache = Collections.synchronizedMap(CollectionUtils2
+            .<List<Object>, Object[]> createCacheMap());
     private Column[] queryOutputColumns;
     private Column[] queryConditionColumns;
     private DatastoreConnection datastoreConnection;
@@ -188,7 +195,7 @@ public class TableLookupTransformer implements Transformer<Object> {
             query = query.setMaxRows(1);
 
             lookupQuery = datastoreConnection.getDataContext().compileQuery(query);
-            
+
         } catch (RuntimeException e) {
             logger.error("Error occurred while compiling lookup query", e);
             throw e;
@@ -237,7 +244,7 @@ public class TableLookupTransformer implements Transformer<Object> {
         logger.info("Looking up based on condition values: {}", queryInput);
 
         Object[] result;
-        synchronized (cache) {
+        if (cacheLookups) {
             result = cache.get(queryInput);
             if (result == null) {
                 result = performQuery(queryInput);
@@ -247,6 +254,8 @@ public class TableLookupTransformer implements Transformer<Object> {
                     logger.debug("Returning cached lookup result: {}", Arrays.toString(result));
                 }
             }
+        } else {
+            result = performQuery(queryInput);
         }
 
         return result;
