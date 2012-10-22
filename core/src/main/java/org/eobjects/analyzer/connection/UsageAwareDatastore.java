@@ -47,7 +47,7 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 	private static final Logger logger = LoggerFactory.getLogger(UsageAwareDatastore.class);
 
 	private transient volatile Reference<UsageAwareDatastoreConnection<E>> _datastoreConnectionRef;
-	private transient volatile UsageAwareDatastoreConnection<E> _dataContextProvider = null;
+	private transient volatile UsageAwareDatastoreConnection<E> _datastoreConnection = null;
 
 	@Moved
 	private final String _name;
@@ -95,15 +95,15 @@ public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObj
 	}
 
 	protected void setDataContextProvider(UsageAwareDatastoreConnection<E> dataContextProvider) {
-		_dataContextProvider = dataContextProvider;
+		_datastoreConnection = dataContextProvider;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	private synchronized final UsageAwareDatastoreConnection<E> getDatastoreConnection() {
-		if (_dataContextProvider != null) {
-			return _dataContextProvider;
+		if (_datastoreConnection != null) {
+			return _datastoreConnection;
 		}
 
 		UsageAwareDatastoreConnection<E> datastoreConnection;

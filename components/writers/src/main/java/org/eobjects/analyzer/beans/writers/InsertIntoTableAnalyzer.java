@@ -383,7 +383,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     @Override
     public void run(final Iterable<Object[]> buffer) throws Exception {
 
-        UpdateableDatastoreConnection con = datastore.openConnection();
+        final UpdateableDatastoreConnection con = datastore.openConnection();
         try {
             final Column[] columns = con.getSchemaNavigator().convertToColumns(schemaName, tableName, columnNames);
 
