@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -36,6 +38,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
@@ -77,428 +80,499 @@ import org.slf4j.LoggerFactory;
  */
 public final class ClasspathScanDescriptorProvider extends AbstractDescriptorProvider {
 
-	private static final Logger logger = LoggerFactory.getLogger(ClasspathScanDescriptorProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClasspathScanDescriptorProvider.class);
 
-	private final Map<String, AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new HashMap<String, AnalyzerBeanDescriptor<?>>();
-	private final Map<String, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<String, FilterBeanDescriptor<?, ?>>();
-	private final Map<String, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<String, TransformerBeanDescriptor<?>>();
-	private final Map<String, RendererBeanDescriptor<?>> _rendererBeanDescriptors = new HashMap<String, RendererBeanDescriptor<?>>();
-	private final Map<String, ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new HashMap<String, ExplorerBeanDescriptor<?>>();
-	private final TaskRunner _taskRunner;
-	private final AtomicInteger _tasksPending;
+    private final Map<String, AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new HashMap<String, AnalyzerBeanDescriptor<?>>();
+    private final Map<String, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<String, FilterBeanDescriptor<?, ?>>();
+    private final Map<String, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<String, TransformerBeanDescriptor<?>>();
+    private final Map<String, RendererBeanDescriptor<?>> _rendererBeanDescriptors = new HashMap<String, RendererBeanDescriptor<?>>();
+    private final Map<String, ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new HashMap<String, ExplorerBeanDescriptor<?>>();
+    private final TaskRunner _taskRunner;
+    private final AtomicInteger _tasksPending;
 
-	public ClasspathScanDescriptorProvider() {
-		this(new SingleThreadedTaskRunner());
-	}
+    public ClasspathScanDescriptorProvider() {
+        this(new SingleThreadedTaskRunner());
+    }
 
-	/**
-	 * Constructs a {@link ClasspathScanDescriptorProvider} using a specified
-	 * {@link TaskRunner}. The taskrunner will be used to perform the classpath
-	 * scan, potentially in a parallel fashion.
-	 * 
-	 * @param taskRunner
-	 */
-	public ClasspathScanDescriptorProvider(TaskRunner taskRunner) {
-		_taskRunner = taskRunner;
-		_tasksPending = new AtomicInteger(0);
-	}
+    /**
+     * Constructs a {@link ClasspathScanDescriptorProvider} using a specified
+     * {@link TaskRunner}. The taskrunner will be used to perform the classpath
+     * scan, potentially in a parallel fashion.
+     * 
+     * @param taskRunner
+     */
+    public ClasspathScanDescriptorProvider(TaskRunner taskRunner) {
+        _taskRunner = taskRunner;
+        _tasksPending = new AtomicInteger(0);
+    }
 
-	/**
-	 * Scans a package in the classpath (of the current thread's context
-	 * classloader) for annotated components.
-	 * 
-	 * @param packageName
-	 *            the package name to scan
-	 * @param recursive
-	 *            whether or not to scan subpackages recursively
-	 * @return
-	 */
-	public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive) {
-		return scanPackage(packageName, recursive, ClassLoaderUtils.getParentClassLoader(), false);
-	}
+    /**
+     * Scans a package in the classpath (of the current thread's context
+     * classloader) for annotated components.
+     * 
+     * @param packageName
+     *            the package name to scan
+     * @param recursive
+     *            whether or not to scan subpackages recursively
+     * @return
+     */
+    public ClasspathScanDescriptorProvider scanPackage(String packageName, boolean recursive) {
+        return scanPackage(packageName, recursive, ClassLoaderUtils.getParentClassLoader(), false);
+    }
 
-	/**
-	 * Scans a package in the classpath (of a particular classloader) for
-	 * annotated components.
-	 * 
-	 * @param packageName
-	 *            the package name to scan
-	 * @param recursive
-	 *            whether or not to scan subpackages recursively
-	 * @param classLoader
-	 *            the classloader to use
-	 * @return
-	 */
-	public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
-			final ClassLoader classLoader) {
-		return scanPackage(packageName, recursive, classLoader, true);
-	}
+    /**
+     * Scans a package in the classpath (of a particular classloader) for
+     * annotated components.
+     * 
+     * @param packageName
+     *            the package name to scan
+     * @param recursive
+     *            whether or not to scan subpackages recursively
+     * @param classLoader
+     *            the classloader to use
+     * @return
+     */
+    public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
+            final ClassLoader classLoader) {
+        return scanPackage(packageName, recursive, classLoader, true);
+    }
 
-	/**
-	 * Scans a package in the classpath (of a particular classloader) for
-	 * annotated components.
-	 * 
-	 * @param packageName
-	 *            the package name to scan
-	 * @param recursive
-	 *            whether or not to scan subpackages recursively
-	 * @param classLoader
-	 *            the classloader to use for discovering resources in the
-	 *            classpath
-	 * @param strictClassLoader
-	 *            whether or not classes originating from other classloaders may
-	 *            be included in scan (classloaders can sometimes discover
-	 *            classes from parent classloaders which may or may not be
-	 *            wanted for inclusion).
-	 * @return
-	 */
-	public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
-			final ClassLoader classLoader, final boolean strictClassLoader) {
-		return scanPackage(packageName, recursive, classLoader, strictClassLoader, null);
-	}
+    /**
+     * Scans a package in the classpath (of a particular classloader) for
+     * annotated components.
+     * 
+     * @param packageName
+     *            the package name to scan
+     * @param recursive
+     *            whether or not to scan subpackages recursively
+     * @param classLoader
+     *            the classloader to use for discovering resources in the
+     *            classpath
+     * @param strictClassLoader
+     *            whether or not classes originating from other classloaders may
+     *            be included in scan (classloaders can sometimes discover
+     *            classes from parent classloaders which may or may not be
+     *            wanted for inclusion).
+     * @return
+     */
+    public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
+            final ClassLoader classLoader, final boolean strictClassLoader) {
+        return scanPackage(packageName, recursive, classLoader, strictClassLoader, null);
+    }
 
-	/**
-	 * Scans a package in the classpath (of a particular classloader) for
-	 * annotated components. Optionally restricted by a set of JAR files to look
-	 * in.
-	 * 
-	 * @param packageName
-	 *            the package name to scan
-	 * @param recursive
-	 *            whether or not to scan subpackages recursively
-	 * @param classLoader
-	 *            the classloader to use for discovering resources in the
-	 *            classpath
-	 * @param strictClassLoader
-	 *            whether or not classes originating from other classloaders may
-	 *            be included in scan (classloaders can sometimes discover
-	 *            classes from parent classloaders which may or may not be
-	 *            wanted for inclusion).
-	 * @param jarFiles
-	 *            optionally (nullable) array of JAR files to scan. Note that if
-	 *            specified, the JAR files are assumed to be included in the
-	 *            classloaders available resources.
-	 * @return
-	 */
-	public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
-			final ClassLoader classLoader, final boolean strictClassLoader, final File[] jarFiles) {
-		_tasksPending.incrementAndGet();
-		final TaskListener listener = new TaskListener() {
-			@Override
-			public void onBegin(Task task) {
-				logger.info("Scan of '{}' beginning", packageName);
-			}
+    /**
+     * Scans a package in the classpath (of a particular classloader) for
+     * annotated components. Optionally restricted by a set of JAR files to look
+     * in.
+     * 
+     * @param packageName
+     *            the package name to scan
+     * @param recursive
+     *            whether or not to scan subpackages recursively
+     * @param classLoader
+     *            the classloader to use for discovering resources in the
+     *            classpath
+     * @param strictClassLoader
+     *            whether or not classes originating from other classloaders may
+     *            be included in scan (classloaders can sometimes discover
+     *            classes from parent classloaders which may or may not be
+     *            wanted for inclusion).
+     * @param jarFiles
+     *            optionally (nullable) array of JAR files to scan. Note that if
+     *            specified, the JAR files are assumed to be included in the
+     *            classloaders available resources.
+     * @return
+     */
+    public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
+            final ClassLoader classLoader, final boolean strictClassLoader, final File[] jarFiles) {
+        _tasksPending.incrementAndGet();
+        final TaskListener listener = new TaskListener() {
+            @Override
+            public void onBegin(Task task) {
+                logger.info("Scan of '{}' beginning", packageName);
+            }
 
-			@Override
-			public void onComplete(Task task) {
-				logger.info("Scan of '{}' complete", packageName);
-				taskDone();
-			}
+            @Override
+            public void onComplete(Task task) {
+                logger.info("Scan of '{}' complete", packageName);
+                taskDone();
+            }
 
-			@Override
-			public void onError(Task task, Throwable throwable) {
-				logger.info("Scan of '{}' failed: {}", packageName, throwable.getMessage());
-				logger.warn("Exception occurred while scanning and installing package", throwable);
-				taskDone();
-			}
-		};
+            @Override
+            public void onError(Task task, Throwable throwable) {
+                logger.info("Scan of '{}' failed: {}", packageName, throwable.getMessage());
+                logger.warn("Exception occurred while scanning and installing package", throwable);
+                taskDone();
+            }
+        };
 
-		final Task task = new Task() {
-			@Override
-			public void execute() throws Exception {
-				final String packagePath = packageName.replace('.', '/');
-				if (recursive) {
-					logger.info("Scanning package path '{}' (and subpackages recursively)", packagePath);
-				} else {
-					logger.info("Scanning package path '{}'", packagePath);
-				}
+        final Task task = new Task() {
+            @Override
+            public void execute() throws Exception {
+                final String packagePath = packageName.replace('.', '/');
+                if (recursive) {
+                    logger.info("Scanning package path '{}' (and subpackages recursively)", packagePath);
+                } else {
+                    logger.info("Scanning package path '{}'", packagePath);
+                }
 
-				try {
-					if (jarFiles != null && jarFiles.length > 0) {
-						for (File file : jarFiles) {
-							logger.info("Scanning JAR file: {}", file);
-							JarFile jarFile = new JarFile(file);
-							scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
-						}
-					} else {
-						Enumeration<URL> resources = classLoader.getResources(packagePath);
-						while (resources.hasMoreElements()) {
-							URL resource = resources.nextElement();
-							String file = resource.getFile();
-							File dir = new File(file);
-							dir = new File(dir.getAbsolutePath().replaceAll("\\%20", " "));
+                try {
+                    if (jarFiles != null && jarFiles.length > 0) {
+                        for (File file : jarFiles) {
+                            logger.info("Scanning JAR file: {}", file);
+                            // JarFile jarFile = new JarFile(file);
+                            JarInputStream inputStream = new JarInputStream(FileHelper.getInputStream(file));
+                            scanInputStreamOfJarFile(inputStream, classLoader, packagePath, recursive,
+                                    strictClassLoader);
+                        }
+                    } else {
+                        Enumeration<URL> resources = classLoader.getResources(packagePath);
+                        while (resources.hasMoreElements()) {
+                            URL resource = resources.nextElement();
+                            String file = resource.getFile();
+                            File dir = new File(file);
+                            dir = new File(dir.getAbsolutePath().replaceAll("\\%20", " "));
 
-							if (dir.isDirectory()) {
-								logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
-								scanDirectory(dir, recursive, classLoader, strictClassLoader);
-							} else {
-								URLConnection connection = resource.openConnection();
-								if (connection instanceof JarURLConnection) {
-									JarURLConnection jarUrlConnection = (JarURLConnection) connection;
-									logger.debug("Resource is a JAR file, scanning file: "
-											+ jarUrlConnection.getJarFile().getName());
-									scanJar(jarUrlConnection, classLoader, packagePath, recursive, strictClassLoader);
-								} else {
-									throw new IllegalStateException("Unknown connection type: " + connection);
-								}
-							}
-						}
-					}
-				} catch (IOException e) {
-					logger.error("Could not open classpath resource", e);
-				}
-			}
-		};
-		_taskRunner.run(task, listener);
-		return this;
-	}
+                            if (dir.isDirectory()) {
+                                logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
+                                scanDirectory(dir, recursive, classLoader, strictClassLoader);
+                            } else {
+                                final URLConnection connection = resource.openConnection();
+                                if (connection instanceof JarURLConnection) {
+                                    final JarURLConnection jarUrlConnection = (JarURLConnection) connection;
+                                    logger.debug("Resource is a JAR file, scanning file: "
+                                            + jarUrlConnection.getJarFile().getName());
+                                    scanJar(jarUrlConnection, classLoader, packagePath, recursive, strictClassLoader);
+                                } else {
+                                    logger.warn("Resource connection type is not known. Will attempt reading InputStream as a JAR file, but this approach is not guaranteed to work.");
+                                    final InputStream inputStream = connection.getInputStream();
+                                    if (inputStream == null) {
+                                        throw new IllegalStateException("Resource connection type return null InputStream: " + connection);
+                                    }
+                                    scanInputStreamOfJarFile(inputStream, classLoader, packagePath, recursive,
+                                            strictClassLoader);
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    logger.error("Could not open classpath resource", e);
+                }
+            }
+        };
+        _taskRunner.run(task, listener);
+        return this;
+    }
 
-	private void scanJar(final JarURLConnection jarUrlConnection, final ClassLoader classLoader, final String packagePath,
-			final boolean recursive, final boolean strictClassLoader) throws IOException {
-		JarFile jarFile = jarUrlConnection.getJarFile();
+    private void scanJar(final JarURLConnection jarUrlConnection, final ClassLoader classLoader,
+            final String packagePath, final boolean recursive, final boolean strictClassLoader) throws IOException {
+        JarFile jarFile = jarUrlConnection.getJarFile();
 
-		scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
-	}
+        scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
+    }
 
-	private void scanJar(final JarFile jarFile, final ClassLoader classLoader, final String packagePath,
-			final boolean recursive, final boolean strictClassLoader) throws IOException {
-		Enumeration<JarEntry> entries = jarFile.entries();
+    private void scanInputStreamOfJarFile(final InputStream inputStream, final ClassLoader classLoader,
+            final String packagePath, final boolean recursive, final boolean strictClassLoader) throws IOException {
+        final JarInputStream jarInputStream;
+        if (inputStream instanceof JarInputStream) {
+            jarInputStream = (JarInputStream) inputStream;
+        } else {
+            jarInputStream = new JarInputStream(inputStream, false);
+        }
 
-		while (entries.hasMoreElements()) {
-			JarEntry entry = entries.nextElement();
-			String entryName = entry.getName();
-			if (entryName.startsWith(packagePath) && entryName.endsWith(".class")) {
-				if (recursive) {
-					InputStream inputStream = jarFile.getInputStream(entry);
-					scanInputStream(inputStream, classLoader, strictClassLoader);
-				} else {
-					String trailingPart = entryName.substring(packagePath.length());
-					if (trailingPart.startsWith("/")) {
-						trailingPart = trailingPart.substring(1);
-					}
-					if (trailingPart.indexOf('/') == -1) {
-						InputStream inputStream = jarFile.getInputStream(entry);
-						scanInputStream(inputStream, classLoader, strictClassLoader);
-					} else {
-						logger.debug("Omitting recursive JAR file entry: {}", entryName);
-					}
-				}
-			} else {
-				logger.debug("Omitting JAR file entry: {}", entryName);
-			}
-		}
-	}
+        for (JarEntry entry = jarInputStream.getNextJarEntry(); entry != null; entry = jarInputStream.getNextJarEntry()) {
+            String entryName = entry.getName();
+            if (isClassInPackage(entryName, packagePath, recursive)) {
+                InputStream entryInputStream = createEntryInputStream(entry, jarInputStream);
+                scanInputStreamOfClassFile(entryInputStream, classLoader, strictClassLoader);
+            } else {
+                logger.debug("Omitting JAR file entry: {}", entryName);
+            }
+        }
+    }
 
-	private void scanDirectory(File dir, boolean recursive, ClassLoader classLoader, final boolean strictClassLoader) {
-		if (!dir.exists()) {
-			throw new IllegalArgumentException("Directory '" + dir + "' does not exist");
-		}
-		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException("The file '" + dir + "' is not a directory");
-		}
-		logger.debug("Scanning directory: " + dir);
+    protected boolean isClassInPackage(String entryName, String packagePath, boolean recursive) {
+        if (!entryName.startsWith(packagePath)) {
+            return false;
+        }
+        if (!entryName.endsWith(".class")) {
+            return false;
+        }
+        if (recursive) {
+            return true;
+        }
+        String trailingPart = entryName.substring(packagePath.length());
+        if (trailingPart.startsWith("/")) {
+            trailingPart = trailingPart.substring(1);
+        }
+        return trailingPart.indexOf('/') == -1;
+    }
 
-		File[] classFiles = dir.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File file, String filename) {
-				return filename.endsWith(".class");
-			}
-		});
+    private InputStream createEntryInputStream(JarEntry entry, JarInputStream jarInputStream) throws IOException {
+        final long size = entry.getSize();
+        if (size > Integer.MAX_VALUE) {
+            logger.info("JarEntry is too big ({} bytes) to be a .class file: {}", size, entry.getName());
+            return null;
+        }
+        
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        
+        byte[] buffer = new byte[1024 * 4];
+        long count = 0;
+        int n = 0;
+        while (-1 != (n = jarInputStream.read(buffer)) && count < size) {
+            out.write(buffer, 0, n);
+            count += n;
+        }
+        
+        final ByteArrayInputStream classFileInputStream = new ByteArrayInputStream(out.toByteArray());
+        return classFileInputStream;
+    }
 
-		for (File file : classFiles) {
-			try {
-				InputStream inputStream = new FileInputStream(file);
-				scanInputStream(inputStream, classLoader, strictClassLoader);
-			} catch (IOException e) {
-				logger.error("Could not read file", e);
-			}
-		}
+    private void scanJar(final JarFile jarFile, final ClassLoader classLoader, final String packagePath,
+            final boolean recursive, final boolean strictClassLoader) throws IOException {
+        Enumeration<JarEntry> entries = jarFile.entries();
 
-		if (recursive) {
-			File[] subDirectories = dir.listFiles(new FileFilter() {
-				@Override
-				public boolean accept(File file) {
-					return file.isDirectory();
-				}
-			});
-			if (subDirectories != null) {
-				if (logger.isInfoEnabled() && subDirectories.length > 0) {
-					logger.info("Recursively scanning " + subDirectories.length + " subdirectories");
-				}
-				for (File subDir : subDirectories) {
-					scanDirectory(subDir, true, classLoader, strictClassLoader);
-				}
-			}
-		}
-	}
+        while (entries.hasMoreElements()) {
+            JarEntry entry = entries.nextElement();
+            String entryName = entry.getName();
+            if (isClassInPackage(entryName, packagePath, recursive)) {
+                InputStream inputStream = jarFile.getInputStream(entry);
+                scanInputStreamOfClassFile(inputStream, classLoader, strictClassLoader);
+            } else {
+                logger.debug("Omitting JAR file entry: {}", entryName);
+            }
+        }
+    }
 
-	protected void scanInputStream(final InputStream inputStream, final ClassLoader classLoader,
-			final boolean strictClassLoader) throws IOException {
-		try {
-			final ClassReader classReader = new ClassReader(inputStream);
-			final BeanClassVisitor visitor = new BeanClassVisitor(classLoader);
-			classReader.accept(visitor, ClassReader.SKIP_CODE);
+    private void scanDirectory(File dir, boolean recursive, ClassLoader classLoader, final boolean strictClassLoader) {
+        if (!dir.exists()) {
+            throw new IllegalArgumentException("Directory '" + dir + "' does not exist");
+        }
+        if (!dir.isDirectory()) {
+            throw new IllegalArgumentException("The file '" + dir + "' is not a directory");
+        }
+        logger.debug("Scanning directory: " + dir);
 
-			Class<?> beanClass = visitor.getBeanClass();
-			if (beanClass == null) {
-				return;
-			}
+        File[] classFiles = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String filename) {
+                return filename.endsWith(".class");
+            }
+        });
 
-			if (strictClassLoader && classLoader != null && beanClass.getClassLoader() != classLoader) {
-				logger.warn("Scanned class did not belong to required classloader: " + beanClass + ", ignoring");
-				return;
-			}
+        for (File file : classFiles) {
+            try {
+                InputStream inputStream = new FileInputStream(file);
+                scanInputStream(inputStream, classLoader, strictClassLoader);
+            } catch (IOException e) {
+                logger.error("Could not read file", e);
+            }
+        }
 
-			if (visitor.isAnalyzer()) {
-				@SuppressWarnings("unchecked")
-				Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) beanClass;
-				addAnalyzerClass(analyzerClass);
-			}
-			if (visitor.isExplorer()) {
-				@SuppressWarnings("unchecked")
-				Class<? extends Explorer<?>> explorerClass = (Class<? extends Explorer<?>>) beanClass;
-				addExplorerClass(explorerClass);
-			}
-			if (visitor.isTransformer()) {
-				@SuppressWarnings("unchecked")
-				Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) beanClass;
-				addTransformerClass(transformerClass);
-			}
-			if (visitor.isFilter()) {
-				@SuppressWarnings("unchecked")
-				Class<? extends Filter<? extends Enum<?>>> filterClass = (Class<? extends Filter<?>>) beanClass;
-				addFilterClass(filterClass);
-			}
-			if (visitor.isRenderer()) {
-				@SuppressWarnings("unchecked")
-				Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) beanClass;
-				addRendererClass(rendererClass);
-			}
-		} finally {
-			FileHelper.safeClose(inputStream);
-		}
-	}
+        if (recursive) {
+            File[] subDirectories = dir.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File file) {
+                    return file.isDirectory();
+                }
+            });
+            if (subDirectories != null) {
+                if (logger.isInfoEnabled() && subDirectories.length > 0) {
+                    logger.info("Recursively scanning " + subDirectories.length + " subdirectories");
+                }
+                for (File subDir : subDirectories) {
+                    scanDirectory(subDir, true, classLoader, strictClassLoader);
+                }
+            }
+        }
+    }
 
-	public ClasspathScanDescriptorProvider addExplorerClass(Class<? extends Explorer<?>> explorerClass) {
-		ExplorerBeanDescriptor<?> descriptor = _explorerBeanDescriptors.get(explorerClass.getName());
-		if (descriptor == null) {
-			try {
-				descriptor = Descriptors.ofExplorer(explorerClass);
-				_explorerBeanDescriptors.put(explorerClass.getName(), descriptor);
-			} catch (Exception e) {
-				logger.error("Unexpected error occurred while creating descriptor for: " + explorerClass, e);
-			}
-		}
-		return this;
-	}
+    /**
+     * 
+     * @param inputStream
+     * @param classLoader
+     * @param strictClassLoader
+     * @throws IOException
+     * 
+     * @{@link deprecated} use
+     *         {@link #scanInputStreamOfClassFile(InputStream, ClassLoader, boolean)}
+     *         instead.
+     */
+    @Deprecated
+    protected void scanInputStream(final InputStream inputStream, final ClassLoader classLoader,
+            final boolean strictClassLoader) throws IOException {
+        scanInputStreamOfClassFile(inputStream, classLoader, strictClassLoader);
+    }
 
-	public ClasspathScanDescriptorProvider addAnalyzerClass(Class<? extends Analyzer<?>> clazz) {
-		AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(clazz.getName());
-		if (descriptor == null) {
-			try {
-				descriptor = Descriptors.ofAnalyzer(clazz);
-				_analyzerBeanDescriptors.put(clazz.getName(), descriptor);
-			} catch (Exception e) {
-				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
-			}
-		}
-		return this;
-	}
+    protected void scanInputStreamOfClassFile(final InputStream inputStream, final ClassLoader classLoader,
+            final boolean strictClassLoader) throws IOException {
+        try {
+            final ClassReader classReader = new ClassReader(inputStream);
+            final BeanClassVisitor visitor = new BeanClassVisitor(classLoader);
+            classReader.accept(visitor, ClassReader.SKIP_CODE);
 
-	public ClasspathScanDescriptorProvider addTransformerClass(Class<? extends Transformer<?>> clazz) {
-		TransformerBeanDescriptor<? extends Transformer<?>> descriptor = _transformerBeanDescriptors.get(clazz.getName());
-		if (descriptor == null) {
-			try {
-				descriptor = Descriptors.ofTransformer(clazz);
-				_transformerBeanDescriptors.put(clazz.getName(), descriptor);
-			} catch (Exception e) {
-				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
-			}
-		}
-		return this;
-	}
+            Class<?> beanClass = visitor.getBeanClass();
+            if (beanClass == null) {
+                return;
+            }
 
-	public ClasspathScanDescriptorProvider addFilterClass(Class<? extends Filter<?>> clazz) {
-		FilterBeanDescriptor<? extends Filter<?>, ?> descriptor = _filterBeanDescriptors.get(clazz.getName());
-		if (descriptor == null) {
-			try {
-				descriptor = Descriptors.ofFilterUnbound(clazz);
-				_filterBeanDescriptors.put(clazz.getName(), descriptor);
-			} catch (Exception e) {
-				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
-			}
-		}
-		return this;
-	}
+            if (strictClassLoader && classLoader != null && beanClass.getClassLoader() != classLoader) {
+                logger.warn("Scanned class did not belong to required classloader: " + beanClass + ", ignoring");
+                return;
+            }
 
-	public ClasspathScanDescriptorProvider addRendererClass(Class<? extends Renderer<?, ?>> clazz) {
-		RendererBeanDescriptor<?> descriptor = _rendererBeanDescriptors.get(clazz.getName());
-		if (descriptor == null) {
-			try {
-				descriptor = Descriptors.ofRenderer(clazz);
-				_rendererBeanDescriptors.put(clazz.getName(), descriptor);
-			} catch (Exception e) {
-				logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
-			}
-		}
-		return this;
-	}
+            if (visitor.isAnalyzer()) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) beanClass;
+                addAnalyzerClass(analyzerClass);
+            }
+            if (visitor.isExplorer()) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Explorer<?>> explorerClass = (Class<? extends Explorer<?>>) beanClass;
+                addExplorerClass(explorerClass);
+            }
+            if (visitor.isTransformer()) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) beanClass;
+                addTransformerClass(transformerClass);
+            }
+            if (visitor.isFilter()) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Filter<? extends Enum<?>>> filterClass = (Class<? extends Filter<?>>) beanClass;
+                addFilterClass(filterClass);
+            }
+            if (visitor.isRenderer()) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) beanClass;
+                addRendererClass(rendererClass);
+            }
+        } finally {
+            FileHelper.safeClose(inputStream);
+        }
+    }
 
-	private void taskDone() {
-		int tasks = _tasksPending.decrementAndGet();
-		if (tasks == 0) {
-			synchronized (this) {
-				notifyAll();
-			}
-		}
-	}
+    public ClasspathScanDescriptorProvider addExplorerClass(Class<? extends Explorer<?>> explorerClass) {
+        ExplorerBeanDescriptor<?> descriptor = _explorerBeanDescriptors.get(explorerClass.getName());
+        if (descriptor == null) {
+            try {
+                descriptor = Descriptors.ofExplorer(explorerClass);
+                _explorerBeanDescriptors.put(explorerClass.getName(), descriptor);
+            } catch (Exception e) {
+                logger.error("Unexpected error occurred while creating descriptor for: " + explorerClass, e);
+            }
+        }
+        return this;
+    }
 
-	/**
-	 * Waits for all pending tasks to finish
-	 */
-	private void awaitTasks() {
-		if (_tasksPending.get() == 0) {
-			return;
-		}
-		synchronized (this) {
-			while (_tasksPending.get() != 0) {
-				try {
-					logger.warn("Scan tasks still pending, waiting");
-					wait();
-				} catch (InterruptedException e) {
-					logger.debug("Interrupted while awaiting task completion", e);
-				}
-			}
-		}
-	}
+    public ClasspathScanDescriptorProvider addAnalyzerClass(Class<? extends Analyzer<?>> clazz) {
+        AnalyzerBeanDescriptor<?> descriptor = _analyzerBeanDescriptors.get(clazz.getName());
+        if (descriptor == null) {
+            try {
+                descriptor = Descriptors.ofAnalyzer(clazz);
+                _analyzerBeanDescriptors.put(clazz.getName(), descriptor);
+            } catch (Exception e) {
+                logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
+            }
+        }
+        return this;
+    }
 
-	@Override
-	public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors() {
-		awaitTasks();
-		return Collections.unmodifiableCollection(_filterBeanDescriptors.values());
-	}
+    public ClasspathScanDescriptorProvider addTransformerClass(Class<? extends Transformer<?>> clazz) {
+        TransformerBeanDescriptor<? extends Transformer<?>> descriptor = _transformerBeanDescriptors.get(clazz
+                .getName());
+        if (descriptor == null) {
+            try {
+                descriptor = Descriptors.ofTransformer(clazz);
+                _transformerBeanDescriptors.put(clazz.getName(), descriptor);
+            } catch (Exception e) {
+                logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
+            }
+        }
+        return this;
+    }
 
-	@Override
-	public Collection<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
-		awaitTasks();
-		return Collections.unmodifiableCollection(_analyzerBeanDescriptors.values());
-	}
+    public ClasspathScanDescriptorProvider addFilterClass(Class<? extends Filter<?>> clazz) {
+        FilterBeanDescriptor<? extends Filter<?>, ?> descriptor = _filterBeanDescriptors.get(clazz.getName());
+        if (descriptor == null) {
+            try {
+                descriptor = Descriptors.ofFilterUnbound(clazz);
+                _filterBeanDescriptors.put(clazz.getName(), descriptor);
+            } catch (Exception e) {
+                logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
+            }
+        }
+        return this;
+    }
 
-	@Override
-	public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
-		awaitTasks();
-		return Collections.unmodifiableCollection(_transformerBeanDescriptors.values());
-	}
+    public ClasspathScanDescriptorProvider addRendererClass(Class<? extends Renderer<?, ?>> clazz) {
+        RendererBeanDescriptor<?> descriptor = _rendererBeanDescriptors.get(clazz.getName());
+        if (descriptor == null) {
+            try {
+                descriptor = Descriptors.ofRenderer(clazz);
+                _rendererBeanDescriptors.put(clazz.getName(), descriptor);
+            } catch (Exception e) {
+                logger.error("Unexpected error occurred while creating descriptor for: " + clazz, e);
+            }
+        }
+        return this;
+    }
 
-	@Override
-	public Collection<RendererBeanDescriptor<?>> getRendererBeanDescriptors() {
-		awaitTasks();
-		return Collections.unmodifiableCollection(_rendererBeanDescriptors.values());
-	}
+    private void taskDone() {
+        int tasks = _tasksPending.decrementAndGet();
+        if (tasks == 0) {
+            synchronized (this) {
+                notifyAll();
+            }
+        }
+    }
 
-	@Override
-	public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
-		awaitTasks();
-		return Collections.unmodifiableCollection(_explorerBeanDescriptors.values());
-	}
+    /**
+     * Waits for all pending tasks to finish
+     */
+    private void awaitTasks() {
+        if (_tasksPending.get() == 0) {
+            return;
+        }
+        synchronized (this) {
+            while (_tasksPending.get() != 0) {
+                try {
+                    logger.warn("Scan tasks still pending, waiting");
+                    wait();
+                } catch (InterruptedException e) {
+                    logger.debug("Interrupted while awaiting task completion", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Collection<FilterBeanDescriptor<?, ?>> getFilterBeanDescriptors() {
+        awaitTasks();
+        return Collections.unmodifiableCollection(_filterBeanDescriptors.values());
+    }
+
+    @Override
+    public Collection<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
+        awaitTasks();
+        return Collections.unmodifiableCollection(_analyzerBeanDescriptors.values());
+    }
+
+    @Override
+    public Collection<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
+        awaitTasks();
+        return Collections.unmodifiableCollection(_transformerBeanDescriptors.values());
+    }
+
+    @Override
+    public Collection<RendererBeanDescriptor<?>> getRendererBeanDescriptors() {
+        awaitTasks();
+        return Collections.unmodifiableCollection(_rendererBeanDescriptors.values());
+    }
+
+    @Override
+    public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
+        awaitTasks();
+        return Collections.unmodifiableCollection(_explorerBeanDescriptors.values());
+    }
 }

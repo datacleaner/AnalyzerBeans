@@ -34,7 +34,6 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
     private MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(2);
 
     public void testScanOnlySingleJar() throws Exception {
-
         // File that only contains the XML decoder transformer
         File pluginFile1 = new File("src/test/resources/plugin-only-xml-transformer.jar");
         // File that only contains the Datastore writer analyzer
@@ -94,5 +93,53 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
                 "[AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.CrosstabTextRenderer], "
                         + "AnnotationBasedRendererBeanDescriptor[org.eobjects.analyzer.result.renderer.DefaultTextRenderer]]",
                 new TreeSet<RendererBeanDescriptor<?>>(rendererBeanDescriptors).toString());
+    }
+    
+    public void testScanJarFilesOnClasspath() throws Exception {
+     // File that only contains the XML decoder transformer
+        File pluginFile1 = new File("src/test/resources/plugin-only-xml-transformer.jar");
+        // File that only contains the Datastore writer analyzer
+        File pluginFile2 = new File("src/test/resources/plugin-only-datastore-writer.jar");
+
+        File[] files = new File[] { pluginFile1, pluginFile2 };
+        ClassLoader classLoader = ClassLoaderUtils.createClassLoader(files);
+        
+        ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
+        
+        assertEquals(0, provider.getAnalyzerBeanDescriptors().size());
+        assertEquals(0, provider.getTransformerBeanDescriptors().size());
+
+        provider = provider.scanPackage("org.eobjects", true, classLoader, true);
+        assertEquals(1, provider.getAnalyzerBeanDescriptors().size());
+        assertEquals(1, provider.getTransformerBeanDescriptors().size());
+
+        assertEquals("org.eobjects.analyzer.beans.writers.WriteToDatastoreAnalyzer", provider
+                .getAnalyzerBeanDescriptors().iterator().next().getComponentClass().getName());
+        assertEquals("org.eobjects.analyzer.beans.transform.XmlDecoderTransformer", provider
+                .getTransformerBeanDescriptors().iterator().next().getComponentClass().getName());   
+    }
+    
+    public void testIsClassInPackageNonRecursive() throws Exception {
+        ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
+        
+        assertTrue(provider.isClassInPackage("foo/bar/Baz.class", "foo/bar", false));
+        assertTrue(provider.isClassInPackage("foo/bar/Foobar.class", "foo/bar", false));
+        
+        assertFalse(provider.isClassInPackage("foo/bar/baz/Baz.class", "foo/bar", false));
+        
+        assertFalse(provider.isClassInPackage("foo/baz/Baz.class", "foo/bar", false));
+        assertFalse(provider.isClassInPackage("foo/Baz.class", "foo/bar", false));
+    }
+    
+    public void testIsClassInPackageRecursive() throws Exception {
+        ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
+        
+        assertTrue(provider.isClassInPackage("foo/bar/Baz.class", "foo/bar", true));
+        assertTrue(provider.isClassInPackage("foo/bar/Foobar.class", "foo/bar", true));
+        
+        assertTrue(provider.isClassInPackage("foo/bar/baz/Baz.class", "foo/bar", true));
+        
+        assertFalse(provider.isClassInPackage("foo/baz/Baz.class", "foo/bar", true));
+        assertFalse(provider.isClassInPackage("foo/Baz.class", "foo/bar", true));
     }
 }
