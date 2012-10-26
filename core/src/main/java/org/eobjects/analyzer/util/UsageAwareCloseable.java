@@ -115,6 +115,7 @@ public abstract class UsageAwareCloseable implements Closeable {
         if (isClosed()) {
             _logger.warn(this + " is already closed, but close() was invoked!");
             if (_logger.isDebugEnabled()) {
+                _closeStackTraces.add(new Throwable().getStackTrace());
                 final int numCloses = _closeStackTraces.size();
                 int i = 1;
                 for (StackTraceElement[] stackTraceElements : _closeStackTraces) {
