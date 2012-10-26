@@ -19,12 +19,8 @@
  */
 package org.eobjects.analyzer.connection;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import org.eobjects.analyzer.util.UsageAwareCloseable;
 import org.eobjects.metamodel.DataContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An abstract pooled {@link DatastoreConnection} that is aware of the amount of
@@ -34,97 +30,17 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Kasper Sørensen
  */
-public abstract class UsageAwareDatastoreConnection<E extends DataContext> implements DatastoreConnection {
-
-    private static final Logger logger = LoggerFactory.getLogger(UsageAwareDatastoreConnection.class);
+public abstract class UsageAwareDatastoreConnection<E extends DataContext> extends UsageAwareCloseable implements DatastoreConnection {
 
     private final Datastore _datastore;
-    private final AtomicInteger _usageCount;
-    private final AtomicBoolean _closed;
 
     public UsageAwareDatastoreConnection(Datastore datastore) {
         _datastore = datastore;
-        _usageCount = new AtomicInteger(1);
-        _closed = new AtomicBoolean(false);
-        if (logger.isDebugEnabled()) {
-            StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-            logger.debug("{} instantiated by:", this);
-            for (int i = 0; i < stackTrace.length && i < 7; i++) {
-                StackTraceElement ste = stackTrace[i];
-                logger.debug(" - {} @ line {}", ste.getClassName(), ste.getLineNumber());
-            }
-        }
-    }
-
-    public synchronized final boolean requestUsage() {
-        if (isClosed()) {
-            return false;
-        }
-
-        final int usage = _usageCount.incrementAndGet();
-        if (usage == 1) {
-            _closed.set(true);
-            _usageCount.decrementAndGet();
-            logger.debug("Connection is closed, request for more usage refused");
-            return false;
-        }
-
-        logger.debug("Usage incremented to {} for {}", usage, this);
-
-        if (logger.isDebugEnabled()) {
-            StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-            logger.debug("Incremented usage by:");
-            for (int i = 0; i < stackTrace.length && i < 7; i++) {
-                StackTraceElement ste = stackTrace[i];
-                logger.debug(" - {} @ line {}", ste.getClassName(), ste.getLineNumber());
-            }
-        }
-        return true;
     }
 
     @Override
     public abstract E getDataContext();
 
-    public synchronized boolean isClosed() {
-        return _closed.get();
-    }
-
-    @Override
-    public synchronized final void close() {
-        if (isClosed()) {
-            logger.warn("Connection is already closed, but close() was invoked!", new Throwable());
-            return;
-        }
-
-        final int usage = _usageCount.decrementAndGet();
-
-        logger.debug("Method close() invoked, usage decremented to {} for {}", _usageCount, this);
-        if (usage == 0) {
-            _closed.set(true);
-            logger.debug("Closing {}", this);
-            closeInternal();
-        }
-    }
-
-    /**
-     * Subclasses should implement this method to do the actual closing logic of
-     * the datacontext
-     */
-    protected abstract void closeInternal();
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        if (!isClosed()) {
-            if (logger.isWarnEnabled()) {
-                logger.warn(
-                        "Method finalize() invoked but not all usages closed ({} remaining) (for {}). Closing DatastoreConnection.",
-                        _usageCount, this);
-            }
-            // in case of gc, also do the closing
-            closeInternal();
-        }
-    }
 
     @Override
     public String toString() {
@@ -142,13 +58,9 @@ public abstract class UsageAwareDatastoreConnection<E extends DataContext> imple
         }
         return "<null>";
     }
-
-    /**
-     * Gets the amount of usages this datacontext provider currently has.
-     * 
-     * @return
-     */
+    
+    @Override
     public int getUsageCount() {
-        return _usageCount.get();
+        return super.getUsageCount();
     }
 }
