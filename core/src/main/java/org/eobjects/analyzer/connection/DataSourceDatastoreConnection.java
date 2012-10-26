@@ -44,6 +44,12 @@ public class DataSourceDatastoreConnection extends UsageAwareDatastoreConnection
         _dataContext = new JdbcDataContext(ds, tableTypes, catalogName);
         _schemaNavigator = new SchemaNavigator(_dataContext);
     }
+    
+    public DataSourceDatastoreConnection(UpdateableDataContext dataContext, Datastore datastore) {
+        super(datastore);
+        _dataContext = dataContext;
+        _schemaNavigator = new SchemaNavigator(_dataContext);
+    }
 
     @Override
     public UpdateableDataContext getDataContext() {
