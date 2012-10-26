@@ -100,7 +100,7 @@ public class UsageAwareCloseableTest extends TestCase {
         _closedCounter.set(0);
 
         final int numThreads = 3;
-        final int numInternalUsages = 10000;
+        final int numInternalUsages = 500;
 
         ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
         final Future<?>[] futures = new Future[numThreads];

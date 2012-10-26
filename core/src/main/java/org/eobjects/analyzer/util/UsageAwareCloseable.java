@@ -36,13 +36,23 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class UsageAwareCloseable implements Closeable {
 
+    private static class CloseEvent {
+        final String threadName;
+        final StackTraceElement[] stackTrace;
+
+        CloseEvent(String name, StackTraceElement[] trace) {
+            threadName = name;
+            stackTrace = trace;
+        }
+    }
+
     private static final int STACK_TRACE_ELEMENTS_TO_LOG = 7;
 
     private final Logger _logger;
 
     private final AtomicInteger _usageCount;
     private final AtomicBoolean _closed;
-    private final List<StackTraceElement[]> _closeStackTraces;
+    private final List<CloseEvent> _closeEvents;
 
     public UsageAwareCloseable() {
         this(LoggerFactory.getLogger(UsageAwareCloseable.class));
@@ -54,11 +64,11 @@ public abstract class UsageAwareCloseable implements Closeable {
         _closed = new AtomicBoolean(false);
 
         if (logger.isDebugEnabled()) {
-            _closeStackTraces = new ArrayList<StackTraceElement[]>(2);
-            logger.debug("{} instantiated by:", this);
+            _closeEvents = new ArrayList<CloseEvent>(2);
+            logger.debug("{} instantiated by:", this.getClass().getSimpleName());
             logNearestStack();
         } else {
-            _closeStackTraces = null;
+            _closeEvents = null;
         }
     }
 
@@ -92,7 +102,7 @@ public abstract class UsageAwareCloseable implements Closeable {
             usage = _usageCount.incrementAndGet();
             if (usage == 1) {
                 _usageCount.decrementAndGet();
-                _logger.debug(this + " is closed, request for more usage refused");
+                _logger.debug("{} is closed, request for more usage refused", this.getClass().getSimpleName());
                 return false;
             }
         }
@@ -115,12 +125,13 @@ public abstract class UsageAwareCloseable implements Closeable {
         if (isClosed()) {
             _logger.warn(this + " is already closed, but close() was invoked!");
             if (_logger.isDebugEnabled()) {
-                _closeStackTraces.add(new Throwable().getStackTrace());
-                final int numCloses = _closeStackTraces.size();
+                _closeEvents.add(new CloseEvent(Thread.currentThread().getName(), new Throwable().getStackTrace()));
+                final int numCloses = _closeEvents.size();
                 int i = 1;
-                for (StackTraceElement[] stackTraceElements : _closeStackTraces) {
+                for (CloseEvent closeEvent : _closeEvents) {
                     _logger.debug("Stack trace when close() no. {} of {}: ", i, numCloses);
-                    logStack(stackTraceElements);
+                    _logger.debug("Thread name: {}", closeEvent.threadName);
+                    logStack(closeEvent.stackTrace);
                     i++;
                 }
             }
@@ -135,7 +146,7 @@ public abstract class UsageAwareCloseable implements Closeable {
             _logger.debug("Method close() invoked, usage decremented to {} for {}", _usageCount, this);
             if (usage == 0) {
                 if (_logger.isDebugEnabled()) {
-                    _closeStackTraces.add(new Throwable().getStackTrace());
+                    _closeEvents.add(new CloseEvent(Thread.currentThread().getName(), new Throwable().getStackTrace()));
                 }
                 _logger.debug("Closing {}", this);
                 closeInternal();
