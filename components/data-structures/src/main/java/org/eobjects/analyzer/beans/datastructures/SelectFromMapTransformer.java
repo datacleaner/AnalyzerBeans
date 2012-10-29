@@ -115,7 +115,26 @@ public class SelectFromMapTransformer implements Transformer<Object> {
         return result;
     }
 
-    private Object find(Map<String, ?> map, String key) {
+    /**
+     * Searches a map for a given key. The key can be a regular map key, or a
+     * simple expression of the form:
+     * 
+     * <ul>
+     * <li>foo.bar (will lookup 'foo', and then 'bar' in a potential nested map)
+     * </li>
+     * <li>foo.bar[0].baz (will lookup 'foo', then 'bar' in a potential nested
+     * map, then pick the first element in case it is a list/array and then pick
+     * 'baz' from the potential map at that position).
+     * </ul>
+     * 
+     * @param map
+     *            the map to search in
+     * @param key
+     *            the key to resolve
+     * @return the object in the map with the given key/expression. Or null if
+     *         it does not exist.
+     */
+    public static Object find(Map<String, ?> map, String key) {
         final Object result = map.get(key);
         if (result == null) {
             final int indexOfDot = key.indexOf('.');
@@ -131,7 +150,7 @@ public class SelectFromMapTransformer implements Transformer<Object> {
                 indexOfEndBracket = key.indexOf("].", indexOfBracket);
                 hasBracket = indexOfEndBracket != -1;
                 if (hasBracket) {
-                    final String indexString = key.substring(indexOfBracket +1, indexOfEndBracket);
+                    final String indexString = key.substring(indexOfBracket + 1, indexOfEndBracket);
                     try {
                         arrayIndex = Integer.parseInt(indexString);
                     } catch (NumberFormatException e) {
