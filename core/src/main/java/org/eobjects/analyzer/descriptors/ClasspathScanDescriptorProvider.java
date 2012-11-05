@@ -19,17 +19,15 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.JarURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -38,7 +36,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
@@ -55,6 +52,7 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.util.ClassLoaderUtils;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.Ref;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,47 +214,39 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                     logger.info("Scanning package path '{}'", packagePath);
                 }
 
-                try {
-                    if (jarFiles != null && jarFiles.length > 0) {
-                        for (File file : jarFiles) {
-                            logger.info("Scanning JAR file: {}", file);
-                            // JarFile jarFile = new JarFile(file);
-                            JarInputStream inputStream = new JarInputStream(FileHelper.getInputStream(file));
-                            scanInputStreamOfJarFile(inputStream, classLoader, packagePath, recursive,
-                                    strictClassLoader);
-                        }
-                    } else {
-                        Enumeration<URL> resources = classLoader.getResources(packagePath);
-                        while (resources.hasMoreElements()) {
-                            URL resource = resources.nextElement();
-                            String file = resource.getFile();
-                            File dir = new File(file);
-                            dir = new File(dir.getAbsolutePath().replaceAll("\\%20", " "));
+                logger.debug("Using ClassLoader: {}", classLoader);
 
-                            if (dir.isDirectory()) {
-                                logger.debug("Resource is a file, scanning directory: {}", dir.getAbsolutePath());
-                                scanDirectory(dir, recursive, classLoader, strictClassLoader);
-                            } else {
-                                final URLConnection connection = resource.openConnection();
-                                if (connection instanceof JarURLConnection) {
-                                    final JarURLConnection jarUrlConnection = (JarURLConnection) connection;
-                                    logger.debug("Resource is a JAR file, scanning file: "
-                                            + jarUrlConnection.getJarFile().getName());
-                                    scanJar(jarUrlConnection, classLoader, packagePath, recursive, strictClassLoader);
-                                } else {
-                                    logger.warn("Resource connection type is not known. Will attempt reading InputStream as a JAR file, but this approach is not guaranteed to work.");
-                                    final InputStream inputStream = connection.getInputStream();
-                                    if (inputStream == null) {
-                                        throw new IllegalStateException("Resource connection type return null InputStream: " + connection);
-                                    }
-                                    scanInputStreamOfJarFile(inputStream, classLoader, packagePath, recursive,
-                                            strictClassLoader);
-                                }
-                            }
+                if (jarFiles != null && jarFiles.length > 0) {
+                    for (File file : jarFiles) {
+                        logger.info("Scanning JAR file: {}", file);
+
+                        JarFile jarFile = new JarFile(file);
+                        try {
+                            scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
+                        } catch (Exception e) {
+                            logger.error("Failed to scan package '" + packageName + "' in file: " + file, e);
+                        } finally {
+                            jarFile.close();
                         }
                     }
-                } catch (IOException e) {
-                    logger.error("Could not open classpath resource", e);
+                } else {
+
+                    final Enumeration<URL> resources = classLoader.getResources(packagePath);
+                    int count = 0;
+
+                    while (resources.hasMoreElements()) {
+                        count++;
+                        final URL resource = resources.nextElement();
+                        logger.info("Scanning resource/URL no. {}: {}", count, resource);
+
+                        try {
+                            scanUrl(resource, classLoader, packagePath, recursive, strictClassLoader);
+                        } catch (Exception e) {
+                            logger.error("Failed to scan package '" + packageName + "' in resource/URL: " + resource, e);
+                        }
+                    }
+
+                    logger.info("Scanned resources of {}: {}", packageName, count);
                 }
             }
         };
@@ -264,38 +254,90 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         return this;
     }
 
-    private void scanJar(final JarURLConnection jarUrlConnection, final ClassLoader classLoader,
-            final String packagePath, final boolean recursive, final boolean strictClassLoader) throws IOException {
-        JarFile jarFile = jarUrlConnection.getJarFile();
+    private void scanUrl(URL resource, final ClassLoader classLoader, final String packagePath,
+            final boolean recursive, final boolean strictClassLoader) throws IOException {
 
-        scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
-    }
+        final String file = resource.getFile();
 
-    private void scanInputStreamOfJarFile(final InputStream inputStream, final ClassLoader classLoader,
-            final String packagePath, final boolean recursive, final boolean strictClassLoader) throws IOException {
-        final JarInputStream jarInputStream;
-        if (inputStream instanceof JarInputStream) {
-            jarInputStream = (JarInputStream) inputStream;
+        logger.info("Resource file string: {}", file);
+
+        final File dir = new File(file.replaceAll("\\%20", " "));
+        if (dir.isDirectory()) {
+            logger.info("Resource is a directory, scanning for files: {}", dir.getAbsolutePath());
+            scanDirectory(dir, recursive, classLoader, strictClassLoader);
         } else {
-            jarInputStream = new JarInputStream(inputStream, false);
-        }
+            // We'll assume URLs of the format "jar:path!/entry", with the
+            // protocol being arbitrary as long as following the entry
+            // format. We'll also handle paths with and without leading
+            // "file:" prefix.
 
-        for (JarEntry entry = jarInputStream.getNextJarEntry(); entry != null; entry = jarInputStream.getNextJarEntry()) {
-            String entryName = entry.getName();
-            if (isClassInPackage(entryName, packagePath, recursive)) {
-                InputStream entryInputStream = createEntryInputStream(entry, jarInputStream);
-                scanInputStreamOfClassFile(entryInputStream, classLoader, strictClassLoader);
-            } else {
-                logger.debug("Omitting JAR file entry: {}", entryName);
+            logger.info("Resource connection type is not known. Will attempt URL parsing, but this approach is not guaranteed to work.");
+
+            JarFile jarFile = null;
+            String rootEntryPath;
+            final String jarFileUrl;
+            int separatorIndex = file.indexOf("!/");
+
+            try {
+                if (separatorIndex != -1) {
+                    jarFileUrl = file.substring(0, separatorIndex);
+                    rootEntryPath = file.substring(separatorIndex + "!/".length());
+                    jarFile = getJarFile(jarFileUrl);
+                } else {
+                    logger.info("Creating JarFile based on URI (without '!/'): {}", file);
+                    jarFile = new JarFile(file);
+                    jarFileUrl = file;
+                    rootEntryPath = "";
+                }
+
+                if (!"".equals(rootEntryPath) && !rootEntryPath.endsWith("/")) {
+                    // Root entry path must end with slash to allow for
+                    // proper matching. The Sun JRE does not return a slash
+                    // here, but BEA JRockit does.
+                    rootEntryPath = rootEntryPath + "/";
+                }
+
+                scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
+            } finally {
+                if (jarFile != null) {
+                    jarFile.close();
+                }
             }
         }
+    }
+
+    /**
+     * Resolve the given jar file URL into a JarFile object.
+     */
+    private JarFile getJarFile(String jarFileUrl) throws IOException {
+        if (jarFileUrl.startsWith("file:")) {
+            try {
+                final URI uri = new URI(jarFileUrl.replaceAll(" ", "\\%20"));
+                final String jarFileName = uri.getSchemeSpecificPart();
+                logger.info("Creating new JarFile based on URI-scheme filename: {}", jarFileName);
+                return new JarFile(jarFileName);
+            } catch (URISyntaxException ex) {
+                // Fallback for URLs that are not valid URIs (should hardly ever
+                // happen).
+                final String jarFileName = jarFileUrl.substring("file:".length());
+                logger.info("Creating new JarFile based on alternative filename: {}", jarFileName);
+                return new JarFile(jarFileName);
+            }
+        } else {
+            logger.info("Creating new JarFile based on URI (with '!/'): {}", jarFileUrl);
+            return new JarFile(jarFileUrl);
+        }
+    }
+
+    private boolean isClass(String entryName) {
+        return entryName.endsWith(".class");
     }
 
     protected boolean isClassInPackage(String entryName, String packagePath, boolean recursive) {
         if (!entryName.startsWith(packagePath)) {
             return false;
         }
-        if (!entryName.endsWith(".class")) {
+        if (!isClass(entryName)) {
             return false;
         }
         if (recursive) {
@@ -308,39 +350,48 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         return trailingPart.indexOf('/') == -1;
     }
 
-    private InputStream createEntryInputStream(JarEntry entry, JarInputStream jarInputStream) throws IOException {
-        final long size = entry.getSize();
-        if (size > Integer.MAX_VALUE) {
-            logger.info("JarEntry is too big ({} bytes) to be a .class file: {}", size, entry.getName());
-            return null;
-        }
-        
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        
-        byte[] buffer = new byte[1024 * 4];
-        long count = 0;
-        int n = 0;
-        while (-1 != (n = jarInputStream.read(buffer)) && count < size) {
-            out.write(buffer, 0, n);
-            count += n;
-        }
-        
-        final ByteArrayInputStream classFileInputStream = new ByteArrayInputStream(out.toByteArray());
-        return classFileInputStream;
-    }
-
     private void scanJar(final JarFile jarFile, final ClassLoader classLoader, final String packagePath,
             final boolean recursive, final boolean strictClassLoader) throws IOException {
         Enumeration<JarEntry> entries = jarFile.entries();
 
         while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            String entryName = entry.getName();
-            if (isClassInPackage(entryName, packagePath, recursive)) {
-                InputStream inputStream = jarFile.getInputStream(entry);
+            final JarEntry entry = entries.nextElement();
+            final Ref<InputStream> entryInputStream = new Ref<InputStream>() {
+                @Override
+                public InputStream get() {
+                    try {
+                        return jarFile.getInputStream(entry);
+                    } catch (IOException e) {
+                        throw new IllegalStateException("Failed to read JAR entry InputStream", e);
+                    }
+                }
+            };
+            scanEntry(entry, packagePath, recursive, classLoader, strictClassLoader, entryInputStream);
+        }
+    }
+
+    private void scanEntry(JarEntry entry, String packagePath, boolean recursive, ClassLoader classLoader,
+            boolean strictClassLoader, Ref<InputStream> entryInputStream) throws IOException {
+        String entryName = entry.getName();
+        if (isClassInPackage(entryName, packagePath, recursive)) {
+            logger.debug("Scanning JAR class file entry: {}", entryName);
+            InputStream inputStream = entryInputStream.get();
+
+            try {
                 scanInputStreamOfClassFile(inputStream, classLoader, strictClassLoader);
-            } else {
-                logger.debug("Omitting JAR file entry: {}", entryName);
+            } catch (RuntimeException e) {
+                logger.error("Failed to scan JAR class file entry: " + entryName, e);
+            }
+        } else {
+
+            if (logger.isInfoEnabled()) {
+                // log omitted .class files
+                if (isClass(entryName)) {
+                    logger.debug("Omitting JAR class file entry: {} (looking for package path: {})", entryName,
+                            packagePath);
+                } else {
+                    logger.trace("Omitting JAR entry (not a class): {}", entryName);
+                }
             }
         }
     }
@@ -352,7 +403,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         if (!dir.isDirectory()) {
             throw new IllegalArgumentException("The file '" + dir + "' is not a directory");
         }
-        logger.debug("Scanning directory: " + dir);
+        logger.info("Scanning directory: {}", dir);
 
         File[] classFiles = dir.listFiles(new FilenameFilter() {
             @Override
@@ -425,26 +476,31 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
             if (visitor.isAnalyzer()) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Analyzer<?>> analyzerClass = (Class<? extends Analyzer<?>>) beanClass;
+                logger.info("Adding analyzer class: {}", beanClass);
                 addAnalyzerClass(analyzerClass);
             }
             if (visitor.isExplorer()) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Explorer<?>> explorerClass = (Class<? extends Explorer<?>>) beanClass;
+                logger.info("Adding explorer class: {}", beanClass);
                 addExplorerClass(explorerClass);
             }
             if (visitor.isTransformer()) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) beanClass;
+                logger.info("Adding transformer class: {}", beanClass);
                 addTransformerClass(transformerClass);
             }
             if (visitor.isFilter()) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Filter<? extends Enum<?>>> filterClass = (Class<? extends Filter<?>>) beanClass;
+                logger.info("Adding filter class: {}", beanClass);
                 addFilterClass(filterClass);
             }
             if (visitor.isRenderer()) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Renderer<?, ?>> rendererClass = (Class<? extends Renderer<?, ?>>) beanClass;
+                logger.info("Adding renderer class: {}", beanClass);
                 addRendererClass(rendererClass);
             }
         } finally {

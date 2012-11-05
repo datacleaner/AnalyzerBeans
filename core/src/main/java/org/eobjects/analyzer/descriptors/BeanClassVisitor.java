@@ -36,10 +36,11 @@ import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class BeanClassVisitor implements ClassVisitor {
+final class BeanClassVisitor extends ClassVisitor {
 
 	private final static Logger _logger = LoggerFactory.getLogger(BeanClassVisitor.class);
 	private final ClassLoader _classLoader;
@@ -47,6 +48,7 @@ final class BeanClassVisitor implements ClassVisitor {
 	private String _name;
 
 	public BeanClassVisitor(ClassLoader classLoader) {
+	    super(Opcodes.ASM4);
 		_classLoader = classLoader;
 	}
 
