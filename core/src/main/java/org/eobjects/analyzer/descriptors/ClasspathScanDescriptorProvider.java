@@ -245,7 +245,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                     while (resources.hasMoreElements()) {
                         count++;
                         final URL resource = resources.nextElement();
-                        logger.info("Scanning resource/URL no. {}: {}", count, resource);
+                        logger.debug("Scanning resource/URL no. {}: {}", count, resource);
 
                         try {
                             scanUrl(resource, classLoader, packagePath, recursive, strictClassLoader);
@@ -254,7 +254,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                         }
                     }
 
-                    logger.info("Scanned resources of {}: {}", packageName, count);
+                    logger.debug("Scanned resources of {}: {}", packageName, count);
                 }
             }
         };
@@ -267,7 +267,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 
         final String file = resource.getFile();
 
-        logger.info("Resource file string: {}", file);
+        logger.debug("Resource file string: {}", file);
 
         final File dir = new File(file.replaceAll("\\%20", " "));
         if (dir.isDirectory()) {
