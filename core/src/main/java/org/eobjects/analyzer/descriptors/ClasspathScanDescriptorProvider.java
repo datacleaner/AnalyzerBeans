@@ -21,7 +21,6 @@ package org.eobjects.analyzer.descriptors;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -176,9 +175,9 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
      *            classes from parent classloaders which may or may not be
      *            wanted for inclusion).
      * @param jarFiles
-     *            optionally (nullable) array of JAR files to scan. Note that if
-     *            specified, the JAR files are assumed to be included in the
-     *            classloaders available resources.
+     *            optionally (nullable) array of JAR files or class directories
+     *            to scan. Note that if specified, the JAR files are assumed to
+     *            be included in the classloaders available resources.
      * @return
      */
     public ClasspathScanDescriptorProvider scanPackage(final String packageName, final boolean recursive,
@@ -218,15 +217,22 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 
                 if (jarFiles != null && jarFiles.length > 0) {
                     for (File file : jarFiles) {
-                        logger.info("Scanning JAR file: {}", file);
+                        if (file.isDirectory()) {
+                            logger.info("Scanning subdirectory of: {}", file);
+                            final File packageDirectory = new File(file, packageName);
 
-                        JarFile jarFile = new JarFile(file);
-                        try {
-                            scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
-                        } catch (Exception e) {
-                            logger.error("Failed to scan package '" + packageName + "' in file: " + file, e);
-                        } finally {
-                            jarFile.close();
+                            scanDirectory(packageDirectory, recursive, classLoader, strictClassLoader);
+                        } else {
+                            logger.info("Scanning JAR file: {}", file);
+
+                            JarFile jarFile = new JarFile(file);
+                            try {
+                                scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
+                            } catch (Exception e) {
+                                logger.error("Failed to scan package '" + packageName + "' in file: " + file, e);
+                            } finally {
+                                jarFile.close();
+                            }
                         }
                     }
                 } else {
@@ -405,7 +411,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         }
         logger.info("Scanning directory: {}", dir);
 
-        File[] classFiles = dir.listFiles(new FilenameFilter() {
+        final File[] classFiles = dir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File file, String filename) {
                 return filename.endsWith(".class");
@@ -413,11 +419,13 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         });
 
         for (File file : classFiles) {
+            final InputStream inputStream = FileHelper.getInputStream(file);
             try {
-                InputStream inputStream = new FileInputStream(file);
                 scanInputStream(inputStream, classLoader, strictClassLoader);
             } catch (IOException e) {
                 logger.error("Could not read file", e);
+            } finally {
+                FileHelper.safeClose(inputStream);
             }
         }
 
