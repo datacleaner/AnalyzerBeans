@@ -221,9 +221,12 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                             logger.debug("Omitting JAR file because it does not exist: {}", file);
                         } else if (file.isDirectory()) {
                             logger.info("Scanning subdirectory of: {}", file);
-                            final File packageDirectory = new File(file, packageName);
-
-                            scanDirectory(packageDirectory, recursive, classLoader, strictClassLoader);
+                            final File packageDirectory = new File(file, packagePath);
+                            if (packageDirectory.exists()) {
+                                scanDirectory(packageDirectory, recursive, classLoader, strictClassLoader);
+                            } else {
+                                logger.debug("Omitting directory because it does not exist: {}", packageDirectory);
+                            }
                         } else {
                             logger.info("Scanning JAR file: {}", file);
 
