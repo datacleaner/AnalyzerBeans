@@ -217,7 +217,9 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
 
                 if (jarFiles != null && jarFiles.length > 0) {
                     for (File file : jarFiles) {
-                        if (file.isDirectory()) {
+                        if (!file.exists()) {
+                            logger.debug("Omitting JAR file because it does not exist: {}", file);
+                        } else if (file.isDirectory()) {
                             logger.info("Scanning subdirectory of: {}", file);
                             final File packageDirectory = new File(file, packageName);
 
@@ -276,8 +278,6 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
             // protocol being arbitrary as long as following the entry
             // format. We'll also handle paths with and without leading
             // "file:" prefix.
-
-            logger.info("Resource connection type is not known. Will attempt URL parsing, but this approach is not guaranteed to work.");
 
             JarFile jarFile = null;
             String rootEntryPath;
