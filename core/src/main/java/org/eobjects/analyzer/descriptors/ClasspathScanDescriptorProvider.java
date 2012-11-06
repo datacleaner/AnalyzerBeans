@@ -24,9 +24,11 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -269,7 +271,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
             final boolean recursive, final boolean strictClassLoader) throws IOException {
 
         final String file = resource.getFile();
-
+        
         logger.debug("Resource file string: {}", file);
 
         final File dir = new File(file.replaceAll("\\%20", " "));
@@ -277,39 +279,49 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
             logger.info("Resource is a directory, scanning for files: {}", dir.getAbsolutePath());
             scanDirectory(dir, recursive, classLoader, strictClassLoader);
         } else {
-            // We'll assume URLs of the format "jar:path!/entry", with the
-            // protocol being arbitrary as long as following the entry
-            // format. We'll also handle paths with and without leading
-            // "file:" prefix.
-
-            JarFile jarFile = null;
-            String rootEntryPath;
-            final String jarFileUrl;
-            int separatorIndex = file.indexOf("!/");
-
-            try {
-                if (separatorIndex != -1) {
-                    jarFileUrl = file.substring(0, separatorIndex);
-                    rootEntryPath = file.substring(separatorIndex + "!/".length());
-                    jarFile = getJarFile(jarFileUrl);
-                } else {
-                    logger.info("Creating JarFile based on URI (without '!/'): {}", file);
-                    jarFile = new JarFile(file);
-                    jarFileUrl = file;
-                    rootEntryPath = "";
-                }
-
-                if (!"".equals(rootEntryPath) && !rootEntryPath.endsWith("/")) {
-                    // Root entry path must end with slash to allow for
-                    // proper matching. The Sun JRE does not return a slash
-                    // here, but BEA JRockit does.
-                    rootEntryPath = rootEntryPath + "/";
-                }
-
+            
+            URLConnection connection = resource.openConnection();
+            if (connection instanceof JarURLConnection) {
+                logger.info("Getting JarFile from JarURLConnection: {}", connection);
+                JarFile jarFile = ((JarURLConnection) connection).getJarFile();
+                // note: We are NOT closing this JarFile, because it is still used by the JarURLConnection
                 scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
-            } finally {
-                if (jarFile != null) {
-                    jarFile.close();
+            } else {
+                // We'll assume URLs of the format "jar:path!/entry", with the
+                // protocol being arbitrary as long as following the entry
+                // format. We'll also handle paths with and without leading
+                // "file:" prefix.
+                
+                JarFile jarFile = null;
+                String rootEntryPath;
+                
+                final String jarFileUrl;
+                final int separatorIndex = file.indexOf("!/");
+
+                try {
+                    if (separatorIndex != -1) {
+                        jarFileUrl = file.substring(0, separatorIndex);
+                        rootEntryPath = file.substring(separatorIndex + "!/".length());
+                        jarFile = getJarFile(jarFileUrl);
+                    } else {
+                        logger.info("Creating JarFile based on URI (without '!/'): {}", file);
+                        jarFile = new JarFile(file);
+                        jarFileUrl = file;
+                        rootEntryPath = "";
+                    }
+
+                    if (!"".equals(rootEntryPath) && !rootEntryPath.endsWith("/")) {
+                        // Root entry path must end with slash to allow for
+                        // proper matching. The Sun JRE does not return a slash
+                        // here, but BEA JRockit does.
+                        rootEntryPath = rootEntryPath + "/";
+                    }
+
+                    scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
+                } finally {
+                    if (jarFile != null) {
+                        jarFile.close();
+                    }
                 }
             }
         }
