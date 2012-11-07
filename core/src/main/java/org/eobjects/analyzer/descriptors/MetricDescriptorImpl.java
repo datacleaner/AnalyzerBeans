@@ -27,14 +27,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.ParameterizableMetric;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Metric;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
-final class MetricDescriptorImpl implements MetricDescriptor {
+/**
+ * Default {@link MetricDescriptor} implementation.
+ */
+final class MetricDescriptorImpl extends AbstractMetricDescriptor implements MetricDescriptor {
 
     private static final long serialVersionUID = 1L;
 
@@ -67,24 +69,6 @@ final class MetricDescriptorImpl implements MetricDescriptor {
 
     public Class<? extends AnalyzerResult> getResultClass() {
         return _resultClass;
-    }
-
-    @Override
-    public int compareTo(MetricDescriptor o) {
-        Metric metric1 = getAnnotation(Metric.class);
-        final int order1 = metric1.order();
-        Metric metric2 = o.getAnnotation(Metric.class);
-        final int order2;
-        if (metric2 == null) {
-            order2 = Integer.MAX_VALUE;
-        } else {
-            order2 = metric2.order();
-        }
-        int diff = order1 - order2;
-        if (diff == 0) {
-            return getName().compareTo(o.getName());
-        }
-        return diff;
     }
 
     @Override
@@ -198,15 +182,6 @@ final class MetricDescriptorImpl implements MetricDescriptor {
     }
 
     @Override
-    public String getDescription() {
-        Description desc = getAnnotation(Description.class);
-        if (desc == null) {
-            return null;
-        }
-        return desc.value();
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -236,10 +211,4 @@ final class MetricDescriptorImpl implements MetricDescriptor {
             return false;
         return true;
     }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "[name=" + getName() + "]";
-    }
-
 }
