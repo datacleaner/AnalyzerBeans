@@ -182,9 +182,6 @@ public class PatternFinderAnalyzer implements Analyzer<PatternFinderResult> {
     }
 
     private void run(String group, String value, InputRow row, int distinctCount) {
-        if (value == null) {
-            return;
-        }
         DefaultPatternFinder patternFinder = getPatternFinderForGroup(group);
         patternFinder.run(row, value, distinctCount);
     }

@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans.stringpattern;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -60,7 +61,11 @@ public class DefaultTokenizer implements Serializable, Tokenizer {
 
 	public List<Token> tokenize(String string) {
 		if (string == null) {
-			return null;
+			return Arrays.asList(NullToken.INSTANCE);
+		}
+		
+		if ("".equals(string)) {
+		    return Arrays.asList(BlankToken.INSTANCE);
 		}
 
 		List<Token> tokens;

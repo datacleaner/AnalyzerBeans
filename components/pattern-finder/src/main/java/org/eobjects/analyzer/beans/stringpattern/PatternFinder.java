@@ -40,125 +40,123 @@ import java.util.Set;
  */
 public abstract class PatternFinder<R> {
 
-	private final Map<String, Set<TokenPattern>> _patterns;
-	private final TokenizerConfiguration _configuration;
-	private final Tokenizer _tokenizer;
+    private final Map<String, Set<TokenPattern>> _patterns;
+    private final TokenizerConfiguration _configuration;
+    private final Tokenizer _tokenizer;
 
-	public PatternFinder(TokenizerConfiguration configuration) {
-		_configuration = configuration;
-		_patterns = new HashMap<String, Set<TokenPattern>>();
-		_tokenizer = new DefaultTokenizer(configuration);
-	}
+    public PatternFinder(TokenizerConfiguration configuration) {
+        _configuration = configuration;
+        _patterns = new HashMap<String, Set<TokenPattern>>();
+        _tokenizer = new DefaultTokenizer(configuration);
+    }
 
-	/**
-	 * This method should be invoked by the user of the PatternFinder. Invoke it
-	 * for each value in your dataset. Repeated values are handled correctly but
-	 * if available it is more effecient to handle only the distinct values and
-	 * their corresponding distinct counts.
-	 * 
-	 * @param row
-	 *            the row containing the value
-	 * @param value
-	 *            the string value to be tokenized and matched against other
-	 *            patterns
-	 * @param distinctCount
-	 *            the count of the value
-	 */
-	public void run(R row, String value, int distinctCount) {
-		if (value != null) {
-			final List<Token> tokens;
-			boolean match = false;
-			try {
-				tokens = _tokenizer.tokenize(value);
-			} catch (RuntimeException e) {
-				throw new IllegalStateException("Error occurred while tokenizing value: " + value, e);
-			}
+    /**
+     * This method should be invoked by the user of the PatternFinder. Invoke it
+     * for each value in your dataset. Repeated values are handled correctly but
+     * if available it is more effecient to handle only the distinct values and
+     * their corresponding distinct counts.
+     * 
+     * @param row
+     *            the row containing the value
+     * @param value
+     *            the string value to be tokenized and matched against other
+     *            patterns
+     * @param distinctCount
+     *            the count of the value
+     */
+    public void run(R row, String value, int distinctCount) {
+        final List<Token> tokens;
+        boolean match = false;
+        try {
+            tokens = _tokenizer.tokenize(value);
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("Error occurred while tokenizing value: " + value, e);
+        }
 
-			final String patternCode = getPatternCode(tokens);
-			Set<TokenPattern> patterns;
+        final String patternCode = getPatternCode(tokens);
+        Set<TokenPattern> patterns;
 
-			synchronized (this) {
-				patterns = _patterns.get(patternCode);
-				if (patterns == null) {
-					patterns = new HashSet<TokenPattern>();
-					_patterns.put(patternCode, patterns);
-				}
+        synchronized (this) {
+            patterns = _patterns.get(patternCode);
+            if (patterns == null) {
+                patterns = new HashSet<TokenPattern>();
+                _patterns.put(patternCode, patterns);
+            }
 
-				for (TokenPattern pattern : patterns) {
-					if (pattern.match(tokens)) {
-						storeMatch(pattern, row, value, distinctCount);
-						match = true;
-					}
-				}
+            for (TokenPattern pattern : patterns) {
+                if (pattern.match(tokens)) {
+                    storeMatch(pattern, row, value, distinctCount);
+                    match = true;
+                }
+            }
 
-				if (!match) {
-					final TokenPattern pattern;
-					try {
-						pattern = new TokenPatternImpl(value, tokens, _configuration);
-					} catch (RuntimeException e) {
-						throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
-					}
+            if (!match) {
+                final TokenPattern pattern;
+                try {
+                    pattern = new TokenPatternImpl(value, tokens, _configuration);
+                } catch (RuntimeException e) {
+                    throw new IllegalStateException("Error occurred while creating pattern for: " + tokens, e);
+                }
 
-					storeNewPattern(pattern, row, value, distinctCount);
-					patterns.add(pattern);
-				}
-			}
-		}
-	}
+                storeNewPattern(pattern, row, value, distinctCount);
+                patterns.add(pattern);
+            }
+        }
+    }
 
-	/**
-	 * Creates an almost unique String code for a list of tokens. This code is
-	 * used to improve search time when looking for potential matching patterns.
-	 * 
-	 * @param tokens
-	 * @return
-	 */
-	private String getPatternCode(List<Token> tokens) {
-		final StringBuilder sb = new StringBuilder();
-		sb.append(tokens.size());
-		for (Token token : tokens) {
-			sb.append(token.getType().ordinal());
-		}
-		return sb.toString();
-	}
+    /**
+     * Creates an almost unique String code for a list of tokens. This code is
+     * used to improve search time when looking for potential matching patterns.
+     * 
+     * @param tokens
+     * @return
+     */
+    private String getPatternCode(List<Token> tokens) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(tokens.size());
+        for (Token token : tokens) {
+            sb.append(token.getType().ordinal());
+        }
+        return sb.toString();
+    }
 
-	public Set<TokenPattern> getPatterns() {
-		final Set<TokenPattern> result = new HashSet<TokenPattern>();
-		final Collection<Set<TokenPattern>> values = _patterns.values();
-		for (Set<TokenPattern> set : values) {
-			result.addAll(set);
-		}
-		return result;
-	}
+    public Set<TokenPattern> getPatterns() {
+        final Set<TokenPattern> result = new HashSet<TokenPattern>();
+        final Collection<Set<TokenPattern>> values = _patterns.values();
+        for (Set<TokenPattern> set : values) {
+            result.addAll(set);
+        }
+        return result;
+    }
 
-	/**
-	 * This method is invoked every time a new pattern is created (ie. when a
-	 * match could not be found in the existing patterns).
-	 * 
-	 * @param pattern
-	 *            the newly produced pattern
-	 * @param row
-	 *            the row that was handed to the run(...) method
-	 * @param value
-	 *            the value that was handed to the run(...) method
-	 * @param distinctCount
-	 *            the distinctCount that was handed to the run(...) method
-	 */
-	protected abstract void storeNewPattern(TokenPattern pattern, R row, String value, int distinctCount);
+    /**
+     * This method is invoked every time a new pattern is created (ie. when a
+     * match could not be found in the existing patterns).
+     * 
+     * @param pattern
+     *            the newly produced pattern
+     * @param row
+     *            the row that was handed to the run(...) method
+     * @param value
+     *            the value that was handed to the run(...) method
+     * @param distinctCount
+     *            the distinctCount that was handed to the run(...) method
+     */
+    protected abstract void storeNewPattern(TokenPattern pattern, R row, String value, int distinctCount);
 
-	/**
-	 * This method is invoked every time a tokenized value matches an existing
-	 * pattern. All existing patterns will previously have been created using
-	 * the storeNewPattern(...) method.
-	 * 
-	 * @param pattern
-	 *            the existing pattern
-	 * @param row
-	 *            the row that was handed to the run(...) method
-	 * @param value
-	 *            the value that was handed to the run(...) method
-	 * @param distinctCount
-	 *            the distinctCount that was handed to the run(...) method
-	 */
-	protected abstract void storeMatch(TokenPattern pattern, R row, String value, int distinctCount);
+    /**
+     * This method is invoked every time a tokenized value matches an existing
+     * pattern. All existing patterns will previously have been created using
+     * the storeNewPattern(...) method.
+     * 
+     * @param pattern
+     *            the existing pattern
+     * @param row
+     *            the row that was handed to the run(...) method
+     * @param value
+     *            the value that was handed to the run(...) method
+     * @param distinctCount
+     *            the distinctCount that was handed to the run(...) method
+     */
+    protected abstract void storeMatch(TokenPattern pattern, R row, String value, int distinctCount);
 }

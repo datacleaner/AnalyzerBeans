@@ -29,6 +29,7 @@ import org.eobjects.analyzer.beans.stringpattern.TokenPattern;
 import org.eobjects.analyzer.beans.stringpattern.TokenPatternImpl;
 import org.eobjects.analyzer.beans.stringpattern.Tokenizer;
 import org.eobjects.analyzer.beans.stringpattern.TokenizerConfiguration;
+import org.eobjects.analyzer.util.LabelUtils;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 
 /**
@@ -86,8 +87,17 @@ public final class SimpleStringPattern extends AbstractReferenceData implements 
 
 	private TokenPattern getTokenPattern() {
 		if (_tokenPattern == null) {
-			List<Token> tokens = getTokenizer().tokenize(_expression);
-			_tokenPattern = new TokenPatternImpl(_expression, tokens, getConfiguration());
+		    final String expression;
+		    if (LabelUtils.NULL_LABEL.equals(_expression)) {
+		        expression = null;
+		    } else if (LabelUtils.BLANK_LABEL.equals(_expression)) {
+                expression = "";
+		    } else {
+                expression = _expression;
+		    }
+		    
+            List<Token> tokens = getTokenizer().tokenize(expression);
+			_tokenPattern = new TokenPatternImpl(expression, tokens, getConfiguration());
 		}
 		return _tokenPattern;
 	}
@@ -98,9 +108,6 @@ public final class SimpleStringPattern extends AbstractReferenceData implements 
 
 	@Override
 	public boolean matches(String string) {
-		if (string == null) {
-			return false;
-		}
 		List<Token> tokens = getTokenizer().tokenize(string);
 		return getTokenPattern().match(tokens);
 	}

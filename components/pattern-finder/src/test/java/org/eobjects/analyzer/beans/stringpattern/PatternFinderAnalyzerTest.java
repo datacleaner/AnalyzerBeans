@@ -107,13 +107,18 @@ public class PatternFinderAnalyzerTest extends TestCase {
 		pf.run(new MockInputRow().put(column, "kasper@eobjects.dk"), 1);
 		pf.run(new MockInputRow().put(column, "kasper.sorensen@eobjects.dk"), 1);
 		pf.run(new MockInputRow().put(column, "john@doe.com"), 1);
+		pf.run(new MockInputRow().put(column, ""), 3);
 		pf.run(new MockInputRow().put(column, "john.doe@company.com"), 1);
+		pf.run(new MockInputRow().put(column, null), 1);
+		pf.run(new MockInputRow().put(column, null), 1);
 
 		String[] resultLines = new PatternFinderResultTextRenderer().render(pf.getResult()).split("\n");
-		assertEquals(3, resultLines.length);
+		assertEquals(5, resultLines.length);
 		assertEquals("                             Match count Sample      ", resultLines[0]);
-		assertEquals("aaaaaa.aaaaaaaa@aaaaaaaa.aaa           2 kasper.sorensen@eobjects.dk ", resultLines[1]);
-		assertEquals("aaaaaa@aaaaaaaa.aaa                    2 kasper@eobjects.dk ", resultLines[2]);
+		assertEquals("<blank>                                3 <blank>     ", resultLines[1]);
+		assertEquals("<null>                                 2 <null>      ", resultLines[2]);
+		assertEquals("aaaaaa.aaaaaaaa@aaaaaaaa.aaa           2 kasper.sorensen@eobjects.dk ", resultLines[3]);
+		assertEquals("aaaaaa@aaaaaaaa.aaa                    2 kasper@eobjects.dk ", resultLines[4]);
 	}
 
 	public void testGroupEmailByDomain() throws Exception {
