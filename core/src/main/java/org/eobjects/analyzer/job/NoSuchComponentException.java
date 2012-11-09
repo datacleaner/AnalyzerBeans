@@ -19,10 +19,12 @@
  */
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 
 /**
  * Exception thrown in case a job is being opened and it references an
- * unexisting column in the datastore.
+ * unexisting component, such as an analyzer or transformer name which is not
+ * resolved using the {@link DescriptorProvider}.
  * 
  * @author Kasper Sørensen
  */
