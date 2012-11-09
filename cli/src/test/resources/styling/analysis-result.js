@@ -95,11 +95,13 @@ function wait_for_script_load(look_for, callback) {
 })();
 
 function drillToDetails(elementId) {
+	var elem = $('#' + elementId);
+	
 	var wWidth = $(window).width();
 	var dWidth = wWidth * 0.85;
 	var wHeight = $(window).height();
 	var dHeight = wHeight * 0.8;
-	$('#' + elementId).dialog({
+	elem.dialog({
 		modal : true,
 		width : dWidth,
 		height : dHeight

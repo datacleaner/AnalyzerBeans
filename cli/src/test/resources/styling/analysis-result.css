@@ -303,6 +303,10 @@ table tr.odd td {
 	overflow: auto;
 }
 
+.drillToDetailsPanel h3 {
+	display: inline;
+}
+
 table.crosstabTable {
 	margin-bottom: 4px;
 	border-top-left-radius: 6px;
@@ -366,6 +370,7 @@ div.valueDistributionChart {
 table.valueDistributionValueTable {
 	min-width: 200px; float : left;
 	margin-left: 10px;
+	margin-bottom: 6px;
 	float: left;
 }
 

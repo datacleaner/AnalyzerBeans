@@ -27,7 +27,11 @@ class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResu
      ]);
      
      var chart = new google.visualization.PieChart(elem);
-     chart.draw(data, {});
+     
+     wait_for_script_load('jQuery', function() {
+       var options = {"width": $(elem).width(), "height": $(elem).height()};
+       chart.draw(data, options);
+     });
    });
 --></script>"""
   }

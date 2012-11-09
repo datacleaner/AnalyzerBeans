@@ -74,7 +74,11 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
      ]);
      
      var chart = new google.visualization.PieChart(elem);
-     chart.draw(data, {});
+     
+     wait_for_script_load('jQuery', function() {
+       var options = {"width": $(elem).width(), "height": $(elem).height()};
+       chart.draw(data, options);
+     });
    });
 --></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
 
@@ -86,7 +90,11 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
      ]);
      
      var chart = new google.visualization.PieChart(elem);
-     chart.draw(data, {});
+     
+     wait_for_script_load('jQuery', function() {
+       var options = {"width": $(elem).width(), "height": $(elem).height()};
+       chart.draw(data, options);
+     });
    });
 --></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(2).toHtml(context).replaceAll("\r\n", "\n"))
   }
@@ -151,7 +159,11 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
      ]);
      
      var chart = new google.visualization.PieChart(elem);
-     chart.draw(data, {});
+     
+     wait_for_script_load('jQuery', function() {
+       var options = {"width": $(elem).width(), "height": $(elem).height()};
+       chart.draw(data, options);
+     });
    });
 --></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
   }
