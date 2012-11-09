@@ -32,6 +32,12 @@ public class StringUtilsTest extends TestCase {
         assertEquals("", StringUtils.rightTrim(""));
     }
 
+    public void testReplaceWhiteSpace() throws Exception {
+        assertEquals("_hel_lo", StringUtils.replaceWhitespaces("  hel lo", "_"));
+        assertEquals("hello", StringUtils.replaceWhitespaces("  hel lo", ""));
+        assertEquals("A+B/Cars", StringUtils.replaceWhitespaces(" A + B / Cars", ""));
+    }
+
     public void testLeftTrim() throws Exception {
         assertEquals("hello", StringUtils.leftTrim("  hello"));
         assertEquals("hello", StringUtils.leftTrim(" \t hello"));
