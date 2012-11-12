@@ -206,9 +206,17 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
     }
 
     private <E extends BeanDescriptor<?>> E getBeanDescriptorByDisplayName(String name, Collection<E> descriptors) {
-        if (name == null || name.length() == 0) {
+        if (name == null) {
             return null;
         }
+
+        // Ticket #951 : trim descriptor names
+        name = name.trim();
+        
+        if (name.length() == 0) {
+            return null;
+        }
+
         for (E descriptor : descriptors) {
             String displayName = descriptor.getDisplayName();
             if (name.equals(displayName)) {

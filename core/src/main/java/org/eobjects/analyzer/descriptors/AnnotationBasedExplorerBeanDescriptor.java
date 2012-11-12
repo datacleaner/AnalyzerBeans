@@ -25,6 +25,7 @@ import java.util.Set;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.StringUtils;
 
 final class AnnotationBasedExplorerBeanDescriptor<E extends Explorer<?>> extends
         AbstractHasAnalyzerResultBeanDescriptor<E> implements ExplorerBeanDescriptor<E> {
@@ -42,10 +43,10 @@ final class AnnotationBasedExplorerBeanDescriptor<E extends Explorer<?>> extends
         }
 
         String displayName = analyzerAnnotation.value();
-        if (displayName == null || displayName.trim().length() == 0) {
+        if (StringUtils.isNullOrEmpty(displayName)) {
             displayName = ReflectionUtils.explodeCamelCase(explorerClass.getSimpleName(), false);
         }
-        _displayName = displayName;
+        _displayName = displayName.trim();
 
         visitClass();
     }

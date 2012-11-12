@@ -28,6 +28,7 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.StringUtils;
 
 final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends
         AbstractBeanDescriptor<F> implements FilterBeanDescriptor<F, C> {
@@ -49,10 +50,10 @@ final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends E
         }
 
         String displayName = filterAnnotation.value();
-        if (displayName == null || displayName.trim().length() == 0) {
+        if (StringUtils.isNullOrEmpty(displayName)) {
             displayName = ReflectionUtils.explodeCamelCase(filterClass.getSimpleName(), false);
         }
-        _displayName = displayName;
+        _displayName = displayName.trim();
 
         visitClass();
     }

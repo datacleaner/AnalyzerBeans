@@ -32,6 +32,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Metric;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.StringUtils;
 
 /**
  * Default {@link MetricDescriptor} implementation.
@@ -51,7 +52,11 @@ final class MetricDescriptorImpl extends AbstractMetricDescriptor implements Met
         _method = method;
         _method.setAccessible(true);
 
-        _name = ReflectionUtils.getAnnotation(_method, Metric.class).value();
+        String metricName = ReflectionUtils.getAnnotation(_method, Metric.class).value();
+        if (StringUtils.isNullOrEmpty(metricName)) {
+            throw new IllegalStateException("Metric method has no name: " + _method);
+        }
+        _name = metricName.trim();
         _methodName = _method.getName();
     }
 

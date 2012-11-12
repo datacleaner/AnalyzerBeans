@@ -22,6 +22,7 @@ package org.eobjects.analyzer.descriptors;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.StringUtils;
 
 final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends AbstractHasAnalyzerResultBeanDescriptor<A> implements
 		AnalyzerBeanDescriptor<A> {
@@ -39,10 +40,10 @@ final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends
 		}
 
 		String displayName = analyzerAnnotation.value();
-		if (displayName == null || displayName.trim().length() == 0) {
+		if (StringUtils.isNullOrEmpty(displayName)) {
 			displayName = ReflectionUtils.explodeCamelCase(analyzerClass.getSimpleName(), false);
 		}
-		_displayName = displayName;
+		_displayName = displayName.trim();
 
 		visitClass();
 	}

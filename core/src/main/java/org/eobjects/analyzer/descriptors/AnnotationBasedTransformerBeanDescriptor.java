@@ -22,6 +22,7 @@ package org.eobjects.analyzer.descriptors;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.StringUtils;
 
 final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> extends AbstractBeanDescriptor<T> implements
 		TransformerBeanDescriptor<T> {
@@ -43,10 +44,10 @@ final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> e
 		}
 
 		String displayName = transformerAnnotation.value();
-		if (displayName == null || displayName.trim().length() == 0) {
+		if (StringUtils.isNullOrEmpty(displayName)) {
 			displayName = ReflectionUtils.explodeCamelCase(transformerClass.getSimpleName(), false);
 		}
-		_displayName = displayName;
+		_displayName = displayName.trim();
 
 		visitClass();
 	}

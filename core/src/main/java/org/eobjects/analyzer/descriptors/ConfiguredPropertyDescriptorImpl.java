@@ -28,6 +28,7 @@ import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.StringUtils;
 
 final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
 		ConfiguredPropertyDescriptor {
@@ -44,8 +45,8 @@ final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor 
 		Configured configured = getAnnotation(Configured.class);
 		if (configured != null) {
 			String value = configured.value();
-			if (value != null && value.length() > 0) {
-				return value;
+			if (!StringUtils.isNullOrEmpty(value)) {
+			    return value.trim();
 			}
 		}
 		return ReflectionUtils.explodeCamelCase(super.getName(), true);
