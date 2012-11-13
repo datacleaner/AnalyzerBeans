@@ -21,6 +21,8 @@ package org.eobjects.analyzer.configuration;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -48,7 +50,9 @@ import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
+import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
+import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.SimpleTableDef;
 import org.junit.Assert;
 
@@ -56,6 +60,44 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
     private final JaxbConfigurationReader reader = new JaxbConfigurationReader();
     private DatastoreCatalog _datastoreCatalog;
+
+    public void testReadComplexDataInPojoDatastore() throws Exception {
+        AnalyzerBeansConfiguration configuration = reader.create(new File(
+                "src/test/resources/example-configuration-pojo-datastore-with-complex-data.xml"));
+        Datastore datastore = configuration.getDatastoreCatalog().getDatastore("pojo");
+        assertNotNull(datastore);
+
+        DatastoreConnection con = datastore.openConnection();
+        DataContext dc = con.getDataContext();
+        Table table = dc.getDefaultSchema().getTable(0);
+
+        Column[] columns = table.getColumns();
+        assertEquals("[Column[name=Foo,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], "
+                + "Column[name=Bar,columnNumber=1,type=MAP,nullable=true,nativeType=null,columnSize=null], "
+                + "Column[name=Baz,columnNumber=2,type=LIST,nullable=true,nativeType=null,columnSize=null]]",
+                Arrays.toString(columns));
+
+        DataSet ds = dc.query().from(table).select(columns).execute();
+
+        assertTrue(ds.next());
+        assertEquals("Hello", ds.getRow().getValue(0).toString());
+        assertEquals("{greeting=hello, person=world}", ds.getRow().getValue(1).toString());
+        assertEquals("[hello, world]", ds.getRow().getValue(2).toString());
+        assertTrue(ds.getRow().getValue(1) instanceof Map);
+        assertTrue(ds.getRow().getValue(2) instanceof List);
+        
+        assertTrue(ds.next());
+        assertEquals("There", ds.getRow().getValue(0).toString());
+        assertEquals("{greeting=hi, there you!, person={Firstname=Kasper, Lastname=Sørensen}}", ds.getRow().getValue(1).toString());
+        assertEquals(null, ds.getRow().getValue(2));
+        assertTrue(ds.getRow().getValue(1) instanceof Map);
+        
+        assertTrue(ds.next());
+        assertEquals("World", ds.getRow().getValue(0).toString());
+        assertEquals(null, ds.getRow().getValue(1));
+        assertEquals("[Sørensen, Kasper]", ds.getRow().getValue(2).toString());
+        assertTrue(ds.getRow().getValue(2) instanceof List);
+    }
 
     public void testOverrideVariables() throws Exception {
         System.setProperty("datastoreCatalog.myDatabase.username", "foobar");
@@ -144,19 +186,19 @@ public class JaxbConfigurationReaderTest extends TestCase {
                 assertEquals(
                         "[Column[name=Baz,columnNumber=0,type=BOOLEAN,nullable=true,nativeType=null,columnSize=null]]",
                         Arrays.toString(schema.getTable(1).getColumns()));
-                
-                DataSet ds = dc.query().from("table1").select("Foo","Bar").execute();
+
+                DataSet ds = dc.query().from("table1").select("Foo", "Bar").execute();
                 assertTrue(ds.next());
                 assertEquals("Row[values=[Hello, 1]]", ds.getRow().toString());
                 assertEquals(String.class, ds.getRow().getValue(0).getClass());
                 assertEquals(Integer.class, ds.getRow().getValue(1).getClass());
-                
+
                 assertTrue(ds.next());
                 assertEquals("Row[values=[There, null]]", ds.getRow().toString());
                 assertNull(ds.getRow().getValue(1));
-                
+
                 ds.close();
-                
+
                 ds = dc.query().from("table2").select("Baz").execute();
                 assertTrue(ds.next());
                 assertEquals("Row[values=[true]]", ds.getRow().toString());

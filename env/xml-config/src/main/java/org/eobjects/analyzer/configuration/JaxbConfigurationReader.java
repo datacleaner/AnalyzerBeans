@@ -29,11 +29,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
@@ -147,6 +149,8 @@ import org.eobjects.metamodel.util.SimpleTableDef;
 import org.eobjects.metamodel.xml.XmlSaxTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Configuration reader that uses the JAXB model to read XML file based
@@ -180,7 +184,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             throw new IllegalStateException(e);
         }
     }
-    
+
     @Override
     public AnalyzerBeansConfiguration read(InputStream input) {
         return create(input);
@@ -756,7 +760,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             final Collection<Object[]> arrays = new ArrayList<Object[]>();
             final List<Row> rows = table.getRows().getRow();
             for (Row row : rows) {
-                final List<String> values = row.getV();
+                final List<Object> values = row.getV();
                 if (values.size() != columnCount) {
                     throw new IllegalStateException("Row value count is not equal to column count in datastore '"
                             + name + "'. Expected " + columnCount + " values, found " + values.size() + " (table "
@@ -767,13 +771,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
                     final Class<?> expectedClass = columnTypes[i].getJavaEquivalentClass();
 
-                    final String stringValue = values.get(i);
-                    final Object value;
-                    if (StringUtils.isNullOrEmpty(stringValue)) {
-                        value = null;
-                    } else {
-                        value = converter.deserialize(stringValue, expectedClass);
-                    }
+                    final Object rawValue = values.get(i);
+                    final Object value = deserializeValue(rawValue, expectedClass, converter);
                     array[i] = value;
                 }
                 arrays.add(array);
@@ -785,6 +784,109 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
         final PojoDatastore ds = new PojoDatastore(name, schemaName, tableDataProviders);
         return ds;
+    }
+
+    private Object deserializeValue(final Object value, Class<?> expectedClass, StringConverter converter) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Node) {
+            final Node node = (Node) value;
+            logger.debug("Value is a DOM node: {}", node);
+            return getNodeValue(node, expectedClass, converter);
+        }
+
+        if (value instanceof JAXBElement) {
+            final JAXBElement<?> element = (JAXBElement<?>) value;
+            logger.debug("Value is a JAXBElement: {}", element);
+            final Object jaxbValue = element.getValue();
+            return deserializeValue(jaxbValue, expectedClass, converter);
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            return converter.deserialize(str, expectedClass);
+        } else {
+            throw new UnsupportedOperationException("Unknown value type: " + value);
+        }
+    }
+
+    private <T> T getNodeValue(Node node, Class<T> expectedClass, StringConverter converter) {
+        if (node.getNodeType() == Node.TEXT_NODE) {
+            final String str = node.getNodeValue();
+            @SuppressWarnings("unchecked")
+            final Class<T> typeToReturn = (Class<T>) (expectedClass == null ? String.class : expectedClass);
+            return converter.deserialize(str, typeToReturn);
+        }
+
+        // a top-level value
+        final List<Node> childNodes = getChildNodes(node);
+        switch (childNodes.size()) {
+        case 0:
+            return null;
+        case 1:
+            Node child = childNodes.get(0);
+            return getNodeValue(child, expectedClass, converter);
+        default:
+            if (expectedClass == null || ReflectionUtils.is(expectedClass, Map.class)) {
+                final Map<String, Object> map = getNodeMap(childNodes, converter);
+                @SuppressWarnings("unchecked")
+                T result = (T) map;
+                return result;
+            }
+        }
+
+        throw new UnsupportedOperationException("Not a value (v) node type: " + node);
+    }
+
+    private List<Node> getChildNodes(Node node) {
+        final List<Node> list = new ArrayList<Node>();
+        final NodeList childNodes = node.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            final Node child = childNodes.item(i);
+            switch (child.getNodeType()) {
+            case Node.ELEMENT_NODE:
+                list.add(child);
+            case Node.TEXT_NODE:
+                String text = child.getNodeValue();
+                if (!StringUtils.isNullOrEmpty(text)) {
+                    list.add(child);
+                }
+            default: // ignore
+            }
+        }
+        return list;
+    }
+
+    private Map<String, Object> getNodeMap(List<Node> entryNodes, StringConverter converter) {
+        final Map<String, Object> map = new LinkedHashMap<String, Object>();
+        for (Node entryNode : entryNodes) {
+            assert "e".equals(entryNode.getNodeName());
+
+            String key = null;
+            Object value = null;
+
+            final List<Node> keyOrValueNodes = getChildNodes(entryNode);
+
+            assert keyOrValueNodes.size() == 2;
+
+            for (Node keyOrValueNode : keyOrValueNodes) {
+                final String keyOrValueNodeName = keyOrValueNode.getNodeName();
+                if ("k".equals(keyOrValueNodeName)) {
+                    key = getNodeValue(keyOrValueNode, String.class, converter);
+                } else if ("v".equals(keyOrValueNodeName)) {
+                    value = getNodeValue(keyOrValueNode, null, converter);
+                }
+            }
+
+            if (key == null) {
+                throw new UnsupportedOperationException("Map key (k) node not set in entry: " + entryNode);
+            }
+
+            map.put(key, value);
+        }
+        return map;
     }
 
     private Datastore createDatastore(String name, OpenOfficeDatabaseDatastoreType odbDatastoreType) {
@@ -894,7 +996,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 tableTypes[i] = TableType.valueOf(tableTypeEnum.toString());
             }
         }
-        
+
         final String catalogName = getStringVariable("catalogName", jdbcDatastoreType.getCatalogName());
 
         final String datasourceJndiUrl = getStringVariable("jndiUrl", jdbcDatastoreType.getDatasourceJndiUrl());

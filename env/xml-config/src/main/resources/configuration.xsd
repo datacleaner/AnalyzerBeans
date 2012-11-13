@@ -393,8 +393,10 @@
 						<element name="row" minOccurs="1" maxOccurs="unbounded">
 							<complexType>
 								<sequence>
-									<element name="v" minOccurs="1" maxOccurs="unbounded"
-										type="string" nillable="true" />
+									<choice>
+										<element name="v" minOccurs="1" maxOccurs="unbounded"
+											type="anyType" nillable="true" />
+									</choice>
 								</sequence>
 							</complexType>
 						</element>
@@ -403,7 +405,7 @@
 			</element>
 		</sequence>
 	</complexType>
-
+	
 	<complexType name="mongodbDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">
