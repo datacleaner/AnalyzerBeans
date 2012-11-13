@@ -54,6 +54,7 @@ import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.CollectionUtils;
 import org.eobjects.metamodel.util.SimpleTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,10 +154,10 @@ public class JaxbPojoDatastoreAdaptor {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T getNodeValue(Node node, Class<T> expectedClass) {
         if (node.getNodeType() == Node.TEXT_NODE) {
             final String str = node.getNodeValue();
-            @SuppressWarnings("unchecked")
             final Class<T> typeToReturn = (Class<T>) (expectedClass == null ? String.class : expectedClass);
             return _converter.deserialize(str, typeToReturn);
         }
@@ -167,18 +168,33 @@ public class JaxbPojoDatastoreAdaptor {
         case 0:
             return null;
         case 1:
-            Node child = childNodes.get(0);
+            final Node child = childNodes.get(0);
             return getNodeValue(child, expectedClass);
         default:
-            if (expectedClass == null || ReflectionUtils.is(expectedClass, Map.class)) {
+            if (expectedClass == null) {
+                final Node firstChild = childNodes.get(0);
+                if ("i".equals(firstChild.getNodeName())) {
+                    final List<Object> list = getNodeList(childNodes);
+                    return (T) list;
+                } else {
+                    final Map<String, Object> map = getNodeMap(childNodes);
+                    return (T) map;
+                }
+            } else if (ReflectionUtils.is(expectedClass, List.class)) {
+                final List<Object> list = getNodeList(childNodes);
+                return (T) list;
+            } else if (ReflectionUtils.is(expectedClass, Map.class)) {
                 final Map<String, Object> map = getNodeMap(childNodes);
-                @SuppressWarnings("unchecked")
-                T result = (T) map;
-                return result;
+                return (T) map;
             }
         }
 
         throw new UnsupportedOperationException("Not a value (v) node type: " + node);
+    }
+
+    private List<Object> getNodeList(List<Node> childNodes) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private List<Node> getChildNodes(Node node) {
@@ -244,6 +260,20 @@ public class JaxbPojoDatastoreAdaptor {
     private void createPojoValue(Object value, Element elem, Document document) {
         if (value == null) {
             // return an empty element
+            return;
+        }
+
+        if (value.getClass().isArray()) {
+            value = CollectionUtils.toList(value);
+        }
+
+        if (value instanceof List) {
+            List<?> list = (List<?>) value;
+            for (Object item : list) {
+                final Element itemElement = document.createElement("i");
+                createPojoValue(item, itemElement, document);
+                elem.appendChild(itemElement);
+            }
             return;
         }
 
