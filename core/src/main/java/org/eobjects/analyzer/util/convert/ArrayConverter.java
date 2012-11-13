@@ -196,7 +196,11 @@ public class ArrayConverter implements Converter<Object> {
     @Override
     public String toString(Object o) {
         assert o != null;
-        assert o.getClass().isArray();
+        assert o.getClass().isArray() || o instanceof List;
+        
+        if (o instanceof List) {
+            o = ((List<?>) o).toArray();
+        }
 
         StringBuilder sb = new StringBuilder();
         int length = Array.getLength(o);

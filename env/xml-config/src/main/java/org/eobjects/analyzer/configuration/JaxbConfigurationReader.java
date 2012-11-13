@@ -26,16 +26,13 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
@@ -71,9 +68,6 @@ import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.OpenOfficeDatabaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.PojoDatastoreType;
-import org.eobjects.analyzer.configuration.jaxb.PojoTableType;
-import org.eobjects.analyzer.configuration.jaxb.PojoTableType.Columns.Column;
-import org.eobjects.analyzer.configuration.jaxb.PojoTableType.Rows.Row;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.StringPatterns;
@@ -140,8 +134,6 @@ import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.convert.StringConverter;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
-import org.eobjects.metamodel.pojo.ArrayTableDataProvider;
-import org.eobjects.metamodel.pojo.TableDataProvider;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.TableType;
 import org.eobjects.metamodel.util.FileHelper;
@@ -149,8 +141,6 @@ import org.eobjects.metamodel.util.SimpleTableDef;
 import org.eobjects.metamodel.xml.XmlSaxTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Configuration reader that uses the JAXB model to read XML file based
@@ -736,157 +726,9 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     private Datastore createDatastore(String name, PojoDatastoreType pojoDatastore) {
-        final String schemaName = (pojoDatastore.getSchemaName() == null ? name : pojoDatastore.getSchemaName());
-
-        final List<TableDataProvider<?>> tableDataProviders = new ArrayList<TableDataProvider<?>>();
-        final List<PojoTableType> tables = pojoDatastore.getTable();
-        for (PojoTableType table : tables) {
-            final String tableName = table.getName();
-
-            final List<Column> columns = table.getColumns().getColumn();
-            final int columnCount = columns.size();
-            final String[] columnNames = new String[columnCount];
-            final ColumnType[] columnTypes = new ColumnType[columnCount];
-
-            for (int i = 0; i < columnCount; i++) {
-                final Column column = columns.get(i);
-                columnNames[i] = column.getName();
-                columnTypes[i] = ColumnType.valueOf(column.getType());
-            }
-
-            final SimpleTableDef tableDef = new SimpleTableDef(tableName, columnNames, columnTypes);
-
-            final StringConverter converter = new StringConverter(null);
-            final Collection<Object[]> arrays = new ArrayList<Object[]>();
-            final List<Row> rows = table.getRows().getRow();
-            for (Row row : rows) {
-                final List<Object> values = row.getV();
-                if (values.size() != columnCount) {
-                    throw new IllegalStateException("Row value count is not equal to column count in datastore '"
-                            + name + "'. Expected " + columnCount + " values, found " + values.size() + " (table "
-                            + tableName + ", row no. " + arrays.size() + ")");
-                }
-                final Object[] array = new Object[columnCount];
-                for (int i = 0; i < array.length; i++) {
-
-                    final Class<?> expectedClass = columnTypes[i].getJavaEquivalentClass();
-
-                    final Object rawValue = values.get(i);
-                    final Object value = deserializeValue(rawValue, expectedClass, converter);
-                    array[i] = value;
-                }
-                arrays.add(array);
-            }
-
-            final TableDataProvider<?> tableDataProvider = new ArrayTableDataProvider(tableDef, arrays);
-            tableDataProviders.add(tableDataProvider);
-        }
-
-        final PojoDatastore ds = new PojoDatastore(name, schemaName, tableDataProviders);
-        return ds;
-    }
-
-    private Object deserializeValue(final Object value, Class<?> expectedClass, StringConverter converter) {
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Node) {
-            final Node node = (Node) value;
-            logger.debug("Value is a DOM node: {}", node);
-            return getNodeValue(node, expectedClass, converter);
-        }
-
-        if (value instanceof JAXBElement) {
-            final JAXBElement<?> element = (JAXBElement<?>) value;
-            logger.debug("Value is a JAXBElement: {}", element);
-            final Object jaxbValue = element.getValue();
-            return deserializeValue(jaxbValue, expectedClass, converter);
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            return converter.deserialize(str, expectedClass);
-        } else {
-            throw new UnsupportedOperationException("Unknown value type: " + value);
-        }
-    }
-
-    private <T> T getNodeValue(Node node, Class<T> expectedClass, StringConverter converter) {
-        if (node.getNodeType() == Node.TEXT_NODE) {
-            final String str = node.getNodeValue();
-            @SuppressWarnings("unchecked")
-            final Class<T> typeToReturn = (Class<T>) (expectedClass == null ? String.class : expectedClass);
-            return converter.deserialize(str, typeToReturn);
-        }
-
-        // a top-level value
-        final List<Node> childNodes = getChildNodes(node);
-        switch (childNodes.size()) {
-        case 0:
-            return null;
-        case 1:
-            Node child = childNodes.get(0);
-            return getNodeValue(child, expectedClass, converter);
-        default:
-            if (expectedClass == null || ReflectionUtils.is(expectedClass, Map.class)) {
-                final Map<String, Object> map = getNodeMap(childNodes, converter);
-                @SuppressWarnings("unchecked")
-                T result = (T) map;
-                return result;
-            }
-        }
-
-        throw new UnsupportedOperationException("Not a value (v) node type: " + node);
-    }
-
-    private List<Node> getChildNodes(Node node) {
-        final List<Node> list = new ArrayList<Node>();
-        final NodeList childNodes = node.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            final Node child = childNodes.item(i);
-            switch (child.getNodeType()) {
-            case Node.ELEMENT_NODE:
-                list.add(child);
-            case Node.TEXT_NODE:
-                String text = child.getNodeValue();
-                if (!StringUtils.isNullOrEmpty(text)) {
-                    list.add(child);
-                }
-            default: // ignore
-            }
-        }
-        return list;
-    }
-
-    private Map<String, Object> getNodeMap(List<Node> entryNodes, StringConverter converter) {
-        final Map<String, Object> map = new LinkedHashMap<String, Object>();
-        for (Node entryNode : entryNodes) {
-            assert "e".equals(entryNode.getNodeName());
-
-            String key = null;
-            Object value = null;
-
-            final List<Node> keyOrValueNodes = getChildNodes(entryNode);
-
-            assert keyOrValueNodes.size() == 2;
-
-            for (Node keyOrValueNode : keyOrValueNodes) {
-                final String keyOrValueNodeName = keyOrValueNode.getNodeName();
-                if ("k".equals(keyOrValueNodeName)) {
-                    key = getNodeValue(keyOrValueNode, String.class, converter);
-                } else if ("v".equals(keyOrValueNodeName)) {
-                    value = getNodeValue(keyOrValueNode, null, converter);
-                }
-            }
-
-            if (key == null) {
-                throw new UnsupportedOperationException("Map key (k) node not set in entry: " + entryNode);
-            }
-
-            map.put(key, value);
-        }
-        return map;
+        JaxbPojoDatastoreAdaptor adaptor = new JaxbPojoDatastoreAdaptor();
+        PojoDatastore datastore = adaptor.read(pojoDatastore);
+        return datastore;
     }
 
     private Datastore createDatastore(String name, OpenOfficeDatabaseDatastoreType odbDatastoreType) {

@@ -40,7 +40,6 @@ import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.util.Percentage;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.analyzer.util.convert.StringConverter;
 import org.eobjects.analyzer.util.convert.MyConvertable.SecondaryConverter;
 import org.eobjects.metamodel.schema.MutableColumn;
 import org.eobjects.metamodel.schema.MutableSchema;
@@ -305,5 +304,16 @@ public class StringConverterTest extends TestCase {
         } else {
             assertEquals(o, o2);
         }
+    }
+    
+    public void testSerializeList() throws Exception {
+        ArrayList<Object> o = new ArrayList<Object>();
+        o.add("foo");
+        o.add("bar");
+        o.add(Arrays.asList("baz","foobar"));
+        
+        StringConverter converter = new StringConverter(null);
+        String result = converter.serialize(o);
+        assertEquals("[foo,bar,[baz,foobar]]", result);
     }
 }

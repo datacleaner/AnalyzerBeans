@@ -79,6 +79,14 @@ public class StandardTypeConverter implements Converter<Object> {
 
     @Inject
     Converter<Object> parentConverter;
+    
+    public StandardTypeConverter() {
+        this(null);
+    }
+    
+    public StandardTypeConverter(Converter<Object> parentConverter) {
+        this.parentConverter = parentConverter;
+    }
 
     @Override
     public Object fromString(Class<?> type, String str) {

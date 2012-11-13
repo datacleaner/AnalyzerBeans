@@ -21,7 +21,6 @@ package org.eobjects.analyzer.util.convert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;
@@ -101,11 +100,11 @@ public final class StringConverter {
      * @return a String representation of the Java object
      */
     public final String serialize(final Object o, final Collection<Class<? extends Converter<?>>> converterClasses) {
-        final List<Converter<?>> converterList = new ArrayList<Converter<?>>();
+        final DelegatingConverter delegatingConverter = new DelegatingConverter();
 
         if (converterClasses != null) {
             for (Class<? extends Converter<?>> converterClass : converterClasses) {
-                converterList.add(createConverter(converterClass));
+                delegatingConverter.addConverter(createConverter(converterClass));
             }
         }
 
@@ -113,17 +112,16 @@ public final class StringConverter {
             Convertable convertable = ReflectionUtils.getAnnotation(o.getClass(), Convertable.class);
             if (convertable != null) {
                 Class<? extends Converter<?>> converterClass = convertable.value();
-                converterList.add(createConverter(converterClass));
+                delegatingConverter.addConverter(createConverter(converterClass));
             }
         }
 
-        converterList.add(new ConfigurationItemConverter());
-        converterList.add(new StandardTypeConverter());
+        delegatingConverter.addConverter(new ConfigurationItemConverter());
+        delegatingConverter.addConverter(new StandardTypeConverter(delegatingConverter));
 
-        final DelegatingConverter converter = new DelegatingConverter(converterList);
-        converter.initializeAll(_injectionManager);
+        delegatingConverter.initializeAll(_injectionManager);
 
-        return converter.toString(o);
+        return delegatingConverter.toString(o);
     }
 
     private Converter<?> createConverter(Class<? extends Converter<?>> converterClass) {
@@ -174,28 +172,27 @@ public final class StringConverter {
     public final <E> E deserialize(String str, Class<E> type, Collection<Class<? extends Converter<?>>> converterClasses) {
         logger.debug("deserialize(\"{}\", {})", str, type);
 
-        Collection<Converter<?>> converterList = new ArrayList<Converter<?>>();
+        final DelegatingConverter delegatingConverter = new DelegatingConverter();
 
         if (converterClasses != null) {
             for (Class<? extends Converter<?>> converterClass : converterClasses) {
-                converterList.add(createConverter(converterClass));
+                delegatingConverter.addConverter(createConverter(converterClass));
             }
         }
 
         Convertable convertable = ReflectionUtils.getAnnotation(type, Convertable.class);
         if (convertable != null) {
             Class<? extends Converter<?>> converterClass = convertable.value();
-            converterList.add(createConverter(converterClass));
+            delegatingConverter.addConverter(createConverter(converterClass));
         }
 
-        converterList.add(new ConfigurationItemConverter());
-        converterList.add(new StandardTypeConverter());
+        delegatingConverter.addConverter(new ConfigurationItemConverter());
+        delegatingConverter.addConverter(new StandardTypeConverter(delegatingConverter));
 
-        DelegatingConverter converter = new DelegatingConverter(converterList);
-        converter.initializeAll(_injectionManager);
+        delegatingConverter.initializeAll(_injectionManager);
 
         @SuppressWarnings("unchecked")
-        E result = (E) converter.fromString(type, str);
+        E result = (E) delegatingConverter.fromString(type, str);
         return result;
     }
 }
