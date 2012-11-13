@@ -40,119 +40,135 @@ import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * ASM class visitor for analyzer beans components.
+ */
 final class BeanClassVisitor extends ClassVisitor {
 
-	private final static Logger _logger = LoggerFactory.getLogger(BeanClassVisitor.class);
-	private final ClassLoader _classLoader;
-	private Class<?> _beanClazz;
-	private String _name;
+    private final static Logger _logger = LoggerFactory.getLogger(BeanClassVisitor.class);
+    private final ClassLoader _classLoader;
+    private Class<?> _beanClazz;
+    private String _name;
 
-	public BeanClassVisitor(ClassLoader classLoader) {
-	    super(Opcodes.ASM4);
-		_classLoader = classLoader;
-	}
+    public BeanClassVisitor(ClassLoader classLoader) {
+        super(Opcodes.ASM4);
+        _classLoader = classLoader;
+    }
 
-	@Override
-	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-		_name = name;
-	}
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        _name = name;
+    }
 
-	@Override
-	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		if (isAnnotation(desc, AnalyzerBean.class) || isAnnotation(desc, TransformerBean.class)
-				|| isAnnotation(desc, FilterBean.class) || isAnnotation(desc, RendererBean.class)) {
-			initializeClass();
-		}
-		return null;
-	}
+    @Override
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+        if (isAnnotation(desc, AnalyzerBean.class) || isAnnotation(desc, TransformerBean.class)
+                || isAnnotation(desc, FilterBean.class) || isAnnotation(desc, RendererBean.class)) {
+            initializeClass();
+        }
+        return null;
+    }
 
-	private boolean isAnnotation(String annotationDesc, Class<? extends Annotation> annotationClass) {
-		return annotationDesc.indexOf(annotationClass.getName().replace('.', '/')) != -1;
-	}
+    private boolean isAnnotation(String annotationDesc, Class<? extends Annotation> annotationClass) {
+        return annotationDesc.indexOf(annotationClass.getName().replace('.', '/')) != -1;
+    }
 
-	private Class<?> initializeClass() {
-		if (_beanClazz == null) {
-			String javaName = _name.replace('/', '.');
-			try {
-				_beanClazz = Class.forName(javaName, true, _classLoader);
-			} catch (ClassNotFoundException e) {
-				_logger.error("Could not load class: " + javaName, e);
-			}
-		}
-		return _beanClazz;
-	}
+    private Class<?> initializeClass() {
+        if (_beanClazz == null) {
+            String javaName = _name.replace('/', '.');
+            try {
+                _beanClazz = Class.forName(javaName, true, _classLoader);
+            } catch (ClassNotFoundException e) {
+                // This happens when the class itself does not exist
+                _logger.error("Could not find class to be loaded: " + javaName, e);
+            } catch (NoClassDefFoundError e) {
+                // This happens if the class depends on a unsatisfied
+                // dependency. For instance when it is a renderer bean that
+                // depends on a particular rendering format. We will gracefully
+                // recover from this scenario with just a warning.
 
-	public boolean isAnalyzer() {
-		if (_beanClazz != null) {
-			return ReflectionUtils.isAnnotationPresent(_beanClazz, AnalyzerBean.class)
-					&& ReflectionUtils.is(_beanClazz, Analyzer.class);
-		}
-		return false;
-	}
+                _logger.error("Failed to load class {} because of unsatisfied class dependency: {}", javaName,
+                        e.getMessage());
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("Failed to load class: " + javaName, e);
+                    ;
+                }
+            }
+        }
+        return _beanClazz;
+    }
 
-	public boolean isExplorer() {
-		if (_beanClazz != null) {
-			return ReflectionUtils.isAnnotationPresent(_beanClazz, AnalyzerBean.class)
-					&& ReflectionUtils.is(_beanClazz, Explorer.class);
-		}
-		return false;
-	}
+    public boolean isAnalyzer() {
+        if (_beanClazz != null) {
+            return ReflectionUtils.isAnnotationPresent(_beanClazz, AnalyzerBean.class)
+                    && ReflectionUtils.is(_beanClazz, Analyzer.class);
+        }
+        return false;
+    }
 
-	public boolean isTransformer() {
-		if (_beanClazz != null) {
-			return ReflectionUtils.isAnnotationPresent(_beanClazz, TransformerBean.class)
-					&& ReflectionUtils.is(_beanClazz, Transformer.class);
-		}
-		return false;
-	}
+    public boolean isExplorer() {
+        if (_beanClazz != null) {
+            return ReflectionUtils.isAnnotationPresent(_beanClazz, AnalyzerBean.class)
+                    && ReflectionUtils.is(_beanClazz, Explorer.class);
+        }
+        return false;
+    }
 
-	public boolean isRenderer() {
-		if (_beanClazz != null) {
-			return ReflectionUtils.isAnnotationPresent(_beanClazz, RendererBean.class)
-					&& ReflectionUtils.is(_beanClazz, Renderer.class);
-		}
-		return false;
-	}
+    public boolean isTransformer() {
+        if (_beanClazz != null) {
+            return ReflectionUtils.isAnnotationPresent(_beanClazz, TransformerBean.class)
+                    && ReflectionUtils.is(_beanClazz, Transformer.class);
+        }
+        return false;
+    }
 
-	public boolean isFilter() {
-		if (_beanClazz != null) {
-			return ReflectionUtils.isAnnotationPresent(_beanClazz, FilterBean.class)
-					&& ReflectionUtils.is(_beanClazz, Filter.class);
-		}
-		return false;
-	}
+    public boolean isRenderer() {
+        if (_beanClazz != null) {
+            return ReflectionUtils.isAnnotationPresent(_beanClazz, RendererBean.class)
+                    && ReflectionUtils.is(_beanClazz, Renderer.class);
+        }
+        return false;
+    }
 
-	public Class<?> getBeanClass() {
-		return _beanClazz;
-	}
+    public boolean isFilter() {
+        if (_beanClazz != null) {
+            return ReflectionUtils.isAnnotationPresent(_beanClazz, FilterBean.class)
+                    && ReflectionUtils.is(_beanClazz, Filter.class);
+        }
+        return false;
+    }
 
-	@Override
-	public void visitAttribute(Attribute arg0) {
-	}
+    public Class<?> getBeanClass() {
+        return _beanClazz;
+    }
 
-	@Override
-	public void visitEnd() {
-	}
+    @Override
+    public void visitAttribute(Attribute arg0) {
+    }
 
-	@Override
-	public FieldVisitor visitField(int arg0, String arg1, String arg2, String arg3, Object arg4) {
-		return null;
-	}
+    @Override
+    public void visitEnd() {
+    }
 
-	@Override
-	public void visitInnerClass(String arg0, String arg1, String arg2, int arg3) {
-	}
+    @Override
+    public FieldVisitor visitField(int arg0, String arg1, String arg2, String arg3, Object arg4) {
+        return null;
+    }
 
-	@Override
-	public MethodVisitor visitMethod(int arg0, String arg1, String arg2, String arg3, String[] arg4) {
-		return null;
-	}
+    @Override
+    public void visitInnerClass(String arg0, String arg1, String arg2, int arg3) {
+    }
 
-	@Override
-	public void visitOuterClass(String arg0, String arg1, String arg2) {
-	}
+    @Override
+    public MethodVisitor visitMethod(int arg0, String arg1, String arg2, String arg3, String[] arg4) {
+        return null;
+    }
 
-	@Override
-	public void visitSource(String arg0, String arg1) {
-	}
+    @Override
+    public void visitOuterClass(String arg0, String arg1, String arg2) {
+    }
+
+    @Override
+    public void visitSource(String arg0, String arg1) {
+    }
 }
