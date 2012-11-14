@@ -44,7 +44,7 @@ import org.eobjects.metamodel.util.HasName;
 public class CompletenessAnalyzer implements Analyzer<CompletenessAnalyzerResult> {
 
     public static enum Condition implements HasName {
-        NOT_NULL("Not <null>"), NOT_BLANK_OR_NULL("Not <blank> or <empty>");
+        NOT_BLANK_OR_NULL("Not <blank> or <null>"), NOT_NULL("Not <null>");
         
         private final String _name;
 
