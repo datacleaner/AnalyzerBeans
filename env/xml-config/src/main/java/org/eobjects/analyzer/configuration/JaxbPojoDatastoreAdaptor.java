@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -158,8 +159,12 @@ public class JaxbPojoDatastoreAdaptor {
     private <T> T getNodeValue(Node node, Class<T> expectedClass) {
         if (node.getNodeType() == Node.TEXT_NODE) {
             final String str = node.getNodeValue();
-            final Class<T> typeToReturn = (Class<T>) (expectedClass == null ? String.class : expectedClass);
-            return _converter.deserialize(str, typeToReturn);
+            if (expectedClass == null) {
+                // we will fall back to string class
+                expectedClass = (Class<T>) String.class;
+            }
+            final Object result = _converter.deserialize(str, determineExpectedClass(node, expectedClass));
+            return (T) result;
         }
 
         // a top-level value
@@ -168,6 +173,7 @@ public class JaxbPojoDatastoreAdaptor {
         case 0:
             return null;
         case 1:
+            expectedClass = (Class<T>) determineExpectedClass(node, expectedClass);
             final Node child = childNodes.get(0);
             return getNodeValue(child, expectedClass);
         default:
@@ -192,9 +198,33 @@ public class JaxbPojoDatastoreAdaptor {
         throw new UnsupportedOperationException("Not a value (v) node type: " + node);
     }
 
+    private Class<?> determineExpectedClass(Node node, Class<?> fallbackType) {
+        NamedNodeMap attributes = node.getAttributes();
+        if (attributes != null) {
+            final Node attribute = attributes.getNamedItem("class");
+            if (attribute != null) {
+                final String className = attribute.getTextContent();
+                if (!StringUtils.isNullOrEmpty(className)) {
+                    try {
+                        final Class<?> cls = Class.forName(className);
+                        return cls;
+                    } catch (ClassNotFoundException e) {
+                        logger.error("Could not load class: " + className + ". Falling back to String type.", e);
+                    }
+                }
+            }
+        }
+        
+        return fallbackType;
+    }
+
     private List<Object> getNodeList(List<Node> childNodes) {
-        // TODO Auto-generated method stub
-        return null;
+        final List<Object> list = new ArrayList<Object>();
+        for (Node childNode : childNodes) {
+            Object value = getNodeValue(childNode, null);
+            list.add(value);
+        }
+        return list;
     }
 
     private List<Node> getChildNodes(Node node) {
@@ -251,13 +281,13 @@ public class JaxbPojoDatastoreAdaptor {
         final Object[] values = row.getValues();
         for (Object value : values) {
             final Element elem = document.createElement("v");
-            createPojoValue(value, elem, document);
+            createPojoValue(value, elem, document, false);
             rowType.getV().add(elem);
         }
         return rowType;
     }
 
-    private void createPojoValue(Object value, Element elem, Document document) {
+    private void createPojoValue(Object value, Element elem, Document document, boolean explicitType) {
         if (value == null) {
             // return an empty element
             return;
@@ -271,7 +301,7 @@ public class JaxbPojoDatastoreAdaptor {
             List<?> list = (List<?>) value;
             for (Object item : list) {
                 final Element itemElement = document.createElement("i");
-                createPojoValue(item, itemElement, document);
+                createPojoValue(item, itemElement, document, true);
                 elem.appendChild(itemElement);
             }
             return;
@@ -281,10 +311,10 @@ public class JaxbPojoDatastoreAdaptor {
             Map<?, ?> map = (Map<?, ?>) value;
             for (Entry<?, ?> entry : map.entrySet()) {
                 final Element keyElement = document.createElement("k");
-                createPojoValue(entry.getKey(), keyElement, document);
+                createPojoValue(entry.getKey(), keyElement, document, true);
 
                 final Element valueElement = document.createElement("v");
-                createPojoValue(entry.getValue(), valueElement, document);
+                createPojoValue(entry.getValue(), valueElement, document, true);
 
                 final Element entryElement = document.createElement("e");
                 entryElement.appendChild(keyElement);
@@ -297,6 +327,9 @@ public class JaxbPojoDatastoreAdaptor {
 
         final String stringValue = _converter.serialize(value);
         elem.setTextContent(stringValue);
+        if (explicitType) {
+            elem.setAttribute("class", value.getClass().getName());
+        }
         return;
     }
 
