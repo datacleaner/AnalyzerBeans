@@ -35,32 +35,32 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
     htmlFragment.initialize(context);
 
-    Assert.assertEquals(3, htmlFragment.getBodyElements().size());
+    Assert.assertEquals(6, htmlFragment.getBodyElements().size());
     Assert.assertEquals(3, htmlFragment.getHeadElements().size());
 
-    val html = htmlFragment.getBodyElements().get(2).toHtml(context);
+    val html = htmlFragment.getBodyElements().get(5).toHtml(context);
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
-             <h3>Group: humaninference.com</h3>
-             <div class="valueDistributionChart" id="reselem_4">
-               </div>
-             <table class="valueDistributionValueTable">
-                   <tr><td>&lt;unique&gt;</td><td><span>3</span></td></tr>
-                 </table>
-             <table class="valueDistributionSummaryTable">
-               <tr><td>Total count</td><td>3</td></tr>
-               <tr><td>Distinct count</td><td>3</td></tr>
-             </table>
-           </div><div class="valueDistributionGroupPanel">
              <h3>Group: eobjects.dk</h3>
              <div class="valueDistributionChart" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><span>1</span></td></tr><tr><td>&lt;unique&gt;</td><td><span>1</span></td></tr>
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">1</a></td></tr><tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>8</td></tr>
                <tr><td>Distinct count</td><td>4</td></tr>
+             </table>
+           </div><div class="valueDistributionGroupPanel">
+             <h3>Group: humaninference.com</h3>
+             <div class="valueDistributionChart" id="reselem_6">
+               </div>
+             <table class="valueDistributionValueTable">
+                   <tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_7'); return false;" href="#">3</a></td></tr>
+                 </table>
+             <table class="valueDistributionSummaryTable">
+               <tr><td>Total count</td><td>3</td></tr>
+               <tr><td>Distinct count</td><td>3</td></tr>
              </table>
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
@@ -84,7 +84,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
 
     Assert.assertEquals("""<script type="text/javascript"><!--
    google.setOnLoadCallback(function() {
-     var elem = document.getElementById("reselem_4");
+     var elem = document.getElementById("reselem_6");
      var data = google.visualization.arrayToDataTable([
      ['Value', 'Count'],['<unique>', 3]
      ]);
@@ -110,6 +110,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     analyzer.run(new MockInputRow().put(col1, "kasper"), 6);
     analyzer.run(new MockInputRow().put(col1, "kasper.sorensen"), 3);
     analyzer.run(new MockInputRow().put(col1, "kasper"), 3);
+    analyzer.run(new MockInputRow().put(col1, ""), 2);
     analyzer.run(new MockInputRow().put(col1, "info"), 1);
 
     val result = analyzer.getResult();
@@ -117,7 +118,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
     htmlFragment.initialize(context);
 
-    Assert.assertEquals(3, htmlFragment.getBodyElements().size());
+    Assert.assertEquals(5, htmlFragment.getBodyElements().size());
     Assert.assertEquals(2, htmlFragment.getHeadElements().size());
 
     var html: String = null;
@@ -134,18 +135,18 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
 <table class="annotatedRowsTable"><tr class="odd"><th>email username</th></tr><tr class="even"><td class="highlighted">kasper.sorensen</td></tr></table>
 </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    html = htmlFragment.getBodyElements().get(2).toHtml(context);
+    html = htmlFragment.getBodyElements().get(4).toHtml(context);
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
              <div class="valueDistributionChart" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">3</a></td></tr><tr><td>&lt;unique&gt;</td><td><span>1</span></td></tr>
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">3</a></td></tr><tr><td>&lt;blank&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">2</a></td></tr><tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
-               <tr><td>Total count</td><td>13</td></tr>
-               <tr><td>Distinct count</td><td>3</td></tr>
+               <tr><td>Total count</td><td>15</td></tr>
+               <tr><td>Distinct count</td><td>4</td></tr>
              </table>
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
@@ -155,7 +156,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
    google.setOnLoadCallback(function() {
      var elem = document.getElementById("reselem_1");
      var data = google.visualization.arrayToDataTable([
-     ['Value', 'Count'],['kasper', 9],['kasper.sorensen', 3],['<unique>', 1]
+     ['Value', 'Count'],['kasper', 9],['kasper.sorensen', 3],['<blank>', 2],['<unique>', 1]
      ]);
      
      var chart = new google.visualization.PieChart(elem);

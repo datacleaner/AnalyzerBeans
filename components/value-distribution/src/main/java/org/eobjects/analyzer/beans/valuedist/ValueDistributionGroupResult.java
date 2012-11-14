@@ -39,9 +39,9 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
 
     private final ValueCountList _topValues;
     private final ValueCountList _bottomValues;
-    private final int _nullCount;
     private final Collection<String> _uniqueValues;
     private final Map<String, RowAnnotation> _annotations;
+    private final RowAnnotation _nullValueAnnotation;
     private final InputColumn<?>[] _highlightedColumns;
     private final int _uniqueValueCount;
     private final String _groupName;
@@ -51,28 +51,28 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
     private final Ref<RowAnnotationFactory> _annotationFactoryRef;
 
     public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
-            int nullCount, Collection<String> uniqueValues, int uniqueValueCount, int distinctCount, int totalCount,
-            Map<String, RowAnnotation> annotations, RowAnnotationFactory annotationFactory,
-            InputColumn<?>[] highlightedColumns) {
+            Collection<String> uniqueValues, int uniqueValueCount, int distinctCount, int totalCount,
+            Map<String, RowAnnotation> annotations, RowAnnotation nullValueAnnotation,
+            RowAnnotationFactory annotationFactory, InputColumn<?>[] highlightedColumns) {
         _groupName = groupName;
         _topValues = topValues;
         _bottomValues = bottomValues;
-        _nullCount = nullCount;
         _uniqueValues = uniqueValues;
         _uniqueValueCount = uniqueValueCount;
         _totalCount = totalCount;
         _distinctCount = distinctCount;
+        _nullValueAnnotation = nullValueAnnotation;
         _annotations = annotations;
         _annotationFactoryRef = new SerializableRef<RowAnnotationFactory>(annotationFactory);
         _highlightedColumns = highlightedColumns;
     }
 
     public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
-            int nullCount, int uniqueValueCount, int distinctCount, int totalCount,
-            Map<String, RowAnnotation> annotations, RowAnnotationFactory annotationFactory,
+            int uniqueValueCount, int distinctCount, int totalCount, Map<String, RowAnnotation> annotations,
+            RowAnnotation nullValueAnnotation, RowAnnotationFactory annotationFactory,
             InputColumn<?>[] highlightedColumns) {
-        this(groupName, topValues, bottomValues, nullCount, null, uniqueValueCount, distinctCount, totalCount,
-                annotations, annotationFactory, highlightedColumns);
+        this(groupName, topValues, bottomValues, null, uniqueValueCount, distinctCount, totalCount, annotations,
+                nullValueAnnotation, annotationFactory, highlightedColumns);
     }
 
     public boolean isAnnotationsEnabled() {
@@ -92,13 +92,32 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
         if (_annotations == null || annotationFactory == null) {
             return null;
         }
-
-        final RowAnnotation annotation = _annotations.get(value);
+        
+        final RowAnnotation annotation;
+        if (value == null) {
+            annotation = _nullValueAnnotation;
+        } else {
+            annotation = _annotations.get(value);
+        }
+        
         if (annotation == null) {
             return null;
         }
 
         return new AnnotatedRowsResult(annotation, annotationFactory, _highlightedColumns);
+    }
+
+    public AnnotatedRowsResult getAnnotatedRowsForNull() {
+        if (_nullValueAnnotation == null) {
+            return null;
+        }
+
+        final RowAnnotationFactory annotationFactory = _annotationFactoryRef.get();
+        if (annotationFactory == null) {
+            return null;
+        }
+
+        return new AnnotatedRowsResult(_nullValueAnnotation, annotationFactory, _highlightedColumns);
     }
 
     public ValueCountList getTopValues() {
@@ -116,7 +135,11 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
     }
 
     public int getNullCount() {
-        return _nullCount;
+        return _nullValueAnnotation.getRowCount();
+    }
+    
+    public boolean isUniqueValuesAvailable() {
+        return _uniqueValues != null;
     }
 
     public int getUniqueCount() {
@@ -186,7 +209,7 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
         }
 
         sb.append("\nNull count: ");
-        sb.append(_nullCount);
+        sb.append(getNullCount());
 
         sb.append("\nUnique values: ");
         if (_uniqueValues == null) {
@@ -209,7 +232,7 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
 
     public Integer getCount(final String value) {
         if (value == null) {
-            return _nullCount;
+            return getNullCount();
         }
 
         if (_topValues != null) {

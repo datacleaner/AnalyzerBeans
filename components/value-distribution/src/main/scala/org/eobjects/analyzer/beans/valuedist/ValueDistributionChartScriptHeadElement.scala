@@ -1,19 +1,19 @@
 package org.eobjects.analyzer.beans.valuedist
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.bufferAsJavaList
-
 import org.eobjects.analyzer.result.html.HeadElement
 import org.eobjects.analyzer.result.html.HtmlRenderingContext
+import org.eobjects.analyzer.util.LabelUtils
 
 class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResult, chartElementId: String) extends HeadElement {
 
   override def toHtml(context: HtmlRenderingContext): String = {
     val valueCounts = result.getTopValues().getValueCounts() ++ result.getBottomValues().getValueCounts()
     if (result.getNullCount() > 0) {
-      valueCounts.add(new ValueCount("<null>", result.getNullCount()));
+      valueCounts.add(new ValueCount(LabelUtils.NULL_LABEL, result.getNullCount()));
     }
     if (result.getUniqueCount() > 0) {
-      valueCounts.add(new ValueCount("<unique>", result.getUniqueCount()));
+      valueCounts.add(new ValueCount(LabelUtils.UNIQUE_LABEL, result.getUniqueCount()));
     }
 
     return """<script type="text/javascript"><!--
@@ -22,7 +22,7 @@ class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResu
      var data = google.visualization.arrayToDataTable([
      ['Value', 'Count'],""" +
       valueCounts.map(vc => {
-        "['" + context.escapeJson(vc.getValue()) + "', " + vc.getCount() + "]";
+        "['" + context.escapeJson(LabelUtils.getValueLabel(vc.getValue())) + "', " + vc.getCount() + "]";
       }).mkString(",") + """
      ]);
      

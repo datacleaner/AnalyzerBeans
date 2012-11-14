@@ -9,8 +9,9 @@ import org.eobjects.analyzer.result.html.SimpleHtmlFragment
 import scala.collection.JavaConversions._
 import org.eobjects.analyzer.result.html.GoogleChartHeadElement
 import java.util.TreeSet
-import org.eobjects.analyzer.util.LabelUtils
 import java.util.Collections
+import org.eobjects.analyzer.util.LabelUtils
+import org.eobjects.analyzer.result.ListResult
 
 class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFactory: RendererFactory) extends HtmlFragment {
 
@@ -90,10 +91,35 @@ class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFac
   }
 
   def getCount(groupResult: ValueDistributionGroupResult, vc: ValueCount, context: HtmlRenderingContext): scala.xml.Node = {
-    val annotatedRowsResult = groupResult.getAnnotatedRows(vc.getValue());
+    if (!groupResult.isAnnotationsEnabled()) {
+      return <span>{ vc.getCount() }</span>
+    }
+
+    var value = vc.getValue();
+    if (LabelUtils.NULL_LABEL.equals(value)) {
+      value = null;
+    } else if (LabelUtils.BLANK_LABEL.equals(value)) {
+      value = "";
+    }
+
+    val annotatedRowsResult = groupResult.getAnnotatedRows(value);
 
     if (annotatedRowsResult == null) {
-      return <span>{ vc.getCount() }</span>;
+      if (LabelUtils.UNIQUE_LABEL.equals(value) && groupResult.isUniqueValuesAvailable()) {
+        val uniqueValues = groupResult.getUniqueValues()
+        val elementId = context.createElementId();
+        
+        val listResult = new ListResult(uniqueValues);
+
+        val bodyElement = new DrillToDetailsBodyElement(elementId, rendererFactory, listResult);
+        frag.addBodyElement(bodyElement);
+
+        val invocation = bodyElement.toJavaScriptInvocation()
+        
+        return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
+      } else {
+        return <span>{ vc.getCount() }</span>;
+      }
     } else {
       val elementId = context.createElementId();
 

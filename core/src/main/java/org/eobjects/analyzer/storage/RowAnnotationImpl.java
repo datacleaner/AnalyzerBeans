@@ -19,17 +19,20 @@
  */
 package org.eobjects.analyzer.storage;
 
-final class RowAnnotationImpl implements RowAnnotation {
+/**
+ * Simple implementation of the {@link RowAnnotation} interface which allows incrementing row count by a member method.
+ */
+public final class RowAnnotationImpl implements RowAnnotation {
 
 	private static final long serialVersionUID = 1L;
 
 	private volatile int _rowCount;
 	
-	protected void incrementRowCount(int increment) {
+	public void incrementRowCount(int increment) {
 		_rowCount += increment;
 	}
 	
-	protected void resetRowCount() {
+	public void resetRowCount() {
 		_rowCount = 0;
 	}
 
