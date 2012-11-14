@@ -27,10 +27,22 @@ class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResu
      ]);
      
      var chart = new google.visualization.PieChart(elem);
+     var drawFunction = function(w, h) {
+       var options = {"width": w, "height": h};
+       chart.draw(data, options);
+     };
      
      wait_for_script_load('jQuery', function() {
-       var options = {"width": $(elem).width(), "height": $(elem).height()};
-       chart.draw(data, options);
+       var interval = setInterval(function() {
+         var bodyWidth = $('body').width();
+         var w = $(elem).width();
+         if (bodyWidth - w > 4) {
+           // css has been loaded
+           var h = $(elem).height();
+           clearInterval(interval);
+           drawFunction(w,h);
+         }
+       }, 100);
      });
    });
 --></script>"""

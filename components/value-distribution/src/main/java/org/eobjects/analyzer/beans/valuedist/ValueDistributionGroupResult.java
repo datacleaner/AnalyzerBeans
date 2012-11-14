@@ -45,9 +45,9 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
     private final InputColumn<?>[] _highlightedColumns;
     private final int _uniqueValueCount;
     private final String _groupName;
+    private final int _nullCount;
     private final int _totalCount;
     private final int _distinctCount;
-
     private final Ref<RowAnnotationFactory> _annotationFactoryRef;
 
     public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
@@ -65,6 +65,7 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
         _annotations = annotations;
         _annotationFactoryRef = new SerializableRef<RowAnnotationFactory>(annotationFactory);
         _highlightedColumns = highlightedColumns;
+        _nullCount = 0;
     }
 
     public ValueDistributionGroupResult(String groupName, ValueCountList topValues, ValueCountList bottomValues,
@@ -135,6 +136,9 @@ public class ValueDistributionGroupResult implements Serializable, Comparable<Va
     }
 
     public int getNullCount() {
+        if (_nullValueAnnotation == null) {
+            return _nullCount;
+        }
         return _nullValueAnnotation.getRowCount();
     }
     
