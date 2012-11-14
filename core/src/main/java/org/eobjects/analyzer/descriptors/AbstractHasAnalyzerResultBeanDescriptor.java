@@ -90,6 +90,10 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
 
     @Override
     public Set<MetricDescriptor> getResultMetrics() {
+        if (_metrics == null) {
+            // can happen with deserialized instances only
+            return Collections.emptySet();
+        }
         return Collections.unmodifiableSet(_metrics);
     }
 }
