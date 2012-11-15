@@ -26,6 +26,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.connection.CouchDbDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
@@ -74,7 +75,8 @@ public class JaxbConfigurationReaderTest extends TestCase {
         Column[] columns = table.getColumns();
         assertEquals("[Column[name=Foo,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], "
                 + "Column[name=Bar,columnNumber=1,type=MAP,nullable=true,nativeType=null,columnSize=null], "
-                + "Column[name=Baz,columnNumber=2,type=LIST,nullable=true,nativeType=null,columnSize=null]]",
+                + "Column[name=Baz,columnNumber=2,type=LIST,nullable=true,nativeType=null,columnSize=null], "
+                + "Column[name=bytes,columnNumber=3,type=BINARY,nullable=true,nativeType=null,columnSize=null]]",
                 Arrays.toString(columns));
 
         DataSet ds = dc.query().from(table).select(columns).execute();
@@ -83,20 +85,26 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("Hello", ds.getRow().getValue(0).toString());
         assertEquals("{greeting=hello, person=world}", ds.getRow().getValue(1).toString());
         assertEquals("[hello, world]", ds.getRow().getValue(2).toString());
+        assertEquals("{1,2,3,4,5}", ArrayUtils.toString(ds.getRow().getValue(3)));
         assertTrue(ds.getRow().getValue(1) instanceof Map);
         assertTrue(ds.getRow().getValue(2) instanceof List);
-        
+        assertTrue(ds.getRow().getValue(3) instanceof byte[]);
+
         assertTrue(ds.next());
         assertEquals("There", ds.getRow().getValue(0).toString());
-        assertEquals("{greeting=hi, there you!, person={Firstname=Kasper, Lastname=Sørensen}}", ds.getRow().getValue(1).toString());
+        assertEquals("{greeting=hi, there you!, person={Firstname=Kasper, Lastname=Sørensen}}", ds.getRow().getValue(1)
+                .toString());
         assertEquals(null, ds.getRow().getValue(2));
+        assertEquals(null, ds.getRow().getValue(3));
         assertTrue(ds.getRow().getValue(1) instanceof Map);
-        
+
         assertTrue(ds.next());
         assertEquals("World", ds.getRow().getValue(0).toString());
         assertEquals(null, ds.getRow().getValue(1));
         assertEquals("[Sørensen, Kasper]", ds.getRow().getValue(2).toString());
+        assertEquals("{-1,-2,-3,-4,-5}", ArrayUtils.toString(ds.getRow().getValue(3)));
         assertTrue(ds.getRow().getValue(2) instanceof List);
+        assertTrue(ds.getRow().getValue(3) instanceof byte[]);
     }
 
     public void testOverrideVariables() throws Exception {
