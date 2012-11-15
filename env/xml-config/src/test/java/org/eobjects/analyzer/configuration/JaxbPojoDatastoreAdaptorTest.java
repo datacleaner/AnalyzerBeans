@@ -52,11 +52,11 @@ public class JaxbPojoDatastoreAdaptorTest extends TestCase {
         final Object map1 = buildMap("{'some_number':1234, 'gender':'M','address':{'city':'Copenhagen','country':'DK','additional_info':null}}");
         final Object map2 = buildMap("{'some_number':5678,'gender':'M','address':{'city':'Amsterdam','countries':['NL','IN']}}");
 
-        SimpleTableDef tableDef = new SimpleTableDef("bar", new String[] { "id", "name", "details" }, new ColumnType[] {
-                ColumnType.INTEGER, ColumnType.VARCHAR, ColumnType.MAP });
+        SimpleTableDef tableDef = new SimpleTableDef("bar", new String[] { "id", "name", "details", "bytes" },
+                new ColumnType[] { ColumnType.INTEGER, ColumnType.VARCHAR, ColumnType.MAP, ColumnType.BINARY });
         Collection<Object[]> arrays = new ArrayList<Object[]>();
-        arrays.add(new Object[] { 1, "Kasper Sørensen", map1 });
-        arrays.add(new Object[] { 2, "Ankit Kumar", map2 });
+        arrays.add(new Object[] { 1, "Kasper Sørensen", map1, new byte[] { (byte) -40, (byte) -2 } });
+        arrays.add(new Object[] { 2, "Ankit Kumar", map2, new byte[] { (byte) 1, (byte) 3, (byte) 3, (byte) 7 } });
         TableDataProvider<?> tableProvider = new ArrayTableDataProvider(tableDef, arrays);
         List<TableDataProvider<?>> tableProviders = new ArrayList<TableDataProvider<?>>();
         tableProviders.add(tableProvider);
@@ -94,7 +94,8 @@ public class JaxbPojoDatastoreAdaptorTest extends TestCase {
 
         @SuppressWarnings("unchecked")
         final Map<String, ?> map3 = (Map<String, ?>) ds.getRow().getValue(2);
-        assertEquals("{some_number=1234, gender=M, address={city=Copenhagen, country=DK, additional_info=null}}", map3.toString());
+        assertEquals("{some_number=1234, gender=M, address={city=Copenhagen, country=DK, additional_info=null}}",
+                map3.toString());
         assertEquals(Integer.class, map3.get("some_number").getClass());
 
         assertTrue(ds.next());

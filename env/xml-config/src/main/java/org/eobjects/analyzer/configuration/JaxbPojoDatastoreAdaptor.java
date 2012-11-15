@@ -332,7 +332,13 @@ public class JaxbPojoDatastoreAdaptor {
         }
 
         if (value.getClass().isArray()) {
-            value = CollectionUtils.toList(value);
+            Class<?> componentType = value.getClass().getComponentType();
+            if (componentType.isPrimitive() || componentType == String.class) {
+                // leave the array to be serialized using the string converter - it
+                // will take up much less space.
+            } else {
+                value = CollectionUtils.toList(value);
+            }
         }
 
         if (value instanceof List) {
