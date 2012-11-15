@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -31,6 +32,12 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.eobjects.analyzer.configuration.jaxb.AbstractDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.PojoDatastoreType;
@@ -40,6 +47,7 @@ import org.eobjects.analyzer.configuration.jaxb.PojoTableType.Rows;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.PojoDatastore;
+import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.convert.StringConverter;
@@ -169,33 +177,38 @@ public class JaxbPojoDatastoreAdaptor {
 
         // a top-level value
         final List<Node> childNodes = getChildNodes(node);
-        switch (childNodes.size()) {
-        case 0:
+        if (childNodes.isEmpty()) {
             return null;
-        case 1:
+        } else if (childNodes.size() == 1 && childNodes.get(0).getNodeType() == Node.TEXT_NODE) {
             expectedClass = (Class<T>) determineExpectedClass(node, expectedClass);
             final Node child = childNodes.get(0);
             return getNodeValue(child, expectedClass);
-        default:
-            if (expectedClass == null) {
-                final Node firstChild = childNodes.get(0);
-                if ("i".equals(firstChild.getNodeName())) {
-                    final List<Object> list = getNodeList(childNodes);
-                    return (T) list;
-                } else {
-                    final Map<String, Object> map = getNodeMap(childNodes);
-                    return (T) map;
-                }
-            } else if (ReflectionUtils.is(expectedClass, List.class)) {
-                final List<Object> list = getNodeList(childNodes);
-                return (T) list;
-            } else if (ReflectionUtils.is(expectedClass, Map.class)) {
-                final Map<String, Object> map = getNodeMap(childNodes);
-                return (T) map;
-            }
         }
 
-        throw new UnsupportedOperationException("Not a value (v) node type: " + node);
+        if (expectedClass == null) {
+            final Node firstChild = childNodes.get(0);
+            if ("i".equals(firstChild.getNodeName())) {
+                final List<Object> list = getNodeList(childNodes);
+                return (T) list;
+            } else if ("e".equals(firstChild.getNodeName())) {
+                final Map<String, Object> map = getNodeMap(childNodes);
+                return (T) map;
+            } else {
+                throw new UnsupportedOperationException("Unexpected child nodes. First child: " + printNode(firstChild));
+            }
+        } else if (ReflectionUtils.is(expectedClass, List.class)) {
+            final List<Object> list = getNodeList(childNodes);
+            return (T) list;
+        } else if (ReflectionUtils.is(expectedClass, Map.class)) {
+            final Map<String, Object> map = getNodeMap(childNodes);
+            return (T) map;
+        } else if (expectedClass.isArray()) {
+            final List<Object> list = getNodeList(childNodes);
+            final Class<?> componentType = expectedClass.getComponentType();
+            return (T) CollectionUtils2.toArray(list, componentType);
+        }
+
+        throw new UnsupportedOperationException("Not a value (v) node type: " + printNode(node));
     }
 
     private Class<?> determineExpectedClass(Node node, Class<?> fallbackType) {
@@ -214,7 +227,7 @@ public class JaxbPojoDatastoreAdaptor {
                 }
             }
         }
-        
+
         return fallbackType;
     }
 
@@ -249,7 +262,11 @@ public class JaxbPojoDatastoreAdaptor {
     private Map<String, Object> getNodeMap(List<Node> entryNodes) {
         final Map<String, Object> map = new LinkedHashMap<String, Object>();
         for (Node entryNode : entryNodes) {
-            assert "e".equals(entryNode.getNodeName());
+            final String entryNodeName = entryNode.getNodeName();
+            if (!"e".equals(entryNodeName)) {
+                throw new UnsupportedOperationException(
+                        "Node passed as Map entry does not appear to be the right type: " + printNode(entryNode));
+            }
 
             String key = null;
             Object value = null;
@@ -268,12 +285,33 @@ public class JaxbPojoDatastoreAdaptor {
             }
 
             if (key == null) {
-                throw new UnsupportedOperationException("Map key (k) node not set in entry: " + entryNode);
+                throw new UnsupportedOperationException("Map key (k) node not set in entry: " + printNode(entryNode));
             }
 
             map.put(key, value);
         }
         return map;
+    }
+
+    private String printNode(Node node) {
+        try {
+            // Set up the output transformer
+            TransformerFactory transfac = TransformerFactory.newInstance();
+            Transformer trans = transfac.newTransformer();
+            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+
+            // Print the DOM node
+            StringWriter sw = new StringWriter();
+            StreamResult result = new StreamResult(sw);
+            DOMSource source = new DOMSource(node);
+            trans.transform(source, result);
+            String xmlString = sw.toString();
+            return xmlString;
+        } catch (TransformerException e) {
+            logger.warn("Could not transform node '" + node + "' to pretty string: " + e.getMessage(), e);
+            return node.toString();
+        }
     }
 
     private org.eobjects.analyzer.configuration.jaxb.PojoTableType.Rows.Row createPojoRow(Row row, Document document) {

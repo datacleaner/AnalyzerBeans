@@ -38,69 +38,112 @@ import org.eobjects.metamodel.util.CollectionUtils;
  */
 public final class CollectionUtils2 {
 
-	private CollectionUtils2() {
-		// prevent instantiation
-	}
+    private CollectionUtils2() {
+        // prevent instantiation
+    }
 
-	@SuppressWarnings("unchecked")
-	public static <E> List<E> filterOnClass(Collection<?> superTypeList, Class<E> subType) {
-		final List<E> result = new ArrayList<E>();
-		for (Object object : superTypeList) {
-			if (object != null) {
-				if (ReflectionUtils.is(object.getClass(), subType)) {
-					result.add((E) object);
-				}
-			}
-		}
-		return result;
-	}
+    @SuppressWarnings("unchecked")
+    public static <E> List<E> filterOnClass(Collection<?> superTypeList, Class<E> subType) {
+        final List<E> result = new ArrayList<E>();
+        for (Object object : superTypeList) {
+            if (object != null) {
+                if (ReflectionUtils.is(object.getClass(), subType)) {
+                    result.add((E) object);
+                }
+            }
+        }
+        return result;
+    }
 
-	@SuppressWarnings("unchecked")
-	public static <E> E[] array(Class<E> elementClass, Object existingArray, E... elements) {
-		if (existingArray == null) {
-			return elements;
-		}
-		E[] result;
-		if (existingArray.getClass().isArray()) {
-			int length = Array.getLength(existingArray);
-			result = (E[]) Array.newInstance(elementClass, length + elements.length);
-			System.arraycopy(existingArray, 0, result, 0, length);
-			System.arraycopy(elements, 0, result, length, elements.length);
-		} else {
-			result = (E[]) Array.newInstance(elementClass, 1 + elements.length);
-			result[0] = (E) existingArray;
-			System.arraycopy(elements, 0, result, 1, elements.length);
-		}
+    @SuppressWarnings("unchecked")
+    public static <E> E[] array(Class<E> elementClass, Object existingArray, E... elements) {
+        if (existingArray == null) {
+            return elements;
+        }
+        E[] result;
+        if (existingArray.getClass().isArray()) {
+            int length = Array.getLength(existingArray);
+            result = (E[]) Array.newInstance(elementClass, length + elements.length);
+            System.arraycopy(existingArray, 0, result, 0, length);
+            System.arraycopy(elements, 0, result, length, elements.length);
+        } else {
+            result = (E[]) Array.newInstance(elementClass, 1 + elements.length);
+            result[0] = (E) existingArray;
+            System.arraycopy(elements, 0, result, 1, elements.length);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@SuppressWarnings("unchecked")
-	public static <E> E[] arrayOf(Class<E> elementClass, Object arrayOrElement) {
-		if (arrayOrElement == null) {
-			return null;
-		}
-		if (arrayOrElement.getClass().isArray()) {
-			return (E[]) arrayOrElement;
-		}
-		Object result = Array.newInstance(elementClass, 1);
-		Array.set(result, 0, arrayOrElement);
-		return (E[]) result;
-	}
+    @SuppressWarnings("unchecked")
+    public static <E> E[] arrayOf(Class<E> elementClass, Object arrayOrElement) {
+        if (arrayOrElement == null) {
+            return null;
+        }
+        if (arrayOrElement.getClass().isArray()) {
+            return (E[]) arrayOrElement;
+        }
+        Object result = Array.newInstance(elementClass, 1);
+        Array.set(result, 0, arrayOrElement);
+        return (E[]) result;
+    }
 
-	public static <E> List<E> sorted(Collection<E> col, Comparator<? super E> comparator) {
-		ArrayList<E> list = new ArrayList<E>(col);
-		Collections.sort(list, comparator);
-		return list;
-	}
+    public static <E> List<E> sorted(Collection<E> col, Comparator<? super E> comparator) {
+        ArrayList<E> list = new ArrayList<E>(col);
+        Collections.sort(list, comparator);
+        return list;
+    }
 
-	public static <E extends Comparable<E>> List<E> sorted(Collection<E> col) {
-		ArrayList<E> list = new ArrayList<E>(col);
-		Collections.sort(list);
-		return list;
-	}
+    public static <E extends Comparable<E>> List<E> sorted(Collection<E> col) {
+        ArrayList<E> list = new ArrayList<E>(col);
+        Collections.sort(list);
+        return list;
+    }
 
-	public static <K, V> Map<K, V> createCacheMap() {
-		return new ReferenceMap<K, V>(ReferenceMap.SOFT, ReferenceMap.SOFT, true);
-	}
+    public static <K, V> Map<K, V> createCacheMap() {
+        return new ReferenceMap<K, V>(ReferenceMap.SOFT, ReferenceMap.SOFT, true);
+    }
+
+    public static Object toArray(List<?> list, Class<?> componentType) {
+        final int size = list.size();
+        final Object result = Array.newInstance(componentType, size);
+        if (!componentType.isPrimitive()) {
+            for (int i = 0; i < size; i++) {
+                Array.set(result, i, list.get(i));
+            }
+        } else if (componentType == boolean.class) {
+            for (int i = 0; i < size; i++) {
+                Array.setBoolean(result, i, (Boolean) list.get(i));
+            }
+        } else if (componentType == byte.class) {
+            for (int i = 0; i < size; i++) {
+                Array.setByte(result, i, (Byte) list.get(i));
+            }
+        } else if (componentType == short.class) {
+            for (int i = 0; i < size; i++) {
+                Array.setShort(result, i, (Short) list.get(i));
+            }
+        } else if (componentType == int.class) {
+            for (int i = 0; i < size; i++) {
+                Array.setInt(result, i, (Integer) list.get(i));
+            }
+        } else if (componentType == long.class) {
+            for (int i = 0; i < size; i++) {
+                Array.setLong(result, i, (Long) list.get(i));
+            }
+        } else if (componentType == float.class) {
+            for (int i = 0; i < size; i++) {
+                Array.setFloat(result, i, (Float) list.get(i));
+            }
+        } else if (componentType == double.class) {
+            for (int i = 0; i < size; i++) {
+                Array.setDouble(result, i, (Double) list.get(i));
+            }
+        } else if (componentType == char.class) {
+            for (int i = 0; i < size; i++) {
+                Array.setChar(result, i, (Character) list.get(i));
+            }
+        }
+        return result;
+    }
 }
