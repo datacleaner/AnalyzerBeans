@@ -124,6 +124,10 @@ ul.analysisResultToc li.ValueDistribution {
 	background-image: url("type_value_distribution.png");
 }
 
+ul.analysisResultToc li.ValueMatcher {
+	background-image: url("type_value_matcher.png");
+}
+
 ul.analysisResultToc li.StringAnalyzer  {
 	background-image: url("type_string_analyzer.png");
 }
@@ -360,6 +364,10 @@ a.drillToDetailsLink:hover {
 /*
  * Value distribution result
  */
+div.valueDistributionGroupPanel {
+	clear: both;
+}
+ 
 div.valueDistributionChart {
 	width: 400px;
 	height: 330px;
