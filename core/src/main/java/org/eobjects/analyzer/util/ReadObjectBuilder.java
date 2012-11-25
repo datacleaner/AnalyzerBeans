@@ -51,105 +51,119 @@ import org.slf4j.LoggerFactory;
  */
 public final class ReadObjectBuilder<E extends Serializable> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ReadObjectBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReadObjectBuilder.class);
 
-	/**
-	 * Annotation used to mark fields in classes that have been moved in the
-	 * class hierarchy, typically from a subclass to a superclass. Such fields
-	 * will be discovered and treated accordingly during deserialization.
-	 * 
-	 * @author Kasper Sørensen
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.FIELD })
-	@Documented
-	@Inherited
-	public static @interface Moved {
-	}
+    /**
+     * Annotation used to mark fields in classes that have been moved in the
+     * class hierarchy, typically from a subclass to a superclass. Such fields
+     * will be discovered and treated accordingly during deserialization.
+     * 
+     * @author Kasper Sørensen
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ ElementType.FIELD })
+    @Documented
+    @Inherited
+    public static @interface Moved {
+    }
 
-	public static <E extends Serializable> ReadObjectBuilder<E> create(E serializable, Class<? super E> clazz) {
-		logger.info("Creating ReadObjectBuilder for new object of class: {}", clazz);
-		return new ReadObjectBuilder<E>(serializable, clazz);
-	}
+    /**
+     * A custom adaptor interface which can be provided externally to do custom
+     * field deserialization logic.
+     */
+    public static interface Adaptor {
+        public void deserialize(GetField getField, Serializable serializable) throws IOException;
+    }
 
-	private final E _serializable;
-	private final Class<? super E> _clazz;
+    public static <E extends Serializable> ReadObjectBuilder<E> create(E serializable, Class<? super E> clazz) {
+        logger.info("Creating ReadObjectBuilder for new object of class: {}", clazz);
+        return new ReadObjectBuilder<E>(serializable, clazz);
+    }
 
-	private ReadObjectBuilder(E serializable, Class<? super E> clazz) {
-		_serializable = serializable;
-		_clazz = clazz;
-	}
+    private final E _serializable;
+    private final Class<? super E> _clazz;
 
-	public void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-		try {
-			GetField getField = stream.readFields();
+    private ReadObjectBuilder(E serializable, Class<? super E> clazz) {
+        _serializable = serializable;
+        _clazz = clazz;
+    }
 
-			Field[] fields;
-			fields = _clazz.getDeclaredFields();
+    public void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        readObject(stream, null);
+    }
 
-			deserializeFields(fields, getField);
+    public void readObject(ObjectInputStream stream, Adaptor adaptor) throws IOException, ClassNotFoundException {
+        try {
+            GetField getField = stream.readFields();
 
-			fields = ReflectionUtils.getFields(_clazz, Moved.class);
-			deserializeFields(fields, getField);
-		} catch (IOException e) {
-			logger.error("Could not deserialize object!", e);
-			throw e;
-		}
-	}
+            Field[] fields;
+            fields = _clazz.getDeclaredFields();
 
-	private void deserializeFields(Field[] fields, GetField getField) throws IOException {
-		for (Field field : fields) {
-			int modifiers = field.getModifiers();
-			if (!Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers)) {
-				deserializeField(field, getField);
-			}
-		}
-	}
+            deserializeFields(fields, getField);
 
-	private void deserializeField(Field field, GetField getField) throws IOException {
-		final String fieldName = field.getName();
-		try {
-			field.setAccessible(true);
-			Class<?> fieldType = field.getType();
-			if (fieldType.isPrimitive()) {
-				if (fieldType == boolean.class) {
-					final boolean value = getField.get(fieldName, false);
-					field.setBoolean(_serializable, value);
-				} else if (fieldType == byte.class) {
-					final byte value = getField.get(fieldName, (byte) 0);
-					field.setByte(_serializable, value);
-				} else if (fieldType == short.class) {
-					final short value = getField.get(fieldName, (short) 0);
-					field.setShort(_serializable, value);
-				} else if (fieldType == int.class) {
-					final int value = getField.get(fieldName, 0);
-					field.setInt(_serializable, value);
-				} else if (fieldType == long.class) {
-					final long value = getField.get(fieldName, 0l);
-					field.setLong(_serializable, value);
-				} else if (fieldType == float.class) {
-					final float value = getField.get(fieldName, 0f);
-					field.setFloat(_serializable, value);
-				} else if (fieldType == double.class) {
-					final double value = getField.get(fieldName, 0d);
-					field.setDouble(_serializable, value);
-				} else if (fieldType == char.class) {
-					final char value = getField.get(fieldName, (char) 0);
-					field.setChar(_serializable, value);
-				}
-			} else {
-				final Object value = getField.get(fieldName, null);
-				if (logger.isDebugEnabled()) {
-					logger.debug("{}.{} was  {}", new Object[] { _clazz, field, value });
-				}
-				if (value != null) {
-					field.set(_serializable, value);
-				}
-			}
-		} catch (IllegalAccessException e) {
-			logger.warn("Not allowed to access field: {}", fieldName);
-		} catch (IllegalArgumentException e) {
-			logger.debug("No such field found in GetFields: {}", fieldName);
-		}
-	}
+            fields = ReflectionUtils.getFields(_clazz, Moved.class);
+            deserializeFields(fields, getField);
+
+            adaptor.deserialize(getField, _serializable);
+        } catch (IOException e) {
+            logger.error("Could not deserialize object!", e);
+            throw e;
+        }
+    }
+
+    private void deserializeFields(Field[] fields, GetField getField) throws IOException {
+        for (Field field : fields) {
+            int modifiers = field.getModifiers();
+            if (!Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers)) {
+                deserializeField(field, getField);
+            }
+        }
+    }
+
+    private void deserializeField(Field field, GetField getField) throws IOException {
+        final String fieldName = field.getName();
+        try {
+            field.setAccessible(true);
+            Class<?> fieldType = field.getType();
+            if (fieldType.isPrimitive()) {
+                if (fieldType == boolean.class) {
+                    final boolean value = getField.get(fieldName, false);
+                    field.setBoolean(_serializable, value);
+                } else if (fieldType == byte.class) {
+                    final byte value = getField.get(fieldName, (byte) 0);
+                    field.setByte(_serializable, value);
+                } else if (fieldType == short.class) {
+                    final short value = getField.get(fieldName, (short) 0);
+                    field.setShort(_serializable, value);
+                } else if (fieldType == int.class) {
+                    final int value = getField.get(fieldName, 0);
+                    field.setInt(_serializable, value);
+                } else if (fieldType == long.class) {
+                    final long value = getField.get(fieldName, 0l);
+                    field.setLong(_serializable, value);
+                } else if (fieldType == float.class) {
+                    final float value = getField.get(fieldName, 0f);
+                    field.setFloat(_serializable, value);
+                } else if (fieldType == double.class) {
+                    final double value = getField.get(fieldName, 0d);
+                    field.setDouble(_serializable, value);
+                } else if (fieldType == char.class) {
+                    final char value = getField.get(fieldName, (char) 0);
+                    field.setChar(_serializable, value);
+                }
+            } else {
+                final Object value = getField.get(fieldName, null);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{}.{} was  {}", new Object[] { _clazz, field, value });
+                }
+                if (value != null) {
+                    field.set(_serializable, value);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            logger.warn("Not allowed to access field: {}", fieldName);
+        } catch (IllegalArgumentException e) {
+            logger.debug("No such field found in GetFields: {}", fieldName);
+        }
+    }
 }
