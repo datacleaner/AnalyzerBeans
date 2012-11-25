@@ -27,8 +27,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.transform.TokenizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionGroupResult;
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzerResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
@@ -114,35 +113,28 @@ public class TokenizerAndValueDistributionTest extends TestCase {
         assertEquals(4, results.size());
 
         for (AnalyzerResult analyzerResult : results) {
-            ValueDistributionResult vdResult = (ValueDistributionResult) analyzerResult;
-            ValueDistributionGroupResult result = vdResult.getSingleValueDistributionResult();
+            ValueDistributionAnalyzerResult result = (ValueDistributionAnalyzerResult) analyzerResult;
             Collection<String> uniqueValues = new TreeSet<String>(result.getUniqueValues());
-            if ("first word".equals(vdResult.getColumnName())) {
-                assertEquals("ValueCountList[[[Sales->19], [VP->2]]]", result.getTopValues().toString());
-                assertTrue(result.getBottomValues().getValueCounts().isEmpty());
+            if ("first word".equals(result.getName())) {
+                assertEquals("[[Sales->19], [VP->2]]", result.getValueCounts().toString());
                 assertEquals(0, result.getNullCount());
-                assertEquals(2, result.getUniqueCount());
-            } else if ("second word".equals(vdResult.getColumnName())) {
-                assertEquals("ValueCountList[[[Rep->17], [Manager->3]]]", result.getTopValues().toString());
-                assertTrue(result.getBottomValues().getValueCounts().isEmpty());
+                assertEquals(2, result.getUniqueCount().intValue());
+            } else if ("second word".equals(result.getName())) {
+                assertEquals("[[Rep->17], [Manager->3], [null->1]]", result.getValueCounts().toString());
                 assertEquals(1, result.getNullCount());
-                assertEquals(2, result.getUniqueCount());
-            } else if ("third words".equals(vdResult.getColumnName())) {
-                assertEquals("ValueCountList[[]]", result.getTopValues().toString());
-                assertTrue(result.getBottomValues().getValueCounts().isEmpty());
+                assertEquals(2, result.getUniqueCount().intValue());
+            } else if ("third words".equals(result.getName())) {
+                assertEquals("[[null->20]]", result.getValueCounts().toString());
                 assertEquals(20, result.getNullCount());
-
-                assertEquals(3, result.getUniqueCount());
+                assertEquals(3, result.getUniqueCount().intValue());
                 assertEquals("[(EMEA), (JAPAN,, (NA)]", uniqueValues.toString());
-            } else if ("fourth words".equals(vdResult.getColumnName())) {
-                assertEquals("ValueCountList[[]]", result.getTopValues().toString());
-                assertTrue(result.getBottomValues().getValueCounts().isEmpty());
+            } else if ("fourth words".equals(result.getName())) {
+                assertEquals("[[null->22]]", result.getValueCounts().toString());
                 assertEquals(22, result.getNullCount());
-
-                assertEquals(1, result.getUniqueCount());
+                assertEquals(1, result.getUniqueCount().intValue());
                 assertEquals("[APAC)]", uniqueValues.toString());
             } else {
-                fail("Unexpected columnName: " + vdResult.getColumnName());
+                fail("Unexpected columnName: " + result.getName());
             }
         }
 

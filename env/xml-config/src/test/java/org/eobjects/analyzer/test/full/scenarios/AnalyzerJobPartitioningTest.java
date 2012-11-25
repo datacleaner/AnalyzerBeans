@@ -27,7 +27,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzerResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
@@ -73,7 +73,7 @@ public class AnalyzerJobPartitioningTest extends TestCase {
 		List<CrosstabResult> saResults = new ArrayList<CrosstabResult>();
 
 		for (AnalyzerResult analyzerResult : results) {
-			if (analyzerResult instanceof ValueDistributionResult) {
+			if (analyzerResult instanceof ValueDistributionAnalyzerResult) {
 				vdResults++;
 			} else if (analyzerResult instanceof CrosstabResult) {
 				saResults.add((CrosstabResult) analyzerResult);

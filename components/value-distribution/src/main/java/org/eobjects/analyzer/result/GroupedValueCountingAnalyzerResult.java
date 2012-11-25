@@ -17,16 +17,17 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.valuedist;
+package org.eobjects.analyzer.result;
 
-import java.io.Serializable;
-import java.util.List;
+import java.util.Collection;
 
-public interface ValueCountList extends Serializable {
+/**
+ * Represents a composite ValueCountingAnalyzerResults, which wraps underlying
+ * ("grouped") results.
+ */
+public interface GroupedValueCountingAnalyzerResult extends ValueCountingAnalyzerResult {
 
-	public List<ValueCount> getValueCounts();
+    public Collection<? extends ValueCountingAnalyzerResult> getGroupResults();
 
-	public int getMaxSize();
-
-	public int getActualSize();
+    public String getGroupDiscriminatorName();
 }

@@ -12,8 +12,11 @@ import java.util.TreeSet
 import java.util.Collections
 import org.eobjects.analyzer.util.LabelUtils
 import org.eobjects.analyzer.result.ListResult
+import org.eobjects.analyzer.result.ValueCount
+import org.eobjects.analyzer.result.ValueCountingAnalyzerResult
+import org.eobjects.analyzer.result.GroupedValueCountingAnalyzerResult
 
-class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFactory: RendererFactory) extends HtmlFragment {
+class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendererFactory: RendererFactory) extends HtmlFragment {
 
   val frag = new SimpleHtmlFragment();
 
@@ -22,13 +25,13 @@ class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFac
 
     val html = <div class="valueDistributionResultContainer">
                  {
-                   if (result.isGroupingEnabled()) {
-                     result.getGroupedValueDistributionResults().map(r => {
-                       renderGroupResult(r, context)
+                   if (result.isInstanceOf[GroupedValueCountingAnalyzerResult]) {
+                     val groupedResult = result.asInstanceOf[GroupedValueCountingAnalyzerResult];
+                     groupedResult.getGroupResults().map(r => {
+                       renderResult(r, context, true)
                      })
                    } else {
-                     val r = result.getSingleValueDistributionResult();
-                     renderGroupResult(r, context);
+                     renderResult(result, context, false);
                    }
                  }
                </div>;
@@ -44,28 +47,28 @@ class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFac
     return frag.getBodyElements();
   }
 
-  def renderGroupResult(groupResult: ValueDistributionGroupResult, context: HtmlRenderingContext): scala.xml.Node = {
+  def renderResult(result: ValueCountingAnalyzerResult, context: HtmlRenderingContext, group: Boolean): scala.xml.Node = {
     val chartElementId: String = context.createElementId();
 
-    frag.addHeadElement(new ValueDistributionChartScriptHeadElement(groupResult, chartElementId));
+    frag.addHeadElement(new ValueDistributionChartScriptHeadElement(result, chartElementId));
 
-    // create a big sorted set of value counts.
-    val valueCounts = new TreeSet[ValueCount]();
-    valueCounts.addAll(groupResult.getTopValues().getValueCounts());
-    valueCounts.addAll(groupResult.getBottomValues().getValueCounts());
+    val valueCounts = result.getValueCounts();
 
-    if (groupResult.getUniqueCount() > 0) {
-      valueCounts.add(new ValueCount(LabelUtils.UNIQUE_LABEL, groupResult.getUniqueCount()));
-    }
-
-    if (groupResult.getNullCount() > 0) {
-      valueCounts.add(new ValueCount(null, groupResult.getNullCount()));
+    val uniqueCount = result.getUniqueCount();
+    if (uniqueCount != null && uniqueCount > 0) {
+      val uniqueValues = result.getUniqueValues();
+      if (uniqueValues == null || uniqueValues.isEmpty()) {
+        val vc = new ValueCount(LabelUtils.UNIQUE_LABEL, uniqueCount);
+        valueCounts.add(vc);
+      } else {
+        uniqueValues.foreach(str => valueCounts.add(new ValueCount(str, 1)));
+      }
     }
 
     return <div class="valueDistributionGroupPanel">
              {
-               if (groupResult.getGroupName() != null) {
-                 <h3>Group: { groupResult.getGroupName() }</h3>
+               if (group && result.getName() != null) {
+                 <h3>Group: { result.getName() }</h3>
                }
              }
              {
@@ -77,58 +80,64 @@ class ValueDistributionHtmlFragment(result: ValueDistributionResult, rendererFac
                  <table class="valueDistributionValueTable">
                    {
                      valueCounts.iterator().map(vc => {
-                       <tr><td>{ LabelUtils.getLabel(vc.getValue()) }</td><td>{ getCount(groupResult, vc, context) }</td></tr>
+                       <tr><td>{ LabelUtils.getLabel(vc.getValue()) }</td><td>{ getCount(result, vc, context) }</td></tr>
                      })
                    }
                  </table>
                }
              }
              <table class="valueDistributionSummaryTable">
-               <tr><td>Total count</td><td>{ groupResult.getTotalCount() }</td></tr>
-               <tr><td>Distinct count</td><td>{ groupResult.getDistinctCount() }</td></tr>
+               <tr><td>Total count</td><td>{ result.getTotalCount() }</td></tr>
+               {
+                 if (result.getDistinctCount() != null) {
+                   <tr><td>Distinct count</td><td>{ result.getDistinctCount() }</td></tr>
+                 }
+               }
              </table>
            </div>;
   }
 
-  def getCount(groupResult: ValueDistributionGroupResult, vc: ValueCount, context: HtmlRenderingContext): scala.xml.Node = {
-    if (!groupResult.isAnnotationsEnabled()) {
-      return <span>{ vc.getCount() }</span>
-    }
-
+  def getCount(result: ValueCountingAnalyzerResult, vc: ValueCount, context: HtmlRenderingContext): scala.xml.Node = {
     var value = vc.getValue();
+    val count = vc.getCount();
     if (LabelUtils.NULL_LABEL.equals(value)) {
       value = null;
     } else if (LabelUtils.BLANK_LABEL.equals(value)) {
       value = "";
     }
 
-    val annotatedRowsResult = groupResult.getAnnotatedRows(value);
+    if (count == 0) {
+      return <span>{ vc.getCount() }</span>;
+    }
+
+    val annotatedRowsResult = result.getAnnotatedRowsForValue(value);
 
     if (annotatedRowsResult == null) {
-      if (LabelUtils.UNIQUE_LABEL.equals(value) && groupResult.isUniqueValuesAvailable()) {
-        val uniqueValues = groupResult.getUniqueValues()
-        val elementId = context.createElementId();
-        
-        val listResult = new ListResult(uniqueValues);
+      if (LabelUtils.UNIQUE_LABEL.equals(value)) {
+        val uniqueValues = result.getUniqueValues()
+        if (uniqueValues != null) {
 
-        val bodyElement = new DrillToDetailsBodyElement(elementId, rendererFactory, listResult);
-        frag.addBodyElement(bodyElement);
+          val elementId = context.createElementId();
+          val listResult = new ListResult(uniqueValues);
 
-        val invocation = bodyElement.toJavaScriptInvocation()
-        
-        return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
-      } else {
-        return <span>{ vc.getCount() }</span>;
+          val bodyElement = new DrillToDetailsBodyElement(elementId, rendererFactory, listResult);
+          frag.addBodyElement(bodyElement);
+
+          val invocation = bodyElement.toJavaScriptInvocation()
+
+          return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
+        }
       }
-    } else {
-      val elementId = context.createElementId();
-
-      val bodyElement = new DrillToDetailsBodyElement(elementId, rendererFactory, annotatedRowsResult);
-      frag.addBodyElement(bodyElement);
-
-      val invocation = bodyElement.toJavaScriptInvocation()
-
-      return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
+      return <span>{ vc.getCount() }</span>;
     }
+
+    val elementId = context.createElementId();
+
+    val bodyElement = new DrillToDetailsBodyElement(elementId, rendererFactory, annotatedRowsResult);
+    frag.addBodyElement(bodyElement);
+
+    val invocation = bodyElement.toJavaScriptInvocation()
+
+    return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
   }
 }

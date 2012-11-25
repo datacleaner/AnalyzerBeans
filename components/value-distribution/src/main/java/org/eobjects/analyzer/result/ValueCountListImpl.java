@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.valuedist;
+package org.eobjects.analyzer.result;
 
 import java.util.LinkedList;
 import java.util.List;

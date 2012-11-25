@@ -55,6 +55,7 @@ public final class LabelUtils {
     public static final String NULL_LABEL = "<null>";
     public static final String UNIQUE_LABEL = "<unique>";
     public static final String BLANK_LABEL = "<blank>";
+    public static final String UNEXPECTED_LABEL = "<unexpected>";
     public static final String COUNT_LABEL = "COUNT(*)";
 
     private LabelUtils() {

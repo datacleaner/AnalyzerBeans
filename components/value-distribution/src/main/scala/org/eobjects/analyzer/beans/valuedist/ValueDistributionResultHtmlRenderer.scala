@@ -7,9 +7,10 @@ import org.eobjects.analyzer.result.html.HtmlFragment
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat
 import org.eobjects.analyzer.result.renderer.RendererFactory
 import javax.inject.Inject
+import org.eobjects.analyzer.result.ValueCountingAnalyzerResult
 
 @RendererBean(classOf[HtmlRenderingFormat])
-class ValueDistributionResultHtmlRenderer(rf: RendererFactory) extends Renderer[ValueDistributionResult, HtmlFragment] {
+class ValueDistributionResultHtmlRenderer(rf: RendererFactory) extends Renderer[ValueCountingAnalyzerResult, HtmlFragment] {
 
   @Inject
   @Provided
@@ -17,7 +18,7 @@ class ValueDistributionResultHtmlRenderer(rf: RendererFactory) extends Renderer[
 
   def this() = this(null)
 
-  override def getPrecedence(result: ValueDistributionResult) = RendererPrecedence.HIGH;
+  override def getPrecedence(result: ValueCountingAnalyzerResult) = RendererPrecedence.HIGH;
 
-  override def render(result: ValueDistributionResult): HtmlFragment = new ValueDistributionHtmlFragment(result, rendererFactory);
+  override def render(result: ValueCountingAnalyzerResult): HtmlFragment = new ValueDistributionHtmlFragment(result, rendererFactory);
 }

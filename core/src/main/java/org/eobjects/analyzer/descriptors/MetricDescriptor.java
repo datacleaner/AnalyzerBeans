@@ -50,7 +50,7 @@ public interface MetricDescriptor extends Serializable, HasName, Comparable<Metr
      * therefore the quality or extensiveness of the suggestions is not
      * guaranteed and should be considered a sample more than a direction.
      * 
-     * @return a collection of suggested metric parameters.
+     * @return an interable of suggested metric parameters.
      */
     public Collection<String> getMetricParameterSuggestions(AnalyzerResult result);
 

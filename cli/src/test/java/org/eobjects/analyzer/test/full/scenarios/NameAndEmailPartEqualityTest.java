@@ -29,7 +29,7 @@ import org.eobjects.analyzer.beans.script.JavaScriptFilter;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
 import org.eobjects.analyzer.beans.standardize.NameStandardizerTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzerResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -52,160 +52,126 @@ import org.eobjects.metamodel.schema.Table;
 
 public class NameAndEmailPartEqualityTest extends TestCase {
 
-	public void testScenario() throws Throwable {
-		TaskRunner taskRunner = new SingleThreadedTaskRunner();
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
-				.replace(taskRunner);
+    public void testScenario() throws Throwable {
+        TaskRunner taskRunner = new SingleThreadedTaskRunner();
+        AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+        AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		CsvDatastore ds = new CsvDatastore("data.csv",
-				"src/test/resources/NameAndEmailPartEqualityTest-data.csv");
+        CsvDatastore ds = new CsvDatastore("data.csv", "src/test/resources/NameAndEmailPartEqualityTest-data.csv");
 
-		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
-				configuration);
-		analysisJobBuilder.setDatastore(ds);
+        AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
+        analysisJobBuilder.setDatastore(ds);
 
-		DatastoreConnection con = ds.openConnection();
-		Schema schema = con.getDataContext().getDefaultSchema();
-		Table table = schema.getTables()[0];
-		assertNotNull(table);
+        DatastoreConnection con = ds.openConnection();
+        Schema schema = con.getDataContext().getDefaultSchema();
+        Table table = schema.getTables()[0];
+        assertNotNull(table);
 
-		Column nameColumn = table.getColumnByName("name");
-		Column emailColumn = table.getColumnByName("email");
+        Column nameColumn = table.getColumnByName("name");
+        Column emailColumn = table.getColumnByName("email");
 
-		analysisJobBuilder.addSourceColumns(nameColumn, emailColumn);
+        analysisJobBuilder.addSourceColumns(nameColumn, emailColumn);
 
-		TransformerJobBuilder<NameStandardizerTransformer> nameTransformerJobBuilder = analysisJobBuilder
-				.addTransformer(NameStandardizerTransformer.class);
-		nameTransformerJobBuilder.addInputColumn(analysisJobBuilder
-				.getSourceColumnByName("name"));
-		nameTransformerJobBuilder.setConfiguredProperty("Name patterns",
-				NameStandardizerTransformer.DEFAULT_PATTERNS);
+        TransformerJobBuilder<NameStandardizerTransformer> nameTransformerJobBuilder = analysisJobBuilder
+                .addTransformer(NameStandardizerTransformer.class);
+        nameTransformerJobBuilder.addInputColumn(analysisJobBuilder.getSourceColumnByName("name"));
+        nameTransformerJobBuilder.setConfiguredProperty("Name patterns", NameStandardizerTransformer.DEFAULT_PATTERNS);
 
-		assertTrue(nameTransformerJobBuilder.isConfigured());
+        assertTrue(nameTransformerJobBuilder.isConfigured());
 
-		final List<MutableInputColumn<?>> nameColumns = nameTransformerJobBuilder
-				.getOutputColumns();
-		assertEquals(4, nameColumns.size());
-		assertEquals("Firstname", nameColumns.get(0).getName());
-		assertEquals("Lastname", nameColumns.get(1).getName());
-		assertEquals("Middlename", nameColumns.get(2).getName());
-		assertEquals("Titulation", nameColumns.get(3).getName());
+        final List<MutableInputColumn<?>> nameColumns = nameTransformerJobBuilder.getOutputColumns();
+        assertEquals(4, nameColumns.size());
+        assertEquals("Firstname", nameColumns.get(0).getName());
+        assertEquals("Lastname", nameColumns.get(1).getName());
+        assertEquals("Middlename", nameColumns.get(2).getName());
+        assertEquals("Titulation", nameColumns.get(3).getName());
 
-		TransformerJobBuilder<EmailStandardizerTransformer> emailTransformerJobBuilder = analysisJobBuilder
-				.addTransformer(EmailStandardizerTransformer.class);
-		emailTransformerJobBuilder.addInputColumn(analysisJobBuilder
-				.getSourceColumnByName("email"));
+        TransformerJobBuilder<EmailStandardizerTransformer> emailTransformerJobBuilder = analysisJobBuilder
+                .addTransformer(EmailStandardizerTransformer.class);
+        emailTransformerJobBuilder.addInputColumn(analysisJobBuilder.getSourceColumnByName("email"));
 
-		assertTrue(emailTransformerJobBuilder.isConfigured());
+        assertTrue(emailTransformerJobBuilder.isConfigured());
 
-		@SuppressWarnings("unchecked")
-		final MutableInputColumn<String> usernameColumn = (MutableInputColumn<String>) emailTransformerJobBuilder
-				.getOutputColumnByName("Username");
-		assertNotNull(usernameColumn);
+        @SuppressWarnings("unchecked")
+        final MutableInputColumn<String> usernameColumn = (MutableInputColumn<String>) emailTransformerJobBuilder
+                .getOutputColumnByName("Username");
+        assertNotNull(usernameColumn);
 
-		assertTrue(analysisJobBuilder
-				.addAnalyzer(StringAnalyzer.class)
-				.addInputColumns(nameColumns)
-				.addInputColumns(emailTransformerJobBuilder.getOutputColumns())
-				.isConfigured());
+        assertTrue(analysisJobBuilder.addAnalyzer(StringAnalyzer.class).addInputColumns(nameColumns)
+                .addInputColumns(emailTransformerJobBuilder.getOutputColumns()).isConfigured());
 
-		for (InputColumn<?> inputColumn : nameColumns) {
-			AnalyzerJobBuilder<ValueDistributionAnalyzer> analyzerJobBuilder = analysisJobBuilder
-					.addAnalyzer(ValueDistributionAnalyzer.class);
-			analyzerJobBuilder.addInputColumn(inputColumn);
-			analyzerJobBuilder.setConfiguredProperty("Record unique values",
-					false);
-			analyzerJobBuilder.setConfiguredProperty(
-					"Top n most frequent values", 1000);
-			analyzerJobBuilder.setConfiguredProperty(
-					"Bottom n most frequent values", 1000);
-			assertTrue(analyzerJobBuilder.isConfigured());
-		}
+        for (InputColumn<?> inputColumn : nameColumns) {
+            AnalyzerJobBuilder<ValueDistributionAnalyzer> analyzerJobBuilder = analysisJobBuilder
+                    .addAnalyzer(ValueDistributionAnalyzer.class);
+            analyzerJobBuilder.addInputColumn(inputColumn);
+            analyzerJobBuilder.setConfiguredProperty("Record unique values", false);
+            analyzerJobBuilder.setConfiguredProperty("Top n most frequent values", 1000);
+            analyzerJobBuilder.setConfiguredProperty("Bottom n most frequent values", 1000);
+            assertTrue(analyzerJobBuilder.isConfigured());
+        }
 
-		FilterJobBuilder<JavaScriptFilter, JavaScriptFilter.Category> fjb = analysisJobBuilder
-				.addFilter(JavaScriptFilter.class);
-		fjb.addInputColumn(nameTransformerJobBuilder
-				.getOutputColumnByName("Firstname"));
-		fjb.addInputColumn(usernameColumn);
-		fjb.setConfiguredProperty("Source code", "values[0] == values[1];");
+        FilterJobBuilder<JavaScriptFilter, JavaScriptFilter.Category> fjb = analysisJobBuilder
+                .addFilter(JavaScriptFilter.class);
+        fjb.addInputColumn(nameTransformerJobBuilder.getOutputColumnByName("Firstname"));
+        fjb.addInputColumn(usernameColumn);
+        fjb.setConfiguredProperty("Source code", "values[0] == values[1];");
 
-		assertTrue(fjb.isConfigured());
+        assertTrue(fjb.isConfigured());
 
-		analysisJobBuilder
-				.addAnalyzer(StringAnalyzer.class)
-				.addInputColumn(
-						analysisJobBuilder.getSourceColumnByName("email"))
-				.setRequirement(fjb, JavaScriptFilter.Category.VALID);
-		analysisJobBuilder
-				.addAnalyzer(StringAnalyzer.class)
-				.addInputColumn(
-						analysisJobBuilder.getSourceColumnByName("email"))
-				.setRequirement(fjb, JavaScriptFilter.Category.INVALID);
+        analysisJobBuilder.addAnalyzer(StringAnalyzer.class)
+                .addInputColumn(analysisJobBuilder.getSourceColumnByName("email"))
+                .setRequirement(fjb, JavaScriptFilter.Category.VALID);
+        analysisJobBuilder.addAnalyzer(StringAnalyzer.class)
+                .addInputColumn(analysisJobBuilder.getSourceColumnByName("email"))
+                .setRequirement(fjb, JavaScriptFilter.Category.INVALID);
 
-		AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder
-				.toAnalysisJob());
+        AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
 
-		con.close();
+        con.close();
 
-		if (!resultFuture.isSuccessful()) {
-			List<Throwable> errors = resultFuture.getErrors();
-			throw errors.get(0);
-		}
+        if (!resultFuture.isSuccessful()) {
+            List<Throwable> errors = resultFuture.getErrors();
+            throw errors.get(0);
+        }
 
-		List<AnalyzerResult> results = resultFuture.getResults();
+        List<AnalyzerResult> results = resultFuture.getResults();
 
-		assertEquals(7, results.size());
+        assertEquals(7, results.size());
 
-		ValueDistributionResult vdResult = (ValueDistributionResult) results
-				.get(1);
-		assertEquals("Firstname", vdResult.getColumnName());
-		assertEquals(0, vdResult.getSingleValueDistributionResult()
-				.getNullCount());
-		assertEquals(2, vdResult.getSingleValueDistributionResult()
-				.getUniqueCount());
-		assertEquals("ValueCountList[[[barack->4]]]", vdResult
-				.getSingleValueDistributionResult().getTopValues().toString());
+        ValueDistributionAnalyzerResult vdResult = (ValueDistributionAnalyzerResult) results.get(1);
+        assertEquals("Firstname", vdResult.getName());
+        assertEquals(0, vdResult.getNullCount());
+        assertEquals(2, vdResult.getUniqueCount().intValue());
+        assertEquals("[[barack->4]]", vdResult.getValueCounts().toString());
 
-		vdResult = (ValueDistributionResult) results.get(2);
-		assertEquals("Lastname", vdResult.getColumnName());
-		assertEquals(0, vdResult.getSingleValueDistributionResult()
-				.getNullCount());
-		assertEquals(0, vdResult.getSingleValueDistributionResult()
-				.getUniqueCount());
-		assertEquals("ValueCountList[[[obama->4], [doe->2]]]", vdResult
-				.getSingleValueDistributionResult().getTopValues().toString());
+        vdResult = (ValueDistributionAnalyzerResult) results.get(2);
+        assertEquals("Lastname", vdResult.getName());
+        assertEquals(0, vdResult.getNullCount());
+        assertEquals(0, vdResult.getUniqueCount().intValue());
+        assertEquals("[[obama->4], [doe->2]]", vdResult.getValueCounts().toString());
 
-		vdResult = (ValueDistributionResult) results.get(3);
-		assertEquals("Middlename", vdResult.getColumnName());
-		assertEquals(4, vdResult.getSingleValueDistributionResult()
-				.getNullCount());
-		assertEquals(0, vdResult.getSingleValueDistributionResult()
-				.getUniqueCount());
-		assertEquals("ValueCountList[[[hussein->2]]]", vdResult
-				.getSingleValueDistributionResult().getTopValues().toString());
+        vdResult = (ValueDistributionAnalyzerResult) results.get(3);
+        assertEquals("Middlename", vdResult.getName());
+        assertEquals(4, vdResult.getNullCount());
+        assertEquals(0, vdResult.getUniqueCount().intValue());
+        assertEquals("[[null->4], [hussein->2]]", vdResult.getValueCounts()
+                .toString());
 
-		vdResult = (ValueDistributionResult) results.get(4);
-		assertEquals("Titulation", vdResult.getColumnName());
-		assertEquals(6, vdResult.getSingleValueDistributionResult()
-				.getNullCount());
-		assertEquals(0, vdResult.getSingleValueDistributionResult()
-				.getUniqueCount());
-		assertEquals("ValueCountList[[]]", vdResult
-				.getSingleValueDistributionResult().getTopValues().toString());
+        vdResult = (ValueDistributionAnalyzerResult) results.get(4);
+        assertEquals("Titulation", vdResult.getName());
+        assertEquals(6, vdResult.getNullCount());
+        assertEquals(0, vdResult.getUniqueCount().intValue());
+        assertEquals("[[null->6]]", vdResult.getValueCounts().toString());
 
-		StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) results
-				.get(5);
-		assertEquals(1, stringAnalyzerResult.getColumns().length);
-		assertEquals("4",
-				stringAnalyzerResult.getCrosstab().where("Column", "email")
-						.where("Measures", "Row count").get().toString());
+        StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) results.get(5);
+        assertEquals(1, stringAnalyzerResult.getColumns().length);
+        assertEquals("4", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count")
+                .get().toString());
 
-		stringAnalyzerResult = (StringAnalyzerResult) results.get(6);
-		assertEquals(1, stringAnalyzerResult.getColumns().length);
-		assertEquals("2",
-				stringAnalyzerResult.getCrosstab().where("Column", "email")
-						.where("Measures", "Row count").get().toString());
-	}
+        stringAnalyzerResult = (StringAnalyzerResult) results.get(6);
+        assertEquals(1, stringAnalyzerResult.getColumns().length);
+        assertEquals("2", stringAnalyzerResult.getCrosstab().where("Column", "email").where("Measures", "Row count")
+                .get().toString());
+    }
 }

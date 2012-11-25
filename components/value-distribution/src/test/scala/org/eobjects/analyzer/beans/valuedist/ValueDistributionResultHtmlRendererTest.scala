@@ -12,6 +12,43 @@ import org.junit.Assert
 import org.scalatest.junit.AssertionsForJUnit
 
 class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
+  
+  @Test
+  def testNoUniqueValuesStored = {
+    val context = new DefaultHtmlRenderingContext();
+    
+    val col1 = new MockInputColumn[String]("email", classOf[String]);
+
+    val analyzer = new ValueDistributionAnalyzer(col1, false, null, null);
+    analyzer.run(new MockInputRow().put(col1, "kasper@eobjects.dk"), 1);
+    analyzer.run(new MockInputRow().put(col1, "kasper.sorensen@humaninference.com"), 1);
+    analyzer.run(new MockInputRow().put(col1, "foo@bar"), 2);
+    
+    val result = analyzer.getResult()
+    
+    Assert.assertEquals(2, result.getUniqueCount());
+    
+    val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
+    htmlFragment.initialize(context);
+    
+    val bodyElems = htmlFragment.getBodyElements()
+    Assert.assertEquals(3, bodyElems.size());
+    
+    Assert.assertEquals("""<div class="valueDistributionResultContainer">
+                 <div class="valueDistributionGroupPanel">
+             
+             <div class="valueDistributionChart" id="reselem_1">
+               </div>
+             <table class="valueDistributionValueTable">
+                   <tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">2</a></td></tr><tr><td>foo@bar</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr>
+                 </table>
+             <table class="valueDistributionSummaryTable">
+               <tr><td>Total count</td><td>4</td></tr>
+               <tr><td>Distinct count</td><td>3</td></tr>
+             </table>
+           </div>
+               </div>""".replaceAll("\r\n", "\n"), bodyElems.get(2).toHtml(context).replaceAll("\r\n","\n"));
+  }
 
   @Test
   def testRenderMultipleGroups = {
@@ -35,17 +72,17 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
     htmlFragment.initialize(context);
 
-    Assert.assertEquals(6, htmlFragment.getBodyElements().size());
+    Assert.assertEquals(8, htmlFragment.getBodyElements().size());
     Assert.assertEquals(3, htmlFragment.getHeadElements().size());
 
-    val html = htmlFragment.getBodyElements().get(5).toHtml(context);
+    val html = htmlFragment.getBodyElements().get(7).toHtml(context);
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              <h3>Group: eobjects.dk</h3>
              <div class="valueDistributionChart" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">1</a></td></tr><tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">1</a></td></tr><tr><td>info</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>8</td></tr>
@@ -56,7 +93,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
              <div class="valueDistributionChart" id="reselem_6">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_7'); return false;" href="#">3</a></td></tr>
+                   <tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_7'); return false;" href="#">1</a></td></tr><tr><td>kaspers</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_8'); return false;" href="#">1</a></td></tr><tr><td>winfried.vanholland</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_9'); return false;" href="#">1</a></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>3</td></tr>
@@ -166,7 +203,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
              <div class="valueDistributionChart" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">3</a></td></tr><tr><td>&lt;blank&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">2</a></td></tr><tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
+                   <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">3</a></td></tr><tr><td>&lt;blank&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">2</a></td></tr><tr><td>info</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>15</td></tr>

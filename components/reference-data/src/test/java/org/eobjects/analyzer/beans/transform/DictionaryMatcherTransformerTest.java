@@ -28,7 +28,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzerResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
@@ -103,25 +103,25 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 		List<AnalyzerResult> results = resultFuture.getResults();
 
 		assertEquals(4, results.size());
-		ValueDistributionResult res = (ValueDistributionResult) results.get(0);
-		assertEquals("eobjects match", res.getColumnName());
-		assertEquals(8, res.getSingleValueDistributionResult().getCount("true").intValue());
-		assertEquals(4, res.getSingleValueDistributionResult().getCount("false").intValue());
+		ValueDistributionAnalyzerResult res = (ValueDistributionAnalyzerResult) results.get(0);
+		assertEquals("eobjects match", res.getName());
+		assertEquals(8, res.getCount("true").intValue());
+		assertEquals(4, res.getCount("false").intValue());
 
-		res = (ValueDistributionResult) results.get(1);
-		assertEquals("apache match", res.getColumnName());
-		assertEquals(2, res.getSingleValueDistributionResult().getCount("true").intValue());
-		assertEquals(10, res.getSingleValueDistributionResult().getCount("false").intValue());
+		res = (ValueDistributionAnalyzerResult) results.get(1);
+		assertEquals("apache match", res.getName());
+		assertEquals(2, res.getCount("true").intValue());
+		assertEquals(10, res.getCount("false").intValue());
 
-		res = (ValueDistributionResult) results.get(2);
-		assertEquals("logging match", res.getColumnName());
-		assertEquals(3, res.getSingleValueDistributionResult().getCount("true").intValue());
-		assertEquals(9, res.getSingleValueDistributionResult().getCount("false").intValue());
+		res = (ValueDistributionAnalyzerResult) results.get(2);
+		assertEquals("logging match", res.getName());
+		assertEquals(3, res.getCount("true").intValue());
+		assertEquals(9, res.getCount("false").intValue());
 
-		res = (ValueDistributionResult) results.get(3);
-		assertEquals("logging match -> number", res.getColumnName());
-		assertEquals(3, res.getSingleValueDistributionResult().getCount("1").intValue());
-		assertEquals(9, res.getSingleValueDistributionResult().getCount("0").intValue());
+		res = (ValueDistributionAnalyzerResult) results.get(3);
+		assertEquals("logging match -> number", res.getName());
+		assertEquals(3, res.getCount("1").intValue());
+		assertEquals(9, res.getCount("0").intValue());
 	}
 
 	public void testTransform() throws Exception {

@@ -19,6 +19,9 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
+import org.eobjects.analyzer.result.ValueCount;
+import org.eobjects.analyzer.result.ValueCountListImpl;
+
 import junit.framework.TestCase;
 
 public class ValueCountListImplTest extends TestCase {

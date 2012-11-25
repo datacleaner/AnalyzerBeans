@@ -1,19 +1,25 @@
 package org.eobjects.analyzer.beans.valuedist
-import scala.collection.JavaConversions.asScalaBuffer
-import scala.collection.JavaConversions.bufferAsJavaList
+import scala.collection.JavaConversions.collectionAsScalaIterable
 import org.eobjects.analyzer.result.html.HeadElement
 import org.eobjects.analyzer.result.html.HtmlRenderingContext
+import org.eobjects.analyzer.result.ValueCountingAnalyzerResult
 import org.eobjects.analyzer.util.LabelUtils
+import org.eobjects.analyzer.result.ValueCount
 
-class ValueDistributionChartScriptHeadElement(result: ValueDistributionGroupResult, chartElementId: String) extends HeadElement {
+class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResult, chartElementId: String) extends HeadElement {
 
   override def toHtml(context: HtmlRenderingContext): String = {
-    val valueCounts = result.getTopValues().getValueCounts() ++ result.getBottomValues().getValueCounts()
-    if (result.getNullCount() > 0) {
-      valueCounts.add(new ValueCount(LabelUtils.NULL_LABEL, result.getNullCount()));
+    val valueCounts = result.getValueCounts();
+    
+    val unexpectedValueCount = result.getUnexpectedValueCount()
+    if (unexpectedValueCount != null && unexpectedValueCount > 0) {
+      valueCounts.add(new ValueCount(LabelUtils.UNEXPECTED_LABEL, unexpectedValueCount));
     }
-    if (result.getUniqueCount() > 0) {
-      valueCounts.add(new ValueCount(LabelUtils.UNIQUE_LABEL, result.getUniqueCount()));
+    
+    val uniqueCount = result.getUniqueCount();
+    if (uniqueCount != null && uniqueCount > 0) {
+      val vc = new ValueCount(LabelUtils.UNIQUE_LABEL, uniqueCount);
+      valueCounts.add(vc);
     }
 
     return """<script type="text/javascript"><!--

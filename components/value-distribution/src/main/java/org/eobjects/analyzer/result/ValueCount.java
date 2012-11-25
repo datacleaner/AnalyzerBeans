@@ -17,11 +17,12 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.valuedist;
+package org.eobjects.analyzer.result;
 
 import java.io.Serializable;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
 import org.eobjects.analyzer.util.NullTolerableComparator;
 import org.eobjects.metamodel.util.BaseObject;
 

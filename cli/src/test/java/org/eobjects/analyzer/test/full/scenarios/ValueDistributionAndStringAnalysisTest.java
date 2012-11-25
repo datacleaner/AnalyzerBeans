@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
-import org.eobjects.analyzer.beans.valuedist.ValueDistributionResult;
+import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzerResult;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
@@ -55,137 +55,136 @@ import org.eobjects.metamodel.schema.Table;
 
 public class ValueDistributionAndStringAnalysisTest extends TestCase {
 
-	public void testScenario() throws Exception {
-		TaskRunner taskRunner = new MultiThreadedTaskRunner(5);
+    public void testScenario() throws Exception {
+        TaskRunner taskRunner = new MultiThreadedTaskRunner(5);
 
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
+        AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+        AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		Datastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
-		DatastoreConnection con = datastore.openConnection();
-		DataContext dc = con.getDataContext();
+        Datastore datastore = TestHelper.createSampleDatabaseDatastore("ds");
+        DatastoreConnection con = datastore.openConnection();
+        DataContext dc = con.getDataContext();
 
-		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
-		analysisJobBuilder.setDatastoreConnection(con);
+        AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
+        analysisJobBuilder.setDatastoreConnection(con);
 
-		Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
-		assertNotNull(table);
+        Table table = dc.getDefaultSchema().getTableByName("EMPLOYEES");
+        assertNotNull(table);
 
-		Column[] columns = table.getColumns();
+        Column[] columns = table.getColumns();
 
-		analysisJobBuilder.addSourceColumns(columns);
+        analysisJobBuilder.addSourceColumns(columns);
 
-		for (InputColumn<?> inputColumn : analysisJobBuilder.getSourceColumns()) {
-			AnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
-					.addAnalyzer(ValueDistributionAnalyzer.class);
-			valueDistribuitionJobBuilder.addInputColumn(inputColumn);
-			valueDistribuitionJobBuilder.setConfiguredProperty("Record unique values", false);
-			valueDistribuitionJobBuilder.setConfiguredProperty("Top n most frequent values", null);
-			valueDistribuitionJobBuilder.setConfiguredProperty("Bottom n most frequent values", null);
-		}
+        for (InputColumn<?> inputColumn : analysisJobBuilder.getSourceColumns()) {
+            AnalyzerJobBuilder<ValueDistributionAnalyzer> valueDistribuitionJobBuilder = analysisJobBuilder
+                    .addAnalyzer(ValueDistributionAnalyzer.class);
+            valueDistribuitionJobBuilder.addInputColumn(inputColumn);
+            valueDistribuitionJobBuilder.setConfiguredProperty("Record unique values", false);
+            valueDistribuitionJobBuilder.setConfiguredProperty("Top n most frequent values", null);
+            valueDistribuitionJobBuilder.setConfiguredProperty("Bottom n most frequent values", null);
+        }
 
-		AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
-		stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(String.class));
+        AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerJob = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
+        stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(String.class));
 
-		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
+        AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
 
-		AnalysisResultFuture resultFuture = runner.run(analysisJob);
+        AnalysisResultFuture resultFuture = runner.run(analysisJob);
 
-		assertFalse(resultFuture.isDone());
+        assertFalse(resultFuture.isDone());
 
-		List<AnalyzerResult> results = resultFuture.getResults();
+        List<AnalyzerResult> results = resultFuture.getResults();
 
-		assertTrue(resultFuture.isDone());
+        assertTrue(resultFuture.isDone());
 
-		// expect 1 result for each column (the value distributions) and 1
-		// result for the string analyzer
-		assertEquals(table.getColumnCount() + 1, results.size());
+        // expect 1 result for each column (the value distributions) and 1
+        // result for the string analyzer
+        assertEquals(table.getColumnCount() + 1, results.size());
 
-		int stringAnalyzerResults = 0;
-		int valueDistributionResults = 0;
+        int stringAnalyzerResults = 0;
+        int valueDistributionResults = 0;
 
-		CrosstabResult stringAnalyzerResult = (CrosstabResult) resultFuture.getResult(stringAnalyzerJob.toAnalyzerJob());
+        CrosstabResult stringAnalyzerResult = (CrosstabResult) resultFuture
+                .getResult(stringAnalyzerJob.toAnalyzerJob());
 
-		for (AnalyzerResult result : results) {
-			if (result instanceof CrosstabResult) {
-				stringAnalyzerResults++;
+        for (AnalyzerResult result : results) {
+            if (result instanceof CrosstabResult) {
+                stringAnalyzerResults++;
 
-				assertTrue(result instanceof CrosstabResult);
-				CrosstabResult cr = (CrosstabResult) result;
-				Crosstab<?> crosstab = cr.getCrosstab();
-				assertEquals("[Column, Measures]", Arrays.toString(crosstab.getDimensionNames()));
-				assertEquals("[LASTNAME, FIRSTNAME, EXTENSION, EMAIL, OFFICECODE, JOBTITLE]", crosstab.getDimension(0)
-						.getCategories().toString());
-				assertEquals(
-						"[Row count, Null count, Entirely uppercase count, Entirely lowercase count, Total char count, Max chars, Min chars, Avg chars, Max white spaces, Min white spaces, Avg white spaces, Uppercase chars, Uppercase chars (excl. first letters), Lowercase chars, Digit chars, Diacritic chars, Non-letter chars, Word count, Max words, Min words]",
-						crosstab.getDimension(1).getCategories().toString());
-				CrosstabNavigator<?> nav = crosstab.navigate();
-				nav.where("Column", "EMAIL");
-				nav.where("Measures", "Total char count");
-				assertEquals("655", nav.get().toString());
-			} else {
-				assertTrue(result instanceof ValueDistributionResult);
+                assertTrue(result instanceof CrosstabResult);
+                CrosstabResult cr = (CrosstabResult) result;
+                Crosstab<?> crosstab = cr.getCrosstab();
+                assertEquals("[Column, Measures]", Arrays.toString(crosstab.getDimensionNames()));
+                assertEquals("[LASTNAME, FIRSTNAME, EXTENSION, EMAIL, OFFICECODE, JOBTITLE]", crosstab.getDimension(0)
+                        .getCategories().toString());
+                assertEquals(
+                        "[Row count, Null count, Entirely uppercase count, Entirely lowercase count, Total char count, Max chars, Min chars, Avg chars, Max white spaces, Min white spaces, Avg white spaces, Uppercase chars, Uppercase chars (excl. first letters), Lowercase chars, Digit chars, Diacritic chars, Non-letter chars, Word count, Max words, Min words]",
+                        crosstab.getDimension(1).getCategories().toString());
+                CrosstabNavigator<?> nav = crosstab.navigate();
+                nav.where("Column", "EMAIL");
+                nav.where("Measures", "Total char count");
+                assertEquals("655", nav.get().toString());
+            } else {
+                assertTrue(result instanceof ValueDistributionAnalyzerResult);
 
-				valueDistributionResults++;
-			}
-		}
+                valueDistributionResults++;
+            }
+        }
 
-		assertEquals(1, stringAnalyzerResults);
-		assertEquals(8, valueDistributionResults);
+        assertEquals(1, stringAnalyzerResults);
+        assertEquals(8, valueDistributionResults);
 
-		ValueDistributionResult jobTitleResult = null;
-		ValueDistributionResult lastnameResult = null;
-		for (AnalyzerResult result : results) {
-			if (result instanceof ValueDistributionResult) {
-				ValueDistributionResult vdResult = (ValueDistributionResult) result;
-				if ("JOBTITLE".equals(vdResult.getColumnName())) {
-					jobTitleResult = vdResult;
-				} else if ("LASTNAME".equals(vdResult.getColumnName())) {
-					lastnameResult = vdResult;
-				}
-			}
-		}
+        ValueDistributionAnalyzerResult jobTitleResult = null;
+        ValueDistributionAnalyzerResult lastnameResult = null;
+        for (AnalyzerResult result : results) {
+            if (result instanceof ValueDistributionAnalyzerResult) {
+                ValueDistributionAnalyzerResult vdResult = (ValueDistributionAnalyzerResult) result;
+                if ("JOBTITLE".equals(vdResult.getName())) {
+                    jobTitleResult = vdResult;
+                } else if ("LASTNAME".equals(vdResult.getName())) {
+                    lastnameResult = vdResult;
+                }
+            }
+        }
 
-		assertNotNull(jobTitleResult);
-		assertNotNull(lastnameResult);
+        assertNotNull(jobTitleResult);
+        assertNotNull(lastnameResult);
 
-		assertEquals("Patterson", lastnameResult.getSingleValueDistributionResult().getTopValues().getValueCounts().get(0)
-				.getValue());
-		assertEquals(3, lastnameResult.getSingleValueDistributionResult().getTopValues().getValueCounts().get(0).getCount());
-		assertEquals(16, lastnameResult.getSingleValueDistributionResult().getUniqueCount());
-		assertEquals(0, lastnameResult.getSingleValueDistributionResult().getNullCount());
+        assertEquals("Patterson", lastnameResult.getValueCounts().iterator().next().getValue());
+        assertEquals(3, lastnameResult.getValueCounts().iterator().next().getCount());
+        assertEquals(16, lastnameResult.getUniqueCount().intValue());
+        assertEquals(0, lastnameResult.getNullCount());
 
-		assertEquals("Sales Rep", jobTitleResult.getSingleValueDistributionResult().getTopValues().getValueCounts().get(0)
-				.getValue());
+        assertEquals("Sales Rep", jobTitleResult.getValueCounts().iterator().next().getValue());
 
-		String[] resultLines = new CrosstabTextRenderer().render(stringAnalyzerResult).split("\n");
-		assertEquals(
-				"                                        LASTNAME  FIRSTNAME  EXTENSION      EMAIL OFFICECODE   JOBTITLE ",
-				resultLines[0]);
-		assertEquals(
-				"Uppercase chars (excl. first letters)          0          1          0          0          0         39 ",
-				resultLines[13]);
-		assertEquals(
-				"Diacritic chars                                0          0          0          0          0          0 ",
-				resultLines[16]);
+        String[] resultLines = new CrosstabTextRenderer().render(stringAnalyzerResult).split("\n");
+        assertEquals(
+                "                                        LASTNAME  FIRSTNAME  EXTENSION      EMAIL OFFICECODE   JOBTITLE ",
+                resultLines[0]);
+        assertEquals(
+                "Uppercase chars (excl. first letters)          0          1          0          0          0         39 ",
+                resultLines[13]);
+        assertEquals(
+                "Diacritic chars                                0          0          0          0          0          0 ",
+                resultLines[16]);
 
-		// do some drill-to-detail on the StringAnalyzerResult
-		Crosstab<?> crosstab = stringAnalyzerResult.getCrosstab();
+        // do some drill-to-detail on the StringAnalyzerResult
+        Crosstab<?> crosstab = stringAnalyzerResult.getCrosstab();
 
-		ResultProducer resultProducer = crosstab.where("Column", "FIRSTNAME")
-				.where("Measures", "Uppercase chars (excl. first letters)").explore();
-		assertNotNull(resultProducer);
+        ResultProducer resultProducer = crosstab.where("Column", "FIRSTNAME")
+                .where("Measures", "Uppercase chars (excl. first letters)").explore();
+        assertNotNull(resultProducer);
 
-		AnnotatedRowsResult arr = (AnnotatedRowsResult) resultProducer.getResult();
-		InputRow[] rows = arr.getRows();
-		assertEquals(1, rows.length);
-		assertEquals("Foon Yue", rows[0].getValue(analysisJobBuilder.getSourceColumnByName("FIRSTNAME")).toString());
+        AnnotatedRowsResult arr = (AnnotatedRowsResult) resultProducer.getResult();
+        InputRow[] rows = arr.getRows();
+        assertEquals(1, rows.length);
+        assertEquals("Foon Yue", rows[0].getValue(analysisJobBuilder.getSourceColumnByName("FIRSTNAME")).toString());
 
-		resultProducer = crosstab.where("Column", "FIRSTNAME").where("Measures", "Diacritic chars").explore();
-		assertNull(resultProducer);
+        resultProducer = crosstab.where("Column", "FIRSTNAME").where("Measures", "Diacritic chars").explore();
+        assertNull(resultProducer);
 
-		con.close();
-		taskRunner.shutdown();
-	}
+        con.close();
+        taskRunner.shutdown();
+    }
 }

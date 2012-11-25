@@ -28,6 +28,8 @@ import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.result.ValueCount;
+import org.eobjects.analyzer.result.ValueCountListImpl;
 import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
@@ -98,7 +100,7 @@ class ValueDistributionGroup {
         _totalCount += distinctCount;
     }
 
-    public ValueDistributionGroupResult createResult(Integer topFrequentValues, Integer bottomFrequentValues,
+    public SingleValueDistributionResult createResult(Integer topFrequentValues, Integer bottomFrequentValues,
             boolean recordUniqueValues) {
         final ValueCountListImpl topValues;
         final ValueCountListImpl bottomValues;
@@ -167,10 +169,10 @@ class ValueDistributionGroup {
         }
 
         if (recordUniqueValues) {
-            return new ValueDistributionGroupResult(_groupName, topValues, bottomValues, uniqueValues, uniqueCount,
+            return new SingleValueDistributionResult(_groupName, topValues, bottomValues, uniqueValues, uniqueCount,
                     distinctCount, _totalCount, annotations, _nullValueAnnotation, _annotationFactory, _inputColumns);
         } else {
-            return new ValueDistributionGroupResult(_groupName, topValues, bottomValues, uniqueCount, distinctCount,
+            return new SingleValueDistributionResult(_groupName, topValues, bottomValues, uniqueCount, distinctCount,
                     _totalCount, annotations, _nullValueAnnotation, _annotationFactory, _inputColumns);
         }
     }

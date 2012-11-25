@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
+import org.eobjects.analyzer.result.ValueCount;
+
 import junit.framework.TestCase;
 
 public class ValueCountTest extends TestCase {

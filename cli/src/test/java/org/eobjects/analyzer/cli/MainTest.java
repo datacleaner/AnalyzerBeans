@@ -204,7 +204,7 @@ public class MainTest extends TestCase {
         String out = _stringWriter.toString().replaceAll("\r\n", "\n");
         String[] lines = out.split("\n");
 
-        assertTrue(out.indexOf("Top values:\n" + " - company.com: 4\n" + " - eobjects.org: 2") != -1);
+        assertTrue(out.indexOf(" - company.com: 4\n" + " - eobjects.org: 2") != -1);
 
         assertTrue("lines length was: " + lines.length, lines.length > 60);
         assertTrue("lines length was: " + lines.length, lines.length < 90);

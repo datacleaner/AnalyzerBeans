@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @AnalyzerBean("Value distribution")
 @Description("Gets the distributions of values that occur in a dataset.\nOften used as an initial way to see if a lot of repeated values are to be expected, if nulls occur and if a few un-repeated values add exceptions to the typical usage-pattern.")
 @Concurrent(true)
-public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResult> {
+public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionAnalyzerResult> {
 
     private static final Logger logger = LoggerFactory.getLogger(ValueDistributionAnalyzer.class);
 
@@ -69,10 +69,12 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
 
     @Inject
     @Configured(value = "Top n most frequent values", required = false, order = 5)
+    @Deprecated
     Integer _topFrequentValues;
 
     @Inject
     @Configured(value = "Bottom n most frequent values", required = false, order = 6)
+    @Deprecated
     Integer _bottomFrequentValues;
 
     @Inject
@@ -139,7 +141,7 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
     }
 
     public void runInternal(InputRow row, Object value, int distinctCount) {
-        runInternal(row, value, null, distinctCount);
+        runInternal(row, value, _column.getName(), distinctCount);
     }
 
     public void runInternal(InputRow row, Object value, String group, int distinctCount) {
@@ -176,24 +178,24 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
     }
 
     @Override
-    public ValueDistributionResult getResult() {
+    public ValueDistributionAnalyzerResult getResult() {
         if (_groupColumn == null) {
             logger.info("getResult() invoked, processing single group");
-            final ValueDistributionGroup valueDistributionGroup = getValueDistributionGroup(null);
-            final ValueDistributionGroupResult ungroupedResult = valueDistributionGroup.createResult(
+            final ValueDistributionGroup valueDistributionGroup = getValueDistributionGroup(_column.getName());
+            final SingleValueDistributionResult ungroupedResult = valueDistributionGroup.createResult(
                     _topFrequentValues, _bottomFrequentValues, _recordUniqueValues);
-            return new ValueDistributionResult(_column, ungroupedResult);
+            return ungroupedResult;
         } else {
             logger.info("getResult() invoked, processing {} groups", _valueDistributionGroups.size());
 
-            final SortedSet<ValueDistributionGroupResult> groupedResults = new TreeSet<ValueDistributionGroupResult>();
+            final SortedSet<SingleValueDistributionResult> groupedResults = new TreeSet<SingleValueDistributionResult>();
             for (String group : _valueDistributionGroups.keySet()) {
                 final ValueDistributionGroup valueDistributibutionGroup = getValueDistributionGroup(group);
-                final ValueDistributionGroupResult result = valueDistributibutionGroup.createResult(_topFrequentValues,
+                final SingleValueDistributionResult result = valueDistributibutionGroup.createResult(_topFrequentValues,
                         _bottomFrequentValues, _recordUniqueValues);
                 groupedResults.add(result);
             }
-            return new ValueDistributionResult(_column, _groupColumn, groupedResults);
+            return new GroupedValueDistributionResult(_column, _groupColumn, groupedResults);
         }
     }
 
@@ -205,6 +207,13 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
         _collectionFactory = collectionFactory;
     }
 
+    /**
+     * 
+     * @param bottomFrequentValues
+     * @deprecated use of this property is no longer adviced. It will be phased
+     *             out in later versions of AnalyzerBeans
+     */
+    @Deprecated
     public void setBottomFrequentValues(Integer bottomFrequentValues) {
         _bottomFrequentValues = bottomFrequentValues;
     }
@@ -225,6 +234,14 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionResu
         _recordUniqueValues = recordUniqueValues;
     }
 
+    /**
+     * 
+     * @param topFrequentValues
+     * 
+     * @deprecated use of this property is no longer adviced. It will be phased
+     *             out in later versions of AnalyzerBeans
+     */
+    @Deprecated
     public void setTopFrequentValues(Integer topFrequentValues) {
         _topFrequentValues = topFrequentValues;
     }
