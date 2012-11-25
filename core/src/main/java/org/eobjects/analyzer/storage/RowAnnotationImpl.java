@@ -67,8 +67,12 @@ public final class RowAnnotationImpl implements RowAnnotation {
         final ReadObjectBuilder.Adaptor adaptor = new ReadObjectBuilder.Adaptor() {
             @Override
             public void deserialize(GetField getField, Serializable serializable) throws IOException {
-                int count = getField.get("_rowCount", 0);
-                _counter.set(count);
+                try {
+                    int count = getField.get("_rowCount", 0);
+                    _counter.set(count);
+                } catch (IllegalArgumentException e) {
+                    // happens for newer versions of the object type.
+                }
             }
         };
         builder.readObject(stream, adaptor);

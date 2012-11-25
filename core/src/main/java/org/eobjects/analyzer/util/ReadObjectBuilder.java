@@ -104,7 +104,9 @@ public final class ReadObjectBuilder<E extends Serializable> {
             fields = ReflectionUtils.getFields(_clazz, Moved.class);
             deserializeFields(fields, getField);
 
-            adaptor.deserialize(getField, _serializable);
+            if (adaptor != null) {
+                adaptor.deserialize(getField, _serializable);
+            }
         } catch (IOException e) {
             logger.error("Could not deserialize object!", e);
             throw e;

@@ -24,19 +24,28 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.util.ChangeAwareObjectInputStream;
+import org.apache.commons.lang.SerializationUtils;
 
 public class RowAnnotationImplTest extends TestCase {
 
     public void testDeserializeOlderVersion() throws Exception {
         InputStream in = new FileInputStream("src/test/resources/old_row_annotation_impl.ser");
-        ChangeAwareObjectInputStream changeAware = new ChangeAwareObjectInputStream(in);
-        
-        Object obj = changeAware.readObject();
+
+        Object obj = SerializationUtils.deserialize(in);
         in.close();
-        
+
         assertTrue(obj instanceof RowAnnotationImpl);
         RowAnnotationImpl annotation = (RowAnnotationImpl) obj;
         assertEquals(10, annotation.getRowCount());
+    }
+
+    public void testSerializeAndDeserializeCurrentVersion() throws Exception {
+        RowAnnotationImpl annotation1 = new RowAnnotationImpl();
+        annotation1.incrementRowCount(20);
+
+        byte[] bytes = SerializationUtils.serialize(annotation1);
+        RowAnnotationImpl annotation2 = (RowAnnotationImpl) SerializationUtils.deserialize(bytes);
+
+        assertEquals(20, annotation2.getRowCount());
     }
 }
