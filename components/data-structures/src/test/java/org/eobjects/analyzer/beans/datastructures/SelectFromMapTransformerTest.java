@@ -58,10 +58,10 @@ public class SelectFromMapTransformerTest extends TestCase {
 
         final List<Map<String, Object>> nestedList = new ArrayList<Map<String, Object>>();
         final Map<String, Object> address1 = new HashMap<String, Object>();
-        address1.put("street","Warwick Avenue");
+        address1.put("street", "Warwick Avenue");
         nestedList.add(address1);
         final Map<String, Object> address2 = new HashMap<String, Object>();
-        address2.put("street","Fifth Avenue");
+        address2.put("street", "Fifth Avenue");
         nestedList.add(address2);
         map.put("Addresses", nestedList);
 
@@ -69,12 +69,24 @@ public class SelectFromMapTransformerTest extends TestCase {
 
         assertEquals(6, result.length);
         assertEquals("[1001, John, foo@bar.com, Doe, null, Fifth Avenue]", Arrays.toString(result));
-        
+
         nestedList.remove(0);
-        
+
         result = trans.transform(new MockInputRow().put(col, map));
 
         assertEquals(6, result.length);
         assertEquals("[1001, John, foo@bar.com, Doe, null, null]", Arrays.toString(result));
+    }
+
+    public void testFindWithKeyIncludingDotAndNestedMap() throws Exception {
+        final Map<String, Object> nestedMap = new HashMap<String, Object>();
+        nestedMap.put("GivenName", "John");
+        nestedMap.put("FamilyName", "Doe");
+        nestedMap.put("Titulation", "Mr");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("Person.Name", nestedMap);
+
+        assertEquals("John", SelectFromMapTransformer.find(map, "Person.Name.GivenName").toString());
     }
 }
