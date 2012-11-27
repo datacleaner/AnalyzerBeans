@@ -390,7 +390,7 @@
 			<element name="rows" minOccurs="1" maxOccurs="1">
 				<complexType>
 					<sequence>
-						<element name="row" minOccurs="1" maxOccurs="unbounded">
+						<element name="row" minOccurs="0" maxOccurs="unbounded">
 							<complexType>
 								<sequence>
 									<choice>
