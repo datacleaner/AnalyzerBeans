@@ -45,19 +45,19 @@ import org.eobjects.analyzer.util.StringUtils;
 public class ValueMatchAnalyzer implements Analyzer<ValueMatchAnalyzerResult> {
 
     @Inject
-    @Configured
+    @Configured(order=10)
     InputColumn<?> column;
 
     @Inject
-    @Configured
+    @Configured(order=20)
     String[] expectedValues;
 
     @Inject
-    @Configured
+    @Configured(order=30)
     boolean caseSensitiveMatching = true;
 
     @Inject
-    @Configured
+    @Configured(order=31)
     boolean whiteSpaceSensitiveMatching = true;
 
     @Inject
