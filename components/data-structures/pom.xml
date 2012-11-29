@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-components</artifactId>
-		<version>0.23</version>
+		<version>0.24-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-data-structures</artifactId>
 	<description>Components which manipulate rich data structures (lists, maps and more) for AnalyzerBeans</description>
