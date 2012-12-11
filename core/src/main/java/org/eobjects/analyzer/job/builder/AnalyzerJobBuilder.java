@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -56,9 +57,18 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
 
         Set<ConfiguredPropertyDescriptor> inputProperties = descriptor.getConfiguredPropertiesForInput(false);
         if (inputProperties.size() == 1) {
-            _multipleJobsSupported = true;
-            _inputColumns = new ArrayList<InputColumn<?>>();
             _inputProperty = inputProperties.iterator().next();
+            final ColumnProperty columnProperty = _inputProperty.getAnnotation(ColumnProperty.class);
+            if (_inputProperty.isArray()) {
+                // for column-arrays, the default is to escalate to multiple
+                // jobs
+                _multipleJobsSupported = columnProperty == null || columnProperty.escalateToMultipleJobs();
+            } else {
+                // for single columns, the default is NOT to escalate to
+                // multiple jobs
+                _multipleJobsSupported = columnProperty != null && columnProperty.escalateToMultipleJobs();
+            }
+            _inputColumns = new ArrayList<InputColumn<?>>();
         } else {
             _multipleJobsSupported = false;
             _inputColumns = null;

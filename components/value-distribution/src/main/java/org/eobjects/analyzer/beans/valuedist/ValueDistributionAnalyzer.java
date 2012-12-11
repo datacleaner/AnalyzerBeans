@@ -28,6 +28,7 @@ import javax.inject.Inject;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -52,6 +53,7 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionAnal
 
     @Inject
     @Configured(value = "Column", order = 1)
+    @ColumnProperty(escalateToMultipleJobs = true)
     InputColumn<?> _column;
 
     @Inject
@@ -191,8 +193,8 @@ public class ValueDistributionAnalyzer implements Analyzer<ValueDistributionAnal
             final SortedSet<SingleValueDistributionResult> groupedResults = new TreeSet<SingleValueDistributionResult>();
             for (String group : _valueDistributionGroups.keySet()) {
                 final ValueDistributionGroup valueDistributibutionGroup = getValueDistributionGroup(group);
-                final SingleValueDistributionResult result = valueDistributibutionGroup.createResult(_topFrequentValues,
-                        _bottomFrequentValues, _recordUniqueValues);
+                final SingleValueDistributionResult result = valueDistributibutionGroup.createResult(
+                        _topFrequentValues, _bottomFrequentValues, _recordUniqueValues);
                 groupedResults.add(result);
             }
             return new GroupedValueDistributionResult(_column, _groupColumn, groupedResults);

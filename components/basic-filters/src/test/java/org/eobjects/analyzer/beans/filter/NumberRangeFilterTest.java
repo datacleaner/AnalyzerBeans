@@ -36,7 +36,7 @@ public class NumberRangeFilterTest extends TestCase {
         assertEquals(1, inputs.size());
         ConfiguredPropertyDescriptor input = inputs.iterator().next();
         assertEquals(
-                "ConfiguredPropertyDescriptorImpl[field=column,baseType=interface org.eobjects.analyzer.data.InputColumn]",
+                "ConfiguredPropertyDescriptorImpl[name=Column]",
                 input.toString());
 
         assertEquals("java.lang.Number", input.getTypeArgument(0).getName());

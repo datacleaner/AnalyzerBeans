@@ -43,4 +43,10 @@ import org.eobjects.metamodel.schema.Column;
 @Qualifier
 public @interface ColumnProperty {
 
+    /**
+     * Determines if a (single) column property may be used semantically as an
+     * column-array where each array-item represents a new analyzer job with an
+     * otherwise duplicated configuration.
+     */
+    public boolean escalateToMultipleJobs() default false;
 }

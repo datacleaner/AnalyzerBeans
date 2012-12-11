@@ -32,6 +32,7 @@ import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -62,6 +63,7 @@ public class PatternFinderAnalyzer implements Analyzer<PatternFinderResult> {
     public static final String DIMENSION_NAME_PATTERN = "Pattern";
 
     @Configured(order = 1)
+    @ColumnProperty(escalateToMultipleJobs = true)
     InputColumn<String> column;
 
     @Configured(required = false, order = 2)

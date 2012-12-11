@@ -94,6 +94,11 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 		ConfiguredPropertyDescriptorImpl d2 = new ConfiguredPropertyDescriptorImpl(f2, null);
 		assertTrue(d1.compareTo(d2) < 0);
 	}
+	
+	public void testToString() throws Exception {
+	    ConfiguredPropertyDescriptor cp = _descriptor.getConfiguredProperty("Some enum");
+	    assertEquals("ConfiguredPropertyDescriptorImpl[name=Some enum]", cp.toString());
+    }
 
 	public void testEnum() throws Exception {
 		Set<ConfiguredPropertyDescriptor> properties = _descriptor.getConfiguredProperties();

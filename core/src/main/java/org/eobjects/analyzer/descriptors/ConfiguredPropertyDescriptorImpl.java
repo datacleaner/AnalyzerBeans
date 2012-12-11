@@ -30,100 +30,107 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 
-final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements
-		ConfiguredPropertyDescriptor {
-	
-	private static final long serialVersionUID = 1L;
+/**
+ * Default implementation of {@link ConfiguredPropertyDescriptor}.
+ */
+final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor implements ConfiguredPropertyDescriptor {
 
-	protected ConfiguredPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor)
-			throws DescriptorException {
-		super(field, componentDescriptor);
-	}
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	public String getName() {
-		Configured configured = getAnnotation(Configured.class);
-		if (configured != null) {
-			String value = configured.value();
-			if (!StringUtils.isNullOrEmpty(value)) {
-			    return value.trim();
-			}
-		}
-		return ReflectionUtils.explodeCamelCase(super.getName(), true);
-	}
+    protected ConfiguredPropertyDescriptorImpl(Field field, ComponentDescriptor<?> componentDescriptor)
+            throws DescriptorException {
+        super(field, componentDescriptor);
+    }
 
-	@Override
-	public String getDescription() {
-		Description desc = getAnnotation(Description.class);
-		if (desc == null) {
-			return null;
-		}
-		return desc.value();
-	}
+    @Override
+    public String getName() {
+        Configured configured = getAnnotation(Configured.class);
+        if (configured != null) {
+            String value = configured.value();
+            if (!StringUtils.isNullOrEmpty(value)) {
+                return value.trim();
+            }
+        }
+        return ReflectionUtils.explodeCamelCase(super.getName(), true);
+    }
 
-	@Override
-	public boolean isInputColumn() {
-		Class<?> baseType = getBaseType();
-		boolean result = ReflectionUtils.isInputColumn(baseType);
-		return result;
-	}
+    @Override
+    public String getDescription() {
+        Description desc = getAnnotation(Description.class);
+        if (desc == null) {
+            return null;
+        }
+        return desc.value();
+    }
 
-	@Override
-	public boolean isRequired() {
-		Configured configured = getAnnotation(Configured.class);
-		if (configured == null) {
-			return true;
-		}
-		return configured.required();
-	}
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[name=" + getName() + "]";
+    }
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public org.eobjects.analyzer.data.DataTypeFamily getInputColumnDataTypeFamily() {
-		if (isInputColumn()) {
-			int count = getTypeArgumentCount();
-			if (count == 0) {
-				return org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED;
-			}
-			Type typeArgument = getTypeArgument(0);
-			return org.eobjects.analyzer.data.DataTypeFamily.valueOf(typeArgument);
-		}
-		return null;
-	}
+    @Override
+    public boolean isInputColumn() {
+        Class<?> baseType = getBaseType();
+        boolean result = ReflectionUtils.isInputColumn(baseType);
+        return result;
+    }
 
-	@Override
-	public int compareTo(PropertyDescriptor o) {
-		Configured conf1 = getAnnotation(Configured.class);
-		final int order1 = conf1.order();
-		Configured conf2 = o.getAnnotation(Configured.class);
-		final int order2;
-		if (conf2 == null) {
-			order2 = Integer.MAX_VALUE;
-		} else {
-			order2 = conf2.order();
-		}
-		int diff = order1 - order2;
-		if (diff == 0) {
-			return super.compareTo(o);
-		}
-		return diff;
-	}
+    @Override
+    public boolean isRequired() {
+        Configured configured = getAnnotation(Configured.class);
+        if (configured == null) {
+            return true;
+        }
+        return configured.required();
+    }
 
-	@Override
-	public Class<? extends Converter<?>> getCustomConverter() {
-		Convertable convertable = getAnnotation(Convertable.class);
-		if (convertable != null) {
-			return convertable.value();
-		}
-		return null;
-	}
+    @SuppressWarnings("deprecation")
+    @Override
+    public org.eobjects.analyzer.data.DataTypeFamily getInputColumnDataTypeFamily() {
+        if (isInputColumn()) {
+            int count = getTypeArgumentCount();
+            if (count == 0) {
+                return org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED;
+            }
+            Type typeArgument = getTypeArgument(0);
+            return org.eobjects.analyzer.data.DataTypeFamily.valueOf(typeArgument);
+        }
+        return null;
+    }
 
-	@Override
-	public String[] getAliases() {
-		Alias alias = getAnnotation(Alias.class);
-		if (alias == null) {
-			return new String[0];
-		}
-		return alias.value();
-	}
+    @Override
+    public int compareTo(PropertyDescriptor o) {
+        Configured conf1 = getAnnotation(Configured.class);
+        final int order1 = conf1.order();
+        Configured conf2 = o.getAnnotation(Configured.class);
+        final int order2;
+        if (conf2 == null) {
+            order2 = Integer.MAX_VALUE;
+        } else {
+            order2 = conf2.order();
+        }
+        int diff = order1 - order2;
+        if (diff == 0) {
+            return super.compareTo(o);
+        }
+        return diff;
+    }
+
+    @Override
+    public Class<? extends Converter<?>> getCustomConverter() {
+        Convertable convertable = getAnnotation(Convertable.class);
+        if (convertable != null) {
+            return convertable.value();
+        }
+        return null;
+    }
+
+    @Override
+    public String[] getAliases() {
+        Alias alias = getAnnotation(Alias.class);
+        if (alias == null) {
+            return new String[0];
+        }
+        return alias.value();
+    }
 }

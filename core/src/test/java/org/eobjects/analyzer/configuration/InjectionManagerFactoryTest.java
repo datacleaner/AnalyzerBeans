@@ -28,6 +28,7 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
@@ -43,62 +44,62 @@ import org.junit.Ignore;
 
 public class InjectionManagerFactoryTest extends TestCase {
 
-	@Ignore
-	@AnalyzerBean("Fancy analyzer")
-	public static class FancyTransformer implements Analyzer<NumberResult> {
+    @Ignore
+    @AnalyzerBean("Fancy analyzer")
+    public static class FancyTransformer implements Analyzer<NumberResult> {
 
-		@Inject
-		AtomicInteger fancyInjection;
+        @Inject
+        AtomicInteger fancyInjection;
 
-		@Configured
-		InputColumn<String> col;
+        @Configured
+        @ColumnProperty(escalateToMultipleJobs = true)
+        InputColumn<String> col;
 
-		@Override
-		public void run(InputRow row, int distinctCount) {
-		}
+        @Override
+        public void run(InputRow row, int distinctCount) {
+        }
 
-		@Override
-		public NumberResult getResult() {
-			return new NumberResult(fancyInjection.get());
-		}
-	}
+        @Override
+        public NumberResult getResult() {
+            return new NumberResult(fancyInjection.get());
+        }
+    }
 
-	public void testInjectCustomClass() throws Exception {
-		final AtomicBoolean touched = new AtomicBoolean(false);
+    public void testInjectCustomClass() throws Exception {
+        final AtomicBoolean touched = new AtomicBoolean(false);
 
-		final InjectionManager injectionManager = new InjectionManager() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public <E> E getInstance(InjectionPoint<E> injectionPoint) {
-				touched.set(true);
-				assertEquals(AtomicInteger.class, injectionPoint.getBaseType());
-				return (E) new AtomicInteger(42);
-			}
-		};
+        final InjectionManager injectionManager = new InjectionManager() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public <E> E getInstance(InjectionPoint<E> injectionPoint) {
+                touched.set(true);
+                assertEquals(AtomicInteger.class, injectionPoint.getBaseType());
+                return (E) new AtomicInteger(42);
+            }
+        };
 
-		final InjectionManagerFactory injectionManagerFactory = new InjectionManagerFactory() {
-			@Override
-			public InjectionManager getInjectionManager(AnalyzerBeansConfiguration conf, AnalysisJob job) {
-				return injectionManager;
-			}
-		};
+        final InjectionManagerFactory injectionManagerFactory = new InjectionManagerFactory() {
+            @Override
+            public InjectionManager getInjectionManager(AnalyzerBeansConfiguration conf, AnalysisJob job) {
+                return injectionManager;
+            }
+        };
 
-		final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl().replace(
-				new DatastoreCatalogImpl(TestHelper.createSampleDatabaseDatastore("orderdb"))).replace(
-				injectionManagerFactory);
+        final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl().replace(
+                new DatastoreCatalogImpl(TestHelper.createSampleDatabaseDatastore("orderdb"))).replace(
+                injectionManagerFactory);
 
-		final AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
-		ajb.setDatastore("orderdb");
-		ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
+        final AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
+        ajb.setDatastore("orderdb");
+        ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
 
-		final AnalyzerJobBuilder<FancyTransformer> analyzerBuilder = ajb
-				.addAnalyzer(FancyTransformer.class);
-		analyzerBuilder.addInputColumns(ajb.getSourceColumns());
+        final AnalyzerJobBuilder<FancyTransformer> analyzerBuilder = ajb.addAnalyzer(FancyTransformer.class);
+        analyzerBuilder.addInputColumns(ajb.getSourceColumns());
 
-		final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());
-		assertTrue(result.isSuccessful());
-		assertTrue(touched.get());
-		assertEquals("42", result.getResults().get(0).toString());
+        final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());
+        assertTrue(result.isSuccessful());
+        assertTrue(touched.get());
+        assertEquals("42", result.getResults().get(0).toString());
 
-	}
+    }
 }
