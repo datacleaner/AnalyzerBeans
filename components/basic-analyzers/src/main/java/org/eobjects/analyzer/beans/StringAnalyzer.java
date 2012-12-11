@@ -73,6 +73,7 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 	public static final String MEASURE_TOTAL_CHAR_COUNT = "Total char count";
 	public static final String MEASURE_ENTIRELY_LOWERCASE_COUNT = "Entirely lowercase count";
 	public static final String MEASURE_ENTIRELY_UPPERCASE_COUNT = "Entirely uppercase count";
+	public static final String MEASURE_BLANK_COUNT = "Blank count";
 	public static final String MEASURE_NULL_COUNT = "Null count";
 	public static final String MEASURE_ROW_COUNT = "Row count";
 
@@ -118,6 +119,7 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 		CrosstabDimension measureDimension = new CrosstabDimension(DIMENSION_MEASURES);
 		measureDimension.addCategory(MEASURE_ROW_COUNT);
 		measureDimension.addCategory(MEASURE_NULL_COUNT);
+		measureDimension.addCategory(MEASURE_BLANK_COUNT);
 		measureDimension.addCategory(MEASURE_ENTIRELY_UPPERCASE_COUNT);
 		measureDimension.addCategory(MEASURE_ENTIRELY_LOWERCASE_COUNT);
 		measureDimension.addCategory(MEASURE_TOTAL_CHAR_COUNT);
@@ -150,6 +152,7 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 
 			final Integer numRows = delegate.getNumRows();
 			final Integer numNull = delegate.getNumNull();
+			final Integer numBlank = delegate.getNumBlank();
 			final Integer numEntirelyUppercase = delegate.getNumEntirelyUppercase();
 			final Integer numEntirelyLowercase = delegate.getNumEntirelyLowercase();
 			final Integer numChars = delegate.getNumChars();
@@ -187,6 +190,11 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 			if (numNull > 0) {
 				addAttachment(nav, delegate.getNullAnnotation(), column);
 			}
+			
+			nav.where(measureDimension, MEASURE_BLANK_COUNT).put(numBlank);
+            if (numBlank > 0) {
+                addAttachment(nav, delegate.getBlankAnnotation(), column);
+            }
 
 			nav.where(measureDimension, MEASURE_ENTIRELY_UPPERCASE_COUNT).put(numEntirelyUppercase);
 			if (numEntirelyUppercase > 0) {

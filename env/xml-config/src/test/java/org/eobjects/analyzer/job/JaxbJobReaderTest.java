@@ -302,12 +302,13 @@ public class JaxbJobReaderTest extends TestCase {
         CrosstabResult crosstabResult = (CrosstabResult) results.get(0);
 
         String[] resultLines = crosstabResult.toString(-1).split("\n");
-        assertEquals(81, resultLines.length);
+        assertEquals(85, resultLines.length);
         assertEquals("Crosstab:", resultLines[0]);
         assertEquals("FIRSTNAME,Avg chars: 5.391304347826087", resultLines[1]);
         assertEquals("FIRSTNAME,Avg white spaces: 0.043478260869565216", resultLines[2]);
-        assertEquals("FIRSTNAME,Diacritic chars: 0", resultLines[3]);
-        assertEquals("FIRSTNAME,Digit chars: 0", resultLines[4]);
+        assertEquals("FIRSTNAME,Blank count: 0", resultLines[3]);
+        assertEquals("FIRSTNAME,Diacritic chars: 0", resultLines[4]);
+        assertEquals("FIRSTNAME,Digit chars: 0", resultLines[5]);
     }
 
     public void testUsingSourceColumnMapping() throws Throwable {

@@ -119,7 +119,7 @@ public class ValueDistributionAndStringAnalysisTest extends TestCase {
                 assertEquals("[LASTNAME, FIRSTNAME, EXTENSION, EMAIL, OFFICECODE, JOBTITLE]", crosstab.getDimension(0)
                         .getCategories().toString());
                 assertEquals(
-                        "[Row count, Null count, Entirely uppercase count, Entirely lowercase count, Total char count, Max chars, Min chars, Avg chars, Max white spaces, Min white spaces, Avg white spaces, Uppercase chars, Uppercase chars (excl. first letters), Lowercase chars, Digit chars, Diacritic chars, Non-letter chars, Word count, Max words, Min words]",
+                        "[Row count, Null count, Blank count, Entirely uppercase count, Entirely lowercase count, Total char count, Max chars, Min chars, Avg chars, Max white spaces, Min white spaces, Avg white spaces, Uppercase chars, Uppercase chars (excl. first letters), Lowercase chars, Digit chars, Diacritic chars, Non-letter chars, Word count, Max words, Min words]",
                         crosstab.getDimension(1).getCategories().toString());
                 CrosstabNavigator<?> nav = crosstab.navigate();
                 nav.where("Column", "EMAIL");
@@ -164,10 +164,10 @@ public class ValueDistributionAndStringAnalysisTest extends TestCase {
                 resultLines[0]);
         assertEquals(
                 "Uppercase chars (excl. first letters)          0          1          0          0          0         39 ",
-                resultLines[13]);
+                resultLines[14]);
         assertEquals(
                 "Diacritic chars                                0          0          0          0          0          0 ",
-                resultLines[16]);
+                resultLines[17]);
 
         // do some drill-to-detail on the StringAnalyzerResult
         Crosstab<?> crosstab = stringAnalyzerResult.getCrosstab();

@@ -36,336 +36,351 @@ import org.eobjects.analyzer.util.CharIterator;
  */
 final class StringAnalyzerColumnDelegate {
 
-	private final RowAnnotationFactory _annotationFactory;
-	private final AverageBuilder _charAverageBuilder = new AverageBuilder();
-	private final AverageBuilder _whitespaceAverageBuilder = new AverageBuilder();
-	private final RowAnnotation _nullAnnotation;
-	private final RowAnnotation _entirelyUppercaseAnnotation;
-	private final RowAnnotation _entirelyLowercaseAnnotation;
-	private final RowAnnotation _maxCharsAnnotation;
-	private final RowAnnotation _minCharsAnnotation;
-	private final RowAnnotation _maxWhitespaceAnnotation;
-	private final RowAnnotation _minWhitespaceAnnotation;
-	private final RowAnnotation _uppercaseExclFirstLetterAnnotation;
-	private final RowAnnotation _digitAnnotation;
-	private final RowAnnotation _diacriticAnnotation;
-	private final RowAnnotation _maxWordsAnnotation;
-	private final RowAnnotation _minWordsAnnotation;
-	private volatile int _numRows;
-	private volatile int _numEntirelyUppercase;
-	private volatile int _numEntirelyLowercase;
-	private volatile int _numChars;
-	private volatile Integer _minChars;
-	private volatile Integer _maxChars;
-	private volatile Integer _minWhitespace;
-	private volatile Integer _maxWhitespace;
-	private volatile int _numUppercase;
-	private volatile int _numUppercaseExclFirstLetter;
-	private volatile int _numLowercase;
-	private volatile int _numDigit;
-	private volatile int _numDiacritics;
-	private volatile int _numNonLetter;
-	private volatile int _numWords;
-	private volatile Integer _maxWords;
-	private volatile Integer _minWords;
+    private final RowAnnotationFactory _annotationFactory;
+    private final AverageBuilder _charAverageBuilder = new AverageBuilder();
+    private final AverageBuilder _whitespaceAverageBuilder = new AverageBuilder();
+    private final RowAnnotation _nullAnnotation;
+    private final RowAnnotation _blankAnnotation;
+    private final RowAnnotation _entirelyUppercaseAnnotation;
+    private final RowAnnotation _entirelyLowercaseAnnotation;
+    private final RowAnnotation _maxCharsAnnotation;
+    private final RowAnnotation _minCharsAnnotation;
+    private final RowAnnotation _maxWhitespaceAnnotation;
+    private final RowAnnotation _minWhitespaceAnnotation;
+    private final RowAnnotation _uppercaseExclFirstLetterAnnotation;
+    private final RowAnnotation _digitAnnotation;
+    private final RowAnnotation _diacriticAnnotation;
+    private final RowAnnotation _maxWordsAnnotation;
+    private final RowAnnotation _minWordsAnnotation;
+    private volatile int _numRows;
+    private volatile int _numEntirelyUppercase;
+    private volatile int _numEntirelyLowercase;
+    private volatile int _numChars;
+    private volatile Integer _minChars;
+    private volatile Integer _maxChars;
+    private volatile Integer _minWhitespace;
+    private volatile Integer _maxWhitespace;
+    private volatile int _numUppercase;
+    private volatile int _numUppercaseExclFirstLetter;
+    private volatile int _numLowercase;
+    private volatile int _numDigit;
+    private volatile int _numDiacritics;
+    private volatile int _numNonLetter;
+    private volatile int _numWords;
+    private volatile Integer _maxWords;
+    private volatile Integer _minWords;
 
-	public StringAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory) {
-		_annotationFactory = annotationFactory;
-		_nullAnnotation = annotationFactory.createAnnotation();
-		_entirelyUppercaseAnnotation = annotationFactory.createAnnotation();
-		_entirelyLowercaseAnnotation = annotationFactory.createAnnotation();
-		_maxCharsAnnotation = annotationFactory.createAnnotation();
-		_minCharsAnnotation = annotationFactory.createAnnotation();
-		_maxWhitespaceAnnotation = annotationFactory.createAnnotation();
-		_minWhitespaceAnnotation = annotationFactory.createAnnotation();
-		_uppercaseExclFirstLetterAnnotation = annotationFactory.createAnnotation();
-		_digitAnnotation = annotationFactory.createAnnotation();
-		_diacriticAnnotation = annotationFactory.createAnnotation();
-		_maxWordsAnnotation = annotationFactory.createAnnotation();
-		_minWordsAnnotation = annotationFactory.createAnnotation();
-	}
+    public StringAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory) {
+        _annotationFactory = annotationFactory;
+        _nullAnnotation = annotationFactory.createAnnotation();
+        _blankAnnotation = annotationFactory.createAnnotation();
+        _entirelyUppercaseAnnotation = annotationFactory.createAnnotation();
+        _entirelyLowercaseAnnotation = annotationFactory.createAnnotation();
+        _maxCharsAnnotation = annotationFactory.createAnnotation();
+        _minCharsAnnotation = annotationFactory.createAnnotation();
+        _maxWhitespaceAnnotation = annotationFactory.createAnnotation();
+        _minWhitespaceAnnotation = annotationFactory.createAnnotation();
+        _uppercaseExclFirstLetterAnnotation = annotationFactory.createAnnotation();
+        _digitAnnotation = annotationFactory.createAnnotation();
+        _diacriticAnnotation = annotationFactory.createAnnotation();
+        _maxWordsAnnotation = annotationFactory.createAnnotation();
+        _minWordsAnnotation = annotationFactory.createAnnotation();
+    }
 
-	public synchronized void run(InputRow row, final String value, int distinctCount) {
-		_numRows += distinctCount;
+    public synchronized void run(InputRow row, final String value, int distinctCount) {
+        _numRows += distinctCount;
 
-		if (value == null) {
-			_annotationFactory.annotate(row, distinctCount, _nullAnnotation);
-		} else {
-			int numChars = value.length();
-			int totalChars = numChars * distinctCount;
-			int numWords = new StringTokenizer(value).countTokens();
-			int totalWords = numWords * distinctCount;
+        if (value == null) {
+            _annotationFactory.annotate(row, distinctCount, _nullAnnotation);
+        } else {
+            final int numChars = value.length();
 
-			int numWhitespace = 0;
-			int numDigits = 0;
-			int numDiacritics = 0;
-			int numLetters = 0;
-			int numNonLetters = 0;
-			int numUppercase = 0;
-			int numUppercaseExclFirstLetter = 0;
-			int numLowercase = 0;
+            if (numChars == 0) {
+                _annotationFactory.annotate(row, distinctCount, _blankAnnotation);
+            }
 
-			boolean firstLetter = true;
-			CharIterator it = new CharIterator(value);
-			while (it.hasNext()) {
-				it.next();
-				if (it.isLetter()) {
-					numLetters += distinctCount;
-					if (it.isUpperCase()) {
-						numUppercase += distinctCount;
-						if (!firstLetter) {
-							numUppercaseExclFirstLetter += distinctCount;
-						}
-					} else {
-						numLowercase += distinctCount;
-					}
-					if (it.isDiacritic()) {
-						numDiacritics += distinctCount;
-					}
-					firstLetter = false;
-				} else {
-					numNonLetters += distinctCount;
-					if (it.isDigit()) {
-						numDigits += distinctCount;
-					}
-					if (it.isWhitespace()) {
-						numWhitespace++;
-					}
-					if (it.is('.')) {
-						firstLetter = true;
-					}
-				}
-			}
+            final int totalChars = numChars * distinctCount;
+            final int numWords = new StringTokenizer(value).countTokens();
+            final int totalWords = numWords * distinctCount;
 
-			_numUppercase += +numUppercase;
-			if (numUppercaseExclFirstLetter > 0) {
-				_annotationFactory.annotate(row, distinctCount, _uppercaseExclFirstLetterAnnotation);
-				_numUppercaseExclFirstLetter += numUppercaseExclFirstLetter;
-			}
-			_numLowercase += numLowercase;
-			_numNonLetter += numNonLetters;
+            int numWhitespace = 0;
+            int numDigits = 0;
+            int numDiacritics = 0;
+            int numLetters = 0;
+            int numNonLetters = 0;
+            int numUppercase = 0;
+            int numUppercaseExclFirstLetter = 0;
+            int numLowercase = 0;
 
-			if (_minChars == null) {
-				// This is the first time we encounter a non-null value, so
-				// we just set all counters
-				_minChars = numChars;
-				_maxChars = numChars;
-				_minWords = numWords;
-				_maxWords = numWords;
-				_minWhitespace = numWhitespace;
-				_maxWhitespace = numWhitespace;
-			}
+            boolean firstLetter = true;
+            CharIterator it = new CharIterator(value);
+            while (it.hasNext()) {
+                it.next();
+                if (it.isLetter()) {
+                    numLetters += distinctCount;
+                    if (it.isUpperCase()) {
+                        numUppercase += distinctCount;
+                        if (!firstLetter) {
+                            numUppercaseExclFirstLetter += distinctCount;
+                        }
+                    } else {
+                        numLowercase += distinctCount;
+                    }
+                    if (it.isDiacritic()) {
+                        numDiacritics += distinctCount;
+                    }
+                    firstLetter = false;
+                } else {
+                    numNonLetters += distinctCount;
+                    if (it.isDigit()) {
+                        numDigits += distinctCount;
+                    }
+                    if (it.isWhitespace()) {
+                        numWhitespace++;
+                    }
+                    if (it.is('.')) {
+                        firstLetter = true;
+                    }
+                }
+            }
 
-			_numChars += totalChars;
-			_numWords += totalWords;
+            _numUppercase += +numUppercase;
+            if (numUppercaseExclFirstLetter > 0) {
+                _annotationFactory.annotate(row, distinctCount, _uppercaseExclFirstLetterAnnotation);
+                _numUppercaseExclFirstLetter += numUppercaseExclFirstLetter;
+            }
+            _numLowercase += numLowercase;
+            _numNonLetter += numNonLetters;
 
-			if (numDiacritics > 0) {
-				_numDiacritics += numDiacritics;
-				_annotationFactory.annotate(row, distinctCount, _diacriticAnnotation);
-			}
+            if (_minChars == null) {
+                // This is the first time we encounter a non-null value, so
+                // we just set all counters
+                _minChars = numChars;
+                _maxChars = numChars;
+                _minWords = numWords;
+                _maxWords = numWords;
+                _minWhitespace = numWhitespace;
+                _maxWhitespace = numWhitespace;
+            }
 
-			if (numDigits > 0) {
-				_numDigit += numDigits;
-				_annotationFactory.annotate(row, distinctCount, _digitAnnotation);
-			}
+            _numChars += totalChars;
+            _numWords += totalWords;
 
-			if (_maxChars < numChars) {
-				_annotationFactory.reset(_maxCharsAnnotation);
-				_maxChars = numChars;
-			}
-			if (_maxChars == numChars) {
-				_annotationFactory.annotate(row, distinctCount, _maxCharsAnnotation);
-			}
+            if (numDiacritics > 0) {
+                _numDiacritics += numDiacritics;
+                _annotationFactory.annotate(row, distinctCount, _diacriticAnnotation);
+            }
 
-			if (_minChars > numChars) {
-				_annotationFactory.reset(_minCharsAnnotation);
-				_minChars = numChars;
-			}
-			if (_minChars == numChars) {
-				_annotationFactory.annotate(row, distinctCount, _minCharsAnnotation);
-			}
+            if (numDigits > 0) {
+                _numDigit += numDigits;
+                _annotationFactory.annotate(row, distinctCount, _digitAnnotation);
+            }
 
-			if (_maxWords < numWords) {
-				_maxWords = numWords;
-				_annotationFactory.reset(_maxWordsAnnotation);
-			}
-			if (_maxWords == numWords) {
-				_annotationFactory.annotate(row, distinctCount, _maxWordsAnnotation);
-			}
-			if (_minWords > numWords) {
-				_minWords = numWords;
-				_annotationFactory.reset(_minWordsAnnotation);
-			}
-			if (_minWords == numWords) {
-				_annotationFactory.annotate(row, distinctCount, _minWordsAnnotation);
-			}
+            if (_maxChars < numChars) {
+                _annotationFactory.reset(_maxCharsAnnotation);
+                _maxChars = numChars;
+            }
+            if (_maxChars == numChars) {
+                _annotationFactory.annotate(row, distinctCount, _maxCharsAnnotation);
+            }
 
-			if (_maxWhitespace < numWhitespace) {
-				_maxWhitespace = numWhitespace;
-				_annotationFactory.reset(_maxWhitespaceAnnotation);
-			}
-			if (_maxWhitespace == numWhitespace) {
-				_annotationFactory.annotate(row, distinctCount, _maxWhitespaceAnnotation);
-			}
+            if (_minChars > numChars) {
+                _annotationFactory.reset(_minCharsAnnotation);
+                _minChars = numChars;
+            }
+            if (_minChars == numChars) {
+                _annotationFactory.annotate(row, distinctCount, _minCharsAnnotation);
+            }
 
-			if (_minWhitespace > numWhitespace) {
-				_minWhitespace = numWhitespace;
-				_annotationFactory.reset(_minWhitespaceAnnotation);
-			}
-			if (_minWhitespace == numWhitespace) {
-				_annotationFactory.annotate(row, distinctCount, _minWhitespaceAnnotation);
-			}
+            if (_maxWords < numWords) {
+                _maxWords = numWords;
+                _annotationFactory.reset(_maxWordsAnnotation);
+            }
+            if (_maxWords == numWords) {
+                _annotationFactory.annotate(row, distinctCount, _maxWordsAnnotation);
+            }
+            if (_minWords > numWords) {
+                _minWords = numWords;
+                _annotationFactory.reset(_minWordsAnnotation);
+            }
+            if (_minWords == numWords) {
+                _annotationFactory.annotate(row, distinctCount, _minWordsAnnotation);
+            }
 
-			if (numLetters > 0) {
-				if (isEntirelyUpperCase(value)) {
-					_numEntirelyUppercase += distinctCount;
-					_annotationFactory.annotate(row, distinctCount, _entirelyUppercaseAnnotation);
-				}
+            if (_maxWhitespace < numWhitespace) {
+                _maxWhitespace = numWhitespace;
+                _annotationFactory.reset(_maxWhitespaceAnnotation);
+            }
+            if (_maxWhitespace == numWhitespace) {
+                _annotationFactory.annotate(row, distinctCount, _maxWhitespaceAnnotation);
+            }
 
-				if (isEntirelyLowerCase(value)) {
-					_numEntirelyLowercase += distinctCount;
-					_annotationFactory.annotate(row, distinctCount, _entirelyLowercaseAnnotation);
-				}
-			}
+            if (_minWhitespace > numWhitespace) {
+                _minWhitespace = numWhitespace;
+                _annotationFactory.reset(_minWhitespaceAnnotation);
+            }
+            if (_minWhitespace == numWhitespace) {
+                _annotationFactory.annotate(row, distinctCount, _minWhitespaceAnnotation);
+            }
 
-			_charAverageBuilder.addValue(numChars);
-			_whitespaceAverageBuilder.addValue(numWhitespace);
-		}
-	}
+            if (numLetters > 0) {
+                if (isEntirelyUpperCase(value)) {
+                    _numEntirelyUppercase += distinctCount;
+                    _annotationFactory.annotate(row, distinctCount, _entirelyUppercaseAnnotation);
+                }
 
-	protected static boolean isEntirelyLowerCase(String value) {
-		return value.equals(value.toLowerCase());
-	}
+                if (isEntirelyLowerCase(value)) {
+                    _numEntirelyLowercase += distinctCount;
+                    _annotationFactory.annotate(row, distinctCount, _entirelyLowercaseAnnotation);
+                }
+            }
 
-	protected static boolean isEntirelyUpperCase(String value) {
-		return value.equals(value.toUpperCase());
-	}
+            _charAverageBuilder.addValue(numChars);
+            _whitespaceAverageBuilder.addValue(numWhitespace);
+        }
+    }
 
-	public int getNumRows() {
-		return _numRows;
-	}
+    protected static boolean isEntirelyLowerCase(String value) {
+        return value.equals(value.toLowerCase());
+    }
 
-	public int getNumNull() {
-		return _nullAnnotation.getRowCount();
-	}
+    protected static boolean isEntirelyUpperCase(String value) {
+        return value.equals(value.toUpperCase());
+    }
 
-	public int getNumEntirelyUppercase() {
-		return _numEntirelyUppercase;
-	}
+    public int getNumRows() {
+        return _numRows;
+    }
 
-	public int getNumEntirelyLowercase() {
-		return _numEntirelyLowercase;
-	}
+    public int getNumNull() {
+        return _nullAnnotation.getRowCount();
+    }
 
-	public int getNumChars() {
-		return _numChars;
-	}
+    public int getNumEntirelyUppercase() {
+        return _numEntirelyUppercase;
+    }
 
-	public Integer getMinChars() {
-		return _minChars;
-	}
+    public int getNumEntirelyLowercase() {
+        return _numEntirelyLowercase;
+    }
 
-	public Integer getMaxChars() {
-		return _maxChars;
-	}
+    public int getNumChars() {
+        return _numChars;
+    }
 
-	public Integer getMinWhitespace() {
-		return _minWhitespace;
-	}
+    public Integer getMinChars() {
+        return _minChars;
+    }
 
-	public Integer getMaxWhitespace() {
-		return _maxWhitespace;
-	}
+    public Integer getMaxChars() {
+        return _maxChars;
+    }
 
-	public int getNumUppercase() {
-		return _numUppercase;
-	}
+    public Integer getMinWhitespace() {
+        return _minWhitespace;
+    }
 
-	public int getNumUppercaseExclFirstLetter() {
-		return _numUppercaseExclFirstLetter;
-	}
+    public Integer getMaxWhitespace() {
+        return _maxWhitespace;
+    }
 
-	public int getNumLowercase() {
-		return _numLowercase;
-	}
+    public int getNumUppercase() {
+        return _numUppercase;
+    }
 
-	public int getNumDigit() {
-		return _numDigit;
-	}
+    public int getNumUppercaseExclFirstLetter() {
+        return _numUppercaseExclFirstLetter;
+    }
 
-	public int getNumDiacritics() {
-		return _numDiacritics;
-	}
+    public int getNumLowercase() {
+        return _numLowercase;
+    }
 
-	public int getNumNonLetter() {
-		return _numNonLetter;
-	}
+    public int getNumDigit() {
+        return _numDigit;
+    }
 
-	public int getNumWords() {
-		return _numWords;
-	}
+    public int getNumDiacritics() {
+        return _numDiacritics;
+    }
 
-	public Integer getMinWords() {
-		return _minWords;
-	}
+    public int getNumNonLetter() {
+        return _numNonLetter;
+    }
 
-	public Integer getMaxWords() {
-		return _maxWords;
-	}
+    public int getNumWords() {
+        return _numWords;
+    }
 
-	public AverageBuilder getCharAverageBuilder() {
-		return _charAverageBuilder;
-	}
+    public Integer getMinWords() {
+        return _minWords;
+    }
 
-	public AverageBuilder getWhitespaceAverageBuilder() {
-		return _whitespaceAverageBuilder;
-	}
+    public Integer getMaxWords() {
+        return _maxWords;
+    }
 
-	public RowAnnotation getNullAnnotation() {
-		return _nullAnnotation;
-	}
+    public AverageBuilder getCharAverageBuilder() {
+        return _charAverageBuilder;
+    }
 
-	public RowAnnotation getEntirelyUppercaseAnnotation() {
-		return _entirelyUppercaseAnnotation;
-	}
+    public AverageBuilder getWhitespaceAverageBuilder() {
+        return _whitespaceAverageBuilder;
+    }
 
-	public RowAnnotation getEntirelyLowercaseAnnotation() {
-		return _entirelyLowercaseAnnotation;
-	}
+    public RowAnnotation getNullAnnotation() {
+        return _nullAnnotation;
+    }
+    
+    public RowAnnotation getBlankAnnotation() {
+        return _blankAnnotation;
+    }
 
-	public RowAnnotation getMaxCharsAnnotation() {
-		return _maxCharsAnnotation;
-	}
+    public RowAnnotation getEntirelyUppercaseAnnotation() {
+        return _entirelyUppercaseAnnotation;
+    }
 
-	public RowAnnotation getMinCharsAnnotation() {
-		return _minCharsAnnotation;
-	}
+    public RowAnnotation getEntirelyLowercaseAnnotation() {
+        return _entirelyLowercaseAnnotation;
+    }
 
-	public RowAnnotation getMaxWhitespaceAnnotation() {
-		return _maxWhitespaceAnnotation;
-	}
+    public RowAnnotation getMaxCharsAnnotation() {
+        return _maxCharsAnnotation;
+    }
 
-	public RowAnnotation getMinWhitespaceAnnotation() {
-		return _minWhitespaceAnnotation;
-	}
+    public RowAnnotation getMinCharsAnnotation() {
+        return _minCharsAnnotation;
+    }
 
-	public RowAnnotation getUppercaseExclFirstLetterAnnotation() {
-		return _uppercaseExclFirstLetterAnnotation;
-	}
+    public RowAnnotation getMaxWhitespaceAnnotation() {
+        return _maxWhitespaceAnnotation;
+    }
 
-	public RowAnnotation getDigitAnnotation() {
-		return _digitAnnotation;
-	}
+    public RowAnnotation getMinWhitespaceAnnotation() {
+        return _minWhitespaceAnnotation;
+    }
 
-	public RowAnnotation getDiacriticAnnotation() {
-		return _diacriticAnnotation;
-	}
+    public RowAnnotation getUppercaseExclFirstLetterAnnotation() {
+        return _uppercaseExclFirstLetterAnnotation;
+    }
 
-	public RowAnnotation getMaxWordsAnnotation() {
-		return _maxWordsAnnotation;
-	}
+    public RowAnnotation getDigitAnnotation() {
+        return _digitAnnotation;
+    }
 
-	public RowAnnotation getMinWordsAnnotation() {
-		return _minWordsAnnotation;
-	}
+    public RowAnnotation getDiacriticAnnotation() {
+        return _diacriticAnnotation;
+    }
+
+    public RowAnnotation getMaxWordsAnnotation() {
+        return _maxWordsAnnotation;
+    }
+
+    public RowAnnotation getMinWordsAnnotation() {
+        return _minWordsAnnotation;
+    }
+
+    public Integer getNumBlank() {
+        return _blankAnnotation.getRowCount();
+    }
 }

@@ -134,9 +134,9 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 			String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
 
 			assertEquals("                                         EMAIL Username   Domain ", resultLines[0]);
-			assertEquals("Total char count                           655      172      460 ", resultLines[5]);
-			assertEquals("Max chars                                   31       10       20 ", resultLines[6]);
-			assertEquals("Min chars                                   26        5       20 ", resultLines[7]);
+			assertEquals("Total char count                           655      172      460 ", resultLines[6]);
+			assertEquals("Max chars                                   31       10       20 ", resultLines[7]);
+			assertEquals("Min chars                                   26        5       20 ", resultLines[8]);
 
 			// username is a virtual columns, but because of the row-annotation
 			// system it is still possible to drill to detail on it.

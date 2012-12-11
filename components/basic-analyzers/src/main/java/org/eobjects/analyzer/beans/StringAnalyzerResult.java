@@ -133,6 +133,12 @@ public class StringAnalyzerResult extends CrosstabResult {
         return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(StringAnalyzer.DIMENSION_MEASURES, StringAnalyzer.MEASURE_NULL_COUNT).get();
     }
+    
+    @Metric(StringAnalyzer.MEASURE_BLANK_COUNT)
+    public Integer getBlankCount(InputColumn<?> col) {
+        return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(StringAnalyzer.DIMENSION_MEASURES, StringAnalyzer.MEASURE_BLANK_COUNT).safeGet(null);
+    }
 
     @Metric(StringAnalyzer.MEASURE_ROW_COUNT)
     public int getRowCount(InputColumn<?> col) {
