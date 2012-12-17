@@ -334,7 +334,8 @@ public class JaxbPojoDatastoreAdaptor {
         if (value.getClass().isArray()) {
             Class<?> componentType = value.getClass().getComponentType();
             if (componentType.isPrimitive() || componentType == String.class) {
-                // leave the array to be serialized using the string converter - it
+                // leave the array to be serialized using the string converter -
+                // it
                 // will take up much less space.
             } else {
                 value = CollectionUtils.toList(value);
@@ -369,10 +370,14 @@ public class JaxbPojoDatastoreAdaptor {
             return;
         }
 
-        final String stringValue = _converter.serialize(value);
-        elem.setTextContent(stringValue);
-        if (explicitType) {
-            elem.setAttribute("class", value.getClass().getName());
+        try {
+            final String stringValue = _converter.serialize(value);
+            elem.setTextContent(stringValue);
+            if (explicitType) {
+                elem.setAttribute("class", value.getClass().getName());
+            }
+        } catch (RuntimeException e) {
+            logger.warn("Failed to serialize value: " + value + ". Returning null.", e);
         }
         return;
     }
