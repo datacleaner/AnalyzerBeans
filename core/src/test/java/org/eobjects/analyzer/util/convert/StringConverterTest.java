@@ -198,7 +198,7 @@ public class StringConverterTest extends TestCase {
         assertTrue(EqualsBuilder.equals(file1, deserialized));
 
         serialized = stringConverter.serialize(fileAbs);
-        assertEquals(fileAbs.getAbsolutePath(), serialized);
+        assertEquals(fileAbs.getAbsolutePath(), new File(serialized).getAbsolutePath());
 
         File[] arr = new File[] { file1, dir1 };
 

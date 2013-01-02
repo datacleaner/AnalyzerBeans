@@ -143,7 +143,7 @@ public class StandardTypeConverter implements Converter<Object> {
             return toDate(str);
         }
         if (ReflectionUtils.is(type, File.class)) {
-            return new File(str);
+            return new File(str.replace('\\', File.separatorChar));
         }
         if (ReflectionUtils.is(type, Calendar.class)) {
             Date date = toDate(str);
@@ -197,9 +197,9 @@ public class StandardTypeConverter implements Converter<Object> {
         } else if (o instanceof File) {
             File file = (File) o;
             if (file.isAbsolute()) {
-                result = file.getAbsolutePath();
+                result = file.getAbsolutePath().replace('\\','/');
             } else {
-                result = file.getPath();
+                result = file.getPath().replace('\\','/');
             }
         } else if (o instanceof Date) {
             if (o instanceof ExpressionDate) {
