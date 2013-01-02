@@ -401,7 +401,7 @@ public class JaxbPojoDatastoreAdaptor {
         return columnType;
     }
 
-    private PojoTableType createPojoTable(final DataContext dataContext, final Table table, final Column[] usedColumns,
+    public PojoTableType createPojoTable(final DataContext dataContext, final Table table, final Column[] usedColumns,
             final int maxRows) {
         final PojoTableType tableType = new PojoTableType();
         tableType.setName(table.getName());
@@ -435,6 +435,15 @@ public class JaxbPojoDatastoreAdaptor {
         }
 
         return tableType;
+    }
+    
+    public AbstractDatastoreType createPojoDatastore(final String datastoreName, final String schemaName, final Collection<PojoTableType> tables) {
+        final PojoDatastoreType datastoreType = new PojoDatastoreType();
+        datastoreType.setName(datastoreName);
+        
+        datastoreType.getTable().addAll(tables);
+        
+        return datastoreType;
     }
 
     /**
