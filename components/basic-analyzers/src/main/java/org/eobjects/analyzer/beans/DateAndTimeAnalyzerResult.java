@@ -58,7 +58,7 @@ public class DateAndTimeAnalyzerResult extends CrosstabResult {
     @Description("The highest date value for the given column. The value is measured in number of days since 1970-01-01.")
     public Number getHighestDate(InputColumn<?> col) {
         String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
-                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_HIGHEST_DATE).get();
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_HIGHEST_DATE).safeGet(null);
         return convertToDaysSinceEpoch(s);
     }
 
@@ -66,7 +66,15 @@ public class DateAndTimeAnalyzerResult extends CrosstabResult {
     @Description("The lowest date value for the given column. The value is measured in number of days since 1970-01-01.")
     public Number getLowestDate(InputColumn<?> col) {
         String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
-                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_LOWEST_DATE).get();
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_LOWEST_DATE).safeGet(null);
+        return convertToDaysSinceEpoch(s);
+    }
+    
+    @Metric(order = 4, value = DateAndTimeAnalyzer.MEASURE_AVERAGE_DATE)
+    @Description("The average date value for the given column. The value is measured in number of days since 1970-01-01.")
+    public Number getAverageDate(InputColumn<?> col) {
+        String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_AVERAGE_DATE).safeGet(null);
         return convertToDaysSinceEpoch(s);
     }
 

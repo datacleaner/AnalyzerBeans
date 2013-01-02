@@ -24,6 +24,7 @@ import java.util.Date;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
+import org.eobjects.analyzer.util.AverageBuilder;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
@@ -42,11 +43,12 @@ final class DateAndTimeAnalyzerColumnDelegate {
 	private final RowAnnotation _minDateAnnotation;
 	private final RowAnnotation _maxTimeAnnotation;
 	private final RowAnnotation _minTimeAnnotation;
+	private final AverageBuilder _averageTimestamp;
+	private volatile int _numRows;
 	private volatile LocalDate _minDate;
 	private volatile LocalDate _maxDate;
 	private volatile LocalTime _minTime;
 	private volatile LocalTime _maxTime;
-	private volatile int _numRows;
 
 	public DateAndTimeAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory) {
 		_annotationFactory = annotationFactory;
@@ -55,13 +57,21 @@ final class DateAndTimeAnalyzerColumnDelegate {
 		_minDateAnnotation = _annotationFactory.createAnnotation();
 		_maxTimeAnnotation = _annotationFactory.createAnnotation();
 		_minTimeAnnotation = _annotationFactory.createAnnotation();
+		_averageTimestamp = new AverageBuilder();
+		_numRows = 0;
 	}
 
-	public synchronized void run(Date value, InputRow row, int distinctCount) {
-		_numRows += distinctCount;
+	public synchronized void run(final Date value, final InputRow row, final int distinctCount) {
+	    _numRows += distinctCount;
 		if (value == null) {
 			_annotationFactory.annotate(row, distinctCount, _nullAnnotation);
 		} else {
+		    final long timestamp = value.getTime();
+		    
+		    for (int i = 0; i < distinctCount; i++) {
+		        _averageTimestamp.addValue(timestamp);
+            }
+		    
 			LocalDate localDate = new LocalDate(value);
 			LocalTime localTime = new LocalTime(value);
 			if (_minDate == null) {
@@ -103,7 +113,15 @@ final class DateAndTimeAnalyzerColumnDelegate {
 			}
 		}
 	}
-
+	
+	public LocalDate getAverageDate() {
+	    double avgTimestamp = _averageTimestamp.getAverage();
+	    if (Double.isNaN(avgTimestamp)) {
+	        return null;
+	    }
+	    return new LocalDate(Double.valueOf(avgTimestamp).longValue());
+	}
+	
 	public LocalDate getMaxDate() {
 		return _maxDate;
 	}
@@ -122,10 +140,6 @@ final class DateAndTimeAnalyzerColumnDelegate {
 
 	public int getNumRows() {
 		return _numRows;
-	}
-
-	public void setNumRows(int numRows) {
-		_numRows = numRows;
 	}
 
 	public RowAnnotation getNullAnnotation() {

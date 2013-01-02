@@ -53,6 +53,7 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
     public static final String MEASURE_HIGHEST_TIME = "Highest time";
     public static final String MEASURE_LOWEST_DATE = "Lowest date";
     public static final String MEASURE_HIGHEST_DATE = "Highest date";
+    public static final String MEASURE_AVERAGE_DATE = "Average date";
     public static final String MEASURE_NULL_COUNT = "Null count";
     public static final String MEASURE_ROW_COUNT = "Row count";
     public static final String DIMENSION_MEASURE = "Measure";
@@ -91,6 +92,7 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
         measureDimension.addCategory(MEASURE_NULL_COUNT);
         measureDimension.addCategory(MEASURE_HIGHEST_DATE);
         measureDimension.addCategory(MEASURE_LOWEST_DATE);
+        measureDimension.addCategory(MEASURE_AVERAGE_DATE);
         measureDimension.addCategory(MEASURE_HIGHEST_TIME);
         measureDimension.addCategory(MEASURE_LOWEST_TIME);
 
@@ -128,6 +130,9 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
+            
+            LocalDate averageDate = delegate.getAverageDate();
+            nav.where(measureDimension, MEASURE_AVERAGE_DATE).put(toString(averageDate));
 
             LocalTime maxTime = delegate.getMaxTime();
             nav.where(measureDimension, MEASURE_HIGHEST_TIME).put(toString(maxTime));

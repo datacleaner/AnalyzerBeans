@@ -71,15 +71,16 @@ public class DateAndTimeAnalyzerTest extends TestCase {
         DateAndTimeAnalyzerResult result = (DateAndTimeAnalyzerResult) results.get(0);
 
         String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
-        assertEquals(7, resultLines.length);
+        assertEquals(8, resultLines.length);
 
         assertEquals("             ORDERDATE    REQUIREDDATE SHIPPEDDATE  ", resultLines[0]);
         assertEquals("Row count            2996         2996         2996 ", resultLines[1]);
         assertEquals("Null count              0            0          141 ", resultLines[2]);
         assertEquals("Highest date 2005-05-31   2005-06-11   2005-05-20   ", resultLines[3]);
         assertEquals("Lowest date  2003-01-06   2003-01-13   2003-01-10   ", resultLines[4]);
-        assertEquals("Highest time 00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[5]);
-        assertEquals("Lowest time  00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[6]);
+        assertEquals("Average date 2004-05-14   2004-05-22   2004-05-09   ", resultLines[5]);
+        assertEquals("Highest time 00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[6]);
+        assertEquals("Lowest time  00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[7]);
 
         CrosstabNavigator<?> nav = result.getCrosstab().where("Column", "ORDERDATE");
         InputColumn<?> column = ajb.getSourceColumnByName("ORDERDATE");

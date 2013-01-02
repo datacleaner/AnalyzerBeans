@@ -50,6 +50,8 @@ public class AverageBuilder {
 	public int _numValues;
 
 	public AverageBuilder() {
+	    _numValues = 0;
+	    _average = 0;
 	}
 
 	public AverageBuilder addValue(Number number) {
@@ -60,6 +62,9 @@ public class AverageBuilder {
 	}
 
 	public double getAverage() {
+	    if (_numValues == 0) {
+	        return Double.NaN;
+	    }
 		return _average;
 	}
 
