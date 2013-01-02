@@ -440,7 +440,7 @@ public class JaxbPojoDatastoreAdaptor {
     public AbstractDatastoreType createPojoDatastore(final String datastoreName, final String schemaName, final Collection<PojoTableType> tables) {
         final PojoDatastoreType datastoreType = new PojoDatastoreType();
         datastoreType.setName(datastoreName);
-        
+        datastoreType.setSchemaName(schemaName);
         datastoreType.getTable().addAll(tables);
         
         return datastoreType;
