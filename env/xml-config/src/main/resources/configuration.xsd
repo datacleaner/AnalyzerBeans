@@ -387,7 +387,7 @@
 					</sequence>
 				</complexType>
 			</element>
-			<element name="rows" minOccurs="1" maxOccurs="1">
+			<element name="rows" minOccurs="0" maxOccurs="1">
 				<complexType>
 					<sequence>
 						<element name="row" minOccurs="0" maxOccurs="unbounded">

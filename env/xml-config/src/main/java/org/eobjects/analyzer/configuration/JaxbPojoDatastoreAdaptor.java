@@ -109,24 +109,27 @@ public class JaxbPojoDatastoreAdaptor {
             final SimpleTableDef tableDef = new SimpleTableDef(tableName, columnNames, columnTypes);
 
             final Collection<Object[]> arrays = new ArrayList<Object[]>();
-            final List<Rows.Row> rows = table.getRows().getRow();
-            for (Rows.Row row : rows) {
-                final List<Object> values = row.getV();
-                if (values.size() != columnCount) {
-                    throw new IllegalStateException("Row value count is not equal to column count in datastore '"
-                            + name + "'. Expected " + columnCount + " values, found " + values.size() + " (table "
-                            + tableName + ", row no. " + arrays.size() + ")");
-                }
-                final Object[] array = new Object[columnCount];
-                for (int i = 0; i < array.length; i++) {
+            final Rows rowsType = table.getRows();
+            if (rowsType != null) {
+                final List<Rows.Row> rows = rowsType.getRow();
+                for (Rows.Row row : rows) {
+                    final List<Object> values = row.getV();
+                    if (values.size() != columnCount) {
+                        throw new IllegalStateException("Row value count is not equal to column count in datastore '"
+                                + name + "'. Expected " + columnCount + " values, found " + values.size() + " (table "
+                                + tableName + ", row no. " + arrays.size() + ")");
+                    }
+                    final Object[] array = new Object[columnCount];
+                    for (int i = 0; i < array.length; i++) {
 
-                    final Class<?> expectedClass = columnTypes[i].getJavaEquivalentClass();
+                        final Class<?> expectedClass = columnTypes[i].getJavaEquivalentClass();
 
-                    final Object rawValue = values.get(i);
-                    final Object value = deserializeValue(rawValue, expectedClass);
-                    array[i] = value;
+                        final Object rawValue = values.get(i);
+                        final Object value = deserializeValue(rawValue, expectedClass);
+                        array[i] = value;
+                    }
+                    arrays.add(array);
                 }
-                arrays.add(array);
             }
 
             final TableDataProvider<?> tableDataProvider = new ArrayTableDataProvider(tableDef, arrays);
@@ -399,7 +402,7 @@ public class JaxbPojoDatastoreAdaptor {
     }
 
     private PojoTableType createPojoTable(final DataContext dataContext, final Table table, final Column[] usedColumns,
-            int maxRows) {
+            final int maxRows) {
         final PojoTableType tableType = new PojoTableType();
         tableType.setName(table.getName());
 
@@ -410,29 +413,47 @@ public class JaxbPojoDatastoreAdaptor {
         }
         tableType.setColumns(columnsType);
 
-        // read values
-        final Query q = dataContext.query().from(table).select(usedColumns).toQuery();
-        q.setMaxRows(maxRows);
+        if (maxRows > 0) {
+            // read values
+            final Query q = dataContext.query().from(table).select(usedColumns).toQuery();
+            q.setMaxRows(maxRows);
 
-        final DocumentBuilder documentBuilder = createDocumentBuilder();
-        final Document document = documentBuilder.newDocument();
-        final Rows rowsType = new Rows();
-        final DataSet ds = dataContext.executeQuery(q);
-        try {
-            while (ds.next()) {
-                Row row = ds.getRow();
-                rowsType.getRow().add(createPojoRow(row, document));
+            final DocumentBuilder documentBuilder = createDocumentBuilder();
+            final Document document = documentBuilder.newDocument();
+            final Rows rowsType = new Rows();
+            final DataSet ds = dataContext.executeQuery(q);
+            try {
+                while (ds.next()) {
+                    Row row = ds.getRow();
+                    rowsType.getRow().add(createPojoRow(row, document));
+                }
+            } finally {
+                ds.close();
             }
-        } finally {
-            ds.close();
-        }
 
-        tableType.setRows(rowsType);
+            tableType.setRows(rowsType);
+        }
 
         return tableType;
     }
 
-    public AbstractDatastoreType createPojoDatastore(Datastore datastore, Set<Column> columns, int maxRowsToQuery) {
+    /**
+     * Creates a serialized POJO copy of a datastore.
+     * 
+     * @param datastore
+     *            the datastore to copy
+     * @param columns
+     *            the columns to include, or null if all tables/columns should
+     *            be included.
+     * @param maxRowsToQuery
+     *            the maximum number of records to query and include in the
+     *            datastore copy. Keep this number reasonably low, or else the
+     *            copy might cause out-of-memory issues (Both while reading and
+     *            writing).
+     * @return
+     */
+    public AbstractDatastoreType createPojoDatastore(final Datastore datastore, final Set<Column> columns,
+            final int maxRowsToQuery) {
         final PojoDatastoreType datastoreType = new PojoDatastoreType();
         datastoreType.setName(datastore.getName());
         datastoreType.setDescription(datastore.getDescription());
