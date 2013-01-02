@@ -38,6 +38,7 @@ import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.NumberProperty;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -45,6 +46,7 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
+import org.eobjects.metamodel.util.Weekday;
 
 @AnalyzerBean("Week number distribution")
 @Description("Finds the distribution of week numbers from Date values.")
@@ -52,10 +54,17 @@ import org.eobjects.analyzer.result.CrosstabResult;
 @Categorized(DateAndTimeCategory.class)
 public class WeekNumberDistributionAnalyzer implements Analyzer<CrosstabResult> {
 
-    private final Map<InputColumn<Date>, ConcurrentMap<Integer, AtomicInteger>> distributionMap;
-
     @Configured
     InputColumn<Date>[] dateColumns;
+
+    @Configured(order = 10)
+    @NumberProperty(negative = false, positive = true)
+    int minimalDaysInFirstWeek = Calendar.getInstance().getMinimalDaysInFirstWeek();
+
+    @Configured(order = 11)
+    Weekday firstDayOfWeek = Weekday.getByCalendarConstant(Calendar.getInstance().getFirstDayOfWeek());
+
+    private final Map<InputColumn<Date>, ConcurrentMap<Integer, AtomicInteger>> distributionMap;
 
     public WeekNumberDistributionAnalyzer() {
         distributionMap = new HashMap<InputColumn<Date>, ConcurrentMap<Integer, AtomicInteger>>();
@@ -75,6 +84,8 @@ public class WeekNumberDistributionAnalyzer implements Analyzer<CrosstabResult> 
             final Date value = row.getValue(col);
             if (value != null) {
                 final Calendar c = Calendar.getInstance();
+                c.setMinimalDaysInFirstWeek(minimalDaysInFirstWeek);
+                c.setFirstDayOfWeek(firstDayOfWeek.getCalendarConstant());
                 c.setTime(value);
                 final int weekNumber = c.get(Calendar.WEEK_OF_YEAR);
                 final ConcurrentMap<Integer, AtomicInteger> countMap = distributionMap.get(col);
