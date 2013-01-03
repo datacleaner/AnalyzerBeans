@@ -22,6 +22,8 @@ package org.eobjects.analyzer.beans;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
@@ -58,116 +60,163 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 @Concurrent(true)
 public class NumberAnalyzer implements Analyzer<NumberAnalyzerResult> {
 
-	public static final String DIMENSION_COLUMN = "Column";
-	public static final String DIMENSION_MEASURE = "Measure";
-	public static final String MEASURE_ROW_COUNT = "Row count";
-	public static final String MEASURE_NULL_COUNT = "Null count";
-	public static final String MEASURE_HIGHEST_VALUE = "Highest value";
-	public static final String MEASURE_LOWEST_VALUE = "Lowest value";
-	public static final String MEASURE_SUM = "Sum";
-	public static final String MEASURE_MEAN = "Mean";
-	public static final String MEASURE_GEOMETRIC_MEAN = "Geometric mean";
-	public static final String MEASURE_STANDARD_DEVIATION = "Standard deviation";
-	public static final String MEASURE_VARIANCE = "Variance";
+    public static final String DIMENSION_COLUMN = "Column";
+    public static final String DIMENSION_MEASURE = "Measure";
+    public static final String MEASURE_ROW_COUNT = "Row count";
+    public static final String MEASURE_NULL_COUNT = "Null count";
+    public static final String MEASURE_HIGHEST_VALUE = "Highest value";
+    public static final String MEASURE_LOWEST_VALUE = "Lowest value";
+    public static final String MEASURE_SUM = "Sum";
+    public static final String MEASURE_MEAN = "Mean";
+    public static final String MEASURE_GEOMETRIC_MEAN = "Geometric mean";
+    public static final String MEASURE_STANDARD_DEVIATION = "Standard deviation";
+    public static final String MEASURE_VARIANCE = "Variance";
 
-	private Map<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate>();
+    public static final String MEASURE_MEDIAN = "Median";
+    public static final String MEASURE_PERCENTILE25 = "25th percentile";
+    public static final String MEASURE_PERCENTILE75 = "75th percentile";
+    public static final String MEASURE_KURTOSIS = "Kurtosis";
+    public static final String MEASURE_SKEWNESS = "Skewness";
 
-	@Configured
-	InputColumn<? extends Number>[] _columns;
+    private Map<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate>();
 
-	@Provided
-	RowAnnotationFactory _annotationFactory;
+    @Configured
+    InputColumn<? extends Number>[] _columns;
 
-	public NumberAnalyzer() {
-	}
+    @Configured
+    @Description("Gather so-called descriptive statistics, including median, skewness, kurtosis and percentiles, which have a larger memory-footprint.")
+    boolean descriptiveStatistics = false;
 
-	public NumberAnalyzer(InputColumn<? extends Number>... columns) {
-		this();
-		_columns = columns;
-		_annotationFactory = new InMemoryRowAnnotationFactory();
-		init();
-	}
+    @Provided
+    RowAnnotationFactory _annotationFactory;
 
-	@Initialize
-	public void init() {
-		for (InputColumn<? extends Number> column : _columns) {
-			_columnDelegates.put(column, new NumberAnalyzerColumnDelegate(_annotationFactory));
-		}
-	}
+    public NumberAnalyzer() {
+    }
 
-	@Override
-	public void run(InputRow row, int distinctCount) {
-		for (InputColumn<? extends Number> column : _columns) {
-			NumberAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
-			Number value = row.getValue(column);
+    public NumberAnalyzer(InputColumn<? extends Number>... columns) {
+        this();
+        _columns = columns;
+        _annotationFactory = new InMemoryRowAnnotationFactory();
+        init();
+    }
 
-			delegate.run(row, value, distinctCount);
-		}
-	}
+    @Initialize
+    public void init() {
+        for (InputColumn<? extends Number> column : _columns) {
+            _columnDelegates.put(column, new NumberAnalyzerColumnDelegate(descriptiveStatistics, _annotationFactory));
+        }
+    }
 
-	@Override
-	public NumberAnalyzerResult getResult() {
-		CrosstabDimension measureDimension = new CrosstabDimension(DIMENSION_MEASURE);
-		measureDimension.addCategory(MEASURE_ROW_COUNT);
-		measureDimension.addCategory(MEASURE_NULL_COUNT);
-		measureDimension.addCategory(MEASURE_HIGHEST_VALUE);
-		measureDimension.addCategory(MEASURE_LOWEST_VALUE);
-		measureDimension.addCategory(MEASURE_SUM);
-		measureDimension.addCategory(MEASURE_MEAN);
-		measureDimension.addCategory(MEASURE_GEOMETRIC_MEAN);
-		measureDimension.addCategory(MEASURE_STANDARD_DEVIATION);
-		measureDimension.addCategory(MEASURE_VARIANCE);
+    @Override
+    public void run(InputRow row, int distinctCount) {
+        for (InputColumn<? extends Number> column : _columns) {
+            NumberAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
+            Number value = row.getValue(column);
 
-		CrosstabDimension columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
-		for (InputColumn<? extends Number> column : _columns) {
-			columnDimension.addCategory(column.getName());
-		}
+            delegate.run(row, value, distinctCount);
+        }
+    }
 
-		Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
-		for (InputColumn<? extends Number> column : _columns) {
-			CrosstabNavigator<Number> nav = crosstab.navigate().where(columnDimension, column.getName());
-			NumberAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
+    @Override
+    public NumberAnalyzerResult getResult() {
+        CrosstabDimension measureDimension = new CrosstabDimension(DIMENSION_MEASURE);
+        measureDimension.addCategory(MEASURE_ROW_COUNT);
+        measureDimension.addCategory(MEASURE_NULL_COUNT);
+        measureDimension.addCategory(MEASURE_HIGHEST_VALUE);
+        measureDimension.addCategory(MEASURE_LOWEST_VALUE);
+        measureDimension.addCategory(MEASURE_SUM);
+        measureDimension.addCategory(MEASURE_MEAN);
+        measureDimension.addCategory(MEASURE_GEOMETRIC_MEAN);
+        measureDimension.addCategory(MEASURE_STANDARD_DEVIATION);
+        measureDimension.addCategory(MEASURE_VARIANCE);
+        
+        if (descriptiveStatistics) {
+            measureDimension.addCategory(MEASURE_MEDIAN);    
+        }
+        if (descriptiveStatistics) {
+            measureDimension.addCategory(MEASURE_PERCENTILE25);    
+        }
+        if (descriptiveStatistics) {
+            measureDimension.addCategory(MEASURE_PERCENTILE75);    
+        }
+        if (descriptiveStatistics) {
+            measureDimension.addCategory(MEASURE_SKEWNESS);    
+        }
+        if (descriptiveStatistics) {
+            measureDimension.addCategory(MEASURE_KURTOSIS);    
+        }
 
-			SummaryStatistics s = delegate.getStatistics();
-			int nullCount = delegate.getNullCount();
+        CrosstabDimension columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
+        for (InputColumn<? extends Number> column : _columns) {
+            columnDimension.addCategory(column.getName());
+        }
 
-			nav.where(measureDimension, MEASURE_NULL_COUNT).put(nullCount);
+        Crosstab<Number> crosstab = new Crosstab<Number>(Number.class, columnDimension, measureDimension);
+        for (InputColumn<? extends Number> column : _columns) {
+            CrosstabNavigator<Number> nav = crosstab.navigate().where(columnDimension, column.getName());
+            NumberAnalyzerColumnDelegate delegate = _columnDelegates.get(column);
 
-			if (nullCount > 0) {
-				addAttachment(nav, delegate.getNullAnnotation(), column);
-			}
+            StatisticalSummary s = delegate.getStatistics();
+            int nullCount = delegate.getNullCount();
 
-			int numRows = delegate.getNumRows();
-			nav.where(measureDimension, MEASURE_ROW_COUNT).put(numRows);
+            nav.where(measureDimension, MEASURE_NULL_COUNT).put(nullCount);
 
-			long nonNullCount = s.getN();
+            if (nullCount > 0) {
+                addAttachment(nav, delegate.getNullAnnotation(), column);
+            }
 
-			if (nonNullCount > 0) {
-				double highestValue = s.getMax();
-				double lowestValue = s.getMin();
-				double sum = s.getSum();
-				double mean = s.getMean();
-				double geometricMean = s.getGeometricMean();
-				double standardDeviation = s.getStandardDeviation();
-				double variance = s.getVariance();
+            int numRows = delegate.getNumRows();
+            nav.where(measureDimension, MEASURE_ROW_COUNT).put(numRows);
 
-				nav.where(measureDimension, MEASURE_HIGHEST_VALUE).put(highestValue);
-				addAttachment(nav, delegate.getMaxAnnotation(), column);
+            long nonNullCount = s.getN();
 
-				nav.where(measureDimension, MEASURE_LOWEST_VALUE).put(lowestValue);
-				addAttachment(nav, delegate.getMinAnnotation(), column);
+            if (nonNullCount > 0) {
+                final double highestValue = s.getMax();
+                final double lowestValue = s.getMin();
+                final double sum = s.getSum();
+                final double mean = s.getMean();
+                final double standardDeviation = s.getStandardDeviation();
+                final double variance = s.getVariance();
 
-				nav.where(measureDimension, MEASURE_SUM).put(sum);
-				nav.where(measureDimension, MEASURE_MEAN).put(mean);
-				nav.where(measureDimension, MEASURE_GEOMETRIC_MEAN).put(geometricMean);
-				nav.where(measureDimension, MEASURE_STANDARD_DEVIATION).put(standardDeviation);
-				nav.where(measureDimension, MEASURE_VARIANCE).put(variance);
-			}
-		}
-		return new NumberAnalyzerResult(_columns, crosstab);
-	}
+                final double geometricMean;
+                if (descriptiveStatistics) {
+                    geometricMean = ((DescriptiveStatistics) s).getGeometricMean();
+                } else {
+                    geometricMean = ((SummaryStatistics) s).getGeometricMean();
+                }
 
-	private void addAttachment(CrosstabNavigator<Number> nav, RowAnnotation annotation, InputColumn<?> column) {
-		nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
-	}
+                nav.where(measureDimension, MEASURE_HIGHEST_VALUE).put(highestValue);
+                addAttachment(nav, delegate.getMaxAnnotation(), column);
+
+                nav.where(measureDimension, MEASURE_LOWEST_VALUE).put(lowestValue);
+                addAttachment(nav, delegate.getMinAnnotation(), column);
+
+                nav.where(measureDimension, MEASURE_SUM).put(sum);
+                nav.where(measureDimension, MEASURE_MEAN).put(mean);
+                nav.where(measureDimension, MEASURE_GEOMETRIC_MEAN).put(geometricMean);
+                nav.where(measureDimension, MEASURE_STANDARD_DEVIATION).put(standardDeviation);
+                nav.where(measureDimension, MEASURE_VARIANCE).put(variance);
+
+                if (descriptiveStatistics) {
+                    final DescriptiveStatistics descriptiveStatistics = (DescriptiveStatistics) s;
+                    final double kurtosis = descriptiveStatistics.getKurtosis();
+                    final double skewness = descriptiveStatistics.getSkewness();
+                    final double median = descriptiveStatistics.getPercentile(50.0);
+                    final double percentile25 = descriptiveStatistics.getPercentile(25.0);
+                    final double percentile75 = descriptiveStatistics.getPercentile(75.0);
+
+                    nav.where(measureDimension, MEASURE_MEDIAN).put(median);
+                    nav.where(measureDimension, MEASURE_PERCENTILE25).put(percentile25);
+                    nav.where(measureDimension, MEASURE_PERCENTILE75).put(percentile75);
+                    nav.where(measureDimension, MEASURE_SKEWNESS).put(skewness);
+                    nav.where(measureDimension, MEASURE_KURTOSIS).put(kurtosis);
+                }
+            }
+        }
+        return new NumberAnalyzerResult(_columns, crosstab);
+    }
+
+    private void addAttachment(CrosstabNavigator<Number> nav, RowAnnotation annotation, InputColumn<?> column) {
+        nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
+    }
 }

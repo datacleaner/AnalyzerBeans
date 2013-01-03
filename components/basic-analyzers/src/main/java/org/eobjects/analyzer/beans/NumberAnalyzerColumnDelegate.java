@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans;
 
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.RowAnnotation;
@@ -33,18 +35,22 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 final class NumberAnalyzerColumnDelegate {
 
 	private final RowAnnotationFactory _annotationFactory;
-	private final SummaryStatistics _statistics;
+	private final StatisticalSummary _statistics;
 	private volatile int _numRows;
 	private final RowAnnotation _nullAnnotation;
 	private final RowAnnotation _maxAnnotation;
 	private final RowAnnotation _minAnnotation;
 
-	public NumberAnalyzerColumnDelegate(RowAnnotationFactory annotationFactory) {
+	public NumberAnalyzerColumnDelegate(boolean descriptiveStatistics, RowAnnotationFactory annotationFactory) {
 		_annotationFactory = annotationFactory;
 		_nullAnnotation = _annotationFactory.createAnnotation();
 		_maxAnnotation = _annotationFactory.createAnnotation();
 		_minAnnotation = _annotationFactory.createAnnotation();
-		_statistics = new SummaryStatistics();
+		if (descriptiveStatistics) {
+		    _statistics = new DescriptiveStatistics();
+		} else {
+		    _statistics = new SummaryStatistics();
+		}
 	}
 
 	public synchronized void run(InputRow row, Number value, int distinctCount) {
@@ -62,7 +68,11 @@ final class NumberAnalyzerColumnDelegate {
 			}
 
 			for (int i = 0; i < distinctCount; i++) {
-				_statistics.addValue(doubleValue);
+			    if (_statistics instanceof DescriptiveStatistics) {
+			        ((DescriptiveStatistics)_statistics).addValue(doubleValue);
+			    } else {
+			        ((SummaryStatistics)_statistics).addValue(doubleValue);
+			    }
 			}
 
 			max = _statistics.getMax();
@@ -83,7 +93,7 @@ final class NumberAnalyzerColumnDelegate {
 		return _nullAnnotation;
 	}
 
-	public SummaryStatistics getStatistics() {
+	public StatisticalSummary getStatistics() {
 		return _statistics;
 	}
 

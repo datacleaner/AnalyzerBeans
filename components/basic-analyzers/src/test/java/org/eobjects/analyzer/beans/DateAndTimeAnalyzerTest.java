@@ -42,7 +42,7 @@ import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class DateAndTimeAnalyzerTest extends TestCase {
-
+    
     public void testOrderFactTable() throws Throwable {
         AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
                 TestHelper.createSampleDatabaseDatastore("orderdb")));

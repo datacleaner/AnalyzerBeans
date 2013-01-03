@@ -44,52 +44,82 @@ public class NumberAnalyzerResult extends CrosstabResult {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_ROW_COUNT).get();
     }
-    
+
     @Metric(NumberAnalyzer.MEASURE_NULL_COUNT)
     public Number getNullCount(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_NULL_COUNT).get();
     }
-    
+
     @Metric(NumberAnalyzer.MEASURE_HIGHEST_VALUE)
     public Number getHighestValue(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_HIGHEST_VALUE).safeGet(null);
     }
-    
+
     @Metric(NumberAnalyzer.MEASURE_LOWEST_VALUE)
     public Number getLowestValue(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_LOWEST_VALUE).safeGet(null);
     }
-    
+
     @Metric(NumberAnalyzer.MEASURE_SUM)
     public Number getSum(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_SUM).safeGet(null);
     }
-    
+
     @Metric(NumberAnalyzer.MEASURE_MEAN)
     public Number getMean(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_MEAN).safeGet(null);
     }
-    
+
     @Metric(NumberAnalyzer.MEASURE_GEOMETRIC_MEAN)
     public Number getGeometricMean(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_GEOMETRIC_MEAN).safeGet(null);
     }
-    
+
     @Metric(NumberAnalyzer.MEASURE_STANDARD_DEVIATION)
     public Number getStandardDeviation(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_STANDARD_DEVIATION).safeGet(null);
     }
-    
+
     @Metric(NumberAnalyzer.MEASURE_VARIANCE)
     public Number getVariance(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_VARIANCE).safeGet(null);
+    }
+
+    @Metric(NumberAnalyzer.MEASURE_PERCENTILE25)
+    public Number getPercentile25(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_PERCENTILE25).safeGet(null);
+    }
+
+    @Metric(NumberAnalyzer.MEASURE_MEDIAN)
+    public Number getMedian(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_MEDIAN).safeGet(null);
+    }
+
+    @Metric(NumberAnalyzer.MEASURE_PERCENTILE25)
+    public Number getPercentile75(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_PERCENTILE75).safeGet(null);
+    }
+
+    @Metric(NumberAnalyzer.MEASURE_KURTOSIS)
+    public Number getKurtosis(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_KURTOSIS).safeGet(null);
+    }
+
+    @Metric(NumberAnalyzer.MEASURE_SKEWNESS)
+    public Number getSkewness(InputColumn<?> col) {
+        return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_SKEWNESS).safeGet(null);
     }
 }
