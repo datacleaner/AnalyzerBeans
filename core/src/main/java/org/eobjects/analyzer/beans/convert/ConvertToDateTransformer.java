@@ -217,6 +217,7 @@ public class ConvertToDateTransformer implements Transformer<Date> {
 
         defaultDateMasks.add("yyyy-MM-dd HH:mm:ss.S");
         defaultDateMasks.add("yyyy-MM-dd HH:mm:ss");
+        defaultDateMasks.add("yyyy-MM-dd HH:mm");
         defaultDateMasks.add("yyyyMMddHHmmssZ");
         defaultDateMasks.add("yyMMddHHmmssZ");
 

@@ -29,6 +29,8 @@ import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.Metric;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the result of a Date and Time Analyzer.
@@ -38,6 +40,8 @@ import org.joda.time.LocalDate;
 public class DateAndTimeAnalyzerResult extends CrosstabResult {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory.getLogger(DateAndTimeAnalyzerResult.class);
 
     public DateAndTimeAnalyzerResult(Crosstab<?> crosstab) {
         super(crosstab);
@@ -127,6 +131,10 @@ public class DateAndTimeAnalyzerResult extends CrosstabResult {
         final LocalDate epoch = new LocalDate(1970, 1, 1);
 
         final Date date = ConvertToDateTransformer.getInternalInstance().transformValue(s);
+        if (date == null) {
+            logger.warn("Could not parse date string: '{}', returning null metric value.", s);
+            return null;
+        }
         int days = Days.daysBetween(epoch, new LocalDate(date)).getDays();
 
         return days;

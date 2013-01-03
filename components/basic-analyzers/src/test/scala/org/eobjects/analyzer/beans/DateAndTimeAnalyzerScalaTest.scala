@@ -73,8 +73,8 @@ Kurtosis          -1.2
     Assert.assertEquals(15710, result.getHighestDate(col1));
     Assert.assertEquals(15706, result.getLowestDate(col1));
     Assert.assertEquals(15708, result.getMedian(col1));
-    Assert.assertEquals(15708, result.getPercentile25(col1));
-    Assert.assertEquals(15708, result.getPercentile75(col1));
+    Assert.assertEquals(15706, result.getPercentile25(col1));
+    Assert.assertEquals(15709, result.getPercentile75(col1));
     
     Assert.assertEquals(0.0, result.getSkewness(col1).doubleValue(), 0.001);
     Assert.assertEquals(-1.1999, result.getKurtosis(col1).doubleValue(), 0.001);
