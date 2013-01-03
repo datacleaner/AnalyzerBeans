@@ -1,0 +1,51 @@
+package org.eobjects.analyzer.beans
+import org.scalatest.junit.AssertionsForJUnit
+import org.junit.Test
+import org.eobjects.analyzer.data.MockInputColumn
+import org.eobjects.analyzer.data.MockInputRow
+import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer
+import org.junit.Assert
+import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory
+import java.util.Date
+import org.eobjects.metamodel.util.DateUtils
+import org.eobjects.metamodel.util.Month
+
+class DateAndTimeAnalyzerScalaTest extends AssertionsForJUnit {
+
+  @Test
+  def testDescriptiveStats() = {
+    val col1 = new MockInputColumn("date", classOf[Date]);
+
+    val analyzer = new DateAndTimeAnalyzer()
+    analyzer.descriptiveStatistics = true;
+    analyzer._columns = Array(col1);
+    analyzer._annotationFactory = new InMemoryRowAnnotationFactory()
+
+    analyzer.init()
+
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 1)), 1);
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 2)), 1);
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 3)), 1);
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 4)), 1);
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 5)), 1);
+
+    val result = analyzer.getResult();
+
+    val text = new CrosstabTextRenderer().render(result)
+
+    Assert.assertEquals("""                date   
+Row count            5 
+Null count           0 
+Highest date    2013-01-05 
+Lowest date     2013-01-01 
+Highest time    00:00:00.000 
+Lowest time     00:00:00.000 
+Mean            2013-01-03 00:00 
+Median          2013-01-03 00:00 
+25th percentile 2013-01-01 12:00 
+75th percentile 2013-01-04 12:00 
+Skewness        0.0    
+Kurtosis        -1.1999999999999975 
+""".replaceAll("\r\n", "\n"), text.replaceAll("\r\n", "\n"));
+  }
+}

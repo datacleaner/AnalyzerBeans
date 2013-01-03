@@ -42,7 +42,7 @@ import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class DateAndTimeAnalyzerTest extends TestCase {
-    
+
     public void testOrderFactTable() throws Throwable {
         AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
                 TestHelper.createSampleDatabaseDatastore("orderdb")));
@@ -78,9 +78,9 @@ public class DateAndTimeAnalyzerTest extends TestCase {
         assertEquals("Null count              0            0          141 ", resultLines[2]);
         assertEquals("Highest date 2005-05-31   2005-06-11   2005-05-20   ", resultLines[3]);
         assertEquals("Lowest date  2003-01-06   2003-01-13   2003-01-10   ", resultLines[4]);
-        assertEquals("Average date 2004-05-14   2004-05-22   2004-05-09   ", resultLines[5]);
-        assertEquals("Highest time 00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[6]);
-        assertEquals("Lowest time  00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[7]);
+        assertEquals("Highest time 00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[5]);
+        assertEquals("Lowest time  00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[6]);
+        assertEquals("Mean         2004-05-14 19:52 2004-05-22 23:35 2004-05-09 04:29 ", resultLines[7]);
 
         CrosstabNavigator<?> nav = result.getCrosstab().where("Column", "ORDERDATE");
         InputColumn<?> column = ajb.getSourceColumnByName("ORDERDATE");

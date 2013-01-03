@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,17 +57,28 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
     public static final String MEASURE_HIGHEST_TIME = "Highest time";
     public static final String MEASURE_LOWEST_DATE = "Lowest date";
     public static final String MEASURE_HIGHEST_DATE = "Highest date";
-    public static final String MEASURE_AVERAGE_DATE = "Average date";
     public static final String MEASURE_NULL_COUNT = "Null count";
     public static final String MEASURE_ROW_COUNT = "Row count";
     public static final String DIMENSION_MEASURE = "Measure";
     public static final String DIMENSION_COLUMN = "Column";
 
+    public static final String MEASURE_MEAN = "Mean";
+    public static final String MEASURE_MEDIAN = "Median";
+    public static final String MEASURE_PERCENTILE25 = "25th percentile";
+    public static final String MEASURE_PERCENTILE75 = "75th percentile";
+    public static final String MEASURE_KURTOSIS = "Kurtosis";
+    public static final String MEASURE_SKEWNESS = "Skewness";
+
     private Map<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate> _delegates = new HashMap<InputColumn<Date>, DateAndTimeAnalyzerColumnDelegate>();
 
     @Inject
-    @Configured
+    @Configured(order = 1)
     InputColumn<Date>[] _columns;
+
+    @Inject
+    @Configured(order = 10)
+    @Description("Gather so-called descriptive statistics, including median, skewness, kurtosis and percentiles, which have a larger memory-footprint.")
+    boolean descriptiveStatistics = false;
 
     @Inject
     @Provided
@@ -75,7 +87,9 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
     @Initialize
     public void init() {
         for (InputColumn<Date> col : _columns) {
-            _delegates.put(col, new DateAndTimeAnalyzerColumnDelegate(_annotationFactory));
+            final DateAndTimeAnalyzerColumnDelegate delegate = new DateAndTimeAnalyzerColumnDelegate(
+                    descriptiveStatistics, _annotationFactory);
+            _delegates.put(col, delegate);
         }
     }
 
@@ -95,60 +109,85 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
         measureDimension.addCategory(MEASURE_NULL_COUNT);
         measureDimension.addCategory(MEASURE_HIGHEST_DATE);
         measureDimension.addCategory(MEASURE_LOWEST_DATE);
-        measureDimension.addCategory(MEASURE_AVERAGE_DATE);
         measureDimension.addCategory(MEASURE_HIGHEST_TIME);
         measureDimension.addCategory(MEASURE_LOWEST_TIME);
+        measureDimension.addCategory(MEASURE_MEAN);
+
+        if (descriptiveStatistics) {
+            measureDimension.addCategory(MEASURE_MEDIAN);
+            measureDimension.addCategory(MEASURE_PERCENTILE25);
+            measureDimension.addCategory(MEASURE_PERCENTILE75);
+            measureDimension.addCategory(MEASURE_SKEWNESS);
+            measureDimension.addCategory(MEASURE_KURTOSIS);
+        }
 
         CrosstabDimension columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
         for (InputColumn<Date> column : _columns) {
             columnDimension.addCategory(column.getName());
         }
 
-        Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, columnDimension,
+        final Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, columnDimension,
                 measureDimension);
-        CrosstabNavigator<Serializable> nav = crosstab.navigate();
+        final CrosstabNavigator<Serializable> nav = crosstab.navigate();
         for (InputColumn<Date> column : _columns) {
-            DateAndTimeAnalyzerColumnDelegate delegate = _delegates.get(column);
+            final DateAndTimeAnalyzerColumnDelegate delegate = _delegates.get(column);
 
             nav.where(columnDimension, column.getName());
 
             nav.where(measureDimension, MEASURE_ROW_COUNT).put(delegate.getNumRows());
 
-            int numNull = delegate.getNumNull();
+            final int numNull = delegate.getNumNull();
             nav.where(measureDimension, MEASURE_NULL_COUNT).put(numNull);
             if (numNull > 0) {
                 nav.attach(new AnnotatedRowsResult(delegate.getNullAnnotation(), _annotationFactory, column));
             }
 
-            LocalDate maxDate = delegate.getMaxDate();
+            final LocalDate maxDate = delegate.getMaxDate();
             nav.where(measureDimension, MEASURE_HIGHEST_DATE).put(toString(maxDate));
             RowAnnotation annotation = delegate.getMaxDateAnnotation();
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
 
-            LocalDate minDate = delegate.getMinDate();
+            final LocalDate minDate = delegate.getMinDate();
             nav.where(measureDimension, MEASURE_LOWEST_DATE).put(toString(minDate));
             annotation = delegate.getMinDateAnnotation();
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
-            
-            LocalDate averageDate = delegate.getAverageDate();
-            nav.where(measureDimension, MEASURE_AVERAGE_DATE).put(toString(averageDate));
 
-            LocalTime maxTime = delegate.getMaxTime();
+            final LocalTime maxTime = delegate.getMaxTime();
             nav.where(measureDimension, MEASURE_HIGHEST_TIME).put(toString(maxTime));
             annotation = delegate.getMaxTimeAnnotation();
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
             }
 
-            LocalTime minTime = delegate.getMinTime();
+            final LocalTime minTime = delegate.getMinTime();
             nav.where(measureDimension, MEASURE_LOWEST_TIME).put(toString(minTime));
             annotation = delegate.getMinTimeAnnotation();
             if (annotation.getRowCount() > 0) {
                 nav.attach(new AnnotatedRowsResult(annotation, _annotationFactory, column));
+            }
+
+            final Date mean = delegate.getMean();
+            nav.where(measureDimension, MEASURE_MEAN).put(toString(mean));
+
+            if (descriptiveStatistics) {
+                final Date median = delegate.getMedian();
+                nav.where(measureDimension, MEASURE_MEDIAN).put(toString(median));
+
+                final Date percentile25 = delegate.getPercentile25();
+                nav.where(measureDimension, MEASURE_PERCENTILE25).put(toString(percentile25));
+
+                final Date percentile75 = delegate.getPercentile75();
+                nav.where(measureDimension, MEASURE_PERCENTILE75).put(toString(percentile75));
+
+                final Number kurtosis = delegate.getKurtosis();
+                nav.where(measureDimension, MEASURE_KURTOSIS).put(toString(kurtosis));
+
+                final Number skewness = delegate.getSkewness();
+                nav.where(measureDimension, MEASURE_SKEWNESS).put(toString(skewness));
             }
         }
 
@@ -158,6 +197,10 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
     private String toString(Object obj) {
         if (obj == null) {
             return null;
+        }
+        if (obj instanceof Date) {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            return format.format((Date)obj);
         }
         return obj.toString();
     }

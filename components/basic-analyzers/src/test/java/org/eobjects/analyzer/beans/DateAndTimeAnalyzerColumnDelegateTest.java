@@ -28,7 +28,7 @@ import org.joda.time.DateTime;
 public class DateAndTimeAnalyzerColumnDelegateTest extends TestCase {
 
 	public void testMaxAndMinValues() throws Exception {
-		DateAndTimeAnalyzerColumnDelegate d = new DateAndTimeAnalyzerColumnDelegate(new InMemoryRowAnnotationFactory());
+		DateAndTimeAnalyzerColumnDelegate d = new DateAndTimeAnalyzerColumnDelegate(false, new InMemoryRowAnnotationFactory());
 
 		assertNull(d.getMaxDate());
 		assertNull(d.getMinDate());

@@ -70,11 +70,11 @@ public class DateAndTimeAnalyzerResult extends CrosstabResult {
         return convertToDaysSinceEpoch(s);
     }
     
-    @Metric(order = 4, value = DateAndTimeAnalyzer.MEASURE_AVERAGE_DATE)
+    @Metric(order = 4, value = DateAndTimeAnalyzer.MEASURE_MEAN)
     @Description("The average date value for the given column. The value is measured in number of days since 1970-01-01.")
-    public Number getAverageDate(InputColumn<?> col) {
+    public Number getMean(InputColumn<?> col) {
         String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
-                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_AVERAGE_DATE).safeGet(null);
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_MEAN).safeGet(null);
         return convertToDaysSinceEpoch(s);
     }
 

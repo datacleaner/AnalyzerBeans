@@ -22,6 +22,8 @@ package org.eobjects.analyzer.beans;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
@@ -80,13 +82,16 @@ public class NumberAnalyzer implements Analyzer<NumberAnalyzerResult> {
 
     private Map<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<? extends Number>, NumberAnalyzerColumnDelegate>();
 
+    @Inject
     @Configured
     InputColumn<? extends Number>[] _columns;
 
+    @Inject
     @Configured
     @Description("Gather so-called descriptive statistics, including median, skewness, kurtosis and percentiles, which have a larger memory-footprint.")
     boolean descriptiveStatistics = false;
 
+    @Inject
     @Provided
     RowAnnotationFactory _annotationFactory;
 
@@ -129,21 +134,13 @@ public class NumberAnalyzer implements Analyzer<NumberAnalyzerResult> {
         measureDimension.addCategory(MEASURE_GEOMETRIC_MEAN);
         measureDimension.addCategory(MEASURE_STANDARD_DEVIATION);
         measureDimension.addCategory(MEASURE_VARIANCE);
-        
+
         if (descriptiveStatistics) {
-            measureDimension.addCategory(MEASURE_MEDIAN);    
-        }
-        if (descriptiveStatistics) {
-            measureDimension.addCategory(MEASURE_PERCENTILE25);    
-        }
-        if (descriptiveStatistics) {
-            measureDimension.addCategory(MEASURE_PERCENTILE75);    
-        }
-        if (descriptiveStatistics) {
-            measureDimension.addCategory(MEASURE_SKEWNESS);    
-        }
-        if (descriptiveStatistics) {
-            measureDimension.addCategory(MEASURE_KURTOSIS);    
+            measureDimension.addCategory(MEASURE_MEDIAN);
+            measureDimension.addCategory(MEASURE_PERCENTILE25);
+            measureDimension.addCategory(MEASURE_PERCENTILE75);
+            measureDimension.addCategory(MEASURE_SKEWNESS);
+            measureDimension.addCategory(MEASURE_KURTOSIS);
         }
 
         CrosstabDimension columnDimension = new CrosstabDimension(DIMENSION_COLUMN);
