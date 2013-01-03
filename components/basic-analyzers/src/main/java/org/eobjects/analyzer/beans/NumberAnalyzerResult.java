@@ -105,7 +105,7 @@ public class NumberAnalyzerResult extends CrosstabResult {
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_PERCENTILE25).safeGet(null);
     }
 
-    @Metric(order = 12, value = NumberAnalyzer.MEASURE_PERCENTILE25)
+    @Metric(order = 12, value = NumberAnalyzer.MEASURE_PERCENTILE75)
     public Number getPercentile75(InputColumn<?> col) {
         return (Number) getCrosstab().where(NumberAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(NumberAnalyzer.DIMENSION_MEASURE, NumberAnalyzer.MEASURE_PERCENTILE75).safeGet(null);

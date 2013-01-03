@@ -19,7 +19,10 @@
  */
 package org.eobjects.analyzer.beans;
 
+import java.util.Date;
+
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabResult;
@@ -69,13 +72,51 @@ public class DateAndTimeAnalyzerResult extends CrosstabResult {
                 .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_LOWEST_DATE).safeGet(null);
         return convertToDaysSinceEpoch(s);
     }
-    
+
     @Metric(order = 4, value = DateAndTimeAnalyzer.MEASURE_MEAN)
-    @Description("The average date value for the given column. The value is measured in number of days since 1970-01-01.")
+    @Description("The mean value for the given column. The value is measured in number of days since 1970-01-01.")
     public Number getMean(InputColumn<?> col) {
         String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_MEAN).safeGet(null);
         return convertToDaysSinceEpoch(s);
+    }
+
+    @Metric(order = 5, value = DateAndTimeAnalyzer.MEASURE_MEDIAN)
+    @Description("The median value for the given column. The value is measured in number of days since 1970-01-01.")
+    public Number getMedian(InputColumn<?> col) {
+        String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_MEDIAN).safeGet(null);
+        return convertToDaysSinceEpoch(s);
+    }
+
+    @Metric(order = 6, value = DateAndTimeAnalyzer.MEASURE_PERCENTILE25)
+    @Description("The 25th percentile value for the given column. The value is measured in number of days since 1970-01-01.")
+    public Number getPercentile25(InputColumn<?> col) {
+        String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_PERCENTILE25).safeGet(null);
+        return convertToDaysSinceEpoch(s);
+    }
+
+    @Metric(order = 7, value = DateAndTimeAnalyzer.MEASURE_PERCENTILE75)
+    @Description("The 75th percentile value for the given column. The value is measured in number of days since 1970-01-01.")
+    public Number getPercentile75(InputColumn<?> col) {
+        String s = (String) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_PERCENTILE75).safeGet(null);
+        return convertToDaysSinceEpoch(s);
+    }
+
+    @Metric(order = 8, value = DateAndTimeAnalyzer.MEASURE_KURTOSIS)
+    public Number getKurtosis(InputColumn<?> col) {
+        Number n = (Number) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_KURTOSIS).safeGet(null);
+        return n;
+    }
+
+    @Metric(order = 9, value = DateAndTimeAnalyzer.MEASURE_SKEWNESS)
+    public Number getSkewness(InputColumn<?> col) {
+        Number n = (Number) getCrosstab().where(DateAndTimeAnalyzer.DIMENSION_COLUMN, col.getName())
+                .where(DateAndTimeAnalyzer.DIMENSION_MEASURE, DateAndTimeAnalyzer.MEASURE_SKEWNESS).safeGet(null);
+        return n;
     }
 
     protected static Number convertToDaysSinceEpoch(String s) {
@@ -85,8 +126,8 @@ public class DateAndTimeAnalyzerResult extends CrosstabResult {
 
         final LocalDate epoch = new LocalDate(1970, 1, 1);
 
-        final LocalDate date = LocalDate.parse(s);
-        int days = Days.daysBetween(epoch, date).getDays();
+        final Date date = ConvertToDateTransformer.getInternalInstance().transformValue(s);
+        int days = Days.daysBetween(epoch, new LocalDate(date)).getDays();
 
         return days;
     }

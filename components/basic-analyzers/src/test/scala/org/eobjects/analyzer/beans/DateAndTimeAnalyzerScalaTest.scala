@@ -44,8 +44,39 @@ Mean            2013-01-03 00:00
 Median          2013-01-03 00:00 
 25th percentile 2013-01-01 12:00 
 75th percentile 2013-01-04 12:00 
-Skewness        0.0    
-Kurtosis        -1.1999999999999975 
+Skewness             0 
+Kurtosis          -1.2 
 """.replaceAll("\r\n", "\n"), text.replaceAll("\r\n", "\n"));
+  }
+  
+  @Test
+  def testMetricParsing() = {
+    val col1 = new MockInputColumn("date", classOf[Date]);
+
+    val analyzer = new DateAndTimeAnalyzer()
+    analyzer.descriptiveStatistics = true;
+    analyzer._columns = Array(col1);
+    analyzer._annotationFactory = new InMemoryRowAnnotationFactory()
+
+    analyzer.init()
+
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 1)), 1);
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 2)), 1);
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 3)), 1);
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 4)), 1);
+    analyzer.run(new MockInputRow().put(col1, DateUtils.get(2013, Month.JANUARY, 5)), 1);
+
+    val result = analyzer.getResult();
+
+    Assert.assertEquals(0, result.getNullCount(col1));
+    Assert.assertEquals(15708, result.getMean(col1));
+    Assert.assertEquals(15710, result.getHighestDate(col1));
+    Assert.assertEquals(15706, result.getLowestDate(col1));
+    Assert.assertEquals(15708, result.getMedian(col1));
+    Assert.assertEquals(15708, result.getPercentile25(col1));
+    Assert.assertEquals(15708, result.getPercentile75(col1));
+    
+    Assert.assertEquals(0.0, result.getSkewness(col1).doubleValue(), 0.001);
+    Assert.assertEquals(-1.1999, result.getKurtosis(col1).doubleValue(), 0.001);
   }
 }

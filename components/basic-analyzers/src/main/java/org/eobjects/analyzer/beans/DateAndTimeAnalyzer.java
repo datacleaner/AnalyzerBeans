@@ -184,10 +184,10 @@ public class DateAndTimeAnalyzer implements Analyzer<DateAndTimeAnalyzerResult> 
                 nav.where(measureDimension, MEASURE_PERCENTILE75).put(toString(percentile75));
 
                 final Number kurtosis = delegate.getKurtosis();
-                nav.where(measureDimension, MEASURE_KURTOSIS).put(toString(kurtosis));
+                nav.where(measureDimension, MEASURE_KURTOSIS).put(kurtosis);
 
                 final Number skewness = delegate.getSkewness();
-                nav.where(measureDimension, MEASURE_SKEWNESS).put(toString(skewness));
+                nav.where(measureDimension, MEASURE_SKEWNESS).put(skewness);
             }
         }
 
