@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.data;
 
+import org.eobjects.analyzer.util.InputColumnComparator;
 import org.eobjects.metamodel.schema.Column;
 
 public abstract class AbstractInputColumn<E> implements InputColumn<E> {
@@ -50,8 +51,8 @@ public abstract class AbstractInputColumn<E> implements InputColumn<E> {
 	protected abstract boolean equalsInternal(AbstractInputColumn<?> that);
 
 	@Override
-	public int compareTo(InputColumn<E> o) {
-		return hashCode() - o.hashCode();
+	public final int compareTo(InputColumn<E> o) {
+	    return InputColumnComparator.compareInputColumns(this, o);
 	}
 
 	@Override

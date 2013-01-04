@@ -22,6 +22,7 @@ package org.eobjects.analyzer.data;
 import java.io.Serializable;
 
 import org.eobjects.analyzer.job.IdGenerator;
+import org.eobjects.analyzer.util.InputColumnComparator;
 
 import org.eobjects.metamodel.schema.Column;
 
@@ -32,97 +33,97 @@ import org.eobjects.metamodel.schema.Column;
  * 
  * @param <E>
  */
-public class TransformedInputColumn<E> implements MutableInputColumn<E>, Serializable {
+public class TransformedInputColumn<E> implements MutableInputColumn<E>, Serializable, Comparable<InputColumn<E>> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final String _id;
-	private Class<?> _dataType;
-	private String _name;
-	private String _initialName;
+    private final String _id;
+    private Class<?> _dataType;
+    private String _name;
+    private String _initialName;
 
-	public TransformedInputColumn(String name, IdGenerator idGenerator) {
-		_name = name;
-		_initialName = name;
-		_id = idGenerator.nextId();
-	}
+    public TransformedInputColumn(String name, IdGenerator idGenerator) {
+        _name = name;
+        _initialName = name;
+        _id = idGenerator.nextId();
+    }
 
-	@Override
-	public String getName() {
-		return _name;
-	}
+    @Override
+    public String getName() {
+        return _name;
+    }
 
-	@Override
-	public String getInitialName() {
-		return _initialName;
-	}
+    @Override
+    public String getInitialName() {
+        return _initialName;
+    }
 
-	public void setInitialName(String initialName) {
-		_initialName = initialName;
-	}
+    public void setInitialName(String initialName) {
+        _initialName = initialName;
+    }
 
-	@Override
-	public void setName(String name) {
-		_name = name;
-	}
+    @Override
+    public void setName(String name) {
+        _name = name;
+    }
 
-	@Override
-	public String getId() {
-		return _id;
-	}
+    @Override
+    public String getId() {
+        return _id;
+    }
 
-	public void setDataType(Class<?> dataType) {
-		_dataType = dataType;
-	}
+    public void setDataType(Class<?> dataType) {
+        _dataType = dataType;
+    }
 
-	@Override
-	public boolean isPhysicalColumn() {
-		return false;
-	}
+    @Override
+    public boolean isPhysicalColumn() {
+        return false;
+    }
 
-	@Override
-	public boolean isVirtualColumn() {
-		return true;
-	}
+    @Override
+    public boolean isVirtualColumn() {
+        return true;
+    }
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public DataTypeFamily getDataTypeFamily() {
-		return DataTypeFamily.valueOf(_dataType);
-	}
+    @SuppressWarnings("deprecation")
+    @Override
+    public DataTypeFamily getDataTypeFamily() {
+        return DataTypeFamily.valueOf(_dataType);
+    }
 
-	@Override
-	public String toString() {
-		return "TransformedInputColumn[id=" + _id + ",name=" + _name + "]";
-	}
+    @Override
+    public String toString() {
+        return "TransformedInputColumn[id=" + _id + ",name=" + _name + "]";
+    }
 
-	@Override
-	public Column getPhysicalColumn() throws IllegalStateException {
-		return null;
-	}
+    @Override
+    public Column getPhysicalColumn() throws IllegalStateException {
+        return null;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Class<? extends E> getDataType() {
-		return (Class<? extends E>) _dataType;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Class<? extends E> getDataType() {
+        return (Class<? extends E>) _dataType;
+    }
 
-	@Override
-	public int hashCode() {
-		return _id.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return _id.hashCode();
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof TransformedInputColumn) {
-			TransformedInputColumn<?> that = (TransformedInputColumn<?>) obj;
-			return getId().equals(that.getId());
-		}
-		return false;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TransformedInputColumn) {
+            TransformedInputColumn<?> that = (TransformedInputColumn<?>) obj;
+            return getId().equals(that.getId());
+        }
+        return false;
+    }
 
-	@Override
-	public int compareTo(InputColumn<E> o) {
-		return hashCode() - o.hashCode();
-	}
+    @Override
+    public int compareTo(InputColumn<E> o) {
+        return InputColumnComparator.compareInputColumns(this, o);
+    }
 }

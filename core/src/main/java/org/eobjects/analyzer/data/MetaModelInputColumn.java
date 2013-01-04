@@ -77,17 +77,6 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 	}
 
 	@Override
-	public int compareTo(InputColumn<Object> o) {
-		if (o.isPhysicalColumn()) {
-			int diff = getPhysicalColumn().compareTo(o.getPhysicalColumn());
-			if (diff != 0) {
-				return diff;
-			}
-		}
-		return super.compareTo(o);
-	}
-
-	@Override
 	@SuppressWarnings("deprecation")
 	public DataTypeFamily getDataTypeFamily() {
 		ColumnType type = _column.getType();
