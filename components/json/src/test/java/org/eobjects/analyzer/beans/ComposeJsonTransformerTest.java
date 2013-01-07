@@ -39,6 +39,7 @@ public class ComposeJsonTransformerTest {
 		InputColumn<Object> col = new MockInputColumn<Object>("obj",
 				Object.class);
 		ComposeJsonTransformer jsonTransformer = new ComposeJsonTransformer(col);
+		jsonTransformer.init();
 
 		assertEquals("OutputColumns[obj (as JSON)]", jsonTransformer
 				.getOutputColumns().toString());
@@ -68,6 +69,7 @@ public class ComposeJsonTransformerTest {
 
 		InputColumn<Map<?, ?>> col = new MockInputColumn<Map<?, ?>>("map");
 		ComposeJsonTransformer jsonTransformer = new ComposeJsonTransformer(col);
+		jsonTransformer.init();
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
 
 		String[] jsonDocs = jsonTransformer.transform(new MockInputRow().put(
@@ -86,6 +88,7 @@ public class ComposeJsonTransformerTest {
 		InputColumn<List<?>> col = new MockInputColumn<List<?>>("list");
 
 		ComposeJsonTransformer jsonTransformer = new ComposeJsonTransformer(col);
+		jsonTransformer.init();
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
 
 		String[] jsonDocs = jsonTransformer.transform(new MockInputRow().put(
@@ -122,6 +125,7 @@ public class ComposeJsonTransformerTest {
 
 		InputColumn<Map<?, ?>> col = new MockInputColumn<Map<?, ?>>("name");
 		ComposeJsonTransformer jsonTransformer = new ComposeJsonTransformer(col);
+		jsonTransformer.init();
 		assertEquals(1, jsonTransformer.getOutputColumns().getColumnCount());
 
 		String[] jsonDocs = jsonTransformer.transform(new MockInputRow().put(

@@ -38,6 +38,7 @@ public class ParseJsonTransformerTest {
 		InputColumn<String> col1 = new MockInputColumn<String>("jsonDocument",
 				String.class);
 		ParseJsonTransformer transformer = new ParseJsonTransformer(col1);
+		transformer.init();
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 
 		String json = "{\"name\":\"shekhar\",\"country\":\"india\"}";
@@ -54,6 +55,7 @@ public class ParseJsonTransformerTest {
 		InputColumn<String> col1 = new MockInputColumn<String>("jsonDocument",
 				String.class);
 		ParseJsonTransformer transformer = new ParseJsonTransformer(col1);
+		transformer.init();
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 
 		String json = "{\"name\":\"kasper\",\"age\":29,\"developer\":true,\"manager\":false,\"balance\":400.17}";
@@ -74,6 +76,7 @@ public class ParseJsonTransformerTest {
 		InputColumn<String> col1 = new MockInputColumn<String>("jsonDocument",
 				String.class);
 		ParseJsonTransformer transformer = new ParseJsonTransformer(col1);
+		transformer.init();
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 		Object[] values = transformer.transform(new MockInputRow());
 		assertTrue(values.length == 1);
@@ -85,6 +88,7 @@ public class ParseJsonTransformerTest {
 		InputColumn<String> col1 = new MockInputColumn<String>("jsonDocument",
 				String.class);
 		ParseJsonTransformer transformer = new ParseJsonTransformer(col1);
+		transformer.init();
 		assertEquals(1, transformer.getOutputColumns().getColumnCount());
 
 		String json = "{\"name\":\"shekhar\",\"addresses\":[{\"city\":\"Delhi\",\"country:\":\"India\"},{\"city\":\"Delhi\",\"country:\":\"India\"}],\"emails\":[\"email1\",\"email2\"]}";

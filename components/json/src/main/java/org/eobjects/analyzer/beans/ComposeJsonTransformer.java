@@ -22,9 +22,11 @@ package org.eobjects.analyzer.beans;
 import javax.inject.Inject;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -37,35 +39,41 @@ import org.eobjects.analyzer.data.InputRow;
 @Categorized(DataStructuresCategory.class)
 public class ComposeJsonTransformer implements Transformer<String> {
 
-	@Inject
-	@Configured
-	@Description("Column containing data structures to format")
-	InputColumn<?> data;
+    @Inject
+    @Configured
+    @Description("Column containing data structures to format")
+    InputColumn<?> data;
 
-	private final ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper;
+    private ObjectWriter writer;
 
-	public ComposeJsonTransformer() {
-	}
+    public ComposeJsonTransformer() {
+    }
 
-	public ComposeJsonTransformer(InputColumn<?> data) {
-		this.data = data;
-	}
+    public ComposeJsonTransformer(InputColumn<?> data) {
+        this.data = data;
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		return new OutputColumns(data.getName() + " (as JSON)");
-	}
+    @Initialize
+    public void init() {
+        mapper = new ObjectMapper();
+        writer = mapper.writer();
+    }
 
-	@Override
-	public String[] transform(InputRow row) {
-		try {
-			Object value = row.getValue(data);
-			final String json = mapper.writeValueAsString(value);
-			return new String[] { json };
-		} catch (Exception e) {
-			throw new IllegalStateException(
-					"Exception while creating JSON representation", e);
-		}
-	}
+    @Override
+    public OutputColumns getOutputColumns() {
+        return new OutputColumns(data.getName() + " (as JSON)");
+    }
+
+    @Override
+    public String[] transform(InputRow row) {
+        try {
+            Object value = row.getValue(data);
+            final String json = writer.writeValueAsString(value);
+            return new String[] { json };
+        } catch (Exception e) {
+            throw new IllegalStateException("Exception while creating JSON representation", e);
+        }
+    }
 
 }

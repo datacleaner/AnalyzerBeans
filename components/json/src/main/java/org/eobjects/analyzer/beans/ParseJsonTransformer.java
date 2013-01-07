@@ -24,9 +24,11 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectReader;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
@@ -40,8 +42,6 @@ import org.eobjects.analyzer.util.StringUtils;
 @Categorized(DataStructuresCategory.class)
 public class ParseJsonTransformer implements Transformer<Object> {
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
     @Inject
     @Configured(order = 1)
     @Description("Column containing JSON documents to parse")
@@ -51,12 +51,21 @@ public class ParseJsonTransformer implements Transformer<Object> {
     @Configured(order = 2)
     Class<?> dataType = Map.class;
 
+    private ObjectMapper mapper;
+    private ObjectReader reader;
+
     public ParseJsonTransformer() {
 
     }
 
     public ParseJsonTransformer(InputColumn<String> json) {
         this.json = json;
+    }
+
+    @Initialize
+    public void init() {
+        this.mapper = new ObjectMapper();
+        this.reader = mapper.reader().withType(dataType);
     }
 
     @Override
@@ -69,29 +78,39 @@ public class ParseJsonTransformer implements Transformer<Object> {
     @Override
     public Object[] transform(InputRow inputRow) {
         final String jsonString = inputRow.getValue(json);
-        final Object result = parse(jsonString, dataType, mapper);
+        final Object result = parse(jsonString, dataType, reader);
 
         return new Object[] { result };
     }
 
-    public static <E> E parse(final String jsonString, final Class<E> dataType,
-            final ObjectMapper objectMapper) {
+    public static <E> E parse(final String jsonString, final Class<E> dataType, final ObjectMapper objectMapper) {
         if (StringUtils.isNullOrEmpty(jsonString)) {
             return null;
-        } else {
-            try {
-                return objectMapper.readValue(jsonString, dataType);
-            } catch (Exception e) {
-                throw new IllegalStateException(
-                        "Exception occurred while parsing JSON", e);
+        }
+
+        final ObjectReader reader = objectMapper.reader().withType(dataType);
+        return parse(jsonString, dataType, reader);
+    }
+
+    public static <E> E parse(final String jsonString, final Class<E> dataType, ObjectReader reader) {
+        if (StringUtils.isNullOrEmpty(jsonString)) {
+            return null;
+        }
+
+        try {
+            return reader.readValue(jsonString);
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
             }
+            throw new IllegalStateException("Exception occurred while parsing JSON", e);
         }
     }
-    
+
     public void setDataType(Class<?> dataType) {
         this.dataType = dataType;
     }
-    
+
     public void setJson(InputColumn<String> json) {
         this.json = json;
     }
