@@ -69,7 +69,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
             // empty list
             return Collections.emptyList();
         }
-        
+
         final Transformer<?> component = getConfigurableBean();
         final TransformerBeanDescriptor<T> descriptor = getDescriptor();
 
@@ -100,6 +100,11 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
                 for (int i = 0; i < colDiff; i++) {
                     int nextIndex = _outputColumns.size();
                     final String name = getColumnName(outputColumns, nextIndex);
+
+                    // TODO: idGenerator will now create a greater number than
+                    // previously, making the newly created column sorted above
+                    // the existing ones :-(
+
                     _outputColumns.add(new TransformedInputColumn<Object>(name, _idGenerator));
                     _automaticOutputColumnNames.add(name);
                 }
@@ -113,8 +118,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
         }
 
         // automatically update names and types of columns if they have not been
-        // manually
-        // set
+        // manually set
         for (int i = 0; i < expectedCols; i++) {
             final String proposedName = getColumnName(outputColumns, i);
             Class<?> dataType = outputColumns.getColumnType(i);
@@ -123,6 +127,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
             }
 
             TransformedInputColumn<?> col = (TransformedInputColumn<?>) _outputColumns.get(i);
+            col.setSortNumber(i);
             col.setInitialName(proposedName);
             if (dataType != col.getDataType()) {
                 col.setDataType(dataType);

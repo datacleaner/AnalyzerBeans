@@ -35,10 +35,10 @@ import org.eobjects.metamodel.schema.Column;
  */
 public class InputColumnComparator implements Comparator<InputColumn<?>>, Serializable {
 
-	private static final long serialVersionUID = 1L;
-	
-	public static int compareInputColumns(InputColumn<?> o1, InputColumn<?> o2) {
-	    if (o1 == null && o2 == null) {
+    private static final long serialVersionUID = 1L;
+
+    public static int compareInputColumns(InputColumn<?> o1, InputColumn<?> o2) {
+        if (o1 == null && o2 == null) {
             return 0;
         }
         if (o1 == null) {
@@ -47,10 +47,10 @@ public class InputColumnComparator implements Comparator<InputColumn<?>>, Serial
         if (o2 == null) {
             return 1;
         }
-	    
-	    if (o1.isPhysicalColumn() && o2.isPhysicalColumn()) {
-            Column physicalColumn1 = o1.getPhysicalColumn();
-            Column physicalColumn2 = o2.getPhysicalColumn();
+
+        if (o1.isPhysicalColumn() && o2.isPhysicalColumn()) {
+            final Column physicalColumn1 = o1.getPhysicalColumn();
+            final Column physicalColumn2 = o2.getPhysicalColumn();
             int result = physicalColumn1.getColumnNumber() - physicalColumn2.getColumnNumber();
             if (result == 0) {
                 result = physicalColumn1.compareTo(physicalColumn2);
@@ -60,9 +60,16 @@ public class InputColumnComparator implements Comparator<InputColumn<?>>, Serial
 
         if (o1.isVirtualColumn() && o2.isVirtualColumn()) {
             if (o1 instanceof TransformedInputColumn<?> && o2 instanceof TransformedInputColumn<?>) {
-                String id1 = ((TransformedInputColumn<?>) o1).getId();
-                String id2 = ((TransformedInputColumn<?>) o2).getId();
-                return id1.compareTo(id2);
+                final TransformedInputColumn<?> col1 = (TransformedInputColumn<?>) o1;
+                final TransformedInputColumn<?> col2 = (TransformedInputColumn<?>) o2;
+
+                final int diff = col1.getSortNumber() - col2.getSortNumber();
+                if (diff == 0) {
+                    String id1 = col1.getId();
+                    String id2 = col2.getId();
+                    return id1.compareTo(id2);
+                }
+                return diff;
             }
             int result = o1.getName().compareTo(o2.getName());
             if (result == 0) {
@@ -76,11 +83,11 @@ public class InputColumnComparator implements Comparator<InputColumn<?>>, Serial
         } else {
             return 1;
         }
-	}
+    }
 
-	@Override
-	public int compare(InputColumn<?> o1, InputColumn<?> o2) {
-		return compareInputColumns(o1, o2);
-	}
+    @Override
+    public int compare(InputColumn<?> o1, InputColumn<?> o2) {
+        return compareInputColumns(o1, o2);
+    }
 
 }

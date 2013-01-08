@@ -38,6 +38,7 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     private static final long serialVersionUID = 1L;
 
     private final String _id;
+    private int sortNumber;
     private Class<?> _dataType;
     private String _name;
     private String _initialName;
@@ -100,6 +101,14 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     @Override
     public Column getPhysicalColumn() throws IllegalStateException {
         return null;
+    }
+    
+    public int getSortNumber() {
+        return sortNumber;
+    }
+    
+    public void setSortNumber(int sortNumber) {
+        this.sortNumber = sortNumber;
     }
 
     @SuppressWarnings("unchecked")
