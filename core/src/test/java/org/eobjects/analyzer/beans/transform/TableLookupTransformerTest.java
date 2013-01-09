@@ -154,4 +154,44 @@ public class TableLookupTransformerTest extends TestCase {
 
         trans.close();
     }
+
+    public void testCarthesianJoin() throws Exception {
+        final List<Object[]> result = new ArrayList<Object[]>();
+
+        final TableLookupTransformer trans = new TableLookupTransformer();
+        trans.datastore = new CsvDatastore("my ds", "src/test/resources/employees.csv");
+        trans.outputColumns = new String[] { "name" };
+        trans.outputRowCollector = new OutputRowCollector() {
+            @Override
+            public void putValues(Object... values) {
+                result.add(values);
+            }
+        };
+        trans.joinSemantic = JoinSemantic.INNER;
+        InputColumn<String> col1 = new MockInputColumn<String>("my email col", String.class);
+
+        OutputColumns outputColumns = trans.getOutputColumns();
+        assertEquals("OutputColumns[name (lookup)]", outputColumns.toString());
+        assertEquals(String.class, outputColumns.getColumnType(0));
+
+        trans.validate();
+        trans.init();
+
+        assertNull(trans.transform(new MockInputRow().put(col1, "foo bar")));
+        assertEquals(7, result.size());
+        assertEquals("[John Doe]", Arrays.toString(result.get(0)));
+        assertEquals("[Jane Doe]", Arrays.toString(result.get(1)));
+        assertEquals("[Jane doe]", Arrays.toString(result.get(2)));
+
+        assertNull(trans.transform(new MockInputRow().put(col1, "jane.doe@company.com")));
+        assertEquals(14, result.size());
+        assertEquals("[John Doe]", Arrays.toString(result.get(0)));
+        assertEquals("[Jane Doe]", Arrays.toString(result.get(1)));
+        assertEquals("[Jane doe]", Arrays.toString(result.get(2)));
+        assertEquals("[John Doe]", Arrays.toString(result.get(7 + 0)));
+        assertEquals("[Jane Doe]", Arrays.toString(result.get(7 + 1)));
+        assertEquals("[Jane doe]", Arrays.toString(result.get(7 + 2)));
+
+        trans.close();
+    }
 }

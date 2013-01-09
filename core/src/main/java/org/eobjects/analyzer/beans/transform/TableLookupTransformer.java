@@ -97,11 +97,11 @@ public class TableLookupTransformer implements Transformer<Object> {
     Datastore datastore;
 
     @Inject
-    @Configured
+    @Configured(required = false)
     InputColumn<?>[] conditionValues;
 
     @Inject
-    @Configured
+    @Configured(required = false)
     @ColumnProperty
     String[] conditionColumns;
 
@@ -150,12 +150,16 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     private Column[] getQueryConditionColumns() {
         if (queryConditionColumns == null) {
-            final DatastoreConnection con = datastore.openConnection();
-            try {
-                queryConditionColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName,
-                        conditionColumns);
-            } finally {
-                con.close();
+            if (isCarthesianProductMode()) {
+                queryConditionColumns = new Column[0];
+            } else {
+                final DatastoreConnection con = datastore.openConnection();
+                try {
+                    queryConditionColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName,
+                            conditionColumns);
+                } finally {
+                    con.close();
+                }
             }
         }
         return queryConditionColumns;
@@ -219,11 +223,13 @@ public class TableLookupTransformer implements Transformer<Object> {
     private void compileLookupQuery() {
         try {
             Column[] queryOutputColumns = getQueryOutputColumns(false);
-            Column[] queryConditionColumns = getQueryConditionColumns();
-
             Query query = new Query().from(queryOutputColumns[0].getTable()).select(queryOutputColumns);
-            for (int i = 0; i < queryConditionColumns.length; i++) {
-                query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, new QueryParameter());
+
+            if (!isCarthesianProductMode()) {
+                Column[] queryConditionColumns = getQueryConditionColumns();
+                for (int i = 0; i < queryConditionColumns.length; i++) {
+                    query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, new QueryParameter());
+                }
             }
             
             if (joinSemantic == JoinSemantic.LEFT) {
@@ -237,10 +243,18 @@ public class TableLookupTransformer implements Transformer<Object> {
             throw e;
         }
     }
+    
+    private boolean isCarthesianProductMode() {
+        return (conditionColumns == null || conditionColumns.length == 0) && (conditionValues == null || conditionValues.length == 0);
+    }
 
     @Validate
     public void validate() {
-        Column[] queryConditionColumns = getQueryConditionColumns();
+        if (isCarthesianProductMode()) {
+            // carthesian product mode
+            return;
+        }
+        final Column[] queryConditionColumns = getQueryConditionColumns();
         final List<String> columnsNotFound = new ArrayList<String>();
         for (int i = 0; i < queryConditionColumns.length; i++) {
             if (queryConditionColumns[i] == null) {
@@ -271,10 +285,16 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     @Override
     public Object[] transform(InputRow inputRow) {
-        final List<Object> queryInput = new ArrayList<Object>(conditionValues.length);
-        for (InputColumn<?> inputColumn : conditionValues) {
-            Object value = inputRow.getValue(inputColumn);
-            queryInput.add(value);
+        final List<Object> queryInput;
+        
+        if (isCarthesianProductMode()) {
+            queryInput = Collections.emptyList();
+        } else {
+            queryInput = new ArrayList<Object>(conditionValues.length);
+            for (InputColumn<?> inputColumn : conditionValues) {
+                Object value = inputRow.getValue(inputColumn);
+                queryInput.add(value);
+            }
         }
 
         logger.info("Looking up based on condition values: {}", queryInput);
