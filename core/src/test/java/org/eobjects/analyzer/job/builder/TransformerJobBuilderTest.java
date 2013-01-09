@@ -23,11 +23,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.mock.TransformerMock;
+import org.eobjects.analyzer.beans.transform.TableLookupTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.ConstantInputColumn;
@@ -101,6 +103,22 @@ public class TransformerJobBuilderTest extends TestCase {
         tjb.clearInputColumns();
 
         assertEquals(0, tjb.getInputColumns().size());
+    }
+    
+    public void testAddNonRequiredColumn() throws Exception {
+        final TransformerJobBuilder<TableLookupTransformer> tjb = ajb.addTransformer(TableLookupTransformer.class);
+        
+        final Set<ConfiguredPropertyDescriptor> inputProperties = tjb.getDescriptor().getConfiguredPropertiesForInput(true);
+        assertEquals(1, inputProperties.size());
+        
+        final ConfiguredPropertyDescriptor inputProperty = inputProperties.iterator().next();
+        assertFalse(inputProperty.isRequired());
+        
+        assertNull(tjb.getConfiguredProperty(inputProperty));
+        
+        tjb.addInputColumn(ajb.getSourceColumns().get(0));
+        
+        assertNotNull(tjb.getConfiguredProperty(inputProperty));
     }
 
     public void testClearInputColumnsSingle() throws Exception {

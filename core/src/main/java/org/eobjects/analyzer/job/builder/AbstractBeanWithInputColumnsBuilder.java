@@ -75,13 +75,20 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
      *             accepted by this transformer.
      */
     public B addInputColumn(InputColumn<?> inputColumn) throws IllegalArgumentException {
-        Collection<ConfiguredPropertyDescriptor> requiredInputProperties = getDescriptor()
-                .getConfiguredPropertiesForInput(false);
-        if (requiredInputProperties.size() == 1) {
-            ConfiguredPropertyDescriptor propertyDescriptor = requiredInputProperties.iterator().next();
+        Collection<ConfiguredPropertyDescriptor> inputProperties = getDescriptor().getConfiguredPropertiesForInput(
+                false);
+
+        if (inputProperties.isEmpty()) {
+            // if there are no required input columns, try optional input
+            // columns
+            inputProperties = getDescriptor().getConfiguredPropertiesForInput(true);
+        }
+
+        if (inputProperties.size() == 1) {
+            ConfiguredPropertyDescriptor propertyDescriptor = inputProperties.iterator().next();
             return addInputColumn(inputColumn, propertyDescriptor);
         } else {
-            throw new UnsupportedOperationException("There are " + requiredInputProperties.size()
+            throw new UnsupportedOperationException("There are " + inputProperties.size()
                     + " named input columns in \"" + getDescriptor().getDisplayName()
                     + "\", please specify which one to configure");
         }
