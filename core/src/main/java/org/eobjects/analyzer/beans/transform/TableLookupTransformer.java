@@ -111,13 +111,13 @@ public class TableLookupTransformer implements Transformer<Object> {
     String[] outputColumns;
 
     @Inject
-    @Configured(required = false)
+    @Configured
     @Alias("Schema")
     @SchemaProperty
     String schemaName;
 
     @Inject
-    @Configured(required = false)
+    @Configured
     @Alias("Table")
     @TableProperty
     String tableName;

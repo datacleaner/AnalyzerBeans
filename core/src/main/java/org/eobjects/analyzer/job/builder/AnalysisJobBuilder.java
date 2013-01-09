@@ -868,6 +868,18 @@ public final class AnalysisJobBuilder implements Closeable {
 	public List<FilterChangeListener> getFilterChangeListeners() {
 		return _filterChangeListeners;
 	}
+	
+    public List<Table> getSourceTables() {
+        final List<Table> tables = new ArrayList<Table>();
+        final List<MetaModelInputColumn> columns = getSourceColumns();
+        for (MetaModelInputColumn column : columns) {
+            Table table = column.getPhysicalColumn().getTable();
+            if (!tables.contains(table)) {
+                tables.add(table);
+            }
+        }
+        return tables;
+    }
 
 	/**
 	 * Removes all source columns and all components from the job

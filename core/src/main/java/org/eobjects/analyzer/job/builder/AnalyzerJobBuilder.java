@@ -39,9 +39,19 @@ import org.eobjects.analyzer.job.ImmutableAnalyzerJob;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * A builder of {@link AnalyzerJob} objects.
+ * 
+ * @param <A>
+ *            the type of {@link Analyzer} that is being built.
+ */
 public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         AbstractBeanWithInputColumnsBuilder<AnalyzerBeanDescriptor<A>, A, AnalyzerJobBuilder<A>> {
+
+    private static final Logger logger = LoggerFactory.getLogger(AnalysisJobBuilder.class);
 
     /**
      * Field that determines if this analyzer is applicable for building
@@ -104,7 +114,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
     }
 
     public AnalyzerJob[] toAnalyzerJobs(boolean validate) throws IllegalStateException {
-        Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
+        final Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
         if (!_multipleJobsSupported) {
             ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(),
                     new ImmutableBeanConfiguration(configuredProperties), getRequirement());
@@ -115,8 +125,8 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
             throw new IllegalStateException("No input column configured");
         }
 
-        List<InputColumn<?>> tableLessColumns = new ArrayList<InputColumn<?>>();
-        Map<Table, List<InputColumn<?>>> originatingTables = new LinkedHashMap<Table, List<InputColumn<?>>>();
+        final List<InputColumn<?>> tableLessColumns = new ArrayList<InputColumn<?>>();
+        final Map<Table, List<InputColumn<?>>> originatingTables = new LinkedHashMap<Table, List<InputColumn<?>>>();
         for (InputColumn<?> inputColumn : _inputColumns) {
             Table table = getAnalysisJobBuilder().getOriginatingTable(inputColumn);
             if (table == null) {
@@ -134,7 +144,14 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         }
 
         if (validate && originatingTables.isEmpty()) {
-            throw new IllegalStateException("Could not determine source for analyzer '" + this + "'");
+            final List<Table> sourceTables = getAnalysisJobBuilder().getSourceTables();
+            if (sourceTables.size() == 1) {
+                logger.info("Only a single source table is available, so the source of analyzer '{}' is inferred", this);
+                Table table = sourceTables.get(0);
+                originatingTables.put(table, new ArrayList<InputColumn<?>>());
+            } else {
+                throw new IllegalStateException("Could not determine source for analyzer '" + this + "'");
+            }
         }
 
         if (originatingTables.size() == 1 && _inputProperty.isArray()) {
