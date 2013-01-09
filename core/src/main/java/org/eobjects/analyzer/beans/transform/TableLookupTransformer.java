@@ -35,6 +35,8 @@ import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.OutputRowCollector;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.SchemaProperty;
 import org.eobjects.analyzer.beans.api.TableProperty;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -51,6 +53,7 @@ import org.eobjects.metamodel.query.OperatorType;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.query.QueryParameter;
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.util.HasName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +70,27 @@ import org.slf4j.LoggerFactory;
 public class TableLookupTransformer implements Transformer<Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(TableLookupTransformer.class);
+
+    public static enum JoinSemantic implements HasName {
+        LEFT("Left join"), INNER("Inner join"), INNER_MIN_ONE("Inner join (min. 1 output record)");
+
+        private final String _name;
+
+        private JoinSemantic(String name) {
+            _name = name;
+        }
+
+        @Override
+        public String getName() {
+            return _name;
+        }
+
+        public boolean isCacheable() {
+            // inner joined result sets are not cached since their size exceeds
+            // the cache capabilities.
+            return this == LEFT;
+        }
+    }
 
     @Inject
     @Configured
@@ -102,6 +126,15 @@ public class TableLookupTransformer implements Transformer<Object> {
     @Configured
     @Description("Use a client-side cache to avoid looking up multiple times with same inputs.")
     boolean cacheLookups = true;
+
+    @Inject
+    @Configured
+    @Description("Which kind of semantic to apply to the lookup, compared to a SQL JOIN.")
+    JoinSemantic joinSemantic = JoinSemantic.LEFT;
+
+    @Inject
+    @Provided
+    OutputRowCollector outputRowCollector;
 
     private final Map<List<Object>, Object[]> cache = Collections.synchronizedMap(CollectionUtils2
             .<List<Object>, Object[]> createCacheMap());
@@ -192,7 +225,10 @@ public class TableLookupTransformer implements Transformer<Object> {
             for (int i = 0; i < queryConditionColumns.length; i++) {
                 query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, new QueryParameter());
             }
-            query = query.setMaxRows(1);
+            
+            if (joinSemantic == JoinSemantic.LEFT) {
+                query = query.setMaxRows(1);
+            }
 
             lookupQuery = datastoreConnection.getDataContext().compileQuery(query);
 
@@ -244,7 +280,7 @@ public class TableLookupTransformer implements Transformer<Object> {
         logger.info("Looking up based on condition values: {}", queryInput);
 
         Object[] result;
-        if (cacheLookups) {
+        if (cacheLookups && joinSemantic.isCacheable()) {
             result = cache.get(queryInput);
             if (result == null) {
                 result = performQuery(queryInput);
@@ -262,8 +298,6 @@ public class TableLookupTransformer implements Transformer<Object> {
     }
 
     private Object[] performQuery(List<Object> queryInput) {
-        final Object[] result;
-
         try {
             final Column[] queryConditionColumns = getQueryConditionColumns();
 
@@ -274,16 +308,7 @@ public class TableLookupTransformer implements Transformer<Object> {
 
             final DataSet dataSet = datastoreConnection.getDataContext().executeQuery(lookupQuery, parameterValues);
             try {
-                if (dataSet.next()) {
-                    result = dataSet.getRow().getValues();
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Result of lookup: " + Arrays.toString(result));
-                    }
-                } else {
-                    logger.warn("Result of lookup: None!");
-                    result = new Object[outputColumns.length];
-                }
-                return result;
+                return handleDataSet(dataSet);
             } finally {
                 dataSet.close();
             }
@@ -291,6 +316,35 @@ public class TableLookupTransformer implements Transformer<Object> {
             logger.error("Error occurred while looking up based on conditions: " + queryInput, e);
             throw e;
         }
+    }
+
+    private Object[] handleDataSet(DataSet dataSet) {
+        if (!dataSet.next()) {
+            logger.warn("Result of lookup: None!");
+            switch (joinSemantic) {
+            case LEFT:
+            case INNER_MIN_ONE:
+                return new Object[outputColumns.length];
+            default:
+                return null;
+            }
+        }
+
+        do {
+            final Object[] result = dataSet.getRow().getValues();
+            if (logger.isInfoEnabled()) {
+                logger.info("Result of lookup: " + Arrays.toString(result));
+            }
+            switch (joinSemantic) {
+            case LEFT:
+                return result;
+            default:
+                outputRowCollector.putValues(result);
+            }
+
+        } while (dataSet.next());
+
+        return null;
     }
 
     @Close
