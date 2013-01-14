@@ -45,6 +45,7 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -53,6 +54,7 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.util.ClassLoaderUtils;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.Predicate;
 import org.eobjects.metamodel.util.Ref;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
@@ -87,8 +89,13 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
     private final Map<String, RendererBeanDescriptor<?>> _rendererBeanDescriptors = new HashMap<String, RendererBeanDescriptor<?>>();
     private final Map<String, ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new HashMap<String, ExplorerBeanDescriptor<?>>();
     private final TaskRunner _taskRunner;
+    private final Predicate<Class<? extends RenderingFormat<?>>> _renderingFormatPredicate;
     private final AtomicInteger _tasksPending;
 
+    /**
+     * Default constructor. Will perform classpath scanning in the calling
+     * thread(s).
+     */
     public ClasspathScanDescriptorProvider() {
         this(new SingleThreadedTaskRunner());
     }
@@ -101,8 +108,24 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
      * @param taskRunner
      */
     public ClasspathScanDescriptorProvider(TaskRunner taskRunner) {
+        this(taskRunner, null);
+    }
+
+    /**
+     * Constructs a {@link ClasspathScanDescriptorProvider} using a specified
+     * {@link TaskRunner}. The taskrunner will be used to perform the classpath
+     * scan, potentially in a parallel fashion.
+     * 
+     * @param taskRunner
+     * @param renderingFormatPredicate
+     *            predicate function to apply when evaluating if a particular
+     *            rendering format is of interest or not
+     */
+    public ClasspathScanDescriptorProvider(TaskRunner taskRunner,
+            Predicate<Class<? extends RenderingFormat<?>>> renderingFormatPredicate) {
         _taskRunner = taskRunner;
         _tasksPending = new AtomicInteger(0);
+        _renderingFormatPredicate = renderingFormatPredicate;
     }
 
     /**
@@ -271,7 +294,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
             final boolean recursive, final boolean strictClassLoader) throws IOException {
 
         final String file = resource.getFile();
-        
+
         logger.debug("Resource file string: {}", file);
 
         final File dir = new File(file.replaceAll("\\%20", " "));
@@ -279,22 +302,23 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
             logger.info("Resource is a directory, scanning for files: {}", dir.getAbsolutePath());
             scanDirectory(dir, recursive, classLoader, strictClassLoader);
         } else {
-            
+
             URLConnection connection = resource.openConnection();
             if (connection instanceof JarURLConnection) {
                 logger.info("Getting JarFile from JarURLConnection: {}", connection);
                 JarFile jarFile = ((JarURLConnection) connection).getJarFile();
-                // note: We are NOT closing this JarFile, because it is still used by the JarURLConnection
+                // note: We are NOT closing this JarFile, because it is still
+                // used by the JarURLConnection
                 scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
             } else {
                 // We'll assume URLs of the format "jar:path!/entry", with the
                 // protocol being arbitrary as long as following the entry
                 // format. We'll also handle paths with and without leading
                 // "file:" prefix.
-                
+
                 JarFile jarFile = null;
                 String rootEntryPath;
-                
+
                 final String jarFileUrl;
                 final int separatorIndex = file.indexOf("!/");
 
@@ -483,7 +507,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
             final boolean strictClassLoader) throws IOException {
         try {
             final ClassReader classReader = new ClassReader(inputStream);
-            final BeanClassVisitor visitor = new BeanClassVisitor(classLoader);
+            final BeanClassVisitor visitor = new BeanClassVisitor(classLoader, _renderingFormatPredicate);
             classReader.accept(visitor, ClassReader.SKIP_CODE);
 
             Class<?> beanClass = visitor.getBeanClass();

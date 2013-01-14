@@ -28,15 +28,18 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RendererBean;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.metamodel.util.Predicate;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,14 +48,19 @@ import org.slf4j.LoggerFactory;
  */
 final class BeanClassVisitor extends ClassVisitor {
 
+    private static final int API_VERSION = Opcodes.ASM4;
+
     private final static Logger _logger = LoggerFactory.getLogger(BeanClassVisitor.class);
     private final ClassLoader _classLoader;
+    private final Predicate<Class<? extends RenderingFormat<?>>> _renderingFormatPredicate;
     private Class<?> _beanClazz;
     private String _name;
 
-    public BeanClassVisitor(ClassLoader classLoader) {
-        super(Opcodes.ASM4);
+    public BeanClassVisitor(ClassLoader classLoader,
+            Predicate<Class<? extends RenderingFormat<?>>> renderingFormatPredicate) {
+        super(API_VERSION);
         _classLoader = classLoader;
+        _renderingFormatPredicate = renderingFormatPredicate;
     }
 
     @Override
@@ -62,8 +70,38 @@ final class BeanClassVisitor extends ClassVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+        if (isAnnotation(desc, RendererBean.class)) {
+            if (_renderingFormatPredicate == null) {
+                initializeClass();
+                return null;
+            }
+            return new AnnotationVisitor(API_VERSION) {
+                @Override
+                public void visit(String name, Object value) {
+                    final Type valueType = (Type) value;
+                    final String renderingFormatClassName = valueType.getClassName();
+                    final Class<? extends RenderingFormat<?>> renderingFormatClass;
+                    try {
+                        @SuppressWarnings("unchecked")
+                        final Class<? extends RenderingFormat<?>> cls = (Class<? extends RenderingFormat<?>>) Class
+                                .forName(renderingFormatClassName, false, _classLoader);
+                        renderingFormatClass = cls;
+                    } catch (Exception e) {
+                        _logger.error("Failed to read rendering format of renderer class: " + _name, e);
+                        return;
+                    }
+
+                    final Boolean proceed = _renderingFormatPredicate.eval(renderingFormatClass);
+                    if (proceed == null || !proceed.booleanValue()) {
+                        _logger.info("Skipping renderer because it's format was not accepted by predicate: {}", _name);
+                        return;
+                    }
+                    initializeClass();
+                }
+            };
+        }
         if (isAnnotation(desc, AnalyzerBean.class) || isAnnotation(desc, TransformerBean.class)
-                || isAnnotation(desc, FilterBean.class) || isAnnotation(desc, RendererBean.class)) {
+                || isAnnotation(desc, FilterBean.class)) {
             initializeClass();
         }
         return null;
@@ -91,7 +129,6 @@ final class BeanClassVisitor extends ClassVisitor {
                         e.getMessage());
                 if (_logger.isDebugEnabled()) {
                     _logger.debug("Failed to load class: " + javaName, e);
-                    ;
                 }
             }
         }
