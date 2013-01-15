@@ -53,9 +53,11 @@ import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.util.ClassLoaderUtils;
+import org.eobjects.metamodel.util.ExclusionPredicate;
 import org.eobjects.metamodel.util.FileHelper;
 import org.eobjects.metamodel.util.Predicate;
 import org.eobjects.metamodel.util.Ref;
+import org.eobjects.metamodel.util.TruePredicate;
 import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +110,22 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
      * @param taskRunner
      */
     public ClasspathScanDescriptorProvider(TaskRunner taskRunner) {
-        this(taskRunner, null);
+        this(taskRunner, new TruePredicate<Class<? extends RenderingFormat<?>>>());
+    }
+
+    /**
+     * Constructs a {@link ClasspathScanDescriptorProvider} using a specified
+     * {@link TaskRunner}. The taskrunner will be used to perform the classpath
+     * scan, potentially in a parallel fashion.
+     * 
+     * @param taskRunner
+     * @param excludedRenderingFormats
+     *            rendering formats to exclude from loading into the descriptor
+     *            provider
+     */
+    public ClasspathScanDescriptorProvider(TaskRunner taskRunner,
+            Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats) {
+        this(taskRunner, new ExclusionPredicate<Class<? extends RenderingFormat<?>>>(excludedRenderingFormats));
     }
 
     /**

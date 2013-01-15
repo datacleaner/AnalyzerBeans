@@ -33,6 +33,7 @@ import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.metamodel.util.Predicate;
+import org.eobjects.metamodel.util.TruePredicate;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -71,7 +72,7 @@ final class BeanClassVisitor extends ClassVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         if (isAnnotation(desc, RendererBean.class)) {
-            if (_renderingFormatPredicate == null) {
+            if (_renderingFormatPredicate == null || _renderingFormatPredicate instanceof TruePredicate) {
                 initializeClass();
                 return null;
             }
