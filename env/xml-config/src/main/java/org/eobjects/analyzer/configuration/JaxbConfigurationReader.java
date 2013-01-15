@@ -26,8 +26,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +40,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.configuration.jaxb.AbstractDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.BerkeleyDbStorageProviderType;
@@ -281,7 +284,23 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             descriptorProvider = createCustomElement(customDescriptorProviderElement, DescriptorProvider.class,
                     injectionManager, true);
         } else {
-            final ClasspathScanDescriptorProvider classpathScanner = new ClasspathScanDescriptorProvider(taskRunner);
+            Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats = new HashSet<Class<? extends RenderingFormat<?>>>();
+            if (classpathScannerElement != null) {
+                final List<String> excludedRenderingFormatList = classpathScannerElement.getExcludedRenderingFormat();
+                for (String excludedRenderingFormat : excludedRenderingFormatList) {
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Class<? extends RenderingFormat<?>> cls = (Class<? extends RenderingFormat<?>>) _interceptor
+                                .loadClass(excludedRenderingFormat);
+                        excludedRenderingFormats.add(cls);
+                    } catch (ClassNotFoundException e) {
+                        logger.error("Could not find excluded rendering format class: " + excludedRenderingFormat, e);
+                    }
+                }
+            }
+
+            final ClasspathScanDescriptorProvider classpathScanner = new ClasspathScanDescriptorProvider(taskRunner,
+                    excludedRenderingFormats);
             if (classpathScannerElement != null) {
                 final List<Package> packages = classpathScannerElement.getPackage();
                 for (Package pkg : packages) {

@@ -125,7 +125,15 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
      */
     public ClasspathScanDescriptorProvider(TaskRunner taskRunner,
             Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats) {
-        this(taskRunner, new ExclusionPredicate<Class<? extends RenderingFormat<?>>>(excludedRenderingFormats));
+        this(taskRunner, createRenderingFormatPredicate(excludedRenderingFormats));
+    }
+
+    private static Predicate<Class<? extends RenderingFormat<?>>> createRenderingFormatPredicate(
+            Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats) {
+        if (excludedRenderingFormats == null || excludedRenderingFormats.isEmpty()) {
+            return new TruePredicate<Class<? extends RenderingFormat<?>>>();
+        }
+        return new ExclusionPredicate<Class<? extends RenderingFormat<?>>>(excludedRenderingFormats);
     }
 
     /**
@@ -694,5 +702,9 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
     public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
         awaitTasks();
         return Collections.unmodifiableCollection(_explorerBeanDescriptors.values());
+    }
+    
+    public Predicate<Class<? extends RenderingFormat<?>>> getRenderingFormatPredicate() {
+        return _renderingFormatPredicate;
     }
 }

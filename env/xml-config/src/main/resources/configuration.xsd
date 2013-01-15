@@ -137,6 +137,7 @@
 
 	<complexType name="classpathScannerType">
 		<sequence>
+			<element name="excluded-rendering-format" minOccurs="0" maxOccurs="unbounded" type="string" />
 			<element name="package" minOccurs="1" maxOccurs="unbounded">
 				<complexType>
 					<simpleContent>

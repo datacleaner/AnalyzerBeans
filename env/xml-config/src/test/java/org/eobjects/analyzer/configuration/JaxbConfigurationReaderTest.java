@@ -21,12 +21,14 @@ package org.eobjects.analyzer.configuration;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.connection.CouchDbDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
@@ -38,13 +40,18 @@ import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.connection.PojoDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.connection.XmlDatastore;
+import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.Descriptors;
+import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat;
+import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
 import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
@@ -54,6 +61,8 @@ import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.ExclusionPredicate;
+import org.eobjects.metamodel.util.Predicate;
 import org.eobjects.metamodel.util.SimpleTableDef;
 import org.junit.Assert;
 
@@ -61,6 +70,27 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
     private final JaxbConfigurationReader reader = new JaxbConfigurationReader();
     private DatastoreCatalog _datastoreCatalog;
+    
+    
+    public void testReadClasspathScannerWithExcludedRenderer() throws Exception {
+        AnalyzerBeansConfiguration configuration = reader.create(new File(
+                "src/test/resources/example-configuration-classpath-scanner-with-exclusions.xml"));
+        
+        DescriptorProvider descriptorProvider = configuration.getDescriptorProvider();
+        assertTrue(descriptorProvider instanceof ClasspathScanDescriptorProvider);
+        
+        ClasspathScanDescriptorProvider scanner = (ClasspathScanDescriptorProvider) descriptorProvider;
+        
+        Predicate<Class<? extends RenderingFormat<?>>> predicate = scanner.getRenderingFormatPredicate();
+        assertNotNull(predicate);
+        assertTrue(predicate instanceof ExclusionPredicate);
+        
+        Collection<RendererBeanDescriptor<?>> renderers = descriptorProvider.getRendererBeanDescriptorsForRenderingFormat(TextRenderingFormat.class);
+        assertTrue(renderers.isEmpty());
+        
+        renderers  = descriptorProvider.getRendererBeanDescriptorsForRenderingFormat(HtmlRenderingFormat.class);
+        assertFalse(renderers.isEmpty());
+    }
 
     public void testReadComplexDataInPojoDatastore() throws Exception {
         AnalyzerBeansConfiguration configuration = reader.create(new File(
