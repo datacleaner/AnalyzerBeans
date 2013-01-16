@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans</artifactId>
-		<version>0.26-SNAPSHOT</version>
+		<version>0.26</version>
 	</parent>
 	<artifactId>AnalyzerBeans-api</artifactId>
 	<description>Public API for component developers of AnalyzerBeans</description>
