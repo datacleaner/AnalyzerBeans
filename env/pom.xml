@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans</artifactId>
-		<version>0.26</version>
+		<version>0.27-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-env</artifactId>
 	<description>Additional environment modules for AnalyzerBeans. These modules provide more deployment options and adapters that make AnalyzerBeans utilize various environments.</description>
