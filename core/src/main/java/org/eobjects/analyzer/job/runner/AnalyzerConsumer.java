@@ -69,13 +69,13 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
 	}
 
 	@Override
-	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
+	public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
 		try {
 			_analyzer.run(row, distinctCount);
+			chain.processNext(row, distinctCount, outcomes);
 		} catch (RuntimeException e) {
 			_analysisListener.errorInAnalyzer(_job, _analyzerJob, row, e);
 		}
-		return null;
 	}
 
 	@Override

@@ -26,36 +26,45 @@ import java.util.List;
 
 import org.eobjects.analyzer.job.Outcome;
 
+/**
+ * Default implementation of {@link OutcomeSink}
+ */
 public final class OutcomeSinkImpl implements OutcomeSink {
 
-	private final List<Outcome> outcomes;
+    private final List<Outcome> outcomes;
 
-	@SuppressWarnings("unchecked")
-	public OutcomeSinkImpl() {
-		this(Collections.EMPTY_LIST);
-	}
+    @SuppressWarnings("unchecked")
+    public OutcomeSinkImpl() {
+        this(Collections.EMPTY_LIST);
+    }
 
-	public OutcomeSinkImpl(Collection<? extends Outcome> availableOutcomes) {
-		outcomes = new ArrayList<Outcome>(availableOutcomes);
-	}
+    public OutcomeSinkImpl(Collection<? extends Outcome> availableOutcomes) {
+        // always take a copy of the collection argument
+        outcomes = new ArrayList<Outcome>(availableOutcomes);
+    }
 
-	@Override
-	public void add(Outcome filterOutcome) {
-		outcomes.add(filterOutcome);
-	}
+    @Override
+    public void add(Outcome filterOutcome) {
+        outcomes.add(filterOutcome);
+    }
 
-	@Override
-	public boolean contains(Outcome outcome) {
-		return outcomes.contains(outcome);
-	}
+    @Override
+    public boolean contains(Outcome outcome) {
+        return outcomes.contains(outcome);
+    }
 
-	@Override
-	public Outcome[] getOutcomes() {
-		return outcomes.toArray(new Outcome[outcomes.size()]);
-	}
+    @Override
+    public Outcome[] getOutcomes() {
+        return outcomes.toArray(new Outcome[outcomes.size()]);
+    }
 
-	@Override
-	public String toString() {
-		return "OutcomeSink[" + outcomes + "]";
-	}
+    @Override
+    public String toString() {
+        return "OutcomeSink[" + outcomes + "]";
+    }
+
+    @Override
+    public OutcomeSink clone() {
+        return new OutcomeSinkImpl(outcomes);
+    }
 }

@@ -19,19 +19,15 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputRow;
-import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.OutcomeSink;
-import org.eobjects.analyzer.job.runner.OutcomeSinkImpl;
+import org.eobjects.analyzer.job.runner.RowProcessingChain;
 import org.eobjects.analyzer.job.runner.RowProcessingConsumer;
 import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
-import org.eobjects.metamodel.data.Row;
 
 /**
  * A {@link Task} that dispatches ("consumes") a record to all relevant
@@ -39,80 +35,79 @@ import org.eobjects.metamodel.data.Row;
  * 
  * @author Kasper Sørensen
  */
-public final class ConsumeRowTask implements Task {
+public final class ConsumeRowTask implements Task, RowProcessingChain {
 
-	private final Iterable<RowProcessingConsumer> _consumers;
-	private final RowProcessingMetrics _rowProcessingMetrics;
-	private final int _rowNumber;
-	private final Row _row;
-	private final AnalysisListener _analysisListener;
-	private final Collection<? extends Outcome> _initialOutcomes;
+    private final List<RowProcessingConsumer> _consumers;
+    private final int _consumerIndex;
+    private final RowProcessingMetrics _rowProcessingMetrics;
+    private final InputRow _row;
+    private final AnalysisListener _analysisListener;
+    private final OutcomeSink _outcomes;
 
-	/**
-	 * 
-	 * @param consumers
-	 * @param rowProcessingMetrics
-	 * @param row
-	 * @param rowCounter
-	 * @param analysisListener
-	 * @param initialOutcomes
-	 *            the initial list of available outcomes (if non-empty, this
-	 *            will contain query-optimized outcomes)
-	 */
-	public ConsumeRowTask(Iterable<RowProcessingConsumer> consumers, RowProcessingMetrics rowProcessingMetrics, Row row,
-			int rowNumber, AnalysisListener analysisListener, Collection<? extends Outcome> initialOutcomes) {
-		_consumers = consumers;
-		_rowProcessingMetrics = rowProcessingMetrics;
-		_row = row;
-		_rowNumber = rowNumber;
-		_analysisListener = analysisListener;
-		_initialOutcomes = initialOutcomes;
-	}
+    /**
+     * 
+     * @param consumers
+     * @param consumerIndex
+     * @param rowProcessingMetrics
+     * @param row
+     * @param analysisListener
+     * @param outcomes
+     *            the initial list of available outcomes (if non-empty, this
+     *            will contain query-optimized outcomes)
+     */
+    public ConsumeRowTask(final List<RowProcessingConsumer> consumers, final int consumerIndex,
+            final RowProcessingMetrics rowProcessingMetrics, final InputRow row,
+            final AnalysisListener analysisListener, final OutcomeSink outcomes) {
+        _consumers = consumers;
+        _consumerIndex = consumerIndex;
+        _rowProcessingMetrics = rowProcessingMetrics;
+        _row = row;
+        _analysisListener = analysisListener;
+        _outcomes = outcomes;
+    }
 
-	@Override
-	public void execute() {
-		OutcomeSink outcomeSink = new OutcomeSinkImpl(_initialOutcomes);
+    @Override
+    public void execute() {
+        if (_consumerIndex >= _consumers.size()) {
+            // finished!
 
-		final int distinctCount = 1;
-		List<InputRow> inputRows = new ArrayList<InputRow>();
-		inputRows.add(new MetaModelInputRow(_rowNumber, _row));
-		for (RowProcessingConsumer consumer : _consumers) {
-			if (consumer.isConcurrent()) {
-				handleConsumer(outcomeSink, distinctCount, inputRows, consumer);
-			} else {
-				synchronized (consumer) {
-					handleConsumer(outcomeSink, distinctCount, inputRows, consumer);
-				}
-			}
-		}
-		_analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
-				_rowProcessingMetrics, _rowNumber);
-	}
+            if (_row instanceof MetaModelInputRow) {
+                _analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
+                        _rowProcessingMetrics, _row.getId());
+            }
 
-	private void handleConsumer(OutcomeSink outcomeSink, final int distinctCount, List<InputRow> rows,
-			RowProcessingConsumer consumer) {
-		final List<InputRow> newRows = new ArrayList<InputRow>();
+            return;
+        }
 
-		// used for optimization: if output rows aren't modified by consumers
-		// (they return null), then we don't need to rebuild the rows list.
-		boolean outputRowsSame = true;
+        final RowProcessingConsumer consumer = _consumers.get(_consumerIndex);
+        if (consumer.isConcurrent()) {
+            handleConsumer(_row, consumer);
+        } else {
+            synchronized (consumer) {
+                handleConsumer(_row, consumer);
+            }
+        }
+    }
 
-		for (InputRow row : rows) {
-			boolean process = consumer.satisfiedForConsume(outcomeSink.getOutcomes(), row);
-			if (process) {
-				InputRow[] outputRows = consumer.consume(row, distinctCount, outcomeSink);
-				if (outputRows != null) {
-					outputRowsSame = false;
-					for (InputRow newRow : outputRows) {
-						newRows.add(newRow);
-					}
-				}
-			}
-		}
+    private void handleConsumer(final InputRow row, final RowProcessingConsumer consumer) {
+        final int distinctCount = 1;
+        final boolean process = consumer.satisfiedForConsume(_outcomes.getOutcomes(), row);
+        if (process) {
+            final RowProcessingChain chain = this;
+            consumer.consume(row, distinctCount, _outcomes, chain);
+        } else {
+            // process the next step
+            processNext(row, distinctCount, _outcomes);
+        }
+    }
 
-		if (!outputRowsSame) {
-			rows.clear();
-			rows.addAll(newRows);
-		}
-	}
+    @Override
+    public void processNext(InputRow row, int distinctCount, OutcomeSink outcomes) {
+        final int nextIndex = _consumerIndex + 1;
+        final ConsumeRowTask subtask = new ConsumeRowTask(_consumers, nextIndex, _rowProcessingMetrics, row,
+                _analysisListener, outcomes);
+        // TODO: Ideally we would use the task runner to run the subtask, but
+        // that will mess up the task-counter in the row processing publisher
+        subtask.execute();
+    }
 }

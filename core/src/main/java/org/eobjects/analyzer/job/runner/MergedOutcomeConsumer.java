@@ -69,7 +69,7 @@ final class MergedOutcomeConsumer extends AbstractRowProcessingConsumer implemen
 	}
 
 	@Override
-	public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
+	public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
 		TransformedInputRow result = new TransformedInputRow(row);
 
 		InputColumn<?>[] output = _mergedOutcomeJob.getOutput();
@@ -98,8 +98,8 @@ final class MergedOutcomeConsumer extends AbstractRowProcessingConsumer implemen
 		}
 
 		outcomes.add(_mergedOutcomeJob.getOutcome());
-
-		return new InputRow[] { result };
+		
+		chain.processNext(result, distinctCount, outcomes);
 	}
 
 	@Override

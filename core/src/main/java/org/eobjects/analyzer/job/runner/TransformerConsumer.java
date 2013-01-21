@@ -19,10 +19,8 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
@@ -89,40 +87,17 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
     }
 
     @Override
-    public InputRow[] consume(InputRow row, int distinctCount, OutcomeSink outcomes) {
+    public void consume(final InputRow row, final int distinctCount, final OutcomeSink outcomes,
+            final RowProcessingChain chain) {
         final InputColumn<?>[] outputColumns = _transformerJob.getOutput();
 
-        final List<Object[]> outputValues = new ArrayList<Object[]>();
-
-        final Listener listener = new Listener() {
-            @Override
-            public void onValues(Object[] values) {
-                outputValues.add(values);
-            }
-        };
-
-        registerListener(_transformer, listener);
+        registerListener(_transformer, row, outcomes, chain, outputColumns);
 
         try {
-            outputValues.add(_transformer.transform(row));
-        } catch (RuntimeException e) {
-            _analysisListener.errorInTransformer(_job, _transformerJob, row, e);
-            outputValues.add(new Object[outputColumns.length]);
-        }
-
-        unregisterListener(_transformer);
-
-        // remove nulls
-        for (Iterator<Object[]> iterator = outputValues.iterator(); iterator.hasNext();) {
-            Object[] values = iterator.next();
+            final Object[] values = _transformer.transform(row);
             if (values == null) {
-                iterator.remove();
+                return;
             }
-        }
-
-        final List<InputRow> result = new ArrayList<InputRow>();
-
-        if (outputValues.size() == 1) {
             final TransformedInputRow resultRow;
             if (row instanceof TransformedInputRow) {
                 // re-use existing transformed input row.
@@ -130,31 +105,13 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
             } else {
                 resultRow = new TransformedInputRow(row);
             }
-
-            final Object[] values = outputValues.get(0);
-
-            assert values != null;
-
             addValuesToRow(resultRow, outputColumns, values);
-            result.add(resultRow);
-        } else {
-            boolean first = true;
-            for (Object[] values : outputValues) {
-                final TransformedInputRow resultRow;
-                if (first) {
-                    // retain the first record's id
-                    resultRow = new TransformedInputRow(row);
-                    first = false;
-                } else {
-                    resultRow = new TransformedInputRow(row, _idGenerator.nextVirtualRowId());
-                }
-
-                addValuesToRow(resultRow, outputColumns, values);
-                result.add(resultRow);
-            }
+            chain.processNext(resultRow, distinctCount, outcomes);
+        } catch (RuntimeException e) {
+            _analysisListener.errorInTransformer(_job, _transformerJob, row, e);
         }
 
-        return result.toArray(new InputRow[result.size()]);
+        unregisterListener(_transformer);
     }
 
     private void unregisterListener(Transformer<?> transformer) {
@@ -168,9 +125,35 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
         }
     }
 
-    private void registerListener(final Transformer<?> transformer, final Listener listener) {
+    private void registerListener(final Transformer<?> transformer, final InputRow row, final OutcomeSink outcomes,
+            final RowProcessingChain chain, final InputColumn<?>[] outputColumns) {
         final Set<ProvidedPropertyDescriptor> outputRowCollectorProperties = _transformerJob.getDescriptor()
                 .getProvidedPropertiesByType(OutputRowCollector.class);
+        if (outputRowCollectorProperties == null || outputRowCollectorProperties.isEmpty()) {
+            return;
+        }
+
+        final Listener listener = new Listener() {
+            private AtomicBoolean first = new AtomicBoolean(true);
+
+            @Override
+            public void onValues(Object[] values) {
+                boolean isFirst = first.getAndSet(false);
+                final TransformedInputRow resultRow;
+                if (isFirst) {
+                    // retain the first record's id
+                    resultRow = new TransformedInputRow(row);
+                } else {
+                    resultRow = new TransformedInputRow(row, _idGenerator.nextVirtualRowId());
+                }
+
+                addValuesToRow(resultRow, outputColumns, values);
+
+                OutcomeSink clonedOutcomeSink = outcomes.clone();
+                chain.processNext(resultRow, 1, clonedOutcomeSink);
+            }
+        };
+
         for (ProvidedPropertyDescriptor descriptor : outputRowCollectorProperties) {
             OutputRowCollector outputRowCollector = (OutputRowCollector) descriptor.getValue(transformer);
             if (outputRowCollector instanceof ThreadLocalOutputRowCollector) {

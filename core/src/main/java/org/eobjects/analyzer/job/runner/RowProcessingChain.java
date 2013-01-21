@@ -19,20 +19,13 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.data.InputRow;
 
 /**
- * A simple write-only interface for RowProcessingConsumers to add outcomes to.
- * 
- * @author Kasper Sørensen
+ * Defines a callback for {@link RowProcessingConsumer}s to request a
+ * {@link InputRow} to have it's next steps processed.
  */
-public interface OutcomeSink extends Cloneable {
+public interface RowProcessingChain {
 
-	public void add(Outcome filterOutcome);
-
-	public Outcome[] getOutcomes();
-
-	public boolean contains(Outcome outcome);
-	
-	public OutcomeSink clone();
+    public void processNext(InputRow row, int distinctCount, OutcomeSink outcomes);
 }

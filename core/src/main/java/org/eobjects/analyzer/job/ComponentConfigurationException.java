@@ -31,4 +31,7 @@ public class ComponentConfigurationException extends RuntimeException {
         super(message);
     }
     
+    public ComponentConfigurationException(String message, Exception cause) {
+        super(message, cause);
+    }
 }

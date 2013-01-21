@@ -33,6 +33,7 @@ import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -135,7 +136,7 @@ public final class RowProcessingPublisher {
                 return;
             }
         }
-        
+
         addPhysicalColumns(primaryKeyColumns);
     }
 
@@ -246,21 +247,24 @@ public final class RowProcessingPublisher {
             // tasks
             // to execute
             int numTasks = 0;
-
+            
             try {
-
                 while (dataSet.next()) {
                     if (taskListener.isErrornous()) {
                         break;
                     }
+                    
                     final Row metaModelRow = dataSet.getRow();
                     final int rowId = idGenerator.nextPhysicalRowId();
-                    ConsumeRowTask task = new ConsumeRowTask(consumers, rowProcessingMetrics, metaModelRow, rowId,
-                            _analysisListener, availableOutcomes);
+                    final MetaModelInputRow inputRow = new MetaModelInputRow(rowId, metaModelRow);
+                    final OutcomeSink outcomes = new OutcomeSinkImpl(availableOutcomes);
+                    
+                    final ConsumeRowTask task = new ConsumeRowTask(consumers, 0, rowProcessingMetrics, inputRow,
+                            _analysisListener, outcomes);
                     _taskRunner.run(task, taskListener);
+                    
                     numTasks++;
                 }
-
             } finally {
                 dataSet.close();
             }
