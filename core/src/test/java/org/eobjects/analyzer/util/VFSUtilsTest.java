@@ -34,7 +34,7 @@ import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 
 public class VFSUtilsTest extends TestCase {
 
-    public void testVfsAssumptions() throws Exception {
+    public void test1VfsAssumptions() throws Exception {
         FileSystemManager manager = VFS.getManager();
 
         FileObject baseFile = manager.getBaseFile();
@@ -62,7 +62,7 @@ public class VFSUtilsTest extends TestCase {
         assertTrue(javaFolderFile.isDirectory());
     }
     
-    public void testHttpAccess() throws Exception {
+    public void test2HttpAccess() throws Exception {
         FileObject file = VFSUtils.getFileSystemManager().resolveFile("http://eobjects.org");
         InputStream in = file.getContent().getInputStream();
         try {
