@@ -124,7 +124,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
      * {@inheritDoc}
      */
     @Override
-    public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException, NoSuchColumnException, NoSuchComponentException, ComponentConfigurationException, IllegalStateException {
+    public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException, NoSuchColumnException,
+            NoSuchComponentException, ComponentConfigurationException, IllegalStateException {
         AnalysisJobBuilder ajb = create(inputStream);
         try {
             return ajb.toAnalysisJob();
@@ -523,8 +524,19 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         List<OutputType> output = unconfiguredTransformerKey.getOutput();
 
                         if (outputColumns.size() != output.size()) {
-                            throw new ComponentConfigurationException("Expected " + outputColumns.size()
-                                    + " output column(s), but found " + output.size() + " (" + transformerJobBuilder + ")");
+                            final String message = "Expected " + outputColumns.size() + " output column(s), but found "
+                                    + output.size() + " (" + transformerJobBuilder + ")";
+                            if (outputColumns.isEmpty()) {
+                                // typically empty output columns is due to a
+                                // component not being configured, we'll attach
+                                // the configuration exception as a cause.
+                                try {
+                                    transformerJobBuilder.isConfigured(true);
+                                } catch (Exception e) {
+                                    throw new ComponentConfigurationException(message, e);
+                                }
+                            }
+                            throw new ComponentConfigurationException(message);
                         }
 
                         for (int i = 0; i < output.size(); i++) {
@@ -571,8 +583,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         }
                         sb.append(")");
                     }
-                    throw new ComponentConfigurationException("Could not connect column dependencies for transformers: "
-                            + sb.toString());
+                    throw new ComponentConfigurationException(
+                            "Could not connect column dependencies for transformers: " + sb.toString());
                 }
             }
 
@@ -628,8 +640,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         String categoryName = outcomeType.getCategory();
                         Enum<?> category = filterJobBuilder.getDescriptor().getOutcomeCategoryByName(categoryName);
                         if (category == null) {
-                            throw new ComponentConfigurationException("No such outcome category name: " + categoryName + " (in "
-                                    + filterJobBuilder.getDescriptor().getDisplayName() + ")");
+                            throw new ComponentConfigurationException("No such outcome category name: " + categoryName
+                                    + " (in " + filterJobBuilder.getDescriptor().getDisplayName() + ")");
                         }
 
                         String id = outcomeType.getId();
