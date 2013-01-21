@@ -70,12 +70,6 @@ public final class ConsumeRowTask implements Task, RowProcessingChain {
     public void execute() {
         if (_consumerIndex >= _consumers.size()) {
             // finished!
-
-            if (_row instanceof MetaModelInputRow) {
-                _analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
-                        _rowProcessingMetrics, _row.getId());
-            }
-
             return;
         }
 
@@ -87,6 +81,11 @@ public final class ConsumeRowTask implements Task, RowProcessingChain {
                 handleConsumer(_row, consumer);
             }
         }
+        
+        if (_row instanceof MetaModelInputRow) {
+            _analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
+                    _rowProcessingMetrics, _row.getId());
+        }
     }
 
     private void handleConsumer(final InputRow row, final RowProcessingConsumer consumer) {
@@ -96,7 +95,7 @@ public final class ConsumeRowTask implements Task, RowProcessingChain {
             final RowProcessingChain chain = this;
             consumer.consume(row, distinctCount, _outcomes, chain);
         } else {
-            // process the next step
+            // jump to the next step
             processNext(row, distinctCount, _outcomes);
         }
     }

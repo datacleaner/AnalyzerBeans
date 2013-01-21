@@ -29,12 +29,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import junit.framework.Assert;
-
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
+import org.junit.Assert;
 
 /**
  * Multithreaded task runner appropriate for thread-testing purposes. Unlike the
