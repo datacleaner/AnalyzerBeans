@@ -19,39 +19,36 @@
  */
 package org.eobjects.analyzer.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.result.ListResult;
 
-@AnalyzerBean("Mock analyzer")
-public class MockAnalyzer implements Analyzer<ListResult<InputRow>> {
+@TransformerBean("Mock transformer")
+public class MockTransformer implements Transformer<String> {
 
     @Configured
-    InputColumn<?>[] cols;
-
-    private List<InputRow> rows = new ArrayList<InputRow>();
+    InputColumn<?> input;
 
     @Override
-    public void run(InputRow row, int distinctCount) {
-        rows.add(row);
+    public OutputColumns getOutputColumns() {
+        return new OutputColumns("mock output");
     }
 
     @Override
-    public ListResult<InputRow> getResult() {
-        return new ListResult<InputRow>(rows);
+    public String[] transform(InputRow inputRow) {
+        Object value = inputRow.getValue(input);
+        return new String[] { "mocked: " + value };
+    }
+    
+    public void setInput(InputColumn<?> input) {
+        this.input = input;
+    }
+    
+    public InputColumn<?> getInput() {
+        return input;
     }
 
-    public void setCols(InputColumn<?>[] cols) {
-        this.cols = cols;
-    }
-
-    public InputColumn<?>[] getCols() {
-        return cols;
-    }
 }

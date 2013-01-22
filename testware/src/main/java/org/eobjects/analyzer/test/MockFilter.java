@@ -19,39 +19,58 @@
  */
 package org.eobjects.analyzer.test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
 
-import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.result.ListResult;
 
-@AnalyzerBean("Mock analyzer")
-public class MockAnalyzer implements Analyzer<ListResult<InputRow>> {
+@FilterBean("Mock filter")
+public class MockFilter implements Filter<MockFilter.Category> {
+
+    public static enum Category {
+        VALID, INVALID
+    }
 
     @Configured
-    InputColumn<?>[] cols;
+    @Alias("a file")
+    File someFile;
 
-    private List<InputRow> rows = new ArrayList<InputRow>();
+    @Configured
+    Category someEnum;
+
+    @Configured
+    InputColumn<?> input;
 
     @Override
-    public void run(InputRow row, int distinctCount) {
-        rows.add(row);
+    public MockFilter.Category categorize(InputRow inputRow) {
+        return someEnum;
     }
 
-    @Override
-    public ListResult<InputRow> getResult() {
-        return new ListResult<InputRow>(rows);
+    public MockFilter.Category getSomeEnum() {
+        return someEnum;
     }
 
-    public void setCols(InputColumn<?>[] cols) {
-        this.cols = cols;
+    public File getSomeFile() {
+        return someFile;
     }
 
-    public InputColumn<?>[] getCols() {
-        return cols;
+    public void setInput(InputColumn<?> input) {
+        this.input = input;
+    }
+
+    public void setSomeEnum(Category someEnum) {
+        this.someEnum = someEnum;
+    }
+
+    public void setSomeFile(File someFile) {
+        this.someFile = someFile;
+    }
+
+    public InputColumn<?> getInput() {
+        return input;
     }
 }

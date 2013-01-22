@@ -128,6 +128,36 @@ public class SourceColumnFinder {
 
         return result;
     }
+    
+    public Set<Object> findAllSourceJobs(Object job) {
+        final Set<Object> result = new HashSet<Object>();
+        findAllSourceJobs(job, result);
+        return result;
+    }
+    
+    private void findAllSourceJobs(Object job, Set<Object> result) {
+        if (job instanceof InputColumnSinkJob) {
+            final InputColumn<?>[] inputColumns = ((InputColumnSinkJob) job).getInput();
+            for (final InputColumn<?> inputColumn : inputColumns) {
+                final InputColumnSourceJob source = findInputColumnSource(inputColumn);
+                if (source != null) {
+                    result.add(source);
+                    findAllSourceJobs(source, result);
+                }
+            }
+        }
+        
+        if (job instanceof OutcomeSinkJob) {
+            final Outcome[] requirements = ((OutcomeSinkJob) job).getRequirements();
+            for (final Outcome outcome : requirements) {
+                OutcomeSourceJob source = findOutcomeSource(outcome);
+                if (source != null) {
+                    result.add(source);
+                    findAllSourceJobs(source, result);
+                }
+            }
+        }
+    }
 
     public InputColumnSourceJob findInputColumnSource(InputColumn<?> inputColumn) {
         if (inputColumn instanceof ExpressionBasedInputColumn) {

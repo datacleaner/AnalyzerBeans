@@ -26,13 +26,10 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
-import org.eobjects.analyzer.beans.api.Filter;
-import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.mock.AnalyzerMock;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.test.MockFilter;
 
 public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 
@@ -131,35 +128,4 @@ public class ConfiguredPropertyDescriptorImplTest extends TestCase {
 		assertSame(cp1, cp2);
 	}
 
-	@FilterBean("Mock filter")
-	private static class MockFilter implements Filter<MockFilter.Category> {
-	    
-	    public static enum Category {
-	        VALID, INVALID
-	    }
-
-		@Configured
-		@Alias("a file")
-		File someFile;
-
-		@Configured
-		Category someEnum;
-
-		@SuppressWarnings("unused")
-		@Configured
-		InputColumn<?> input;
-
-		@Override
-		public MockFilter.Category categorize(InputRow inputRow) {
-			return someEnum;
-		}
-
-		public MockFilter.Category getSomeEnum() {
-			return someEnum;
-		}
-
-		public File getSomeFile() {
-			return someFile;
-		}
-	}
 }
