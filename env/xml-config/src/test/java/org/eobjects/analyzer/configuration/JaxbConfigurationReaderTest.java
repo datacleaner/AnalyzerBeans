@@ -284,7 +284,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         for (String name : datastoreNames) {
             // test that all connections, except the JNDI-, MongoDB- and
             // CouchDB-based on will work
-            if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name) && !"my couch".equals(name)) {
+            if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name) && !"my couch".equals(name) && !"my_sfdc_ds".equals(name)) {
                 Datastore datastore = datastoreCatalog.getDatastore(name);
                 DataContext dc = datastore.openConnection().getDataContext();
                 assertNotNull(dc);
