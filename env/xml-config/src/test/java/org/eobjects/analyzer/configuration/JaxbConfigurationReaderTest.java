@@ -70,25 +70,25 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
     private final JaxbConfigurationReader reader = new JaxbConfigurationReader();
     private DatastoreCatalog _datastoreCatalog;
-    
-    
+
     public void testReadClasspathScannerWithExcludedRenderer() throws Exception {
         AnalyzerBeansConfiguration configuration = reader.create(new File(
                 "src/test/resources/example-configuration-classpath-scanner-with-exclusions.xml"));
-        
+
         DescriptorProvider descriptorProvider = configuration.getDescriptorProvider();
         assertTrue(descriptorProvider instanceof ClasspathScanDescriptorProvider);
-        
+
         ClasspathScanDescriptorProvider scanner = (ClasspathScanDescriptorProvider) descriptorProvider;
-        
+
         Predicate<Class<? extends RenderingFormat<?>>> predicate = scanner.getRenderingFormatPredicate();
         assertNotNull(predicate);
         assertTrue(predicate instanceof ExclusionPredicate);
-        
-        Collection<RendererBeanDescriptor<?>> renderers = descriptorProvider.getRendererBeanDescriptorsForRenderingFormat(TextRenderingFormat.class);
+
+        Collection<RendererBeanDescriptor<?>> renderers = descriptorProvider
+                .getRendererBeanDescriptorsForRenderingFormat(TextRenderingFormat.class);
         assertTrue(renderers.isEmpty());
-        
-        renderers  = descriptorProvider.getRendererBeanDescriptorsForRenderingFormat(HtmlRenderingFormat.class);
+
+        renderers = descriptorProvider.getRendererBeanDescriptorsForRenderingFormat(HtmlRenderingFormat.class);
         assertFalse(renderers.isEmpty());
     }
 
@@ -189,8 +189,8 @@ public class JaxbConfigurationReaderTest extends TestCase {
         String[] datastoreNames = datastoreCatalog.getDatastoreNames();
         assertEquals(
                 "[my couch, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, "
-                        + "my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_pojo, my_sas, my_sax_xml]",
-                Arrays.toString(datastoreNames));
+                        + "my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_pojo, "
+                        + "my_sas, my_sax_xml, my_sfdc_ds]", Arrays.toString(datastoreNames));
 
         assertEquals("a mongo db based datastore", datastoreCatalog.getDatastore("my mongo").getDescription());
         assertEquals("jdbc_con", datastoreCatalog.getDatastore("my_jdbc_connection").getDescription());
@@ -203,6 +203,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("odb", datastoreCatalog.getDatastore("my_odb").getDescription());
         assertEquals("xls", datastoreCatalog.getDatastore("my_excel_2003").getDescription());
         assertEquals("comp", datastoreCatalog.getDatastore("my_composite").getDescription());
+        assertEquals("salesforce.com is an online CRM system", datastoreCatalog.getDatastore("my_sfdc_ds").getDescription());
         assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
         assertEquals("folder of sas7bdat files", datastoreCatalog.getDatastore("my_sas").getDescription());
         assertEquals("A datastore based on plain values", datastoreCatalog.getDatastore("my_pojo").getDescription());

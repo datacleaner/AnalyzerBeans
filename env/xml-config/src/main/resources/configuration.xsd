@@ -137,7 +137,8 @@
 
 	<complexType name="classpathScannerType">
 		<sequence>
-			<element name="excluded-rendering-format" minOccurs="0" maxOccurs="unbounded" type="string" />
+			<element name="excluded-rendering-format" minOccurs="0"
+				maxOccurs="unbounded" type="string" />
 			<element name="package" minOccurs="1" maxOccurs="unbounded">
 				<complexType>
 					<simpleContent>
@@ -174,6 +175,13 @@
 						<documentation>
 							Defines a datastore based on a Comma-separated
 							file.
+						</documentation>
+					</annotation>
+				</element>
+				<element name="salesforce-datastore" type="ab:salesforceDatastoreType">
+					<annotation>
+						<documentation>
+							Defines a datastore based on a Salesforce.com account.
 						</documentation>
 					</annotation>
 				</element>
@@ -356,6 +364,21 @@
 		</complexContent>
 	</complexType>
 
+	<complexType name="salesforceDatastoreType">
+		<complexContent>
+			<extension base="ab:abstractDatastoreType">
+				<all>
+					<element name="username" type="string" minOccurs="1"
+						maxOccurs="1" />
+					<element name="password" type="string" minOccurs="1"
+						maxOccurs="1" />
+					<element name="security-token" type="string" minOccurs="1"
+						maxOccurs="1" />
+				</all>
+			</extension>
+		</complexContent>
+	</complexType>
+
 	<complexType name="pojoDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">
@@ -406,7 +429,7 @@
 			</element>
 		</sequence>
 	</complexType>
-	
+
 	<complexType name="mongodbDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">

@@ -17,6 +17,12 @@
 		<jdbc-datastore name="my_jdbc_datasource" description="jdbc_ds">
 			<datasource-jndi-url>java:comp/env/jdbc/mydb</datasource-jndi-url>
 		</jdbc-datastore>
+		
+		<salesforce-datastore name="my_sfdc_ds" description="salesforce.com is an online CRM system">
+			<username>foo</username>
+			<password>bar</password>
+			<security-token>baz</security-token>
+		</salesforce-datastore>
 
 		<xml-datastore name="my_dom_xml" description="dom xml">
 			<filename>../../core/src/test/resources/example-xml-file.xml</filename>

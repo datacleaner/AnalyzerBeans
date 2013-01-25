@@ -76,6 +76,7 @@ import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Diction
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.StringPatterns;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
 import org.eobjects.analyzer.configuration.jaxb.RegexPatternType;
+import org.eobjects.analyzer.configuration.jaxb.SalesforceDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.SasDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.SimplePatternType;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
@@ -100,6 +101,7 @@ import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.connection.PojoDatastore;
+import org.eobjects.analyzer.connection.SalesforceDatastore;
 import org.eobjects.analyzer.connection.SasDatastore;
 import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
@@ -610,6 +612,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 ds = createDatastore(name, (CouchdbDatastoreType) datastoreType);
             } else if (datastoreType instanceof MongodbDatastoreType) {
                 ds = createDatastore(name, (MongodbDatastoreType) datastoreType);
+            } else if (datastoreType instanceof SalesforceDatastoreType) {
+                ds = createDatastore(name, (SalesforceDatastoreType) datastoreType);
             } else if (datastoreType instanceof CompositeDatastoreType) {
                 // skip composite datastores at this point
                 continue;
@@ -658,6 +662,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
         final DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
         return result;
+    }
+
+    private Datastore createDatastore(String name, SalesforceDatastoreType datastoreType) {
+        String username = getStringVariable("username", datastoreType.getUsername());
+        String password = getStringVariable("password", datastoreType.getPassword());
+        String securityToken = getStringVariable("securityToken", datastoreType.getSecurityToken());
+        return new SalesforceDatastore(name, username, password, securityToken);
     }
 
     private Datastore createDatastore(String name, MongodbDatastoreType mongodbDatastoreType) {
