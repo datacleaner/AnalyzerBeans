@@ -18,6 +18,12 @@
 			<datasource-jndi-url>java:comp/env/jdbc/mydb</datasource-jndi-url>
 		</jdbc-datastore>
 		
+		<sugar-crm-datastore name="my_sugarcrm" description="a SugarCRM instance">
+			<base-url>http://localhost/sugar</base-url>
+			<username>root</username>
+			<password>pwd</password>
+		</sugar-crm-datastore>
+		
 		<salesforce-datastore name="my_sfdc_ds" description="salesforce.com is an online CRM system">
 			<username>foo</username>
 			<password>bar</password>

@@ -190,13 +190,14 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals(
                 "[my couch, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, "
                         + "my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_pojo, "
-                        + "my_sas, my_sax_xml, my_sfdc_ds]", Arrays.toString(datastoreNames));
+                        + "my_sas, my_sax_xml, my_sfdc_ds, my_sugarcrm]", Arrays.toString(datastoreNames));
 
         assertEquals("a mongo db based datastore", datastoreCatalog.getDatastore("my mongo").getDescription());
         assertEquals("jdbc_con", datastoreCatalog.getDatastore("my_jdbc_connection").getDescription());
         assertEquals("jdbc_ds", datastoreCatalog.getDatastore("my_jdbc_datasource").getDescription());
         assertEquals("dbf", datastoreCatalog.getDatastore("my_dbase").getDescription());
         assertEquals("csv", datastoreCatalog.getDatastore("my_csv").getDescription());
+        assertEquals("a SugarCRM instance", datastoreCatalog.getDatastore("my_sugarcrm").getDescription());
         assertEquals("dom xml", datastoreCatalog.getDatastore("my_dom_xml").getDescription());
         assertEquals("sax xml", datastoreCatalog.getDatastore("my_sax_xml").getDescription());
         assertEquals("custom", datastoreCatalog.getDatastore("my_custom").getDescription());
@@ -284,7 +285,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         for (String name : datastoreNames) {
             // test that all connections, except the JNDI-, MongoDB- and
             // CouchDB-based on will work
-            if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name) && !"my couch".equals(name) && !"my_sfdc_ds".equals(name)) {
+            if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name) && !"my couch".equals(name) && !"my_sfdc_ds".equals(name) && !"my_sugarcrm".equals(name)) {
                 Datastore datastore = datastoreCatalog.getDatastore(name);
                 DataContext dc = datastore.openConnection().getDataContext();
                 assertNotNull(dc);

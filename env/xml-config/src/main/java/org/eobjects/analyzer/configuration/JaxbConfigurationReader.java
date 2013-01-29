@@ -81,6 +81,7 @@ import org.eobjects.analyzer.configuration.jaxb.SasDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.SimplePatternType;
 import org.eobjects.analyzer.configuration.jaxb.SinglethreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.StorageProviderType;
+import org.eobjects.analyzer.configuration.jaxb.SugarCrmDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.TableTypeEnum;
 import org.eobjects.analyzer.configuration.jaxb.TextFileDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.TextFileSynonymCatalogType;
@@ -103,6 +104,7 @@ import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.connection.PojoDatastore;
 import org.eobjects.analyzer.connection.SalesforceDatastore;
 import org.eobjects.analyzer.connection.SasDatastore;
+import org.eobjects.analyzer.connection.SugarCrmDatastore;
 import org.eobjects.analyzer.connection.XmlDatastore;
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
@@ -614,6 +616,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 ds = createDatastore(name, (MongodbDatastoreType) datastoreType);
             } else if (datastoreType instanceof SalesforceDatastoreType) {
                 ds = createDatastore(name, (SalesforceDatastoreType) datastoreType);
+            } else if (datastoreType instanceof SugarCrmDatastoreType) {
+                ds = createDatastore(name, (SugarCrmDatastoreType) datastoreType);
             } else if (datastoreType instanceof CompositeDatastoreType) {
                 // skip composite datastores at this point
                 continue;
@@ -669,6 +673,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         String password = getStringVariable("password", datastoreType.getPassword());
         String securityToken = getStringVariable("securityToken", datastoreType.getSecurityToken());
         return new SalesforceDatastore(name, username, password, securityToken);
+    }
+
+    private Datastore createDatastore(String name, SugarCrmDatastoreType datastoreType) {
+        String baseUrl = getStringVariable("baseUrl", datastoreType.getBaseUrl());
+        String username = getStringVariable("username", datastoreType.getUsername());
+        String password = getStringVariable("password", datastoreType.getPassword());
+        return new SugarCrmDatastore(name, baseUrl, username, password);
     }
 
     private Datastore createDatastore(String name, MongodbDatastoreType mongodbDatastoreType) {

@@ -181,7 +181,15 @@
 				<element name="salesforce-datastore" type="ab:salesforceDatastoreType">
 					<annotation>
 						<documentation>
-							Defines a datastore based on a Salesforce.com account.
+							Defines a datastore based on a Salesforce.com
+							account.
+						</documentation>
+					</annotation>
+				</element>
+				<element name="sugar-crm-datastore" type="ab:sugarCrmDatastoreType">
+					<annotation>
+						<documentation>
+							Defines a datastore based on a SugarCRM system.
 						</documentation>
 					</annotation>
 				</element>
@@ -373,6 +381,21 @@
 					<element name="password" type="string" minOccurs="1"
 						maxOccurs="1" />
 					<element name="security-token" type="string" minOccurs="1"
+						maxOccurs="1" />
+				</all>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="sugarCrmDatastoreType">
+		<complexContent>
+			<extension base="ab:abstractDatastoreType">
+				<all>
+					<element name="base-url" type="string" minOccurs="1"
+						maxOccurs="1" />
+					<element name="username" type="string" minOccurs="1"
+						maxOccurs="1" />
+					<element name="password" type="string" minOccurs="1"
 						maxOccurs="1" />
 				</all>
 			</extension>
