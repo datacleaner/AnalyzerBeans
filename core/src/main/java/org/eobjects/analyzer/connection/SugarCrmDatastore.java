@@ -24,7 +24,7 @@ import org.eobjects.metamodel.sugarcrm.SugarCrmDataContext;
 /**
  * A datastore that connects to a SugarCRM instance to fetch data
  */
-public class SugarCrmDatastore extends UsageAwareDatastore<SugarCrmDataContext> {
+public class SugarCrmDatastore extends UsageAwareDatastore<SugarCrmDataContext> implements UsernameDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -55,6 +55,7 @@ public class SugarCrmDatastore extends UsageAwareDatastore<SugarCrmDataContext> 
         return _baseUrl;
     }
 
+    @Override
     public String getUsername() {
         return _username;
     }

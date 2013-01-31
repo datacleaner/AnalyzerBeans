@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 
-public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext> implements UpdateableDatastore {
+public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext> implements UpdateableDatastore, UsernameDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -139,6 +139,7 @@ public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext>
         return _databaseName;
     }
 
+    @Override
     public String getUsername() {
         return _username;
     }

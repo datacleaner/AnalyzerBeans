@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Kasper Sørensen
  * 
  */
-public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> implements UpdateableDatastore {
+public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> implements UpdateableDatastore, UsernameDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -157,6 +157,7 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
         return _jdbcUrl;
     }
 
+    @Override
     public String getUsername() {
         return _username;
     }

@@ -25,7 +25,7 @@ import org.ektorp.http.StdHttpClient;
 import org.eobjects.metamodel.couchdb.CouchDbDataContext;
 import org.eobjects.metamodel.util.SimpleTableDef;
 
-public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> implements UpdateableDatastore {
+public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> implements UpdateableDatastore, UsernameDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -94,6 +94,7 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
         return _port;
     }
 
+    @Override
     public String getUsername() {
         return _username;
     }

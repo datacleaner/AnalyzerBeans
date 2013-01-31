@@ -24,7 +24,7 @@ import org.eobjects.metamodel.salesforce.SalesforceDataContext;
 /**
  * A datastore that uses a Salesforce.com account as it's source.
  */
-public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataContext> {
+public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataContext> implements UsernameDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,6 +44,7 @@ public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataConte
      * 
      * @return
      */
+    @Override
     public String getUsername() {
         return _username;
     }
