@@ -55,6 +55,8 @@ public class ArrayConverter implements Converter<Object> {
             type = String[].class;
         }
 
+        str = str.trim();
+        
         Object result = fromStringInternal(type, str);
 
         if (isList) {
