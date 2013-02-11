@@ -58,4 +58,9 @@ public @interface StringProperty {
      *         security token), not shown literally to the user.
      */
     public boolean password() default false;
+    
+    /**
+     * @return true if an empty string value is acceptable
+     */
+    public boolean emptyString() default false;
 }

@@ -173,7 +173,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
     }
 
     public TransformerJob toTransformerJob(boolean validate) {
-        if (!isConfigured()) {
+        if (validate && !isConfigured(true)) {
             throw new IllegalStateException("Transformer job is not correctly configured");
         }
 

@@ -56,7 +56,7 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 	}
 
 	public FilterJob toFilterJob(boolean validate) {
-		if (validate && !isConfigured()) {
+		if (validate && !isConfigured(true)) {
 			throw new IllegalStateException("Filter job is not correctly configured");
 		}
 

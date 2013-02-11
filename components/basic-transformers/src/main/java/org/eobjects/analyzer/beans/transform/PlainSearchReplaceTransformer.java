@@ -23,8 +23,10 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.api.StringProperty;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -41,11 +43,19 @@ public class PlainSearchReplaceTransformer implements Transformer<String> {
     String searchString;
 
     @Configured(order = 3)
-    String replacementString;
+    @StringProperty(emptyString = true)
+    String replacementString = "";
 
     @Configured(order = 4)
     @Description("Replace the entire string when the search string is found.")
     boolean replaceEntireString = false;
+    
+    @Validate
+    public void validate() {
+        if (!replaceEntireString && replacementString.indexOf(searchString) != -1) {
+            throw new IllegalArgumentException("Replacement string cannot contain the search string (implies an infinite replacement loop)");
+        }
+    }
 
     @Override
     public OutputColumns getOutputColumns() {
