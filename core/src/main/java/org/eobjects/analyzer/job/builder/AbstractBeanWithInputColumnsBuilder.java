@@ -278,5 +278,4 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         List<InputColumn<?>> inputColumns = getInputColumns();
         return inputColumns.toArray(new InputColumn[inputColumns.size()]);
     }
-
 }

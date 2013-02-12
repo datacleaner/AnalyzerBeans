@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.result.renderer.Renderable;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -82,6 +83,20 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
 
     public final E getConfigurableBean() {
         return _configurableBean;
+    }
+
+    /**
+     * Sets the configured properties of this component based on a
+     * {@link BeanConfiguration}.
+     * 
+     * @param configuration
+     */
+    public void setConfiguredProperties(BeanConfiguration configuration) {
+        final Set<ConfiguredPropertyDescriptor> properties = getDescriptor().getConfiguredProperties();
+        for (ConfiguredPropertyDescriptor property : properties) {
+            final Object value = configuration.getProperty(property);
+            setConfiguredProperty(property, value);
+        }
     }
 
     public final boolean isConfigured(boolean throwException) throws IllegalStateException,

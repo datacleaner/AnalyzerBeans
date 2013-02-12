@@ -20,11 +20,16 @@
 package org.eobjects.analyzer.job.builder;
 
 import java.io.Closeable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
@@ -38,16 +43,21 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
+import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
@@ -129,6 +139,11 @@ public final class AnalysisJobBuilder implements Closeable {
         _analyzerJobBuilders = analyzerJobBuilders;
         _mergedOutcomeJobBuilders = mergedOutcomeJobBuilders;
         _explorerJobBuilders = explorerJobBuilders;
+    }
+
+    public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, AnalysisJob job) {
+        this(configuration);
+        importJob(job);
     }
 
     public AnalysisJobBuilder setDatastore(String datastoreName) {
@@ -240,6 +255,166 @@ public final class AnalysisJobBuilder implements Closeable {
         return removeSourceColumn(inputColumn);
     }
 
+    /**
+     * Imports the datastore, components and configuration of a
+     * {@link AnalysisJob} into this builder.
+     * 
+     * @param job
+     */
+    public void importJob(AnalysisJob job) {
+        setDatastore(job.getDatastore());
+
+        final Collection<InputColumn<?>> sourceColumns = job.getSourceColumns();
+        for (InputColumn<?> inputColumn : sourceColumns) {
+            addSourceColumn((MetaModelInputColumn) inputColumn);
+        }
+
+        final SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
+        sourceColumnFinder.addSources(job);
+
+        // map that translates original component jobs to their builder objects
+        final Map<ComponentJob, Object> componentBuilders = new IdentityHashMap<ComponentJob, Object>();
+        addComponentBuilders(job.getFilterJobs(), componentBuilders);
+        addComponentBuilders(job.getMergedOutcomeJobs(), componentBuilders);
+        addComponentBuilders(job.getExplorerJobs(), componentBuilders);
+        addComponentBuilders(job.getTransformerJobs(), componentBuilders);
+        addComponentBuilders(job.getAnalyzerJobs(), componentBuilders);
+
+        // re-build filter requirements
+        for (Entry<ComponentJob, Object> entry : componentBuilders.entrySet()) {
+            ComponentJob componentJob = entry.getKey();
+            if (componentJob instanceof ConfigurableBeanJob<?>) {
+                Outcome[] requirements = ((ConfigurableBeanJob<?>) componentJob).getRequirements();
+                if (requirements != null && requirements.length > 0) {
+                    assert requirements.length == 1;
+
+                    final AbstractBeanWithInputColumnsBuilder<?, ?, ?> builder = (AbstractBeanWithInputColumnsBuilder<?, ?, ?>) entry
+                            .getValue();
+
+                    final Outcome originalRequirement = requirements[0];
+                    final Outcome requirement = findImportedRequirement(originalRequirement, componentBuilders);
+                    builder.setRequirement(requirement);
+                }
+            } else if (componentJob instanceof MergedOutcomeJob) {
+                final MergedOutcomeJobBuilder builder = (MergedOutcomeJobBuilder) entry.getValue();
+                final MergedOutcomeJob mergedOutcomeJob = (MergedOutcomeJob) componentJob;
+                final MergeInput[] mergeInputs = mergedOutcomeJob.getMergeInputs();
+                for (MergeInput mergeInput : mergeInputs) {
+                    final Outcome requirement = findImportedRequirement(mergeInput.getOutcome(), componentBuilders);
+                    final MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(requirement);
+
+                    // we need to also build input columns here. There's a risk
+                    // that these input columns are not available (imported)
+                    // yet.
+                    final InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
+                    for (InputColumn<?> originalInputColumn : inputColumns) {
+                        final InputColumn<?> inputColumn = findImportedInputColumn(originalInputColumn,
+                                componentBuilders, sourceColumnFinder);
+                        mergedOutcomeBuilder.addInputColumn(inputColumn);
+                    }
+                }
+            }
+        }
+
+        // re-build input column dependencies
+        for (Entry<ComponentJob, Object> entry : componentBuilders.entrySet()) {
+            final ComponentJob componentJob = entry.getKey();
+            if (componentJob instanceof ConfigurableBeanJob) {
+                final ConfigurableBeanJob<?> configurableBeanJob = (ConfigurableBeanJob<?>) componentJob;
+                final Set<ConfiguredPropertyDescriptor> inputColumnProperties = configurableBeanJob.getDescriptor()
+                        .getConfiguredPropertiesForInput(true);
+
+                final AbstractBeanWithInputColumnsBuilder<?, ?, ?> builder = (AbstractBeanWithInputColumnsBuilder<?, ?, ?>) entry
+                        .getValue();
+
+                for (ConfiguredPropertyDescriptor inputColumnProperty : inputColumnProperties) {
+                    final Object originalInputColumnValue = configurableBeanJob.getConfiguration().getProperty(
+                            inputColumnProperty);
+                    final Object newInputColumnValue = findImportedInputColumns(originalInputColumnValue,
+                            componentBuilders, sourceColumnFinder);
+                    builder.setConfiguredProperty(inputColumnProperty, newInputColumnValue);
+                }
+            }
+        }
+    }
+
+    private Object findImportedInputColumns(Object originalInputColumnValue,
+            Map<ComponentJob, Object> componentBuilders, SourceColumnFinder sourceColumnFinder) {
+        if (originalInputColumnValue == null) {
+            return null;
+        }
+        
+        if (originalInputColumnValue instanceof InputColumn) {
+            return findImportedInputColumn((InputColumn<?>) originalInputColumnValue, componentBuilders, sourceColumnFinder);
+        }
+        
+        if (originalInputColumnValue.getClass().isArray()) {
+            int length = Array.getLength(originalInputColumnValue);
+            InputColumn<?>[] value = new InputColumn[length];
+            for (int i = 0; i < value.length; i++) {
+                InputColumn<?> element = (InputColumn<?>) Array.get(originalInputColumnValue, i);
+                value[i] = findImportedInputColumn(element, componentBuilders, sourceColumnFinder);
+            }
+            return value;
+        }
+        
+        throw new UnsupportedOperationException("Unknown input column value type: " + originalInputColumnValue);
+    }
+
+    private InputColumn<?> findImportedInputColumn(InputColumn<?> originalInputColumn,
+            Map<ComponentJob, Object> componentBuilders, SourceColumnFinder sourceColumnFinder) {
+        if (originalInputColumn.isPhysicalColumn()) {
+            Column physicalColumn = originalInputColumn.getPhysicalColumn();
+            return getSourceColumnByName(physicalColumn.getQualifiedLabel());
+        }
+
+        final InputColumnSourceJob originalSourceJob = sourceColumnFinder.findInputColumnSource(originalInputColumn);
+        final InputColumnSourceJob newSourceJob = (InputColumnSourceJob) componentBuilders.get(originalSourceJob);
+
+        if (newSourceJob == null) {
+            throw new IllegalStateException("Could not find builder corresponding to " + originalSourceJob
+                    + " in builder map: " + componentBuilders);
+        }
+
+        final String originalColumnName = originalInputColumn.getName();
+        final InputColumn<?>[] candidates = newSourceJob.getOutput();
+        for (InputColumn<?> candidate : candidates) {
+            if (candidate.getName().equals(originalColumnName)) {
+                return candidate;
+            }
+        }
+
+        throw new IllegalStateException("Could not determine a replacement input column for '" + originalColumnName
+                + "' in output column candidate set: " + Arrays.toString(candidates));
+    }
+
+    private Outcome findImportedRequirement(Outcome originalRequirement, Map<ComponentJob, Object> componentBuilders) {
+        final OutcomeSourceJob sourceJob = originalRequirement.getSourceJob();
+        final Object builder = componentBuilders.get(sourceJob);
+        if (builder == null) {
+            throw new IllegalStateException("Could not find builder corresponding to " + sourceJob
+                    + " in builder map: " + componentBuilders);
+        }
+
+        if (builder instanceof MergedOutcomeJobBuilder) {
+            return ((MergedOutcomeJobBuilder) builder).getOutcomes()[0];
+        } else if (builder instanceof FilterJobBuilder<?, ?>) {
+            final FilterOutcome filterOutcome = (FilterOutcome) originalRequirement;
+            final Enum<?> category = filterOutcome.getCategory();
+            return ((FilterJobBuilder<?, ?>) builder).getOutcome(category);
+        } else {
+            throw new UnsupportedOperationException("Unsupported outcome builder type: " + builder);
+        }
+    }
+
+    private void addComponentBuilders(Collection<? extends ComponentJob> componentJobs,
+            Map<ComponentJob, Object> componentBuilders) {
+        for (ComponentJob componentJob : componentJobs) {
+            Object builder = addComponent(componentJob);
+            componentBuilders.put(componentJob, builder);
+        }
+    }
+
     public AnalysisJobBuilder removeSourceColumn(MetaModelInputColumn inputColumn) {
         boolean removed = _sourceColumns.remove(inputColumn);
         if (removed) {
@@ -348,6 +523,46 @@ public final class AnalysisJobBuilder implements Closeable {
         return this;
     }
 
+    /**
+     * Creates a filter job builder like the incoming filter job. Note that
+     * input (columns and requirements) will not be mapped since these depend on
+     * the context of the {@link FilterJob} and may not be matched in the
+     * {@link AnalysisJobBuilder}.
+     * 
+     * @param filterJob
+     * 
+     * @return the builder object for the specific component
+     */
+    private Object addComponent(ComponentJob componentJob) {
+        final AbstractBeanJobBuilder<?, ?, ?> builder;
+        if (componentJob instanceof FilterJob) {
+            builder = addFilter((FilterBeanDescriptor<?, ?>) componentJob.getDescriptor());
+        } else if (componentJob instanceof TransformerJob) {
+            builder = addTransformer((TransformerBeanDescriptor<?>) componentJob.getDescriptor());
+        } else if (componentJob instanceof AnalyzerJob) {
+            builder = addAnalyzer((AnalyzerBeanDescriptor<?>) componentJob.getDescriptor());
+        } else if (componentJob instanceof ExplorerJob) {
+            builder = addExplorer((ExplorerBeanDescriptor<?>) componentJob.getDescriptor());
+        } else if (componentJob instanceof MergedOutcomeJob) {
+            // special behaviour for merged outcomes - they're not configurable,
+            // except in terms of input columns and requirements
+            final MergedOutcomeJobBuilder mergedOutcomeJobBuilder = addMergedOutcomeJobBuilder();
+            mergedOutcomeJobBuilder.setName(componentJob.getName());
+            return mergedOutcomeJobBuilder;
+        } else {
+            throw new UnsupportedOperationException("Unknown component job type: " + componentJob);
+        }
+
+        builder.setName(componentJob.getName());
+
+        if (componentJob instanceof ConfigurableBeanJob<?>) {
+            ConfigurableBeanJob<?> configurableBeanJob = (ConfigurableBeanJob<?>) componentJob;
+            builder.setConfiguredProperties(configurableBeanJob.getConfiguration());
+        }
+
+        return builder;
+    }
+
     public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(Class<F> filterClass) {
         FilterBeanDescriptor<F, C> descriptor = _configuration.getDescriptorProvider().getFilterBeanDescriptorForClass(
                 filterClass);
@@ -428,21 +643,27 @@ public final class AnalysisJobBuilder implements Closeable {
         return Collections.unmodifiableList(_filterJobBuilders);
     }
 
-    public <A extends Explorer<?>> ExplorerJobBuilder<A> addExplorer(Class<A> explorerClass) {
-        ExplorerBeanDescriptor<A> descriptor = _configuration.getDescriptorProvider()
-                .getExplorerBeanDescriptorForClass(explorerClass);
-        if (descriptor == null) {
-            throw new IllegalArgumentException("No descriptor found for: " + explorerClass);
-        }
-        ExplorerJobBuilder<A> explorerJobBuilder = new ExplorerJobBuilder<A>(this, descriptor);
+    public <E extends Explorer<?>> ExplorerJobBuilder<E> addExplorer(ExplorerBeanDescriptor<E> descriptor) {
+        final ExplorerJobBuilder<E> explorerJobBuilder = new ExplorerJobBuilder<E>(this, descriptor);
         _explorerJobBuilders.add(explorerJobBuilder);
 
         // make a copy since some of the listeners may add additional listeners
         // which will otherwise cause ConcurrentModificationExceptions
-        List<ExplorerChangeListener> listeners = new ArrayList<ExplorerChangeListener>(_explorerChangeListeners);
+        final List<ExplorerChangeListener> listeners = new ArrayList<ExplorerChangeListener>(_explorerChangeListeners);
         for (ExplorerChangeListener listener : listeners) {
             listener.onAdd(explorerJobBuilder);
         }
+        return explorerJobBuilder;
+    }
+
+    public <E extends Explorer<?>> ExplorerJobBuilder<E> addExplorer(Class<E> explorerClass) {
+        final ExplorerBeanDescriptor<E> descriptor = _configuration.getDescriptorProvider()
+                .getExplorerBeanDescriptorForClass(explorerClass);
+        if (descriptor == null) {
+            throw new IllegalArgumentException("No descriptor found for: " + explorerClass);
+        }
+
+        final ExplorerJobBuilder<E> explorerJobBuilder = addExplorer(descriptor);
         return explorerJobBuilder;
     }
 

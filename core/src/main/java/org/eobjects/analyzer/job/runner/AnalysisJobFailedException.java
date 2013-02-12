@@ -43,6 +43,10 @@ public class AnalysisJobFailedException extends RuntimeException {
 
     @Override
     public String getMessage() {
+        if (_errors.isEmpty()) {
+            return "The analysis ended with an error state, but no exceptions where reported. Please inspect the logs.";
+        }
+
         final StringBuilder sb = new StringBuilder();
 
         for (Throwable throwable : _errors) {

@@ -93,9 +93,6 @@ public final class RowProcessingPublisher {
         if (taskRunner == null) {
             throw new IllegalArgumentException("TaskRunner cannot be null");
         }
-        if (analysisListener == null) {
-            throw new IllegalArgumentException("AnalysisListener cannot be null");
-        }
         _analysisJob = analysisJob;
         _table = table;
         _taskRunner = taskRunner;
