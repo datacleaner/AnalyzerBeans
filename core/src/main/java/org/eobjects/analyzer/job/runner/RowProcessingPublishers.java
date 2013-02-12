@@ -50,7 +50,7 @@ import org.eobjects.metamodel.schema.Table;
  * Class which partitions a single {@link AnalysisJob}'s components into
  * {@link RowProcessingPublisher}s.
  */
-final class RowProcessingPublishers {
+public final class RowProcessingPublishers {
 
 	private final AnalysisJob _analysisJob;
 	private final AnalysisListener _analysisListener;
@@ -224,4 +224,8 @@ final class RowProcessingPublishers {
 		Set<Table> tables = _rowProcessingPublishers.keySet();
 		return tables.toArray(new Table[tables.size()]);
 	}
+
+    public AnalysisJobMetrics buildAnalysisJobMetrics() {
+        return new AnalysisJobMetricsImpl(_analysisJob, this);
+    }
 }

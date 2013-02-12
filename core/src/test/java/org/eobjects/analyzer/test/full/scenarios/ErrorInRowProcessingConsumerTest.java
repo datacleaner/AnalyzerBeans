@@ -40,6 +40,7 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
+import org.eobjects.analyzer.job.runner.AnalysisJobFailedException;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.NumberResult;
@@ -57,104 +58,114 @@ import org.eobjects.metamodel.schema.Column;
  */
 public class ErrorInRowProcessingConsumerTest extends TestCase {
 
-	private static final AtomicBoolean closed = new AtomicBoolean();
+    private static final AtomicBoolean closed = new AtomicBoolean();
 
-	@AnalyzerBean("Errornous analyzer")
-	public static class ErrornousAnalyzer implements Analyzer<NumberResult> {
+    @AnalyzerBean("Errornous analyzer")
+    public static class ErrornousAnalyzer implements Analyzer<NumberResult> {
 
-		private final AtomicInteger counter = new AtomicInteger(0);
+        private final AtomicInteger counter = new AtomicInteger(0);
 
-		@Configured
-		InputColumn<String> inputColumn;
+        @Configured
+        InputColumn<String> inputColumn;
 
-		@Override
-		public NumberResult getResult() {
-			return new NumberResult(counter.get());
-		}
+        @Override
+        public NumberResult getResult() {
+            return new NumberResult(counter.get());
+        }
 
-		@Override
-		public void run(InputRow row, int distinctCount) {
-			assertNotNull(inputColumn);
-			assertNotNull(row);
-			assertEquals(1, distinctCount);
-			String value = row.getValue(inputColumn);
-			assertNotNull(value);
-			int count = counter.incrementAndGet();
-			if (count == 3) {
-				throw new IllegalStateException("This analyzer can only analyze two rows!");
-			}
-		}
+        @Override
+        public void run(InputRow row, int distinctCount) {
+            assertNotNull(inputColumn);
+            assertNotNull(row);
+            assertEquals(1, distinctCount);
+            String value = row.getValue(inputColumn);
+            assertNotNull(value);
+            int count = counter.incrementAndGet();
+            if (count == 3) {
+                throw new IllegalStateException("This analyzer can only analyze two rows!");
+            }
+        }
 
-		@Close
-		public void close() {
-			closed.set(true);
-		}
+        @Close
+        public void close() {
+            closed.set(true);
+        }
 
-	}
+    }
 
-	public void testScenario() throws Exception {
-		closed.set(false);
-		
-		ActivityAwareMultiThreadedTaskRunner taskRunner = new ActivityAwareMultiThreadedTaskRunner();
+    public void testScenario() throws Exception {
+        closed.set(false);
 
-		Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
-		AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(taskRunner).replace(
-				new DatastoreCatalogImpl(datastore));
+        ActivityAwareMultiThreadedTaskRunner taskRunner = new ActivityAwareMultiThreadedTaskRunner();
 
-		AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
-		ajb.setDatastore(datastore);
+        Datastore datastore = TestHelper.createSampleDatabaseDatastore("my db");
+        AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(taskRunner).replace(
+                new DatastoreCatalogImpl(datastore));
 
-		SchemaNavigator schemaNavigator = datastore.openConnection().getSchemaNavigator();
-		Column column = schemaNavigator.convertToColumn("PUBLIC.EMPLOYEES.EMAIL");
-		assertNotNull(column);
+        AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
+        ajb.setDatastore(datastore);
 
-		ajb.addSourceColumn(column);
-		ajb.addAnalyzer(ErrornousAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
+        SchemaNavigator schemaNavigator = datastore.openConnection().getSchemaNavigator();
+        Column column = schemaNavigator.convertToColumn("PUBLIC.EMPLOYEES.EMAIL");
+        assertNotNull(column);
 
-		AnalysisJob job = ajb.toAnalysisJob();
+        ajb.addSourceColumn(column);
+        ajb.addAnalyzer(ErrornousAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
 
-		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(job);
+        AnalysisJob job = ajb.toAnalysisJob();
 
-		assertTrue(resultFuture.isErrornous());
+        AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(job);
 
-		// isErrornous should be blocking
-		assertTrue(resultFuture.isDone());
+        assertTrue(resultFuture.isErrornous());
 
-		List<Throwable> errors = resultFuture.getErrors();
+        // isErrornous should be blocking
+        assertTrue(resultFuture.isDone());
 
-		// the amount of errors may vary depending on the thread scheduling
-		int numErrors = errors.size();
-		assertTrue(numErrors == 2 || numErrors == 3);
+        try {
+            resultFuture.getResults();
+            fail("Exception expected");
+        } catch (AnalysisJobFailedException e) {
+            String message = e.getMessage();
+            assertEquals("The analysis ended with 2 errors: ["
+                    + "IllegalStateException: This analyzer can only analyze two rows!,"
+                    + "PreviousErrorsExistException: A previous exception has occurred]", message);
+        }
 
-		// sort the errors to make the order deterministic
-		errors = CollectionUtils2.sorted(errors, new Comparator<Throwable>() {
-			@Override
-			public int compare(Throwable o1, Throwable o2) {
-				return o1.getClass().getName().compareTo(o2.getClass().getName());
-			}
-		});
+        List<Throwable> errors = resultFuture.getErrors();
 
-		assertEquals(IllegalStateException.class, errors.get(0).getClass());
-		assertEquals("This analyzer can only analyze two rows!", errors.get(0).getMessage());
+        // the amount of errors may vary depending on the thread scheduling
+        int numErrors = errors.size();
+        assertTrue(numErrors == 2 || numErrors == 3);
 
-		assertTrue(numErrors + " errors found, 2 or 3 expected!", numErrors == 2 || numErrors == 3);
+        // sort the errors to make the order deterministic
+        errors = CollectionUtils2.sorted(errors, new Comparator<Throwable>() {
+            @Override
+            public int compare(Throwable o1, Throwable o2) {
+                return o1.getClass().getName().compareTo(o2.getClass().getName());
+            }
+        });
 
-		if (numErrors == 3) {
-			// this is caused by the assertion
-			// ("assertEquals(1, distinctCount);")
-			// above
-			assertEquals(AssertionFailedError.class, errors.get(1).getClass());
-			assertEquals("expected:<1> but was:<2>", errors.get(1).getMessage());
-			assertEquals(PreviousErrorsExistException.class, errors.get(2).getClass());
-			assertEquals("A previous exception has occurred", errors.get(2).getMessage());
-		} else {
-			assertEquals(PreviousErrorsExistException.class, errors.get(1).getClass());
-			assertEquals("A previous exception has occurred", errors.get(1).getMessage());
-		}
+        assertEquals(IllegalStateException.class, errors.get(0).getClass());
+        assertEquals("This analyzer can only analyze two rows!", errors.get(0).getMessage());
 
-		int taskCount = taskRunner.assertAllBegunTasksFinished(500);
-		assertTrue("taskCount was: " + taskCount, taskCount > 4);
-		
-		assertTrue(closed.get());
-	}
+        assertTrue(numErrors + " errors found, 2 or 3 expected!", numErrors == 2 || numErrors == 3);
+
+        if (numErrors == 3) {
+            // this is caused by the assertion
+            // ("assertEquals(1, distinctCount);")
+            // above
+            assertEquals(AssertionFailedError.class, errors.get(1).getClass());
+            assertEquals("expected:<1> but was:<2>", errors.get(1).getMessage());
+            assertEquals(PreviousErrorsExistException.class, errors.get(2).getClass());
+            assertEquals("A previous exception has occurred", errors.get(2).getMessage());
+        } else {
+            assertEquals(PreviousErrorsExistException.class, errors.get(1).getClass());
+            assertEquals("A previous exception has occurred", errors.get(1).getMessage());
+        }
+
+        int taskCount = taskRunner.assertAllBegunTasksFinished(500);
+        assertTrue("taskCount was: " + taskCount, taskCount > 4);
+
+        assertTrue(closed.get());
+    }
 }

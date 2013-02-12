@@ -31,7 +31,7 @@ import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.LazyRef;
 import org.eobjects.metamodel.util.Ref;
 
-class AnalysisJobMetricsImpl implements AnalysisJobMetrics {
+final class AnalysisJobMetricsImpl implements AnalysisJobMetrics {
 
 	private final AnalysisJob _job;
 	private final RowProcessingPublishers _publishers;

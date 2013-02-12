@@ -86,12 +86,12 @@ public interface AnalysisResultFuture extends ErrorAware, AnalysisResult {
 	 * Finds (and waits if nescesary) the results of this analysis.
 	 * 
 	 * @return the results from the Analyzers in the executed job
-	 * @throws IllegalStateException
+	 * @throws AnalysisJobFailedException
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
 	@Override
-	public List<AnalyzerResult> getResults() throws IllegalStateException;
+	public List<AnalyzerResult> getResults() throws AnalysisJobFailedException;
 
 	/**
 	 * Finds (and waits if nescesary) the results of a single Analyzer.
@@ -100,24 +100,24 @@ public interface AnalysisResultFuture extends ErrorAware, AnalysisResult {
 	 *            the component (either analyzer or explorer) job to find the
 	 *            result for
 	 * @return the result for a given component job
-	 * @throws IllegalStateException
+	 * @throws AnalysisJobFailedException
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
 	@Override
-	public AnalyzerResult getResult(ComponentJob componentJob) throws IllegalStateException;
+	public AnalyzerResult getResult(ComponentJob componentJob) throws AnalysisJobFailedException;
 
 	/**
 	 * Finds (and waits if nescesary) the results mapped to the Analyzer jobs
 	 * 
 	 * @return a map with ComponentJobs as keys to the corresponding
 	 *         AnalyzerResults.
-	 * @throws IllegalStateException
+	 * @throws AnalysisJobFailedException
 	 *             if the analysis did not go well (use isSuccesfull() or
 	 *             isErrornous() to check)
 	 */
 	@Override
-	public Map<ComponentJob, AnalyzerResult> getResultMap() throws IllegalStateException;
+	public Map<ComponentJob, AnalyzerResult> getResultMap() throws AnalysisJobFailedException;
 
 	/**
 	 * @return any errors reported during execution, if the job was not

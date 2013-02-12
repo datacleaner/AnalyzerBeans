@@ -98,7 +98,7 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	public List<AnalyzerResult> getResults() throws IllegalStateException {
 		await();
 		if (isErrornous()) {
-			throwError();
+		    throw new AnalysisJobFailedException(getErrors());
 		}
 		ArrayList<JobAndResult> resultQueueCopy = new ArrayList<JobAndResult>(_resultQueue);
 		ArrayList<AnalyzerResult> result = new ArrayList<AnalyzerResult>(resultQueueCopy.size());
@@ -109,10 +109,10 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	}
 
 	@Override
-	public AnalyzerResult getResult(ComponentJob componentJob) throws IllegalStateException {
+	public AnalyzerResult getResult(ComponentJob componentJob) throws AnalysisJobFailedException {
 		await();
 		if (isErrornous()) {
-			throwError();
+			throw new AnalysisJobFailedException(getErrors());
 		}
 		ArrayList<JobAndResult> resultQueueCopy = new ArrayList<JobAndResult>(_resultQueue);
 		for (JobAndResult jobResult : resultQueueCopy) {
@@ -127,7 +127,7 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 	public Map<ComponentJob, AnalyzerResult> getResultMap() throws IllegalStateException {
 		await();
 		if (isErrornous()) {
-			throwError();
+		    throw new AnalysisJobFailedException(getErrors());
 		}
 		ArrayList<JobAndResult> resultQueueCopy = new ArrayList<JobAndResult>(_resultQueue);
 		Map<ComponentJob, AnalyzerResult> result = new HashMap<ComponentJob, AnalyzerResult>();
@@ -137,24 +137,6 @@ public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
 			result.put(job, analyzerResult);
 		}
 		return result;
-	}
-
-	private void throwError() throws IllegalStateException {
-		StringBuilder sb = new StringBuilder();
-		List<Throwable> errors = getErrors();
-		for (Throwable throwable : errors) {
-			if (sb.length() == 0) {
-				sb.append("The analysis ended with " + errors.size() + " errors: [");
-			} else {
-				sb.append(",");
-			}
-			String className = throwable.getClass().getSimpleName();
-			sb.append(className);
-			sb.append(":");
-			String message = throwable.getMessage();
-			sb.append(message);
-		}
-		sb.append("[");
 	}
 
 	@Override

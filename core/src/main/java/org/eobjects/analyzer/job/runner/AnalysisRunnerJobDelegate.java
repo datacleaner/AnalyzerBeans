@@ -126,7 +126,7 @@ final class AnalysisRunnerJobDelegate {
 			final RowProcessingPublishers publishers = new RowProcessingPublishers(_job, _analysisListener, _taskRunner,
 					rowProcessingLifeCycleHelper, _sourceColumnFinder);
 
-			final AnalysisJobMetrics analysisJobMetrics = new AnalysisJobMetricsImpl(_job, publishers);
+			final AnalysisJobMetrics analysisJobMetrics = publishers.buildAnalysisJobMetrics();
 
 			// A task listener that will register either succesfull executions
 			// or
