@@ -23,6 +23,7 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.ComponentCategory;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.util.HasAliases;
 
@@ -38,47 +39,56 @@ import org.eobjects.analyzer.util.HasAliases;
  */
 public interface BeanDescriptor<B> extends ComponentDescriptor<B>, HasAliases {
 
-	/**
-	 * @return a humanly readable description of the bean.
-	 */
-	public String getDescription();
+    /**
+     * @return a humanly readable description of the bean.
+     */
+    public String getDescription();
 
-	/**
-	 * @return a set of component categories that the bean has been assigned to.
-	 */
-	public Set<ComponentCategory> getComponentCategories();
+    /**
+     * @return a set of component categories that the bean has been assigned to.
+     */
+    public Set<ComponentCategory> getComponentCategories();
 
-	/**
-	 * @return a set of annotations for the bean.
-	 */
-	public Set<Annotation> getAnnotations();
+    /**
+     * @return a set of annotations for the bean.
+     */
+    public Set<Annotation> getAnnotations();
 
-	/**
-	 * Gets an annotation of a specific type
-	 * 
-	 * @param <A>
-	 * @param annotationClass
-	 * @return an annotation of the specified type, or null of no such
-	 *         annotation exists.
-	 */
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+    /**
+     * Determines if the bean is a distributable component or not.
+     * 
+     * @return true if the component can be distributed.
+     * 
+     * @see Distributed
+     */
+    public boolean isDistributable();
 
-	/**
-	 * Gets the configured properties that have {@link InputColumn} type.
-	 * 
-	 * @return a set containing all configured property descriptors of
-	 *         {@link InputColumn}s in the bean.
-	 */
-	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput();
+    /**
+     * Gets an annotation of a specific type
+     * 
+     * @param <A>
+     * @param annotationClass
+     * @return an annotation of the specified type, or null of no such
+     *         annotation exists.
+     */
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
-	/**
-	 * Gets the configured properties that have {@link InputColumn} type.
-	 * 
-	 * @param onlyRequired
-	 *            a boolean indicating if optional properties should be
-	 *            returned. If false, only required properties will be included.
-	 * @return a set containing all configured property descriptors of
-	 *         {@link InputColumn}s in the bean.
-	 */
-	public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput(boolean includeOptional);
+    /**
+     * Gets the configured properties that have {@link InputColumn} type.
+     * 
+     * @return a set containing all configured property descriptors of
+     *         {@link InputColumn}s in the bean.
+     */
+    public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput();
+
+    /**
+     * Gets the configured properties that have {@link InputColumn} type.
+     * 
+     * @param onlyRequired
+     *            a boolean indicating if optional properties should be
+     *            returned. If false, only required properties will be included.
+     * @return a set containing all configured property descriptors of
+     *         {@link InputColumn}s in the bean.
+     */
+    public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput(boolean includeOptional);
 }

@@ -22,6 +22,7 @@ package org.eobjects.analyzer.descriptors;
 import java.util.Set;
 
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.AnalyzerResultReducer;
 import org.eobjects.analyzer.result.HasAnalyzerResult;
 
 /**
@@ -54,4 +55,12 @@ public interface HasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResult<?>>
      * @return the result metrics of this component's result
      */
     public Set<MetricDescriptor> getResultMetrics();
+
+    /**
+     * Gets the {@link AnalyzerResultReducer} class of this component, if
+     * available.
+     * 
+     * @return a reducer class, or null if none is available
+     */
+    public Class<? extends AnalyzerResultReducer<?>> getResultReducerClass();
 }

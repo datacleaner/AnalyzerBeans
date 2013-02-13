@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans.writers;
 
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.FileDatastore;
@@ -33,6 +34,7 @@ import org.eobjects.metamodel.schema.Table;
  * 
  * @author Kasper Sørensen
  */
+@Distributed(reducer=WriteDataResultReducer.class)
 public interface WriteDataResult extends AnalyzerResult {
 
     /**

@@ -21,35 +21,64 @@ package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Distributed;
+import org.eobjects.analyzer.result.AnalyzerResultReducer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 
-final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends AbstractHasAnalyzerResultBeanDescriptor<A> implements
-		AnalyzerBeanDescriptor<A> {
-	
-	private static final long serialVersionUID = 1L;
+final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends
+        AbstractHasAnalyzerResultBeanDescriptor<A> implements AnalyzerBeanDescriptor<A> {
 
-	private final String _displayName;
-	
-	protected AnnotationBasedAnalyzerBeanDescriptor(Class<A> analyzerClass) throws DescriptorException {
-		super(analyzerClass, true);
+    private static final long serialVersionUID = 1L;
 
-		AnalyzerBean analyzerAnnotation = ReflectionUtils.getAnnotation(analyzerClass, AnalyzerBean.class);
-		if (analyzerAnnotation == null) {
-			throw new DescriptorException(analyzerClass + " doesn't implement the AnalyzerBean annotation");
-		}
+    private final String _displayName;
 
-		String displayName = analyzerAnnotation.value();
-		if (StringUtils.isNullOrEmpty(displayName)) {
-			displayName = ReflectionUtils.explodeCamelCase(analyzerClass.getSimpleName(), false);
-		}
-		_displayName = displayName.trim();
+    protected AnnotationBasedAnalyzerBeanDescriptor(Class<A> analyzerClass) throws DescriptorException {
+        super(analyzerClass, true);
 
-		visitClass();
-	}
+        AnalyzerBean analyzerAnnotation = ReflectionUtils.getAnnotation(analyzerClass, AnalyzerBean.class);
+        if (analyzerAnnotation == null) {
+            throw new DescriptorException(analyzerClass + " doesn't implement the AnalyzerBean annotation");
+        }
 
-	@Override
-	public String getDisplayName() {
-		return _displayName;
-	}
+        String displayName = analyzerAnnotation.value();
+        if (StringUtils.isNullOrEmpty(displayName)) {
+            displayName = ReflectionUtils.explodeCamelCase(analyzerClass.getSimpleName(), false);
+        }
+        _displayName = displayName.trim();
+
+        visitClass();
+    }
+
+    @Override
+    public String getDisplayName() {
+        return _displayName;
+    }
+
+    @Override
+    public Class<? extends AnalyzerResultReducer<?>> getResultReducerClass() {
+        final Distributed distributedAnalyzer = getAnnotation(Distributed.class);
+        if (distributedAnalyzer != null) {
+            // the analyzer-level annotation always comes first (can override
+            // the result-level annotation).
+            final  Class<? extends AnalyzerResultReducer<?>> reducer = distributedAnalyzer.reducer();
+            if (reducer != null) {
+                return reducer;
+            }
+        }
+        
+        final Distributed distributedResult = ReflectionUtils.getAnnotation(getResultClass(), Distributed.class);
+        if (distributedResult != null) {
+            final   Class<? extends AnalyzerResultReducer<?>> reducer = distributedResult.reducer();
+            if (reducer != null) {
+                return reducer;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isDistributable() {
+        return getResultReducerClass() != null;
+    }
 }

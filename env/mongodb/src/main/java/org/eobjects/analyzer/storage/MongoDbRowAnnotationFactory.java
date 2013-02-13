@@ -41,7 +41,9 @@ import com.mongodb.DBObject;
 
 public class MongoDbRowAnnotationFactory extends AbstractRowAnnotationFactory {
 
-	private static final Logger logger = LoggerFactory.getLogger(MongoDbRowAnnotationFactory.class);
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory.getLogger(MongoDbRowAnnotationFactory.class);
 	private static final String ROW_ID_KEY = "row_id";
 	private static final String DISTINCT_COUNT_KEY = "count";
 
@@ -166,5 +168,13 @@ public class MongoDbRowAnnotationFactory extends AbstractRowAnnotationFactory {
 		dbRow.put(DISTINCT_COUNT_KEY, distinctCount);
 		_dbCollection.insert(dbRow);
 	}
+
+    @Override
+    public void transferAnnotations(RowAnnotation from, RowAnnotation to) {
+        final int increment = from.getRowCount();
+        ((RowAnnotationImpl)to).incrementRowCount(increment);
+        
+        // TODO: Copy records to new annotation also?
+    }
 
 }

@@ -21,7 +21,6 @@ package org.eobjects.analyzer.cluster;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
@@ -46,8 +45,6 @@ import org.eobjects.metamodel.schema.Table;
  */
 public final class DistributedAnalysisRunner implements AnalysisRunner {
 
-    private static final int MIN_RECORDS_PER_CHUNK = 100;
-
     private final ClusterManager _nodeManager;
     private final AnalyzerBeansConfiguration _configuration;
 
@@ -68,13 +65,11 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
         failIfJobIsUnsupported(job);
 
-        final List<ClusterNode> availableNodes = _nodeManager.getAvailableNodes();
+        final JobDivisionManager jobDivisionManager = _nodeManager.getJobDivisionManager();
 
         final int expectedRows = getExpectedRows(job);
-        final int chunks = calculateChunks(availableNodes, expectedRows);
+        final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
         final int rowsPerChunk = expectedRows / chunks;
-
-        final List<ClusterNode> targetNodes = pickTargetNodes(availableNodes, chunks);
 
         final List<AnalysisResultFuture> results = new ArrayList<AnalysisResultFuture>();
         for (int i = 0; i < chunks; i++) {
@@ -87,9 +82,9 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             }
 
             final AnalysisJob slaveJob = buildSlaveJob(job, firstRow, maxRows);
-            final ClusterNode targetNode = targetNodes.get(i);
 
-            final AnalysisResultFuture slaveResultFuture = _nodeManager.dispatchJob(targetNode, slaveJob);
+            final AnalysisResultFuture slaveResultFuture = _nodeManager.dispatchJob(slaveJob, new DistributedJobContextImpl(job,
+                    i, chunks));
             results.add(slaveResultFuture);
         }
 
@@ -113,45 +108,11 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
 
         jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
-        
+
         // in assertion/test mode do an early validation
         assert jobBuilder.isConfigured(true);
 
         return jobBuilder.toAnalysisJob();
-    }
-
-    private List<ClusterNode> pickTargetNodes(List<ClusterNode> availableNodes, int chunks) {
-        final int nodeCount = availableNodes.size();
-        if (chunks > nodeCount) {
-            throw new IllegalStateException("Chunks cannot be larger than the available amount of nodes");
-        } else if (chunks == nodeCount) {
-            // all nodes will be targeted
-            return availableNodes;
-        } else {
-            // select randomly
-            Collections.shuffle(availableNodes);
-            return availableNodes.subList(0, chunks);
-        }
-    }
-
-    /**
-     * Calculates the amount of chunks of data (each represented as a slave job)
-     * to create.
-     * 
-     * @param nodes
-     * @param expectedRows
-     * @return
-     */
-    private int calculateChunks(List<ClusterNode> nodes, int expectedRows) {
-        final int nodeCount = nodes.size();
-        final int rowsPerChunk = expectedRows / nodeCount;
-        if (rowsPerChunk >= MIN_RECORDS_PER_CHUNK) {
-            // we'll utilize all nodes
-            return nodeCount;
-        }
-
-        final int chunkCount = (int) Math.ceil((1.0d * expectedRows / MIN_RECORDS_PER_CHUNK));
-        return chunkCount;
     }
 
     private int getExpectedRows(AnalysisJob job) throws UnsupportedOperationException {

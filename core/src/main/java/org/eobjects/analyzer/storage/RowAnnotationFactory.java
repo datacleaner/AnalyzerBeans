@@ -40,48 +40,56 @@ import org.eobjects.analyzer.data.InputRow;
  */
 public interface RowAnnotationFactory {
 
-	/**
-	 * Creates a new annotation
-	 * 
-	 * @return a new annotation
-	 */
-	public RowAnnotation createAnnotation();
+    /**
+     * Creates a new annotation
+     * 
+     * @return a new annotation
+     */
+    public RowAnnotation createAnnotation();
 
-	/**
-	 * Annotates/labels a row with an annotation. The row will be retrievable
-	 * using the getRows(...) method later in the process.
-	 * 
-	 * @param row
-	 * @param distinctCount
-	 * @param annotation
-	 */
-	public void annotate(InputRow row, int distinctCount, RowAnnotation annotation);
+    /**
+     * Annotates/labels a row with an annotation. The row will be retrievable
+     * using the getRows(...) method later in the process.
+     * 
+     * @param row
+     * @param distinctCount
+     * @param annotation
+     */
+    public void annotate(InputRow row, int distinctCount, RowAnnotation annotation);
 
-	/**
-	 * Removes/resets all annotations of a specific kind. This method can be
-	 * used for situations where eg. an analyzer is annotating extreme values
-	 * (highest/lowest values etc.) and the threshold is changing, cancelling
-	 * all previous annotations.
-	 * 
-	 * @param annotation
-	 */
-	public void reset(RowAnnotation annotation);
+    /**
+     * Removes/resets all annotations of a specific kind. This method can be
+     * used for situations where eg. an analyzer is annotating extreme values
+     * (highest/lowest values etc.) and the threshold is changing, cancelling
+     * all previous annotations.
+     * 
+     * @param annotation
+     */
+    public void reset(RowAnnotation annotation);
 
-	/**
-	 * Gets all the available rows with a given annotation.
-	 * 
-	 * @param annotation
-	 * @return
-	 */
-	public InputRow[] getRows(RowAnnotation annotation);
+    /**
+     * Gets all the available rows with a given annotation.
+     * 
+     * @param annotation
+     * @return
+     */
+    public InputRow[] getRows(RowAnnotation annotation);
 
-	/**
-	 * Gets a summarized view of the distinct values and their counts for a
-	 * single column and annotation.
-	 * 
-	 * @param annotation
-	 * @param inputColumn
-	 * @return
-	 */
-	public Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn);
+    /**
+     * Gets a summarized view of the distinct values and their counts for a
+     * single column and annotation.
+     * 
+     * @param annotation
+     * @param inputColumn
+     * @return
+     */
+    public Map<Object, Integer> getValueCounts(RowAnnotation annotation, InputColumn<?> inputColumn);
+
+    /**
+     * Transfers registered annotated rows from one annotation to the other.
+     * 
+     * @param from
+     * @param to
+     */
+    public void transferAnnotations(RowAnnotation from, RowAnnotation to);
 }

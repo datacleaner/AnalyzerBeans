@@ -43,6 +43,10 @@ public final class WriteDataResultImpl implements WriteDataResult {
 
     private final transient Func<DatastoreCatalog, Datastore> _datastoreFunc;
     private final transient FileDatastore _errorDatastore;
+    
+    public WriteDataResultImpl(final int writtenRowCount, final int updatesCount, final int errorRowCount) {
+        this(writtenRowCount, updatesCount, null, null, null, errorRowCount, null);
+    }
 
     public WriteDataResultImpl(final int writtenRowCount, final Datastore datastore, final String schemaName,
             final String tableName) {

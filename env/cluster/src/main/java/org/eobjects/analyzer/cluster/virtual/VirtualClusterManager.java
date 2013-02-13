@@ -19,15 +19,14 @@
  */
 package org.eobjects.analyzer.cluster.virtual;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eobjects.analyzer.cluster.ClusterManager;
-import org.eobjects.analyzer.cluster.ClusterNode;
+import org.eobjects.analyzer.cluster.DistributedJobContext;
+import org.eobjects.analyzer.cluster.FixedDivisionsCountJobDivisionManager;
+import org.eobjects.analyzer.cluster.JobDivisionManager;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
-import org.eobjects.analyzer.job.runner.AnalysisRunner;
+import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 
 /**
  * A cluster manager which spawns virtual nodes, i.e. nodes that are not
@@ -44,20 +43,14 @@ public class VirtualClusterManager implements ClusterManager {
     }
 
     @Override
-    public List<ClusterNode> getAvailableNodes() {
-        final List<ClusterNode> nodes = new ArrayList<ClusterNode>(_nodeCount);
-        for (int i = 0; i < _nodeCount; i++) {
-            nodes.add(new VirtualClusterNode("Node " + (i + 1), _configuration));
-        }
-        return nodes;
+    public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context) {
+        AnalysisRunnerImpl runner = new AnalysisRunnerImpl(_configuration);
+        return runner.run(job);
     }
 
     @Override
-    public AnalysisResultFuture dispatchJob(ClusterNode node, AnalysisJob job) {
-        final VirtualClusterNode virtualClusterNode = (VirtualClusterNode) node;
-        final AnalysisRunner runner = virtualClusterNode.getAnalysisRunner();
-        final AnalysisResultFuture resultFuture = runner.run(job);
-        return resultFuture;
+    public JobDivisionManager getJobDivisionManager() {
+        return new FixedDivisionsCountJobDivisionManager(_nodeCount);
     }
 
 }

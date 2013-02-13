@@ -20,31 +20,29 @@
 package org.eobjects.analyzer.cluster;
 
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 
 /**
- * Defines an interface for a cluster and it's management.
+ * A simple {@link JobDivisionManager} which builds divisions based on a
+ * preferred chunk size. If for instance there's a chunk size of 1000 records,
+ * and an incoming job has an expected row count of 30,000 records - then there
+ * will be 30 divisions made.
  */
-public interface ClusterManager {
+public class FixedChunkSizeJobDivisionManager implements JobDivisionManager {
 
-    /**
-     * Gets a {@link JobDivisionManager} object, used to advice the distribution
-     * plan on how to divide work across the cluster.
-     * 
-     * @return
-     */
-    public JobDivisionManager getJobDivisionManager();
+    private final int _chunkSize;
 
-    /**
-     * Dispatches a job for execution on a node. Typically this job will not be
-     * the original job which the {@link DistributedAnalysisRunner} received,
-     * but a "slave job" which represents a variant with processing thresholds
-     * added to spread the load over multiple nodes.
-     * 
-     * @param job
-     * @param context
-     * @return
-     */
-    public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context);
+    public FixedChunkSizeJobDivisionManager(int chunkSize) {
+        if (chunkSize <= 0) {
+            throw new IllegalArgumentException("Chunk size must be a positive integer");
+        }
+        _chunkSize = chunkSize;
+    }
+
+    @Override
+    public int calculateDivisionCount(AnalysisJob masterJob, int expectedRows) {
+        final int chunkCount = (int) Math.ceil((1.0d * expectedRows / _chunkSize));
+
+        return chunkCount;
+    }
 
 }

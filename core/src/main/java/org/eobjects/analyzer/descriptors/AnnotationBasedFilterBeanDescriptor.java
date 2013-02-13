@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Alias;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
@@ -120,5 +121,14 @@ final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends E
     @Override
     public boolean isQueryOptimizable() {
         return ReflectionUtils.is(getComponentClass(), QueryOptimizedFilter.class);
+    }
+
+    @Override
+    public boolean isDistributable() {
+        final Distributed annotation = getAnnotation(Distributed.class);
+        if (annotation != null) {
+            return annotation.value();
+        }
+        return true;
     }
 }

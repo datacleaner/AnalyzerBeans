@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Explorer;
+import org.eobjects.analyzer.result.AnalyzerResultReducer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 
@@ -59,5 +60,15 @@ final class AnnotationBasedExplorerBeanDescriptor<E extends Explorer<?>> extends
     @Override
     public Set<ConfiguredPropertyDescriptor> getConfiguredPropertiesForInput() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public Class<? extends AnalyzerResultReducer<?>> getResultReducerClass() {
+        return null;
+    }
+
+    @Override
+    public boolean isDistributable() {
+        return false;
     }
 }

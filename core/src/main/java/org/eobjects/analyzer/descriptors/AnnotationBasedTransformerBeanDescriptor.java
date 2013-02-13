@@ -19,54 +19,64 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 
-final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> extends AbstractBeanDescriptor<T> implements
-		TransformerBeanDescriptor<T> {
+final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> extends AbstractBeanDescriptor<T>
+        implements TransformerBeanDescriptor<T> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final String _displayName;
+    private final String _displayName;
 
-	protected AnnotationBasedTransformerBeanDescriptor(Class<T> transformerClass) throws DescriptorException {
-		super(transformerClass, false);
+    protected AnnotationBasedTransformerBeanDescriptor(Class<T> transformerClass) throws DescriptorException {
+        super(transformerClass, false);
 
-		if (!ReflectionUtils.is(transformerClass, Transformer.class)) {
-			throw new DescriptorException(transformerClass + " does not implement " + Transformer.class.getName());
-		}
+        if (!ReflectionUtils.is(transformerClass, Transformer.class)) {
+            throw new DescriptorException(transformerClass + " does not implement " + Transformer.class.getName());
+        }
 
-		TransformerBean transformerAnnotation = ReflectionUtils.getAnnotation(transformerClass, TransformerBean.class);
-		if (transformerAnnotation == null) {
-			throw new DescriptorException(transformerClass + " doesn't implement the TransformerBean annotation");
-		}
+        TransformerBean transformerAnnotation = ReflectionUtils.getAnnotation(transformerClass, TransformerBean.class);
+        if (transformerAnnotation == null) {
+            throw new DescriptorException(transformerClass + " doesn't implement the TransformerBean annotation");
+        }
 
-		String displayName = transformerAnnotation.value();
-		if (StringUtils.isNullOrEmpty(displayName)) {
-			displayName = ReflectionUtils.explodeCamelCase(transformerClass.getSimpleName(), false);
-		}
-		_displayName = displayName.trim();
+        String displayName = transformerAnnotation.value();
+        if (StringUtils.isNullOrEmpty(displayName)) {
+            displayName = ReflectionUtils.explodeCamelCase(transformerClass.getSimpleName(), false);
+        }
+        _displayName = displayName.trim();
 
-		visitClass();
-	}
+        visitClass();
+    }
 
-	@Override
-	public String getDisplayName() {
-		return _displayName;
-	}
+    @Override
+    public String getDisplayName() {
+        return _displayName;
+    }
 
-	@Override
-	public Class<?> getOutputDataType() {
-		Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), Transformer.class, 0);
-		return typeParameter;
-	}
+    @Override
+    public Class<?> getOutputDataType() {
+        Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), Transformer.class, 0);
+        return typeParameter;
+    }
 
-	@Override
-	@SuppressWarnings("deprecation")
-	public org.eobjects.analyzer.data.DataTypeFamily getOutputDataTypeFamily() {
-		Class<?> outputDataType = getOutputDataType();
-		return org.eobjects.analyzer.data.DataTypeFamily.valueOf(outputDataType);
-	}
+    @Override
+    @SuppressWarnings("deprecation")
+    public org.eobjects.analyzer.data.DataTypeFamily getOutputDataTypeFamily() {
+        Class<?> outputDataType = getOutputDataType();
+        return org.eobjects.analyzer.data.DataTypeFamily.valueOf(outputDataType);
+    }
+
+    @Override
+    public boolean isDistributable() {
+        final Distributed annotation = getAnnotation(Distributed.class);
+        if (annotation != null) {
+            return annotation.value();
+        }
+        return true;
+    }
 }

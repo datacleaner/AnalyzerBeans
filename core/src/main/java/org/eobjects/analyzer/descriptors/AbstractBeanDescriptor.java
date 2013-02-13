@@ -95,7 +95,7 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 		return descriptors;
 	}
 
-	@Override
+    @Override
 	public String getDescription() {
 		Description description = getAnnotation(Description.class);
 		if (description == null) {

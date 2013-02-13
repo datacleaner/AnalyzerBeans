@@ -20,31 +20,26 @@
 package org.eobjects.analyzer.cluster;
 
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 
 /**
- * Defines an interface for a cluster and it's management.
+ * A simple {@link JobDivisionManager} which builds divisions based on a
+ * preferred fixed number of divisions. Typically this fixed number will be the
+ * number of slave nodes in the cluster.
  */
-public interface ClusterManager {
+public class FixedDivisionsCountJobDivisionManager implements JobDivisionManager {
 
-    /**
-     * Gets a {@link JobDivisionManager} object, used to advice the distribution
-     * plan on how to divide work across the cluster.
-     * 
-     * @return
-     */
-    public JobDivisionManager getJobDivisionManager();
+    private final int _divisionCount;
 
-    /**
-     * Dispatches a job for execution on a node. Typically this job will not be
-     * the original job which the {@link DistributedAnalysisRunner} received,
-     * but a "slave job" which represents a variant with processing thresholds
-     * added to spread the load over multiple nodes.
-     * 
-     * @param job
-     * @param context
-     * @return
-     */
-    public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context);
+    public FixedDivisionsCountJobDivisionManager(int divisionCount) {
+        if (divisionCount <= 0) {
+            throw new IllegalArgumentException("Division count must be a positive integer");
+        }
+        _divisionCount = divisionCount;
+    }
+
+    @Override
+    public int calculateDivisionCount(AnalysisJob masterJob, int expectedRows) {
+        return _divisionCount;
+    }
 
 }

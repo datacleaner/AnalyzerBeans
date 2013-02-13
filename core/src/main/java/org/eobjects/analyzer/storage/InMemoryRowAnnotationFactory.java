@@ -70,12 +70,17 @@ public class InMemoryRowAnnotationFactory extends AbstractRowAnnotationFactory i
 
     @Override
     protected void storeRowAnnotation(int rowId, RowAnnotation annotation) {
+        Set<Integer> rowIds = getRowIds(annotation);
+        rowIds.add(rowId);
+    }
+
+    private Set<Integer> getRowIds(RowAnnotation annotation) {
         Set<Integer> rowIds = _annotatedRows.get(annotation);
         if (rowIds == null) {
             rowIds = Collections.synchronizedSet(new LinkedHashSet<Integer>());
             _annotatedRows.put(annotation, rowIds);
         }
-        rowIds.add(rowId);
+        return rowIds;
     }
 
     @Override
@@ -96,5 +101,18 @@ public class InMemoryRowAnnotationFactory extends AbstractRowAnnotationFactory i
             i++;
         }
         return rows;
+    }
+
+    @Override
+    public void transferAnnotations(RowAnnotation from, RowAnnotation to) {
+        final int rowCountToAdd = from.getRowCount();
+        ((RowAnnotationImpl) to).incrementRowCount(rowCountToAdd);
+
+        final Set<Integer> fromRowIds = _annotatedRows.get(from);
+        if (fromRowIds != null && !fromRowIds.isEmpty()) {
+            // copy rowIds to the 'to' annotation
+            final Set<Integer> toRowIds = getRowIds(to);
+            toRowIds.addAll(fromRowIds);
+        }
     }
 }

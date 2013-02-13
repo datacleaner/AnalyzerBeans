@@ -20,31 +20,15 @@
 package org.eobjects.analyzer.cluster;
 
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 
 /**
- * Defines an interface for a cluster and it's management.
+ * Defines the context information related to the distributed execution of a partial job.
  */
-public interface ClusterManager {
+public interface DistributedJobContext {
 
-    /**
-     * Gets a {@link JobDivisionManager} object, used to advice the distribution
-     * plan on how to divide work across the cluster.
-     * 
-     * @return
-     */
-    public JobDivisionManager getJobDivisionManager();
-
-    /**
-     * Dispatches a job for execution on a node. Typically this job will not be
-     * the original job which the {@link DistributedAnalysisRunner} received,
-     * but a "slave job" which represents a variant with processing thresholds
-     * added to spread the load over multiple nodes.
-     * 
-     * @param job
-     * @param context
-     * @return
-     */
-    public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context);
-
+    public AnalysisJob getMasterJob();
+    
+    public int getJobDivisionCount();
+    
+    public int getJobDivisionIndex();
 }
