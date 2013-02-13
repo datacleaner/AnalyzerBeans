@@ -26,6 +26,7 @@ import java.util.List;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter.Category;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -36,6 +37,7 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 import org.eobjects.analyzer.job.runner.RowProcessingPublishers;
+import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.eobjects.metamodel.schema.Table;
 
@@ -64,12 +66,16 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     @Override
     public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
         failIfJobIsUnsupported(job);
+        
 
         final JobDivisionManager jobDivisionManager = _nodeManager.getJobDivisionManager();
 
         final int expectedRows = getExpectedRows(job);
         final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
         final int rowsPerChunk = expectedRows / chunks;
+        
+        final InjectionManager injectionManager = _configuration.getInjectionManager(job);
+        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager);
 
         final List<AnalysisResultFuture> results = new ArrayList<AnalysisResultFuture>();
         for (int i = 0; i < chunks; i++) {
@@ -87,8 +93,10 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
                     i, chunks));
             results.add(slaveResultFuture);
         }
+        
+        final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper);
 
-        final DistributedAnalysisResultFuture resultFuture = new DistributedAnalysisResultFuture(results);
+        final DistributedAnalysisResultFuture resultFuture = new DistributedAnalysisResultFuture(results, reducer);
         return resultFuture;
     }
 

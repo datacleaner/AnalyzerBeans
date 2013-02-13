@@ -37,6 +37,10 @@ public final class LifeCycleHelper {
 
 	private final InjectionManager _injectionManager;
 	private final ReferenceDataActivationManager _referenceDataActivationManager;
+	
+	public LifeCycleHelper(InjectionManager injectionManager) {
+	    this(injectionManager, null);
+	}
 
 	public LifeCycleHelper(InjectionManager injectionManager, ReferenceDataActivationManager referenceDataActivationManager) {
 		_injectionManager = injectionManager;

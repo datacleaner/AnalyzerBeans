@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eobjects.analyzer.job.ComponentJob;
-import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisJobFailedException;
+import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.JobStatus;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
@@ -40,24 +40,36 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  */
 public final class DistributedAnalysisResultFuture implements AnalysisResultFuture {
 
+    private final DistributedAnalysisResultReducer _reducer;
     private final List<AnalysisResultFuture> _results;
-    private volatile Date _creationDate;
     private final Map<ComponentJob, AnalyzerResult> _resultMap;
+    private volatile Date _creationDate;
+    private volatile boolean _cancelled;
 
-    public DistributedAnalysisResultFuture(List<AnalysisResultFuture> results) {
+    public DistributedAnalysisResultFuture(List<AnalysisResultFuture> results, DistributedAnalysisResultReducer reducer) {
         _results = results;
+        _reducer = reducer;
         _resultMap = new HashMap<ComponentJob, AnalyzerResult>();
+        _cancelled = false;
     }
 
     @Override
     public void cancel() {
-        // TODO Auto-generated method stub
+        if (isDone()) {
+            // too late to cancel
+            return;
+        }
+
+        if (!_cancelled) {
+            for (AnalysisResultFuture result : _results) {
+                result.cancel();
+            }
+        }
     }
 
     @Override
     public boolean isCancelled() {
-        // TODO Auto-generated method stub
-        return false;
+        return _cancelled;
     }
 
     @Override
@@ -82,6 +94,13 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
     public void await() {
         for (AnalysisResultFuture result : _results) {
             result.await();
+        }
+        if (_resultMap.isEmpty()) {
+            synchronized (this) {
+                if (_resultMap.isEmpty()) {
+                    _reducer.reduce(_results, _resultMap);
+                }
+            }
         }
     }
 
@@ -109,6 +128,9 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
 
     @Override
     public JobStatus getStatus() {
+        if (isCancelled()) {
+            return JobStatus.ERRORNOUS;
+        }
         JobStatus status = JobStatus.SUCCESSFUL;
         for (AnalysisResultFuture result : _results) {
             JobStatus slaveStatus = result.getStatus();

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.commons.collections15.map.ReferenceMap;
 import org.eobjects.metamodel.util.CollectionUtils;
+import org.eobjects.metamodel.util.Predicate;
 
 /**
  * Additional (to {@link CollectionUtils} utility methods for common collection
@@ -40,6 +41,26 @@ public final class CollectionUtils2 {
 
     private CollectionUtils2() {
         // prevent instantiation
+    }
+
+    /**
+     * Refines a list of candidate objects based on a inclusion predicate. If no
+     * candidates are found, the original list will be retained in the result.
+     * Therefore the result will always have 1 or more elements in it.
+     * 
+     * @param candidates
+     * @param predicate
+     * @return
+     */
+    public static <E> List<E> refineCandidates(final List<E> candidates, final Predicate<? super E> predicate) {
+        if (candidates.size() == 1) {
+            return candidates;
+        }
+        List<E> newCandidates = CollectionUtils.filter(candidates, predicate);
+        if (newCandidates.isEmpty()) {
+            return candidates;
+        }
+        return newCandidates;
     }
 
     @SuppressWarnings("unchecked")

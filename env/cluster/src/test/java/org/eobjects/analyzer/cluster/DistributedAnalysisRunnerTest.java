@@ -97,6 +97,7 @@ public class DistributedAnalysisRunnerTest extends TestCase {
             final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration,
                     new VirtualClusterManager(configuration, 2));
             final AnalysisResultFuture resultFuture = runner.run(job);
+            
             resultFuture.await();
 
             // check that the file created has the same amount of records as the
@@ -111,12 +112,16 @@ public class DistributedAnalysisRunnerTest extends TestCase {
                 ds1.close();
                 ds2.close();
             }
+            
+            // await multiple times to ensure that second time isn't distorting the result
+            resultFuture.await();
+            resultFuture.await();
 
             // check that the analysis result elements are there...
             final Map<ComponentJob, AnalyzerResult> resultMap = resultFuture.getResultMap();
-
-            // TODO: The result map is not yet being updated...
-            assertEquals("", resultMap.toString());
+            assertEquals(1, resultMap.size());
+            assertEquals("{ImmutableAnalyzerJob[name=null,analyzer=Insert into table]=122 inserts executed}",
+                    resultMap.toString());
 
         } finally {
             dbCon.close();
