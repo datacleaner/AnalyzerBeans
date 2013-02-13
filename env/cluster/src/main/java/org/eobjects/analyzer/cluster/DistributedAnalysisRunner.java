@@ -27,8 +27,10 @@ import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter.Category;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
+import org.eobjects.analyzer.descriptors.BeanDescriptor;
+import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.ExplorerJob;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -66,14 +68,13 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     @Override
     public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
         failIfJobIsUnsupported(job);
-        
 
         final JobDivisionManager jobDivisionManager = _nodeManager.getJobDivisionManager();
 
         final int expectedRows = getExpectedRows(job);
         final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
         final int rowsPerChunk = expectedRows / chunks;
-        
+
         final InjectionManager injectionManager = _configuration.getInjectionManager(job);
         final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager);
 
@@ -89,11 +90,11 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
             final AnalysisJob slaveJob = buildSlaveJob(job, firstRow, maxRows);
 
-            final AnalysisResultFuture slaveResultFuture = _nodeManager.dispatchJob(slaveJob, new DistributedJobContextImpl(job,
-                    i, chunks));
+            final AnalysisResultFuture slaveResultFuture = _nodeManager.dispatchJob(slaveJob,
+                    new DistributedJobContextImpl(job, i, chunks));
             results.add(slaveResultFuture);
         }
-        
+
         final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper);
 
         final DistributedAnalysisResultFuture resultFuture = new DistributedAnalysisResultFuture(results, reducer);
@@ -144,13 +145,26 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     }
 
     private void failIfJobIsUnsupported(AnalysisJob job) throws UnsupportedOperationException {
-        Collection<ExplorerJob> explorerJobs = job.getExplorerJobs();
-        if (explorerJobs != null && !explorerJobs.isEmpty()) {
-            throw new UnsupportedOperationException("Explorer jobs are not distributable.");
-        }
+        failIfComponentsAreUnsupported(job.getExplorerJobs());
+        failIfComponentsAreUnsupported(job.getFilterJobs());
+        failIfComponentsAreUnsupported(job.getTransformerJobs());
+        failIfComponentsAreUnsupported(job.getAnalyzerJobs());
+    }
 
-        // TODO : check distributability of row processing components (needs new
-        // API)
+    private void failIfComponentsAreUnsupported(Collection<? extends ComponentJob> jobs)
+            throws UnsupportedOperationException {
+        for (ComponentJob job : jobs) {
+            final ComponentDescriptor<?> descriptor = job.getDescriptor();
+            if (descriptor instanceof BeanDescriptor) {
+                final BeanDescriptor<?> beanDescriptor = (BeanDescriptor<?>) descriptor;
+                final boolean distributable = beanDescriptor.isDistributable();
+                if (!distributable) {
+                    throw new UnsupportedOperationException("Component is not distributable: " + job);
+                }
+            } else {
+                throw new UnsupportedOperationException("Unsupported component type: " + descriptor);
+            }
+        }
     }
 
 }
