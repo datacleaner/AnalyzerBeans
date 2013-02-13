@@ -19,12 +19,15 @@
  */
 package org.eobjects.analyzer.cluster;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
 
 /**
  * Defines the context information related to the distributed execution of a partial job.
  */
 public interface DistributedJobContext {
+    
+    public AnalyzerBeansConfiguration getMasterConfiguration();
 
     public AnalysisJob getMasterJob();
     

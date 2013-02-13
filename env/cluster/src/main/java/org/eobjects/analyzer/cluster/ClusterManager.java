@@ -44,7 +44,11 @@ public interface ClusterManager {
      * @param job
      * @param context
      * @return
+     * 
+     * @throws Exception
+     *             if dispatching the job failed, typically because of a
+     *             transport error.
      */
-    public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context);
+    public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context) throws Exception;
 
 }

@@ -89,10 +89,18 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             }
 
             final AnalysisJob slaveJob = buildSlaveJob(job, firstRow, maxRows);
+            final DistributedJobContextImpl context = new DistributedJobContextImpl(_configuration, job, i, chunks);
 
-            final AnalysisResultFuture slaveResultFuture = _nodeManager.dispatchJob(slaveJob,
-                    new DistributedJobContextImpl(job, i, chunks));
-            results.add(slaveResultFuture);
+            try {
+                final AnalysisResultFuture slaveResultFuture = _nodeManager.dispatchJob(slaveJob, context);
+                results.add(slaveResultFuture);
+            } catch (Exception e) {
+                // exceptions due to dispatching jobs are added as the first of
+                // the job's errors, and the rest of the execution is aborted.
+                AnalysisResultFuture errorResult = new FailedAnalysisResultFuture(e);
+                results.add(0, errorResult);
+                break;
+            }
         }
 
         final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper);

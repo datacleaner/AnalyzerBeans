@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.cluster;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
 
 /**
@@ -26,14 +27,21 @@ import org.eobjects.analyzer.job.AnalysisJob;
  */
 final class DistributedJobContextImpl implements DistributedJobContext {
 
+    private final AnalyzerBeansConfiguration _masterConfiguration;
     private final AnalysisJob _masterJob;
     private final int _chunkIndex;
     private final int _chunkCount;
 
-    public DistributedJobContextImpl(AnalysisJob masterJob, int chunkIndex, int chunkCount) {
+    public DistributedJobContextImpl(AnalyzerBeansConfiguration masterConfiguration, AnalysisJob masterJob, int chunkIndex, int chunkCount) {
+        _masterConfiguration = masterConfiguration;
         _masterJob = masterJob;
         _chunkIndex = chunkIndex;
         _chunkCount = chunkCount;
+    }
+    
+    @Override
+    public AnalyzerBeansConfiguration getMasterConfiguration() {
+        return _masterConfiguration;
     }
 
     @Override
