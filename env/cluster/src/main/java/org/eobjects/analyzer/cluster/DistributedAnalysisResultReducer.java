@@ -50,7 +50,8 @@ final class DistributedAnalysisResultReducer {
         _lifeCycleHelper = lifeCycleHelper;
     }
 
-    public void reduce(final List<AnalysisResultFuture> results, final Map<ComponentJob, AnalyzerResult> resultMap) {
+    public void reduce(final List<AnalysisResultFuture> results, final Map<ComponentJob, AnalyzerResult> resultMap,
+            List<AnalysisResultReductionException> reductionErrors) {
         Collection<AnalyzerJob> analyzerJobs = _masterJob.getAnalyzerJobs();
         for (AnalyzerJob masterAnalyzerJob : analyzerJobs) {
             final Collection<AnalyzerResult> slaveResults = new ArrayList<AnalyzerResult>();
@@ -60,8 +61,8 @@ final class DistributedAnalysisResultReducer {
                     return;
                 }
                 final Map<ComponentJob, AnalyzerResult> slaveResultMap = result.getResultMap();
-                final List<AnalyzerJob> slaveAnalyzerJobs = CollectionUtils2.filterOnClass(slaveResultMap
-                        .keySet(), AnalyzerJob.class);
+                final List<AnalyzerJob> slaveAnalyzerJobs = CollectionUtils2.filterOnClass(slaveResultMap.keySet(),
+                        AnalyzerJob.class);
                 final AnalyzerJobHelper analyzerJobHelper = new AnalyzerJobHelper(slaveAnalyzerJobs);
                 final AnalyzerJob slaveAnalyzerJob = analyzerJobHelper.getAnalyzerJob(masterAnalyzerJob);
                 if (slaveAnalyzerJob == null) {
@@ -72,29 +73,36 @@ final class DistributedAnalysisResultReducer {
                 final AnalyzerResult analyzerResult = result.getResult(slaveAnalyzerJob);
                 slaveResults.add(analyzerResult);
             }
-            final AnalyzerResult reducedResult = reduce(masterAnalyzerJob, slaveResults);
-            resultMap.put(masterAnalyzerJob, reducedResult);
+            reduce(masterAnalyzerJob, slaveResults, resultMap, reductionErrors);
         }
     }
 
-    private AnalyzerResult reduce(AnalyzerJob analyzerJob, Collection<AnalyzerResult> slaveResults) {
+    @SuppressWarnings("unchecked")
+    private void reduce(AnalyzerJob analyzerJob, Collection<AnalyzerResult> slaveResults,
+            Map<ComponentJob, AnalyzerResult> resultMap, List<AnalysisResultReductionException> reductionErrors) {
         final Class<? extends AnalyzerResultReducer<?>> reducerClass = analyzerJob.getDescriptor()
                 .getResultReducerClass();
 
         final ComponentDescriptor<? extends AnalyzerResultReducer<?>> reducerDescriptor = Descriptors
                 .ofComponent(reducerClass);
+        
+        AnalyzerResultReducer<AnalyzerResult> reducer = null;
+        try {
+            reducer = (AnalyzerResultReducer<AnalyzerResult>) reducerDescriptor
+                    .newInstance();
 
-        @SuppressWarnings("unchecked")
-        final AnalyzerResultReducer<AnalyzerResult> reducer = (AnalyzerResultReducer<AnalyzerResult>) reducerDescriptor
-                .newInstance();
+            _lifeCycleHelper.assignProvidedProperties(reducerDescriptor, reducer);
+            _lifeCycleHelper.initialize(reducerDescriptor, reducer);
 
-        _lifeCycleHelper.assignProvidedProperties(reducerDescriptor, reducer);
-        _lifeCycleHelper.initialize(reducerDescriptor, reducer);
-
-        final AnalyzerResult reducedResult = reducer.reduce(slaveResults);
-
-        _lifeCycleHelper.close(reducerDescriptor, reducer);
-
-        return reducedResult;
+            final AnalyzerResult reducedResult = reducer.reduce(slaveResults);
+            resultMap.put(analyzerJob, reducedResult);
+        } catch (Exception e) {
+            AnalysisResultReductionException reductionError = new AnalysisResultReductionException(analyzerJob, slaveResults, e);
+            reductionErrors.add(reductionError);
+        } finally {
+            if (reducer != null) {
+                _lifeCycleHelper.close(reducerDescriptor, reducer);
+            }
+        }
     }
 }

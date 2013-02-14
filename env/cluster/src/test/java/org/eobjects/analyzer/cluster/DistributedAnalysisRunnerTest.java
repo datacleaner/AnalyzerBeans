@@ -32,6 +32,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
+import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class DistributedAnalysisRunnerTest extends TestCase {
@@ -103,5 +104,37 @@ public class DistributedAnalysisRunnerTest extends TestCase {
             assertEquals("Component is not distributable: "
                     + "ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", e.getMessage());
         }
+    }
+
+    public void testErrorHandlingInReductionPhase() throws Exception {
+        final Datastore datastore = TestHelper.createSampleDatabaseDatastore("orderdb");
+        final AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
+                .replace(new DatastoreCatalogImpl(datastore));
+
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        jobBuilder.setDatastore(datastore);
+        jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNAME");
+
+        // The String Analyzer is (currently) not distributable
+        final AnalyzerJobBuilder<MockAnalyzerWithBadReducer> analyzer = jobBuilder
+                .addAnalyzer(MockAnalyzerWithBadReducer.class);
+        analyzer.addInputColumns(jobBuilder.getSourceColumns());
+
+        AnalysisJob job = jobBuilder.toAnalysisJob();
+
+        DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, new VirtualClusterManager(
+                configuration, 2));
+
+        AnalysisResultFuture result = runner.run(job);
+
+        if (result.isSuccessful()) {
+            fail("Expected result to be errornous. Got result: " + result.getResults());
+        }
+
+        List<Throwable> errors = result.getErrors();
+
+        assertEquals("Failed to reduce results for ImmutableAnalyzerJob[name=null,analyzer=Analyzer with bad reducer]: Damn, I failed during reduction phase", errors.get(0).getMessage());
+
+        assertEquals(1, errors.size());
     }
 }

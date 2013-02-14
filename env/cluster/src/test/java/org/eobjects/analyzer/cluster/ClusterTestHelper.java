@@ -46,6 +46,7 @@ import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
+import org.eobjects.analyzer.job.runner.JobStatus;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.UpdateCallback;
@@ -93,10 +94,11 @@ public class ClusterTestHelper {
         }
         final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider(true);
         descriptorProvider.addFilterBeanDescriptor(Descriptors.ofFilter(MaxRowsFilter.class));
-        descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(TransformerThatWillFail.class));
+        descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(MockTransformerThatWillFail.class));
         descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(ConcatenatorTransformer.class));
         descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(InsertIntoTableAnalyzer.class));
         descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(CompletenessAnalyzer.class));
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(MockAnalyzerWithBadReducer.class));
 
         final AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner)
                 .replace(datastoreCatalog).replace(descriptorProvider);
@@ -105,8 +107,8 @@ public class ClusterTestHelper {
 
     /**
      * Runs a job that verifies that errors (caused by the
-     * {@link TransformerThatWillFail} dummy component) are picked up correctly
-     * from the slave nodes.
+     * {@link MockTransformerThatWillFail} dummy component) are picked up
+     * correctly from the slave nodes.
      * 
      * @param configuration
      * @param virtualClusterManager
@@ -118,8 +120,8 @@ public class ClusterTestHelper {
         jobBuilder.setDatastore("orderdb");
         jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER");
 
-        final TransformerJobBuilder<TransformerThatWillFail> transformer = jobBuilder
-                .addTransformer(TransformerThatWillFail.class);
+        final TransformerJobBuilder<MockTransformerThatWillFail> transformer = jobBuilder
+                .addTransformer(MockTransformerThatWillFail.class);
         transformer.addInputColumns(jobBuilder.getSourceColumns());
 
         final AnalyzerJobBuilder<CompletenessAnalyzer> analyzer = jobBuilder.addAnalyzer(CompletenessAnalyzer.class);
@@ -134,11 +136,21 @@ public class ClusterTestHelper {
         final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
         final AnalysisResultFuture resultFuture = runner.run(job);
 
+        switch (resultFuture.getStatus()) {
+        case NOT_FINISHED:
+        case ERRORNOUS:
+            break;
+        default:
+            Assert.fail("Unexpected job status: " + resultFuture.getStatus());
+        }
+
         resultFuture.await();
 
         if (resultFuture.isSuccessful()) {
             Assert.fail("Job that was supposed to fail was succesful! Results: " + resultFuture.getResultMap());
         }
+
+        Assert.assertEquals(JobStatus.ERRORNOUS, resultFuture.getStatus());
 
         final List<Throwable> errors = resultFuture.getErrors();
 
@@ -201,12 +213,16 @@ public class ClusterTestHelper {
             final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
             final AnalysisResultFuture resultFuture = runner.run(job);
 
+            Assert.assertEquals(JobStatus.NOT_FINISHED, resultFuture.getStatus());
+
             resultFuture.await();
 
             if (resultFuture.isErrornous()) {
                 List<Throwable> errors = resultFuture.getErrors();
                 throw errors.get(0);
             }
+
+            Assert.assertEquals(JobStatus.SUCCESSFUL, resultFuture.getStatus());
 
             // check that the file created has the same amount of records as the
             // CUSTOMER table of orderdb.

@@ -26,8 +26,11 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 
+/**
+ * Dummy transformer that will throw an exception. Used only for testing.
+ */
 @TransformerBean("Example transformer that will fail")
-public class TransformerThatWillFail implements Transformer<String> {
+public class MockTransformerThatWillFail implements Transformer<String> {
 
     @Configured
     InputColumn<?> input;

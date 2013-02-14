@@ -43,6 +43,7 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
     private final DistributedAnalysisResultReducer _reducer;
     private final List<AnalysisResultFuture> _results;
     private final Map<ComponentJob, AnalyzerResult> _resultMap;
+    private final List<AnalysisResultReductionException> _reductionErrors;
     private volatile Date _creationDate;
     private volatile boolean _cancelled;
 
@@ -50,6 +51,7 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
         _results = results;
         _reducer = reducer;
         _resultMap = new HashMap<ComponentJob, AnalyzerResult>();
+        _reductionErrors = new ArrayList<AnalysisResultReductionException>();
         _cancelled = false;
     }
 
@@ -97,8 +99,8 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
         }
         if (_resultMap.isEmpty()) {
             synchronized (this) {
-                if (_resultMap.isEmpty()) {
-                    _reducer.reduce(_results, _resultMap);
+                if (_resultMap.isEmpty() && _reductionErrors.isEmpty()) {
+                    _reducer.reduce(_results, _resultMap, _reductionErrors);
                 }
             }
         }
@@ -123,7 +125,7 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
                 return false;
             }
         }
-        return true;
+        return _reductionErrors.isEmpty();
     }
 
     @Override
@@ -131,19 +133,18 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
         if (isCancelled()) {
             return JobStatus.ERRORNOUS;
         }
-        JobStatus status = JobStatus.SUCCESSFUL;
         for (AnalysisResultFuture result : _results) {
             JobStatus slaveStatus = result.getStatus();
-            switch (slaveStatus) {
-            case ERRORNOUS:
-                return JobStatus.ERRORNOUS;
-            case NOT_FINISHED:
-                status = JobStatus.NOT_FINISHED;
-                break;
+            if (slaveStatus == JobStatus.NOT_FINISHED) {
+                return JobStatus.NOT_FINISHED;
             }
         }
+        
+        if (isSuccessful()) {
+            return JobStatus.SUCCESSFUL;
+        }
 
-        return status;
+        return JobStatus.ERRORNOUS;
     }
 
     @Override
@@ -186,6 +187,7 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
                 errors.addAll(slaveErrors);
             }
         }
+        errors.addAll(_reductionErrors);
         return errors;
     }
 
