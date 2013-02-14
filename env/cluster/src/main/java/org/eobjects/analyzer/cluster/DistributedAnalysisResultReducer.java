@@ -55,7 +55,12 @@ final class DistributedAnalysisResultReducer {
         for (AnalyzerJob masterAnalyzerJob : analyzerJobs) {
             final Collection<AnalyzerResult> slaveResults = new ArrayList<AnalyzerResult>();
             for (AnalysisResultFuture result : results) {
-                final List<AnalyzerJob> slaveAnalyzerJobs = CollectionUtils2.filterOnClass(result.getResultMap()
+                if (result.isErrornous()) {
+                    // error occurred!
+                    return;
+                }
+                final Map<ComponentJob, AnalyzerResult> slaveResultMap = result.getResultMap();
+                final List<AnalyzerJob> slaveAnalyzerJobs = CollectionUtils2.filterOnClass(slaveResultMap
                         .keySet(), AnalyzerJob.class);
                 final AnalyzerJobHelper analyzerJobHelper = new AnalyzerJobHelper(slaveAnalyzerJobs);
                 final AnalyzerJob slaveAnalyzerJob = analyzerJobHelper.getAnalyzerJob(masterAnalyzerJob);

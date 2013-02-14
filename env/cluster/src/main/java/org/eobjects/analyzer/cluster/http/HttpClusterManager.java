@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.cluster.servlet;
+package org.eobjects.analyzer.cluster.http;
 
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -29,6 +29,8 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.eobjects.analyzer.cluster.ClusterManager;
 import org.eobjects.analyzer.cluster.DistributedJobContext;
 import org.eobjects.analyzer.cluster.FixedDivisionsCountJobDivisionManager;
@@ -47,19 +49,32 @@ import org.eobjects.metamodel.util.LazyRef;
  * A cluster manager that uses HTTP servlet transport to communicate between
  * nodes.
  */
-public class ServletClusterManager implements ClusterManager {
+public class HttpClusterManager implements ClusterManager {
 
     private final HttpClient _httpClient;
     private final List<String> _slaveEndpoints;
 
     /**
+     * Creates a new HTTP cluster manager
      * 
-     * @param masterEndpoint
-     *            the endpoint URL of the master servlet
      * @param slaveEndpoints
-     *            the endpoint URLs of the slave servlets
+     *            the endpoint URLs of the slaves
      */
-    public ServletClusterManager(HttpClient httpClient, List<String> slaveEndpoints) {
+    public HttpClusterManager(List<String> slaveEndpoints) {
+        this(new DefaultHttpClient(new PoolingClientConnectionManager()), slaveEndpoints);
+    }
+
+    /**
+     * Create a new HTTP cluster manager
+     * 
+     * @param httpClient
+     *            http client to use for invoking slave endpoints. Must be
+     *            capable of executing multiple requests at the same time (see
+     *            {@link PoolingClientConnectionManager}).
+     * @param slaveEndpoints
+     *            the endpoint URLs of the slaves
+     */
+    public HttpClusterManager(HttpClient httpClient, List<String> slaveEndpoints) {
         _httpClient = httpClient;
         _slaveEndpoints = slaveEndpoints;
     }
@@ -68,7 +83,7 @@ public class ServletClusterManager implements ClusterManager {
     public JobDivisionManager getJobDivisionManager() {
         return new FixedDivisionsCountJobDivisionManager(_slaveEndpoints.size());
     }
-    
+
     @Override
     public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context) throws Exception {
         // determine endpoint url

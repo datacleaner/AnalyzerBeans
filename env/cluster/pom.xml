@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
@@ -15,7 +16,7 @@
 			<artifactId>AnalyzerBeans-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
 		<!-- Servlet+JSP dependencies -->
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
@@ -30,7 +31,7 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
@@ -42,6 +43,20 @@
 			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-writers</artifactId>
 			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.3.168</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Jetty included for servlet testing -->
+		<dependency>
+			<groupId>org.eclipse.jetty.aggregate</groupId>
+			<artifactId>jetty-all</artifactId>
+			<version>7.2.0.v20101020</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
