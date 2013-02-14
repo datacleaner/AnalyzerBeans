@@ -22,11 +22,18 @@ package org.eobjects.analyzer.beans;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import junit.framework.TestCase;
 
 public class CompletenessAnalyzerTest extends TestCase {
+
+    public void testIsDistributable() throws Exception {
+        AnalyzerBeanDescriptor<CompletenessAnalyzer> descriptor = Descriptors.ofAnalyzer(CompletenessAnalyzer.class);
+        assertTrue(descriptor.isDistributable());
+    }
 
     public void testSimpleScenario() throws Exception {
         final RowAnnotationFactory annotationFactory = new InMemoryRowAnnotationFactory();

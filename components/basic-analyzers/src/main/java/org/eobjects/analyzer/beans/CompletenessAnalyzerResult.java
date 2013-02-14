@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans;
 
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
@@ -31,6 +32,7 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
  * {@link AnalyzerResult} class for {@link CompletenessAnalyzer}.
  */
 @Description("Incomplete records")
+@Distributed(reducer=CompletenessAnalyzerResultReducer.class)
 public class CompletenessAnalyzerResult extends AnnotatedRowsResult implements AnalyzerResult {
 
     private static final long serialVersionUID = 1L;
