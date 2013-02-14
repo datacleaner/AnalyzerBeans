@@ -115,7 +115,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     @Inject
     @Configured("Buffer size")
     @Description("How much data to buffer before committing batches of data. Large batches often perform better, but require more memory.")
-    WriteBufferSizeOption bufferSizeOption = WriteBufferSizeOption.LARGE;
+    WriteBufferSizeOption bufferSizeOption = WriteBufferSizeOption.MEDIUM;
 
     @Inject
     @Configured(value = "How to handle insertion errors?")
