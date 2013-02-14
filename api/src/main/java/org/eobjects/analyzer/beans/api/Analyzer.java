@@ -24,11 +24,17 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.HasAnalyzerResult;
 
 /**
- * Super-interface for analyzers. Analyzers should implement one of the two
- * sub-interfaces, ExploringAnalyzer or RowProcessingAnalyzer.
+ * Ananalyzer is a component that recieves rows of data and produces some sort
+ * of result from it.
  * 
- * @see ExploringAnalyzer
- * @see RowProcessingAnalyzer
+ * The run(InputRow, int) method will be invoked on the analyzer for each row in
+ * a configured datastore. To retrieve the values from the row InputColumn
+ * instances must be used as qualifiers. These InputColumns needs to be injected
+ * (either a single instance or an array) using the @Configured annotation. If
+ * no @Configured InputColumns are found in the class, the analyzer will not be
+ * able to execute.
+ * 
+ * @see AnalyzerBean
  * 
  * @author Kasper Sørensen
  * 
@@ -37,21 +43,21 @@ import org.eobjects.analyzer.result.HasAnalyzerResult;
  */
 public interface Analyzer<R extends AnalyzerResult> extends HasAnalyzerResult<R> {
 
-	/**
-	 * Executes the analyzer for a single row.
-	 * 
-	 * @param row
-	 *            the row to analyze
-	 * @param distinctCount
-	 *            the distinct count of the row.
-	 */
-	public void run(InputRow row, int distinctCount);
+    /**
+     * Executes the analyzer for a single row.
+     * 
+     * @param row
+     *            the row to analyze
+     * @param distinctCount
+     *            the distinct count of the row.
+     */
+    public void run(InputRow row, int distinctCount);
 
-	/**
-	 * Gets the result of the analysis that the analyzer has conducted.
-	 * 
-	 * @return an analyzer result object.
-	 */
-	@Override
-	public R getResult();
+    /**
+     * Gets the result of the analysis that the analyzer has conducted.
+     * 
+     * @return an analyzer result object.
+     */
+    @Override
+    public R getResult();
 }
