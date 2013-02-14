@@ -19,31 +19,37 @@
  */
 package org.eobjects.analyzer.job.builder;
 
+import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 
+/**
+ * Exception thrown when a required {@link Configured} property of a component
+ * is not set.
+ */
 public class UnconfiguredConfiguredPropertyException extends IllegalStateException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final AbstractBeanJobBuilder<?, ?, ?> _beanJobBuilder;
-	private final ConfiguredPropertyDescriptor _configuredProperty;
+    private final AbstractBeanJobBuilder<?, ?, ?> _beanJobBuilder;
+    private final ConfiguredPropertyDescriptor _configuredProperty;
 
-	public UnconfiguredConfiguredPropertyException(AbstractBeanJobBuilder<?, ?, ?> beanJobBuilder,
-			ConfiguredPropertyDescriptor configuredProperty) {
-		_beanJobBuilder = beanJobBuilder;
-		_configuredProperty = configuredProperty;
-	}
+    public UnconfiguredConfiguredPropertyException(AbstractBeanJobBuilder<?, ?, ?> beanJobBuilder,
+            ConfiguredPropertyDescriptor configuredProperty) {
+        _beanJobBuilder = beanJobBuilder;
+        _configuredProperty = configuredProperty;
+    }
 
-	public ConfiguredPropertyDescriptor getConfiguredProperty() {
-		return _configuredProperty;
-	}
+    public ConfiguredPropertyDescriptor getConfiguredProperty() {
+        return _configuredProperty;
+    }
 
-	public AbstractBeanJobBuilder<?, ?, ?> getBeanJobBuilder() {
-		return _beanJobBuilder;
-	}
+    public AbstractBeanJobBuilder<?, ?, ?> getBeanJobBuilder() {
+        return _beanJobBuilder;
+    }
 
-	@Override
-	public String getMessage() {
-		return "Property '" + getConfiguredProperty().getName() + "' is not properly configured";
-	}
+    @Override
+    public String getMessage() {
+        return "Property '" + getConfiguredProperty().getName() + "' is not properly configured (" + _beanJobBuilder
+                + ")";
+    }
 }

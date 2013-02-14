@@ -22,6 +22,7 @@ package org.eobjects.analyzer.cluster;
 import java.util.List;
 import java.util.Map;
 
+import org.eobjects.analyzer.beans.CompletenessAnalyzer;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.beans.writers.InsertIntoTableAnalyzer;
@@ -56,6 +57,14 @@ import org.junit.Assert;
 
 public class ClusterTestHelper {
 
+    /**
+     * Creates a {@link AnalyzerBeansConfiguration} object (based on a few
+     * parameters), typically to use in test methods of this class.
+     * 
+     * @param testName
+     * @param multiThreaded
+     * @return
+     */
     public static AnalyzerBeansConfiguration createConfiguration(String testName, boolean multiThreaded) {
         final JdbcDatastore csvDatastore = new JdbcDatastore("csv", "jdbc:h2:mem:" + testName, "org.h2.Driver", "SA",
                 "", true);
@@ -84,14 +93,71 @@ public class ClusterTestHelper {
         }
         final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider(true);
         descriptorProvider.addFilterBeanDescriptor(Descriptors.ofFilter(MaxRowsFilter.class));
+        descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(TransformerThatWillFail.class));
         descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(ConcatenatorTransformer.class));
         descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(InsertIntoTableAnalyzer.class));
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(CompletenessAnalyzer.class));
 
         final AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner)
                 .replace(datastoreCatalog).replace(descriptorProvider);
         return configuration;
     }
 
+    /**
+     * Runs a job that verifies that errors (caused by the
+     * {@link TransformerThatWillFail} dummy component) are picked up correctly
+     * from the slave nodes.
+     * 
+     * @param configuration
+     * @param virtualClusterManager
+     * @return the list of errors returned, to perform further assertions
+     */
+    public static List<Throwable> runErrorHandlingJob(AnalyzerBeansConfiguration configuration,
+            ClusterManager clusterManager) {
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        jobBuilder.setDatastore("orderdb");
+        jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER");
+
+        final TransformerJobBuilder<TransformerThatWillFail> transformer = jobBuilder
+                .addTransformer(TransformerThatWillFail.class);
+        transformer.addInputColumns(jobBuilder.getSourceColumns());
+
+        final AnalyzerJobBuilder<CompletenessAnalyzer> analyzer = jobBuilder.addAnalyzer(CompletenessAnalyzer.class);
+        analyzer.addInputColumns(transformer.getOutputColumns());
+        analyzer.setConfiguredProperty("Conditions",
+                new CompletenessAnalyzer.Condition[] { CompletenessAnalyzer.Condition.NOT_BLANK_OR_NULL });
+
+        // build the job
+        final AnalysisJob job = jobBuilder.toAnalysisJob();
+
+        // run the job in a distributed fashion
+        final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
+        final AnalysisResultFuture resultFuture = runner.run(job);
+
+        resultFuture.await();
+
+        if (resultFuture.isSuccessful()) {
+            Assert.fail("Job that was supposed to fail was succesful! Results: " + resultFuture.getResultMap());
+        }
+
+        final List<Throwable> errors = resultFuture.getErrors();
+
+        Assert.assertNotNull(errors);
+        Assert.assertFalse(errors.isEmpty());
+
+        return errors;
+    }
+
+    /**
+     * Runs a simple job that is fully distributable and should be able to
+     * execute in all contexts. The job does one transformation (concatenates
+     * two fields) and inserts this field, together with a source field, into
+     * another table.
+     * 
+     * @param configuration
+     * @param clusterManager
+     * @throws Throwable
+     */
     public static void runConcatAndInsertJob(AnalyzerBeansConfiguration configuration, ClusterManager clusterManager)
             throws Throwable {
         // build a job that concats names and inserts the concatenated names

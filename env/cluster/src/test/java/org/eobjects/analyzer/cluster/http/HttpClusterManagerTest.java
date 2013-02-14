@@ -35,6 +35,7 @@ public class HttpClusterManagerTest extends TestCase {
     private Server server1;
     private Server server2;
     private Server server3;
+    private HttpClusterManager clusterManager;
 
     @Override
     protected void setUp() throws Exception {
@@ -43,6 +44,13 @@ public class HttpClusterManagerTest extends TestCase {
         server1 = createServer(8882, false);
         server2 = createServer(8883, false);
         server3 = createServer(8884, true);
+        
+        final List<String> slaveEndpoints = new ArrayList<String>();
+        slaveEndpoints.add("http://localhost:8882/slave_endpoint");
+        slaveEndpoints.add("http://localhost:8883/slave_endpoint");
+        slaveEndpoints.add("http://localhost:8884/slave_endpoint");
+        
+        clusterManager = new HttpClusterManager(slaveEndpoints);
     }
 
     @Override
@@ -55,15 +63,23 @@ public class HttpClusterManagerTest extends TestCase {
     }
 
     public void testVanilla() throws Throwable {
-        final List<String> slaveEndpoints = new ArrayList<String>();
-        slaveEndpoints.add("http://localhost:8882/slave_endpoint");
-        slaveEndpoints.add("http://localhost:8883/slave_endpoint");
-        slaveEndpoints.add("http://localhost:8884/slave_endpoint");
-
-        final HttpClusterManager clusterManager = new HttpClusterManager(slaveEndpoints);
-
         final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass().getSimpleName() + "_" + getName(), false);
         ClusterTestHelper.runConcatAndInsertJob(configuration, clusterManager);
+    }
+    
+    public void testErrorHandling() throws Exception {
+        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass().getSimpleName() + "_" + getName(), false);
+        final List<Throwable> errors = ClusterTestHelper.runErrorHandlingJob(configuration, clusterManager);
+        
+        for (Throwable throwable : errors) {
+            String message = throwable.getMessage();
+            if (!"I am just a dummy transformer!".equals(message)
+                    && !"A previous exception has occurred".equals(message)) {
+                fail("Unexpected exception: " + message + " (" + throwable.getClass().getName() + ")");
+            }
+        }
+        
+        assertTrue(errors.size() >= 4);
     }
 
     private Server createServer(int port, boolean multiThreaded) throws Exception {

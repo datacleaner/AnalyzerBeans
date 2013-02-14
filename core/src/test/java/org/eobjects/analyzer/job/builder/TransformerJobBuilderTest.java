@@ -83,7 +83,7 @@ public class TransformerJobBuilderTest extends TestCase {
             tjb.isConfigured(true);
             fail("Exception occurred");
         } catch (UnconfiguredConfiguredPropertyException e) {
-            assertEquals("Property 'Some integer' is not properly configured", e.getMessage());
+            assertEquals("Property 'Some integer' is not properly configured (TransformerJobBuilder[transformer=Transformer mock,inputColumns=[MetaModelInputColumn[fooStr]]])", e.getMessage());
         }
 
         tjb.setConfiguredProperty("Some integer", 10);
