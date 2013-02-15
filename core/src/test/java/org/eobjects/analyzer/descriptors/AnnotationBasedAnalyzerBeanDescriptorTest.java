@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.descriptors;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -26,9 +27,11 @@ import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.mock.AnalyzerMock;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.AnalyzerResultReducer;
 import org.eobjects.analyzer.result.NumberResult;
 
 public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
@@ -45,8 +48,35 @@ public class AnnotationBasedAnalyzerBeanDescriptorTest extends TestCase {
     }
 
     @AnalyzerBean("One more mock")
+    @Distributed(false)
     public static class OneMoreMockAnalyzer extends AnalyzerMock {
 
+    }
+    
+    public static class MockResultReducer implements AnalyzerResultReducer<AnalyzerResult> {
+        @Override
+        public AnalyzerResult reduce(Collection<? extends AnalyzerResult> results) {
+            return results.iterator().next();
+        }
+    }
+    
+    @AnalyzerBean("Third analyzer mock")
+    @Distributed(reducer = MockResultReducer.class)
+    public static class ThirdMockAnalyzer extends AnalyzerMock {
+
+    }
+    
+    public void testIsDistributed() throws Exception {
+        AnalyzerBeanDescriptor<?> desc;
+        
+        desc = Descriptors.ofAnalyzer(AnalyzerMock.class);
+        assertFalse(desc.isDistributable());
+        
+        desc = Descriptors.ofAnalyzer(OneMoreMockAnalyzer.class);
+        assertFalse(desc.isDistributable());
+        
+        desc = Descriptors.ofAnalyzer(ThirdMockAnalyzer.class);
+        assertTrue(desc.isDistributable());
     }
 
     public void testGetConfiguredPropertiesOfType() throws Exception {
