@@ -43,4 +43,22 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 public @interface Close {
+    
+    /**
+     * Determines if the initialize method is to be executed in a distributed
+     * fashion, potentially on multiple nodes in a cluster.
+     * 
+     * By default initialization methods will only initialize internal state of
+     * the component, and is thus fully distributable. But if the initialization
+     * touches outside resources, such as datastores, files or other, then the
+     * initialization is typically NOT distributable, since timing of the
+     * initializations accross the cluster isn't predictable.
+     * 
+     * @return true if this initialization method is distributable. In that case
+     *         it will be invoked on all nodes of a cluster. If the value is
+     *         false, the initialization method will ONLY be invoked on a single
+     *         (master) node and all other nodes will not have this particular
+     *         initialization method invoked.
+     */
+    public boolean distributed() default true;
 }
