@@ -83,8 +83,25 @@ public class LazyRefAnalysisResultFuture implements AnalysisResultFuture {
 
     @Override
     public void await(long timeout, TimeUnit timeUnit) {
-        // TODO: timeout not implemented
-        await();
+        final long offsetMillis = System.currentTimeMillis();
+
+        final long millisToWait = timeUnit.convert(timeout, TimeUnit.MILLISECONDS);
+
+        final long sleepInterval = (millisToWait % 1000 == 0 ? 1000 : 500);
+
+        while (!isDone()) {
+            try {
+                Thread.sleep(sleepInterval);
+            } catch (InterruptedException e) {
+                // do nothing
+            }
+
+            final long currentMillis = System.currentTimeMillis();
+            final long duration = currentMillis - offsetMillis;
+            if (duration >= millisToWait) {
+                return;
+            }
+        }
     }
 
     @Override
@@ -97,7 +114,7 @@ public class LazyRefAnalysisResultFuture implements AnalysisResultFuture {
         if (!_resultRef.isFetched()) {
             return JobStatus.NOT_FINISHED;
         }
-        
+
         if (_errors.isEmpty()) {
             return JobStatus.SUCCESSFUL;
         }
