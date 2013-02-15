@@ -26,12 +26,20 @@ import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 
 final class CloseCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
 
-	@Override
-	public void onEvent(Object analyzerBean, ComponentDescriptor<?> descriptor) {
-		Set<CloseMethodDescriptor> closeMethods = descriptor.getCloseMethods();
-		for (CloseMethodDescriptor closeDescriptor : closeMethods) {
-			closeDescriptor.close(analyzerBean);
-		}
-	}
+    private final boolean _includeNonDistributed;
+
+    public CloseCallback(boolean includeNonDistributed) {
+        _includeNonDistributed = includeNonDistributed;
+    }
+
+    @Override
+    public void onEvent(Object analyzerBean, ComponentDescriptor<?> descriptor) {
+        Set<CloseMethodDescriptor> closeMethods = descriptor.getCloseMethods();
+        for (CloseMethodDescriptor closeDescriptor : closeMethods) {
+            if (_includeNonDistributed || closeDescriptor.isDistributed()) {
+                closeDescriptor.close(analyzerBean);
+            }
+        }
+    }
 
 }

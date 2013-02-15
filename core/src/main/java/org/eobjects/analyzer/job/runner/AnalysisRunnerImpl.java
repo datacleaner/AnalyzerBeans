@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job.runner;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -33,57 +34,72 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
  */
 public final class AnalysisRunnerImpl implements AnalysisRunner {
 
-	private final AnalyzerBeansConfiguration _configuration;
-	private final AnalysisListener[] _sharedAnalysisListeners;
+    private final AnalyzerBeansConfiguration _configuration;
+    private final AnalysisListener[] _sharedAnalysisListeners;
 
-	/**
-	 * Creates an AnalysisRunner based on a configuration, with no listeners
-	 * 
-	 * @param configuration
-	 */
-	public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration) {
-		this(configuration, new AnalysisListener[0]);
-	}
+    /**
+     * Creates an AnalysisRunner based on a configuration, with no listeners
+     * 
+     * @param configuration
+     */
+    public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration) {
+        this(configuration, new AnalysisListener[0]);
+    }
 
-	/**
-	 * Create an AnalysisRunner with a set of listeners, based on a
-	 * configuration
-	 * 
-	 * @param configuration
-	 * @param sharedAnalysisListeners
-	 */
-	public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration, AnalysisListener... sharedAnalysisListeners) {
-		if (configuration == null) {
-			throw new IllegalArgumentException("configuration cannot be null");
-		}
-		_configuration = configuration;
-		_sharedAnalysisListeners = sharedAnalysisListeners;
-	}
+    /**
+     * Create an AnalysisRunner with a set of listeners, based on a
+     * configuration
+     * 
+     * @param configuration
+     * @param sharedAnalysisListeners
+     */
+    public AnalysisRunnerImpl(AnalyzerBeansConfiguration configuration, AnalysisListener... sharedAnalysisListeners) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("configuration cannot be null");
+        }
+        _configuration = configuration;
+        _sharedAnalysisListeners = sharedAnalysisListeners;
+    }
 
-	@Override
-	public AnalysisResultFuture run(final AnalysisJob job) {
-		final Queue<JobAndResult> resultQueue = new LinkedBlockingQueue<JobAndResult>();
+    @Override
+    public AnalysisResultFuture run(final AnalysisJob job) {
+        final Queue<JobAndResult> resultQueue = new LinkedBlockingQueue<JobAndResult>();
 
-		// This analysis listener will keep track of all collected errors
-		final ErrorAwareAnalysisListener errorListener = new ErrorAwareAnalysisListener();
+        // This analysis listener will keep track of all collected errors
+        final ErrorAwareAnalysisListener errorListener = new ErrorAwareAnalysisListener();
 
-		// This analysis listener is a composite for all other listeners
-		final CompositeAnalysisListener analysisListener = new CompositeAnalysisListener(errorListener,
-				_sharedAnalysisListeners);
+        // This analysis listener is a composite for all other listeners
+        final CompositeAnalysisListener analysisListener = new CompositeAnalysisListener(errorListener,
+                _sharedAnalysisListeners);
 
-		if (DebugLoggingAnalysisListener.isEnabled()) {
-			// enable debug logging?
-			analysisListener.addDelegate(new DebugLoggingAnalysisListener());
-		} else if (InfoLoggingAnalysisListener.isEnabled()) {
-			analysisListener.addDelegate(new InfoLoggingAnalysisListener());
-		}
+        if (DebugLoggingAnalysisListener.isEnabled()) {
+            // enable debug logging?
+            analysisListener.addDelegate(new DebugLoggingAnalysisListener());
+        } else if (InfoLoggingAnalysisListener.isEnabled()) {
+            analysisListener.addDelegate(new InfoLoggingAnalysisListener());
+        }
 
-		// set up the task runner that is aware of errors
-		final TaskRunner taskRunner = new ErrorAwareTaskRunnerWrapper(errorListener, _configuration.getTaskRunner());
+        // set up the task runner that is aware of errors
+        final TaskRunner taskRunner = new ErrorAwareTaskRunnerWrapper(errorListener, _configuration.getTaskRunner());
 
-		// the delegate will do all the actual work
-		final AnalysisRunnerJobDelegate delegate = new AnalysisRunnerJobDelegate(job, _configuration, taskRunner,
-				analysisListener, resultQueue, errorListener);
-		return delegate.run();
-	}
+        boolean includedNonDistributed = isNonDistributedTasksIncluded();
+
+        // the delegate will do all the actual work
+        final AnalysisRunnerJobDelegate delegate = new AnalysisRunnerJobDelegate(job, _configuration, taskRunner,
+                analysisListener, resultQueue, errorListener, includedNonDistributed);
+        return delegate.run();
+    }
+
+    /**
+     * Determines whether or not non-distributed methods (such as
+     * {@link Initialize} or {@link Cloneable} methods that are marked with
+     * distributed=false) should be included or not in the work executed. On
+     * single-node executions, this will typically be true, on slave nodes in a
+     * cluster, this will typically be false.
+     * 
+     * @return
+     */
+    protected boolean isNonDistributedTasksIncluded() {
+        return true;
+    }
 }

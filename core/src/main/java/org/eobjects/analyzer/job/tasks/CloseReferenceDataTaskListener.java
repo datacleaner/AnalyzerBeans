@@ -30,28 +30,28 @@ import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
  */
 public final class CloseReferenceDataTaskListener implements TaskListener {
 
-	private final LifeCycleHelper _lifeCycleHelper;
+    private final LifeCycleHelper _lifeCycleHelper;
 
-	public CloseReferenceDataTaskListener(LifeCycleHelper lifeCycleHelper) {
-		_lifeCycleHelper = lifeCycleHelper;
-	}
+    public CloseReferenceDataTaskListener(LifeCycleHelper lifeCycleHelper) {
+        _lifeCycleHelper = lifeCycleHelper;
+    }
 
-	private void cleanup() {
-		_lifeCycleHelper.closeReferenceData();
-	}
+    private void cleanup() {
+        _lifeCycleHelper.closeReferenceData();
+    }
 
-	@Override
-	public void onBegin(Task task) {
-	}
+    @Override
+    public void onBegin(Task task) {
+    }
 
-	@Override
-	public void onComplete(Task task) {
-		cleanup();
-	}
+    @Override
+    public void onComplete(Task task) {
+        cleanup();
+    }
 
-	@Override
-	public void onError(Task task, Throwable throwable) {
-		cleanup();
-	}
+    @Override
+    public void onError(Task task, Throwable throwable) {
+        cleanup();
+    }
 
 }

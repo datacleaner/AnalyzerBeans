@@ -34,10 +34,12 @@ final class InitializeCallback implements LifeCycleCallback<Object, ComponentDes
 	
 	private final boolean _validate;
 	private final boolean _initialize;
+    private final boolean _initializeNonDistributed;
 
-	public InitializeCallback(boolean validate, boolean initialize) {
+	public InitializeCallback(boolean validate, boolean initialize, boolean initializeNonDistributed) {
 		_validate = validate;
 		_initialize = initialize;
+		_initializeNonDistributed = initializeNonDistributed;
 	}
 
 	@Override
@@ -52,7 +54,9 @@ final class InitializeCallback implements LifeCycleCallback<Object, ComponentDes
 		if (_initialize) {
 			Set<InitializeMethodDescriptor> initializeDescriptors = descriptor.getInitializeMethods();
 			for (InitializeMethodDescriptor initializeDescriptor : initializeDescriptors) {
-				initializeDescriptor.initialize(component);
+			    if (_initializeNonDistributed || initializeDescriptor.isDistributed()) {
+			        initializeDescriptor.initialize(component);
+			    }
 			}
 		}
 	}

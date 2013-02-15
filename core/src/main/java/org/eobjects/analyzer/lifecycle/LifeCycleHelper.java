@@ -21,6 +21,10 @@ package org.eobjects.analyzer.lifecycle;
 
 import java.util.Collection;
 
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Provided;
+import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
@@ -35,71 +39,162 @@ import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
  */
 public final class LifeCycleHelper {
 
-	private final InjectionManager _injectionManager;
-	private final ReferenceDataActivationManager _referenceDataActivationManager;
-	
-	public LifeCycleHelper(InjectionManager injectionManager) {
-	    this(injectionManager, null);
-	}
+    private final InjectionManager _injectionManager;
+    private final ReferenceDataActivationManager _referenceDataActivationManager;
+    private boolean _includeNonDistributedTasks;
 
-	public LifeCycleHelper(InjectionManager injectionManager, ReferenceDataActivationManager referenceDataActivationManager) {
-		_injectionManager = injectionManager;
-		_referenceDataActivationManager = referenceDataActivationManager;
-	}
+    /**
+     * @param injectionManager
+     * 
+     * @deprecated use {@link #LifeCycleHelper(InjectionManager, boolean)}
+     *             instead
+     */
+    @Deprecated
+    public LifeCycleHelper(InjectionManager injectionManager) {
+        this(injectionManager, null, true);
+    }
 
-	public void assignConfiguredProperties(ComponentDescriptor<?> descriptor, Object component,
-			BeanConfiguration beanConfiguration) {
-		AssignConfiguredCallback callback = new AssignConfiguredCallback(beanConfiguration, _referenceDataActivationManager);
-		callback.onEvent(component, descriptor);
-	}
+    /**
+     * @param injectionManager
+     * 
+     * @deprecated use
+     *             {@link #LifeCycleHelper(InjectionManager, ReferenceDataActivationManager, boolean)}
+     *             instead
+     */
+    @Deprecated
+    public LifeCycleHelper(InjectionManager injectionManager,
+            ReferenceDataActivationManager referenceDataActivationManager) {
+        this(injectionManager, referenceDataActivationManager, true);
+    }
 
-	public void assignProvidedProperties(ComponentDescriptor<?> descriptor, Object component) {
-		AssignProvidedCallback callback = new AssignProvidedCallback(_injectionManager);
-		callback.onEvent(component, descriptor);
-	}
+    /**
+     * 
+     * @param injectionManager
+     * @param includeNonDistributedTasks
+     *            whether or not non-distributed methods (such as
+     *            {@link Initialize} or {@link Cloneable} methods that are
+     *            marked with distributed=false) should be included or not. On
+     *            single-node executions, this will typically be true, on slave
+     *            nodes in a cluster, this will typically be false.
+     */
+    public LifeCycleHelper(InjectionManager injectionManager, boolean includeNonDistributedTasks) {
+        this(injectionManager, null, includeNonDistributedTasks);
+    }
 
-	public void validate(ComponentDescriptor<?> descriptor, Object component) {
-		InitializeCallback callback = new InitializeCallback(true, false);
-		callback.onEvent(component, descriptor);
-	}
+    /**
+     * 
+     * @param injectionManager
+     * @param referenceDataActivationManager
+     * @param includeNonDistributedTasks whether or not non-distributed methods (such as
+     *            {@link Initialize} or {@link Cloneable} methods that are
+     *            marked with distributed=false) should be included or not. On
+     *            single-node executions, this will typically be true, on slave
+     *            nodes in a cluster, this will typically be false.
+     */
+    public LifeCycleHelper(InjectionManager injectionManager,
+            ReferenceDataActivationManager referenceDataActivationManager, boolean includeNonDistributedTasks) {
+        _injectionManager = injectionManager;
+        _referenceDataActivationManager = referenceDataActivationManager;
+        _includeNonDistributedTasks = includeNonDistributedTasks;
+    }
 
-	public void initialize(ComponentDescriptor<?> descriptor, Object component) {
-		InitializeCallback callback = new InitializeCallback(true, true);
-		callback.onEvent(component, descriptor);
-	}
+    /**
+     * Assigns/injects {@link Configured} property values to a component.
+     * 
+     * @param descriptor
+     * @param component
+     * @param beanConfiguration
+     */
+    public void assignConfiguredProperties(ComponentDescriptor<?> descriptor, Object component,
+            BeanConfiguration beanConfiguration) {
+        AssignConfiguredCallback callback = new AssignConfiguredCallback(beanConfiguration,
+                _referenceDataActivationManager);
+        callback.onEvent(component, descriptor);
+    }
 
-	public void close(ComponentDescriptor<?> descriptor, Object component) {
-		CloseCallback callback = new CloseCallback();
-		callback.onEvent(component, descriptor);
-	}
+    /**
+     * Assigns/injects {@link Provided} property values to a component.
+     * 
+     * @param descriptor
+     * @param component
+     */
+    public void assignProvidedProperties(ComponentDescriptor<?> descriptor, Object component) {
+        AssignProvidedCallback callback = new AssignProvidedCallback(_injectionManager);
+        callback.onEvent(component, descriptor);
+    }
 
-	/**
-	 * Closes all reference data used in this life cycle helper
-	 */
-	public void closeReferenceData() {
-		if (_referenceDataActivationManager == null) {
-			return;
-		}
-		final Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
-		for (Object object : referenceData) {
-			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(object.getClass());
-			close(descriptor, object);
-		}
-	}
+    /**
+     * Validates a component using any {@link Validate} methods. This is
+     * typically done after
+     * {@link #assignProvidedProperties(ComponentDescriptor, Object)} and
+     * {@link #assignConfiguredProperties(ComponentDescriptor, Object, BeanConfiguration)}
+     * 
+     * Usually validation is light-weight, idempotent and quick, as compared to
+     * {@link #initialize(ComponentDescriptor, Object, boolean)}.
+     * 
+     * @param descriptor
+     * @param component
+     */
+    public void validate(ComponentDescriptor<?> descriptor, Object component) {
+        InitializeCallback callback = new InitializeCallback(true, false, _includeNonDistributedTasks);
+        callback.onEvent(component, descriptor);
+    }
 
-	/**
-	 * Initializes all reference data used in this life cycle helper
-	 */
-	public void initializeReferenceData() {
-		if (_referenceDataActivationManager == null) {
-			return;
-		}
-		final Collection<Object> referenceDataCollection = _referenceDataActivationManager.getAllReferenceData();
-		for (Object referenceData : referenceDataCollection) {
-			ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(referenceData.getClass());
+    /**
+     * Initializes a component before use. This is typically done after
+     * {@link #assignProvidedProperties(ComponentDescriptor, Object)} and
+     * {@link #assignConfiguredProperties(ComponentDescriptor, Object, BeanConfiguration)}
+     * .
+     * 
+     * This initialization also includes a validation, see
+     * {@link #validate(ComponentDescriptor, Object)}.
+     * 
+     * @param descriptor
+     * @param component
+     */
+    public void initialize(ComponentDescriptor<?> descriptor, Object component) {
+        InitializeCallback callback = new InitializeCallback(true, true, _includeNonDistributedTasks);
+        callback.onEvent(component, descriptor);
+    }
 
-			assignProvidedProperties(descriptor, referenceData);
-			initialize(descriptor, referenceData);
-		}
-	}
+    /**
+     * Closes a component after use.
+     * 
+     * @param descriptor
+     * @param component
+     */
+    public void close(ComponentDescriptor<?> descriptor, Object component) {
+        CloseCallback callback = new CloseCallback(_includeNonDistributedTasks);
+        callback.onEvent(component, descriptor);
+    }
+
+    /**
+     * Closes all reference data used in this life cycle helper
+     */
+    public void closeReferenceData() {
+        if (_referenceDataActivationManager == null) {
+            return;
+        }
+        final Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
+        for (Object object : referenceData) {
+            ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(object.getClass());
+            close(descriptor, object);
+        }
+    }
+
+    /**
+     * Initializes all reference data used in this life cycle helper
+     */
+    public void initializeReferenceData() {
+        if (_referenceDataActivationManager == null) {
+            return;
+        }
+        final Collection<Object> referenceDataCollection = _referenceDataActivationManager.getAllReferenceData();
+        for (Object referenceData : referenceDataCollection) {
+            ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(referenceData.getClass());
+
+            assignProvidedProperties(descriptor, referenceData);
+            initialize(descriptor, referenceData);
+        }
+    }
 }

@@ -112,7 +112,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
         }
 
         try {
-            LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null);
+            LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null, false);
             lifeCycleHelper.validate(getDescriptor(), getConfigurableBean());
         } catch (RuntimeException e) {
             if (throwException) {

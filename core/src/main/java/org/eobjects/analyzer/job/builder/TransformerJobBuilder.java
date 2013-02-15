@@ -74,7 +74,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
         final TransformerBeanDescriptor<T> descriptor = getDescriptor();
 
         final InjectionManager injectionManager = getAnalysisJobBuilder().getConfiguration().getInjectionManager(null);
-        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, null);
+        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, null, false);
 
         // mimic the configuration of a real transformer bean instance
         final BeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(getConfiguredProperties());

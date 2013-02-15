@@ -29,15 +29,15 @@ import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
  */
 public class InitializeReferenceDataTask implements Task {
 
-	private final LifeCycleHelper _lifeCycleHelper;
+    private final LifeCycleHelper _lifeCycleHelper;
 
-	public InitializeReferenceDataTask(LifeCycleHelper lifeCycleHelper) {
-		_lifeCycleHelper = lifeCycleHelper;
-	}
+    public InitializeReferenceDataTask(LifeCycleHelper lifeCycleHelper) {
+        _lifeCycleHelper = lifeCycleHelper;
+    }
 
-	@Override
-	public void execute() throws Exception {
-		_lifeCycleHelper.initializeReferenceData();
-	}
+    @Override
+    public void execute() throws Exception {
+        _lifeCycleHelper.initializeReferenceData();
+    }
 
 }

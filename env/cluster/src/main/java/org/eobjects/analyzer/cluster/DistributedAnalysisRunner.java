@@ -78,7 +78,6 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         final int rowsPerChunk = expectedRows / chunks;
 
         final InjectionManager injectionManager = _configuration.getInjectionManager(job);
-        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager);
 
         final List<AnalysisResultFuture> results = new ArrayList<AnalysisResultFuture>();
         for (int i = 0; i < chunks; i++) {
@@ -105,6 +104,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             }
         }
 
+        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
         final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper);
 
         // TODO: Close non-distributable components once the results have been
