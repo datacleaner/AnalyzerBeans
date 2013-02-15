@@ -108,8 +108,18 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
 
     @Override
     public void await(long timeout, TimeUnit timeUnit) {
-        // TODO: Timeout not yet implemented
-        await();
+        final long offsetMillis = System.currentTimeMillis();
+        final long millisToWait = timeUnit.convert(timeout, TimeUnit.MILLISECONDS);
+        for (AnalysisResultFuture result : _results) {
+            if (!isDone()) {
+                result.await(timeout, TimeUnit.MILLISECONDS);
+                final long currentMillis = System.currentTimeMillis();
+                final long duration = currentMillis - offsetMillis;
+                if (duration >= millisToWait) {
+                    return;
+                }
+            }
+        }
     }
 
     @Override
