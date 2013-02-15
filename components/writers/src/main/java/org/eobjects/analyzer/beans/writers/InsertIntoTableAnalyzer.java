@@ -138,6 +138,36 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     private AtomicInteger _errorRowCount;
     private CsvDataContext _errorDataContext;
 
+    /**
+     * Truncates the database table if necesary. This is NOT a distributable
+     * initializer, since it can only happen once.
+     */
+    @Initialize(distributed = false)
+    public void truncateIfNecesary() {
+        if (truncateTable) {
+            final UpdateableDatastoreConnection con = datastore.openConnection();
+            try {
+                final SchemaNavigator schemaNavigator = con.getSchemaNavigator();
+
+                final Table table = schemaNavigator.convertToTable(schemaName, tableName);
+
+                final UpdateableDataContext dc = con.getUpdateableDataContext();
+                dc.executeUpdate(new UpdateScript() {
+                    @Override
+                    public void run(UpdateCallback callback) {
+                        final RowDeletionBuilder delete = callback.deleteFrom(table);
+                        if (logger.isInfoEnabled()) {
+                            logger.info("Executing truncating DELETE operation: {}", delete.toSql());
+                        }
+                        delete.execute();
+                    }
+                });
+            } finally {
+                con.close();
+            }
+        }
+    }
+
     @Initialize
     public void init() throws IllegalArgumentException {
         if (logger.isDebugEnabled()) {
@@ -169,22 +199,6 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
 
             if (!columnsNotFound.isEmpty()) {
                 throw new IllegalArgumentException("Could not find column(s): " + columnsNotFound);
-            }
-
-            final Table table = schemaNavigator.convertToTable(schemaName, tableName);
-
-            if (truncateTable) {
-                UpdateableDataContext dc = con.getUpdateableDataContext();
-                dc.executeUpdate(new UpdateScript() {
-                    @Override
-                    public void run(UpdateCallback callback) {
-                        final RowDeletionBuilder delete = callback.deleteFrom(table);
-                        if (logger.isInfoEnabled()) {
-                            logger.info("Executing truncating DELETE operation: {}", delete.toSql());
-                        }
-                        delete.execute();
-                    }
-                });
             }
         } finally {
             con.close();

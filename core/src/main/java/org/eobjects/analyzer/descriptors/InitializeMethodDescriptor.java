@@ -35,28 +35,38 @@ import org.eobjects.analyzer.beans.api.Initialize;
  */
 public interface InitializeMethodDescriptor extends Serializable {
 
-	/**
-	 * Invokes the initialize method
-	 * 
-	 * @param component the component to initialize
-	 */
-	public void initialize(Object component);
+    /**
+     * Determines if this initialize method is distributed or not. 
+     * 
+     * @return
+     * 
+     * @see Initialize#distributed()
+     */
+    public boolean isDistributed();
 
-	/**
-	 * Gets the annotations of the method
-	 * 
-	 * @return the annotations of the method
-	 */
-	public Set<Annotation> getAnnotations();
+    /**
+     * Invokes the initialize method
+     * 
+     * @param component
+     *            the component to initialize
+     */
+    public void initialize(Object component);
 
-	/**
-	 * Gets a particular annotation of the method
-	 * 
-	 * @param <A>
-	 *            the annotation type
-	 * @param annotationClass
-	 *            the annotation class to look for
-	 * @return a matching annotation or null, if none is present
-	 */
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+    /**
+     * Gets the annotations of the method
+     * 
+     * @return the annotations of the method
+     */
+    public Set<Annotation> getAnnotations();
+
+    /**
+     * Gets a particular annotation of the method
+     * 
+     * @param <A>
+     *            the annotation type
+     * @param annotationClass
+     *            the annotation class to look for
+     * @return a matching annotation or null, if none is present
+     */
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 }

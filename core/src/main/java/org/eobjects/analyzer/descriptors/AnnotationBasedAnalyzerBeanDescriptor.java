@@ -22,6 +22,7 @@ package org.eobjects.analyzer.descriptors;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Distributed;
+import org.eobjects.analyzer.beans.api.NoAnalyzerResultReducer;
 import org.eobjects.analyzer.result.AnalyzerResultReducer;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
@@ -61,16 +62,22 @@ final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends
         if (distributedAnalyzer != null) {
             // the analyzer-level annotation always comes first (can override
             // the result-level annotation).
-            final  Class<? extends AnalyzerResultReducer<?>> reducer = distributedAnalyzer.reducer();
-            if (reducer != null) {
+            if (!distributedAnalyzer.value()) {
+                return null;
+            }
+            final Class<? extends AnalyzerResultReducer<?>> reducer = distributedAnalyzer.reducer();
+            if (reducer != null && reducer != NoAnalyzerResultReducer.class) {
                 return reducer;
             }
         }
-        
+
         final Distributed distributedResult = ReflectionUtils.getAnnotation(getResultClass(), Distributed.class);
         if (distributedResult != null) {
-            final   Class<? extends AnalyzerResultReducer<?>> reducer = distributedResult.reducer();
-            if (reducer != null) {
+            if (!distributedResult.value()) {
+                return null;
+            }
+            final Class<? extends AnalyzerResultReducer<?>> reducer = distributedResult.reducer();
+            if (reducer != null && reducer != NoAnalyzerResultReducer.class) {
                 return reducer;
             }
         }

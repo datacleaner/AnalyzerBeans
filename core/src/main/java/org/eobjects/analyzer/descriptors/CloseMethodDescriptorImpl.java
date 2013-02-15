@@ -21,6 +21,8 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Method;
 
+import org.eobjects.analyzer.beans.api.Close;
+
 final class CloseMethodDescriptorImpl extends AbstractMethodDescriptor implements CloseMethodDescriptor {
 
 	private static final long serialVersionUID = 1L;
@@ -28,7 +30,16 @@ final class CloseMethodDescriptorImpl extends AbstractMethodDescriptor implement
 	protected CloseMethodDescriptorImpl(Method method, ComponentDescriptor<?> componentDescriptor) {
 		super(method, componentDescriptor);
 	}
-
+	
+	@Override
+	public boolean isDistributed() {
+	    Close annotation = getAnnotation(Close.class);
+	    if (annotation == null) {
+	        return true;
+	    }
+        return annotation.distributed();
+	}
+	
 	@Override
 	public void close(Object component) throws IllegalStateException {
 		invoke(component);

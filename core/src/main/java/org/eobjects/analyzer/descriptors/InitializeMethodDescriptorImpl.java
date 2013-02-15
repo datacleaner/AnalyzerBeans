@@ -21,15 +21,26 @@ package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Method;
 
+import org.eobjects.analyzer.beans.api.Close;
+
 final class InitializeMethodDescriptorImpl extends AbstractMethodDescriptor implements InitializeMethodDescriptor {
-	
-	private static final long serialVersionUID = 1L;
 
-	protected InitializeMethodDescriptorImpl(Method method, ComponentDescriptor<?> componentDescriptor) {
-		super(method, componentDescriptor);
-	}
+    private static final long serialVersionUID = 1L;
 
-	public void initialize(Object component) throws IllegalStateException {
-		invoke(component);
-	}
+    protected InitializeMethodDescriptorImpl(Method method, ComponentDescriptor<?> componentDescriptor) {
+        super(method, componentDescriptor);
+    }
+
+    @Override
+    public boolean isDistributed() {
+        Close annotation = getAnnotation(Close.class);
+        if (annotation == null) {
+            return true;
+        }
+        return annotation.distributed();
+    }
+
+    public void initialize(Object component) throws IllegalStateException {
+        invoke(component);
+    }
 }

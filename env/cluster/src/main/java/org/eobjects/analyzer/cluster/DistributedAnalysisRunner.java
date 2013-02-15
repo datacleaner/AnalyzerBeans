@@ -69,6 +69,8 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
         failIfJobIsUnsupported(job);
 
+        // TODO: Initialize non-distributable components
+
         final JobDivisionManager jobDivisionManager = _nodeManager.getJobDivisionManager();
 
         final int expectedRows = getExpectedRows(job);
@@ -104,6 +106,9 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         }
 
         final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper);
+
+        // TODO: Close non-distributable components once the results have been
+        // collected
 
         final DistributedAnalysisResultFuture resultFuture = new DistributedAnalysisResultFuture(results, reducer);
         return resultFuture;

@@ -37,28 +37,37 @@ import org.eobjects.analyzer.beans.api.Close;
  */
 public interface CloseMethodDescriptor extends Serializable {
 
-	/**
-	 * Invokes the close method
-	 * 
-	 * @param bean
-	 */
-	public void close(Object bean);
+    /**
+     * Determines if this close method is distributed or not.
+     * 
+     * @return
+     * 
+     * @see Close#distributed()
+     */
+    public boolean isDistributed();
 
-	/**
-	 * Gets the annotations of the method
-	 * 
-	 * @return the annotations of the method
-	 */
-	public Set<Annotation> getAnnotations();
+    /**
+     * Invokes the close method
+     * 
+     * @param bean
+     */
+    public void close(Object bean);
 
-	/**
-	 * Gets a particular annotation of the method
-	 * 
-	 * @param <A>
-	 *            the annotation type
-	 * @param annotationClass
-	 *            the annotation class to look for
-	 * @return a matching annotation or null, if none is present
-	 */
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+    /**
+     * Gets the annotations of the method
+     * 
+     * @return the annotations of the method
+     */
+    public Set<Annotation> getAnnotations();
+
+    /**
+     * Gets a particular annotation of the method
+     * 
+     * @param <A>
+     *            the annotation type
+     * @param annotationClass
+     *            the annotation class to look for
+     * @return a matching annotation or null, if none is present
+     */
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 }
