@@ -32,7 +32,7 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
  * 
  * @author Kasper Sørensen
  */
-public final class AnalysisRunnerImpl implements AnalysisRunner {
+public class AnalysisRunnerImpl implements AnalysisRunner {
 
     private final AnalyzerBeansConfiguration _configuration;
     private final AnalysisListener[] _sharedAnalysisListeners;

@@ -23,10 +23,11 @@ import org.eobjects.analyzer.cluster.ClusterManager;
 import org.eobjects.analyzer.cluster.DistributedJobContext;
 import org.eobjects.analyzer.cluster.FixedDivisionsCountJobDivisionManager;
 import org.eobjects.analyzer.cluster.JobDivisionManager;
+import org.eobjects.analyzer.cluster.SlaveAnalysisRunner;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
-import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
+import org.eobjects.analyzer.job.runner.AnalysisRunner;
 
 /**
  * A cluster manager which spawns virtual nodes, i.e. nodes that are not
@@ -44,7 +45,7 @@ public class VirtualClusterManager implements ClusterManager {
 
     @Override
     public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context) {
-        AnalysisRunnerImpl runner = new AnalysisRunnerImpl(_configuration);
+        AnalysisRunner runner = new SlaveAnalysisRunner(_configuration);
         return runner.run(job);
     }
 

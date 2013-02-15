@@ -58,7 +58,7 @@ import org.eobjects.metamodel.schema.Column;
 
 public class RowProcessingQueryOptimizerTest extends TestCase {
 
-	private final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null);
+	private final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null, true);
 
 	private Datastore datastore;
 	private AnalyzerBeansConfiguration conf;

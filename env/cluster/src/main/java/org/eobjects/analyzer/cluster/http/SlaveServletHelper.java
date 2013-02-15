@@ -29,12 +29,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.eobjects.analyzer.cluster.SlaveAnalysisRunner;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
-import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.SimpleAnalysisResult;
 import org.eobjects.metamodel.util.FileHelper;
 
@@ -63,7 +63,7 @@ public class SlaveServletHelper {
             FileHelper.safeClose(inputStream);
         }
 
-        final AnalysisRunner runner = new AnalysisRunnerImpl(_configuration);
+        final AnalysisRunner runner = new SlaveAnalysisRunner(_configuration);
         final AnalysisResultFuture resultFuture = runner.run(job);
         
         resultFuture.await();

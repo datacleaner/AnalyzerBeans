@@ -122,7 +122,7 @@ public class RowProcessingMetricsImplTest extends TestCase {
         AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
         TaskRunner taskRunner = configuration.getTaskRunner();
 
-        LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(configuration.getInjectionManager(job), null);
+        LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(configuration.getInjectionManager(job), null, true);
         SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
         sourceColumnFinder.addSources(job);
 

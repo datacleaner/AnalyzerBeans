@@ -324,7 +324,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         String[] dictionaryNames = referenceDataCatalog.getDictionaryNames();
         assertEquals("[custom_dict, datastore_dict, textfile_dict, valuelist_dict]", Arrays.toString(dictionaryNames));
 
-        LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf.getInjectionManager(null), null);
+        LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(conf.getInjectionManager(null), null, true);
 
         Dictionary d = referenceDataCatalog.getDictionary("datastore_dict");
         assertEquals("dict_ds", d.getDescription());
