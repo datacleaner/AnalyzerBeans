@@ -21,7 +21,11 @@ package org.eobjects.analyzer.cluster;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter.Category;
@@ -29,6 +33,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
+import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
@@ -42,6 +47,8 @@ import org.eobjects.analyzer.job.runner.RowProcessingPublishers;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.eobjects.metamodel.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link AnalysisRunner} which executes {@link AnalysisJob}s accross a
@@ -49,12 +56,31 @@ import org.eobjects.metamodel.schema.Table;
  */
 public final class DistributedAnalysisRunner implements AnalysisRunner {
 
+    private static final Logger logger = LoggerFactory.getLogger(DistributedAnalysisRunner.class);
+
     private final ClusterManager _nodeManager;
     private final AnalyzerBeansConfiguration _configuration;
 
     public DistributedAnalysisRunner(AnalyzerBeansConfiguration configuration, ClusterManager nodeManager) {
         _configuration = configuration;
         _nodeManager = nodeManager;
+    }
+
+    /**
+     * Determines if an {@link AnalysisJob} is distributable or not. If this
+     * method returns false, calling {@link #run(AnalysisJob)} with the job will
+     * typically throw a {@link UnsupportedOperationException}.
+     * 
+     * @param job
+     * @return
+     */
+    public boolean isDistributable(final AnalysisJob job) {
+        try {
+            failIfJobIsUnsupported(job);
+            return true;
+        } catch (Throwable e) {
+            return false;
+        }
     }
 
     /**
@@ -69,8 +95,6 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
         failIfJobIsUnsupported(job);
 
-        // TODO: Initialize non-distributable components
-
         final JobDivisionManager jobDivisionManager = _nodeManager.getJobDivisionManager();
 
         final int expectedRows = getExpectedRows(job);
@@ -78,7 +102,21 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         final int rowsPerChunk = expectedRows / chunks;
 
         final InjectionManager injectionManager = _configuration.getInjectionManager(job);
+        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
 
+        final Map<Object, ComponentDescriptor<?>> nonDistributableComponents = initializeNonDistributableComponents(
+                job, lifeCycleHelper);
+
+        final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk);
+
+        final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper,
+                nonDistributableComponents);
+
+        final DistributedAnalysisResultFuture resultFuture = new DistributedAnalysisResultFuture(results, reducer);
+        return resultFuture;
+    }
+
+    public List<AnalysisResultFuture> dispatchJobs(final AnalysisJob job, final int chunks, final int rowsPerChunk) {
         final List<AnalysisResultFuture> results = new ArrayList<AnalysisResultFuture>();
         for (int i = 0; i < chunks; i++) {
             final int firstRow = (i * rowsPerChunk) + 1;
@@ -103,15 +141,47 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
                 break;
             }
         }
+        return results;
+    }
 
-        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
-        final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper);
+    private Map<Object, ComponentDescriptor<?>> initializeNonDistributableComponents(AnalysisJob job,
+            LifeCycleHelper lifeCycleHelper) {
+        final Map<Object, ComponentDescriptor<?>> map = new IdentityHashMap<Object, ComponentDescriptor<?>>();
+        collectNonDistributableComponents(job.getExplorerJobs(), lifeCycleHelper, map);
+        collectNonDistributableComponents(job.getFilterJobs(), lifeCycleHelper, map);
+        collectNonDistributableComponents(job.getTransformerJobs(), lifeCycleHelper, map);
+        collectNonDistributableComponents(job.getAnalyzerJobs(), lifeCycleHelper, map);
 
-        // TODO: Close non-distributable components once the results have been
-        // collected
+        final Set<Entry<Object, ComponentDescriptor<?>>> entries = map.entrySet();
+        for (Entry<Object, ComponentDescriptor<?>> entry : entries) {
+            final Object component = entry.getKey();
+            final ComponentDescriptor<?> descriptor = entry.getValue();
 
-        final DistributedAnalysisResultFuture resultFuture = new DistributedAnalysisResultFuture(results, reducer);
-        return resultFuture;
+            lifeCycleHelper.initialize(descriptor, component);
+        }
+
+        return map;
+    }
+
+    private void collectNonDistributableComponents(Collection<? extends ComponentJob> jobs,
+            LifeCycleHelper lifeCycleHelper, Map<Object, ComponentDescriptor<?>> map) {
+        for (ComponentJob job : jobs) {
+            final ComponentDescriptor<?> descriptor = job.getDescriptor();
+            final Set<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
+            for (InitializeMethodDescriptor initializeMethodDescriptor : initializeMethods) {
+                if (!initializeMethodDescriptor.isDistributed()) {
+                    // component needs to be initialized at master node
+                    logger.info(
+                            "Initializer of component '{}' is not distributable, performing initialization at master node",
+                            descriptor.getDisplayName());
+
+                    final Object instance = descriptor.newInstance();
+                    map.put(instance, descriptor);
+
+                    break;
+                }
+            }
+        }
     }
 
     /**

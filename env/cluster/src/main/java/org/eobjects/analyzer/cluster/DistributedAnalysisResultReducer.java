@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
@@ -44,14 +46,37 @@ final class DistributedAnalysisResultReducer {
 
     private final AnalysisJob _masterJob;
     private final LifeCycleHelper _lifeCycleHelper;
+    private final Map<Object, ComponentDescriptor<?>> _nonDistributableComponents;
 
-    public DistributedAnalysisResultReducer(AnalysisJob masterJob, LifeCycleHelper lifeCycleHelper) {
+    public DistributedAnalysisResultReducer(AnalysisJob masterJob, LifeCycleHelper lifeCycleHelper,
+            Map<Object, ComponentDescriptor<?>> nonDistributableComponents) {
         _masterJob = masterJob;
         _lifeCycleHelper = lifeCycleHelper;
+        _nonDistributableComponents = nonDistributableComponents;
     }
 
     public void reduce(final List<AnalysisResultFuture> results, final Map<ComponentJob, AnalyzerResult> resultMap,
-            List<AnalysisResultReductionException> reductionErrors) {
+            final List<AnalysisResultReductionException> reductionErrors) {
+        try {
+            reduceResults(results, resultMap, reductionErrors);
+        } finally {
+            closeNonDistributableComponents();
+        }
+    }
+
+    private void closeNonDistributableComponents() {
+        final Set<Entry<Object, ComponentDescriptor<?>>> entries = _nonDistributableComponents.entrySet();
+        for (Entry<Object, ComponentDescriptor<?>> entry : entries) {
+            Object component = entry.getKey();
+            ComponentDescriptor<?> descriptor = entry.getValue();
+
+            _lifeCycleHelper.close(descriptor, component);
+        }
+    }
+
+    private void reduceResults(final List<AnalysisResultFuture> results,
+            final Map<ComponentJob, AnalyzerResult> resultMap,
+            final List<AnalysisResultReductionException> reductionErrors) {
         Collection<AnalyzerJob> analyzerJobs = _masterJob.getAnalyzerJobs();
         for (AnalyzerJob masterAnalyzerJob : analyzerJobs) {
             final Collection<AnalyzerResult> slaveResults = new ArrayList<AnalyzerResult>();
@@ -85,11 +110,10 @@ final class DistributedAnalysisResultReducer {
 
         final ComponentDescriptor<? extends AnalyzerResultReducer<?>> reducerDescriptor = Descriptors
                 .ofComponent(reducerClass);
-        
+
         AnalyzerResultReducer<AnalyzerResult> reducer = null;
         try {
-            reducer = (AnalyzerResultReducer<AnalyzerResult>) reducerDescriptor
-                    .newInstance();
+            reducer = (AnalyzerResultReducer<AnalyzerResult>) reducerDescriptor.newInstance();
 
             _lifeCycleHelper.assignProvidedProperties(reducerDescriptor, reducer);
             _lifeCycleHelper.initialize(reducerDescriptor, reducer);
@@ -97,7 +121,8 @@ final class DistributedAnalysisResultReducer {
             final AnalyzerResult reducedResult = reducer.reduce(slaveResults);
             resultMap.put(analyzerJob, reducedResult);
         } catch (Exception e) {
-            AnalysisResultReductionException reductionError = new AnalysisResultReductionException(analyzerJob, slaveResults, e);
+            AnalysisResultReductionException reductionError = new AnalysisResultReductionException(analyzerJob,
+                    slaveResults, e);
             reductionErrors.add(reductionError);
         } finally {
             if (reducer != null) {
