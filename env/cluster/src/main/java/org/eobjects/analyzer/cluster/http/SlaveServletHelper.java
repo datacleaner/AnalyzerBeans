@@ -37,12 +37,16 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.result.SimpleAnalysisResult;
 import org.eobjects.metamodel.util.FileHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper method for handling servlet requests and responses according to the
  * requests sent by the master node if it is using a {@link HttpClusterManager}.
  */
 public class SlaveServletHelper {
+
+    private static final Logger logger = LoggerFactory.getLogger(SlaveServletHelper.class);
 
     private final AnalyzerBeansConfiguration _configuration;
 
@@ -53,19 +57,50 @@ public class SlaveServletHelper {
         _configuration = configuration;
     }
 
-    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        final JaxbJobReader reader = new JaxbJobReader(_configuration);
-        final ServletInputStream inputStream = request.getInputStream();
-        final AnalysisJob job;
+    /**
+     * Completely handles a HTTP request and response. This method is
+     * functionally equivalent of calling these methods in sequence:
+     * 
+     * {@link #readJob(HttpServletRequest)}
+     * 
+     * {@link #runJob(AnalysisJob)}
+     * 
+     * {@link #serializeResult(AnalysisResultFuture)}
+     * 
+     * {@link #sendResponse(HttpServletResponse, Serializable)}
+     * 
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    public void handleRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        AnalysisJob job;
         try {
-            job = reader.read(inputStream);
-        } finally {
-            FileHelper.safeClose(inputStream);
+            job = readJob(request);
+        } catch (IOException e) {
+            logger.error("Failed to read job definition from HTTP request", e);
+            throw e;
         }
 
-        final AnalysisRunner runner = new SlaveAnalysisRunner(_configuration);
-        final AnalysisResultFuture resultFuture = runner.run(job);
-        
+        final Serializable resultObject;
+        try {
+            final AnalysisResultFuture resultFuture = runJob(job);
+            resultObject = serializeResult(resultFuture);
+        } catch (RuntimeException e) {
+            logger.error("Unexpected error occurred while running slave job", e);
+            throw e;
+        }
+
+        try {
+            sendResponse(response, resultObject);
+        } catch (IOException e) {
+            logger.error("Failed to send job result through HTTP response", e);
+            throw e;
+        }
+    }
+
+    public Serializable serializeResult(AnalysisResultFuture resultFuture) {
+        // wait for result to be ready
         resultFuture.await();
 
         final Serializable resultObject;
@@ -74,10 +109,27 @@ public class SlaveServletHelper {
         } else {
             resultObject = new ArrayList<Throwable>(resultFuture.getErrors());
         }
-        sendResponse(response, resultObject);
+        return resultObject;
     }
 
-    private void sendResponse(HttpServletResponse response, Serializable object) throws IOException {
+    public AnalysisJob readJob(HttpServletRequest request) throws IOException {
+        final JaxbJobReader reader = new JaxbJobReader(_configuration);
+        final ServletInputStream inputStream = request.getInputStream();
+        try {
+            final AnalysisJob job = reader.read(inputStream);
+            return job;
+        } finally {
+            FileHelper.safeClose(inputStream);
+        }
+    }
+
+    public AnalysisResultFuture runJob(AnalysisJob job) {
+        final AnalysisRunner runner = new SlaveAnalysisRunner(_configuration);
+        final AnalysisResultFuture resultFuture = runner.run(job);
+        return resultFuture;
+    }
+
+    public void sendResponse(HttpServletResponse response, Serializable object) throws IOException {
         ServletOutputStream outputStream = response.getOutputStream();
         try {
             SerializationUtils.serialize(object, outputStream);
