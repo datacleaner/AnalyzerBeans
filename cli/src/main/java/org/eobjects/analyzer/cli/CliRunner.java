@@ -113,6 +113,9 @@ public final class CliRunner implements Closeable {
                             OutputStream out = outputFile.getContent().getOutputStream();
                             return new OutputStreamWriter(out, FileHelper.DEFAULT_ENCODING);
                         } catch (Exception e) {
+                            if (e instanceof RuntimeException) {
+                                throw (RuntimeException) e;
+                            }
                             throw new IllegalStateException(e);
                         }
                     }
