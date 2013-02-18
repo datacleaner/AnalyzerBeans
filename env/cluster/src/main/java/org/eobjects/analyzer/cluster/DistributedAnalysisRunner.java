@@ -58,12 +58,12 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DistributedAnalysisRunner.class);
 
-    private final ClusterManager _nodeManager;
+    private final ClusterManager _clusterManager;
     private final AnalyzerBeansConfiguration _configuration;
 
-    public DistributedAnalysisRunner(AnalyzerBeansConfiguration configuration, ClusterManager nodeManager) {
+    public DistributedAnalysisRunner(AnalyzerBeansConfiguration configuration, ClusterManager clusterManager) {
         _configuration = configuration;
-        _nodeManager = nodeManager;
+        _clusterManager = clusterManager;
     }
 
     /**
@@ -95,7 +95,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
         failIfJobIsUnsupported(job);
 
-        final JobDivisionManager jobDivisionManager = _nodeManager.getJobDivisionManager();
+        final JobDivisionManager jobDivisionManager = _clusterManager.getJobDivisionManager();
 
         final int expectedRows = getExpectedRows(job);
         final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
@@ -131,7 +131,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             final DistributedJobContextImpl context = new DistributedJobContextImpl(_configuration, job, i, chunks);
 
             try {
-                final AnalysisResultFuture slaveResultFuture = _nodeManager.dispatchJob(slaveJob, context);
+                final AnalysisResultFuture slaveResultFuture = _clusterManager.dispatchJob(slaveJob, context);
                 results.add(slaveResultFuture);
             } catch (Exception e) {
                 // exceptions due to dispatching jobs are added as the first of
