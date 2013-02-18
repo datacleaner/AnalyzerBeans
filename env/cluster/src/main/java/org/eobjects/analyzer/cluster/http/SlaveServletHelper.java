@@ -30,9 +30,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.eobjects.analyzer.cluster.SlaveAnalysisRunner;
+import org.eobjects.analyzer.cluster.SlaveJobInterceptor;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
+import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.result.SimpleAnalysisResult;
@@ -49,12 +51,18 @@ public class SlaveServletHelper {
     private static final Logger logger = LoggerFactory.getLogger(SlaveServletHelper.class);
 
     private final AnalyzerBeansConfiguration _configuration;
-
+    private final SlaveJobInterceptor _jobInterceptor;
+    
     public SlaveServletHelper(AnalyzerBeansConfiguration configuration) {
+        this(configuration, null);
+    }
+
+    public SlaveServletHelper(AnalyzerBeansConfiguration configuration, SlaveJobInterceptor jobInterceptor) {
         if (configuration == null) {
             throw new IllegalArgumentException("AnalyzerBeansConfiguration cannot be null");
         }
         _configuration = configuration;
+        _jobInterceptor = jobInterceptor;
     }
 
     /**
@@ -116,7 +124,11 @@ public class SlaveServletHelper {
         final JaxbJobReader reader = new JaxbJobReader(_configuration);
         final ServletInputStream inputStream = request.getInputStream();
         try {
-            final AnalysisJob job = reader.read(inputStream);
+            final AnalysisJobBuilder jobBuilder = reader.create(inputStream);
+            if (_jobInterceptor != null) {
+                _jobInterceptor.intercept(jobBuilder, _configuration);
+            }
+            final AnalysisJob job = jobBuilder.toAnalysisJob();
             return job;
         } finally {
             FileHelper.safeClose(inputStream);
