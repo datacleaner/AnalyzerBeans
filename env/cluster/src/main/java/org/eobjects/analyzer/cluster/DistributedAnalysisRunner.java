@@ -35,7 +35,9 @@ import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -47,6 +49,7 @@ import org.eobjects.analyzer.job.runner.CompositeAnalysisListener;
 import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 import org.eobjects.analyzer.job.runner.RowProcessingPublishers;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
+import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.SharedExecutorService;
@@ -109,13 +112,18 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
         final RowProcessingPublishers publishers = getRowProcessingPublishers(job);
         final AnalysisJobMetrics analysisJobMetrics = publishers.buildAnalysisJobMetrics();
-        _analysisListener.jobBegin(job, analysisJobMetrics);
-
+        
+        final RowProcessingMetrics rowProcessingMetrics;
         final DistributedAnalysisResultFuture resultFuture;
+
+        _analysisListener.jobBegin(job, analysisJobMetrics);
         try {
-            final int expectedRows = getExpectedRows(publishers, analysisJobMetrics);
+            rowProcessingMetrics = getRowProcessingMetrics(publishers, analysisJobMetrics);
+            final int expectedRows = rowProcessingMetrics.getExpectedRows();
             final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
             final int rowsPerChunk = expectedRows / chunks;
+
+            _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
 
             final InjectionManager injectionManager = _configuration.getInjectionManager(job);
             final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
@@ -135,19 +143,47 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         }
 
         if (!_analysisListener.isEmpty()) {
-            // eager await the outcome of the execution (in another thread)
-            SharedExecutorService.get().execute(new Runnable() {
-                @Override
-                public void run() {
-                    resultFuture.await();
-                    if (resultFuture.isSuccessful()) {
-                        _analysisListener.jobSuccess(job, analysisJobMetrics);
-                    }
-                }
-            });
+            awaitAndInformListener(job, analysisJobMetrics, rowProcessingMetrics, resultFuture);
         }
 
         return resultFuture;
+    }
+
+    /**
+     * Spawns a new thread for awaiting the result future and informs the
+     * {@link AnalysisListener} of the outcome.
+     * 
+     * @param job
+     * @param analysisJobMetrics
+     * @param resultFuture
+     */
+    private void awaitAndInformListener(final AnalysisJob job, final AnalysisJobMetrics analysisJobMetrics,
+            final RowProcessingMetrics rowProcessingMetrics, final AnalysisResultFuture resultFuture) {
+        SharedExecutorService.get().execute(new Runnable() {
+            @Override
+            public void run() {
+                resultFuture.await();
+                if (resultFuture.isSuccessful()) {
+                    _analysisListener.rowProcessingSuccess(job, rowProcessingMetrics);
+                    Set<Entry<ComponentJob, AnalyzerResult>> resultEntries = resultFuture.getResultMap().entrySet();
+                    for (Entry<ComponentJob, AnalyzerResult> entry : resultEntries) {
+                        final ComponentJob componentJob = entry.getKey();
+                        final AnalyzerResult analyzerResult = entry.getValue();
+                        if (componentJob instanceof AnalyzerJob) {
+                            AnalyzerJob analyzerJob = (AnalyzerJob) componentJob;
+                            _analysisListener.analyzerSuccess(job, analyzerJob, analyzerResult);
+                        } else if (componentJob instanceof ExplorerJob) {
+                            ExplorerJob explorerJob = (ExplorerJob) componentJob;
+                            _analysisListener.explorerSuccess(job, explorerJob, analyzerResult);
+                        } else {
+                            logger.warn("Unexpected component job with a result: " + componentJob
+                                    + ". Success state will not be notified in AnalysisListener.");
+                        }
+                    }
+                    _analysisListener.jobSuccess(job, analysisJobMetrics);
+                }
+            }
+        });
     }
 
     public List<AnalysisResultFuture> dispatchJobs(final AnalysisJob job, final int chunks, final int rowsPerChunk) {
@@ -251,8 +287,8 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         return publishers;
     }
 
-    private int getExpectedRows(RowProcessingPublishers publishers, AnalysisJobMetrics analysisJobMetrics)
-            throws UnsupportedOperationException {
+    private RowProcessingMetrics getRowProcessingMetrics(RowProcessingPublishers publishers,
+            AnalysisJobMetrics analysisJobMetrics) throws UnsupportedOperationException {
         final Table[] tables = publishers.getTables();
 
         if (tables.length != 1) {
@@ -262,8 +298,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         final Table table = tables[0];
 
         final RowProcessingMetrics rowProcessingMetrics = analysisJobMetrics.getRowProcessingMetrics(table);
-        final int expectedRows = rowProcessingMetrics.getExpectedRows();
-        return expectedRows;
+        return rowProcessingMetrics;
     }
 
     private void failIfJobIsUnsupported(AnalysisJob job) throws UnsupportedOperationException {
