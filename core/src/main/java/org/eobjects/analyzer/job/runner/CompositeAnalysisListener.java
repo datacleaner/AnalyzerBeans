@@ -31,7 +31,8 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
- * {@link AnalysisListener} that wraps a list of inner listeners. Makes life easier for the invokers of the listeners.
+ * {@link AnalysisListener} that wraps a list of inner listeners. Makes life
+ * easier for the invokers of the listeners.
  */
 public final class CompositeAnalysisListener implements AnalysisListener {
 
@@ -52,8 +53,32 @@ public final class CompositeAnalysisListener implements AnalysisListener {
         }
     }
 
+    /**
+     * Adds a delegate to this {@link CompositeAnalysisListener}.
+     * 
+     * @param analysisListener
+     */
     public void addDelegate(AnalysisListener analysisListener) {
         _delegates.add(analysisListener);
+    }
+
+    /**
+     * Determines if this {@link CompositeAnalysisListener} is empty (i.e. has
+     * no delegates)
+     * 
+     * @return
+     */
+    public boolean isEmpty() {
+        return _delegates.isEmpty();
+    }
+
+    /**
+     * Gets the number of delegates
+     * 
+     * @return
+     */
+    public int size() {
+        return _delegates.size();
     }
 
     @Override
