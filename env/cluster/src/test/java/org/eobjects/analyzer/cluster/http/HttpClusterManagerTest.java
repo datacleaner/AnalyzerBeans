@@ -62,7 +62,7 @@ public class HttpClusterManagerTest extends TestCase {
         server3.stop();
     }
 
-    public void testVanilla() throws Throwable {
+    public void testConcatAndInsert() throws Throwable {
         final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass().getSimpleName() + "_" + getName(), false);
         ClusterTestHelper.runConcatAndInsertJob(configuration, clusterManager);
     }
@@ -80,6 +80,11 @@ public class HttpClusterManagerTest extends TestCase {
         }
         
         assertTrue(errors.size() >= 4);
+    }
+    
+    public void testCompletenessAnalyzer() throws Throwable {
+    	 final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass().getSimpleName() + "_" + getName(), false);
+         ClusterTestHelper.runCompletenessAnalyzerJob(configuration, clusterManager);
     }
 
     private Server createServer(int port, boolean multiThreaded) throws Exception {

@@ -105,6 +105,14 @@ final class DistributedAnalysisResultReducer {
     @SuppressWarnings("unchecked")
     private void reduce(AnalyzerJob analyzerJob, Collection<AnalyzerResult> slaveResults,
             Map<ComponentJob, AnalyzerResult> resultMap, List<AnalysisResultReductionException> reductionErrors) {
+    	
+    	if (slaveResults.size() == 1) {
+    		// special case where these was only 1 slave job
+    		final AnalyzerResult firstResult = slaveResults.iterator().next();
+			resultMap.put(analyzerJob, firstResult);
+    		return;
+    	}
+    	
         final Class<? extends AnalyzerResultReducer<?>> reducerClass = analyzerJob.getDescriptor()
                 .getResultReducerClass();
 

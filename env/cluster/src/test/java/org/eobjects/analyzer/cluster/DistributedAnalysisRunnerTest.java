@@ -48,6 +48,12 @@ public class DistributedAnalysisRunnerTest extends TestCase {
 
         ClusterTestHelper.runConcatAndInsertJob(configuration, new VirtualClusterManager(configuration, 4));
     }
+    
+    public void testRunCompletenessAnalyzer() throws Throwable {
+    	final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), true);
+
+        ClusterTestHelper.runCompletenessAnalyzerJob(configuration, new VirtualClusterManager(configuration, 3));
+	}
 
     public void testErrorHandlingSingleSlave() throws Exception {
         final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), false);
@@ -103,6 +109,8 @@ public class DistributedAnalysisRunnerTest extends TestCase {
         } catch (UnsupportedOperationException e) {
             assertEquals("Component is not distributable: "
                     + "ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", e.getMessage());
+        } finally {
+        	jobBuilder.close();
         }
     }
 
@@ -121,6 +129,7 @@ public class DistributedAnalysisRunnerTest extends TestCase {
         analyzer.addInputColumns(jobBuilder.getSourceColumns());
 
         AnalysisJob job = jobBuilder.toAnalysisJob();
+        jobBuilder.close();
 
         DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, new VirtualClusterManager(
                 configuration, 2));

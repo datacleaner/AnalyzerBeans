@@ -78,6 +78,7 @@ public class SimpleMainAppForManualTesting {
                 CompletenessAnalyzer.Condition.NOT_BLANK_OR_NULL, CompletenessAnalyzer.Condition.NOT_BLANK_OR_NULL });
 
         AnalysisJob job = jobBuilder.toAnalysisJob();
+        jobBuilder.close();
 
         AnalysisResultFuture result = new DistributedAnalysisRunner(configuration, clusterManager).run(job);
         

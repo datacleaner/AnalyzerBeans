@@ -140,6 +140,7 @@ public class HttpClusterManager implements ClusterManager {
     protected AnalysisResult readResult(InputStream inputStream, List<Throwable> errors) throws Exception {
         final ChangeAwareObjectInputStream changeAwareObjectInputStream = new ChangeAwareObjectInputStream(inputStream);
         final Object object = changeAwareObjectInputStream.readObject();
+        changeAwareObjectInputStream.close();
         if (object instanceof AnalysisResult) {
             // response carries a result
             return (AnalysisResult) object;

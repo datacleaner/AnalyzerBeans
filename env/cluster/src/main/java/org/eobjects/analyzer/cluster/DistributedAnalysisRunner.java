@@ -266,16 +266,20 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
      */
     private AnalysisJob buildSlaveJob(AnalysisJob job, int firstRow, int maxRows) {
         final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job);
-        final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
-        maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
-        maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
-
-        jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
-
-        // in assertion/test mode do an early validation
-        assert jobBuilder.isConfigured(true);
-
-        return jobBuilder.toAnalysisJob();
+        try {
+        	final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
+        	maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
+        	maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
+        	
+        	jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
+        	
+        	// in assertion/test mode do an early validation
+        	assert jobBuilder.isConfigured(true);
+        	
+        	return jobBuilder.toAnalysisJob();
+        } finally {
+        	jobBuilder.close();
+        }
     }
 
     private RowProcessingPublishers getRowProcessingPublishers(AnalysisJob job) {
