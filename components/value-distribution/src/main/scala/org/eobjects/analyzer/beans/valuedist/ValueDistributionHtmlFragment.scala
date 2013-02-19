@@ -118,7 +118,7 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
         if (uniqueValues != null) {
 
           val elementId = context.createElementId();
-          val listResult = new ListResult(uniqueValues);
+          val listResult = new ListResult(uniqueValues.toList);
 
           val bodyElement = new DrillToDetailsBodyElement(elementId, rendererFactory, listResult);
           frag.addBodyElement(bodyElement);

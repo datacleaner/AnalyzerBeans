@@ -73,7 +73,8 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
         }
 
         if (storeRow) {
-            int rowId = row.getId();
+            // TODO: In clustered scenarios, there's a chance of row ID collision
+            final int rowId = row.getId();
             if (_cachedRows != null) {
                 synchronized (_cachedRows) {
                     if (_cachedRows.get(rowId) == null) {

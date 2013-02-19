@@ -37,12 +37,16 @@ import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.AnalyzerResultReducer;
 import org.eobjects.analyzer.util.CollectionUtils2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class to perform the reduction phase of {@link AnalyzerResult}s
  * collected in a {@link DistributedAnalysisResultFuture}.
  */
 final class DistributedAnalysisResultReducer {
+    
+    private static final Logger logger = LoggerFactory.getLogger(DistributedAnalysisResultReducer.class);
 
     private final AnalysisJob _masterJob;
     private final LifeCycleHelper _lifeCycleHelper;
@@ -57,8 +61,11 @@ final class DistributedAnalysisResultReducer {
 
     public void reduce(final List<AnalysisResultFuture> results, final Map<ComponentJob, AnalyzerResult> resultMap,
             final List<AnalysisResultReductionException> reductionErrors) {
+        final int size = results.size();
         try {
+            logger.debug("Starting reduce phase of {} results", size);
             reduceResults(results, resultMap, reductionErrors);
+            logger.debug("Finished reduce phase of {} results", size);
         } finally {
             closeNonDistributableComponents();
         }

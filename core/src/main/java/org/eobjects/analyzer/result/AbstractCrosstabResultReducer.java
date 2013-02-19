@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eobjects.metamodel.util.NumberComparator;
+
 /**
  * Abstract reducer class for {@link CrosstabResult}s that are two dimensional
  * and the dimensions are the same on all slave results. This scenario is quite
@@ -66,7 +68,7 @@ public abstract class AbstractCrosstabResultReducer<R extends CrosstabResult> im
                     }
                 }
 
-                final Serializable masterValue = reduceValues(slaveValues, category1, category2, valueClass);
+                final Serializable masterValue = reduceValues(slaveValues, category1, category2, results, valueClass);
                 masterNav.put(masterValue);
 
                 if (!slaveResultProducers.isEmpty()) {
@@ -104,7 +106,103 @@ public abstract class AbstractCrosstabResultReducer<R extends CrosstabResult> im
     }
 
     protected abstract Serializable reduceValues(List<Object> slaveValues, String category1, String category2,
-            Class<?> valueClass);
+            Collection<? extends R> results, Class<?> valueClass);
 
     protected abstract R buildResult(final Crosstab<?> crosstab, final Collection<? extends R> results);
+
+    /**
+     * Helper method to get a sum of values (values will be checked whether they
+     * are integers only, or else a double will be returned).
+     * 
+     * @param slaveValues
+     * @return
+     */
+    protected static Number sum(List<?> slaveValues) {
+        for (Object slaveValue : slaveValues) {
+            if (slaveValue != null) {
+                final Class<? extends Object> cls = slaveValue.getClass();
+                if (!(cls == Integer.class || cls == Short.class || cls == Byte.class)) {
+                    return sumAsDouble(slaveValues);
+                }
+            }
+        }
+        return sumAsInteger(slaveValues);
+    }
+
+    /**
+     * Helper method to get a sum of values (sum will be calculated as an
+     * integer)
+     * 
+     * @param slaveValues
+     * @return
+     */
+    protected static Integer sumAsInteger(List<?> slaveValues) {
+        int sum = 0;
+        for (Object slaveValue : slaveValues) {
+            Number value = (Number) slaveValue;
+            if (value != null) {
+                sum += value.intValue();
+            }
+        }
+        return sum;
+    }
+
+    /**
+     * Helper method to get a sum of values (sum will be calculated as a double)
+     * 
+     * @param slaveValues
+     * @return
+     */
+    protected static Double sumAsDouble(List<?> slaveValues) {
+        double sum = 0;
+        for (Object slaveValue : slaveValues) {
+            Number value = (Number) slaveValue;
+            if (value != null) {
+                sum += value.doubleValue();
+            }
+        }
+        return sum;
+    }
+
+    /**
+     * Helper method to get the maximum of all values (must be numbers)
+     * 
+     * @param slaveValues
+     * @return
+     */
+    protected static Number maximum(List<?> slaveValues) {
+        Number max = null;
+        for (Object slaveValue : slaveValues) {
+            if (max == null) {
+                max = (Number) slaveValue;
+            } else {
+                Comparable<Object> comparable = NumberComparator.getComparable(max);
+                if (comparable.compareTo(slaveValue) < 0) {
+                    max = (Number) slaveValue;
+                }
+            }
+        }
+        return max;
+    }
+
+    /**
+     * Helper method to get the minimum of all values (must be numbers)
+     * 
+     * @param slaveValues
+     * @return
+     */
+    protected static Number minimum(List<?> slaveValues) {
+        Number min = null;
+        for (Object slaveValue : slaveValues) {
+            if (min == null) {
+                min = (Number) slaveValue;
+            } else {
+                Comparable<Object> comparable = NumberComparator.getComparable(min);
+                if (comparable.compareTo(slaveValue) > 0) {
+                    min = (Number) slaveValue;
+                }
+            }
+        }
+        return min;
+    }
 }

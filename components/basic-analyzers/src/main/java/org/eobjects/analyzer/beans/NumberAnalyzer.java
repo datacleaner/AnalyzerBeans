@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math.stat.descriptive.moment.SecondMoment;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Concurrent;
@@ -73,6 +74,8 @@ public class NumberAnalyzer implements Analyzer<NumberAnalyzerResult> {
     public static final String MEASURE_GEOMETRIC_MEAN = "Geometric mean";
     public static final String MEASURE_STANDARD_DEVIATION = "Standard deviation";
     public static final String MEASURE_VARIANCE = "Variance";
+    public static final String MEASURE_SUM_OF_SQUARES = "Sum of squares";
+    public static final String MEASURE_SECOND_MOMENT = "Second moment";
 
     public static final String MEASURE_MEDIAN = "Median";
     public static final String MEASURE_PERCENTILE25 = "25th percentile";
@@ -134,6 +137,8 @@ public class NumberAnalyzer implements Analyzer<NumberAnalyzerResult> {
         measureDimension.addCategory(MEASURE_GEOMETRIC_MEAN);
         measureDimension.addCategory(MEASURE_STANDARD_DEVIATION);
         measureDimension.addCategory(MEASURE_VARIANCE);
+        measureDimension.addCategory(MEASURE_SECOND_MOMENT);
+        measureDimension.addCategory(MEASURE_SUM_OF_SQUARES);
 
         if (descriptiveStatistics) {
             measureDimension.addCategory(MEASURE_MEDIAN);
@@ -176,10 +181,18 @@ public class NumberAnalyzer implements Analyzer<NumberAnalyzerResult> {
                 final double variance = s.getVariance();
 
                 final double geometricMean;
+                final double secondMoment;
+                final double sumOfSquares;
                 if (descriptiveStatistics) {
-                    geometricMean = ((DescriptiveStatistics) s).getGeometricMean();
+                    final DescriptiveStatistics descriptiveStats = (DescriptiveStatistics) s;
+                    geometricMean = descriptiveStats.getGeometricMean();
+                    sumOfSquares = descriptiveStats.getSumsq();
+                    secondMoment = new SecondMoment().evaluate(descriptiveStats.getValues());
                 } else {
-                    geometricMean = ((SummaryStatistics) s).getGeometricMean();
+                    final SummaryStatistics summaryStats = (SummaryStatistics) s;
+                    geometricMean = summaryStats.getGeometricMean();
+                    secondMoment = summaryStats.getSecondMoment();
+                    sumOfSquares = summaryStats.getSumsq();
                 }
 
                 nav.where(measureDimension, MEASURE_HIGHEST_VALUE).put(highestValue);
@@ -193,6 +206,8 @@ public class NumberAnalyzer implements Analyzer<NumberAnalyzerResult> {
                 nav.where(measureDimension, MEASURE_GEOMETRIC_MEAN).put(geometricMean);
                 nav.where(measureDimension, MEASURE_STANDARD_DEVIATION).put(standardDeviation);
                 nav.where(measureDimension, MEASURE_VARIANCE).put(variance);
+                nav.where(measureDimension, MEASURE_SUM_OF_SQUARES).put(sumOfSquares);
+                nav.where(measureDimension, MEASURE_SECOND_MOMENT).put(secondMoment);
 
                 if (descriptiveStatistics) {
                     final DescriptiveStatistics descriptiveStatistics = (DescriptiveStatistics) s;

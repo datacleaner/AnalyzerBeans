@@ -207,7 +207,15 @@ public final class RowProcessingPublisher {
     }
 
     public void run(RowProcessingMetrics rowProcessingMetrics) {
-        final RowIdGenerator idGenerator = new SimpleRowIdGenerator();
+        final RowProcessingQueryOptimizer queryOptimizer = getQueryOptimizer();
+        final Query finalQuery = queryOptimizer.getOptimizedQuery();
+
+        final RowIdGenerator idGenerator;
+        if (finalQuery.getFirstRow() == null) {
+            idGenerator = new SimpleRowIdGenerator();
+        } else {
+            idGenerator = new SimpleRowIdGenerator(finalQuery.getFirstRow());
+        }
 
         for (RowProcessingConsumer rowProcessingConsumer : _consumers) {
             if (rowProcessingConsumer instanceof AnalyzerConsumer) {
@@ -222,8 +230,6 @@ public final class RowProcessingPublisher {
                 ((TransformerConsumer) rowProcessingConsumer).setRowIdGenerator(idGenerator);
             }
         }
-        final RowProcessingQueryOptimizer queryOptimizer = getQueryOptimizer();
-        final Query finalQuery = queryOptimizer.getOptimizedQuery();
         final List<RowProcessingConsumer> consumers = queryOptimizer.getOptimizedConsumers();
         final Collection<? extends Outcome> availableOutcomes = queryOptimizer.getOptimizedAvailableOutcomes();
 

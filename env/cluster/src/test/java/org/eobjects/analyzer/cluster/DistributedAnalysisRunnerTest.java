@@ -23,7 +23,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.cluster.virtual.VirtualClusterManager;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
@@ -51,9 +50,23 @@ public class DistributedAnalysisRunnerTest extends TestCase {
     
     public void testRunCompletenessAnalyzer() throws Throwable {
     	final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), true);
+    	
+    	// run with only a single node to verify a baseline scenario
+    	ClusterTestHelper.runCompletenessAndValueMatcherAnalyzerJob(configuration, new VirtualClusterManager(configuration, 1));
 
+    	ClusterTestHelper.runCompletenessAndValueMatcherAnalyzerJob(configuration, new VirtualClusterManager(configuration, 10));
         ClusterTestHelper.runCompletenessAndValueMatcherAnalyzerJob(configuration, new VirtualClusterManager(configuration, 3));
 	}
+    
+    public void testRunBasicAnalyzers() throws Throwable {
+        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), true);
+
+        // run with only a single node to verify a baseline scenario
+        ClusterTestHelper.runBasicAnalyzersJob(configuration, new VirtualClusterManager(configuration, 1));
+
+        ClusterTestHelper.runBasicAnalyzersJob(configuration, new VirtualClusterManager(configuration, 6));
+        ClusterTestHelper.runBasicAnalyzersJob(configuration, new VirtualClusterManager(configuration, 10));
+    }
 
     public void testErrorHandlingSingleSlave() throws Exception {
         final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), false);
@@ -95,7 +108,7 @@ public class DistributedAnalysisRunnerTest extends TestCase {
         jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNAME");
 
         // The String Analyzer is (currently) not distributable
-        final AnalyzerJobBuilder<StringAnalyzer> analyzer = jobBuilder.addAnalyzer(StringAnalyzer.class);
+        final AnalyzerJobBuilder<MockAnalyzerWithoutReducer> analyzer = jobBuilder.addAnalyzer(MockAnalyzerWithoutReducer.class);
         analyzer.addInputColumns(jobBuilder.getSourceColumns());
 
         AnalysisJob job = jobBuilder.toAnalysisJob();
@@ -108,7 +121,7 @@ public class DistributedAnalysisRunnerTest extends TestCase {
             fail("Exception expected");
         } catch (UnsupportedOperationException e) {
             assertEquals("Component is not distributable: "
-                    + "ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", e.getMessage());
+                    + "ImmutableAnalyzerJob[name=null,analyzer=Analyzer without reducer]", e.getMessage());
         } finally {
         	jobBuilder.close();
         }

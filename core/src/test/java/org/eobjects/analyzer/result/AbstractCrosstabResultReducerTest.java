@@ -44,12 +44,9 @@ public class AbstractCrosstabResultReducerTest extends TestCase {
         final AbstractCrosstabResultReducer<CrosstabResult> reducer = new AbstractCrosstabResultReducer<CrosstabResult>() {
 
             @Override
-            protected Serializable reduceValues(List<Object> slaveValues, String category1, String category2, Class<?> valueClass) {
-                int sum = 0;
-                for (Object slaveValue : slaveValues) {
-                    sum += ((Number)slaveValue).intValue();
-                }
-                return sum;
+            protected Serializable reduceValues(List<Object> slaveValues, String category1, String category2,
+                    Collection<? extends CrosstabResult> results, Class<?> valueClass) {
+                return sumAsInteger(slaveValues);
             }
 
             @Override
@@ -68,5 +65,22 @@ public class AbstractCrosstabResultReducerTest extends TestCase {
         assertEquals(4, crosstab.where("Column", "col2").where("Measure", "Null count").get());
         assertEquals(30, crosstab.where("Column", "col1").where("Measure", "Valid count").get());
         assertEquals(32, crosstab.where("Column", "col2").where("Measure", "Valid count").get());
+    }
+    
+    public void testSumAsDouble() throws Exception {
+        Number sum = AbstractCrosstabResultReducer.sumAsDouble(Arrays.asList(123.1d, null, 124d, 125d, 12d));
+        assertTrue(sum instanceof Double);
+        assertEquals(384.1, sum.doubleValue());
+        assertEquals(384, sum.intValue());
+    }
+
+    public void testMaximum() throws Exception {
+        Number maximum = AbstractCrosstabResultReducer.maximum(Arrays.asList(123, null, 124, 125, 12));
+        assertEquals(125, maximum.intValue());
+    }
+
+    public void testMinimum() throws Exception {
+        Number minimum = AbstractCrosstabResultReducer.minimum(Arrays.asList(123, 124, 125, null, 12));
+        assertEquals(12, minimum.intValue());
     }
 }

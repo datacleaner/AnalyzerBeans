@@ -33,7 +33,7 @@ public class CharacterSetDistributionResultReducer extends
 
     @Override
     protected Serializable reduceValues(List<Object> slaveValues, String category1, String category2,
-            Class<?> valueClass) {
+            Collection<? extends CharacterSetDistributionResult> results, Class<?> valueClass) {
         int sum = 0;
         for (Object slaveValue : slaveValues) {
             sum += ((Number) slaveValue).intValue();

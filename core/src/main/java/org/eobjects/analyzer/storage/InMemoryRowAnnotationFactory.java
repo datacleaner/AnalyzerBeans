@@ -107,12 +107,5 @@ public class InMemoryRowAnnotationFactory extends AbstractRowAnnotationFactory i
     public void transferAnnotations(RowAnnotation from, RowAnnotation to) {
         final int rowCountToAdd = from.getRowCount();
         ((RowAnnotationImpl) to).incrementRowCount(rowCountToAdd);
-
-        final Set<Integer> fromRowIds = _annotatedRows.get(from);
-        if (fromRowIds != null && !fromRowIds.isEmpty()) {
-            // copy rowIds to the 'to' annotation
-            final Set<Integer> toRowIds = getRowIds(to);
-            toRowIds.addAll(fromRowIds);
-        }
     }
 }

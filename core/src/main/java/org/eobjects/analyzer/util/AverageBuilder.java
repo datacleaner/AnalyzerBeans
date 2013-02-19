@@ -46,39 +46,60 @@ package org.eobjects.analyzer.util;
  */
 public class AverageBuilder {
 
-	public double _average;
-	public int _numValues;
+    private double _average;
+    private int _numValues;
 
-	public AverageBuilder() {
-	    _numValues = 0;
-	    _average = 0;
-	}
+    public AverageBuilder() {
+        _numValues = 0;
+        _average = 0;
+    }
 
-	public AverageBuilder addValue(Number number) {
-		double total = _average * _numValues + number.doubleValue();
-		_numValues++;
-		_average = total / _numValues;
-		return this;
-	}
+    /**
+     * Adds a value to the average that is being built.
+     * 
+     * @param number
+     * @return
+     */
+    public AverageBuilder addValue(Number number) {
+        double total = _average * _numValues + number.doubleValue();
+        _numValues++;
+        _average = total / _numValues;
+        return this;
+    }
 
-	public double getAverage() {
-	    if (_numValues == 0) {
-	        return Double.NaN;
-	    }
-		return _average;
-	}
+    /**
+     * Adds the same value [count] number of times to the average that is being
+     * built.
+     * 
+     * @param number
+     * @param count
+     * @return
+     */
+    public AverageBuilder addValue(Number number, int count) {
+        double total = _average * _numValues + number.doubleValue() * count;
+        _numValues = _numValues + count;
+        _average = total / _numValues;
+        return this;
+    }
 
-	public int getNumValues() {
-		return _numValues;
-	}
+    public double getAverage() {
+        if (_numValues == 0) {
+            return Double.NaN;
+        }
+        return _average;
+    }
 
-	@Override
-	public String toString() {
-		return "AverageBuilder[average=" + _average + ",numValues=" + _numValues + "]";
-	}
+    public int getNumValues() {
+        return _numValues;
+    }
 
-	@Override
-	public int hashCode() {
-		return (int) (_average + _numValues);
-	}
+    @Override
+    public String toString() {
+        return "AverageBuilder[average=" + _average + ",numValues=" + _numValues + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (_average + _numValues);
+    }
 }

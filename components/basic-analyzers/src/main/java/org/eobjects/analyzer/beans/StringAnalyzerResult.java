@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans;
 
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabResult;
@@ -29,6 +30,7 @@ import org.eobjects.analyzer.result.Metric;
  * 
  * @author Kasper Sørensen
  */
+@Distributed(reducer = StringAnalyzerResultReducer.class)
 public class StringAnalyzerResult extends CrosstabResult {
 
     private static final long serialVersionUID = 1L;
@@ -133,7 +135,7 @@ public class StringAnalyzerResult extends CrosstabResult {
         return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())
                 .where(StringAnalyzer.DIMENSION_MEASURES, StringAnalyzer.MEASURE_NULL_COUNT).get();
     }
-    
+
     @Metric(StringAnalyzer.MEASURE_BLANK_COUNT)
     public Integer getBlankCount(InputColumn<?> col) {
         return (Integer) getCrosstab().where(StringAnalyzer.DIMENSION_COLUMN, col.getName())

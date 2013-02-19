@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eobjects.analyzer.beans.CompletenessAnalyzer;
+import org.eobjects.analyzer.beans.NumberAnalyzer;
+import org.eobjects.analyzer.beans.NumberAnalyzerResult;
+import org.eobjects.analyzer.beans.StringAnalyzer;
+import org.eobjects.analyzer.beans.StringAnalyzerResult;
 import org.eobjects.analyzer.beans.CompletenessAnalyzer.Condition;
 import org.eobjects.analyzer.beans.CompletenessAnalyzerResult;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
@@ -39,6 +43,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.Descriptors;
@@ -169,6 +174,84 @@ public class ClusterTestHelper {
         return errors;
     }
 
+    public static void runBasicAnalyzersJob(AnalyzerBeansConfiguration configuration, ClusterManager clusterManager)
+            throws Throwable {
+        // build a job that concats names and inserts the concatenated names
+        // into a file
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        jobBuilder.setDatastore("orderdb");
+        jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER");
+        jobBuilder.addSourceColumns("CUSTOMERS.COUNTRY");
+
+        final AnalyzerJobBuilder<StringAnalyzer> stringAnalyzer = jobBuilder.addAnalyzer(StringAnalyzer.class);
+        stringAnalyzer.addInputColumns(jobBuilder.getAvailableInputColumns(String.class));
+
+        final AnalyzerJobBuilder<NumberAnalyzer> numberAnalyzer = jobBuilder.addAnalyzer(NumberAnalyzer.class);
+        numberAnalyzer.addInputColumns(jobBuilder.getAvailableInputColumns(Number.class));
+
+        final AnalysisJob job = jobBuilder.toAnalysisJob();
+
+        // run the job in a distributed fashion
+        final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
+        final AnalysisResultFuture resultFuture = runner.run(job);
+
+        Assert.assertEquals(JobStatus.NOT_FINISHED, resultFuture.getStatus());
+
+        jobBuilder.close();
+        resultFuture.await();
+
+        if (resultFuture.isErrornous()) {
+            List<Throwable> errors = resultFuture.getErrors();
+            throw errors.get(0);
+        }
+
+        Assert.assertEquals(JobStatus.SUCCESSFUL, resultFuture.getStatus());
+
+        final List<AnalyzerResult> results = resultFuture.getResults();
+
+        Assert.assertEquals(2, results.size());
+
+        for (AnalyzerResult analyzerResult : results) {
+            Assert.assertNotNull(analyzerResult);
+            if (analyzerResult instanceof StringAnalyzerResult) {
+                final StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) analyzerResult;
+
+                final InputColumn<String>[] columns = stringAnalyzerResult.getColumns();
+                Assert.assertEquals(1, columns.length);
+
+                final InputColumn<String> column = columns[0];
+                Assert.assertEquals("COUNTRY", column.getName());
+
+                // test reduction: various ways of aggregating crosstab metrics
+                // - min, max, avg, sum
+                Assert.assertEquals(122, stringAnalyzerResult.getRowCount(column));
+                Assert.assertEquals(1, stringAnalyzerResult.getMinWords(column));
+                Assert.assertEquals(2, stringAnalyzerResult.getMaxWords(column));
+                Assert.assertEquals(5.71, stringAnalyzerResult.getAvgChars(column), 0.1d);
+                Assert.assertEquals(697, stringAnalyzerResult.getTotalCharCount(column));
+
+            } else if (analyzerResult instanceof NumberAnalyzerResult) {
+                final NumberAnalyzerResult numberAnalyzerResult = (NumberAnalyzerResult) analyzerResult;
+
+                final InputColumn<? extends Number>[] columns = numberAnalyzerResult.getColumns();
+                Assert.assertEquals(1, columns.length);
+
+                final InputColumn<? extends Number> column = columns[0];
+                Assert.assertEquals("CUSTOMERNUMBER", column.getName());
+
+                Assert.assertEquals(122, numberAnalyzerResult.getRowCount(column));
+                Assert.assertEquals(36161.0, numberAnalyzerResult.getSum(column).doubleValue(), 0.1);
+                Assert.assertEquals(296.4, numberAnalyzerResult.getMean(column).doubleValue(), 0.1);
+                Assert.assertEquals(496, numberAnalyzerResult.getHighestValue(column).doubleValue(), 0.1);
+                Assert.assertEquals(103.0, numberAnalyzerResult.getLowestValue(column).doubleValue(), 0.1);
+                Assert.assertEquals(117.0, numberAnalyzerResult.getStandardDeviation(column).doubleValue(), 0.8);
+                Assert.assertEquals(null, numberAnalyzerResult.getMedian(column));
+            } else {
+                Assert.fail("Unexpected analyzer result found: " + analyzerResult);
+            }
+        }
+    }
+
     public static void runCompletenessAndValueMatcherAnalyzerJob(AnalyzerBeansConfiguration configuration,
             ClusterManager clusterManager) throws Throwable {
         // build a job that concats names and inserts the concatenated names
@@ -231,20 +314,24 @@ public class ClusterTestHelper {
 
                 ValueMatchAnalyzerResult valueMatchAnalyzerResult = (ValueMatchAnalyzerResult) analyzerResult;
                 Assert.assertEquals(0, valueMatchAnalyzerResult.getNullCount());
-                
+
                 Assert.assertEquals(83, valueMatchAnalyzerResult.getUnexpectedValueCount().intValue());
                 InputRow[] rows = valueMatchAnalyzerResult.getAnnotatedRowsForUnexpectedValues().getRows();
                 Assert.assertTrue(rows.length > 0);
-                Assert.assertTrue(rows.length < 83);
-                Assert.assertEquals("MetaModelInputRow[Row[values=[France, null, 103, Carine, Schmitt]]]", rows[0].toString());
+                Assert.assertTrue(rows.length <= 83);
 
                 Assert.assertEquals(2, valueMatchAnalyzerResult.getCount("Denmark").intValue());
                 rows = valueMatchAnalyzerResult.getAnnotatedRowsForValue("Denmark").getRows();
                 Assert.assertEquals(2, rows.length);
-                Assert.assertEquals("MetaModelInputRow[Row[values=[Denmark, null, 145, Jytte, Petersen]]]",
-                        rows[0].toString());
-                Assert.assertEquals("MetaModelInputRow[Row[values=[Denmark, null, 227, Palle, Ibsen]]]",
-                        rows[1].toString());
+                for (InputRow row : rows) {
+                    String rowString = row.toString();
+                    boolean assert1 = rowString
+                            .equals("MetaModelInputRow[Row[values=[Denmark, null, 145, Jytte, Petersen]]]");
+                    boolean assert2 = rowString
+                            .equals("MetaModelInputRow[Row[values=[Denmark, null, 227, Palle, Ibsen]]]");
+
+                    Assert.assertTrue("Unexpected 'Denmark' row: " + rowString, assert1 || assert2);
+                }
             } else {
                 Assert.fail("Unexpected analyzer result found: " + analyzerResult);
             }

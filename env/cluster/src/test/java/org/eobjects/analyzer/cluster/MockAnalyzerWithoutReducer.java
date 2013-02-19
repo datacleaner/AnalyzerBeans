@@ -17,36 +17,34 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.job.runner;
+package org.eobjects.analyzer.cluster;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Simple implementation of {@link RowIdGenerator}, based on
- * {@link AtomicInteger}s.
- */
-class SimpleRowIdGenerator implements RowIdGenerator {
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.result.ListResult;
 
-    private final AtomicInteger _physicalCounter;
-    private final AtomicInteger _virtualCounter;
+@AnalyzerBean("Analyzer without reducer")
+public class MockAnalyzerWithoutReducer implements Analyzer<ListResult<String>> {
 
-    public SimpleRowIdGenerator(int offset) {
-        _physicalCounter = new AtomicInteger(offset);
-        _virtualCounter = new AtomicInteger(Integer.MIN_VALUE + (offset * 3));
-    }
+    @Configured
+    InputColumn<?>[] input;
 
-    public SimpleRowIdGenerator() {
-        this(0);
+    @Override
+    public ListResult<String> getResult() {
+        List<String> list = new ArrayList<String>();
+        list.add("foobar");
+        return new ListResult<String>(list);
     }
 
     @Override
-    public int nextPhysicalRowId() {
-        return _physicalCounter.incrementAndGet();
-    }
-
-    @Override
-    public int nextVirtualRowId() {
-        return _virtualCounter.incrementAndGet();
+    public void run(InputRow row, int arg1) {
+        // do nothing
     }
 
 }

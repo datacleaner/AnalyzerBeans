@@ -64,15 +64,20 @@ public class ValueMatchAnalyzerResultReducer implements AnalyzerResultReducer<Va
 
             final Set<String> expectedValues = analyzerResult.getExpectedValueAnnotations().keySet();
             for (final String expectedValue : expectedValues) {
-                RowAnnotation masterAnnotation = valueAnnotations.get(expectedValue);
-                if (masterAnnotation == null) {
-                    masterAnnotation = _rowAnnotationFactory.createAnnotation();
-                    valueAnnotations.put(expectedValue, masterAnnotation);
-                }
-
                 final AnnotatedRowsResult annotatedRowsResultForExpectedValue = analyzerResult
                         .getAnnotatedRowsForValue(expectedValue);
-                reduce(masterAnnotation, annotatedRowsResultForExpectedValue);
+                if (annotatedRowsResultForExpectedValue != null) {
+                    final int slaveRowCount = annotatedRowsResultForExpectedValue.getAnnotatedRowCount();
+                    if (slaveRowCount > 0) {
+                        RowAnnotation masterAnnotation = valueAnnotations.get(expectedValue);
+                        if (masterAnnotation == null) {
+                            masterAnnotation = _rowAnnotationFactory.createAnnotation();
+                            valueAnnotations.put(expectedValue, masterAnnotation);
+                        }
+                        
+                        reduce(masterAnnotation, annotatedRowsResultForExpectedValue);
+                    }
+                }
             }
         }
 

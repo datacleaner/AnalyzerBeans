@@ -48,7 +48,7 @@ public class NumberAnalyzerTest extends TestCase {
 	public void testNoRows() throws Exception {
 		CrosstabResult result = numberAnalyzer.getResult();
 		String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
-		assertEquals(10, resultLines.length);
+		assertEquals(12, resultLines.length);
 		assertEquals("                      foo    bar   w00p ", resultLines[0]);
 		assertEquals("Row count               0      0      0 ", resultLines[1]);
 		assertEquals("Null count              0      0      0 ", resultLines[2]);
@@ -59,6 +59,8 @@ public class NumberAnalyzerTest extends TestCase {
 		assertEquals("Geometric mean     <null> <null> <null> ", resultLines[7]);
 		assertEquals("Standard deviation <null> <null> <null> ", resultLines[8]);
 		assertEquals("Variance           <null> <null> <null> ", resultLines[9]);
+		assertEquals("Second moment      <null> <null> <null> ", resultLines[10]);
+		assertEquals("Sum of squares     <null> <null> <null> ", resultLines[11]);
 	}
 
 	public void testOnlyeOneColumnNonNull() throws Exception {
@@ -70,7 +72,7 @@ public class NumberAnalyzerTest extends TestCase {
 
 		CrosstabResult result = numberAnalyzer.getResult();
 		String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
-		assertEquals(10, resultLines.length);
+		assertEquals(12, resultLines.length);
 		assertEquals("                      foo    bar   w00p ", resultLines[0]);
 		assertEquals("Row count               5      5      5 ", resultLines[1]);
 		assertEquals("Null count              5      0      5 ", resultLines[2]);
@@ -81,6 +83,8 @@ public class NumberAnalyzerTest extends TestCase {
 		assertEquals("Geometric mean     <null>   2.61 <null> ", resultLines[7]);
 		assertEquals("Standard deviation <null>   1.58 <null> ", resultLines[8]);
 		assertEquals("Variance           <null>    2.5 <null> ", resultLines[9]);
+		assertEquals("Second moment      <null>     10 <null> ", resultLines[10]);
+		assertEquals("Sum of squares     <null>     55 <null> ", resultLines[11]);
 	}
 
 	public void testSimpleRun() throws Exception {
@@ -89,7 +93,7 @@ public class NumberAnalyzerTest extends TestCase {
 
 		CrosstabResult result = numberAnalyzer.getResult();
 		String[] resultLines = new CrosstabTextRenderer().render(result).split("\n");
-		assertEquals(10, resultLines.length);
+		assertEquals(12, resultLines.length);
 		assertEquals("                      foo    bar   w00p ", resultLines[0]);
 		assertEquals("Row count               2      2      2 ", resultLines[1]);
 		assertEquals("Null count              0      0      0 ", resultLines[2]);
@@ -100,5 +104,7 @@ public class NumberAnalyzerTest extends TestCase {
 		assertEquals("Geometric mean      264.7 2647.01   20.2 ", resultLines[7]);
 		assertEquals("Standard deviation 314.24 3142.38  15.56 ", resultLines[8]);
 		assertEquals("Variance           98745.67 9874568    242 ", resultLines[9]);
+		assertEquals("Second moment      98745.67 9874568    242 ", resultLines[10]);
+		assertEquals("Sum of squares     337624.39 33762440   1300 ", resultLines[11]);
 	}
 }
