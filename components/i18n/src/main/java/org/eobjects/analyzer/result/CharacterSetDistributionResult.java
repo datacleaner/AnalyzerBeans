@@ -20,10 +20,12 @@
 package org.eobjects.analyzer.result;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.CharacterSetDistributionAnalyzer;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.data.InputColumn;
 
 /**
@@ -32,37 +34,48 @@ import org.eobjects.analyzer.data.InputColumn;
  * @author Kasper Sørensen
  * 
  */
+@Distributed(reducer = CharacterSetDistributionResultReducer.class)
 public class CharacterSetDistributionResult extends CrosstabResult {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final InputColumn<String>[] _columns;
-	private final Set<String> _unicodeSetNames;
+    private final InputColumn<String>[] _columns;
+    private final Set<String> _unicodeSetNames;
 
-	public CharacterSetDistributionResult(InputColumn<String>[] columns,
-			Set<String> unicodeSetNames, Crosstab<Number> crosstab) {
-		super(crosstab);
-		_columns = columns;
-		_unicodeSetNames = new TreeSet<String>(unicodeSetNames);
-	}
+    public CharacterSetDistributionResult(InputColumn<String>[] columns, String[] unicodeSetNames,
+            Crosstab<Number> crosstab) {
+        super(crosstab);
+        _columns = columns;
+        _unicodeSetNames = new TreeSet<String>();
+        for (String unicodeSetName : unicodeSetNames) {
+            _unicodeSetNames.add(unicodeSetName);
+        }
+    }
 
-	/**
-	 * Gets the columns that where analyzed
-	 * 
-	 * @return an array of {@link InputColumn}s.
-	 */
-	public InputColumn<String>[] getColumns() {
-		return Arrays.copyOf(_columns, _columns.length);
-	}
+    public CharacterSetDistributionResult(InputColumn<String>[] columns, Collection<String> unicodeSetNames,
+            Crosstab<Number> crosstab) {
+        super(crosstab);
+        _columns = columns;
+        _unicodeSetNames = new TreeSet<String>(unicodeSetNames);
+    }
 
-	/**
-	 * Gets the names of the character sets which are available in the
-	 * distribution
-	 * 
-	 * @return an array of string names.
-	 */
-	public String[] getUnicodeSetNames() {
-		return _unicodeSetNames.toArray(new String[_unicodeSetNames.size()]);
-	}
+    /**
+     * Gets the columns that where analyzed
+     * 
+     * @return an array of {@link InputColumn}s.
+     */
+    public InputColumn<String>[] getColumns() {
+        return Arrays.copyOf(_columns, _columns.length);
+    }
+
+    /**
+     * Gets the names of the character sets which are available in the
+     * distribution
+     * 
+     * @return an array of string names.
+     */
+    public String[] getUnicodeSetNames() {
+        return _unicodeSetNames.toArray(new String[_unicodeSetNames.size()]);
+    }
 
 }

@@ -21,18 +21,21 @@ package org.eobjects.analyzer.result;
 
 import java.io.Serializable;
 
+/**
+ * Default result producer implementation
+ */
 public class DefaultResultProducer implements Serializable, ResultProducer {
 
-	private static final long serialVersionUID = 1L;
-	
-	private final AnalyzerResult result;
+    private static final long serialVersionUID = 1L;
 
-	public DefaultResultProducer(AnalyzerResult result) {
-		this.result = result;
-	}
+    private final AnalyzerResult result;
 
-	@Override
-	public AnalyzerResult getResult() {
-		return result;
-	}
+    public DefaultResultProducer(AnalyzerResult result) {
+        this.result = result;
+    }
+
+    @Override
+    public AnalyzerResult getResult() {
+        return result;
+    }
 }
