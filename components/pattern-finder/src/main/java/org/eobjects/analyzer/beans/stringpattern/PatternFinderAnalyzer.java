@@ -222,19 +222,25 @@ public class PatternFinderAnalyzer implements Analyzer<PatternFinderResult> {
             return new PatternFinderResult(column, groupColumn, crosstabs, _configuration);
         }
     }
-
-    private Crosstab<Serializable> createCrosstab(DefaultPatternFinder patternFinder) {
+    
+    public static Crosstab<Serializable> createCrosstab() {
         CrosstabDimension measuresDimension = new CrosstabDimension(DIMENSION_NAME_MEASURES);
         measuresDimension.addCategory(MEASURE_MATCH_COUNT);
+        measuresDimension.addCategory(MEASURE_SAMPLE);
         CrosstabDimension patternDimension = new CrosstabDimension(DIMENSION_NAME_PATTERN);
         Crosstab<Serializable> crosstab = new Crosstab<Serializable>(Serializable.class, measuresDimension,
                 patternDimension);
+        return crosstab;
+    }
 
-        Set<Entry<TokenPattern, RowAnnotation>> entrySet = patternFinder.getAnnotations().entrySet();
+    private Crosstab<Serializable> createCrosstab(DefaultPatternFinder patternFinder) {
+        final Crosstab<Serializable> crosstab = createCrosstab();
+
+        final Set<Entry<TokenPattern, RowAnnotation>> entrySet = patternFinder.getAnnotations().entrySet();
 
         // sort the entries so that the ones with the highest amount of
         // matches are at the top
-        Set<Entry<TokenPattern, RowAnnotation>> sortedEntrySet = new TreeSet<Entry<TokenPattern, RowAnnotation>>(
+        final Set<Entry<TokenPattern, RowAnnotation>> sortedEntrySet = new TreeSet<Entry<TokenPattern, RowAnnotation>>(
                 new Comparator<Entry<TokenPattern, RowAnnotation>>() {
                     public int compare(Entry<TokenPattern, RowAnnotation> o1, Entry<TokenPattern, RowAnnotation> o2) {
                         int result = o2.getValue().getRowCount() - o1.getValue().getRowCount();
@@ -247,17 +253,18 @@ public class PatternFinderAnalyzer implements Analyzer<PatternFinderResult> {
         sortedEntrySet.addAll(entrySet);
 
         for (Entry<TokenPattern, RowAnnotation> entry : sortedEntrySet) {
-            CrosstabNavigator<Serializable> nav = crosstab.where(patternDimension, entry.getKey().toSymbolicString());
+            final TokenPattern pattern = entry.getKey();
+            final CrosstabNavigator<Serializable> nav = crosstab.navigate();
+            nav.where(DIMENSION_NAME_PATTERN, pattern.toSymbolicString());
 
-            nav.where(measuresDimension, MEASURE_MATCH_COUNT);
-            nav.where(patternDimension, entry.getKey().toSymbolicString());
+            nav.where(DIMENSION_NAME_MEASURES, MEASURE_MATCH_COUNT);
             RowAnnotation annotation = entry.getValue();
             int size = annotation.getRowCount();
             nav.put(size, true);
             nav.attach(new AnnotatedRowsResult(annotation, _rowAnnotationFactory, column));
 
-            nav.where(measuresDimension, MEASURE_SAMPLE);
-            nav.put(entry.getKey().getSampleString(), true);
+            nav.where(DIMENSION_NAME_MEASURES, MEASURE_SAMPLE);
+            nav.put(pattern.getSampleString(), true);
         }
         return crosstab;
     }

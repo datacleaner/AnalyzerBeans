@@ -43,11 +43,15 @@ public abstract class PatternFinder<R> {
     private final Map<String, Set<TokenPattern>> _patterns;
     private final TokenizerConfiguration _configuration;
     private final Tokenizer _tokenizer;
+    
+    public PatternFinder(Tokenizer tokenizer, TokenizerConfiguration configuration) {
+        _configuration = configuration;
+        _tokenizer = tokenizer;
+        _patterns = new HashMap<String, Set<TokenPattern>>();
+    }
 
     public PatternFinder(TokenizerConfiguration configuration) {
-        _configuration = configuration;
-        _patterns = new HashMap<String, Set<TokenPattern>>();
-        _tokenizer = new DefaultTokenizer(configuration);
+        this(new DefaultTokenizer(configuration), configuration);
     }
 
     /**

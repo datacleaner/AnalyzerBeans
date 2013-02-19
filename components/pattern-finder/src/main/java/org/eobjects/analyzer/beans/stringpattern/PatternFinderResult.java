@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.reference.SimpleStringPattern;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -44,6 +45,7 @@ import org.eobjects.analyzer.result.QueryParameterizableMetric;
  * 
  * @author Kasper Sørensen
  */
+@Distributed(reducer = PatternFinderResultReducer.class)
 public class PatternFinderResult implements AnalyzerResult {
 
     private static final long serialVersionUID = 1L;
@@ -68,6 +70,10 @@ public class PatternFinderResult implements AnalyzerResult {
         _groupColumn = groupColumn;
         _crosstabs = crosstabs;
         _tokenizerConfiguration = tokenizerConfiguration;
+    }
+    
+    public TokenizerConfiguration getTokenizerConfiguration() {
+        return _tokenizerConfiguration;
     }
 
     public InputColumn<String> getColumn() {

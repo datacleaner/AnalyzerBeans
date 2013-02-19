@@ -45,7 +45,7 @@ public final class SimpleStringPattern extends AbstractReferenceData implements 
 
 	private static final long serialVersionUID = 1L;
 	private final String _expression;
-	private transient TokenPatternImpl _tokenPattern;
+	private transient TokenPattern _tokenPattern;
 	private transient DefaultTokenizer _tokenizer;
 	private transient TokenizerConfiguration _configuration;
 	
