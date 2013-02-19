@@ -22,6 +22,7 @@ package org.eobjects.analyzer.beans;
 import java.util.Collection;
 
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnalyzerResultReducer;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
@@ -33,17 +34,26 @@ public class CompletenessAnalyzerResultReducer implements AnalyzerResultReducer<
     public CompletenessAnalyzerResult reduce(Collection<? extends CompletenessAnalyzerResult> results) {
         final CompletenessAnalyzerResult firstResult = results.iterator().next();
 
-        RowAnnotationFactory annotationFactory = new InMemoryRowAnnotationFactory();
-        RowAnnotation annotation = annotationFactory.createAnnotation();
-        InputColumn<?>[] highlightedColumns = firstResult.getHighlightedColumns();
-        
-        
+        final RowAnnotationFactory annotationFactory = new InMemoryRowAnnotationFactory();
+        final RowAnnotation annotation = annotationFactory.createAnnotation();
+        final InputColumn<?>[] highlightedColumns = firstResult.getHighlightedColumns();
+
         int totalRowCount = 0;
         for (CompletenessAnalyzerResult result : results) {
+            final InputRow[] rows = result.getRows();
+            final int invalidRowCount = result.getInvalidRowCount();
+            if (invalidRowCount == rows.length) {
+                // if the rows are included for preview/sampling - then
+                // re-annotate them in the master result
+                annotationFactory.annotate(rows, annotation);
+            } else {
+                // else we just transfer annotation counts
+                annotationFactory.transferAnnotations(result.getAnnotation(), annotation);
+            }
+
             totalRowCount += result.getTotalRowCount();
-            annotationFactory.transferAnnotations(result.getAnnotation(), annotation);
         }
-        
+
         return new CompletenessAnalyzerResult(totalRowCount, annotation, annotationFactory, highlightedColumns);
     }
 

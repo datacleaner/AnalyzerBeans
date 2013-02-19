@@ -46,6 +46,14 @@ public interface RowAnnotationFactory {
      * @return a new annotation
      */
     public RowAnnotation createAnnotation();
+    
+    /**
+     * Annotates an array of rows (all assumed to have distinct count = 1).
+     * 
+     * @param rows
+     * @param annotation
+     */
+    public void annotate(InputRow[] rows, RowAnnotation annotation);
 
     /**
      * Annotates/labels a row with an annotation. The row will be retrievable

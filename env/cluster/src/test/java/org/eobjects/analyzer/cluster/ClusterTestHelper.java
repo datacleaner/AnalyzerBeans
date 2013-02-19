@@ -241,8 +241,7 @@ public class ClusterTestHelper {
 		InputRow[] rows = completenessAnalyzerResult.getRows();
 		Assert.assertNotNull(rows);
 		
-		// TODO: Enable assertion, but fix row transfer first.
-		// Assert.assertTrue("No annotated rows available", rows.length > 0);
+		Assert.assertTrue("No annotated rows available", rows.length > 0);
 	}
 
 	/**

@@ -98,6 +98,13 @@ public class SqlDatabaseRowAnnotationFactory implements RowAnnotationFactory {
     }
 
     @Override
+    public void annotate(InputRow[] rows, RowAnnotation annotation) {
+        for (InputRow row : rows) {
+            annotate(row, 1, annotation);
+        }
+    }
+
+    @Override
     public synchronized void annotate(InputRow row, int distinctCount, RowAnnotation annotation) {
         RowAnnotationImpl a = (RowAnnotationImpl) annotation;
 

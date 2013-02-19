@@ -51,6 +51,13 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
             _storedRowsThreshold = storedRowsThreshold;
         }
     }
+    
+    @Override
+    public void annotate(InputRow[] rows, RowAnnotation annotation) {
+        for (InputRow row : rows) {
+            annotate(row, 1, annotation);
+        }
+    }
 
     @Override
     public final void annotate(InputRow row, int distinctCount, RowAnnotation annotation) {
