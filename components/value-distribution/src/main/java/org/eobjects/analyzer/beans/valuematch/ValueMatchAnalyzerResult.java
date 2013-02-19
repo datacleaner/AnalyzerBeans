@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AbstractValueCountingAnalyzerResult;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
@@ -33,10 +34,12 @@ import org.eobjects.analyzer.result.ValueCount;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.LabelUtils;
+import org.eobjects.metamodel.util.SerializableRef;
 
 /**
  * Represents the result of the {@link ValueMatchAnalyzer}.
  */
+@Distributed(reducer = ValueMatchAnalyzerResultReducer.class)
 public class ValueMatchAnalyzerResult extends AbstractValueCountingAnalyzerResult {
 
     private static final long serialVersionUID = 1L;
@@ -46,14 +49,13 @@ public class ValueMatchAnalyzerResult extends AbstractValueCountingAnalyzerResul
     private final RowAnnotation _nullAnnotation;
     private final RowAnnotation _nonMatchingValuesAnnotation;
     private final int _totalCount;
-
-    private final transient RowAnnotationFactory _rowAnnotationFactory;
+    private final SerializableRef<RowAnnotationFactory> _rowAnnotationFactoryRef;
 
     public ValueMatchAnalyzerResult(InputColumn<?> column, RowAnnotationFactory rowAnnotationFactory,
             Map<String, RowAnnotation> valueAnnotations, RowAnnotation nullAnnotation,
             RowAnnotation nonMatchingValuesAnnotation, int totalCount) {
         _column = column;
-        _rowAnnotationFactory = rowAnnotationFactory;
+        _rowAnnotationFactoryRef = new SerializableRef<RowAnnotationFactory>(rowAnnotationFactory);
         _valueAnnotations = valueAnnotations;
         _nullAnnotation = nullAnnotation;
         _nonMatchingValuesAnnotation = nonMatchingValuesAnnotation;
@@ -79,8 +81,8 @@ public class ValueMatchAnalyzerResult extends AbstractValueCountingAnalyzerResul
         }
         return annotation.getRowCount();
     }
-    
-    @Metric(value = "Unexpected value count", supportsInClause = true)
+
+    @Metric(value = "Unexpected value count")
     @Override
     public Integer getUnexpectedValueCount() {
         return _nonMatchingValuesAnnotation.getRowCount();
@@ -88,18 +90,12 @@ public class ValueMatchAnalyzerResult extends AbstractValueCountingAnalyzerResul
 
     @Override
     public AnnotatedRowsResult getAnnotatedRowsForUnexpectedValues() {
-        if (_rowAnnotationFactory == null) {
-            return null;
-        }
-        return new AnnotatedRowsResult(_nonMatchingValuesAnnotation, _rowAnnotationFactory, _column);
+        return new AnnotatedRowsResult(_nonMatchingValuesAnnotation, _rowAnnotationFactoryRef.get(), _column);
     }
 
     @Override
     public AnnotatedRowsResult getAnnotatedRowsForNull() {
-        if (_rowAnnotationFactory == null) {
-            return null;
-        }
-        return new AnnotatedRowsResult(_nullAnnotation, _rowAnnotationFactory, _column);
+        return new AnnotatedRowsResult(_nullAnnotation, _rowAnnotationFactoryRef.get(), _column);
     }
 
     @Override
@@ -110,14 +106,18 @@ public class ValueMatchAnalyzerResult extends AbstractValueCountingAnalyzerResul
         if (LabelUtils.UNEXPECTED_LABEL.equals(value)) {
             return getAnnotatedRowsForUnexpectedValues();
         }
-        if (_rowAnnotationFactory == null) {
+        if (_rowAnnotationFactoryRef.get() == null) {
             return null;
         }
         final RowAnnotation annotation = _valueAnnotations.get(value);
         if (annotation == null) {
             return null;
         }
-        return new AnnotatedRowsResult(annotation, _rowAnnotationFactory, _column);
+        return new AnnotatedRowsResult(annotation, _rowAnnotationFactoryRef.get(), _column);
+    }
+
+    public InputColumn<?> getColumn() {
+        return _column;
     }
 
     @Override
@@ -143,6 +143,10 @@ public class ValueMatchAnalyzerResult extends AbstractValueCountingAnalyzerResul
         return result;
     }
 
+    public Map<String, RowAnnotation> getExpectedValueAnnotations() {
+        return _valueAnnotations;
+    }
+
     @Override
     public Integer getDistinctCount() {
         // not applicable
@@ -163,7 +167,7 @@ public class ValueMatchAnalyzerResult extends AbstractValueCountingAnalyzerResul
 
     @Override
     public boolean hasAnnotatedRows(String value) {
-        if (_rowAnnotationFactory == null) {
+        if (_rowAnnotationFactoryRef.get() == null) {
             return false;
         }
         if (value == null) {

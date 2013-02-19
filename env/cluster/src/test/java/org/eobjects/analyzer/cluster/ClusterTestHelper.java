@@ -27,6 +27,8 @@ import org.eobjects.analyzer.beans.CompletenessAnalyzer.Condition;
 import org.eobjects.analyzer.beans.CompletenessAnalyzerResult;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
+import org.eobjects.analyzer.beans.valuematch.ValueMatchAnalyzer;
+import org.eobjects.analyzer.beans.valuematch.ValueMatchAnalyzerResult;
 import org.eobjects.analyzer.beans.writers.InsertIntoTableAnalyzer;
 import org.eobjects.analyzer.beans.writers.WriteBufferSizeOption;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
@@ -62,296 +64,286 @@ import org.junit.Assert;
 
 public class ClusterTestHelper {
 
-	/**
-	 * Creates a {@link AnalyzerBeansConfiguration} object (based on a few
-	 * parameters), typically to use in test methods of this class.
-	 * 
-	 * @param testName
-	 * @param multiThreaded
-	 * @return
-	 */
-	public static AnalyzerBeansConfiguration createConfiguration(
-			String testName, boolean multiThreaded) {
-		final JdbcDatastore csvDatastore = new JdbcDatastore("csv",
-				"jdbc:h2:mem:" + testName, "org.h2.Driver", "SA", "", true);
-		final UpdateableDatastoreConnection con = csvDatastore.openConnection();
-		con.getUpdateableDataContext().executeUpdate(new UpdateScript() {
-			@Override
-			public void run(UpdateCallback callback) {
-				Schema schema = callback.getDataContext().getDefaultSchema();
-				if (schema.getTableByName("testtable") != null) {
-					return;
-				}
-				callback.createTable(schema, "testtable").withColumn("id")
-						.ofType(ColumnType.INTEGER).asPrimaryKey()
-						.withColumn("name").ofType(ColumnType.VARCHAR)
-						.execute();
-			}
-		});
-		con.close();
+    /**
+     * Creates a {@link AnalyzerBeansConfiguration} object (based on a few
+     * parameters), typically to use in test methods of this class.
+     * 
+     * @param testName
+     * @param multiThreaded
+     * @return
+     */
+    public static AnalyzerBeansConfiguration createConfiguration(String testName, boolean multiThreaded) {
+        final JdbcDatastore csvDatastore = new JdbcDatastore("csv", "jdbc:h2:mem:" + testName, "org.h2.Driver", "SA",
+                "", true);
+        final UpdateableDatastoreConnection con = csvDatastore.openConnection();
+        con.getUpdateableDataContext().executeUpdate(new UpdateScript() {
+            @Override
+            public void run(UpdateCallback callback) {
+                Schema schema = callback.getDataContext().getDefaultSchema();
+                if (schema.getTableByName("testtable") != null) {
+                    return;
+                }
+                callback.createTable(schema, "testtable").withColumn("id").ofType(ColumnType.INTEGER).asPrimaryKey()
+                        .withColumn("name").ofType(ColumnType.VARCHAR).execute();
+            }
+        });
+        con.close();
 
-		final Datastore databaseDatastore = TestHelper
-				.createSampleDatabaseDatastore("orderdb");
+        final Datastore databaseDatastore = TestHelper.createSampleDatabaseDatastore("orderdb");
 
-		final DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(
-				databaseDatastore, csvDatastore);
-		final TaskRunner taskRunner;
-		if (multiThreaded) {
-			taskRunner = new MultiThreadedTaskRunner(20);
-		} else {
-			taskRunner = new SingleThreadedTaskRunner();
-		}
-		final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider(
-				true);
-		descriptorProvider.addFilterBeanDescriptor(Descriptors
-				.ofFilter(MaxRowsFilter.class));
-		descriptorProvider.addTransformerBeanDescriptor(Descriptors
-				.ofTransformer(MockTransformerThatWillFail.class));
-		descriptorProvider.addTransformerBeanDescriptor(Descriptors
-				.ofTransformer(ConcatenatorTransformer.class));
-		descriptorProvider.addAnalyzerBeanDescriptor(Descriptors
-				.ofAnalyzer(InsertIntoTableAnalyzer.class));
-		descriptorProvider.addAnalyzerBeanDescriptor(Descriptors
-				.ofAnalyzer(CompletenessAnalyzer.class));
-		descriptorProvider.addAnalyzerBeanDescriptor(Descriptors
-				.ofAnalyzer(MockAnalyzerWithBadReducer.class));
+        final DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(databaseDatastore, csvDatastore);
+        final TaskRunner taskRunner;
+        if (multiThreaded) {
+            taskRunner = new MultiThreadedTaskRunner(20);
+        } else {
+            taskRunner = new SingleThreadedTaskRunner();
+        }
+        final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider(true);
+        descriptorProvider.addFilterBeanDescriptor(Descriptors.ofFilter(MaxRowsFilter.class));
+        descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(MockTransformerThatWillFail.class));
+        descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(ConcatenatorTransformer.class));
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(InsertIntoTableAnalyzer.class));
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(CompletenessAnalyzer.class));
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(ValueMatchAnalyzer.class));
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(MockAnalyzerWithBadReducer.class));
 
-		final AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
-				.replace(taskRunner).replace(datastoreCatalog)
-				.replace(descriptorProvider);
-		return configuration;
-	}
+        final AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner)
+                .replace(datastoreCatalog).replace(descriptorProvider);
+        return configuration;
+    }
 
-	/**
-	 * Runs a job that verifies that errors (caused by the
-	 * {@link MockTransformerThatWillFail} dummy component) are picked up
-	 * correctly from the slave nodes.
-	 * 
-	 * @param configuration
-	 * @param virtualClusterManager
-	 * @return the list of errors returned, to perform further assertions
-	 */
-	public static List<Throwable> runErrorHandlingJob(
-			AnalyzerBeansConfiguration configuration,
-			ClusterManager clusterManager) {
-		final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(
-				configuration);
-		jobBuilder.setDatastore("orderdb");
-		jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER");
+    /**
+     * Runs a job that verifies that errors (caused by the
+     * {@link MockTransformerThatWillFail} dummy component) are picked up
+     * correctly from the slave nodes.
+     * 
+     * @param configuration
+     * @param virtualClusterManager
+     * @return the list of errors returned, to perform further assertions
+     */
+    public static List<Throwable> runErrorHandlingJob(AnalyzerBeansConfiguration configuration,
+            ClusterManager clusterManager) {
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        jobBuilder.setDatastore("orderdb");
+        jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER");
 
-		final TransformerJobBuilder<MockTransformerThatWillFail> transformer = jobBuilder
-				.addTransformer(MockTransformerThatWillFail.class);
-		transformer.addInputColumns(jobBuilder.getSourceColumns());
+        final TransformerJobBuilder<MockTransformerThatWillFail> transformer = jobBuilder
+                .addTransformer(MockTransformerThatWillFail.class);
+        transformer.addInputColumns(jobBuilder.getSourceColumns());
 
-		final AnalyzerJobBuilder<CompletenessAnalyzer> analyzer = jobBuilder
-				.addAnalyzer(CompletenessAnalyzer.class);
-		analyzer.addInputColumns(transformer.getOutputColumns());
-		analyzer.setConfiguredProperty(
-				"Conditions",
-				new CompletenessAnalyzer.Condition[] { CompletenessAnalyzer.Condition.NOT_BLANK_OR_NULL });
+        final AnalyzerJobBuilder<CompletenessAnalyzer> analyzer = jobBuilder.addAnalyzer(CompletenessAnalyzer.class);
+        analyzer.addInputColumns(transformer.getOutputColumns());
+        analyzer.setConfiguredProperty("Conditions",
+                new CompletenessAnalyzer.Condition[] { CompletenessAnalyzer.Condition.NOT_BLANK_OR_NULL });
 
-		// build the job
-		final AnalysisJob job = jobBuilder.toAnalysisJob();
+        // build the job
+        final AnalysisJob job = jobBuilder.toAnalysisJob();
 
-		// run the job in a distributed fashion
-		final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(
-				configuration, clusterManager);
-		final AnalysisResultFuture resultFuture = runner.run(job);
+        // run the job in a distributed fashion
+        final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
+        final AnalysisResultFuture resultFuture = runner.run(job);
 
-		switch (resultFuture.getStatus()) {
-		case NOT_FINISHED:
-		case ERRORNOUS:
-			break;
-		default:
-			Assert.fail("Unexpected job status: " + resultFuture.getStatus());
-		}
+        switch (resultFuture.getStatus()) {
+        case NOT_FINISHED:
+        case ERRORNOUS:
+            break;
+        default:
+            Assert.fail("Unexpected job status: " + resultFuture.getStatus());
+        }
 
-		resultFuture.await();
+        resultFuture.await();
 
-		if (resultFuture.isSuccessful()) {
-			Assert.fail("Job that was supposed to fail was succesful! Results: "
-					+ resultFuture.getResultMap());
-		}
+        if (resultFuture.isSuccessful()) {
+            Assert.fail("Job that was supposed to fail was succesful! Results: " + resultFuture.getResultMap());
+        }
 
-		Assert.assertEquals(JobStatus.ERRORNOUS, resultFuture.getStatus());
+        Assert.assertEquals(JobStatus.ERRORNOUS, resultFuture.getStatus());
 
-		final List<Throwable> errors = resultFuture.getErrors();
+        final List<Throwable> errors = resultFuture.getErrors();
 
-		Assert.assertNotNull(errors);
-		Assert.assertFalse(errors.isEmpty());
+        Assert.assertNotNull(errors);
+        Assert.assertFalse(errors.isEmpty());
 
-		jobBuilder.close();
+        jobBuilder.close();
 
-		return errors;
-	}
+        return errors;
+    }
 
-	public static void runCompletenessAnalyzerJob(
-			AnalyzerBeansConfiguration configuration,
-			ClusterManager clusterManager) throws Throwable {
-		// build a job that concats names and inserts the concatenated names
-		// into a file
-		final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(
-				configuration);
-		jobBuilder.setDatastore("orderdb");
-		jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER",
-				"CUSTOMERS.CONTACTFIRSTNAME", "CUSTOMERS.CONTACTLASTNAME",
-				"CUSTOMERS.PHONE", "CUSTOMERS.ADDRESSLINE2");
+    public static void runCompletenessAndValueMatcherAnalyzerJob(AnalyzerBeansConfiguration configuration,
+            ClusterManager clusterManager) throws Throwable {
+        // build a job that concats names and inserts the concatenated names
+        // into a file
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        jobBuilder.setDatastore("orderdb");
+        jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER", "CUSTOMERS.CONTACTFIRSTNAME",
+                "CUSTOMERS.CONTACTLASTNAME", "CUSTOMERS.COUNTRY", "CUSTOMERS.ADDRESSLINE2");
 
-		List<MetaModelInputColumn> cols = jobBuilder.getSourceColumns();
-		AnalyzerJobBuilder<CompletenessAnalyzer> completeness = jobBuilder
-				.addAnalyzer(CompletenessAnalyzer.class);
-		completeness.addInputColumns(cols);
-		Condition[] conditions = new CompletenessAnalyzer.Condition[cols.size()];
-		for (int i = 0; i < conditions.length; i++) {
-			conditions[i] = Condition.NOT_BLANK_OR_NULL;
-		}
-		completeness.setConfiguredProperty("Conditions", conditions);
+        List<MetaModelInputColumn> cols = jobBuilder.getSourceColumns();
+        AnalyzerJobBuilder<CompletenessAnalyzer> completeness = jobBuilder.addAnalyzer(CompletenessAnalyzer.class);
+        completeness.addInputColumns(cols);
+        Condition[] conditions = new CompletenessAnalyzer.Condition[cols.size()];
+        for (int i = 0; i < conditions.length; i++) {
+            conditions[i] = Condition.NOT_BLANK_OR_NULL;
+        }
+        completeness.setConfiguredProperty("Conditions", conditions);
 
-		final AnalysisJob job = jobBuilder.toAnalysisJob();
+        AnalyzerJobBuilder<ValueMatchAnalyzer> valueMatch = jobBuilder.addAnalyzer(ValueMatchAnalyzer.class);
+        valueMatch.addInputColumn(jobBuilder.getSourceColumnByName("COUNTRY"));
+        valueMatch.setConfiguredProperty("Expected values", new String[] { "United States", "USA", "Denmark",
+                "Danmark", "Netherlands" });
 
-		// run the job in a distributed fashion
-		final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(
-				configuration, clusterManager);
-		final AnalysisResultFuture resultFuture = runner.run(job);
+        final AnalysisJob job = jobBuilder.toAnalysisJob();
 
-		Assert.assertEquals(JobStatus.NOT_FINISHED, resultFuture.getStatus());
+        // run the job in a distributed fashion
+        final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
+        final AnalysisResultFuture resultFuture = runner.run(job);
 
-		jobBuilder.close();
-		resultFuture.await();
+        Assert.assertEquals(JobStatus.NOT_FINISHED, resultFuture.getStatus());
 
-		if (resultFuture.isErrornous()) {
-			List<Throwable> errors = resultFuture.getErrors();
-			throw errors.get(0);
-		}
+        jobBuilder.close();
+        resultFuture.await();
 
-		Assert.assertEquals(JobStatus.SUCCESSFUL, resultFuture.getStatus());
+        if (resultFuture.isErrornous()) {
+            List<Throwable> errors = resultFuture.getErrors();
+            throw errors.get(0);
+        }
 
-		AnalyzerResult analyzerResult = resultFuture.getResult(job
-				.getAnalyzerJobs().iterator().next());
+        Assert.assertEquals(JobStatus.SUCCESSFUL, resultFuture.getStatus());
 
-		Assert.assertNotNull(analyzerResult);
-		Assert.assertEquals(CompletenessAnalyzerResult.class,
-				analyzerResult.getClass());
+        final List<AnalyzerResult> results = resultFuture.getResults();
+        Assert.assertEquals(2, results.size());
 
-		CompletenessAnalyzerResult completenessAnalyzerResult = (CompletenessAnalyzerResult) analyzerResult;
+        for (AnalyzerResult analyzerResult : results) {
+            Assert.assertNotNull(analyzerResult);
+            if (analyzerResult instanceof CompletenessAnalyzerResult) {
+                // Check completeness analyzer result
 
-		Assert.assertEquals(109,
-				completenessAnalyzerResult.getInvalidRowCount());
-		
-		InputRow[] rows = completenessAnalyzerResult.getRows();
-		Assert.assertNotNull(rows);
-		
-		Assert.assertTrue("No annotated rows available", rows.length > 0);
-	}
+                CompletenessAnalyzerResult completenessAnalyzerResult = (CompletenessAnalyzerResult) analyzerResult;
 
-	/**
-	 * Runs a simple job that is fully distributable and should be able to
-	 * execute in all contexts. The job does one transformation (concatenates
-	 * two fields) and inserts this field, together with a source field, into
-	 * another table.
-	 * 
-	 * @param configuration
-	 * @param clusterManager
-	 * @throws Throwable
-	 */
-	public static void runConcatAndInsertJob(
-			AnalyzerBeansConfiguration configuration,
-			ClusterManager clusterManager) throws Throwable {
-		// build a job that concats names and inserts the concatenated names
-		// into a file
-		final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(
-				configuration);
-		jobBuilder.setDatastore("orderdb");
-		jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER",
-				"CUSTOMERS.CONTACTFIRSTNAME", "CUSTOMERS.CONTACTLASTNAME");
+                Assert.assertEquals(109, completenessAnalyzerResult.getInvalidRowCount());
 
-		// concatenate firstname + lastname
-		final TransformerJobBuilder<ConcatenatorTransformer> concatenator = jobBuilder
-				.addTransformer(ConcatenatorTransformer.class);
-		concatenator.addInputColumn(jobBuilder
-				.getSourceColumnByName("CONTACTFIRSTNAME"));
-		concatenator.addInputColumn(jobBuilder
-				.getSourceColumnByName("CONTACTLASTNAME"));
-		concatenator.setConfiguredProperty("Separator", " ");
+                InputRow[] rows = completenessAnalyzerResult.getRows();
+                Assert.assertNotNull(rows);
 
-		// insert into CSV file
-		final Datastore csvDatastore = configuration.getDatastoreCatalog()
-				.getDatastore("csv");
-		final Datastore dbDatastore = configuration.getDatastoreCatalog()
-				.getDatastore("orderdb");
-		final DatastoreConnection csvCon = csvDatastore.openConnection();
-		final DatastoreConnection dbCon = dbDatastore.openConnection();
-		try {
-			Schema schema = csvCon.getDataContext().getDefaultSchema();
-			final String schemaName = schema.getName();
-			final String tableName = schema.getTable(0).getName();
+                Assert.assertTrue("No annotated rows available in CompletenessAnalyzer's result", rows.length > 0);
 
-			final AnalyzerJobBuilder<InsertIntoTableAnalyzer> insert = jobBuilder
-					.addAnalyzer(InsertIntoTableAnalyzer.class);
-			insert.setConfiguredProperty("Datastore", csvDatastore);
-			insert.addInputColumn(jobBuilder
-					.getSourceColumnByName("CUSTOMERNUMBER"));
-			insert.addInputColumn(concatenator.getOutputColumns().get(0));
-			insert.setConfiguredProperty("Schema name", schemaName);
-			insert.setConfiguredProperty("Table name", tableName);
-			insert.setConfiguredProperty("Column names", new String[] { "id",
-					"name" });
-			insert.setConfiguredProperty("Buffer size",
-					WriteBufferSizeOption.TINY);
+            } else if (analyzerResult instanceof ValueMatchAnalyzerResult) {
 
-			// build the job
-			final AnalysisJob job = jobBuilder.toAnalysisJob();
+                ValueMatchAnalyzerResult valueMatchAnalyzerResult = (ValueMatchAnalyzerResult) analyzerResult;
+                Assert.assertEquals(0, valueMatchAnalyzerResult.getNullCount());
+                
+                Assert.assertEquals(83, valueMatchAnalyzerResult.getUnexpectedValueCount().intValue());
+                InputRow[] rows = valueMatchAnalyzerResult.getAnnotatedRowsForUnexpectedValues().getRows();
+                Assert.assertTrue(rows.length > 0);
+                Assert.assertTrue(rows.length < 83);
+                Assert.assertEquals("MetaModelInputRow[Row[values=[France, null, 103, Carine, Schmitt]]]", rows[0].toString());
 
-			// run the job in a distributed fashion
-			final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(
-					configuration, clusterManager);
-			final AnalysisResultFuture resultFuture = runner.run(job);
+                Assert.assertEquals(2, valueMatchAnalyzerResult.getCount("Denmark").intValue());
+                rows = valueMatchAnalyzerResult.getAnnotatedRowsForValue("Denmark").getRows();
+                Assert.assertEquals(2, rows.length);
+                Assert.assertEquals("MetaModelInputRow[Row[values=[Denmark, null, 145, Jytte, Petersen]]]",
+                        rows[0].toString());
+                Assert.assertEquals("MetaModelInputRow[Row[values=[Denmark, null, 227, Palle, Ibsen]]]",
+                        rows[1].toString());
+            } else {
+                Assert.fail("Unexpected analyzer result found: " + analyzerResult);
+            }
+        }
 
-			Assert.assertEquals(JobStatus.NOT_FINISHED,
-					resultFuture.getStatus());
+    }
 
-			resultFuture.await();
+    /**
+     * Runs a simple job that is fully distributable and should be able to
+     * execute in all contexts. The job does one transformation (concatenates
+     * two fields) and inserts this field, together with a source field, into
+     * another table.
+     * 
+     * @param configuration
+     * @param clusterManager
+     * @throws Throwable
+     */
+    public static void runConcatAndInsertJob(AnalyzerBeansConfiguration configuration, ClusterManager clusterManager)
+            throws Throwable {
+        // build a job that concats names and inserts the concatenated names
+        // into a file
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        jobBuilder.setDatastore("orderdb");
+        jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER", "CUSTOMERS.CONTACTFIRSTNAME",
+                "CUSTOMERS.CONTACTLASTNAME");
 
-			if (resultFuture.isErrornous()) {
-				List<Throwable> errors = resultFuture.getErrors();
-				throw errors.get(0);
-			}
+        // concatenate firstname + lastname
+        final TransformerJobBuilder<ConcatenatorTransformer> concatenator = jobBuilder
+                .addTransformer(ConcatenatorTransformer.class);
+        concatenator.addInputColumn(jobBuilder.getSourceColumnByName("CONTACTFIRSTNAME"));
+        concatenator.addInputColumn(jobBuilder.getSourceColumnByName("CONTACTLASTNAME"));
+        concatenator.setConfiguredProperty("Separator", " ");
 
-			Assert.assertEquals(JobStatus.SUCCESSFUL, resultFuture.getStatus());
+        // insert into CSV file
+        final Datastore csvDatastore = configuration.getDatastoreCatalog().getDatastore("csv");
+        final Datastore dbDatastore = configuration.getDatastoreCatalog().getDatastore("orderdb");
+        final DatastoreConnection csvCon = csvDatastore.openConnection();
+        final DatastoreConnection dbCon = dbDatastore.openConnection();
+        try {
+            Schema schema = csvCon.getDataContext().getDefaultSchema();
+            final String schemaName = schema.getName();
+            final String tableName = schema.getTable(0).getName();
 
-			// check that the file created has the same amount of records as the
-			// CUSTOMER table of orderdb.
-			DataSet ds1 = dbCon.getDataContext().query().from("CUSTOMERS")
-					.selectCount().execute();
-			DataSet ds2 = csvCon.getDataContext().query().from(tableName)
-					.selectCount().execute();
-			try {
-				Assert.assertTrue(ds1.next());
-				Assert.assertTrue(ds2.next());
-				Assert.assertEquals(ds1.getRow().toString(), ds2.getRow()
-						.toString());
-			} finally {
-				ds1.close();
-				ds2.close();
-			}
+            final AnalyzerJobBuilder<InsertIntoTableAnalyzer> insert = jobBuilder
+                    .addAnalyzer(InsertIntoTableAnalyzer.class);
+            insert.setConfiguredProperty("Datastore", csvDatastore);
+            insert.addInputColumn(jobBuilder.getSourceColumnByName("CUSTOMERNUMBER"));
+            insert.addInputColumn(concatenator.getOutputColumns().get(0));
+            insert.setConfiguredProperty("Schema name", schemaName);
+            insert.setConfiguredProperty("Table name", tableName);
+            insert.setConfiguredProperty("Column names", new String[] { "id", "name" });
+            insert.setConfiguredProperty("Buffer size", WriteBufferSizeOption.TINY);
 
-			// await multiple times to ensure that second time isn't distorting
-			// the result
-			resultFuture.await();
-			resultFuture.await();
+            // build the job
+            final AnalysisJob job = jobBuilder.toAnalysisJob();
 
-			// check that the analysis result elements are there...
-			final Map<ComponentJob, AnalyzerResult> resultMap = resultFuture
-					.getResultMap();
-			Assert.assertEquals(1, resultMap.size());
-			Assert.assertEquals(
-					"{ImmutableAnalyzerJob[name=null,analyzer=Insert into table]=122 inserts executed}",
-					resultMap.toString());
+            // run the job in a distributed fashion
+            final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
+            final AnalysisResultFuture resultFuture = runner.run(job);
 
-		} finally {
-			dbCon.close();
-			csvCon.close();
-			jobBuilder.close();
-		}
-	}
+            Assert.assertEquals(JobStatus.NOT_FINISHED, resultFuture.getStatus());
+
+            resultFuture.await();
+
+            if (resultFuture.isErrornous()) {
+                List<Throwable> errors = resultFuture.getErrors();
+                throw errors.get(0);
+            }
+
+            Assert.assertEquals(JobStatus.SUCCESSFUL, resultFuture.getStatus());
+
+            // check that the file created has the same amount of records as the
+            // CUSTOMER table of orderdb.
+            DataSet ds1 = dbCon.getDataContext().query().from("CUSTOMERS").selectCount().execute();
+            DataSet ds2 = csvCon.getDataContext().query().from(tableName).selectCount().execute();
+            try {
+                Assert.assertTrue(ds1.next());
+                Assert.assertTrue(ds2.next());
+                Assert.assertEquals(ds1.getRow().toString(), ds2.getRow().toString());
+            } finally {
+                ds1.close();
+                ds2.close();
+            }
+
+            // await multiple times to ensure that second time isn't distorting
+            // the result
+            resultFuture.await();
+            resultFuture.await();
+
+            // check that the analysis result elements are there...
+            final Map<ComponentJob, AnalyzerResult> resultMap = resultFuture.getResultMap();
+            Assert.assertEquals(1, resultMap.size());
+            Assert.assertEquals("{ImmutableAnalyzerJob[name=null,analyzer=Insert into table]=122 inserts executed}",
+                    resultMap.toString());
+
+        } finally {
+            dbCon.close();
+            csvCon.close();
+            jobBuilder.close();
+        }
+    }
 }

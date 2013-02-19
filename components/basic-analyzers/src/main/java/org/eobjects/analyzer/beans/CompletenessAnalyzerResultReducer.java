@@ -21,21 +21,29 @@ package org.eobjects.analyzer.beans;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.AnalyzerResultReducer;
-import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 
+/**
+ * Reducer of {@link CompletenessAnalyzerResult}s
+ */
 public class CompletenessAnalyzerResultReducer implements AnalyzerResultReducer<CompletenessAnalyzerResult> {
+
+    @Inject
+    @Provided
+    RowAnnotationFactory _rowAnnotationFactory;
 
     @Override
     public CompletenessAnalyzerResult reduce(Collection<? extends CompletenessAnalyzerResult> results) {
         final CompletenessAnalyzerResult firstResult = results.iterator().next();
 
-        final RowAnnotationFactory annotationFactory = new InMemoryRowAnnotationFactory();
-        final RowAnnotation annotation = annotationFactory.createAnnotation();
+        final RowAnnotation annotation = _rowAnnotationFactory.createAnnotation();
         final InputColumn<?>[] highlightedColumns = firstResult.getHighlightedColumns();
 
         int totalRowCount = 0;
@@ -45,16 +53,16 @@ public class CompletenessAnalyzerResultReducer implements AnalyzerResultReducer<
             if (invalidRowCount == rows.length) {
                 // if the rows are included for preview/sampling - then
                 // re-annotate them in the master result
-                annotationFactory.annotate(rows, annotation);
+                _rowAnnotationFactory.annotate(rows, annotation);
             } else {
                 // else we just transfer annotation counts
-                annotationFactory.transferAnnotations(result.getAnnotation(), annotation);
+                _rowAnnotationFactory.transferAnnotations(result.getAnnotation(), annotation);
             }
 
             totalRowCount += result.getTotalRowCount();
         }
 
-        return new CompletenessAnalyzerResult(totalRowCount, annotation, annotationFactory, highlightedColumns);
+        return new CompletenessAnalyzerResult(totalRowCount, annotation, _rowAnnotationFactory, highlightedColumns);
     }
 
 }

@@ -52,7 +52,7 @@ public class DistributedAnalysisRunnerTest extends TestCase {
     public void testRunCompletenessAnalyzer() throws Throwable {
     	final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), true);
 
-        ClusterTestHelper.runCompletenessAnalyzerJob(configuration, new VirtualClusterManager(configuration, 3));
+        ClusterTestHelper.runCompletenessAndValueMatcherAnalyzerJob(configuration, new VirtualClusterManager(configuration, 3));
 	}
 
     public void testErrorHandlingSingleSlave() throws Exception {

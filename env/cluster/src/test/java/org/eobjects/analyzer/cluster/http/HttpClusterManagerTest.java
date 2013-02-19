@@ -84,7 +84,7 @@ public class HttpClusterManagerTest extends TestCase {
     
     public void testCompletenessAnalyzer() throws Throwable {
     	 final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass().getSimpleName() + "_" + getName(), false);
-         ClusterTestHelper.runCompletenessAnalyzerJob(configuration, clusterManager);
+         ClusterTestHelper.runCompletenessAndValueMatcherAnalyzerJob(configuration, clusterManager);
     }
 
     private Server createServer(int port, boolean multiThreaded) throws Exception {
