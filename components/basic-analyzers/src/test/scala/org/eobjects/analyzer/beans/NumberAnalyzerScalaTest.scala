@@ -40,6 +40,8 @@ Mean                    3
 Geometric mean       2.61 
 Standard deviation   1.58 
 Variance              2.5 
+Second moment          10 
+Sum of squares         55 
 Median                  3 
 25th percentile       1.5 
 75th percentile       4.5 
