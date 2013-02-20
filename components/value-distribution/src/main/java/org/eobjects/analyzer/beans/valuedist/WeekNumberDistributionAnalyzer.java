@@ -37,6 +37,7 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.NumberProperty;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
@@ -52,6 +53,7 @@ import org.eobjects.metamodel.util.Weekday;
 @Description("Finds the distribution of week numbers from Date values.")
 @Concurrent(true)
 @Categorized(DateAndTimeCategory.class)
+@Distributed(reducer=DatePartDistributionResultReducer.class)
 public class WeekNumberDistributionAnalyzer implements Analyzer<CrosstabResult> {
 
     @Configured

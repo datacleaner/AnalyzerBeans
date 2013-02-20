@@ -26,13 +26,21 @@ import java.util.Date;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
+import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 
 import junit.framework.TestCase;
 
 public class WeekdayDistributionAnalyzerTest extends TestCase {
-
+    
+    public void testDescriptorIsDistributable() throws Exception {
+        AnalyzerBeanDescriptor<WeekdayDistributionAnalyzer> desc = Descriptors.ofAnalyzer(WeekdayDistributionAnalyzer.class);
+        
+        assertTrue(desc.isDistributable());
+    }
+    
 	public void testTypicalUsage() throws Exception {
 		WeekdayDistributionAnalyzer analyzer = new WeekdayDistributionAnalyzer();
 

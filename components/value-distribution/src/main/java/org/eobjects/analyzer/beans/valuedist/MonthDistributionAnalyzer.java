@@ -34,6 +34,7 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.data.InputColumn;
@@ -48,6 +49,7 @@ import org.eobjects.metamodel.util.Month;
 @Description("Finds the distribution of months from Date values.")
 @Concurrent(true)
 @Categorized(DateAndTimeCategory.class)
+@Distributed(reducer=MonthDistributionResultReducer.class)
 public class MonthDistributionAnalyzer implements Analyzer<CrosstabResult> {
 
     private final Map<InputColumn<Date>, ConcurrentMap<Integer, AtomicInteger>> distributionMap;

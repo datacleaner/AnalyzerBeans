@@ -36,16 +36,10 @@ public abstract class AbstractCrosstabResultReducer<R extends CrosstabResult> im
 
     @Override
     public R reduce(Collection<? extends R> results) {
-        // just use the first result to define the crosstab structure
-        final R firstResult = results.iterator().next();
-
-        assert firstResult.getCrosstab().getDimensionCount() == 2;
-
-        final Class<?> valueClass = firstResult.getCrosstab().getValueClass();
-        final CrosstabDimension dimension1 = firstResult.getCrosstab().getDimension(0);
-        final CrosstabDimension dimension2 = firstResult.getCrosstab().getDimension(1);
-
-        final Crosstab<Serializable> masterCrosstab = createCrosstab(valueClass, dimension1, dimension2);
+        final Crosstab<Serializable> masterCrosstab = createMasterCrosstab(results);
+        final Class<?> valueClass = masterCrosstab.getValueClass();
+        final CrosstabDimension dimension1 = masterCrosstab.getDimension(0);
+        final CrosstabDimension dimension2 = masterCrosstab.getDimension(1);
 
         final CrosstabNavigator<Serializable> masterNav = masterCrosstab.navigate();
         for (String category1 : dimension1) {
@@ -59,12 +53,17 @@ public abstract class AbstractCrosstabResultReducer<R extends CrosstabResult> im
                 final List<Object> slaveValues = new ArrayList<Object>(results.size());
                 for (R result : results) {
                     final Crosstab<?> slaveCrosstab = result.getCrosstab();
-                    final Object slaveValue = slaveCrosstab.getValue(categories);
-                    slaveValues.add(slaveValue);
+                    try {
+                        final Object slaveValue = slaveCrosstab.getValue(categories);
+                        slaveValues.add(slaveValue);
 
-                    final ResultProducer resultProducer = slaveCrosstab.explore(categories);
-                    if (resultProducer != null) {
-                        slaveResultProducers.add(resultProducer);
+                        final ResultProducer resultProducer = slaveCrosstab.explore(categories);
+                        if (resultProducer != null) {
+                            slaveResultProducers.add(resultProducer);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // ignore this value - it was not present in one of the
+                        // slaves
                     }
                 }
 
@@ -84,6 +83,31 @@ public abstract class AbstractCrosstabResultReducer<R extends CrosstabResult> im
         return buildResult(masterCrosstab, results);
     }
 
+    /**
+     * Builds the master crosstab, including all dimensions and categories that
+     * will be included in the final result.
+     * 
+     * By default this method will use the first result's crosstab dimensions
+     * and categories, assuming that they are all the same.
+     * 
+     * Subclasses can override this method to build the other dimensions.
+     * 
+     * @param results
+     * @return
+     */
+    protected Crosstab<Serializable> createMasterCrosstab(Collection<? extends R> results) {
+        final R firstResult = results.iterator().next();
+        final Crosstab<?> firstCrosstab = firstResult.getCrosstab();
+
+        final Class<?> valueClass = firstCrosstab.getValueClass();
+        final CrosstabDimension dimension1 = firstCrosstab.getDimension(0);
+        final CrosstabDimension dimension2 = firstCrosstab.getDimension(1);
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        final Crosstab<Serializable> masterCrosstab = new Crosstab(valueClass, dimension1, dimension2);
+        return masterCrosstab;
+    }
+
     protected ResultProducer reduceResultProducers(List<ResultProducer> slaveResultProducers, String category1,
             String category2, Class<?> valueClass, Serializable masterValue) {
         for (ResultProducer resultProducer : slaveResultProducers) {
@@ -97,12 +121,6 @@ public abstract class AbstractCrosstabResultReducer<R extends CrosstabResult> im
             }
         }
         return null;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Crosstab<Serializable> createCrosstab(Class<?> valueClass, CrosstabDimension dimension1,
-            CrosstabDimension dimension2) {
-        return new Crosstab(valueClass, dimension1, dimension2);
     }
 
     protected abstract Serializable reduceValues(List<Object> slaveValues, String category1, String category2,

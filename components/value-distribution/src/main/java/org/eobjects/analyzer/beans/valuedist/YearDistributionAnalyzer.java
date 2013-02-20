@@ -37,6 +37,7 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.data.InputColumn;
@@ -50,6 +51,7 @@ import org.eobjects.analyzer.result.CrosstabResult;
 @Description("Finds the distribution of years from Date values.")
 @Concurrent(true)
 @Categorized(DateAndTimeCategory.class)
+@Distributed(reducer=DatePartDistributionResultReducer.class)
 public class YearDistributionAnalyzer implements Analyzer<CrosstabResult> {
 
     private final Map<InputColumn<Date>, ConcurrentMap<Integer, AtomicInteger>> distributionMap;

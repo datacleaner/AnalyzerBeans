@@ -31,6 +31,7 @@ import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.data.InputColumn;
@@ -44,6 +45,7 @@ import org.eobjects.analyzer.result.CrosstabResult;
 @Description("Finds the distribution of weekdays from Date values.")
 @Concurrent(true)
 @Categorized(DateAndTimeCategory.class)
+@Distributed(reducer=WeekdayDistributionResultReducer.class)
 public class WeekdayDistributionAnalyzer implements Analyzer<CrosstabResult> {
 
 	private final Map<InputColumn<Date>, Map<Integer, AtomicInteger>> distributionMap;
