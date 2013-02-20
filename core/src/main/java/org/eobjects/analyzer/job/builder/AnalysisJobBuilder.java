@@ -404,6 +404,20 @@ public final class AnalysisJobBuilder implements Closeable {
             ConfigurableBeanJob<?> configurableBeanJob = (ConfigurableBeanJob<?>) componentJob;
             builder.setConfiguredProperties(configurableBeanJob.getConfiguration());
         }
+        
+        if (componentJob instanceof InputColumnSourceJob) {
+            InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();
+            
+            TransformerJobBuilder<?> transformerJobBuilder = (TransformerJobBuilder<?>) builder;
+            List<MutableInputColumn<?>> outputColumns = transformerJobBuilder.getOutputColumns();
+            
+            assert output.length == outputColumns.size();
+            
+            for (int i = 0; i < output.length; i++) {
+                MutableInputColumn<?> mutableOutputColumn = outputColumns.get(i);
+                mutableOutputColumn.setName(output[i].getName());
+            }
+        }
 
         return builder;
     }
