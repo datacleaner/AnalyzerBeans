@@ -31,76 +31,81 @@ import org.eobjects.analyzer.job.ImmutableFilterOutcome;
 
 final class FilterConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
-	private final AnalysisJob _job;
-	private final Filter<?> _filter;
-	private final FilterJob _filterJob;
-	private final InputColumn<?>[] _inputColumns;
-	private final AnalysisListener _analysisListener;
-	private final boolean _concurrent;
+    private final AnalysisJob _job;
+    private final Filter<?> _filter;
+    private final FilterJob _filterJob;
+    private final InputColumn<?>[] _inputColumns;
+    private final AnalysisListener _analysisListener;
+    private final boolean _concurrent;
 
-	public FilterConsumer(AnalysisJob job, Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns,
-			AnalysisListener analysisListener) {
-		super(filterJob, filterJob);
-		_filter = filter;
-		_filterJob = filterJob;
-		_inputColumns = inputColumns;
-		_job = job;
-		_analysisListener = analysisListener;
+    public FilterConsumer(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns,
+            RowProcessingPublishers publishers) {
+        super(filterJob, filterJob);
+        _filter = filter;
+        _filterJob = filterJob;
+        _inputColumns = inputColumns;
+        if (publishers == null) {
+            _job = null;
+            _analysisListener = null;
+        } else {
+            _job = publishers.getAnalysisJob();
+            _analysisListener = publishers.getAnalysisListener();
+        }
 
-		Concurrent concurrent = _filterJob.getDescriptor().getAnnotation(Concurrent.class);
-		if (concurrent == null) {
-			// filter are by default concurrent
-			_concurrent = true;
-		} else {
-			_concurrent = concurrent.value();
-		}
-	}
+        Concurrent concurrent = filterJob.getDescriptor().getAnnotation(Concurrent.class);
+        if (concurrent == null) {
+            // filter are by default concurrent
+            _concurrent = true;
+        } else {
+            _concurrent = concurrent.value();
+        }
+    }
 
-	@Override
-	public boolean isConcurrent() {
-		return _concurrent;
-	}
+    @Override
+    public boolean isConcurrent() {
+        return _concurrent;
+    }
 
-	@Override
-	public InputColumn<?>[] getRequiredInput() {
-		return _inputColumns;
-	}
+    @Override
+    public InputColumn<?>[] getRequiredInput() {
+        return _inputColumns;
+    }
 
-	@Override
-	public Filter<?> getComponent() {
-		return _filter;
-	}
+    @Override
+    public Filter<?> getComponent() {
+        return _filter;
+    }
 
-	@Override
-	public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
-		try {
-			Enum<?> category = _filter.categorize(row);
-			FilterOutcome outcome = new ImmutableFilterOutcome(_filterJob, category);
-			outcomes.add(outcome);
-			chain.processNext(row, distinctCount, outcomes);
-		} catch (RuntimeException e) {
-			_analysisListener.errorInFilter(_job, _filterJob, row, e);
-		}
-	}
+    @Override
+    public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
+        try {
+            Enum<?> category = _filter.categorize(row);
+            FilterOutcome outcome = new ImmutableFilterOutcome(_filterJob, category);
+            outcomes.add(outcome);
+            chain.processNext(row, distinctCount, outcomes);
+        } catch (RuntimeException e) {
+            _analysisListener.errorInFilter(_job, _filterJob, row, e);
+        }
+    }
 
-	@Override
-	public FilterJob getComponentJob() {
-		return _filterJob;
-	}
+    @Override
+    public FilterJob getComponentJob() {
+        return _filterJob;
+    }
 
-	@Override
-	public String toString() {
-		return "FilterConsumer[" + _filter + "]";
-	}
+    @Override
+    public String toString() {
+        return "FilterConsumer[" + _filter + "]";
+    }
 
-	public boolean isQueryOptimizable(FilterOutcome filterOutcome) {
-		if (_filter instanceof QueryOptimizedFilter) {
-			@SuppressWarnings("rawtypes")
-			QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) _filter;
-			@SuppressWarnings("unchecked")
-			boolean optimizable = queryOptimizedFilter.isOptimizable(filterOutcome.getCategory());
-			return optimizable;
-		}
-		return false;
-	}
+    public boolean isQueryOptimizable(FilterOutcome filterOutcome) {
+        if (_filter instanceof QueryOptimizedFilter) {
+            @SuppressWarnings("rawtypes")
+            QueryOptimizedFilter queryOptimizedFilter = (QueryOptimizedFilter) _filter;
+            @SuppressWarnings("unchecked")
+            boolean optimizable = queryOptimizedFilter.isOptimizable(filterOutcome.getCategory());
+            return optimizable;
+        }
+        return false;
+    }
 }

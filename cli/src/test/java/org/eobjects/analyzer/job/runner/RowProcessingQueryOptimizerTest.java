@@ -222,7 +222,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 		lifeCycleHelper.assignConfiguredProperties(descriptor, filter, filterJob.getConfiguration());
 
-		FilterConsumer consumer = new FilterConsumer(null, filter, filterJob, filterJobBuilder.getInput(), null);
+		FilterConsumer consumer = new FilterConsumer(filter, filterJob, filterJobBuilder.getInput(), null);
 		return consumer;
 	}
 
@@ -233,7 +233,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 		lifeCycleHelper.assignConfiguredProperties(descriptor, transformer, transformerJob.getConfiguration());
 
-		TransformerConsumer consumer = new TransformerConsumer(null, transformer, transformerJob,
+		TransformerConsumer consumer = new TransformerConsumer(transformer, transformerJob,
 				transformerJobBuilder.getInput(), null);
 		return consumer;
 	}
@@ -245,7 +245,7 @@ public class RowProcessingQueryOptimizerTest extends TestCase {
 
 		lifeCycleHelper.assignConfiguredProperties(descriptor, analyzer, analyzerJob.getConfiguration());
 
-		AnalyzerConsumer consumer = new AnalyzerConsumer(null, analyzer, analyzerJob, analyzerBuilder.getInput(), null);
+        AnalyzerConsumer consumer = new AnalyzerConsumer(analyzer, analyzerJob, analyzerBuilder.getInput(), null);
 		return consumer;
 	}
 }

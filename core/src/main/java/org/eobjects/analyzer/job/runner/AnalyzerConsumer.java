@@ -28,63 +28,68 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 
 final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
-	private final AnalysisJob _job;
-	private final AnalyzerJob _analyzerJob;
-	private final Analyzer<?> _analyzer;
-	private final InputColumn<?>[] _inputColumns;
-	private final AnalysisListener _analysisListener;
-	private final boolean _concurrent;
+    private final AnalysisJob _job;
+    private final AnalyzerJob _analyzerJob;
+    private final Analyzer<?> _analyzer;
+    private final InputColumn<?>[] _inputColumns;
+    private final AnalysisListener _analysisListener;
+    private final boolean _concurrent;
 
-	public AnalyzerConsumer(AnalysisJob job, Analyzer<?> analyzer, AnalyzerJob analyzerJob,
-			InputColumn<?>[] inputColumns, AnalysisListener analysisListener) {
-		super(analyzerJob, analyzerJob);
-		_job = job;
-		_analyzer = analyzer;
-		_analyzerJob = analyzerJob;
-		_inputColumns = inputColumns;
-		_analysisListener = analysisListener;
+    public AnalyzerConsumer(Analyzer<?> analyzer, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns,
+            RowProcessingPublishers publishers) {
+        super(analyzerJob, analyzerJob);
+        _analyzer = analyzer;
+        _analyzerJob = analyzerJob;
+        _inputColumns = inputColumns;
+        if (publishers == null) {
+            _job = null;
+            _analysisListener = null;
+        } else {
+            _job = publishers.getAnalysisJob();
+            _analysisListener = publishers.getAnalysisListener();
+        }
 
-		Concurrent concurrent = analyzerJob.getDescriptor().getAnnotation(Concurrent.class);
-		if (concurrent == null) {
-			// analyzers are by default not concurrent
-			_concurrent = false;
-		} else {
-			_concurrent = concurrent.value();
-		}
-	}
-	
-	@Override
-	public Analyzer<?> getComponent() {
-		return _analyzer;
-	}
+        Concurrent concurrent = analyzerJob.getDescriptor().getAnnotation(Concurrent.class);
+        if (concurrent == null) {
+            // analyzers are by default not concurrent
+            _concurrent = false;
+        } else {
+            _concurrent = concurrent.value();
+        }
+    }
 
-	@Override
-	public boolean isConcurrent() {
-		return _concurrent;
-	}
+    @Override
+    public Analyzer<?> getComponent() {
+        return _analyzer;
+    }
 
-	@Override
-	public InputColumn<?>[] getRequiredInput() {
-		return _inputColumns;
-	}
+    @Override
+    public boolean isConcurrent() {
+        return _concurrent;
+    }
 
-	@Override
-	public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
-		try {
-			_analyzer.run(row, distinctCount);
-			chain.processNext(row, distinctCount, outcomes);
-		} catch (RuntimeException e) {
-			_analysisListener.errorInAnalyzer(_job, _analyzerJob, row, e);
-		}
-	}
+    @Override
+    public InputColumn<?>[] getRequiredInput() {
+        return _inputColumns;
+    }
 
-	@Override
-	public AnalyzerJob getComponentJob() {
-		return _analyzerJob;
-	}
+    @Override
+    public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
+        try {
+            _analyzer.run(row, distinctCount);
+            chain.processNext(row, distinctCount, outcomes);
+        } catch (RuntimeException e) {
+            _analysisListener.errorInAnalyzer(_job, _analyzerJob, row, e);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "AnalyzerConsumer[" + _analyzer + "]";
-	}
+    @Override
+    public AnalyzerJob getComponentJob() {
+        return _analyzerJob;
+    }
+
+    @Override
+    public String toString() {
+        return "AnalyzerConsumer[" + _analyzer + "]";
+    }
 }

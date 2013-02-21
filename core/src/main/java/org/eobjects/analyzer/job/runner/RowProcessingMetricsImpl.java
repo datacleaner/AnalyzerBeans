@@ -31,44 +31,40 @@ import org.eobjects.metamodel.util.Ref;
 
 final class RowProcessingMetricsImpl implements RowProcessingMetrics {
 
-    private final AnalysisJobMetrics _analysisJobMetrics;
-    private final Ref<Query> _queryRef;
+    private final RowProcessingPublishers _publishers;
+    private final RowProcessingPublisher _publisher;
     private final Ref<Integer> _expectedRows;
-    private final Table _table;
-    private final AnalyzerJob[] _analyzerJobs;
 
-    public RowProcessingMetricsImpl(AnalysisJobMetrics analysisJobMetrics, Table table, AnalyzerJob[] analyzerJobs,
-            Ref<Query> queryRef) {
-        _analysisJobMetrics = analysisJobMetrics;
-        _table = table;
-        _analyzerJobs = analyzerJobs;
-        _queryRef = queryRef;
+    public RowProcessingMetricsImpl(RowProcessingPublishers publishers, RowProcessingPublisher publisher) {
+        _publishers = publishers;
+        _publisher = publisher;
         _expectedRows = createExpectedRowsRef();
     }
 
     @Override
     public AnalysisJobMetrics getAnalysisJobMetrics() {
-        return _analysisJobMetrics;
+        return _publishers.getAnalysisJobMetrics();
     }
 
     @Override
     public Query getQuery() {
-        return _queryRef.get().clone();
+        return _publisher.getQuery();
     }
 
     @Override
     public Table getTable() {
-        return _table;
+        return _publisher.getTable();
     }
 
     @Override
     public int getExpectedRows() {
-        return _expectedRows.get().intValue();
+        final Integer expectedRows = _expectedRows.get();
+        return expectedRows.intValue();
     }
 
     @Override
     public AnalyzerJob[] getAnalyzerJobs() {
-        return _analyzerJobs;
+        return _publisher.getAnalyzerJobs();
     }
 
     private Ref<Integer> createExpectedRowsRef() {
@@ -78,14 +74,14 @@ final class RowProcessingMetricsImpl implements RowProcessingMetrics {
             protected Integer fetch() {
                 int expectedRows = -1;
                 {
-                    Query query = getQuery();
-                    final Query countQuery = query.clone();
+                    final Query originalQuery = getQuery();
+                    final Query countQuery = originalQuery.clone();
                     countQuery.setMaxRows(null);
                     countQuery.getSelectClause().removeItems();
                     countQuery.selectCount();
                     countQuery.getSelectClause().getItem(0).setFunctionApproximationAllowed(true);
 
-                    Datastore datastore = _analysisJobMetrics.getAnalysisJob().getDatastore();
+                    Datastore datastore = _publishers.getDatastore();
                     DatastoreConnection connection = datastore.openConnection();
                     try {
                         final DataSet countDataSet = connection.getDataContext().executeQuery(countQuery);
@@ -104,7 +100,7 @@ final class RowProcessingMetricsImpl implements RowProcessingMetrics {
                         connection.close();
                     }
 
-                    Integer maxRows = query.getMaxRows();
+                    Integer maxRows = originalQuery.getMaxRows();
                     if (maxRows != null) {
                         expectedRows = Math.min(expectedRows, maxRows.intValue());
                     }

@@ -119,7 +119,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
         final RowProcessingPublishers publishers = getRowProcessingPublishers(job, lifeCycleHelper);
 
-        final AnalysisJobMetrics analysisJobMetrics = publishers.buildAnalysisJobMetrics();
+        final AnalysisJobMetrics analysisJobMetrics = publishers.getAnalysisJobMetrics();
 
         final RowProcessingMetrics rowProcessingMetrics;
         final DistributedAnalysisResultFuture resultFuture;

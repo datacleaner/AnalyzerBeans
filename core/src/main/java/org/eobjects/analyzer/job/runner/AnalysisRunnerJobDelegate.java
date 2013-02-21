@@ -145,7 +145,7 @@ final class AnalysisRunnerJobDelegate {
             final RowProcessingPublishers publishers = new RowProcessingPublishers(_job, _analysisListener,
                     _taskRunner, rowProcessingLifeCycleHelper, _sourceColumnFinder);
 
-            final AnalysisJobMetrics analysisJobMetrics = publishers.buildAnalysisJobMetrics();
+            final AnalysisJobMetrics analysisJobMetrics = publishers.getAnalysisJobMetrics();
 
             // A task listener that will register either succesfull executions
             // or
@@ -196,11 +196,10 @@ final class AnalysisRunnerJobDelegate {
         final TaskListener rowProcessorPublishersDoneCompletionListener = new JoinTaskListener(publishers.size(),
                 finalTaskListener);
 
-        final Table[] tables = publishers.getTables();
-        for (Table table : tables) {
-            final RowProcessingPublisher rowProcessingPublisher = publishers.getRowProcessingPublisher(table);
-            final List<TaskRunnable> initTasks = rowProcessingPublisher.createInitialTasks(_taskRunner, _resultQueue,
-                    rowProcessorPublishersDoneCompletionListener, _datastore, analysisJobMetrics);
+        final Collection<RowProcessingPublisher> rowProcessingPublishers = publishers.getRowProcessingPublishers();
+        for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers) {
+            final List<TaskRunnable> initTasks = rowProcessingPublisher.createInitialTasks(_resultQueue,
+                    rowProcessorPublishersDoneCompletionListener);
             logger.debug("Scheduling {} tasks for row processing publisher: {}", initTasks.size(),
                     rowProcessingPublisher);
             for (TaskRunnable taskRunnable : initTasks) {

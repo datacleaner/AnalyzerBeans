@@ -33,7 +33,6 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
@@ -41,9 +40,6 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.Ref;
 
 public class RowProcessingMetricsImplTest extends TestCase {
 
@@ -119,33 +115,22 @@ public class RowProcessingMetricsImplTest extends TestCase {
     }
 
     private int getExpectedRowCount() {
-        AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
-        TaskRunner taskRunner = configuration.getTaskRunner();
+        final AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
+        final TaskRunner taskRunner = configuration.getTaskRunner();
 
-        LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(configuration.getInjectionManager(job), null, true);
+        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(configuration.getInjectionManager(job), null, true);
         SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
         sourceColumnFinder.addSources(job);
 
         final RowProcessingPublishers publishers = new RowProcessingPublishers(job, analysisListener, taskRunner,
                 lifeCycleHelper, sourceColumnFinder);
-        final AnalysisJobMetrics analysisJobMetrics = new AnalysisJobMetricsImpl(job, publishers);
         final RowProcessingPublisher publisher = publishers.getRowProcessingPublisher(publishers.getTables()[0]);
-        List<TaskRunnable> tasks = publisher.createInitialTasks(taskRunner, null, null, datastore, analysisJobMetrics);
+        final List<TaskRunnable> tasks = publisher.createInitialTasks(null, null);
         for (TaskRunnable taskRunnable : tasks) {
             taskRunner.run(taskRunnable);
         }
 
-        Table table = null;
-        AnalyzerJob[] analyzerJobs = null;
-        Ref<Query> queryRef = new Ref<Query>() {
-            @Override
-            public Query get() {
-                return publisher.getQuery();
-            }
-        };
-
-        RowProcessingMetricsImpl metrics = new RowProcessingMetricsImpl(analysisJobMetrics, table, analyzerJobs,
-                queryRef);
+        final RowProcessingMetricsImpl metrics = new RowProcessingMetricsImpl(publishers, publisher);
 
         return metrics.getExpectedRows();
     }

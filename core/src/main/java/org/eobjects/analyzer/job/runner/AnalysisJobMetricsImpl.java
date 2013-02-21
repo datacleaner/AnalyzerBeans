@@ -19,83 +19,60 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ExplorerJob;
-import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.LazyRef;
-import org.eobjects.metamodel.util.Ref;
 
 final class AnalysisJobMetricsImpl implements AnalysisJobMetrics {
 
-	private final AnalysisJob _job;
-	private final RowProcessingPublishers _publishers;
-	private final Map<Table, RowProcessingMetrics> _rowProcessingMetrics;
+    private final AnalysisJob _job;
+    private final RowProcessingPublishers _publishers;
 
-	public AnalysisJobMetricsImpl(AnalysisJob job, RowProcessingPublishers publishers) {
-		_job = job;
-		_publishers = publishers;
-		_rowProcessingMetrics = createRowProcessingMetrics();
-	}
+    public AnalysisJobMetricsImpl(AnalysisJob job, RowProcessingPublishers publishers) {
+        _job = job;
+        _publishers = publishers;
+    }
 
-	@Override
-	public AnalysisJob getAnalysisJob() {
-		return _job;
-	}
+    @Override
+    public AnalysisJob getAnalysisJob() {
+        return _job;
+    }
 
-	@Override
-	public ExplorerMetrics getExplorerMetrics(ExplorerJob explorerJob) {
-		return new ExplorerMetricsImpl(this, explorerJob);
-	}
+    @Override
+    public ExplorerMetrics getExplorerMetrics(ExplorerJob explorerJob) {
+        return new ExplorerMetricsImpl(this, explorerJob);
+    }
 
-	@Override
-	public AnalyzerMetrics getAnalyzerMetrics(AnalyzerJob analyzerJob) {
-		Table table = getRowProcessingTable(analyzerJob);
-		RowProcessingMetrics rowProcessingMetrics = getRowProcessingMetrics(table);
-		return new AnalyzerMetricsImpl(rowProcessingMetrics, analyzerJob);
-	}
+    @Override
+    public AnalyzerMetrics getAnalyzerMetrics(AnalyzerJob analyzerJob) {
+        Table table = getRowProcessingTable(analyzerJob);
+        RowProcessingMetrics rowProcessingMetrics = getRowProcessingMetrics(table);
+        return new AnalyzerMetricsImpl(rowProcessingMetrics, analyzerJob);
+    }
 
-	@Override
-	public Table[] getRowProcessingTables() {
-		Set<Table> tables = _rowProcessingMetrics.keySet();
-		return tables.toArray(new Table[tables.size()]);
-	}
+    @Override
+    public Table[] getRowProcessingTables() {
+        return _publishers.getTables();
+    }
 
-	@Override
-	public RowProcessingMetrics getRowProcessingMetrics(Table table) {
-		return _rowProcessingMetrics.get(table);
-	}
+    @Override
+    public RowProcessingMetrics getRowProcessingMetrics(Table table) {
+        final RowProcessingPublisher publisher = _publishers.getRowProcessingPublisher(table);
+        if (publisher == null) {
+            return null;
+        }
+        return publisher.getRowProcessingMetrics();
+    }
 
-	@Override
-	public Table getRowProcessingTable(AnalyzerJob analyzerJob) {
-		Table[] tables = _publishers.getTables(analyzerJob);
-		// this should always work for analyzers
-		return tables[0];
-	}
-
-	private Map<Table, RowProcessingMetrics> createRowProcessingMetrics() {
-		final Map<Table, RowProcessingMetrics> map = new HashMap<Table, RowProcessingMetrics>();
-		final Table[] tables = _publishers.getTables();
-
-		for (Table table : tables) {
-			final RowProcessingPublisher publisher = _publishers.getRowProcessingPublisher(table);
-			final AnalyzerJob[] analyzerJobs = publisher.getAnalyzerJobs();
-			final Ref<Query> queryRef = new LazyRef<Query>() {
-				@Override
-				protected Query fetch() {
-					return publisher.getQuery();
-				}
-			};
-
-			final RowProcessingMetricsImpl metrics = new RowProcessingMetricsImpl(this, table, analyzerJobs, queryRef);
-			map.put(table, metrics);
-		}
-
-		return map;
-	}
+    @Override
+    public Table getRowProcessingTable(AnalyzerJob analyzerJob) {
+        Table[] tables = _publishers.getTables(analyzerJob);
+        if (tables == null || tables.length == 0) {
+            return null;
+        }
+        // this should always work for analyzers, since they only pertain to a
+        // single table
+        return tables[0];
+    }
 }

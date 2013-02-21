@@ -30,6 +30,7 @@ import java.util.Set;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -65,7 +66,14 @@ public final class RowProcessingPublishers {
 		_analysisListener = analysisListener;
 		_taskRunner = taskRunner;
 		_lifeCycleHelper = lifeCycleHelper;
-		_sourceColumnFinder = sourceColumnFinder;
+		
+		if (sourceColumnFinder == null) {
+		    _sourceColumnFinder = new SourceColumnFinder();
+		    _sourceColumnFinder.addSources(_analysisJob);
+		} else {
+		    _sourceColumnFinder = sourceColumnFinder;
+		}
+		
 		_rowProcessingPublishers = new HashMap<Table, RowProcessingPublisher>();
 
 		for (FilterJob filterJob : _analysisJob.getFilterJobs()) {
@@ -145,8 +153,7 @@ public final class RowProcessingPublishers {
 		for (Table table : tables) {
 			RowProcessingPublisher rowPublisher = _rowProcessingPublishers.get(table);
 			if (rowPublisher == null) {
-				rowPublisher = new RowProcessingPublisher(_analysisJob, table, _taskRunner, _analysisListener,
-						_lifeCycleHelper);
+				rowPublisher = new RowProcessingPublisher(this, table);
 				rowPublisher.addPrimaryKeysIfSourced();
 				_rowProcessingPublishers.put(table, rowPublisher);
 			}
@@ -219,13 +226,37 @@ public final class RowProcessingPublishers {
 	public RowProcessingPublisher getRowProcessingPublisher(Table table) {
 		return _rowProcessingPublishers.get(table);
 	}
+	
+	public Collection<RowProcessingPublisher> getRowProcessingPublishers() {
+	    return _rowProcessingPublishers.values();
+	}
 
 	public Table[] getTables() {
 		Set<Table> tables = _rowProcessingPublishers.keySet();
 		return tables.toArray(new Table[tables.size()]);
 	}
 
-    public AnalysisJobMetrics buildAnalysisJobMetrics() {
+    public AnalysisJobMetrics getAnalysisJobMetrics() {
         return new AnalysisJobMetricsImpl(_analysisJob, this);
+    }
+
+    protected AnalysisJob getAnalysisJob() {
+        return _analysisJob;
+    }
+    
+    protected AnalysisListener getAnalysisListener() {
+        return _analysisListener;
+    }
+    
+    protected LifeCycleHelper getLifeCycleHelper() {
+        return _lifeCycleHelper;
+    }
+    
+    protected TaskRunner getTaskRunner() {
+        return _taskRunner;
+    }
+
+    public Datastore getDatastore() {
+        return _analysisJob.getDatastore();
     }
 }

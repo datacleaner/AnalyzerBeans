@@ -76,30 +76,32 @@ public final class RowProcessingPublisher {
 
     private final static Logger logger = LoggerFactory.getLogger(RowProcessingPublisher.class);
 
-    private final AnalysisJob _analysisJob;
+    private final RowProcessingPublishers _publishers;
     private final Table _table;
     private final Set<Column> _physicalColumns = new HashSet<Column>();
     private final List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
-    private final TaskRunner _taskRunner;
-    private final AnalysisListener _analysisListener;
-    private final LifeCycleHelper _lifeCycleHelper;
     private final LazyRef<RowProcessingQueryOptimizer> _queryOptimizerRef;
 
-    public RowProcessingPublisher(AnalysisJob analysisJob, Table table, TaskRunner taskRunner,
-            AnalysisListener analysisListener, LifeCycleHelper lifeCycleHelper) {
+    public RowProcessingPublisher(RowProcessingPublishers publishers, Table table) {
+        if (publishers == null) {
+            throw new IllegalArgumentException("RowProcessingPublishers cannot be null");
+        }
         if (table == null) {
             throw new IllegalArgumentException("Table cannot be null");
         }
-        if (taskRunner == null) {
-            throw new IllegalArgumentException("TaskRunner cannot be null");
-        }
-        _analysisJob = analysisJob;
+        _publishers = publishers;
         _table = table;
-        _taskRunner = taskRunner;
-        _analysisListener = analysisListener;
-        _lifeCycleHelper = lifeCycleHelper;
 
         _queryOptimizerRef = createQueryOptimizerRef();
+    }
+
+    public RowProcessingMetrics getRowProcessingMetrics() {
+        RowProcessingMetricsImpl metrics = new RowProcessingMetricsImpl(_publishers, this);
+        return metrics;
+    }
+
+    public Table getTable() {
+        return _table;
     }
 
     /**
@@ -119,7 +121,8 @@ public final class RowProcessingPublisher {
             return;
         }
 
-        final Collection<InputColumn<?>> sourceInputColumns = _analysisJob.getSourceColumns();
+        final AnalysisJob analysisJob = _publishers.getAnalysisJob();
+        final Collection<InputColumn<?>> sourceInputColumns = analysisJob.getSourceColumns();
         final List<Column> sourceColumns = CollectionUtils.map(sourceInputColumns, new Func<InputColumn<?>, Column>() {
             @Override
             public Column eval(InputColumn<?> inputColumn) {
@@ -141,7 +144,7 @@ public final class RowProcessingPublisher {
         return new LazyRef<RowProcessingQueryOptimizer>() {
             @Override
             protected RowProcessingQueryOptimizer fetch() {
-                final Datastore datastore = _analysisJob.getDatastore();
+                final Datastore datastore = _publishers.getDatastore();
                 final DatastoreConnection con = datastore.openConnection();
                 try {
                     final DataContext dataContext = con.getDataContext();
@@ -217,13 +220,17 @@ public final class RowProcessingPublisher {
             idGenerator = new SimpleRowIdGenerator(finalQuery.getFirstRow());
         }
 
+        final AnalysisJob analysisJob = _publishers.getAnalysisJob();
+        final AnalysisListener analysisListener = _publishers.getAnalysisListener();
+        final TaskRunner taskRunner = _publishers.getTaskRunner();
+
         for (RowProcessingConsumer rowProcessingConsumer : _consumers) {
             if (rowProcessingConsumer instanceof AnalyzerConsumer) {
                 final AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) rowProcessingConsumer;
                 final AnalyzerJob analyzerJob = analyzerConsumer.getComponentJob();
                 final AnalyzerMetrics metrics = rowProcessingMetrics.getAnalysisJobMetrics().getAnalyzerMetrics(
                         analyzerJob);
-                _analysisListener.analyzerBegin(_analysisJob, analyzerJob, metrics);
+                analysisListener.analyzerBegin(analysisJob, analyzerJob, metrics);
             }
 
             if (rowProcessingConsumer instanceof TransformerConsumer) {
@@ -233,13 +240,13 @@ public final class RowProcessingPublisher {
         final List<RowProcessingConsumer> consumers = queryOptimizer.getOptimizedConsumers();
         final Collection<? extends Outcome> availableOutcomes = queryOptimizer.getOptimizedAvailableOutcomes();
 
-        _analysisListener.rowProcessingBegin(_analysisJob, rowProcessingMetrics);
+        analysisListener.rowProcessingBegin(analysisJob, rowProcessingMetrics);
 
         // TODO: Needs to delegate errors downstream
-        final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(_analysisJob, _analysisListener,
-                _taskRunner);
+        final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(analysisJob, analysisListener,
+                taskRunner);
 
-        final Datastore datastore = _analysisJob.getDatastore();
+        final Datastore datastore = _publishers.getDatastore();
         final DatastoreConnection con = datastore.openConnection();
 
         try {
@@ -250,22 +257,22 @@ public final class RowProcessingPublisher {
             // tasks
             // to execute
             int numTasks = 0;
-            
+
             try {
                 while (dataSet.next()) {
                     if (taskListener.isErrornous()) {
                         break;
                     }
-                    
+
                     final Row metaModelRow = dataSet.getRow();
                     final int rowId = idGenerator.nextPhysicalRowId();
                     final MetaModelInputRow inputRow = new MetaModelInputRow(rowId, metaModelRow);
                     final OutcomeSink outcomes = new OutcomeSinkImpl(availableOutcomes);
-                    
+
                     final ConsumeRowTask task = new ConsumeRowTask(consumers, 0, rowProcessingMetrics, inputRow,
-                            _analysisListener, outcomes);
-                    _taskRunner.run(task, taskListener);
-                    
+                            analysisListener, outcomes);
+                    taskRunner.run(task, taskListener);
+
                     numTasks++;
                 }
             } finally {
@@ -278,21 +285,21 @@ public final class RowProcessingPublisher {
         }
 
         if (!taskListener.isErrornous()) {
-            _analysisListener.rowProcessingSuccess(_analysisJob, rowProcessingMetrics);
+            analysisListener.rowProcessingSuccess(analysisJob, rowProcessingMetrics);
         }
     }
 
     public void addAnalyzerBean(Analyzer<?> analyzer, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns) {
-        addConsumer(new AnalyzerConsumer(_analysisJob, analyzer, analyzerJob, inputColumns, _analysisListener));
+        addConsumer(new AnalyzerConsumer(analyzer, analyzerJob, inputColumns, _publishers));
     }
 
     public void addTransformerBean(Transformer<?> transformer, TransformerJob transformerJob,
             InputColumn<?>[] inputColumns) {
-        addConsumer(new TransformerConsumer(_analysisJob, transformer, transformerJob, inputColumns, _analysisListener));
+        addConsumer(new TransformerConsumer(transformer, transformerJob, inputColumns, _publishers));
     }
 
     public void addFilterBean(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns) {
-        addConsumer(new FilterConsumer(_analysisJob, filter, filterJob, inputColumns, _analysisListener));
+        addConsumer(new FilterConsumer(filter, filterJob, inputColumns, _publishers));
     }
 
     public void addMergedOutcomeJob(MergedOutcomeJob mergedOutcomeJob) {
@@ -317,7 +324,7 @@ public final class RowProcessingPublisher {
     private void addConsumer(RowProcessingConsumer consumer) {
         _consumers.add(consumer);
     }
-    
+
     public List<RowProcessingConsumer> getConfigurableConsumers() {
         final List<RowProcessingConsumer> configurableConsumers = CollectionUtils.filter(_consumers,
                 new Predicate<RowProcessingConsumer>() {
@@ -329,8 +336,11 @@ public final class RowProcessingPublisher {
         return configurableConsumers;
     }
 
-    public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<JobAndResult> resultQueue,
-            TaskListener rowProcessorPublishersTaskListener, Datastore datastore, AnalysisJobMetrics analysisJobMetrics) {
+    public List<TaskRunnable> createInitialTasks(Queue<JobAndResult> resultQueue,
+            TaskListener rowProcessorPublishersTaskListener) {
+
+        final LifeCycleHelper lifeCycleHelper = _publishers.getLifeCycleHelper();
+        final TaskRunner taskRunner = _publishers.getTaskRunner();
 
         final List<RowProcessingConsumer> configurableConsumers = getConfigurableConsumers();
         int numConfigurableConsumers = configurableConsumers.size();
@@ -346,20 +356,20 @@ public final class RowProcessingPublisher {
             } else {
                 closeTasks.add(new TaskRunnable(closeTask, closeTaskListener));
             }
-            closeTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(_lifeCycleHelper, consumer
-                    .getComponentJob().getDescriptor(), consumer.getComponent())));
+            closeTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(lifeCycleHelper, consumer.getComponentJob()
+                    .getDescriptor(), consumer.getComponent())));
         }
 
         final TaskListener runCompletionListener = new ForkTaskListener("run row processing", taskRunner, closeTasks);
 
-        final RowProcessingMetrics rowProcessingMetrics = analysisJobMetrics.getRowProcessingMetrics(_table);
+        final RowProcessingMetrics rowProcessingMetrics = getRowProcessingMetrics();
         final RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this, rowProcessingMetrics);
 
         final TaskListener referenceDataInitFinishedListener = new ForkTaskListener("Initialize row consumers",
                 taskRunner, Arrays.asList(new TaskRunnable(runTask, runCompletionListener)));
 
-        final RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner,
-                new InitializeReferenceDataTask(_lifeCycleHelper), referenceDataInitFinishedListener);
+        final RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(taskRunner,
+                new InitializeReferenceDataTask(lifeCycleHelper), referenceDataInitFinishedListener);
         final TaskListener initFinishedListener = new JoinTaskListener(numConfigurableConsumers, joinFinishedListener);
 
         final List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
@@ -373,10 +383,12 @@ public final class RowProcessingPublisher {
         if (consumer instanceof TransformerConsumer || consumer instanceof FilterConsumer) {
             return null;
         } else if (consumer instanceof AnalyzerConsumer) {
-            AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
-            Analyzer<?> analyzer = analyzerConsumer.getComponent();
-            return new CollectResultsTask(analyzer, _analysisJob, consumer.getComponentJob(), resultQueue,
-                    _analysisListener);
+            final AnalyzerConsumer analyzerConsumer = (AnalyzerConsumer) consumer;
+            final Analyzer<?> analyzer = analyzerConsumer.getComponent();
+            final AnalysisJob analysisJob = _publishers.getAnalysisJob();
+            final AnalysisListener analysisListener = _publishers.getAnalysisListener();
+            return new CollectResultsTask(analyzer, analysisJob, consumer.getComponentJob(), resultQueue,
+                    analysisListener);
         } else {
             throw new IllegalStateException("Unknown consumer type: " + consumer);
         }
@@ -384,12 +396,14 @@ public final class RowProcessingPublisher {
 
     private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener,
             Queue<JobAndResult> resultQueue) {
-        ComponentJob componentJob = consumer.getComponentJob();
-        Object component = consumer.getComponent();
-        BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
-        ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
+        final ComponentJob componentJob = consumer.getComponentJob();
+        final Object component = consumer.getComponent();
+        final BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();
+        final ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
 
-        InitializeTask task = new InitializeTask(_lifeCycleHelper, descriptor, component, configuration);
+        final LifeCycleHelper lifeCycleHelper = _publishers.getLifeCycleHelper();
+
+        InitializeTask task = new InitializeTask(lifeCycleHelper, descriptor, component, configuration);
         return new TaskRunnable(task, listener);
     }
 
