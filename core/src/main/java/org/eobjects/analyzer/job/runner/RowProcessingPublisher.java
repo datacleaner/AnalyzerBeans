@@ -317,10 +317,8 @@ public final class RowProcessingPublisher {
     private void addConsumer(RowProcessingConsumer consumer) {
         _consumers.add(consumer);
     }
-
-    public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<JobAndResult> resultQueue,
-            TaskListener rowProcessorPublishersTaskListener, Datastore datastore, AnalysisJobMetrics analysisJobMetrics) {
-
+    
+    public List<RowProcessingConsumer> getConfigurableConsumers() {
         final List<RowProcessingConsumer> configurableConsumers = CollectionUtils.filter(_consumers,
                 new Predicate<RowProcessingConsumer>() {
                     @Override
@@ -328,6 +326,13 @@ public final class RowProcessingPublisher {
                         return input.getComponentJob() instanceof ConfigurableBeanJob<?>;
                     }
                 });
+        return configurableConsumers;
+    }
+
+    public List<TaskRunnable> createInitialTasks(TaskRunner taskRunner, Queue<JobAndResult> resultQueue,
+            TaskListener rowProcessorPublishersTaskListener, Datastore datastore, AnalysisJobMetrics analysisJobMetrics) {
+
+        final List<RowProcessingConsumer> configurableConsumers = getConfigurableConsumers();
         int numConfigurableConsumers = configurableConsumers.size();
 
         final TaskListener closeTaskListener = new JoinTaskListener(numConfigurableConsumers,

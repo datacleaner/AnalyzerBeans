@@ -36,7 +36,9 @@ import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
@@ -46,8 +48,11 @@ import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.CompositeAnalysisListener;
+import org.eobjects.analyzer.job.runner.RowProcessingConsumer;
 import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
+import org.eobjects.analyzer.job.runner.RowProcessingPublisher;
 import org.eobjects.analyzer.job.runner.RowProcessingPublishers;
+import org.eobjects.analyzer.job.tasks.InitializeTask;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.util.SourceColumnFinder;
@@ -110,9 +115,12 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
         final JobDivisionManager jobDivisionManager = _clusterManager.getJobDivisionManager();
 
-        final RowProcessingPublishers publishers = getRowProcessingPublishers(job);
+        final InjectionManager injectionManager = _configuration.getInjectionManager(job);
+        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
+        final RowProcessingPublishers publishers = getRowProcessingPublishers(job, lifeCycleHelper);
+
         final AnalysisJobMetrics analysisJobMetrics = publishers.buildAnalysisJobMetrics();
-        
+
         final RowProcessingMetrics rowProcessingMetrics;
         final DistributedAnalysisResultFuture resultFuture;
 
@@ -125,8 +133,6 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
             _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
 
-            final InjectionManager injectionManager = _configuration.getInjectionManager(job);
-            final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
 
             final Map<Object, ComponentDescriptor<?>> nonDistributableComponents = initializeNonDistributableComponents(
                     job, lifeCycleHelper);
@@ -267,27 +273,44 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     private AnalysisJob buildSlaveJob(AnalysisJob job, int firstRow, int maxRows) {
         final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job);
         try {
-        	final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
-        	maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
-        	maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
-        	
-        	jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
-        	
-        	// in assertion/test mode do an early validation
-        	assert jobBuilder.isConfigured(true);
-        	
-        	return jobBuilder.toAnalysisJob();
+            final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
+            maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
+            maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
+
+            jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
+
+            // in assertion/test mode do an early validation
+            assert jobBuilder.isConfigured(true);
+
+            return jobBuilder.toAnalysisJob();
         } finally {
-        	jobBuilder.close();
+            jobBuilder.close();
         }
     }
 
-    private RowProcessingPublishers getRowProcessingPublishers(AnalysisJob job) {
+    private RowProcessingPublishers getRowProcessingPublishers(AnalysisJob job, LifeCycleHelper lifeCycleHelper) {
         final SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
         sourceColumnFinder.addSources(job);
 
-        final RowProcessingPublishers publishers = new RowProcessingPublishers(job, null,
-                new SingleThreadedTaskRunner(), null, sourceColumnFinder);
+        final SingleThreadedTaskRunner taskRunner = new SingleThreadedTaskRunner();
+
+        final RowProcessingPublishers publishers = new RowProcessingPublishers(job, null, taskRunner, null,
+                sourceColumnFinder);
+
+        // TODO: Quick fix to initialize components before getting expected rows
+        // - should be refactored.
+        final Table table = publishers.getTables()[0];
+        final RowProcessingPublisher publisher = publishers.getRowProcessingPublisher(table);
+        final List<RowProcessingConsumer> consumers = publisher.getConfigurableConsumers();
+        for (RowProcessingConsumer consumer : consumers) {
+            final ConfigurableBeanJob<?> componentJob = (ConfigurableBeanJob<?>) consumer.getComponentJob();
+            final ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
+            final Object component = consumer.getComponent();
+            final BeanConfiguration configuration = componentJob.getConfiguration();
+            final InitializeTask task = new InitializeTask(lifeCycleHelper, descriptor, component, configuration);
+            taskRunner.run(task, null);
+        }
+
         return publishers;
     }
 
