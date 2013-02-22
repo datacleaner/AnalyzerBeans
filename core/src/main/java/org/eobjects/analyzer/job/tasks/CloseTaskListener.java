@@ -25,7 +25,7 @@ import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloseBeanTaskListener implements TaskListener {
+public class CloseTaskListener implements TaskListener {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -33,7 +33,7 @@ public class CloseBeanTaskListener implements TaskListener {
 	private final ComponentDescriptor<?> _descriptor;
 	private final Object _component;
 
-	public CloseBeanTaskListener(LifeCycleHelper lifeCycleHelper, ComponentDescriptor<?> descriptor, Object component) {
+	public CloseTaskListener(LifeCycleHelper lifeCycleHelper, ComponentDescriptor<?> descriptor, Object component) {
 		_lifeCycleHelper = lifeCycleHelper;
 		_descriptor = descriptor;
 		_component = component;

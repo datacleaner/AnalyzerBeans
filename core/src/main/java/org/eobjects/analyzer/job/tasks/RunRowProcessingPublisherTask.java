@@ -40,7 +40,7 @@ public final class RunRowProcessingPublisherTask implements Task {
 	public void execute() throws Exception {
 		logger.debug("execute()");
 
-		_publisher.run(_metrics);
+		_publisher.processRows(_metrics);
 	}
 
 }

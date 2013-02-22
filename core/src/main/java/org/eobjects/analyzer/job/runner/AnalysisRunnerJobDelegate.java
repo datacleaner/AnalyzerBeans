@@ -47,7 +47,7 @@ import org.eobjects.analyzer.job.concurrent.RunNextTaskTaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.job.tasks.CloseBeanTaskListener;
+import org.eobjects.analyzer.job.tasks.CloseTaskListener;
 import org.eobjects.analyzer.job.tasks.CloseReferenceDataTaskListener;
 import org.eobjects.analyzer.job.tasks.CloseResourcesTaskListener;
 import org.eobjects.analyzer.job.tasks.CollectResultsTask;
@@ -198,13 +198,8 @@ final class AnalysisRunnerJobDelegate {
 
         final Collection<RowProcessingPublisher> rowProcessingPublishers = publishers.getRowProcessingPublishers();
         for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers) {
-            final List<TaskRunnable> initTasks = rowProcessingPublisher.createInitialTasks(_resultQueue,
-                    rowProcessorPublishersDoneCompletionListener);
-            logger.debug("Scheduling {} tasks for row processing publisher: {}", initTasks.size(),
-                    rowProcessingPublisher);
-            for (TaskRunnable taskRunnable : initTasks) {
-                _taskRunner.run(taskRunnable);
-            }
+            logger.debug("Scheduling row processing publisher: {}", rowProcessingPublisher);
+            rowProcessingPublisher.runRowProcessing(_resultQueue, rowProcessorPublishersDoneCompletionListener);
         }
     }
 
@@ -238,7 +233,7 @@ final class AnalysisRunnerJobDelegate {
             final Explorer<?> explorer = descriptor.newInstance();
 
             finalTasks.add(new TaskRunnable(null, new CloseResourcesTaskListener(connection)));
-            finalTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(lifeCycleHelper, descriptor, explorer)));
+            finalTasks.add(new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, explorer)));
 
             // set up scheduling for the explorers
             final Task closeTask = new CollectResultsTask(explorer, _job, explorerJob, _resultQueue, _analysisListener);

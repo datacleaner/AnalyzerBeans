@@ -21,9 +21,7 @@ package org.eobjects.analyzer.cluster;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -33,26 +31,23 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
-import org.eobjects.analyzer.descriptors.InitializeMethodDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.ComponentJob;
-import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
+import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.runner.AnalysisJobMetrics;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.CompositeAnalysisListener;
-import org.eobjects.analyzer.job.runner.RowProcessingConsumer;
 import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 import org.eobjects.analyzer.job.runner.RowProcessingPublisher;
 import org.eobjects.analyzer.job.runner.RowProcessingPublishers;
-import org.eobjects.analyzer.job.tasks.InitializeTask;
+import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.util.SourceColumnFinder;
@@ -118,29 +113,42 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         final InjectionManager injectionManager = _configuration.getInjectionManager(job);
         final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
         final RowProcessingPublishers publishers = getRowProcessingPublishers(job, lifeCycleHelper);
+        final RowProcessingPublisher publisher = getRowProcessingPublisher(publishers);
+        publisher.initializeConsumers(new TaskListener() {
+            @Override
+            public void onError(Task task, Throwable throwable) {
+                logger.error("Failed to initialize consumers at master node!", throwable);
+            }
+
+            @Override
+            public void onComplete(Task task) {
+            }
+
+            @Override
+            public void onBegin(Task task) {
+            }
+        });
+
+        // since we always use a SingleThreadedTaskRunner, the above operation
+        // will be synchronized/blocking.
 
         final AnalysisJobMetrics analysisJobMetrics = publishers.getAnalysisJobMetrics();
 
-        final RowProcessingMetrics rowProcessingMetrics;
+        final RowProcessingMetrics rowProcessingMetrics = publisher.getRowProcessingMetrics();
         final DistributedAnalysisResultFuture resultFuture;
 
         _analysisListener.jobBegin(job, analysisJobMetrics);
         try {
-            rowProcessingMetrics = getRowProcessingMetrics(publishers, analysisJobMetrics);
             final int expectedRows = rowProcessingMetrics.getExpectedRows();
             final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
             final int rowsPerChunk = expectedRows / chunks;
 
             _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
 
-
-            final Map<Object, ComponentDescriptor<?>> nonDistributableComponents = initializeNonDistributableComponents(
-                    job, lifeCycleHelper);
-
             final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk);
 
             final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper,
-                    nonDistributableComponents);
+                    publisher);
 
             resultFuture = new DistributedAnalysisResultFuture(results, reducer);
         } catch (RuntimeException e) {
@@ -221,46 +229,6 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         return results;
     }
 
-    private Map<Object, ComponentDescriptor<?>> initializeNonDistributableComponents(AnalysisJob job,
-            LifeCycleHelper lifeCycleHelper) {
-        final Map<Object, ComponentDescriptor<?>> map = new IdentityHashMap<Object, ComponentDescriptor<?>>();
-        collectNonDistributableComponents(job.getExplorerJobs(), lifeCycleHelper, map);
-        collectNonDistributableComponents(job.getFilterJobs(), lifeCycleHelper, map);
-        collectNonDistributableComponents(job.getTransformerJobs(), lifeCycleHelper, map);
-        collectNonDistributableComponents(job.getAnalyzerJobs(), lifeCycleHelper, map);
-
-        final Set<Entry<Object, ComponentDescriptor<?>>> entries = map.entrySet();
-        for (Entry<Object, ComponentDescriptor<?>> entry : entries) {
-            final Object component = entry.getKey();
-            final ComponentDescriptor<?> descriptor = entry.getValue();
-
-            lifeCycleHelper.initialize(descriptor, component);
-        }
-
-        return map;
-    }
-
-    private void collectNonDistributableComponents(Collection<? extends ComponentJob> jobs,
-            LifeCycleHelper lifeCycleHelper, Map<Object, ComponentDescriptor<?>> map) {
-        for (ComponentJob job : jobs) {
-            final ComponentDescriptor<?> descriptor = job.getDescriptor();
-            final Set<InitializeMethodDescriptor> initializeMethods = descriptor.getInitializeMethods();
-            for (InitializeMethodDescriptor initializeMethodDescriptor : initializeMethods) {
-                if (!initializeMethodDescriptor.isDistributed()) {
-                    // component needs to be initialized at master node
-                    logger.info(
-                            "Initializer of component '{}' is not distributable, performing initialization at master node",
-                            descriptor.getDisplayName());
-
-                    final Object instance = descriptor.newInstance();
-                    map.put(instance, descriptor);
-
-                    break;
-                }
-            }
-        }
-    }
-
     /**
      * Creates a slave job by copying the original job and adding a
      * {@link MaxRowsFilter} as a default requirement.
@@ -294,28 +262,13 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
         final SingleThreadedTaskRunner taskRunner = new SingleThreadedTaskRunner();
 
-        final RowProcessingPublishers publishers = new RowProcessingPublishers(job, null, taskRunner, null,
+        final RowProcessingPublishers publishers = new RowProcessingPublishers(job, null, taskRunner, lifeCycleHelper,
                 sourceColumnFinder);
-
-        // TODO: Quick fix to initialize components before getting expected rows
-        // - should be refactored.
-        final Table table = publishers.getTables()[0];
-        final RowProcessingPublisher publisher = publishers.getRowProcessingPublisher(table);
-        final List<RowProcessingConsumer> consumers = publisher.getConfigurableConsumers();
-        for (RowProcessingConsumer consumer : consumers) {
-            final ConfigurableBeanJob<?> componentJob = (ConfigurableBeanJob<?>) consumer.getComponentJob();
-            final ComponentDescriptor<?> descriptor = componentJob.getDescriptor();
-            final Object component = consumer.getComponent();
-            final BeanConfiguration configuration = componentJob.getConfiguration();
-            final InitializeTask task = new InitializeTask(lifeCycleHelper, descriptor, component, configuration);
-            taskRunner.run(task, null);
-        }
 
         return publishers;
     }
 
-    private RowProcessingMetrics getRowProcessingMetrics(RowProcessingPublishers publishers,
-            AnalysisJobMetrics analysisJobMetrics) throws UnsupportedOperationException {
+    private RowProcessingPublisher getRowProcessingPublisher(RowProcessingPublishers publishers) {
         final Table[] tables = publishers.getTables();
 
         if (tables.length != 1) {
@@ -324,8 +277,8 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
         final Table table = tables[0];
 
-        final RowProcessingMetrics rowProcessingMetrics = analysisJobMetrics.getRowProcessingMetrics(table);
-        return rowProcessingMetrics;
+        final RowProcessingPublisher publisher = publishers.getRowProcessingPublisher(table);
+        return publisher;
     }
 
     private void failIfJobIsUnsupported(AnalysisJob job) throws UnsupportedOperationException {

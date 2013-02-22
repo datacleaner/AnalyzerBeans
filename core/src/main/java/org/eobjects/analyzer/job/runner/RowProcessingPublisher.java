@@ -51,7 +51,7 @@ import org.eobjects.analyzer.job.concurrent.RunNextTaskTaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.job.tasks.CloseBeanTaskListener;
+import org.eobjects.analyzer.job.tasks.CloseTaskListener;
 import org.eobjects.analyzer.job.tasks.CollectResultsTask;
 import org.eobjects.analyzer.job.tasks.ConsumeRowTask;
 import org.eobjects.analyzer.job.tasks.InitializeReferenceDataTask;
@@ -95,6 +95,13 @@ public final class RowProcessingPublisher {
         _queryOptimizerRef = createQueryOptimizerRef();
     }
 
+    /**
+     * Gets metrics for this row processing session. Note that consumers are
+     * assumed to be initialized at this point. See
+     * {@link #initializeConsumers(TaskListener)}.
+     * 
+     * @return
+     */
     public RowProcessingMetrics getRowProcessingMetrics() {
         RowProcessingMetricsImpl metrics = new RowProcessingMetricsImpl(_publishers, this);
         return metrics;
@@ -209,7 +216,15 @@ public final class RowProcessingPublisher {
         return getQueryOptimizer().getOptimizedQuery();
     }
 
-    public void run(RowProcessingMetrics rowProcessingMetrics) {
+    /**
+     * Fires the actual row processing. This method assumes that consumers have
+     * been initialized and the publisher is ready to start processing.
+     * 
+     * @param rowProcessingMetrics
+     * 
+     * @see #runRowProcessing(Queue, TaskListener)
+     */
+    public void processRows(RowProcessingMetrics rowProcessingMetrics) {
         final RowProcessingQueryOptimizer queryOptimizer = getQueryOptimizer();
         final Query finalQuery = queryOptimizer.getOptimizedQuery();
 
@@ -336,28 +351,39 @@ public final class RowProcessingPublisher {
         return configurableConsumers;
     }
 
-    public List<TaskRunnable> createInitialTasks(Queue<JobAndResult> resultQueue,
-            TaskListener rowProcessorPublishersTaskListener) {
+    /**
+     * Runs the whole row processing logic, start to finish, including
+     * initialization, process rows, result collection and cleanup/closing
+     * resources.
+     * 
+     * @param resultQueue
+     *            a queue on which to append results
+     * @param finishedTaskListener
+     *            a task listener which will be invoked once the processing is
+     *            done.
+     * 
+     * @see #processRows(RowProcessingMetrics)
+     * @see #initializeConsumers(TaskListener)
+     */
+    public void runRowProcessing(Queue<JobAndResult> resultQueue, TaskListener finishedTaskListener) {
 
         final LifeCycleHelper lifeCycleHelper = _publishers.getLifeCycleHelper();
         final TaskRunner taskRunner = _publishers.getTaskRunner();
 
         final List<RowProcessingConsumer> configurableConsumers = getConfigurableConsumers();
-        int numConfigurableConsumers = configurableConsumers.size();
+        final int numConfigurableConsumers = configurableConsumers.size();
 
-        final TaskListener closeTaskListener = new JoinTaskListener(numConfigurableConsumers,
-                rowProcessorPublishersTaskListener);
+        final TaskListener closeTaskListener = new JoinTaskListener(numConfigurableConsumers, finishedTaskListener);
 
         final List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
         for (RowProcessingConsumer consumer : configurableConsumers) {
-            Task closeTask = createCloseTask(consumer, resultQueue);
-            if (closeTask == null) {
+            Task collectResultTask = createCollectResultTask(consumer, resultQueue);
+            if (collectResultTask == null) {
                 closeTasks.add(new TaskRunnable(null, closeTaskListener));
             } else {
-                closeTasks.add(new TaskRunnable(closeTask, closeTaskListener));
+                closeTasks.add(new TaskRunnable(collectResultTask, closeTaskListener));
             }
-            closeTasks.add(new TaskRunnable(null, new CloseBeanTaskListener(lifeCycleHelper, consumer.getComponentJob()
-                    .getDescriptor(), consumer.getComponent())));
+            closeTasks.add(createCloseTask(consumer));
         }
 
         final TaskListener runCompletionListener = new ForkTaskListener("run row processing", taskRunner, closeTasks);
@@ -368,18 +394,47 @@ public final class RowProcessingPublisher {
         final TaskListener referenceDataInitFinishedListener = new ForkTaskListener("Initialize row consumers",
                 taskRunner, Arrays.asList(new TaskRunnable(runTask, runCompletionListener)));
 
-        final RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(taskRunner,
+        final RunNextTaskTaskListener initializeFinishedListener = new RunNextTaskTaskListener(taskRunner,
                 new InitializeReferenceDataTask(lifeCycleHelper), referenceDataInitFinishedListener);
-        final TaskListener initFinishedListener = new JoinTaskListener(numConfigurableConsumers, joinFinishedListener);
 
-        final List<TaskRunnable> initTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
-        for (RowProcessingConsumer consumer : configurableConsumers) {
-            initTasks.add(createInitTask(consumer, initFinishedListener, resultQueue));
-        }
-        return initTasks;
+        // kick off the initialization
+        initializeConsumers(initializeFinishedListener);
     }
 
-    private Task createCloseTask(RowProcessingConsumer consumer, Queue<JobAndResult> resultQueue) {
+    /**
+     * Initializes consumers of this {@link RowProcessingPublisher}. Once
+     * consumers are initialized, row processing can begin, expected rows can be
+     * calculated and more.
+     * 
+     * @param finishedListener
+     */
+    public void initializeConsumers(TaskListener finishedListener) {
+        final List<RowProcessingConsumer> configurableConsumers = getConfigurableConsumers();
+        final int numConfigurableConsumers = configurableConsumers.size();
+        final TaskListener initFinishedListener = new JoinTaskListener(numConfigurableConsumers, finishedListener);
+        final TaskRunner taskRunner = _publishers.getTaskRunner();
+        for (RowProcessingConsumer consumer : configurableConsumers) {
+            TaskRunnable task = createInitTask(consumer, initFinishedListener);
+            taskRunner.run(task);
+        }
+    }
+
+    /**
+     * Closes consumers of this {@link RowProcessingPublisher}. Usually this
+     * will be done automatically when
+     * {@link #runRowProcessing(Queue, TaskListener)} is invoked.
+     */
+    public void closeConsumers() {
+        final List<RowProcessingConsumer> configurableConsumers = getConfigurableConsumers();
+        final TaskRunner taskRunner = _publishers.getTaskRunner();
+        for (RowProcessingConsumer consumer : configurableConsumers) {
+            TaskRunnable task = createCloseTask(consumer);
+            taskRunner.run(task);
+        }
+
+    }
+
+    private Task createCollectResultTask(RowProcessingConsumer consumer, Queue<JobAndResult> resultQueue) {
         if (consumer instanceof TransformerConsumer || consumer instanceof FilterConsumer) {
             return null;
         } else if (consumer instanceof AnalyzerConsumer) {
@@ -394,8 +449,14 @@ public final class RowProcessingPublisher {
         }
     }
 
-    private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener,
-            Queue<JobAndResult> resultQueue) {
+    private TaskRunnable createCloseTask(RowProcessingConsumer consumer) {
+        final LifeCycleHelper lifeCycleHelper = _publishers.getLifeCycleHelper();
+        final ComponentDescriptor<?> descriptor = consumer.getComponentJob().getDescriptor();
+        final Object component = consumer.getComponent();
+        return new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, component));
+    }
+
+    private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener) {
         final ComponentJob componentJob = consumer.getComponentJob();
         final Object component = consumer.getComponent();
         final BeanConfiguration configuration = ((ConfigurableBeanJob<?>) componentJob).getConfiguration();

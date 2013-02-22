@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
@@ -33,6 +31,7 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.AnalyzerJobHelper;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
+import org.eobjects.analyzer.job.runner.RowProcessingPublisher;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.AnalyzerResultReducer;
@@ -50,13 +49,13 @@ final class DistributedAnalysisResultReducer {
 
     private final AnalysisJob _masterJob;
     private final LifeCycleHelper _lifeCycleHelper;
-    private final Map<Object, ComponentDescriptor<?>> _nonDistributableComponents;
+    private final RowProcessingPublisher _publisher;
 
     public DistributedAnalysisResultReducer(AnalysisJob masterJob, LifeCycleHelper lifeCycleHelper,
-            Map<Object, ComponentDescriptor<?>> nonDistributableComponents) {
+            RowProcessingPublisher publisher) {
         _masterJob = masterJob;
         _lifeCycleHelper = lifeCycleHelper;
-        _nonDistributableComponents = nonDistributableComponents;
+        _publisher = publisher;
     }
 
     public void reduce(final List<AnalysisResultFuture> results, final Map<ComponentJob, AnalyzerResult> resultMap,
@@ -72,13 +71,7 @@ final class DistributedAnalysisResultReducer {
     }
 
     private void closeNonDistributableComponents() {
-        final Set<Entry<Object, ComponentDescriptor<?>>> entries = _nonDistributableComponents.entrySet();
-        for (Entry<Object, ComponentDescriptor<?>> entry : entries) {
-            Object component = entry.getKey();
-            ComponentDescriptor<?> descriptor = entry.getValue();
-
-            _lifeCycleHelper.close(descriptor, component);
-        }
+        _publisher.closeConsumers();
     }
 
     private void reduceResults(final List<AnalysisResultFuture> results,
