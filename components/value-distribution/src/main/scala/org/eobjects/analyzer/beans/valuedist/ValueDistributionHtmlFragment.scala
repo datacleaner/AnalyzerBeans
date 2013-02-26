@@ -72,7 +72,7 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
                }
              }
              {
-               <div class="valueDistributionChart" id={ chartElementId }>
+               <div class="valueDistributionChart graph" id={ chartElementId }>
                </div>
              }
              {
