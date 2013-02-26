@@ -19,8 +19,6 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.util.List;
-
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.NumberAnalyzer;
@@ -35,11 +33,13 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
-import org.eobjects.analyzer.job.concurrent.TaskRunnable;
+import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
+import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
+import org.junit.Assert;
 
 public class RowProcessingMetricsImplTest extends TestCase {
 
@@ -125,10 +125,20 @@ public class RowProcessingMetricsImplTest extends TestCase {
         final RowProcessingPublishers publishers = new RowProcessingPublishers(job, analysisListener, taskRunner,
                 lifeCycleHelper, sourceColumnFinder);
         final RowProcessingPublisher publisher = publishers.getRowProcessingPublisher(publishers.getTables()[0]);
-        final List<TaskRunnable> tasks = publisher.createInitialTasks(null, null);
-        for (TaskRunnable taskRunnable : tasks) {
-            taskRunner.run(taskRunnable);
-        }
+        publisher.initializeConsumers(new TaskListener() {
+            @Override
+            public void onError(Task arg0, Throwable t) {
+                Assert.fail(t.getMessage());
+            }
+            
+            @Override
+            public void onComplete(Task arg0) {
+            }
+            
+            @Override
+            public void onBegin(Task arg0) {
+            }
+        });
 
         final RowProcessingMetricsImpl metrics = new RowProcessingMetricsImpl(publishers, publisher);
 
