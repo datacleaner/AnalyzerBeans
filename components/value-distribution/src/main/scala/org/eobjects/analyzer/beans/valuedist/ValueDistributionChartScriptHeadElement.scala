@@ -20,8 +20,6 @@ class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResul
     if (uniqueCount != null && uniqueCount > 0) {
       val vc = new ValueCount(LabelUtils.UNIQUE_LABEL, uniqueCount);
       valueCounts.add(vc);
-      val displayCount: String = vc.getCount().toString();
-      val displayText: String = vc.getValue();
     }
 
     return """<script type="text/javascript">
