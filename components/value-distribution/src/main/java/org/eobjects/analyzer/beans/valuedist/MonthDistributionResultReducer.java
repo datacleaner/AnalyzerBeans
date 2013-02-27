@@ -19,13 +19,10 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.eobjects.analyzer.result.AnalyzerResultReducer;
-import org.eobjects.metamodel.util.Month;
 
 /**
  * {@link AnalyzerResultReducer} for results of the date-part distribution
