@@ -372,7 +372,16 @@ div.valueDistributionChart {
 	width: 400px;
 	height: 330px;
 	float: left;
-	border: 1px solid #eee;
+}
+
+div.valueDistributionChart table {
+	border-top: none;
+	border-left: none;
+}
+
+div.valueDistributionChart table td, div.valueDistributionChart table th {
+	border-bottom: none;
+	border-right: none;
 }
 
 table.valueDistributionValueTable {
