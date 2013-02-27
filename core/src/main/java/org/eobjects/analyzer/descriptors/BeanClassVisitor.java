@@ -88,7 +88,9 @@ final class BeanClassVisitor extends ClassVisitor {
                                 .forName(renderingFormatClassName, false, _classLoader);
                         renderingFormatClass = cls;
                     } catch (Exception e) {
-                        _logger.error("Failed to read rendering format of renderer class: " + _name, e);
+                        if (_logger.isWarnEnabled()) {
+                            _logger.warn("Failed to read rendering format of renderer class '" + renderingFormatClassName + "', ignoring: " + _name, e);
+                        }
                         return;
                     }
 
