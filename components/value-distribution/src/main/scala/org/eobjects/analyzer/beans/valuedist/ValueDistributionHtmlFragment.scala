@@ -20,6 +20,8 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
   val frag = new SimpleHtmlFragment();
 
   override def initialize(context: HtmlRenderingContext) {
+    frag.addHeadElement(ValueDistributionReusableScriptHeadElement)
+    
     val html = <div class="valueDistributionResultContainer">
                  {
                    if (result.isInstanceOf[GroupedValueCountingAnalyzerResult]) {

@@ -25,41 +25,15 @@ class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResul
     }
 
     return """<script type="text/javascript">
-     var data = [
-     """ +
-      valueCounts.map(vc => {
-        "{label:\"" + context.escapeJson(LabelUtils.getValueLabel(vc.getValue())) + "\", " + "data:" + +vc.getCount() + "}" + "";
-      }).mkString(",") + """
-     ];
-     wait_for_script_load('jQuery', function() {
-        importJS('http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.min.js', 'jQuery.plot', function() {
-            importJS('http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.pie.min.js', "jQuery.plot.plugins[0]", function() {
-                var elem = jQuery("#""" + chartElementId +  """");
-                jQuery.plot(elem, data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 3/5,
-                        }
-                    },
-                    grid: {
-                        hoverable: true,
-                        clickable: true
-                    }
-                });
-                elem.bind("plothover", function(event, pos, obj) {
-                    if (!obj) { return; }
-                    percent = parseFloat(obj.series.percent).toFixed(2);
-                    jQuery("#hover").html('<span style="font-weight: bold; color: '+obj.series.color+'">'+obj.series.label+' ('+percent+'%)</span>');
-                });
-                elem.bind("plotclick", function(event, pos, obj) {
-                    if (!obj) { return; }
-                    percent = parseFloat(obj.series.percent).toFixed(2);
-                    alert(''+obj.series.label+': '+percent+'%');
-                });
-            });
-        });
-    });
+    //<![CDATA[
+    var data = [
+        """ +
+  valueCounts.map(vc => {
+    "{label:\"" + context.escapeJson(LabelUtils.getValueLabel(vc.getValue())) + "\", " + "data:" + +vc.getCount() + "}" + "";
+  }).mkString(",") + """
+    ];
+    draw_value_distribution_pie('""" + chartElementId +  """', data, 2);
+    //]]>
 </script>
 """
   }
