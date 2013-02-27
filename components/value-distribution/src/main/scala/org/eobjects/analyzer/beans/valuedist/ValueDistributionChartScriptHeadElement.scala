@@ -60,6 +60,7 @@ class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResul
             });
         });
     });
+</script>
 """
   }
 }
