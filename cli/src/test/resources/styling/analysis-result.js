@@ -55,10 +55,18 @@ function importCSS(href, look_for, onload) {
 }
 
 function wait_for_script_load(look_for, callback) {
+	if (look_for == null) {
+		callback();
+		return;
+	}
 	var interval = setInterval(function() {
-		if (eval("typeof " + look_for) != 'undefined') {
-			clearInterval(interval);
-			callback();
+		try {
+			if (eval("typeof " + look_for) != 'undefined') {
+				clearInterval(interval);
+				callback();
+			}
+		} catch (err) {
+			// swallow the exception - the look_for was not yet reachable
 		}
 	}, 50);
 }
