@@ -76,11 +76,6 @@ function pieClick(event, pos, obj)
 		  font-family: sans-serif;
 		}
 		
-		body
-		{
-			padding: 0 1em 1em 1em;
-		}
-		
 		div.graph
 		{
 			width: 400px;
@@ -88,59 +83,7 @@ function pieClick(event, pos, obj)
 			float: left;
 			border: 1px dashed gainsboro;
 		}
-		
-		label
-		{
-			display: block;
-			margin-left: 400px;
-			padding-left: 1em;
-		}
-		
-		h2
-		{
-			padding-top: 1em;
-			margin-bottom: 0;
-			clear: both;
-			color: #ccc;
-		}
-		
-		code
-		{
-			display: block;
-			background-color: #eee;
-			border: 1px dashed #999;
-			padding: 0.5em;
-			margin: 0.5em;
-			color: #666;
-			font-size: 10pt;
-		}
-		
-		code b
-		{
-			color: black;
-		}
-		
-		ul
-		{
-			font-size: 10pt;
-		}
-		
-		ul li
-		{
-			margin-bottom: 0.5em;
-		}
-		
-		ul.options li
-		{
-			list-style: none;
-			margin-bottom: 1em;
-		}
-		
-		ul li i
-		{
-			color: #999;
-		}
-	</style> 
+      			</style> 
 """
   }
 }

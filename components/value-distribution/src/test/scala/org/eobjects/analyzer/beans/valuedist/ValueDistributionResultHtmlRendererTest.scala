@@ -1,39 +1,38 @@
 package org.eobjects.analyzer.beans.valuedist
-import org.eobjects.analyzer.beans.api.RendererBean
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl
 import org.eobjects.analyzer.data.MockInputColumn
 import org.eobjects.analyzer.data.MockInputRow
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider
 import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext
-import org.eobjects.analyzer.result.html.GoogleChartHeadElement
+import org.eobjects.analyzer.result.html.FlotChartHeadElement
 import org.eobjects.analyzer.result.renderer.RendererFactory
-import org.junit.Test
 import org.junit.Assert
+import org.junit.Test
 import org.scalatest.junit.AssertionsForJUnit
 
 class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
-  
+
   @Test
   def testNoUniqueValuesStored = {
     val context = new DefaultHtmlRenderingContext();
-    
+
     val col1 = new MockInputColumn[String]("email", classOf[String]);
 
     val analyzer = new ValueDistributionAnalyzer(col1, false, null, null);
     analyzer.run(new MockInputRow().put(col1, "kasper@eobjects.dk"), 1);
     analyzer.run(new MockInputRow().put(col1, "kasper.sorensen@humaninference.com"), 1);
     analyzer.run(new MockInputRow().put(col1, "foo@bar"), 2);
-    
+
     val result = analyzer.getResult()
-    
+
     Assert.assertEquals(2, result.getUniqueCount());
-    
+
     val htmlFragment = new ValueDistributionResultHtmlRenderer(createRendererFactory()).render(result);
     htmlFragment.initialize(context);
-    
+
     val bodyElems = htmlFragment.getBodyElements()
     Assert.assertEquals(3, bodyElems.size());
-    
+
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
@@ -47,7 +46,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
                <tr><td>Distinct count</td><td>3</td></tr>
              </table>
            </div>
-               </div>""".replaceAll("\r\n", "\n"), bodyElems.get(2).toHtml(context).replaceAll("\r\n","\n"));
+               </div>""".replaceAll("\r\n", "\n"), bodyElems.get(2).toHtml(context).replaceAll("\r\n", "\n"));
   }
 
   @Test
@@ -79,7 +78,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              <h3>Group: eobjects.dk</h3>
-             <div class="valueDistributionChart" id="reselem_1">
+             <div class="valueDistributionChart graph" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
                    <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">1</a></td></tr><tr><td>info</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
@@ -102,7 +101,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    Assert.assertEquals(GoogleChartHeadElement, htmlFragment.getHeadElements().get(0))
+    Assert.assertEquals(FlotChartHeadElement, htmlFragment.getHeadElements().get(0))
     Assert.assertEquals("""<script type="text/javascript"><!--
    google.setOnLoadCallback(function() {
      var elem = document.getElementById("reselem_1");
@@ -183,7 +182,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals(2, htmlFragment.getHeadElements().size());
 
     var html: String = null;
-    
+
     html = htmlFragment.getBodyElements().get(0).toHtml(context);
     Assert.assertEquals("""<div id="reselem_2" class="drillToDetailsPanel" style="display:none;">
 <h3>Records (9)</h3>
@@ -212,7 +211,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    Assert.assertEquals(GoogleChartHeadElement, htmlFragment.getHeadElements().get(0))
+    Assert.assertEquals(FlotChartHeadElement, htmlFragment.getHeadElements().get(0))
     Assert.assertEquals("""<script type="text/javascript"><!--
    google.setOnLoadCallback(function() {
      var elem = document.getElementById("reselem_1");

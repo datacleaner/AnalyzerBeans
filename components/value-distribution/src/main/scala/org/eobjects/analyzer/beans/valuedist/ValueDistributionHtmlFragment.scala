@@ -1,27 +1,27 @@
 package org.eobjects.analyzer.beans.valuedist
-import org.eobjects.analyzer.result.html.HtmlFragment
-import org.eobjects.analyzer.result.renderer.RendererFactory
-import org.eobjects.analyzer.result.html.HtmlRenderingContext
-import org.eobjects.analyzer.result.html.HeadElement
+import scala.collection.JavaConversions._
 import org.eobjects.analyzer.result.html.BodyElement
 import org.eobjects.analyzer.result.html.DrillToDetailsBodyElement
+import org.eobjects.analyzer.result.html.FlotChartHeadElement
+import org.eobjects.analyzer.result.html.HeadElement
+import org.eobjects.analyzer.result.html.HtmlFragment
+import org.eobjects.analyzer.result.html.HtmlRenderingContext
 import org.eobjects.analyzer.result.html.SimpleHtmlFragment
-import scala.collection.JavaConversions._
-import org.eobjects.analyzer.result.html.GoogleChartHeadElement
-import java.util.TreeSet
-import java.util.Collections
-import org.eobjects.analyzer.util.LabelUtils
+import org.eobjects.analyzer.result.renderer.RendererFactory
+import org.eobjects.analyzer.result.GroupedValueCountingAnalyzerResult
 import org.eobjects.analyzer.result.ListResult
 import org.eobjects.analyzer.result.ValueCount
 import org.eobjects.analyzer.result.ValueCountingAnalyzerResult
-import org.eobjects.analyzer.result.GroupedValueCountingAnalyzerResult
+import org.eobjects.analyzer.util.LabelUtils
+import org.eobjects.analyzer.result.ListResult
+import org.eobjects.analyzer.result.ListResult
 
 class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendererFactory: RendererFactory) extends HtmlFragment {
 
   val frag = new SimpleHtmlFragment();
 
   override def initialize(context: HtmlRenderingContext) {
-    frag.addHeadElement(GoogleChartHeadElement);
+    frag.addHeadElement(FlotChartHeadElement);
 
     val html = <div class="valueDistributionResultContainer">
                  {
