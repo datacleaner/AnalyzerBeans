@@ -2,7 +2,6 @@ package org.eobjects.analyzer.beans.valuedist
 import scala.collection.JavaConversions._
 import org.eobjects.analyzer.result.html.BodyElement
 import org.eobjects.analyzer.result.html.DrillToDetailsBodyElement
-import org.eobjects.analyzer.result.html.FlotChartHeadElement
 import org.eobjects.analyzer.result.html.HeadElement
 import org.eobjects.analyzer.result.html.HtmlFragment
 import org.eobjects.analyzer.result.html.HtmlRenderingContext
@@ -21,8 +20,6 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
   val frag = new SimpleHtmlFragment();
 
   override def initialize(context: HtmlRenderingContext) {
-    frag.addHeadElement(FlotChartHeadElement);
-
     val html = <div class="valueDistributionResultContainer">
                  {
                    if (result.isInstanceOf[GroupedValueCountingAnalyzerResult]) {

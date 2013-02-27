@@ -4,7 +4,6 @@ import org.eobjects.analyzer.data.MockInputColumn
 import org.eobjects.analyzer.data.MockInputRow
 import org.eobjects.analyzer.descriptors.ClasspathScanDescriptorProvider
 import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext
-import org.eobjects.analyzer.result.html.FlotChartHeadElement
 import org.eobjects.analyzer.result.renderer.RendererFactory
 import org.junit.Assert
 import org.junit.Test
@@ -101,7 +100,6 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    Assert.assertEquals(FlotChartHeadElement, htmlFragment.getHeadElements().get(0))
     Assert.assertEquals("""<script type="text/javascript"><!--
    google.setOnLoadCallback(function() {
      var elem = document.getElementById("reselem_1");
@@ -211,7 +209,6 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    Assert.assertEquals(FlotChartHeadElement, htmlFragment.getHeadElements().get(0))
     Assert.assertEquals("""<script type="text/javascript"><!--
    google.setOnLoadCallback(function() {
      var elem = document.getElementById("reselem_1");
