@@ -267,7 +267,7 @@ public class MainTest extends TestCase {
 
         String parserOutput = writer.toString();
         assertTrue("Parser output was:\n" + parserOutput,
-                parserOutput.indexOf("no warnings or errors were found") != -1);
+                parserOutput.indexOf("no warnings or errors were found") == -1);
 
         // parse it with SAX for XML correctnes. Takes a long time, but useful
         // for the occasional verification.

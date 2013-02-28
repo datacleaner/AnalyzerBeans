@@ -35,7 +35,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
-             <div class="valueDistributionChart" id="reselem_1">
+             <div class="valueDistributionChart graph" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
                    <tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">2</a></td></tr><tr><td>foo@bar</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr>
@@ -88,7 +88,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
              </table>
            </div><div class="valueDistributionGroupPanel">
              <h3>Group: humaninference.com</h3>
-             <div class="valueDistributionChart" id="reselem_6">
+             <div class="valueDistributionChart graph" id="reselem_6">
                </div>
              <table class="valueDistributionValueTable">
                    <tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_7'); return false;" href="#">1</a></td></tr><tr><td>kaspers</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_8'); return false;" href="#">1</a></td></tr><tr><td>winfried.vanholland</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_9'); return false;" href="#">1</a></td></tr>
@@ -100,61 +100,25 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    Assert.assertEquals("""<script type="text/javascript"><!--
-   google.setOnLoadCallback(function() {
-     var elem = document.getElementById("reselem_1");
-     var data = google.visualization.arrayToDataTable([
-     ['Value', 'Count'],['kasper', 4],['kasper.sorensen', 2],['<null>', 1],['<unique>', 1]
-     ]);
-     
-     var chart = new google.visualization.PieChart(elem);
-     var drawFunction = function(w, h) {
-       var options = {"width": w, "height": h};
-       chart.draw(data, options);
-     };
-     
-     wait_for_script_load('jQuery', function() {
-       var interval = setInterval(function() {
-         var bodyWidth = $('body').width();
-         var w = $(elem).width();
-         if (bodyWidth - w > 4) {
-           // css has been loaded
-           var h = $(elem).height();
-           clearInterval(interval);
-           drawFunction(w,h);
-         }
-       }, 100);
-     });
-   });
---></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
+    Assert.assertEquals("""<script type="text/javascript">
+    //<![CDATA[
+    var data = [
+        {label:"kasper", data:4},{label:"kasper.sorensen", data:2},{label:"<null>", data:1},{label:"<unique>", data:1}
+    ];
+    draw_value_distribution_pie('reselem_1', data, 2);
+    //]]>
+</script>
+""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
 
-    Assert.assertEquals("""<script type="text/javascript"><!--
-   google.setOnLoadCallback(function() {
-     var elem = document.getElementById("reselem_6");
-     var data = google.visualization.arrayToDataTable([
-     ['Value', 'Count'],['<unique>', 3]
-     ]);
-     
-     var chart = new google.visualization.PieChart(elem);
-     var drawFunction = function(w, h) {
-       var options = {"width": w, "height": h};
-       chart.draw(data, options);
-     };
-     
-     wait_for_script_load('jQuery', function() {
-       var interval = setInterval(function() {
-         var bodyWidth = $('body').width();
-         var w = $(elem).width();
-         if (bodyWidth - w > 4) {
-           // css has been loaded
-           var h = $(elem).height();
-           clearInterval(interval);
-           drawFunction(w,h);
-         }
-       }, 100);
-     });
-   });
---></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(2).toHtml(context).replaceAll("\r\n", "\n"))
+    Assert.assertEquals("""<script type="text/javascript">
+    //<![CDATA[
+    var data = [
+        {label:"<unique>", data:3}
+    ];
+    draw_value_distribution_pie('reselem_6', data, 2);
+    //]]>
+</script>
+""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(2).toHtml(context).replaceAll("\r\n", "\n"))
   }
 
   @Test
@@ -197,7 +161,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
-             <div class="valueDistributionChart" id="reselem_1">
+             <div class="valueDistributionChart graph" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
                    <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">3</a></td></tr><tr><td>&lt;blank&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">2</a></td></tr><tr><td>info</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
@@ -209,33 +173,15 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
            </div>
                </div>""".replaceAll("\r\n", "\n"), html.replaceAll("\r\n", "\n"));
 
-    Assert.assertEquals("""<script type="text/javascript"><!--
-   google.setOnLoadCallback(function() {
-     var elem = document.getElementById("reselem_1");
-     var data = google.visualization.arrayToDataTable([
-     ['Value', 'Count'],['kasper', 9],['kasper.sorensen', 3],['<blank>', 2],['<unique>', 1]
-     ]);
-     
-     var chart = new google.visualization.PieChart(elem);
-     var drawFunction = function(w, h) {
-       var options = {"width": w, "height": h};
-       chart.draw(data, options);
-     };
-     
-     wait_for_script_load('jQuery', function() {
-       var interval = setInterval(function() {
-         var bodyWidth = $('body').width();
-         var w = $(elem).width();
-         if (bodyWidth - w > 4) {
-           // css has been loaded
-           var h = $(elem).height();
-           clearInterval(interval);
-           drawFunction(w,h);
-         }
-       }, 100);
-     });
-   });
---></script>""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
+    Assert.assertEquals("""<script type="text/javascript">
+    //<![CDATA[
+    var data = [
+        {label:"kasper", data:9},{label:"kasper.sorensen", data:3},{label:"<blank>", data:2},{label:"<unique>", data:1}
+    ];
+    draw_value_distribution_pie('reselem_1', data, 2);
+    //]]>
+</script>
+""".replaceAll("\r\n", "\n"), htmlFragment.getHeadElements().get(1).toHtml(context).replaceAll("\r\n", "\n"))
   }
 
   def createRendererFactory(): RendererFactory = {
