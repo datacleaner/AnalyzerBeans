@@ -141,7 +141,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         try {
             final int expectedRows = rowProcessingMetrics.getExpectedRows();
             final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
-            final int rowsPerChunk = expectedRows / chunks;
+            final int rowsPerChunk = (expectedRows +1) / chunks;
 
             _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
 
@@ -206,7 +206,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             final int firstRow = (i * rowsPerChunk) + 1;
             final int maxRows;
             if (i == chunks - 1) {
-                maxRows = Integer.MAX_VALUE - firstRow - 1;
+                maxRows = rowsPerChunk + firstRow - 1;
             } else {
                 maxRows = rowsPerChunk;
             }
