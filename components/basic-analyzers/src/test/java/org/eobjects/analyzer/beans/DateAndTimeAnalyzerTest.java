@@ -79,7 +79,10 @@ public class DateAndTimeAnalyzerTest extends TestCase {
         assertEquals("Lowest date  2003-01-06   2003-01-13   2003-01-10   ", resultLines[4]);
         assertEquals("Highest time 00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[5]);
         assertEquals("Lowest time  00:00:00.000 00:00:00.000 00:00:00.000 ", resultLines[6]);
-        assertEquals("Mean         2004-05-14 19:22 2004-05-22 23:04 2004-05-09 03:58 ", resultLines[7]);
+        
+        String meanResultLine = resultLines[7];
+        // due to timezone diffs, this line will have slight variants on different machines
+        assertTrue(meanResultLine.startsWith("Mean         2004-05-14"));
 
         CrosstabNavigator<?> nav = result.getCrosstab().where("Column", "ORDERDATE");
         InputColumn<?> column = ajb.getSourceColumnByName("ORDERDATE");
