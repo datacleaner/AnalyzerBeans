@@ -28,7 +28,8 @@ class HtmlAnalysisResultWriterTest extends AssertionsForJUnit {
 <link rel="shortcut icon" href="http://eobjects.org/resources/datacleaner-html-rendering/analysis-result-icon.png" />
 <script type="text/javascript">//<![CDATA[
   var analysisResult = {};
-//]]></script>
+//]]>
+</script>
 </head><body>
 <div class="analysisResultContainer">
 <div class="analysisResultHeader"><ul class="analysisResultToc"></ul></div></div>
