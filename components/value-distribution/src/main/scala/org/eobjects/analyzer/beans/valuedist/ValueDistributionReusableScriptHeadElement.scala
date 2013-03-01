@@ -14,7 +14,6 @@ object ValueDistributionReusableScriptHeadElement extends HeadElement {
   override def toHtml(context: HtmlRenderingContext): String = {
     val flotBaseLocation = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")) { "http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.min.js" } else { System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.flot.min.js"""; }
     val flotPiePluginLocation = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")) { "http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.pie.min.js" } else { System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.flot.pie.min.js"""; }
-    val flotJqueryPlugin = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")) { "http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js" } else { System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.min.js"""; }
 
     return """<script type="text/javascript">
 //<![CDATA[
