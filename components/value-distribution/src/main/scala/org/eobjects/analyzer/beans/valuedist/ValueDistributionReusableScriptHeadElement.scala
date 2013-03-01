@@ -11,13 +11,17 @@ import org.eobjects.analyzer.result.ValueCount
  */
 object ValueDistributionReusableScriptHeadElement extends HeadElement {
 
-  override def toHtml(context: HtmlRenderingContext): String = {   
-    val flotBaseLocation = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")){"http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.min.js"} else {System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.flot.min.js""";}
-    val flotPiePluginLocation = if (null != System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")){"http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.pie.min.js"}else{System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.flot.pie.min.js""";}
+  override def toHtml(context: HtmlRenderingContext): String = {
+    val flotBaseLocation = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")) { "http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.min.js" } else { System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.flot.min.js"""; }
+    val flotPiePluginLocation = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")) { "http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.pie.min.js" } else { System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.flot.pie.min.js"""; }
+    val flotJqueryPlugin = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")) { "http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js" } else { System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.min.js"""; }
+
     return """<script type="text/javascript">
 //<![CDATA[
 function draw_value_distribution_pie(chartElement, chartData, retries) {
+   
     wait_for_script_load('jQuery', function() {
+     importJS('""" + flotJqueryPlugin + """', 'jQuery', function() {
         importJS('""" + flotBaseLocation + """', 'jQuery.plot', function() {
             importJS('""" + flotPiePluginLocation + """', "jQuery.plot.plugins[0]", function() {
                 var elem = document.getElementById(chartElement);
@@ -54,6 +58,7 @@ function draw_value_distribution_pie(chartElement, chartData, retries) {
                 }
             });
         });
+  });
     });
 }
 //]]>
