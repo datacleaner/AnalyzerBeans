@@ -206,7 +206,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             final int firstRow = (i * rowsPerChunk) + 1;
             final int maxRows;
             if (i == chunks - 1) {
-                maxRows = rowsPerChunk + firstRow - 1;
+                maxRows = Integer.MAX_VALUE - firstRow - 1;
             } else {
                 maxRows = rowsPerChunk;
             }
