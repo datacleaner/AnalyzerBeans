@@ -27,12 +27,13 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import junit.framework.TestCase;
+import nu.validator.htmlparser.common.XmlViolationPolicy;
+import nu.validator.htmlparser.sax.HtmlParser;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.PropertyConfigurator;
@@ -40,7 +41,10 @@ import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.metamodel.util.FileHelper;
 import org.w3c.tidy.Tidy;
 import org.xml.sax.Attributes;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class MainTest extends TestCase {
@@ -253,44 +257,66 @@ public class MainTest extends TestCase {
 
         File file = new File(filename);
         assertTrue(file.exists());
-        String result = FileHelper.readFileAsString(file);
-        String[] lines = result.split("\n");
 
-        assertEquals("<html>", lines[1]);
+        {
+            String result = FileHelper.readFileAsString(file);
+            String[] lines = result.split("\n");
 
-        // parse it with tidy for HTML correctness
-        Tidy tidy = new Tidy();
-        StringWriter writer = new StringWriter();
-        tidy.setTrimEmptyElements(false);
-        tidy.setErrout(new PrintWriter(writer));
-        tidy.parse(FileHelper.getReader(file), System.out);
+            assertEquals("<html>", lines[1]);
+        }
 
-        String parserOutput = writer.toString();
-        assertTrue("Parser output was:\n" + parserOutput,
-                parserOutput.indexOf("no warnings or errors were found") == -1);
-
-        // parse it with SAX for XML correctnes. Takes a long time, but useful
-        // for the occasional verification.
-        final boolean verifyWithParsing = false;
-        if (verifyWithParsing) {
-            SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-            parserFactory.setNamespaceAware(false);
-            parserFactory.setValidating(false);
-            SAXParser parser = parserFactory.newSAXParser();
+        InputStream in = FileHelper.getInputStream(file);
+        try {
+            // parse it with validator.nu for HTML correctness
+            final HtmlParser htmlParser = new HtmlParser(XmlViolationPolicy.FATAL);
             final AtomicInteger elementCounter = new AtomicInteger();
-            final InputStream in = FileHelper.getInputStream(file);
-            parser.parse(in, new DefaultHandler() {
+            htmlParser.setContentHandler(new DefaultHandler() {
                 @Override
                 public void startElement(String uri, String localName, String qName, Attributes attributes)
                         throws SAXException {
                     elementCounter.incrementAndGet();
                 }
             });
-            in.close();
+            final List<Exception> warningsAndErrors = new ArrayList<Exception>();
+            htmlParser.setErrorHandler(new ErrorHandler() {
+                @Override
+                public void warning(SAXParseException exception) throws SAXException {
+                    System.err.println("Warning: " + exception.getMessage());
+                    warningsAndErrors.add(exception);
+                }
+
+                @Override
+                public void fatalError(SAXParseException exception) throws SAXException {
+                    System.out.println("Fatal error: " + exception.getMessage());
+                    throw exception;
+                }
+
+                @Override
+                public void error(SAXParseException exception) throws SAXException {
+                    System.err.println("Error: " + exception.getMessage());
+                    warningsAndErrors.add(exception);
+                }
+            });
+
+            htmlParser.parse(new InputSource(in));
 
             // the output has approx 3600 XML elements
-            assertTrue(elementCounter.get() > 3000);
-            assertTrue(elementCounter.get() < 5000);
+            int elementCount = elementCounter.get();
+            assertTrue("Element count: " + elementCount, elementCount > 3000);
+            assertTrue("Element count: " + elementCount, elementCount < 5000);
+
+            if (!warningsAndErrors.isEmpty()) {
+                for (Exception error : warningsAndErrors) {
+                    if (error.getMessage().startsWith("No explicit character encoding declaration has been seen yet")) {
+                        // ignore/accept this one
+                        continue;
+                    }
+                    error.printStackTrace();
+                    fail("Got " + warningsAndErrors.size() + " warnings and errors, see log for details");
+                }
+            }
+        } finally {
+            in.close();
         }
     }
 

@@ -47,7 +47,7 @@ public final class BaseHeadElement implements HeadElement {
     public String toHtml(HtmlRenderingContext context) {
         return "<script type=\"text/javascript\" src=\"" + _resourcesDirectory + "/analysis-result.js\"></script>\n"
                 + "<link rel=\"shortcut icon\" href=\"" + _resourcesDirectory + "/analysis-result-icon.png\" />\n"
-                + "<script type=\"text/javascript\">//<![CDATA[\n" + "  var analysisResult = {};\n" + "//]]></script>";
+                + "<script type=\"text/javascript\">//<![CDATA[\n" + "  var analysisResult = {};\n" + "//]]>\n</script>";
     }
 
 }
