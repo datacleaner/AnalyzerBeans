@@ -21,7 +21,6 @@ object ValueDistributionReusableScriptHeadElement extends HeadElement {
 function draw_value_distribution_pie(chartElement, chartData, retries) {
    
     wait_for_script_load('jQuery', function() {
-     importJS('""" + flotJqueryPlugin + """', 'jQuery', function() {
         importJS('""" + flotBaseLocation + """', 'jQuery.plot', function() {
             importJS('""" + flotPiePluginLocation + """', "jQuery.plot.plugins[0]", function() {
                 var elem = document.getElementById(chartElement);
@@ -58,7 +57,6 @@ function draw_value_distribution_pie(chartElement, chartData, retries) {
                 }
             });
         });
-  });
     });
 }
 //]]>
