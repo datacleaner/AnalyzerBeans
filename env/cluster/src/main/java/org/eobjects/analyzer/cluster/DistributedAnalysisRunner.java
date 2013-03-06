@@ -141,7 +141,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         try {
             final int expectedRows = rowProcessingMetrics.getExpectedRows();
             final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
-            final int rowsPerChunk = (expectedRows +1) / chunks;
+            final int rowsPerChunk = (expectedRows == 0) ? 0 : (expectedRows + 1) / chunks;
 
             _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
 
