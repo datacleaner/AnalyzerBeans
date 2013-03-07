@@ -273,6 +273,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         types.add(type);
                     } catch (IllegalArgumentException e) {
                         // type literal was not a valid ColumnType
+                        logger.warn("Unrecognized column type: {}", typeName);
                         types.add(null);
                     }
                 }
