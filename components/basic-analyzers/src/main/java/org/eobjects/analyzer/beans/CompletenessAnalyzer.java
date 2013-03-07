@@ -38,6 +38,8 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.util.HasName;
 
+import scala.actors.threadpool.Arrays;
+
 @AnalyzerBean("Completeness analyzer")
 @Description("Asserts the completeness of your data by ensuring that all required fields are filled.")
 @Categorized(ValidationCategory.class)
@@ -45,7 +47,7 @@ public class CompletenessAnalyzer implements Analyzer<CompletenessAnalyzerResult
 
     public static enum Condition implements HasName {
         NOT_BLANK_OR_NULL("Not <blank> or <null>"), NOT_NULL("Not <null>");
-        
+
         private final String _name;
 
         private Condition(String name) {
@@ -108,6 +110,28 @@ public class CompletenessAnalyzer implements Analyzer<CompletenessAnalyzerResult
     @Override
     public CompletenessAnalyzerResult getResult() {
         return new CompletenessAnalyzerResult(_rowCount.get(), _invalidRecords, _annotationFactory, _valueColumns);
+    }
+
+    public void setConditions(Condition[] conditions) {
+        _conditions = conditions;
+    }
+
+    public void setValueColumns(InputColumn<?>[] valueColumns) {
+        _valueColumns = valueColumns;
+    }
+
+    /**
+     * Shortcut method to fill all conditions (of existing columns) to a single
+     * condition.
+     * 
+     * @param condition
+     */
+    public void fillAllConditions(Condition condition) {
+        if (_valueColumns != null) {
+            final Condition[] conditions = new Condition[_valueColumns.length];
+            Arrays.fill(conditions, condition);
+            _conditions = conditions;
+        }
     }
 
 }
