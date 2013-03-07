@@ -267,9 +267,14 @@ public class JaxbJobReader implements JobReader<InputStream> {
                 if (StringUtils.isNullOrEmpty(typeName)) {
                     types.add(null);
                 } else {
-                    final org.eobjects.metamodel.schema.ColumnType type = org.eobjects.metamodel.schema.ColumnType
-                            .valueOf(typeName);
-                    types.add(type);
+                    try {
+                        final org.eobjects.metamodel.schema.ColumnType type = org.eobjects.metamodel.schema.ColumnType
+                                .valueOf(typeName);
+                        types.add(type);
+                    } catch (IllegalArgumentException e) {
+                        // type literal was not a valid ColumnType
+                        types.add(null);
+                    }
                 }
             }
         } else {
