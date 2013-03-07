@@ -19,20 +19,45 @@
  */
 package org.eobjects.analyzer.beans;
 
+import java.util.Collections;
+import java.util.List;
+
+import junit.framework.TestCase;
+
+import org.eobjects.analyzer.beans.CompletenessAnalyzer.Condition;
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.PojoDatastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
+import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import junit.framework.TestCase;
+import org.eobjects.metamodel.pojo.TableDataProvider;
+import org.eobjects.metamodel.schema.ColumnType;
+import org.eobjects.metamodel.schema.MutableColumn;
 
 public class CompletenessAnalyzerTest extends TestCase {
 
     public void testIsDistributable() throws Exception {
         AnalyzerBeanDescriptor<CompletenessAnalyzer> descriptor = Descriptors.ofAnalyzer(CompletenessAnalyzer.class);
         assertTrue(descriptor.isDistributable());
+    }
+
+    public void testConfigurableBeanConfiguration() throws Exception {
+        AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
+        List<TableDataProvider<?>> tableDataProviders = Collections.emptyList();
+        ajb.setDatastore(new PojoDatastore("ds", tableDataProviders));
+        ajb.addSourceColumn(new MutableColumn("foo", ColumnType.VARCHAR));
+
+        AnalyzerJobBuilder<CompletenessAnalyzer> analyzer = ajb.addAnalyzer(CompletenessAnalyzer.class);
+        analyzer.getConfigurableBean().setValueColumns(ajb.getSourceColumns().toArray(new InputColumn[0]));
+        analyzer.getConfigurableBean().fillAllConditions(Condition.NOT_BLANK_OR_NULL);
+
+        assertTrue(analyzer.isConfigured(true));
     }
 
     public void testSimpleScenario() throws Exception {

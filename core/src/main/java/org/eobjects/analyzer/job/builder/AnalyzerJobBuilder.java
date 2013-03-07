@@ -205,6 +205,13 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
     public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty, boolean throwException) {
         if (_multipleJobsSupported && configuredProperty == _inputProperty) {
             if (_inputColumns.isEmpty()) {
+                Object propertyValue = super.getConfiguredProperty(configuredProperty);
+                if (propertyValue != null) {
+                    if (propertyValue.getClass().isArray() && Array.getLength(propertyValue) > 0) {
+                        setConfiguredProperty(configuredProperty, propertyValue);
+                        return isConfigured(configuredProperty, throwException);
+                    }
+                }
                 if (throwException) {
                     throw new IllegalStateException("No input columns have been added to " + this);
                 } else {
