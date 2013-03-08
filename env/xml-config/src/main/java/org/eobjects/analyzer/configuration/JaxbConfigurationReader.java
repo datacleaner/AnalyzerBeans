@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.vfs2.FileObject;
@@ -216,6 +218,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         return create(configuration);
     }
 
+    /**
+     * Convenience method to get the untouched JAXB configuration object from an
+     * inputstream.
+     * 
+     * @param inputStream
+     * @return
+     */
     public Configuration unmarshall(InputStream inputStream) {
         try {
             Unmarshaller unmarshaller = _jaxbContext.createUnmarshaller();
@@ -224,7 +233,25 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             Configuration configuration = (Configuration) unmarshaller.unmarshal(inputStream);
             return configuration;
         } catch (JAXBException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Convenience method to marshal a JAXB configuration object into an output
+     * stream.
+     * 
+     * @param configuration
+     * @param outputStream
+     */
+    public void marshall(Configuration configuration, OutputStream outputStream) {
+        try {
+            Marshaller marshaller = _jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.setEventHandler(new JaxbValidationEventHandler());
+            marshaller.marshal(configuration, outputStream);
+        } catch (JAXBException e) {
+            throw new IllegalStateException(e);
         }
     }
 

@@ -61,6 +61,7 @@ import org.eobjects.analyzer.job.jaxb.SourceType;
 import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
+import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.convert.StringConverter;
 import org.eobjects.metamodel.schema.Column;
 import org.slf4j.Logger;
@@ -159,6 +160,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         try {
             final Marshaller marshaller = _jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.setEventHandler(new JaxbValidationEventHandler());
             marshaller.marshal(jobType, outputStream);
         } catch (JAXBException e) {
             throw new IllegalStateException(e);
