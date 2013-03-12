@@ -57,6 +57,7 @@ import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
 import org.eobjects.metamodel.DataContext;
+import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Schema;
@@ -70,6 +71,15 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
     private final JaxbConfigurationReader reader = new JaxbConfigurationReader();
     private DatastoreCatalog _datastoreCatalog;
+
+    public void testReadCsvFilesWithSpecialCharacters() throws Exception {
+        AnalyzerBeansConfiguration configuration = reader.create(new File(
+                "src/test/resources/example-configuration-csv-with-special-chars.xml"));
+        CsvDatastore csv = (CsvDatastore) configuration.getDatastoreCatalog().getDatastore("csv");
+
+        assertTrue("Unexpected separator: " + csv.getSeparatorChar(), '\t' == csv.getSeparatorChar());
+        assertTrue("Unexpected escape: " + csv.getEscapeChar(), CsvConfiguration.NOT_A_CHAR == csv.getEscapeChar());
+    }
 
     public void testReadClasspathScannerWithExcludedRenderer() throws Exception {
         AnalyzerBeansConfiguration configuration = reader.create(new File(
@@ -204,7 +214,8 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("odb", datastoreCatalog.getDatastore("my_odb").getDescription());
         assertEquals("xls", datastoreCatalog.getDatastore("my_excel_2003").getDescription());
         assertEquals("comp", datastoreCatalog.getDatastore("my_composite").getDescription());
-        assertEquals("salesforce.com is an online CRM system", datastoreCatalog.getDatastore("my_sfdc_ds").getDescription());
+        assertEquals("salesforce.com is an online CRM system", datastoreCatalog.getDatastore("my_sfdc_ds")
+                .getDescription());
         assertEquals("mdb", datastoreCatalog.getDatastore("my_access").getDescription());
         assertEquals("folder of sas7bdat files", datastoreCatalog.getDatastore("my_sas").getDescription());
         assertEquals("A datastore based on plain values", datastoreCatalog.getDatastore("my_pojo").getDescription());
@@ -285,7 +296,8 @@ public class JaxbConfigurationReaderTest extends TestCase {
         for (String name : datastoreNames) {
             // test that all connections, except the JNDI-, MongoDB- and
             // CouchDB-based on will work
-            if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name) && !"my couch".equals(name) && !"my_sfdc_ds".equals(name) && !"my_sugarcrm".equals(name)) {
+            if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name) && !"my couch".equals(name)
+                    && !"my_sfdc_ds".equals(name) && !"my_sugarcrm".equals(name)) {
                 Datastore datastore = datastoreCatalog.getDatastore(name);
                 DataContext dc = datastore.openConnection().getDataContext();
                 assertNotNull(dc);

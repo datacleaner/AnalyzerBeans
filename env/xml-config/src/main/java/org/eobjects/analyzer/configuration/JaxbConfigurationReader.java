@@ -930,31 +930,20 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     private Datastore createDatastore(String name, CsvDatastoreType csvDatastoreType) {
-        String filename = _interceptor.createFilename(getStringVariable("filename", csvDatastoreType.getFilename()));
+        final String filename = _interceptor.createFilename(getStringVariable("filename",
+                csvDatastoreType.getFilename()));
 
-        String quoteCharString = getStringVariable("quoteChar", csvDatastoreType.getQuoteChar());
-        Character quoteChar = null;
+        final String quoteCharString = getStringVariable("quoteChar", csvDatastoreType.getQuoteChar());
+        final char quoteChar = getChar(quoteCharString, CsvConfiguration.DEFAULT_QUOTE_CHAR,
+                CsvConfiguration.NOT_A_CHAR);
 
-        String separatorCharString = getStringVariable("separatorChar", csvDatastoreType.getSeparatorChar());
-        Character separatorChar = null;
+        final String separatorCharString = getStringVariable("separatorChar", csvDatastoreType.getSeparatorChar());
+        final char separatorChar = getChar(separatorCharString, CsvConfiguration.DEFAULT_SEPARATOR_CHAR,
+                CsvConfiguration.NOT_A_CHAR);
 
-        String escapeCharString = getStringVariable("escapeChar", csvDatastoreType.getEscapeChar());
-        Character escapeChar = null;
-
-        if (!StringUtils.isNullOrEmpty(separatorCharString)) {
-            assert separatorCharString.length() == 1;
-            separatorChar = separatorCharString.charAt(0);
-        }
-
-        if (!StringUtils.isNullOrEmpty(quoteCharString)) {
-            assert quoteCharString.length() == 1;
-            quoteChar = quoteCharString.charAt(0);
-        }
-
-        if (!StringUtils.isNullOrEmpty(escapeCharString)) {
-            assert escapeCharString.length() == 1;
-            escapeChar = escapeCharString.charAt(0);
-        }
+        final String escapeCharString = getStringVariable("escapeChar", csvDatastoreType.getEscapeChar());
+        final char escapeChar = getChar(escapeCharString, CsvConfiguration.DEFAULT_ESCAPE_CHAR,
+                CsvConfiguration.NOT_A_CHAR);
 
         String encoding = getStringVariable("encoding", csvDatastoreType.getEncoding());
         if (StringUtils.isNullOrEmpty(encoding)) {
@@ -975,6 +964,36 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, escapeChar, encoding,
                 failOnInconsistencies, headerLineNumber);
         return ds;
+    }
+
+    private char getChar(String charString, char ifNull, char ifBlank) {
+        if (charString == null) {
+            return ifNull;
+        }
+        if ("".equals(charString)) {
+            return ifBlank;
+        }
+        if (charString.length() == 1) {
+            return charString.charAt(0);
+        }
+        if ("\\t".equals(charString)) {
+            return '\t';
+        }
+        if ("\\\n".equals(charString)) {
+            return '\n';
+        }
+        if ("\\r".equals(charString)) {
+            return '\r';
+        }
+        if ("\\\\".equals(charString)) {
+            return '\\';
+        }
+        if ("NOT_A_CHAR".equals(charString)) {
+            return CsvConfiguration.NOT_A_CHAR;
+        }
+        logger.warn("Char string contained more than 1 character and was not identified as a special char: '{}'",
+                charString);
+        return charString.charAt(0);
     }
 
     private void addVariablePath(String name) {
