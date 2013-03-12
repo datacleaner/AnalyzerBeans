@@ -140,8 +140,18 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         _analysisListener.jobBegin(job, analysisJobMetrics);
         try {
             final int expectedRows = rowProcessingMetrics.getExpectedRows();
-            final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
-            final int rowsPerChunk = (expectedRows == 0) ? 0 : (expectedRows + 1) / chunks;
+            final int chunks;
+            final int rowsPerChunk;
+            if (expectedRows == 0) {
+                // when there are no expected rows we still need to build a
+                // single slave job, since the job lifecycle needs to be
+                // guaranteed.
+                chunks = 1;
+                rowsPerChunk = 0;
+            } else {
+                chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
+                rowsPerChunk = (expectedRows + 1) / chunks;
+            }
 
             _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
 
