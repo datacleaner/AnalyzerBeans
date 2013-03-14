@@ -29,7 +29,9 @@ import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzerResult;
 import org.eobjects.analyzer.beans.CompletenessAnalyzer.Condition;
 import org.eobjects.analyzer.beans.CompletenessAnalyzerResult;
+import org.eobjects.analyzer.beans.filter.EqualsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
+import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.beans.valuematch.ValueMatchAnalyzer;
 import org.eobjects.analyzer.beans.valuematch.ValueMatchAnalyzerResult;
@@ -52,6 +54,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
+import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -432,5 +435,61 @@ public class ClusterTestHelper {
             csvCon.close();
             jobBuilder.close();
         }
+    }
+
+    public static void runNoExpectedRecordsJob(AnalyzerBeansConfiguration configuration) throws Throwable {
+        final AnalysisJob job;
+        {
+            final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+            try {
+                // build a job that concats names and inserts the concatenated
+                // names
+                // into a file
+                jobBuilder.setDatastore("orderdb");
+                jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER", "CUSTOMERS.CONTACTFIRSTNAME",
+                        "CUSTOMERS.CONTACTLASTNAME");
+
+                final FilterJobBuilder<EqualsFilter, ValidationCategory> equalsFilter = jobBuilder
+                        .addFilter(EqualsFilter.class);
+                equalsFilter.addInputColumn(jobBuilder.getSourceColumnByName("CUSTOMERNUMBER"));
+                equalsFilter.getConfigurableBean().setValues(new String[] { "-1000000" });
+
+                final AnalyzerJobBuilder<StringAnalyzer> stringAnalyzer = jobBuilder.addAnalyzer(StringAnalyzer.class);
+                stringAnalyzer.addInputColumns(jobBuilder.getAvailableInputColumns(String.class));
+                stringAnalyzer.setRequirement(equalsFilter, ValidationCategory.VALID);
+
+                job = jobBuilder.toAnalysisJob();
+            } finally {
+                jobBuilder.close();
+            }
+        }
+
+        final DistributedAnalysisRunner analysisRunner = new DistributedAnalysisRunner(configuration,
+                new ClusterManager() {
+                    @Override
+                    public JobDivisionManager getJobDivisionManager() {
+                        throw new IllegalStateException(
+                                "Since this job should yield 0 expected records, this method should not be invoked");
+                    }
+
+                    @Override
+                    public AnalysisResultFuture dispatchJob(AnalysisJob job, DistributedJobContext context)
+                            throws Exception {
+                        throw new IllegalStateException(
+                                "Since this job should yield 0 expected records, this method should not be invoked");
+                    }
+                });
+
+        final AnalysisResultFuture resultFuture = analysisRunner.run(job);
+        resultFuture.await();
+        if (resultFuture.isErrornous()) {
+            throw resultFuture.getErrors().get(0);
+        }
+
+        final List<AnalyzerResult> results = resultFuture.getResults();
+        Assert.assertEquals(1, results.size());
+
+        final AnalyzerResult analyzerResult = results.get(0);
+        Assert.assertTrue(analyzerResult instanceof StringAnalyzerResult);
     }
 }

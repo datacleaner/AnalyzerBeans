@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter.Category;
+import org.eobjects.analyzer.cluster.virtual.VirtualClusterManager;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
@@ -108,8 +109,6 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
         failIfJobIsUnsupported(job);
 
-        final JobDivisionManager jobDivisionManager = _clusterManager.getJobDivisionManager();
-
         final InjectionManager injectionManager = _configuration.getInjectionManager(job);
         final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
         final RowProcessingPublishers publishers = getRowProcessingPublishers(job, lifeCycleHelper);
@@ -133,34 +132,36 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         // will be synchronized/blocking.
 
         final AnalysisJobMetrics analysisJobMetrics = publishers.getAnalysisJobMetrics();
+        _analysisListener.jobBegin(job, analysisJobMetrics);
 
         final RowProcessingMetrics rowProcessingMetrics = publisher.getRowProcessingMetrics();
-        final DistributedAnalysisResultFuture resultFuture;
+        _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
 
-        _analysisListener.jobBegin(job, analysisJobMetrics);
+        final AnalysisResultFuture resultFuture;
+
         try {
             final int expectedRows = rowProcessingMetrics.getExpectedRows();
-            final int chunks;
-            final int rowsPerChunk;
+
             if (expectedRows == 0) {
                 // when there are no expected rows we still need to build a
-                // single slave job, since the job lifecycle needs to be
-                // guaranteed.
-                chunks = 1;
-                rowsPerChunk = 0;
+                // single slave job, but run it locally, since the job lifecycle
+                // still needs to be guaranteed.
+                final DistributedJobContext context = new DistributedJobContextImpl(_configuration, job, 0, 1);
+
+                // use a virtual cluster, which just runs the job locally.
+                final VirtualClusterManager localCluster = new VirtualClusterManager(_configuration, 1);
+                resultFuture = localCluster.dispatchJob(job, context);
             } else {
-                chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
-                rowsPerChunk = (expectedRows + 1) / chunks;
+                final JobDivisionManager jobDivisionManager = _clusterManager.getJobDivisionManager();
+                final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
+                final int rowsPerChunk = (expectedRows + 1) / chunks;
+
+                final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk);
+                final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job,
+                        lifeCycleHelper, publisher);
+                resultFuture = new DistributedAnalysisResultFuture(results, reducer);
             }
 
-            _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
-
-            final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk);
-
-            final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job, lifeCycleHelper,
-                    publisher);
-
-            resultFuture = new DistributedAnalysisResultFuture(results, reducer);
         } catch (RuntimeException e) {
             _analysisListener.errorUknown(job, e);
             throw e;
@@ -222,7 +223,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             }
 
             final AnalysisJob slaveJob = buildSlaveJob(job, firstRow, maxRows);
-            final DistributedJobContextImpl context = new DistributedJobContextImpl(_configuration, job, i, chunks);
+            final DistributedJobContext context = new DistributedJobContextImpl(_configuration, job, i, chunks);
 
             try {
                 final AnalysisResultFuture slaveResultFuture = _clusterManager.dispatchJob(slaveJob, context);

@@ -53,6 +53,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-basic-filters</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-writers</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>

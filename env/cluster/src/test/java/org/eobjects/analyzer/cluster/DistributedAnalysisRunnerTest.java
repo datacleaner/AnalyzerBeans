@@ -35,6 +35,12 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.test.TestHelper;
 
 public class DistributedAnalysisRunnerTest extends TestCase {
+    
+    public void testNoRecords() throws Throwable {
+        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), true);
+        
+        ClusterTestHelper.runNoExpectedRecordsJob(configuration);
+    }
 
     public void testVanillaScenarioSingleSlave() throws Throwable {
         final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), true);
