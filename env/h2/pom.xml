@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-env</artifactId>
-		<version>0.28-SNAPSHOT</version>
+		<version>0.28</version>
 	</parent>
 	<artifactId>AnalyzerBeans-h2</artifactId>
 	<description>A storage provider for AnalyzerBeans, based on the H2 database</description>
