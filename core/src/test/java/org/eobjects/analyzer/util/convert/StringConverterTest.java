@@ -31,6 +31,7 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
+import org.eobjects.analyzer.beans.transform.TableLookupTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.reference.Dictionary;
 import org.eobjects.analyzer.reference.ReferenceDataCatalogImpl;
@@ -51,15 +52,15 @@ public class StringConverterTest extends TestCase {
 
     private final Dictionary dictionary = new SimpleDictionary("my dict");
     private final SynonymCatalog synonymCatalog = new SimpleSynonymCatalog("my synonyms");
-    private final ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(
-            Arrays.asList(dictionary), Arrays.asList(synonymCatalog), new ArrayList<StringPattern>());
+    private final ReferenceDataCatalogImpl referenceDataCatalog = new ReferenceDataCatalogImpl(Arrays.asList(dictionary),
+            Arrays.asList(synonymCatalog), new ArrayList<StringPattern>());
 
     private StringConverter stringConverter;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl().replace(referenceDataCatalog);
 
         stringConverter = new StringConverter(conf.getInjectionManager(null));
@@ -83,8 +84,7 @@ public class StringConverterTest extends TestCase {
         }
 
         {
-            MyConvertable copy2 = stringConverter.deserialize(serializedForm2, MyConvertable.class,
-                    SecondaryConverter.class);
+            MyConvertable copy2 = stringConverter.deserialize(serializedForm2, MyConvertable.class, SecondaryConverter.class);
             assertTrue(convertable != copy2);
             assertEquals("foo", copy2.getName());
             assertEquals("bar", copy2.getDescription());
@@ -134,14 +134,14 @@ public class StringConverterTest extends TestCase {
             return myString;
         }
     }
-    
+
     public void testConvertList() throws Exception {
         List<?> list = stringConverter.deserialize("[foo,bar]", List.class);
         assertEquals(2, list.size());
         assertEquals(String.class, list.get(0).getClass());
         assertEquals(String.class, list.get(1).getClass());
     }
-    
+
     public void testConvertExpressionDates() throws Exception {
         runTests(new TodayDate(), "today()");
         runTests(new NowDate(), "now()");
@@ -184,6 +184,13 @@ public class StringConverterTest extends TestCase {
 
         deserialized = stringConverter.deserialize(serialized, MaxRowsFilter.Category[].class);
         assertTrue(EqualsBuilder.equals(array, deserialized));
+    }
+
+    public void testEnumWithAlias() throws Exception {
+        // TableLookupTransformer has multiple aliased enum values
+
+        Object deserialized = stringConverter.deserialize("LEFT", TableLookupTransformer.JoinSemantic.class);
+        assertEquals(TableLookupTransformer.JoinSemantic.LEFT_JOIN_MAX_ONE, deserialized);
     }
 
     public void testFile() throws Exception {
@@ -305,13 +312,13 @@ public class StringConverterTest extends TestCase {
             assertEquals(o, o2);
         }
     }
-    
+
     public void testSerializeList() throws Exception {
         ArrayList<Object> o = new ArrayList<Object>();
         o.add("foo");
         o.add("bar");
-        o.add(Arrays.asList("baz","foobar"));
-        
+        o.add(Arrays.asList("baz", "foobar"));
+
         StringConverter converter = new StringConverter(null);
         String result = converter.serialize(o);
         assertEquals("[foo,bar,[baz,foobar]]", result);

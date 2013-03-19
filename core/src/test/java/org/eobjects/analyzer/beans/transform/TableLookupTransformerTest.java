@@ -34,7 +34,7 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 
 public class TableLookupTransformerTest extends TestCase {
-
+    
     public void testScenario() throws Exception {
         TableLookupTransformer trans = new TableLookupTransformer();
         trans.datastore = new CsvDatastore("my ds", "src/test/resources/employees.csv");
@@ -97,7 +97,7 @@ public class TableLookupTransformerTest extends TestCase {
                 result.add(values);
             }
         };
-        trans.joinSemantic = JoinSemantic.INNER_MIN_ONE;
+        trans.joinSemantic = JoinSemantic.LEFT_JOIN;
         trans.conditionColumns = new String[] { "email" };
         InputColumn<String> col1 = new MockInputColumn<String>("my email col", String.class);
         trans.conditionValues = new InputColumn[] { col1 };
@@ -132,7 +132,7 @@ public class TableLookupTransformerTest extends TestCase {
                 result.add(values);
             }
         };
-        trans.joinSemantic = JoinSemantic.INNER;
+        trans.joinSemantic = JoinSemantic.INNER_JOIN;
         trans.conditionColumns = new String[] { "email" };
         InputColumn<String> col1 = new MockInputColumn<String>("my email col", String.class);
         trans.conditionValues = new InputColumn[] { col1 };
@@ -167,7 +167,7 @@ public class TableLookupTransformerTest extends TestCase {
                 result.add(values);
             }
         };
-        trans.joinSemantic = JoinSemantic.INNER;
+        trans.joinSemantic = JoinSemantic.INNER_JOIN;
         InputColumn<String> col1 = new MockInputColumn<String>("my email col", String.class);
 
         OutputColumns outputColumns = trans.getOutputColumns();

@@ -22,6 +22,7 @@ package org.eobjects.analyzer.util.convert;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,6 +34,7 @@ import java.util.regex.PatternSyntaxException;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
@@ -127,11 +129,28 @@ public class StandardTypeConverter implements Converter<Object> {
         if (type.isEnum()) {
             try {
                 Object[] enumConstants = type.getEnumConstants();
+                
+                // first look for enum constant matches
                 Method nameMethod = Enum.class.getMethod("name");
                 for (Object e : enumConstants) {
                     String name = (String) nameMethod.invoke(e);
                     if (name.equals(str)) {
                         return e;
+                    }
+                }
+                
+                // check for aliased enums
+                for (Object e : enumConstants) {
+                    String name = (String) nameMethod.invoke(e);
+                    Field field = type.getField(name);
+                    Alias alias = ReflectionUtils.getAnnotation(field, Alias.class);
+                    if (alias != null) {
+                        String[] aliasValues = alias.value();
+                        for (String aliasValue : aliasValues) {
+                            if (aliasValue.equals(str)) {
+                                return e;
+                            }
+                        }
                     }
                 }
             } catch (Exception e) {

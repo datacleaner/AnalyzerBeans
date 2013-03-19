@@ -72,7 +72,14 @@ public class TableLookupTransformer implements Transformer<Object> {
     private static final Logger logger = LoggerFactory.getLogger(TableLookupTransformer.class);
 
     public static enum JoinSemantic implements HasName {
-        LEFT("Left join"), INNER("Inner join"), INNER_MIN_ONE("Inner join (min. 1 output record)");
+        @Alias("LEFT")
+        LEFT_JOIN_MAX_ONE("Left join (max 1 record)"), 
+        
+        @Alias("INNER")
+        INNER_JOIN("Inner join"), 
+        
+        @Alias("INNER_MIN_ONE")
+        LEFT_JOIN("Left join");
 
         private final String _name;
 
@@ -88,7 +95,7 @@ public class TableLookupTransformer implements Transformer<Object> {
         public boolean isCacheable() {
             // inner joined result sets are not cached since their size exceeds
             // the cache capabilities.
-            return this == LEFT;
+            return this == LEFT_JOIN_MAX_ONE;
         }
     }
 
@@ -130,7 +137,7 @@ public class TableLookupTransformer implements Transformer<Object> {
     @Inject
     @Configured
     @Description("Which kind of semantic to apply to the lookup, compared to a SQL JOIN.")
-    JoinSemantic joinSemantic = JoinSemantic.LEFT;
+    JoinSemantic joinSemantic = JoinSemantic.LEFT_JOIN_MAX_ONE;
 
     @Inject
     @Provided
@@ -232,7 +239,7 @@ public class TableLookupTransformer implements Transformer<Object> {
                 }
             }
             
-            if (joinSemantic == JoinSemantic.LEFT) {
+            if (joinSemantic == JoinSemantic.LEFT_JOIN_MAX_ONE) {
                 query = query.setMaxRows(1);
             }
 
@@ -342,8 +349,8 @@ public class TableLookupTransformer implements Transformer<Object> {
         if (!dataSet.next()) {
             logger.warn("Result of lookup: None!");
             switch (joinSemantic) {
-            case LEFT:
-            case INNER_MIN_ONE:
+            case LEFT_JOIN_MAX_ONE:
+            case LEFT_JOIN:
                 return new Object[outputColumns.length];
             default:
                 return null;
@@ -356,7 +363,7 @@ public class TableLookupTransformer implements Transformer<Object> {
                 logger.info("Result of lookup: " + Arrays.toString(result));
             }
             switch (joinSemantic) {
-            case LEFT:
+            case LEFT_JOIN_MAX_ONE:
                 return result;
             default:
                 outputRowCollector.putValues(result);
