@@ -123,7 +123,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
 
     @Inject
     @Configured(value = "Error log file location", required = false)
-    @Description("Directory or file path for saving errornuos records")
+    @Description("Directory or file path for saving erroneous records")
     @FileProperty(accessMode = FileAccessMode.SAVE, extension = ".csv")
     File errorLogFile = TEMP_DIR;
 

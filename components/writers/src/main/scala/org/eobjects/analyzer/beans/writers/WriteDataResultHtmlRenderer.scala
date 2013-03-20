@@ -22,7 +22,7 @@ class WriteDataResultHtmlRenderer extends Renderer[WriteDataResult, HtmlFragment
     val html = <div>
                  { if (inserts > 0) { <p>Executed { inserts } inserts</p> } }
                  { if (updates > 0) { <p>Executed { updates } updates</p> } }
-                 { if (errors > 0) { <p>{ errors } Errornous records</p> } }
+                 { if (errors > 0) { <p>{ errors } Erroneous records</p> } }
                </div>;
 
     val frag = new SimpleHtmlFragment();

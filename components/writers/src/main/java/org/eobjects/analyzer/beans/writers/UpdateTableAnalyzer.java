@@ -133,7 +133,7 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
 
     @Inject
     @Configured(value = "Error log file location", required = false)
-    @Description("Directory or file path for saving errornuos records")
+    @Description("Directory or file path for saving erroneous records")
     @FileProperty(accessMode = FileAccessMode.SAVE, extension = ".csv")
     File errorLogFile = TEMP_DIR;
 
