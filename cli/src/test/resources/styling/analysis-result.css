@@ -136,6 +136,10 @@ ul.analysisResultToc li.CompletenessAnalyzer  {
 	background-image: url("type_completeness_analyzer.png");
 }
 
+ul.analysisResultToc li.PentahoJobResult  {
+	background-image: url("type_pentaho_job.png");
+}
+
 ul.analysisResultToc li.DateGapAnalyzer {
 	background-image: url("type_date_gap_analyzer.png");
 }
