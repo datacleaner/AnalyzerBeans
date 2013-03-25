@@ -31,6 +31,12 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
 
     public static final int DEFAULT_PORT = CouchDbDataContext.DEFAULT_PORT;
 
+    /**
+     * 20 second connection timeout - due to batching nature of the connections,
+     * CouchDB may take a bit of time to respond to new connections.
+     */
+    private static final int HTTP_TIMEOUT = 20000;
+
     private final String _hostname;
     private final Integer _port;
     private final String _username;
@@ -38,8 +44,8 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
     private final boolean _sslEnabled;
     private final SimpleTableDef[] _tableDefs;
 
-    public CouchDbDatastore(String name, String hostname, Integer port, String username, String password,
-            boolean sslEnabled, SimpleTableDef[] tableDefs) {
+    public CouchDbDatastore(String name, String hostname, Integer port, String username, String password, boolean sslEnabled,
+            SimpleTableDef[] tableDefs) {
         super(name);
         _hostname = hostname;
         _port = port;
@@ -73,6 +79,9 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
             httpClient.password(_password);
         }
         httpClient.enableSSL(_sslEnabled);
+
+        httpClient.connectionTimeout(HTTP_TIMEOUT);
+        httpClient.socketTimeout(HTTP_TIMEOUT);
 
         final CouchDbDataContext dataContext;
         if (_tableDefs != null && _tableDefs.length > 0) {
