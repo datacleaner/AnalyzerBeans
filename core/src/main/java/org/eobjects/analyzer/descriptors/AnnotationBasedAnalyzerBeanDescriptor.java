@@ -63,7 +63,7 @@ final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends
             // the analyzer-level annotation always comes first (can override
             // the result-level annotation).
             if (!distributedAnalyzer.value()) {
-                return null;
+                return super.getResultReducerClass();
             }
             final Class<? extends AnalyzerResultReducer<?>> reducer = distributedAnalyzer.reducer();
             if (reducer != null && reducer != NoAnalyzerResultReducer.class) {
@@ -71,17 +71,7 @@ final class AnnotationBasedAnalyzerBeanDescriptor<A extends Analyzer<?>> extends
             }
         }
 
-        final Distributed distributedResult = ReflectionUtils.getAnnotation(getResultClass(), Distributed.class);
-        if (distributedResult != null) {
-            if (!distributedResult.value()) {
-                return null;
-            }
-            final Class<? extends AnalyzerResultReducer<?>> reducer = distributedResult.reducer();
-            if (reducer != null && reducer != NoAnalyzerResultReducer.class) {
-                return reducer;
-            }
-        }
-        return null;
+        return super.getResultReducerClass();
     }
 
     @Override

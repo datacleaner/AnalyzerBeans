@@ -19,14 +19,11 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.AnalyzerResultReducer;
 import org.eobjects.analyzer.result.HasAnalyzerResult;
-import org.eobjects.analyzer.result.Metric;
 import org.eobjects.analyzer.util.ReflectionUtils;
 
 /**
@@ -42,58 +39,36 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
 
     private static final long serialVersionUID = 1L;
 
-    private final Class<? extends AnalyzerResult> _resultClass;
-    private final Set<MetricDescriptor> _metrics;
+    private final ResultDescriptor _resultDescriptor;
 
     public AbstractHasAnalyzerResultBeanDescriptor(Class<B> beanClass, boolean requireInputColumns) {
         super(beanClass, requireInputColumns);
+        
 
         Class<?> typeParameter = ReflectionUtils.getTypeParameter(getComponentClass(), HasAnalyzerResult.class, 0);
 
         @SuppressWarnings("unchecked")
         Class<? extends AnalyzerResult> resultClass = (Class<? extends AnalyzerResult>) typeParameter;
-        _resultClass = resultClass;
-
-        Method[] metricMethods = ReflectionUtils.getMethods(resultClass, Metric.class);
-        _metrics = new TreeSet<MetricDescriptor>();
-        for (Method method : metricMethods) {
-            MetricDescriptor metric = new MetricDescriptorImpl(resultClass, method);
-            _metrics.add(metric);
-        }
-    }
-
-    @Override
-    public Class<? extends AnalyzerResult> getResultClass() {
-        return _resultClass;
+        _resultDescriptor = new ResultDescriptorImpl(resultClass);
     }
     
     @Override
     public MetricDescriptor getResultMetric(String name) {
-        if (name == null) {
-            return null;
-        }
-        
-        for (MetricDescriptor metric : _metrics) {
-            if (name.equals(metric.getName())) {
-                return metric;
-            }
-        }
-        
-        // second try - case insensitive
-        for (MetricDescriptor metric : _metrics) {
-            if (name.equalsIgnoreCase(metric.getName())) {
-                return metric;
-            }
-        }
-        return null;
+        return _resultDescriptor.getResultMetric(name);
     }
 
     @Override
     public Set<MetricDescriptor> getResultMetrics() {
-        if (_metrics == null) {
-            // can happen with deserialized instances only
-            return Collections.emptySet();
-        }
-        return Collections.unmodifiableSet(_metrics);
+        return _resultDescriptor.getResultMetrics();
+    }
+    
+    @Override
+    public Class<? extends AnalyzerResultReducer<?>> getResultReducerClass() {
+        return _resultDescriptor.getResultReducerClass();
+    }
+    
+    @Override
+    public Class<? extends AnalyzerResult> getResultClass() {
+        return _resultDescriptor.getResultClass();
     }
 }
