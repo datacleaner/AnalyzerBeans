@@ -149,7 +149,7 @@ public class AnalyzerJobHelper {
         final ComponentDescriptor<?> descriptor = o.getDescriptor();
         if (descriptor instanceof BeanDescriptor) {
             final BeanDescriptor<?> beanDescriptor = (BeanDescriptor<?>) descriptor;
-            final Set<ConfiguredPropertyDescriptor> inputProperties = beanDescriptor.getConfiguredPropertiesForInput();
+            final Set<ConfiguredPropertyDescriptor> inputProperties = beanDescriptor.getConfiguredPropertiesForInput(false);
             if (inputProperties.size() != 1) {
                 return null;
             }
