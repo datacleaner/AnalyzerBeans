@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans</artifactId>
-		<version>0.29-SNAPSHOT</version>
+		<version>0.29</version>
 	</parent>
 	<artifactId>AnalyzerBeans-core</artifactId>
 	<description>Core module of AnalyzerBeans, provides a bare-bones engine for composing and executing AnalyzerBeans jobs</description>
