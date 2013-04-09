@@ -112,6 +112,18 @@ ul.analysisResultToc li.CharacterSetDistribution {
 	background-image: url("type_charset.png");
 }
 
+ul.analysisResultToc li.ScatterPlot {
+	background-image: url("type_scatter.png");
+}
+
+ul.analysisResultToc li.DensityPlot {
+	background-image: url("type_density.png");
+}
+
+ul.analysisResultToc li.StackedAreaPlot {
+	background-image: url("type_stacked_area.png");
+}
+
 ul.analysisResultToc li.InsertIntoTable {
 	background-image: url("type_insert.png");
 }
