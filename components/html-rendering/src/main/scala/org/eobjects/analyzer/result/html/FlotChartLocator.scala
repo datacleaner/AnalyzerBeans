@@ -20,6 +20,11 @@ object FlotChartLocator {
   def getFlotPieUrl: String = getFlotHome() + "/jquery.flot.pie.min.js";
 
   /**
+   * Gets the URL for the flot plugin for selecting parts of the plot, typically named as "jquery.flot.selection.min.js"
+   */
+  def getFlotSelectionUrl: String = getFlotHome() + "/jquery.flot.selection.min.js";
+  
+  /**
    * Gets the URL for the flot plugin for additional point symbols, typically named as "jquery.flot.symbol.min.js"
    */
   def getFlotSymbolUrl: String = getFlotHome() + "/jquery.flot.symbol.min.js";
