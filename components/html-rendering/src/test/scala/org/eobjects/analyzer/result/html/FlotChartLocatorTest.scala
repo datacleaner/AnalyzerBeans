@@ -15,5 +15,7 @@ class FlotChartLocatorTest extends AssertionsForJUnit {
     Assert.assertEquals("../bar/jquery.flot.min.js", FlotChartLocator.getFlotBaseUrl);
     
     FlotChartLocator.setFlotHome(null)
+    
+    Assert.assertEquals("http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.min.js", FlotChartLocator.getFlotBaseUrl);
   }
 }

@@ -5,6 +5,7 @@ import org.eobjects.analyzer.result.html.HtmlRenderingContext
 import org.eobjects.analyzer.result.ValueCountingAnalyzerResult
 import org.eobjects.analyzer.util.LabelUtils
 import org.eobjects.analyzer.result.ValueCount
+import org.eobjects.analyzer.result.html.FlotChartLocator
 
 /**
  * Defines reusable script parts for value distribution results
@@ -12,8 +13,8 @@ import org.eobjects.analyzer.result.ValueCount
 object ValueDistributionReusableScriptHeadElement extends HeadElement {
 
   override def toHtml(context: HtmlRenderingContext): String = {
-    val flotBaseLocation = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")) { "http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.min.js" } else { System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.flot.min.js"""; }
-    val flotPiePluginLocation = if (null == System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation")) { "http://cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.pie.min.js" } else { System.getProperty("org.eobjects.analyzer.valuedist.flotLibraryLocation") + """/jquery.flot.pie.min.js"""; }
+    val flotBaseLocation = FlotChartLocator.getFlotBaseUrl
+    val flotPiePluginLocation = FlotChartLocator.getFlotPieUrl
 
     return """<script type="text/javascript">
 //<![CDATA[
