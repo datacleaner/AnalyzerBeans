@@ -62,6 +62,7 @@ import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
+import org.eobjects.metamodel.jdbc.JdbcDataContext;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
@@ -266,6 +267,19 @@ public final class RowProcessingPublisher {
 
         try {
             final DataContext dataContext = con.getDataContext();
+            
+            if (logger.isDebugEnabled()) {
+                final String queryString;
+                if (dataContext instanceof JdbcDataContext) {
+                    final JdbcDataContext jdbcDataContext = (JdbcDataContext) dataContext;
+                    queryString = jdbcDataContext.getQueryRewriter().rewriteQuery(finalQuery);
+                } else {
+                    queryString = finalQuery.toSql();
+                }
+                logger.debug("Final query: {}", queryString);
+                logger.debug("Final query firstRow={}, maxRows={}", finalQuery.getFirstRow(), finalQuery.getMaxRows());
+            }
+            
             final DataSet dataSet = dataContext.executeQuery(finalQuery);
 
             // represents the distinct count of rows as well as the number of

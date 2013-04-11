@@ -250,6 +250,8 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
      * @return
      */
     private AnalysisJob buildSlaveJob(AnalysisJob job, int firstRow, int maxRows) {
+        logger.info("Building slave job with firstRow={} and maxRow={}", firstRow, maxRows);
+        
         final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job);
         try {
             final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
