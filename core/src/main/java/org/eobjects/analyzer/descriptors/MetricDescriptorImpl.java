@@ -62,7 +62,11 @@ final class MetricDescriptorImpl extends AbstractMetricDescriptor implements Met
 
     public Method getMethod() {
         if (_method == null) {
-            return ReflectionUtils.getMethod(_resultClass, _methodName);
+            Method method = ReflectionUtils.getMethod(_resultClass, _methodName, true);
+            if (method == null) {
+                throw new IllegalStateException("No such method: " + _methodName + " in " + _resultClass);
+            }
+            return method;
         }
         return _method;
     }

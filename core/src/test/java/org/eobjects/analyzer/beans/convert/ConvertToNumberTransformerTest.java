@@ -40,4 +40,8 @@ public class ConvertToNumberTransformerTest extends TestCase {
 		assertEquals(-2000l, ConvertToNumberTransformer.transformValue("-2,000.0"));
 		assertEquals(987654321l, ConvertToNumberTransformer.transformValue("987654321"));
 	}
+	
+	public void testTransformUntrimmed() throws Exception {
+	    assertEquals(2309628.8, ConvertToNumberTransformer.transformValue("    2309628.8"));
+    }
 }

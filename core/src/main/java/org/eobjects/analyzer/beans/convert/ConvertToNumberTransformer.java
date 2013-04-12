@@ -151,7 +151,7 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 					n = (int) c;
 				}
 			} else {
-				String stringValue = value.toString();
+				String stringValue = value.toString().trim();
 
 				try {
 					if (stringValue.indexOf('%') != -1) {
