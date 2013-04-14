@@ -63,6 +63,11 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
         uniqueValues.foreach(str => valueCounts.add(new ValueCount(str, 1)));
       }
     }
+    
+    val numBars = (valueCounts.size() - uniqueCount + 1);
+    val barHeight = if (numBars < 20) 50 else 30
+    val height = numBars * barHeight;
+    val style = "height: " + height + "px;"
 
     return <div class="valueDistributionGroupPanel">
              {
@@ -71,7 +76,7 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
                }
              }
              {
-               <div class="valueDistributionChart graph" id={ chartElementId }>
+               <div class="valueDistributionChart" style={ style } id={ chartElementId }>
                </div>
              }
              {

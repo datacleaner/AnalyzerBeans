@@ -14,57 +14,56 @@ object ValueDistributionReusableScriptHeadElement extends HeadElement {
 
   override def toHtml(context: HtmlRenderingContext): String = {
     val flotBaseLocation = FlotChartLocator.getFlotBaseUrl
-    val flotPiePluginLocation = FlotChartLocator.getFlotPieUrl
 
     return """<script type="text/javascript">
 //<![CDATA[
-function draw_value_distribution_pie(chartElement, chartData, retries) {
+function draw_value_distribution_bar(chartElement, chartData, retries) {
    
     wait_for_script_load('jQuery', function() {
         importJS('""" + flotBaseLocation + """', 'jQuery.plot', function() {
-            importJS('""" + flotPiePluginLocation + """', "jQuery.plot.plugins[0]", function() {
-                var elem = document.getElementById(chartElement);
-                
-                try {
-                    jQuery.plot(elem, chartData, {
-                        series: {
-                            pie: {
-                                show: true,
-                                radius: 3/5,
-                            }
-                        },
-                        grid: {
-                            hoverable: true,
-                            clickable: true
+            var elem = document.getElementById(chartElement);
+            
+            try {
+                jQuery.plot(elem, chartData, {
+                    series: {
+                        bars: {
+                            align: "center",
+                            horizontal: true,
+                            show: 0.5,
+                            fill: 1,
+                            lineWidth: 1,
+                            barWidth: 0.9
                         }
-                    });
-                    jQuery(elem).bind("plothover", function(event, pos, obj) {
-                        if (!obj) { return; }
-                        percent = parseFloat(obj.series.percent).toFixed(2);
-                        jQuery("#hover").html('<span style="font-weight: bold; color: '+obj.series.color+'">'+obj.series.label+' ('+percent+'%)</span>');
-                    });
-                    jQuery(elem).bind("plotclick", function(event, pos, obj) {
-                        if (!obj) { return; }
-                        percent = parseFloat(obj.series.percent).toFixed(2);
-                        alert(''+obj.series.label+': '+percent+'%');
-                    });
-                } catch (err) {
-                    // error can sometimes occur due to load time issues
-                    if (retries > 0) {
-                        retries = retries-1;
-                        draw_value_distribution_pie(chartElement, chartData, retries);
+                    },
+                    grid: { 
+                        borderWidth: 1
+                    },
+                    xaxis: {
+                        ticks: null
+                    },
+                    yaxis: {
+                        show: false
+                    },
+                    legend: {
+                        sorted: null,
+                        position: "se"
                     }
+                });
+            } catch (err) {
+                // error can sometimes occur due to load time issues
+                if (retries > 0) {
+                    retries = retries-1;
+                    draw_value_distribution_bar(chartElement, chartData, retries);
                 }
-            });
+            }
         });
     });
 }
 //]]>
 </script>
 <style type="text/css">
-.graph {
+.valueDistributionChart {
     width: 400px;
-    height: 300px;
 }
 </style>"""
   }

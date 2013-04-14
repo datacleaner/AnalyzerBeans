@@ -22,17 +22,26 @@ class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResul
       valueCounts.add(vc);
     }
 
+    // will be used to plot the y-axis value. Descending/negative because we want them to go from top to bottom.
+    var negativeIndex = 0;
+
     return """<script type="text/javascript">
     //<![CDATA[
     var data = [
         """ +
-  valueCounts.map(vc => {
-    "{label:\"" + context.escapeJson(LabelUtils.getValueLabel(vc.getValue())) + "\", " + "data:" + +vc.getCount() + "}" + "";
-  }).mkString(",") + """
+      valueCounts.map(vc => {
+        negativeIndex = negativeIndex - 1;
+        "{label:\"" + escapeLabel(context, vc.getValue()) + "\", " + "data:[[" + vc.getCount() + "," + negativeIndex + "]]}" + "";
+      }).mkString(",") + """
     ];
-    draw_value_distribution_pie('""" + chartElementId +  """', data, 2);
+    draw_value_distribution_bar('""" + chartElementId + """', data, 2);
     //]]>
 </script>
 """
+  }
+
+  def escapeLabel(context: HtmlRenderingContext, value: AnyRef): String = {
+    val escaped = context.escapeJson(LabelUtils.getValueLabel(value))
+    return escaped.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
   }
 }
