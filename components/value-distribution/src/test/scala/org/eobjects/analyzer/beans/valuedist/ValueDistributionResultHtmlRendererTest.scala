@@ -8,8 +8,59 @@ import org.eobjects.analyzer.result.renderer.RendererFactory
 import org.junit.Assert
 import org.junit.Test
 import org.scalatest.junit.AssertionsForJUnit
+import org.eobjects.analyzer.result.html.HtmlRenderer
+import org.eobjects.analyzer.result.html.HtmlAnalysisResultWriter
+import org.eobjects.analyzer.result.SimpleAnalysisResult
+import org.eobjects.analyzer.job.ComponentJob
+import org.eobjects.analyzer.result.AnalysisResult
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration
+import org.eobjects.analyzer.result.AnalyzerResult
+import org.eobjects.analyzer.job.ImmutableAnalyzerJob
+import org.eobjects.metamodel.util.FileHelper
+import java.io.File
+import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider
+import org.eobjects.analyzer.descriptors.Descriptors
+import org.eobjects.analyzer.job.BeanConfiguration
+import org.eobjects.analyzer.job.ImmutableBeanConfiguration
+import org.eobjects.analyzer.result.renderer.AnnotatedRowsHtmlRenderer
 
 class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
+  
+  @Test
+  def testSpecialColorValues = {
+    val context = new DefaultHtmlRenderingContext();
+
+    val col1 = new MockInputColumn[String]("Traffic light", classOf[String]);
+
+    val analyzer = new ValueDistributionAnalyzer(col1, false, null, null);
+    analyzer.run(new MockInputRow().put(col1, "green"), 10);
+    analyzer.run(new MockInputRow().put(col1, "BLUE"), 8);
+    analyzer.run(new MockInputRow().put(col1, "orange"), 5);
+    analyzer.run(new MockInputRow().put(col1, "red"), 2);
+    analyzer.run(new MockInputRow().put(col1, "<blank>"), 2);
+    analyzer.run(new MockInputRow().put(col1, null), 2);
+    analyzer.run(new MockInputRow().put(col1, "foo"), 1);
+    analyzer.run(new MockInputRow().put(col1, "bar"), 1);
+    analyzer.run(new MockInputRow().put(col1, "baz"), 1);
+    
+    val analyzerResult = analyzer.getResult()
+    val conf = new AnalyzerBeansConfigurationImpl()
+    val descriptorProvider = conf.getDescriptorProvider().asInstanceOf[SimpleDescriptorProvider];
+    descriptorProvider.addRendererBeanDescriptor(Descriptors.ofRenderer(classOf[ValueDistributionResultHtmlRenderer]))
+    descriptorProvider.addRendererBeanDescriptor(Descriptors.ofRenderer(classOf[AnnotatedRowsHtmlRenderer]))
+    val descriptor = conf.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(classOf[ValueDistributionAnalyzer]);
+    val map = new java.util.HashMap[ComponentJob, AnalyzerResult]()
+    val componentJob = new ImmutableAnalyzerJob("my value dist", descriptor, new ImmutableBeanConfiguration(null), null);
+    map.put(componentJob, analyzerResult);
+    val result = new SimpleAnalysisResult(map)
+    
+    val fileWriter = FileHelper.getBufferedWriter(new File("target/out_special_colors.html")); 
+    
+    val resultWriter = new HtmlAnalysisResultWriter
+    resultWriter.write(result, conf, fileWriter);
+    
+    fileWriter.close();
+  }
 
   @Test
   def testNoUniqueValuesStored = {
@@ -103,7 +154,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<script type="text/javascript">
     //<![CDATA[
     var data = [
-        {label:"kasper", data:[[4,-1]]},{label:"kasper.sorensen", data:[[2,-2]]},{label:"&lt;null&gt;", data:[[1,-3]]},{label:"&lt;unique&gt;", data:[[1,-4]]}
+        {label:"kasper", data:[[4,-1]]},{label:"kasper.sorensen", data:[[2,-2]]},{label:"&lt;null&gt;", data:[[1,-3]], color:"#111"},{label:"&lt;unique&gt;", data:[[1,-4]], color:"#ccc"}
     ];
     draw_value_distribution_bar('reselem_1', data, 2);
     //]]>
@@ -113,7 +164,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<script type="text/javascript">
     //<![CDATA[
     var data = [
-        {label:"&lt;unique&gt;", data:[[3,-1]]}
+        {label:"&lt;unique&gt;", data:[[3,-1]], color:"#ccc"}
     ];
     draw_value_distribution_bar('reselem_6', data, 2);
     //]]>
@@ -176,7 +227,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<script type="text/javascript">
     //<![CDATA[
     var data = [
-        {label:"kasper", data:[[9,-1]]},{label:"kasper.sorensen", data:[[3,-2]]},{label:"&lt;blank&gt;", data:[[2,-3]]},{label:"&lt;unique&gt;", data:[[1,-4]]}
+        {label:"kasper", data:[[9,-1]]},{label:"kasper.sorensen", data:[[3,-2]]},{label:"&lt;blank&gt;", data:[[2,-3]]},{label:"&lt;unique&gt;", data:[[1,-4]], color:"#ccc"}
     ];
     draw_value_distribution_bar('reselem_1', data, 2);
     //]]>

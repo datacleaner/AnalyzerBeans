@@ -30,14 +30,32 @@ class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResul
     var data = [
         """ +
       valueCounts.map(vc => {
+        val color = getColor(vc);
         negativeIndex = negativeIndex - 1;
-        "{label:\"" + escapeLabel(context, vc.getValue()) + "\", " + "data:[[" + vc.getCount() + "," + negativeIndex + "]]}" + "";
+        "{label:\"" + escapeLabel(context, vc.getValue()) + "\", " + 
+         "data:[[" + vc.getCount() + "," + negativeIndex + "]]" + 
+         {if (color == null) "" else ", color:\"" + color + "\""} +
+        "}" + "";
       }).mkString(",") + """
     ];
     draw_value_distribution_bar('""" + chartElementId + """', data, 2);
     //]]>
 </script>
 """
+  }
+  
+  def getColor(vc: ValueCount): String = {
+    val v = vc.getValue();
+    if (v == null) {
+      return "#111";
+    }
+    v.toLowerCase() match {
+      case "red"|"blue"|"green"|"yellow"|"orange"|"black" => return v.toLowerCase();
+      case "not_processed" => return "#333";
+      case LabelUtils.UNIQUE_LABEL => return "#ccc";
+      case LabelUtils.BLANK_LABEL|"white" => return "#eee";
+      case _ => return null;
+    }
   }
 
   def escapeLabel(context: HtmlRenderingContext, value: AnyRef): String = {
