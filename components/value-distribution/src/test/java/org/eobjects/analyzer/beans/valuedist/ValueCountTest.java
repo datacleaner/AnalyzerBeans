@@ -19,17 +19,18 @@
  */
 package org.eobjects.analyzer.beans.valuedist;
 
-import org.eobjects.analyzer.result.ValueCount;
-
 import junit.framework.TestCase;
+
+import org.eobjects.analyzer.result.SingleValueFrequency;
+import org.eobjects.analyzer.result.ValueFrequency;
 
 public class ValueCountTest extends TestCase {
 
 	public void testEqualsAndHashCode() throws Exception {
-		ValueCount vc1 = new ValueCount("foo", 1337);
-		ValueCount vc2 = new ValueCount("foo", 1337);
-		ValueCount vc3 = new ValueCount(null, 1337);
-		ValueCount vc4 = new ValueCount("foo", 1338);
+		ValueFrequency vc1 = new SingleValueFrequency("foo", 1337);
+		ValueFrequency vc2 = new SingleValueFrequency("foo", 1337);
+		ValueFrequency vc3 = new SingleValueFrequency(null, 1337);
+		ValueFrequency vc4 = new SingleValueFrequency("foo", 1338);
 		
 		assertEquals(vc1, vc2);
 		assertEquals(vc1.hashCode(), vc2.hashCode());

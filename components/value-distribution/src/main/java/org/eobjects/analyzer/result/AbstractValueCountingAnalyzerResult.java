@@ -20,11 +20,19 @@
 package org.eobjects.analyzer.result;
 
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.eobjects.analyzer.util.LabelUtils;
 import org.eobjects.metamodel.util.CollectionUtils;
 import org.eobjects.metamodel.util.Func;
+import org.eobjects.metamodel.util.Predicate;
 
 /**
  * An abstract implementation of {@link ValueCountingAnalyzerResult} which
@@ -40,11 +48,12 @@ public abstract class AbstractValueCountingAnalyzerResult implements ValueCounti
 
             @Override
             public Collection<String> getParameterSuggestions() {
-                final Collection<ValueCount> valueCounts = AbstractValueCountingAnalyzerResult.this.getValueCounts();
-                final List<String> result = CollectionUtils.map(valueCounts, new Func<ValueCount, String>() {
+                final Collection<ValueFrequency> valueCounts = AbstractValueCountingAnalyzerResult.this
+                        .getValueCounts();
+                final List<String> result = CollectionUtils.map(valueCounts, new Func<ValueFrequency, String>() {
                     @Override
-                    public String eval(ValueCount vc) {
-                        return vc.getValue();
+                    public String eval(ValueFrequency vc) {
+                        return vc.getName();
                     }
                 });
                 result.remove(null);
@@ -70,6 +79,86 @@ public abstract class AbstractValueCountingAnalyzerResult implements ValueCounti
     }
 
     @Override
+    public Collection<ValueFrequency> getReducedValueFrequencies(final int preferredMaximum) {
+        final Collection<ValueFrequency> original = getValueCounts();
+        
+        final Collection<ValueFrequency> result = new TreeSet<ValueFrequency>(original);
+
+        if (original.size() <= preferredMaximum) {
+            // check if any composite value freq's can be exploded
+            for (ValueFrequency valueFrequency : original) {
+                if (valueFrequency.isComposite()) {
+                    List<ValueFrequency> children = valueFrequency.getChildren();
+                    if (children != null) {
+                        if (result.size() - 1 + children.size() <= preferredMaximum) {
+                            // replace with children
+                            result.remove(valueFrequency);
+                            result.addAll(children);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        // Attempt to group/reduce values by frequency.
+        final SortedSet<List<ValueFrequency>> values;
+        {
+            Collection<List<ValueFrequency>> allValues;
+            {
+                // Add all the non-composite value freq's to a map where we can
+                // group
+                // them by their frequency
+                final Map<Integer, List<ValueFrequency>> frequencyMap = new HashMap<Integer, List<ValueFrequency>>();
+                for (ValueFrequency valueFrequency : original) {
+                    if (!valueFrequency.isComposite()) {
+                        int count = valueFrequency.getCount();
+                        List<ValueFrequency> list = frequencyMap.get(count);
+                        if (list == null) {
+                            list = new LinkedList<ValueFrequency>();
+                            frequencyMap.put(count, list);
+                        }
+                        list.add(valueFrequency);
+                    }
+                }
+                allValues = frequencyMap.values();
+            }
+            allValues = CollectionUtils.filter(allValues, new Predicate<List<ValueFrequency>>() {
+                @Override
+                public Boolean eval(List<ValueFrequency> list) {
+                    return list.size() > 1;
+                }
+            });
+
+            values = new TreeSet<List<ValueFrequency>>(new Comparator<List<?>>() {
+                @Override
+                public int compare(List<?> o1, List<?> o2) {
+                    int diff = o2.size() - o1.size();
+                    if (diff == 0) {
+                        return -1;
+                    }
+                    return diff;
+                }
+            });
+            values.addAll(allValues);
+        }
+
+        final Iterator<List<ValueFrequency>> iterator = values.iterator();
+        while (result.size() > preferredMaximum && iterator.hasNext()) {
+            final List<ValueFrequency> groupChildren = iterator.next();
+            final int groupFrequency = groupChildren.get(0).getCount();
+            final String groupName = "<count=" + groupFrequency + ">";
+            final ValueFrequency compositeValueFrequency = new CompositeValueFrequency(groupName, groupChildren);
+
+            result.removeAll(groupChildren);
+            result.add(compositeValueFrequency);
+        }
+
+        return result;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Value distribution for: ");
@@ -89,35 +178,12 @@ public abstract class AbstractValueCountingAnalyzerResult implements ValueCounti
      */
     protected void appendToString(StringBuilder sb, ValueCountingAnalyzerResult groupResult, int maxEntries) {
         if (maxEntries != 0) {
-            Collection<ValueCount> valueCounts = groupResult.getValueCounts();
-            for (ValueCount valueCount : valueCounts) {
+            Collection<ValueFrequency> valueCounts = groupResult.getValueCounts();
+            for (ValueFrequency valueCount : valueCounts) {
                 sb.append("\n - ");
-                sb.append(valueCount.getValue());
+                sb.append(valueCount.getName());
                 sb.append(": ");
                 sb.append(valueCount.getCount());
-
-                maxEntries--;
-                if (maxEntries == 0) {
-                    sb.append("\n ...");
-                    break;
-                }
-            }
-        }
-
-        sb.append("\nNull count: ");
-        sb.append(groupResult.getNullCount());
-
-        sb.append("\nUnique values: ");
-        Collection<String> uniqueValues = groupResult.getUniqueValues();
-
-        if (uniqueValues == null) {
-            sb.append(groupResult.getUniqueCount());
-        } else if (uniqueValues.isEmpty()) {
-            sb.append("0");
-        } else {
-            for (String value : uniqueValues) {
-                sb.append("\n - ");
-                sb.append(value);
 
                 maxEntries--;
                 if (maxEntries == 0) {

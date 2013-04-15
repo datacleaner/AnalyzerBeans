@@ -119,7 +119,8 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
         addRenamedClass("org.eobjects.analyzer.result.ValueDistributionResult","org.eobjects.analyzer.beans.valuedist.GroupedValueDistributionResult");
         addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueDistributionGroupResult","org.eobjects.analyzer.beans.valuedist.SingleValueDistributionResult");
         addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueDistributionResult","org.eobjects.analyzer.beans.valuedist.GroupedValueDistributionResult");
-        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCount", "org.eobjects.analyzer.result.ValueCount");
+        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCount", "org.eobjects.analyzer.result.SingleValueFrequency");
+        addRenamedClass("org.eobjects.analyzer.result.ValueCount", "org.eobjects.analyzer.result.SingleValueFrequency");
         addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCountList", "org.eobjects.analyzer.result.ValueCountList");
         addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCountListImpl", "org.eobjects.analyzer.result.ValueCountListImpl");
     }

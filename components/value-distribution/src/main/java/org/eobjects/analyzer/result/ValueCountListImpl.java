@@ -29,7 +29,7 @@ public class ValueCountListImpl implements ValueCountList {
 
 	private final boolean _retainHighest;
 	private final int _maxSize;
-	private final LinkedList<ValueCount> _values = new LinkedList<ValueCount>();
+	private final LinkedList<ValueFrequency> _values = new LinkedList<ValueFrequency>();
 
 	public static ValueCountListImpl createFullList() {
 		return new ValueCountListImpl(-1, true);
@@ -52,11 +52,11 @@ public class ValueCountListImpl implements ValueCountList {
 		_retainHighest = retainHighest;
 	}
 
-	public void register(ValueCount valueCount) {
+	public void register(ValueFrequency valueCount) {
 		boolean inserted = false;
 		if (_retainHighest) {
-			for (ListIterator<ValueCount> it = _values.listIterator(); it.hasNext();) {
-				ValueCount v = it.next();
+			for (ListIterator<ValueFrequency> it = _values.listIterator(); it.hasNext();) {
+				ValueFrequency v = it.next();
 				if (valueCount.getCount() > v.getCount()) {
 					it.previous();
 					it.add(valueCount);
@@ -67,8 +67,8 @@ public class ValueCountListImpl implements ValueCountList {
 				}
 			}
 		} else {
-			for (ListIterator<ValueCount> it = _values.listIterator(); it.hasNext();) {
-				ValueCount v = it.next();
+			for (ListIterator<ValueFrequency> it = _values.listIterator(); it.hasNext();) {
+				ValueFrequency v = it.next();
 				if (valueCount.getCount() < v.getCount()) {
 					it.previous();
 					it.add(valueCount);
@@ -93,7 +93,7 @@ public class ValueCountListImpl implements ValueCountList {
 		}
 	}
 
-	public List<ValueCount> getValueCounts() {
+	public List<ValueFrequency> getValueCounts() {
 		return _values;
 	}
 

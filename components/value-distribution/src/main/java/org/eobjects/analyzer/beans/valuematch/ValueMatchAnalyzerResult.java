@@ -29,8 +29,10 @@ import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AbstractValueCountingAnalyzerResult;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
+import org.eobjects.analyzer.result.CompositeValueFrequency;
 import org.eobjects.analyzer.result.Metric;
-import org.eobjects.analyzer.result.ValueCount;
+import org.eobjects.analyzer.result.SingleValueFrequency;
+import org.eobjects.analyzer.result.ValueFrequency;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.LabelUtils;
@@ -127,18 +129,18 @@ public class ValueMatchAnalyzerResult extends AbstractValueCountingAnalyzerResul
     }
 
     @Override
-    public Collection<ValueCount> getValueCounts() {
-        final Set<ValueCount> result = new TreeSet<ValueCount>();
+    public Collection<ValueFrequency> getValueCounts() {
+        final Set<ValueFrequency> result = new TreeSet<ValueFrequency>();
         for (Entry<String, RowAnnotation> entry : _valueAnnotations.entrySet()) {
-            result.add(new ValueCount(entry.getKey(), entry.getValue().getRowCount()));
+            result.add(new SingleValueFrequency(entry.getKey(), entry.getValue().getRowCount()));
         }
         final int nullCount = getNullCount();
         if (nullCount > 0) {
-            result.add(new ValueCount(null, nullCount));
+            result.add(new SingleValueFrequency(null, nullCount));
         }
         final Integer unexpectedCount = getUnexpectedValueCount();
         if (unexpectedCount > 0) {
-            result.add(new ValueCount(LabelUtils.UNEXPECTED_LABEL, unexpectedCount));
+            result.add(new CompositeValueFrequency(LabelUtils.UNEXPECTED_LABEL, unexpectedCount));
         }
         return result;
     }

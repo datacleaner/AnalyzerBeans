@@ -27,7 +27,7 @@ import java.util.List;
  */
 public interface ValueCountList extends Serializable {
 
-    public List<ValueCount> getValueCounts();
+    public List<ValueFrequency> getValueCounts();
 
     public int getMaxSize();
 

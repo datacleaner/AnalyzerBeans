@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.test.full.scenarios;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -47,6 +48,7 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.ResultProducer;
+import org.eobjects.analyzer.result.ValueFrequency;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.metamodel.DataContext;
@@ -89,6 +91,7 @@ public class ValueDistributionAndStringAnalysisTest extends TestCase {
         stringAnalyzerJob.addInputColumns(analysisJobBuilder.getAvailableInputColumns(String.class));
 
         AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
+        analysisJobBuilder.close();
 
         AnalysisResultFuture resultFuture = runner.run(analysisJob);
 
@@ -151,8 +154,10 @@ public class ValueDistributionAndStringAnalysisTest extends TestCase {
         assertNotNull(jobTitleResult);
         assertNotNull(lastnameResult);
 
-        assertEquals("Patterson", lastnameResult.getValueCounts().iterator().next().getValue());
-        assertEquals(3, lastnameResult.getValueCounts().iterator().next().getCount());
+        Iterator<ValueFrequency> it = lastnameResult.getValueCounts().iterator();
+        assertEquals("<unique>", it.next().getName());
+        assertEquals("Patterson", it.next().getName());
+        assertEquals(2, it.next().getCount());
         assertEquals(16, lastnameResult.getUniqueCount().intValue());
         assertEquals(0, lastnameResult.getNullCount());
 

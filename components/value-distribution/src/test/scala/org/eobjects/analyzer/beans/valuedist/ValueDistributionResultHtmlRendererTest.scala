@@ -23,6 +23,7 @@ import org.eobjects.analyzer.descriptors.Descriptors
 import org.eobjects.analyzer.job.BeanConfiguration
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration
 import org.eobjects.analyzer.result.renderer.AnnotatedRowsHtmlRenderer
+import org.eobjects.analyzer.result.renderer.ListResultHtmlRenderer
 
 class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
   
@@ -47,6 +48,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     val conf = new AnalyzerBeansConfigurationImpl()
     val descriptorProvider = conf.getDescriptorProvider().asInstanceOf[SimpleDescriptorProvider];
     descriptorProvider.addRendererBeanDescriptor(Descriptors.ofRenderer(classOf[ValueDistributionResultHtmlRenderer]))
+    descriptorProvider.addRendererBeanDescriptor(Descriptors.ofRenderer(classOf[ListResultHtmlRenderer]))
     descriptorProvider.addRendererBeanDescriptor(Descriptors.ofRenderer(classOf[AnnotatedRowsHtmlRenderer]))
     val descriptor = conf.getDescriptorProvider().getAnalyzerBeanDescriptorForClass(classOf[ValueDistributionAnalyzer]);
     val map = new java.util.HashMap[ComponentJob, AnalyzerResult]()
@@ -81,22 +83,22 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     htmlFragment.initialize(context);
 
     val bodyElems = htmlFragment.getBodyElements()
-    Assert.assertEquals(3, bodyElems.size());
+    Assert.assertEquals(2, bodyElems.size());
 
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
-             <div class="valueDistributionChart" style="height: 50px;" id="reselem_1">
+             <div class="valueDistributionChart" style="height: 80px;" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
-                   <tr><td>&lt;unique&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">2</a></td></tr><tr><td>foo@bar</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr>
+                   <tr><td>foo@bar</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">2</a></td></tr><tr><td>&lt;unique&gt;</td><td><span>2</span></td></tr>
                  </table>
              <table class="valueDistributionSummaryTable">
                <tr><td>Total count</td><td>4</td></tr>
                <tr><td>Distinct count</td><td>3</td></tr>
              </table>
            </div>
-               </div>""".replaceAll("\r\n", "\n"), bodyElems.get(2).toHtml(context).replaceAll("\r\n", "\n"));
+               </div>""".replaceAll("\r\n", "\n"), bodyElems.get(1).toHtml(context).replaceAll("\r\n", "\n"));
   }
 
   @Test
@@ -128,7 +130,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              <h3>Group: eobjects.dk</h3>
-             <div class="valueDistributionChart" style="height: 200px;" id="reselem_1">
+             <div class="valueDistributionChart" style="height: 160px;" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
                    <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">4</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">2</a></td></tr><tr><td>&lt;null&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">1</a></td></tr><tr><td>info</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
@@ -139,7 +141,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
              </table>
            </div><div class="valueDistributionGroupPanel">
              <h3>Group: humaninference.com</h3>
-             <div class="valueDistributionChart" style="height: 50px;" id="reselem_6">
+             <div class="valueDistributionChart" style="height: 120px;" id="reselem_6">
                </div>
              <table class="valueDistributionValueTable">
                    <tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_7'); return false;" href="#">1</a></td></tr><tr><td>kaspers</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_8'); return false;" href="#">1</a></td></tr><tr><td>winfried.vanholland</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_9'); return false;" href="#">1</a></td></tr>
@@ -154,7 +156,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<script type="text/javascript">
     //<![CDATA[
     var data = [
-        {label:"kasper", data:[[4,-1]]},{label:"kasper.sorensen", data:[[2,-2]]},{label:"&lt;null&gt;", data:[[1,-3]], color:"#111"},{label:"&lt;unique&gt;", data:[[1,-4]], color:"#ccc"}
+        {label:"kasper", data:[[4,-1]]},{label:"kasper.sorensen", data:[[2,-2]]},{label:"&lt;null&gt;", data:[[1,-3]], color:"#111"},{label:"info", data:[[1,-4]]}
     ];
     draw_value_distribution_bar('reselem_1', data, 2);
     //]]>
@@ -164,7 +166,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<script type="text/javascript">
     //<![CDATA[
     var data = [
-        {label:"&lt;unique&gt;", data:[[3,-1]], color:"#ccc"}
+        {label:"kasper.sorensen", data:[[1,-1]]},{label:"kaspers", data:[[1,-2]]},{label:"winfried.vanholland", data:[[1,-3]]}
     ];
     draw_value_distribution_bar('reselem_6', data, 2);
     //]]>
@@ -212,7 +214,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<div class="valueDistributionResultContainer">
                  <div class="valueDistributionGroupPanel">
              
-             <div class="valueDistributionChart" style="height: 200px;" id="reselem_1">
+             <div class="valueDistributionChart" style="height: 160px;" id="reselem_1">
                </div>
              <table class="valueDistributionValueTable">
                    <tr><td>kasper</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_2'); return false;" href="#">9</a></td></tr><tr><td>kasper.sorensen</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_3'); return false;" href="#">3</a></td></tr><tr><td>&lt;blank&gt;</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_4'); return false;" href="#">2</a></td></tr><tr><td>info</td><td><a class="drillToDetailsLink" onclick="drillToDetails('reselem_5'); return false;" href="#">1</a></td></tr>
@@ -227,7 +229,7 @@ class ValueDistributionResultHtmlRendererTest extends AssertionsForJUnit {
     Assert.assertEquals("""<script type="text/javascript">
     //<![CDATA[
     var data = [
-        {label:"kasper", data:[[9,-1]]},{label:"kasper.sorensen", data:[[3,-2]]},{label:"&lt;blank&gt;", data:[[2,-3]]},{label:"&lt;unique&gt;", data:[[1,-4]], color:"#ccc"}
+        {label:"kasper", data:[[9,-1]]},{label:"kasper.sorensen", data:[[3,-2]]},{label:"&lt;blank&gt;", data:[[2,-3]], color:"#eee"},{label:"info", data:[[1,-4]]}
     ];
     draw_value_distribution_bar('reselem_1', data, 2);
     //]]>

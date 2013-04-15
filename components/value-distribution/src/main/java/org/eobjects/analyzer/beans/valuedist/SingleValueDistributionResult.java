@@ -27,11 +27,14 @@ import java.util.TreeSet;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
-import org.eobjects.analyzer.result.ValueCount;
+import org.eobjects.analyzer.result.CompositeValueFrequency;
+import org.eobjects.analyzer.result.SingleValueFrequency;
+import org.eobjects.analyzer.result.ValueFrequency;
 import org.eobjects.analyzer.result.ValueCountList;
 import org.eobjects.analyzer.result.ValueCountListImpl;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
+import org.eobjects.analyzer.util.LabelUtils;
 import org.eobjects.analyzer.util.NullTolerableComparator;
 import org.eobjects.metamodel.util.Ref;
 import org.eobjects.metamodel.util.SerializableRef;
@@ -79,6 +82,7 @@ public class SingleValueDistributionResult extends ValueDistributionAnalyzerResu
         this(groupName, topValues, bottomValues, null, uniqueValueCount, distinctCount, totalCount, annotations,
                 nullValueAnnotation, annotationFactory, highlightedColumns);
     }
+
     @Override
     public boolean hasAnnotatedRows(String value) {
         if (_annotations == null) {
@@ -88,7 +92,7 @@ public class SingleValueDistributionResult extends ValueDistributionAnalyzerResu
         if (annotationFactory == null) {
             return false;
         }
-        
+
         if (value == null) {
             return _nullValueAnnotation != null;
         }
@@ -187,8 +191,8 @@ public class SingleValueDistributionResult extends ValueDistributionAnalyzerResu
         }
 
         if (_topValues != null) {
-            List<ValueCount> valueCounts = _topValues.getValueCounts();
-            for (ValueCount valueCount : valueCounts) {
+            List<ValueFrequency> valueCounts = _topValues.getValueCounts();
+            for (ValueFrequency valueCount : valueCounts) {
                 if (value.equals(valueCount.getValue())) {
                     return valueCount.getCount();
                 }
@@ -196,8 +200,8 @@ public class SingleValueDistributionResult extends ValueDistributionAnalyzerResu
         }
 
         if (_bottomValues != null) {
-            List<ValueCount> valueCounts = _bottomValues.getValueCounts();
-            for (ValueCount valueCount : valueCounts) {
+            List<ValueFrequency> valueCounts = _bottomValues.getValueCounts();
+            for (ValueFrequency valueCount : valueCounts) {
                 if (value.equals(valueCount.getValue())) {
                     return valueCount.getCount();
                 }
@@ -231,8 +235,8 @@ public class SingleValueDistributionResult extends ValueDistributionAnalyzerResu
     }
 
     @Override
-    public Collection<ValueCount> getValueCounts() {
-        Collection<ValueCount> result = new TreeSet<ValueCount>();
+    public Collection<ValueFrequency> getValueCounts() {
+        Collection<ValueFrequency> result = new TreeSet<ValueFrequency>();
         if (_topValues != null) {
             result.addAll(_topValues.getValueCounts());
         }
@@ -241,7 +245,12 @@ public class SingleValueDistributionResult extends ValueDistributionAnalyzerResu
         }
         final int nullCount = getNullCount();
         if (nullCount > 0) {
-            result.add(new ValueCount(null, nullCount));
+            result.add(new SingleValueFrequency(null, nullCount));
+        }
+        if (_uniqueValues != null && !_uniqueValues.isEmpty()) {
+            result.add(new CompositeValueFrequency(LabelUtils.UNIQUE_LABEL, _uniqueValues, 1));
+        } else if (_uniqueValueCount > 0) {
+            result.add(new CompositeValueFrequency(LabelUtils.UNIQUE_LABEL, _uniqueValueCount));
         }
         return result;
     }

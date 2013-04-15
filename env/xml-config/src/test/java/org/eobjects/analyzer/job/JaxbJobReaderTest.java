@@ -144,17 +144,17 @@ public class JaxbJobReaderTest extends TestCase {
         assertEquals(1, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measures", "Min words").get());
         assertEquals(2, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measures", "Max words").get());
         
-        // this result represents all the employees: Two repeated values and 18
-        // unique
-        ValueDistributionAnalyzerResult res2 = (ValueDistributionAnalyzerResult) results.get(1);
-        assertEquals(18, res2.getUniqueCount().intValue());
-        assertEquals("[[Gerard->2], [Leslie->2]]", res2.getValueCounts().toString());
-
         // this result represents the single manager (one unique and no repeated
         // values)
-        ValueDistributionAnalyzerResult res1 = (ValueDistributionAnalyzerResult) results.get(2);
-        assertEquals("[]", res1.getValueCounts().toString());
+        ValueDistributionAnalyzerResult res1 = (ValueDistributionAnalyzerResult) results.get(1);
+        assertEquals("[[<unique>->1]]", res1.getValueCounts().toString());
         assertEquals(1, res1.getUniqueCount().intValue());
+        
+        // this result represents all the employees: Two repeated values and 18
+        // unique
+        ValueDistributionAnalyzerResult res2 = (ValueDistributionAnalyzerResult) results.get(2);
+        assertEquals(18, res2.getUniqueCount().intValue());
+        assertEquals("[[<unique>->18], [Gerard->2], [Leslie->2]]", res2.getValueCounts().toString());
     }
 
     public void testNamedInputs() throws Exception {

@@ -9,11 +9,12 @@ import org.eobjects.analyzer.result.html.SimpleHtmlFragment
 import org.eobjects.analyzer.result.renderer.RendererFactory
 import org.eobjects.analyzer.result.GroupedValueCountingAnalyzerResult
 import org.eobjects.analyzer.result.ListResult
-import org.eobjects.analyzer.result.ValueCount
 import org.eobjects.analyzer.result.ValueCountingAnalyzerResult
 import org.eobjects.analyzer.util.LabelUtils
 import org.eobjects.analyzer.result.ListResult
 import org.eobjects.analyzer.result.ListResult
+import org.eobjects.analyzer.result.SingleValueFrequency
+import org.eobjects.analyzer.result.ValueFrequency
 
 class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendererFactory: RendererFactory) extends HtmlFragment {
 
@@ -21,7 +22,7 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
 
   override def initialize(context: HtmlRenderingContext) {
     frag.addHeadElement(ValueDistributionReusableScriptHeadElement)
-    
+
     val html = <div class="valueDistributionResultContainer">
                  {
                    if (result.isInstanceOf[GroupedValueCountingAnalyzerResult]) {
@@ -49,23 +50,12 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
   def renderResult(result: ValueCountingAnalyzerResult, context: HtmlRenderingContext, group: Boolean): scala.xml.Node = {
     val chartElementId: String = context.createElementId();
 
-    frag.addHeadElement(new ValueDistributionChartScriptHeadElement(result, chartElementId));
+    val valueCounts = result.getReducedValueFrequencies(32);
 
-    val valueCounts = result.getValueCounts();
+    frag.addHeadElement(new ValueDistributionChartScriptHeadElement(result, valueCounts, chartElementId));
 
-    val uniqueCount = result.getUniqueCount();
-    if (uniqueCount != null && uniqueCount > 0) {
-      val uniqueValues = result.getUniqueValues();
-      if (uniqueValues == null || uniqueValues.isEmpty()) {
-        val vc = new ValueCount(LabelUtils.UNIQUE_LABEL, uniqueCount);
-        valueCounts.add(vc);
-      } else {
-        uniqueValues.foreach(str => valueCounts.add(new ValueCount(str, 1)));
-      }
-    }
-    
-    val numBars = (valueCounts.size() - uniqueCount + 1);
-    val barHeight = if (numBars < 20) 50 else 30
+    val numBars = valueCounts.size();
+    val barHeight = if (numBars < 20) 40 else if (numBars < 30) 30 else 20
     val height = numBars * barHeight;
     val style = "height: " + height + "px;"
 
@@ -83,8 +73,8 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
                if (!valueCounts.isEmpty()) {
                  <table class="valueDistributionValueTable">
                    {
-                     valueCounts.iterator().map(vc => {
-                       <tr><td>{ LabelUtils.getLabel(vc.getValue()) }</td><td>{ getCount(result, vc, context) }</td></tr>
+                     valueCounts.iterator().map(valueFreq => {
+                       <tr><td>{ valueFreq.getName() }</td><td>{ getCount(result, valueFreq, context) }</td></tr>
                      })
                    }
                  </table>
@@ -101,26 +91,16 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
            </div>;
   }
 
-  def getCount(result: ValueCountingAnalyzerResult, vc: ValueCount, context: HtmlRenderingContext): scala.xml.Node = {
-    var value = vc.getValue();
-    val count = vc.getCount();
-    if (LabelUtils.NULL_LABEL.equals(value)) {
-      value = null;
-    } else if (LabelUtils.BLANK_LABEL.equals(value)) {
-      value = "";
-    }
-
+  def getCount(result: ValueCountingAnalyzerResult, valueFreq: ValueFrequency, context: HtmlRenderingContext): scala.xml.Node = {
+    val count = valueFreq.getCount();
     if (count == 0) {
-      return <span>{ vc.getCount() }</span>;
+      return <span>{ count }</span>;
     }
 
-    val annotatedRowsResult = result.getAnnotatedRowsForValue(value);
-
-    if (annotatedRowsResult == null) {
-      if (LabelUtils.UNIQUE_LABEL.equals(value)) {
+    if (valueFreq.isComposite()) {
+      if (LabelUtils.UNIQUE_LABEL.equals(valueFreq.getName())) {
         val uniqueValues = result.getUniqueValues()
-        if (uniqueValues != null) {
-
+        if (uniqueValues != null && !uniqueValues.isEmpty()) {
           val elementId = context.createElementId();
           val listResult = new ListResult(uniqueValues.toList);
 
@@ -129,10 +109,18 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
 
           val invocation = bodyElement.toJavaScriptInvocation()
 
-          return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
+          return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ count }</a>
         }
       }
-      return <span>{ vc.getCount() }</span>;
+
+      return <span>{ count }</span>;
+    }
+
+    var value = valueFreq.getValue();
+
+    val annotatedRowsResult = result.getAnnotatedRowsForValue(value);
+    if (annotatedRowsResult == null || annotatedRowsResult.getAnnotatedRowCount() == 0) {
+      return <span>{ count }</span>;
     }
 
     val elementId = context.createElementId();
@@ -142,6 +130,6 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
 
     val invocation = bodyElement.toJavaScriptInvocation()
 
-    return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ vc.getCount() }</a>
+    return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ count }</a>
   }
 }

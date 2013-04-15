@@ -139,12 +139,10 @@ public class ValueDistributionAnalyzerTest extends TestCase {
         assertEquals(0, result.getUniqueCount().intValue());
 
         String[] resultLines = result.toString().split("\n");
-        assertEquals(5, resultLines.length);
+        assertEquals(3, resultLines.length);
         assertEquals("Value distribution for: col", resultLines[0]);
         assertEquals(" - world: 3", resultLines[1]);
         assertEquals(" - hello: 2", resultLines[2]);
-        assertEquals("Null count: 0", resultLines[3]);
-        assertEquals("Unique values: 0", resultLines[4]);
     }
 
     public void testGroupedRun() throws Exception {
@@ -162,7 +160,7 @@ public class ValueDistributionAnalyzerTest extends TestCase {
         String resultString = result.toString();
         System.out.println(resultString);
         String[] resultLines = resultString.split("\n");
-        assertEquals(17, resultLines.length);
+        assertEquals(11, resultLines.length);
 
         assertEquals("Value distribution for column: foo", resultLines[0]);
         
@@ -172,18 +170,12 @@ public class ValueDistributionAnalyzerTest extends TestCase {
         assertEquals("Group: 1732", resultLines[i++]);
         assertEquals(" - Copenhagen: 4", resultLines[i++]);
         assertEquals(" - Coppenhagen: 3", resultLines[i++]);
-        assertEquals("Null count: 0", resultLines[i++]);
-        assertEquals("Unique values: 0", resultLines[i++]);
         assertEquals("", resultLines[i++]);
         assertEquals("Group: 2100", resultLines[i++]);
         assertEquals(" - Copenhagen E: 2", resultLines[i++]);
-        assertEquals("Null count: 0", resultLines[i++]);
-        assertEquals("Unique values: 0", resultLines[i++]);
         assertEquals("", resultLines[i++]);
         assertEquals("Group: 2200", resultLines[i++]);
         assertEquals(" - Copenhagen N: 3", resultLines[i++]);
-        assertEquals("Null count: 0", resultLines[i++]);
-        assertEquals("Unique values: 0", resultLines[i++]);
     }
 
     @SuppressWarnings("deprecation")

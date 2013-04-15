@@ -4,7 +4,6 @@ import org.eobjects.analyzer.result.html.HeadElement
 import org.eobjects.analyzer.result.html.HtmlRenderingContext
 import org.eobjects.analyzer.result.ValueCountingAnalyzerResult
 import org.eobjects.analyzer.util.LabelUtils
-import org.eobjects.analyzer.result.ValueCount
 import org.eobjects.analyzer.result.html.FlotChartLocator
 
 /**

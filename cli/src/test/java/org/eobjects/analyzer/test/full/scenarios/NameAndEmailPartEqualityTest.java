@@ -127,6 +127,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
                 .setRequirement(fjb, JavaScriptFilter.Category.INVALID);
 
         AnalysisResultFuture resultFuture = runner.run(analysisJobBuilder.toAnalysisJob());
+        analysisJobBuilder.close();
 
         con.close();
 
@@ -143,7 +144,7 @@ public class NameAndEmailPartEqualityTest extends TestCase {
         assertEquals("Firstname", vdResult.getName());
         assertEquals(0, vdResult.getNullCount());
         assertEquals(2, vdResult.getUniqueCount().intValue());
-        assertEquals("[[barack->4]]", vdResult.getValueCounts().toString());
+        assertEquals("[[barack->4], [<unique>->2]]", vdResult.getValueCounts().toString());
 
         vdResult = (ValueDistributionAnalyzerResult) results.get(2);
         assertEquals("Lastname", vdResult.getName());
@@ -155,14 +156,14 @@ public class NameAndEmailPartEqualityTest extends TestCase {
         assertEquals("Middlename", vdResult.getName());
         assertEquals(4, vdResult.getNullCount());
         assertEquals(0, vdResult.getUniqueCount().intValue());
-        assertEquals("[[null->4], [hussein->2]]", vdResult.getValueCounts()
+        assertEquals("[[<null>->4], [hussein->2]]", vdResult.getValueCounts()
                 .toString());
 
         vdResult = (ValueDistributionAnalyzerResult) results.get(4);
         assertEquals("Titulation", vdResult.getName());
         assertEquals(6, vdResult.getNullCount());
         assertEquals(0, vdResult.getUniqueCount().intValue());
-        assertEquals("[[null->6]]", vdResult.getValueCounts().toString());
+        assertEquals("[[<null>->6]]", vdResult.getValueCounts().toString());
 
         StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) results.get(5);
         assertEquals(1, stringAnalyzerResult.getColumns().length);

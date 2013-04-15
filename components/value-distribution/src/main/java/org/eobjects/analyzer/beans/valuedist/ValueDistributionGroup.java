@@ -28,7 +28,8 @@ import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.result.ValueCount;
+import org.eobjects.analyzer.result.SingleValueFrequency;
+import org.eobjects.analyzer.result.ValueFrequency;
 import org.eobjects.analyzer.result.ValueCountListImpl;
 import org.eobjects.analyzer.storage.CollectionFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
@@ -185,7 +186,7 @@ class ValueDistributionGroup {
             }
             uniqueCount++;
         } else {
-            ValueCount vc = new ValueCount(value, count);
+            ValueFrequency vc = new SingleValueFrequency(value, count);
             topValues.register(vc);
             if (bottomValues != null) {
                 bottomValues.register(vc);

@@ -24,7 +24,7 @@ import java.util.Collection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.GroupedValueCountingAnalyzerResult;
-import org.eobjects.analyzer.result.ValueCount;
+import org.eobjects.analyzer.result.ValueFrequency;
 import org.eobjects.analyzer.result.ValueCountingAnalyzerResult;
 
 /**
@@ -89,7 +89,7 @@ public class GroupedValueDistributionResult extends ValueDistributionAnalyzerRes
     }
 
     @Override
-    public Collection<ValueCount> getValueCounts() {
+    public Collection<ValueFrequency> getValueCounts() {
         return getSingleValueDistributionResult().getValueCounts();
     }
 

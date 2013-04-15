@@ -19,26 +19,24 @@
  */
 package org.eobjects.analyzer.result;
 
-import java.io.Serializable;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.valuedist.ValueDistributionAnalyzer;
-import org.eobjects.analyzer.util.NullTolerableComparator;
-import org.eobjects.metamodel.util.BaseObject;
+import org.eobjects.analyzer.util.LabelUtils;
 
 /**
  * Represents a simple value and count pair, used by the
  * {@link ValueDistributionAnalyzer} to represent which values occur at what
  * frequencies.
  */
-public final class ValueCount extends BaseObject implements Serializable, Comparable<ValueCount> {
+public final class SingleValueFrequency extends AbstractValueFrequency implements ValueFrequency {
 
     private static final long serialVersionUID = 1L;
 
     private final String _value;
     private final int _count;
 
-    public ValueCount(String value, int count) {
+    public SingleValueFrequency(String value, int count) {
         _value = value;
         _count = count;
     }
@@ -52,22 +50,18 @@ public final class ValueCount extends BaseObject implements Serializable, Compar
     }
 
     @Override
-    public String toString() {
-        return "[" + _value + "->" + _count + "]";
+    public String getName() {
+        return LabelUtils.getLabel(_value);
     }
 
     @Override
-    protected void decorateIdentity(List<Object> identifiers) {
-        identifiers.add(_value);
-        identifiers.add(_count);
+    public boolean isComposite() {
+        return false;
     }
 
     @Override
-    public int compareTo(ValueCount o) {
-        int diff = o.getCount() - getCount();
-        if (diff == 0) {
-            diff = NullTolerableComparator.get(String.class).compare(getValue(), o.getValue());
-        }
-        return diff;
+    public List<ValueFrequency> getChildren() {
+        return null;
     }
+
 }

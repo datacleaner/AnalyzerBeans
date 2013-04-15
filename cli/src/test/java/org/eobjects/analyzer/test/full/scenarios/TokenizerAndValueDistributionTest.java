@@ -95,6 +95,7 @@ public class TokenizerAndValueDistributionTest extends TestCase {
         }
 
         AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
+        analysisJobBuilder.close();
 
         AnalysisResultFuture resultFuture = runner.run(analysisJob);
 
@@ -116,20 +117,20 @@ public class TokenizerAndValueDistributionTest extends TestCase {
             ValueDistributionAnalyzerResult result = (ValueDistributionAnalyzerResult) analyzerResult;
             Collection<String> uniqueValues = new TreeSet<String>(result.getUniqueValues());
             if ("first word".equals(result.getName())) {
-                assertEquals("[[Sales->19], [VP->2]]", result.getValueCounts().toString());
+                assertEquals("[[Sales->19], [VP->2], [<unique>->2]]", result.getValueCounts().toString());
                 assertEquals(0, result.getNullCount());
                 assertEquals(2, result.getUniqueCount().intValue());
             } else if ("second word".equals(result.getName())) {
-                assertEquals("[[Rep->17], [Manager->3], [null->1]]", result.getValueCounts().toString());
+                assertEquals("[[Rep->17], [Manager->3], [<unique>->2], [<null>->1]]", result.getValueCounts().toString());
                 assertEquals(1, result.getNullCount());
                 assertEquals(2, result.getUniqueCount().intValue());
             } else if ("third words".equals(result.getName())) {
-                assertEquals("[[null->20]]", result.getValueCounts().toString());
+                assertEquals("[[<null>->20], [<unique>->3]]", result.getValueCounts().toString());
                 assertEquals(20, result.getNullCount());
                 assertEquals(3, result.getUniqueCount().intValue());
                 assertEquals("[(EMEA), (JAPAN,, (NA)]", uniqueValues.toString());
             } else if ("fourth words".equals(result.getName())) {
-                assertEquals("[[null->22]]", result.getValueCounts().toString());
+                assertEquals("[[<null>->22], [<unique>->1]]", result.getValueCounts().toString());
                 assertEquals(22, result.getNullCount());
                 assertEquals(1, result.getUniqueCount().intValue());
                 assertEquals("[APAC)]", uniqueValues.toString());
