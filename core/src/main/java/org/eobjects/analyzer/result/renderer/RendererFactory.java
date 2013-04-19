@@ -208,7 +208,7 @@ public final class RendererFactory {
             if (bestMatch != null) {
                 final RendererPrecedence bestPrecedence = bestMatch.getPrecedence();
                 if (precedence.ordinal() < bestPrecedence.ordinal()) {
-                    logger.info("precedence did not match or supersede best matching precedende.");
+                    logger.info("Precedence {} did not match or supersede best matching precedence ({}).", precedence, bestPrecedence);
                     return null;
                 }
             }

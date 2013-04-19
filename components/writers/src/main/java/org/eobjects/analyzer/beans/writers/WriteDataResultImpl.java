@@ -37,13 +37,14 @@ public final class WriteDataResultImpl implements WriteDataResult {
 
     private final int _writtenRowCount;
     private final int _updatesCount;
+    private final String _datastoreName;
     private final String _schemaName;
     private final String _tableName;
     private final int _errorRowCount;
 
     private final transient Func<DatastoreCatalog, Datastore> _datastoreFunc;
     private final transient FileDatastore _errorDatastore;
-    
+
     public WriteDataResultImpl(final int writtenRowCount, final int updatesCount, final int errorRowCount) {
         this(writtenRowCount, updatesCount, null, null, null, errorRowCount, null);
     }
@@ -64,6 +65,7 @@ public final class WriteDataResultImpl implements WriteDataResult {
         _updatesCount = updatesCount;
         _schemaName = schemaName;
         _tableName = tableName;
+        _datastoreName = (datastore == null ? null : datastore.getName());
         _datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
             @Override
             public Datastore eval(DatastoreCatalog catalog) {
@@ -85,6 +87,7 @@ public final class WriteDataResultImpl implements WriteDataResult {
         _updatesCount = updatesCount;
         _schemaName = schemaName;
         _tableName = tableName;
+        _datastoreName = datastoreName;
         _datastoreFunc = new Func<DatastoreCatalog, Datastore>() {
             @Override
             public Datastore eval(DatastoreCatalog catalog) {
@@ -118,7 +121,10 @@ public final class WriteDataResultImpl implements WriteDataResult {
     @Override
     public Datastore getDatastore(DatastoreCatalog datastoreCatalog) {
         if (_datastoreFunc == null) {
-            return null;
+            if (_datastoreName == null) {
+                return null;
+            }
+            return datastoreCatalog.getDatastore(_datastoreName);
         }
         return _datastoreFunc.eval(datastoreCatalog);
     }
