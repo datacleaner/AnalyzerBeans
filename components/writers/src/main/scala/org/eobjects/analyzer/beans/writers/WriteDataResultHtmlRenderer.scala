@@ -8,9 +8,14 @@ import javax.xml.transform.Transformer
 import org.eobjects.analyzer.beans.api.RendererBean
 import org.eobjects.analyzer.result.renderer.HtmlRenderingFormat
 import org.eobjects.analyzer.beans.api.RendererPrecedence
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration
+import javax.inject.Inject
 
 @RendererBean(classOf[HtmlRenderingFormat])
 class WriteDataResultHtmlRenderer extends Renderer[WriteDataResult, HtmlFragment] {
+  
+  @Inject
+  var configuration: AnalyzerBeansConfiguration = null
   
   override def getPrecedence(renderable: WriteDataResult) = RendererPrecedence.MEDIUM;
 
@@ -18,7 +23,10 @@ class WriteDataResultHtmlRenderer extends Renderer[WriteDataResult, HtmlFragment
     val inserts = r.getWrittenRowCount()
     val updates = r.getUpdatesCount()
     val errors = r.getErrorRowCount()
-    val datastoreName = r.getDatastoreName()
+    val datastoreName = if (configuration == null) null else {
+      val ds = r.getDatastore(configuration.getDatastoreCatalog())
+      if (ds == null) null else ds.getName()
+    }
 
     val html = <div>
                  { if (datastoreName != null) { <p>Data written to <span class="datastoreName">{datastoreName}</span></p> } }
@@ -30,5 +38,9 @@ class WriteDataResultHtmlRenderer extends Renderer[WriteDataResult, HtmlFragment
     val frag = new SimpleHtmlFragment();
     frag.addBodyElement(html.toString());
     return frag;
+  }
+  
+  def setConfiguration(configuration: AnalyzerBeansConfiguration) {
+    this.configuration = configuration;
   }
 }

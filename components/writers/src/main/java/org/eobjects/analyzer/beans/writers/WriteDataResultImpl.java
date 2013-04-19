@@ -99,11 +99,6 @@ public final class WriteDataResultImpl implements WriteDataResult {
     }
     
     @Override
-    public String getDatastoreName() {
-        return _datastoreName;
-    }
-
-    @Override
     public FileDatastore getErrorDatastore() {
         return _errorDatastore;
     }
