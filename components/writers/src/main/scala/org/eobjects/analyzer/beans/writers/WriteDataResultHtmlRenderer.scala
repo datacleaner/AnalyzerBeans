@@ -18,8 +18,10 @@ class WriteDataResultHtmlRenderer extends Renderer[WriteDataResult, HtmlFragment
     val inserts = r.getWrittenRowCount()
     val updates = r.getUpdatesCount()
     val errors = r.getErrorRowCount()
+    val datastoreName = r.getDatastoreName()
 
     val html = <div>
+                 { if (datastoreName != null) { <p>Data written to <span class="datastoreName">{datastoreName}</span></p> } }
                  { if (inserts > 0) { <p>Executed { inserts } inserts</p> } }
                  { if (updates > 0) { <p>Executed { updates } updates</p> } }
                  { if (errors > 0) { <p>{ errors } Erroneous records</p> } }

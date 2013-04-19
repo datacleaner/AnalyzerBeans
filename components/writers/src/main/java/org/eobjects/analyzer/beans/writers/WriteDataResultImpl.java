@@ -97,6 +97,11 @@ public final class WriteDataResultImpl implements WriteDataResult {
         _errorRowCount = 0;
         _errorDatastore = null;
     }
+    
+    @Override
+    public String getDatastoreName() {
+        return _datastoreName;
+    }
 
     @Override
     public FileDatastore getErrorDatastore() {

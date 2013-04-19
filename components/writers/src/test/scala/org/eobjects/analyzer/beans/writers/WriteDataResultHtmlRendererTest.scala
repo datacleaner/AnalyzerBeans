@@ -23,6 +23,7 @@ class WriteDataResultHtmlRendererTest extends AssertionsForJUnit {
     val context = new DefaultHtmlRenderingContext();
 
     Assert.assertEquals("""<div>
+                 <p>Data written to <span class="datastoreName">datastore</span></p>
                  <p>Executed 2 inserts</p>
                  <p>Executed 3 updates</p>
                  

@@ -34,7 +34,7 @@ import org.eobjects.metamodel.schema.Table;
  * 
  * @author Kasper Sørensen
  */
-@Distributed(reducer=WriteDataResultReducer.class)
+@Distributed(reducer = WriteDataResultReducer.class)
 public interface WriteDataResult extends AnalyzerResult {
 
     /**
@@ -58,6 +58,13 @@ public interface WriteDataResult extends AnalyzerResult {
      */
     @Metric("Errornous rows")
     public int getErrorRowCount();
+
+    /**
+     * Gets the name of the datastore that was written to, if available.
+     * 
+     * @return the name of the datastore that was written to, if available, or else null.
+     */
+    public String getDatastoreName();
 
     /**
      * Gets a reference to a datastore containing error records. Note that the
