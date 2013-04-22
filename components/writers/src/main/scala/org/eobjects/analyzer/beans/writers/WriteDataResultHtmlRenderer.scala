@@ -23,19 +23,20 @@ class WriteDataResultHtmlRenderer extends Renderer[WriteDataResult, HtmlFragment
     val inserts = r.getWrittenRowCount()
     val updates = r.getUpdatesCount()
     val errors = r.getErrorRowCount()
+    val total = inserts + updates + errors
     val datastoreName = if (configuration == null) null else {
       val ds = r.getDatastore(configuration.getDatastoreCatalog())
       if (ds == null) null else ds.getName()
     }
-
+    
     val html = <div>
-                 { if (datastoreName != null) { <p>Data written to <span class="datastoreName">{datastoreName}</span></p> } }
+                 { if (datastoreName != null) { <p>{if (total == 0) "No data" else "Data"} written to <span class="datastoreName">{datastoreName}</span></p> } }
                  { if (inserts > 0) { <p>Executed { inserts } inserts</p> } }
                  { if (updates > 0) { <p>Executed { updates } updates</p> } }
                  { if (errors > 0) { <p>{ errors } Erroneous records</p> } }
                </div>;
 
-    val frag = new SimpleHtmlFragment();
+               val frag = new SimpleHtmlFragment();
     frag.addBodyElement(html.toString());
     return frag;
   }
