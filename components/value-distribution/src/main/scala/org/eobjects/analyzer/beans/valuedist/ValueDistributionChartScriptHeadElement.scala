@@ -43,6 +43,7 @@ class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResul
       case _ => name.toLowerCase() match {
         case "red" | "blue" | "green" | "yellow" | "orange" | "black" => return name.toLowerCase();
         case "not_processed" => return "#333";
+        case "failure" => return "#000";
         case _ => return null;
       }
     }
