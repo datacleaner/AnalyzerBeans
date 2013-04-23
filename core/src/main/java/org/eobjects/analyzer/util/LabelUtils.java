@@ -70,7 +70,28 @@ public final class LabelUtils {
         return label;
     }
 
+    /**
+     * Gets the label of a component job
+     * 
+     * @param job
+     * @return
+     */
     public static String getLabel(ComponentJob job) {
+        return getLabel(job, false, true, true);
+    }
+
+    /**
+     * Gets the label of a components job
+     * 
+     * @param job
+     * @param includeDescriptorName
+     * @param includeInputColumnNames
+     * @param includeRequirements
+     * 
+     * @return
+     */
+    public static String getLabel(ComponentJob job, boolean includeDescriptorName, boolean includeInputColumnNames,
+            boolean includeRequirements) {
         String jobName = job.getName();
         StringBuilder label = new StringBuilder();
         if (StringUtils.isNullOrEmpty(jobName)) {
@@ -91,14 +112,23 @@ public final class LabelUtils {
 
         if (job instanceof AnalyzerJob) {
             AnalyzerJob analyzerJob = (AnalyzerJob) job;
-            if (!StringUtils.isNullOrEmpty(jobName)) {
+            if (includeDescriptorName && !StringUtils.isNullOrEmpty(jobName)) {
                 label.append(" (");
                 label.append(analyzerJob.getDescriptor().getDisplayName());
                 label.append(')');
             }
 
             final InputColumn<?>[] input = analyzerJob.getInput();
-            if (input.length > 0) {
+            if (input.length == 1) {
+                if (input[0].getName().equals(jobName)) {
+                    // special case where jobName is the same as the single
+                    // input column - in that case we'll leave out the column
+                    // name
+                    includeInputColumnNames = false;
+                }
+            }
+            if (includeInputColumnNames && input.length > 0) {
+
                 label.append(" (");
                 if (input.length < 5) {
                     for (int i = 0; i < input.length; i++) {
@@ -115,7 +145,7 @@ public final class LabelUtils {
             }
 
             final Outcome[] requirements = analyzerJob.getRequirements();
-            if (requirements != null && requirements.length != 0) {
+            if (includeRequirements && requirements != null && requirements.length != 0) {
                 label.append(" (");
                 for (int i = 0; i < requirements.length; i++) {
                     if (i != 0) {
@@ -212,7 +242,7 @@ public final class LabelUtils {
         // format dates
         if (value instanceof Date) {
             final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            final String result = format.format((Date)value);
+            final String result = format.format((Date) value);
             logger.debug("Formatted date {} to: {}", value, result);
             return result;
         }
