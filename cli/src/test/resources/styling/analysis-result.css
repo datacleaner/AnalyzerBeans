@@ -437,6 +437,7 @@ div.duplicateGroupGraph {
  * Annotated rows
  */
 table.annotatedRowsTable {
+	font-size: 0.85em;
 }
 
 table.annotatedRowsTable td.highlighted {
