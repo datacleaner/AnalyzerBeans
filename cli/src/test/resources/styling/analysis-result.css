@@ -12,6 +12,7 @@ div.analyzerResult {
 }
 
 div.analysisResultHeader {
+	height: 33px;
 	background-color: #333;
 	margin: 0px;
 	padding: 0px;
