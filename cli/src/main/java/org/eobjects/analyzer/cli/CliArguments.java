@@ -33,6 +33,8 @@ import org.kohsuke.args4j.Option;
  */
 public class CliArguments {
 
+    private static final String[] USAGE_TOKENS = new String[] { "-usage", "--usage", "-help", "--help", "-?" };
+
     /**
      * Parses the CLI arguments and creates a CliArguments instance
      * 
@@ -52,9 +54,13 @@ public class CliArguments {
             }
 
             arguments.usageMode = false;
-            for (String string : args) {
-                if ("-usage".equalsIgnoreCase(string)) {
-                    arguments.usageMode = true;
+            for (String arg : args) {
+                for (int i = 0; i < USAGE_TOKENS.length; i++) {
+                    String usageToken = USAGE_TOKENS[i];
+                    if (usageToken.equalsIgnoreCase(arg)) {
+                        arguments.usageMode = true;
+                        break;
+                    }
                 }
             }
         }
