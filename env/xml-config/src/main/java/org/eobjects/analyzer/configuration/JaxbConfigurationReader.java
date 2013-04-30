@@ -518,12 +518,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                         if (encoding == null) {
                             encoding = FileHelper.UTF_8_ENCODING;
                         }
-                        Boolean caseSensitive = getBooleanVariable("caseSensitive", tfsct.isCaseSensitive());
-                        if (caseSensitive == null) {
-                            caseSensitive = true;
-                        }
-                        TextFileSynonymCatalog sc = new TextFileSynonymCatalog(name, filename,
-                                caseSensitive.booleanValue(), encoding);
+                        boolean caseSensitive = getBooleanVariable("caseSensitive", tfsct.isCaseSensitive(), true);
+                        TextFileSynonymCatalog sc = new TextFileSynonymCatalog(name, filename, caseSensitive, encoding);
                         sc.setDescription(tfsct.getDescription());
                         synonymCatalogList.add(sc);
 
@@ -574,7 +570,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
                         String expression = getStringVariable("expression", regexPatternType.getExpression());
                         boolean matchEntireString = getBooleanVariable("matchEntireString",
-                                regexPatternType.isMatchEntireString());
+                                regexPatternType.isMatchEntireString(), true);
                         RegexStringPattern sp = new RegexStringPattern(name, expression, matchEntireString);
                         sp.setDescription(regexPatternType.getDescription());
                         stringPatterns.add(sp);
@@ -756,7 +752,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         Integer port = getIntegerVariable("port", couchdbDatastoreType.getPort());
         String username = getStringVariable("username", couchdbDatastoreType.getUsername());
         String password = getStringVariable("password", couchdbDatastoreType.getPassword());
-        Boolean sslEnabled = getBooleanVariable("ssl", couchdbDatastoreType.isSsl());
+        boolean sslEnabled = getBooleanVariable("ssl", couchdbDatastoreType.isSsl(), false);
 
         List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef> tableDefList = couchdbDatastoreType
                 .getTableDef();
@@ -861,11 +857,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             encoding = FileHelper.UTF_8_ENCODING;
         }
 
-        Boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
-                fixedWidthDatastore.isFailOnInconsistencies());
-        if (failOnInconsistencies == null) {
-            failOnInconsistencies = true;
-        }
+        boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
+                fixedWidthDatastore.isFailOnInconsistencies(), true);
 
         Integer headerLineNumber = getIntegerVariable("headerLineNumber", fixedWidthDatastore.getHeaderLineNumber());
         if (headerLineNumber == null) {
@@ -915,14 +908,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             final String driver = getStringVariable("driver", jdbcDatastoreType.getDriver());
             final String username = getStringVariable("username", jdbcDatastoreType.getUsername());
             final String password = getStringVariable("password", jdbcDatastoreType.getPassword());
-            Boolean multipleConnections = getBooleanVariable("multipleConnections",
-                    jdbcDatastoreType.isMultipleConnections());
-            if (multipleConnections == null) {
-                multipleConnections = true;
-            }
+            boolean multipleConnections = getBooleanVariable("multipleConnections",
+                    jdbcDatastoreType.isMultipleConnections(), true);
 
-            ds = new JdbcDatastore(name, url, driver, username, password, multipleConnections.booleanValue(),
-                    tableTypes, catalogName);
+            ds = new JdbcDatastore(name, url, driver, username, password, multipleConnections, tableTypes, catalogName);
         } else {
             ds = new JdbcDatastore(name, datasourceJndiUrl, tableTypes, catalogName);
         }
@@ -950,11 +939,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             encoding = FileHelper.UTF_8_ENCODING;
         }
 
-        Boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
-                csvDatastoreType.isFailOnInconsistencies());
-        if (failOnInconsistencies == null) {
-            failOnInconsistencies = true;
-        }
+        boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
+                csvDatastoreType.isFailOnInconsistencies(), true);
 
         Integer headerLineNumber = getIntegerVariable("headerLineNumber", csvDatastoreType.getHeaderLineNumber());
         if (headerLineNumber == null) {
@@ -1033,9 +1019,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         return Integer.parseInt(value);
     }
 
-    private Boolean getBooleanVariable(String key, Boolean valueIfNull) {
+    private boolean getBooleanVariable(String key, Boolean valueIfNull, boolean valueIfNull2) {
         String value = getStringVariable(key, null);
-        if (value == null) {
+        if (StringUtils.isNullOrEmpty(value)) {
+            if (valueIfNull == null) {
+                return valueIfNull2;
+            }
             return valueIfNull;
         }
         return Boolean.parseBoolean(value);
