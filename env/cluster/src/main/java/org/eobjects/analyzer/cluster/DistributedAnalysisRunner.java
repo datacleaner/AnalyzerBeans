@@ -107,6 +107,8 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
      */
     @Override
     public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
+        logger.info("Validating distributed job: {}", job);
+
         failIfJobIsUnsupported(job);
 
         final InjectionManager injectionManager = _configuration.getInjectionManager(job);
@@ -128,6 +130,8 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             }
         });
 
+        logger.info("Validation passed! Chunking job for distribution amongst slaves: {}", job);
+
         // since we always use a SingleThreadedTaskRunner, the above operation
         // will be synchronized/blocking.
 
@@ -141,8 +145,9 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
         try {
             final int expectedRows = rowProcessingMetrics.getExpectedRows();
-
             if (expectedRows == 0) {
+                logger.info("Expected rows of the job was zero. Job will run on a local virtual slave.");
+
                 // when there are no expected rows we still need to build a
                 // single slave job, but run it locally, since the job lifecycle
                 // still needs to be guaranteed.
@@ -155,6 +160,10 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
                 final JobDivisionManager jobDivisionManager = _clusterManager.getJobDivisionManager();
                 final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
                 final int rowsPerChunk = (expectedRows + 1) / chunks;
+
+                logger.info(
+                        "Expected rows was {}. A total number of {} slave jobs will be built, each of approx. {} rows.",
+                        expectedRows, chunks, rowsPerChunk);
 
                 final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk);
                 final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job,
@@ -222,10 +231,11 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
                 maxRows = rowsPerChunk;
             }
 
-            final AnalysisJob slaveJob = buildSlaveJob(job, firstRow, maxRows);
+            final AnalysisJob slaveJob = buildSlaveJob(job, i, firstRow, maxRows);
             final DistributedJobContext context = new DistributedJobContextImpl(_configuration, job, i, chunks);
 
             try {
+                logger.info("Dispatching slave job {} of {}", i + 1, chunks);
                 final AnalysisResultFuture slaveResultFuture = _clusterManager.dispatchJob(slaveJob, context);
                 results.add(slaveResultFuture);
             } catch (Exception e) {
@@ -249,9 +259,9 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
      * @param maxRows
      * @return
      */
-    private AnalysisJob buildSlaveJob(AnalysisJob job, int firstRow, int maxRows) {
-        logger.info("Building slave job with firstRow={} and maxRow={}", firstRow, maxRows);
-        
+    private AnalysisJob buildSlaveJob(AnalysisJob job, int slaveJobIndex, int firstRow, int maxRows) {
+        logger.info("Building slave job {} with firstRow={} and maxRow={}", slaveJobIndex + 1, firstRow, maxRows);
+
         final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job);
         try {
             final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);

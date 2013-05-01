@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * collected in a {@link DistributedAnalysisResultFuture}.
  */
 final class DistributedAnalysisResultReducer {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(DistributedAnalysisResultReducer.class);
 
     private final AnalysisJob _masterJob;
@@ -80,8 +80,12 @@ final class DistributedAnalysisResultReducer {
         Collection<AnalyzerJob> analyzerJobs = _masterJob.getAnalyzerJobs();
         for (AnalyzerJob masterAnalyzerJob : analyzerJobs) {
             final Collection<AnalyzerResult> slaveResults = new ArrayList<AnalyzerResult>();
+            logger.info("Reducing {} slave results for component: {}", results.size(), masterAnalyzerJob);
             for (AnalysisResultFuture result : results) {
                 if (result.isErrornous()) {
+                    logger.error(
+                            "Encountered errorneous slave result. Result reduction will stop. Component={}, Result={}",
+                            masterAnalyzerJob, result);
                     // error occurred!
                     return;
                 }
@@ -105,14 +109,14 @@ final class DistributedAnalysisResultReducer {
     @SuppressWarnings("unchecked")
     private void reduce(AnalyzerJob analyzerJob, Collection<AnalyzerResult> slaveResults,
             Map<ComponentJob, AnalyzerResult> resultMap, List<AnalysisResultReductionException> reductionErrors) {
-    	
-    	if (slaveResults.size() == 1) {
-    		// special case where these was only 1 slave job
-    		final AnalyzerResult firstResult = slaveResults.iterator().next();
-			resultMap.put(analyzerJob, firstResult);
-    		return;
-    	}
-    	
+
+        if (slaveResults.size() == 1) {
+            // special case where these was only 1 slave job
+            final AnalyzerResult firstResult = slaveResults.iterator().next();
+            resultMap.put(analyzerJob, firstResult);
+            return;
+        }
+
         final Class<? extends AnalyzerResultReducer<?>> reducerClass = analyzerJob.getDescriptor()
                 .getResultReducerClass();
 

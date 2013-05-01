@@ -76,7 +76,7 @@ public final class ReadObjectBuilder<E extends Serializable> {
     }
 
     public static <E extends Serializable> ReadObjectBuilder<E> create(E serializable, Class<? super E> clazz) {
-        logger.info("Creating ReadObjectBuilder for new object of class: {}", clazz);
+        logger.debug("Creating ReadObjectBuilder for new object of {}", clazz);
         return new ReadObjectBuilder<E>(serializable, clazz);
     }
 
