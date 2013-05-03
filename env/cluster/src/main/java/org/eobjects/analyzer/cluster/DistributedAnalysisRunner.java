@@ -22,8 +22,6 @@ package org.eobjects.analyzer.cluster;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter.Category;
@@ -33,9 +31,7 @@ import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
@@ -50,7 +46,6 @@ import org.eobjects.analyzer.job.runner.RowProcessingPublisher;
 import org.eobjects.analyzer.job.runner.RowProcessingPublishers;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
-import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.SharedExecutorService;
@@ -167,7 +162,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
                 final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk);
                 final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job,
-                        lifeCycleHelper, publisher);
+                        lifeCycleHelper, publisher, _analysisListener);
                 resultFuture = new DistributedAnalysisResultFuture(results, reducer);
             }
 
@@ -184,8 +179,8 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     }
 
     /**
-     * Spawns a new thread for awaiting the result future and informs the
-     * {@link AnalysisListener} of the outcome.
+     * Spawns a new thread for awaiting the result future (which will force the
+     * reducer to inform about the progress).
      * 
      * @param job
      * @param analysisJobMetrics
@@ -198,22 +193,6 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
             public void run() {
                 resultFuture.await();
                 if (resultFuture.isSuccessful()) {
-                    _analysisListener.rowProcessingSuccess(job, rowProcessingMetrics);
-                    Set<Entry<ComponentJob, AnalyzerResult>> resultEntries = resultFuture.getResultMap().entrySet();
-                    for (Entry<ComponentJob, AnalyzerResult> entry : resultEntries) {
-                        final ComponentJob componentJob = entry.getKey();
-                        final AnalyzerResult analyzerResult = entry.getValue();
-                        if (componentJob instanceof AnalyzerJob) {
-                            AnalyzerJob analyzerJob = (AnalyzerJob) componentJob;
-                            _analysisListener.analyzerSuccess(job, analyzerJob, analyzerResult);
-                        } else if (componentJob instanceof ExplorerJob) {
-                            ExplorerJob explorerJob = (ExplorerJob) componentJob;
-                            _analysisListener.explorerSuccess(job, explorerJob, analyzerResult);
-                        } else {
-                            logger.warn("Unexpected component job with a result: " + componentJob
-                                    + ". Success state will not be notified in AnalysisListener.");
-                        }
-                    }
                     _analysisListener.jobSuccess(job, analysisJobMetrics);
                 }
             }

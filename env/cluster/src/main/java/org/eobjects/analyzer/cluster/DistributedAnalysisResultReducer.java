@@ -30,6 +30,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.AnalyzerJobHelper;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.RowProcessingPublisher;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
@@ -50,12 +51,14 @@ final class DistributedAnalysisResultReducer {
     private final AnalysisJob _masterJob;
     private final LifeCycleHelper _lifeCycleHelper;
     private final RowProcessingPublisher _publisher;
+    private final AnalysisListener _analysisListener;
 
     public DistributedAnalysisResultReducer(AnalysisJob masterJob, LifeCycleHelper lifeCycleHelper,
-            RowProcessingPublisher publisher) {
+            RowProcessingPublisher publisher, AnalysisListener analysisListener) {
         _masterJob = masterJob;
         _lifeCycleHelper = lifeCycleHelper;
         _publisher = publisher;
+        _analysisListener = analysisListener;
     }
 
     public void reduce(final List<AnalysisResultFuture> results, final Map<ComponentJob, AnalyzerResult> resultMap,
@@ -77,7 +80,8 @@ final class DistributedAnalysisResultReducer {
     private void reduceResults(final List<AnalysisResultFuture> results,
             final Map<ComponentJob, AnalyzerResult> resultMap,
             final List<AnalysisResultReductionException> reductionErrors) {
-        Collection<AnalyzerJob> analyzerJobs = _masterJob.getAnalyzerJobs();
+        
+        final Collection<AnalyzerJob> analyzerJobs = _masterJob.getAnalyzerJobs();
         for (AnalyzerJob masterAnalyzerJob : analyzerJobs) {
             final Collection<AnalyzerResult> slaveResults = new ArrayList<AnalyzerResult>();
             logger.info("Reducing {} slave results for component: {}", results.size(), masterAnalyzerJob);
@@ -86,6 +90,11 @@ final class DistributedAnalysisResultReducer {
                     logger.error(
                             "Encountered errorneous slave result. Result reduction will stop. Component={}, Result={}",
                             masterAnalyzerJob, result);
+                    final List<Throwable> errors = result.getErrors();
+                    if (!errors.isEmpty()) {
+                        final Throwable firstError = errors.get(0);
+                        _analysisListener.errorInAnalyzer(_masterJob, masterAnalyzerJob, null, firstError);
+                    }
                     // error occurred!
                     return;
                 }
@@ -102,6 +111,7 @@ final class DistributedAnalysisResultReducer {
                 final AnalyzerResult analyzerResult = result.getResult(slaveAnalyzerJob);
                 slaveResults.add(analyzerResult);
             }
+
             reduce(masterAnalyzerJob, slaveResults, resultMap, reductionErrors);
         }
     }
@@ -114,6 +124,7 @@ final class DistributedAnalysisResultReducer {
             // special case where these was only 1 slave job
             final AnalyzerResult firstResult = slaveResults.iterator().next();
             resultMap.put(analyzerJob, firstResult);
+            _analysisListener.analyzerSuccess(_masterJob, analyzerJob, firstResult);
             return;
         }
 
@@ -132,10 +143,14 @@ final class DistributedAnalysisResultReducer {
 
             final AnalyzerResult reducedResult = reducer.reduce(slaveResults);
             resultMap.put(analyzerJob, reducedResult);
+            _analysisListener.analyzerSuccess(_masterJob, analyzerJob, reducedResult);
+
         } catch (Exception e) {
             AnalysisResultReductionException reductionError = new AnalysisResultReductionException(analyzerJob,
                     slaveResults, e);
             reductionErrors.add(reductionError);
+
+            _analysisListener.errorInAnalyzer(_masterJob, analyzerJob, null, e);
         } finally {
             if (reducer != null) {
                 _lifeCycleHelper.close(reducerDescriptor, reducer);
