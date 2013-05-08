@@ -53,7 +53,7 @@ final class DistributedAnalysisResultReducer {
     private final LifeCycleHelper _lifeCycleHelper;
     private final RowProcessingPublisher _publisher;
     private final AnalysisListener _analysisListener;
-    private final AtomicBoolean _success;
+    private final AtomicBoolean _hasRun;
 
     public DistributedAnalysisResultReducer(AnalysisJob masterJob, LifeCycleHelper lifeCycleHelper,
             RowProcessingPublisher publisher, AnalysisListener analysisListener) {
@@ -61,7 +61,7 @@ final class DistributedAnalysisResultReducer {
         _lifeCycleHelper = lifeCycleHelper;
         _publisher = publisher;
         _analysisListener = analysisListener;
-        _success = new AtomicBoolean(true);
+        _hasRun = new AtomicBoolean(false);
     }
 
     public void reduce(final List<AnalysisResultFuture> results, final Map<ComponentJob, AnalyzerResult> resultMap,
@@ -91,17 +91,18 @@ final class DistributedAnalysisResultReducer {
             final Map<ComponentJob, AnalyzerResult> resultMap,
             final List<AnalysisResultReductionException> reductionErrors) {
 
-        if (!_success.get()) {
-            // error occurred previously
+        if (_hasRun.get()) {
+            // already reduced
             return;
         }
+        
+        _hasRun.set(true);
 
         for (AnalysisResultFuture result : results) {
             if (result.isErrornous()) {
                 logger.error("Encountered errorneous slave result. Result reduction will stop. Result={}", result);
                 final List<Throwable> errors = result.getErrors();
                 if (!errors.isEmpty()) {
-                    _success.set(false);
                     final Throwable firstError = errors.get(0);
                     logger.error(
                             "Encountered error before reducing results (showing stack trace of invoking the reducer): "
