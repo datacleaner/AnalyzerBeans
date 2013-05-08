@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
@@ -52,6 +53,7 @@ final class DistributedAnalysisResultReducer {
     private final LifeCycleHelper _lifeCycleHelper;
     private final RowProcessingPublisher _publisher;
     private final AnalysisListener _analysisListener;
+    private final AtomicBoolean _success;
 
     public DistributedAnalysisResultReducer(AnalysisJob masterJob, LifeCycleHelper lifeCycleHelper,
             RowProcessingPublisher publisher, AnalysisListener analysisListener) {
@@ -59,6 +61,7 @@ final class DistributedAnalysisResultReducer {
         _lifeCycleHelper = lifeCycleHelper;
         _publisher = publisher;
         _analysisListener = analysisListener;
+        _success = new AtomicBoolean(true);
     }
 
     public void reduce(final List<AnalysisResultFuture> results, final Map<ComponentJob, AnalyzerResult> resultMap,
@@ -77,27 +80,46 @@ final class DistributedAnalysisResultReducer {
         _publisher.closeConsumers();
     }
 
+    /**
+     * Reduces all the analyzer results of an analysis
+     * 
+     * @param results
+     * @param resultMap
+     * @param reductionErrors
+     */
     private void reduceResults(final List<AnalysisResultFuture> results,
             final Map<ComponentJob, AnalyzerResult> resultMap,
             final List<AnalysisResultReductionException> reductionErrors) {
-        
+
+        if (!_success.get()) {
+            // error occurred previously
+            return;
+        }
+
+        for (AnalysisResultFuture result : results) {
+            if (result.isErrornous()) {
+                logger.error("Encountered errorneous slave result. Result reduction will stop. Result={}", result);
+                final List<Throwable> errors = result.getErrors();
+                if (!errors.isEmpty()) {
+                    _success.set(false);
+                    final Throwable firstError = errors.get(0);
+                    logger.error(
+                            "Encountered error before reducing results (showing stack trace of invoking the reducer): "
+                                    + firstError.getMessage(), new Throwable());
+                    _analysisListener.errorUknown(_masterJob, firstError);
+                }
+
+                // error occurred!
+                return;
+            }
+        }
+
         final Collection<AnalyzerJob> analyzerJobs = _masterJob.getAnalyzerJobs();
         for (AnalyzerJob masterAnalyzerJob : analyzerJobs) {
             final Collection<AnalyzerResult> slaveResults = new ArrayList<AnalyzerResult>();
             logger.info("Reducing {} slave results for component: {}", results.size(), masterAnalyzerJob);
             for (AnalysisResultFuture result : results) {
-                if (result.isErrornous()) {
-                    logger.error(
-                            "Encountered errorneous slave result. Result reduction will stop. Component={}, Result={}",
-                            masterAnalyzerJob, result);
-                    final List<Throwable> errors = result.getErrors();
-                    if (!errors.isEmpty()) {
-                        final Throwable firstError = errors.get(0);
-                        _analysisListener.errorInAnalyzer(_masterJob, masterAnalyzerJob, null, firstError);
-                    }
-                    // error occurred!
-                    return;
-                }
+
                 final Map<ComponentJob, AnalyzerResult> slaveResultMap = result.getResultMap();
                 final List<AnalyzerJob> slaveAnalyzerJobs = CollectionUtils2.filterOnClass(slaveResultMap.keySet(),
                         AnalyzerJob.class);
@@ -116,6 +138,14 @@ final class DistributedAnalysisResultReducer {
         }
     }
 
+    /**
+     * Reduces result for a single analyzer
+     * 
+     * @param analyzerJob
+     * @param slaveResults
+     * @param resultMap
+     * @param reductionErrors
+     */
     @SuppressWarnings("unchecked")
     private void reduce(AnalyzerJob analyzerJob, Collection<AnalyzerResult> slaveResults,
             Map<ComponentJob, AnalyzerResult> resultMap, List<AnalysisResultReductionException> reductionErrors) {
