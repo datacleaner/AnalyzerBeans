@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import org.eobjects.metamodel.util.Resource;
+
 /**
  * Defines an interface that allows for interception, decoration and other
  * handling of configuration building.
@@ -33,8 +35,20 @@ public interface ConfigurationReaderInterceptor {
      * 
      * @param filename
      * @return
+     * 
+     * @deprecated use {@link #createResource(String)} instead.
      */
+    @Deprecated
     public String createFilename(String filename);
+
+    /**
+     * Intercepts a filename, allowing for eg. replacing variables or changing
+     * relative paths to absolute paths.
+     * 
+     * @param filename
+     * @return
+     */
+    public Resource createResource(String resourceUrl);
 
     /**
      * Gets a temporary storage directory

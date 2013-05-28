@@ -29,6 +29,10 @@ import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.csv.CsvDataContext;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.Resource;
+import org.eobjects.metamodel.util.SerializableRef;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Datastore implementation for CSV files.
@@ -40,6 +44,8 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger logger = LoggerFactory.getLogger(CsvDatastore.class);
+
     /**
      * The value is '\\uFFFF', the "not a character" value which should not
      * occur in any valid Unicode string.
@@ -49,6 +55,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
     public static final char DEFAULT_QUOTE_CHAR = NOT_A_CHAR;
     public static final char DEFAULT_SEPARATOR_CHAR = CsvConfiguration.DEFAULT_SEPARATOR_CHAR;
 
+    private final SerializableRef<Resource> _resourceRef;
     private final String _filename;
     private final Character _quoteChar;
     private final Character _separatorChar;
@@ -58,7 +65,8 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
     private final int _headerLineNumber;
 
     public CsvDatastore(String name, String filename) {
-        this(name, filename, CsvConfiguration.DEFAULT_QUOTE_CHAR, CsvConfiguration.DEFAULT_SEPARATOR_CHAR, FileHelper.DEFAULT_ENCODING);
+        this(name, filename, CsvConfiguration.DEFAULT_QUOTE_CHAR, CsvConfiguration.DEFAULT_SEPARATOR_CHAR,
+                FileHelper.DEFAULT_ENCODING);
     }
 
     public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding) {
@@ -73,14 +81,15 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 
     public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar, String encoding,
             boolean failOnInconsistencies, int headerLineNumber) {
-        this(name, filename, quoteChar, separatorChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, encoding,
+        this(name, null, filename, quoteChar, separatorChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, encoding,
                 failOnInconsistencies, headerLineNumber);
     }
 
-    public CsvDatastore(String name, String filename, Character quoteChar, Character separatorChar,
+    public CsvDatastore(String name, Resource resource, String filename, Character quoteChar, Character separatorChar,
             Character escapeChar, String encoding, boolean failOnInconsistencies, int headerLineNumber) {
         super(name);
         _filename = filename;
+        _resourceRef = new SerializableRef<Resource>(resource);
         _quoteChar = quoteChar;
         _separatorChar = separatorChar;
         _escapeChar = escapeChar;
@@ -118,6 +127,13 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
         return _separatorChar;
     }
 
+    public Resource getResource() {
+        if (_resourceRef == null) {
+            return null;
+        }
+        return _resourceRef.get();
+    }
+
     @Override
     protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
         final char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
@@ -126,7 +142,16 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
         final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
         final CsvConfiguration configuration = new CsvConfiguration(_headerLineNumber, encoding, separatorChar,
                 quoteChar, escapeChar, _failOnInconsistencies);
-        final UpdateableDataContext dataContext = new CsvDataContext(new File(_filename), configuration);
+
+        final UpdateableDataContext dataContext;
+        final Resource resource = getResource();
+        if (resource == null) {
+            logger.warn("Resource was not available, a local file reference will be created with path: {}", _filename);
+            dataContext = new CsvDataContext(new File(_filename), configuration);
+        } else {
+            dataContext = new CsvDataContext(resource, configuration);
+        }
+
         return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
     }
 

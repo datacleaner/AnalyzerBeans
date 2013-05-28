@@ -19,7 +19,17 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eobjects.analyzer.util.convert.ClasspathResourceTypeHandler;
+import org.eobjects.analyzer.util.convert.FileResourceTypeHandler;
+import org.eobjects.analyzer.util.convert.ResourceConverter;
+import org.eobjects.analyzer.util.convert.ResourceConverter.ResourceTypeHandler;
+import org.eobjects.analyzer.util.convert.UrlResourceTypeHandler;
+import org.eobjects.analyzer.util.convert.VfsResourceTypeHandler;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.Resource;
 
 /**
  * Defines a default implementation of the
@@ -29,27 +39,49 @@ import org.eobjects.metamodel.util.FileHelper;
  * @author Kasper Sørensen
  */
 public class DefaultConfigurationReaderInterceptor implements ConfigurationReaderInterceptor {
+    
+    @Override
+    public String createFilename(String filename) {
+        return filename;
+    }
 
-	@Override
-	public String createFilename(String filename) {
-		return filename;
-	}
+    @Override
+    public Resource createResource(String resourceUrl) {
+        final ResourceConverter converter = new ResourceConverter(getResourceTypeHandlers());
+        final Resource resource = converter.fromString(Resource.class, resourceUrl);
+        return resource;
+    }
 
-	@Override
-	public String getTemporaryStorageDirectory() {
-		return FileHelper.getTempDir().getAbsolutePath();
-	}
+    /**
+     * Creates a list of {@link ResourceTypeHandler}s. Subclasses can optionally
+     * override this method and add more handlers to the list.
+     * 
+     * @return
+     */
+    protected List<ResourceTypeHandler<?>> getResourceTypeHandlers() {
+        final List<ResourceTypeHandler<?>> handlers = new ArrayList<ResourceTypeHandler<?>>();
+        handlers.add(new FileResourceTypeHandler());
+        handlers.add(new UrlResourceTypeHandler());
+        handlers.add(new ClasspathResourceTypeHandler());
+        handlers.add(new VfsResourceTypeHandler());
+        return handlers;
+    }
 
-	@Override
-	public Class<?> loadClass(String className) throws ClassNotFoundException {
-	    return Class.forName(className);
-	}
-	
-	@Override
-	public String getPropertyOverride(String variablePath) {
-	    String result = System.getProperty(variablePath);
+    @Override
+    public String getTemporaryStorageDirectory() {
+        return FileHelper.getTempDir().getAbsolutePath();
+    }
+
+    @Override
+    public Class<?> loadClass(String className) throws ClassNotFoundException {
+        return Class.forName(className);
+    }
+
+    @Override
+    public String getPropertyOverride(String variablePath) {
+        String result = System.getProperty(variablePath);
         return result;
-	}
+    }
 
     @Override
     public AnalyzerBeansConfigurationImpl createBaseConfiguration() {

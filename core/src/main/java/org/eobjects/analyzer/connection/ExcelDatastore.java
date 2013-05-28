@@ -26,53 +26,72 @@ import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.metamodel.UpdateableDataContext;
+import org.eobjects.metamodel.excel.ExcelConfiguration;
 import org.eobjects.metamodel.excel.ExcelDataContext;
+import org.eobjects.metamodel.util.Resource;
+import org.eobjects.metamodel.util.SerializableRef;
 
 /**
  * Datastore implementation for Excel spreadsheets.
  * 
  * @author Kasper Sørensen
  */
-public final class ExcelDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore, UpdateableDatastore {
+public final class ExcelDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore,
+        UpdateableDatastore {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final String _filename;
+    private final String _filename;
+    private final SerializableRef<Resource> _resourceRef;
 
-	public ExcelDatastore(String name, String filename) {
-		super(name);
-		_filename = filename;
-	}
+    public ExcelDatastore(String name, Resource resource, String filename) {
+        super(name);
+        _resourceRef = new SerializableRef<Resource>(resource);
+        _filename = filename;
+    }
 
-	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-		ReadObjectBuilder.create(this, ExcelDatastore.class).readObject(stream);
-	}
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        ReadObjectBuilder.create(this, ExcelDatastore.class).readObject(stream);
+    }
 
-	@Override
-	public String getFilename() {
-		return _filename;
-	}
+    public Resource getResource() {
+        if (_resourceRef == null) {
+            return null;
+        }
+        return _resourceRef.get();
+    }
 
-	@Override
-	protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
-		UpdateableDataContext dc = new ExcelDataContext(new File(_filename));
-		return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dc, this);
-	}
+    @Override
+    public String getFilename() {
+        return _filename;
+    }
 
-	@Override
-	public UpdateableDatastoreConnection openConnection() {
-		DatastoreConnection connection = super.openConnection();
-		return (UpdateableDatastoreConnection) connection;
-	}
+    @Override
+    protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
+        final UpdateableDataContext dc;
+        final Resource resource = getResource();
+        if (resource == null) {
+            dc = new ExcelDataContext(new File(_filename));
+        } else {
+            dc = new ExcelDataContext(resource, new ExcelConfiguration());
+        }
+        return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dc, this);
+    }
 
-	@Override
-	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
-	}
+    @Override
+    public UpdateableDatastoreConnection openConnection() {
+        DatastoreConnection connection = super.openConnection();
+        return (UpdateableDatastoreConnection) connection;
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		super.decorateIdentity(identifiers);
-		identifiers.add(_filename);
-	}
+    @Override
+    public PerformanceCharacteristics getPerformanceCharacteristics() {
+        return new PerformanceCharacteristicsImpl(false);
+    }
+
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        super.decorateIdentity(identifiers);
+        identifiers.add(_filename);
+    }
 }

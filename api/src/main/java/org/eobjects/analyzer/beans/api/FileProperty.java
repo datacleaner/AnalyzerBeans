@@ -21,6 +21,7 @@
  */
 package org.eobjects.analyzer.beans.api;
 
+import java.io.File;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -30,10 +31,12 @@ import java.lang.annotation.Target;
 
 import javax.inject.Qualifier;
 
+import org.eobjects.metamodel.util.Resource;
+
 /**
- * Annotation containing supplementary metadata about a file property. This
- * metadata can be used as a way to give hints to the UI as to how the content
- * should be presented.
+ * Annotation containing supplementary metadata about a {@link File} or
+ * {@link Resource} property. This metadata can be used as a way to give hints
+ * to the UI as to how the content should be presented.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })
@@ -42,27 +45,27 @@ import javax.inject.Qualifier;
 @Qualifier
 public @interface FileProperty {
 
-	/**
-	 * Defines the access modes available for a file property
-	 */
-	public static enum FileAccessMode {
-		OPEN, SAVE;
-	}
+    /**
+     * Defines the access modes available for a file property
+     */
+    public static enum FileAccessMode {
+        OPEN, SAVE;
+    }
 
-	/**
-	 * Defines whether or not the property is used to open an existing file or
-	 * to specify a file to save.
-	 * 
-	 * @return the access mode of this file property
-	 */
-	public FileAccessMode accessMode() default FileAccessMode.OPEN;
+    /**
+     * Defines whether or not the property is used to open an existing file or
+     * to specify a file to save.
+     * 
+     * @return the access mode of this file property
+     */
+    public FileAccessMode accessMode() default FileAccessMode.OPEN;
 
-	/**
-	 * Defines an (array of) file extension to suggest/expect. Extensions will
-	 * be automatically prefixed with a dot and are case insensitive. Examples:
-	 * "csv", "xls", "txt" etc.
-	 * 
-	 * @return the expected file extension of this file property
-	 */
-	public String[] extension() default {};
+    /**
+     * Defines an (array of) file extension to suggest/expect. Extensions will
+     * be automatically prefixed with a dot and are case insensitive. Examples:
+     * "csv", "xls", "txt" etc.
+     * 
+     * @return the expected file extension of this file property
+     */
+    public String[] extension() default {};
 }

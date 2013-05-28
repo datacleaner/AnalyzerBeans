@@ -146,6 +146,7 @@ import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.TableType;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.Resource;
 import org.eobjects.metamodel.util.SimpleTableDef;
 import org.eobjects.metamodel.xml.XmlSaxTableDef;
 import org.slf4j.Logger;
@@ -803,16 +804,16 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     private Datastore createDatastore(String name, DbaseDatastoreType dbaseDatastoreType) {
-        String filenamePath = getStringVariable("filename", dbaseDatastoreType.getFilename());
-        String filename = _interceptor.createFilename(filenamePath);
-        DbaseDatastore ds = new DbaseDatastore(name, filename);
+        final String filenamePath = getStringVariable("filename", dbaseDatastoreType.getFilename());
+        final String filename = _interceptor.createFilename(filenamePath);
+        final DbaseDatastore ds = new DbaseDatastore(name, filename);
         return ds;
     }
 
     private Datastore createDatastore(String name, ExcelDatastoreType excelDatastoreType) {
-        String filenamePath = getStringVariable("filename", excelDatastoreType.getFilename());
-        String filename = _interceptor.createFilename(filenamePath);
-        ExcelDatastore ds = new ExcelDatastore(name, filename);
+        final String filename = getStringVariable("filename", excelDatastoreType.getFilename());
+        final Resource resource = _interceptor.createResource(filename);
+        final ExcelDatastore ds = new ExcelDatastore(name, resource, filename);
         return ds;
     }
 
@@ -919,8 +920,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     private Datastore createDatastore(String name, CsvDatastoreType csvDatastoreType) {
-        final String filename = _interceptor.createFilename(getStringVariable("filename",
-                csvDatastoreType.getFilename()));
+        final String filename = getStringVariable("filename", csvDatastoreType.getFilename());
+        final Resource resource = _interceptor.createResource(filename);
 
         final String quoteCharString = getStringVariable("quoteChar", csvDatastoreType.getQuoteChar());
         final char quoteChar = getChar(quoteCharString, CsvConfiguration.DEFAULT_QUOTE_CHAR,
@@ -947,7 +948,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             headerLineNumber = CsvConfiguration.DEFAULT_COLUMN_NAME_LINE;
         }
 
-        CsvDatastore ds = new CsvDatastore(name, filename, quoteChar, separatorChar, escapeChar, encoding,
+        CsvDatastore ds = new CsvDatastore(name, resource, filename, quoteChar, separatorChar, escapeChar, encoding,
                 failOnInconsistencies, headerLineNumber);
         return ds;
     }

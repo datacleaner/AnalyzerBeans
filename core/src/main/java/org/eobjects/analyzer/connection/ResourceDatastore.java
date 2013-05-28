@@ -19,19 +19,17 @@
  */
 package org.eobjects.analyzer.connection;
 
+import org.eobjects.metamodel.util.Resource;
+
 /**
- * Interface for datastores that are based upon a file.
- * 
- * File datastores are often also {@link ResourceDatastore}s.
- * 
- * @author Kasper Sørensen
+ * Interface for datastores that are based upon a {@link Resource}.
  */
-public interface FileDatastore extends Datastore {
+public interface ResourceDatastore extends Datastore {
 
     /**
-     * Gets the filename that this datastore is based upon
+     * Gets the resource that this datastore is based upon.
      * 
      * @return
      */
-    public String getFilename();
+    public Resource getResource();
 }

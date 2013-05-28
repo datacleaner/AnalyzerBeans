@@ -38,7 +38,7 @@ public class VFSUtilsTest extends TestCase {
         FileSystemManager manager = VFS.getManager();
 
         FileObject baseFile = manager.getBaseFile();
-        assertNull(baseFile);
+        assertTrue(baseFile == null || "core".equals(baseFile.getName().getBaseName()));
 
         File file = new File("src/main/java");
         assertNotNull(manager.resolveFile(file.getAbsolutePath()));

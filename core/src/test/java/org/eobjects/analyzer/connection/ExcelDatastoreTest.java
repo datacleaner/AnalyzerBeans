@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 public class ExcelDatastoreTest extends TestCase {
 
 	public void testOpenSpreadsheetXls() throws Exception {
-		Datastore datastore = new ExcelDatastore("foobar", "src/test/resources/Spreadsheet2003.xls");
+		Datastore datastore = new ExcelDatastore("foobar", null, "src/test/resources/Spreadsheet2003.xls");
 		assertEquals("foobar", datastore.getName());
 		DatastoreConnection con = datastore.openConnection();
 		assertNotNull(con);
@@ -44,7 +44,7 @@ public class ExcelDatastoreTest extends TestCase {
 	}
 
 	public void testOpenSpreadsheetXlsx() throws Exception {
-		Datastore datastore = new ExcelDatastore("foobar", "src/test/resources/Spreadsheet2007.xlsx");
+		Datastore datastore = new ExcelDatastore("foobar", null, "src/test/resources/Spreadsheet2007.xlsx");
 		assertEquals("foobar", datastore.getName());
 		DatastoreConnection con = datastore.openConnection();
 		assertNotNull(con);
@@ -63,7 +63,7 @@ public class ExcelDatastoreTest extends TestCase {
 	}
 
 	public void testToString() throws Exception {
-		Datastore datastore = new ExcelDatastore("foobar", "src/test/resources/Spreadsheet2007.xlsx");
+		Datastore datastore = new ExcelDatastore("foobar", null, "src/test/resources/Spreadsheet2007.xlsx");
 		assertEquals("ExcelDatastore[name=foobar]", datastore.toString());
 	}
 }

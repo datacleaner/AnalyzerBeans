@@ -19,10 +19,9 @@
  */
 package org.eobjects.analyzer.beans.filter;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.Properties;
 
@@ -43,7 +42,8 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.Action;
+import org.eobjects.metamodel.util.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +67,7 @@ public class CaptureChangedRecordsFilter implements Filter<ValidationCategory> {
     @Configured
     @Description("A file used to persist and load the latest state of this data capture component.")
     @FileProperty(extension = "properties", accessMode = FileAccessMode.SAVE)
-    File captureStateFile;
+    Resource captureStateFile;
 
     private Date _lastModifiedThreshold;
     private Date _greatestEncounteredDate;
@@ -87,12 +87,13 @@ public class CaptureChangedRecordsFilter implements Filter<ValidationCategory> {
             final Properties properties = loadProperties();
             final String key = getPropertyKey();
             properties.setProperty(key, "" + _greatestEncounteredDate.getTime());
-            final Writer writer = FileHelper.getBufferedWriter(captureStateFile);
-            try {
-                properties.store(writer, null);
-            } finally {
-                FileHelper.safeClose(writer);
-            }
+            
+            captureStateFile.write(new Action<OutputStream>() {
+                @Override
+                public void run(OutputStream out) throws Exception {
+                    properties.store(out, null);
+                }
+            });
         }
     }
 
@@ -116,16 +117,17 @@ public class CaptureChangedRecordsFilter implements Filter<ValidationCategory> {
 
     private Properties loadProperties() throws IOException {
         final Properties properties = new Properties();
-        if (!captureStateFile.exists() || !captureStateFile.isFile()) {
+        if (!captureStateFile.isExists()) {
             logger.info("Capture state file does not exist: {}", captureStateFile);
             return properties;
         }
-        final BufferedReader reader = FileHelper.getBufferedReader(captureStateFile);
-        try {
-            properties.load(reader);
-        } finally {
-            FileHelper.safeClose(reader);
-        }
+        
+        captureStateFile.read(new Action<InputStream>() {
+            @Override
+            public void run(InputStream in) throws Exception {
+                properties.load(in);
+            }
+        });
         return properties;
     }
 
