@@ -117,6 +117,7 @@ public final class StringConverter {
         }
 
         delegatingConverter.addConverter(new ConfigurationItemConverter());
+        delegatingConverter.addConverter(new ResourceConverter());
         delegatingConverter.addConverter(new StandardTypeConverter(delegatingConverter));
 
         delegatingConverter.initializeAll(_injectionManager);
@@ -187,6 +188,7 @@ public final class StringConverter {
         }
 
         delegatingConverter.addConverter(new ConfigurationItemConverter());
+        delegatingConverter.addConverter(new ResourceConverter());
         delegatingConverter.addConverter(new StandardTypeConverter(delegatingConverter));
 
         delegatingConverter.initializeAll(_injectionManager);

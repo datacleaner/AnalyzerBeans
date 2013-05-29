@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.util.convert;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,6 +43,10 @@ public class ResourceConverter implements Converter<Resource> {
 
     private static final Pattern RESOURCE_PATTERN = Pattern.compile("\\b([a-zA-Z]+)://(.+)");
     private static final String DEFAULT_SCHEME = "file";
+
+    private static final Collection<ResourceTypeHandler<?>> DEFAULT_HANDLERS = Arrays.<ResourceTypeHandler<?>> asList(
+            new FileResourceTypeHandler(), new UrlResourceTypeHandler(), new ClasspathResourceTypeHandler(),
+            new VfsResourceTypeHandler());
 
     /**
      * Represents a component capable of handling the parsing and serializing of
@@ -82,7 +87,14 @@ public class ResourceConverter implements Converter<Resource> {
     private final Map<String, ResourceTypeHandler<?>> _parsers;
 
     /**
-     * Constructs a {@link ResourceConverter} using a set of parsers.
+     * Constructs a {@link ResourceConverter} using a default set of handlers
+     */
+    public ResourceConverter() {
+        this(DEFAULT_HANDLERS);
+    }
+
+    /**
+     * Constructs a {@link ResourceConverter} using a set of handlers.
      * 
      * @param handlers
      */
