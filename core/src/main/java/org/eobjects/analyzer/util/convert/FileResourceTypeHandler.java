@@ -31,6 +31,44 @@ import org.eobjects.metamodel.util.Resource;
  */
 public class FileResourceTypeHandler implements ResourceTypeHandler<FileResource> {
 
+    /**
+     * The default scheme value for a {@link FileResourceTypeHandler}.
+     */
+    public static final String DEFAULT_SCHEME = "file";
+
+    private final String _scheme;
+    private final File _relativeParentDirectory;
+
+    /**
+     * Construct a {@link FileResourceTypeHandler} using defaults.
+     */
+    public FileResourceTypeHandler() {
+        this(null);
+    }
+
+    /**
+     * Constructs a {@link FileResourceTypeHandler} using a specified parent
+     * directory for relative paths.
+     * 
+     * @param relativeParentDirectory
+     */
+    public FileResourceTypeHandler(File relativeParentDirectory) {
+        this(DEFAULT_SCHEME, relativeParentDirectory);
+    }
+
+    /**
+     * Constructs a {@link FileResourceTypeHandler} using a specified parent
+     * directory for relative paths.
+     * 
+     * @param scheme
+     *            the scheme of this resource type, e.g. "file"
+     * @param relativeParentDirectory
+     */
+    public FileResourceTypeHandler(String scheme, File relativeParentDirectory) {
+        _scheme = scheme;
+        _relativeParentDirectory = relativeParentDirectory;
+    }
+
     @Override
     public boolean isParserFor(Class<? extends Resource> resourceType) {
         return ReflectionUtils.is(resourceType, FileResource.class);
@@ -38,13 +76,23 @@ public class FileResourceTypeHandler implements ResourceTypeHandler<FileResource
 
     @Override
     public String getScheme() {
-        return "file";
+        return _scheme;
     }
 
     @Override
     public FileResource parsePath(String path) {
-        File file = new File(path);
+        final File file;
+        if (_relativeParentDirectory != null && !isAbsolute(path)) {
+            file = new File(_relativeParentDirectory, path);
+        } else {
+            file = new File(path);
+        }
+
         return new FileResource(file);
+    }
+
+    private boolean isAbsolute(String path) {
+        return new File(path).isAbsolute();
     }
 
     @Override

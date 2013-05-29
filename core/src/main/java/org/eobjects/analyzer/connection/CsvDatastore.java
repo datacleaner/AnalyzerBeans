@@ -40,7 +40,7 @@ import org.slf4j.Logger;
  * @author Kasper Sørensen
  */
 public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore,
-        UpdateableDatastore {
+        ResourceDatastore, UpdateableDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -127,6 +127,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
         return _separatorChar;
     }
 
+    @Override
     public Resource getResource() {
         if (_resourceRef == null) {
             return null;

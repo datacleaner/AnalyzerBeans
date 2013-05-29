@@ -23,6 +23,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.eobjects.analyzer.util.VFSUtils;
 import org.eobjects.analyzer.util.VfsResource;
 import org.eobjects.analyzer.util.convert.ResourceConverter.ResourceTypeHandler;
@@ -30,21 +32,20 @@ import org.eobjects.metamodel.util.FileResource;
 import org.eobjects.metamodel.util.Resource;
 import org.eobjects.metamodel.util.UrlResource;
 
-import junit.framework.TestCase;
-
 public class ResourceConverterTest extends TestCase {
 
     public void testParse() throws Exception {
-        assertEquals("url", ResourceConverter.parseStructure("url://foobar").getScheme());
-        assertEquals("foobar", ResourceConverter.parseStructure("url://foobar").getPath());
-        assertEquals("file", ResourceConverter.parseStructure("file://c:/blabla").getScheme());
-        assertEquals("c:/blabla", ResourceConverter.parseStructure("file://c:/blabla").getPath());
-        assertEquals("/c:/blabla", ResourceConverter.parseStructure("file:///c:/blabla").getPath());
+        ResourceConverter resourceConverter = new ResourceConverter();
+        assertEquals("url", resourceConverter.parseStructure("url://foobar").getScheme());
+        assertEquals("foobar", resourceConverter.parseStructure("url://foobar").getPath());
+        assertEquals("file", resourceConverter.parseStructure("file://c:/blabla").getScheme());
+        assertEquals("c:/blabla", resourceConverter.parseStructure("file://c:/blabla").getPath());
+        assertEquals("/c:/blabla", resourceConverter.parseStructure("file:///c:/blabla").getPath());
     }
 
     public void testConvertFileResource() throws Exception {
         List<? extends ResourceTypeHandler<?>> handlers = Arrays.asList(new FileResourceTypeHandler());
-        ResourceConverter converter = new ResourceConverter(handlers);
+        ResourceConverter converter = new ResourceConverter(handlers, "foo");
 
         FileResource resource1 = new FileResource("foo/bar.txt");
 
@@ -60,7 +61,7 @@ public class ResourceConverterTest extends TestCase {
 
     public void testConvertUrlResource() throws Exception {
         List<? extends ResourceTypeHandler<?>> handlers = Arrays.asList(new UrlResourceTypeHandler());
-        ResourceConverter converter = new ResourceConverter(handlers);
+        ResourceConverter converter = new ResourceConverter(handlers, "foo");
 
         UrlResource resource1 = new UrlResource("http://localhost");
 
@@ -76,7 +77,7 @@ public class ResourceConverterTest extends TestCase {
 
     public void testConvertVfsResource() throws Exception {
         List<? extends ResourceTypeHandler<?>> handlers = Arrays.asList(new VfsResourceTypeHandler());
-        ResourceConverter converter = new ResourceConverter(handlers);
+        ResourceConverter converter = new ResourceConverter(handlers, "foo");
 
         VfsResource resource1 = new VfsResource(VFSUtils.getFileSystemManager().resolveFile("target"));
 

@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,15 +40,30 @@ import org.eobjects.metamodel.util.Resource;
  * @author Kasper Sørensen
  */
 public class DefaultConfigurationReaderInterceptor implements ConfigurationReaderInterceptor {
-    
+
     @Override
     public String createFilename(String filename) {
-        return filename;
+        if (filename == null) {
+            return null;
+        }
+        
+        final File file = new File(filename);
+        if (file.isAbsolute()) {
+            return filename;
+        }
+        
+        final File relativeParentDirectory = getRelativeParentDirectory();
+        if (relativeParentDirectory == null) {
+            return filename;
+        }
+        
+        return new File(relativeParentDirectory, filename).getPath();
     }
 
     @Override
     public Resource createResource(String resourceUrl) {
-        final ResourceConverter converter = new ResourceConverter(getResourceTypeHandlers());
+        final ResourceConverter converter = new ResourceConverter(getResourceTypeHandlers(),
+                ResourceConverter.DEFAULT_DEFAULT_SCHEME);
         final Resource resource = converter.fromString(Resource.class, resourceUrl);
         return resource;
     }
@@ -60,11 +76,21 @@ public class DefaultConfigurationReaderInterceptor implements ConfigurationReade
      */
     protected List<ResourceTypeHandler<?>> getResourceTypeHandlers() {
         final List<ResourceTypeHandler<?>> handlers = new ArrayList<ResourceTypeHandler<?>>();
-        handlers.add(new FileResourceTypeHandler());
+        handlers.add(new FileResourceTypeHandler(getRelativeParentDirectory()));
         handlers.add(new UrlResourceTypeHandler());
         handlers.add(new ClasspathResourceTypeHandler());
         handlers.add(new VfsResourceTypeHandler());
         return handlers;
+    }
+
+    /**
+     * Returns the parent directory of relative files. Can be overridden by
+     * subclasses to specify a "root" of the relative files loaded.
+     * 
+     * @return
+     */
+    protected File getRelativeParentDirectory() {
+        return null;
     }
 
     @Override

@@ -37,7 +37,7 @@ import org.eobjects.metamodel.util.SerializableRef;
  * @author Kasper Sørensen
  */
 public final class ExcelDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore,
-        UpdateableDatastore {
+        ResourceDatastore, UpdateableDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -54,6 +54,7 @@ public final class ExcelDatastore extends UsageAwareDatastore<UpdateableDataCont
         ReadObjectBuilder.create(this, ExcelDatastore.class).readObject(stream);
     }
 
+    @Override
     public Resource getResource() {
         if (_resourceRef == null) {
             return null;

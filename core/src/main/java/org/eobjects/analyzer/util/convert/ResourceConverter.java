@@ -41,8 +41,13 @@ public class ResourceConverter implements Converter<Resource> {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceConverter.class);
 
+    /**
+     * Represents the default "default scheme", for representations that does
+     * not have a scheme in the path. This default scheme is "file".
+     */
+    public static final String DEFAULT_DEFAULT_SCHEME = FileResourceTypeHandler.DEFAULT_SCHEME;
+
     private static final Pattern RESOURCE_PATTERN = Pattern.compile("\\b([a-zA-Z]+)://(.+)");
-    private static final String DEFAULT_SCHEME = "file";
 
     private static final Collection<ResourceTypeHandler<?>> DEFAULT_HANDLERS = Arrays.<ResourceTypeHandler<?>> asList(
             new FileResourceTypeHandler(), new UrlResourceTypeHandler(), new ClasspathResourceTypeHandler(),
@@ -85,20 +90,23 @@ public class ResourceConverter implements Converter<Resource> {
     }
 
     private final Map<String, ResourceTypeHandler<?>> _parsers;
+    private final String _defaultScheme;
 
     /**
      * Constructs a {@link ResourceConverter} using a default set of handlers
      */
     public ResourceConverter() {
-        this(DEFAULT_HANDLERS);
+        this(DEFAULT_HANDLERS, DEFAULT_DEFAULT_SCHEME);
     }
 
     /**
      * Constructs a {@link ResourceConverter} using a set of handlers.
      * 
      * @param handlers
+     * @param defaultScheme
      */
-    public ResourceConverter(Collection<? extends ResourceTypeHandler<?>> handlers) {
+    public ResourceConverter(Collection<? extends ResourceTypeHandler<?>> handlers, String defaultScheme) {
+        _defaultScheme = DEFAULT_DEFAULT_SCHEME;
         _parsers = new ConcurrentHashMap<String, ResourceConverter.ResourceTypeHandler<?>>();
         for (ResourceTypeHandler<?> handler : handlers) {
             String scheme = handler.getScheme();
@@ -146,11 +154,12 @@ public class ResourceConverter implements Converter<Resource> {
      * @param str
      * @return
      */
-    public static ResourceStructure parseStructure(String str) {
+    public ResourceStructure parseStructure(String str) {
         Matcher matcher = RESOURCE_PATTERN.matcher(str);
         if (!matcher.find()) {
-            logger.info("Did not find any scheme definition in resource path: {}. Assuming this is a file path.", str);
-            return new ResourceStructure(DEFAULT_SCHEME, str);
+            logger.info("Did not find any scheme definition in resource path: {}. Using default scheme: {}.", str,
+                    _defaultScheme);
+            return new ResourceStructure(_defaultScheme, str);
         }
         String scheme = matcher.group(1);
         String path = matcher.group(2);

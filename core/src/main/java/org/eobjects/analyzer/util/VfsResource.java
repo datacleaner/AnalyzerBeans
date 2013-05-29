@@ -45,6 +45,11 @@ public class VfsResource implements Resource {
     public VfsResource(FileObject fileObject) {
         _fileObject = fileObject;
     }
+    
+    @Override
+    public String toString() {
+        return "VfsResource[" + _fileObject + "]";
+    }
 
     /**
      * Gets the wrapped {@link FileObject} of this resource.
