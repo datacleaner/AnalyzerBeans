@@ -84,7 +84,11 @@ public class ResourceConverterTest extends TestCase {
         String str = converter.toString(resource1);
 
         String absoluteFilePath = new File("target").getAbsolutePath().replaceAll("\\\\", "/");
-        assertEquals("vfs://file:///" + absoluteFilePath, str);
+        if (absoluteFilePath.startsWith("/")) {
+            assertEquals("vfs://file://" + absoluteFilePath, str);
+        } else {
+            assertEquals("vfs://file:///" + absoluteFilePath, str);
+        }
 
         Resource resource2 = converter.fromString(Resource.class, str);
 
