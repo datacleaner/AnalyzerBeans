@@ -106,5 +106,7 @@ public class InjectionManagerImplTest extends TestCase {
 		assertEquals(13, res.getAnnotatedRowCount());
 		assertNotNull(listRef.get());
 		assertEquals(10, listRef.get().size());
+		
+		ajb.close();
 	}
 }

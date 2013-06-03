@@ -71,6 +71,8 @@ public class AnalysisJobBuilderImportHelperTest extends TestCase {
             jobBuilder.addAnalyzer(MockAnalyzer.class).addInputColumn(transformer1.getOutputColumnByName("foo"));
 
             originalJob = jobBuilder.toAnalysisJob();
+            
+            jobBuilder.close();
         }
 
         AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(conf, originalJob);
@@ -90,6 +92,8 @@ public class AnalysisJobBuilderImportHelperTest extends TestCase {
         assertEquals("FIRSTNAME", transformer2.getInputColumns().get(0).getName());
 
         assertSame(transformer1.getInputColumns().get(0), transformer2.getOutputColumns().get(0));
+        
+        jobBuilder.close();
     }
 
     public void testImportTransformerAndAnalyzer() throws Exception {
@@ -115,6 +119,7 @@ public class AnalysisJobBuilderImportHelperTest extends TestCase {
             jobBuilder.addAnalyzer(MockAnalyzer.class).addInputColumn(renamedColumn);
 
             originalJob = jobBuilder.toAnalysisJob();
+            jobBuilder.close();
         }
 
         AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(conf, originalJob);
@@ -124,5 +129,7 @@ public class AnalysisJobBuilderImportHelperTest extends TestCase {
 
         List<MutableInputColumn<?>> outputColumns = transformers.get(0).getOutputColumns();
         assertEquals("foobar", outputColumns.get(0).getName());
+        
+        jobBuilder.close();
     }
 }

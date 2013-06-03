@@ -77,6 +77,8 @@ public class ConsumeRowTaskTest extends TestCase {
             builder.addAnalyzer(MockAnalyzer.class).addInputColumns(mockTransformerColumns);
 
             job = builder.toAnalysisJob();
+            
+            builder.close();
         }
 
         ListResult<InputRow> result;
@@ -142,6 +144,8 @@ public class ConsumeRowTaskTest extends TestCase {
             convertTransformer.setRequirement(filterJobBuilder, MaxRowsFilter.Category.VALID);
             builder.addAnalyzer(MockAnalyzer.class).addInputColumns(numberColumn);
             job = builder.toAnalysisJob();
+            
+            builder.close();
         }
 
         ListResult<InputRow> result;

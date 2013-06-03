@@ -74,5 +74,7 @@ public class AnalysisJobBuilderTest extends TestCase {
         assertEquals("FilterOutcome[category=VALID]", tjb2.getRequirement().toString());
         assertEquals(null, filter.getRequirement());
         assertEquals(null, tjb1.getRequirement());
+        
+        ajb.close();
     }
 }

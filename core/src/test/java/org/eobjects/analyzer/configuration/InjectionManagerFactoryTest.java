@@ -101,5 +101,6 @@ public class InjectionManagerFactoryTest extends TestCase {
         assertTrue(touched.get());
         assertEquals("42", result.getResults().get(0).toString());
 
+        ajb.close();
     }
 }

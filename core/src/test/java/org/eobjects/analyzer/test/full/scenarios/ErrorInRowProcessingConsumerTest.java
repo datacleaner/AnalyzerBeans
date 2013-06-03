@@ -167,5 +167,7 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
         assertTrue("taskCount was: " + taskCount, taskCount > 4);
 
         assertTrue(closed.get());
+        
+        ajb.close();
     }
 }

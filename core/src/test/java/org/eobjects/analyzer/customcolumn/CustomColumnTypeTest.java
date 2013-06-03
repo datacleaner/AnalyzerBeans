@@ -56,6 +56,8 @@ public class CustomColumnTypeTest extends TestCase {
 
 			builder.addAnalyzer(MockMonthConsumingAnalyzer.class).addInputColumns(monthObjectColumn);
 			job = builder.toAnalysisJob();
+			
+			builder.close();
 		}
 
 		ListResult<InputRow> result;
