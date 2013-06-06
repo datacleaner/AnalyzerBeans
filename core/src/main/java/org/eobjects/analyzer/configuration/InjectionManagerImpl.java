@@ -126,7 +126,10 @@ public class InjectionManagerImpl implements InjectionManager {
         } else if (baseType == AnalysisJob.class) {
             return _job;
         } else if (baseType == StringConverter.class) {
-        	return new StringConverter(this);
+            // create a child injection manager (instead of using 'this') to
+            // ensure that any wrapping/decoration is preserved
+            final InjectionManager childInjectionManager = _configuration.getInjectionManager(_job);
+            return new StringConverter(childInjectionManager);
         } else if (baseType == RowAnnotation.class) {
             return _rowAnntationFactoryRef.get().createAnnotation();
         } else if (baseType == Datastore.class && _job != null) {
