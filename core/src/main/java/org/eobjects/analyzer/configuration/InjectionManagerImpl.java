@@ -128,7 +128,8 @@ public class InjectionManagerImpl implements InjectionManager {
         } else if (baseType == StringConverter.class) {
             // create a child injection manager (instead of using 'this') to
             // ensure that any wrapping/decoration is preserved
-            final InjectionManager childInjectionManager = _configuration.getInjectionManager(_job);
+            final InjectionManager childInjectionManager = (_configuration == null ? this : _configuration
+                    .getInjectionManager(_job));
             return new StringConverter(childInjectionManager);
         } else if (baseType == RowAnnotation.class) {
             return _rowAnntationFactoryRef.get().createAnnotation();
