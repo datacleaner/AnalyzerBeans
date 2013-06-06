@@ -37,6 +37,7 @@ import org.eobjects.analyzer.storage.CollectionFactoryImpl;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.analyzer.util.convert.StringConverter;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.util.LazyRef;
 import org.eobjects.metamodel.util.Ref;
@@ -124,6 +125,8 @@ public class InjectionManagerImpl implements InjectionManager {
             return _configuration;
         } else if (baseType == AnalysisJob.class) {
             return _job;
+        } else if (baseType == StringConverter.class) {
+        	return new StringConverter(this);
         } else if (baseType == RowAnnotation.class) {
             return _rowAnntationFactoryRef.get().createAnnotation();
         } else if (baseType == Datastore.class && _job != null) {

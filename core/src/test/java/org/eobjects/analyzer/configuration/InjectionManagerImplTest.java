@@ -42,6 +42,7 @@ import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.analyzer.util.convert.StringConverter;
 import org.eobjects.metamodel.util.MutableRef;
 import org.junit.Ignore;
 
@@ -108,5 +109,14 @@ public class InjectionManagerImplTest extends TestCase {
 		assertEquals(10, listRef.get().size());
 		
 		ajb.close();
+	}
+	
+	public void testGetInstanceUsingSimpleInjectionPoint() throws Exception {
+		InjectionManagerImpl injectionManager = new InjectionManagerImpl(null);
+		
+		InjectionPoint<StringConverter> point = SimpleInjectionPoint.of(StringConverter.class);
+		
+		StringConverter instance = injectionManager.getInstance(point);
+		assertNotNull(instance);
 	}
 }
