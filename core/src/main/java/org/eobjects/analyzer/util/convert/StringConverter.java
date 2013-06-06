@@ -219,7 +219,7 @@ public final class StringConverter {
 		}
 
 		delegatingConverter.addConverter(new ConfigurationItemConverter());
-		delegatingConverter.addConverter(new ResourceConverter());
+		delegatingConverter.addConverter(getResourceConverter());
 		delegatingConverter.addConverter(new StandardTypeConverter(
 				delegatingConverter));
 
