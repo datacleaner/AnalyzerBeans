@@ -32,15 +32,19 @@ import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.FileProperty;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
-import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.Optimizeable;
+import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.metamodel.query.OperatorType;
+import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.Action;
 import org.eobjects.metamodel.util.Resource;
@@ -56,7 +60,8 @@ import org.slf4j.LoggerFactory;
 @Description("Include only records that have changed since the last time you ran the job. This filter assumes a field containing the timestamp of the latest change for each record, and stores the greatest encountered value in order to update the filter's future state.")
 @Distributed(false)
 @Categorized({ FilterCategory.class, DateAndTimeCategory.class })
-public class CaptureChangedRecordsFilter implements Filter<ValidationCategory> {
+@Optimizeable(removeableUponOptimization = false)
+public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<ValidationCategory> {
 
     private static final Logger logger = LoggerFactory.getLogger(CaptureChangedRecordsFilter.class);
 
@@ -81,13 +86,36 @@ public class CaptureChangedRecordsFilter implements Filter<ValidationCategory> {
         _lastModifiedThreshold = date;
     }
 
+    @Override
+    public boolean isOptimizable(final ValidationCategory category) {
+        // only the valid category is optimizeable currently
+        return category == ValidationCategory.VALID;
+    }
+
+    @Override
+    public Query optimizeQuery(final Query q, final ValidationCategory category) {
+        assert category == ValidationCategory.VALID;
+        
+        if (_lastModifiedThreshold != null) {
+            final Column column = lastModifiedColumn.getPhysicalColumn();
+            if (column.getType().isNumber()) {
+                final long timestamp = _lastModifiedThreshold.getTime();
+                q.where(column, OperatorType.GREATER_THAN, timestamp);
+            } else {
+                q.where(column, OperatorType.GREATER_THAN, _lastModifiedThreshold);
+            }
+        }
+        
+        return q;
+    }
+
     @Close
     public void close() throws IOException {
         if (_greatestEncounteredDate != null) {
             final Properties properties = loadProperties();
             final String key = getPropertyKey();
             properties.setProperty(key, "" + _greatestEncounteredDate.getTime());
-            
+
             captureStateFile.write(new Action<OutputStream>() {
                 @Override
                 public void run(OutputStream out) throws Exception {
@@ -121,7 +149,7 @@ public class CaptureChangedRecordsFilter implements Filter<ValidationCategory> {
             logger.info("Capture state file does not exist: {}", captureStateFile);
             return properties;
         }
-        
+
         captureStateFile.read(new Action<InputStream>() {
             @Override
             public void run(InputStream in) throws Exception {
@@ -135,7 +163,7 @@ public class CaptureChangedRecordsFilter implements Filter<ValidationCategory> {
     public ValidationCategory categorize(InputRow inputRow) {
         final Object lastModified = inputRow.getValue(lastModifiedColumn);
         final Date date = ConvertToDateTransformer.getInternalInstance().transformValue(lastModified);
-        
+
         if (date != null) {
             synchronized (this) {
                 if (_greatestEncounteredDate == null || _greatestEncounteredDate.before(date)) {
@@ -143,7 +171,7 @@ public class CaptureChangedRecordsFilter implements Filter<ValidationCategory> {
                 }
             }
         }
-        
+
         if (_lastModifiedThreshold == null) {
             return ValidationCategory.VALID;
         }
