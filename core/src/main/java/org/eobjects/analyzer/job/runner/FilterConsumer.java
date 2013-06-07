@@ -21,6 +21,7 @@ package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Filter;
+import org.eobjects.analyzer.beans.api.Optimizeable;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
@@ -28,6 +29,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
+import org.eobjects.analyzer.util.ReflectionUtils;
 
 final class FilterConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
@@ -107,5 +109,13 @@ final class FilterConsumer extends AbstractRowProcessingConsumer implements RowP
             return optimizable;
         }
         return false;
+    }
+
+    public boolean isRemoveableUponOptimization() {
+        final Optimizeable optimizeable = ReflectionUtils.getAnnotation(_filterJob.getDescriptor().getComponentClass(), Optimizeable.class);
+        if (optimizeable == null) {
+            return true;
+        }
+        return optimizeable.removeableUponOptimization();
     }
 }

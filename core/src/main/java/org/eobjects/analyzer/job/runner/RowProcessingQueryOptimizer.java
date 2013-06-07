@@ -162,7 +162,8 @@ public class RowProcessingQueryOptimizer {
                 Outcome[] requirements = ((OutcomeSinkJob) componentJob).getRequirements();
                 for (Outcome requirement : requirements) {
                     if (!satisfiedRequirements.contains(requirement)) {
-                        logger.debug("Requirement {} is not met using query optimization of {}", requirement, filterConsumer);
+                        logger.debug("Requirement {} is not met using query optimization of {}", requirement,
+                                filterConsumer);
                         return false;
                     } else {
                         independentComponent = false;
@@ -175,7 +176,9 @@ public class RowProcessingQueryOptimizer {
                 for (InputColumn<?> column : requiredColumns) {
                     if (column.isVirtualColumn()) {
                         if (!satisfiedColumns.contains(column)) {
-                            logger.debug("InputColumn {} is available at query time, and therefore not satisfied for query optimization of {}", column, filterConsumer);
+                            logger.debug(
+                                    "InputColumn {} is available at query time, and therefore not satisfied for query optimization of {}",
+                                    column, filterConsumer);
                             return false;
                         } else {
                             independentComponent = false;
@@ -186,7 +189,9 @@ public class RowProcessingQueryOptimizer {
 
             if (independentComponent) {
                 // totally independent components prohibit optimization
-                logger.debug("Component {} is completely independent. Position in chain is not determinable, so optimization cannot be done.", filterConsumer);
+                logger.debug(
+                        "Component {} is completely independent. Position in chain is not determinable, so optimization cannot be done.",
+                        filterConsumer);
                 return false;
             }
 
@@ -234,7 +239,9 @@ public class RowProcessingQueryOptimizer {
     public List<RowProcessingConsumer> getOptimizedConsumers() {
         List<RowProcessingConsumer> result = new ArrayList<RowProcessingConsumer>(_consumers);
         for (FilterConsumer filterConsumer : _optimizedFilters.keySet()) {
-            result.remove(filterConsumer);
+            if (filterConsumer.isRemoveableUponOptimization()) {
+                result.remove(filterConsumer);
+            }
         }
         return result;
     }
