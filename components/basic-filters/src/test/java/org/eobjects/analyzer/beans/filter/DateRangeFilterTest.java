@@ -66,6 +66,7 @@ public class DateRangeFilterTest extends TestCase {
         assertEquals(RangeFilterCategory.HIGHER, filter.categorize(DateUtils.get(2012, Month.JANUARY, 1)));
     }
 
+    @SuppressWarnings("resource")
     public void testQueryOptimize() throws Throwable {
         Datastore ds = TestHelper.createSampleDatabaseDatastore("orderdb");
         AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds));
@@ -99,5 +100,7 @@ public class DateRangeFilterTest extends TestCase {
         assertEquals("[MetaModelInputRow[Row[values=[2003-03-10 00:00:00.0]]], "
                 + "MetaModelInputRow[Row[values=[2003-03-18 00:00:00.0]]], "
                 + "MetaModelInputRow[Row[values=[2003-03-24 00:00:00.0]]]]", values.toString());
+        
+        ajb.close();
     }
 }

@@ -29,47 +29,65 @@ import java.lang.annotation.Annotation;
  */
 public class SimpleInjectionPoint<E> implements InjectionPoint<E> {
 
-	private final Class<E> _class;
+    private final Class<E> _class;
 
-	public static final <E> InjectionPoint<E> of(Class<E> cls) {
-		return new SimpleInjectionPoint<E>(cls);
-	}
+    /**
+     * Factory method to produce an {@link InjectionPoint} that describes the
+     * specified class.
+     * 
+     * @param cls
+     * @return
+     */
+    public static final <E> InjectionPoint<E> of(Class<E> cls) {
+        return new SimpleInjectionPoint<E>(cls);
+    }
 
-	public SimpleInjectionPoint(Class<E> cls) {
-		_class = cls;
-	}
+    /**
+     * Constructs a {@link SimpleInjectionPoint} for requesting a specific class
+     * 
+     * @param cls
+     */
+    public SimpleInjectionPoint(Class<E> cls) {
+        if (cls == null) {
+            throw new IllegalArgumentException("Injection class cannot be null");
+        }
+        _class = cls;
+    }
 
-	@Override
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return null;
-	}
+    @Override
+    public String toString() {
+        return "SimpleInjectionPoint[" + _class.getName() + "]";
+    }
 
-	@Override
-	public Object getInstance() {
-		return this;
-	}
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+        return null;
+    }
 
-	@Override
-	public Class<E> getBaseType() {
-		return _class;
-	}
+    @Override
+    public Object getInstance() {
+        return this;
+    }
 
-	@Override
-	public boolean isGenericType() {
-		return false;
-	}
+    @Override
+    public Class<E> getBaseType() {
+        return _class;
+    }
 
-	@Override
-	public int getGenericTypeArgumentCount() {
-		return 0;
-	}
+    @Override
+    public boolean isGenericType() {
+        return false;
+    }
 
-	@Override
-	public Class<?> getGenericTypeArgument(int i)
-			throws IndexOutOfBoundsException {
-		throw new IndexOutOfBoundsException(
-				"This injection point has no generic type arguments, requested index no. "
-						+ i);
-	}
+    @Override
+    public int getGenericTypeArgumentCount() {
+        return 0;
+    }
+
+    @Override
+    public Class<?> getGenericTypeArgument(int i) throws IndexOutOfBoundsException {
+        throw new IndexOutOfBoundsException("This injection point has no generic type arguments, requested index no. "
+                + i);
+    }
 
 }
