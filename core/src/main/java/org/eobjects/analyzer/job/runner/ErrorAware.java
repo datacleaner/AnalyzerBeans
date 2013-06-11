@@ -21,11 +21,15 @@ package org.eobjects.analyzer.job.runner;
 
 import java.util.List;
 
+/**
+ * Interface for components that are aware of errors in a job and is able to
+ * inform other components of them.
+ */
 public interface ErrorAware {
 
-	public boolean isErrornous();
-	
-	public boolean isCancelled();
+    public boolean isErrornous();
 
-	public List<Throwable> getErrors();
+    public boolean isCancelled();
+
+    public List<Throwable> getErrors();
 }

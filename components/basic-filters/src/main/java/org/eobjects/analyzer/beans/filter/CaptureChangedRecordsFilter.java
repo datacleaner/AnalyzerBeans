@@ -74,6 +74,10 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
     @FileProperty(extension = "properties", accessMode = FileAccessMode.SAVE)
     Resource captureStateFile;
 
+    @Configured(required = false)
+    @Description("A custom identifier for this captured state. If omitted, the name of the 'Last modified column' will be used.")
+    String captureStateIdentifier;
+
     private Date _lastModifiedThreshold;
     private Date _greatestEncounteredDate;
 
@@ -95,7 +99,7 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
     @Override
     public Query optimizeQuery(final Query q, final ValidationCategory category) {
         assert category == ValidationCategory.VALID;
-        
+
         if (_lastModifiedThreshold != null) {
             final Column column = lastModifiedColumn.getPhysicalColumn();
             if (column.getType().isNumber()) {
@@ -105,7 +109,7 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
                 q.where(column, OperatorType.GREATER_THAN, _lastModifiedThreshold);
             }
         }
-        
+
         return q;
     }
 
@@ -126,21 +130,25 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
     }
 
     /**
-     * Gets the key to use in the capture state file. If possible we want to
-     * avoid using a hardcoded key, since the same file may be used for multiple
-     * purposes, even multiple filters of the same type. Of course this is not
-     * desired configuration, but may be more convenient for lazy users!
+     * Gets the key to use in the capture state file. If there is not a
+     * captureStateIdentifier available, we want to avoid using a hardcoded key,
+     * since the same file may be used for multiple purposes, even multiple
+     * filters of the same type. Of course this is not desired configuration,
+     * but may be more convenient for lazy users!
      * 
      * @return
      */
     private String getPropertyKey() {
-        if (lastModifiedColumn.isPhysicalColumn()) {
-            Table table = lastModifiedColumn.getPhysicalColumn().getTable();
-            if (table != null && !StringUtils.isNullOrEmpty(table.getName())) {
-                return table.getName() + "." + lastModifiedColumn.getName() + ".GreatestLastModifiedTimestamp";
+        if (StringUtils.isNullOrEmpty(captureStateIdentifier)) {
+            if (lastModifiedColumn.isPhysicalColumn()) {
+                Table table = lastModifiedColumn.getPhysicalColumn().getTable();
+                if (table != null && !StringUtils.isNullOrEmpty(table.getName())) {
+                    return table.getName() + "." + lastModifiedColumn.getName() + ".GreatestLastModifiedTimestamp";
+                }
             }
+            return lastModifiedColumn.getName() + ".GreatestLastModifiedTimestamp";
         }
-        return lastModifiedColumn.getName() + ".GreatestLastModifiedTimestamp";
+        return captureStateIdentifier.trim() + ".GreatestLastModifiedTimestamp";
     }
 
     private Properties loadProperties() throws IOException {

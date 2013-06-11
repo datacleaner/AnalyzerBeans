@@ -283,8 +283,7 @@ public final class RowProcessingPublisher {
             final DataSet dataSet = dataContext.executeQuery(finalQuery);
 
             // represents the distinct count of rows as well as the number of
-            // tasks
-            // to execute
+            // tasks to execute
             int numTasks = 0;
 
             try {
