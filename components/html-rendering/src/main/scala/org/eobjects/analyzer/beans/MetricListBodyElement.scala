@@ -45,9 +45,10 @@ class MetricListBodyElement(result: AnalyzerResult) extends BodyElement {
   def renderMetrics(job: ConfigurableBeanJob[_], descriptor: HasAnalyzerResultBeanDescriptor[_]): String = {
     val primaryInputProperties = descriptor.getConfiguredPropertiesForInput(false)
     val columns = primaryInputProperties.flatMap(property => getInputColumns(job, property));
-
+    val resultMetrics = descriptor.getResultMetrics()
+    
     val html = <div class="analyzerResultMetrics">{
-      descriptor.getResultMetrics().map(m => {
+      resultMetrics.toList.map(m => {
         if (!m.isParameterizedByString()) {
           if (m.isParameterizedByInputColumn()) {
             columns.map(col => {

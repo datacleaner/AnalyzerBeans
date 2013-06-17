@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans.script;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -40,10 +41,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A transformer that uses userwritten JavaScript to generate a value
- * 
- * @author Kasper Sørensen
  */
-@TransformerBean("JavaScript transformer")
+@TransformerBean("JavaScript transformer (simple)")
+@Alias("JavaScript transformer")
 @Description("Supply your own piece of JavaScript to do a custom transformation")
 @Categorized({ ScriptingCategory.class })
 public class JavaScriptTransformer implements Transformer<Object> {
@@ -65,7 +65,7 @@ public class JavaScriptTransformer implements Transformer<Object> {
 	@Description("Available variables:\nvalues[0..]: Array of values\nvalues[\"my_col\"]: Map of values\nmy_col: Each column value has it's own variable\nout: Print to console using out.println('hello')\nlog: Print to log using log.info(...), log.warn(...), log.error(...)")
 	@StringProperty(multiline = true, mimeType = { "text/javascript",
 			"application/x-javascript" })
-	String sourceCode = "function eval() {\n  return \"hello \" + values[0];\n}\n\neval();";
+	String sourceCode = "function eval() {\n\treturn \"hello \" + values[0];\n}\n\neval();";
 
 	private ContextFactory _contextFactory;
 	private Script _script;

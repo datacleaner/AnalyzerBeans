@@ -8,7 +8,7 @@ import org.eobjects.analyzer.result.SingleValueFrequency
 import org.eobjects.analyzer.result.ValueFrequency
 import java.util.Collections
 
-class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResult, valueCounts: Collection[ValueFrequency], chartElementId: String) extends HeadElement {
+class ValueDistributionChartScriptHeadElement(result: ValueCountingAnalyzerResult, valueCounts: Iterable[ValueFrequency], chartElementId: String) extends HeadElement {
 
   override def toHtml(context: HtmlRenderingContext): String = {
     // will be used to plot the y-axis value. Descending/negative because we want them to go from top to bottom.

@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -37,8 +38,6 @@ import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.util.HasName;
-
-import scala.actors.threadpool.Arrays;
 
 @AnalyzerBean("Completeness analyzer")
 @Description("Asserts the completeness of your data by ensuring that all required fields are filled.")

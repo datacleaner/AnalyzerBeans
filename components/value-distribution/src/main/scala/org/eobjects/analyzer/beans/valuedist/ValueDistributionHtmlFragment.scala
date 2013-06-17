@@ -109,7 +109,7 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
 
           val invocation = bodyElement.toJavaScriptInvocation()
 
-          return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ count }</a>
+          return <a class="drillToDetailsLink" onclick={ invocation } href="#">{ count }</a>
         }
       }
 
@@ -130,6 +130,6 @@ class ValueDistributionHtmlFragment(result: ValueCountingAnalyzerResult, rendere
 
     val invocation = bodyElement.toJavaScriptInvocation()
 
-    return <a class="drillToDetailsLink" href="#" onclick={ invocation }>{ count }</a>
+    return <a class="drillToDetailsLink" onclick={ invocation } href="#">{ count }</a>
   }
 }
