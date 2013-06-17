@@ -170,11 +170,17 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
     }
 
     private void addValuesToRow(TransformedInputRow resultRow, final InputColumn<?>[] outputColumns, Object[] values) {
-        // add output values to row.
         assert outputColumns.length == values.length;
+
+        // add output values to row.
         for (int i = 0; i < outputColumns.length; i++) {
-            Object value = values[i];
-            InputColumn<?> column = outputColumns[i];
+            final Object value;
+            if (i < values.length) {
+                value = values[i];
+            } else {
+                value = null;
+            }
+            final InputColumn<?> column = outputColumns[i];
             resultRow.addValue(column, value);
         }
     }
