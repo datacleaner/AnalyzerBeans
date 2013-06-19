@@ -42,7 +42,7 @@ class PlainSearchReplaceTransformerTest extends AssertionsForJUnit {
       fail("Exception expected");
     } catch {
       case e: IllegalArgumentException => assertEquals("Replacement string cannot contain the search string (implies an infinite replacement loop)", e.getMessage());
-      case e => fail("Unexpected exception: " + e);
+      case e: Throwable => fail("Unexpected exception: " + e);
     }
   }
 
