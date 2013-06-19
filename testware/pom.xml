@@ -51,6 +51,10 @@
 			<version>1.9.1</version>
 			<exclusions>
 				<exclusion>
+					<artifactId>scala-library</artifactId>
+					<groupId>org.scala-lang</groupId>
+				</exclusion>
+				<exclusion>
 					<artifactId>scala-actors</artifactId>
 					<groupId>org.scala-lang</groupId>
 				</exclusion>
