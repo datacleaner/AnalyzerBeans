@@ -69,7 +69,7 @@ public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataConte
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(false);
+        return new PerformanceCharacteristicsImpl(true);
     }
 
     @Override
