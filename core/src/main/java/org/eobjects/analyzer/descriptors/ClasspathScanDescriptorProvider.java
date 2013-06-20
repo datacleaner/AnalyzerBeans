@@ -665,7 +665,7 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         synchronized (this) {
             while (_tasksPending.get() != 0) {
                 try {
-                    logger.warn("Scan tasks still pending, waiting");
+                    logger.info("Scan tasks still pending, waiting");
                     wait();
                 } catch (InterruptedException e) {
                     logger.debug("Interrupted while awaiting task completion", e);
