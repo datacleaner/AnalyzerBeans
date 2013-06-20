@@ -54,6 +54,20 @@ public class VFSUtils {
     }
 
     /**
+     * Converts a {@link File} to a FileObject.
+     * 
+     * @param file
+     * @return
+     */
+    public static FileObject toFileObject(File file) {
+        try {
+            return getFileSystemManager().toFileObject(file);
+        } catch (FileSystemException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
      * Converts (if possible) a {@link FileObject} to a {@link File}. Use with
      * caution since {@link FileObject} is generally preferred.
      * 
