@@ -52,6 +52,7 @@ import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.metamodel.BatchUpdateScript;
 import org.eobjects.metamodel.UpdateCallback;
 import org.eobjects.metamodel.UpdateScript;
 import org.eobjects.metamodel.UpdateableDataContext;
@@ -68,6 +69,7 @@ import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.update.RowUpdationBuilder;
 import org.eobjects.metamodel.util.Action;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -401,8 +403,8 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
 
         final FileDatastore errorDatastore;
         if (_errorDataContext != null) {
-            File file = _errorDataContext.getFile();
-            errorDatastore = new CsvDatastore(file.getName(), file.getAbsolutePath());
+            Resource resource = _errorDataContext.getResource();
+            errorDatastore = new CsvDatastore(resource.getName(), resource);
         } else {
             errorDatastore = null;
         }
@@ -429,7 +431,7 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
             }
 
             final UpdateableDataContext dc = con.getUpdateableDataContext();
-            dc.executeUpdate(new UpdateScript() {
+            dc.executeUpdate(new BatchUpdateScript() {
                 @Override
                 public void run(UpdateCallback callback) {
                     for (Object[] rowData : buffer) {

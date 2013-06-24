@@ -306,25 +306,30 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
                     new MultiThreadedTaskRunner(4)).replace(datastoreCatalog);
 
             AnalysisJobBuilder ajb = new AnalysisJobBuilder(configuration);
-            ajb.setDatastore(datastoreIn);
+            try {
 
-            ajb.addSourceColumns(columns);
+                ajb.setDatastore(datastoreIn);
 
-            AnalyzerJobBuilder<InsertIntoTableAnalyzer> analyzerJobBuilder = ajb
-                    .addAnalyzer(InsertIntoTableAnalyzer.class);
-            analyzerJobBuilder.addInputColumns(ajb.getSourceColumns());
-            analyzerJobBuilder.setConfiguredProperty("Datastore", datastoreOut);
-            analyzerJobBuilder.setConfiguredProperty("Column names", "col0,col1,col2,col3,col4".split(","));
+                ajb.addSourceColumns(columns);
 
-            assertTrue(analyzerJobBuilder.isConfigured());
+                AnalyzerJobBuilder<InsertIntoTableAnalyzer> analyzerJobBuilder = ajb
+                        .addAnalyzer(InsertIntoTableAnalyzer.class);
+                analyzerJobBuilder.addInputColumns(ajb.getSourceColumns());
+                analyzerJobBuilder.setConfiguredProperty("Datastore", datastoreOut);
+                analyzerJobBuilder.setConfiguredProperty("Column names", "col0,col1,col2,col3,col4".split(","));
 
-            AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
-            AnalysisResultFuture resultFuture = runner.run(ajb.toAnalysisJob());
+                assertTrue(analyzerJobBuilder.isConfigured());
 
-            if (resultFuture.isErrornous()) {
-                throw resultFuture.getErrors().get(0);
+                AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+                AnalysisResultFuture resultFuture = runner.run(ajb.toAnalysisJob());
+
+                if (resultFuture.isErrornous()) {
+                    throw resultFuture.getErrors().get(0);
+                }
+                assertTrue(resultFuture.isSuccessful());
+            } finally {
+                ajb.close();
             }
-            assertTrue(resultFuture.isSuccessful());
         }
 
         // count output file lines
