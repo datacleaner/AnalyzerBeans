@@ -123,6 +123,8 @@ public class DataStructuresIntegrationTest extends TestCase {
 				.addInputColumns(mapColumn, valueColumn1, valueColumn2, listColumn, elementColumn);
 
 		AnalysisJob job = ajb.toAnalysisJob();
+		ajb.close();
+
 		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(job);
 
 		if (resultFuture.isErrornous()) {
