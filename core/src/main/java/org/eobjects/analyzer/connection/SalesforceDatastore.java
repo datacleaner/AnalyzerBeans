@@ -24,7 +24,7 @@ import org.eobjects.metamodel.salesforce.SalesforceDataContext;
 /**
  * A datastore that uses a Salesforce.com account as it's source.
  */
-public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataContext> implements UsernameDatastore {
+public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataContext> implements UpdateableDatastore, UsernameDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -68,6 +68,12 @@ public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataConte
     }
 
     @Override
+    public UpdateableDatastoreConnection openConnection() {
+        DatastoreConnection connection = super.openConnection();
+        return (UpdateableDatastoreConnection) connection;
+    }
+
+    @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
         return new PerformanceCharacteristicsImpl(true);
     }
@@ -75,7 +81,7 @@ public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataConte
     @Override
     protected UsageAwareDatastoreConnection<SalesforceDataContext> createDatastoreConnection() {
         final SalesforceDataContext dataContext = new SalesforceDataContext(_username, _password, _securityToken);
-        return new DatastoreConnectionImpl<SalesforceDataContext>(dataContext, this);
+        return new UpdateableDatastoreConnectionImpl<SalesforceDataContext>(dataContext, this);
     }
 
     @Override
