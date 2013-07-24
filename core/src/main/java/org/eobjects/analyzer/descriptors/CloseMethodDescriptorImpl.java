@@ -41,6 +41,24 @@ final class CloseMethodDescriptorImpl extends AbstractMethodDescriptor implement
 	}
 	
 	@Override
+	public boolean isEnabledOnSuccess() {
+	    Close annotation = getAnnotation(Close.class);
+	    if (annotation == null) {
+	        return true;
+	    }
+	    return annotation.onSuccess();
+	}
+	
+	@Override
+	public boolean isEnabledOnFailure() {
+	    Close annotation = getAnnotation(Close.class);
+	    if (annotation == null) {
+	        return true;
+	    }
+	    return annotation.onFailure();
+	}
+	
+	@Override
 	public void close(Object component) throws IllegalStateException {
 		invoke(component);
 	}

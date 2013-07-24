@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
@@ -36,13 +38,15 @@ public final class RunExplorerTask implements Task {
 	private final Datastore _datastore;
 	private final AnalysisListener _analysisListener;
 	private final ExplorerMetrics _explorerMetrics;
+    private final AtomicBoolean _success;
 
 	public RunExplorerTask(Explorer<?> explorer, ExplorerMetrics explorerMetrics, Datastore datastore,
-			AnalysisListener analysisListener) {
+			AnalysisListener analysisListener, AtomicBoolean success) {
 		_explorer = explorer;
 		_explorerMetrics = explorerMetrics;
 		_datastore = datastore;
 		_analysisListener = analysisListener;
+		_success = success;
 	}
 
 	@Override
@@ -57,6 +61,9 @@ public final class RunExplorerTask implements Task {
 		DataContext dc = con.getDataContext();
 		try {
 			_explorer.run(dc);
+		} catch (Exception e) {
+		    _success.set(false);
+		    throw e;
 		} finally {
 			con.close();
 		}

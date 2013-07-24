@@ -85,7 +85,8 @@ public final class LifeCycleHelper {
      * 
      * @param injectionManager
      * @param referenceDataActivationManager
-     * @param includeNonDistributedTasks whether or not non-distributed methods (such as
+     * @param includeNonDistributedTasks
+     *            whether or not non-distributed methods (such as
      *            {@link Initialize} or {@link Cloneable} methods that are
      *            marked with distributed=false) should be included or not. On
      *            single-node executions, this will typically be true, on slave
@@ -163,9 +164,23 @@ public final class LifeCycleHelper {
      * @param descriptor
      * @param component
      */
-    public void close(ComponentDescriptor<?> descriptor, Object component) {
-        CloseCallback callback = new CloseCallback(_includeNonDistributedTasks);
+    public void close(ComponentDescriptor<?> descriptor, Object component, boolean success) {
+        CloseCallback callback = new CloseCallback(_includeNonDistributedTasks, success);
         callback.onEvent(component, descriptor);
+    }
+
+    /**
+     * Closes a component after user.
+     * 
+     * @param descriptor
+     * @param component
+     * 
+     * @deprecated use {@link #close(ComponentDescriptor, Object, boolean)}
+     *             instead.
+     */
+    @Deprecated
+    public void close(ComponentDescriptor<?> descriptor, Object component) {
+        close(descriptor, component, true);
     }
 
     /**
@@ -178,7 +193,7 @@ public final class LifeCycleHelper {
         final Collection<Object> referenceData = _referenceDataActivationManager.getAllReferenceData();
         for (Object object : referenceData) {
             ComponentDescriptor<? extends Object> descriptor = Descriptors.ofComponent(object.getClass());
-            close(descriptor, object);
+            close(descriptor, object, true);
         }
     }
 

@@ -47,6 +47,26 @@ public interface CloseMethodDescriptor extends Serializable {
     public boolean isDistributed();
 
     /**
+     * Determines if this close method should be run when the context of the
+     * component (typically a job execution) is successful.
+     * 
+     * @return
+     * 
+     * @see Close#onSuccess()
+     */
+    public boolean isEnabledOnSuccess();
+
+    /**
+     * Determines if this close method should be run when the context of the
+     * component (typically a job execution) is in a failure state.
+     * 
+     * @return
+     * 
+     * @see Close#onFailure()
+     */
+    public boolean isEnabledOnFailure();
+
+    /**
      * Invokes the close method
      * 
      * @param bean

@@ -113,7 +113,7 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
         return q;
     }
 
-    @Close
+    @Close(onFailure = false)
     public void close() throws IOException {
         if (_greatestEncounteredDate != null) {
             final Properties properties = loadProperties();

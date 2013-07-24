@@ -23,13 +23,21 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.CloseMethodDescriptor;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Life cycle callback for closing components after execution.
+ */
 final class CloseCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
 
+    private static final Logger logger = LoggerFactory.getLogger(CloseCallback.class);
     private final boolean _includeNonDistributed;
+    private final boolean _success;
 
-    public CloseCallback(boolean includeNonDistributed) {
+    public CloseCallback(boolean includeNonDistributed, boolean success) {
         _includeNonDistributed = includeNonDistributed;
+        _success = success;
     }
 
     @Override
@@ -37,7 +45,13 @@ final class CloseCallback implements LifeCycleCallback<Object, ComponentDescript
         Set<CloseMethodDescriptor> closeMethods = descriptor.getCloseMethods();
         for (CloseMethodDescriptor closeDescriptor : closeMethods) {
             if (_includeNonDistributed || closeDescriptor.isDistributed()) {
-                closeDescriptor.close(analyzerBean);
+                if (_success && closeDescriptor.isEnabledOnSuccess()) {
+                    closeDescriptor.close(analyzerBean);
+                } else if (!_success && closeDescriptor.isEnabledOnFailure()) {
+                    closeDescriptor.close(analyzerBean);
+                } else {
+                    logger.debug("Omitting close method {} since success={}", closeDescriptor, _success);
+                }
             }
         }
     }

@@ -27,9 +27,26 @@ import java.util.List;
  */
 public interface ErrorAware {
 
+    /**
+     * Determines if an error has occurred in the job.
+     * 
+     * @return
+     */
     public boolean isErrornous();
 
+    /**
+     * Determines if the job has been cancelled.
+     * 
+     * @return
+     */
     public boolean isCancelled();
 
+    /**
+     * Gets a list of errors, if there was any errors reported.
+     * 
+     * @return a list of errors (Throwables) if errors was reported.
+     * 
+     * @see #isErrornous()
+     */
     public List<Throwable> getErrors();
 }

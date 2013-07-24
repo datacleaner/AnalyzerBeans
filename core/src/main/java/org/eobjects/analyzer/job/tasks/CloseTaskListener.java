@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job.tasks;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
@@ -32,18 +34,20 @@ public class CloseTaskListener implements TaskListener {
 	private final LifeCycleHelper _lifeCycleHelper;
 	private final ComponentDescriptor<?> _descriptor;
 	private final Object _component;
+    private final AtomicBoolean _success;
 
-	public CloseTaskListener(LifeCycleHelper lifeCycleHelper, ComponentDescriptor<?> descriptor, Object component) {
+	public CloseTaskListener(LifeCycleHelper lifeCycleHelper, ComponentDescriptor<?> descriptor, Object component, AtomicBoolean success) {
 		_lifeCycleHelper = lifeCycleHelper;
 		_descriptor = descriptor;
 		_component = component;
+		_success = success;
 	}
 
 	private void cleanup() {
 		logger.debug("execute()");
 
 		// close can occur AFTER completion
-		_lifeCycleHelper.close(_descriptor, _component);
+		_lifeCycleHelper.close(_descriptor, _component, _success.get());
 	}
 
 	@Override
@@ -57,6 +61,7 @@ public class CloseTaskListener implements TaskListener {
 
 	@Override
 	public void onError(Task task, Throwable throwable) {
+	    _success.set(false);
 		cleanup();
 	}
 }

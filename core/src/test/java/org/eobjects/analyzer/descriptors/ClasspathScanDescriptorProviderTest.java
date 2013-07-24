@@ -80,7 +80,7 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
         assertEquals("[AnnotationBasedTransformerBeanDescriptor[org.eobjects.analyzer.beans.mock.TransformerMock]]",
                 Arrays.toString(transformerBeanDescriptors.toArray()));
 
-        analyzerDescriptors = new ClasspathScanDescriptorProvider(taskRunner).scanPackage("org.eobjects.analyzer.job",
+        analyzerDescriptors = new ClasspathScanDescriptorProvider(taskRunner).scanPackage("org.eobjects.analyzer.job.builder",
                 true).getAnalyzerBeanDescriptors();
         assertEquals(0, analyzerDescriptors.size());
     }

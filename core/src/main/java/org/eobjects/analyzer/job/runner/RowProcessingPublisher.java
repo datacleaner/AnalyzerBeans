@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
@@ -82,6 +83,7 @@ public final class RowProcessingPublisher {
     private final Set<Column> _physicalColumns = new HashSet<Column>();
     private final List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
     private final LazyRef<RowProcessingQueryOptimizer> _queryOptimizerRef;
+    private final AtomicBoolean _successful = new AtomicBoolean(true);
 
     public RowProcessingPublisher(RowProcessingPublishers publishers, Table table) {
         if (publishers == null) {
@@ -221,6 +223,8 @@ public final class RowProcessingPublisher {
      * Fires the actual row processing. This method assumes that consumers have
      * been initialized and the publisher is ready to start processing.
      * 
+     * @return true if no errors occurred during processing
+     * 
      * @param rowProcessingMetrics
      * 
      * @see #runRowProcessing(Queue, TaskListener)
@@ -267,7 +271,7 @@ public final class RowProcessingPublisher {
 
         try {
             final DataContext dataContext = con.getDataContext();
-            
+
             if (logger.isDebugEnabled()) {
                 final String queryString;
                 if (dataContext instanceof JdbcDataContext) {
@@ -279,7 +283,7 @@ public final class RowProcessingPublisher {
                 logger.debug("Final query: {}", queryString);
                 logger.debug("Final query firstRow={}, maxRows={}", finalQuery.getFirstRow(), finalQuery.getMaxRows());
             }
-            
+
             final DataSet dataSet = dataContext.executeQuery(finalQuery);
 
             // represents the distinct count of rows as well as the number of
@@ -312,9 +316,12 @@ public final class RowProcessingPublisher {
             con.close();
         }
 
-        if (!taskListener.isErrornous()) {
-            analysisListener.rowProcessingSuccess(analysisJob, rowProcessingMetrics);
+        if (taskListener.isErrornous()) {
+            _successful.set(false);
+            return;
         }
+
+        analysisListener.rowProcessingSuccess(analysisJob, rowProcessingMetrics);
     }
 
     public void addAnalyzerBean(Analyzer<?> analyzer, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns) {
@@ -444,7 +451,6 @@ public final class RowProcessingPublisher {
             TaskRunnable task = createCloseTask(consumer);
             taskRunner.run(task);
         }
-
     }
 
     private Task createCollectResultTask(RowProcessingConsumer consumer, Queue<JobAndResult> resultQueue) {
@@ -466,7 +472,7 @@ public final class RowProcessingPublisher {
         final LifeCycleHelper lifeCycleHelper = _publishers.getLifeCycleHelper();
         final ComponentDescriptor<?> descriptor = consumer.getComponentJob().getDescriptor();
         final Object component = consumer.getComponent();
-        return new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, component));
+        return new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, component, _successful));
     }
 
     private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener) {

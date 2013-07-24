@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Initialize;
@@ -232,25 +233,29 @@ final class AnalysisRunnerJobDelegate {
             final ExplorerBeanDescriptor<?> descriptor = explorerJob.getDescriptor();
             final Explorer<?> explorer = descriptor.newInstance();
 
+            // indicator for the success of this individual explorer
+            final AtomicBoolean success = new AtomicBoolean(true);
+
             finalTasks.add(new TaskRunnable(null, new CloseResourcesTaskListener(connection)));
-            finalTasks.add(new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, explorer)));
+            finalTasks
+                    .add(new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, explorer, success)));
 
             // set up scheduling for the explorers
             final Task closeTask = new CollectResultsTask(explorer, _job, explorerJob, _resultQueue, _analysisListener);
             final TaskListener runFinishedListener = new RunNextTaskTaskListener(_taskRunner, closeTask,
                     explorersDoneTaskListener);
-            final Task runTask = new RunExplorerTask(explorer, metrics, _datastore, _analysisListener);
+            final Task runTask = new RunExplorerTask(explorer, metrics, _datastore, _analysisListener, success);
 
-            TaskListener referenceDataInitFinishedListener = new RunNextTaskTaskListener(_taskRunner, runTask,
+            final TaskListener referenceDataInitFinishedListener = new RunNextTaskTaskListener(_taskRunner, runTask,
                     runFinishedListener);
 
-            Task initializeReferenceData = new InitializeReferenceDataTask(lifeCycleHelper);
-            RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner,
+            final Task initializeReferenceData = new InitializeReferenceDataTask(lifeCycleHelper);
+            final RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner,
                     initializeReferenceData, referenceDataInitFinishedListener);
 
-            TaskListener initializeFinishedListener = new JoinTaskListener(numExplorerJobs, joinFinishedListener);
+            final TaskListener initializeFinishedListener = new JoinTaskListener(numExplorerJobs, joinFinishedListener);
 
-            InitializeTask initTask = new InitializeTask(lifeCycleHelper, descriptor, explorer,
+            final InitializeTask initTask = new InitializeTask(lifeCycleHelper, descriptor, explorer,
                     explorerJob.getConfiguration());
 
             // begin the explorers
