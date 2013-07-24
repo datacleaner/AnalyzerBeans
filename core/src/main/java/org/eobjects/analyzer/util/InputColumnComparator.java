@@ -63,13 +63,9 @@ public class InputColumnComparator implements Comparator<InputColumn<?>>, Serial
                 final TransformedInputColumn<?> col1 = (TransformedInputColumn<?>) o1;
                 final TransformedInputColumn<?> col2 = (TransformedInputColumn<?>) o2;
 
-                final int diff = col1.getSortNumber() - col2.getSortNumber();
-                if (diff == 0) {
-                    String id1 = col1.getId();
-                    String id2 = col2.getId();
-                    return id1.compareTo(id2);
-                }
-                return diff;
+                String id1 = col1.getId();
+                String id2 = col2.getId();
+                return id1.compareTo(id2);
             }
             int result = o1.getName().compareTo(o2.getName());
             if (result == 0) {

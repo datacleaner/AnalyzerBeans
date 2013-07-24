@@ -21,9 +21,7 @@ package org.eobjects.analyzer.data;
 
 import java.io.Serializable;
 
-import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.util.InputColumnComparator;
-
 import org.eobjects.metamodel.schema.Column;
 
 /**
@@ -38,15 +36,14 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     private static final long serialVersionUID = 1L;
 
     private final String _id;
-    private int sortNumber;
     private Class<?> _dataType;
     private String _name;
     private String _initialName;
 
-    public TransformedInputColumn(String name, IdGenerator idGenerator) {
+    public TransformedInputColumn(String name, String id) {
         _name = name;
         _initialName = name;
-        _id = idGenerator.nextId();
+        _id = id;
     }
 
     @Override
@@ -103,14 +100,6 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
         return null;
     }
     
-    public int getSortNumber() {
-        return sortNumber;
-    }
-    
-    public void setSortNumber(int sortNumber) {
-        this.sortNumber = sortNumber;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public Class<? extends E> getDataType() {

@@ -51,6 +51,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
         AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> implements
         InputColumnSourceJob, InputColumnSinkJob, OutcomeSinkJob {
 
+    private final String _id;
     private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
     private final List<String> _automaticOutputColumnNames = new ArrayList<String>();
     private final IdGenerator _idGenerator;
@@ -59,6 +60,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
     public TransformerJobBuilder(AnalysisJobBuilder analysisJobBuilder, TransformerBeanDescriptor<T> descriptor,
             IdGenerator idGenerator, List<TransformerChangeListener> transformerChangeListeners) {
         super(analysisJobBuilder, descriptor, TransformerJobBuilder.class);
+        _id = "trans-" + idGenerator.nextId();
         _idGenerator = idGenerator;
         _transformerChangeListeners = transformerChangeListeners;
     }
@@ -91,21 +93,17 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
         boolean changed = false;
 
         // adjust the amount of output columns
-        int expectedCols = outputColumns.getColumnCount();
-        int existingCols = _outputColumns.size();
+        final int expectedCols = outputColumns.getColumnCount();
+        final int existingCols = _outputColumns.size();
         if (expectedCols != existingCols) {
             changed = true;
             int colDiff = expectedCols - existingCols;
             if (colDiff > 0) {
                 for (int i = 0; i < colDiff; i++) {
-                    int nextIndex = _outputColumns.size();
+                    final int nextIndex = _outputColumns.size();
                     final String name = getColumnName(outputColumns, nextIndex);
-
-                    // TODO: idGenerator will now create a greater number than
-                    // previously, making the newly created column sorted above
-                    // the existing ones :-(
-
-                    _outputColumns.add(new TransformedInputColumn<Object>(name, _idGenerator));
+                    final String id = _id + "-" + _idGenerator.nextId();
+                    _outputColumns.add(new TransformedInputColumn<Object>(name, id));
                     _automaticOutputColumnNames.add(name);
                 }
             } else if (colDiff < 0) {
@@ -113,6 +111,17 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
                     // remove from the tail
                     _outputColumns.remove(_outputColumns.size() - 1);
                     _automaticOutputColumnNames.remove(_automaticOutputColumnNames.size() - 1);
+                }
+            }
+
+            // reset the names when the number of output columns change and the
+            // initial name has changed
+            for (int i = 0; i < expectedCols; i++) {
+                final MutableInputColumn<?> column = _outputColumns.get(i);
+                final String previousProposedName = column.getInitialName();
+                final String newProposedName = outputColumns.getColumnName(i);
+                if (newProposedName != null && !newProposedName.equals(previousProposedName)) {
+                    column.setName(newProposedName);
                 }
             }
         }
@@ -126,16 +135,15 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
                 dataType = descriptor.getOutputDataType();
             }
 
-            TransformedInputColumn<?> col = (TransformedInputColumn<?>) _outputColumns.get(i);
-            col.setSortNumber(i);
+            final TransformedInputColumn<?> col = (TransformedInputColumn<?>) _outputColumns.get(i);
             col.setInitialName(proposedName);
             if (dataType != col.getDataType()) {
                 col.setDataType(dataType);
                 changed = true;
             }
 
-            String automaticName = _automaticOutputColumnNames.get(i);
-            String columnName = col.getName();
+            final String automaticName = _automaticOutputColumnNames.get(i);
+            final String columnName = col.getName();
             if (StringUtils.isNullOrEmpty(columnName) || automaticName.equals(columnName)) {
                 if (proposedName != null) {
                     col.setName(proposedName);

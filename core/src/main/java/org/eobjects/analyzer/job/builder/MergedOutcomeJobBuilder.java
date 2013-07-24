@@ -114,13 +114,14 @@ public final class MergedOutcomeJobBuilder implements InputColumnSourceJob, Inpu
 
 	public List<MutableInputColumn<?>> getOutputColumns() {
 		for (MergeInputBuilder mib : _mergeInputs) {
-			List<InputColumn<?>> inputColumns = mib.getInputColumns();
-			int numInput = inputColumns.size();
-			int numOutput = _outputColumns.size();
+		    final List<InputColumn<?>> inputColumns = mib.getInputColumns();
+			final int numInput = inputColumns.size();
+			final int numOutput = _outputColumns.size();
 			if (numInput > numOutput) {
 				for (int i = numOutput; i < numInput; i++) {
-					InputColumn<?> inputColumn = inputColumns.get(i);
-					TransformedInputColumn<Object> outputColumn = new TransformedInputColumn<Object>("Merged column " + (i + 1), _idGenerator);
+				    final InputColumn<?> inputColumn = inputColumns.get(i);
+					final String id = "merged-" + _idGenerator.nextId();
+					final TransformedInputColumn<Object> outputColumn = new TransformedInputColumn<Object>("Merged column " + (i + 1), id);
 					outputColumn.setDataType(inputColumn.getDataType());
 					_outputColumns.add(outputColumn);
 				}

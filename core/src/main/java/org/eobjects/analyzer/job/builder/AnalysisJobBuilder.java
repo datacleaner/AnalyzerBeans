@@ -102,7 +102,7 @@ public final class AnalysisJobBuilder implements Closeable {
 
     public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
         _configuration = configuration;
-        _transformedColumnIdGenerator = new PrefixedIdGenerator("trans");
+        _transformedColumnIdGenerator = new PrefixedIdGenerator("");
         _sourceColumns = new ArrayList<MetaModelInputColumn>();
         _filterJobBuilders = new ArrayList<FilterJobBuilder<?, ?>>();
         _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
