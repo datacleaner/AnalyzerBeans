@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.util.convert;
 
-import java.lang.reflect.Field;
 import java.net.URI;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -50,18 +49,8 @@ public class UrlResourceTypeHandler implements ResourceTypeHandler<UrlResource> 
     @Override
     public String createPath(Resource resource) {
         final UrlResource urlResource = (UrlResource) resource;
-
-        // TODO: URI is not exposed in current version, so we need to rely on
-        // reflection
-        final Field field = ReflectionUtils.getField(UrlResource.class, "_uri");
-        field.setAccessible(true);
-
-        try {
-            URI uri = (URI) field.get(urlResource);
-            return uri.toString();
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
+        final URI uri = urlResource.getUri();
+        return uri.toString();
     }
 
 }
