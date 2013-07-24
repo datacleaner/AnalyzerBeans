@@ -23,34 +23,50 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
+
 import junit.framework.TestCase;
 
 public class ConvertToStringTransformerTest extends TestCase {
 
-	public void testTransformValue() throws Exception {
-		assertEquals("hello\nworld", ConvertToStringTransformer.transformValue("hello\nworld"));
+    public void testBasicScenario() throws Exception {
+        ConvertToStringTransformer t = new ConvertToStringTransformer();
+        InputColumn<Object> col = new MockInputColumn<Object>("foo");
+        t.setInput(new InputColumn[] { col });
+        t.setNullReplacement("!null!");
+        
+        assertEquals("OutputColumns[foo (as string)]", t.getOutputColumns().toString());
 
-		assertEquals("w00p\nw0000p",
-				ConvertToStringTransformer.transformValue(new ByteArrayInputStream("w00p\nw0000p".getBytes())));
+        assertEquals("!null!", t.transform(new MockInputRow().put(col, null))[0]);
+        assertEquals("foo", t.transform(new MockInputRow().put(col, "foo"))[0]);
+    }
 
-		assertEquals("mrr\nrh", ConvertToStringTransformer.transformValue(new StringReader("mrr\nrh")));
-	}
+    public void testTransformValue() throws Exception {
+        assertEquals("hello\nworld", ConvertToStringTransformer.transformValue("hello\nworld"));
 
-	public void testTransformInputStream() throws Exception {
-		InputStream inputStream = new ByteArrayInputStream("hello\nworld".getBytes());
-		assertEquals("hello\nworld", ConvertToStringTransformer.transformValue(inputStream));
+        assertEquals("w00p\nw0000p",
+                ConvertToStringTransformer.transformValue(new ByteArrayInputStream("w00p\nw0000p".getBytes())));
 
-		inputStream = new ByteArrayInputStream("hello\r\nworld\n".getBytes());
-		assertEquals("hello\r\nworld\n", ConvertToStringTransformer.transformValue(inputStream));
+        assertEquals("mrr\nrh", ConvertToStringTransformer.transformValue(new StringReader("mrr\nrh")));
+    }
 
-		// make a string that will not fit into the buffer being used in the
-		// converter
-		StringBuilder longString = new StringBuilder("hello");
-		for (int i = 0; i < 1024; i++) {
-			longString.append(" hello");
-		}
+    public void testTransformInputStream() throws Exception {
+        InputStream inputStream = new ByteArrayInputStream("hello\nworld".getBytes());
+        assertEquals("hello\nworld", ConvertToStringTransformer.transformValue(inputStream));
 
-		inputStream = new ByteArrayInputStream(longString.toString().getBytes());
-		assertEquals(longString.toString(), ConvertToStringTransformer.transformValue(inputStream));
-	}
+        inputStream = new ByteArrayInputStream("hello\r\nworld\n".getBytes());
+        assertEquals("hello\r\nworld\n", ConvertToStringTransformer.transformValue(inputStream));
+
+        // make a string that will not fit into the buffer being used in the
+        // converter
+        StringBuilder longString = new StringBuilder("hello");
+        for (int i = 0; i < 1024; i++) {
+            longString.append(" hello");
+        }
+
+        inputStream = new ByteArrayInputStream(longString.toString().getBytes());
+        assertEquals(longString.toString(), ConvertToStringTransformer.transformValue(inputStream));
+    }
 }

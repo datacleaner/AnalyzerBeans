@@ -38,6 +38,7 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.beans.categories.ConversionCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.metamodel.util.FileHelper;
 
 /**
  * Attempts to convert anything to a String value.
@@ -49,79 +50,76 @@ import org.eobjects.analyzer.data.InputRow;
 @Categorized({ ConversionCategory.class })
 public class ConvertToStringTransformer implements Transformer<String> {
 
-	@Inject
-	@Configured
-	InputColumn<?>[] input;
+    @Inject
+    @Configured
+    InputColumn<?>[] input;
 
-	@StringProperty(multiline = true)
-	@Configured(required = false)
-	String nullReplacement;
+    @StringProperty(multiline = true)
+    @Configured(required = false)
+    String nullReplacement;
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		String[] names = new String[input.length];
-		for (int i = 0; i < names.length; i++) {
-			names[i] = input[i].getName() + " (as string)";
-		}
-		return new OutputColumns(names);
-	}
+    @Override
+    public OutputColumns getOutputColumns() {
+        String[] names = new String[input.length];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = input[i].getName() + " (as string)";
+        }
+        return new OutputColumns(names);
+    }
 
-	@Override
-	public String[] transform(InputRow inputRow) {
-		String[] result = new String[input.length];
-		for (int i = 0; i < input.length; i++) {
-			Object value = inputRow.getValue(input[i]);
-			String stringValue = transformValue(value);
-			if (stringValue == null) {
-				stringValue = nullReplacement;
-			}
-			result[i]  = stringValue;
-		}
-		return result;
-	}
+    @Override
+    public String[] transform(InputRow inputRow) {
+        String[] result = new String[input.length];
+        for (int i = 0; i < input.length; i++) {
+            Object value = inputRow.getValue(input[i]);
+            String stringValue = transformValue(value);
+            if (stringValue == null) {
+                stringValue = nullReplacement;
+            }
+            result[i] = stringValue;
+        }
+        return result;
+    }
 
-	public static String transformValue(Object value) {
-		String stringValue = null;
-		if (value != null) {
-			if (value instanceof InputStream) {
-				value = new InputStreamReader(new BufferedInputStream((InputStream) value));
-			}
-			if (value instanceof Reader) {
-				char[] buffer = new char[1024];
+    public static String transformValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof InputStream) {
+            value = new InputStreamReader(new BufferedInputStream((InputStream) value));
+        }
+        final String stringValue;
+        if (value instanceof Reader) {
+            char[] buffer = new char[1024];
 
-				Reader reader = (Reader) value;
+            Reader reader = (Reader) value;
 
-				StringBuilder sb = new StringBuilder();
-				try {
-					for (int read = reader.read(buffer); read != -1; read = reader.read(buffer)) {
-						char[] charsToWrite = buffer;
-						if (read != buffer.length) {
-							charsToWrite = Arrays.copyOf(charsToWrite, read);
-						}
-						sb.append(charsToWrite);
-					}
-				} catch (IOException e) {
-					throw new IllegalStateException(e);
-				} finally {
-					try {
-						reader.close();
-					} catch (Exception e) {
-						// do nothing
-					}
-				}
-				stringValue = sb.toString();
-			} else {
-				stringValue = value.toString();
-			}
-		}
-		return stringValue;
-	}
-	
-	public void setInput(InputColumn<?>[] input) {
-		this.input = input;
-	}
-	
-	public void setNullReplacement(String nullReplacement) {
-		this.nullReplacement = nullReplacement;
-	}
+            StringBuilder sb = new StringBuilder();
+            try {
+                for (int read = reader.read(buffer); read != -1; read = reader.read(buffer)) {
+                    char[] charsToWrite = buffer;
+                    if (read != buffer.length) {
+                        charsToWrite = Arrays.copyOf(charsToWrite, read);
+                    }
+                    sb.append(charsToWrite);
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            } finally {
+                FileHelper.safeClose(reader);
+            }
+            stringValue = sb.toString();
+        } else {
+            stringValue = value.toString();
+        }
+        return stringValue;
+    }
+
+    public void setInput(InputColumn<?>[] input) {
+        this.input = input;
+    }
+
+    public void setNullReplacement(String nullReplacement) {
+        this.nullReplacement = nullReplacement;
+    }
 }
