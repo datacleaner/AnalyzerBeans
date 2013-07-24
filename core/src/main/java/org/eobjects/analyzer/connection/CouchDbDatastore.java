@@ -25,7 +25,8 @@ import org.ektorp.http.StdHttpClient;
 import org.eobjects.metamodel.couchdb.CouchDbDataContext;
 import org.eobjects.metamodel.util.SimpleTableDef;
 
-public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> implements UpdateableDatastore, UsernameDatastore {
+public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> implements UpdateableDatastore,
+        UsernameDatastore {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,8 +45,8 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
     private final boolean _sslEnabled;
     private final SimpleTableDef[] _tableDefs;
 
-    public CouchDbDatastore(String name, String hostname, Integer port, String username, String password, boolean sslEnabled,
-            SimpleTableDef[] tableDefs) {
+    public CouchDbDatastore(String name, String hostname, Integer port, String username, String password,
+            boolean sslEnabled, SimpleTableDef[] tableDefs) {
         super(name);
         _hostname = hostname;
         _port = port;
@@ -68,7 +69,7 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
     @Override
     protected UsageAwareDatastoreConnection<CouchDbDataContext> createDatastoreConnection() {
         final StdHttpClient.Builder httpClient = new StdHttpClient.Builder();
-        httpClient.host(_hostname);
+        httpClient.host(getHostname());
         if (_port != null) {
             httpClient.port(_port);
         }
@@ -93,6 +94,9 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
     }
 
     public String getHostname() {
+        if (_hostname == null) {
+            return "localhost";
+        }
         return _hostname;
     }
 
@@ -124,7 +128,7 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
     protected void decorateIdentity(List<Object> identifiers) {
         super.decorateIdentity(identifiers);
         identifiers.add(_hostname);
-        identifiers.add(_port);
+        identifiers.add(getPort());
         identifiers.add(_username);
         identifiers.add(_password);
         identifiers.add(_sslEnabled);
