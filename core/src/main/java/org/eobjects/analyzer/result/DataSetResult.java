@@ -31,39 +31,34 @@ import org.eobjects.metamodel.data.Row;
 
 public class DataSetResult implements TableModelResult, AnalyzerResult {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private transient DataSet dataSet;
+    // this class uses a list of rows in order to make it serializable (a
+    // DataSet is not serializable)
+    private final List<Row> _rows;
 
-	// this class uses a list of rows in order to make it serializable (a
-	// DataSet is not serializable)
-	private final List<Row> _rows;
+    public DataSetResult(List<Row> rows) {
+        _rows = rows;
+    }
 
-	public DataSetResult(List<Row> rows) {
-		_rows = rows;
-	}
+    public DataSetResult(DataSet ds) {
+        _rows = new ArrayList<Row>();
+        while (ds.next()) {
+            _rows.add(ds.getRow());
+        }
+        ds.close();
+    }
 
-	public DataSetResult(DataSet ds) {
-		_rows = new ArrayList<Row>();
-		while (ds.next()) {
-			_rows.add(ds.getRow());
-		}
-		ds.close();
-	}
+    public List<Row> getRows() {
+        return _rows;
+    }
 
-	public List<Row> getRows() {
-		return _rows;
-	}
+    public DataSet getDataSet() {
+        return new InMemoryDataSet(_rows);
+    }
 
-	public DataSet getDataSet() {
-		if (dataSet == null) {
-			dataSet = new InMemoryDataSet(_rows);
-		}
-		return dataSet;
-	}
-
-	@Override
-	public TableModel toTableModel() {
-		return new DataSetTableModel(getDataSet());
-	}
+    @Override
+    public TableModel toTableModel() {
+        return new DataSetTableModel(getDataSet());
+    }
 }
