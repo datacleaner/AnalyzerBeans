@@ -79,6 +79,10 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
         assertTrue("Unexpected separator: " + csv.getSeparatorChar(), '\t' == csv.getSeparatorChar());
         assertTrue("Unexpected escape: " + csv.getEscapeChar(), CsvConfiguration.NOT_A_CHAR == csv.getEscapeChar());
+        
+        csv = (CsvDatastore) configuration.getDatastoreCatalog().getDatastore("csv_quot");
+        
+        assertEquals("\"", csv.getQuoteChar().toString());
     }
 
     public void testReadClasspathScannerWithExcludedRenderer() throws Exception {

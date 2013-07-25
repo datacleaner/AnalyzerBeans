@@ -8,6 +8,13 @@
 			<escape-char></escape-char>
 			<separator-char>\t</separator-char>
 		</csv-datastore>
+		
+		<csv-datastore name="csv_quot">
+			<filename>foo.csv</filename>
+			<quote-char>&quot;</quote-char>
+			<escape-char></escape-char>
+			<separator-char>\t</separator-char>
+		</csv-datastore>
 	</datastore-catalog>
 
 	<singlethreaded-taskrunner />
