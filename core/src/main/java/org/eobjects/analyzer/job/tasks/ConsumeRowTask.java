@@ -22,7 +22,6 @@ package org.eobjects.analyzer.job.tasks;
 import java.util.List;
 
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.data.MetaModelInputRow;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.OutcomeSink;
 import org.eobjects.analyzer.job.runner.RowProcessingChain;
@@ -32,8 +31,6 @@ import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 /**
  * A {@link Task} that dispatches ("consumes") a record to all relevant
  * {@link RowProcessingConsumer}s (eg. analyzerbeans components).
- * 
- * @author Kasper Sørensen
  */
 public final class ConsumeRowTask implements Task, RowProcessingChain {
 
@@ -68,6 +65,10 @@ public final class ConsumeRowTask implements Task, RowProcessingChain {
 
     @Override
     public void execute() {
+        execute(true);
+    }
+
+    private void execute(final boolean notifyListener) {
         if (_consumerIndex >= _consumers.size()) {
             // finished!
             return;
@@ -81,8 +82,8 @@ public final class ConsumeRowTask implements Task, RowProcessingChain {
                 handleConsumer(_row, consumer);
             }
         }
-        
-        if (_row instanceof MetaModelInputRow) {
+
+        if (notifyListener) {
             _analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
                     _rowProcessingMetrics, _row.getId());
         }
@@ -105,8 +106,6 @@ public final class ConsumeRowTask implements Task, RowProcessingChain {
         final int nextIndex = _consumerIndex + 1;
         final ConsumeRowTask subtask = new ConsumeRowTask(_consumers, nextIndex, _rowProcessingMetrics, row,
                 _analysisListener, outcomes);
-        // TODO: Ideally we would use the task runner to run the subtask, but
-        // that will mess up the task-counter in the row processing publisher
-        subtask.execute();
+        subtask.execute(false);
     }
 }
