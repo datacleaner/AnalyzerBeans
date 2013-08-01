@@ -374,8 +374,19 @@ public class JaxbJobReader implements JobReader<InputStream> {
             logger.info("Updated date: {}", metadata.getUpdatedDate());
         }
 
-        final AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(_configuration);
+        final AnalysisJobBuilder builder = new AnalysisJobBuilder(_configuration);
 
+        try {
+            final AnalysisJobBuilder result = create(job, sourceColumnMapping, variables, builder);
+            return result;
+        } catch (RuntimeException e) {
+            FileHelper.safeClose(builder);
+            throw e;
+        }
+    }
+
+    private AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping,
+            final Map<String, String> variables, final AnalysisJobBuilder analysisJobBuilder) {
         String ref;
         final Datastore datastore;
         final DatastoreConnection datastoreConnection;
