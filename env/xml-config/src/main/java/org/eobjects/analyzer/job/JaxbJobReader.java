@@ -862,7 +862,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
     private InputColumn<?> createExpressionBasedInputColumn(InputType inputType) {
         String expression = inputType.getValue();
-        if (StringUtils.isNullOrEmpty(expression)) {
+        if (expression == null) {
             throw new IllegalStateException("Input ref & value cannot both be null");
         }
         if (expression.indexOf("#{") == -1) {
