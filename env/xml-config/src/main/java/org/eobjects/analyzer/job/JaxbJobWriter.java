@@ -37,6 +37,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.jaxb.AnalysisType;
 import org.eobjects.analyzer.job.jaxb.AnalyzerDescriptorType;
@@ -306,14 +307,21 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             final Map<MergedOutcomeJob, MergedOutcomeType> mergedOutcomeMappings) {
         // register all transformed columns
         for (Entry<TransformerJob, TransformerType> entry : transformerMappings.entrySet()) {
-            TransformerJob transformerJob = entry.getKey();
-            TransformerType transformerType = entry.getValue();
-            InputColumn<?>[] columns = transformerJob.getOutput();
+            final TransformerJob transformerJob = entry.getKey();
+            final TransformerType transformerType = entry.getValue();
+            final InputColumn<?>[] columns = transformerJob.getOutput();
             for (InputColumn<?> inputColumn : columns) {
-                String id = getId(inputColumn, columnMappings);
-                OutputType outputType = new OutputType();
+                final String id = getId(inputColumn, columnMappings);
+                final OutputType outputType = new OutputType();
                 outputType.setId(id);
                 outputType.setName(inputColumn.getName());
+                if (inputColumn instanceof MutableInputColumn) {
+                    final boolean hidden = ((MutableInputColumn<?>) inputColumn).isHidden();
+                    if (hidden) {
+                        outputType.setHidden(hidden);
+                    }
+                }
+
                 transformerType.getOutput().add(outputType);
             }
         }

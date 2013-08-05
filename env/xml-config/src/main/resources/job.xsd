@@ -192,6 +192,7 @@
 	<complexType name="outputType">
 		<attribute name="name" type="string" use="optional" />
 		<attribute name="id" type="token" use="required" />
+		<attribute name="hidden" type="boolean" use="optional"></attribute>
 	</complexType>
 
 	<complexType name="analyzerType">

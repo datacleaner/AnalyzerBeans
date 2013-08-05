@@ -158,6 +158,8 @@ public class JaxbJobWriterTest extends TestCase {
 		assertEquals("        </analyzer>", lines[24]);
 		assertEquals("    </analysis>", lines[25]);
 		assertEquals("</job>", lines[26]);
+		
+		ajb.close();
 	}
 
 	public void testEmptyJobEnvelope() throws Exception {
@@ -294,6 +296,8 @@ public class JaxbJobWriterTest extends TestCase {
 
 		assertMatchesBenchmark(ajb.toAnalysisJob(),
 				"JaxbJobWriterTest-file6.xml");
+		
+		ajb.close();
 	}
 
 	/**

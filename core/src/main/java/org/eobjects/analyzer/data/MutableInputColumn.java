@@ -29,21 +29,65 @@ package org.eobjects.analyzer.data;
  */
 public interface MutableInputColumn<E> extends InputColumn<E> {
 
-	/**
-	 * Sets the name of the column
-	 * 
-	 * @param name
-	 */
-	public void setName(String name);
+    /**
+     * Listener interface for changes made to a {@link MutableInputColumn}.
+     */
+    public static interface Listener {
 
-	/**
-	 * Gets the initial name of the column
-	 */
-	public String getInitialName();
-	
-	/**
-	 * @return an id that is unique within the AnalysisJob that is being built
-	 *         or executed.
-	 */
-	public String getId();
+        public void onNameChanged(MutableInputColumn<?> inputColumn, String oldName, String newName);
+
+        public void onVisibilityChanged(MutableInputColumn<?> inputColumn, boolean hidden);
+
+    }
+
+    /**
+     * Sets the name of the column
+     * 
+     * @param name
+     */
+    public void setName(String name);
+
+    /**
+     * Gets the initial name of the column
+     */
+    public String getInitialName();
+
+    /**
+     * @return an id that is unique within the AnalysisJob that is being built
+     *         or executed.
+     */
+    public String getId();
+
+    /**
+     * Determines if this input column is visible or hidden for the user.
+     * 
+     * @return
+     */
+    public boolean isHidden();
+
+    /**
+     * Sets if 'hidden' flag to indicate if this input column is visibile or
+     * hidden for the user.
+     * 
+     * @param hidden
+     */
+    public void setHidden(boolean hidden);
+
+    /**
+     * Adds a listener to this {@link MutableInputColumn}.
+     * 
+     * @param listener
+     * @return a boolean indicating if the listener was added (returns true) or
+     *         if it already existed (return false).
+     */
+    public boolean addListener(Listener listener);
+
+    /**
+     * Removes a listener from this {@link MutableInputColumn}
+     * 
+     * @param listener
+     * @return a boolean indicating if the listener was found and removed or
+     *         not.
+     */
+    public boolean removeListener(Listener listener);
 }

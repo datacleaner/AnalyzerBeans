@@ -20,6 +20,8 @@
 package org.eobjects.analyzer.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eobjects.analyzer.util.InputColumnComparator;
 import org.eobjects.metamodel.schema.Column;
@@ -35,15 +37,22 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 
     private static final long serialVersionUID = 1L;
 
+    private final List<Listener> _listeners;
     private final String _id;
     private Class<?> _dataType;
     private String _name;
     private String _initialName;
+    private boolean _hidden;
 
     public TransformedInputColumn(String name, String id) {
+        if (name == null) {
+            throw new IllegalArgumentException("Name cannot be null");
+        }
         _name = name;
         _initialName = name;
         _id = id;
+        _listeners = new ArrayList<MutableInputColumn.Listener>(0);
+        _hidden = false;
     }
 
     @Override
@@ -62,7 +71,17 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 
     @Override
     public void setName(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Name cannot be null");
+        }
+        if (name.equals(_name)) {
+            return;
+        }
+        final String oldName = _name;
         _name = name;
+        for (Listener listener : _listeners) {
+            listener.onNameChanged(this, oldName, name);
+        }
     }
 
     @Override
@@ -99,7 +118,7 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     public Column getPhysicalColumn() throws IllegalStateException {
         return null;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public Class<? extends E> getDataType() {
@@ -123,5 +142,30 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     @Override
     public int compareTo(InputColumn<E> o) {
         return InputColumnComparator.compareInputColumns(this, o);
+    }
+
+    @Override
+    public boolean isHidden() {
+        return _hidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        _hidden = hidden;
+        for (Listener listener : _listeners) {
+            listener.onVisibilityChanged(this, hidden);
+        }
+    }
+
+    @Override
+    public boolean addListener(Listener listener) {
+        boolean added = _listeners.add(listener);
+        return added;
+    }
+
+    @Override
+    public boolean removeListener(Listener listener) {
+        boolean removed = _listeners.remove(listener);
+        return removed;
     }
 }

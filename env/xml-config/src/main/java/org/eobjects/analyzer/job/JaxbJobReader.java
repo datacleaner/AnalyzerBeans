@@ -557,13 +557,17 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         }
 
                         for (int i = 0; i < output.size(); i++) {
-                            OutputType o1 = output.get(i);
-                            MutableInputColumn<?> o2 = outputColumns.get(i);
-                            String name = o1.getName();
+                            final OutputType o1 = output.get(i);
+                            final MutableInputColumn<?> o2 = outputColumns.get(i);
+                            final String name = o1.getName();
                             if (!StringUtils.isNullOrEmpty(name)) {
                                 o2.setName(name);
                             }
-                            String id = o1.getId();
+                            final Boolean hidden = o1.isHidden();
+                            if (hidden != null && hidden.booleanValue()) {
+                                o2.setHidden(true);
+                            }
+                            final String id = o1.getId();
                             if (StringUtils.isNullOrEmpty(id)) {
                                 throw new IllegalStateException("Transformer output column id cannot be null");
                             }
