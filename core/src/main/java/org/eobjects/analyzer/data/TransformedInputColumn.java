@@ -20,11 +20,13 @@
 package org.eobjects.analyzer.data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 
 import org.eobjects.analyzer.util.InputColumnComparator;
 import org.eobjects.metamodel.schema.Column;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents an InputColumn that is a result of a transformer.
@@ -37,7 +39,9 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 
     private static final long serialVersionUID = 1L;
 
-    private final List<Listener> _listeners;
+    private static final Logger logger = LoggerFactory.getLogger(TransformedInputColumn.class);
+
+    private final Collection<Listener> _listeners;
     private final String _id;
     private Class<?> _dataType;
     private String _name;
@@ -51,7 +55,7 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
         _name = name;
         _initialName = name;
         _id = id;
-        _listeners = new ArrayList<MutableInputColumn.Listener>(0);
+        _listeners = new HashSet<Listener>();
         _hidden = false;
     }
 
@@ -160,12 +164,19 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     @Override
     public boolean addListener(Listener listener) {
         boolean added = _listeners.add(listener);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[{}].addListener({}): {}", getName(), listener, added);
+        }
         return added;
     }
 
     @Override
     public boolean removeListener(Listener listener) {
         boolean removed = _listeners.remove(listener);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[{}].removeListener({}): {}", getName(), listener, removed);
+            logger.debug("[{}].listeners.size: {}", _listeners.size());
+        }
         return removed;
     }
 }
