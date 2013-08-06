@@ -175,7 +175,7 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
         boolean removed = _listeners.remove(listener);
         if (logger.isDebugEnabled()) {
             logger.debug("[{}].removeListener({}): {}", getName(), listener, removed);
-            logger.debug("[{}].listeners.size: {}", _listeners.size());
+            logger.debug("[{}].listeners.size: {}", getName(), _listeners.size());
         }
         return removed;
     }
