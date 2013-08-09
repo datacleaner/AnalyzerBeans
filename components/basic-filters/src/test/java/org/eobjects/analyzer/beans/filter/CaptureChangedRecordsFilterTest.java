@@ -20,7 +20,9 @@
 package org.eobjects.analyzer.beans.filter;
 
 import java.io.File;
+import java.util.Date;
 
+import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.metamodel.util.FileHelper;
@@ -57,7 +59,11 @@ public class CaptureChangedRecordsFilterTest extends TestCase {
         // the first line is a comment with a date of writing
         assertEquals(2, lines.length);
 
-        assertEquals("Foo\\ LastModified.GreatestLastModifiedTimestamp=1357167600000", lines[1]);
+        // do like this to overcome time zone differences in the asserted
+        // timestamp
+        Date benchmarkDate = ConvertToDateTransformer.getInternalInstance().transformValue("2013-01-03");
+
+        assertEquals("Foo\\ LastModified.GreatestLastModifiedTimestamp=" + benchmarkDate.getTime(), lines[1]);
 
         filter = new CaptureChangedRecordsFilter();
 
@@ -80,7 +86,11 @@ public class CaptureChangedRecordsFilterTest extends TestCase {
         // the first line is a comment with a date of writing
         assertEquals(2, lines.length);
 
-        assertEquals("Foo\\ LastModified.GreatestLastModifiedTimestamp=1357599600000", lines[1]);
+        // do like this to overcome time zone differences in the asserted
+        // timestamp
+        benchmarkDate = ConvertToDateTransformer.getInternalInstance().transformValue("2013-01-08");
+
+        assertEquals("Foo\\ LastModified.GreatestLastModifiedTimestamp=" + benchmarkDate.getTime(), lines[1]);
 
         // create a new session with a custom capture state identifier
         filter = new CaptureChangedRecordsFilter();
