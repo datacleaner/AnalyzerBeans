@@ -82,7 +82,7 @@ public class TableBodyElement implements BodyElement {
         for (int col = 0; col < columnCount; col++) {
             String columnName = _tableModel.getColumnName(col);
             sb.append("<th>");
-            sb.append(context.escapeHtml(columnName));
+            sb.append(getHeaderValue(context, col, columnName));
             sb.append("</th>");
         }
         sb.append("</tr>");
@@ -108,6 +108,19 @@ public class TableBodyElement implements BodyElement {
         sb.append("</table>");
 
         return sb.toString();
+    }
+
+    /**
+     * Overrideable method for defining the literal HTML table header of a
+     * particular column.
+     * 
+     * @param context
+     * @param col
+     * @param columnName
+     * @return
+     */
+    protected String getHeaderValue(HtmlRenderingContext context, int col, String columnName) {
+        return context.escapeHtml(columnName);
     }
 
     /**
