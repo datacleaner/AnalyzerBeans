@@ -293,7 +293,16 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 
                 final Property propertyType = new Property();
                 propertyType.setName(property.getName());
-                propertyType.setValueAttribute(stringValue);
+
+                if (stringValue != null && stringValue.indexOf('\n') != -1) {
+                    // multi-line values are put as simple content of the
+                    // property
+                    propertyType.setValue(stringValue);
+                } else {
+                    // single-line values are preferred as an attribute for
+                    // backwards compatibility
+                    propertyType.setValueAttribute(stringValue);
+                }
                 result.add(propertyType);
             }
         }
