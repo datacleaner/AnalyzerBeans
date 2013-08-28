@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.util.InputColumnComparator;
 import org.eobjects.metamodel.schema.Column;
 import org.slf4j.Logger;
@@ -47,6 +48,10 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     private String _name;
     private String _initialName;
     private boolean _hidden;
+
+    public TransformedInputColumn(String name, IdGenerator idGenerator) {
+        this(name, idGenerator.nextId());
+    }
 
     public TransformedInputColumn(String name, String id) {
         if (name == null) {
