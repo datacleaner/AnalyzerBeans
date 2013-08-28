@@ -22,11 +22,24 @@ package org.eobjects.analyzer.result.renderer;
 import java.util.Arrays;
 
 import org.eobjects.analyzer.result.Crosstab;
+import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabResult;
 
 import junit.framework.TestCase;
 
 public class CrosstabTextRendererTest extends TestCase {
+    
+    public void testEmptyCrosstab() throws Exception {
+        CrosstabDimension genderDimension = new CrosstabDimension("Gender");
+        genderDimension.addCategory("Male");
+        genderDimension.addCategory("Female");
+        CrosstabDimension regionDimension = new CrosstabDimension("Region");
+
+        Crosstab<Integer> c = new Crosstab<Integer>(Integer.class, genderDimension, regionDimension);
+        
+        String s = new CrosstabTextRenderer().render(new CrosstabResult(c));
+        assertEquals("  Male Female \n", s);
+    }
 
     public void testSimpleCrosstab() throws Exception {
         Crosstab<Integer> c = new Crosstab<Integer>(Integer.class, "Gender", "Region");

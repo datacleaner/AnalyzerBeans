@@ -121,8 +121,9 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
             return ' ';
         case MIXED:
             return '?';
+        default:
+            throw new UnsupportedOperationException("No symbolic char for token type: " + _tokenType);
         }
-        throw new UnsupportedOperationException("No symbolic char for token type: " + _tokenType);
     }
 
     @Override

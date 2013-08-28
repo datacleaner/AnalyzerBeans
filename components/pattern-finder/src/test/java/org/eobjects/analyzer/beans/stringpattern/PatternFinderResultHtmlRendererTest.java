@@ -51,6 +51,26 @@ public class PatternFinderResultHtmlRendererTest extends TestCase {
         descriptorProvider.addRendererBeanDescriptor(Descriptors.ofRenderer(AnnotatedRowsHtmlRenderer.class));
         context = new DefaultHtmlRenderingContext();
     }
+    
+    public void testNoPatterns() throws Exception {
+        InputColumn<String> col1 = new MockInputColumn<String>("email username", String.class);
+
+        PatternFinderAnalyzer analyzer = new PatternFinderAnalyzer();
+        analyzer.setColumn(col1);
+        analyzer.setRowAnnotationFactory(new InMemoryRowAnnotationFactory());
+        analyzer.init();
+        
+        PatternFinderResult result = analyzer.getResult();
+
+        HtmlFragment htmlFragment = new PatternFinderResultHtmlRenderer(rendererFactory).render(result);
+        htmlFragment.initialize(context);
+        assertEquals(0, htmlFragment.getHeadElements().size());
+        assertEquals(1, htmlFragment.getBodyElements().size());
+
+        String html = htmlFragment.getBodyElements().get(0).toHtml(context);
+        assertEquals(FileHelper.readFileAsString(new File(
+                "src/test/resources/pattern_finder_result_html_renderer_empty.html")), html);
+    }
 
     public void testSinglePatterns() throws Exception {
         InputColumn<String> col1 = new MockInputColumn<String>("email username", String.class);
