@@ -38,7 +38,7 @@ public class CrosstabTextRendererTest extends TestCase {
         Crosstab<Integer> c = new Crosstab<Integer>(Integer.class, genderDimension, regionDimension);
         
         String s = new CrosstabTextRenderer().render(new CrosstabResult(c));
-        assertEquals("  Male Female \n", s);
+        assertEquals("   Male Female \n", s);
     }
 
     public void testSimpleCrosstab() throws Exception {

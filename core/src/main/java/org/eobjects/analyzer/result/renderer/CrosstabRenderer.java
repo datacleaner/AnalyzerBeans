@@ -66,7 +66,9 @@ public class CrosstabRenderer {
         List<CrosstabDimension> autoAssignDimensions = new LinkedList<CrosstabDimension>();
 
         for (CrosstabDimension dimension : dimensions) {
-            if (dimension.getCategoryCount() > 0 && !isAssigned(dimension)) {
+            // boolean hasCategories = dimension.getCategoryCount() > 0;
+            // if (hasCategories && !isAssigned(dimension)) {
+            if (!isAssigned(dimension)) {
                 autoAssignDimensions.add(dimension);
             }
         }
@@ -136,24 +138,23 @@ public class CrosstabRenderer {
         {
             int colspan = horizontalCells;
             int repeatHeaders = 1;
-            if (!horizontalDimensions.isEmpty()) {
-                for (int i = 0; i < horizontalDimensions.size(); i++) {
+            for (int i = 0; i < horizontalDimensions.size(); i++) {
+                CrosstabDimension dimension = horizontalDimensions.get(i);
+                if (dimension.getCategoryCount() > 0) {
                     callback.beginRow();
-                    CrosstabDimension dimension = horizontalDimensions.get(i);
 
                     // empty cells for each vertical dimension
                     for (CrosstabDimension verticalDimension : verticalDimensions) {
                         callback.emptyHeader(verticalDimension, dimension);
                     }
 
-                    List<String> categories = dimension.getCategories();
-                    colspan = colspan / categories.size();
+                    colspan = colspan / dimension.getCategoryCount();
                     for (int j = 0; j < repeatHeaders; j++) {
-                        for (String category : categories) {
+                        for (String category : dimension.getCategories()) {
                             callback.horizontalHeaderCell(category, dimension, colspan);
                         }
                     }
-                    repeatHeaders = repeatHeaders * categories.size();
+                    repeatHeaders = repeatHeaders * dimension.getCategoryCount();
                     callback.endRow();
                 }
             }
@@ -163,39 +164,37 @@ public class CrosstabRenderer {
         {
             CrosstabNavigator<?> navigator = crosstab.navigate();
 
-            if (!verticalDimensions.isEmpty()) {
-                for (int i = 0; i < verticalCells; i++) {
-                    callback.beginRow();
+            for (int i = 0; i < verticalCells; i++) {
+                callback.beginRow();
 
-                    navigateOnAxis(verticalDimensions, i, verticalCells, navigator);
+                navigateOnAxis(verticalDimensions, i, verticalCells, navigator);
 
-                    // print the vertical headers
-                    {
+                // print the vertical headers
+                {
 
-                        int rowspan = verticalCells;
-                        for (int j = 0; j < verticalDimensions.size(); j++) {
-                            CrosstabDimension dimension = verticalDimensions.get(j);
-                            rowspan = rowspan / dimension.getCategoryCount();
+                    int rowspan = verticalCells;
+                    for (int j = 0; j < verticalDimensions.size(); j++) {
+                        CrosstabDimension dimension = verticalDimensions.get(j);
+                        rowspan = rowspan / dimension.getCategoryCount();
 
-                            if (i % rowspan == 0) {
-                                String category = navigator.getCategory(dimension);
+                        if (i % rowspan == 0) {
+                            String category = navigator.getCategory(dimension);
 
-                                callback.verticalHeaderCell(category, dimension, rowspan);
-                            }
+                            callback.verticalHeaderCell(category, dimension, rowspan);
                         }
                     }
-
-                    for (int j = 0; j < horizontalCells; j++) {
-
-                        navigateOnAxis(horizontalDimensions, j, horizontalCells, navigator);
-
-                        final Object value = navigator.get();
-                        final ResultProducer resultProducer = navigator.explore();
-                        callback.valueCell(value, resultProducer);
-                    }
-
-                    callback.endRow();
                 }
+
+                for (int j = 0; j < horizontalCells; j++) {
+
+                    navigateOnAxis(horizontalDimensions, j, horizontalCells, navigator);
+
+                    final Object value = navigator.get();
+                    final ResultProducer resultProducer = navigator.explore();
+                    callback.valueCell(value, resultProducer);
+                }
+
+                callback.endRow();
             }
         }
 
