@@ -51,6 +51,18 @@ public class TableBodyElement implements BodyElement {
         _highlightedColumns = highlightedColumns;
     }
 
+    public TableModel getTableModel() {
+        return _tableModel;
+    }
+
+    public int[] getHighlightedColumns() {
+        return _highlightedColumns;
+    }
+
+    public String getTableClassName() {
+        return _tableClassName;
+    }
+
     @Override
     public String toHtml(HtmlRenderingContext context) {
         final int columnCount = _tableModel.getColumnCount();
@@ -60,7 +72,7 @@ public class TableBodyElement implements BodyElement {
         if (_tableClassName == null) {
             sb.append("<table>");
         } else {
-            sb.append("<table class=\"" + _tableClassName + "\">");
+            sb.append("<table class=\"" + getTableClassName() + "\">");
         }
 
         int rowNumber = 0;
@@ -81,13 +93,13 @@ public class TableBodyElement implements BodyElement {
             sb.append("<tr class=\"" + (rowNumber % 2 == 0 ? "even" : "odd") + "\">");
             for (int col = 0; col < columnCount; col++) {
                 final Object value = _tableModel.getValueAt(row, col);
-                final String cellClass = getCellClass(context, col);
+                final String cellClass = getCellClass(context, row, col);
                 if (cellClass == null) {
                     sb.append("<td>");
                 } else {
                     sb.append("<td class=\"" + cellClass + "\">");
                 }
-                sb.append(getCellValue(context, col, value));
+                sb.append(getCellValue(context, row, col, value));
                 sb.append("</td>");
             }
             sb.append("</tr>");
@@ -103,10 +115,11 @@ public class TableBodyElement implements BodyElement {
      * the table
      * 
      * @param context
+     * @param row
      * @param col
      * @return
      */
-    protected String getCellClass(HtmlRenderingContext context, int col) {
+    protected String getCellClass(HtmlRenderingContext context, int row, int col) {
         if (ArrayUtils.indexOf(_highlightedColumns, col) == -1) {
             return null;
         }
@@ -117,11 +130,12 @@ public class TableBodyElement implements BodyElement {
      * Overrideable method for defining a cell's literal HTML value in the table
      * 
      * @param context
+     * @param row
      * @param col
      * @param value
      * @return
      */
-    protected String getCellValue(HtmlRenderingContext context, int col, Object value) {
+    protected String getCellValue(HtmlRenderingContext context, int row, int col, Object value) {
         String stringValue = LabelUtils.getValueLabel(value);
         String result = context.escapeHtml(stringValue);
         return result;
