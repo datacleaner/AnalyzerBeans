@@ -43,8 +43,7 @@ public class TableBodyElement implements BodyElement {
      * @param tableClassName
      *            a CSS class name to to set to the table
      * @param highlightedColumns
-     *            an optional array of column indexes that should be
-     *            highlighted
+     *            an optional array of column indexes that should be highlighted
      */
     public TableBodyElement(TableModel tableModel, String tableClassName, int[] highlightedColumns) {
         _tableModel = tableModel;
@@ -76,19 +75,19 @@ public class TableBodyElement implements BodyElement {
         }
         sb.append("</tr>");
 
-        int rowCount = _tableModel.getRowCount();
+        final int rowCount = _tableModel.getRowCount();
         for (int row = 0; row < rowCount; row++) {
             rowNumber++;
             sb.append("<tr class=\"" + (rowNumber % 2 == 0 ? "even" : "odd") + "\">");
             for (int col = 0; col < columnCount; col++) {
-                Object value = _tableModel.getValueAt(row, col);
-                String stringValue = LabelUtils.getValueLabel(value);
-                if (ArrayUtils.indexOf(_highlightedColumns, col) == -1) {
+                final Object value = _tableModel.getValueAt(row, col);
+                final String cellClass = getCellClass(context, col);
+                if (cellClass == null) {
                     sb.append("<td>");
                 } else {
-                    sb.append("<td class=\"highlighted\">");
+                    sb.append("<td class=\"" + cellClass + "\">");
                 }
-                sb.append(context.escapeHtml(stringValue));
+                sb.append(getCellValue(context, col, value));
                 sb.append("</td>");
             }
             sb.append("</tr>");
@@ -97,5 +96,34 @@ public class TableBodyElement implements BodyElement {
         sb.append("</table>");
 
         return sb.toString();
+    }
+
+    /**
+     * Overrideable method for setting the class of a cell (the <td>element) in
+     * the table
+     * 
+     * @param context
+     * @param col
+     * @return
+     */
+    protected String getCellClass(HtmlRenderingContext context, int col) {
+        if (ArrayUtils.indexOf(_highlightedColumns, col) == -1) {
+            return null;
+        }
+        return "highlighted";
+    }
+
+    /**
+     * Overrideable method for defining a cell's literal HTML value in the table
+     * 
+     * @param context
+     * @param col
+     * @param value
+     * @return
+     */
+    protected String getCellValue(HtmlRenderingContext context, int col, Object value) {
+        String stringValue = LabelUtils.getValueLabel(value);
+        String result = context.escapeHtml(stringValue);
+        return result;
     }
 }
