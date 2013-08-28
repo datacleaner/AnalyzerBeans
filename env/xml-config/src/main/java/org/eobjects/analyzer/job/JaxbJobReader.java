@@ -911,7 +911,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                     throw new ComponentConfigurationException("No such property: " + name);
                 }
 
-                String stringValue = property.getValue();
+                String stringValue = getValue(property);
                 if (stringValue == null) {
                     String variableRef = property.getRef();
                     if (variableRef == null) {
@@ -933,5 +933,16 @@ public class JaxbJobReader implements JobReader<InputStream> {
                 builder.setConfiguredProperty(configuredProperty, value);
             }
         }
+    }
+
+    private String getValue(Property property) {
+        String value = property.getValue();
+        if (StringUtils.isNullOrEmpty(value)) {
+            final String valueAttribute = property.getValueAttribute();
+            if (value != null) {
+                value = valueAttribute;
+            }
+        }
+        return value;
     }
 }

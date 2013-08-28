@@ -215,12 +215,12 @@
 	<complexType name="filterDescriptorType">
 		<attribute name="ref" type="token" use="required" />
 	</complexType>
-	
+
 	<complexType name="outcomeType">
 		<attribute name="category" type="string" use="required" />
 		<attribute name="id" type="token" use="required" />
 	</complexType>
-	
+
 	<complexType name="explorerType">
 		<sequence>
 			<element name="descriptor" type="ab:explorerDescriptorType"
@@ -230,7 +230,7 @@
 		</sequence>
 		<attribute name="name" type="string" use="optional" />
 	</complexType>
-	
+
 	<complexType name="explorerDescriptorType">
 		<attribute name="ref" type="token" use="required" />
 	</complexType>
@@ -239,22 +239,27 @@
 		<sequence>
 			<element name="property" minOccurs="0" maxOccurs="unbounded">
 				<complexType>
-					<attribute name="name" type="string" use="required" />
-					<attribute name="ref" type="token" use="optional">
-						<annotation>
-							<documentation>
-								A reference to the id of a variable (defined in
-								the source section). If a ref is defined, the value of the
-								variable will be inserted instead of the value of this property
-								element.
-							</documentation>
-						</annotation>
-					</attribute>
-					<attribute name="value" type="string" use="optional">
-						<annotation>
-							<documentation>The value of the property.</documentation>
-						</annotation>
-					</attribute>
+					<simpleContent>
+						<extension base="string">
+							<attribute name="name" type="string" use="required" />
+							<attribute name="ref" type="token" use="optional">
+								<annotation>
+									<documentation>
+										A reference to the id of a variable (defined in
+										the source section). If a ref is defined, the value of the
+										variable will be inserted instead of the value of this
+										property
+										element.
+									</documentation>
+								</annotation>
+							</attribute>
+							<attribute name="value" type="string" use="optional">
+								<annotation>
+									<documentation>The value of the property.</documentation>
+								</annotation>
+							</attribute>
+						</extension>
+					</simpleContent>
 				</complexType>
 			</element>
 		</sequence>

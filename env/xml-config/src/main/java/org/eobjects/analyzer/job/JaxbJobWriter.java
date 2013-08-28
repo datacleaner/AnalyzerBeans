@@ -291,9 +291,9 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
                 Object value = configuration.getProperty(property);
                 String stringValue = stringConverter.serialize(value, property.getCustomConverter());
 
-                Property propertyType = new Property();
+                final Property propertyType = new Property();
                 propertyType.setName(property.getName());
-                propertyType.setValue(stringValue);
+                propertyType.setValueAttribute(stringValue);
                 result.add(propertyType);
             }
         }

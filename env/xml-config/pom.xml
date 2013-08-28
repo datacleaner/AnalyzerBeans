@@ -26,9 +26,7 @@
 				<artifactId>maven-jaxb21-plugin</artifactId>
 				<version>0.8.3</version>
 				<configuration>
-					<includeBindings>
-						<includeBinding>*.xjb</includeBinding>
-					</includeBindings>
+					<schemaDirectory>src/main/resources</schemaDirectory>
 					<forceRegenerate>false</forceRegenerate>
 					<removeOldOutput>true</removeOldOutput>
 					<strict>true</strict>
@@ -61,6 +59,10 @@
 							<schemaIncludes>
 								<value>job.xsd</value>
 							</schemaIncludes>
+							<bindingDirectory>src/main/bindings</bindingDirectory>
+							<bindingIncludes>
+								<value>bindings-job.xjb</value>
+							</bindingIncludes>
 						</configuration>
 					</execution>
 				</executions>
