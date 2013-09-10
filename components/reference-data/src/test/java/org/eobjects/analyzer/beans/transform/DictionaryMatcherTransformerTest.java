@@ -97,6 +97,7 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 		AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(analysisJob);
 		
 		if (!resultFuture.isSuccessful()) {
+		    job.close();
 			throw resultFuture.getErrors().get(0);
 		}
 		
@@ -122,6 +123,8 @@ public class DictionaryMatcherTransformerTest extends TestCase {
 		assertEquals("logging match -> number", res.getName());
 		assertEquals(3, res.getCount("1").intValue());
 		assertEquals(9, res.getCount("0").intValue());
+		
+		job.close();
 	}
 
 	public void testTransform() throws Exception {

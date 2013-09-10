@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
+import java.util.StringTokenizer;
+
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -40,45 +42,77 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
 @Description("Replaces strings with their synonyms")
 public class SynonymLookupTransformer implements Transformer<String> {
 
-	@Configured
-	InputColumn<String> column;
+    @Configured
+    InputColumn<String> column;
 
-	@Configured
-	SynonymCatalog synonymCatalog;
+    @Configured
+    SynonymCatalog synonymCatalog;
 
-	@Configured
-	@Description("Retain original value in case no synonym is found (otherwise null)")
-	boolean retainOriginalValue = true;
+    @Configured
+    @Description("Retain original value in case no synonym is found (otherwise null)")
+    boolean retainOriginalValue = true;
 
-	public SynonymLookupTransformer() {
-	}
+    @Configured
+    @Description("Tokenize and look up every token of the input, rather than looking up the complete input string?")
+    boolean lookUpEveryToken = false;
 
-	public SynonymLookupTransformer(InputColumn<String> column, SynonymCatalog synonymCatalog,
-			boolean retainOriginalValue) {
-		this();
-		this.column = column;
-		this.synonymCatalog = synonymCatalog;
-		this.retainOriginalValue = retainOriginalValue;
-	}
+    public SynonymLookupTransformer() {
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		return new OutputColumns(new String[] { column.getName() + " (synonyms replaced)" });
-	}
+    public SynonymLookupTransformer(InputColumn<String> column, SynonymCatalog synonymCatalog,
+            boolean retainOriginalValue) {
+        this();
+        this.column = column;
+        this.synonymCatalog = synonymCatalog;
+        this.retainOriginalValue = retainOriginalValue;
+    }
 
-	@Override
-	public String[] transform(InputRow inputRow) {
-		final String originalValue = inputRow.getValue(column);
+    @Override
+    public OutputColumns getOutputColumns() {
+        return new OutputColumns(new String[] { column.getName() + " (synonyms replaced)" });
+    }
 
-		if (originalValue == null) {
-			return new String[1];
-		}
+    @Override
+    public String[] transform(InputRow inputRow) {
+        final String originalValue = inputRow.getValue(column);
 
-		final String replacedValue = synonymCatalog.getMasterTerm(originalValue);
-		if (retainOriginalValue && replacedValue == null) {
-			return new String[] { originalValue };
-		}
+        if (originalValue == null) {
+            return new String[1];
+        }
 
-		return new String[] { replacedValue };
-	}
+        if (lookUpEveryToken) {
+            final String delim = " \t\n\r\f.,!?\"'+-_:;/\\\\()%@";
+            final StringBuilder sb = new StringBuilder();
+            final StringTokenizer tokenizer = new StringTokenizer(originalValue, delim, true);
+            final int numTokens = tokenizer.countTokens();
+            for (int i = 0; i < numTokens; i++) {
+                final String token = tokenizer.nextToken();
+                if (token.matches(delim)) {
+                    // add the delim as-is
+                    sb.append(token);
+                } else {
+                    // look up the token
+                    String replacedToken = lookup(token);
+                    if (replacedToken == null) {
+                        sb.append(token);
+                    } else {
+                        sb.append(replacedToken);
+                    }
+                }
+            }
+            return new String[] { sb.toString() };
+
+        } else {
+            final String replacedValue = lookup(originalValue);
+            return new String[] { replacedValue };
+        }
+    }
+
+    private String lookup(String originalValue) {
+        final String replacedValue = synonymCatalog.getMasterTerm(originalValue);
+        if (retainOriginalValue && replacedValue == null) {
+            return originalValue;
+        }
+        return replacedValue;
+    }
 }
