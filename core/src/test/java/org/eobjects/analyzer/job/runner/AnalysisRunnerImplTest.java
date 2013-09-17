@@ -38,6 +38,8 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
+import org.eobjects.analyzer.job.concurrent.MultiThreadedTaskRunner;
+import org.eobjects.analyzer.result.ListResult;
 import org.eobjects.analyzer.test.MockAnalyzer;
 import org.eobjects.analyzer.test.MockTransformer;
 
@@ -46,29 +48,39 @@ public class AnalysisRunnerImplTest extends TestCase {
     private static final AtomicBoolean MY_BOOL1 = new AtomicBoolean(false);
     private static final AtomicBoolean MY_BOOL2 = new AtomicBoolean(false);
     private static final AtomicBoolean MY_BOOL3 = new AtomicBoolean(false);
-    private AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl();
+    private AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
+            .replace(new MultiThreadedTaskRunner());
     private AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
-    private Datastore datastore = new CsvDatastore("ds", "src/test/resources/employees.csv");
+    private Datastore datastore = new CsvDatastore("ds",
+            "src/test/resources/employees.csv");
 
     public void testCloseMethodOnFailure() throws Exception {
 
-        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(
+                configuration);
         jobBuilder.setDatastore(datastore);
         jobBuilder.addSourceColumns("name");
 
-        final TransformerJobBuilder<TestTransformer1> transformer1 = jobBuilder.addTransformer(TestTransformer1.class);
+        final TransformerJobBuilder<TestTransformer1> transformer1 = jobBuilder
+                .addTransformer(TestTransformer1.class);
         transformer1.addInputColumn(jobBuilder.getSourceColumnByName("name"));
-        final List<MutableInputColumn<?>> outputColumns1 = transformer1.getOutputColumns();
-        
-        final TransformerJobBuilder<TestTransformer2> transformer2 = jobBuilder.addTransformer(TestTransformer2.class);
-        transformer2.addInputColumn(jobBuilder.getSourceColumnByName("name"));
-        final List<MutableInputColumn<?>> outputColumns2 = transformer2.getOutputColumns();
-        
-        final TransformerJobBuilder<TestTransformer3> transformer3 = jobBuilder.addTransformer(TestTransformer3.class);
-        transformer3.addInputColumn(jobBuilder.getSourceColumnByName("name"));
-        final List<MutableInputColumn<?>> outputColumns3 = transformer3.getOutputColumns();
+        final List<MutableInputColumn<?>> outputColumns1 = transformer1
+                .getOutputColumns();
 
-        final AnalyzerJobBuilder<TestAnalyzer> analyzer = jobBuilder.addAnalyzer(TestAnalyzer.class);
+        final TransformerJobBuilder<TestTransformer2> transformer2 = jobBuilder
+                .addTransformer(TestTransformer2.class);
+        transformer2.addInputColumn(jobBuilder.getSourceColumnByName("name"));
+        final List<MutableInputColumn<?>> outputColumns2 = transformer2
+                .getOutputColumns();
+
+        final TransformerJobBuilder<TestTransformer3> transformer3 = jobBuilder
+                .addTransformer(TestTransformer3.class);
+        transformer3.addInputColumn(jobBuilder.getSourceColumnByName("name"));
+        final List<MutableInputColumn<?>> outputColumns3 = transformer3
+                .getOutputColumns();
+
+        final AnalyzerJobBuilder<TestAnalyzer> analyzer = jobBuilder
+                .addAnalyzer(TestAnalyzer.class);
         analyzer.addInputColumns(outputColumns1);
         analyzer.addInputColumns(outputColumns2);
         analyzer.addInputColumns(outputColumns3);
@@ -98,7 +110,26 @@ public class AnalysisRunnerImplTest extends TestCase {
         resultFuture = runner.run(analysisJob);
         resultFuture.await();
         assertFalse(resultFuture.isSuccessful());
-        assertEquals("produceAnError=true", resultFuture.getErrors().get(0).getMessage());
+        assertEquals("produceAnError=true", resultFuture.getErrors().get(0)
+                .getMessage());
+        assertFalse(MY_BOOL1.get());
+        assertTrue(MY_BOOL2.get());
+        assertTrue(MY_BOOL3.get());
+
+        // Error on get result
+        analyzer.setConfiguredProperty("Produce an error", false);
+        analyzer.setConfiguredProperty("Produce an error on get result", true);
+        analysisJob = jobBuilder.toAnalysisJob();
+
+        // run again but this time produce an error
+        MY_BOOL1.set(false);
+        MY_BOOL2.set(false);
+        MY_BOOL3.set(false);
+        resultFuture = runner.run(analysisJob);
+        resultFuture.await();
+        assertFalse(resultFuture.isSuccessful());
+        assertEquals("produceAnErrorOnGetResult=true", resultFuture.getErrors()
+                .get(0).getMessage());
         assertFalse(MY_BOOL1.get());
         assertTrue(MY_BOOL2.get());
         assertTrue(MY_BOOL3.get());
@@ -112,6 +143,9 @@ public class AnalysisRunnerImplTest extends TestCase {
         @Configured
         boolean produceAnError = false;
 
+        @Configured
+        boolean produceAnErrorOnGetResult = false;
+
         @Override
         public void run(InputRow row, int distinctCount) {
             if (produceAnError) {
@@ -119,6 +153,18 @@ public class AnalysisRunnerImplTest extends TestCase {
             }
             super.run(row, distinctCount);
         }
+
+        @Override
+        public ListResult<InputRow> getResult() {
+
+            if (produceAnErrorOnGetResult) {
+
+                throw new IllegalStateException(
+                        "produceAnErrorOnGetResult=true");
+            }
+            return super.getResult();
+        }
+
     }
 
     @TransformerBean("Test transformer1")
@@ -136,7 +182,7 @@ public class AnalysisRunnerImplTest extends TestCase {
             MY_BOOL2.set(true);
         }
     }
-    
+
     @TransformerBean("Test transformer3")
     public static class TestTransformer3 extends MockTransformer {
         @Close
