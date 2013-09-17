@@ -391,22 +391,32 @@ public final class RowProcessingPublisher {
         final TaskRunner taskRunner = _publishers.getTaskRunner();
 
         final List<RowProcessingConsumer> configurableConsumers = getConfigurableConsumers();
-        final int numConfigurableConsumers = configurableConsumers.size();
 
-        final TaskListener closeTaskListener = new JoinTaskListener(numConfigurableConsumers, finishedTaskListener);
+        final int numConsumerTasks = configurableConsumers.size();
 
-        final List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConfigurableConsumers);
+        // add tasks for closing components
+        final TaskListener closeTaskListener = new JoinTaskListener(numConsumerTasks, finishedTaskListener);
+        final List<TaskRunnable> closeTasks = new ArrayList<TaskRunnable>(numConsumerTasks);
         for (RowProcessingConsumer consumer : configurableConsumers) {
-            Task collectResultTask = createCollectResultTask(consumer, resultQueue);
-            if (collectResultTask == null) {
-                closeTasks.add(new TaskRunnable(null, closeTaskListener));
-            } else {
-                closeTasks.add(new TaskRunnable(collectResultTask, closeTaskListener));
-            }
-            closeTasks.add(createCloseTask(consumer));
+            closeTasks.add(createCloseTask(consumer, closeTaskListener));
         }
 
-        final TaskListener runCompletionListener = new ForkTaskListener("run row processing", taskRunner, closeTasks);
+        final TaskListener getResultCompletionListener = new ForkTaskListener("collect results", taskRunner, closeTasks);
+
+        // add tasks for collecting results
+        final TaskListener getResultTaskListener = new JoinTaskListener(numConsumerTasks, getResultCompletionListener);
+        final List<TaskRunnable> getResultTasks = new ArrayList<TaskRunnable>();
+        for (RowProcessingConsumer consumer : configurableConsumers) {
+            final Task collectResultTask = createCollectResultTask(consumer, resultQueue);
+            if (collectResultTask == null) {
+                getResultTasks.add(new TaskRunnable(null, getResultTaskListener));
+            } else {
+                getResultTasks.add(new TaskRunnable(collectResultTask, getResultTaskListener));
+            }
+        }
+
+        final TaskListener runCompletionListener = new ForkTaskListener("run row processing", taskRunner,
+                getResultTasks);
 
         final RowProcessingMetrics rowProcessingMetrics = getRowProcessingMetrics();
         final RunRowProcessingPublisherTask runTask = new RunRowProcessingPublisherTask(this, rowProcessingMetrics);
@@ -448,7 +458,7 @@ public final class RowProcessingPublisher {
         final List<RowProcessingConsumer> configurableConsumers = getConfigurableConsumers();
         final TaskRunner taskRunner = _publishers.getTaskRunner();
         for (RowProcessingConsumer consumer : configurableConsumers) {
-            TaskRunnable task = createCloseTask(consumer);
+            TaskRunnable task = createCloseTask(consumer, null);
             taskRunner.run(task);
         }
     }
@@ -468,11 +478,12 @@ public final class RowProcessingPublisher {
         }
     }
 
-    private TaskRunnable createCloseTask(RowProcessingConsumer consumer) {
+    private TaskRunnable createCloseTask(RowProcessingConsumer consumer, TaskListener closeTaskListener) {
         final LifeCycleHelper lifeCycleHelper = _publishers.getLifeCycleHelper();
         final ComponentDescriptor<?> descriptor = consumer.getComponentJob().getDescriptor();
         final Object component = consumer.getComponent();
-        return new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, component, _successful));
+        return new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, component, _successful,
+                closeTaskListener));
     }
 
     private TaskRunnable createInitTask(RowProcessingConsumer consumer, TaskListener listener) {
