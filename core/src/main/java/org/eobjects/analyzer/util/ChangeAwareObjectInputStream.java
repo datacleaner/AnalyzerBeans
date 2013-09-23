@@ -99,30 +99,42 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
         renamedPackages = new TreeMap<String, String>(comparator);
         renamedClasses = new HashMap<String, String>();
         additionalClassLoaders = new ArrayList<ClassLoader>();
-        
 
         // add analyzerbeans' own renamed classes
         addRenamedClass("org.eobjects.analyzer.reference.TextBasedDictionary", TextFileDictionary.class);
         addRenamedClass("org.eobjects.analyzer.reference.TextBasedSynonymCatalog", TextFileSynonymCatalog.class);
-        
+
         // analyzer results moved as of ticket #843
-        addRenamedClass("org.eobjects.analyzer.result.PatternFinderResult", "org.eobjects.analyzer.beans.stringpattern.PatternFinderResult");
-        addRenamedClass("org.eobjects.analyzer.result.DateGapAnalyzerResult", "org.eobjects.analyzer.beans.dategap.DateGapAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.result.PatternFinderResult",
+                "org.eobjects.analyzer.beans.stringpattern.PatternFinderResult");
+        addRenamedClass("org.eobjects.analyzer.result.DateGapAnalyzerResult",
+                "org.eobjects.analyzer.beans.dategap.DateGapAnalyzerResult");
         addRenamedClass("org.eobjects.analyzer.util.TimeInterval", "org.eobjects.analyzer.beans.dategap.TimeInterval");
-        addRenamedClass("org.eobjects.analyzer.result.StringAnalyzerResult", "org.eobjects.analyzer.beans.StringAnalyzerResult");
-        addRenamedClass("org.eobjects.analyzer.result.NumberAnalyzerResult", "org.eobjects.analyzer.beans.NumberAnalyzerResult");
-        addRenamedClass("org.eobjects.analyzer.result.BooleanAnalyzerResult", "org.eobjects.analyzer.beans.BooleanAnalyzerResult");
-        addRenamedClass("org.eobjects.analyzer.result.DateAndTimeAnalyzerResult", "org.eobjects.analyzer.beans.DateAndTimeAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.result.StringAnalyzerResult",
+                "org.eobjects.analyzer.beans.StringAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.result.NumberAnalyzerResult",
+                "org.eobjects.analyzer.beans.NumberAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.result.BooleanAnalyzerResult",
+                "org.eobjects.analyzer.beans.BooleanAnalyzerResult");
+        addRenamedClass("org.eobjects.analyzer.result.DateAndTimeAnalyzerResult",
+                "org.eobjects.analyzer.beans.DateAndTimeAnalyzerResult");
 
         // analyzer results moved as of ticket #993
-        addRenamedClass("org.eobjects.analyzer.result.ValueDistributionGroupResult","org.eobjects.analyzer.beans.valuedist.SingleValueDistributionResult");
-        addRenamedClass("org.eobjects.analyzer.result.ValueDistributionResult","org.eobjects.analyzer.beans.valuedist.GroupedValueDistributionResult");
-        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueDistributionGroupResult","org.eobjects.analyzer.beans.valuedist.SingleValueDistributionResult");
-        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueDistributionResult","org.eobjects.analyzer.beans.valuedist.GroupedValueDistributionResult");
-        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCount", "org.eobjects.analyzer.result.SingleValueFrequency");
+        addRenamedClass("org.eobjects.analyzer.result.ValueDistributionGroupResult",
+                "org.eobjects.analyzer.beans.valuedist.SingleValueDistributionResult");
+        addRenamedClass("org.eobjects.analyzer.result.ValueDistributionResult",
+                "org.eobjects.analyzer.beans.valuedist.GroupedValueDistributionResult");
+        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueDistributionGroupResult",
+                "org.eobjects.analyzer.beans.valuedist.SingleValueDistributionResult");
+        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueDistributionResult",
+                "org.eobjects.analyzer.beans.valuedist.GroupedValueDistributionResult");
+        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCount",
+                "org.eobjects.analyzer.result.SingleValueFrequency");
         addRenamedClass("org.eobjects.analyzer.result.ValueCount", "org.eobjects.analyzer.result.SingleValueFrequency");
-        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCountList", "org.eobjects.analyzer.result.ValueCountList");
-        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCountListImpl", "org.eobjects.analyzer.result.ValueCountListImpl");
+        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCountList",
+                "org.eobjects.analyzer.result.ValueCountList");
+        addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCountListImpl",
+                "org.eobjects.analyzer.result.ValueCountListImpl");
     }
 
     public void addClassLoader(ClassLoader classLoader) {
@@ -211,14 +223,27 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
             }
 
             logger.info("Class '{}' was not resolved in main class loader.", className);
+            List<Exception> exceptions = new ArrayList<Exception>(additionalClassLoaders.size());
             for (ClassLoader classLoader : additionalClassLoaders) {
                 try {
-                    return classLoader.loadClass(className);
+                    return Class.forName(className, true, classLoader);
                 } catch (ClassNotFoundException minorException) {
                     logger.info("Class '{}' was not resolved in additional class loader '{}'", className, classLoader);
+                    exceptions.add(minorException);
                 }
             }
+
             logger.warn("Could not resolve class of name '{}'", className);
+
+            // if we reach this stage, all classloaders have failed, log their
+            // issues
+            int i = 1;
+            for (Exception exception : exceptions) {
+                int numExceptions = exceptions.size();
+                logger.error("Exception " + i + " of " + numExceptions, exception);
+                i++;
+            }
+
             throw e;
         }
     }
