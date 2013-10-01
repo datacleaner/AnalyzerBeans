@@ -31,8 +31,8 @@ import org.eobjects.metamodel.csv.CsvDataContext;
 import org.eobjects.metamodel.util.FileHelper;
 import org.eobjects.metamodel.util.Resource;
 import org.eobjects.metamodel.util.SerializableRef;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Datastore implementation for CSV files.
@@ -89,6 +89,11 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
             boolean failOnInconsistencies, int headerLineNumber) {
         this(name, null, filename, quoteChar, separatorChar, CsvConfiguration.DEFAULT_ESCAPE_CHAR, encoding,
                 failOnInconsistencies, headerLineNumber);
+    }
+
+    public CsvDatastore(String name, Resource resource, CsvConfiguration c) {
+        this(name, resource, resource.getName(), c.getQuoteChar(), c.getSeparatorChar(), c.getEscapeChar(), c
+                .getEncoding(), c.isFailOnInconsistentRowLength(), c.getColumnNameLineNumber());
     }
 
     public CsvDatastore(String name, Resource resource, String filename, Character quoteChar, Character separatorChar,
