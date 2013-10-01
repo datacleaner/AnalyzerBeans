@@ -106,12 +106,16 @@ public class ResourceConverter implements Converter<Resource> {
      * @param defaultScheme
      */
     public ResourceConverter(Collection<? extends ResourceTypeHandler<?>> handlers, String defaultScheme) {
-        _defaultScheme = DEFAULT_DEFAULT_SCHEME;
+        _defaultScheme = defaultScheme;
         _parsers = new ConcurrentHashMap<String, ResourceConverter.ResourceTypeHandler<?>>();
         for (ResourceTypeHandler<?> handler : handlers) {
             String scheme = handler.getScheme();
             _parsers.put(scheme, handler);
         }
+    }
+
+    public ResourceConverter(ResourceTypeHandler<?>... handlers) {
+        this(Arrays.asList(handlers), DEFAULT_DEFAULT_SCHEME);
     }
 
     @Override

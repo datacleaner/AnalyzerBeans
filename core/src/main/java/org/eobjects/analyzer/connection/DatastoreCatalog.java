@@ -26,7 +26,19 @@ import java.io.Serializable;
  */
 public interface DatastoreCatalog extends Serializable {
 
-	public String[] getDatastoreNames();
+    /**
+     * Gets all the names of the datastores in this datastore catalog.
+     * 
+     * @return
+     */
+    public String[] getDatastoreNames();
 
-	public Datastore getDatastore(String name);
+    /**
+     * Gets a datastore by it's name. If no such datastore is found, null will
+     * be returned.
+     * 
+     * @param name
+     * @return
+     */
+    public Datastore getDatastore(String name);
 }
