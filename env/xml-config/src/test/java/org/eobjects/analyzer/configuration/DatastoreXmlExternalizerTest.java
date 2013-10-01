@@ -21,7 +21,6 @@ package org.eobjects.analyzer.configuration;
 
 import java.io.ByteArrayOutputStream;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -32,33 +31,48 @@ import javax.xml.transform.stream.StreamResult;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.connection.CsvDatastore;
-import org.w3c.dom.Document;
+import org.eobjects.analyzer.connection.ExcelDatastore;
+import org.eobjects.metamodel.util.FileResource;
 import org.w3c.dom.Element;
 
 public class DatastoreXmlExternalizerTest extends TestCase {
-
+    
     public void testExternalizeCsvDatastore() throws Exception {
         CsvDatastore ds = new CsvDatastore("foo", "foo.txt");
         ds.setDescription("bar");
 
-        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        Element elem = new DatastoreXmlExternalizer().externalize(ds, "baz.txt");
 
-        Element elem = new DatastoreXmlExternalizer().externalize(ds, "baz.txt", doc);
+        String str = transform(elem);
 
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
-
-        Source source = new DOMSource(elem);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Result outputTarget = new StreamResult(baos);
-
-        transformer.transform(source, outputTarget);
-
-        String str = new String(baos.toByteArray());
         assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<csv-datastore description=\"bar\" name=\"foo\"><filename>baz.txt</filename>"
                 + "<quote-char>\"</quote-char><separator-char>,</separator-char>"
                 + "<escape-char>\\</escape-char><encoding>UTF-8</encoding>"
                 + "<fail-on-inconsistencies>true</fail-on-inconsistencies>"
                 + "<header-line-number>1</header-line-number></csv-datastore>", str);
+    }
+    
+    public void testExternalizeExcelDatastore() throws Exception {
+        ExcelDatastore ds = new ExcelDatastore("foo", new FileResource("foo.txt"), "foo.txt");
+        ds.setDescription("bar");
+
+        Element elem = new DatastoreXmlExternalizer().externalize(ds, "baz.txt");
+
+        String str = transform(elem);
+
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><excel-datastore description=\"bar\" name=\"foo\"><filename>baz.txt</filename></excel-datastore>", str);
+    }
+
+    private String transform(Element elem) throws Exception {
+        Source source = new DOMSource(elem);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Result outputTarget = new StreamResult(baos);
+
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.transform(source, outputTarget);
+
+        String str = new String(baos.toByteArray());
+        return str;
     }
 }

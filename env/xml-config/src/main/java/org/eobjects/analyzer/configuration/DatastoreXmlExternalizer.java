@@ -19,7 +19,11 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.eobjects.analyzer.connection.CsvDatastore;
+import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.util.Resource;
@@ -34,6 +38,64 @@ import org.w3c.dom.Element;
  * {@link JaxbConfigurationReader}.
  */
 public class DatastoreXmlExternalizer {
+
+    /**
+     * Externalizes a {@link ExcelDatastore} to a XML element.
+     * 
+     * @param datastore
+     * @param filename
+     *            the filename/path to use in the XML element. Since the
+     *            appropriate path will depend on the reading application's
+     *            environment (supported {@link Resource} types), this specific
+     *            property of the datastore is provided separately.
+     * @return
+     */
+    public Element externalize(ExcelDatastore datastore, String filename) {
+        return externalize(datastore, filename, createDocument());
+    }
+
+    /**
+     * Externalizes a {@link ExcelDatastore} to a XML element.
+     * 
+     * @param datastore
+     * @param filename
+     *            the filename/path to use in the XML element. Since the
+     *            appropriate path will depend on the reading application's
+     *            environment (supported {@link Resource} types), this specific
+     *            property of the datastore is provided separately.
+     * @param doc
+     * @return
+     */
+    public Element externalize(ExcelDatastore datastore, String filename, Document doc) {
+        final Element ds = doc.createElement("excel-datastore");
+
+        ds.setAttribute("name", datastore.getName());
+        if (!StringUtils.isNullOrEmpty(datastore.getDescription())) {
+            ds.setAttribute("description", datastore.getDescription());
+        }
+
+        final Element filenameElem = doc.createElement("filename");
+        filenameElem.setTextContent(filename);
+        ds.appendChild(filenameElem);
+
+        return ds;
+    }
+
+    /**
+     * Externalizes a {@link CsvDatastore} to a XML element.
+     * 
+     * @param datastore
+     *            the datastore to externalize
+     * @param filename
+     *            the filename/path to use in the XML element. Since the
+     *            appropriate path will depend on the reading application's
+     *            environment (supported {@link Resource} types), this specific
+     *            property of the datastore is provided separately.
+     * @return a XML element representing the datastore.
+     */
+    public Element externalize(CsvDatastore datastore, String filename) {
+        return externalize(datastore, filename, createDocument());
+    }
 
     /**
      * Externalizes a {@link CsvDatastore} to a XML element.
@@ -67,6 +129,17 @@ public class DatastoreXmlExternalizer {
         appendElement(doc, datastoreElement, "header-line-number", datastore.getHeaderLineNumber());
 
         return datastoreElement;
+    }
+
+    private Document createDocument() {
+        final DocumentBuilder documentBuilder;
+        try {
+            final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return documentBuilder.newDocument();
     }
 
     private void appendElement(Document doc, Element parent, String elementName, Object value) {
