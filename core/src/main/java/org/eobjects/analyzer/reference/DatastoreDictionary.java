@@ -55,7 +55,7 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 	private static final Logger logger = LoggerFactory.getLogger(DatastoreDictionary.class);
 	
 	private transient ReferenceValues<String> _cachedRefValues;
-	private transient BlockingQueue<DatastoreConnection> _dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
+	private transient BlockingQueue<DatastoreConnection> _datastoreConnections = new LinkedBlockingQueue<DatastoreConnection>();
 	private final String _datastoreName;
 	private final String _qualifiedColumnName;
 	
@@ -81,14 +81,14 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 	}
 
 	private BlockingQueue<DatastoreConnection> getDatastoreConnections() {
-		if (_dataContextProviders == null) {
+		if (_datastoreConnections == null) {
 			synchronized (this) {
-				if (_dataContextProviders == null) {
-					_dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
+				if (_datastoreConnections == null) {
+					_datastoreConnections = new LinkedBlockingQueue<DatastoreConnection>();
 				}
 			}
 		}
-		return _dataContextProviders;
+		return _datastoreConnections;
 	}
 
 	/**
@@ -148,14 +148,14 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 				if (_cachedRefValues == null) {
 					Datastore datastore = getDatastore();
 
-					DatastoreConnection dataContextProvider = datastore.openConnection();
-					SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+					DatastoreConnection datastoreConnection = datastore.openConnection();
+					SchemaNavigator schemaNavigator = datastoreConnection.getSchemaNavigator();
 					Column column = schemaNavigator.convertToColumns(new String[] { _qualifiedColumnName })[0];
 					if (column == null) {
 						throw new IllegalStateException("Could not resolve column " + _qualifiedColumnName);
 					}
 					_cachedRefValues = new DatastoreReferenceValues(datastore, column);
-					dataContextProvider.close();
+					datastoreConnection.close();
 				}
 			}
 		}

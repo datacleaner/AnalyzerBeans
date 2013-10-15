@@ -56,7 +56,7 @@ public interface SynonymCatalog extends ReferenceData {
 	/**
 	 * @return all synonyms contained within this catalog
 	 */
-	public Collection<Synonym> getSynonyms();
+	public Collection<? extends Synonym> getSynonyms();
 
 	/**
 	 * Searches the catalog for a replacement (master) term for a given term

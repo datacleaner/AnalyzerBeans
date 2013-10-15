@@ -19,20 +19,63 @@
  */
 package org.eobjects.analyzer.reference;
 
+import java.io.FileInputStream;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.apache.commons.lang.SerializationUtils;
 
 import junit.framework.TestCase;
 
 public class SimpleSynonymCatalogTest extends TestCase {
 
-	public void testGetMasterTerm() throws Exception {
-		SimpleSynonymCatalog sc = new SimpleSynonymCatalog("countries", Arrays.asList(new Synonym[] {
-				new SimpleSynonym("DNK", "Denmark"), new SimpleSynonym("NLD", "The netherlands") }));
+    public void testGetMasterTerm() throws Exception {
+        SimpleSynonymCatalog sc = new SimpleSynonymCatalog("countries", Arrays.asList(new Synonym[] {
+                new SimpleSynonym("DNK", "Denmark"), new SimpleSynonym("NLD", "The netherlands") }));
 
-		assertEquals("DNK", sc.getMasterTerm("DNK"));
-		assertEquals("NLD", sc.getMasterTerm("NLD"));
-		assertEquals("DNK", sc.getMasterTerm("Denmark"));
-		assertEquals("NLD", sc.getMasterTerm("The netherlands"));
-		assertNull(sc.getMasterTerm("Danemark"));
-	}
+        assertEquals("DNK", sc.getMasterTerm("DNK"));
+        assertEquals("NLD", sc.getMasterTerm("NLD"));
+        assertEquals("DNK", sc.getMasterTerm("Denmark"));
+        assertEquals("NLD", sc.getMasterTerm("The netherlands"));
+        assertNull(sc.getMasterTerm("Danemark"));
+    }
+    
+    public void testDeserializePreviousVersion() throws Exception {
+        FileInputStream in = new FileInputStream("src/test/resources/analyzerbeans-0.34-simple-synonym-catalog.ser");
+        SynonymCatalog sc;
+        try {
+            sc = (SynonymCatalog) SerializationUtils.deserialize(in);
+        } finally {
+            in.close();
+        }
+        
+        assertEquals("DNK", sc.getMasterTerm("DNK"));
+        assertEquals("NLD", sc.getMasterTerm("NLD"));
+        assertEquals("DNK", sc.getMasterTerm("Denmark"));
+        assertEquals("NLD", sc.getMasterTerm("The netherlands"));
+        assertNull(sc.getMasterTerm("Danemark"));
+    }
+
+    public void testGetSynonyms() throws Exception {
+        SimpleSynonymCatalog sc = new SimpleSynonymCatalog("countries", Arrays.asList(new Synonym[] {
+                new SimpleSynonym("DNK", "Denmark", "Danmark"), new SimpleSynonym("NLD", "The netherlands") }));
+
+        Collection<? extends Synonym> synonyms = sc.getSynonyms();
+        assertEquals(2, synonyms.size());
+
+        Iterator<? extends Synonym> it = synonyms.iterator();
+        assertTrue(it.hasNext());
+        Synonym s1 = it.next();
+        assertNotNull(s1);
+        assertEquals("DNK", s1.getMasterTerm());
+        assertEquals("[DNK, Denmark, Danmark]", s1.getSynonyms().getValues().toString());
+
+        assertTrue(it.hasNext());
+        Synonym s2 = it.next();
+        assertEquals("NLD", s2.getMasterTerm());
+        assertEquals("SimpleStringReferenceValues[[NLD, The netherlands]]", s2.getSynonyms().toString());
+
+        assertFalse(it.hasNext());
+    }
 }

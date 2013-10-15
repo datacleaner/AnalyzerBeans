@@ -21,64 +21,110 @@ package org.eobjects.analyzer.reference;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.ObjectInputStream.GetField;
+import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
+import org.eobjects.analyzer.util.ReadObjectBuilder.Adaptor;
 import org.eobjects.analyzer.util.StringUtils;
 
 public final class SimpleSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final List<Synonym> _synonyms;
+    private final Map<String, String> _synonymMap;
 
-	public SimpleSynonymCatalog(String name) {
-		super(name);
-		_synonyms = new ArrayList<Synonym>();
-	}
+    public SimpleSynonymCatalog(String name) {
+        super(name);
+        _synonymMap = new HashMap<String, String>();
+    }
 
-	public SimpleSynonymCatalog(String name, Synonym... synonyms) {
-		super(name);
-		_synonyms = new ArrayList<Synonym>(Arrays.asList(synonyms));
-	}
+    public SimpleSynonymCatalog(String name, Synonym... synonyms) {
+        this(name);
+        for (Synonym synonym : synonyms) {
+            addSynonym(synonym);
+        }
+    }
 
-	public SimpleSynonymCatalog(String name, List<Synonym> synonyms) {
-		super(name);
-		_synonyms = synonyms;
-	}
-	
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		super.decorateIdentity(identifiers);
-		identifiers.add(_synonyms);
-	}
-	
-	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-		ReadObjectBuilder.create(this, SimpleSynonymCatalog.class).readObject(stream);
-	}
+    public SimpleSynonymCatalog(String name, List<Synonym> synonyms) {
+        this(name);
+        for (Synonym synonym : synonyms) {
+            addSynonym(synonym);
+        }
+    }
 
-	@Override
-	public String getMasterTerm(String term) {
-		if (StringUtils.isNullOrEmpty(term)) {
-			return null;
-		}
-		for (Synonym synonym : _synonyms) {
-			if (synonym.getMasterTerm().equals(term)) {
-				return synonym.getMasterTerm();
-			}
-			if (synonym.getSynonyms().containsValue(term)) {
-				return synonym.getMasterTerm();
-			}
-		}
-		return null;
-	}
+    private void addSynonym(Synonym synonym) {
+        final String masterTerm = synonym.getMasterTerm();
+        _synonymMap.put(masterTerm, masterTerm);
+        final Collection<String> values = synonym.getSynonyms().getValues();
+        for (String value : values) {
+            _synonymMap.put(value, masterTerm);
+        }
+    }
 
-	@Override
-	public Collection<Synonym> getSynonyms() {
-		return _synonyms;
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        super.decorateIdentity(identifiers);
+        identifiers.add(_synonymMap);
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        ReadObjectBuilder.create(this, SimpleSynonymCatalog.class).readObject(stream, new Adaptor() {
+            @Override
+            public void deserialize(GetField getField, Serializable serializable) throws IOException {
+                // Get the old List<Synonym> field '_synonyms'.
+                Object synonyms = getField.get("_synonyms", null);
+                if (synonyms instanceof List) {
+                    try {
+                        Field field = SimpleSynonymCatalog.class.getDeclaredField("_synonymMap");
+                        field.setAccessible(true);
+                        field.set(SimpleSynonymCatalog.this, new HashMap<String, String>());
+                    } catch (Exception e) {
+                        throw new IllegalStateException(e);
+                    }
+
+                    @SuppressWarnings("unchecked")
+                    List<Synonym> synonymsList = (List<Synonym>) synonyms;
+                    for (Synonym synonym : synonymsList) {
+                        addSynonym(synonym);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public String getMasterTerm(String term) {
+        if (StringUtils.isNullOrEmpty(term)) {
+            return null;
+        }
+        String masterTerm = _synonymMap.get(term);
+        return masterTerm;
+    }
+
+    @Override
+    public Collection<? extends Synonym> getSynonyms() {
+        Map<String, MutableSynonym> synonyms = new TreeMap<String, MutableSynonym>();
+        for (Entry<String, String> synonymEntry : _synonymMap.entrySet()) {
+            String masterTerm = synonymEntry.getValue();
+            String synonymValue = synonymEntry.getKey();
+
+            MutableSynonym synonym = synonyms.get(masterTerm);
+            if (synonym == null) {
+                synonym = new MutableSynonym(masterTerm);
+                synonyms.put(masterTerm, synonym);
+            }
+
+            synonym.addSynonym(synonymValue);
+        }
+        return synonyms.values();
+    }
 
 }

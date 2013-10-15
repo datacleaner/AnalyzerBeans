@@ -29,61 +29,61 @@ import org.eobjects.metamodel.util.BaseObject;
 
 public final class SimpleStringReferenceValues extends BaseObject implements ReferenceValues<String> {
 
-	private final Set<String> _values;
-	private final boolean _caseSensitive;
+    private final Set<String> _values;
+    private final boolean _caseSensitive;
 
-	public SimpleStringReferenceValues(String[] values, boolean caseSensitive) {
-		_values = new HashSet<String>();
-		for (String value : values) {
-			_values.add(value);
-		}
-		_caseSensitive = caseSensitive;
-	}
+    public SimpleStringReferenceValues(String[] values, boolean caseSensitive) {
+        _values = new HashSet<String>();
+        for (String value : values) {
+            _values.add(value);
+        }
+        _caseSensitive = caseSensitive;
+    }
 
-	public SimpleStringReferenceValues(Collection<String> values, boolean caseSensitive) {
-		if (values instanceof Set<?>) {
-			_values = (Set<String>) values;
-		} else {
-			_values = new HashSet<String>(values);
-		}
-		_caseSensitive = caseSensitive;
-	}
+    public SimpleStringReferenceValues(Collection<String> values, boolean caseSensitive) {
+        if (values instanceof Set<?>) {
+            _values = (Set<String>) values;
+        } else {
+            _values = new HashSet<String>(values);
+        }
+        _caseSensitive = caseSensitive;
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_values);
-		identifiers.add(_caseSensitive);
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(_values);
+        identifiers.add(_caseSensitive);
 
-	}
+    }
 
-	@Override
-	public Collection<String> getValues() {
-		return Collections.unmodifiableSet(_values);
-	}
+    @Override
+    public Collection<String> getValues() {
+        return Collections.unmodifiableSet(_values);
+    }
 
-	@Override
-	public boolean containsValue(String value) {
-		if (value == null) {
-			for (String v : _values) {
-				if (v == null) {
-					return true;
-				}
-			}
-		} else {
-			for (String v : _values) {
-				if (value.equals(v)) {
-					return true;
-				}
-			}
-			if (!_caseSensitive) {
-				for (String v : _values) {
-					if (value.equalsIgnoreCase(v)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean containsValue(String value) {
+        boolean contains = _values.contains(value);
 
+        if (contains) {
+            return true;
+        }
+
+        if (_caseSensitive) {
+            return false;
+        }
+
+        for (String v : _values) {
+            if (value.equalsIgnoreCase(v)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleStringReferenceValues[" + _values + "]";
+    }
 }

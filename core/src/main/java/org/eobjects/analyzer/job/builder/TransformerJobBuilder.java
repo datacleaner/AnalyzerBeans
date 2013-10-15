@@ -65,6 +65,12 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
         _transformerChangeListeners = transformerChangeListeners;
     }
 
+    /**
+     * Gets the output column of this transformation with it's current
+     * configuration.
+     * 
+     * @return
+     */
     public List<MutableInputColumn<?>> getOutputColumns() {
         if (!isConfigured()) {
             // as long as the transformer is not configured, just return an
@@ -195,13 +201,23 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
                 + getInputColumns() + "]";
     }
 
+    /**
+     * Gets an output column by name.
+     * 
+     * @see #getOutputColumns()
+     * 
+     * @param name
+     * @return
+     */
     public MutableInputColumn<?> getOutputColumnByName(String name) {
-        if (name != null) {
-            List<MutableInputColumn<?>> outputColumns = getOutputColumns();
-            for (MutableInputColumn<?> inputColumn : outputColumns) {
-                if (name.equals(inputColumn.getName())) {
-                    return inputColumn;
-                }
+        if (StringUtils.isNullOrEmpty(name)) {
+            return null;
+        }
+
+        final List<MutableInputColumn<?>> outputColumns = getOutputColumns();
+        for (MutableInputColumn<?> inputColumn : outputColumns) {
+            if (name.equals(inputColumn.getName())) {
+                return inputColumn;
             }
         }
         return null;
