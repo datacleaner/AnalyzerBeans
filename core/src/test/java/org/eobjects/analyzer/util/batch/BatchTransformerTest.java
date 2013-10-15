@@ -77,7 +77,7 @@ public class BatchTransformerTest extends TestCase {
             for (InputRow inputRow : values) {
                 Object sourceValue = inputRow.getValue(sourceColumn);
                 Object sortedValue = inputRow.getValue(sortedColumn);
-                if (sourceValue.equals(sortedValue)) {
+                if (!sourceValue.equals(sortedValue)) {
                     foundRemixedFields = true;
                     break;
                 }
