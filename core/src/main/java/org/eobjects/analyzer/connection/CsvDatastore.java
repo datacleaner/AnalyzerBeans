@@ -148,23 +148,26 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 
     @Override
     protected UsageAwareDatastoreConnection<UpdateableDataContext> createDatastoreConnection() {
+        final UpdateableDataContext dataContext;
+        final Resource resource = getResource();
+        if (resource == null) {
+            logger.warn("Resource was not available, a local file reference will be created with path: {}", _filename);
+            dataContext = new CsvDataContext(new File(_filename), getCsvConfiguration());
+        } else {
+            dataContext = new CsvDataContext(resource, getCsvConfiguration());
+        }
+
+        return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
+    }
+    
+    public CsvConfiguration getCsvConfiguration() {
         final char separatorChar = _separatorChar == null ? DEFAULT_SEPARATOR_CHAR : _separatorChar;
         final char quoteChar = _quoteChar == null ? DEFAULT_QUOTE_CHAR : _quoteChar;
         final char escapeChar = _escapeChar == null ? CsvConfiguration.DEFAULT_ESCAPE_CHAR : _escapeChar;
         final String encoding = _encoding == null ? FileHelper.UTF_8_ENCODING : _encoding;
         final CsvConfiguration configuration = new CsvConfiguration(_headerLineNumber, encoding, separatorChar,
                 quoteChar, escapeChar, _failOnInconsistencies);
-
-        final UpdateableDataContext dataContext;
-        final Resource resource = getResource();
-        if (resource == null) {
-            logger.warn("Resource was not available, a local file reference will be created with path: {}", _filename);
-            dataContext = new CsvDataContext(new File(_filename), configuration);
-        } else {
-            dataContext = new CsvDataContext(resource, configuration);
-        }
-
-        return new UpdateableDatastoreConnectionImpl<UpdateableDataContext>(dataContext, this);
+        return configuration;
     }
 
     @Override
