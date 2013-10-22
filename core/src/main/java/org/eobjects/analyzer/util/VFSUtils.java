@@ -60,6 +60,9 @@ public class VFSUtils {
      * @return
      */
     public static FileObject toFileObject(File file) {
+        if (file == null) {
+            return null;
+        }
         try {
             return getFileSystemManager().toFileObject(file);
         } catch (FileSystemException e) {

@@ -73,4 +73,9 @@ public class VFSUtilsTest extends TestCase {
             in.close();
         }
     }
+    
+    public void testToFileObjectNull() throws Exception {
+        assertNull(VFSUtils.toFileObject(null));
+        assertNull(VFSUtils.toFile(null));
+    }
 }
