@@ -36,26 +36,31 @@ public class StringAnalyzerResultTest extends TestCase {
         FileInputStream in = new FileInputStream(
                 "src/test/resources/string_analyzer_result_old.analysis.result.dat");
         try {
-            Object obj = new ChangeAwareObjectInputStream(in).readObject();
-            assertNotNull(obj);
-            
-            AnalysisResult result = (AnalysisResult) obj;
-            
-            AnalyzerResult analyzerResult = result.getResults().get(0);
-            assertNotNull(analyzerResult);
-            
-            StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) analyzerResult;
-            
-            InputColumn<String>[] cols = stringAnalyzerResult.getColumns();
-            assertEquals("[id, address1, address2]", CollectionUtils.map(cols, new HasNameMapper()).toString());
-            
-            assertNotNull(stringAnalyzerResult.getNullCount(cols[0]));
-            assertNotNull(stringAnalyzerResult.getNullCount(cols[1]));
-            assertNotNull(stringAnalyzerResult.getNullCount(cols[2]));
-            
-            assertNull(stringAnalyzerResult.getBlankCount(cols[0]));
-            assertNull(stringAnalyzerResult.getBlankCount(cols[1]));
-            assertNull(stringAnalyzerResult.getBlankCount(cols[2]));
+            ChangeAwareObjectInputStream ois = new ChangeAwareObjectInputStream(in);
+            try {
+                Object obj = ois.readObject();
+                assertNotNull(obj);
+                
+                AnalysisResult result = (AnalysisResult) obj;
+                
+                AnalyzerResult analyzerResult = result.getResults().get(0);
+                assertNotNull(analyzerResult);
+                
+                StringAnalyzerResult stringAnalyzerResult = (StringAnalyzerResult) analyzerResult;
+                
+                InputColumn<String>[] cols = stringAnalyzerResult.getColumns();
+                assertEquals("[id, address1, address2]", CollectionUtils.map(cols, new HasNameMapper()).toString());
+                
+                assertNotNull(stringAnalyzerResult.getNullCount(cols[0]));
+                assertNotNull(stringAnalyzerResult.getNullCount(cols[1]));
+                assertNotNull(stringAnalyzerResult.getNullCount(cols[2]));
+                
+                assertNull(stringAnalyzerResult.getBlankCount(cols[0]));
+                assertNull(stringAnalyzerResult.getBlankCount(cols[1]));
+                assertNull(stringAnalyzerResult.getBlankCount(cols[2]));
+            } finally {
+                ois.close();
+            }
         } finally {
             in.close();
         }

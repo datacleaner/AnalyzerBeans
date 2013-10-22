@@ -49,15 +49,19 @@ public class CompletenessAnalyzerTest extends TestCase {
 
     public void testConfigurableBeanConfiguration() throws Exception {
         AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
-        List<TableDataProvider<?>> tableDataProviders = Collections.emptyList();
-        ajb.setDatastore(new PojoDatastore("ds", tableDataProviders));
-        ajb.addSourceColumn(new MutableColumn("foo", ColumnType.VARCHAR));
-
-        AnalyzerJobBuilder<CompletenessAnalyzer> analyzer = ajb.addAnalyzer(CompletenessAnalyzer.class);
-        analyzer.getConfigurableBean().setValueColumns(ajb.getSourceColumns().toArray(new InputColumn[0]));
-        analyzer.getConfigurableBean().fillAllConditions(Condition.NOT_BLANK_OR_NULL);
-
-        assertTrue(analyzer.isConfigured(true));
+        try {
+            List<TableDataProvider<?>> tableDataProviders = Collections.emptyList();
+            ajb.setDatastore(new PojoDatastore("ds", tableDataProviders));
+            ajb.addSourceColumn(new MutableColumn("foo", ColumnType.VARCHAR));
+            
+            AnalyzerJobBuilder<CompletenessAnalyzer> analyzer = ajb.addAnalyzer(CompletenessAnalyzer.class);
+            analyzer.getConfigurableBean().setValueColumns(ajb.getSourceColumns().toArray(new InputColumn[0]));
+            analyzer.getConfigurableBean().fillAllConditions(Condition.NOT_BLANK_OR_NULL);
+            
+            assertTrue(analyzer.isConfigured(true));
+        } finally {
+            ajb.close();
+        }
     }
 
     public void testSimpleScenario() throws Exception {
