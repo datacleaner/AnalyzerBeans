@@ -49,7 +49,7 @@ public class DatastoreXmlExternalizerTest extends TestCase {
                 + "<csv-datastore description=\"bar\" name=\"foo\"><filename>baz.txt</filename>"
                 + "<quote-char>\"</quote-char><separator-char>,</separator-char>"
                 + "<escape-char>\\</escape-char><encoding>UTF-8</encoding>"
-                + "<fail-on-inconsistencies>true</fail-on-inconsistencies>"
+                + "<fail-on-inconsistencies>true</fail-on-inconsistencies><multiline-values>true</multiline-values>"
                 + "<header-line-number>1</header-line-number></csv-datastore>", str);
     }
     

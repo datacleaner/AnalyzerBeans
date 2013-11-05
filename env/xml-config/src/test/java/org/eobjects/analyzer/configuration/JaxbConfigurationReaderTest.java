@@ -80,9 +80,13 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertTrue("Unexpected separator: " + csv.getSeparatorChar(), '\t' == csv.getSeparatorChar());
         assertTrue("Unexpected escape: " + csv.getEscapeChar(), CsvConfiguration.NOT_A_CHAR == csv.getEscapeChar());
         
+        assertTrue(csv.isMultilineValues());
+        
         csv = (CsvDatastore) configuration.getDatastoreCatalog().getDatastore("csv_quot");
         
         assertEquals("\"", csv.getQuoteChar().toString());
+        
+        assertFalse(csv.isMultilineValues());
     }
 
     public void testReadClasspathScannerWithExcludedRenderer() throws Exception {
@@ -210,7 +214,13 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("jdbc_con", datastoreCatalog.getDatastore("my_jdbc_connection").getDescription());
         assertEquals("jdbc_ds", datastoreCatalog.getDatastore("my_jdbc_datasource").getDescription());
         assertEquals("dbf", datastoreCatalog.getDatastore("my_dbase").getDescription());
-        assertEquals("csv", datastoreCatalog.getDatastore("my_csv").getDescription());
+
+        CsvDatastore myCsvDatastore = (CsvDatastore) datastoreCatalog.getDatastore("my_csv");
+        assertEquals("csv", myCsvDatastore.getDescription());
+        assertTrue(myCsvDatastore.isMultilineValues());
+        assertTrue(myCsvDatastore.isFailOnInconsistencies());
+        assertEquals('\\', myCsvDatastore.getEscapeChar().charValue());
+        
         assertEquals("a SugarCRM instance", datastoreCatalog.getDatastore("my_sugarcrm").getDescription());
         assertEquals("dom xml", datastoreCatalog.getDatastore("my_dom_xml").getDescription());
         assertEquals("sax xml", datastoreCatalog.getDatastore("my_sax_xml").getDescription());

@@ -126,6 +126,7 @@ public class DatastoreXmlExternalizer {
         appendElement(doc, datastoreElement, "escape-char", datastore.getEscapeChar());
         appendElement(doc, datastoreElement, "encoding", datastore.getEncoding());
         appendElement(doc, datastoreElement, "fail-on-inconsistencies", datastore.isFailOnInconsistencies());
+        appendElement(doc, datastoreElement, "multiline-values", datastore.isMultilineValues());
         appendElement(doc, datastoreElement, "header-line-number", datastore.getHeaderLineNumber());
 
         return datastoreElement;

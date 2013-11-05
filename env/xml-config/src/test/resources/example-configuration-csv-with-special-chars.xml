@@ -7,6 +7,7 @@
 			<filename>foo.csv</filename>
 			<escape-char></escape-char>
 			<separator-char>\t</separator-char>
+			<multiline-values>true</multiline-values>
 		</csv-datastore>
 		
 		<csv-datastore name="csv_quot">
@@ -14,6 +15,7 @@
 			<quote-char>&quot;</quote-char>
 			<escape-char></escape-char>
 			<separator-char>\t</separator-char>
+			<multiline-values>false</multiline-values>
 		</csv-datastore>
 	</datastore-catalog>
 

@@ -357,6 +357,7 @@
 					<element name="encoding" type="token" minOccurs="0" />
 					<element name="fail-on-inconsistencies" type="boolean"
 						minOccurs="0" />
+					<element name="multiline-values" type="boolean" minOccurs="0" />
 					<element name="header-line-number" type="int" default="1"
 						minOccurs="0">
 						<annotation>

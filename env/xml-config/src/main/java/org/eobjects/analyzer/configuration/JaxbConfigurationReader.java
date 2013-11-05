@@ -942,6 +942,9 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
         boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
                 csvDatastoreType.isFailOnInconsistencies(), true);
+        
+        boolean multilineValues = getBooleanVariable("multilineValues",
+                csvDatastoreType.isMultilineValues(), true);
 
         Integer headerLineNumber = getIntegerVariable("headerLineNumber", csvDatastoreType.getHeaderLineNumber());
         if (headerLineNumber == null) {
@@ -949,7 +952,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         }
 
         CsvDatastore ds = new CsvDatastore(name, resource, filename, quoteChar, separatorChar, escapeChar, encoding,
-                failOnInconsistencies, headerLineNumber);
+                failOnInconsistencies, multilineValues, headerLineNumber);
         return ds;
     }
 
