@@ -26,15 +26,17 @@ import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper for the TaskRunner that only submits jobs when no errors have been
  * reported yet. This makes sure that a job will finish early if an error is
  * reported.
- * 
- * @author Kasper Sørensen
  */
 final class ErrorAwareTaskRunnerWrapper implements TaskRunner, ErrorAware {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ErrorAwareTaskRunnerWrapper.class);
 
 	// a single shared exception is used if previous exceptions have been
 	// reported. This is to make sure that the error message
@@ -55,7 +57,8 @@ final class ErrorAwareTaskRunnerWrapper implements TaskRunner, ErrorAware {
 		if (isErrornous()) {
 			taskListener.onError(task, PREVIOUS_ERROR_EXCEPTION);
 		} else if (isCancelled()) {
-			taskListener.onError(task, null);
+		    logger.info("Ignoring task because job has been cancelled: {}", task);
+		    taskListener.onError(task, PREVIOUS_ERROR_EXCEPTION);
 		} else {
 			_taskRunner.run(task, taskListener);
 		}
