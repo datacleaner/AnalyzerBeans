@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -117,17 +117,17 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         sourceType.setDataContext(dataContextType);
 
         // mappings for lookup of ID's
-        final Map<InputColumn<?>, String> columnMappings = new HashMap<InputColumn<?>, String>();
-        final Map<Outcome, String> outcomeMappings = new HashMap<Outcome, String>();
+        final Map<InputColumn<?>, String> columnMappings = new LinkedHashMap<InputColumn<?>, String>();
+        final Map<Outcome, String> outcomeMappings = new LinkedHashMap<Outcome, String>();
 
         // mappings for lookup of component's elements
-        final Map<TransformerJob, TransformerType> transformerMappings = new HashMap<TransformerJob, TransformerType>();
-        final Map<FilterJob, FilterType> filterMappings = new HashMap<FilterJob, FilterType>();
-        final Map<AnalyzerJob, AnalyzerType> analyzerMappings = new HashMap<AnalyzerJob, AnalyzerType>();
-        final Map<MergedOutcomeJob, MergedOutcomeType> mergedOutcomeMappings = new HashMap<MergedOutcomeJob, MergedOutcomeType>();
-        final Map<ExplorerJob, ExplorerType> explorerMappings = new HashMap<ExplorerJob, ExplorerType>();
+        final Map<TransformerJob, TransformerType> transformerMappings = new LinkedHashMap<TransformerJob, TransformerType>();
+        final Map<FilterJob, FilterType> filterMappings = new LinkedHashMap<FilterJob, FilterType>();
+        final Map<AnalyzerJob, AnalyzerType> analyzerMappings = new LinkedHashMap<AnalyzerJob, AnalyzerType>();
+        final Map<MergedOutcomeJob, MergedOutcomeType> mergedOutcomeMappings = new LinkedHashMap<MergedOutcomeJob, MergedOutcomeType>();
+        final Map<ExplorerJob, ExplorerType> explorerMappings = new LinkedHashMap<ExplorerJob, ExplorerType>();
 
-        // register alle source columns
+        // register all source columns
         final Collection<InputColumn<?>> sourceColumns = analysisJob.getSourceColumns();
         for (InputColumn<?> inputColumn : sourceColumns) {
             final ColumnType jaxbColumn = new ColumnType();
