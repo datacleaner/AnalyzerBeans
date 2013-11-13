@@ -21,21 +21,23 @@ package org.eobjects.analyzer.job;
 
 /**
  * Represents a job that merges separate filter flows into a merged/joined flow.
- * 
- * @author Kasper Sørensen
  */
 public interface MergedOutcomeJob extends ComponentJob, InputColumnSinkJob, InputColumnSourceJob, OutcomeSourceJob,
-		OutcomeSinkJob {
+        OutcomeSinkJob {
 
-	/**
-	 * @return
-	 */
-	public MergeInput[] getMergeInputs();
+    /**
+     * Gets the {@link MergeInput}s that goes into this merged outcome.
+     * 
+     * @return
+     */
+    public MergeInput[] getMergeInputs();
 
-	/**
-	 * @return the outcome that represents this merge operation. Succeeding
-	 *         components can set up this outcome as a requirement similarly to
-	 *         the way that they can have a filter requirement.
-	 */
-	public MergedOutcome getOutcome();
+    /**
+     * Gets the outcome that represents this merge operation. Succeeding
+     * components can set up this outcome as a requirement similarly to the way
+     * that they can have a filter requirement.
+     * 
+     * @return the outcome that represents this merge operation.
+     */
+    public MergedOutcome getOutcome();
 }

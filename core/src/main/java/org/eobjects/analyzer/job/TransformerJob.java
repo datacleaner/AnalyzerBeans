@@ -19,9 +19,17 @@
  */
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.beans.api.Transformer;
+import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
+/**
+ * {@link ComponentJob} subinterface for {@link Transformer}s.
+ * 
+ * @see Transformer
+ * @see TransformerBean
+ */
 public interface TransformerJob extends ConfigurableBeanJob<TransformerBeanDescriptor<?>>, InputColumnSourceJob,
-		InputColumnSinkJob, OutcomeSinkJob {
+        InputColumnSinkJob, OutcomeSinkJob {
 
 }

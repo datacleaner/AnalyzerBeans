@@ -28,8 +28,7 @@ import java.lang.annotation.Target;
 /**
  * Classes that are annotated with the @AnalyzerBean annotation are components
  * for data analysis. All @AnalyzerBean classes must implement either
- * <code>org.eobjects.analyzer.beans.ExploringAnalyzer</code> or
- * <code>org.eobjects.analyzer.beans.RowProcessingAnalyzer</code>.
+ * {@link Analyzer} or {@link Explorer}.
  * 
  * The life-cycle of an AnalyzerBean is as follows:
  * <ul>
@@ -38,9 +37,11 @@ import java.lang.annotation.Target;
  * invoked/assigned to configure the AnalyzerBean before execution.</li>
  * <li>All methods or fields with the @Provided annotation are invoked/assigned</li>
  * <li>Any no-args methods with the @Initialize annotation are executed.</li>
- * <li>If the AnalyzerBean is an ExploringAnalyzer then the run(DataContext)
- * method is called once. If the AnalyzerBean is a RowProcessingAnalyzer then
- * the run(Row,long) method is called for each row in the analyzed DataSet.</li>
+ * <li>If the AnalyzerBean is an {@link Explorer} then the
+ * {@link Explorer#run(org.eobjects.metamodel.DataContext)} method is called
+ * once. If the AnalyzerBean is a {@link Analyzer} then the
+ * {@link Analyzer#run(org.eobjects.analyzer.data.InputRow, int)} method is
+ * called for each row in the analyzed DataSet.</li>
  * <li>All methods with the @Result annotation are invoked to retrieve the
  * result.</li>
  * <li>Any no-args methods with the @Close annotation are invoked if the
@@ -63,11 +64,11 @@ import java.lang.annotation.Target;
 @Documented
 public @interface AnalyzerBean {
 
-	/**
-	 * The display name of the AnalyzerBean. The display name should be humanly
-	 * readable and is presented to the user in User Interfaces.
-	 * 
-	 * @return the name of the AnalyzerBean
-	 */
-	String value();
+    /**
+     * The display name of the AnalyzerBean. The display name should be humanly
+     * readable and is presented to the user in User Interfaces.
+     * 
+     * @return the name of the AnalyzerBean
+     */
+    String value();
 }

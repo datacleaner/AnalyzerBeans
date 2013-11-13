@@ -26,8 +26,6 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
  * 
  * @see Filter
  * @See FilterBean
- * 
- * @author Kasper Sørensen
  */
 public interface FilterJob extends ConfigurableBeanJob<FilterBeanDescriptor<?, ?>>, OutcomeSourceJob {
 

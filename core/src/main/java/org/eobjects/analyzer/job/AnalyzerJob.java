@@ -19,8 +19,16 @@
  */
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.beans.api.Analyzer;
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 
+/**
+ * {@link ComponentJob} subinterface for {@link Analyzer}s.
+ * 
+ * @see Analyzer
+ * @see AnalyzerBean
+ */
 public interface AnalyzerJob extends ConfigurableBeanJob<AnalyzerBeanDescriptor<?>> {
 
 }

@@ -19,10 +19,23 @@
  */
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 
+/**
+ * Represents a subinterface of {@link ComponentJob} for all component types
+ * that are "configurable beans", meaning that they can be chained together by
+ * using {@link InputColumn}s and {@link Outcome}s as requirements/dependencies
+ * for their positioning in the processing flow.
+ * 
+ * @param <E>
+ */
 public interface ConfigurableBeanJob<E extends BeanDescriptor<?>> extends ComponentJob, HasBeanConfiguration,
         InputColumnSinkJob, OutcomeSinkJob {
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public E getDescriptor();
 }

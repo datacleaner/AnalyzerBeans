@@ -25,9 +25,15 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
+import org.eobjects.metamodel.schema.Column;
 
 /**
  * Defines a job to be executed by AnalyzerBeans.
+ * 
+ * A {@link AnalysisJob} contains a set of components.
+ * 
+ * A {@link AnalysisJob} references a source {@link Datastore} and some
+ * {@link Column}s (represented via {@link InputColumn}s) of this datastore.
  * 
  * Building jobs is usually done using the {@link AnalysisJobBuilder} class.
  * 
@@ -35,17 +41,53 @@ import org.eobjects.analyzer.job.runner.AnalysisRunner;
  */
 public interface AnalysisJob {
 
-	public Datastore getDatastore();
+    /**
+     * Gets the {@link Datastore} that this job uses as it's source.
+     * 
+     * @return
+     */
+    public Datastore getDatastore();
 
-	public Collection<InputColumn<?>> getSourceColumns();
+    /**
+     * Gets the source columns of the {@link Datastore} (see
+     * {@link #getDatastore()}) referenced by this job.
+     * 
+     * @return
+     */
+    public Collection<InputColumn<?>> getSourceColumns();
 
-	public Collection<TransformerJob> getTransformerJobs();
+    /**
+     * Gets all {@link TransformerJob}s contained in this job.
+     * 
+     * @return
+     */
+    public Collection<TransformerJob> getTransformerJobs();
 
-	public Collection<FilterJob> getFilterJobs();
-	
-	public Collection<MergedOutcomeJob> getMergedOutcomeJobs();
+    /**
+     * Gets all {@link FilterJob}s contained in this job.
+     * 
+     * @return
+     */
+    public Collection<FilterJob> getFilterJobs();
 
-	public Collection<AnalyzerJob> getAnalyzerJobs();
-	
-	public Collection<ExplorerJob> getExplorerJobs();
+    /**
+     * Gets all {@link MergedOutcomeJob}s contained in this job.
+     * 
+     * @return
+     */
+    public Collection<MergedOutcomeJob> getMergedOutcomeJobs();
+
+    /**
+     * Gets all {@link AnalyzerJob}s contained in this job.
+     * 
+     * @return
+     */
+    public Collection<AnalyzerJob> getAnalyzerJobs();
+
+    /**
+     * Gets all {@link ExplorerJob}s contained in this job.
+     * 
+     * @return
+     */
+    public Collection<ExplorerJob> getExplorerJobs();
 }

@@ -19,8 +19,17 @@
  */
 package org.eobjects.analyzer.job;
 
+import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 
+/**
+ *  {@link ComponentJob} subinterface for {@link Explorer}s.
+ * 
+ * @see Explorer
+ * @see AnalyzerBean
+ * @see ExplorerBeanDescriptor
+ */
 public interface ExplorerJob extends ComponentJob, HasBeanConfiguration {
 	
 	public ExplorerBeanDescriptor<?> getDescriptor();

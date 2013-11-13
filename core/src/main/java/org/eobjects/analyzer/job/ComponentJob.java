@@ -25,25 +25,24 @@ import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.metamodel.util.HasName;
 
 /**
- * Super-interface for all job entries in an Analysis
- * 
- * @author Kasper Sørensen
+ * Super-interface for all job entries in an Analysis. A {@link ComponentJob}
+ * represents a component's configuration in a {@link AnalysisJob}.
  */
 public interface ComponentJob extends HasName, Serializable {
 
-	/**
-	 * Gets the descriptor of this component type.
-	 * 
-	 * @return a descriptor of this component type
-	 */
-	public ComponentDescriptor<?> getDescriptor();
+    /**
+     * Gets the descriptor of this component type.
+     * 
+     * @return a descriptor of this component type
+     */
+    public ComponentDescriptor<?> getDescriptor();
 
-	/**
-	 * Gets the name of this component job
-	 * 
-	 * @return an optional name given by the user to identify this component in
-	 *         a job (can be null if no name is assigned).
-	 */
-	@Override
-	public String getName();
+    /**
+     * Gets the name of this component job
+     * 
+     * @return an optional name given by the user to identify this component in
+     *         a job (can be null if no name is assigned).
+     */
+    @Override
+    public String getName();
 }
