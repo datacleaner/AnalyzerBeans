@@ -26,7 +26,8 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 
 /**
  * Represents a catalog of items that are considered as reference data that a
- * user can choose to utilize in various analyzers, transformers etc.
+ * user can choose to utilize in various analyzers, transformers etc. All of
+ * these implement the {@link ReferenceData} interface.
  * 
  * Reference data is typically reusable between jobs which is why it is
  * contained within the configuration of AnalyzerBeans. For example you could
@@ -34,25 +35,57 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
  * dictionary is then resuable both as input to a Dictionary validation filter
  * and an analyzer that will match values against different dictionaries.
  * 
- * All reference data types (Dictionary, SynonymCatalog etc.) is injectable into
- * components using the @Configured annotation.
+ * All reference data types ( {@link Dictionary} , {@link SynonymCatalog},
+ * {@link StringPattern} etc.) is injectable into components using the @Configured
+ * annotation.
  * 
  * @see AnalyzerBeansConfiguration
  * @see Configured
- * 
- * @author Kasper Sørensen
  */
 public interface ReferenceDataCatalog extends Serializable {
 
-	public String[] getDictionaryNames();
+    /**
+     * Gets the names of all registered {@link Dictionary}
+     * 
+     * @return
+     */
+    public String[] getDictionaryNames();
 
-	public Dictionary getDictionary(String name);
+    /**
+     * Gets a {@link Dictionary} by its name.
+     * 
+     * @param name
+     * @return
+     */
+    public Dictionary getDictionary(String name);
 
-	public String[] getSynonymCatalogNames();
+    /**
+     * Gets the names of all registered {@link SynonymCatalog}.
+     * 
+     * @return
+     */
+    public String[] getSynonymCatalogNames();
 
-	public SynonymCatalog getSynonymCatalog(String name);
+    /**
+     * Gets a {@link SynonymCatalog} by its name.
+     * 
+     * @param name
+     * @return
+     */
+    public SynonymCatalog getSynonymCatalog(String name);
 
-	public String[] getStringPatternNames();
+    /**
+     * Gets the names of all registered {@link StringPattern}s.
+     * 
+     * @return
+     */
+    public String[] getStringPatternNames();
 
-	public StringPattern getStringPattern(String name);
+    /**
+     * Gets a {@link StringPattern} by its name.
+     * 
+     * @param name
+     * @return
+     */
+    public StringPattern getStringPattern(String name);
 }

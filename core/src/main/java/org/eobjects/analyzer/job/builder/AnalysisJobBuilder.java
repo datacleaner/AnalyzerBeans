@@ -38,6 +38,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
@@ -258,8 +259,6 @@ public final class AnalysisJobBuilder implements Closeable {
         helper.importJob(job);
     }
 
-    
-
     public AnalysisJobBuilder removeSourceColumn(MetaModelInputColumn inputColumn) {
         boolean removed = _sourceColumns.remove(inputColumn);
         if (removed) {
@@ -404,15 +403,15 @@ public final class AnalysisJobBuilder implements Closeable {
             ConfigurableBeanJob<?> configurableBeanJob = (ConfigurableBeanJob<?>) componentJob;
             builder.setConfiguredProperties(configurableBeanJob.getConfiguration());
         }
-        
+
         if (componentJob instanceof InputColumnSourceJob) {
             InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();
-            
+
             TransformerJobBuilder<?> transformerJobBuilder = (TransformerJobBuilder<?>) builder;
             List<MutableInputColumn<?>> outputColumns = transformerJobBuilder.getOutputColumns();
-            
+
             assert output.length == outputColumns.size();
-            
+
             for (int i = 0; i < output.length; i++) {
                 MutableInputColumn<?> mutableOutputColumn = outputColumns.get(i);
                 mutableOutputColumn.setName(output[i].getName());
@@ -548,8 +547,8 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public <A extends Analyzer<?>> AnalyzerJobBuilder<A> addAnalyzer(Class<A> analyzerClass) {
-        AnalyzerBeanDescriptor<A> descriptor = _configuration.getDescriptorProvider()
-                .getAnalyzerBeanDescriptorForClass(analyzerClass);
+        final DescriptorProvider descriptorProvider = _configuration.getDescriptorProvider();
+        final AnalyzerBeanDescriptor<A> descriptor = descriptorProvider.getAnalyzerBeanDescriptorForClass(analyzerClass);
         if (descriptor == null) {
             throw new IllegalArgumentException("No descriptor found for: " + analyzerClass);
         }

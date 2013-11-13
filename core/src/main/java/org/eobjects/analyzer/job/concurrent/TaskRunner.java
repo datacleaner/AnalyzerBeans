@@ -29,11 +29,35 @@ import org.eobjects.analyzer.job.tasks.Task;
  */
 public interface TaskRunner {
 
+    /**
+     * Submits a {@link Task} and a {@link TaskListener} to the
+     * {@link TaskRunner}, that will (eventually) execute it.
+     * 
+     * @param task
+     * @param listener
+     */
     public void run(Task task, TaskListener listener);
 
+    /**
+     * Submits a {@link TaskRunnable} to the {@link TaskRunner}, that will
+     * (eventually) execute it.
+     * 
+     * @param taskRunnable
+     */
     public void run(TaskRunnable taskRunnable);
 
+    /**
+     * Shuts down the {@link TaskRunner}, cleaning up allocated threads and
+     * making it unusable for future use.
+     */
     public void shutdown();
 
+    /**
+     * Offers to 'assist' the {@link TaskRunner} in executing tasks. This will
+     * effectively 'steal work' from the task runner and do that work in the
+     * current thread. Calling this method may be advantageous in cases where
+     * the thread is anyways waiting for tasks in the {@link TaskRunner} to
+     * complete.
+     */
     public void assistExecution();
 }

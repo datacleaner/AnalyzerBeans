@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents a Runnable wrapper for a task. A task might have also a listener
  * which will be invoked based on the outcome of the task.
- * 
- * @author Kasper Sørensen
  */
 public final class TaskRunnable implements Runnable {
 
