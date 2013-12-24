@@ -78,7 +78,7 @@ final class RowProcessingMetricsImpl implements RowProcessingMetrics {
                     final Query countQuery = originalQuery.clone();
                     countQuery.setMaxRows(null);
                     countQuery.getSelectClause().removeItems();
-		    countQuery.getOrderByClause().removeItems();
+                    countQuery.getOrderByClause().removeItems();
                     countQuery.selectCount();
                     countQuery.getSelectClause().getItem(0).setFunctionApproximationAllowed(true);
 
