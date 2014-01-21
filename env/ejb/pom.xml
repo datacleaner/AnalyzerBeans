@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-env</artifactId>
-		<version>0.37</version>
+		<version>0.38-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-ejb</artifactId>
 	<description>A task runner for AnalyzerBeans, based on the EJB timer service</description>
