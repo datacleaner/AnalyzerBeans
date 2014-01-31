@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -68,16 +67,17 @@ public class TransformerJobBuilderTest extends TestCase {
     public void testGetOutputColumnsRetainingAndSorting() throws Exception {
         final TransformerJobBuilder<?> tjb1 = ajb.addTransformer(TransformerMockForOutputColumnChanges.class);
         tjb1.addInputColumn(ajb.getSourceColumnByName("fooStr"));
-        
+
         final TransformerJobBuilder<?> tjb2 = ajb.addTransformer(TransformerMockForOutputColumnChanges.class);
         tjb2.addInputColumn(ajb.getSourceColumnByName("fooStr"));
-        
+
         assertEquals("[foo, bar, foo, bar]", getSortedOutputColumns(tjb1, tjb2));
 
-        // Column ordering is retained when configuration changes output column names
-        tjb1.setConfiguredProperty("Output column names", new String[] {"Hello","There"});
-        tjb2.setConfiguredProperty("Output column names", new String[] {"Big","World"});
-        
+        // Column ordering is retained when configuration changes output column
+        // names
+        tjb1.setConfiguredProperty("Output column names", new String[] { "Hello", "There" });
+        tjb2.setConfiguredProperty("Output column names", new String[] { "Big", "World" });
+
         assertEquals("[Hello, There, Big, World]", getSortedOutputColumns(tjb1, tjb2));
 
         // Column ordering is retained when user changes output column name
@@ -85,12 +85,12 @@ public class TransformerJobBuilderTest extends TestCase {
         tjb1.getOutputColumns().get(1).setName("There");
         tjb2.getOutputColumns().get(0).setName("Column3");
         tjb2.getOutputColumns().get(1).setName("Column4");
-        
+
         assertEquals("[Howdy, There, Column3, Column4]", getSortedOutputColumns(tjb1, tjb2));
-        
-        
-        // Column names and ordering is reset when configuration changes output columns size
-        tjb1.setConfiguredProperty("Output column names", new String[] {"Hello","To","You"});
+
+        // Column names and ordering is reset when configuration changes output
+        // columns size
+        tjb1.setConfiguredProperty("Output column names", new String[] { "Hello", "To", "You" });
         assertEquals("[Howdy, To, You, Column3, Column4]", getSortedOutputColumns(tjb1, tjb2));
     }
 
@@ -100,7 +100,7 @@ public class TransformerJobBuilderTest extends TestCase {
         List<InputColumn<?>> list = new ArrayList<InputColumn<?>>();
         list.addAll(cols1);
         list.addAll(cols2);
-        
+
         Collections.sort(list, new InputColumnComparator());
 
         List<String> names = CollectionUtils.map(list, new HasNameMapper());
@@ -228,7 +228,7 @@ public class TransformerJobBuilderTest extends TestCase {
         TransformerBeanDescriptor<ConvertToNumberTransformer> descriptor = Descriptors
                 .ofTransformer(ConvertToNumberTransformer.class);
         TransformerJobBuilder<ConvertToNumberTransformer> builder = new TransformerJobBuilder<ConvertToNumberTransformer>(
-                new AnalysisJobBuilder(null), descriptor, IdGenerator, new LinkedList<TransformerChangeListener>());
+                new AnalysisJobBuilder(null), descriptor, IdGenerator);
         assertFalse(builder.isConfigured());
 
         ConvertToNumberTransformer configurableBean = builder.getConfigurableBean();
@@ -248,8 +248,7 @@ public class TransformerJobBuilderTest extends TestCase {
         TransformerBeanDescriptor<TransformerMock> descriptor = Descriptors.ofTransformer(TransformerMock.class);
 
         TransformerJobBuilder<TransformerMock> builder = new TransformerJobBuilder<TransformerMock>(
-                new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl()), descriptor, IdGenerator,
-                new LinkedList<TransformerChangeListener>());
+                new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl()), descriptor, IdGenerator);
 
         MockInputColumn<String> colA = new MockInputColumn<String>("A", String.class);
         MockInputColumn<String> colB = new MockInputColumn<String>("B", String.class);

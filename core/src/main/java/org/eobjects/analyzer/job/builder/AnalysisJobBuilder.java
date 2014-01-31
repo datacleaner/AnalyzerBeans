@@ -98,7 +98,7 @@ public final class AnalysisJobBuilder implements Closeable {
     private final List<ExplorerChangeListener> _explorerChangeListeners = new ArrayList<ExplorerChangeListener>();
     private final List<TransformerChangeListener> _transformerChangeListeners = new ArrayList<TransformerChangeListener>();
     private final List<FilterChangeListener> _filterChangeListeners = new ArrayList<FilterChangeListener>();
-    private final List<MergedOutcomeChangeListener> _mergedOutcomeChangeListener = new ArrayList<MergedOutcomeChangeListener>();
+    private final List<MergedOutcomeChangeListener> _mergedOutcomeChangeListeners = new ArrayList<MergedOutcomeChangeListener>();
     private Outcome _defaultRequirement;
 
     public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
@@ -285,7 +285,7 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public MergedOutcomeJobBuilder addMergedOutcomeJobBuilder() {
-        MergedOutcomeJobBuilder mojb = new MergedOutcomeJobBuilder(_transformedColumnIdGenerator);
+        MergedOutcomeJobBuilder mojb = new MergedOutcomeJobBuilder(this, _transformedColumnIdGenerator);
         return addMergedOutcomeJobBuilder(mojb);
     }
 
@@ -293,7 +293,7 @@ public final class AnalysisJobBuilder implements Closeable {
         _mergedOutcomeJobBuilders.add(mojb);
 
         List<MergedOutcomeChangeListener> listeners = new ArrayList<MergedOutcomeChangeListener>(
-                _mergedOutcomeChangeListener);
+                _mergedOutcomeChangeListeners);
         for (MergedOutcomeChangeListener listener : listeners) {
             listener.onAdd(mojb);
         }
@@ -303,11 +303,7 @@ public final class AnalysisJobBuilder implements Closeable {
     public AnalysisJobBuilder removeMergedOutcomeJobBuilder(MergedOutcomeJobBuilder mojb) {
         boolean removed = _mergedOutcomeJobBuilders.remove(mojb);
         if (removed) {
-            List<MergedOutcomeChangeListener> listeners = new ArrayList<MergedOutcomeChangeListener>(
-                    _mergedOutcomeChangeListener);
-            for (MergedOutcomeChangeListener listener : listeners) {
-                listener.onRemove(mojb);
-            }
+            mojb.onRemoved();
         }
         return this;
     }
@@ -330,8 +326,7 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor) {
-        TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(this, descriptor, _transformedColumnIdGenerator,
-                _transformerChangeListeners);
+        TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(this, descriptor, _transformedColumnIdGenerator);
         return addTransformer(tjb);
     }
 
@@ -354,15 +349,7 @@ public final class AnalysisJobBuilder implements Closeable {
     public AnalysisJobBuilder removeTransformer(TransformerJobBuilder<?> tjb) {
         boolean removed = _transformerJobBuilders.remove(tjb);
         if (removed) {
-            // make a copy since some of the listeners may add additional
-            // listeners
-            // which will otherwise cause ConcurrentModificationExceptions
-            List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(
-                    _transformerChangeListeners);
-            for (TransformerChangeListener listener : listeners) {
-                listener.onOutputChanged(tjb, new LinkedList<MutableInputColumn<?>>());
-                listener.onRemove(tjb);
-            }
+            tjb.onRemoved();
         }
         return this;
     }
@@ -485,10 +472,7 @@ public final class AnalysisJobBuilder implements Closeable {
                 }
             }
 
-            List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
-            for (FilterChangeListener listener : listeners) {
-                listener.onRemove(filterJobBuilder);
-            }
+            filterJobBuilder.onRemoved();
         }
         return this;
     }
@@ -548,7 +532,8 @@ public final class AnalysisJobBuilder implements Closeable {
 
     public <A extends Analyzer<?>> AnalyzerJobBuilder<A> addAnalyzer(Class<A> analyzerClass) {
         final DescriptorProvider descriptorProvider = _configuration.getDescriptorProvider();
-        final AnalyzerBeanDescriptor<A> descriptor = descriptorProvider.getAnalyzerBeanDescriptorForClass(analyzerClass);
+        final AnalyzerBeanDescriptor<A> descriptor = descriptorProvider
+                .getAnalyzerBeanDescriptorForClass(analyzerClass);
         if (descriptor == null) {
             throw new IllegalArgumentException("No descriptor found for: " + analyzerClass);
         }
@@ -558,9 +543,7 @@ public final class AnalysisJobBuilder implements Closeable {
     public AnalysisJobBuilder removeAnalyzer(AnalyzerJobBuilder<?> ajb) {
         boolean removed = _analyzerJobBuilders.remove(ajb);
         if (removed) {
-            for (AnalyzerChangeListener listener : _analyzerChangeListeners) {
-                listener.onRemove(ajb);
-            }
+            ajb.onRemoved();
         }
         return this;
     }
@@ -568,9 +551,7 @@ public final class AnalysisJobBuilder implements Closeable {
     public AnalysisJobBuilder removeExplorer(ExplorerJobBuilder<?> ejb) {
         boolean removed = _explorerJobBuilders.remove(ejb);
         if (removed) {
-            for (ExplorerChangeListener listener : _explorerChangeListeners) {
-                listener.onRemove(ejb);
-            }
+            ejb.onRemoved();
         }
         return this;
     }
@@ -948,6 +929,10 @@ public final class AnalysisJobBuilder implements Closeable {
 
     public List<AnalyzerChangeListener> getAnalyzerChangeListeners() {
         return _analyzerChangeListeners;
+    }
+
+    public List<MergedOutcomeChangeListener> getMergedOutcomeChangeListeners() {
+        return _mergedOutcomeChangeListeners;
     }
 
     public List<ExplorerChangeListener> getExplorerChangeListeners() {

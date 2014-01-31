@@ -21,6 +21,7 @@ package org.eobjects.analyzer.job.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.OutputColumns;
@@ -55,14 +56,14 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
     private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
     private final List<String> _automaticOutputColumnNames = new ArrayList<String>();
     private final IdGenerator _idGenerator;
-    private final List<TransformerChangeListener> _transformerChangeListeners;
+    private final List<TransformerChangeListener> _localChangeListeners;
 
     public TransformerJobBuilder(AnalysisJobBuilder analysisJobBuilder, TransformerBeanDescriptor<T> descriptor,
-            IdGenerator idGenerator, List<TransformerChangeListener> transformerChangeListeners) {
+            IdGenerator idGenerator) {
         super(analysisJobBuilder, descriptor, TransformerJobBuilder.class);
         _id = "trans-" + idGenerator.nextId();
         _idGenerator = idGenerator;
-        _transformerChangeListeners = transformerChangeListeners;
+        _localChangeListeners = new ArrayList<TransformerChangeListener>(0);
     }
 
     /**
@@ -175,9 +176,9 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
     }
 
     public void onOutputChanged() {
-
         // notify listeners
-        for (TransformerChangeListener listener : _transformerChangeListeners) {
+        List<TransformerChangeListener> listeners = getAllListeners();
+        for (TransformerChangeListener listener : listeners) {
             listener.onOutputChanged(this, _outputColumns);
         }
     }
@@ -199,6 +200,21 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
     public String toString() {
         return "TransformerJobBuilder[transformer=" + getDescriptor().getDisplayName() + ",inputColumns="
                 + getInputColumns() + "]";
+    }
+
+    /**
+     * Builds a temporary list of all listeners, both global and local
+     * 
+     * @return
+     */
+    private List<TransformerChangeListener> getAllListeners() {
+        List<TransformerChangeListener> globalChangeListeners = getAnalysisJobBuilder().getTransformerChangeListeners();
+
+        List<TransformerChangeListener> list = new ArrayList<TransformerChangeListener>(globalChangeListeners.size()
+                + _localChangeListeners.size());
+        list.addAll(globalChangeListeners);
+        list.addAll(_localChangeListeners);
+        return list;
     }
 
     /**
@@ -233,8 +249,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
             getOutputColumns();
         }
 
-        List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(getAnalysisJobBuilder()
-                .getTransformerChangeListeners());
+        List<TransformerChangeListener> listeners = getAllListeners();
         for (TransformerChangeListener listener : listeners) {
             listener.onConfigurationChanged(this);
         }
@@ -243,8 +258,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
     @Override
     public void onRequirementChanged() {
         super.onRequirementChanged();
-        List<TransformerChangeListener> listeners = new ArrayList<TransformerChangeListener>(getAnalysisJobBuilder()
-                .getTransformerChangeListeners());
+        List<TransformerChangeListener> listeners = getAllListeners();
         for (TransformerChangeListener listener : listeners) {
             listener.onRequirementChanged(this);
         }
@@ -258,5 +272,35 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
     @Override
     public MutableInputColumn<?>[] getOutput() {
         return getOutputColumns().toArray(new MutableInputColumn<?>[0]);
+    }
+
+    /**
+     * Notification method invoked when transformer is removed.
+     */
+    protected void onRemoved() {
+        List<TransformerChangeListener> listeners = getAllListeners();
+        for (TransformerChangeListener listener : listeners) {
+            listener.onOutputChanged(this, new LinkedList<MutableInputColumn<?>>());
+            listener.onRemove(this);
+        }
+    }
+
+    /**
+     * Adds a change listener to this component
+     * 
+     * @param listener
+     */
+    public void addChangeListener(TransformerChangeListener listener) {
+        _localChangeListeners.add(listener);
+    }
+
+    /**
+     * Removes a change listener from this component
+     * 
+     * @param listener
+     * @return whether or not the listener was found and removed.
+     */
+    public boolean removeChangeListener(TransformerChangeListener listener) {
+        return _localChangeListeners.remove(listener);
     }
 }

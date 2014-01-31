@@ -28,37 +28,82 @@ import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 
 public final class ExplorerJobBuilder<A extends Explorer<?>> extends
-		AbstractBeanJobBuilder<ExplorerBeanDescriptor<A>, A, ExplorerJobBuilder<A>> {
+        AbstractBeanJobBuilder<ExplorerBeanDescriptor<A>, A, ExplorerJobBuilder<A>> {
 
-	public ExplorerJobBuilder(AnalysisJobBuilder analysisJobBuilder, ExplorerBeanDescriptor<A> descriptor) {
-		super(analysisJobBuilder, descriptor, ExplorerJobBuilder.class);
-	}
+    private final List<ExplorerChangeListener> _localChangeListeners;
 
-	public ExplorerJob toExplorerJob() throws IllegalStateException {
-		return toExplorerJob(true);
-	}
+    public ExplorerJobBuilder(AnalysisJobBuilder analysisJobBuilder, ExplorerBeanDescriptor<A> descriptor) {
+        super(analysisJobBuilder, descriptor, ExplorerJobBuilder.class);
+        _localChangeListeners = new ArrayList<ExplorerChangeListener>(0);
+    }
 
-	public ExplorerJob toExplorerJob(boolean validate) throws IllegalStateException {
-		if (validate && !isConfigured()) {
-			throw new IllegalStateException("Explorer job is not correctly configured");
-		}
+    public ExplorerJob toExplorerJob() throws IllegalStateException {
+        return toExplorerJob(true);
+    }
 
-		return new ImmutableExplorerJob(getName(), getDescriptor(),
-				new ImmutableBeanConfiguration(getConfiguredProperties()));
-	}
+    public ExplorerJob toExplorerJob(boolean validate) throws IllegalStateException {
+        if (validate && !isConfigured()) {
+            throw new IllegalStateException("Explorer job is not correctly configured");
+        }
 
-	@Override
-	public String toString() {
-		return "ExplorerJobBuilder[analyzer=" + getDescriptor().getDisplayName() + "]";
-	}
+        return new ImmutableExplorerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
+                getConfiguredProperties()));
+    }
 
-	@Override
-	public void onConfigurationChanged() {
-		super.onConfigurationChanged();
-		List<ExplorerChangeListener> listeners = new ArrayList<ExplorerChangeListener>(getAnalysisJobBuilder()
-				.getExplorerChangeListeners());
-		for (ExplorerChangeListener listener : listeners) {
-			listener.onConfigurationChanged(this);
-		}
-	}
+    @Override
+    public String toString() {
+        return "ExplorerJobBuilder[analyzer=" + getDescriptor().getDisplayName() + "]";
+    }
+
+    @Override
+    public void onConfigurationChanged() {
+        super.onConfigurationChanged();
+        List<ExplorerChangeListener> listeners = getAllListeners();
+        for (ExplorerChangeListener listener : listeners) {
+            listener.onConfigurationChanged(this);
+        }
+    }
+
+    /**
+     * Adds a change listener to this component
+     * 
+     * @param listener
+     */
+    public void addChangeListener(ExplorerChangeListener listener) {
+        _localChangeListeners.add(listener);
+    }
+
+    /**
+     * Removes a change listener from this component
+     * 
+     * @param listener
+     * @return whether or not the listener was found and removed.
+     */
+    public boolean removeChangeListener(ExplorerChangeListener listener) {
+        return _localChangeListeners.remove(listener);
+    }
+
+    /**
+     * Notification method invoked when transformer is removed.
+     */
+    protected void onRemoved() {
+        List<ExplorerChangeListener> listeners = getAllListeners();
+        for (ExplorerChangeListener listener : listeners) {
+            listener.onRemove(this);
+        }
+    }
+
+    /**
+     * Builds a temporary list of all listeners, both global and local
+     * 
+     * @return
+     */
+    private List<ExplorerChangeListener> getAllListeners() {
+        List<ExplorerChangeListener> globalChangeListeners = getAnalysisJobBuilder().getExplorerChangeListeners();
+        List<ExplorerChangeListener> list = new ArrayList<ExplorerChangeListener>(
+                globalChangeListeners.size() + _localChangeListeners.size());
+        list.addAll(globalChangeListeners);
+        list.addAll(_localChangeListeners);
+        return list;
+    }
 }

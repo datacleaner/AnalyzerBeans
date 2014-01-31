@@ -61,6 +61,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
     private final boolean _multipleJobsSupported;
     private final List<InputColumn<?>> _inputColumns;
     private final ConfiguredPropertyDescriptor _inputProperty;
+    private final List<AnalyzerChangeListener> _localChangeListeners;
 
     public AnalyzerJobBuilder(AnalysisJobBuilder analysisJobBuilder, AnalyzerBeanDescriptor<A> descriptor) {
         super(analysisJobBuilder, descriptor, AnalyzerJobBuilder.class);
@@ -84,6 +85,22 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
             _inputColumns = null;
             _inputProperty = null;
         }
+
+        _localChangeListeners = new ArrayList<AnalyzerChangeListener>(0);
+    }
+
+    /**
+     * Builds a temporary list of all listeners, both global and local
+     * 
+     * @return
+     */
+    private List<AnalyzerChangeListener> getAllListeners() {
+        List<AnalyzerChangeListener> globalChangeListeners = getAnalysisJobBuilder().getAnalyzerChangeListeners();
+        List<AnalyzerChangeListener> list = new ArrayList<AnalyzerChangeListener>(globalChangeListeners.size()
+                + _localChangeListeners.size());
+        list.addAll(globalChangeListeners);
+        list.addAll(_localChangeListeners);
+        return list;
     }
 
     public boolean isMultipleJobsDeterminedBy(ConfiguredPropertyDescriptor propertyDescriptor) {
@@ -294,8 +311,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
     @Override
     public void onConfigurationChanged() {
         super.onConfigurationChanged();
-        List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(getAnalysisJobBuilder()
-                .getAnalyzerChangeListeners());
+        List<AnalyzerChangeListener> listeners = getAllListeners();
         for (AnalyzerChangeListener listener : listeners) {
             listener.onConfigurationChanged(this);
         }
@@ -304,8 +320,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
     @Override
     public void onRequirementChanged() {
         super.onRequirementChanged();
-        List<AnalyzerChangeListener> listeners = new ArrayList<AnalyzerChangeListener>(getAnalysisJobBuilder()
-                .getAnalyzerChangeListeners());
+        List<AnalyzerChangeListener> listeners = getAllListeners();
         for (AnalyzerChangeListener listener : listeners) {
             listener.onRequirementChanged(this);
         }
@@ -313,5 +328,34 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
 
     public boolean isMultipleJobsSupported() {
         return _multipleJobsSupported;
+    }
+
+    /**
+     * Notification method invoked when transformer is removed.
+     */
+    protected void onRemoved() {
+        List<AnalyzerChangeListener> listeners = getAllListeners();
+        for (AnalyzerChangeListener listener : listeners) {
+            listener.onRemove(this);
+        }
+    }
+
+    /**
+     * Adds a change listener to this component
+     * 
+     * @param listener
+     */
+    public void addChangeListener(AnalyzerChangeListener listener) {
+        _localChangeListeners.add(listener);
+    }
+
+    /**
+     * Removes a change listener from this component
+     * 
+     * @param listener
+     * @return whether or not the listener was found and removed.
+     */
+    public boolean removeChangeListener(AnalyzerChangeListener listener) {
+        return _localChangeListeners.remove(listener);
     }
 }

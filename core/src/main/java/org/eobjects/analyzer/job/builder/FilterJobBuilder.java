@@ -34,89 +34,135 @@ import org.eobjects.analyzer.job.ImmutableFilterJob;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 
 public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> extends
-		AbstractBeanWithInputColumnsBuilder<FilterBeanDescriptor<F, C>, F, FilterJobBuilder<F, C>> implements
-		OutcomeSourceJob {
+        AbstractBeanWithInputColumnsBuilder<FilterBeanDescriptor<F, C>, F, FilterJobBuilder<F, C>> implements
+        OutcomeSourceJob {
 
-	// We keep a cached version of the resulting filter job because of
-	// references coming from other objects, particular LazyFilterOutcome.
-	private FilterJob _cachedJob;
-	private EnumMap<C, FilterOutcome> _outcomes;
+    // We keep a cached version of the resulting filter job because of
+    // references coming from other objects, particular LazyFilterOutcome.
+    private FilterJob _cachedJob;
+    private EnumMap<C, FilterOutcome> _outcomes;
 
-	public FilterJobBuilder(AnalysisJobBuilder analysisJobBuilder, FilterBeanDescriptor<F, C> descriptor) {
-		super(analysisJobBuilder, descriptor, FilterJobBuilder.class);
-		_outcomes = new EnumMap<C, FilterOutcome>(descriptor.getOutcomeCategoryEnum());
-		EnumSet<C> categories = descriptor.getOutcomeCategories();
-		for (C category : categories) {
-			_outcomes.put(category, new LazyFilterOutcome(this, category));
-		}
-	}
+    private final List<FilterChangeListener> _localChangeListeners;
 
-	public FilterJob toFilterJob() {
-		return toFilterJob(true);
-	}
+    public FilterJobBuilder(AnalysisJobBuilder analysisJobBuilder, FilterBeanDescriptor<F, C> descriptor) {
+        super(analysisJobBuilder, descriptor, FilterJobBuilder.class);
+        _outcomes = new EnumMap<C, FilterOutcome>(descriptor.getOutcomeCategoryEnum());
+        EnumSet<C> categories = descriptor.getOutcomeCategories();
+        for (C category : categories) {
+            _outcomes.put(category, new LazyFilterOutcome(this, category));
+        }
 
-	public FilterJob toFilterJob(boolean validate) {
-		if (validate && !isConfigured(true)) {
-			throw new IllegalStateException("Filter job is not correctly configured");
-		}
+        _localChangeListeners = new ArrayList<FilterChangeListener>(0);
+    }
 
-		if (_cachedJob == null) {
-			_cachedJob = new ImmutableFilterJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-					getConfiguredProperties()), getRequirement());
-		} else {
-			ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getName(), getDescriptor(),
-					new ImmutableBeanConfiguration(getConfiguredProperties()), getRequirement());
-			if (!newFilterJob.equals(_cachedJob)) {
-				_cachedJob = newFilterJob;
-			}
-		}
-		return _cachedJob;
-	}
+    public FilterJob toFilterJob() {
+        return toFilterJob(true);
+    }
 
-	@Override
-	public String toString() {
-		return "FilterJobBuilder[filter=" + getDescriptor().getDisplayName() + ",inputColumns=" + getInputColumns() + "]";
-	}
+    public FilterJob toFilterJob(boolean validate) {
+        if (validate && !isConfigured(true)) {
+            throw new IllegalStateException("Filter job is not correctly configured");
+        }
 
-	@Override
-	public void onConfigurationChanged() {
-		super.onConfigurationChanged();
-		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(getAnalysisJobBuilder()
-				.getFilterChangeListeners());
-		for (FilterChangeListener listener : listeners) {
-			listener.onConfigurationChanged(this);
-		}
-	}
+        if (_cachedJob == null) {
+            _cachedJob = new ImmutableFilterJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
+                    getConfiguredProperties()), getRequirement());
+        } else {
+            ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getName(), getDescriptor(),
+                    new ImmutableBeanConfiguration(getConfiguredProperties()), getRequirement());
+            if (!newFilterJob.equals(_cachedJob)) {
+                _cachedJob = newFilterJob;
+            }
+        }
+        return _cachedJob;
+    }
 
-	@Override
-	public void onRequirementChanged() {
-		super.onRequirementChanged();
-		List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(getAnalysisJobBuilder()
-				.getFilterChangeListeners());
-		for (FilterChangeListener listener : listeners) {
-			listener.onRequirementChanged(this);
-		}
-	}
+    /**
+     * Builds a temporary list of all listeners, both global and local
+     * 
+     * @return
+     */
+    private List<FilterChangeListener> getAllListeners() {
+        List<FilterChangeListener> globalChangeListeners = getAnalysisJobBuilder().getFilterChangeListeners();
+        List<FilterChangeListener> list = new ArrayList<FilterChangeListener>(globalChangeListeners.size()
+                + _localChangeListeners.size());
+        list.addAll(globalChangeListeners);
+        list.addAll(_localChangeListeners);
+        return list;
+    }
 
-	@Override
-	public FilterOutcome[] getOutcomes() {
-		Collection<FilterOutcome> outcomes = _outcomes.values();
-		return outcomes.toArray(new FilterOutcome[outcomes.size()]);
-	}
+    @Override
+    public String toString() {
+        return "FilterJobBuilder[filter=" + getDescriptor().getDisplayName() + ",inputColumns=" + getInputColumns()
+                + "]";
+    }
 
-	public FilterOutcome getOutcome(C category) {
-		FilterOutcome outcome = _outcomes.get(category);
-		if (outcome == null) {
-			throw new IllegalArgumentException(category + " is not a valid category for " + this);
-		}
-		return outcome;
-	}
+    @Override
+    public void onConfigurationChanged() {
+        super.onConfigurationChanged();
+        List<FilterChangeListener> listeners = getAllListeners();
+        for (FilterChangeListener listener : listeners) {
+            listener.onConfigurationChanged(this);
+        }
+    }
 
-	public FilterOutcome getOutcome(Object category) {
-		FilterOutcome outcome = _outcomes.get(category);
-		if (outcome == null) {
-			throw new IllegalArgumentException(category + " is not a valid category for " + this);
-		}
-		return outcome;
-	}
+    @Override
+    public void onRequirementChanged() {
+        super.onRequirementChanged();
+        List<FilterChangeListener> listeners = getAllListeners();
+        for (FilterChangeListener listener : listeners) {
+            listener.onRequirementChanged(this);
+        }
+    }
+
+    @Override
+    public FilterOutcome[] getOutcomes() {
+        Collection<FilterOutcome> outcomes = _outcomes.values();
+        return outcomes.toArray(new FilterOutcome[outcomes.size()]);
+    }
+
+    public FilterOutcome getOutcome(C category) {
+        FilterOutcome outcome = _outcomes.get(category);
+        if (outcome == null) {
+            throw new IllegalArgumentException(category + " is not a valid category for " + this);
+        }
+        return outcome;
+    }
+
+    public FilterOutcome getOutcome(Object category) {
+        FilterOutcome outcome = _outcomes.get(category);
+        if (outcome == null) {
+            throw new IllegalArgumentException(category + " is not a valid category for " + this);
+        }
+        return outcome;
+    }
+
+    /**
+     * Notification method invoked when transformer is removed.
+     */
+    protected void onRemoved() {
+        List<FilterChangeListener> listeners = getAllListeners();
+        for (FilterChangeListener listener : listeners) {
+            listener.onRemove(this);
+        }
+    }
+    
+    /**
+     * Adds a change listener to this component
+     * 
+     * @param listener
+     */
+    public void addChangeListener(FilterChangeListener listener) {
+        _localChangeListeners.add(listener);
+    }
+
+    /**
+     * Removes a change listener from this component
+     * 
+     * @param listener
+     * @return whether or not the listener was found and removed.
+     */
+    public boolean removeChangeListener(FilterChangeListener listener) {
+        return _localChangeListeners.remove(listener);
+    }
 }
