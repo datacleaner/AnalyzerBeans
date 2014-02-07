@@ -329,9 +329,9 @@ public class ClusterTestHelper {
                 for (InputRow row : rows) {
                     String rowString = row.toString();
                     boolean assert1 = rowString
-                            .equals("MetaModelInputRow[Row[values=[Denmark, null, 145, Jytte, Petersen]]]");
+                            .equals("MetaModelInputRow[Row[values=[145, Jytte, Petersen, Denmark, null]]]");
                     boolean assert2 = rowString
-                            .equals("MetaModelInputRow[Row[values=[Denmark, null, 227, Palle, Ibsen]]]");
+                            .equals("MetaModelInputRow[Row[values=[227, Palle, Ibsen, Denmark, null]]]");
 
                     Assert.assertTrue("Unexpected 'Denmark' row: " + rowString, assert1 || assert2);
                 }

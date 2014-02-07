@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job.runner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -60,6 +60,7 @@ import org.eobjects.analyzer.job.tasks.InitializeTask;
 import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
+import org.eobjects.analyzer.util.SystemProperties;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
 import org.eobjects.metamodel.data.Row;
@@ -80,7 +81,7 @@ public final class RowProcessingPublisher {
 
     private final RowProcessingPublishers _publishers;
     private final Table _table;
-    private final Set<Column> _physicalColumns = new HashSet<Column>();
+    private final Set<Column> _physicalColumns = new LinkedHashSet<Column>();
     private final List<RowProcessingConsumer> _consumers = new ArrayList<RowProcessingConsumer>();
     private final LazyRef<RowProcessingQueryOptimizer> _queryOptimizerRef;
     private final AtomicBoolean _successful = new AtomicBoolean(true);
@@ -96,6 +97,19 @@ public final class RowProcessingPublisher {
         _table = table;
 
         _queryOptimizerRef = createQueryOptimizerRef();
+
+        if (!"true".equalsIgnoreCase(SystemProperties.QUERY_SELECTCLAUSE_OPTIMIZE)) {
+            final Collection<InputColumn<?>> sourceColumns = publishers.getAnalysisJob().getSourceColumns();
+            final List<Column> columns = new ArrayList<Column>();
+            for (InputColumn<?> sourceColumn : sourceColumns) {
+                Column column = sourceColumn.getPhysicalColumn();
+                if (column != null && table.equals(column.getTable())) {
+                    columns.add(column);
+                }
+            }
+
+            addPhysicalColumns(columns.toArray(new Column[columns.size()]));
+        }
     }
 
     /**

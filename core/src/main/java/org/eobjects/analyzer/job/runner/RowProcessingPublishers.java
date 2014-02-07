@@ -52,7 +52,7 @@ import org.eobjects.metamodel.schema.Table;
  * {@link RowProcessingPublisher}s.
  */
 public final class RowProcessingPublishers {
-
+    
     private final AnalysisJob _analysisJob;
     private final AnalysisListener _analysisListener;
     private final TaskRunner _taskRunner;
