@@ -46,6 +46,31 @@ public class CompletenessAnalyzerTest extends TestCase {
         AnalyzerBeanDescriptor<CompletenessAnalyzer> descriptor = Descriptors.ofAnalyzer(CompletenessAnalyzer.class);
         assertTrue(descriptor.isDistributable());
     }
+    
+    public void testAllFieldsEvaluationMode() throws Exception {
+        final RowAnnotationFactory annotationFactory = new InMemoryRowAnnotationFactory();
+
+        final InputColumn<?> col1 = new MockInputColumn<String>("foo");
+        final InputColumn<?> col2 = new MockInputColumn<String>("bar");
+
+        final CompletenessAnalyzer analyzer = new CompletenessAnalyzer();
+        analyzer._evaluationMode = CompletenessAnalyzer.EvaluationMode.ALL_FIELDS;
+        analyzer._annotationFactory = annotationFactory;
+        analyzer._invalidRecords = annotationFactory.createAnnotation();
+        analyzer._valueColumns = new InputColumn[] { col1, col2 };
+        analyzer._conditions = new CompletenessAnalyzer.Condition[] { CompletenessAnalyzer.Condition.NOT_NULL, CompletenessAnalyzer.Condition.NOT_NULL };
+
+        analyzer.init();
+
+        analyzer.run(new MockInputRow(1001).put(col1, null).put(col2, null), 1);
+        analyzer.run(new MockInputRow(1002).put(col1, "hello").put(col2, null), 1);
+        analyzer.run(new MockInputRow(1002).put(col1, null).put(col2, "world"), 1);
+        analyzer.run(new MockInputRow(1002).put(col1, "hello").put(col2, "world"), 1);
+
+        assertEquals(4, analyzer.getResult().getTotalRowCount());
+        assertEquals(1, analyzer.getResult().getInvalidRowCount());
+        assertEquals(3, analyzer.getResult().getValidRowCount());
+    }
 
     public void testConfigurableBeanConfiguration() throws Exception {
         AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());

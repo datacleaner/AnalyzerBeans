@@ -58,6 +58,22 @@ public class CompletenessAnalyzer implements Analyzer<CompletenessAnalyzerResult
             return _name;
         }
     }
+    
+    public static enum EvaluationMode implements HasName {
+        ALL_FIELDS("When all fields are incomplete, the record is incomplete"), ANY_FIELD("When any field is incomplete, the record is incomplete");
+
+        private final String _name;
+        
+        private EvaluationMode(String name) {
+            _name = name;
+        }
+        
+        @Override
+        public String getName() {
+            return _name;
+        }
+        
+    }
 
     @Inject
     @Configured("Values")
@@ -68,6 +84,10 @@ public class CompletenessAnalyzer implements Analyzer<CompletenessAnalyzerResult
     @Configured("Conditions")
     @Description("The conditions of which a value is determined to be filled or not")
     Condition[] _conditions;
+    
+    @Inject
+    @Configured("Evaluation mode")
+    EvaluationMode _evaluationMode = EvaluationMode.ANY_FIELD;
 
     @Inject
     @Provided
@@ -91,6 +111,7 @@ public class CompletenessAnalyzer implements Analyzer<CompletenessAnalyzerResult
     @Override
     public void run(InputRow row, int distinctCount) {
         _rowCount.addAndGet(distinctCount);
+        boolean allInvalid = true;
         for (int i = 0; i < _valueColumns.length; i++) {
             final Object value = row.getValue(_valueColumns[i]);
             final boolean valid;
@@ -99,10 +120,18 @@ public class CompletenessAnalyzer implements Analyzer<CompletenessAnalyzerResult
             } else {
                 valid = value != null;
             }
-            if (!valid) {
+            if (_evaluationMode == EvaluationMode.ANY_FIELD && !valid) {
                 _annotationFactory.annotate(row, distinctCount, _invalidRecords);
                 return;
             }
+            
+            if (valid) {
+                allInvalid = false;
+            }
+        }
+        if (_evaluationMode == EvaluationMode.ALL_FIELDS && allInvalid) {
+            _annotationFactory.annotate(row, distinctCount, _invalidRecords);
+            return;
         }
     }
 
