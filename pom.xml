@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -6,10 +7,11 @@
 		<javadoc.version>2.9</javadoc.version>
 		<slf4j.version>1.7.4</slf4j.version>
 		<junit.version>4.11</junit.version>
-		<metamodel.version>3.4.8</metamodel.version>
+		<metamodel.version>3.4.9-SNAPSHOT</metamodel.version>
 		<easymock.version>3.1</easymock.version>
 		<scala.version>2.10.2</scala.version>
 		<httpcomponents.version>4.2.3</httpcomponents.version>
+		<guava.version>16.0.1</guava.version>
 	</properties>
 	<parent>
 		<!-- Uses the OSS sonatype nexus repository for distribution -->
@@ -411,6 +413,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.scala-lang</groupId>
 				<artifactId>scala-library</artifactId>
