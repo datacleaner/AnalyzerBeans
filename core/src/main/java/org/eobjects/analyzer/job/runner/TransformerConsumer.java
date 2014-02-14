@@ -20,7 +20,7 @@
 package org.eobjects.analyzer.job.runner;
 
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
@@ -34,6 +34,9 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector.Listener;
 
+/**
+ * {@link RowProcessingConsumer} implementation for {@link Transformer}s.
+ */
 final class TransformerConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
     private final AnalysisJob _job;
@@ -139,17 +142,18 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
         }
 
         final Listener listener = new Listener() {
-            private AtomicBoolean first = new AtomicBoolean(true);
+            private AtomicInteger recordNumber = new AtomicInteger(0);
 
             @Override
             public void onValues(Object[] values) {
-                boolean isFirst = first.getAndSet(false);
+                int recordNo = recordNumber.incrementAndGet();
+                boolean isFirst = recordNo == 1;
                 final TransformedInputRow resultRow;
                 if (isFirst) {
                     // retain the first record's id
                     resultRow = new TransformedInputRow(row);
                 } else {
-                    resultRow = new TransformedInputRow(row, _idGenerator.nextVirtualRowId());
+                    resultRow = new TransformedInputRow(row, getNextVirtualRowId(row, recordNo));
                 }
 
                 addValuesToRow(resultRow, outputColumns, values);
@@ -167,6 +171,19 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
                 throw new UnsupportedOperationException("Unsupported output row collector type: " + outputRowCollector);
             }
         }
+    }
+
+    private int getNextVirtualRowId(InputRow row, int recordNo) {
+        if (_idGenerator == null) {
+            // this can more or less never happen, except in test cases or in
+            // cases where the consumers are programmatically being used outside
+            // of an AnalysisRunner. There's a risk then here that we get the
+            // same row ID twice, but that's life :-P
+            int offset = Integer.MAX_VALUE;
+            int hiLoIntervalOffset = row.getId() * 1000;
+            return offset - hiLoIntervalOffset + recordNo;
+        }
+        return _idGenerator.nextVirtualRowId();
     }
 
     private void addValuesToRow(TransformedInputRow resultRow, final InputColumn<?>[] outputColumns, Object[] values) {
