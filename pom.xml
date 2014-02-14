@@ -10,7 +10,7 @@
 		<metamodel.version>3.4.9-SNAPSHOT</metamodel.version>
 		<easymock.version>3.2</easymock.version>
 		<scala.version>2.10.3</scala.version>
-		<httpcomponents.version>4.3.1</httpcomponents.version>
+		<httpcomponents.version>4.2.5</httpcomponents.version>
 		<guava.version>16.0.1</guava.version>
 	</properties>
 	<parent>
