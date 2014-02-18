@@ -7,7 +7,7 @@
 		<javadoc.version>2.9.1</javadoc.version>
 		<slf4j.version>1.7.6</slf4j.version>
 		<junit.version>4.11</junit.version>
-		<metamodel.version>3.4.9-SNAPSHOT</metamodel.version>
+		<metamodel.version>3.4.9</metamodel.version>
 		<easymock.version>3.2</easymock.version>
 		<scala.version>2.10.3</scala.version>
 		<httpcomponents.version>4.2.5</httpcomponents.version>
@@ -151,7 +151,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.3</version>
 				<dependencies>
 					<dependency>
 						<!-- Provide support for scp based deployment of site -->
