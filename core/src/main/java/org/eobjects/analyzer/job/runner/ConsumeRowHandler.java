@@ -29,6 +29,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.tasks.Task;
@@ -47,21 +48,50 @@ public class ConsumeRowHandler {
     private static final Logger logger = LoggerFactory.getLogger(ConsumeRowHandler.class);
 
     private final List<RowProcessingConsumer> _consumers;
+    private final Collection<? extends Outcome> _alwaysSatisfiedOutcomes;
 
     public static class Configuration {
         public boolean includeNonDistributedTasks = true;
         public AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
         public boolean includeAnalyzers = true;
+        public Collection<? extends Outcome> alwaysSatisfiedOutcomes;
     }
 
+    /**
+     * Builds a {@link ConsumeRowHandler} based on a job, and the configuration
+     * to read the job's consumers
+     * 
+     * @param job
+     * @param analyzerBeansConfiguration
+     * @param configuration
+     */
     public ConsumeRowHandler(AnalysisJob job, AnalyzerBeansConfiguration analyzerBeansConfiguration,
             Configuration configuration) {
         // TODO: Verify that there is only one source table
         _consumers = extractConsumers(job, analyzerBeansConfiguration, configuration);
+        _alwaysSatisfiedOutcomes = configuration.alwaysSatisfiedOutcomes;
     }
 
+    /**
+     * Builds a {@link ConsumeRowHandler} based on a list of consumers.
+     * 
+     * @param consumers
+     */
     public ConsumeRowHandler(List<RowProcessingConsumer> consumers) {
+        this(consumers, null);
+    }
+
+    /**
+     * Builds a {@link ConsumeRowHandler} based on a list of consumers as well
+     * as a collection of always-satisfied outcomes.
+     * 
+     * @param consumers
+     * @param alwaysSatisfiedOutcomes
+     */
+    public ConsumeRowHandler(List<RowProcessingConsumer> consumers,
+            Collection<? extends Outcome> alwaysSatisfiedOutcomes) {
         _consumers = consumers;
+        _alwaysSatisfiedOutcomes = alwaysSatisfiedOutcomes;
     }
 
     /**
@@ -74,7 +104,7 @@ public class ConsumeRowHandler {
     }
 
     public List<InputRow> consume(InputRow row) {
-        OutcomeSink outcomes = new OutcomeSinkImpl();
+        OutcomeSink outcomes = new OutcomeSinkImpl(_alwaysSatisfiedOutcomes);
         ConsumeRowHandlerDelegate delegate = new ConsumeRowHandlerDelegate(_consumers, row, 0, outcomes);
         List<InputRow> result = delegate.consume();
         return result;

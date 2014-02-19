@@ -39,8 +39,12 @@ public final class OutcomeSinkImpl implements OutcomeSink {
     }
 
     public OutcomeSinkImpl(Collection<? extends Outcome> availableOutcomes) {
-        // always take a copy of the collection argument
-        outcomes = new ArrayList<Outcome>(availableOutcomes);
+        if (availableOutcomes == null) {
+            outcomes = new ArrayList<Outcome>();
+        } else {
+            // always take a copy of the collection argument
+            outcomes = new ArrayList<Outcome>(availableOutcomes);
+        }
     }
 
     @Override

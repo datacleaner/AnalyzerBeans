@@ -95,15 +95,16 @@ public class ConsumeRowHandlerTest extends TestCase {
 
         List<InputRow> result;
 
-        result = handler.consume(new MockInputRow().put(nameColumn, "Kasper").put(ageColumn, null)
-                .put(countryColumn, null));
+        MockInputRow inputRow = new MockInputRow().put(nameColumn, "Kasper").put(ageColumn, null)
+                .put(countryColumn, null);
+        result = handler.consume(inputRow);
 
         assertEquals(1, result.size());
         InputRow outputRow = result.get(0);
         assertEquals("TransformedInputRow[values={"
                 + "TransformedInputColumn[id=trans-0001-0002,name=mock output]=mocked: Kasper, "
-                + "TransformedInputColumn[id=trans-0003-0004,name=mock output]=mocked: mocked: Kasper},"
-                + "delegate=MockInputRow[id=-2147483648]]", outputRow.toString());
+                + "TransformedInputColumn[id=trans-0003-0004,name=mock output]=mocked: mocked: Kasper}," + "delegate="
+                + inputRow.toString() + "]", outputRow.toString());
 
         List<InputColumn<?>> outputColumns = outputRow.getInputColumns();
         assertEquals(5, outputColumns.size());
@@ -131,31 +132,33 @@ public class ConsumeRowHandlerTest extends TestCase {
 
         List<InputRow> result;
 
-        result = handler.consume(new MockInputRow(100).put(nameColumn, "Vera").put(ageColumn, 3).put(countryColumn, "DK"));
+        MockInputRow inputRow = new MockInputRow(100).put(nameColumn, "Vera").put(ageColumn, 3)
+                .put(countryColumn, "DK");
+        result = handler.consume(inputRow);
 
         assertEquals(3, result.size());
         InputRow outputRow = result.get(0);
         assertEquals("TransformedInputRow[values={"
                 + "TransformedInputColumn[id=trans-0001-0002,name=Mock multi row transformer (1)]=1, "
                 + "TransformedInputColumn[id=trans-0001-0003,name=Mock multi row transformer (2)]=42, "
-                + "TransformedInputColumn[id=trans-0004-0005,name=mock output]=mocked: 1},"
-                + "delegate=MockInputRow[id=100]]", outputRow.toString());
+                + "TransformedInputColumn[id=trans-0004-0005,name=mock output]=mocked: 1}," + "delegate=" + inputRow
+                + "]", outputRow.toString());
         assertEquals(100, outputRow.getId());
 
         outputRow = result.get(1);
         assertEquals("TransformedInputRow[values={"
                 + "TransformedInputColumn[id=trans-0001-0002,name=Mock multi row transformer (1)]=2, "
                 + "TransformedInputColumn[id=trans-0001-0003,name=Mock multi row transformer (2)]=42, "
-                + "TransformedInputColumn[id=trans-0004-0005,name=mock output]=mocked: 2},"
-                + "delegate=MockInputRow[id=100]]", outputRow.toString());
+                + "TransformedInputColumn[id=trans-0004-0005,name=mock output]=mocked: 2}," + "delegate=" + inputRow
+                + "]", outputRow.toString());
         assertEquals(2147383649, outputRow.getId());
-        
+
         outputRow = result.get(2);
         assertEquals("TransformedInputRow[values={"
                 + "TransformedInputColumn[id=trans-0001-0002,name=Mock multi row transformer (1)]=3, "
                 + "TransformedInputColumn[id=trans-0001-0003,name=Mock multi row transformer (2)]=42, "
-                + "TransformedInputColumn[id=trans-0004-0005,name=mock output]=mocked: 3},"
-                + "delegate=MockInputRow[id=100]]", outputRow.toString());
+                + "TransformedInputColumn[id=trans-0004-0005,name=mock output]=mocked: 3}," + "delegate=" + inputRow
+                + "]", outputRow.toString());
         assertEquals(2147383650, outputRow.getId());
 
         List<InputColumn<?>> outputColumns = outputRow.getInputColumns();

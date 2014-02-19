@@ -305,6 +305,7 @@ public final class RowProcessingPublisher {
             int numTasks = 0;
 
             try {
+                final ConsumeRowHandler consumeRowHandler = new ConsumeRowHandler(consumers, availableOutcomes);
                 while (dataSet.next()) {
                     if (taskListener.isErrornous()) {
                         break;
@@ -313,10 +314,9 @@ public final class RowProcessingPublisher {
                     final Row metaModelRow = dataSet.getRow();
                     final int rowId = idGenerator.nextPhysicalRowId();
                     final MetaModelInputRow inputRow = new MetaModelInputRow(rowId, metaModelRow);
-                    final OutcomeSink outcomes = new OutcomeSinkImpl(availableOutcomes);
 
-                    final ConsumeRowTask task = new ConsumeRowTask(consumers, 0, rowProcessingMetrics, inputRow,
-                            analysisListener, outcomes);
+                    final ConsumeRowTask task = new ConsumeRowTask(consumeRowHandler, rowProcessingMetrics, inputRow,
+                            analysisListener);
                     taskRunner.run(task, taskListener);
 
                     numTasks++;
