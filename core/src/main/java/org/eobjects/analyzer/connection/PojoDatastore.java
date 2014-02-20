@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.connection;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eobjects.metamodel.UpdateableDataContext;
@@ -39,6 +40,14 @@ public class PojoDatastore implements UpdateableDatastore, Serializable {
 
     public PojoDatastore(String name, List<TableDataProvider<?>> tableDataProviders) {
         this(name, name, tableDataProviders);
+    }
+
+    public PojoDatastore(String name, TableDataProvider<?>... tableDataProviders) {
+        this(name, name, Arrays.asList(tableDataProviders));
+    }
+
+    public PojoDatastore(String name, String schemaName, TableDataProvider<?>... tableDataProviders) {
+        this(name, schemaName, Arrays.asList(tableDataProviders));
     }
 
     public PojoDatastore(String datastoreName, String schemaName, List<TableDataProvider<?>> tableDataProviders) {

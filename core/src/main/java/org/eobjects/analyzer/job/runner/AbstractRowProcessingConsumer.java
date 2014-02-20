@@ -45,6 +45,11 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 	public final boolean satisfiedForConsume(Outcome[] outcomes, InputRow row) {
 		return (satisfiedOutcomesForConsume(outcomes) && satisfiedInputsForConsume(row));
 	}
+	
+	@Override
+	public InputColumn<?>[] getOutputColumns() {
+	    return new InputColumn[0];
+	}
 
 	private boolean satisfiedInputsForConsume(InputRow row) {
 		boolean isSatisfiedInputColumns = true;

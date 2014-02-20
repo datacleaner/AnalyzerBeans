@@ -93,11 +93,16 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
     public Transformer<?> getComponent() {
         return _transformer;
     }
+    
+    @Override
+    public InputColumn<?>[] getOutputColumns() {
+        return _transformerJob.getOutput();
+    }
 
     @Override
     public void consume(final InputRow row, final int distinctCount, final OutcomeSink outcomes,
             final RowProcessingChain chain) {
-        final InputColumn<?>[] outputColumns = _transformerJob.getOutput();
+        final InputColumn<?>[] outputColumns = getOutputColumns();
 
         registerListener(_transformer, row, outcomes, chain, outputColumns);
 

@@ -34,95 +34,115 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MockInputRow extends AbstractInputRow {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final AtomicInteger _idGenerator = new AtomicInteger(Integer.MIN_VALUE);
+    private static final AtomicInteger _idGenerator = new AtomicInteger(Integer.MIN_VALUE);
 
-	private final Map<InputColumn<?>, Object> _values = new LinkedHashMap<InputColumn<?>, Object>();
-	private final int _id;
+    private final Map<InputColumn<?>, Object> _values;
+    private final int _id;
 
-	public MockInputRow() {
-		this(_idGenerator.getAndIncrement());
-	}
+    public MockInputRow() {
+        this(_idGenerator.getAndIncrement());
+    }
 
-	public MockInputRow(int id) {
-		_id = id;
-	}
+    public MockInputRow(int id, Map<InputColumn<?>, Object> values) {
+        _values = values;
+        _id = id;
+    }
 
-	public MockInputRow(InputColumn<?>[] columns, Object[] values) {
-		this(_idGenerator.getAndIncrement(), columns, values);
-	}
+    public MockInputRow(Map<InputColumn<?>, Object> values) {
+        this(_idGenerator.getAndIncrement(), values);
+    }
 
-	public MockInputRow(int id, InputColumn<?>[] columns, Object[] values) {
-		this(id);
-		for (int i = 0; i < values.length; i++) {
-			put(columns[i], values[i]);
-		}
-	}
+    public MockInputRow(int id) {
+        this(id, new LinkedHashMap<InputColumn<?>, Object>());
+    }
 
-	@Override
-	public int getId() {
-		return _id;
-	}
+    public MockInputRow(InputColumn<?>[] columns, Object[] values) {
+        this(_idGenerator.getAndIncrement(), columns, values);
+    }
 
-	@Override
-	public List<InputColumn<?>> getInputColumns() {
-		return new ArrayList<InputColumn<?>>(_values.keySet());
-	}
+    public MockInputRow(int id, InputColumn<?>[] columns, Object[] values) {
+        this(id);
+        for (int i = 0; i < values.length; i++) {
+            put(columns[i], values[i]);
+        }
+    }
 
-	@Override
-	public boolean containsInputColumn(InputColumn<?> inputColumn) {
-		return _values.containsKey(inputColumn);
-	}
+    @Override
+    public int getId() {
+        return _id;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E> E getValueInternal(InputColumn<E> column) {
-		return (E) _values.get(column);
-	}
+    @Override
+    public List<InputColumn<?>> getInputColumns() {
+        return new ArrayList<InputColumn<?>>(_values.keySet());
+    }
 
-	/**
-	 * Puts/adds a new value to the row.
-	 * 
-	 * @param column
-	 * @param value
-	 * @return
-	 */
-	public MockInputRow put(InputColumn<?> column, Object value) {
-		_values.put(column, value);
-		return this;
-	}
+    @Override
+    public boolean containsInputColumn(InputColumn<?> inputColumn) {
+        return _values.containsKey(inputColumn);
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + _id;
-		result = prime * result + ((_values == null) ? 0 : _values.hashCode());
-		return result;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E> E getValueInternal(InputColumn<E> column) {
+        return (E) _values.get(column);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		MockInputRow other = (MockInputRow) obj;
-		if (_id != other._id)
-			return false;
-		if (_values == null) {
-			if (other._values != null)
-				return false;
-		} else if (!_values.equals(other._values))
-			return false;
-		return true;
-	}
+    /**
+     * Puts/adds a new value to the row.
+     * 
+     * @param column
+     * @param value
+     * @return
+     */
+    public MockInputRow put(InputColumn<?> column, Object value) {
+        _values.put(column, value);
+        return this;
+    }
 
-	@Override
-	public String toString() {
-		return "MockInputRow[id=" + _id + "]";
-	}
+    /**
+     * Puts/adds new values to the row.
+     * 
+     * @param values
+     * @return
+     */
+    public MockInputRow putAll(Map<InputColumn<?>, Object> values) {
+        _values.putAll(values);
+        return this;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + _id;
+        result = prime * result + ((_values == null) ? 0 : _values.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MockInputRow other = (MockInputRow) obj;
+        if (_id != other._id)
+            return false;
+        if (_values == null) {
+            if (other._values != null)
+                return false;
+        } else if (!_values.equals(other._values))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "MockInputRow[id=" + _id + "]";
+    }
 }

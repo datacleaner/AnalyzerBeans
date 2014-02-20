@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.Outcome;
@@ -35,13 +36,15 @@ import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
+import org.eobjects.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Object that can handle the task of consuming rows.
- * 
- * TODO: Improve doc
+ * Object that can handle the task of consuming a number of rows. The
+ * {@link ConsumeRowHandler} is internally used to execute all necesary
+ * components for every record, but it can also be used as a utility if
+ * AnalyzerBeans jobs are being embedded or applied in externally.
  */
 public class ConsumeRowHandler {
 
@@ -55,6 +58,7 @@ public class ConsumeRowHandler {
         public AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
         public boolean includeAnalyzers = true;
         public Collection<? extends Outcome> alwaysSatisfiedOutcomes;
+        public Table table;
     }
 
     /**
@@ -67,7 +71,6 @@ public class ConsumeRowHandler {
      */
     public ConsumeRowHandler(AnalysisJob job, AnalyzerBeansConfiguration analyzerBeansConfiguration,
             Configuration configuration) {
-        // TODO: Verify that there is only one source table
         _consumers = extractConsumers(job, analyzerBeansConfiguration, configuration);
         _alwaysSatisfiedOutcomes = configuration.alwaysSatisfiedOutcomes;
     }
@@ -103,6 +106,23 @@ public class ConsumeRowHandler {
         return _consumers;
     }
 
+    /**
+     * Gets the output columns produced by all the consumers of this
+     * {@link ConsumeRowHandler}.
+     * 
+     * @return
+     */
+    public List<InputColumn<?>> getOutputColumns() {
+        List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
+        for (RowProcessingConsumer consumer : _consumers) {
+            InputColumn<?>[] outputColumns = consumer.getOutputColumns();
+            for (InputColumn<?> outputColumn : outputColumns) {
+                result.add(outputColumn);
+            }
+        }
+        return result;
+    }
+
     public List<InputRow> consume(InputRow row) {
         OutcomeSink outcomes = new OutcomeSinkImpl(_alwaysSatisfiedOutcomes);
         ConsumeRowHandlerDelegate delegate = new ConsumeRowHandlerDelegate(_consumers, row, 0, outcomes);
@@ -131,13 +151,21 @@ public class ConsumeRowHandler {
         final RowProcessingPublishers rowProcessingPublishers = new RowProcessingPublishers(analysisJob,
                 analysisListener, taskRunner, lifeCycleHelper, sourceColumnFinder);
 
-        final Collection<RowProcessingPublisher> publisherCollection = rowProcessingPublishers
-                .getRowProcessingPublishers();
-
-        // TODO: Throw if not correct
-        assert publisherCollection.size() == 1;
-
-        final RowProcessingPublisher publisher = publisherCollection.iterator().next();
+        final RowProcessingPublisher publisher;
+        if (configuration.table != null) {
+            publisher = rowProcessingPublishers.getRowProcessingPublisher(configuration.table);
+            if (publisher == null) {
+                throw new IllegalArgumentException("Job does not consume records from table: " + configuration.table);
+            }
+        } else {
+            final Collection<RowProcessingPublisher> publisherCollection = rowProcessingPublishers
+                    .getRowProcessingPublishers();
+            if (publisherCollection.size() > 1) {
+                throw new IllegalArgumentException(
+                        "Job consumes multiple tables, but ConsumeRowHandler can only handle a single table's components. Please specify a Table constructor argument.");
+            }
+            publisher = publisherCollection.iterator().next();
+        }
 
         final AtomicReference<Throwable> errorReference = new AtomicReference<Throwable>();
 

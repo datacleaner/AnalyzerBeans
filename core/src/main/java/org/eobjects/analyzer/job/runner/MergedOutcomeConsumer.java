@@ -32,83 +32,88 @@ import org.slf4j.LoggerFactory;
 
 final class MergedOutcomeConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
-	private static final Logger logger = LoggerFactory.getLogger(MergedOutcomeConsumer.class);
-	private final MergedOutcomeJob _mergedOutcomeJob;
+    private static final Logger logger = LoggerFactory.getLogger(MergedOutcomeConsumer.class);
+    private final MergedOutcomeJob _mergedOutcomeJob;
 
-	public MergedOutcomeConsumer(MergedOutcomeJob mergedOutcomeJob) {
-		super(mergedOutcomeJob, mergedOutcomeJob);
-		_mergedOutcomeJob = mergedOutcomeJob;
-	}
+    public MergedOutcomeConsumer(MergedOutcomeJob mergedOutcomeJob) {
+        super(mergedOutcomeJob, mergedOutcomeJob);
+        _mergedOutcomeJob = mergedOutcomeJob;
+    }
 
-	public MergedOutcomeJob getMergedOutcomeJob() {
-		return _mergedOutcomeJob;
-	}
+    public MergedOutcomeJob getMergedOutcomeJob() {
+        return _mergedOutcomeJob;
+    }
 
-	@Override
-	public boolean isConcurrent() {
-		return true;
-	}
+    @Override
+    public boolean isConcurrent() {
+        return true;
+    }
 
-	@Override
-	public Object getComponent() {
-		// no actual component
-		return null;
-	}
+    @Override
+    public Object getComponent() {
+        // no actual component
+        return null;
+    }
 
-	@Override
-	public InputColumn<?>[] getRequiredInput() {
-		Set<InputColumn<?>> columns = new HashSet<InputColumn<?>>();
-		MergeInput[] mergeInputs = _mergedOutcomeJob.getMergeInputs();
-		for (MergeInput mergeInput : mergeInputs) {
-			InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
-			for (InputColumn<?> inputColumn : inputColumns) {
-				columns.add(inputColumn);
-			}
-		}
-		return columns.toArray(new InputColumn[columns.size()]);
-	}
+    @Override
+    public InputColumn<?>[] getRequiredInput() {
+        Set<InputColumn<?>> columns = new HashSet<InputColumn<?>>();
+        MergeInput[] mergeInputs = _mergedOutcomeJob.getMergeInputs();
+        for (MergeInput mergeInput : mergeInputs) {
+            InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
+            for (InputColumn<?> inputColumn : inputColumns) {
+                columns.add(inputColumn);
+            }
+        }
+        return columns.toArray(new InputColumn[columns.size()]);
+    }
 
-	@Override
-	public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
-		TransformedInputRow result = new TransformedInputRow(row);
+    @Override
+    public InputColumn<?>[] getOutputColumns() {
+        return _mergedOutcomeJob.getOutput();
+    }
 
-		InputColumn<?>[] output = _mergedOutcomeJob.getOutput();
-		if (output != null && output.length > 0) {
-			MergeInput[] mergeInputs = _mergedOutcomeJob.getMergeInputs();
-			MergeInput currentMergeInput = null;
-			for (MergeInput mergeInput : mergeInputs) {
-				if (outcomes.contains(mergeInput.getOutcome())) {
-					currentMergeInput = mergeInput;
-					break;
-				}
-			}
+    @Override
+    public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
+        TransformedInputRow result = new TransformedInputRow(row);
 
-			if (currentMergeInput == null) {
-				logger.error(
-						"Could not determine current merge input state.\nAvailable outcomes are: {}\nMerged outcomes are: {}",
-						outcomes.getOutcomes(), _mergedOutcomeJob.getMergeInputs());
-				throw new IllegalStateException("Could not determine current merge input state");
-			}
+        InputColumn<?>[] output = getOutputColumns();
+        if (output != null && output.length > 0) {
+            MergeInput[] mergeInputs = _mergedOutcomeJob.getMergeInputs();
+            MergeInput currentMergeInput = null;
+            for (MergeInput mergeInput : mergeInputs) {
+                if (outcomes.contains(mergeInput.getOutcome())) {
+                    currentMergeInput = mergeInput;
+                    break;
+                }
+            }
 
-			InputColumn<?>[] inputColumnsForCoalesce = currentMergeInput.getInputColumns();
-			for (int i = 0; i < output.length; i++) {
-				InputColumn<?> currentColumn = output[i];
-				result.addValue(currentColumn, row.getValue(inputColumnsForCoalesce[i]));
-			}
-		}
+            if (currentMergeInput == null) {
+                logger.error(
+                        "Could not determine current merge input state.\nAvailable outcomes are: {}\nMerged outcomes are: {}",
+                        outcomes.getOutcomes(), _mergedOutcomeJob.getMergeInputs());
+                throw new IllegalStateException("Could not determine current merge input state");
+            }
 
-		outcomes.add(_mergedOutcomeJob.getOutcome());
-		
-		chain.processNext(result, distinctCount, outcomes);
-	}
+            InputColumn<?>[] inputColumnsForCoalesce = currentMergeInput.getInputColumns();
+            for (int i = 0; i < output.length; i++) {
+                InputColumn<?> currentColumn = output[i];
+                result.addValue(currentColumn, row.getValue(inputColumnsForCoalesce[i]));
+            }
+        }
 
-	@Override
-	public MergedOutcomeJob getComponentJob() {
-		return _mergedOutcomeJob;
-	}
+        outcomes.add(_mergedOutcomeJob.getOutcome());
 
-	@Override
-	public String toString() {
-		return "MergedOutcomeConsumer[" + _mergedOutcomeJob + "]";
-	}
+        chain.processNext(result, distinctCount, outcomes);
+    }
+
+    @Override
+    public MergedOutcomeJob getComponentJob() {
+        return _mergedOutcomeJob;
+    }
+
+    @Override
+    public String toString() {
+        return "MergedOutcomeConsumer[" + _mergedOutcomeJob + "]";
+    }
 }
