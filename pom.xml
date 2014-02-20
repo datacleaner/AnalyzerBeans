@@ -73,15 +73,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>
-			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
-		</connection>
-		<developerConnection>
-			scm:svn:http://eobjects.org/svn/AnalyzerBeans/trunk/
-		</developerConnection>
-		<url>
-			http://eobjects.org/svn/AnalyzerBeans/trunk/ 
-		</url>
+		<url>https://github.com/datacleaner/AnalyzerBeans</url>
+		<connection>scm:git:https://github.com/datacleaner/AnalyzerBeans.git</connection>
+		<developerConnection>scm:git:https://github.com/datacleaner/AnalyzerBeans.git</developerConnection>
 	</scm>
 	<distributionManagement>
 		<snapshotRepository>
@@ -372,19 +366,6 @@
 			</plugin>
 		</plugins>
 	</reporting>
-
-	<repositories>
-		<repository>
-			<id>eobjects-snapshot-repo</id>
-			<url>http://repo.eobjects.org/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<!--Test dependencies -->
