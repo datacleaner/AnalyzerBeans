@@ -42,49 +42,55 @@ import org.eobjects.analyzer.test.MockAnalyzer;
 
 public class BatchTransformerTest extends TestCase {
 
-    public void testScenario() throws Exception {
+    private AnalysisJob job;
+    private AnalyzerBeansConfigurationImpl configuration;
+    private MetaModelInputColumn sourceColumn;
+    private MutableInputColumn<?> sortedColumn;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
         DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(new CsvDatastore("foo",
                 "src/test/resources/employees.csv"));
-        AnalyzerBeansConfigurationImpl configuration = new AnalyzerBeansConfigurationImpl().replace(
-                new MultiThreadedTaskRunner(10)).replace(datastoreCatalog);
+        configuration = new AnalyzerBeansConfigurationImpl().replace(new MultiThreadedTaskRunner(10)).replace(
+                datastoreCatalog);
 
         AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
-        try {
-            jobBuilder.setDatastore("foo");
-            jobBuilder.addSourceColumns("name");
+        jobBuilder.setDatastore("foo");
+        jobBuilder.addSourceColumns("name");
 
-            TransformerJobBuilder<MockBatchTransformer> transformerBuilder = jobBuilder
-                    .addTransformer(MockBatchTransformer.class);
-            MetaModelInputColumn sourceColumn = jobBuilder.getSourceColumns().get(0);
-            transformerBuilder.addInputColumns(sourceColumn);
+        TransformerJobBuilder<MockBatchTransformer> transformerBuilder = jobBuilder
+                .addTransformer(MockBatchTransformer.class);
+        sourceColumn = jobBuilder.getSourceColumns().get(0);
+        transformerBuilder.addInputColumns(sourceColumn);
 
-            AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);
-            analyzer.addInputColumns(sourceColumn);
-            MutableInputColumn<?> sortedColumn = transformerBuilder.getOutputColumns().get(0);
-            analyzer.addInputColumns(sortedColumn);
+        AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);
+        analyzer.addInputColumns(sourceColumn);
+        sortedColumn = transformerBuilder.getOutputColumns().get(0);
+        analyzer.addInputColumns(sortedColumn);
 
-            AnalysisJob job = jobBuilder.toAnalysisJob();
+        job = jobBuilder.toAnalysisJob();
+        jobBuilder.close();
+    }
 
-            AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(job);
+    public void testScenario() throws Exception {
+        AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(job);
 
-            @SuppressWarnings("unchecked")
-            ListResult<InputRow> result = (ListResult<InputRow>) resultFuture.getResults().get(0);
+        @SuppressWarnings("unchecked")
+        ListResult<InputRow> result = (ListResult<InputRow>) resultFuture.getResults().get(0);
 
-            List<InputRow> values = result.getValues();
-            assertEquals(7, values.size());
+        List<InputRow> values = result.getValues();
+        assertEquals(7, values.size());
 
-            boolean foundRemixedFields = false;
-            for (InputRow inputRow : values) {
-                Object sourceValue = inputRow.getValue(sourceColumn);
-                Object sortedValue = inputRow.getValue(sortedColumn);
-                if (!sourceValue.equals(sortedValue)) {
-                    foundRemixedFields = true;
-                    break;
-                }
+        boolean foundRemixedFields = false;
+        for (InputRow inputRow : values) {
+            Object sourceValue = inputRow.getValue(sourceColumn);
+            Object sortedValue = inputRow.getValue(sortedColumn);
+            if (!sourceValue.equals(sortedValue)) {
+                foundRemixedFields = true;
+                break;
             }
-            assertTrue(foundRemixedFields);
-        } finally {
-            jobBuilder.close();
         }
+        assertTrue(foundRemixedFields);
     }
 }

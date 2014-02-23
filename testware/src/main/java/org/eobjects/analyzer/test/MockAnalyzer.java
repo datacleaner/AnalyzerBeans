@@ -21,21 +21,25 @@ package org.eobjects.analyzer.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.result.ListResult;
 
 @AnalyzerBean("Mock analyzer")
+@Concurrent(true)
 public class MockAnalyzer implements Analyzer<ListResult<InputRow>> {
 
     @Configured
     InputColumn<?>[] cols;
 
-    private List<InputRow> rows = new ArrayList<InputRow>();
+    private BlockingQueue<InputRow> rows = new LinkedBlockingQueue<InputRow>();
 
     @Override
     public void run(InputRow row, int distinctCount) {
@@ -44,7 +48,9 @@ public class MockAnalyzer implements Analyzer<ListResult<InputRow>> {
 
     @Override
     public ListResult<InputRow> getResult() {
-        return new ListResult<InputRow>(rows);
+        List<InputRow> rowsList = new ArrayList<InputRow>(rows.size());
+        rows.drainTo(rowsList);
+        return new ListResult<InputRow>(rowsList);
     }
 
     public void setCols(InputColumn<?>[] cols) {

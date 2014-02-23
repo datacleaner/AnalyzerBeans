@@ -29,9 +29,13 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.util.CollectionUtils;
 import org.eobjects.metamodel.util.Func;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @TransformerBean("Mock batcher")
 public class MockBatchTransformer extends BatchTransformer {
+
+    private static final Logger logger = LoggerFactory.getLogger(MockBatchTransformer.class);
 
     @Configured
     InputColumn<String> input;
@@ -43,6 +47,9 @@ public class MockBatchTransformer extends BatchTransformer {
 
     @Override
     public void map(BatchSource<InputRow> source, BatchSink<Object[]> sink) {
+        logger.info("map({} records)", source.size());
+        ;
+
         List<InputRow> list = source.toList();
         List<String> values = CollectionUtils.map(list, new Func<InputRow, String>() {
             @Override
@@ -57,6 +64,7 @@ public class MockBatchTransformer extends BatchTransformer {
         for (int i = 0; i < source.size(); i++) {
             String value = values.get(i);
             sink.setOutput(i, new Object[] { value });
+            logger.info("setOutput({}, {})", i, value);
         }
     }
 

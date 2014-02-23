@@ -125,8 +125,8 @@ public class BatchTransformationBuffer<I, O> {
 
         if (batchSize == 0) {
             logger.debug("Batch ignored, no elements left in queue");
-            // it may happen that multiple threads try to flush at the same time
-            // - in this case we want to stop them here.
+            // it may happen that multiple threads try to flush at the same
+            // time - in this case we want to stop them here.
             return;
         }
 
@@ -147,7 +147,7 @@ public class BatchTransformationBuffer<I, O> {
         logger.info("Batch #{} - Finished", batchNumber, batchSize);
 
         batchCountDownLatch.countDown();
-        
+
         if (scheduled) {
             if (!_queue.isEmpty()) {
                 flushBuffer(true);
