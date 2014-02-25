@@ -108,7 +108,7 @@ public class CaptureChangedRecordsFilterTest extends TestCase {
         // the first line is a comment with a date of writing
         assertEquals(3, lines.length);
 
-        assertEquals("my_id.GreatestLastModifiedTimestamp=1357599600000", lines[1]);
-        assertEquals("Foo\\ LastModified.GreatestLastModifiedTimestamp=1357599600000", lines[2]);
+        assertEquals("my_id.GreatestLastModifiedTimestamp=" + benchmarkDate.getTime(), lines[1]);
+        assertEquals("Foo\\ LastModified.GreatestLastModifiedTimestamp=" + benchmarkDate.getTime(), lines[2]);
     }
 }
