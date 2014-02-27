@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.beans.coalesce;
 
+import java.util.Arrays;
+
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -99,5 +101,27 @@ public class CoalesceUnit {
         }
 
         return candidate;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(_inputColumnNames);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CoalesceUnit other = (CoalesceUnit) obj;
+        if (!Arrays.equals(_inputColumnNames, other._inputColumnNames))
+            return false;
+        return true;
     }
 }
