@@ -54,9 +54,12 @@ public class MergeAndExpressionBasedInputColumnsTest extends TestCase {
 		}
 
 		ValueDistributionAnalyzerResult result = (ValueDistributionAnalyzerResult) resultFuture.getResults().get(0);
+		assertEquals("[LONG NAME: christoffer, NO NAME]", result.getUniqueValues().toString());
+		assertEquals("[REGULAR NAME, SHORT NAME, <unique>]", result.getValueCount().getParameterSuggestions().toString());
+		
 		assertEquals(7, result.getCount("REGULAR NAME").intValue());
-		assertEquals(1, result.getCount("NO NAME").intValue());
-		assertEquals(4, result.getCount("SHORT NAME").intValue());
 		assertEquals(1, result.getCount("LONG NAME: christoffer").intValue());
+		assertEquals(4, result.getCount("SHORT NAME").intValue());
+		assertEquals(1, result.getCount("NO NAME").intValue());
 	}
 }

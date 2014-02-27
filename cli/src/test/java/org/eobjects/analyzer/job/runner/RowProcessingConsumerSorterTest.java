@@ -113,6 +113,8 @@ public class RowProcessingConsumerSorterTest extends TestCase {
         assertEquals("ImmutableFilterJob[name=fjb2,filter=Mock filter]", consumers.get(3).getComponentJob().toString());
         assertEquals("ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", consumers.get(4).getComponentJob()
                 .toString());
+        
+        ajb.close();
     }
 
     public void testCreateProcessOrderedConsumerListWithFilterDependencies() throws Exception {
@@ -164,6 +166,8 @@ public class RowProcessingConsumerSorterTest extends TestCase {
         assertEquals("ImmutableTransformerJob[name=tjb2,transformer=Transformer mock]", consumers.get(2)
                 .getComponentJob().toString());
         assertEquals("ImmutableFilterJob[name=fjb2,filter=Mock filter]", consumers.get(3).getComponentJob().toString());
+        
+        ajb.close();
     }
 
     public void testCreateProcessOrderedConsumerListChainedTransformers() throws Exception {
@@ -220,6 +224,8 @@ public class RowProcessingConsumerSorterTest extends TestCase {
 
         assertTrue(analyzerJob1found);
         assertEquals(4, jobDependenciesFound);
+        
+        ajb.close();
     }
 
     private List<RowProcessingConsumer> getConsumers(AnalysisJob analysisJob) {
@@ -243,7 +249,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
             consumers.add(consumer);
         }
         for (MergedOutcomeJob mergedOutcomeJob : analysisJob.getMergedOutcomeJobs()) {
-            MergedOutcomeConsumer consumer = new MergedOutcomeConsumer(mergedOutcomeJob);
+            MergedOutcomeConsumer consumer = new MergedOutcomeConsumer(mergedOutcomeJob, publishers);
             consumers.add(consumer);
         }
 

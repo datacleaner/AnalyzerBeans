@@ -27,6 +27,7 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
+import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.util.SourceColumnFinder;
@@ -50,7 +51,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
             SourceColumnFinder sourceColumnFinder) {
         this(outcomeSinkJob, buildSourceJobsOfInputColumns(inputColumnSinkJob, sourceColumnFinder));
     }
-    
+
     protected AbstractRowProcessingConsumer(OutcomeSinkJob outcomeSinkJob, Set<OutcomeSinkJob> sourceJobsOfInputColumns) {
         _outcomeSinkJob = outcomeSinkJob;
         _sourceJobsOfInputColumns = sourceJobsOfInputColumns;
@@ -58,8 +59,15 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
     private static Set<OutcomeSinkJob> buildSourceJobsOfInputColumns(InputColumnSinkJob inputColumnSinkJob,
             SourceColumnFinder sourceColumnFinder) {
-        Set<OutcomeSinkJob> result = new HashSet<OutcomeSinkJob>();
-        Set<Object> sourceJobsOfInputColumns = sourceColumnFinder.findAllSourceJobs(inputColumnSinkJob);
+        final Set<OutcomeSinkJob> result = new HashSet<OutcomeSinkJob>();
+
+        if (inputColumnSinkJob instanceof MergedOutcomeJob) {
+            // merged outcome jobs are evaluated entirely on it's own
+            // requirements, not outside requirements.
+            return result;
+        }
+
+        final Set<Object> sourceJobsOfInputColumns = sourceColumnFinder.findAllSourceJobs(inputColumnSinkJob);
         for (Iterator<Object> it = sourceJobsOfInputColumns.iterator(); it.hasNext();) {
             Object sourceJob = it.next();
             if (sourceJob instanceof OutcomeSinkJob) {

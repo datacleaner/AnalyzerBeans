@@ -51,55 +51,60 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
         Datastore ds = TestHelper.createSampleDatabaseDatastore("mydb");
         AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(
                 new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds)));
-
-        analysisJobBuilder.setDatastore("mydb");
-        analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
-        analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.FIRSTNAME");
-
-        FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> fjb1 = analysisJobBuilder
-                .addFilter(MaxRowsFilter.class);
-
-        FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> fjb2 = analysisJobBuilder
-                .addFilter(MaxRowsFilter.class);
-
-        MergedOutcomeJobBuilder mergedOutcomeJobBuilder = analysisJobBuilder.addMergedOutcomeJobBuilder();
-
         try {
-            mergedOutcomeJobBuilder.toMergedOutcomeJob();
-            fail("Exception expected");
-        } catch (IllegalStateException e) {
-            assertEquals("Merged outcome jobs need at least 2 merged outcomes, none found", e.getMessage());
+
+            analysisJobBuilder.setDatastore("mydb");
+            analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
+            analysisJobBuilder.addSourceColumns("PUBLIC.EMPLOYEES.FIRSTNAME");
+
+            FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> fjb1 = analysisJobBuilder
+                    .addFilter(MaxRowsFilter.class);
+
+            FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> fjb2 = analysisJobBuilder
+                    .addFilter(MaxRowsFilter.class);
+
+            MergedOutcomeJobBuilder mergedOutcomeJobBuilder = analysisJobBuilder.addMergedOutcomeJobBuilder();
+
+            try {
+                mergedOutcomeJobBuilder.toMergedOutcomeJob();
+                fail("Exception expected");
+            } catch (IllegalStateException e) {
+                assertEquals("Merged outcome jobs need at least 2 merged outcomes, none found", e.getMessage());
+            }
+
+            mergedOutcomeJobBuilder.addMergedOutcome(fjb1, MaxRowsFilter.Category.VALID);
+
+            try {
+                mergedOutcomeJobBuilder.toMergedOutcomeJob();
+                fail("Exception expected");
+            } catch (IllegalStateException e) {
+                assertEquals("Merged outcome jobs need at least 2 merged outcomes, only 1 found", e.getMessage());
+            }
+
+            mergedOutcomeJobBuilder.addMergedOutcome(fjb2, MaxRowsFilter.Category.VALID);
+
+            MergedOutcomeJob mergedOutcomeJob = mergedOutcomeJobBuilder.toMergedOutcomeJob();
+
+            assertEquals(2, mergedOutcomeJob.getMergeInputs().length);
+            assertEquals(0, mergedOutcomeJob.getOutput().length);
+
+            MergedOutcome outcome = mergedOutcomeJob.getOutcome();
+
+            assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(),
+                    MaxRowsFilter.Category.VALID)));
+            assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(),
+                    MaxRowsFilter.Category.INVALID)));
+            assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(),
+                    MaxRowsFilter.Category.VALID)));
+            assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(),
+                    MaxRowsFilter.Category.INVALID)));
+
+            AnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
+            ajb.setRequirement(outcome);
+
+        } finally {
+            analysisJobBuilder.close();
         }
-
-        mergedOutcomeJobBuilder.addMergedOutcome(fjb1, MaxRowsFilter.Category.VALID);
-
-        try {
-            mergedOutcomeJobBuilder.toMergedOutcomeJob();
-            fail("Exception expected");
-        } catch (IllegalStateException e) {
-            assertEquals("Merged outcome jobs need at least 2 merged outcomes, only 1 found", e.getMessage());
-        }
-
-        mergedOutcomeJobBuilder.addMergedOutcome(fjb2, MaxRowsFilter.Category.VALID);
-
-        MergedOutcomeJob mergedOutcomeJob = mergedOutcomeJobBuilder.toMergedOutcomeJob();
-
-        assertEquals(2, mergedOutcomeJob.getMergeInputs().length);
-        assertEquals(0, mergedOutcomeJob.getOutput().length);
-
-        MergedOutcome outcome = mergedOutcomeJob.getOutcome();
-
-        assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(),
-                MaxRowsFilter.Category.VALID)));
-        assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb1.toFilterJob(),
-                MaxRowsFilter.Category.INVALID)));
-        assertTrue(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(),
-                MaxRowsFilter.Category.VALID)));
-        assertFalse(outcome.satisfiesRequirement(new ImmutableFilterOutcome(fjb2.toFilterJob(),
-                MaxRowsFilter.Category.INVALID)));
-
-        AnalyzerJobBuilder<StringAnalyzer> ajb = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
-        ajb.setRequirement(outcome);
     }
 
     public void testRunAnalysis() throws Throwable {
@@ -142,6 +147,7 @@ public class MergedOutcomeJobBuilderTest extends TestCase {
         a.addInputColumn(outputColumn);
 
         AnalysisJob analysisJob = ajb.toAnalysisJob();
+        ajb.close();
 
         AnalysisRunnerImpl runner = new AnalysisRunnerImpl(conf);
 

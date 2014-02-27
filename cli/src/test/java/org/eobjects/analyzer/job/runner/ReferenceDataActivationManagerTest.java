@@ -86,6 +86,7 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 
         ajb.addAnalyzer(BooleanAnalyzer.class).addInputColumns(outputColumns);
         AnalysisJob job = ajb.toAnalysisJob();
+        ajb.close();
 
         AnalysisResultFuture result = runner.run(job);
 

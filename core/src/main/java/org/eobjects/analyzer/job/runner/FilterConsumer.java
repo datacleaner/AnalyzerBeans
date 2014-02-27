@@ -30,6 +30,7 @@ import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.analyzer.util.SourceColumnFinder;
 
 final class FilterConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
@@ -41,26 +42,36 @@ final class FilterConsumer extends AbstractRowProcessingConsumer implements RowP
     private final boolean _concurrent;
 
     public FilterConsumer(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns,
+            SourceColumnFinder sourceColumnFinder) {
+        super(filterJob, filterJob, sourceColumnFinder);
+        _filter = filter;
+        _filterJob = filterJob;
+        _inputColumns = inputColumns;
+        _job = null;
+        _analysisListener = null;
+
+        _concurrent = determineConcurrent();
+    }
+    
+    public FilterConsumer(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns,
             RowProcessingPublishers publishers) {
         super(filterJob, filterJob, publishers);
         _filter = filter;
         _filterJob = filterJob;
         _inputColumns = inputColumns;
-        if (publishers == null) {
-            _job = null;
-            _analysisListener = null;
-        } else {
-            _job = publishers.getAnalysisJob();
-            _analysisListener = publishers.getAnalysisListener();
-        }
+        _job = publishers.getAnalysisJob();
+        _analysisListener = publishers.getAnalysisListener();
 
-        Concurrent concurrent = filterJob.getDescriptor().getAnnotation(Concurrent.class);
+        _concurrent = determineConcurrent();
+    }
+
+    private boolean determineConcurrent() {
+        Concurrent concurrent = _filterJob.getDescriptor().getAnnotation(Concurrent.class);
         if (concurrent == null) {
             // filter are by default concurrent
-            _concurrent = true;
-        } else {
-            _concurrent = concurrent.value();
+            return true;
         }
+        return concurrent.value();
     }
 
     @Override
@@ -112,7 +123,8 @@ final class FilterConsumer extends AbstractRowProcessingConsumer implements RowP
     }
 
     public boolean isRemoveableUponOptimization() {
-        final Optimizeable optimizeable = ReflectionUtils.getAnnotation(_filterJob.getDescriptor().getComponentClass(), Optimizeable.class);
+        final Optimizeable optimizeable = ReflectionUtils.getAnnotation(_filterJob.getDescriptor().getComponentClass(),
+                Optimizeable.class);
         if (optimizeable == null) {
             return true;
         }

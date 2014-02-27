@@ -53,199 +53,205 @@ import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.test.TestHelper;
+import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
 
 public class RowProcessingQueryOptimizerTest extends TestCase {
 
-	private final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null, true);
+    private final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(null, null, true);
 
-	private Datastore datastore;
-	private AnalyzerBeansConfiguration conf;
-	private AnalysisJobBuilder ajb;
-	private FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRowsBuilder;
-	private AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerBuilder;
-	private DatastoreConnection con;
-	private Column lastnameColumn;
-	private InputColumn<?> lastNameInputColumn;
-	private ArrayList<RowProcessingConsumer> consumers;
-	private Query baseQuery;
+    private Datastore datastore;
+    private AnalyzerBeansConfiguration conf;
+    private AnalysisJobBuilder ajb;
+    private FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRowsBuilder;
+    private AnalyzerJobBuilder<StringAnalyzer> stringAnalyzerBuilder;
+    private DatastoreConnection con;
+    private Column lastnameColumn;
+    private InputColumn<?> lastNameInputColumn;
+    private ArrayList<RowProcessingConsumer> consumers;
+    private Query baseQuery;
+    private SourceColumnFinder sourceColumnFinder;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		// set up a common fixture with a simple Max rows filter and a String
-		// analyzer on the LASTNAME
-		// column
-		datastore = TestHelper.createSampleDatabaseDatastore("mydb");
-		conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(datastore));
-		ajb = new AnalysisJobBuilder(conf);
-		ajb.setDatastore(datastore);
-		maxRowsBuilder = ajb.addFilter(MaxRowsFilter.class);
-		stringAnalyzerBuilder = ajb.addAnalyzer(StringAnalyzer.class);
-		stringAnalyzerBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
-		con = conf.getDatastoreCatalog().getDatastore("mydb").openConnection();
-		lastnameColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.LASTNAME");
-		ajb.addSourceColumn(lastnameColumn);
-		lastNameInputColumn = ajb.getSourceColumnByName("lastname");
-		stringAnalyzerBuilder.addInputColumn(lastNameInputColumn);
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        // set up a common fixture with a simple Max rows filter and a String
+        // analyzer on the LASTNAME
+        // column
+        datastore = TestHelper.createSampleDatabaseDatastore("mydb");
+        conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(datastore));
+        ajb = new AnalysisJobBuilder(conf);
+        ajb.setDatastore(datastore);
+        maxRowsBuilder = ajb.addFilter(MaxRowsFilter.class);
+        stringAnalyzerBuilder = ajb.addAnalyzer(StringAnalyzer.class);
+        stringAnalyzerBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
+        con = conf.getDatastoreCatalog().getDatastore("mydb").openConnection();
+        lastnameColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.LASTNAME");
+        ajb.addSourceColumn(lastnameColumn);
+        lastNameInputColumn = ajb.getSourceColumnByName("lastname");
+        stringAnalyzerBuilder.addInputColumn(lastNameInputColumn);
 
-		consumers = new ArrayList<RowProcessingConsumer>();
-		consumers.add(createConsumer(maxRowsBuilder));
-		consumers.add(createConsumer(stringAnalyzerBuilder));
+        sourceColumnFinder = new SourceColumnFinder();
 
-		baseQuery = con.getDataContext().query().from("EMPLOYEES").select("LASTNAME").toQuery();
-	}
+        consumers = new ArrayList<RowProcessingConsumer>();
+        consumers.add(createConsumer(maxRowsBuilder));
+        consumers.add(createConsumer(stringAnalyzerBuilder));
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		con.close();
-	}
+        baseQuery = con.getDataContext().query().from("EMPLOYEES").select("LASTNAME").toQuery();
+    }
 
-	public void testSimpleOptimization() throws Exception {
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        con.close();
+    }
 
-		assertTrue(optimizer.isOptimizable());
+    public void testSimpleOptimization() throws Exception {
+        RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 
-		Query optimizedQuery = optimizer.getOptimizedQuery();
-		Integer maxRows = optimizedQuery.getMaxRows();
-		assertNotNull("No max rows specified!", maxRows);
-		assertEquals(1000, maxRows.intValue());
-	}
+        assertTrue(optimizer.isOptimizable());
 
-	public void testAlwaysOptimizableFilter() throws Exception {
-		Datastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+        Query optimizedQuery = optimizer.getOptimizedQuery();
+        Integer maxRows = optimizedQuery.getMaxRows();
+        assertNotNull("No max rows specified!", maxRows);
+        assertEquals(1000, maxRows.intValue());
+    }
 
-		assertTrue(optimizer.isOptimizable());
+    public void testAlwaysOptimizableFilter() throws Exception {
+        Datastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
+        RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 
-		FilterJobBuilder<?, ?> fjb = ajb.addFilter(NullCheckFilter.class).addInputColumn(lastNameInputColumn);
-		maxRowsBuilder.setRequirement(fjb, NullCheckCategory.NOT_NULL);
-		consumers.add(0, createConsumer(fjb));
+        assertTrue(optimizer.isOptimizable());
 
-		optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
-		assertFalse(optimizer.isOptimizable());
-	}
+        FilterJobBuilder<?, ?> fjb = ajb.addFilter(NullCheckFilter.class).addInputColumn(lastNameInputColumn);
+        maxRowsBuilder.setRequirement(fjb, NullCheckCategory.NOT_NULL);
+        consumers.add(0, createConsumer(fjb));
 
-	public void testOptimizedChainedTransformer() throws Exception {
-		TransformerJobBuilder<EmailStandardizerTransformer> emailStdBuilder = ajb
-				.addTransformer(EmailStandardizerTransformer.class);
-		Column emailColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
-		ajb.addSourceColumn(emailColumn);
-		InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
-		emailStdBuilder.addInputColumn(emailInputColumn);
+        optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+        assertFalse(optimizer.isOptimizable());
+    }
 
-		// reconfigure the string analyzer to depend on transformed columns
-		stringAnalyzerBuilder.clearInputColumns();
-		List<MutableInputColumn<?>> outputColumns = emailStdBuilder.getOutputColumns();
-		stringAnalyzerBuilder.addInputColumns(outputColumns);
+    public void testOptimizedChainedTransformer() throws Exception {
+        TransformerJobBuilder<EmailStandardizerTransformer> emailStdBuilder = ajb
+                .addTransformer(EmailStandardizerTransformer.class);
+        Column emailColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
+        ajb.addSourceColumn(emailColumn);
+        InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
+        emailStdBuilder.addInputColumn(emailInputColumn);
 
-		// remove the string analyzer and add the transformer in between
-		consumers.remove(1);
-		consumers.add(createConsumer(emailStdBuilder));
-		consumers.add(createConsumer(stringAnalyzerBuilder));
+        // reconfigure the string analyzer to depend on transformed columns
+        stringAnalyzerBuilder.clearInputColumns();
+        List<MutableInputColumn<?>> outputColumns = emailStdBuilder.getOutputColumns();
+        stringAnalyzerBuilder.addInputColumns(outputColumns);
 
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+        // remove the string analyzer and add the transformer in between
+        consumers.remove(1);
+        consumers.add(createConsumer(emailStdBuilder));
+        consumers.add(createConsumer(stringAnalyzerBuilder));
 
-		// not optimizable because the transformer doesn't have the requirement
-		assertFalse(optimizer.isOptimizable());
+        RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
 
-		consumers.remove(2);
-		consumers.remove(1);
-		emailStdBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
-		consumers.add(createConsumer(emailStdBuilder));
-		consumers.add(createConsumer(stringAnalyzerBuilder));
+        // not optimizable because the transformer doesn't have the requirement
+        assertFalse(optimizer.isOptimizable());
 
-		optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
-		assertTrue(optimizer.isOptimizable());
+        consumers.remove(2);
+        consumers.remove(1);
+        emailStdBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
+        consumers.add(createConsumer(emailStdBuilder));
+        consumers.add(createConsumer(stringAnalyzerBuilder));
 
-		// even without the requirement, the string analyzer should still be
-		// optimizable, because of it's dependency to the email standardizer
-		stringAnalyzerBuilder.setRequirement(null);
-		consumers.remove(2);
-		consumers.add(createConsumer(stringAnalyzerBuilder));
+        optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+        assertTrue(optimizer.isOptimizable());
 
-		optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
-		assertTrue(optimizer.isOptimizable());
-	}
+        // even without the requirement, the string analyzer should still be
+        // optimizable, because of it's dependency to the email standardizer
+        stringAnalyzerBuilder.setRequirement(null);
+        consumers.remove(2);
+        consumers.add(createConsumer(stringAnalyzerBuilder));
 
-	public void testDontOptimizeWhenComponentsHaveNoRequirements() throws Exception {
-		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb.addAnalyzer(PatternFinderAnalyzer.class);
-		patternFinderBuilder.addInputColumn(lastNameInputColumn);
-		consumers.add(createConsumer(patternFinderBuilder));
+        optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+        assertTrue(optimizer.isOptimizable());
+    }
 
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
-		assertFalse(optimizer.isOptimizable());
-	}
+    public void testDontOptimizeWhenComponentsHaveNoRequirements() throws Exception {
+        AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb.addAnalyzer(PatternFinderAnalyzer.class);
+        patternFinderBuilder.addInputColumn(lastNameInputColumn);
+        consumers.add(createConsumer(patternFinderBuilder));
 
-	public void testMultipleOptimizations() throws Exception {
-		FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> notNullBuilder = ajb.addFilter(NullCheckFilter.class);
-		Column emailColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
-		ajb.addSourceColumn(emailColumn);
-		InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
-		notNullBuilder.addInputColumn(emailInputColumn);
-		notNullBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
-		stringAnalyzerBuilder.setRequirement(notNullBuilder, NullCheckCategory.NOT_NULL);
+        RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+        assertFalse(optimizer.isOptimizable());
+    }
 
-		consumers.remove(1);
-		consumers.add(createConsumer(notNullBuilder));
-		consumers.add(createConsumer(stringAnalyzerBuilder));
+    public void testMultipleOptimizations() throws Exception {
+        FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> notNullBuilder = ajb
+                .addFilter(NullCheckFilter.class);
+        Column emailColumn = con.getSchemaNavigator().convertToColumn("EMPLOYEES.EMAIL");
+        ajb.addSourceColumn(emailColumn);
+        InputColumn<?> emailInputColumn = ajb.getSourceColumnByName("email");
+        notNullBuilder.addInputColumn(emailInputColumn);
+        notNullBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.VALID);
+        stringAnalyzerBuilder.setRequirement(notNullBuilder, NullCheckCategory.NOT_NULL);
 
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
-		assertTrue(optimizer.isOptimizable());
+        consumers.remove(1);
+        consumers.add(createConsumer(notNullBuilder));
+        consumers.add(createConsumer(stringAnalyzerBuilder));
 
-		List<RowProcessingConsumer> optimizedConsumers = optimizer.getOptimizedConsumers();
-		assertEquals(1, optimizedConsumers.size());
+        RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+        assertTrue(optimizer.isOptimizable());
 
-		Query q = optimizer.getOptimizedQuery();
-		assertEquals(
-				"SELECT \"EMPLOYEES\".\"LASTNAME\" FROM PUBLIC.\"EMPLOYEES\" WHERE \"EMPLOYEES\".\"EMAIL\" IS NOT NULL",
-				q.toSql());
-		assertEquals(1000, q.getMaxRows().intValue());
-	}
+        List<RowProcessingConsumer> optimizedConsumers = optimizer.getOptimizedConsumers();
+        assertEquals(1, optimizedConsumers.size());
 
-	public void testMultipleOutcomesUsed() throws Exception {
-		AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb.addAnalyzer(PatternFinderAnalyzer.class);
-		patternFinderBuilder.addInputColumn(lastNameInputColumn);
-		patternFinderBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.INVALID);
-		consumers.add(createConsumer(patternFinderBuilder));
+        Query q = optimizer.getOptimizedQuery();
+        assertEquals(
+                "SELECT \"EMPLOYEES\".\"LASTNAME\" FROM PUBLIC.\"EMPLOYEES\" WHERE \"EMPLOYEES\".\"EMAIL\" IS NOT NULL",
+                q.toSql());
+        assertEquals(1000, q.getMaxRows().intValue());
+    }
 
-		RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
-		assertFalse(optimizer.isOptimizable());
-	}
+    public void testMultipleOutcomesUsed() throws Exception {
+        AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinderBuilder = ajb.addAnalyzer(PatternFinderAnalyzer.class);
+        patternFinderBuilder.addInputColumn(lastNameInputColumn);
+        patternFinderBuilder.setRequirement(maxRowsBuilder, MaxRowsFilter.Category.INVALID);
+        consumers.add(createConsumer(patternFinderBuilder));
 
-	private FilterConsumer createConsumer(FilterJobBuilder<?, ?> filterJobBuilder) {
-		FilterJob filterJob = filterJobBuilder.toFilterJob();
-		FilterBeanDescriptor<?, ?> descriptor = filterJob.getDescriptor();
-		Filter<?> filter = descriptor.newInstance();
+        RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore, consumers, baseQuery);
+        assertFalse(optimizer.isOptimizable());
+    }
 
-		lifeCycleHelper.assignConfiguredProperties(descriptor, filter, filterJob.getConfiguration());
+    private FilterConsumer createConsumer(FilterJobBuilder<?, ?> filterJobBuilder) {
+        FilterJob filterJob = filterJobBuilder.toFilterJob();
+        FilterBeanDescriptor<?, ?> descriptor = filterJob.getDescriptor();
+        Filter<?> filter = descriptor.newInstance();
 
-		FilterConsumer consumer = new FilterConsumer(filter, filterJob, filterJobBuilder.getInput(), null);
-		return consumer;
-	}
+        lifeCycleHelper.assignConfiguredProperties(descriptor, filter, filterJob.getConfiguration());
 
-	private TransformerConsumer createConsumer(TransformerJobBuilder<?> transformerJobBuilder) {
-		TransformerJob transformerJob = transformerJobBuilder.toTransformerJob();
-		TransformerBeanDescriptor<?> descriptor = transformerJob.getDescriptor();
-		Transformer<?> transformer = descriptor.newInstance();
+        FilterConsumer consumer = new FilterConsumer(filter, filterJob, filterJobBuilder.getInput(), sourceColumnFinder);
+        return consumer;
+    }
 
-		lifeCycleHelper.assignConfiguredProperties(descriptor, transformer, transformerJob.getConfiguration());
+    private TransformerConsumer createConsumer(TransformerJobBuilder<?> transformerJobBuilder) {
+        TransformerJob transformerJob = transformerJobBuilder.toTransformerJob();
+        TransformerBeanDescriptor<?> descriptor = transformerJob.getDescriptor();
+        Transformer<?> transformer = descriptor.newInstance();
 
-		TransformerConsumer consumer = new TransformerConsumer(transformer, transformerJob,
-				transformerJobBuilder.getInput(), null);
-		return consumer;
-	}
+        lifeCycleHelper.assignConfiguredProperties(descriptor, transformer, transformerJob.getConfiguration());
 
-	private AnalyzerConsumer createConsumer(AnalyzerJobBuilder<?> analyzerBuilder) {
-		AnalyzerJob analyzerJob = analyzerBuilder.toAnalyzerJob();
-		AnalyzerBeanDescriptor<?> descriptor = analyzerJob.getDescriptor();
-		Analyzer<?> analyzer = descriptor.newInstance();
+        TransformerConsumer consumer = new TransformerConsumer(transformer, transformerJob,
+                transformerJobBuilder.getInput(), sourceColumnFinder);
+        return consumer;
+    }
 
-		lifeCycleHelper.assignConfiguredProperties(descriptor, analyzer, analyzerJob.getConfiguration());
+    private AnalyzerConsumer createConsumer(AnalyzerJobBuilder<?> analyzerBuilder) {
+        AnalyzerJob analyzerJob = analyzerBuilder.toAnalyzerJob();
+        AnalyzerBeanDescriptor<?> descriptor = analyzerJob.getDescriptor();
+        Analyzer<?> analyzer = descriptor.newInstance();
 
-        AnalyzerConsumer consumer = new AnalyzerConsumer(analyzer, analyzerJob, analyzerBuilder.getInput(), null);
-		return consumer;
-	}
+        lifeCycleHelper.assignConfiguredProperties(descriptor, analyzer, analyzerJob.getConfiguration());
+
+        AnalyzerConsumer consumer = new AnalyzerConsumer(analyzer, analyzerJob, analyzerBuilder.getInput(),
+                sourceColumnFinder);
+        return consumer;
+    }
 }

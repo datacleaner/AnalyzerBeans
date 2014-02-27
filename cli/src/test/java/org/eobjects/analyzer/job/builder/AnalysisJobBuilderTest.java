@@ -369,5 +369,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		ajb.reset();
 
 		EasyMock.verify(listener1, listener2);
+		
+		ajb.close();
 	}
 }

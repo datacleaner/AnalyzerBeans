@@ -98,7 +98,8 @@ final class MergedOutcomeConsumer extends AbstractRowProcessingConsumer implemen
             InputColumn<?>[] inputColumnsForCoalesce = currentMergeInput.getInputColumns();
             for (int i = 0; i < output.length; i++) {
                 InputColumn<?> currentColumn = output[i];
-                result.addValue(currentColumn, row.getValue(inputColumnsForCoalesce[i]));
+                Object value = row.getValue(inputColumnsForCoalesce[i]);
+                result.addValue(currentColumn, value);
             }
         }
 

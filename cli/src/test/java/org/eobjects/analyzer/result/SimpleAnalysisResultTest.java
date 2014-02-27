@@ -46,8 +46,10 @@ public class SimpleAnalysisResultTest extends TestCase {
             
             ChangeAwareObjectInputStream in = new ChangeAwareObjectInputStream(new FileInputStream(filename));
             analysisResults[i] = (AnalysisResult) in.readObject();
+            in.close();
             assertNotNull(analysisResults[i]);
             assertTrue(analysisResults[i] instanceof SimpleAnalysisResult);
+            
         }
 
         Map<ComponentJob, AnalyzerResult> resultMap = analysisResults[0].getResultMap();

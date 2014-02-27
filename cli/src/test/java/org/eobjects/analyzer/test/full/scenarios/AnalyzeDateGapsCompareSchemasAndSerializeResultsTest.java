@@ -111,6 +111,7 @@ public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCa
 			con.close();
 
 			job = analysisJobBuilder.toAnalysisJob();
+			analysisJobBuilder.close();
 		}
 
 		AnalysisResultFuture future = new AnalysisRunnerImpl(configuration).run(job);
