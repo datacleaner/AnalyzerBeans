@@ -37,7 +37,7 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
 
     public AnalyzerConsumer(Analyzer<?> analyzer, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns,
             RowProcessingPublishers publishers) {
-        super(analyzerJob, analyzerJob);
+        super(analyzerJob, analyzerJob, publishers);
         _analyzer = analyzer;
         _analyzerJob = analyzerJob;
         _inputColumns = inputColumns;

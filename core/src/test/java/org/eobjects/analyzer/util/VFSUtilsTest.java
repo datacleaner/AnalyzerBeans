@@ -23,6 +23,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import junit.framework.TestCase;
 
@@ -61,8 +63,18 @@ public class VFSUtilsTest extends TestCase {
         assertTrue(javaFolderFile.exists());
         assertTrue(javaFolderFile.isDirectory());
     }
-    
+
     public void test2HttpAccess() throws Exception {
+        // first check if we have a connection
+        try {
+            InetAddress.getByName("eobjects.org");
+        } catch (UnknownHostException e) {
+            System.err.println("Skipping test " + getClass().getSimpleName() + "." + getName()
+                    + " since we don't seem to be able to reach eobjects.org");
+            e.printStackTrace();
+            return;
+        }
+
         FileObject file = VFSUtils.getFileSystemManager().resolveFile("http://eobjects.org");
         InputStream in = file.getContent().getInputStream();
         try {
@@ -73,7 +85,7 @@ public class VFSUtilsTest extends TestCase {
             in.close();
         }
     }
-    
+
     public void testToFileObjectNull() throws Exception {
         assertNull(VFSUtils.toFileObject(null));
         assertNull(VFSUtils.toFile(null));

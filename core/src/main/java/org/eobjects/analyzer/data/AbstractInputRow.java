@@ -19,6 +19,10 @@
  */
 package org.eobjects.analyzer.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Abstract implementation of the InputRow.
  * 
@@ -39,6 +43,27 @@ public abstract class AbstractInputRow implements InputRow {
 			return value;
 		}
 		return getValueInternal(column);
+	}
+	
+	@Override
+	public List<Object> getValues(List<InputColumn<?>> columns) {
+	    if (columns == null) {
+            return new ArrayList<Object>(0);
+        }
+	    List<Object> result = new ArrayList<Object>(columns.size());
+	    for (InputColumn<?> inputColumn : columns) {
+            Object value = getValue(inputColumn);
+            result.add(value);
+        }
+	    return result;
+	}
+	
+	@Override
+	public List<Object> getValues(InputColumn<?>... columns) {
+	    if (columns == null) {
+	        return new ArrayList<Object>(0);
+	    }
+	    return getValues(Arrays.asList(columns));
 	}
 
 	protected abstract <E> E getValueInternal(InputColumn<E> column);

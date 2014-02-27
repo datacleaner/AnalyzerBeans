@@ -240,6 +240,10 @@ public final class RowProcessingPublishers {
     public AnalysisJobMetrics getAnalysisJobMetrics() {
         return new AnalysisJobMetricsImpl(_analysisJob, this);
     }
+    
+    public SourceColumnFinder getSourceColumnFinder() {
+        return _sourceColumnFinder;
+    }
 
     protected AnalysisJob getAnalysisJob() {
         return _analysisJob;

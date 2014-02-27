@@ -35,8 +35,8 @@ final class MergedOutcomeConsumer extends AbstractRowProcessingConsumer implemen
     private static final Logger logger = LoggerFactory.getLogger(MergedOutcomeConsumer.class);
     private final MergedOutcomeJob _mergedOutcomeJob;
 
-    public MergedOutcomeConsumer(MergedOutcomeJob mergedOutcomeJob) {
-        super(mergedOutcomeJob, mergedOutcomeJob);
+    public MergedOutcomeConsumer(MergedOutcomeJob mergedOutcomeJob, RowProcessingPublishers publishers) {
+        super(mergedOutcomeJob, mergedOutcomeJob, publishers);
         _mergedOutcomeJob = mergedOutcomeJob;
     }
 

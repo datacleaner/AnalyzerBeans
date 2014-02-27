@@ -41,35 +41,53 @@ import org.eobjects.analyzer.beans.api.Transformer;
  */
 public interface InputRow extends Serializable {
 
-	/**
-	 * Gets a value from the row on a given column position, or null if no value
-	 * exists at this column position.
-	 * 
-	 * @param <E>
-	 * @param column
-	 * @return
-	 */
-	public <E> E getValue(InputColumn<E> column);
+    /**
+     * Gets a value from the row on a given column position, or null if no value
+     * exists at this column position.
+     * 
+     * @param <E>
+     * @param column
+     * @return
+     */
+    public <E> E getValue(InputColumn<E> column);
 
-	/**
-	 * An id identifying this row. The id is guaranteed to be unique (and
-	 * typically sequential) within a single dataset only.
-	 * 
-	 * @return an identifier for this row
-	 */
-	public int getId();
+    /**
+     * An id identifying this row. The id is guaranteed to be unique (and
+     * typically sequential) within a single dataset only.
+     * 
+     * @return an identifier for this row
+     */
+    public int getId();
 
-	/**
-	 * @return the input columns represented in this row
-	 */
-	public List<InputColumn<?>> getInputColumns();
+    /**
+     * @return the input columns represented in this row
+     */
+    public List<InputColumn<?>> getInputColumns();
 
-	/**
-	 * Determines whether a particular {@link InputColumn} is mapped within the
-	 * row or not.
-	 * 
-	 * @param inputColumn
-	 * @return true if the input column is mapped in this input row
-	 */
-	public boolean containsInputColumn(InputColumn<?> inputColumn);
+    /**
+     * Determines whether a particular {@link InputColumn} is mapped within the
+     * row or not.
+     * 
+     * @param inputColumn
+     * @return true if the input column is mapped in this input row
+     */
+    public boolean containsInputColumn(InputColumn<?> inputColumn);
+
+    /**
+     * Gets multiple values in one go. Will delegate to
+     * {@link #getValue(InputColumn)} for each column in the array.
+     * 
+     * @param columns
+     * @return
+     */
+    public List<Object> getValues(InputColumn<?>... columns);
+
+    /**
+     * Gets multiple values in one go. Will delegate to
+     * {@link #getValue(InputColumn)} for each column in the list.
+     * 
+     * @param columns
+     * @return
+     */
+    public List<Object> getValues(List<InputColumn<?>> columns);
 }

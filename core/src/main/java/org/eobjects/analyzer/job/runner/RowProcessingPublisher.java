@@ -352,7 +352,7 @@ public final class RowProcessingPublisher {
     }
 
     public void addMergedOutcomeJob(MergedOutcomeJob mergedOutcomeJob) {
-        addConsumer(new MergedOutcomeConsumer(mergedOutcomeJob));
+        addConsumer(new MergedOutcomeConsumer(mergedOutcomeJob, _publishers));
     }
 
     public boolean containsOutcome(Outcome prerequisiteOutcome) {

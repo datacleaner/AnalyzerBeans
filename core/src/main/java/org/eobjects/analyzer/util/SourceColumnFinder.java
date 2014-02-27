@@ -128,7 +128,18 @@ public class SourceColumnFinder {
 
         return result;
     }
-    
+
+    /**
+     * Finds all source jobs/components for a particular job/component. This
+     * method uses {@link Object} as types because input and output can be quite
+     * polymorphic. Typically {@link InputColumnSinkJob},
+     * {@link InputColumnSourceJob}, {@link OutcomeSinkJob} and
+     * {@link OutcomeSourceJob} implementations are used.
+     * 
+     * @param job
+     *            typically some {@link InputColumnSinkJob}
+     * @return a list of jobs/components that are a source of this job.
+     */
     public Set<Object> findAllSourceJobs(Object job) {
         final Set<Object> result = new HashSet<Object>();
         findAllSourceJobs(job, result);
@@ -146,7 +157,7 @@ public class SourceColumnFinder {
                 }
             }
         }
-        
+
         if (job instanceof OutcomeSinkJob) {
             final Outcome[] requirements = ((OutcomeSinkJob) job).getRequirements();
             for (final Outcome outcome : requirements) {

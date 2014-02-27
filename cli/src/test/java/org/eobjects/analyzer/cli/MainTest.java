@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -229,6 +231,16 @@ public class MainTest extends TestCase {
     }
 
     public void testRunFromUrlJobAndConf() throws Throwable {
+        // first check if we have a connection
+        try {
+            InetAddress.getByName("eobjects.org");
+        } catch (UnknownHostException e) {
+            System.err.println("Skipping test " + getClass().getSimpleName() + "." + getName()
+                    + " since we don't seem to be able to reach eobjects.org");
+            e.printStackTrace();
+            return;
+        }
+
         String filename = "target/test_run_from_url_job_and_conf.html";
         Main.main(("-ot HTML -of " + filename + " -job http://eobjects.org/resources/example_repo/DC/jobs/random_number_generation.analysis.xml -conf http://eobjects.org/resources/example_repo/DC/conf.xml")
                 .split(" "));

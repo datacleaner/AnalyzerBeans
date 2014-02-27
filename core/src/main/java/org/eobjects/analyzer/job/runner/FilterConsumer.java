@@ -42,7 +42,7 @@ final class FilterConsumer extends AbstractRowProcessingConsumer implements RowP
 
     public FilterConsumer(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns,
             RowProcessingPublishers publishers) {
-        super(filterJob, filterJob);
+        super(filterJob, filterJob, publishers);
         _filter = filter;
         _filterJob = filterJob;
         _inputColumns = inputColumns;
