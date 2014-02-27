@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.beans.coalesce;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.data.InputColumn;
@@ -35,6 +36,10 @@ public class CoalesceUnit {
 
     // transient cached view of columns
     private transient InputColumn<?>[] _inputColumns;
+
+    public CoalesceUnit(List<InputColumn<?>> inputColumns) {
+        this(inputColumns.toArray(new InputColumn[inputColumns.size()]));
+    }
 
     public CoalesceUnit(String... columnNames) {
         _inputColumnNames = columnNames;
