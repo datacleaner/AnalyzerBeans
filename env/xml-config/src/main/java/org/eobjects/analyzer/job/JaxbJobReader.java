@@ -65,6 +65,7 @@ import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.builder.AbstractBeanJobBuilder;
+import org.eobjects.analyzer.job.builder.AbstractBeanWithInputColumnsBuilder;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.ExplorerJobBuilder;
@@ -102,6 +103,9 @@ import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 
 public class JaxbJobReader implements JobReader<InputStream> {
 
@@ -519,23 +523,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         TransformerJobBuilder<?> transformerJobBuilder = transformerJobBuilders
                                 .get(unconfiguredTransformerKey);
 
-                        for (InputType inputType : input) {
-                            String name = inputType.getName();
-                            ref = inputType.getRef();
-                            InputColumn<?> inputColumn;
-                            if (StringUtils.isNullOrEmpty(ref)) {
-                                inputColumn = createExpressionBasedInputColumn(inputType);
-                            } else {
-                                inputColumn = inputColumns.get(ref);
-                            }
-                            if (StringUtils.isNullOrEmpty(name)) {
-                                transformerJobBuilder.addInputColumn(inputColumn);
-                            } else {
-                                ConfiguredPropertyDescriptor configuredProperty = transformerJobBuilder.getDescriptor()
-                                        .getConfiguredProperty(name);
-                                transformerJobBuilder.addInputColumn(inputColumn, configuredProperty);
-                            }
-                        }
+                        applyInputColumns(input, inputColumns, transformerJobBuilder);
 
                         List<MutableInputColumn<?>> outputColumns = transformerJobBuilder.getOutputColumns();
                         List<OutputType> output = unconfiguredTransformerKey.getOutput();
@@ -629,29 +617,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                     filterJobBuilder.setName(filter.getName());
 
                     List<InputType> input = filter.getInput();
-                    for (InputType inputType : input) {
-                        ref = inputType.getRef();
-
-                        InputColumn<?> inputColumn;
-                        if (StringUtils.isNullOrEmpty(ref)) {
-                            inputColumn = createExpressionBasedInputColumn(inputType);
-                        } else {
-                            inputColumn = inputColumns.get(ref);
-                            if (inputColumn == null) {
-                                throw new ComponentConfigurationException("No such input column: " + ref);
-                            }
-                        }
-
-                        String name = inputType.getName();
-                        if (StringUtils.isNullOrEmpty(name)) {
-                            filterJobBuilder.addInputColumn(inputColumn);
-                        } else {
-                            ConfiguredPropertyDescriptor propertyDescriptor = filterJobBuilder.getDescriptor()
-                                    .getConfiguredProperty(name);
-                            filterJobBuilder.addInputColumn(inputColumn, propertyDescriptor);
-                        }
-                    }
-
+                    applyInputColumns(input, inputColumns, filterJobBuilder);
                     applyProperties(filterJobBuilder, filter.getProperties(), stringConverter, variables);
 
                     filterJobBuilders.put(filter, filterJobBuilder);
@@ -803,31 +769,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
             analyzerJobBuilder.setName(analyzerType.getName());
 
             List<InputType> input = analyzerType.getInput();
-            for (InputType inputType : input) {
-                ref = inputType.getRef();
 
-                InputColumn<?> inputColumn;
-                if (StringUtils.isNullOrEmpty(ref)) {
-                    inputColumn = createExpressionBasedInputColumn(inputType);
-                } else {
-                    inputColumn = inputColumns.get(ref);
-                    if (inputColumn == null) {
-                        throw new ComponentConfigurationException("No such input column: " + ref);
-                    }
-                }
-
-                String name = inputType.getName();
-                if (StringUtils.isNullOrEmpty(name)) {
-                    analyzerJobBuilder.addInputColumn(inputColumn);
-                } else {
-                    ConfiguredPropertyDescriptor propertyDescriptor = analyzerJobBuilder.getDescriptor()
-                            .getConfiguredProperty(name);
-                    if (propertyDescriptor == null) {
-                        throw new ComponentConfigurationException("No such input property name: " + name);
-                    }
-                    analyzerJobBuilder.addInputColumn(inputColumn, propertyDescriptor);
-                }
-            }
+            applyInputColumns(input, inputColumns, analyzerJobBuilder);
             applyProperties(analyzerJobBuilder, analyzerType.getProperties(), stringConverter, variables);
 
             ref = analyzerType.getRequires();
@@ -867,6 +810,40 @@ public class JaxbJobReader implements JobReader<InputStream> {
         datastoreConnection.close();
 
         return analysisJobBuilder;
+    }
+
+    private void applyInputColumns(List<InputType> input, Map<String, InputColumn<?>> inputColumns,
+            AbstractBeanWithInputColumnsBuilder<?, ?, ?> componentJobBuilder) {
+        // build a map of inputs first so that we can set the
+        // input in one go
+        final ListMultimap<ConfiguredPropertyDescriptor, InputColumn<?>> inputMap = MultimapBuilder.hashKeys()
+                .arrayListValues().build();
+
+        for (InputType inputType : input) {
+            String name = inputType.getName();
+            String ref = inputType.getRef();
+            InputColumn<?> inputColumn;
+            if (StringUtils.isNullOrEmpty(ref)) {
+                inputColumn = createExpressionBasedInputColumn(inputType);
+            } else {
+                inputColumn = inputColumns.get(ref);
+            }
+            if (StringUtils.isNullOrEmpty(name)) {
+                ConfiguredPropertyDescriptor propertyDescriptor = componentJobBuilder
+                        .getDefaultConfiguredPropertyForInput();
+                inputMap.put(propertyDescriptor, inputColumn);
+            } else {
+                ConfiguredPropertyDescriptor propertyDescriptor = componentJobBuilder.getDescriptor()
+                        .getConfiguredProperty(name);
+                inputMap.put(propertyDescriptor, inputColumn);
+            }
+        }
+
+        final Set<ConfiguredPropertyDescriptor> keys = inputMap.keySet();
+        for (ConfiguredPropertyDescriptor propertyDescriptor : keys) {
+            List<InputColumn<?>> inputColumnsForProperty = inputMap.get(propertyDescriptor);
+            componentJobBuilder.addInputColumns(inputColumnsForProperty, propertyDescriptor);
+        }
     }
 
     private StringConverter createStringConverter(final AnalysisJobBuilder analysisJobBuilder) {

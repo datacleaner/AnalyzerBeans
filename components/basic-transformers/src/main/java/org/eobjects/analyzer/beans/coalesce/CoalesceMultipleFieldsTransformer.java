@@ -41,7 +41,7 @@ public class CoalesceMultipleFieldsTransformer implements Transformer<Object> {
     InputColumn<?>[] _input;
 
     @Configured
-    CoalesceUnit[] units;
+    CoalesceUnit[] _units;
 
     @Configured
     @Description("Consider empty strings (\"\") as null also?")
@@ -52,14 +52,14 @@ public class CoalesceMultipleFieldsTransformer implements Transformer<Object> {
 
     public CoalesceMultipleFieldsTransformer(CoalesceUnit... units) {
         this();
-        this.units = units;
+        this._units = units;
     }
 
     @Override
     public OutputColumns getOutputColumns() {
-        OutputColumns outputColumns = new OutputColumns(units.length);
-        for (int i = 0; i < units.length; i++) {
-            CoalesceUnit unit = units[i];
+        OutputColumns outputColumns = new OutputColumns(_units.length);
+        for (int i = 0; i < _units.length; i++) {
+            CoalesceUnit unit = _units[i];
             Class<?> dataType = unit.getOutputDataType(_input);
             outputColumns.setColumnType(i, dataType);
         }
@@ -68,9 +68,9 @@ public class CoalesceMultipleFieldsTransformer implements Transformer<Object> {
 
     @Override
     public Object[] transform(InputRow inputRow) {
-        Object[] result = new Object[units.length];
-        for (int i = 0; i < units.length; i++) {
-            InputColumn<?>[] inputColumns = units[i].getInputColumns(_input);
+        Object[] result = new Object[_units.length];
+        for (int i = 0; i < _units.length; i++) {
+            InputColumn<?>[] inputColumns = _units[i].getInputColumns(_input);
             List<Object> values = inputRow.getValues(inputColumns);
             Object value = coalesce(values);
             result[i] = value;

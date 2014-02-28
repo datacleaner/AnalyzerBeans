@@ -46,14 +46,14 @@ public class InjectionManagerFactoryTest extends TestCase {
 
     @Ignore
     @AnalyzerBean("Fancy analyzer")
-    public static class FancyTransformer implements Analyzer<NumberResult> {
+    public static class FancyAnalyzer implements Analyzer<NumberResult> {
 
         @Inject
         AtomicInteger fancyInjection;
 
         @Configured
         @ColumnProperty(escalateToMultipleJobs = true)
-        InputColumn<String> col;
+        InputColumn<Object> col;
 
         @Override
         public void run(InputRow row, int distinctCount) {
@@ -93,7 +93,7 @@ public class InjectionManagerFactoryTest extends TestCase {
         ajb.setDatastore("orderdb");
         ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
 
-        final AnalyzerJobBuilder<FancyTransformer> analyzerBuilder = ajb.addAnalyzer(FancyTransformer.class);
+        final AnalyzerJobBuilder<FancyAnalyzer> analyzerBuilder = ajb.addAnalyzer(FancyAnalyzer.class);
         analyzerBuilder.addInputColumns(ajb.getSourceColumns());
 
         final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());

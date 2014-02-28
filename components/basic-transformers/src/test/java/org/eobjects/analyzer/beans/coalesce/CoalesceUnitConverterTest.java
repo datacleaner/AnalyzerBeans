@@ -23,32 +23,52 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.configuration.InjectionManagerImpl;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.util.convert.StringConverter;
 
 public class CoalesceUnitConverterTest extends TestCase {
-    
-    private final CoalesceUnitConverter converter = new CoalesceUnitConverter();
+
+    private final MockInputColumn<?> numberCol1 = new MockInputColumn<Number>("num1", Number.class);
+    private final MockInputColumn<?> numberCol2 = new MockInputColumn<Number>("num1", Number.class);
+    private final MockInputColumn<?> integerCol1 = new MockInputColumn<Integer>("int1", Integer.class);
+    private final MockInputColumn<?> integerCol2 = new MockInputColumn<Integer>("int2", Integer.class);
+    private final MockInputColumn<?> stringCol1 = new MockInputColumn<String>("str1", String.class);
+    private final MockInputColumn<?> stringCol2 = new MockInputColumn<String>("str2", String.class);
+    private final MockInputColumn<?> objCol1 = new MockInputColumn<Object>("obj1", Object.class);
 
     public void testGetOutputDataType() throws Exception {
-        MockInputColumn<?> numberCol1 = new MockInputColumn<Number>("num1", Number.class);
-        MockInputColumn<?> numberCol2 = new MockInputColumn<Number>("num1", Number.class);
-        MockInputColumn<?> integerCol1 = new MockInputColumn<Integer>("int1", Integer.class);
-        MockInputColumn<?> integerCol2 = new MockInputColumn<Integer>("int2", Integer.class);
-        MockInputColumn<?> stringCol1 = new MockInputColumn<String>("str1", String.class);
-        MockInputColumn<?> stringCol2 = new MockInputColumn<String>("str2", String.class);
-        MockInputColumn<?> objCol1 = new MockInputColumn<Object>("obj1", Object.class);
+        CoalesceUnitConverter converter = new CoalesceUnitConverter();
 
         InputColumn<?>[] allColumns = new InputColumn[] { numberCol1, numberCol2, integerCol1, integerCol2, stringCol1,
                 stringCol2, objCol1 };
 
-        
         CoalesceUnit unit1 = new CoalesceUnit(stringCol1, stringCol2);
         String str = converter.toString(unit1);
         assertEquals("[str1,str2]", str);
-        
+
         CoalesceUnit unit2 = converter.fromString(CoalesceUnit.class, str);
         assertEquals("[str1, str2]", Arrays.toString(unit2.getInputColumnNames()));
         assertEquals(String.class, unit2.getOutputDataType(allColumns));
+    }
+
+    public void testDiscoverAndResolveConverter() throws Exception {
+        StringConverter stringConverter = new StringConverter(new InjectionManagerImpl(
+                new AnalyzerBeansConfigurationImpl()));
+
+        CoalesceUnit unit1 = new CoalesceUnit(stringCol1, stringCol2);
+        String str = stringConverter.serialize(unit1);
+        assertEquals("[str1,str2]", str);
+
+        CoalesceUnit[] array = new CoalesceUnit[] { unit1, unit1 };
+        str = stringConverter.serialize(array);
+        assertEquals("[[str1,str2],[str1,str2]]", str);
+        
+        CoalesceUnit[] units = stringConverter.deserialize(str, CoalesceUnit[].class);
+        assertEquals(2, units.length);
+        assertEquals("CoalesceUnit[inputColumnNames=[str1, str2]]", units[0].toString());
+        assertEquals("CoalesceUnit[inputColumnNames=[str1, str2]]", units[1].toString());
     }
 }

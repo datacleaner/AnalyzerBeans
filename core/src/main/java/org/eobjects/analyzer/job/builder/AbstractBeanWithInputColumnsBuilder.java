@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.job.builder;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -75,6 +76,11 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
      *             accepted by this transformer.
      */
     public B addInputColumn(InputColumn<?> inputColumn) throws IllegalArgumentException {
+        ConfiguredPropertyDescriptor propertyDescriptor = getDefaultConfiguredPropertyForInput();
+        return addInputColumn(inputColumn, propertyDescriptor);
+    }
+
+    public ConfiguredPropertyDescriptor getDefaultConfiguredPropertyForInput() {
         Collection<ConfiguredPropertyDescriptor> inputProperties = getDescriptor().getConfiguredPropertiesForInput(
                 false);
 
@@ -86,7 +92,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 
         if (inputProperties.size() == 1) {
             ConfiguredPropertyDescriptor propertyDescriptor = inputProperties.iterator().next();
-            return addInputColumn(inputColumn, propertyDescriptor);
+            return propertyDescriptor;
         } else {
             throw new UnsupportedOperationException("There are " + inputProperties.size()
                     + " named input columns in \"" + getDescriptor().getDisplayName()
@@ -125,17 +131,58 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         return (B) this;
     }
 
-    public B addInputColumns(Collection<? extends InputColumn<?>> inputColumns) {
-        for (InputColumn<?> inputColumn : inputColumns) {
-            addInputColumn(inputColumn);
+    // this is the main "addInputColumns" method that the other similar methods
+    // delegate to
+    public B addInputColumns(Collection<? extends InputColumn<?>> inputColumns, ConfiguredPropertyDescriptor propertyDescriptor) {
+        if (propertyDescriptor == null || !propertyDescriptor.isInputColumn()) {
+            throw new IllegalArgumentException("Property is not of InputColumn type: " + propertyDescriptor);
         }
+
+        final Class<?> expectedDataType = propertyDescriptor.getTypeArgument(0);
+        if (expectedDataType != null && expectedDataType != Object.class) {
+            // check input column type parameter compatibility
+            for (InputColumn<?> inputColumn : inputColumns) {
+                final Class<?> actualDataType = inputColumn.getDataType();
+                if (!ReflectionUtils.is(actualDataType, expectedDataType, false)) {
+                    throw new IllegalArgumentException("Unsupported InputColumn type: " + actualDataType
+                            + ", expected: " + expectedDataType);
+                }
+            }
+        }
+
+        Object newInputColumns = getConfiguredProperty(propertyDescriptor);
+        if (newInputColumns == null) {
+            if (propertyDescriptor.isArray()) {
+                InputColumn<?>[] asArray = inputColumns.toArray(new InputColumn[inputColumns.size()]);
+                newInputColumns = asArray;
+            } else {
+                if (inputColumns == null || inputColumns.isEmpty()) {
+                    newInputColumns = null;
+                } else if (inputColumns.size() > 1) {
+                    throw new IllegalArgumentException(
+                            "Property type is a single InputColumn, but a collection of more than one element was given");
+                } else {
+                    newInputColumns = inputColumns.iterator().next();
+                }
+            }
+        } else {
+            InputColumn<?>[] asArray = inputColumns.toArray(new InputColumn[inputColumns.size()]);
+            newInputColumns = CollectionUtils2.array(InputColumn.class, newInputColumns, asArray);
+        }
+        setConfiguredProperty(propertyDescriptor, newInputColumns);
+        return (B) this;
+    }
+
+    public B addInputColumns(Collection<? extends InputColumn<?>> inputColumns) {
+        ConfiguredPropertyDescriptor propertyDescriptor = getDefaultConfiguredPropertyForInput();
+        addInputColumns(inputColumns, propertyDescriptor);
         return (B) this;
     }
 
     public B addInputColumns(InputColumn<?>... inputColumns) {
-        for (InputColumn<?> inputColumn : inputColumns) {
-            addInputColumn(inputColumn);
-        }
+        List<InputColumn<?>> list = Arrays.asList(inputColumns);
+        ConfiguredPropertyDescriptor propertyDescriptor = getDefaultConfiguredPropertyForInput();
+        addInputColumns(list, propertyDescriptor);
         return (B) this;
     }
 

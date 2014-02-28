@@ -22,11 +22,9 @@ package org.eobjects.analyzer.util.convert;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.configuration.SimpleInjectionPoint;
-import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,169 +62,137 @@ import org.slf4j.LoggerFactory;
  */
 public final class StringConverter {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(StringConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(StringConverter.class);
 
-	private final InjectionManager _injectionManager;
+    private final InjectionManager _injectionManager;
 
-	public StringConverter(InjectionManager injectionManager) {
-		_injectionManager = injectionManager;
-	}
+    public StringConverter(InjectionManager injectionManager) {
+        _injectionManager = injectionManager;
+    }
 
-	/**
-	 * Serializes a Java object to a String representation.
-	 * 
-	 * @param o
-	 *            the object to serialize
-	 * @return a String representation of the Java object
-	 */
-	public final String serialize(final Object o) {
-		return serialize(o, new ArrayList<Class<? extends Converter<?>>>(0));
-	}
+    /**
+     * Serializes a Java object to a String representation.
+     * 
+     * @param o
+     *            the object to serialize
+     * @return a String representation of the Java object
+     */
+    public final String serialize(final Object o) {
+        return serialize(o, new ArrayList<Class<? extends Converter<?>>>(0));
+    }
 
-	public final String serialize(final Object o,
-			final Class<? extends Converter<?>> converterClass) {
-		final Collection<Class<? extends Converter<?>>> col = new ArrayList<Class<? extends Converter<?>>>();
-		if (converterClass != null) {
-			col.add(converterClass);
-		}
-		return serialize(o, col);
-	}
+    public final String serialize(final Object o, final Class<? extends Converter<?>> converterClass) {
+        final Collection<Class<? extends Converter<?>>> col = new ArrayList<Class<? extends Converter<?>>>();
+        if (converterClass != null) {
+            col.add(converterClass);
+        }
+        return serialize(o, col);
+    }
 
-	/**
-	 * Serializes a Java object to a String representation.
-	 * 
-	 * @param o
-	 *            the object to serialize
-	 * @param converterClasses
-	 *            an optional collection of custom converter classes
-	 * @return a String representation of the Java object
-	 */
-	public final String serialize(final Object o,
-			final Collection<Class<? extends Converter<?>>> converterClasses) {
-		final DelegatingConverter delegatingConverter = new DelegatingConverter();
+    /**
+     * Serializes a Java object to a String representation.
+     * 
+     * @param o
+     *            the object to serialize
+     * @param converterClasses
+     *            an optional collection of custom converter classes
+     * @return a String representation of the Java object
+     */
+    public final String serialize(final Object o, final Collection<Class<? extends Converter<?>>> converterClasses) {
+        final DelegatingConverter delegatingConverter = new DelegatingConverter();
 
-		if (converterClasses != null) {
-			for (Class<? extends Converter<?>> converterClass : converterClasses) {
-				delegatingConverter
-						.addConverter(createConverter(converterClass));
-			}
-		}
+        if (converterClasses != null) {
+            for (Class<? extends Converter<?>> converterClass : converterClasses) {
+                delegatingConverter.addConverter(createConverter(converterClass));
+            }
+        }
 
-		if (o != null) {
-			Convertable convertable = ReflectionUtils.getAnnotation(
-					o.getClass(), Convertable.class);
-			if (convertable != null) {
-				Class<? extends Converter<?>> converterClass = convertable
-						.value();
-				delegatingConverter
-						.addConverter(createConverter(converterClass));
-			}
-		}
+        delegatingConverter.addConverter(new ConfigurationItemConverter());
+        delegatingConverter.addConverter(getResourceConverter());
+        delegatingConverter.addConverter(new StandardTypeConverter(delegatingConverter));
 
-		delegatingConverter.addConverter(new ConfigurationItemConverter());
-		delegatingConverter.addConverter(getResourceConverter());
-		delegatingConverter.addConverter(new StandardTypeConverter(
-				delegatingConverter));
+        delegatingConverter.initializeAll(_injectionManager);
 
-		delegatingConverter.initializeAll(_injectionManager);
+        return delegatingConverter.toString(o);
+    }
 
-		return delegatingConverter.toString(o);
-	}
+    private ResourceConverter getResourceConverter() {
+        if (_injectionManager == null) {
+            return new ResourceConverter();
+        } else {
+            ResourceConverter converter = _injectionManager.getInstance(SimpleInjectionPoint
+                    .of(ResourceConverter.class));
+            if (converter == null) {
+                return new ResourceConverter();
+            }
+            return converter;
+        }
+    }
 
-	private ResourceConverter getResourceConverter() {
-		if (_injectionManager == null) {
-			return new ResourceConverter();
-		} else {
-			ResourceConverter converter = _injectionManager
-					.getInstance(SimpleInjectionPoint
-							.of(ResourceConverter.class));
-			if (converter == null) {
-				return new ResourceConverter();
-			}
-			return converter;
-		}
-	}
+    private Converter<?> createConverter(Class<? extends Converter<?>> converterClass) {
+        try {
+            Converter<?> converter = converterClass.newInstance();
+            return converter;
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new IllegalStateException("Error occurred while using instantiating: " + converterClass, e);
+        }
+    }
 
-	private Converter<?> createConverter(
-			Class<? extends Converter<?>> converterClass) {
-		try {
-			Converter<?> converter = converterClass.newInstance();
-			return converter;
-		} catch (Exception e) {
-			if (e instanceof RuntimeException) {
-				throw (RuntimeException) e;
-			}
-			throw new IllegalStateException(
-					"Error occurred while using instantiating: "
-							+ converterClass, e);
-		}
-	}
+    /**
+     * Deserializes a String into a Java object of the particular type.
+     * 
+     * @param str
+     *            the serialized string representation
+     * @param type
+     *            the requested type
+     * @return a Java object matching the String representation
+     */
+    public final <E> E deserialize(String str, Class<E> type) {
+        return deserialize(str, type, new ArrayList<Class<? extends Converter<?>>>(0));
+    }
 
-	/**
-	 * Deserializes a String into a Java object of the particular type.
-	 * 
-	 * @param str
-	 *            the serialized string representation
-	 * @param type
-	 *            the requested type
-	 * @return a Java object matching the String representation
-	 */
-	public final <E> E deserialize(String str, Class<E> type) {
-		return deserialize(str, type,
-				new ArrayList<Class<? extends Converter<?>>>(0));
-	}
+    public final <E> E deserialize(String str, Class<E> type, Class<? extends Converter<?>> converterClass) {
+        Collection<Class<? extends Converter<?>>> col = new ArrayList<Class<? extends Converter<?>>>();
+        if (converterClass != null) {
+            col.add(converterClass);
+        }
+        return deserialize(str, type, col);
+    }
 
-	public final <E> E deserialize(String str, Class<E> type,
-			Class<? extends Converter<?>> converterClass) {
-		Collection<Class<? extends Converter<?>>> col = new ArrayList<Class<? extends Converter<?>>>();
-		if (converterClass != null) {
-			col.add(converterClass);
-		}
-		return deserialize(str, type, col);
-	}
+    /**
+     * Deserializes a String into a Java object of the particular type.
+     * 
+     * @param str
+     *            the serialized string representation
+     * @param type
+     *            the requested type
+     * @param converterClasses
+     *            an optional collection of custom converters to apply when
+     *            deserializing
+     * @return a Java object matching the String representation
+     */
+    public final <E> E deserialize(String str, Class<E> type, Collection<Class<? extends Converter<?>>> converterClasses) {
+        logger.debug("deserialize(\"{}\", {})", str, type);
 
-	/**
-	 * Deserializes a String into a Java object of the particular type.
-	 * 
-	 * @param str
-	 *            the serialized string representation
-	 * @param type
-	 *            the requested type
-	 * @param converterClasses
-	 *            an optional collection of custom converters to apply when
-	 *            deserializing
-	 * @return a Java object matching the String representation
-	 */
-	public final <E> E deserialize(String str, Class<E> type,
-			Collection<Class<? extends Converter<?>>> converterClasses) {
-		logger.debug("deserialize(\"{}\", {})", str, type);
+        final DelegatingConverter delegatingConverter = new DelegatingConverter();
 
-		final DelegatingConverter delegatingConverter = new DelegatingConverter();
+        if (converterClasses != null) {
+            for (Class<? extends Converter<?>> converterClass : converterClasses) {
+                delegatingConverter.addConverter(createConverter(converterClass));
+            }
+        }
 
-		if (converterClasses != null) {
-			for (Class<? extends Converter<?>> converterClass : converterClasses) {
-				delegatingConverter
-						.addConverter(createConverter(converterClass));
-			}
-		}
+        delegatingConverter.addConverter(new ConfigurationItemConverter());
+        delegatingConverter.addConverter(getResourceConverter());
+        delegatingConverter.addConverter(new StandardTypeConverter(delegatingConverter));
 
-		Convertable convertable = ReflectionUtils.getAnnotation(type,
-				Convertable.class);
-		if (convertable != null) {
-			Class<? extends Converter<?>> converterClass = convertable.value();
-			delegatingConverter.addConverter(createConverter(converterClass));
-		}
+        delegatingConverter.initializeAll(_injectionManager);
 
-		delegatingConverter.addConverter(new ConfigurationItemConverter());
-		delegatingConverter.addConverter(getResourceConverter());
-		delegatingConverter.addConverter(new StandardTypeConverter(
-				delegatingConverter));
-
-		delegatingConverter.initializeAll(_injectionManager);
-
-		@SuppressWarnings("unchecked")
-		E result = (E) delegatingConverter.fromString(type, str);
-		return result;
-	}
+        @SuppressWarnings("unchecked")
+        E result = (E) delegatingConverter.fromString(type, str);
+        return result;
+    }
 }

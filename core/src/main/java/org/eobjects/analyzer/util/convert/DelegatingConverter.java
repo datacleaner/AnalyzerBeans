@@ -26,11 +26,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.configuration.InjectionPoint;
 import org.eobjects.analyzer.lifecycle.MemberInjectionPoint;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main converter used by {@link StringConverter}. This converter will delegate
@@ -42,6 +45,8 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * 
  */
 public class DelegatingConverter implements Converter<Object> {
+
+    private static final Logger logger = LoggerFactory.getLogger(DelegatingConverter.class);
 
     private static final String[][] ESCAPE_MAPPING = { { "&amp;", "&" }, { "&#91;", "[" }, { "&#93;", "]" },
             { "&#44;", "," }, { "&lt;", "<" }, { "&gt;", ">" }, { "&quot;", "\"" }, { "&copy;", "\u00a9" },
@@ -96,6 +101,19 @@ public class DelegatingConverter implements Converter<Object> {
             return _arrayConverter.fromString(type, serializedForm);
         }
 
+        Convertable convertable = ReflectionUtils.getAnnotation(type, Convertable.class);
+        if (convertable != null) {
+            try {
+                Class<? extends Converter<?>> converterClass = convertable.value();
+                @SuppressWarnings("unchecked")
+                Converter<Object> converter = (Converter<Object>) ReflectionUtils.newInstance(converterClass);
+                return converter.fromString(type, serializedForm);
+            } catch (Exception e) {
+                logger.warn("Failed to convert fromString(" + serializedForm
+                        + ") using Convertable annotated converter class", e);
+            }
+        }
+
         throw new IllegalStateException("Could not find matching converter for type: " + type);
     }
 
@@ -120,6 +138,19 @@ public class DelegatingConverter implements Converter<Object> {
                 serializedForm = escape(serializedForm);
 
                 return serializedForm;
+            }
+        }
+
+        Convertable convertable = ReflectionUtils.getAnnotation(instance.getClass(), Convertable.class);
+        if (convertable != null) {
+            try {
+                Class<? extends Converter<?>> converterClass = convertable.value();
+                @SuppressWarnings("unchecked")
+                Converter<Object> converter = (Converter<Object>) ReflectionUtils.newInstance(converterClass);
+                return converter.toString(instance);
+            } catch (Exception e) {
+                logger.warn("Failed to convert toString(" + instance + ") using Convertable annotated converter class",
+                        e);
             }
         }
 

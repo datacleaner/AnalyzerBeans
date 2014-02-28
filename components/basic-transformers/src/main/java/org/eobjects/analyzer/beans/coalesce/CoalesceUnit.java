@@ -25,6 +25,8 @@ import java.util.List;
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.util.ReflectionUtils;
+import org.eobjects.metamodel.util.CollectionUtils;
+import org.eobjects.metamodel.util.HasNameMapper;
 
 /**
  * Represents a set of columns to be coalesced.
@@ -73,7 +75,8 @@ public class CoalesceUnit {
                     }
                 }
                 if (_inputColumns[i] == null) {
-                    throw new IllegalStateException("Column not found: " + name);
+                    List<String> names = CollectionUtils.map(allInputColumns, new HasNameMapper());
+                    throw new IllegalStateException("Column '" + name + "' not found. Available columns: " + names);
                 }
             }
         }
@@ -128,5 +131,10 @@ public class CoalesceUnit {
         if (!Arrays.equals(_inputColumnNames, other._inputColumnNames))
             return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "CoalesceUnit[inputColumnNames=" + Arrays.toString(_inputColumnNames) + "]";
     }
 }
