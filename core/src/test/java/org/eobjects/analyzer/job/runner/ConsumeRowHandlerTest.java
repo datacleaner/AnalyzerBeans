@@ -97,7 +97,7 @@ public class ConsumeRowHandlerTest extends TestCase {
 
         MockInputRow inputRow = new MockInputRow().put(nameColumn, "Kasper").put(ageColumn, null)
                 .put(countryColumn, null);
-        result = handler.consume(inputRow);
+        result = handler.consumeRow(inputRow).getRows();
 
         assertEquals(1, result.size());
         InputRow outputRow = result.get(0);
@@ -134,7 +134,7 @@ public class ConsumeRowHandlerTest extends TestCase {
 
         MockInputRow inputRow = new MockInputRow(100).put(nameColumn, "Vera").put(ageColumn, 3)
                 .put(countryColumn, "DK");
-        result = handler.consume(inputRow);
+        result = handler.consumeRow(inputRow).getRows();
 
         assertEquals(3, result.size());
         InputRow outputRow = result.get(0);

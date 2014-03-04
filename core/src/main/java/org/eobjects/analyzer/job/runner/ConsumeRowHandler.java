@@ -123,10 +123,26 @@ public class ConsumeRowHandler {
         return result;
     }
 
+    /**
+     * @deprecated use {@link #consumeRow(InputRow)} instead
+     */
+    @Deprecated
     public List<InputRow> consume(InputRow row) {
+        ConsumeRowResult result = consumeRow(row);
+        return result.getRows();
+    }
+
+    /**
+     * Consumes a {@link InputRow} by applying all transformations etc. to it,
+     * returning a result of transformed rows and their {@link OutcomeSink}s.
+     * 
+     * @param row
+     * @return
+     */
+    public ConsumeRowResult consumeRow(InputRow row) {
         OutcomeSink outcomes = new OutcomeSinkImpl(_alwaysSatisfiedOutcomes);
         ConsumeRowHandlerDelegate delegate = new ConsumeRowHandlerDelegate(_consumers, row, 0, outcomes);
-        List<InputRow> result = delegate.consume();
+        ConsumeRowResult result = delegate.consume();
         return result;
     }
 

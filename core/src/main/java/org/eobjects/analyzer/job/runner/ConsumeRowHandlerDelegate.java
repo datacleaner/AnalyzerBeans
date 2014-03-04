@@ -36,22 +36,24 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
     private final int _consumerIndex;
     private final OutcomeSink _outcomes;
     private final List<InputRow> _resultRecords;
+    private final List<OutcomeSink> _resultOutcomes;
 
     public ConsumeRowHandlerDelegate(List<RowProcessingConsumer> consumers, InputRow row, int consumerIndex,
             OutcomeSink outcomes) {
-        this(consumers, row, consumerIndex, outcomes, new ArrayList<InputRow>(1));
+        this(consumers, row, consumerIndex, outcomes, new ArrayList<InputRow>(1), new ArrayList<OutcomeSink>(1));
     }
 
     private ConsumeRowHandlerDelegate(List<RowProcessingConsumer> consumers, InputRow row, int consumerIndex,
-            OutcomeSink outcomes, List<InputRow> resultRecords) {
+            OutcomeSink outcomes, List<InputRow> resultRecords, List<OutcomeSink> resultOutcomes) {
         _consumers = consumers;
         _row = row;
         _consumerIndex = consumerIndex;
         _outcomes = outcomes;
         _resultRecords = resultRecords;
+        _resultOutcomes = resultOutcomes;
     }
 
-    public List<InputRow> consume() {
+    public ConsumeRowResult consume() {
         RowProcessingConsumer consumer = _consumers.get(_consumerIndex);
 
         final boolean process = consumer.satisfiedForConsume(_outcomes.getOutcomes(), _row);
@@ -62,7 +64,7 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
             processNext(_row, 1, _outcomes);
         }
 
-        return _resultRecords;
+        return new ConsumeRowResult(_resultRecords, _resultOutcomes);
     }
 
     @Override
@@ -71,11 +73,12 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
         if (nextIndex >= _consumers.size()) {
             // finished!
             _resultRecords.add(row);
+            _resultOutcomes.add(outcomes);
             return;
         }
 
         final ConsumeRowHandlerDelegate subDelegate = new ConsumeRowHandlerDelegate(_consumers, row, nextIndex,
-                outcomes, _resultRecords);
+                outcomes, _resultRecords, _resultOutcomes);
         subDelegate.consume();
     }
 

@@ -151,7 +151,7 @@ public abstract class AbstractWrappedAnalysisJobTransformer implements Transform
             wrappedInputRow.put(wrappedColumn, value);
         }
 
-        final List<InputRow> outputRows = _consumeRowHandler.consume(wrappedInputRow);
+        final List<InputRow> outputRows = _consumeRowHandler.consumeRow(wrappedInputRow).getRows();
         for (InputRow wrappedOutputRow : outputRows) {
             final Object[] outputValues = convertToOutputValues(wrappedOutputRow);
             _outputRowCollector.putValues(outputValues);

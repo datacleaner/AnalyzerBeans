@@ -19,40 +19,28 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import org.eobjects.analyzer.job.Outcome;
+import java.util.List;
+
+import org.eobjects.analyzer.data.InputRow;
 
 /**
- * Interface for RowProcessingConsumers to add outcomes to and for others to
- * detect the {@link Outcome} state of a record.
+ * Result type of {@link ConsumeRowHandler}.
  */
-public interface OutcomeSink extends Cloneable {
+public class ConsumeRowResult {
 
-    /**
-     * Adds a {@link Outcome} to the set of active outcomes
-     * 
-     * @param filterOutcome
-     */
-    public void add(Outcome filterOutcome);
+    private final List<InputRow> _rows;
+    private final List<OutcomeSink> _outcomeSinks;
 
-    /**
-     * Gets the currently active outcomes.
-     * 
-     * @return
-     */
-    public Outcome[] getOutcomes();
+    public ConsumeRowResult(List<InputRow> rows, List<OutcomeSink> outcomeSinks) {
+        _rows = rows;
+        _outcomeSinks = outcomeSinks;
+    }
 
-    /**
-     * Determines if a particular outcome is active in the current state.
-     * 
-     * @param outcome
-     * @return
-     */
-    public boolean contains(Outcome outcome);
+    public List<OutcomeSink> getOutcomeSinks() {
+        return _outcomeSinks;
+    }
 
-    /**
-     * Clones the instance.
-     * 
-     * @return
-     */
-    public OutcomeSink clone();
+    public List<InputRow> getRows() {
+        return _rows;
+    }
 }

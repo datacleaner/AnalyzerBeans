@@ -46,7 +46,7 @@ public final class ConsumeRowTask implements Task {
 
     @Override
     public void execute() {
-        _consumeRowHandler.consume(_row);
+        _consumeRowHandler.consumeRow(_row).getRows();
         _analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
                 _rowProcessingMetrics, _row.getId());
     }
