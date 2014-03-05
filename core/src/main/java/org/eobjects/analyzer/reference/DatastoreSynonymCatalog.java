@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -36,9 +35,9 @@ import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.SchemaNavigator;
@@ -55,221 +54,224 @@ import org.eobjects.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
+
 public final class DatastoreSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LoggerFactory.getLogger(DatastoreSynonymCatalog.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatastoreSynonymCatalog.class);
 
-	private transient Map<String, String> _masterTermCache;
-	private transient BlockingQueue<DatastoreConnection> _dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
-	private final String _datastoreName;
-	private final String _masterTermColumnPath;
-	private final String[] _synonymColumnPaths;
+    private transient Cache<String, String> _masterTermCache;
+    private transient BlockingQueue<DatastoreConnection> _dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
+    private final String _datastoreName;
+    private final String _masterTermColumnPath;
+    private final String[] _synonymColumnPaths;
 
-	@Inject
-	@Provided
-	transient DatastoreCatalog _datastoreCatalog;
+    @Inject
+    @Provided
+    transient DatastoreCatalog _datastoreCatalog;
 
-	public DatastoreSynonymCatalog(String name, String datastoreName, String masterTermColumnPath,
-			String[] synonymColumnPaths) {
-		super(name);
-		_datastoreName = datastoreName;
-		_masterTermColumnPath = masterTermColumnPath;
-		_synonymColumnPaths = synonymColumnPaths;
-	}
+    public DatastoreSynonymCatalog(String name, String datastoreName, String masterTermColumnPath,
+            String[] synonymColumnPaths) {
+        super(name);
+        _datastoreName = datastoreName;
+        _masterTermColumnPath = masterTermColumnPath;
+        _synonymColumnPaths = synonymColumnPaths;
+    }
 
-	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-		ReadObjectBuilder.create(this, DatastoreSynonymCatalog.class).readObject(stream);
-	}
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        ReadObjectBuilder.create(this, DatastoreSynonymCatalog.class).readObject(stream);
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		super.decorateIdentity(identifiers);
-		identifiers.add(_datastoreName);
-		identifiers.add(_masterTermColumnPath);
-		identifiers.add(_synonymColumnPaths);
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        super.decorateIdentity(identifiers);
+        identifiers.add(_datastoreName);
+        identifiers.add(_masterTermColumnPath);
+        identifiers.add(_synonymColumnPaths);
+    }
 
-	/**
-	 * Initializes a DatastoreConnection, which will keep the connection open
-	 */
-	@Initialize
-	public void init() {
-		logger.info("Initializing dictionary: {}", this);
-		Datastore datastore = getDatastore();
-		DatastoreConnection dataContextProvider = datastore.openConnection();
-		getDatastoreConnections().add(dataContextProvider);
-	}
+    /**
+     * Initializes a DatastoreConnection, which will keep the connection open
+     */
+    @Initialize
+    public void init() {
+        logger.info("Initializing dictionary: {}", this);
+        Datastore datastore = getDatastore();
+        DatastoreConnection dataContextProvider = datastore.openConnection();
+        getDatastoreConnections().add(dataContextProvider);
+    }
 
-	/**
-	 * Closes a DatastoreConnection, potentially closing the connection (if no
-	 * other DatastoreConnections are open).
-	 */
-	@Close
-	public void close() {
-		DatastoreConnection dataContextProvider = getDatastoreConnections().poll();
-		if (dataContextProvider != null) {
-			logger.info("Closing dictionary: {}", this);
-			dataContextProvider.close();
-		}
-	}
+    /**
+     * Closes a DatastoreConnection, potentially closing the connection (if no
+     * other DatastoreConnections are open).
+     */
+    @Close
+    public void close() {
+        DatastoreConnection dataContextProvider = getDatastoreConnections().poll();
+        if (dataContextProvider != null) {
+            logger.info("Closing dictionary: {}", this);
+            dataContextProvider.close();
+        }
+    }
 
-	private Map<String, String> getMasterTermCache() {
-		if (_masterTermCache == null) {
-			synchronized (this) {
-				if (_masterTermCache == null) {
-					_masterTermCache = CollectionUtils2.createCacheMap();
-				}
-			}
-		}
-		return _masterTermCache;
-	}
+    private Cache<String, String> getMasterTermCache() {
+        if (_masterTermCache == null) {
+            synchronized (this) {
+                if (_masterTermCache == null) {
+                    _masterTermCache = CollectionUtils2.createCache(1000, 5 * 60);
+                }
+            }
+        }
+        return _masterTermCache;
+    }
 
-	private BlockingQueue<DatastoreConnection> getDatastoreConnections() {
-		if (_dataContextProviders == null) {
-			synchronized (this) {
-				if (_dataContextProviders == null) {
-					_dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
-				}
-			}
-		}
-		return _dataContextProviders;
-	}
+    private BlockingQueue<DatastoreConnection> getDatastoreConnections() {
+        if (_dataContextProviders == null) {
+            synchronized (this) {
+                if (_dataContextProviders == null) {
+                    _dataContextProviders = new LinkedBlockingQueue<DatastoreConnection>();
+                }
+            }
+        }
+        return _dataContextProviders;
+    }
 
-	private Datastore getDatastore() {
-		Datastore datastore = _datastoreCatalog.getDatastore(_datastoreName);
-		if (datastore == null) {
-			throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
-		}
-		return datastore;
-	}
+    private Datastore getDatastore() {
+        Datastore datastore = _datastoreCatalog.getDatastore(_datastoreName);
+        if (datastore == null) {
+            throw new IllegalStateException("Could not resolve datastore " + _datastoreName);
+        }
+        return datastore;
+    }
 
-	public String getDatastoreName() {
-		return _datastoreName;
-	}
+    public String getDatastoreName() {
+        return _datastoreName;
+    }
 
-	public String getMasterTermColumnPath() {
-		return _masterTermColumnPath;
-	}
+    public String getMasterTermColumnPath() {
+        return _masterTermColumnPath;
+    }
 
-	public String[] getSynonymColumnPaths() {
-		return Arrays.copyOf(_synonymColumnPaths, _synonymColumnPaths.length);
-	}
+    public String[] getSynonymColumnPaths() {
+        return Arrays.copyOf(_synonymColumnPaths, _synonymColumnPaths.length);
+    }
 
-	@Override
-	public Collection<Synonym> getSynonyms() {
+    @Override
+    public Collection<Synonym> getSynonyms() {
 
-		Datastore datastore = getDatastore();
+        Datastore datastore = getDatastore();
 
-		DatastoreConnection dataContextProvider = datastore.openConnection();
-		DataContext dataContext = dataContextProvider.getDataContext();
+        DatastoreConnection dataContextProvider = datastore.openConnection();
+        DataContext dataContext = dataContextProvider.getDataContext();
 
-		SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+        SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
 
-		Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
-		Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
+        Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
+        Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
 
-		Table table = masterTermColumn.getTable();
+        Table table = masterTermColumn.getTable();
 
-		Query query = dataContext.query().from(table.getName()).select(masterTermColumn).select(columns).toQuery();
-		DataSet results = dataContext.executeQuery(query);
+        Query query = dataContext.query().from(table.getName()).select(masterTermColumn).select(columns).toQuery();
+        DataSet results = dataContext.executeQuery(query);
 
-		List<Synonym> synonyms = new ArrayList<Synonym>();
+        List<Synonym> synonyms = new ArrayList<Synonym>();
 
-		while (results.next()) {
-			Row row = results.getRow();
-			synonyms.add(new SimpleSynonym(getMasterTerm(row, masterTermColumn), getSynonyms(row, table.getColumns())));
-		}
-		dataContextProvider.close();
-		return synonyms;
-	}
+        while (results.next()) {
+            Row row = results.getRow();
+            synonyms.add(new SimpleSynonym(getMasterTerm(row, masterTermColumn), getSynonyms(row, table.getColumns())));
+        }
+        dataContextProvider.close();
+        return synonyms;
+    }
 
-	@Override
-	public String getMasterTerm(String term) {
-		if (StringUtils.isNullOrEmpty(term)) {
-			return null;
-		}
+    @Override
+    public String getMasterTerm(String term) {
+        if (StringUtils.isNullOrEmpty(term)) {
+            return null;
+        }
 
-		final Map<String, String> cache = getMasterTermCache();
+        final Cache<String, String> cache = getMasterTermCache();
 
-		String result;
+        String result;
 
-		synchronized (cache) {
+        synchronized (cache) {
 
-			result = cache.get(term);
+            result = cache.getIfPresent(term);
 
-			if (result == null) {
-				Datastore datastore = getDatastore();
+            if (result == null) {
+                Datastore datastore = getDatastore();
 
-				DatastoreConnection dataContextProvider = datastore.openConnection();
-				try {
+                DatastoreConnection dataContextProvider = datastore.openConnection();
+                try {
 
-					SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+                    SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
 
-					Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
-					Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
+                    Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
+                    Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
 
-					DataContext dataContext = dataContextProvider.getDataContext();
-					Table table = masterTermColumn.getTable();
+                    DataContext dataContext = dataContextProvider.getDataContext();
+                    Table table = masterTermColumn.getTable();
 
-					// create a query that gets the master term where any of the
-					// synonym columns are equal to the synonym
-					Query query = dataContext.query().from(table.getName()).select(masterTermColumn).toQuery();
-					List<FilterItem> filterItems = new ArrayList<FilterItem>();
-					for (int i = 0; i < columns.length; i++) {
-						Column column = columns[i];
-						if (column.getType().isNumber()) {
-							Number numberValue = ConvertToNumberTransformer.transformValue(term);
-							if (numberValue != null) {
-								filterItems.add(new FilterItem(new SelectItem(column), OperatorType.EQUALS_TO, numberValue));
-							}
-						} else {
-							filterItems.add(new FilterItem(new SelectItem(column), OperatorType.EQUALS_TO, term));
-						}
-					}
-					if (filterItems.isEmpty()) {
-						result = "";
-					} else {
-						query.where(new FilterItem(filterItems.toArray(new FilterItem[0])));
+                    // create a query that gets the master term where any of the
+                    // synonym columns are equal to the synonym
+                    Query query = dataContext.query().from(table.getName()).select(masterTermColumn).toQuery();
+                    List<FilterItem> filterItems = new ArrayList<FilterItem>();
+                    for (int i = 0; i < columns.length; i++) {
+                        Column column = columns[i];
+                        if (column.getType().isNumber()) {
+                            Number numberValue = ConvertToNumberTransformer.transformValue(term);
+                            if (numberValue != null) {
+                                filterItems.add(new FilterItem(new SelectItem(column), OperatorType.EQUALS_TO,
+                                        numberValue));
+                            }
+                        } else {
+                            filterItems.add(new FilterItem(new SelectItem(column), OperatorType.EQUALS_TO, term));
+                        }
+                    }
+                    if (filterItems.isEmpty()) {
+                        result = "";
+                    } else {
+                        query.where(new FilterItem(filterItems.toArray(new FilterItem[0])));
 
-						DataSet dataSet = dataContext.executeQuery(query);
+                        DataSet dataSet = dataContext.executeQuery(query);
 
-						if (dataSet.next()) {
-							Row row = dataSet.getRow();
-							result = getMasterTerm(row, masterTermColumn);
-						} else {
-							result = "";
-						}
-						dataSet.close();
-					}
-				} finally {
-					dataContextProvider.close();
-				}
+                        if (dataSet.next()) {
+                            Row row = dataSet.getRow();
+                            result = getMasterTerm(row, masterTermColumn);
+                        } else {
+                            result = "";
+                        }
+                        dataSet.close();
+                    }
+                } finally {
+                    dataContextProvider.close();
+                }
 
-				cache.put(term, result);
-			}
-		}
+                cache.put(term, result);
+            }
+        }
 
-		if ("".equals(result)) {
-			result = null;
-		}
+        if ("".equals(result)) {
+            result = null;
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	private String getMasterTerm(Row row, Column column) {
-		Object value = row.getValue(column);
-		return ConvertToStringTransformer.transformValue(value);
-	}
+    private String getMasterTerm(Row row, Column column) {
+        Object value = row.getValue(column);
+        return ConvertToStringTransformer.transformValue(value);
+    }
 
-	private String[] getSynonyms(Row row, Column[] columns) {
-		List<String> synonyms = new ArrayList<String>();
-		for (Column synonymColumn : columns) {
-			String value = (String) row.getValue(synonymColumn);
-			synonyms.add(value);
-		}
-		return synonyms.toArray(new String[0]);
-	}
+    private String[] getSynonyms(Row row, Column[] columns) {
+        List<String> synonyms = new ArrayList<String>();
+        for (Column synonymColumn : columns) {
+            String value = (String) row.getValue(synonymColumn);
+            synonyms.add(value);
+        }
+        return synonyms.toArray(new String[0]);
+    }
 
 }

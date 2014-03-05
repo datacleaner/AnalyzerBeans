@@ -166,6 +166,7 @@ final class DistributedAnalysisResultReducer {
                 .ofComponent(reducerClass);
 
         AnalyzerResultReducer<AnalyzerResult> reducer = null;
+        boolean success = false;
         try {
             reducer = (AnalyzerResultReducer<AnalyzerResult>) reducerDescriptor.newInstance();
 
@@ -174,6 +175,8 @@ final class DistributedAnalysisResultReducer {
 
             final AnalyzerResult reducedResult = reducer.reduce(slaveResults);
             resultMap.put(analyzerJob, reducedResult);
+            
+            success = true;
             _analysisListener.analyzerSuccess(_masterJob, analyzerJob, reducedResult);
 
         } catch (Exception e) {
@@ -184,7 +187,7 @@ final class DistributedAnalysisResultReducer {
             _analysisListener.errorInAnalyzer(_masterJob, analyzerJob, null, e);
         } finally {
             if (reducer != null) {
-                _lifeCycleHelper.close(reducerDescriptor, reducer);
+                _lifeCycleHelper.close(reducerDescriptor, reducer, success);
             }
         }
     }

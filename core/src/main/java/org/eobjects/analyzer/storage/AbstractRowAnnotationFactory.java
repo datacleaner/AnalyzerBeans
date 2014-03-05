@@ -30,11 +30,10 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.CollectionUtils2;
 
+import com.google.common.cache.Cache;
+
 /**
  * An abstract RowAnnotationFactory that supports a (optional) threshold
- * 
- * @author Kasper Sørensen
- * 
  */
 public abstract class AbstractRowAnnotationFactory implements RowAnnotationFactory, Serializable {
 
@@ -42,7 +41,8 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
 
     private final Map<RowAnnotationImpl, AtomicInteger> _rowCounts = new ConcurrentHashMap<RowAnnotationImpl, AtomicInteger>();
     private final Integer _storedRowsThreshold;
-    private final transient Map<Integer, Boolean> _cachedRows = CollectionUtils2.createCacheMap();
+
+    private final transient Cache<Integer, Boolean> _cachedRows = CollectionUtils2.createCache(10000, 10 * 60);
 
     public AbstractRowAnnotationFactory(Integer storedRowsThreshold) {
         if (storedRowsThreshold == null) {
@@ -51,7 +51,7 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
             _storedRowsThreshold = storedRowsThreshold;
         }
     }
-    
+
     @Override
     public void annotate(InputRow[] rows, RowAnnotation annotation) {
         for (InputRow row : rows) {
@@ -73,14 +73,15 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
         }
 
         if (storeRow) {
-            // TODO: In clustered scenarios, there's a chance of row ID collision
+            // TODO: In clustered scenarios, there's a chance of row ID
+            // collision
             final int rowId = row.getId();
             if (_cachedRows != null) {
-                synchronized (_cachedRows) {
-                    if (_cachedRows.get(rowId) == null) {
-                        storeRowValues(rowId, row, distinctCount);
-                        _cachedRows.put(rowId, Boolean.TRUE);
-                    }
+                Boolean previously = _cachedRows.asMap().putIfAbsent(rowId, true);
+                if (previously == null) {
+                    // only store row values when they where not present
+                    // previously
+                    storeRowValues(rowId, row, distinctCount);
                 }
             }
             storeRowAnnotation(rowId, annotation);
@@ -100,7 +101,8 @@ public abstract class AbstractRowAnnotationFactory implements RowAnnotationFacto
                     count = newCounter;
                 }
             } else {
-                // for backwards compatibility we also need to support (deserialized) hash maps
+                // for backwards compatibility we also need to support
+                // (deserialized) hash maps
                 synchronized (_rowCounts) {
                     count = _rowCounts.get(ann);
                     if (count == null) {

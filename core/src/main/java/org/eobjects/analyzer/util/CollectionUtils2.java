@@ -25,11 +25,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.collections15.map.ReferenceMap;
 import org.eobjects.metamodel.util.CollectionUtils;
 import org.eobjects.metamodel.util.Predicate;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * Additional (to {@link CollectionUtils} utility methods for common collection
@@ -121,8 +124,31 @@ public final class CollectionUtils2 {
         return list;
     }
 
-    public static <K, V> Map<K, V> createCacheMap() {
-        return new ReferenceMap<K, V>(ReferenceMap.SOFT, ReferenceMap.SOFT, true);
+    /**
+     * 
+     * @return
+     * 
+     * @deprecated use Google Guava's {@link CacheBuilder},
+     *             {@link #createCache(int, long)} or something similar if
+     *             needed.
+     */
+    @Deprecated
+    public static <K, V> ConcurrentMap<K, V> createCacheMap() {
+        Cache<K, V> cache = CacheBuilder.newBuilder().maximumSize(10000).build();
+        return cache.asMap();
+    }
+
+    /**
+     * Creates a typical Google Guava cache
+     * 
+     * @param maximumSize
+     * @param expiryDurationSeconds
+     * @return
+     */
+    public static <K, V> Cache<K, V> createCache(int maximumSize, long expiryDurationSeconds) {
+        Cache<K, V> cache = CacheBuilder.newBuilder().maximumSize(maximumSize)
+                .expireAfterAccess(expiryDurationSeconds, TimeUnit.SECONDS).build();
+        return cache;
     }
 
     public static Object toArray(List<?> list, Class<?> componentType) {

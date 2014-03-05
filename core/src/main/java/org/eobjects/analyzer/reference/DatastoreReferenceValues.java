@@ -22,10 +22,9 @@ package org.eobjects.analyzer.reference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.data.DataSet;
@@ -33,6 +32,8 @@ import org.eobjects.metamodel.data.Row;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.util.BaseObject;
+
+import com.google.common.cache.Cache;
 
 /**
  * Reference values implementation based on a datastore column.
@@ -43,7 +44,8 @@ public final class DatastoreReferenceValues extends BaseObject implements Refere
 
 	private final Datastore _datastore;
 	private final Column _column;
-	private transient Map<String, Boolean> _containsValueCache = CollectionUtils2.createCacheMap();
+	
+	private transient Cache<String, Boolean> _containsValueCache = CollectionUtils2.createCache(1000, 60);
 
 	public DatastoreReferenceValues(Datastore datastore, Column column) {
 		_datastore = datastore;
@@ -57,15 +59,15 @@ public final class DatastoreReferenceValues extends BaseObject implements Refere
 	}
 
 	public void clearCache() {
-		_containsValueCache.clear();
+		_containsValueCache.invalidateAll();
 	}
 
 	@Override
 	public boolean containsValue(String value) {
-		Boolean result = _containsValueCache.get(value);
+		Boolean result = _containsValueCache.getIfPresent(value);
 		if (result == null) {
 			synchronized (_containsValueCache) {
-				result = _containsValueCache.get(value);
+				result = _containsValueCache.getIfPresent(value);
 				if (result == null) {
 					result = false;
 					DatastoreConnection con = _datastore.openConnection();

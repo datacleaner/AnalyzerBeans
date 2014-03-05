@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -57,6 +56,8 @@ import org.eobjects.metamodel.util.HasName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
+
 /**
  * A transformer that can do a lookup (like a left join) based on a set of
  * columns in any datastore.
@@ -73,11 +74,11 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     public static enum JoinSemantic implements HasName {
         @Alias("LEFT")
-        LEFT_JOIN_MAX_ONE("Left join (max 1 record)"), 
-        
+        LEFT_JOIN_MAX_ONE("Left join (max 1 record)"),
+
         @Alias("INNER")
-        INNER_JOIN("Inner join"), 
-        
+        INNER_JOIN("Inner join"),
+
         @Alias("INNER_MIN_ONE")
         LEFT_JOIN("Left join");
 
@@ -143,8 +144,8 @@ public class TableLookupTransformer implements Transformer<Object> {
     @Provided
     OutputRowCollector outputRowCollector;
 
-    private final Map<List<Object>, Object[]> cache = Collections.synchronizedMap(CollectionUtils2
-            .<List<Object>, Object[]> createCacheMap());
+    private final Cache<List<Object>, Object[]> cache = CollectionUtils2.<List<Object>, Object[]> createCache(10000,
+            5 * 60);
     private Column[] queryOutputColumns;
     private Column[] queryConditionColumns;
     private DatastoreConnection datastoreConnection;
@@ -223,7 +224,7 @@ public class TableLookupTransformer implements Transformer<Object> {
     public void init() {
         datastoreConnection = datastore.openConnection();
         resetCachedColumns();
-        cache.clear();
+        cache.invalidateAll();
         compileLookupQuery();
     }
 
@@ -238,7 +239,7 @@ public class TableLookupTransformer implements Transformer<Object> {
                     query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, new QueryParameter());
                 }
             }
-            
+
             if (joinSemantic == JoinSemantic.LEFT_JOIN_MAX_ONE) {
                 query = query.setMaxRows(1);
             }
@@ -250,9 +251,10 @@ public class TableLookupTransformer implements Transformer<Object> {
             throw e;
         }
     }
-    
+
     private boolean isCarthesianProductMode() {
-        return (conditionColumns == null || conditionColumns.length == 0) && (conditionValues == null || conditionValues.length == 0);
+        return (conditionColumns == null || conditionColumns.length == 0)
+                && (conditionValues == null || conditionValues.length == 0);
     }
 
     @Validate
@@ -293,7 +295,7 @@ public class TableLookupTransformer implements Transformer<Object> {
     @Override
     public Object[] transform(InputRow inputRow) {
         final List<Object> queryInput;
-        
+
         if (isCarthesianProductMode()) {
             queryInput = Collections.emptyList();
         } else {
@@ -308,7 +310,7 @@ public class TableLookupTransformer implements Transformer<Object> {
 
         Object[] result;
         if (cacheLookups && joinSemantic.isCacheable()) {
-            result = cache.get(queryInput);
+            result = cache.getIfPresent(queryInput);
             if (result == null) {
                 result = performQuery(queryInput);
                 cache.put(queryInput, result);
@@ -378,7 +380,7 @@ public class TableLookupTransformer implements Transformer<Object> {
     public void close() {
         lookupQuery.close();
         datastoreConnection.close();
-        cache.clear();
+        cache.invalidateAll();
         queryOutputColumns = null;
         queryConditionColumns = null;
     }
