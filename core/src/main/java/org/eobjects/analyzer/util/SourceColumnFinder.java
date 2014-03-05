@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SourceColumnFinder {
 
+    private static final String LOGGER_WARN_RECURSIVE_TRAVERSAL = "Ending traversal of object graph because the same originating objects are appearing recursively";
+
     private static final Logger logger = LoggerFactory.getLogger(SourceColumnFinder.class);
 
     private Set<InputColumnSinkJob> _inputColumnSinks = new HashSet<InputColumnSinkJob>();
@@ -145,7 +147,7 @@ public class SourceColumnFinder {
         findAllSourceJobs(job, result);
         return result;
     }
-    
+
     private void findAllSourceJobs(Object job, Set<Object> result) {
         if (job instanceof InputColumnSinkJob) {
             final InputColumn<?>[] inputColumns = ((InputColumnSinkJob) job).getInput();
@@ -206,11 +208,28 @@ public class SourceColumnFinder {
     }
 
     public Table findOriginatingTable(Outcome requirement) {
+        return findOriginatingTable(requirement, new HashSet<Object>());
+    }
+
+    private Table findOriginatingTable(Outcome requirement, Set<Object> resolvedSet) {
         OutcomeSourceJob source = findOutcomeSource(requirement);
-        return findOriginatingTableOfSource(source);
+        if (!resolvedSet.add(source)) {
+            logger.warn(LOGGER_WARN_RECURSIVE_TRAVERSAL);
+            return null;
+        }
+        return findOriginatingTableOfSource(source, resolvedSet);
     }
 
     public Table findOriginatingTable(InputColumn<?> inputColumn) {
+        return findOriginatingTable(inputColumn, new HashSet<Object>());
+    }
+
+    private Table findOriginatingTable(InputColumn<?> inputColumn, Set<Object> resolvedSet) {
+        if (!resolvedSet.add(inputColumn)) {
+            logger.warn(LOGGER_WARN_RECURSIVE_TRAVERSAL);
+            return null;
+        }
+
         if (inputColumn == null) {
             logger.warn("InputColumn was null, no originating table found");
             return null;
@@ -218,11 +237,18 @@ public class SourceColumnFinder {
         if (inputColumn.isPhysicalColumn()) {
             return inputColumn.getPhysicalColumn().getTable();
         }
-        return findOriginatingTableOfSource(findInputColumnSource(inputColumn));
+
+        final InputColumnSourceJob inputColumnSource = findInputColumnSource(inputColumn);
+        if (!resolvedSet.add(inputColumnSource)) {
+            logger.warn(LOGGER_WARN_RECURSIVE_TRAVERSAL);
+            return null;
+        }
+
+        return findOriginatingTableOfSource(inputColumnSource, resolvedSet);
     }
 
-    private Table findOriginatingTableOfSource(Object source) {
-        Set<Table> result = new TreeSet<Table>();
+    private Table findOriginatingTableOfSource(Object source, Set<Object> resolvedSet) {
+        final Set<Table> result = new TreeSet<Table>();
         if (source instanceof InputColumnSinkJob) {
             InputColumn<?>[] input = ((InputColumnSinkJob) source).getInput();
             if (input != null) {
@@ -230,7 +256,7 @@ public class SourceColumnFinder {
                     if (col == null) {
                         logger.warn("InputColumn sink had a null-column element!");
                     } else {
-                        Table table = findOriginatingTable(col);
+                        Table table = findOriginatingTable(col, resolvedSet);
                         if (table != null) {
                             result.add(table);
                         }
@@ -242,7 +268,7 @@ public class SourceColumnFinder {
             Outcome[] requirements = ((OutcomeSinkJob) source).getRequirements();
             if (requirements != null) {
                 for (Outcome outcome : requirements) {
-                    Table table = findOriginatingTable(outcome);
+                    Table table = findOriginatingTable(outcome, resolvedSet);
                     if (table != null) {
                         result.add(table);
                     }
