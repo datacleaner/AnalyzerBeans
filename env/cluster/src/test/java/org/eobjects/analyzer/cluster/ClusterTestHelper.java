@@ -198,7 +198,8 @@ public class ClusterTestHelper {
         final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
         final AnalysisResultFuture resultFuture = runner.run(job);
 
-        Assert.assertEquals(JobStatus.NOT_FINISHED, resultFuture.getStatus());
+        Assert.assertTrue(resultFuture.getStatus() == JobStatus.NOT_FINISHED
+                || resultFuture.getStatus() == JobStatus.SUCCESSFUL);
 
         jobBuilder.close();
         resultFuture.await();
