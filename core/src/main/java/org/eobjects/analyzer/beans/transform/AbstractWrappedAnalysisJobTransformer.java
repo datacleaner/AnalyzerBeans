@@ -67,7 +67,7 @@ public abstract class AbstractWrappedAnalysisJobTransformer implements Transform
      * 
      * @return
      */
-    protected abstract AnalysisJob getWrappedAnalysisJob();
+    protected abstract AnalysisJob createWrappedAnalysisJob();
 
     /**
      * Provides the conversion map for input columns. Keys are expected to be
@@ -86,7 +86,7 @@ public abstract class AbstractWrappedAnalysisJobTransformer implements Transform
             return;
         }
 
-        _wrappedAnalysisJob = getWrappedAnalysisJob();
+        _wrappedAnalysisJob = createWrappedAnalysisJob();
         if (_wrappedAnalysisJob == null) {
             throw new IllegalStateException("Wrapped AnalysisJob cannot be null");
         }
@@ -167,5 +167,13 @@ public abstract class AbstractWrappedAnalysisJobTransformer implements Transform
             result[i] = value;
         }
         return result;
+    }
+    
+    public AnalyzerBeansConfiguration getAnalyzerBeansConfiguration() {
+        return _analyzerBeansConfiguration;
+    }
+    
+    public OutputRowCollector getOutputRowCollector() {
+        return _outputRowCollector;
     }
 }

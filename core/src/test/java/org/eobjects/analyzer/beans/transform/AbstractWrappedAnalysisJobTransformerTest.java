@@ -131,7 +131,7 @@ public class AbstractWrappedAnalysisJobTransformerTest extends TestCase {
         InputColumn<?>[] input;
 
         @Override
-        protected AnalysisJob getWrappedAnalysisJob() {
+        protected AnalysisJob createWrappedAnalysisJob() {
             AnalysisJobBuilder builder = new AnalysisJobBuilder(_analyzerBeansConfiguration);
             builder.setDatastore("orig_input");
             builder.addSourceColumns("table.foo");
