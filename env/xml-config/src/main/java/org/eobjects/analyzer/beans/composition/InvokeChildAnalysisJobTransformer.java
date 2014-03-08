@@ -15,6 +15,7 @@ import org.eobjects.analyzer.beans.transform.AbstractWrappedAnalysisJobTransform
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
+import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.metamodel.util.Func;
 import org.eobjects.metamodel.util.Resource;
 
@@ -35,7 +36,8 @@ public class InvokeChildAnalysisJobTransformer extends AbstractWrappedAnalysisJo
             @Override
             public AnalysisJob eval(InputStream in) {
                 JaxbJobReader reader = new JaxbJobReader(getAnalyzerBeansConfiguration());
-                AnalysisJob job = reader.read(in);
+                AnalysisJobBuilder jobBuilder = reader.create(in);
+                AnalysisJob job = jobBuilder.toAnalysisJob(false);
                 return job;
             }
         });
