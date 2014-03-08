@@ -45,9 +45,9 @@ public class InvokeChildAnalysisJobTransformer extends AbstractWrappedAnalysisJo
     @Override
     protected Map<InputColumn<?>, InputColumn<?>> getInputColumnConversion(AnalysisJob wrappedAnalysisJob) {
         Collection<InputColumn<?>> sourceColumns = wrappedAnalysisJob.getSourceColumns();
-        if (input.length != sourceColumns.size()) {
+        if (input.length < sourceColumns.size()) {
             throw new IllegalStateException("Wrapped job defines " + sourceColumns.size()
-                    + " columns, but transformer input defines " + input.length);
+                    + " columns, but transformer input only defines " + input.length);
         }
 
         Map<InputColumn<?>, InputColumn<?>> result = new LinkedHashMap<InputColumn<?>, InputColumn<?>>();
