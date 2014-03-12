@@ -45,84 +45,84 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  */
 public interface AnalysisResultFuture extends ErrorAware, AnalysisResult {
 
-	/**
-	 * @return true if the job has finished
-	 */
-	public boolean isDone();
+    /**
+     * @return true if the job has finished
+     */
+    public boolean isDone();
 
-	/**
-	 * Blocks the current thread until interrupted, most probably because the
-	 * job has ended.
-	 */
-	public void await();
+    /**
+     * Blocks the current thread until interrupted, most probably because the
+     * job has ended.
+     */
+    public void await();
 
-	/**
-	 * Cancels the job, if it is still running.
-	 */
-	public void cancel();
+    /**
+     * Cancels the job, if it is still running.
+     */
+    public void cancel();
 
-	/**
-	 * Blocks the current thread until interrupted, either because the job has
-	 * ended or because it has timed out.
-	 * 
-	 * @param timeout
-	 * @param timeUnit
-	 */
-	public void await(long timeout, TimeUnit timeUnit);
+    /**
+     * Blocks the current thread until interrupted, either because the job has
+     * ended or because it has timed out.
+     * 
+     * @param timeout
+     * @param timeUnit
+     */
+    public void await(long timeout, TimeUnit timeUnit);
 
-	/**
-	 * @return true if the job has executed without errors
-	 */
-	public boolean isSuccessful();
+    /**
+     * @return true if the job has executed without errors
+     */
+    public boolean isSuccessful();
 
-	/**
-	 * @return SUCCESSFUL if the job is finished and successful, ERRORNOUS if
-	 *         errors have been reported and NOT_FINISHED if no errors have been
-	 *         reported but the job is not done yet
-	 */
-	public JobStatus getStatus();
+    /**
+     * @return SUCCESSFUL if the job is finished and successful, ERRORNOUS if
+     *         errors have been reported and NOT_FINISHED if no errors have been
+     *         reported but the job is not done yet
+     */
+    public JobStatus getStatus();
 
-	/**
-	 * Finds (and waits if nescesary) the results of this analysis.
-	 * 
-	 * @return the results from the Analyzers in the executed job
-	 * @throws AnalysisJobFailedException
-	 *             if the analysis did not go well (use isSuccesfull() or
-	 *             isErrornous() to check)
-	 */
-	@Override
-	public List<AnalyzerResult> getResults() throws AnalysisJobFailedException;
+    /**
+     * Finds (and waits if nescesary) the results of this analysis.
+     * 
+     * @return the results from the Analyzers in the executed job
+     * @throws AnalysisJobFailedException
+     *             if the analysis did not go well (use isSuccesfull() or
+     *             isErrornous() to check)
+     */
+    @Override
+    public List<AnalyzerResult> getResults() throws AnalysisJobFailedException;
 
-	/**
-	 * Finds (and waits if nescesary) the results of a single Analyzer.
-	 * 
-	 * @param componentJob
-	 *            the component (either analyzer or explorer) job to find the
-	 *            result for
-	 * @return the result for a given component job
-	 * @throws AnalysisJobFailedException
-	 *             if the analysis did not go well (use isSuccesfull() or
-	 *             isErrornous() to check)
-	 */
-	@Override
-	public AnalyzerResult getResult(ComponentJob componentJob) throws AnalysisJobFailedException;
+    /**
+     * Finds (and waits if nescesary) the results of a single Analyzer.
+     * 
+     * @param componentJob
+     *            the component job (typically AnalyzerJob) to find the result
+     *            for
+     * @return the result for a given component job
+     * @throws AnalysisJobFailedException
+     *             if the analysis did not go well (use isSuccesfull() or
+     *             isErrornous() to check)
+     */
+    @Override
+    public AnalyzerResult getResult(ComponentJob componentJob) throws AnalysisJobFailedException;
 
-	/**
-	 * Finds (and waits if nescesary) the results mapped to the Analyzer jobs
-	 * 
-	 * @return a map with ComponentJobs as keys to the corresponding
-	 *         AnalyzerResults.
-	 * @throws AnalysisJobFailedException
-	 *             if the analysis did not go well (use isSuccesfull() or
-	 *             isErrornous() to check)
-	 */
-	@Override
-	public Map<ComponentJob, AnalyzerResult> getResultMap() throws AnalysisJobFailedException;
+    /**
+     * Finds (and waits if nescesary) the results mapped to the Analyzer jobs
+     * 
+     * @return a map with ComponentJobs as keys to the corresponding
+     *         AnalyzerResults.
+     * @throws AnalysisJobFailedException
+     *             if the analysis did not go well (use isSuccesfull() or
+     *             isErrornous() to check)
+     */
+    @Override
+    public Map<ComponentJob, AnalyzerResult> getResultMap() throws AnalysisJobFailedException;
 
-	/**
-	 * @return any errors reported during execution, if the job was not
-	 *         successful
-	 */
-	@Override
-	public List<Throwable> getErrors();
+    /**
+     * @return any errors reported during execution, if the job was not
+     *         successful
+     */
+    @Override
+    public List<Throwable> getErrors();
 }

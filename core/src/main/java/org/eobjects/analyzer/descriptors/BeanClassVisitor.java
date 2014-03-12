@@ -23,7 +23,6 @@ import java.lang.annotation.Annotation;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Renderer;
@@ -142,14 +141,6 @@ final class BeanClassVisitor extends ClassVisitor {
         if (_beanClazz != null) {
             return ReflectionUtils.isAnnotationPresent(_beanClazz, AnalyzerBean.class)
                     && ReflectionUtils.is(_beanClazz, Analyzer.class);
-        }
-        return false;
-    }
-
-    public boolean isExplorer() {
-        if (_beanClazz != null) {
-            return ReflectionUtils.isAnnotationPresent(_beanClazz, AnalyzerBean.class)
-                    && ReflectionUtils.is(_beanClazz, Explorer.class);
         }
         return false;
     }

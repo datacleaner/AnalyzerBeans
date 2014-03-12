@@ -23,20 +23,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
-import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.MergeInput;
 import org.eobjects.analyzer.job.MergedOutcomeJob;
@@ -44,18 +38,10 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ForkTaskListener;
 import org.eobjects.analyzer.job.concurrent.JobCompletionTaskListener;
 import org.eobjects.analyzer.job.concurrent.JoinTaskListener;
-import org.eobjects.analyzer.job.concurrent.RunNextTaskTaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunnable;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
-import org.eobjects.analyzer.job.tasks.CloseTaskListener;
 import org.eobjects.analyzer.job.tasks.CloseReferenceDataTaskListener;
-import org.eobjects.analyzer.job.tasks.CloseResourcesTaskListener;
-import org.eobjects.analyzer.job.tasks.CollectResultsTask;
-import org.eobjects.analyzer.job.tasks.InitializeReferenceDataTask;
-import org.eobjects.analyzer.job.tasks.InitializeTask;
-import org.eobjects.analyzer.job.tasks.RunExplorerTask;
-import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.eobjects.metamodel.schema.Table;
@@ -67,8 +53,6 @@ import org.slf4j.LoggerFactory;
  * 
  * As opposed to the AnalysisRunner, this class is NOT thread-safe (which is why
  * the AnalysisRunner instantiates a new delegate for each execution).
- * 
- * @author Kasper Sørensen
  */
 final class AnalysisRunnerJobDelegate {
 
@@ -80,8 +64,6 @@ final class AnalysisRunnerJobDelegate {
     private final AnalysisListener _analysisListener;
     private final Queue<JobAndResult> _resultQueue;
     private final ErrorAware _errorAware;
-    private final Datastore _datastore;
-    private final Collection<ExplorerJob> _explorerJobs;
     private final Collection<AnalyzerJob> _analyzerJobs;
     private final Collection<TransformerJob> _transformerJobs;
     private final Collection<FilterJob> _filterJobs;
@@ -119,12 +101,10 @@ final class AnalysisRunnerJobDelegate {
 
         _errorAware = errorAware;
 
-        _datastore = _job.getDatastore();
         _transformerJobs = _job.getTransformerJobs();
         _filterJobs = _job.getFilterJobs();
         _mergedOutcomeJobs = _job.getMergedOutcomeJobs();
 
-        _explorerJobs = _job.getExplorerJobs();
         _analyzerJobs = _job.getAnalyzerJobs();
     }
 
@@ -138,8 +118,6 @@ final class AnalysisRunnerJobDelegate {
             // the injection manager is job scoped
             final InjectionManager injectionManager = _configuration.getInjectionManager(_job);
 
-            final LifeCycleHelper explorerLifeCycleHelper = new LifeCycleHelper(injectionManager,
-                    new ReferenceDataActivationManager(), _includeNonDistributedTasks);
             final LifeCycleHelper rowProcessingLifeCycleHelper = new LifeCycleHelper(injectionManager,
                     new ReferenceDataActivationManager(), _includeNonDistributedTasks);
 
@@ -149,10 +127,9 @@ final class AnalysisRunnerJobDelegate {
             final AnalysisJobMetrics analysisJobMetrics = publishers.getAnalysisJobMetrics();
 
             // A task listener that will register either succesfull executions
-            // or
-            // unexpected errors (which will be delegated to the errorListener)
+            // or unexpected errors (which will be delegated to the errorListener)
             JobCompletionTaskListener jobCompletionTaskListener = new JobCompletionTaskListener(analysisJobMetrics,
-                    _analysisListener, 2);
+                    _analysisListener, 1);
 
             _analysisListener.jobBegin(_job, analysisJobMetrics);
 
@@ -162,7 +139,6 @@ final class AnalysisRunnerJobDelegate {
             validateSingleTableInput(_analyzerJobs);
 
             // at this point we are done validating the job, it will run.
-            scheduleExplorers(explorerLifeCycleHelper, jobCompletionTaskListener, analysisJobMetrics);
             scheduleRowProcessing(publishers, rowProcessingLifeCycleHelper, jobCompletionTaskListener,
                     analysisJobMetrics);
 
@@ -201,65 +177,6 @@ final class AnalysisRunnerJobDelegate {
         for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers) {
             logger.debug("Scheduling row processing publisher: {}", rowProcessingPublisher);
             rowProcessingPublisher.runRowProcessing(_resultQueue, rowProcessorPublishersDoneCompletionListener);
-        }
-    }
-
-    /**
-     * Starts exploration based job flows.
-     * 
-     * @param injectionManager
-     */
-    private void scheduleExplorers(final LifeCycleHelper lifeCycleHelper,
-            final JobCompletionTaskListener jobCompletionTaskListener, final AnalysisJobMetrics analysisJobMetrics) {
-        final int numExplorerJobs = _explorerJobs.size();
-        if (numExplorerJobs == 0) {
-            jobCompletionTaskListener.onComplete(null);
-            return;
-        }
-
-        final List<TaskRunnable> finalTasks = new ArrayList<TaskRunnable>();
-        finalTasks.add(new TaskRunnable(null, jobCompletionTaskListener));
-        finalTasks.add(new TaskRunnable(null, new CloseReferenceDataTaskListener(lifeCycleHelper)));
-
-        final TaskListener explorersDoneTaskListener = new JoinTaskListener(numExplorerJobs, new ForkTaskListener(
-                "Exploring analyzers done", _taskRunner, finalTasks));
-
-        // begin explorer jobs first because they can run independently (
-        for (ExplorerJob explorerJob : _explorerJobs) {
-            final ExplorerMetrics metrics = analysisJobMetrics.getExplorerMetrics(explorerJob);
-
-            final DatastoreConnection connection = _datastore.openConnection();
-
-            final ExplorerBeanDescriptor<?> descriptor = explorerJob.getDescriptor();
-            final Explorer<?> explorer = descriptor.newInstance();
-
-            // indicator for the success of this individual explorer
-            final AtomicBoolean success = new AtomicBoolean(true);
-
-            finalTasks.add(new TaskRunnable(null, new CloseResourcesTaskListener(connection)));
-            finalTasks
-                    .add(new TaskRunnable(null, new CloseTaskListener(lifeCycleHelper, descriptor, explorer, success)));
-
-            // set up scheduling for the explorers
-            final Task closeTask = new CollectResultsTask(explorer, _job, explorerJob, _resultQueue, _analysisListener);
-            final TaskListener runFinishedListener = new RunNextTaskTaskListener(_taskRunner, closeTask,
-                    explorersDoneTaskListener);
-            final Task runTask = new RunExplorerTask(explorer, metrics, _datastore, _analysisListener, success);
-
-            final TaskListener referenceDataInitFinishedListener = new RunNextTaskTaskListener(_taskRunner, runTask,
-                    runFinishedListener);
-
-            final Task initializeReferenceData = new InitializeReferenceDataTask(lifeCycleHelper);
-            final RunNextTaskTaskListener joinFinishedListener = new RunNextTaskTaskListener(_taskRunner,
-                    initializeReferenceData, referenceDataInitFinishedListener);
-
-            final TaskListener initializeFinishedListener = new JoinTaskListener(numExplorerJobs, joinFinishedListener);
-
-            final InitializeTask initTask = new InitializeTask(lifeCycleHelper, descriptor, explorer,
-                    explorerJob.getConfiguration());
-
-            // begin the explorers
-            _taskRunner.run(initTask, initializeFinishedListener);
         }
     }
 

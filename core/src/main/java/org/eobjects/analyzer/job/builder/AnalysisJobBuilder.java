@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
@@ -39,14 +38,12 @@ import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
-import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
@@ -89,13 +86,11 @@ public final class AnalysisJobBuilder implements Closeable {
     private final List<FilterJobBuilder<?, ?>> _filterJobBuilders;
     private final List<TransformerJobBuilder<?>> _transformerJobBuilders;
     private final List<AnalyzerJobBuilder<?>> _analyzerJobBuilders;
-    private final List<ExplorerJobBuilder<?>> _explorerJobBuilders;
     private final List<MergedOutcomeJobBuilder> _mergedOutcomeJobBuilders;
 
     // listeners, typically for UI that uses the builders
     private final List<SourceColumnChangeListener> _sourceColumnListeners = new ArrayList<SourceColumnChangeListener>();
     private final List<AnalyzerChangeListener> _analyzerChangeListeners = new ArrayList<AnalyzerChangeListener>();
-    private final List<ExplorerChangeListener> _explorerChangeListeners = new ArrayList<ExplorerChangeListener>();
     private final List<TransformerChangeListener> _transformerChangeListeners = new ArrayList<TransformerChangeListener>();
     private final List<FilterChangeListener> _filterChangeListeners = new ArrayList<FilterChangeListener>();
     private final List<MergedOutcomeChangeListener> _mergedOutcomeChangeListeners = new ArrayList<MergedOutcomeChangeListener>();
@@ -109,19 +104,15 @@ public final class AnalysisJobBuilder implements Closeable {
         _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
         _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder<?>>();
         _mergedOutcomeJobBuilders = new ArrayList<MergedOutcomeJobBuilder>();
-        _explorerJobBuilders = new ArrayList<ExplorerJobBuilder<?>>();
     }
 
     /**
      * Private constructor for {@link #withoutListeners()} method
-     * 
-     * @param explorerJobBuilders
      */
     private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, DatastoreConnection dataContextProvider,
             List<MetaModelInputColumn> sourceColumns, Outcome defaultRequirement, IdGenerator idGenerator,
             List<TransformerJobBuilder<?>> transformerJobBuilders, List<FilterJobBuilder<?, ?>> filterJobBuilders,
-            List<AnalyzerJobBuilder<?>> analyzerJobBuilders, List<MergedOutcomeJobBuilder> mergedOutcomeJobBuilders,
-            List<ExplorerJobBuilder<?>> explorerJobBuilders) {
+            List<AnalyzerJobBuilder<?>> analyzerJobBuilders, List<MergedOutcomeJobBuilder> mergedOutcomeJobBuilders) {
         _configuration = configuration;
         _datastoreConnection = dataContextProvider;
         _sourceColumns = sourceColumns;
@@ -131,7 +122,6 @@ public final class AnalysisJobBuilder implements Closeable {
         _transformerJobBuilders = transformerJobBuilders;
         _analyzerJobBuilders = analyzerJobBuilders;
         _mergedOutcomeJobBuilders = mergedOutcomeJobBuilders;
-        _explorerJobBuilders = explorerJobBuilders;
     }
 
     public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, AnalysisJob job) {
@@ -372,8 +362,6 @@ public final class AnalysisJobBuilder implements Closeable {
             builder = addTransformer((TransformerBeanDescriptor<?>) componentJob.getDescriptor());
         } else if (componentJob instanceof AnalyzerJob) {
             builder = addAnalyzer((AnalyzerBeanDescriptor<?>) componentJob.getDescriptor());
-        } else if (componentJob instanceof ExplorerJob) {
-            builder = addExplorer((ExplorerBeanDescriptor<?>) componentJob.getDescriptor());
         } else if (componentJob instanceof MergedOutcomeJob) {
             // special behaviour for merged outcomes - they're not configurable,
             // except in terms of input columns and requirements
@@ -485,30 +473,6 @@ public final class AnalysisJobBuilder implements Closeable {
         return Collections.unmodifiableList(_filterJobBuilders);
     }
 
-    public <E extends Explorer<?>> ExplorerJobBuilder<E> addExplorer(ExplorerBeanDescriptor<E> descriptor) {
-        final ExplorerJobBuilder<E> explorerJobBuilder = new ExplorerJobBuilder<E>(this, descriptor);
-        _explorerJobBuilders.add(explorerJobBuilder);
-
-        // make a copy since some of the listeners may add additional listeners
-        // which will otherwise cause ConcurrentModificationExceptions
-        final List<ExplorerChangeListener> listeners = new ArrayList<ExplorerChangeListener>(_explorerChangeListeners);
-        for (ExplorerChangeListener listener : listeners) {
-            listener.onAdd(explorerJobBuilder);
-        }
-        return explorerJobBuilder;
-    }
-
-    public <E extends Explorer<?>> ExplorerJobBuilder<E> addExplorer(Class<E> explorerClass) {
-        final ExplorerBeanDescriptor<E> descriptor = _configuration.getDescriptorProvider()
-                .getExplorerBeanDescriptorForClass(explorerClass);
-        if (descriptor == null) {
-            throw new IllegalArgumentException("No descriptor found for: " + explorerClass);
-        }
-
-        final ExplorerJobBuilder<E> explorerJobBuilder = addExplorer(descriptor);
-        return explorerJobBuilder;
-    }
-
     public <A extends Analyzer<?>> AnalyzerJobBuilder<A> addAnalyzer(AnalyzerBeanDescriptor<A> descriptor) {
         AnalyzerJobBuilder<A> analyzerJobBuilder = new AnalyzerJobBuilder<A>(this, descriptor);
         return addAnalyzer(analyzerJobBuilder);
@@ -544,14 +508,6 @@ public final class AnalysisJobBuilder implements Closeable {
         boolean removed = _analyzerJobBuilders.remove(ajb);
         if (removed) {
             ajb.onRemoved();
-        }
-        return this;
-    }
-
-    public AnalysisJobBuilder removeExplorer(ExplorerJobBuilder<?> ejb) {
-        boolean removed = _explorerJobBuilders.remove(ejb);
-        if (removed) {
-            ejb.onRemoved();
         }
         return this;
     }
@@ -626,18 +582,16 @@ public final class AnalysisJobBuilder implements Closeable {
             return false;
         }
 
-        boolean exploringAnalyzers = !_explorerJobBuilders.isEmpty();
-
-        if (!exploringAnalyzers && _sourceColumns.isEmpty()) {
+        if (_sourceColumns.isEmpty()) {
             if (throwException) {
                 throw new IllegalStateException("No source columns in job");
             }
             return false;
         }
 
-        if (_analyzerJobBuilders.isEmpty() && _explorerJobBuilders.isEmpty()) {
+        if (_analyzerJobBuilders.isEmpty()) {
             if (throwException) {
-                throw new IllegalStateException("No Analyzers or Explorers in job");
+                throw new IllegalStateException("No Analyzers in job");
             }
             return false;
         }
@@ -685,17 +639,6 @@ public final class AnalysisJobBuilder implements Closeable {
     public AnalysisJob toAnalysisJob(boolean validate) throws IllegalStateException {
         if (validate && !isConfigured(true)) {
             throw new IllegalStateException("Analysis job is not correctly configured");
-        }
-
-        Collection<ExplorerJob> explorerJobs = new LinkedList<ExplorerJob>();
-        for (ExplorerJobBuilder<?> ejb : _explorerJobBuilders) {
-            try {
-                ExplorerJob explorerJob = ejb.toExplorerJob(validate);
-                explorerJobs.add(explorerJob);
-            } catch (IllegalStateException e) {
-                throw new IllegalStateException("Could not create explorer job from builder: " + ejb + ", ("
-                        + e.getMessage() + ")", e);
-            }
         }
 
         Collection<FilterJob> filterJobs = new LinkedList<FilterJob>();
@@ -747,7 +690,7 @@ public final class AnalysisJobBuilder implements Closeable {
         DatastoreConnection con = _datastoreConnection;
         Datastore datastore = con.getDatastore();
         return new ImmutableAnalysisJob(datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs,
-                mergedOutcomeJobs, explorerJobs);
+                mergedOutcomeJobs);
     }
 
     /**
@@ -935,10 +878,6 @@ public final class AnalysisJobBuilder implements Closeable {
         return _mergedOutcomeChangeListeners;
     }
 
-    public List<ExplorerChangeListener> getExplorerChangeListeners() {
-        return _explorerChangeListeners;
-    }
-
     public List<TransformerChangeListener> getTransformerChangeListeners() {
         return _transformerChangeListeners;
     }
@@ -986,14 +925,6 @@ public final class AnalysisJobBuilder implements Closeable {
         assert _analyzerJobBuilders.isEmpty();
     }
 
-    public void removeAllExplorers() {
-        List<ExplorerJobBuilder<?>> explorers = new ArrayList<ExplorerJobBuilder<?>>(_explorerJobBuilders);
-        for (ExplorerJobBuilder<?> ejb : explorers) {
-            removeExplorer(ejb);
-        }
-        assert _explorerJobBuilders.isEmpty();
-    }
-
     public void removeAllTransformers() {
         List<TransformerJobBuilder<?>> transformers = new ArrayList<TransformerJobBuilder<?>>(_transformerJobBuilders);
         for (TransformerJobBuilder<?> transformerJobBuilder : transformers) {
@@ -1028,7 +959,7 @@ public final class AnalysisJobBuilder implements Closeable {
     public AnalysisJobBuilder withoutListeners() {
         AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _datastoreConnection, _sourceColumns,
                 _defaultRequirement, _transformedColumnIdGenerator, _transformerJobBuilders, _filterJobBuilders,
-                _analyzerJobBuilders, _mergedOutcomeJobBuilders, _explorerJobBuilders);
+                _analyzerJobBuilders, _mergedOutcomeJobBuilders);
         return clone;
     }
 }

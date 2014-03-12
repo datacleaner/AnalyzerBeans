@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.descriptors;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -57,17 +56,6 @@ public class Descriptors {
 	 */
 	public static <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> ofAnalyzer(Class<A> analyzerClass) {
 		return new AnnotationBasedAnalyzerBeanDescriptor<A>(analyzerClass);
-	}
-
-	/**
-	 * Creates a {@link ExplorerBeanDescriptor} for an explorer class.
-	 * 
-	 * @param <E>
-	 * @param explorerClass
-	 * @return
-	 */
-	public static <E extends Explorer<?>> ExplorerBeanDescriptor<E> ofExplorer(Class<E> explorerClass) {
-		return new AnnotationBasedExplorerBeanDescriptor<E>(explorerClass);
 	}
 
 	/**

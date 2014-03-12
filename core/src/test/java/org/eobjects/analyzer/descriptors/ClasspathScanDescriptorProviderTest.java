@@ -71,10 +71,6 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
         assertEquals("[AnnotationBasedAnalyzerBeanDescriptor[org.eobjects.analyzer.beans.mock.AnalyzerMock]]",
                 Arrays.toString(array));
 
-        array = descriptorProvider.getExplorerBeanDescriptors().toArray();
-        assertEquals("[AnnotationBasedExplorerBeanDescriptor[org.eobjects.analyzer.beans.mock.ExploringAnalyzerMock]]",
-                Arrays.toString(array));
-
         Collection<TransformerBeanDescriptor<?>> transformerBeanDescriptors = descriptorProvider
                 .getTransformerBeanDescriptors();
         assertEquals("[AnnotationBasedTransformerBeanDescriptor[org.eobjects.analyzer.beans.mock.TransformerMock]]",

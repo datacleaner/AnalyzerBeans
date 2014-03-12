@@ -23,7 +23,6 @@ import java.util.Collection;
 
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
@@ -67,30 +66,6 @@ public interface DescriptorProvider {
      * @return
      */
     public AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name);
-
-    /**
-     * Gets all {@link ExplorerBeanDescriptor}s currently registered.
-     * 
-     * @return
-     */
-    public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors();
-
-    /**
-     * Gets a {@link ExplorerBeanDescriptor} by its {@link Explorer} class.
-     * 
-     * @param explorerClass
-     * @return
-     */
-    public <E extends Explorer<?>> ExplorerBeanDescriptor<E> getExplorerBeanDescriptorForClass(Class<E> explorerClass);
-
-    /**
-     * Gets a {@link ExplorerBeanDescriptor} by its display name (or secondly by
-     * searching using {@link Alias}es).
-     * 
-     * @param name
-     * @return
-     */
-    public ExplorerBeanDescriptor<?> getExplorerBeanDescriptorByDisplayName(String name);
 
     /**
      * Gets all {@link TransformerBeanDescriptor}s currently registered.

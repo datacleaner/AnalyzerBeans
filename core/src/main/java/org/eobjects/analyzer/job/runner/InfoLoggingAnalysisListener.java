@@ -22,7 +22,6 @@ package org.eobjects.analyzer.job.runner;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -32,8 +31,6 @@ import org.slf4j.LoggerFactory;
 /**
  * AnalysisListener used for INFO level logging. This listener will log
  * interesting progress information for each thousands rows being processed.
- * 
- * @author Kasper Sørensen
  */
 public class InfoLoggingAnalysisListener implements AnalysisListener {
 
@@ -67,21 +64,6 @@ public class InfoLoggingAnalysisListener implements AnalysisListener {
 		if (currentRow > 0 && currentRow % 1000 == 0) {
 			logger.info("Reading row no. {} in {}", new Object[] { currentRow, metrics.getTable().getName() });
 		}
-	}
-
-	@Override
-	public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
-		// do nothing
-	}
-
-	@Override
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
-		// do nothing
-	}
-
-	@Override
-	public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
-		// do nothing
 	}
 
 	@Override

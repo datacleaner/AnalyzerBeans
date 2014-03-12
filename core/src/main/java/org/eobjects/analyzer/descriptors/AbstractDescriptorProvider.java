@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
@@ -34,19 +33,12 @@ import org.eobjects.analyzer.beans.api.Transformer;
 /**
  * Abstract descriptor provider implementation that implements most trivial
  * methods.
- * 
- * @author Kasper Sørensen
  */
 public abstract class AbstractDescriptorProvider implements DescriptorProvider {
 
     @Override
     public final AnalyzerBeanDescriptor<?> getAnalyzerBeanDescriptorByDisplayName(String name) {
         return getBeanDescriptorByDisplayName(name, getAnalyzerBeanDescriptors());
-    }
-
-    @Override
-    public final ExplorerBeanDescriptor<?> getExplorerBeanDescriptorByDisplayName(String name) {
-        return getBeanDescriptorByDisplayName(name, getExplorerBeanDescriptors());
     }
 
     /**
@@ -57,17 +49,6 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
      * @return
      */
     protected <A extends Analyzer<?>> AnalyzerBeanDescriptor<A> notFoundAnalyzer(Class<A> analyzerClass) {
-        return null;
-    }
-
-    /**
-     * Overridable method for handling (and perhaps discovering) unfound
-     * explorer descriptors by class.
-     * 
-     * @param explorerClass
-     * @return
-     */
-    protected <E extends Explorer<?>> ExplorerBeanDescriptor<E> notFoundExplorer(Class<E> explorerClass) {
         return null;
     }
 
@@ -114,18 +95,6 @@ public abstract class AbstractDescriptorProvider implements DescriptorProvider {
             }
         }
         return notFoundAnalyzer(analyzerBeanClass);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public final <E extends Explorer<?>> ExplorerBeanDescriptor<E> getExplorerBeanDescriptorForClass(
-            Class<E> explorerClass) {
-        for (ExplorerBeanDescriptor<?> descriptor : getExplorerBeanDescriptors()) {
-            if (descriptor.getComponentClass() == explorerClass) {
-                return (ExplorerBeanDescriptor<E>) descriptor;
-            }
-        }
-        return notFoundExplorer(explorerClass);
     }
 
     @Override

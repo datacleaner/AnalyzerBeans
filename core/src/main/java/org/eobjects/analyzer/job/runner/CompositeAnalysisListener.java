@@ -25,7 +25,6 @@ import java.util.List;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -124,20 +123,6 @@ public final class CompositeAnalysisListener implements AnalysisListener {
     }
 
     @Override
-    public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
-        for (AnalysisListener delegate : _delegates) {
-            delegate.explorerBegin(job, explorerJob, metrics);
-        }
-    }
-
-    @Override
-    public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
-        for (AnalysisListener delegate : _delegates) {
-            delegate.explorerSuccess(job, explorerJob, result);
-        }
-    }
-
-    @Override
     public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
         for (AnalysisListener delegate : _delegates) {
             delegate.analyzerSuccess(job, analyzerJob, result);
@@ -148,13 +133,6 @@ public final class CompositeAnalysisListener implements AnalysisListener {
     public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
         for (AnalysisListener delegate : _delegates) {
             delegate.errorInFilter(job, filterJob, row, throwable);
-        }
-    }
-
-    @Override
-    public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
-        for (AnalysisListener delegate : _delegates) {
-            delegate.errorInExplorer(job, explorerJob, throwable);
         }
     }
 

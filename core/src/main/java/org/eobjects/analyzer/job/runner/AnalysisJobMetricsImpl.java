@@ -21,7 +21,6 @@ package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.metamodel.schema.Table;
 
 final class AnalysisJobMetricsImpl implements AnalysisJobMetrics {
@@ -37,11 +36,6 @@ final class AnalysisJobMetricsImpl implements AnalysisJobMetrics {
     @Override
     public AnalysisJob getAnalysisJob() {
         return _job;
-    }
-
-    @Override
-    public ExplorerMetrics getExplorerMetrics(ExplorerJob explorerJob) {
-        return new ExplorerMetricsImpl(this, explorerJob);
     }
 
     @Override

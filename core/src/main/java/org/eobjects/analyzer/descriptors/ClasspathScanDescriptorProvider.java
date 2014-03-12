@@ -40,7 +40,6 @@ import java.util.jar.JarFile;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Renderer;
@@ -89,7 +88,6 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
     private final Map<String, FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new HashMap<String, FilterBeanDescriptor<?, ?>>();
     private final Map<String, TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new HashMap<String, TransformerBeanDescriptor<?>>();
     private final Map<String, RendererBeanDescriptor<?>> _rendererBeanDescriptors = new HashMap<String, RendererBeanDescriptor<?>>();
-    private final Map<String, ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new HashMap<String, ExplorerBeanDescriptor<?>>();
     private final TaskRunner _taskRunner;
     private final Predicate<Class<? extends RenderingFormat<?>>> _renderingFormatPredicate;
     private final AtomicInteger _tasksPending;
@@ -551,12 +549,6 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                 logger.info("Adding analyzer class: {}", beanClass);
                 addAnalyzerClass(analyzerClass);
             }
-            if (visitor.isExplorer()) {
-                @SuppressWarnings("unchecked")
-                Class<? extends Explorer<?>> explorerClass = (Class<? extends Explorer<?>>) beanClass;
-                logger.info("Adding explorer class: {}", beanClass);
-                addExplorerClass(explorerClass);
-            }
             if (visitor.isTransformer()) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Transformer<?>> transformerClass = (Class<? extends Transformer<?>>) beanClass;
@@ -578,19 +570,6 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         } finally {
             FileHelper.safeClose(inputStream);
         }
-    }
-
-    public ClasspathScanDescriptorProvider addExplorerClass(Class<? extends Explorer<?>> explorerClass) {
-        ExplorerBeanDescriptor<?> descriptor = _explorerBeanDescriptors.get(explorerClass.getName());
-        if (descriptor == null) {
-            try {
-                descriptor = Descriptors.ofExplorer(explorerClass);
-                _explorerBeanDescriptors.put(explorerClass.getName(), descriptor);
-            } catch (Exception e) {
-                logger.error("Unexpected error occurred while creating descriptor for: " + explorerClass, e);
-            }
-        }
-        return this;
     }
 
     public ClasspathScanDescriptorProvider addAnalyzerClass(Class<? extends Analyzer<?>> clazz) {
@@ -698,12 +677,6 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         return Collections.unmodifiableCollection(_rendererBeanDescriptors.values());
     }
 
-    @Override
-    public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
-        awaitTasks();
-        return Collections.unmodifiableCollection(_explorerBeanDescriptors.values());
-    }
-    
     public Predicate<Class<? extends RenderingFormat<?>>> getRenderingFormatPredicate() {
         return _renderingFormatPredicate;
     }

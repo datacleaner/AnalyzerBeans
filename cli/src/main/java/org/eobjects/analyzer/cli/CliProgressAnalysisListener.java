@@ -26,16 +26,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.runner.AnalysisJobMetrics;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.AnalyzerMetrics;
-import org.eobjects.analyzer.job.runner.ExplorerMetrics;
 import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
 import org.eobjects.analyzer.result.AnalyzerResult;
-
 import org.eobjects.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,17 +101,4 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 	@Override
 	public void errorUknown(AnalysisJob job, Throwable throwable) {
 	}
-
-	@Override
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
-	}
-
-	@Override
-	public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
-	}
-
-	@Override
-	public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
-	}
-
 }

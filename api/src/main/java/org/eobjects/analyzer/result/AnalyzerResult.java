@@ -22,12 +22,11 @@ package org.eobjects.analyzer.result;
 import java.io.Serializable;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.result.renderer.Renderable;
 
 /**
- * An {@link AnalyzerResult} represents the result of an {@link Analyzer}s or
- * {@link Explorer}s execution.
+ * An {@link AnalyzerResult} represents the result of an {@link Analyzer}s
+ * execution.
  * 
  * It is advised that {@link AnalyzerResult} implementations expose a number of
  * result metrics. This is done by having getter methods annotated with the

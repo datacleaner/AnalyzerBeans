@@ -13,7 +13,6 @@
 		<module>basic-transformers</module>
 		<module>basic-filters</module>
 		<module>basic-analyzers</module>
-		<module>basic-explorers</module>
 		<module>data-structures</module>
 		<module>json</module>
 		<module>standardizers</module>

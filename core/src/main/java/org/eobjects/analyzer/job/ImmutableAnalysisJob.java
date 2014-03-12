@@ -32,24 +32,21 @@ import org.eobjects.metamodel.util.BaseObject;
 public final class ImmutableAnalysisJob extends BaseObject implements AnalysisJob {
 
 	private final Datastore _datastore;
-	private final Collection<InputColumn<?>> _sourceColumns;
-	private final Collection<TransformerJob> _transformerJobs;
-	private final Collection<AnalyzerJob> _analyzerJobs;
-	private final Collection<ExplorerJob> _explorerJobs;
-	private final Collection<FilterJob> _filterJobs;
-	private final Collection<MergedOutcomeJob> _mergedOutcomeJobs;
+	private final List<InputColumn<?>> _sourceColumns;
+	private final List<TransformerJob> _transformerJobs;
+	private final List<AnalyzerJob> _analyzerJobs;
+	private final List<FilterJob> _filterJobs;
+	private final List<MergedOutcomeJob> _mergedOutcomeJobs;
 
 	public ImmutableAnalysisJob(Datastore datastore, Collection<? extends InputColumn<?>> sourceColumns,
 			Collection<FilterJob> filterJobs, Collection<TransformerJob> transformerJobs,
-			Collection<AnalyzerJob> analyzerJobs, Collection<MergedOutcomeJob> mergedOutcomeJobs,
-			Collection<ExplorerJob> explorerJobs) {
+			Collection<AnalyzerJob> analyzerJobs, Collection<MergedOutcomeJob> mergedOutcomeJobs) {
 		_datastore = datastore;
 		_sourceColumns = Collections.unmodifiableList(new ArrayList<InputColumn<?>>(sourceColumns));
 		_transformerJobs = Collections.unmodifiableList(new ArrayList<TransformerJob>(transformerJobs));
 		_analyzerJobs = Collections.unmodifiableList(new ArrayList<AnalyzerJob>(analyzerJobs));
 		_filterJobs = Collections.unmodifiableList(new ArrayList<FilterJob>(filterJobs));
 		_mergedOutcomeJobs = Collections.unmodifiableList(new ArrayList<MergedOutcomeJob>(mergedOutcomeJobs));
-		_explorerJobs = Collections.unmodifiableList(new ArrayList<ExplorerJob>(explorerJobs));
 	}
 
 	@Override
@@ -68,32 +65,27 @@ public final class ImmutableAnalysisJob extends BaseObject implements AnalysisJo
 	}
 	
 	@Override
-	public Collection<ExplorerJob> getExplorerJobs() {
-		return _explorerJobs;
-	}
-
-	@Override
-	public Collection<InputColumn<?>> getSourceColumns() {
+	public List<InputColumn<?>> getSourceColumns() {
 		return _sourceColumns;
 	}
 
 	@Override
-	public Collection<TransformerJob> getTransformerJobs() {
+	public List<TransformerJob> getTransformerJobs() {
 		return _transformerJobs;
 	}
 
 	@Override
-	public Collection<AnalyzerJob> getAnalyzerJobs() {
+	public List<AnalyzerJob> getAnalyzerJobs() {
 		return _analyzerJobs;
 	}
 
 	@Override
-	public Collection<FilterJob> getFilterJobs() {
+	public List<FilterJob> getFilterJobs() {
 		return _filterJobs;
 	}
 
 	@Override
-	public Collection<MergedOutcomeJob> getMergedOutcomeJobs() {
+	public List<MergedOutcomeJob> getMergedOutcomeJobs() {
 		return _mergedOutcomeJobs;
 	}
 

@@ -284,7 +284,6 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     }
 
     private void failIfJobIsUnsupported(AnalysisJob job) throws UnsupportedOperationException {
-        failIfComponentsAreUnsupported(job.getExplorerJobs());
         failIfComponentsAreUnsupported(job.getFilterJobs());
         failIfComponentsAreUnsupported(job.getTransformerJobs());
         failIfComponentsAreUnsupported(job.getAnalyzerJobs());

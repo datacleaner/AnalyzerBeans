@@ -22,11 +22,9 @@ package org.eobjects.analyzer.job.tasks;
 import java.util.Collection;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.JobAndResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -35,9 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Task that collects the {@link AnalyzerResult} from an analyzer/explorer.
- * 
- * @author Kasper Sørensen
+ * Task that collects the {@link AnalyzerResult} from an Analyzer.
  */
 public final class CollectResultsTask implements Task {
 
@@ -68,8 +64,6 @@ public final class CollectResultsTask implements Task {
 		}
 		if (_hasResult instanceof Analyzer) {
 			_analysisListener.analyzerSuccess(_job, (AnalyzerJob) _componentJob, result);
-		} else if (_hasResult instanceof Explorer) {
-			_analysisListener.explorerSuccess(_job, (ExplorerJob) _componentJob, result);
 		} else {
 			throw new UnsupportedOperationException("Unsupported component type: " + _hasResult);
 		}

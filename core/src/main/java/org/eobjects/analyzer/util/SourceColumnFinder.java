@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SourceColumnFinder {
 
-    private static final String LOGGER_WARN_RECURSIVE_TRAVERSAL = "Ending traversal of object graph because the same originating objects are appearing recursively";
+    private static final String LOG_MESSAGE_RECURSIVE_TRAVERSAL = "Ending traversal of object graph because the same originating objects are appearing recursively";
 
     private static final Logger logger = LoggerFactory.getLogger(SourceColumnFinder.class);
 
@@ -214,7 +214,7 @@ public class SourceColumnFinder {
     private Table findOriginatingTable(Outcome requirement, Set<Object> resolvedSet) {
         OutcomeSourceJob source = findOutcomeSource(requirement);
         if (!resolvedSet.add(source)) {
-            logger.warn(LOGGER_WARN_RECURSIVE_TRAVERSAL);
+            logger.info(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
             return null;
         }
         return findOriginatingTableOfSource(source, resolvedSet);
@@ -226,7 +226,7 @@ public class SourceColumnFinder {
 
     private Table findOriginatingTable(InputColumn<?> inputColumn, Set<Object> resolvedSet) {
         if (!resolvedSet.add(inputColumn)) {
-            logger.warn(LOGGER_WARN_RECURSIVE_TRAVERSAL);
+            logger.info(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
             return null;
         }
 
@@ -240,7 +240,7 @@ public class SourceColumnFinder {
 
         final InputColumnSourceJob inputColumnSource = findInputColumnSource(inputColumn);
         if (!resolvedSet.add(inputColumnSource)) {
-            logger.warn(LOGGER_WARN_RECURSIVE_TRAVERSAL);
+            logger.info(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
             return null;
         }
 

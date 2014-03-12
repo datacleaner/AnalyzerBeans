@@ -21,10 +21,8 @@ package org.eobjects.analyzer.cli;
 
 /**
  * Defines the list types that the user can query for in the CLI.
- * 
- * @author Kasper Sørensen
  */
 public enum CliListType {
 
-	ANALYZERS, TRANSFORMERS, FILTERS, EXPLORERS, DATASTORES, SCHEMAS, TABLES, COLUMNS
+	ANALYZERS, TRANSFORMERS, FILTERS, DATASTORES, SCHEMAS, TABLES, COLUMNS
 }

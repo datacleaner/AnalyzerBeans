@@ -54,10 +54,7 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.analyzer.result.ColumnComparisonResult;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.analyzer.result.TableComparisonResult;
-import org.eobjects.analyzer.result.TableDifference;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
@@ -143,13 +140,13 @@ public class JaxbJobReaderTest extends TestCase {
         CrosstabResult res3 = (CrosstabResult) results.get(0);
         assertEquals(1, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measures", "Min words").get());
         assertEquals(2, res3.getCrosstab().where("Column", "FIRSTNAME").where("Measures", "Max words").get());
-        
+
         // this result represents the single manager (one unique and no repeated
         // values)
         ValueDistributionAnalyzerResult res1 = (ValueDistributionAnalyzerResult) results.get(1);
         assertEquals("[[<unique>->1]]", res1.getValueCounts().toString());
         assertEquals(1, res1.getUniqueCount().intValue());
-        
+
         // this result represents all the employees: Two repeated values and 18
         // unique
         ValueDistributionAnalyzerResult res2 = (ValueDistributionAnalyzerResult) results.get(2);
@@ -218,44 +215,6 @@ public class JaxbJobReaderTest extends TestCase {
         }
     }
 
-    public void testDeserializeTableReference() throws Exception {
-        JaxbJobReader factory = new JaxbJobReader(conf);
-        AnalysisJobBuilder builder = factory.create(new File("src/test/resources/example-job-compare-tables.xml"));
-        AnalysisJob analysisJob = builder.toAnalysisJob();
-
-        AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(analysisJob);
-        List<AnalyzerResult> results = resultFuture.getResults();
-        assertEquals(1, results.size());
-
-        TableComparisonResult result = (TableComparisonResult) results.get(0);
-        List<TableDifference<?>> tableDifferences = result.getTableDifferences();
-        assertEquals(4, tableDifferences.size());
-        assertEquals("Tables 'CUSTOMER_W_TER' and 'CUSTOMERS' differ on 'name': [CUSTOMER_W_TER] vs. [CUSTOMERS]",
-                tableDifferences.get(0).toString());
-        assertEquals(
-                "Tables 'CUSTOMER_W_TER' and 'CUSTOMERS' differ on 'unmatched column': [EMPLOYEENUMBER] vs. [null]",
-                tableDifferences.get(1).toString());
-        assertEquals("Tables 'CUSTOMER_W_TER' and 'CUSTOMERS' differ on 'unmatched column': [TERRITORY] vs. [null]",
-                tableDifferences.get(2).toString());
-        assertEquals(
-                "Tables 'CUSTOMER_W_TER' and 'CUSTOMERS' differ on 'unmatched column': [null] vs. [SALESREPEMPLOYEENUMBER]",
-                tableDifferences.get(3).toString());
-
-        List<ColumnComparisonResult> columnComparisonResults = result.getColumnComparisonResults();
-        assertEquals(9, columnComparisonResults.size());
-
-        for (ColumnComparisonResult columnComparisonResult : columnComparisonResults) {
-            int differences = columnComparisonResult.getColumnDifferences().size();
-            if (differences == 1) {
-                assertEquals("nullable", columnComparisonResult.getColumnDifferences().get(0).getValueName());
-            } else {
-                assertEquals("[Columns 'CREDITLIMIT' and 'CREDITLIMIT' differ on 'type': [DECIMAL] vs. [NUMERIC], "
-                        + "Columns 'CREDITLIMIT' and 'CREDITLIMIT' differ on 'native type': [DECIMAL] vs. [NUMERIC]]",
-                        columnComparisonResult.getColumnDifferences().toString());
-            }
-        }
-    }
-
     public void testMissingDatastore() throws Exception {
         JaxbJobReader factory = new JaxbJobReader(new AnalyzerBeansConfigurationImpl());
         try {
@@ -288,8 +247,9 @@ public class JaxbJobReaderTest extends TestCase {
         assertEquals("MetaModelInputColumn[PUBLIC.EMPLOYEES.EMAIL]", sourceColumns.get(2).toString());
 
         assertEquals(1, builder.getTransformerJobBuilders().size());
-        assertEquals("[TransformedInputColumn[id=trans-0001-0002,name=username], TransformedInputColumn[id=trans-0001-0003,name=domain]]", builder.getTransformerJobBuilders().get(0)
-                .getOutputColumns().toString());
+        assertEquals(
+                "[TransformedInputColumn[id=trans-0001-0002,name=username], TransformedInputColumn[id=trans-0001-0003,name=domain]]",
+                builder.getTransformerJobBuilders().get(0).getOutputColumns().toString());
         assertEquals("[TransformedInputColumn[id=trans-0001-0002,name=username], "
                 + "TransformedInputColumn[id=trans-0001-0003,name=domain], "
                 + "MetaModelInputColumn[PUBLIC.EMPLOYEES.FIRSTNAME], "

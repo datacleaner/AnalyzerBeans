@@ -45,7 +45,6 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Converter;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
@@ -61,14 +60,12 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
-import org.eobjects.analyzer.descriptors.ExplorerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.builder.AbstractBeanJobBuilder;
 import org.eobjects.analyzer.job.builder.AbstractBeanWithInputColumnsBuilder;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
-import org.eobjects.analyzer.job.builder.ExplorerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.MergeInputBuilder;
 import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
@@ -80,7 +77,6 @@ import org.eobjects.analyzer.job.jaxb.ColumnsType;
 import org.eobjects.analyzer.job.jaxb.ConfiguredPropertiesType;
 import org.eobjects.analyzer.job.jaxb.ConfiguredPropertiesType.Property;
 import org.eobjects.analyzer.job.jaxb.DataContextType;
-import org.eobjects.analyzer.job.jaxb.ExplorerType;
 import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
@@ -95,7 +91,6 @@ import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.job.jaxb.VariableType;
 import org.eobjects.analyzer.job.jaxb.VariablesType;
-import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.convert.StringConverter;
@@ -749,8 +744,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
         AnalysisType analysis = job.getAnalysis();
 
-        List<AnalyzerType> analyzers = CollectionUtils2.filterOnClass(analysis.getAnalyzerOrExplorer(),
-                AnalyzerType.class);
+        List<AnalyzerType> analyzers = analysis.getAnalyzer();
         for (AnalyzerType analyzerType : analyzers) {
             ref = analyzerType.getDescriptor().getRef();
             if (StringUtils.isNullOrEmpty(ref)) {
@@ -782,29 +776,6 @@ public class JaxbJobReader implements JobReader<InputStream> {
                 analyzerJobBuilder.setRequirement(requirement);
             }
 
-        }
-
-        List<ExplorerType> explorers = CollectionUtils2.filterOnClass(analysis.getAnalyzerOrExplorer(),
-                ExplorerType.class);
-        for (ExplorerType explorerType : explorers) {
-
-            ref = explorerType.getDescriptor().getRef();
-            if (StringUtils.isNullOrEmpty(ref)) {
-                throw new IllegalStateException("Explorer descriptor ref cannot be null");
-            }
-
-            ExplorerBeanDescriptor<?> descriptor = _configuration.getDescriptorProvider()
-                    .getExplorerBeanDescriptorByDisplayName(ref);
-
-            if (descriptor == null) {
-                throw new NoSuchComponentException(Explorer.class, ref);
-            }
-
-            Class<? extends Explorer<?>> beanClass = descriptor.getComponentClass();
-
-            ExplorerJobBuilder<? extends Explorer<?>> explorerJobBuilder = analysisJobBuilder.addExplorer(beanClass);
-            explorerJobBuilder.setName(explorerType.getName());
-            applyProperties(explorerJobBuilder, explorerType.getProperties(), stringConverter, variables);
         }
 
         datastoreConnection.close();

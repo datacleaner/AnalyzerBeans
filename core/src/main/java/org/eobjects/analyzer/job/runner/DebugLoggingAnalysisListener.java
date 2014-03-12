@@ -22,7 +22,6 @@ package org.eobjects.analyzer.job.runner;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -37,83 +36,68 @@ import org.slf4j.LoggerFactory;
  */
 public class DebugLoggingAnalysisListener implements AnalysisListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(DebugLoggingAnalysisListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(DebugLoggingAnalysisListener.class);
 
-	/**
-	 * @return whether or not the debug logging level is enabled. Can be used to
-	 *         find out of it is even feasable to add this listener or not.
-	 */
-	public static boolean isEnabled() {
-		return logger.isDebugEnabled();
-	}
+    /**
+     * @return whether or not the debug logging level is enabled. Can be used to
+     *         find out of it is even feasable to add this listener or not.
+     */
+    public static boolean isEnabled() {
+        return logger.isDebugEnabled();
+    }
 
-	@Override
-	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
-		logger.debug("jobBegin({})", job);
-	}
+    @Override
+    public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
+        logger.debug("jobBegin({})", job);
+    }
 
-	@Override
-	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
-		logger.debug("jobSuccess({})", job);
-	}
+    @Override
+    public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
+        logger.debug("jobSuccess({})", job);
+    }
 
-	@Override
-	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
-		logger.debug("rowProcessingBegin({}, {})", new Object[] { job, metrics.getTable() });
-	}
+    @Override
+    public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
+        logger.debug("rowProcessingBegin({}, {})", new Object[] { job, metrics.getTable() });
+    }
 
-	@Override
-	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
-		logger.debug("rowProcessingProgress({}, {}, {})", new Object[] { job, metrics.getTable(), currentRow });
-	}
+    @Override
+    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
+        logger.debug("rowProcessingProgress({}, {}, {})", new Object[] { job, metrics.getTable(), currentRow });
+    }
 
-	@Override
-	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
-		logger.debug("rowProcessingSuccess({}, {})", new Object[] { job, metrics.getTable() });
-	}
+    @Override
+    public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
+        logger.debug("rowProcessingSuccess({}, {})", new Object[] { job, metrics.getTable() });
+    }
 
-	@Override
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
-		logger.debug("analyzerBegin({}, {})", new Object[] { job, analyzerJob });
-	}
+    @Override
+    public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
+        logger.debug("analyzerBegin({}, {})", new Object[] { job, analyzerJob });
+    }
 
-	@Override
-	public void explorerBegin(AnalysisJob job, ExplorerJob explorerJob, ExplorerMetrics metrics) {
-		logger.debug("explorerBegin({}, {})", new Object[] { job, explorerJob });
-	}
+    @Override
+    public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
+        logger.debug("analyzerSuccess({}, {})", new Object[] { job, analyzerJob, result });
+    }
 
-	@Override
-	public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
-		logger.debug("analyzerSuccess({}, {})", new Object[] { job, analyzerJob, result });
-	}
+    @Override
+    public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
+        logger.debug("errorInFilter(" + job + "," + filterJob + "," + row + ")", throwable);
+    }
 
-	@Override
-	public void explorerSuccess(AnalysisJob job, ExplorerJob explorerJob, AnalyzerResult result) {
-		logger.debug("explorerSuccess({}, {}, {})", new Object[] { job, explorerJob, result });
-	}
+    @Override
+    public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
+        logger.debug("errorInTransformer(" + job + "," + transformerJob + "," + row + ")", throwable);
+    }
 
-	@Override
-	public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
-		logger.debug("errorInFilter(" + job + "," + filterJob + "," + row + ")", throwable);
-	}
+    @Override
+    public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
+        logger.debug("errorInAnalyzer(" + job + "," + analyzerJob + "," + row + ")", throwable);
+    }
 
-	@Override
-	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
-		logger.debug("errorInTransformer(" + job + "," + transformerJob + "," + row + ")", throwable);
-	}
-
-	@Override
-	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
-		logger.debug("errorInAnalyzer(" + job + "," + analyzerJob + "," + row + ")", throwable);
-	}
-
-	@Override
-	public void errorInExplorer(AnalysisJob job, ExplorerJob explorerJob, Throwable throwable) {
-		logger.debug("errorInExplorer(" + job + "," + explorerJob + ")", throwable);
-	}
-
-	@Override
-	public void errorUknown(AnalysisJob job, Throwable throwable) {
-		logger.debug("errorUknown(" + job + ")", throwable);
-	}
+    @Override
+    public void errorUknown(AnalysisJob job, Throwable throwable) {
+        logger.debug("errorUknown(" + job + ")", throwable);
+    }
 }

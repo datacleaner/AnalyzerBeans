@@ -71,11 +71,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
-			<artifactId>AnalyzerBeans-basic-explorers</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-data-structures</artifactId>
 			<version>${project.version}</version>
 		</dependency>

@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.job;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
@@ -54,40 +54,33 @@ public interface AnalysisJob {
      * 
      * @return
      */
-    public Collection<InputColumn<?>> getSourceColumns();
+    public List<InputColumn<?>> getSourceColumns();
 
     /**
      * Gets all {@link TransformerJob}s contained in this job.
      * 
      * @return
      */
-    public Collection<TransformerJob> getTransformerJobs();
+    public List<TransformerJob> getTransformerJobs();
 
     /**
      * Gets all {@link FilterJob}s contained in this job.
      * 
      * @return
      */
-    public Collection<FilterJob> getFilterJobs();
+    public List<FilterJob> getFilterJobs();
 
     /**
      * Gets all {@link MergedOutcomeJob}s contained in this job.
      * 
      * @return
      */
-    public Collection<MergedOutcomeJob> getMergedOutcomeJobs();
+    public List<MergedOutcomeJob> getMergedOutcomeJobs();
 
     /**
      * Gets all {@link AnalyzerJob}s contained in this job.
      * 
      * @return
      */
-    public Collection<AnalyzerJob> getAnalyzerJobs();
-
-    /**
-     * Gets all {@link ExplorerJob}s contained in this job.
-     * 
-     * @return
-     */
-    public Collection<ExplorerJob> getExplorerJobs();
+    public List<AnalyzerJob> getAnalyzerJobs();
 }

@@ -23,26 +23,24 @@ import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
- * Represents a reference to a component job (analyzer or explorer) and it's
+ * Represents a reference to a component job (Typically AnalyzerJob) and it's
  * result
- * 
- * @author Kasper Sørensen
  */
 public final class JobAndResult {
 
-	private final ComponentJob _job;
-	private final AnalyzerResult _result;
+    private final ComponentJob _job;
+    private final AnalyzerResult _result;
 
-	public JobAndResult(ComponentJob job, AnalyzerResult result) {
-		_job = job;
-		_result = result;
-	}
+    public JobAndResult(ComponentJob job, AnalyzerResult result) {
+        _job = job;
+        _result = result;
+    }
 
-	public ComponentJob getJob() {
-		return _job;
-	}
+    public ComponentJob getJob() {
+        return _job;
+    }
 
-	public AnalyzerResult getResult() {
-		return _result;
-	}
+    public AnalyzerResult getResult() {
+        return _result;
+    }
 }

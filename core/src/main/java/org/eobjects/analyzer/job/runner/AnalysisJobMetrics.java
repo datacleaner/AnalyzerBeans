@@ -21,7 +21,6 @@ package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.ExplorerJob;
 import org.eobjects.metamodel.schema.Table;
 
 /**
@@ -35,8 +34,6 @@ public interface AnalysisJobMetrics {
 	 * @return the analysis job being executed.
 	 */
 	public AnalysisJob getAnalysisJob();
-
-	public ExplorerMetrics getExplorerMetrics(ExplorerJob explorerJob);
 
 	public AnalyzerMetrics getAnalyzerMetrics(AnalyzerJob analyzerJob);
 

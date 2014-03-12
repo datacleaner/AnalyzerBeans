@@ -61,8 +61,6 @@
 		<choice minOccurs="1" maxOccurs="unbounded">
 			<element name="analyzer" type="ab:analyzerType" minOccurs="0"
 				maxOccurs="unbounded" />
-			<element name="explorer" type="ab:explorerType" minOccurs="0"
-				maxOccurs="unbounded" />
 		</choice>
 	</complexType>
 
@@ -219,20 +217,6 @@
 	<complexType name="outcomeType">
 		<attribute name="category" type="string" use="required" />
 		<attribute name="id" type="token" use="required" />
-	</complexType>
-
-	<complexType name="explorerType">
-		<sequence>
-			<element name="descriptor" type="ab:explorerDescriptorType"
-				minOccurs="1" maxOccurs="1" />
-			<element name="properties" type="ab:configuredPropertiesType"
-				minOccurs="0" maxOccurs="1" />
-		</sequence>
-		<attribute name="name" type="string" use="optional" />
-	</complexType>
-
-	<complexType name="explorerDescriptorType">
-		<attribute name="ref" type="token" use="required" />
 	</complexType>
 
 	<complexType name="configuredPropertiesType">

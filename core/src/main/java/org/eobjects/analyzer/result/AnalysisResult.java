@@ -44,7 +44,7 @@ public interface AnalysisResult {
      * Gets the results of a single Analyzer.
      * 
      * @param componentJob
-     *            the component (either analyzer or explorer) job to find the
+     *            the component (typically AnalyzerJob) job to find the
      *            result for
      * @return the result for a given component job
      */

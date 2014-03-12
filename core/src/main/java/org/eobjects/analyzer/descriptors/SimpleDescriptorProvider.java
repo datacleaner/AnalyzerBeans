@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
-import org.eobjects.analyzer.beans.api.Explorer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Renderer;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -63,7 +62,6 @@ import org.eobjects.analyzer.beans.api.Transformer;
 public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 
     private List<AnalyzerBeanDescriptor<?>> _analyzerBeanDescriptors = new ArrayList<AnalyzerBeanDescriptor<?>>();
-    private List<ExplorerBeanDescriptor<?>> _explorerBeanDescriptors = new ArrayList<ExplorerBeanDescriptor<?>>();
     private List<TransformerBeanDescriptor<?>> _transformerBeanDescriptors = new ArrayList<TransformerBeanDescriptor<?>>();
     private List<RendererBeanDescriptor<?>> _rendererBeanDescriptors = new ArrayList<RendererBeanDescriptor<?>>();
     private List<FilterBeanDescriptor<?, ?>> _filterBeanDescriptors = new ArrayList<FilterBeanDescriptor<?, ?>>();
@@ -126,10 +124,6 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
         _filterBeanDescriptors.add(descriptor);
     }
 
-    public void addExplorerBeanDescriptor(ExplorerBeanDescriptor<?> descriptor) {
-        _explorerBeanDescriptors.add(descriptor);
-    }
-
     @Override
     public List<AnalyzerBeanDescriptor<?>> getAnalyzerBeanDescriptors() {
         return _analyzerBeanDescriptors;
@@ -142,16 +136,6 @@ public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
     @Override
     public List<TransformerBeanDescriptor<?>> getTransformerBeanDescriptors() {
         return _transformerBeanDescriptors;
-    }
-
-    @Override
-    public Collection<ExplorerBeanDescriptor<?>> getExplorerBeanDescriptors() {
-        return _explorerBeanDescriptors;
-    }
-
-    @Override
-    protected <E extends Explorer<?>> ExplorerBeanDescriptor<E> notFoundExplorer(Class<E> explorerClass) {
-        return Descriptors.ofExplorer(explorerClass);
     }
 
     public void setTransformerBeanDescriptors(List<TransformerBeanDescriptor<?>> transformerBeanDescriptors) {
