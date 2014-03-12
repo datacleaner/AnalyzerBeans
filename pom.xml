@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,7 +21,7 @@
 	</parent>
 	<groupId>org.eobjects.analyzerbeans</groupId>
 	<artifactId>AnalyzerBeans</artifactId>
-	<version>0.39-SNAPSHOT</version>
+	<version>0.39</version>
 	<name>AnalyzerBeans</name>
 	<description>A framework for processing and analyzing data in a database, spreadsheet or other data source. AnalyzerBeans is widely based on a simple annotation-based development model where plugin/component development is very easy while it still supports reuse of business logic, configurability, type-safety and super-fast execution.</description>
 	<packaging>pom</packaging>
@@ -76,7 +75,7 @@
 		<url>https://github.com/datacleaner/AnalyzerBeans</url>
 		<connection>scm:git:https://github.com/datacleaner/AnalyzerBeans.git</connection>
 		<developerConnection>scm:git:https://github.com/datacleaner/AnalyzerBeans.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>AnalyzerBeans-0.39</tag>
 	</scm>
 	<distributionManagement>
 		<site>
