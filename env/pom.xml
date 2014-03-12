@@ -12,7 +12,6 @@
 		<module>mongodb</module>
 		<module>berkeleydb</module>
 		<module>h2</module>
-		<module>ejb</module>
 		<module>xml-config</module>
 		<module>cluster</module>
 	</modules>
