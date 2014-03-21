@@ -58,7 +58,13 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
 
         final boolean process = consumer.satisfiedForConsume(_outcomes.getOutcomes(), _row);
         if (process) {
-            consumer.consume(_row, 1, _outcomes, this);
+            if (consumer.isConcurrent()) {
+                consumer.consume(_row, 1, _outcomes, this);
+            } else {
+                synchronized (consumer) {
+                    consumer.consume(_row, 1, _outcomes, this);
+                }
+            }
         } else {
             // jump to the next step
             processNext(_row, 1, _outcomes);
