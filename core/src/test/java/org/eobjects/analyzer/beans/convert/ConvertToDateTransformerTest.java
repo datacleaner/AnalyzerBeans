@@ -25,9 +25,29 @@ import java.util.Date;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MockInputColumn;
+import org.eobjects.analyzer.data.MockInputRow;
+
 public class ConvertToDateTransformerTest extends TestCase {
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    public void testConvertWithNumberOnlyDateMask() throws Exception {
+        ConvertToDateTransformer transformer = new ConvertToDateTransformer();
+        transformer.dateMasks = new String[] { "ddMMyyyy" };
+        InputColumn<?> col = new MockInputColumn<Object>("datestr");
+        transformer.input = new InputColumn[] { col };
+        transformer.init();
+
+        Date[] result;
+        
+        result = transformer.transform(new MockInputRow().put(col, "31012014"));
+        assertEquals("2014-01-31", dateFormat.format(result[0]));
+
+        result = transformer.transform(new MockInputRow().put(col, 31012014));
+        assertEquals("2014-01-31", dateFormat.format(result[0]));
+    }
 
     public void testConvertFromNumber() throws Exception {
         Calendar cal = Calendar.getInstance();
@@ -48,11 +68,11 @@ public class ConvertToDateTransformerTest extends TestCase {
         assertEquals("1997-05-19", format(transformer.convertFromNumber(19970519)));
         assertEquals("1997-05-19", format(transformer.convertFromNumber(970519)));
     }
-    
+
     public void testConvertFromString() throws Exception {
         ConvertToDateTransformer transformer = new ConvertToDateTransformer();
         transformer.init();
-        
+
         assertEquals("1999-04-20", format(transformer.convertFromString("1999-04-20")));
         assertEquals("1999-04-20", format(transformer.convertFromString("04/20/1999")));
         assertEquals("1999-04-20", format(transformer.convertFromString("1999/04/20")));

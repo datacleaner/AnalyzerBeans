@@ -134,20 +134,13 @@ public class ConvertToDateTransformer implements Transformer<Date> {
             } else if (value instanceof String) {
                 d = convertFromString((String) value);
             } else if (value instanceof Number) {
-                d = convertFromNumber((Number) value);
+                d = convertFromNumber((Number) value, true);
             }
         }
         return d;
     }
 
     protected Date convertFromString(final String value) {
-        try {
-            long longValue = Long.parseLong(value);
-            return convertFromNumber(longValue);
-        } catch (NumberFormatException e) {
-            // do nothing, proceed to dateFormat parsing
-        }
-
         if ("now()".equalsIgnoreCase(value)) {
             return new NowDate();
         }
@@ -166,6 +159,13 @@ public class ConvertToDateTransformer implements Transformer<Date> {
             }
         }
 
+        try {
+            long longValue = Long.parseLong(value);
+            return convertFromNumber(longValue, false);
+        } catch (NumberFormatException e) {
+            // do nothing, proceed to dateFormat parsing
+        }
+
         // try also with SimpleDateFormat since it is more fault tolerant in
         // millisecond parsing
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.S");
@@ -179,10 +179,31 @@ public class ConvertToDateTransformer implements Transformer<Date> {
     }
 
     protected Date convertFromNumber(Number value) {
+        return convertFromNumber(value, true);
+    }
+
+    protected Date convertFromNumber(Number value, boolean tryDateTimeFormatters) {
         Number numberValue = (Number) value;
         long longValue = numberValue.longValue();
 
         String stringValue = Long.toString(longValue);
+
+        if (tryDateTimeFormatters) {
+            for (int i = 0; i < _dateTimeFormatters.length; i++) {
+                String dateMask = dateMasks[i];
+                boolean isPotentialNumberDateMask = dateMask.indexOf("-") == -1 && dateMask.indexOf(".") == -1
+                        && dateMask.indexOf("/") == -1;
+                if (isPotentialNumberDateMask) {
+                    DateTimeFormatter formatter = _dateTimeFormatters[i];
+                    try {
+                        return formatter.parseDateTime(stringValue).toDate();
+                    } catch (Exception e) {
+                        // proceed to next formatter
+                    }
+                }
+            }
+        }
+
         // test if the number is actually a format of the type yyyyMMdd
         if (stringValue.length() == 8 && (stringValue.startsWith("1") || stringValue.startsWith("2"))) {
             try {
