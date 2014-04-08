@@ -19,27 +19,36 @@
  */
 package org.eobjects.analyzer.metadata;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link MetadataAnnotationAdaptor} for {@link LocalizedName}.
+ * {@link MetadataAnnotationAdaptor} for {@link ForeignKey}.
  */
-public class LocalizedNameAnnotationAdaptor implements MetadataAnnotationAdaptor<LocalizedName> {
+public class ForeignKeyAnnotationAdaptor implements MetadataAnnotationAdaptor<ForeignKey> {
 
     @Override
     public String getAnnotationName() {
-        return "LocalizedName";
+        return "ForeignKey";
     }
 
     @Override
-    public LocalizedName convertFromAnnotation(MetadataAnnotation annotation) {
+    public ForeignKey convertFromAnnotation(MetadataAnnotation annotation) {
         final Map<String, String> parameters = annotation.getParameters();
-        return new LocalizedName(parameters);
+        final String datastoreName = parameters.get("ForeignDatastoreName");
+        final String schemaName = parameters.get("ForeignSchemaName");
+        final String tableName = parameters.get("ForeignTableName");
+        final String columnName = parameters.get("ForeignColumnName");
+        return new ForeignKey(datastoreName, schemaName, tableName, columnName);
     }
 
     @Override
-    public MetadataAnnotation convertToAnnotation(LocalizedName object) {
-        final Map<String, String> map = object.getDisplayNamesAsMap();
+    public MetadataAnnotation convertToAnnotation(ForeignKey object) {
+        final Map<String, String> map = new HashMap<String, String>();
+        map.put("ForeignDatastoreName", object.getForeignDatastoreName());
+        map.put("ForeignSchemaName", object.getForeignSchemaName());
+        map.put("ForeignTableName", object.getForeignTableName());
+        map.put("ForeignColumnName", object.getForeignColumnName());
         return new MetadataAnnotationImpl(getAnnotationName(), map);
     }
 
