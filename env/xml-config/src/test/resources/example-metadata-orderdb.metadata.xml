@@ -11,6 +11,17 @@
 				<value>main</value>
 			</parameter>
 		</annotation>
+
+		<table>
+			<name>EMPLOYEES</name>
+			<column>
+				<name>EMPLOYEENUMBER</name>
+				<annotation>
+					<name>PrimaryKey</name>
+				</annotation>
+			</column>
+		</table>
+
 		<table>
 			<name>CUSTOMERS</name>
 			<annotation>
