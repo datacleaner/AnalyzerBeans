@@ -20,10 +20,11 @@
 package org.eobjects.analyzer.metadata;
 
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.util.HasName;
 
 /**
  * Defines metadata about a single {@link Column}.
  */
-public interface ColumnMetadata extends HasMetadataAnnotations {
+public interface ColumnMetadata extends HasName, HasMetadataAnnotations {
 
 }

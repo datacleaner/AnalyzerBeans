@@ -23,11 +23,12 @@ import java.util.List;
 
 import org.eobjects.metamodel.schema.Schema;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.HasName;
 
 /**
  * Defines metadata about a {@link Schema}.
  */
-public interface SchemaMetadata extends HasMetadataAnnotations {
+public interface SchemaMetadata extends HasName, HasMetadataAnnotations {
 
     /**
      * Gets {@link TableMetadata} about a particular {@link Table}.

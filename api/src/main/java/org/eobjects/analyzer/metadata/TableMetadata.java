@@ -22,11 +22,12 @@ package org.eobjects.analyzer.metadata;
 import java.util.List;
 
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.HasName;
 
 /**
  * Defines metadata about a {@link Table}.
  */
-public interface TableMetadata extends HasMetadataAnnotations, HasColumnMetadata {
+public interface TableMetadata extends HasName, HasMetadataAnnotations, HasColumnMetadata {
 
     /**
      * Gets {@link ColumnGroupMetadata} by the name of the group.
