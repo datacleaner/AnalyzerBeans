@@ -19,28 +19,23 @@
  */
 package org.eobjects.analyzer.metadata;
 
-import java.util.Map;
-
-import org.eobjects.metamodel.util.HasName;
+import java.util.Collection;
 
 /**
- * Represents an annotation of a metadata element such as a
- * {@link TableMetadata}, {@link ColumnGroupMetadata} or {@link ColumnMetadata}.
- * An annotation is used to
+ * Default (immutable) implementation of {@link ColumnMetadata}
  */
-public interface MetadataAnnotation extends HasName {
+public class ColumnMetadataImpl extends AbstractHasMetadataAnnotations implements ColumnMetadata {
 
-    /**
-     * Gets the name of the annotation.
-     */
+    private final String _columnName;
+
+    public ColumnMetadataImpl(String columnName, Collection<? extends MetadataAnnotation> annotations) {
+        super(annotations);
+        _columnName = columnName;
+    }
+
     @Override
-    public String getName();
+    public String getName() {
+        return _columnName;
+    }
 
-    /**
-     * Gets any parameters set on the annotation. Parameters may be used to
-     * specify further details and behaviour for the annotations.
-     * 
-     * @return
-     */
-    public Map<String, String> getParameters();
 }
