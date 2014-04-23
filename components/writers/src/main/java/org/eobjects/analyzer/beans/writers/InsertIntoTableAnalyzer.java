@@ -38,6 +38,7 @@ import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FileProperty;
+import org.eobjects.analyzer.beans.api.MappedProperty;
 import org.eobjects.analyzer.beans.api.SchemaProperty;
 import org.eobjects.analyzer.beans.api.TableProperty;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
@@ -75,6 +76,8 @@ import org.slf4j.LoggerFactory;
 @Concurrent(true)
 public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Action<Iterable<Object[]>> {
 
+    private static final String PROPERTY_NAME_VALUES = "Values";
+    
     private static final File TEMP_DIR = FileHelper.getTempDir();
 
     private static final String ERROR_MESSAGE_COLUMN_NAME = "insert_into_table_error_message";
@@ -82,7 +85,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     private static final Logger logger = LoggerFactory.getLogger(InsertIntoTableAnalyzer.class);
 
     @Inject
-    @Configured
+    @Configured(PROPERTY_NAME_VALUES)
     @Description("Values to write to the table")
     InputColumn<?>[] values;
 
@@ -90,6 +93,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     @Configured
     @Description("Names of columns in the target table.")
     @ColumnProperty
+    @MappedProperty(PROPERTY_NAME_VALUES)
     String[] columnNames;
 
     @Inject
