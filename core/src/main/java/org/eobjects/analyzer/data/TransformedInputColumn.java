@@ -21,6 +21,7 @@ package org.eobjects.analyzer.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 import org.eobjects.analyzer.job.IdGenerator;
@@ -42,7 +43,7 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 
     private static final Logger logger = LoggerFactory.getLogger(TransformedInputColumn.class);
 
-    private final Collection<Listener> _listeners;
+    private final transient Collection<Listener> _listeners;
     private final String _id;
     private Class<?> _dataType;
     private String _name;
@@ -88,9 +89,16 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
         }
         final String oldName = _name;
         _name = name;
-        for (Listener listener : _listeners) {
+        for (Listener listener : getListeners()) {
             listener.onNameChanged(this, oldName, name);
         }
+    }
+
+    public Collection<Listener> getListeners() {
+        if (_listeners == null) {
+            return Collections.emptyList();
+        }
+        return _listeners;
     }
 
     @Override
@@ -161,13 +169,17 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     @Override
     public void setHidden(boolean hidden) {
         _hidden = hidden;
-        for (Listener listener : _listeners) {
+        for (Listener listener : getListeners()) {
             listener.onVisibilityChanged(this, hidden);
         }
     }
 
     @Override
     public boolean addListener(Listener listener) {
+        if (_listeners == null) {
+            logger.warn("Attempted to add listener onto TransformedInputColumn with null List of listeners");
+            return false;
+        }
         boolean added = _listeners.add(listener);
         if (logger.isDebugEnabled()) {
             logger.debug("[{}].addListener({}): {}", getName(), listener, added);
@@ -177,6 +189,10 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 
     @Override
     public boolean removeListener(Listener listener) {
+        if (_listeners == null) {
+            logger.warn("Attempted to remove listener onto TransformedInputColumn with null List of listeners");
+            return false;
+        }
         boolean removed = _listeners.remove(listener);
         if (logger.isDebugEnabled()) {
             logger.debug("[{}].removeListener({}): {}", getName(), listener, removed);

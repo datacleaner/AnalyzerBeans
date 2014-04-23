@@ -68,8 +68,6 @@ import org.slf4j.LoggerFactory;
  * The AnalysisJobBuilder supports a wide variety of listeners to make it
  * possible to be informed of changes to the state and dependencies between the
  * components/beans that defines the job.
- * 
- * @author Kasper Sørensen
  */
 public final class AnalysisJobBuilder implements Closeable {
 
