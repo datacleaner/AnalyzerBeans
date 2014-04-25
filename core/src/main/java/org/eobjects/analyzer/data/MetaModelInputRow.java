@@ -103,7 +103,7 @@ public final class MetaModelInputRow extends AbstractInputRow {
                 }
             } catch (SQLException e) {
                 logger.error("Failed to convert CLOB to String", e);
-                return null;
+                value = null;
             }
         } else if (value instanceof Blob) {
             try {
@@ -115,7 +115,7 @@ public final class MetaModelInputRow extends AbstractInputRow {
                 }
             } catch (SQLException e) {
                 logger.error("Failed to convert BLOB to byte[]", e);
-                return null;
+                value = null;
             }
         }
         return value;
