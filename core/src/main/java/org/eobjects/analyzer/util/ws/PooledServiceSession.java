@@ -33,31 +33,63 @@ public class PooledServiceSession<R> extends RetryServiceSession<R> {
 
     private final GenericObjectPool<Integer> _connectionPool;
 
+    /**
+     * Constructs a {@link PooledServiceSession} with a specific pool.
+     * 
+     * @see #createPool(int).
+     * 
+     * @param pool
+     */
     public PooledServiceSession(GenericObjectPool<Integer> pool) {
         this(pool, 0, null);
     }
 
+    /**
+     * Constructs a {@link PooledServiceSession} with a specific pool, a number
+     * of retries and a sleep/backoff time array
+     * 
+     * @see #createPool(int).
+     * 
+     * @param pool
+     * @param maxRetries
+     * @param sleepTimeBetweenRetries
+     */
     public PooledServiceSession(GenericObjectPool<Integer> pool, int maxRetries, int[] sleepTimeBetweenRetries) {
         super(maxRetries, sleepTimeBetweenRetries);
         _connectionPool = pool;
     }
 
+    /**
+     * Constructs a {@link PooledServiceSession} with a pool size and no
+     * retries.
+     * 
+     * @param maxConnections
+     */
     public PooledServiceSession(int maxConnections) {
         this(maxConnections, 0, null);
     }
 
+    /**
+     * Constructs a {@link PooledServiceSession} with a pool size, a number of
+     * retries and a sleep/backoff time array
+     * 
+     * @param maxConnections
+     * @param maxRetries
+     * @param sleepTimeBetweenRetries
+     */
     public PooledServiceSession(int maxConnections, int maxRetries, int[] sleepTimeBetweenRetries) {
         super(maxRetries, sleepTimeBetweenRetries);
-        _connectionPool = createPool(maxConnections);
+        _connectionPool = createConnectionPool(maxConnections);
     }
 
     /**
-     * Creates a connection pool
+     * Creates a connection pool that can be used for one or more
+     * {@link PooledServiceSession} objects.
      * 
      * @param maxConnections
      * @return
      */
-    public static GenericObjectPool<Integer> createPool(int maxConnections) {
+    public static GenericObjectPool<Integer> createConnectionPool(int maxConnections) {
         GenericObjectPool<Integer> connectionPool = new GenericObjectPool<Integer>(new ConnectionPoolObjectFactory());
         connectionPool.setMaxActive(maxConnections);
         connectionPool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK);
