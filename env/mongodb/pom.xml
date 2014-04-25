@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-env</artifactId>
-		<version>0.41</version>
+		<version>0.42-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-mongodb</artifactId>
 	<description>An (experimental) storage provider for AnalyzerBeans, based on mongo db</description>
