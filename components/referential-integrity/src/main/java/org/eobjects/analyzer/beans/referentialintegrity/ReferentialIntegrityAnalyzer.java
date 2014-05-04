@@ -50,41 +50,42 @@ public class ReferentialIntegrityAnalyzer implements Analyzer<ReferentialIntegri
     private static final String PROPERTY_NAME_DATASTORE = "Datastore";
     private static final String PROPERTY_NAME_SCHEMA_NAME = "Schema name";
     private static final String PROPERTY_NAME_TABLE_NAME = "Table name";
-    
-    @Configured
+
+    @Inject
+    @Configured(order = 1)
     InputColumn<?> foreignKey;
 
     @Inject
-    @Configured(value=PROPERTY_NAME_DATASTORE)
+    @Configured(order = 2, value = PROPERTY_NAME_DATASTORE)
     Datastore datastore;
 
     @Inject
-    @Configured(value=PROPERTY_NAME_SCHEMA_NAME)
+    @Configured(order = 3, value = PROPERTY_NAME_SCHEMA_NAME)
     @Alias("Schema")
     @SchemaProperty
     @MappedProperty(PROPERTY_NAME_DATASTORE)
     String schemaName;
 
     @Inject
-    @Configured(value=PROPERTY_NAME_TABLE_NAME)
+    @Configured(order = 4, value = PROPERTY_NAME_TABLE_NAME)
     @Alias("Table")
     @TableProperty
     @MappedProperty(PROPERTY_NAME_SCHEMA_NAME)
     String tableName;
 
     @Inject
-    @Configured
+    @Configured(order = 5)
     @ColumnProperty
     @MappedProperty(PROPERTY_NAME_TABLE_NAME)
     String columnName;
 
     @Inject
-    @Configured
+    @Configured(required = false)
     @Description("Use a client-side cache to avoid looking up multiple times with same inputs.")
     boolean cacheLookups = true;
-    
+
     @Inject
-    @Configured
+    @Configured(required = false)
     @Description("Ignore null values")
     boolean ignoreNullValues = true;
 
@@ -118,7 +119,7 @@ public class ReferentialIntegrityAnalyzer implements Analyzer<ReferentialIntegri
                 return;
             }
         }
-        
+
         Object[] result = _tableLookup.transform(row);
         assert result.length == 1;
 
