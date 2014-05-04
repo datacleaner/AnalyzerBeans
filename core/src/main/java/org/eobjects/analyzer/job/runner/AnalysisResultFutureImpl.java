@@ -29,11 +29,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.concurrent.StatusAwareTaskListener;
+import org.eobjects.analyzer.result.AbstractAnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class AnalysisResultFutureImpl implements AnalysisResultFuture {
+public final class AnalysisResultFutureImpl extends AbstractAnalysisResult implements AnalysisResultFuture {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnalysisResultFutureImpl.class);
 

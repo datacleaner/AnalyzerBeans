@@ -52,6 +52,7 @@ import org.eobjects.metamodel.query.OperatorType;
 import org.eobjects.metamodel.query.Query;
 import org.eobjects.metamodel.query.QueryParameter;
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.HasName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,6 +152,37 @@ public class TableLookupTransformer implements Transformer<Object> {
     private DatastoreConnection datastoreConnection;
     private CompiledQuery lookupQuery;
 
+    /**
+     * Default constructor
+     */
+    public TableLookupTransformer() {
+    }
+
+    /**
+     * Constructor for direct usage within e.g. other components where we always
+     * expect to do LEFT JOIN (max one record) semantic lookups.
+     * 
+     * @param datastore
+     * @param schemaName
+     * @param tableName
+     * @param conditionColumns
+     * @param conditionValues
+     * @param outputColumns
+     * @param joinSemantic
+     * @param cacheLookups
+     */
+    public TableLookupTransformer(Datastore datastore, String schemaName, String tableName, String[] conditionColumns,
+            InputColumn<?>[] conditionValues, String[] outputColumns, boolean cacheLookups) {
+        this.datastore = datastore;
+        this.schemaName = schemaName;
+        this.tableName = tableName;
+        this.conditionColumns = conditionColumns;
+        this.conditionValues = conditionValues;
+        this.cacheLookups = cacheLookups;
+        this.outputColumns = outputColumns;
+        this.joinSemantic = JoinSemantic.LEFT_JOIN_MAX_ONE;
+    }
+
     private void resetCachedColumns() {
         queryOutputColumns = null;
         queryConditionColumns = null;
@@ -230,11 +262,14 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     private void compileLookupQuery() {
         try {
-            Column[] queryOutputColumns = getQueryOutputColumns(false);
-            Query query = new Query().from(queryOutputColumns[0].getTable()).select(queryOutputColumns);
+            final Column[] queryOutputColumns = getQueryOutputColumns(false);
+            final Column queryOutputColumn = queryOutputColumns[0];
+            final Table table = queryOutputColumn.getTable();
+
+            Query query = new Query().from(table).select(queryOutputColumns);
 
             if (!isCarthesianProductMode()) {
-                Column[] queryConditionColumns = getQueryConditionColumns();
+                final Column[] queryConditionColumns = getQueryConditionColumns();
                 for (int i = 0; i < queryConditionColumns.length; i++) {
                     query = query.where(queryConditionColumns[i], OperatorType.EQUALS_TO, new QueryParameter());
                 }
@@ -378,8 +413,14 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     @Close
     public void close() {
-        lookupQuery.close();
-        datastoreConnection.close();
+        if (lookupQuery != null) {
+            lookupQuery.close();
+            lookupQuery = null;
+        }
+        if (datastore != null) {
+            datastoreConnection.close();
+            datastoreConnection = null;
+        }
         cache.invalidateAll();
         queryOutputColumns = null;
         queryConditionColumns = null;

@@ -14,6 +14,7 @@
 		<module>basic-filters</module>
 		<module>basic-analyzers</module>
 		<module>data-structures</module>
+		<module>referential-integrity</module>
 		<module>json</module>
 		<module>standardizers</module>
 		<module>pattern-finder</module>

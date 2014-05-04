@@ -86,6 +86,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eobjects.analyzerbeans</groupId>
+			<artifactId>AnalyzerBeans-referential-integrity</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.analyzerbeans</groupId>
 			<artifactId>AnalyzerBeans-pattern-finder</artifactId>
 			<version>${project.version}</version>
 		</dependency>

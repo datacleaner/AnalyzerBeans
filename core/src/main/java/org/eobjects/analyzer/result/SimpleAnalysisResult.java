@@ -32,43 +32,35 @@ import org.eobjects.analyzer.job.ComponentJob;
  * A simple (and Serializable!) implementation of the {@link AnalysisResult}
  * interface. Useful for storing and loading in files or other binary
  * destinations, using Java's serialization API.
- * 
- * @author Kasper Sørensen
  */
-public class SimpleAnalysisResult implements Serializable, AnalysisResult {
+public class SimpleAnalysisResult extends AbstractAnalysisResult implements Serializable, AnalysisResult {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final Map<ComponentJob, AnalyzerResult> _results;
-	private final Date _creationDate;
-	
-	public SimpleAnalysisResult(Map<ComponentJob, AnalyzerResult> results) {
-	    this(results, new Date());
-	}
+    private final Map<ComponentJob, AnalyzerResult> _results;
+    private final Date _creationDate;
 
-	public SimpleAnalysisResult(Map<ComponentJob, AnalyzerResult> results, Date creationDate) {
-		_results = results;
-		_creationDate = creationDate;
-	}
+    public SimpleAnalysisResult(Map<ComponentJob, AnalyzerResult> results) {
+        this(results, new Date());
+    }
 
-	@Override
-	public List<AnalyzerResult> getResults() {
-		return new ArrayList<AnalyzerResult>(_results.values());
-	}
+    public SimpleAnalysisResult(Map<ComponentJob, AnalyzerResult> results, Date creationDate) {
+        _results = results;
+        _creationDate = creationDate;
+    }
 
-	@Override
-	public AnalyzerResult getResult(ComponentJob componentJob) {
-		return _results.get(componentJob);
-	}
+    @Override
+    public List<AnalyzerResult> getResults() {
+        return new ArrayList<AnalyzerResult>(_results.values());
+    }
 
-	@Override
-	public Map<ComponentJob, AnalyzerResult> getResultMap() {
-		return Collections.unmodifiableMap(_results);
-	}
+    @Override
+    public Map<ComponentJob, AnalyzerResult> getResultMap() {
+        return Collections.unmodifiableMap(_results);
+    }
 
-	@Override
-	public Date getCreationDate() {
-		return _creationDate;
-	}
-
+    @Override
+    public Date getCreationDate() {
+        return _creationDate;
+    }
 }
