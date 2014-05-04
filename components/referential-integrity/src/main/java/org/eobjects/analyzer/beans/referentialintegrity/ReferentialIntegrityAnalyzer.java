@@ -30,6 +30,7 @@ import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.MappedProperty;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.SchemaProperty;
 import org.eobjects.analyzer.beans.api.TableProperty;
@@ -46,28 +47,35 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 @Categorized(ValidationCategory.class)
 public class ReferentialIntegrityAnalyzer implements Analyzer<ReferentialIntegrityAnalyzerResult> {
 
+    private static final String PROPERTY_NAME_DATASTORE = "Datastore";
+    private static final String PROPERTY_NAME_SCHEMA_NAME = "Schema name";
+    private static final String PROPERTY_NAME_TABLE_NAME = "Table name";
+    
     @Configured
     InputColumn<?> foreignKey;
 
     @Inject
-    @Configured
+    @Configured(value=PROPERTY_NAME_DATASTORE)
     Datastore datastore;
 
     @Inject
-    @Configured
+    @Configured(value=PROPERTY_NAME_SCHEMA_NAME)
     @Alias("Schema")
     @SchemaProperty
+    @MappedProperty(PROPERTY_NAME_DATASTORE)
     String schemaName;
 
     @Inject
-    @Configured
+    @Configured(value=PROPERTY_NAME_TABLE_NAME)
     @Alias("Table")
     @TableProperty
+    @MappedProperty(PROPERTY_NAME_SCHEMA_NAME)
     String tableName;
 
     @Inject
     @Configured
     @ColumnProperty
+    @MappedProperty(PROPERTY_NAME_TABLE_NAME)
     String columnName;
 
     @Inject

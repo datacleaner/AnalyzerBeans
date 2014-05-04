@@ -33,6 +33,7 @@ import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
+import org.eobjects.analyzer.beans.api.MappedProperty;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.api.Provided;
@@ -73,6 +74,10 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(TableLookupTransformer.class);
 
+    private static final String PROPERTY_NAME_DATASTORE = "Datastore";
+    private static final String PROPERTY_NAME_SCHEMA_NAME = "Schema name";
+    private static final String PROPERTY_NAME_TABLE_NAME = "Table name";
+
     public static enum JoinSemantic implements HasName {
         @Alias("LEFT")
         LEFT_JOIN_MAX_ONE("Left join (max 1 record)"),
@@ -102,7 +107,7 @@ public class TableLookupTransformer implements Transformer<Object> {
     }
 
     @Inject
-    @Configured
+    @Configured(value=PROPERTY_NAME_DATASTORE)
     Datastore datastore;
 
     @Inject
@@ -112,23 +117,27 @@ public class TableLookupTransformer implements Transformer<Object> {
     @Inject
     @Configured(required = false)
     @ColumnProperty
+    @MappedProperty(PROPERTY_NAME_TABLE_NAME)
     String[] conditionColumns;
 
     @Inject
     @Configured
     @ColumnProperty
+    @MappedProperty(PROPERTY_NAME_TABLE_NAME)
     String[] outputColumns;
 
     @Inject
-    @Configured
+    @Configured(value=PROPERTY_NAME_SCHEMA_NAME)
     @Alias("Schema")
     @SchemaProperty
+    @MappedProperty(PROPERTY_NAME_DATASTORE)
     String schemaName;
 
     @Inject
-    @Configured
+    @Configured(value=PROPERTY_NAME_TABLE_NAME)
     @Alias("Table")
     @TableProperty
+    @MappedProperty(PROPERTY_NAME_SCHEMA_NAME)
     String tableName;
 
     @Inject

@@ -41,6 +41,11 @@ import org.eobjects.analyzer.data.InputColumn;
  * {@link InputColumn}s and the other would be an array of Strings, enums or
  * something else. The second would then be mapped to the first, making it
  * possible for each input column to "have" a String or a enum value mapped.
+ * 
+ * Another way that properties may be mapped is by hierarical structure or
+ * dependency. For instance, a {@link ColumnProperty} may be mapped to a
+ * {@link TableProperty} which indicates that the column should exist within the
+ * table.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })
