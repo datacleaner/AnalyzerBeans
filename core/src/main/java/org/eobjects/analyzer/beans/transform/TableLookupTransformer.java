@@ -393,7 +393,7 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     private Object[] handleDataSet(DataSet dataSet) {
         if (!dataSet.next()) {
-            logger.warn("Result of lookup: None!");
+            logger.info("Result of lookup: None!");
             switch (joinSemantic) {
             case LEFT_JOIN_MAX_ONE:
             case LEFT_JOIN:
