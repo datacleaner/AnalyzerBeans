@@ -154,4 +154,9 @@ public class LazyRefAnalysisResultFuture implements AnalysisResultFuture {
         return Collections.unmodifiableList(_errors);
     }
 
+    @Override
+    public <R extends AnalyzerResult> List<? extends R> getResults(Class<R> resultClass) {
+        return _resultRef.get().getResults(resultClass);
+    }
+
 }

@@ -28,8 +28,6 @@ import org.eobjects.analyzer.job.ComponentJob;
 
 /**
  * Represents a collection of results for an {@link AnalysisJob}.
- * 
- * @author Kasper Sørensen
  */
 public interface AnalysisResult {
 
@@ -44,8 +42,8 @@ public interface AnalysisResult {
      * Gets the results of a single Analyzer.
      * 
      * @param componentJob
-     *            the component (typically AnalyzerJob) job to find the
-     *            result for
+     *            the component (typically AnalyzerJob) job to find the result
+     *            for
      * @return the result for a given component job
      */
     public AnalyzerResult getResult(ComponentJob componentJob);
@@ -57,6 +55,14 @@ public interface AnalysisResult {
      *         AnalyzerResults.
      */
     public Map<ComponentJob, AnalyzerResult> getResultMap();
+
+    /**
+     * Gets a list of all results with the given result class.
+     * 
+     * @param resultClass
+     * @return
+     */
+    public <R extends AnalyzerResult> List<? extends R> getResults(Class<R> resultClass);
 
     /**
      * Gets the time that the results were created

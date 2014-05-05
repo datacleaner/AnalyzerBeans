@@ -20,47 +20,55 @@
 package org.eobjects.analyzer.data;
 
 import junit.framework.TestCase;
+
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.schema.MutableColumn;
 
 public class MetaModelInputColumnTest extends TestCase {
 
-	@SuppressWarnings("deprecation")
-	public void testGetDataTypeFamily() throws Exception {
-		assertEquals(DataTypeFamily.STRING,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.VARCHAR)).getDataTypeFamily());
+    @SuppressWarnings("deprecation")
+    public void testGetDataTypeFamily() throws Exception {
+        assertEquals(DataTypeFamily.STRING,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.VARCHAR)).getDataTypeFamily());
 
-		assertEquals(DataTypeFamily.STRING,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.CHAR)).getDataTypeFamily());
+        assertEquals(DataTypeFamily.STRING,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.CHAR)).getDataTypeFamily());
 
-		assertEquals(DataTypeFamily.UNDEFINED,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.BLOB)).getDataTypeFamily());
+        assertEquals(DataTypeFamily.UNDEFINED,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.BLOB)).getDataTypeFamily());
 
-		assertEquals(DataTypeFamily.NUMBER,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.INTEGER)).getDataTypeFamily());
+        assertEquals(DataTypeFamily.NUMBER,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.INTEGER)).getDataTypeFamily());
 
-		assertEquals(DataTypeFamily.NUMBER,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.FLOAT)).getDataTypeFamily());
+        assertEquals(DataTypeFamily.NUMBER,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.FLOAT)).getDataTypeFamily());
 
-		assertEquals(DataTypeFamily.DATE,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.DATE)).getDataTypeFamily());
+        assertEquals(DataTypeFamily.DATE,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.DATE)).getDataTypeFamily());
 
-		assertEquals(DataTypeFamily.DATE,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.TIMESTAMP)).getDataTypeFamily());
+        assertEquals(DataTypeFamily.DATE,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.TIMESTAMP)).getDataTypeFamily());
 
-		assertEquals(DataTypeFamily.BOOLEAN,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.BIT)).getDataTypeFamily());
+        assertEquals(DataTypeFamily.BOOLEAN,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.BIT)).getDataTypeFamily());
 
-		assertEquals(DataTypeFamily.UNDEFINED,
-				new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.JAVA_OBJECT)).getDataTypeFamily());
-	}
+        assertEquals(DataTypeFamily.UNDEFINED, new MetaModelInputColumn(new MutableColumn("foobar",
+                ColumnType.JAVA_OBJECT)).getDataTypeFamily());
+    }
 
-	public void testConstructorArgRequired() throws Exception {
-		try {
-			new MetaModelInputColumn(null);
-			fail("Exception expected");
-		} catch (IllegalArgumentException e) {
-			assertEquals("column cannot be null", e.getMessage());
-		}
-	}
+    public void testConstructorArgRequired() throws Exception {
+        try {
+            new MetaModelInputColumn(null);
+            fail("Exception expected");
+        } catch (IllegalArgumentException e) {
+            assertEquals("column cannot be null", e.getMessage());
+        }
+    }
+
+    public void testGetDataTypeWhenClob() throws Exception {
+        assertEquals(String.class,
+                new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.VARCHAR)).getDataType());
+        assertEquals(String.class, new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.CLOB)).getDataType());
+        assertEquals(byte[].class, new MetaModelInputColumn(new MutableColumn("foobar", ColumnType.BLOB)).getDataType());
+    }
 }

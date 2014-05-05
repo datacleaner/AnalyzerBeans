@@ -32,13 +32,14 @@ import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.runner.AnalysisJobFailedException;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.JobStatus;
+import org.eobjects.analyzer.result.AbstractAnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
  * {@link AnalysisResultFuture} implementation for clustered/distributed
  * set-ups.
  */
-public final class DistributedAnalysisResultFuture implements AnalysisResultFuture {
+public final class DistributedAnalysisResultFuture extends AbstractAnalysisResult implements AnalysisResultFuture {
 
     private final DistributedAnalysisResultReducer _reducer;
     private final List<AnalysisResultFuture> _results;
@@ -149,7 +150,7 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
                 return JobStatus.NOT_FINISHED;
             }
         }
-        
+
         if (isSuccessful()) {
             return JobStatus.SUCCESSFUL;
         }
@@ -166,16 +167,6 @@ public final class DistributedAnalysisResultFuture implements AnalysisResultFutu
 
         final Collection<AnalyzerResult> values = _resultMap.values();
         return new ArrayList<AnalyzerResult>(values);
-    }
-
-    @Override
-    public AnalyzerResult getResult(ComponentJob componentJob) throws AnalysisJobFailedException {
-        await();
-        if (isErrornous()) {
-            throw new AnalysisJobFailedException(getErrors());
-        }
-
-        return _resultMap.get(componentJob);
     }
 
     @Override

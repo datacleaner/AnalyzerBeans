@@ -38,6 +38,7 @@ import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FileProperty;
+import org.eobjects.analyzer.beans.api.MappedProperty;
 import org.eobjects.analyzer.beans.api.SchemaProperty;
 import org.eobjects.analyzer.beans.api.TableProperty;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
@@ -79,6 +80,8 @@ import org.slf4j.LoggerFactory;
 @Concurrent(true)
 public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<Iterable<Object[]>> {
 
+    private static final String PROPERTY_NAME_VALUES = "Values";
+    
     private static final File TEMP_DIR = FileHelper.getTempDir();
 
     private static final String ERROR_MESSAGE_COLUMN_NAME = "update_table_error_message";
@@ -86,7 +89,7 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
     private static final Logger logger = LoggerFactory.getLogger(UpdateTableAnalyzer.class);
 
     @Inject
-    @Configured
+    @Configured(PROPERTY_NAME_VALUES)
     @Description("Values to update in the table")
     InputColumn<?>[] values;
 
@@ -94,6 +97,7 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
     @Configured
     @Description("Names of columns in the target table, on which the values will be updated.")
     @ColumnProperty
+    @MappedProperty(PROPERTY_NAME_VALUES)
     String[] columnNames;
 
     @Inject

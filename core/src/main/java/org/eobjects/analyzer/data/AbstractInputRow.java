@@ -42,7 +42,8 @@ public abstract class AbstractInputRow implements InputRow {
 			E value = ebic.evaluate(this);
 			return value;
 		}
-		return getValueInternal(column);
+		
+        return getValueInternal(column);
 	}
 	
 	@Override

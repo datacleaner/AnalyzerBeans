@@ -19,78 +19,122 @@
  */
 package org.eobjects.analyzer.data;
 
+import java.io.InputStream;
+import java.io.Reader;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eobjects.metamodel.data.Row;
 import org.eobjects.metamodel.query.SelectItem;
 import org.eobjects.metamodel.schema.Column;
+import org.eobjects.metamodel.util.FileHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * A physical {@link InputRow} originating from a MetaModel {@link Row} object.
+ */
 public final class MetaModelInputRow extends AbstractInputRow {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final Row _row;
-	private final int _rowNumber;
+    private static final Logger logger = LoggerFactory.getLogger(MetaModelInputRow.class);
 
-	public MetaModelInputRow(int rowNumber, Row row) {
-		_rowNumber = rowNumber;
-		_row = row;
-	}
+    private final Row _row;
+    private final int _rowNumber;
 
-	@Override
-	public int getId() {
-		return _rowNumber;
-	}
+    public MetaModelInputRow(int rowNumber, Row row) {
+        _rowNumber = rowNumber;
+        _row = row;
+    }
 
-	public Row getRow() {
-		return _row;
-	}
+    @Override
+    public int getId() {
+        return _rowNumber;
+    }
 
-	@Override
-	public boolean containsInputColumn(InputColumn<?> inputColumn) {
-		if (!inputColumn.isPhysicalColumn()) {
-			return false;
-		}
-		Column physicalColumn = inputColumn.getPhysicalColumn();
-		SelectItem[] selectItems = _row.getSelectItems();
-		for (SelectItem selectItem : selectItems) {
-			if (selectItem.getColumn() != null && selectItem.getFunction() == null) {
-				Column column = selectItem.getColumn();
-				if (physicalColumn.equals(column)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    public Row getRow() {
+        return _row;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <E> E getValueInternal(InputColumn<E> column) {
-		if (!column.isPhysicalColumn()) {
-			return null;
-		}
-		Column physicalColumn = column.getPhysicalColumn();
-		Object value = _row.getValue(physicalColumn);
-		
-		return (E) value;
-	}
+    @Override
+    public boolean containsInputColumn(InputColumn<?> inputColumn) {
+        if (!inputColumn.isPhysicalColumn()) {
+            return false;
+        }
+        Column physicalColumn = inputColumn.getPhysicalColumn();
+        SelectItem[] selectItems = _row.getSelectItems();
+        for (SelectItem selectItem : selectItems) {
+            if (selectItem.getColumn() != null && selectItem.getFunction() == null) {
+                Column column = selectItem.getColumn();
+                if (physicalColumn.equals(column)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public String toString() {
-		return "MetaModelInputRow[" + _row + "]";
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E> E getValueInternal(InputColumn<E> column) {
+        if (!column.isPhysicalColumn()) {
+            return null;
+        }
+        Column physicalColumn = column.getPhysicalColumn();
+        Object value = _row.getValue(physicalColumn);
 
-	@Override
-	public List<InputColumn<?>> getInputColumns() {
-		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
-		SelectItem[] selectItems = _row.getSelectItems();
-		for (SelectItem selectItem : selectItems) {
-			if (selectItem.getColumn() != null && selectItem.getFunction() == null) {
-				result.add(new MetaModelInputColumn(selectItem.getColumn()));
-			}
-		}
-		return result;
-	}
+        value = convertValue(value);
+
+        return (E) value;
+    }
+
+    private Object convertValue(Object value) {
+        if (value instanceof Clob) {
+            try {
+                Reader reader = ((Clob) value).getCharacterStream();
+                try {
+                    value = FileHelper.readAsString(reader);
+                } finally {
+                    FileHelper.safeClose(reader);
+                }
+            } catch (SQLException e) {
+                logger.error("Failed to convert CLOB to String", e);
+                value = null;
+            }
+        } else if (value instanceof Blob) {
+            try {
+                InputStream inputStream = ((Blob) value).getBinaryStream();
+                try {
+                    value = FileHelper.readAsBytes(inputStream);
+                } finally {
+                    FileHelper.safeClose(inputStream);
+                }
+            } catch (SQLException e) {
+                logger.error("Failed to convert BLOB to byte[]", e);
+                value = null;
+            }
+        }
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return "MetaModelInputRow[" + _row + "]";
+    }
+
+    @Override
+    public List<InputColumn<?>> getInputColumns() {
+        List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
+        SelectItem[] selectItems = _row.getSelectItems();
+        for (SelectItem selectItem : selectItems) {
+            if (selectItem.getColumn() != null && selectItem.getFunction() == null) {
+                result.add(new MetaModelInputColumn(selectItem.getColumn()));
+            }
+        }
+        return result;
+    }
 }

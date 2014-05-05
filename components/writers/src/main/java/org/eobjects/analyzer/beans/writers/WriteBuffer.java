@@ -38,52 +38,58 @@ import org.slf4j.LoggerFactory;
  */
 public final class WriteBuffer {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(WriteBuffer.class);
+    private static final Logger logger = LoggerFactory.getLogger(WriteBuffer.class);
 
-	private final BlockingQueue<Object[]> _buffer;
-	private final Action<Iterable<Object[]>> _flushAction;
-	private final AtomicInteger _batchNumber;
+    private final BlockingQueue<Object[]> _buffer;
+    private final Action<Iterable<Object[]>> _flushAction;
+    private final AtomicInteger _batchNumber;
 
-	public WriteBuffer(int bufferSize, Action<Iterable<Object[]>> flushAction) {
-		if (bufferSize <= 0) {
-			throw new IllegalArgumentException(
-					"Buffer size must be a positive integer");
-		}
-		_batchNumber = new AtomicInteger();
-		_buffer = new ArrayBlockingQueue<Object[]>(bufferSize);
-		_flushAction = flushAction;
-	}
+    public WriteBuffer(int bufferSize, Action<Iterable<Object[]>> flushAction) {
+        if (bufferSize <= 0) {
+            throw new IllegalArgumentException("Buffer size must be a positive integer");
+        }
+        _batchNumber = new AtomicInteger();
+        _buffer = new ArrayBlockingQueue<Object[]>(bufferSize);
+        _flushAction = flushAction;
+    }
 
-	protected Queue<Object[]> getBuffer() {
-		return _buffer;
-	}
+    protected Queue<Object[]> getBuffer() {
+        return _buffer;
+    }
 
-	public final void addToBuffer(Object[] rowData) {
-		while (!_buffer.offer(rowData)) {
-			flushBuffer();
-		}
-	}
+    public final void addToBuffer(Object[] rowData) {
+        while (!_buffer.offer(rowData)) {
+            flushBuffer();
+        }
+    }
 
-	public final void flushBuffer() {
-		if (!_buffer.isEmpty()) {
-			int flushSize = _buffer.size();
-			logger.info("Flushing {} rows in write buffer", flushSize);
+    public final void flushBuffer() {
+        int flushSize = _buffer.size();
+        if (flushSize == 0) {
+            return;
+        }
+        
+        logger.info("Flushing {} rows in write buffer", flushSize);
 
-			final List<Object[]> copy = new ArrayList<Object[]>(flushSize);
-			_buffer.drainTo(copy, flushSize);
+        final List<Object[]> copy = new ArrayList<Object[]>(flushSize);
+        _buffer.drainTo(copy, flushSize);
 
-			try {
-				int batchNo = _batchNumber.incrementAndGet();
-				logger.info("Write batch no. {} starting", batchNo);
-				_flushAction.run(copy);
-				logger.info("Write batch no. {} finished", batchNo);
-			} catch (Exception e) {
-				if (e instanceof RuntimeException) {
-					throw (RuntimeException) e;
-				}
-				throw new IllegalStateException(e);
-			}
-		}
-	}
+        if (copy.isEmpty()) {
+            // this can happen when there's a race going on for flushing the
+            // buffer concurrently.
+            return;
+        }
+
+        try {
+            int batchNo = _batchNumber.incrementAndGet();
+            logger.info("Write batch no. {} starting", batchNo);
+            _flushAction.run(copy);
+            logger.info("Write batch no. {} finished", batchNo);
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new IllegalStateException(e);
+        }
+    }
 }

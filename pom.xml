@@ -21,7 +21,7 @@
 	</parent>
 	<groupId>org.eobjects.analyzerbeans</groupId>
 	<artifactId>AnalyzerBeans</artifactId>
-	<version>0.41-SNAPSHOT</version>
+	<version>0.42-SNAPSHOT</version>
 	<name>AnalyzerBeans</name>
 	<description>A framework for processing and analyzing data in a database, spreadsheet or other data source. AnalyzerBeans is widely based on a simple annotation-based development model where plugin/component development is very easy while it still supports reuse of business logic, configurability, type-safety and super-fast execution.</description>
 	<packaging>pom</packaging>
@@ -313,7 +313,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-project-info-reports-plugin</artifactId>
-					<version>2.5</version>
+					<version>2.6</version>
 				</plugin>
 
 				<plugin>
@@ -460,6 +460,11 @@
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
 				<version>1.2.17</version>
+			</dependency>
+				<dependency>
+				<groupId>commons-pool</groupId>
+				<artifactId>commons-pool</artifactId>
+				<version>1.6</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

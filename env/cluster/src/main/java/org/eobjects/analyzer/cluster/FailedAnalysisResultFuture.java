@@ -95,6 +95,11 @@ public class FailedAnalysisResultFuture implements AnalysisResultFuture {
     public AnalyzerResult getResult(ComponentJob componentJob) throws AnalysisJobFailedException {
         return null;
     }
+    
+    @Override
+    public <R extends AnalyzerResult> List<? extends R> getResults(Class<R> resultClass) {
+        return Collections.emptyList();
+    }
 
     @Override
     public Map<ComponentJob, AnalyzerResult> getResultMap() throws AnalysisJobFailedException {

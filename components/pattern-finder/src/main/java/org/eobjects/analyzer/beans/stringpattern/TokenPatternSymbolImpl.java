@@ -116,7 +116,7 @@ public class TokenPatternSymbolImpl implements TokenPatternSymbol {
             }
             return 'a';
         case NUMBER:
-            return '9';
+            return '#';
         case WHITESPACE:
             return ' ';
         case MIXED:
