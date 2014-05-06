@@ -173,18 +173,21 @@ public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
                 }
             }
             return ValidationCategory.INVALID;
-        }
-
-        for (Object operand : operands) {
-            if (number) {
-                Number n1 = (Number) operand;
-                Number n2 = (Number) v;
-                if (equals(n1, n2)) {
-                    return ValidationCategory.VALID;
+        } else {
+            for (Object operand : operands) {
+                if (operand != null) {
+                    
+                    if (number) {
+                        Number n1 = (Number) operand;
+                        Number n2 = (Number) v;
+                        if (equals(n1, n2)) {
+                            return ValidationCategory.VALID;
+                        }
+                    }
+                    if (operand.equals(v)) {
+                        return ValidationCategory.VALID;
+                    }
                 }
-            }
-            if (operand.equals(v)) {
-                return ValidationCategory.VALID;
             }
         }
 
@@ -203,7 +206,13 @@ public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
     @Override
     public boolean isOptimizable(ValidationCategory category) {
         if (compareColumn != null && compareValues != null && compareValues.length > 0) {
-            return false;
+            boolean hasCompareValues = false;
+            for (String compareValue : compareValues) {
+                if (compareValue != null) {
+                    hasCompareValues = true;
+                }
+            }
+            return !hasCompareValues;
         }
         return true;
     }
