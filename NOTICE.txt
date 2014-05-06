@@ -1,5 +1,5 @@
-eobjects.org AnalyzerBeans
-Copyright 2010 eobjects.org
+AnalyzerBeans
+Copyright (C) 2014 Human Inference
 
 This product includes software developed by
-eobjects.org (http://eobjects.org/).
+Human Inference and the DataCleaner community (http://datacleaner.org/).
