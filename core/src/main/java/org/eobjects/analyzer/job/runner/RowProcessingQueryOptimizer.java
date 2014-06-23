@@ -215,7 +215,16 @@ public class RowProcessingQueryOptimizer {
         return true;
     }
 
+    /**
+     * Gets the optimized query.
+     * 
+     * @return
+     */
     public Query getOptimizedQuery() {
+//        if (isOptimizable()) {
+//            return _baseQuery;
+//        }
+        
         // create a copy/clone of the original query
         Query q = _baseQuery.clone();
 
@@ -236,6 +245,13 @@ public class RowProcessingQueryOptimizer {
         return q;
     }
 
+    /**
+     * Gets the optimized list of {@link RowProcessingConsumer}. This list will
+     * consist of the original consumers, except the eliminated ones (see
+     * {@link #getEliminatedConsumers()}).
+     * 
+     * @return
+     */
     public List<RowProcessingConsumer> getOptimizedConsumers() {
         List<RowProcessingConsumer> result = new ArrayList<RowProcessingConsumer>(_consumers);
         for (FilterConsumer filterConsumer : _optimizedFilters.keySet()) {
@@ -246,10 +262,31 @@ public class RowProcessingQueryOptimizer {
         return result;
     }
 
+    /**
+     * Gets the {@link RowProcessingConsumer}s that where eliminated while
+     * optimizing the query.
+     * 
+     * @return
+     */
+    public Set<? extends RowProcessingConsumer> getEliminatedConsumers() {
+        final Set<FilterConsumer> consumers = _optimizedFilters.keySet();
+        return consumers;
+    }
+
+    /**
+     * Gets the {@link Outcome}s that has been optimized by the query.
+     * 
+     * @return
+     */
     public Collection<? extends Outcome> getOptimizedAvailableOutcomes() {
         return _optimizedFilters.values();
     }
 
+    /**
+     * Determines if the query has been optimized or not.
+     * 
+     * @return
+     */
     public boolean isOptimizable() {
         return !_optimizedFilters.isEmpty();
     }

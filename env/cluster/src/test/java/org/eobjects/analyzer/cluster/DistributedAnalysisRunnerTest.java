@@ -41,6 +41,12 @@ public class DistributedAnalysisRunnerTest extends TestCase {
         
         ClusterTestHelper.runNoExpectedRecordsJob(configuration);
     }
+    
+    public void testExistingMaxRowsScenario() throws Throwable {
+        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), true);
+
+        ClusterTestHelper.runExistingMaxRowsJob(configuration, new VirtualClusterManager(configuration, 2));
+    }
 
     public void testVanillaScenarioSingleSlave() throws Throwable {
         final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getName(), true);

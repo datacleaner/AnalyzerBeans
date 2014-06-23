@@ -165,7 +165,7 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
                         "Expected rows was {}. A total number of {} slave jobs will be built, each of approx. {} rows.",
                         expectedRows, chunks, rowsPerChunk);
 
-                final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk);
+                final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk, publisher);
                 final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job,
                         lifeCycleHelper, publisher, _analysisListener);
                 resultFuture = new DistributedAnalysisResultFuture(results, reducer);
@@ -204,7 +204,8 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         });
     }
 
-    public List<AnalysisResultFuture> dispatchJobs(final AnalysisJob job, final int chunks, final int rowsPerChunk) {
+    public List<AnalysisResultFuture> dispatchJobs(final AnalysisJob job, final int chunks, final int rowsPerChunk,
+            final RowProcessingPublisher publisher) {
         final List<AnalysisResultFuture> results = new ArrayList<AnalysisResultFuture>();
         for (int i = 0; i < chunks; i++) {
             final int firstRow = (i * rowsPerChunk) + 1;
@@ -248,20 +249,20 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
 
         final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job);
 
+        final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
+        maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
+        maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
+
+        final boolean naturalRecordOrderConsistent = jobBuilder.getDatastore().getPerformanceCharacteristics()
+                .isNaturalRecordOrderConsistent();
+        if (!naturalRecordOrderConsistent) {
+            final InputColumn<?> orderColumn = findOrderByColumn(jobBuilder);
+            maxRowsFilter.getConfigurableBean().setOrderColumn(orderColumn);
+        }
+
+        jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
+
         try {
-
-            final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
-            maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
-            maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
-
-            final boolean naturalRecordOrderConsistent = jobBuilder.getDatastore().getPerformanceCharacteristics()
-                    .isNaturalRecordOrderConsistent();
-            if (!naturalRecordOrderConsistent) {
-                final InputColumn<?> orderColumn = findOrderByColumn(jobBuilder);
-                maxRowsFilter.getConfigurableBean().setOrderColumn(orderColumn);
-            }
-
-            jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
 
             // in assertion/test mode do an early validation
             assert jobBuilder.isConfigured(true);

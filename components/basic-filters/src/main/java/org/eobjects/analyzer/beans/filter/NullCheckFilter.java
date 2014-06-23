@@ -26,6 +26,7 @@ import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
@@ -41,6 +42,7 @@ import org.eobjects.metamodel.schema.Column;
 @Alias("Not null")
 @Description("Filter rows that contain null values.")
 @Categorized(FilterCategory.class)
+@Distributed(true)
 public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.NullCheckCategory> {
 
     public static enum NullCheckCategory {

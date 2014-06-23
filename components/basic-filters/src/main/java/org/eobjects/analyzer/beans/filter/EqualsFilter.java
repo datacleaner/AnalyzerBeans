@@ -28,6 +28,7 @@ import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.FilterBean;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
@@ -49,6 +50,7 @@ import org.eobjects.metamodel.schema.Column;
 @FilterBean("Equals")
 @Description("A filter that excludes values that are not equal (=) to specific set of valid values")
 @Categorized(FilterCategory.class)
+@Distributed(true)
 public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
 
     @Inject

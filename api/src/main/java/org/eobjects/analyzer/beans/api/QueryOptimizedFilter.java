@@ -32,8 +32,6 @@ import org.eobjects.metamodel.query.Query;
  * among the first steps in a job, and all succeeding steps depend on a single
  * outcome of the particular filter, it will be allowed to optimize the query.
  * 
- * @author Kasper Sørensen
- * 
  * @param <C>
  *            the filter category enum
  */

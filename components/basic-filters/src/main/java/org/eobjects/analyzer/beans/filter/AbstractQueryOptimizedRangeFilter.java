@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans.filter;
 
 import java.util.Comparator;
 
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.data.InputColumn;
@@ -35,6 +36,7 @@ import org.eobjects.metamodel.schema.Column;
  * Abstract {@link QueryOptimizedFilter} which implementation for range filters
  * which demarcate valid value bounds.
  */
+@Distributed(true)
 abstract class AbstractQueryOptimizedRangeFilter<E> implements QueryOptimizedFilter<RangeFilterCategory>, Comparator<E> {
 
     @Validate
