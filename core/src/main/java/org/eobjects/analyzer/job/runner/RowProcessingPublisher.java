@@ -225,7 +225,7 @@ public final class RowProcessingPublisher {
         }
     }
 
-    private RowProcessingQueryOptimizer getQueryOptimizer() {
+    public RowProcessingQueryOptimizer getQueryOptimizer() {
         return _queryOptimizerRef.get();
     }
 

@@ -528,7 +528,8 @@ public final class ReflectionUtils {
 
     public static <A extends Annotation> A getAnnotation(AnnotatedElement element, Class<A> annotationClass) {
         synchronized (ANNOTATION_REFLECTION_LOCK) {
-            return element.getAnnotation(annotationClass);
+            A annotation = element.getAnnotation(annotationClass);
+            return annotation;
         }
     }
 

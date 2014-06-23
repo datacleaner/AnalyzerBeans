@@ -129,6 +129,11 @@ final class AnnotationBasedFilterBeanDescriptor<F extends Filter<C>, C extends E
         if (annotation != null) {
             return annotation.value();
         }
+        if (isQueryOptimizable()) {
+            // The general rule for query optimized filters is that they are NOT
+            // distributeable (unless annotated with @Distributed).
+            return false;
+        }
         return true;
     }
 }
