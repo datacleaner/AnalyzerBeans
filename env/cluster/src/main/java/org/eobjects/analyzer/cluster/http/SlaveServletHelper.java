@@ -194,21 +194,23 @@ public class SlaveServletHelper {
     }
 
     public Serializable serializeResult(AnalysisResultFuture resultFuture, String slaveJobId) {
-        // wait for result to be ready
-        resultFuture.await();
+        try {
+            // wait for result to be ready
+            resultFuture.await();
 
-        final Serializable resultObject;
-        if (resultFuture.isSuccessful()) {
-            resultObject = new SimpleAnalysisResult(resultFuture.getResultMap());
-        } else {
-            resultObject = new ArrayList<Throwable>(resultFuture.getErrors());
+            final Serializable resultObject;
+            if (resultFuture.isSuccessful()) {
+                resultObject = new SimpleAnalysisResult(resultFuture.getResultMap());
+            } else {
+                resultObject = new ArrayList<Throwable>(resultFuture.getErrors());
+            }
+
+            return resultObject;
+        } finally {
+            if (slaveJobId != null) {
+                _runningJobs.remove(slaveJobId);
+            }
         }
-
-        if (slaveJobId != null) {
-            _runningJobs.remove(slaveJobId);
-        }
-
-        return resultObject;
     }
 
     public AnalysisJob readJob(HttpServletRequest request) throws IOException {
