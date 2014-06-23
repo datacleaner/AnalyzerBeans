@@ -28,6 +28,7 @@ import org.eobjects.analyzer.beans.filter.MaxRowsFilter.Category;
 import org.eobjects.analyzer.cluster.virtual.VirtualClusterManager;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
+import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -58,251 +59,297 @@ import org.slf4j.LoggerFactory;
  */
 public final class DistributedAnalysisRunner implements AnalysisRunner {
 
-    private static final Logger logger = LoggerFactory.getLogger(DistributedAnalysisRunner.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(DistributedAnalysisRunner.class);
 
-    private final ClusterManager _clusterManager;
-    private final AnalyzerBeansConfiguration _configuration;
-    private final CompositeAnalysisListener _analysisListener;
+	private final ClusterManager _clusterManager;
+	private final AnalyzerBeansConfiguration _configuration;
+	private final CompositeAnalysisListener _analysisListener;
 
-    public DistributedAnalysisRunner(AnalyzerBeansConfiguration configuration, ClusterManager clusterManager) {
-        this(configuration, clusterManager, new AnalysisListener[0]);
-    }
+	public DistributedAnalysisRunner(AnalyzerBeansConfiguration configuration,
+			ClusterManager clusterManager) {
+		this(configuration, clusterManager, new AnalysisListener[0]);
+	}
 
-    public DistributedAnalysisRunner(AnalyzerBeansConfiguration configuration, ClusterManager clusterManager,
-            AnalysisListener... listeners) {
-        _configuration = configuration;
-        _clusterManager = clusterManager;
-        _analysisListener = new CompositeAnalysisListener(listeners);
-    }
+	public DistributedAnalysisRunner(AnalyzerBeansConfiguration configuration,
+			ClusterManager clusterManager, AnalysisListener... listeners) {
+		_configuration = configuration;
+		_clusterManager = clusterManager;
+		_analysisListener = new CompositeAnalysisListener(listeners);
+	}
 
-    /**
-     * Determines if an {@link AnalysisJob} is distributable or not. If this
-     * method returns false, calling {@link #run(AnalysisJob)} with the job will
-     * typically throw a {@link UnsupportedOperationException}.
-     * 
-     * @param job
-     * @return
-     */
-    public boolean isDistributable(final AnalysisJob job) {
-        try {
-            failIfJobIsUnsupported(job);
-            return true;
-        } catch (Throwable e) {
-            return false;
-        }
-    }
+	/**
+	 * Determines if an {@link AnalysisJob} is distributable or not. If this
+	 * method returns false, calling {@link #run(AnalysisJob)} with the job will
+	 * typically throw a {@link UnsupportedOperationException}.
+	 * 
+	 * @param job
+	 * @return
+	 */
+	public boolean isDistributable(final AnalysisJob job) {
+		try {
+			failIfJobIsUnsupported(job);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     * 
-     * @throws UnsupportedOperationException
-     *             if the job is not distributable (either because components
-     *             are not distributable in their nature, or because some
-     *             features are limited).
-     */
-    @Override
-    public AnalysisResultFuture run(final AnalysisJob job) throws UnsupportedOperationException {
-        logger.info("Validating distributed job: {}", job);
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws UnsupportedOperationException
+	 *             if the job is not distributable (either because components
+	 *             are not distributable in their nature, or because some
+	 *             features are limited).
+	 */
+	@Override
+	public AnalysisResultFuture run(final AnalysisJob job)
+			throws UnsupportedOperationException {
+		logger.info("Validating distributed job: {}", job);
 
-        failIfJobIsUnsupported(job);
+		failIfJobIsUnsupported(job);
 
-        final InjectionManager injectionManager = _configuration.getInjectionManager(job);
-        final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(injectionManager, true);
-        final RowProcessingPublishers publishers = getRowProcessingPublishers(job, lifeCycleHelper);
-        final RowProcessingPublisher publisher = getRowProcessingPublisher(publishers);
-        publisher.initializeConsumers(new TaskListener() {
-            @Override
-            public void onError(Task task, Throwable throwable) {
-                logger.error("Failed to initialize consumers at master node!", throwable);
-            }
+		final InjectionManager injectionManager = _configuration
+				.getInjectionManager(job);
+		final LifeCycleHelper lifeCycleHelper = new LifeCycleHelper(
+				injectionManager, true);
+		final RowProcessingPublishers publishers = getRowProcessingPublishers(
+				job, lifeCycleHelper);
+		final RowProcessingPublisher publisher = getRowProcessingPublisher(publishers);
+		publisher.initializeConsumers(new TaskListener() {
+			@Override
+			public void onError(Task task, Throwable throwable) {
+				logger.error("Failed to initialize consumers at master node!",
+						throwable);
+			}
 
-            @Override
-            public void onComplete(Task task) {
-            }
+			@Override
+			public void onComplete(Task task) {
+			}
 
-            @Override
-            public void onBegin(Task task) {
-            }
-        });
+			@Override
+			public void onBegin(Task task) {
+			}
+		});
 
-        logger.info("Validation passed! Chunking job for distribution amongst slaves: {}", job);
+		logger.info(
+				"Validation passed! Chunking job for distribution amongst slaves: {}",
+				job);
 
-        // since we always use a SingleThreadedTaskRunner, the above operation
-        // will be synchronized/blocking.
+		// since we always use a SingleThreadedTaskRunner, the above operation
+		// will be synchronized/blocking.
 
-        final AnalysisJobMetrics analysisJobMetrics = publishers.getAnalysisJobMetrics();
-        _analysisListener.jobBegin(job, analysisJobMetrics);
+		final AnalysisJobMetrics analysisJobMetrics = publishers
+				.getAnalysisJobMetrics();
+		_analysisListener.jobBegin(job, analysisJobMetrics);
 
-        final RowProcessingMetrics rowProcessingMetrics = publisher.getRowProcessingMetrics();
-        _analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
+		final RowProcessingMetrics rowProcessingMetrics = publisher
+				.getRowProcessingMetrics();
+		_analysisListener.rowProcessingBegin(job, rowProcessingMetrics);
 
-        final AnalysisResultFuture resultFuture;
+		final AnalysisResultFuture resultFuture;
 
-        try {
-            final int expectedRows = rowProcessingMetrics.getExpectedRows();
-            if (expectedRows == 0) {
-                logger.info("Expected rows of the job was zero. Job will run on a local virtual slave.");
+		try {
+			final int expectedRows = rowProcessingMetrics.getExpectedRows();
+			if (expectedRows == 0) {
+				logger.info("Expected rows of the job was zero. Job will run on a local virtual slave.");
 
-                // when there are no expected rows we still need to build a
-                // single slave job, but run it locally, since the job lifecycle
-                // still needs to be guaranteed.
-                final DistributedJobContext context = new DistributedJobContextImpl(_configuration, job, 0, 1);
+				// when there are no expected rows we still need to build a
+				// single slave job, but run it locally, since the job lifecycle
+				// still needs to be guaranteed.
+				final DistributedJobContext context = new DistributedJobContextImpl(
+						_configuration, job, 0, 1);
 
-                // use a virtual cluster, which just runs the job locally.
-                final VirtualClusterManager localCluster = new VirtualClusterManager(_configuration, 1);
-                resultFuture = localCluster.dispatchJob(job, context);
-            } else {
-                final JobDivisionManager jobDivisionManager = _clusterManager.getJobDivisionManager();
-                final int chunks = jobDivisionManager.calculateDivisionCount(job, expectedRows);
-                final int rowsPerChunk = (expectedRows + 1) / chunks;
+				// use a virtual cluster, which just runs the job locally.
+				final VirtualClusterManager localCluster = new VirtualClusterManager(
+						_configuration, 1);
+				resultFuture = localCluster.dispatchJob(job, context);
+			} else {
+				final JobDivisionManager jobDivisionManager = _clusterManager
+						.getJobDivisionManager();
+				final int chunks = jobDivisionManager.calculateDivisionCount(
+						job, expectedRows);
+				final int rowsPerChunk = (expectedRows + 1) / chunks;
 
-                logger.info(
-                        "Expected rows was {}. A total number of {} slave jobs will be built, each of approx. {} rows.",
-                        expectedRows, chunks, rowsPerChunk);
+				logger.info(
+						"Expected rows was {}. A total number of {} slave jobs will be built, each of approx. {} rows.",
+						expectedRows, chunks, rowsPerChunk);
 
-                final List<AnalysisResultFuture> results = dispatchJobs(job, chunks, rowsPerChunk);
-                final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(job,
-                        lifeCycleHelper, publisher, _analysisListener);
-                resultFuture = new DistributedAnalysisResultFuture(results, reducer);
-            }
+				final List<AnalysisResultFuture> results = dispatchJobs(job,
+						chunks, rowsPerChunk);
+				final DistributedAnalysisResultReducer reducer = new DistributedAnalysisResultReducer(
+						job, lifeCycleHelper, publisher, _analysisListener);
+				resultFuture = new DistributedAnalysisResultFuture(results,
+						reducer);
+			}
 
-        } catch (RuntimeException e) {
-            _analysisListener.errorUknown(job, e);
-            throw e;
-        }
+		} catch (RuntimeException e) {
+			_analysisListener.errorUknown(job, e);
+			throw e;
+		}
 
-        if (!_analysisListener.isEmpty()) {
-            awaitAndInformListener(job, analysisJobMetrics, rowProcessingMetrics, resultFuture);
-        }
+		if (!_analysisListener.isEmpty()) {
+			awaitAndInformListener(job, analysisJobMetrics,
+					rowProcessingMetrics, resultFuture);
+		}
 
-        return resultFuture;
-    }
+		return resultFuture;
+	}
 
-    /**
-     * Spawns a new thread for awaiting the result future (which will force the
-     * reducer to inform about the progress).
-     * 
-     * @param job
-     * @param analysisJobMetrics
-     * @param resultFuture
-     */
-    private void awaitAndInformListener(final AnalysisJob job, final AnalysisJobMetrics analysisJobMetrics,
-            final RowProcessingMetrics rowProcessingMetrics, final AnalysisResultFuture resultFuture) {
-        SharedExecutorService.get().execute(new Runnable() {
-            @Override
-            public void run() {
-                resultFuture.await();
-                if (resultFuture.isSuccessful()) {
-                    _analysisListener.jobSuccess(job, analysisJobMetrics);
-                }
-            }
-        });
-    }
+	/**
+	 * Spawns a new thread for awaiting the result future (which will force the
+	 * reducer to inform about the progress).
+	 * 
+	 * @param job
+	 * @param analysisJobMetrics
+	 * @param resultFuture
+	 */
+	private void awaitAndInformListener(final AnalysisJob job,
+			final AnalysisJobMetrics analysisJobMetrics,
+			final RowProcessingMetrics rowProcessingMetrics,
+			final AnalysisResultFuture resultFuture) {
+		SharedExecutorService.get().execute(new Runnable() {
+			@Override
+			public void run() {
+				resultFuture.await();
+				if (resultFuture.isSuccessful()) {
+					_analysisListener.jobSuccess(job, analysisJobMetrics);
+				}
+			}
+		});
+	}
 
-    public List<AnalysisResultFuture> dispatchJobs(final AnalysisJob job, final int chunks, final int rowsPerChunk) {
-        final List<AnalysisResultFuture> results = new ArrayList<AnalysisResultFuture>();
-        for (int i = 0; i < chunks; i++) {
-            final int firstRow = (i * rowsPerChunk) + 1;
-            final int maxRows;
-            if (i == chunks - 1) {
-                maxRows = Integer.MAX_VALUE - firstRow - 1;
-            } else {
-                maxRows = rowsPerChunk;
-            }
+	public List<AnalysisResultFuture> dispatchJobs(final AnalysisJob job,
+			final int chunks, final int rowsPerChunk) {
+		final List<AnalysisResultFuture> results = new ArrayList<AnalysisResultFuture>();
+		for (int i = 0; i < chunks; i++) {
+			final int firstRow = (i * rowsPerChunk) + 1;
+			final int maxRows;
+			if (i == chunks - 1) {
+				maxRows = Integer.MAX_VALUE - firstRow - 1;
+			} else {
+				maxRows = rowsPerChunk;
+			}
 
-            final AnalysisJob slaveJob = buildSlaveJob(job, i, firstRow, maxRows);
-            final DistributedJobContext context = new DistributedJobContextImpl(_configuration, job, i, chunks);
+			final AnalysisJob slaveJob = buildSlaveJob(job, i, firstRow,
+					maxRows);
+			final DistributedJobContext context = new DistributedJobContextImpl(
+					_configuration, job, i, chunks);
 
-            try {
-                logger.info("Dispatching slave job {} of {}", i + 1, chunks);
-                final AnalysisResultFuture slaveResultFuture = _clusterManager.dispatchJob(slaveJob, context);
-                results.add(slaveResultFuture);
-            } catch (Exception e) {
-                _analysisListener.errorUknown(job, e);
-                // exceptions due to dispatching jobs are added as the first of
-                // the job's errors, and the rest of the execution is aborted.
-                AnalysisResultFuture errorResult = new FailedAnalysisResultFuture(e);
-                results.add(0, errorResult);
-                break;
-            }
-        }
-        return results;
-    }
+			try {
+				logger.info("Dispatching slave job {} of {}", i + 1, chunks);
+				final AnalysisResultFuture slaveResultFuture = _clusterManager
+						.dispatchJob(slaveJob, context);
+				results.add(slaveResultFuture);
+			} catch (Exception e) {
+				_analysisListener.errorUknown(job, e);
+				// exceptions due to dispatching jobs are added as the first of
+				// the job's errors, and the rest of the execution is aborted.
+				AnalysisResultFuture errorResult = new FailedAnalysisResultFuture(
+						e);
+				results.add(0, errorResult);
+				break;
+			}
+		}
+		return results;
+	}
 
-    /**
-     * Creates a slave job by copying the original job and adding a
-     * {@link MaxRowsFilter} as a default requirement.
-     * 
-     * @param job
-     * @param firstRow
-     * @param maxRows
-     * @return
-     */
-    private AnalysisJob buildSlaveJob(AnalysisJob job, int slaveJobIndex, int firstRow, int maxRows) {
-        logger.info("Building slave job {} with firstRow={} and maxRow={}", slaveJobIndex + 1, firstRow, maxRows);
+	/**
+	 * Creates a slave job by copying the original job and adding a
+	 * {@link MaxRowsFilter} as a default requirement.
+	 * 
+	 * @param job
+	 * @param firstRow
+	 * @param maxRows
+	 * @return
+	 */
+	private AnalysisJob buildSlaveJob(AnalysisJob job, int slaveJobIndex,
+			int firstRow, int maxRows) {
+		logger.info("Building slave job {} with firstRow={} and maxRow={}",
+				slaveJobIndex + 1, firstRow, maxRows);
 
-        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job);
-        try {
-            final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
-            maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
-            maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
+		final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(
+				_configuration, job);
 
-            jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
+		// TODO: More intelligently find a proper order column - if PK is
+		// available select it
+		final MetaModelInputColumn orderColumn = jobBuilder.getSourceColumns()
+				.get(0);
 
-            // in assertion/test mode do an early validation
-            assert jobBuilder.isConfigured(true);
+		try {
 
-            return jobBuilder.toAnalysisJob();
-        } finally {
-            jobBuilder.close();
-        }
-    }
+			final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder
+					.addFilter(MaxRowsFilter.class);
+			maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
+			maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
+			maxRowsFilter.getConfigurableBean().setOrderColumn(orderColumn);
 
-    private RowProcessingPublishers getRowProcessingPublishers(AnalysisJob job, LifeCycleHelper lifeCycleHelper) {
-        final SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
-        sourceColumnFinder.addSources(job);
+			jobBuilder.setDefaultRequirement(maxRowsFilter,
+					MaxRowsFilter.Category.VALID);
 
-        final SingleThreadedTaskRunner taskRunner = new SingleThreadedTaskRunner();
+			// in assertion/test mode do an early validation
+			assert jobBuilder.isConfigured(true);
 
-        final RowProcessingPublishers publishers = new RowProcessingPublishers(job, null, taskRunner, lifeCycleHelper,
-                sourceColumnFinder);
+			return jobBuilder.toAnalysisJob();
+		} finally {
+			jobBuilder.close();
+		}
+	}
 
-        return publishers;
-    }
+	private RowProcessingPublishers getRowProcessingPublishers(AnalysisJob job,
+			LifeCycleHelper lifeCycleHelper) {
+		final SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
+		sourceColumnFinder.addSources(job);
 
-    private RowProcessingPublisher getRowProcessingPublisher(RowProcessingPublishers publishers) {
-        final Table[] tables = publishers.getTables();
+		final SingleThreadedTaskRunner taskRunner = new SingleThreadedTaskRunner();
 
-        if (tables.length != 1) {
-            throw new UnsupportedOperationException("Jobs with multiple source tables are not distributable");
-        }
+		final RowProcessingPublishers publishers = new RowProcessingPublishers(
+				job, null, taskRunner, lifeCycleHelper, sourceColumnFinder);
 
-        final Table table = tables[0];
+		return publishers;
+	}
 
-        final RowProcessingPublisher publisher = publishers.getRowProcessingPublisher(table);
-        return publisher;
-    }
+	private RowProcessingPublisher getRowProcessingPublisher(
+			RowProcessingPublishers publishers) {
+		final Table[] tables = publishers.getTables();
 
-    private void failIfJobIsUnsupported(AnalysisJob job) throws UnsupportedOperationException {
-        failIfComponentsAreUnsupported(job.getFilterJobs());
-        failIfComponentsAreUnsupported(job.getTransformerJobs());
-        failIfComponentsAreUnsupported(job.getAnalyzerJobs());
-    }
+		if (tables.length != 1) {
+			throw new UnsupportedOperationException(
+					"Jobs with multiple source tables are not distributable");
+		}
 
-    private void failIfComponentsAreUnsupported(Collection<? extends ComponentJob> jobs)
-            throws UnsupportedOperationException {
-        for (ComponentJob job : jobs) {
-            final ComponentDescriptor<?> descriptor = job.getDescriptor();
-            if (descriptor instanceof BeanDescriptor) {
-                final BeanDescriptor<?> beanDescriptor = (BeanDescriptor<?>) descriptor;
-                final boolean distributable = beanDescriptor.isDistributable();
-                if (!distributable) {
-                    throw new UnsupportedOperationException("Component is not distributable: " + job);
-                }
-            } else {
-                throw new UnsupportedOperationException("Unsupported component type: " + descriptor);
-            }
-        }
-    }
+		final Table table = tables[0];
+
+		final RowProcessingPublisher publisher = publishers
+				.getRowProcessingPublisher(table);
+		return publisher;
+	}
+
+	private void failIfJobIsUnsupported(AnalysisJob job)
+			throws UnsupportedOperationException {
+		failIfComponentsAreUnsupported(job.getFilterJobs());
+		failIfComponentsAreUnsupported(job.getTransformerJobs());
+		failIfComponentsAreUnsupported(job.getAnalyzerJobs());
+	}
+
+	private void failIfComponentsAreUnsupported(
+			Collection<? extends ComponentJob> jobs)
+			throws UnsupportedOperationException {
+		for (ComponentJob job : jobs) {
+			final ComponentDescriptor<?> descriptor = job.getDescriptor();
+			if (descriptor instanceof BeanDescriptor) {
+				final BeanDescriptor<?> beanDescriptor = (BeanDescriptor<?>) descriptor;
+				final boolean distributable = beanDescriptor.isDistributable();
+				if (!distributable) {
+					throw new UnsupportedOperationException(
+							"Component is not distributable: " + job);
+				}
+			} else {
+				throw new UnsupportedOperationException(
+						"Unsupported component type: " + descriptor);
+			}
+		}
+	}
 
 }
