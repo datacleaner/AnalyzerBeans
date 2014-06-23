@@ -75,4 +75,8 @@ final class TestDatastore implements UpdateableDatastore, PerformanceCharacteris
         return true;
     }
 
+    @Override
+    public boolean isNaturalRecordOrderConsistent() {
+        return false;
+    }
 }

@@ -23,10 +23,12 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Strings;
+
 /**
  * Contains various utility methods regarding string handling.
  * 
- * @author Kasper Sørensen
+ * Consider using Guava's {@link Strings} instead.
  */
 public final class StringUtils {
 
@@ -104,7 +106,7 @@ public final class StringUtils {
 
         return toCamelCase(name);
     }
-    
+
     public static String getLongestCommonToken(Iterable<String> iterable, char tokenSeparatorChar) {
         Iterator<String> it = iterable.iterator();
         String commonToken = it.next();
@@ -119,9 +121,8 @@ public final class StringUtils {
         }
         return commonToken;
     }
-    
-    public static String getLongestCommonToken(String str1, String str2,
-            char tokenSeparatorChar) {
+
+    public static String getLongestCommonToken(String str1, String str2, char tokenSeparatorChar) {
         StringBuilder result = new StringBuilder();
         String[] tokens1 = str1.split("\\" + tokenSeparatorChar);
         String[] tokens2 = str2.split("\\" + tokenSeparatorChar);
@@ -135,5 +136,29 @@ public final class StringUtils {
             result.append(tokens1[i]);
         }
         return result.toString();
+    }
+
+    /**
+     * Utility method that will do replacement multiple times until no more
+     * occurrences are left.
+     * 
+     * Note that this is NOT the same as
+     * {@link String#replaceAll(String, String)} which will only do one
+     * run-through of the string, and it will use regexes instead of exact
+     * searching.
+     * 
+     * @param v
+     * @param searchToken
+     * @param replacement
+     * @return
+     */
+    public static String replaceAll(String v, String searchToken, String replacement) {
+        if (v == null) {
+            return v;
+        }
+        while (v.indexOf(searchToken) != -1) {
+            v = v.replace(searchToken, replacement);
+        }
+        return v;
     }
 }
