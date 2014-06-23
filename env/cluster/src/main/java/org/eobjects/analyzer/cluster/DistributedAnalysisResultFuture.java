@@ -67,6 +67,7 @@ public final class DistributedAnalysisResultFuture extends AbstractAnalysisResul
             for (AnalysisResultFuture result : _results) {
                 result.cancel();
             }
+            _cancelled = true;
         }
     }
 

@@ -19,11 +19,15 @@
  */
 package org.eobjects.analyzer.cluster.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,17 +56,70 @@ public class SlaveServletHelper {
 
     private final AnalyzerBeansConfiguration _configuration;
     private final SlaveJobInterceptor _jobInterceptor;
-    
+    private final ConcurrentMap<String, AnalysisResultFuture> _runningJobs;
+
+    /**
+     * 
+     * @param configuration
+     * @deprecated Use
+     *             {@link #SlaveServletHelper(AnalyzerBeansConfiguration, Map)}
+     *             instead.
+     */
+    @Deprecated
     public SlaveServletHelper(AnalyzerBeansConfiguration configuration) {
-        this(configuration, null);
+        this(configuration, new ConcurrentHashMap<String, AnalysisResultFuture>());
     }
 
+    /**
+     * Creates a {@link SlaveServletHelper}.
+     * 
+     * @param configuration
+     * @param runningJobsMap
+     *            a map to be used for internal book-keeping of running jobs.
+     *            This parameter is required so that multiple
+     *            {@link SlaveServletHelper}s can share the same running jobs
+     *            state.
+     */
+    public SlaveServletHelper(AnalyzerBeansConfiguration configuration,
+            ConcurrentMap<String, AnalysisResultFuture> runningJobsMap) {
+        this(configuration, null, runningJobsMap);
+    }
+
+    /**
+     * 
+     * @param configuration
+     * @param jobInterceptor
+     * 
+     * @deprecated use
+     *             {@link #SlaveServletHelper(AnalyzerBeansConfiguration, SlaveJobInterceptor, ConcurrentMap)}
+     *             instead
+     */
+    @Deprecated
     public SlaveServletHelper(AnalyzerBeansConfiguration configuration, SlaveJobInterceptor jobInterceptor) {
+        this(configuration, jobInterceptor, new ConcurrentHashMap<String, AnalysisResultFuture>());
+    }
+
+    /**
+     * Creates a {@link SlaveServletHelper}.
+     * 
+     * @param configuration
+     *            the slave's {@link AnalyzerBeansConfiguration}.
+     * @param jobInterceptor
+     *            an optional interceptor
+     * @param runningJobsMap
+     *            a map to be used for internal book-keeping of running jobs.
+     *            This parameter is required so that multiple
+     *            {@link SlaveServletHelper}s can share the same running jobs
+     *            state.
+     */
+    public SlaveServletHelper(AnalyzerBeansConfiguration configuration, SlaveJobInterceptor jobInterceptor,
+            ConcurrentMap<String, AnalysisResultFuture> runningJobsMap) {
         if (configuration == null) {
             throw new IllegalArgumentException("AnalyzerBeansConfiguration cannot be null");
         }
         _configuration = configuration;
         _jobInterceptor = jobInterceptor;
+        _runningJobs = runningJobsMap;
     }
 
     /**
@@ -71,9 +128,9 @@ public class SlaveServletHelper {
      * 
      * {@link #readJob(HttpServletRequest)}
      * 
-     * {@link #runJob(AnalysisJob)}
+     * {@link #runJob(AnalysisJob, String)}
      * 
-     * {@link #serializeResult(AnalysisResultFuture)}
+     * {@link #serializeResult(AnalysisResultFuture, String)}
      * 
      * {@link #sendResponse(HttpServletResponse, Serializable)}
      * 
@@ -82,32 +139,61 @@ public class SlaveServletHelper {
      * @throws IOException
      */
     public void handleRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-        AnalysisJob job;
-        try {
-            job = readJob(request);
-        } catch (IOException e) {
-            logger.error("Failed to read job definition from HTTP request", e);
-            throw e;
+        final String jobId = request.getParameter(HttpClusterManager.HTTP_PARAM_SLAVE_JOB_ID);
+        final String action = request.getParameter(HttpClusterManager.HTTP_PARAM_ACTION);
+
+        if (HttpClusterManager.ACTION_CANCEL.equals(action)) {
+            logger.info("Handling 'cancel' request: {}", jobId);
+            cancelJob(jobId);
+            return;
         }
 
-        final Serializable resultObject;
-        try {
-            final AnalysisResultFuture resultFuture = runJob(job);
-            resultObject = serializeResult(resultFuture);
-        } catch (RuntimeException e) {
-            logger.error("Unexpected error occurred while running slave job", e);
-            throw e;
+        if (HttpClusterManager.ACTION_RUN.equals(action)) {
+            logger.info("Handling 'run' request: {}", jobId);
+            
+            final AnalysisJob job;
+            try {
+                job = readJob(request);
+            } catch (IOException e) {
+                logger.error("Failed to read job definition from HTTP request", e);
+                throw e;
+            }
+            
+            final Serializable resultObject;
+            try {
+                final AnalysisResultFuture resultFuture = runJob(job, jobId);
+                resultObject = serializeResult(resultFuture, jobId);
+            } catch (RuntimeException e) {
+                logger.error("Unexpected error occurred while running slave job", e);
+                throw e;
+            }
+            
+            try {
+                sendResponse(response, resultObject);
+            } catch (IOException e) {
+                logger.error("Failed to send job result through HTTP response", e);
+                throw e;
+            }
+            
+            return;
         }
-
-        try {
-            sendResponse(response, resultObject);
-        } catch (IOException e) {
-            logger.error("Failed to send job result through HTTP response", e);
-            throw e;
-        }
+        
+        logger.warn("Unspecified action request: {}", jobId);
     }
 
+    /**
+     * 
+     * @param resultFuture
+     * @return
+     * @deprecated use {@link #serializeResult(AnalysisResultFuture, String)}
+     *             instead.
+     */
+    @Deprecated
     public Serializable serializeResult(AnalysisResultFuture resultFuture) {
+        return serializeResult(resultFuture, null);
+    }
+
+    public Serializable serializeResult(AnalysisResultFuture resultFuture, String slaveJobId) {
         // wait for result to be ready
         resultFuture.await();
 
@@ -117,12 +203,26 @@ public class SlaveServletHelper {
         } else {
             resultObject = new ArrayList<Throwable>(resultFuture.getErrors());
         }
+
+        if (slaveJobId != null) {
+            _runningJobs.remove(slaveJobId);
+        }
+
         return resultObject;
     }
 
     public AnalysisJob readJob(HttpServletRequest request) throws IOException {
         final JaxbJobReader reader = new JaxbJobReader(_configuration);
-        final ServletInputStream inputStream = request.getInputStream();
+        final String jobDefinition = request.getParameter(HttpClusterManager.HTTP_PARAM_JOB_DEF);
+
+        final InputStream inputStream;
+        if (jobDefinition == null) {
+            // backwards compatibility node
+            inputStream = request.getInputStream();
+        } else {
+            inputStream = new ByteArrayInputStream(jobDefinition.getBytes());
+        }
+
         try {
             final AnalysisJobBuilder jobBuilder = reader.create(inputStream);
             if (_jobInterceptor != null) {
@@ -135,10 +235,47 @@ public class SlaveServletHelper {
         }
     }
 
+    /**
+     * 
+     * @param job
+     * @return
+     * @deprecated use {@link #runJob(AnalysisJob, String)} instead
+     */
+    @Deprecated
     public AnalysisResultFuture runJob(AnalysisJob job) {
+        return runJob(job, null);
+    }
+
+    /**
+     * Runs a slave job
+     * 
+     * @param job
+     * @param slaveJobId
+     *            a unique ID for the slave job.
+     * @return
+     */
+    public AnalysisResultFuture runJob(AnalysisJob job, String slaveJobId) {
         final AnalysisRunner runner = new SlaveAnalysisRunner(_configuration);
         final AnalysisResultFuture resultFuture = runner.run(job);
+        if (slaveJobId != null) {
+            _runningJobs.put(slaveJobId, resultFuture);
+        }
         return resultFuture;
+    }
+
+    /**
+     * Cancels a slave job, referred by it's id.
+     * 
+     * @param slaveJobId
+     * @return whether or not the job was (found and) cancelled.
+     */
+    public boolean cancelJob(String slaveJobId) {
+        final AnalysisResultFuture resultFuture = _runningJobs.remove(slaveJobId);
+        if (resultFuture != null) {
+            resultFuture.cancel();
+            return true;
+        }
+        return false;
     }
 
     public void sendResponse(HttpServletResponse response, Serializable object) throws IOException {

@@ -20,6 +20,8 @@
 package org.eobjects.analyzer.cluster.http;
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
@@ -30,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 
 /**
  * A simple execution servlet to deploy on a slave node
@@ -43,6 +46,8 @@ public class SlaveServlet extends HttpServlet {
     @Inject
     AnalyzerBeansConfiguration _configuration;
 
+    private final ConcurrentMap<String, AnalysisResultFuture> _runningJobs;
+
     public SlaveServlet() {
         this(null);
     }
@@ -50,6 +55,7 @@ public class SlaveServlet extends HttpServlet {
     public SlaveServlet(AnalyzerBeansConfiguration configuration) {
         super();
         _configuration = configuration;
+        _runningJobs = new ConcurrentHashMap<String, AnalysisResultFuture>();
     }
 
     @Override
@@ -66,7 +72,7 @@ public class SlaveServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final SlaveServletHelper helper = new SlaveServletHelper(_configuration);
+        final SlaveServletHelper helper = new SlaveServletHelper(_configuration, _runningJobs);
         helper.handleRequest(req, resp);
     }
 }
