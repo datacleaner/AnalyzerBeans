@@ -22,37 +22,34 @@ package org.eobjects.analyzer.job.runner;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.PerformanceCharacteristics;
+import org.eobjects.analyzer.connection.PerformanceCharacteristicsImpl;
 
-public class MockDatastore implements Datastore, PerformanceCharacteristics {
+public class MockDatastore implements Datastore {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	public String getName() {
-		return "MockDatastore";
-	}
+    @Override
+    public String getName() {
+        return "MockDatastore";
+    }
 
-	@Override
-	public String getDescription() {
-		return null;
-	}
+    @Override
+    public String getDescription() {
+        return null;
+    }
 
-	@Override
-	public void setDescription(String description) {
-	}
+    @Override
+    public void setDescription(String description) {
+    }
 
-	@Override
-	public DatastoreConnection openConnection() {
-		return new MockDatastoreConnection();
-	}
+    @Override
+    public DatastoreConnection openConnection() {
+        return new MockDatastoreConnection();
+    }
 
-	@Override
-	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return this;
-	}
+    @Override
+    public PerformanceCharacteristics getPerformanceCharacteristics() {
+        return new PerformanceCharacteristicsImpl(true, true);
+    }
 
-	@Override
-	public boolean isQueryOptimizationPreferred() {
-		return true;
-	}
 }
