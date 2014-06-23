@@ -63,7 +63,7 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(true);
+        return new PerformanceCharacteristicsImpl(true, false);
     }
 
     @Override

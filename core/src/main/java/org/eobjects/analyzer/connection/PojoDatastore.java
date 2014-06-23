@@ -77,7 +77,7 @@ public class PojoDatastore implements UpdateableDatastore, Serializable {
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(false);
+        return new PerformanceCharacteristicsImpl(false, true);
     }
 
 }

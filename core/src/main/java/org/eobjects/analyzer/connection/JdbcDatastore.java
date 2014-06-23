@@ -266,7 +266,7 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(true);
+        return new PerformanceCharacteristicsImpl(true, false);
     }
 
     @Override

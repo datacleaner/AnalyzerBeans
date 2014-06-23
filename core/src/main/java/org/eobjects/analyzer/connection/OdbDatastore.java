@@ -61,7 +61,7 @@ public final class OdbDatastore extends UsageAwareDatastore<DataContext> impleme
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(true);
+		return new PerformanceCharacteristicsImpl(true, false);
 	}
 
 	@Override

@@ -21,20 +21,37 @@ package org.eobjects.analyzer.connection;
 
 /**
  * Simple implementation of the performance characteristics interface.
- * 
- * @author Kasper Sørensen
  */
 public final class PerformanceCharacteristicsImpl implements PerformanceCharacteristics {
 
-	private final boolean _queryOptimizationPreferred;
+    private final boolean _queryOptimizationPreferred;
+    private final boolean _naturalRecordOrderConsistent;
 
-	public PerformanceCharacteristicsImpl(boolean queryOptimizationPreferred) {
-		_queryOptimizationPreferred = queryOptimizationPreferred;
-	}
+    /**
+     * 
+     * @param queryOptimizationPreferred
+     * 
+     * @deprecated use {@link #PerformanceCharacteristicsImpl(boolean, boolean)}
+     *             instead.
+     */
+    @Deprecated
+    public PerformanceCharacteristicsImpl(boolean queryOptimizationPreferred) {
+        this(queryOptimizationPreferred, true);
+    }
 
-	@Override
-	public boolean isQueryOptimizationPreferred() {
-		return _queryOptimizationPreferred;
-	}
+    public PerformanceCharacteristicsImpl(boolean queryOptimizationPreferred, boolean naturalRecordOrderConsistent) {
+        _queryOptimizationPreferred = queryOptimizationPreferred;
+        _naturalRecordOrderConsistent = naturalRecordOrderConsistent;
+    }
+
+    @Override
+    public boolean isQueryOptimizationPreferred() {
+        return _queryOptimizationPreferred;
+    }
+
+    @Override
+    public boolean isNaturalRecordOrderConsistent() {
+        return _naturalRecordOrderConsistent;
+    }
 
 }

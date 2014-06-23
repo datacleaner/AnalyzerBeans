@@ -91,7 +91,7 @@ public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext>
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(true);
+        return new PerformanceCharacteristicsImpl(true, false);
     }
 
     @Override

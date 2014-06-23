@@ -28,8 +28,6 @@ import org.eobjects.metamodel.util.HasName;
  * 
  * Datastores are kept in the {@link AnalyzerBeansConfiguration}, or rather in
  * the {@link DatastoreCatalog}.
- * 
- * @author Kasper Sørensen
  */
 public interface Datastore extends Serializable, HasName {
 
