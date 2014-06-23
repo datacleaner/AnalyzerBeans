@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.cluster;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,6 +29,8 @@ import org.eobjects.analyzer.beans.filter.MaxRowsFilter.Category;
 import org.eobjects.analyzer.cluster.virtual.VirtualClusterManager;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -47,6 +50,8 @@ import org.eobjects.analyzer.job.runner.RowProcessingPublishers;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
+import org.eobjects.analyzer.util.StringUtils;
+import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
 import org.eobjects.metamodel.util.SharedExecutorService;
 import org.slf4j.Logger;
@@ -242,10 +247,19 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         logger.info("Building slave job {} with firstRow={} and maxRow={}", slaveJobIndex + 1, firstRow, maxRows);
 
         final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job);
+
         try {
+
             final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
             maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
             maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
+
+            final boolean naturalRecordOrderConsistent = jobBuilder.getDatastore().getPerformanceCharacteristics()
+                    .isNaturalRecordOrderConsistent();
+            if (!naturalRecordOrderConsistent) {
+                final InputColumn<?> orderColumn = findOrderByColumn(jobBuilder);
+                maxRowsFilter.getConfigurableBean().setOrderColumn(orderColumn);
+            }
 
             jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
 
@@ -256,6 +270,64 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         } finally {
             jobBuilder.close();
         }
+    }
+
+    /**
+     * Finds a source column which is appropriate for an ORDER BY clause in the
+     * generated paginated queries
+     * 
+     * @param jobBuilder
+     * @return
+     */
+    private InputColumn<?> findOrderByColumn(AnalysisJobBuilder jobBuilder) {
+        final Table sourceTable = jobBuilder.getSourceTables().get(0);
+
+        // preferred strategy: Use the primary key
+        final Column[] primaryKeys = sourceTable.getPrimaryKeys();
+        if (primaryKeys.length == 1) {
+            final Column primaryKey = primaryKeys[0];
+            final InputColumn<?> sourceColumn = jobBuilder.getSourceColumnByName(primaryKey.getName());
+            if (sourceColumn == null) {
+                jobBuilder.addSourceColumn(primaryKey);
+                logger.info("Added PK source column for ORDER BY clause on slave jobs: {}", sourceColumn);
+                return jobBuilder.getSourceColumnByName(primaryKey.getName());
+            } else {
+                logger.info("Using existing PK source column for ORDER BY clause on slave jobs: {}", sourceColumn);
+                return sourceColumn;
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Found {} primary keys, cannot select a single for ORDER BY clause on slave jobs: {}",
+                        primaryKeys.length, Arrays.toString(primaryKeys));
+            }
+        }
+
+        // secondary strategy: See if there's a source column called something
+        // like 'ID' or so, and use that.
+        final List<MetaModelInputColumn> sourceColumns = jobBuilder.getSourceColumns();
+        final String tableName = sourceTable.getName().toLowerCase();
+        for (final MetaModelInputColumn sourceColumn : sourceColumns) {
+            String name = sourceColumn.getName();
+            if (name != null) {
+                name = StringUtils.replaceWhitespaces(name, "");
+                name = StringUtils.replaceAll(name, "_", "");
+                name = StringUtils.replaceAll(name, "-", "");
+                name = name.toLowerCase();
+                if ("id".equals(name) || (tableName + "id").equals(name) || (tableName + "number").equals(name)
+                        || (tableName + "key").equals(name)) {
+                    logger.info("Using existing source column for ORDER BY clause on slave jobs: {}", sourceColumn);
+                    return sourceColumn;
+                }
+            }
+        }
+
+        // last resort: Pick any source column and sort on that (might not work
+        // if the column contains a lot of repeated values)
+        final MetaModelInputColumn sourceColumn = sourceColumns.get(0);
+        logger.warn(
+                "Couldn't pick a good source column for ORDER BY clause on slave jobs. Picking the first column: {}",
+                sourceColumn);
+        return sourceColumn;
     }
 
     private RowProcessingPublishers getRowProcessingPublishers(AnalysisJob job, LifeCycleHelper lifeCycleHelper) {

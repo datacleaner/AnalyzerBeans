@@ -94,7 +94,7 @@ public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implem
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
+		return new PerformanceCharacteristicsImpl(false, true);
 	}
 
 	@Override

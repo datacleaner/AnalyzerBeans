@@ -41,7 +41,7 @@ public class SugarCrmDatastore extends UsageAwareDatastore<SugarCrmDataContext> 
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(false);
+        return new PerformanceCharacteristicsImpl(false, true);
     }
 
     @Override

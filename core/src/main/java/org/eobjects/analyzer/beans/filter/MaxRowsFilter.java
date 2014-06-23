@@ -29,92 +29,115 @@ import org.eobjects.analyzer.beans.api.NumberProperty;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.metamodel.query.Query;
+import org.eobjects.metamodel.schema.Column;
 
 @FilterBean("Max rows")
 @Description("Sets a maximum number of rows to process.")
 @Categorized(FilterCategory.class)
-public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Category> {
+public class MaxRowsFilter implements
+		QueryOptimizedFilter<MaxRowsFilter.Category> {
 
-    public static enum Category {
-        VALID, INVALID
-    }
+	public static enum Category {
+		VALID, INVALID
+	}
 
-    @Configured
-    @NumberProperty(negative = false, zero = false)
-    @Description("The maximum number of rows to process.")
-    int maxRows = 1000;
+	@Configured
+	@NumberProperty(negative = false, zero = false)
+	@Description("The maximum number of rows to process.")
+	int maxRows = 1000;
 
-    @Configured
-    @NumberProperty(negative = false, zero = false)
-    @Description("The first row (aka 'offset') to process.")
-    int firstRow = 1;
+	@Configured
+	@NumberProperty(negative = false, zero = false)
+	@Description("The first row (aka 'offset') to process.")
+	int firstRow = 1;
 
-    private final AtomicInteger counter = new AtomicInteger();
+	@Configured(required = false)
+	@Description("Optional column to use for specifying dataset ordering. Use if consistent pagination is needed.")
+	InputColumn<?> orderColumn;
 
-    public MaxRowsFilter() {
-    }
+	private final AtomicInteger counter = new AtomicInteger();
 
-    public MaxRowsFilter(int firstRow, int maxRows) {
-        this();
-        this.firstRow = firstRow;
-        this.maxRows = maxRows;
-    }
+	public MaxRowsFilter() {
+	}
 
-    public void setMaxRows(int maxRows) {
-        this.maxRows = maxRows;
-    }
+	public MaxRowsFilter(int firstRow, int maxRows) {
+		this();
+		this.firstRow = firstRow;
+		this.maxRows = maxRows;
+	}
 
-    public int getMaxRows() {
-        return maxRows;
-    }
-    
-    public int getFirstRow() {
-        return firstRow;
-    }
-    
-    public void setFirstRow(int firstRow) {
-        this.firstRow = firstRow;
-    }
+	public void setMaxRows(int maxRows) {
+		this.maxRows = maxRows;
+	}
 
-    @Validate
-    public void validate() {
-        if (maxRows <= 0) {
-            throw new IllegalStateException("Max rows value must be a positive integer");
-        }
-        if (firstRow <= 0) {
-            throw new IllegalStateException("First row value must be a positive integer");
-        }
-    }
+	public int getMaxRows() {
+		return maxRows;
+	}
 
-    @Override
-    public Category categorize(InputRow inputRow) {
-        int count = counter.incrementAndGet();
-        if (count < firstRow || count >= maxRows + firstRow) {
-            return Category.INVALID;
-        }
-        return Category.VALID;
-    }
+	public int getFirstRow() {
+		return firstRow;
+	}
 
-    @Override
-    public boolean isOptimizable(Category category) {
-        // can only optimize the valid records
-        return category == Category.VALID;
-    }
+	public void setFirstRow(int firstRow) {
+		this.firstRow = firstRow;
+	}
 
-    @Override
-    public Query optimizeQuery(Query q, Category category) {
-        if (category == Category.VALID) {
-            q.setMaxRows(maxRows);
-            
-            if (firstRow > 1) {
-                q.setFirstRow(firstRow);
-            }
-        } else {
-            throw new IllegalStateException("Can only optimize the VALID max rows category");
-        }
-        return q;
-    }
+	public InputColumn<?> getOrderColumn() {
+		return orderColumn;
+	}
+
+	public void setOrderColumn(InputColumn<?> orderColumn) {
+		this.orderColumn = orderColumn;
+	}
+
+	@Validate
+	public void validate() {
+		if (maxRows <= 0) {
+			throw new IllegalStateException(
+					"Max rows value must be a positive integer");
+		}
+		if (firstRow <= 0) {
+			throw new IllegalStateException(
+					"First row value must be a positive integer");
+		}
+	}
+
+	@Override
+	public Category categorize(InputRow inputRow) {
+		int count = counter.incrementAndGet();
+		if (count < firstRow || count >= maxRows + firstRow) {
+			return Category.INVALID;
+		}
+		return Category.VALID;
+	}
+
+	@Override
+	public boolean isOptimizable(Category category) {
+		// can only optimize the valid records
+		return category == Category.VALID;
+	}
+
+	@Override
+	public Query optimizeQuery(Query q, Category category) {
+		if (category == Category.VALID) {
+			q.setMaxRows(maxRows);
+
+			if (firstRow > 1) {
+				q.setFirstRow(firstRow);
+			}
+
+			if (orderColumn != null) {
+				Column physicalColumn = orderColumn.getPhysicalColumn();
+				q.orderBy(physicalColumn);
+			}
+		} else {
+			throw new IllegalStateException(
+					"Can only optimize the VALID max rows category");
+		}
+		return q;
+	}
 
 }

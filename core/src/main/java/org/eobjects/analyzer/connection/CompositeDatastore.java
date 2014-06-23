@@ -31,46 +31,55 @@ import org.eobjects.metamodel.DataContextFactory;
 
 public final class CompositeDatastore extends UsageAwareDatastore<DataContext> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final List<? extends Datastore> _datastores;
+    private final List<? extends Datastore> _datastores;
 
-	public CompositeDatastore(String name, List<? extends Datastore> datastores) {
-		super(name);
-		_datastores = datastores;
-	}
+    public CompositeDatastore(String name, List<? extends Datastore> datastores) {
+        super(name);
+        _datastores = datastores;
+    }
 
-	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-		ReadObjectBuilder.create(this, CompositeDatastore.class).readObject(stream);
-	}
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        ReadObjectBuilder.create(this, CompositeDatastore.class).readObject(stream);
+    }
 
-	public List<? extends Datastore> getDatastores() {
-		return _datastores;
-	}
+    public List<? extends Datastore> getDatastores() {
+        return _datastores;
+    }
 
-	@Override
-	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
-		final List<DataContext> dataContexts = new ArrayList<DataContext>(_datastores.size());
-		final List<Closeable> closeables = new ArrayList<Closeable>(_datastores.size());
-		for (Datastore datastore : _datastores) {
-			final DatastoreConnection con = datastore.openConnection();
-			final DataContext dc = con.getDataContext();
-			closeables.add(con);
-			dataContexts.add(dc);
-		}
-		final Closeable[] closeablesArray = closeables.toArray(new Closeable[closeables.size()]);
-		return new DatastoreConnectionImpl<DataContext>(DataContextFactory.createCompositeDataContext(dataContexts), this,
-				closeablesArray);
-	}
+    @Override
+    protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
+        final List<DataContext> dataContexts = new ArrayList<DataContext>(_datastores.size());
+        final List<Closeable> closeables = new ArrayList<Closeable>(_datastores.size());
+        for (Datastore datastore : _datastores) {
+            final DatastoreConnection con = datastore.openConnection();
+            final DataContext dc = con.getDataContext();
+            closeables.add(con);
+            dataContexts.add(dc);
+        }
+        final Closeable[] closeablesArray = closeables.toArray(new Closeable[closeables.size()]);
+        return new DatastoreConnectionImpl<DataContext>(DataContextFactory.createCompositeDataContext(dataContexts),
+                this, closeablesArray);
+    }
 
-	@Override
-	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(true);
-	}
+    @Override
+    public PerformanceCharacteristics getPerformanceCharacteristics() {
+        boolean queryOptimizationPreferred = true;
+        boolean naturalRecordOrderConsistent = true;
+        for (Datastore datastore : _datastores) {
+            final PerformanceCharacteristics performanceCharacteristics = datastore.getPerformanceCharacteristics();
+            queryOptimizationPreferred = queryOptimizationPreferred
+                    && performanceCharacteristics.isQueryOptimizationPreferred();
+            naturalRecordOrderConsistent = naturalRecordOrderConsistent
+                    && performanceCharacteristics.isNaturalRecordOrderConsistent();
+        }
+        return new PerformanceCharacteristicsImpl(queryOptimizationPreferred, naturalRecordOrderConsistent);
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		super.decorateIdentity(identifiers);
-		identifiers.add(_datastores);
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        super.decorateIdentity(identifiers);
+        identifiers.add(_datastores);
+    }
 }

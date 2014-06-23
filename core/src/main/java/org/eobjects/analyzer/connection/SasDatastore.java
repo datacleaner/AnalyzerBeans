@@ -41,7 +41,7 @@ public class SasDatastore extends UsageAwareDatastore<DataContext> implements Fi
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
+		return new PerformanceCharacteristicsImpl(false, true);
 	}
 
 	@Override

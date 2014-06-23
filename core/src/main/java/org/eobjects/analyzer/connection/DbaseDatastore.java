@@ -60,7 +60,7 @@ public final class DbaseDatastore extends UsageAwareDatastore<DataContext> imple
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
+		return new PerformanceCharacteristicsImpl(false, true);
 	}
 
 	@Override
