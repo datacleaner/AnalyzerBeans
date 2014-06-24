@@ -9,7 +9,6 @@
 	<description>Additional environment modules for AnalyzerBeans. These modules provide more deployment options and adapters that make AnalyzerBeans utilize various environments.</description>
 	<packaging>pom</packaging>
 	<modules>
-		<module>mongodb</module>
 		<module>berkeleydb</module>
 		<module>h2</module>
 		<module>xml-config</module>
