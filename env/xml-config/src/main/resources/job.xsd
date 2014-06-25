@@ -52,8 +52,6 @@
 				minOccurs="0" maxOccurs="unbounded" />
 			<element name="filter" type="ab:filterType" minOccurs="0"
 				maxOccurs="unbounded" />
-			<element name="merged-outcome" type="ab:mergedOutcomeType"
-				minOccurs="0" maxOccurs="unbounded" />
 		</choice>
 	</complexType>
 
@@ -113,24 +111,6 @@
 				</documentation>
 			</annotation>
 		</attribute>
-	</complexType>
-
-	<complexType name="mergedOutcomeType">
-		<sequence>
-			<element name="outcome" minOccurs="2" maxOccurs="unbounded">
-				<complexType>
-					<sequence>
-						<element name="input" minOccurs="0" maxOccurs="unbounded"
-							type="ab:inputType" />
-					</sequence>
-					<attribute name="ref" type="token" use="required" />
-				</complexType>
-			</element>
-			<element name="output" minOccurs="0" maxOccurs="unbounded"
-				type="ab:outputType" />
-		</sequence>
-		<attribute name="id" use="required" type="token" />
-		<attribute name="name" type="string" use="optional" />
 	</complexType>
 
 	<complexType name="transformerType">

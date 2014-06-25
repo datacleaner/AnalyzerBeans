@@ -82,9 +82,6 @@ public class JaxbJobReaderTest extends TestCase {
 
         assertEquals(1, job.getTransformerJobs().size());
         assertEquals("email_std_1", job.getTransformerJobs().iterator().next().getName());
-
-        assertEquals(2, job.getMergedOutcomeJobs().size());
-        assertEquals("merge_1", job.getMergedOutcomeJobs().iterator().next().getName());
     }
 
     public void testReadMetadataFull() throws Exception {

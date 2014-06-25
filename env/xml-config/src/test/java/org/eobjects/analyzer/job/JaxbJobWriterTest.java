@@ -34,7 +34,6 @@ import org.easymock.EasyMock;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.dategap.DateGapAnalyzer;
 import org.eobjects.analyzer.beans.filter.NullCheckFilter;
-import org.eobjects.analyzer.beans.filter.NullCheckFilter.NullCheckCategory;
 import org.eobjects.analyzer.beans.filter.SingleWordFilter;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.standardize.EmailStandardizerTransformer;
@@ -48,7 +47,6 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
-import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.test.TestHelper;
@@ -150,7 +148,6 @@ public class JaxbJobWriterTest extends TestCase {
         EasyMock.expect(job.getSourceColumns()).andReturn(new ArrayList<InputColumn<?>>());
         EasyMock.expect(job.getTransformerJobs()).andReturn(new ArrayList<TransformerJob>());
         EasyMock.expect(job.getFilterJobs()).andReturn(new ArrayList<FilterJob>());
-        EasyMock.expect(job.getMergedOutcomeJobs()).andReturn(new ArrayList<MergedOutcomeJob>());
         EasyMock.expect(job.getAnalyzerJobs()).andReturn(new ArrayList<AnalyzerJob>());
 
         EasyMock.replay(job, ds);
@@ -225,19 +222,11 @@ public class JaxbJobWriterTest extends TestCase {
         FilterJobBuilder<SingleWordFilter, ValidationCategory> fjb2 = ajb.addFilter(SingleWordFilter.class);
         fjb2.addInputColumn(usernameColumn);
 
-        MergedOutcomeJobBuilder mergedOutcome = ajb.addMergedOutcomeJobBuilder();
-        mergedOutcome.addMergedOutcome(fjb1, NullCheckCategory.NULL).addInputColumn(fnCol);
-        mergedOutcome.addMergedOutcome(fjb2, ValidationCategory.INVALID).addInputColumn(usernameColumn);
-        MutableInputColumn<?> mergedColumn = mergedOutcome.getOutputColumns().get(0);
-        mergedColumn.setName("Merged output column (fn or username)");
-
         AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder2 = ajb.addAnalyzer(PatternFinderAnalyzer.class);
         makeCrossPlatformCompatible(patternFinder2);
-        patternFinder2.addInputColumn(mergedColumn);
 
         assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file5.xml");
 
-        mergedOutcome.setName("merge1");
         tjb.setName("trans1");
         fjb1.setName("fjb1");
         fjb2.setName("fjb2");

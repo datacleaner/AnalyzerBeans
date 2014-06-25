@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.beans.coalesce;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Categorized;
@@ -36,7 +37,7 @@ import org.eobjects.analyzer.data.InputRow;
         + "accurate or most recent observation, if multiple entries have been recorded in separate columns.")
 @Categorized({ FilterCategory.class })
 public class CoalesceMultipleFieldsTransformer implements Transformer<Object> {
-    
+
     @Configured
     InputColumn<?>[] _input;
 
@@ -53,6 +54,24 @@ public class CoalesceMultipleFieldsTransformer implements Transformer<Object> {
     public CoalesceMultipleFieldsTransformer(CoalesceUnit... units) {
         this();
         this._units = units;
+    }
+
+    /**
+     * Configures the transformer using the coalesce units provided
+     * 
+     * @param units
+     */
+    public void configureUsingCoalesceUnits(CoalesceUnit... units) {
+        List<InputColumn<?>> input = new ArrayList<InputColumn<?>>();
+        for (CoalesceUnit coalesceUnit : units) {
+            InputColumn<?>[] inputColumns = coalesceUnit.getInputColumns(null);
+            for (InputColumn<?> inputColumn : inputColumns) {
+                input.add(inputColumn);
+            }
+        }
+
+        _input = input.toArray(new InputColumn[input.size()]);
+        _units = units;
     }
 
     @Override
