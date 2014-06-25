@@ -24,33 +24,18 @@
 			<outcome category="INVALID" id="no_email" />
 		</filter>
 
-		<merged-outcome id="has_singleword_fn_or_email" name="merge_1">
-			<outcome ref="single_word_fn" />
-			<outcome ref="has_email" />
-		</merged-outcome>
-
 		<transformer name="email_std_1">
 			<descriptor ref="Email standardizer" />
 			<input ref="col_email" />
 			<output id="col_username" name="username" />
 			<output id="col_domain" name="domain" />
 		</transformer>
-
-		<merged-outcome id="has_merged_username" name="merge_2">
-			<outcome ref="has_email">
-				<input ref="col_email" />
-			</outcome>
-			<outcome ref="no_email">
-				<input ref="col_fn" />
-			</outcome>
-			<output id="merged_username" />
-		</merged-outcome>
 	</transformation>
 
 	<analysis>
-		<analyzer requires="has_merged_username" name="analyzer_1">
+		<analyzer requires="has_email" name="analyzer_1">
 			<descriptor ref="String analyzer" />
-			<input ref="merged_username" />
+			<input ref="col_username" />
 		</analyzer>
 	</analysis>
 

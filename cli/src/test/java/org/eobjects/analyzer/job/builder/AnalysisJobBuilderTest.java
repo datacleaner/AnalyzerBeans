@@ -165,7 +165,7 @@ public class AnalysisJobBuilderTest extends TestCase {
 		AnalysisJob analysisJob = analysisJobBuilder.toAnalysisJob();
 
 		assertEquals(
-				"ImmutableAnalysisJob[sourceColumns=3,filterJobs=0,transformerJobs=1,analyzerJobs=1,mergedOutcomeJobs=0]",
+		        "ImmutableAnalysisJob[sourceColumns=3,filterJobs=0,transformerJobs=1,analyzerJobs=1]",
 				analysisJob.toString());
 
 		// test hashcode and equals

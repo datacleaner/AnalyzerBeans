@@ -72,7 +72,7 @@ public class JaxbJobReaderTest extends TestCase {
     public void testReadComponentNames() throws Exception {
         JobReader<InputStream> reader = new JaxbJobReader(conf);
         AnalysisJob job = reader
-                .read(new FileInputStream(new File("src/test/resources/example-job-merged-outcome.xml")));
+                .read(new FileInputStream(new File("src/test/resources/example-job-component-names.xml")));
 
         assertEquals(1, job.getAnalyzerJobs().size());
         assertEquals("analyzer_1", job.getAnalyzerJobs().iterator().next().getName());

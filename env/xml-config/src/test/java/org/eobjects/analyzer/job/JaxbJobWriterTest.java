@@ -223,6 +223,8 @@ public class JaxbJobWriterTest extends TestCase {
         fjb2.addInputColumn(usernameColumn);
 
         AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder2 = ajb.addAnalyzer(PatternFinderAnalyzer.class);
+        patternFinder2.addInputColumn(tjb.getOutputColumns().get(1));
+        patternFinder2.setRequirement(fjb2, ValidationCategory.INVALID);
         makeCrossPlatformCompatible(patternFinder2);
 
         assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file5.xml");
