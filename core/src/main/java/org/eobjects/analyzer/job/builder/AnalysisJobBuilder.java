@@ -48,7 +48,6 @@ import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
@@ -84,14 +83,12 @@ public final class AnalysisJobBuilder implements Closeable {
     private final List<FilterJobBuilder<?, ?>> _filterJobBuilders;
     private final List<TransformerJobBuilder<?>> _transformerJobBuilders;
     private final List<AnalyzerJobBuilder<?>> _analyzerJobBuilders;
-    private final List<MergedOutcomeJobBuilder> _mergedOutcomeJobBuilders;
 
     // listeners, typically for UI that uses the builders
     private final List<SourceColumnChangeListener> _sourceColumnListeners = new ArrayList<SourceColumnChangeListener>();
     private final List<AnalyzerChangeListener> _analyzerChangeListeners = new ArrayList<AnalyzerChangeListener>();
     private final List<TransformerChangeListener> _transformerChangeListeners = new ArrayList<TransformerChangeListener>();
     private final List<FilterChangeListener> _filterChangeListeners = new ArrayList<FilterChangeListener>();
-    private final List<MergedOutcomeChangeListener> _mergedOutcomeChangeListeners = new ArrayList<MergedOutcomeChangeListener>();
     private Outcome _defaultRequirement;
 
     public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
@@ -101,7 +98,6 @@ public final class AnalysisJobBuilder implements Closeable {
         _filterJobBuilders = new ArrayList<FilterJobBuilder<?, ?>>();
         _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
         _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder<?>>();
-        _mergedOutcomeJobBuilders = new ArrayList<MergedOutcomeJobBuilder>();
     }
 
     /**
@@ -110,7 +106,7 @@ public final class AnalysisJobBuilder implements Closeable {
     private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, DatastoreConnection dataContextProvider,
             List<MetaModelInputColumn> sourceColumns, Outcome defaultRequirement, IdGenerator idGenerator,
             List<TransformerJobBuilder<?>> transformerJobBuilders, List<FilterJobBuilder<?, ?>> filterJobBuilders,
-            List<AnalyzerJobBuilder<?>> analyzerJobBuilders, List<MergedOutcomeJobBuilder> mergedOutcomeJobBuilders) {
+            List<AnalyzerJobBuilder<?>> analyzerJobBuilders) {
         _configuration = configuration;
         _datastoreConnection = dataContextProvider;
         _sourceColumns = sourceColumns;
@@ -119,7 +115,6 @@ public final class AnalysisJobBuilder implements Closeable {
         _filterJobBuilders = filterJobBuilders;
         _transformerJobBuilders = transformerJobBuilders;
         _analyzerJobBuilders = analyzerJobBuilders;
-        _mergedOutcomeJobBuilders = mergedOutcomeJobBuilders;
     }
 
     public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, AnalysisJob job) {
@@ -272,34 +267,6 @@ public final class AnalysisJobBuilder implements Closeable {
         return Collections.unmodifiableList(_sourceColumns);
     }
 
-    public MergedOutcomeJobBuilder addMergedOutcomeJobBuilder() {
-        MergedOutcomeJobBuilder mojb = new MergedOutcomeJobBuilder(this, _transformedColumnIdGenerator);
-        return addMergedOutcomeJobBuilder(mojb);
-    }
-
-    public MergedOutcomeJobBuilder addMergedOutcomeJobBuilder(MergedOutcomeJobBuilder mojb) {
-        _mergedOutcomeJobBuilders.add(mojb);
-
-        List<MergedOutcomeChangeListener> listeners = new ArrayList<MergedOutcomeChangeListener>(
-                _mergedOutcomeChangeListeners);
-        for (MergedOutcomeChangeListener listener : listeners) {
-            listener.onAdd(mojb);
-        }
-        return mojb;
-    }
-
-    public AnalysisJobBuilder removeMergedOutcomeJobBuilder(MergedOutcomeJobBuilder mojb) {
-        boolean removed = _mergedOutcomeJobBuilders.remove(mojb);
-        if (removed) {
-            mojb.onRemoved();
-        }
-        return this;
-    }
-
-    public List<MergedOutcomeJobBuilder> getMergedOutcomeJobBuilders() {
-        return Collections.unmodifiableList(_mergedOutcomeJobBuilders);
-    }
-
     public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(Class<T> transformerClass) {
         TransformerBeanDescriptor<T> descriptor = _configuration.getDescriptorProvider()
                 .getTransformerBeanDescriptorForClass(transformerClass);
@@ -360,12 +327,6 @@ public final class AnalysisJobBuilder implements Closeable {
             builder = addTransformer((TransformerBeanDescriptor<?>) componentJob.getDescriptor());
         } else if (componentJob instanceof AnalyzerJob) {
             builder = addAnalyzer((AnalyzerBeanDescriptor<?>) componentJob.getDescriptor());
-        } else if (componentJob instanceof MergedOutcomeJob) {
-            // special behaviour for merged outcomes - they're not configurable,
-            // except in terms of input columns and requirements
-            final MergedOutcomeJobBuilder mergedOutcomeJobBuilder = addMergedOutcomeJobBuilder();
-            mergedOutcomeJobBuilder.setName(componentJob.getName());
-            return mergedOutcomeJobBuilder;
         } else {
             throw new UnsupportedOperationException("Unknown component job type: " + componentJob);
         }
@@ -650,17 +611,6 @@ public final class AnalysisJobBuilder implements Closeable {
             }
         }
 
-        Collection<MergedOutcomeJob> mergedOutcomeJobs = new LinkedList<MergedOutcomeJob>();
-        for (MergedOutcomeJobBuilder mojb : _mergedOutcomeJobBuilders) {
-            try {
-                MergedOutcomeJob mergedOutcomeJob = mojb.toMergedOutcomeJob(validate);
-                mergedOutcomeJobs.add(mergedOutcomeJob);
-            } catch (IllegalStateException e) {
-                throw new IllegalStateException("Could not create merged outcome job from builder: " + mojb + ", ("
-                        + e.getMessage() + ")", e);
-            }
-        }
-
         Collection<TransformerJob> transformerJobs = new LinkedList<TransformerJob>();
         for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
             try {
@@ -687,8 +637,7 @@ public final class AnalysisJobBuilder implements Closeable {
 
         DatastoreConnection con = _datastoreConnection;
         Datastore datastore = con.getDatastore();
-        return new ImmutableAnalysisJob(datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs,
-                mergedOutcomeJobs);
+        return new ImmutableAnalysisJob(datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs);
     }
 
     /**
@@ -872,10 +821,6 @@ public final class AnalysisJobBuilder implements Closeable {
         return _analyzerChangeListeners;
     }
 
-    public List<MergedOutcomeChangeListener> getMergedOutcomeChangeListeners() {
-        return _mergedOutcomeChangeListeners;
-    }
-
     public List<TransformerChangeListener> getTransformerChangeListeners() {
         return _transformerChangeListeners;
     }
@@ -901,14 +846,13 @@ public final class AnalysisJobBuilder implements Closeable {
      */
     public void reset() {
         removeAllSourceColumns();
-        removeAllMergedOutcomes();
         removeAllFilters();
         removeAllTransformers();
         removeAllAnalyzers();
     }
 
     public void removeAllSourceColumns() {
-        List<MetaModelInputColumn> sourceColumns = new ArrayList<MetaModelInputColumn>(_sourceColumns);
+        final List<MetaModelInputColumn> sourceColumns = new ArrayList<MetaModelInputColumn>(_sourceColumns);
         for (MetaModelInputColumn inputColumn : sourceColumns) {
             removeSourceColumn(inputColumn);
         }
@@ -916,7 +860,7 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public void removeAllAnalyzers() {
-        List<AnalyzerJobBuilder<?>> analyzers = new ArrayList<AnalyzerJobBuilder<?>>(_analyzerJobBuilders);
+        final List<AnalyzerJobBuilder<?>> analyzers = new ArrayList<AnalyzerJobBuilder<?>>(_analyzerJobBuilders);
         for (AnalyzerJobBuilder<?> ajb : analyzers) {
             removeAnalyzer(ajb);
         }
@@ -924,7 +868,8 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public void removeAllTransformers() {
-        List<TransformerJobBuilder<?>> transformers = new ArrayList<TransformerJobBuilder<?>>(_transformerJobBuilders);
+        final List<TransformerJobBuilder<?>> transformers = new ArrayList<TransformerJobBuilder<?>>(
+                _transformerJobBuilders);
         for (TransformerJobBuilder<?> transformerJobBuilder : transformers) {
             removeTransformer(transformerJobBuilder);
         }
@@ -932,19 +877,11 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public void removeAllFilters() {
-        List<FilterJobBuilder<?, ?>> filters = new ArrayList<FilterJobBuilder<?, ?>>(_filterJobBuilders);
+        final List<FilterJobBuilder<?, ?>> filters = new ArrayList<FilterJobBuilder<?, ?>>(_filterJobBuilders);
         for (FilterJobBuilder<?, ?> filterJobBuilder : filters) {
             removeFilter(filterJobBuilder);
         }
         assert _filterJobBuilders.isEmpty();
-    }
-
-    public void removeAllMergedOutcomes() {
-        List<MergedOutcomeJobBuilder> mojbs = new ArrayList<MergedOutcomeJobBuilder>(_mergedOutcomeJobBuilders);
-        for (MergedOutcomeJobBuilder mergedOutcomeJobBuilder : mojbs) {
-            removeMergedOutcomeJobBuilder(mergedOutcomeJobBuilder);
-        }
-        assert _mergedOutcomeJobBuilders.isEmpty();
     }
 
     @Override
@@ -955,9 +892,9 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public AnalysisJobBuilder withoutListeners() {
-        AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _datastoreConnection, _sourceColumns,
+        final AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _datastoreConnection, _sourceColumns,
                 _defaultRequirement, _transformedColumnIdGenerator, _transformerJobBuilders, _filterJobBuilders,
-                _analyzerJobBuilders, _mergedOutcomeJobBuilders);
+                _analyzerJobBuilders);
         return clone;
     }
 }

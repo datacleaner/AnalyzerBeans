@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
@@ -35,8 +35,6 @@ import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
-import org.eobjects.analyzer.job.MergeInput;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.util.SourceColumnFinder;
@@ -68,7 +66,6 @@ final class AnalysisJobBuilderImportHelper {
         // map that translates original component jobs to their builder objects
         final Map<ComponentJob, Object> componentBuilders = new IdentityHashMap<ComponentJob, Object>();
         addComponentBuilders(job.getFilterJobs(), componentBuilders);
-        addComponentBuilders(job.getMergedOutcomeJobs(), componentBuilders);
         addComponentBuilders(job.getTransformerJobs(), componentBuilders);
         addComponentBuilders(job.getAnalyzerJobs(), componentBuilders);
 
@@ -86,24 +83,6 @@ final class AnalysisJobBuilderImportHelper {
                     final Outcome originalRequirement = requirements[0];
                     final Outcome requirement = findImportedRequirement(originalRequirement, componentBuilders);
                     builder.setRequirement(requirement);
-                }
-            } else if (componentJob instanceof MergedOutcomeJob) {
-                final MergedOutcomeJobBuilder builder = (MergedOutcomeJobBuilder) entry.getValue();
-                final MergedOutcomeJob mergedOutcomeJob = (MergedOutcomeJob) componentJob;
-                final MergeInput[] mergeInputs = mergedOutcomeJob.getMergeInputs();
-                for (MergeInput mergeInput : mergeInputs) {
-                    final Outcome requirement = findImportedRequirement(mergeInput.getOutcome(), componentBuilders);
-                    final MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(requirement);
-
-                    // we need to also build input columns here. There's a risk
-                    // that these input columns are not available (imported)
-                    // yet.
-                    final InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
-                    for (InputColumn<?> originalInputColumn : inputColumns) {
-                        final InputColumn<?> inputColumn = findImportedInputColumn(originalInputColumn,
-                                componentBuilders, sourceColumnFinder);
-                        mergedOutcomeBuilder.addInputColumn(inputColumn);
-                    }
                 }
             }
         }
@@ -189,9 +168,7 @@ final class AnalysisJobBuilderImportHelper {
                     + " in builder map: " + componentBuilders);
         }
 
-        if (builder instanceof MergedOutcomeJobBuilder) {
-            return ((MergedOutcomeJobBuilder) builder).getOutcomes()[0];
-        } else if (builder instanceof FilterJobBuilder<?, ?>) {
+        if (builder instanceof FilterJobBuilder<?, ?>) {
             final FilterOutcome filterOutcome = (FilterOutcome) originalRequirement;
             final Enum<?> category = filterOutcome.getCategory();
             return ((FilterJobBuilder<?, ?>) builder).getOutcome(category);

@@ -31,69 +31,60 @@ import org.eobjects.metamodel.util.BaseObject;
 
 public final class ImmutableAnalysisJob extends BaseObject implements AnalysisJob {
 
-	private final Datastore _datastore;
-	private final List<InputColumn<?>> _sourceColumns;
-	private final List<TransformerJob> _transformerJobs;
-	private final List<AnalyzerJob> _analyzerJobs;
-	private final List<FilterJob> _filterJobs;
-	private final List<MergedOutcomeJob> _mergedOutcomeJobs;
+    private final Datastore _datastore;
+    private final List<InputColumn<?>> _sourceColumns;
+    private final List<TransformerJob> _transformerJobs;
+    private final List<AnalyzerJob> _analyzerJobs;
+    private final List<FilterJob> _filterJobs;
 
-	public ImmutableAnalysisJob(Datastore datastore, Collection<? extends InputColumn<?>> sourceColumns,
-			Collection<FilterJob> filterJobs, Collection<TransformerJob> transformerJobs,
-			Collection<AnalyzerJob> analyzerJobs, Collection<MergedOutcomeJob> mergedOutcomeJobs) {
-		_datastore = datastore;
-		_sourceColumns = Collections.unmodifiableList(new ArrayList<InputColumn<?>>(sourceColumns));
-		_transformerJobs = Collections.unmodifiableList(new ArrayList<TransformerJob>(transformerJobs));
-		_analyzerJobs = Collections.unmodifiableList(new ArrayList<AnalyzerJob>(analyzerJobs));
-		_filterJobs = Collections.unmodifiableList(new ArrayList<FilterJob>(filterJobs));
-		_mergedOutcomeJobs = Collections.unmodifiableList(new ArrayList<MergedOutcomeJob>(mergedOutcomeJobs));
-	}
+    public ImmutableAnalysisJob(Datastore datastore, Collection<? extends InputColumn<?>> sourceColumns,
+            Collection<FilterJob> filterJobs, Collection<TransformerJob> transformerJobs,
+            Collection<AnalyzerJob> analyzerJobs) {
+        _datastore = datastore;
+        _sourceColumns = Collections.unmodifiableList(new ArrayList<InputColumn<?>>(sourceColumns));
+        _transformerJobs = Collections.unmodifiableList(new ArrayList<TransformerJob>(transformerJobs));
+        _analyzerJobs = Collections.unmodifiableList(new ArrayList<AnalyzerJob>(analyzerJobs));
+        _filterJobs = Collections.unmodifiableList(new ArrayList<FilterJob>(filterJobs));
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_datastore);
-		identifiers.add(_sourceColumns);
-		identifiers.add(_transformerJobs);
-		identifiers.add(_analyzerJobs);
-		identifiers.add(_filterJobs);
-		identifiers.add(_mergedOutcomeJobs);
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(_datastore);
+        identifiers.add(_sourceColumns);
+        identifiers.add(_transformerJobs);
+        identifiers.add(_analyzerJobs);
+        identifiers.add(_filterJobs);
+    }
 
-	@Override
-	public Datastore getDatastore() {
-		return _datastore;
-	}
-	
-	@Override
-	public List<InputColumn<?>> getSourceColumns() {
-		return _sourceColumns;
-	}
+    @Override
+    public Datastore getDatastore() {
+        return _datastore;
+    }
 
-	@Override
-	public List<TransformerJob> getTransformerJobs() {
-		return _transformerJobs;
-	}
+    @Override
+    public List<InputColumn<?>> getSourceColumns() {
+        return _sourceColumns;
+    }
 
-	@Override
-	public List<AnalyzerJob> getAnalyzerJobs() {
-		return _analyzerJobs;
-	}
+    @Override
+    public List<TransformerJob> getTransformerJobs() {
+        return _transformerJobs;
+    }
 
-	@Override
-	public List<FilterJob> getFilterJobs() {
-		return _filterJobs;
-	}
+    @Override
+    public List<AnalyzerJob> getAnalyzerJobs() {
+        return _analyzerJobs;
+    }
 
-	@Override
-	public List<MergedOutcomeJob> getMergedOutcomeJobs() {
-		return _mergedOutcomeJobs;
-	}
+    @Override
+    public List<FilterJob> getFilterJobs() {
+        return _filterJobs;
+    }
 
-	@Override
-	public String toString() {
-		return "ImmutableAnalysisJob[sourceColumns=" + _sourceColumns.size() + ",filterJobs=" + _filterJobs.size()
-				+ ",transformerJobs=" + _transformerJobs.size() + ",analyzerJobs=" + _analyzerJobs.size()
-				+ ",mergedOutcomeJobs=" + _mergedOutcomeJobs.size() + "]";
-	}
+    @Override
+    public String toString() {
+        return "ImmutableAnalysisJob[sourceColumns=" + _sourceColumns.size() + ",filterJobs=" + _filterJobs.size()
+                + ",transformerJobs=" + _transformerJobs.size() + ",analyzerJobs=" + _analyzerJobs.size() + "]";
+    }
 
 }

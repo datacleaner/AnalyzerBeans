@@ -44,8 +44,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Helper class for traversing dependencies between virtual and physical
  * columns.
- * 
- * @author Kasper Sørensen
  */
 public class SourceColumnFinder {
 
@@ -83,7 +81,6 @@ public class SourceColumnFinder {
         addSources(new SourceColumns(job.getSourceColumns()));
         addSources(job.getFilterJobBuilders());
         addSources(job.getTransformerJobBuilders());
-        addSources(job.getMergedOutcomeJobBuilders());
         addSources(job.getAnalyzerJobBuilders());
     }
 
@@ -91,7 +88,6 @@ public class SourceColumnFinder {
         addSources(new SourceColumns(job.getSourceColumns()));
         addSources(job.getFilterJobs());
         addSources(job.getTransformerJobs());
-        addSources(job.getMergedOutcomeJobs());
         addSources(job.getAnalyzerJobs());
     }
 

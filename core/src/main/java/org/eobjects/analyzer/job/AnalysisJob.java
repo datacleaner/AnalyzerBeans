@@ -71,13 +71,6 @@ public interface AnalysisJob {
     public List<FilterJob> getFilterJobs();
 
     /**
-     * Gets all {@link MergedOutcomeJob}s contained in this job.
-     * 
-     * @return
-     */
-    public List<MergedOutcomeJob> getMergedOutcomeJobs();
-
-    /**
      * Gets all {@link AnalyzerJob}s contained in this job.
      * 
      * @return

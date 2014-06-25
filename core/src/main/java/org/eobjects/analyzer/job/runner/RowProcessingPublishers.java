@@ -36,8 +36,6 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.MergeInput;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
@@ -52,7 +50,7 @@ import org.eobjects.metamodel.schema.Table;
  * {@link RowProcessingPublisher}s.
  */
 public final class RowProcessingPublishers {
-    
+
     private final AnalysisJob _analysisJob;
     private final AnalysisListener _analysisListener;
     private final TaskRunner _taskRunner;
@@ -82,9 +80,6 @@ public final class RowProcessingPublishers {
     private void initialize() {
         for (FilterJob filterJob : _analysisJob.getFilterJobs()) {
             registerRowProcessingPublishers(filterJob);
-        }
-        for (MergedOutcomeJob mergedOutcomeJob : _analysisJob.getMergedOutcomeJobs()) {
-            registerRowProcessingPublishers(mergedOutcomeJob);
         }
         for (TransformerJob transformerJob : _analysisJob.getTransformerJobs()) {
             registerRowProcessingPublishers(transformerJob);
@@ -201,25 +196,6 @@ public final class RowProcessingPublishers {
         return result.toArray(new InputColumn<?>[result.size()]);
     }
 
-    private void registerRowProcessingPublishers(MergedOutcomeJob mergedOutcomeJob) {
-        Collection<RowProcessingPublisher> publishers = _rowProcessingPublishers.values();
-        for (RowProcessingPublisher rowProcessingPublisher : publishers) {
-            boolean prerequisiteOutcomesExist = true;
-            MergeInput[] mergeInputs = mergedOutcomeJob.getMergeInputs();
-            for (MergeInput mergeInput : mergeInputs) {
-                Outcome prerequisiteOutcome = mergeInput.getOutcome();
-                if (!rowProcessingPublisher.containsOutcome(prerequisiteOutcome)) {
-                    prerequisiteOutcomesExist = false;
-                    break;
-                }
-            }
-
-            if (prerequisiteOutcomesExist) {
-                rowProcessingPublisher.addMergedOutcomeJob(mergedOutcomeJob);
-            }
-        }
-    }
-
     public int size() {
         return _rowProcessingPublishers.size();
     }
@@ -240,7 +216,7 @@ public final class RowProcessingPublishers {
     public AnalysisJobMetrics getAnalysisJobMetrics() {
         return new AnalysisJobMetricsImpl(_analysisJob, this);
     }
-    
+
     public SourceColumnFinder getSourceColumnFinder() {
         return _sourceColumnFinder;
     }
