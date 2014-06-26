@@ -67,8 +67,6 @@ import org.eobjects.analyzer.job.builder.AbstractBeanWithInputColumnsBuilder;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
-import org.eobjects.analyzer.job.builder.MergeInputBuilder;
-import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.AnalysisType;
 import org.eobjects.analyzer.job.jaxb.AnalyzerType;
@@ -81,7 +79,6 @@ import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
-import org.eobjects.analyzer.job.jaxb.MergedOutcomeType;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
@@ -461,7 +458,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         final TransformationType transformation = job.getTransformation();
         if (transformation != null) {
 
-            final List<Object> transformersAndFilters = transformation.getTransformerOrFilterOrMergedOutcome();
+            final List<Object> transformersAndFilters = transformation.getTransformerOrFilter();
 
             final Map<TransformerType, TransformerJobBuilder<?>> transformerJobBuilders = new HashMap<TransformerType, TransformerJobBuilder<?>>();
             final Map<FilterType, FilterJobBuilder<?, ?>> filterJobBuilders = new HashMap<FilterType, FilterJobBuilder<?, ?>>();
@@ -636,80 +633,6 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         outcomeMapping.put(id, filterJobBuilder.getOutcome(category));
                     }
                 }
-
-                if (o instanceof MergedOutcomeType) {
-                    MergedOutcomeType mergedOutcomeType = (MergedOutcomeType) o;
-                    String id = mergedOutcomeType.getId();
-                    if (StringUtils.isNullOrEmpty(id)) {
-                        throw new IllegalStateException("Outcome id cannot be null");
-                    }
-                    if (outcomeMapping.containsKey(id)) {
-                        throw new ComponentConfigurationException("Outcome id '" + id + "' is not unique");
-                    }
-
-                    MergedOutcomeJobBuilder mojb = analysisJobBuilder.addMergedOutcomeJobBuilder();
-                    mojb.setName(mergedOutcomeType.getName());
-                    outcomeMapping.put(id, new LazyMergedOutcome(mojb));
-                }
-            }
-
-            // iterate again to initialize all MergedOutcomes and collect all
-            // outcomes
-            for (Object o : transformersAndFilters) {
-                if (o instanceof MergedOutcomeType) {
-                    MergedOutcomeType mergedOutcomeType = (MergedOutcomeType) o;
-                    String id = mergedOutcomeType.getId();
-
-                    // we added this element during the previous iteration
-                    LazyMergedOutcome outcome = (LazyMergedOutcome) outcomeMapping.get(id);
-                    MergedOutcomeJobBuilder builder = outcome.getSourceJob();
-
-                    // map the input requirements and columns
-                    List<MergedOutcomeType.Outcome> mergedOutcomes = ((MergedOutcomeType) o).getOutcome();
-                    for (MergedOutcomeType.Outcome mergedOutcome : mergedOutcomes) {
-                        ref = mergedOutcome.getRef();
-                        if (StringUtils.isNullOrEmpty(ref)) {
-                            throw new IllegalStateException("Merged outcome ref cannot be null");
-                        }
-                        Outcome outcomeToMerge = outcomeMapping.get(ref);
-                        MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(outcomeToMerge);
-
-                        List<InputType> inputs = mergedOutcome.getInput();
-                        for (InputType inputType : inputs) {
-                            ref = inputType.getRef();
-                            InputColumn<?> inputColumn;
-                            if (StringUtils.isNullOrEmpty(ref)) {
-                                inputColumn = createExpressionBasedInputColumn(inputType);
-                            } else {
-                                inputColumn = inputColumns.get(ref);
-                                if (inputColumn == null) {
-                                    throw new ComponentConfigurationException("No such input column: " + ref);
-                                }
-                            }
-                            mergedOutcomeBuilder.addInputColumn(inputColumn);
-                        }
-                    }
-
-                    // map the output columns
-                    List<MutableInputColumn<?>> outputColumns = builder.getOutputColumns();
-
-                    List<OutputType> output = ((MergedOutcomeType) o).getOutput();
-
-                    assert output.size() == outputColumns.size();
-
-                    for (int i = 0; i < output.size(); i++) {
-                        OutputType outputType = output.get(i);
-                        MutableInputColumn<?> outputColumn = outputColumns.get(i);
-                        id = outputType.getId();
-                        String name = outputType.getName();
-
-                        if (!StringUtils.isNullOrEmpty(name)) {
-                            outputColumn.setName(name);
-                        }
-
-                        registerInputColumn(inputColumns, id, outputColumn);
-                    }
-                }
             }
 
             // iterate again to set up filter outcome dependencies
@@ -734,8 +657,6 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         }
                         builder.setRequirement(requirement);
                     }
-                } else if (o instanceof MergedOutcomeType) {
-                    // do nothing
                 } else {
                     throw new IllegalStateException("Unexpected transformation child element: " + o);
                 }

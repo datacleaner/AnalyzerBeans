@@ -42,7 +42,6 @@ import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.TransformerJob;
@@ -349,10 +348,6 @@ public final class RowProcessingPublisher {
 
     public void addFilterBean(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns) {
         addConsumer(new FilterConsumer(filter, filterJob, inputColumns, _publishers));
-    }
-
-    public void addMergedOutcomeJob(MergedOutcomeJob mergedOutcomeJob) {
-        addConsumer(new MergedOutcomeConsumer(mergedOutcomeJob, _publishers));
     }
 
     public boolean containsOutcome(Outcome prerequisiteOutcome) {

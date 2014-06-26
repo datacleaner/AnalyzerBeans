@@ -27,7 +27,6 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.util.SourceColumnFinder;
@@ -60,12 +59,6 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
     private static Set<OutcomeSinkJob> buildSourceJobsOfInputColumns(InputColumnSinkJob inputColumnSinkJob,
             SourceColumnFinder sourceColumnFinder) {
         final Set<OutcomeSinkJob> result = new HashSet<OutcomeSinkJob>();
-
-        if (inputColumnSinkJob instanceof MergedOutcomeJob) {
-            // merged outcome jobs are evaluated entirely on it's own
-            // requirements, not outside requirements.
-            return result;
-        }
 
         final Set<Object> sourceJobsOfInputColumns = sourceColumnFinder.findAllSourceJobs(inputColumnSinkJob);
         for (Iterator<Object> it = sourceJobsOfInputColumns.iterator(); it.hasNext();) {

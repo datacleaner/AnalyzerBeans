@@ -32,8 +32,6 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.MergeInput;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ForkTaskListener;
 import org.eobjects.analyzer.job.concurrent.JobCompletionTaskListener;
@@ -67,7 +65,6 @@ final class AnalysisRunnerJobDelegate {
     private final Collection<AnalyzerJob> _analyzerJobs;
     private final Collection<TransformerJob> _transformerJobs;
     private final Collection<FilterJob> _filterJobs;
-    private final Collection<MergedOutcomeJob> _mergedOutcomeJobs;
     private final SourceColumnFinder _sourceColumnFinder;
     private final boolean _includeNonDistributedTasks;
 
@@ -103,7 +100,6 @@ final class AnalysisRunnerJobDelegate {
 
         _transformerJobs = _job.getTransformerJobs();
         _filterJobs = _job.getFilterJobs();
-        _mergedOutcomeJobs = _job.getMergedOutcomeJobs();
 
         _analyzerJobs = _job.getAnalyzerJobs();
     }
@@ -127,7 +123,8 @@ final class AnalysisRunnerJobDelegate {
             final AnalysisJobMetrics analysisJobMetrics = publishers.getAnalysisJobMetrics();
 
             // A task listener that will register either succesfull executions
-            // or unexpected errors (which will be delegated to the errorListener)
+            // or unexpected errors (which will be delegated to the
+            // errorListener)
             JobCompletionTaskListener jobCompletionTaskListener = new JobCompletionTaskListener(analysisJobMetrics,
                     _analysisListener, 1);
 
@@ -135,7 +132,6 @@ final class AnalysisRunnerJobDelegate {
 
             validateSingleTableInput(_transformerJobs);
             validateSingleTableInput(_filterJobs);
-            validateSingleTableInputForMergedOutcomes(_mergedOutcomeJobs);
             validateSingleTableInput(_analyzerJobs);
 
             // at this point we are done validating the job, it will run.
@@ -177,30 +173,6 @@ final class AnalysisRunnerJobDelegate {
         for (RowProcessingPublisher rowProcessingPublisher : rowProcessingPublishers) {
             logger.debug("Scheduling row processing publisher: {}", rowProcessingPublisher);
             rowProcessingPublisher.runRowProcessing(_resultQueue, rowProcessorPublishersDoneCompletionListener);
-        }
-    }
-
-    private void validateSingleTableInputForMergedOutcomes(Collection<MergedOutcomeJob> mergedOutcomeJobs) {
-        Table originatingTable = null;
-
-        for (MergedOutcomeJob mergedOutcomeJob : mergedOutcomeJobs) {
-            MergeInput[] input = mergedOutcomeJob.getMergeInputs();
-            for (MergeInput mergeInput : input) {
-                InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
-                for (InputColumn<?> inputColumn : inputColumns) {
-                    Table currentTable = _sourceColumnFinder.findOriginatingTable(inputColumn);
-                    if (currentTable != null) {
-                        if (originatingTable == null) {
-                            originatingTable = currentTable;
-                        } else {
-                            if (!originatingTable.equals(currentTable)) {
-                                throw new IllegalArgumentException("Input columns in " + mergeInput
-                                        + " originate from different tables");
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
