@@ -30,7 +30,7 @@ import org.eobjects.metamodel.util.BaseObject;
  * Simple array/in-memory based implementation of the {@link ReferenceValues}
  * interface.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <E>
  *            the type of values

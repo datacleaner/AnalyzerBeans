@@ -36,8 +36,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Datastore implementation for CSV files.
- * 
- * @author Kasper Sørensen
  */
 public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore,
         ResourceDatastore, UpdateableDatastore {

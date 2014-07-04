@@ -29,7 +29,7 @@ import org.eobjects.metamodel.util.Func;
 /**
  * Default implementation of {@link WriteDataResult}.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class WriteDataResultImpl implements WriteDataResult {
 

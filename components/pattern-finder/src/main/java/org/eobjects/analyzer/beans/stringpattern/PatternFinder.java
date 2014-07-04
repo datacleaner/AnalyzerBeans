@@ -31,7 +31,7 @@ import java.util.Set;
  * patterns. It does not contain the actual logic to store/persist the rows, but
  * has callback methods so that it's rather easy to implement this on your own.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <R>
  *            the type representing the row. Enables the user of the class to

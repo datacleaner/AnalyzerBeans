@@ -41,7 +41,7 @@ import org.junit.Ignore;
  * difference in performance between the different collection provider
  * implementations.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @Ignore
 public class StorageProvidersBenchmarkTest extends TestCase {

@@ -28,9 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A mock implementation of the InputRow interface. Allows for adhoc generation
  * of a row using the put(...) method.
- * 
- * @author Kasper Sørensen
- * 
  */
 public class MockInputRow extends AbstractInputRow {
 

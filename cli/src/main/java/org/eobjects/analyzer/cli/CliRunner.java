@@ -63,8 +63,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Contains the execution logic to run a job from the command line.
- * 
- * @author Kasper Sørensen
  */
 public final class CliRunner implements Closeable {
 

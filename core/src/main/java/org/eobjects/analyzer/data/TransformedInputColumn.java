@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents an InputColumn that is a result of a transformer.
  * 
- * @author Kasper Sørensen
- * 
  * @param <E>
  */
 public class TransformedInputColumn<E> implements MutableInputColumn<E>, Serializable, Comparable<InputColumn<E>> {

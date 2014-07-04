@@ -31,7 +31,7 @@ import org.eobjects.metamodel.schema.Column;
  * Comparator for input columns. Physical columns will be ordered first, sorted
  * by their column numbers.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class InputColumnComparator implements Comparator<InputColumn<?>>, Serializable {
 

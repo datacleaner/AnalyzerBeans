@@ -46,8 +46,6 @@ import java.lang.annotation.Target;
  * @see FilterBean
  * @see TransformerBean
  * @see AnalyzerBean
- * 
- * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

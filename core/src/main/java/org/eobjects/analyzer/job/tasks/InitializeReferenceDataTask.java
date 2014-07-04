@@ -25,7 +25,7 @@ import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
  * Task that invokes initializing methods for reference data where this is
  * nescesary.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class InitializeReferenceDataTask implements Task {
 

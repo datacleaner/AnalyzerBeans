@@ -54,7 +54,7 @@ import org.eobjects.metamodel.schema.Column;
  * Tests that a job where one of the row processing consumers fail is gracefully
  * error handled.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class ErrorInRowProcessingConsumerTest extends TestCase {
 

@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * entirely able to gracefully deserialize. The user of the dictionary will have
  * to inject the DatastoreCatalog using the setter method for this.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class DatastoreDictionary extends AbstractReferenceData implements Dictionary {
 

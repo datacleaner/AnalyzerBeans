@@ -42,8 +42,6 @@ import org.eobjects.metamodel.util.FileHelper;
 
 /**
  * Attempts to convert anything to a String value.
- * 
- * @author Kasper Sørensen
  */
 @TransformerBean("Convert to string")
 @Description("Converts anything to a string (or null).")

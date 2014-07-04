@@ -44,7 +44,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
  * @see Initialize
  * @see Close
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface StringPattern extends ReferenceData {
 

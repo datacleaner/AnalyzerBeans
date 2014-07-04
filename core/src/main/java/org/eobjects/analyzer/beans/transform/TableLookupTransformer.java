@@ -63,8 +63,6 @@ import com.google.common.cache.Cache;
 /**
  * A transformer that can do a lookup (like a left join) based on a set of
  * columns in any datastore.
- * 
- * @author Kasper Sørensen
  */
 @TransformerBean("Table lookup")
 @Alias("Datastore lookup")

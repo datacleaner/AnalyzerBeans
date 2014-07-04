@@ -33,7 +33,7 @@ import org.eobjects.metamodel.schema.ColumnType;
  * matched in the current AnalyzerBeansConfiguration and that the source column
  * paths are present in that particular datastore.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface AnalysisJobMetadata {
 

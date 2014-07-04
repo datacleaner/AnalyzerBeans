@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * A very simple AnalyzerResult that simply holds a list of values
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <E>
  */

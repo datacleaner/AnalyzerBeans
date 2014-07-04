@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * @see Configured
  * @see Closeable
  * 
- * @author Kasper Sørensen
+ * 
  */
 class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements ComponentDescriptor<B> {
 

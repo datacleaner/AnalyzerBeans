@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * applcation can be deployed to: Embedded in a non-system classloader, a Java
  * Web Start classloader and running in a regular system classloader.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ClassLoaderUtils {
 

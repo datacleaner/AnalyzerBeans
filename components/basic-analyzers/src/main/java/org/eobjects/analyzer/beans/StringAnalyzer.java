@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An analyzer for various typical String measures.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @AnalyzerBean("String analyzer")
 @Description("The String analyzer is used to collect a variety of typical metrics on string values.\nMetrics include statistics on character case, words, diacritics, white-spaces and more...")

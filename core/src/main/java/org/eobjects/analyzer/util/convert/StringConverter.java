@@ -56,9 +56,6 @@ import org.slf4j.LoggerFactory;
  * <li>org.eobjects.metamodel.schema.Table</li>
  * <li>org.eobjects.metamodel.schema.Schema</li>
  * </ul>
- * 
- * @author Kasper Sørensen
- * @author Nancy Sharma
  */
 public final class StringConverter {
 

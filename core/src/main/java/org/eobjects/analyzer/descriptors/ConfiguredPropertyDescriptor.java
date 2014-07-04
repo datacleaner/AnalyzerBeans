@@ -30,7 +30,7 @@ import org.eobjects.analyzer.util.HasAliases;
  * 
  * @see Configured
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface ConfiguredPropertyDescriptor extends PropertyDescriptor, HasAliases {
 

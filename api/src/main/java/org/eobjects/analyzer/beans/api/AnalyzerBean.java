@@ -52,8 +52,6 @@ import java.lang.annotation.Target;
  * 
  * @see org.eobjects.analyzer.lifecycle.LifeCycleState
  * @see Concurrent
- * 
- * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

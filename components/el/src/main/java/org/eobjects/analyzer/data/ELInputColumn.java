@@ -37,7 +37,7 @@ import de.odysseus.el.util.SimpleContext;
  * value. This can be used as a lightweight alternative to eg. JavaScript
  * transformation.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class ELInputColumn extends AbstractExpressionBasedInputColumn<String> {
 

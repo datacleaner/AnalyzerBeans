@@ -25,7 +25,7 @@ package org.eobjects.analyzer.util;
  * 
  * 
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class Percentage extends Number {
 

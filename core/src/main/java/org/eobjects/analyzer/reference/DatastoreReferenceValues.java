@@ -38,7 +38,7 @@ import com.google.common.cache.Cache;
 /**
  * Reference values implementation based on a datastore column.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class DatastoreReferenceValues extends BaseObject implements ReferenceValues<String> {
 

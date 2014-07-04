@@ -27,9 +27,6 @@ import org.eobjects.analyzer.beans.api.OutputRowCollector;
  * This implementation holds a listener which recieves the values that are put
  * to the collector. Consumers should register a listener and remove it after
  * invocation.
- * 
- * @author Kasper Sørensen
- * @author Ankit Kumar
  */
 public class ThreadLocalOutputRowCollector implements OutputRowCollector {
 

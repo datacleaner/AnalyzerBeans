@@ -24,7 +24,7 @@ package org.eobjects.analyzer.beans.stringpattern;
  * on the users entered patterns, before any other pattern finding processing.
  * using a set of regular expressions and given a name.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  */
 public class PredefinedToken implements Token {

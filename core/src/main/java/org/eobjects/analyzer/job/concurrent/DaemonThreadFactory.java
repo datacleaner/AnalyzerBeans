@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * factory, except that it uses different thread naming and thread daemon
  * settings.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class DaemonThreadFactory implements ThreadFactory {
 

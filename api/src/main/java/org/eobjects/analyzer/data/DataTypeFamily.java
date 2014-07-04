@@ -49,8 +49,6 @@ import java.util.Date;
  * 
  * @see InputColumn
  * 
- * @author Kasper Sørensen
- * 
  * @deprecated {@link DataTypeFamily} is no longer sufficient for AnalyzerBeans'
  *             scope. The full Java type system will be used.
  */

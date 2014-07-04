@@ -37,7 +37,7 @@ import org.eobjects.metamodel.util.CollectionUtils;
  * 
  * @see CrosstabRendererCallback
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class CrosstabRenderer {
 

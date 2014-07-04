@@ -24,8 +24,6 @@ import org.eobjects.metamodel.UpdateableDataContext;
 
 /**
  * Represents a connection to a datastore that is updateable/writable.
- * 
- * @author Kasper Sørensen
  */
 public interface UpdateableDatastoreConnection extends DatastoreConnection {
 

@@ -32,7 +32,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * to progress notifications or errors occurring in the execution of the
  * analysis.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface AnalysisListener {
 

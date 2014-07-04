@@ -30,8 +30,6 @@ import org.eobjects.metamodel.DataContextFactory;
 
 /**
  * Datastore implementation for OpenOffice database files (.odb).
- * 
- * @author Kasper Sørensen
  */
 public final class OdbDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 

@@ -155,9 +155,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Configuration reader that uses the JAXB model to read XML file based
  * configurations for AnalyzerBeans.
- * 
- * @author Kasper Sørensen
- * @author Nancy Sharma
  */
 public final class JaxbConfigurationReader implements ConfigurationReader<InputStream> {
 

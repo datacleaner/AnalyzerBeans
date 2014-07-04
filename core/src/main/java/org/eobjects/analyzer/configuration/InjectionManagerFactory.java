@@ -25,8 +25,6 @@ import org.eobjects.analyzer.job.AnalysisJob;
  * Factory for {@link InjectionManager} instances. Since such instances
  * represent job-level context, they much be created individually for each job
  * execution.
- * 
- * @author Kasper Sørensen
  */
 public interface InjectionManagerFactory {
 

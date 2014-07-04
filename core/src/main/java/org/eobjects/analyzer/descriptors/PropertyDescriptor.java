@@ -32,7 +32,7 @@ import org.eobjects.metamodel.util.HasName;
  * A property exist within a component, which are described by the
  * {@link ComponentDescriptor} interface.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface PropertyDescriptor extends Comparable<PropertyDescriptor>, Serializable, HasName {
 

@@ -36,7 +36,7 @@ import org.eobjects.metamodel.util.BaseObject;
  * @see ImmutableFilterOutcome
  * @see LazyFilterOutcome
  * 
- * @author Kasper Sørensen
+ * 
  * 
  */
 public abstract class AbstractFilterOutcome extends BaseObject implements FilterOutcome {

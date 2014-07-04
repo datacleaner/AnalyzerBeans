@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * of a job. It will make sure that any @Initialize or @Close methods are called
  * before and after the job executes.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ReferenceDataActivationManager {
 

@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Provides a buffering mechanism that enables writing rows periodically instead
  * of instantly.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class WriteBuffer {
 

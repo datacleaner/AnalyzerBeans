@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * pertains to a different {@link ClassLoader}, then this classloader can be
  * added using the {@link #addClassLoader(ClassLoader)} method.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class ChangeAwareObjectInputStream extends ObjectInputStream {
 

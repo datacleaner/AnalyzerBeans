@@ -38,7 +38,7 @@ import org.eobjects.analyzer.data.InputRow;
 /**
  * Transformer for extracting elements from lists.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @TransformerBean("Read keys and values from map")
 @Description("Reads all key/value pairs of a map, creating a record for each pair")

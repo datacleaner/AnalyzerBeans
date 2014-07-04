@@ -57,7 +57,7 @@ import org.eobjects.analyzer.beans.api.Transformer;
  * &lt;/bean&gt;
  * </pre>
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class SimpleDescriptorProvider extends AbstractDescriptorProvider {
 

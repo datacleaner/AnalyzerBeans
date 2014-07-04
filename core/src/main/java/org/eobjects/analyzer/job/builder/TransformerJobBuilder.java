@@ -43,7 +43,7 @@ import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.StringUtils;
 
 /**
- * @author Kasper Sørensen
+ * 
  * 
  * @param <T>
  *            the transformer type being configured

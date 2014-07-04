@@ -32,9 +32,6 @@ import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
 
 /**
  * Datastore based on fixed width files
- * 
- * @author Kasper Sørensen
- * 
  */
 public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 

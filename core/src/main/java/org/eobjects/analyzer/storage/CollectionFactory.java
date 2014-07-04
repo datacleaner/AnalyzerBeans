@@ -29,7 +29,7 @@ import java.util.Set;
  * persistent storage strategy, making them safe to fill with even millions of
  * elements without running out of memory.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface CollectionFactory {
 

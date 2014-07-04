@@ -26,8 +26,6 @@ package org.eobjects.analyzer.data;
  * These columns can be used for various purposes, eg. to mark a filter outcome
  * in the data, to open jobs as templates, even though the new datastore is
  * missing some columns etc.
- * 
- * @author Kasper Sørensen
  */
 public final class ConstantInputColumn extends AbstractExpressionBasedInputColumn<String> {
 

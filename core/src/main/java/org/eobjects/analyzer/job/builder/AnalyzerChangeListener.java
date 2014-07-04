@@ -23,7 +23,7 @@ package org.eobjects.analyzer.job.builder;
  * Listener interface for receiving notifications that analyzers are being added
  * or removed from a job that is being built.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface AnalyzerChangeListener {
 

@@ -26,8 +26,6 @@ import org.eobjects.sassy.metamodel.SasDataContext;
 
 /**
  * Datastore implementation for directories with SAS datasets.
- * 
- * @author Kasper Sørensen
  */
 public class SasDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 

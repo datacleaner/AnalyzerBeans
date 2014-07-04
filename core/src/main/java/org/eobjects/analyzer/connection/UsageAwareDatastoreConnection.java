@@ -27,8 +27,6 @@ import org.eobjects.metamodel.DataContext;
  * times it has been acquired and closed. It encapsulates the closing logic,
  * making sure that it will only close if all usages of the datastore are
  * closed.
- * 
- * @author Kasper Sørensen
  */
 public abstract class UsageAwareDatastoreConnection<E extends DataContext> extends UsageAwareCloseable implements DatastoreConnection {
 

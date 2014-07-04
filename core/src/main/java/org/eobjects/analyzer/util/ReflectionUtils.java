@@ -48,7 +48,7 @@ import com.googlecode.gentyref.GenericTypeReflector;
 /**
  * Various static methods for reflection related tasks.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ReflectionUtils {
 

@@ -27,7 +27,7 @@ import org.eobjects.analyzer.data.MutableInputColumn;
  * Listener interface for receiving notifications when transformers are being
  * added, removed or modified in a way which changes their output.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface TransformerChangeListener {
 

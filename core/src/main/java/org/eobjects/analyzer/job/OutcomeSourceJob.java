@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job;
 /**
  * Interface for job objects that generates outcomes.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface OutcomeSourceJob {
 

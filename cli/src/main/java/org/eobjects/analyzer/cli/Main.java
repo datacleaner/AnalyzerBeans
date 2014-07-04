@@ -25,8 +25,6 @@ import org.eobjects.metamodel.util.FileHelper;
 
 /**
  * Main class for the AnalyzerBeans Command-line interface (CLI).
- * 
- * @author Kasper Sørensen
  */
 public final class Main {
 

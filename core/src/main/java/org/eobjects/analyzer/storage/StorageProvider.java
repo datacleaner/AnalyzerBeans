@@ -27,7 +27,7 @@ import java.util.Set;
  * Configurable component which provides cached/persistent storage for
  * collections and other types that are needed during execution.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface StorageProvider {
 

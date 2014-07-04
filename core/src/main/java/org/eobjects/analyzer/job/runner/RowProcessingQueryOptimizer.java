@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * Optimizer that will apply possible optimizations coming from
  * {@link QueryOptimizedFilter} instances in the job.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class RowProcessingQueryOptimizer {
 

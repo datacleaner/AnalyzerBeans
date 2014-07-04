@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * AnalysisListener used for DEBUG level logging. This listener is obviously
  * very verbose.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class DebugLoggingAnalysisListener implements AnalysisListener {
 

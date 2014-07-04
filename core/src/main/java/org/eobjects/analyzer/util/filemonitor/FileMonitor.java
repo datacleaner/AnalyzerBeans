@@ -22,8 +22,6 @@ package org.eobjects.analyzer.util.filemonitor;
 /**
  * A monitoring mechanism for file change events. Typically used by file-based
  * reference data to monitor changes to the reference data files.
- * 
- * @author Kasper Sørensen
  */
 public interface FileMonitor {
 

@@ -33,7 +33,7 @@ import org.eobjects.analyzer.util.ReadObjectBuilder;
  * Using entire string matching or subsequence matching. This mode is determined
  * using the <code>matchEntireString</code> property.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class RegexStringPattern extends AbstractReferenceData implements StringPattern {
 

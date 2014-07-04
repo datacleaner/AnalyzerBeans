@@ -32,8 +32,6 @@ import org.eobjects.metamodel.DataContext;
  * 
  * {@link DatastoreConnection}s should be closed using the {@link #close()}
  * method.
- * 
- * @author Kasper Sørensen
  */
 public interface DatastoreConnection extends Closeable {
 

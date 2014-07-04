@@ -30,7 +30,7 @@ import java.util.TreeSet;
 /**
  * Represents a timeline of some entity. A timeline contains several intervals.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class TimeLine implements Serializable {
 

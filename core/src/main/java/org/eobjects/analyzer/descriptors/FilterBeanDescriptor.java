@@ -27,7 +27,7 @@ import org.eobjects.analyzer.beans.api.Filter;
 /**
  * Descriptor interface for {@link Filter}s.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  */

@@ -39,10 +39,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Transformer for building lists based on values in a row.
- * 
- * @author Kasper Sørensen
- * @author Shekhar Gulati
- * @author Saurabh Gupta
  */
 @TransformerBean("Build list")
 @Description("Build a list containing a variable amount of elements. Adds the capability to save multiple values in a single field.")

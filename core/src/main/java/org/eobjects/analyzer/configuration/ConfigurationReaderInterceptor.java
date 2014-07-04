@@ -24,8 +24,6 @@ import org.eobjects.metamodel.util.Resource;
 /**
  * Defines an interface that allows for interception, decoration and other
  * handling of configuration building.
- * 
- * @author Kasper Sørensen
  */
 public interface ConfigurationReaderInterceptor {
 

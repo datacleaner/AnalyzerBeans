@@ -30,7 +30,7 @@ import org.eobjects.analyzer.util.ReadObjectBuilder;
  * The simplest possible Dictionary implementation. Based on an in-memory set of
  * values.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class SimpleDictionary extends AbstractReferenceData implements Dictionary {
 

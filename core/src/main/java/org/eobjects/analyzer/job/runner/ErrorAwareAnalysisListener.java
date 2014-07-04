@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * AnalysisListener that will register errors
  * 
- * @author Kasper Sørensen
+ * 
  */
 final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
 

@@ -29,8 +29,6 @@ import org.eobjects.metamodel.DataContextFactory;
 
 /**
  * Datastore implementation for dBase databases.
- * 
- * @author Kasper Sørensen
  */
 public final class DbaseDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 

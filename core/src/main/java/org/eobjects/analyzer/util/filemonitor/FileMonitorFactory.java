@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Factory that creates file monitors.
- * 
- * @author Kasper Sørensen
  */
 public class FileMonitorFactory {
 

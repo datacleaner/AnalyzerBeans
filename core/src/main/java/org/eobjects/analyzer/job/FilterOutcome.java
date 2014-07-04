@@ -24,7 +24,7 @@ package org.eobjects.analyzer.job;
  * 
  * @see FilterJob
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface FilterOutcome extends Outcome {
 

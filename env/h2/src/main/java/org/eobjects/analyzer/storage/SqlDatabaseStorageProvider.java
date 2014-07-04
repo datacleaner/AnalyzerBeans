@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Abstract class for storage providers that use an SQL database as a backend to
  * store values.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public abstract class SqlDatabaseStorageProvider implements StorageProvider {
 

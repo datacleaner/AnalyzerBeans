@@ -28,8 +28,6 @@ import org.kohsuke.args4j.Option;
 
 /**
  * Defines the Command-line arguments. These are populated by the CLI parser.
- * 
- * @author Kasper Sørensen
  */
 public class CliArguments {
 

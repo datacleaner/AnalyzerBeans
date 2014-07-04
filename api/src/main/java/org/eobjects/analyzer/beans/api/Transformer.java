@@ -51,8 +51,6 @@ import org.eobjects.analyzer.data.InputRow;
  * @see OutputRowCollector
  * @see OutputColumns
  * 
- * @author Kasper Sørensen
- * 
  * @param <E>
  *            the type of the new/transformed values
  */

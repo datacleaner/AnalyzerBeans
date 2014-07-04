@@ -26,8 +26,6 @@ import org.eobjects.metamodel.UpdateableDataContext;
  * implementations.
  * 
  * @see DatastoreConnectionLease
- * 
- * @author Kasper Sørensen
  */
 public class UpdateableDatastoreConnectionLease extends DatastoreConnectionLease implements UpdateableDatastoreConnection {
 

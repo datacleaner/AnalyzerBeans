@@ -32,7 +32,7 @@ import org.eobjects.analyzer.util.CharIterator;
  * for a single column. The String Analyzer then consists of a number of these
  * delegates.
  * 
- * @author Kasper Sørensen
+ * 
  */
 final class StringAnalyzerColumnDelegate {
 

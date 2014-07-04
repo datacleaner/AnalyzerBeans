@@ -47,7 +47,7 @@ import org.eobjects.metamodel.util.SerializableRef;
  * annotated with the {@link Description} annotation to provide a labeling
  * description, used often in rendering.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class AnnotatedRowsResult implements AnalyzerResult, TableModelResult {
 

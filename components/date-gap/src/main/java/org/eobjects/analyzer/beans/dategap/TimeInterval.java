@@ -29,7 +29,7 @@ import org.eobjects.analyzer.util.CompareUtils;
  * and to) in time can also be infinite, meaning that they span from "the past"
  * to a point in time or from a point in time to "the future".
  * 
- * @author Kasper Sørensen
+ * 
  * 
  */
 public class TimeInterval implements Serializable, Comparable<TimeInterval>, Cloneable {

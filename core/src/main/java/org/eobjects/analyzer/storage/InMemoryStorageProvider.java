@@ -31,7 +31,7 @@ import java.util.Set;
  * This implementation is prone to out of memory errors, but is on the other
  * hand very quick for small jobs.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class InMemoryStorageProvider implements StorageProvider {
 

@@ -26,7 +26,7 @@ import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
  * Task listener that calls closing methods for reference data where this is
  * nescesary.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class CloseReferenceDataTaskListener implements TaskListener {
 

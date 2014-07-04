@@ -31,7 +31,7 @@ import org.eobjects.analyzer.beans.api.Validate;
  * 
  * @see Validate
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface ValidateMethodDescriptor extends Serializable {
 

@@ -29,7 +29,7 @@ import org.eobjects.analyzer.result.renderer.Renderable;
  * 
  * @see RendererBean
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  *            the Bean type

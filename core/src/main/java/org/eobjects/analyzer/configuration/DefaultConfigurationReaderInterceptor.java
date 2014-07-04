@@ -36,8 +36,6 @@ import org.eobjects.metamodel.util.Resource;
  * Defines a default implementation of the
  * {@link ConfigurationReaderInterceptor} interface. This implementation does
  * not intercept or perform any special treatment when invoked.
- * 
- * @author Kasper Sørensen
  */
 public class DefaultConfigurationReaderInterceptor implements ConfigurationReaderInterceptor {
 

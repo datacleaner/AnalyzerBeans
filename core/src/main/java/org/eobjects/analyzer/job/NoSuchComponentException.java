@@ -26,7 +26,7 @@ import org.eobjects.analyzer.descriptors.DescriptorProvider;
  * unexisting component, such as an analyzer or transformer name which is not
  * resolved using the {@link DescriptorProvider}.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class NoSuchComponentException extends RuntimeException {
 

@@ -28,8 +28,6 @@ import javax.inject.Inject;
  * Defines an injection point in an AnalyzerBeans component. An injection point
  * is typically derived from the {@link Inject} annotation
  * 
- * @author Kasper Sørensen
- * 
  * @param <E>
  */
 public interface InjectionPoint<E> {

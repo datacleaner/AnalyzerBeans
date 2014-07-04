@@ -27,8 +27,6 @@ import org.eobjects.analyzer.beans.api.Transformer;
  * Component that manages injections made into components such as
  * {@link Analyzer}s, {@link Transformer}, {@link Filter}s, custom components
  * and more.
- * 
- * @author Kasper Sørensen
  */
 public interface InjectionManager {
 

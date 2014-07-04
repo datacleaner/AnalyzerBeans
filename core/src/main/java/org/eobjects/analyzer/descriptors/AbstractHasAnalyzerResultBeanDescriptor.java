@@ -30,7 +30,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * Abstract implementation of the {@link HasAnalyzerResultBeanDescriptor}
  * interface. Convenient for implementing it's subclasses.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  */

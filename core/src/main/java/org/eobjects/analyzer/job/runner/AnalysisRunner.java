@@ -33,7 +33,7 @@ import org.eobjects.analyzer.job.AnalysisJob;
  * that it is a reference to a future result. You can use the future to ask if
  * the result is ready or it is possible to wait/block untill it is done.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface AnalysisRunner {
 

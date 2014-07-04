@@ -23,7 +23,7 @@ package org.eobjects.analyzer.job;
  * Exception thrown in case a job is being opened and it references an
  * unexisting column in the datastore.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class NoSuchColumnException extends RuntimeException {
 

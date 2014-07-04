@@ -30,8 +30,6 @@ import org.slf4j.LoggerFactory;
  * A datastore connection lease that ensures that the connection can only be
  * closed once by a particular user. The underlying (delegated) connection can
  * thus be shared safely without risking premature closing by other parties.
- * 
- * @author Kasper Sørensen
  */
 public class DatastoreConnectionLease implements DatastoreConnection {
 

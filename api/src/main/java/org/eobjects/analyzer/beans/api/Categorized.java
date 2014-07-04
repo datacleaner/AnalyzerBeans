@@ -28,8 +28,6 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation used to assign a set of categories to a component.
- * 
- * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })

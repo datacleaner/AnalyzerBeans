@@ -29,7 +29,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * results. Mostly used for testing (or result types that implement a meaningful
  * toString() method.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @RendererBean(TextRenderingFormat.class)
 public class DefaultTextRenderer implements Renderer<AnalyzerResult, String> {

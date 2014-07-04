@@ -32,7 +32,7 @@ import org.eobjects.analyzer.util.HasAliases;
  * that support configured properties, provided properties, initialize methods
  * and close methods.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  *            the Bean type

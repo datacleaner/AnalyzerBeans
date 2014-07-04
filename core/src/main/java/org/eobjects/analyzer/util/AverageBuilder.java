@@ -42,7 +42,7 @@ package org.eobjects.analyzer.util;
  * Note that this class is NOT thread-safe, so do not share an instance between
  * threads (or at least make sure to synchronize).
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class AverageBuilder {
 

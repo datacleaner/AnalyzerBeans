@@ -46,9 +46,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Datastore implementation for JDBC based connections. Connections can either
  * be based on JDBC urls or JNDI urls.
- * 
- * @author Kasper Sørensen
- * 
  */
 public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> implements UpdateableDatastore, UsernameDatastore {
 

@@ -32,8 +32,6 @@ import org.eobjects.metamodel.util.HasName;
  * 
  * @see DataTypeFamily
  * 
- * @author Kasper Sørensen
- * 
  * @param <E>
  *            the data type of the column. See <code>DataTypeFamily</code> for
  *            available values.

@@ -41,7 +41,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * If the analysis was only partly errornous, there may be both result and
  * errors, but isSuccesful() will return false.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface AnalysisResultFuture extends ErrorAware, AnalysisResult {
 

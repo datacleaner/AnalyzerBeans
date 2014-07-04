@@ -30,7 +30,7 @@ import org.eobjects.analyzer.job.Outcome;
 /**
  * Interface for objects that recieve rows from the RowProcessingPublisher.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface RowProcessingConsumer {
     

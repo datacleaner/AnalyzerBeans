@@ -33,8 +33,6 @@ import org.eobjects.analyzer.data.InputRow;
  * filter functionality to be pushed down to the query in certain circumstances
  * where it is desirable to do so.
  * 
- * @author Kasper Sørensen
- * 
  * @param <C>
  *            an enum type with the available categories
  */

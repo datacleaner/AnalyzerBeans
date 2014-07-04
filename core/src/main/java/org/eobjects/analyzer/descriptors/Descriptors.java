@@ -28,7 +28,7 @@ import org.eobjects.analyzer.beans.api.Transformer;
  * Contains static factory and utility methods for descriptors within this
  * package.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class Descriptors {
 

@@ -25,8 +25,6 @@ import java.util.List;
 
 /**
  * Abstract implementation of the InputRow.
- * 
- * @author Kasper Sørensen
  */
 public abstract class AbstractInputRow implements InputRow {
 

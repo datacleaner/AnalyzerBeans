@@ -30,7 +30,7 @@ import org.mozilla.javascript.ScriptableObject;
 /**
  * Various utility methods for dealing with JavaScript (Mozilla Rhino)
  * 
- * @author Kasper Sørensen
+ * 
  */
 final class JavaScriptUtils {
 

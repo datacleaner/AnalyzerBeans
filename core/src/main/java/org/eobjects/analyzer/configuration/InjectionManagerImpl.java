@@ -47,8 +47,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Simple injection manager implementation, which is aware of catalogs used
  * within the {@link AnalyzerBeansConfiguration}, but not anymore.
- * 
- * @author Kasper Sørensen
  */
 public class InjectionManagerImpl implements InjectionManager {
 

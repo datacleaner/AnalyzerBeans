@@ -38,7 +38,7 @@ import com.google.common.cache.CacheBuilder;
  * Additional (to {@link CollectionUtils} utility methods for common collection
  * or array operations.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class CollectionUtils2 {
 

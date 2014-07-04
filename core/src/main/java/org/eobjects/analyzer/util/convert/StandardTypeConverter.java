@@ -68,9 +68,6 @@ import org.slf4j.LoggerFactory;
  * 
  * If given a {@link Serializable} type it will also attempt serializing it to a
  * byte-array string.
- * 
- * @author Kasper Sørensen
- * 
  */
 public class StandardTypeConverter implements Converter<Object> {
 

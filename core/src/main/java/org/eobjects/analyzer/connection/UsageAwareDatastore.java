@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
  * UsageAwareDataContextProvider when posssible.
  * 
  * @see UsageAwareDatastoreConnection
- * 
- * @author Kasper Sørensen
  */
 public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObject implements Datastore {
 

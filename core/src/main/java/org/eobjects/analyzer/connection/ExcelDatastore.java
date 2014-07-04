@@ -33,8 +33,6 @@ import org.eobjects.metamodel.util.SerializableRef;
 
 /**
  * Datastore implementation for Excel spreadsheets.
- * 
- * @author Kasper Sørensen
  */
 public final class ExcelDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore,
         ResourceDatastore, UpdateableDatastore {

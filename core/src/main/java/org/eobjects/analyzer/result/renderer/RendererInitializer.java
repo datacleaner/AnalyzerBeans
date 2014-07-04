@@ -26,7 +26,7 @@ import org.eobjects.analyzer.descriptors.RendererBeanDescriptor;
  * Callback interface allowing to initialize renderers before any actions are
  * performed on them.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface RendererInitializer {
 

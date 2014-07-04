@@ -21,8 +21,6 @@ package org.eobjects.analyzer.result;
 
 /**
  * Super-interface for all types that has an {@link AnalyzerResult}.
- * 
- * @author Kasper Sørensen
  *
  * @param <R> the type of {@link AnalyzerResult} contained.
  */

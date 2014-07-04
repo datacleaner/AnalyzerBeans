@@ -38,7 +38,7 @@ import org.eobjects.analyzer.test.TestHelper;
  * Ticket #383: Error handling when a job has been errornously configured - the
  * input columns of a transformer originate from different tables
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class InputColumnsFromDifferentTablesTest extends TestCase {
 

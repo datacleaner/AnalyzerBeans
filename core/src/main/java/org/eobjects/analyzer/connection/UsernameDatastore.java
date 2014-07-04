@@ -21,8 +21,6 @@ package org.eobjects.analyzer.connection;
 
 /**
  * Interface for datastores that are based upon a identifyable username.
- * 
- * @author Kasper Sørensen
  */
 public interface UsernameDatastore extends Datastore {
 

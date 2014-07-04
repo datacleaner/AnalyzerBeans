@@ -50,7 +50,7 @@ import com.google.common.cache.Cache;
  * FR,France
  * </pre>
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class TextFileSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
 

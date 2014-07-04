@@ -27,7 +27,7 @@ import java.util.Collection;
  * caching mechanism for the contained values because getting all values would
  * mean loading a lot of objects into memory.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <E>
  */

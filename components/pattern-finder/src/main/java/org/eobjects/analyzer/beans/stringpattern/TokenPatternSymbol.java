@@ -45,7 +45,7 @@ import java.io.Serializable;
  * 
  * @see Token
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface TokenPatternSymbol extends Serializable {
 

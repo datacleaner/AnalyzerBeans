@@ -38,8 +38,6 @@ import org.eobjects.metamodel.schema.Column;
  * serialized/saved job and their actual column objects. Having this in a
  * separate class allows the user to apply the flow defined in a job on to
  * another set of columns that have been mapped to the original column paths.
- * 
- * @author Kasper Sørensen
  */
 public final class SourceColumnMapping {
 

@@ -32,8 +32,6 @@ import org.eobjects.metamodel.xml.XmlSaxTableDef;
 
 /**
  * Datastore implementation for XML files.
- * 
- * @author Kasper Sørensen
  */
 public class XmlDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 

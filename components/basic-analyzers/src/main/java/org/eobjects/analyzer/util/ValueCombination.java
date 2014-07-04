@@ -35,7 +35,7 @@ import org.eobjects.metamodel.util.BaseObject;
  * A ValueCombination has proper hashCode and equals methods. It also implements
  * Comparable, comparing value-by-value.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class ValueCombination<E> extends BaseObject implements Comparable<ValueCombination<E>> {
 

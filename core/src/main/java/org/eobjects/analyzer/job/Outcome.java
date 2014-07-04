@@ -29,7 +29,7 @@ import java.io.Serializable;
  * @see FilterJob
  * @see MergedOutcomeJob
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface Outcome extends Serializable {
 

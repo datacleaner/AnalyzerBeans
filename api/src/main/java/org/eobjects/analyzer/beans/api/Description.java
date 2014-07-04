@@ -29,8 +29,6 @@ import java.lang.annotation.Target;
 /**
  * Annotation used to provide a description of a component or a configured
  * property.
- * 
- * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.FIELD, ElementType.METHOD })

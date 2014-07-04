@@ -47,8 +47,6 @@ import org.slf4j.LoggerFactory;
  * 
  * Note: This class is NOT thread-safe.
  * 
- * @author Kasper Sørensen
- * 
  * @param <R>
  *            the row type, HAS to be serializable
  * @param <W>

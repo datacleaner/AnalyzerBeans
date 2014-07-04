@@ -30,7 +30,7 @@ import org.eobjects.analyzer.job.concurrent.TaskRunner;
 /**
  * Default implementation of the AnalysisRunner interface.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class AnalysisRunnerImpl implements AnalysisRunner {
 

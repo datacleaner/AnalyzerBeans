@@ -23,8 +23,6 @@ import java.io.File;
 
 /**
  * The simplest (but also worst) implementation of the file monitor interface.
- * 
- * @author Kasper Sørensen
  */
 final class PollingBasedFileMonitor implements FileMonitor {
 

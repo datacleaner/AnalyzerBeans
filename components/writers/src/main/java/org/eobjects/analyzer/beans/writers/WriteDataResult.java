@@ -32,7 +32,7 @@ import org.eobjects.metamodel.schema.Table;
  * The result will not be an analysis result as such, but a pointer to a written
  * dataset.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @Distributed(reducer = WriteDataResultReducer.class)
 public interface WriteDataResult extends AnalyzerResult {

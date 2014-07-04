@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job;
 /**
  * Defines an interface for jobs that require outcomes
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface OutcomeSinkJob {
 

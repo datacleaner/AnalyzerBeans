@@ -38,7 +38,7 @@ import org.eobjects.metamodel.util.FileHelper;
  * dictionary. Each line of the file will be treated as a value within the
  * dictionary.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class TextFileDictionary extends AbstractReferenceData implements Dictionary {
 

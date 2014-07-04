@@ -26,7 +26,7 @@ import org.eobjects.analyzer.descriptors.DescriptorProvider;
 /**
  * An object that is capable of reading an AnalysisJob from a source.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <E>
  *            The source type, typically an InputStream, but could be another

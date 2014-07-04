@@ -38,7 +38,7 @@ import org.eobjects.analyzer.job.OutcomeSourceJob;
  * Helping class for the row processing publisher, that will help sort the
  * consumers correctly
  * 
- * @author Kasper Sørensen
+ * 
  */
 class RowProcessingConsumerSorter {
 

@@ -24,7 +24,7 @@ import org.eobjects.analyzer.beans.api.Transformer;
 /**
  * Descriptor interface for {@link Transformer}s.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  */

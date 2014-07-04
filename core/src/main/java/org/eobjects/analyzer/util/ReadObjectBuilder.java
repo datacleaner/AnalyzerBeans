@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * {@link AbstractReferenceData} (where the _name fields have been moved to
  * these super classes).
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ReadObjectBuilder<E extends Serializable> {
 
@@ -58,7 +58,7 @@ public final class ReadObjectBuilder<E extends Serializable> {
      * class hierarchy, typically from a subclass to a superclass. Such fields
      * will be discovered and treated accordingly during deserialization.
      * 
-     * @author Kasper Sørensen
+     * 
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.FIELD })

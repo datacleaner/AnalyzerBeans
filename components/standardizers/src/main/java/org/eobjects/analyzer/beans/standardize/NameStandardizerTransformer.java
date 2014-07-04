@@ -42,7 +42,7 @@ import org.eobjects.analyzer.util.NamedPatternMatch;
  * Tokenizes/standardizes four components of a full name: Firstname, Lastname,
  * Middlename and Titulation.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @TransformerBean("Name standardizer")
 @Description("Identify the various parts of a full name column and turn it into separate, standardized tokens.")

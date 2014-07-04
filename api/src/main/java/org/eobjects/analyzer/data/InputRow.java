@@ -36,8 +36,6 @@ import org.eobjects.analyzer.beans.api.Transformer;
  * 
  * @see Transformer
  * @see InputColumn
- * 
- * @author Kasper Sørensen
  */
 public interface InputRow extends Serializable {
 

@@ -27,7 +27,7 @@ import org.eobjects.metamodel.util.HasName;
  * to support renaming components or properties and retaining backwards
  * compatibility.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface HasAliases {
 

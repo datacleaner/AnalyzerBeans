@@ -40,7 +40,7 @@ import org.eobjects.metamodel.util.HasName;
 /**
  * Tokenizes values into a configurable amount of tokens.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @TransformerBean("Tokenizer")
 @Description("Tokenizes a String value (splits into substrings).")

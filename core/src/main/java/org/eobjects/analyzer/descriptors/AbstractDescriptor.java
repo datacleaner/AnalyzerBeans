@@ -30,7 +30,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * Abstract descriptor implementation which contains only the bare bones of a
  * class field- and method-inspecting descriptor.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  */

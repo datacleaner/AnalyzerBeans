@@ -32,7 +32,7 @@ import org.eobjects.analyzer.beans.api.Close;
  * 
  * @see Close
  * 
- * @author Kasper Sørensen
+ * 
  * 
  */
 public interface CloseMethodDescriptor extends Serializable {

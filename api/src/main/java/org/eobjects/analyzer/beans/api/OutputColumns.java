@@ -30,8 +30,6 @@ import java.util.Arrays;
  * by the generic argument (E) in {@link Transformer}<E>. The column type can
  * however be overridden using the output columns, by setting specific column
  * types per column index using the {@link #setColumnType(int, Class)} method.
- * 
- * @author Kasper Sørensen
  */
 public final class OutputColumns implements Serializable {
 

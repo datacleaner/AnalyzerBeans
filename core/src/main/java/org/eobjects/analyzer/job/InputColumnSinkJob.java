@@ -24,7 +24,7 @@ import org.eobjects.analyzer.data.InputColumn;
 /**
  * Interface for job objects that consume input columns in a job.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface InputColumnSinkJob {
 

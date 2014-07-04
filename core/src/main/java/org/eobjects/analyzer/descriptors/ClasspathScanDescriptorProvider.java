@@ -78,7 +78,7 @@ import org.slf4j.LoggerFactory;
  * <li>{@link RendererBean}</li>
  * </ul>
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ClasspathScanDescriptorProvider extends AbstractDescriptorProvider {
 

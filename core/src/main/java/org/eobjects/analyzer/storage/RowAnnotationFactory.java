@@ -36,7 +36,7 @@ import org.eobjects.analyzer.data.InputRow;
  * 
  * @see Provided
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface RowAnnotationFactory {
 

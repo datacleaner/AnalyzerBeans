@@ -27,8 +27,6 @@ package org.eobjects.analyzer.beans.api;
  * 
  * A low precedence means that renderers with such precedence will only be
  * applied if no higher-ranked renderers are found.
- * 
- * @author Kasper Sørensen
  */
 public enum RendererPrecedence {
 

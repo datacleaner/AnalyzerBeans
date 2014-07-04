@@ -22,8 +22,6 @@ package org.eobjects.analyzer.connection;
 /**
  * Subclass of {@link Datastore}, used to indicate that the DataContext provided
  * is updateable.
- * 
- * @author Kasper Sørensen
  */
 public interface UpdateableDatastore extends Datastore {
 

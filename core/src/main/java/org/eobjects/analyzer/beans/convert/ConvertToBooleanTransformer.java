@@ -34,8 +34,6 @@ import org.eobjects.analyzer.data.InputRow;
 
 /**
  * Attempts to convert anything to a Boolean value
- * 
- * @author Kasper Sørensen
  */
 @TransformerBean("Convert to boolean")
 @Description("Converts anything to a boolean (or null).")
