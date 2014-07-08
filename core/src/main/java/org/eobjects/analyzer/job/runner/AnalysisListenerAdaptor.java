@@ -25,79 +25,70 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * AnalysisListener used for DEBUG level logging. This listener is obviously
- * very verbose.
- * 
- * 
+ * An {@link AnalysisListener} that does nothing. Useful base-class for
+ * implementing only particular methods of the {@link AnalysisListener}
+ * interface.
  */
-public class DebugLoggingAnalysisListener implements AnalysisListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(DebugLoggingAnalysisListener.class);
-
-    /**
-     * @return whether or not the debug logging level is enabled. Can be used to
-     *         find out of it is even feasable to add this listener or not.
-     */
-    public static boolean isEnabled() {
-        return logger.isDebugEnabled();
-    }
+public class AnalysisListenerAdaptor implements AnalysisListener {
 
     @Override
     public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
-        logger.debug("jobBegin({})", job);
     }
 
     @Override
     public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
-        logger.debug("jobSuccess({})", job);
     }
 
     @Override
     public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
-        logger.debug("rowProcessingBegin({}, {})", new Object[] { job, metrics.getTable() });
     }
 
     @Override
     public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, InputRow row, int currentRow) {
-        logger.debug("rowProcessingProgress({}, {}, {}, {})", new Object[] { job, metrics.getTable(), row, currentRow });
+        rowProcessingProgress(job, metrics, currentRow);
+    }
+
+    /**
+     * 
+     * @param job
+     * @param metrics
+     * @param currentRow
+     * 
+     * @deprecated use
+     *             {@link #rowProcessingProgress(AnalysisJob, RowProcessingMetrics, InputRow, int)}
+     *             instead.
+     */
+    @Deprecated
+    protected void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
     }
 
     @Override
     public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
-        logger.debug("rowProcessingSuccess({}, {})", new Object[] { job, metrics.getTable() });
     }
 
     @Override
     public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
-        logger.debug("analyzerBegin({}, {})", new Object[] { job, analyzerJob });
     }
 
     @Override
     public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
-        logger.debug("analyzerSuccess({}, {})", new Object[] { job, analyzerJob, result });
     }
 
     @Override
     public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
-        logger.debug("errorInFilter(" + job + "," + filterJob + "," + row + ")", throwable);
     }
 
     @Override
     public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
-        logger.debug("errorInTransformer(" + job + "," + transformerJob + "," + row + ")", throwable);
     }
 
     @Override
     public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
-        logger.debug("errorInAnalyzer(" + job + "," + analyzerJob + "," + row + ")", throwable);
     }
 
     @Override
     public void errorUknown(AnalysisJob job, Throwable throwable) {
-        logger.debug("errorUknown(" + job + ")", throwable);
     }
 }

@@ -275,7 +275,6 @@ public final class RowProcessingPublisher {
 
         analysisListener.rowProcessingBegin(analysisJob, rowProcessingMetrics);
 
-        // TODO: Needs to delegate errors downstream
         final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(analysisJob, analysisListener,
                 taskRunner);
 
@@ -310,15 +309,16 @@ public final class RowProcessingPublisher {
                         break;
                     }
 
+                    numTasks++;
+
                     final Row metaModelRow = dataSet.getRow();
                     final int rowId = idGenerator.nextPhysicalRowId();
                     final MetaModelInputRow inputRow = new MetaModelInputRow(rowId, metaModelRow);
 
                     final ConsumeRowTask task = new ConsumeRowTask(consumeRowHandler, rowProcessingMetrics, inputRow,
-                            analysisListener);
+                            analysisListener, numTasks);
                     taskRunner.run(task, taskListener);
 
-                    numTasks++;
                 }
             } finally {
                 dataSet.close();

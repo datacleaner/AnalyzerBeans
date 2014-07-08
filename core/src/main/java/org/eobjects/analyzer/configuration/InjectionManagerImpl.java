@@ -29,6 +29,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
@@ -121,6 +122,8 @@ public class InjectionManagerImpl implements InjectionManager {
             return _rowAnntationFactoryRef.get();
         } else if (baseType == AnalyzerBeansConfiguration.class) {
             return _configuration;
+        } else if (baseType == TaskRunner.class) {
+            return _configuration.getTaskRunner();
         } else if (baseType == AnalysisJob.class) {
             return _job;
         } else if (baseType == StringConverter.class) {

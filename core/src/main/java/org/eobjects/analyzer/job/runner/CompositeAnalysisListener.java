@@ -102,9 +102,9 @@ public final class CompositeAnalysisListener implements AnalysisListener {
     }
 
     @Override
-    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
+    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, InputRow row, int currentRow) {
         for (AnalysisListener delegate : _delegates) {
-            delegate.rowProcessingProgress(job, metrics, currentRow);
+            delegate.rowProcessingProgress(job, metrics, row, currentRow);
         }
     }
 
