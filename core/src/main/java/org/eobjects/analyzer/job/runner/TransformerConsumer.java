@@ -29,7 +29,6 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.TransformedInputRow;
 import org.eobjects.analyzer.descriptors.ProvidedPropertyDescriptor;
-import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector.Listener;
@@ -40,33 +39,27 @@ import org.eobjects.analyzer.util.SourceColumnFinder;
  */
 final class TransformerConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
-    private final AnalysisJob _job;
     private final Transformer<?> _transformer;
     private final TransformerJob _transformerJob;
     private final InputColumn<?>[] _inputColumns;
-    private final AnalysisListener _analysisListener;
     private final boolean _concurrent;
     private RowIdGenerator _idGenerator;
 
     public TransformerConsumer(Transformer<?> transformer, TransformerJob transformerJob,
             InputColumn<?>[] inputColumns, SourceColumnFinder sourceColumnFinder) {
-        super(transformerJob, transformerJob, sourceColumnFinder);
+        super(null, null, transformerJob, transformerJob, sourceColumnFinder);
         _transformer = transformer;
         _transformerJob = transformerJob;
         _inputColumns = inputColumns;
-        _job = null;
-        _analysisListener = null;
         _concurrent = determineConcurrent();
     }
     
     public TransformerConsumer(Transformer<?> transformer, TransformerJob transformerJob,
             InputColumn<?>[] inputColumns, RowProcessingPublishers publishers) {
-        super(transformerJob, transformerJob, publishers);
+        super(publishers, transformerJob, transformerJob);
         _transformer = transformer;
         _transformerJob = transformerJob;
         _inputColumns = inputColumns;
-        _job = publishers.getAnalysisJob();
-        _analysisListener = publishers.getAnalysisListener();
         _concurrent = determineConcurrent();
     }
 
@@ -109,7 +102,7 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
     }
 
     @Override
-    public void consume(final InputRow row, final int distinctCount, final OutcomeSink outcomes,
+    public void consumeInternal(final InputRow row, final int distinctCount, final OutcomeSink outcomes,
             final RowProcessingChain chain) {
         final InputColumn<?>[] outputColumns = getOutputColumns();
 
@@ -129,11 +122,9 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
             }
             addValuesToRow(resultRow, outputColumns, values);
             chain.processNext(resultRow, distinctCount, outcomes);
-        } catch (RuntimeException e) {
-            _analysisListener.errorInTransformer(_job, _transformerJob, row, e);
+        } finally  {
+            unregisterListener(_transformer);
         }
-
-        unregisterListener(_transformer);
     }
 
     private void unregisterListener(Transformer<?> transformer) {

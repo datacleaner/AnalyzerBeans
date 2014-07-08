@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job.runner;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
@@ -77,15 +78,59 @@ public class AnalysisListenerAdaptor implements AnalysisListener {
     }
 
     @Override
-    public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
+    public void errorInComponent(AnalysisJob job, ComponentJob componentJob, InputRow row, Throwable throwable) {
+        if (componentJob instanceof AnalyzerJob) {
+            errorInAnalyzer(job, (AnalyzerJob) componentJob, row, throwable);
+        } else if (componentJob instanceof TransformerJob) {
+            errorInTransformer(job, (TransformerJob) componentJob, row, throwable);
+        } else if (componentJob instanceof FilterJob) {
+            errorInFilter(job, (FilterJob) componentJob, row, throwable);
+        }
     }
 
-    @Override
-    public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
+    /**
+     * 
+     * @param job
+     * @param filterJob
+     * @param row
+     * @param throwable
+     * 
+     * @deprecated use
+     *             {@link #errorInComponent(AnalysisJob, ComponentJob, InputRow, Throwable)}
+     *             instead
+     */
+    @Deprecated
+    protected void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
     }
 
-    @Override
-    public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
+    /**
+     * 
+     * @param job
+     * @param transformerJob
+     * @param row
+     * @param throwable
+     * 
+     * @deprecated use
+     *             {@link #errorInComponent(AnalysisJob, ComponentJob, InputRow, Throwable)}
+     *             instead
+     */
+    @Deprecated
+    protected void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
+    }
+
+    /**
+     * 
+     * @param job
+     * @param analyzerJob
+     * @param row
+     * @param throwable
+     * 
+     * @deprecated use
+     *             {@link #errorInComponent(AnalysisJob, ComponentJob, InputRow, Throwable)}
+     *             instead
+     */
+    @Deprecated
+    protected void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
     }
 
     @Override

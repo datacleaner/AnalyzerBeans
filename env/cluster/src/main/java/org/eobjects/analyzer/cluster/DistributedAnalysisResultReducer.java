@@ -184,7 +184,7 @@ final class DistributedAnalysisResultReducer {
                     slaveResults, e);
             reductionErrors.add(reductionError);
 
-            _analysisListener.errorInAnalyzer(_masterJob, analyzerJob, null, e);
+            _analysisListener.errorInComponent(_masterJob, analyzerJob, null, e);
         } finally {
             if (reducer != null) {
                 _lifeCycleHelper.close(reducerDescriptor, reducer, success);

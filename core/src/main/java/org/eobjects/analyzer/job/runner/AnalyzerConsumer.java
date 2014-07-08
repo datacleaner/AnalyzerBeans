@@ -23,38 +23,31 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 
 final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
-    private final AnalysisJob _job;
     private final AnalyzerJob _analyzerJob;
     private final Analyzer<?> _analyzer;
     private final InputColumn<?>[] _inputColumns;
-    private final AnalysisListener _analysisListener;
     private final boolean _concurrent;
 
     public AnalyzerConsumer(Analyzer<?> analyzer, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns,
             SourceColumnFinder sourceColumnFinder) {
-        super(analyzerJob, analyzerJob, sourceColumnFinder);
+        super(null, null, analyzerJob, analyzerJob, sourceColumnFinder);
         _analyzer = analyzer;
         _analyzerJob = analyzerJob;
         _inputColumns = inputColumns;
-        _job = null;
-        _analysisListener = null;
         _concurrent = determineConcurrent();
     }
 
     public AnalyzerConsumer(Analyzer<?> analyzer, AnalyzerJob analyzerJob, InputColumn<?>[] inputColumns,
             RowProcessingPublishers publishers) {
-        super(analyzerJob, analyzerJob, publishers);
+        super(publishers, analyzerJob, analyzerJob);
         _analyzer = analyzer;
         _analyzerJob = analyzerJob;
         _inputColumns = inputColumns;
-        _job = publishers.getAnalysisJob();
-        _analysisListener = publishers.getAnalysisListener();
         _concurrent = determineConcurrent();
     }
 
@@ -83,13 +76,9 @@ final class AnalyzerConsumer extends AbstractRowProcessingConsumer implements Ro
     }
 
     @Override
-    public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
-        try {
-            _analyzer.run(row, distinctCount);
-            chain.processNext(row, distinctCount, outcomes);
-        } catch (RuntimeException e) {
-            _analysisListener.errorInAnalyzer(_job, _analyzerJob, row, e);
-        }
+    public void consumeInternal(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
+        _analyzer.run(row, distinctCount);
+        chain.processNext(row, distinctCount, outcomes);
     }
 
     @Override

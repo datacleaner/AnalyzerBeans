@@ -26,10 +26,14 @@ import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.util.SourceColumnFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract implementation of {@link RowProcessingConsumer}. Contains utility
@@ -38,20 +42,29 @@ import org.eobjects.analyzer.util.SourceColumnFinder;
  */
 abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
+    private static final Logger logger = LoggerFactory.getLogger(AbstractRowProcessingConsumer.class);
+
+    private final AnalysisJob _analysisJob;
+    private final AnalysisListener _analysisListener;
     private final OutcomeSinkJob _outcomeSinkJob;
     private final Set<OutcomeSinkJob> _sourceJobsOfInputColumns;
 
-    protected AbstractRowProcessingConsumer(OutcomeSinkJob outcomeSinkJob, InputColumnSinkJob inputColumnSinkJob,
-            RowProcessingPublishers publishers) {
-        this(outcomeSinkJob, inputColumnSinkJob, publishers.getSourceColumnFinder());
+    protected AbstractRowProcessingConsumer(RowProcessingPublishers publishers, OutcomeSinkJob outcomeSinkJob,
+            InputColumnSinkJob inputColumnSinkJob) {
+        this(publishers.getAnalysisJob(), publishers.getAnalysisListener(), outcomeSinkJob, inputColumnSinkJob,
+                publishers.getSourceColumnFinder());
     }
 
-    protected AbstractRowProcessingConsumer(OutcomeSinkJob outcomeSinkJob, InputColumnSinkJob inputColumnSinkJob,
-            SourceColumnFinder sourceColumnFinder) {
-        this(outcomeSinkJob, buildSourceJobsOfInputColumns(inputColumnSinkJob, sourceColumnFinder));
+    protected AbstractRowProcessingConsumer(AnalysisJob analysisJob, AnalysisListener analysisListener,
+            OutcomeSinkJob outcomeSinkJob, InputColumnSinkJob inputColumnSinkJob, SourceColumnFinder sourceColumnFinder) {
+        this(analysisJob, analysisListener, outcomeSinkJob, buildSourceJobsOfInputColumns(inputColumnSinkJob,
+                sourceColumnFinder));
     }
 
-    protected AbstractRowProcessingConsumer(OutcomeSinkJob outcomeSinkJob, Set<OutcomeSinkJob> sourceJobsOfInputColumns) {
+    protected AbstractRowProcessingConsumer(AnalysisJob analysisJob, AnalysisListener analysisListener,
+            OutcomeSinkJob outcomeSinkJob, Set<OutcomeSinkJob> sourceJobsOfInputColumns) {
+        _analysisJob = analysisJob;
+        _analysisListener = analysisListener;
         _outcomeSinkJob = outcomeSinkJob;
         _sourceJobsOfInputColumns = sourceJobsOfInputColumns;
     }
@@ -91,6 +104,33 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
     public InputColumn<?>[] getOutputColumns() {
         return new InputColumn[0];
     }
+
+    @Override
+    public final void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
+        try {
+            consumeInternal(row, distinctCount, outcomes, chain);
+        } catch (RuntimeException e) {
+            final ComponentJob componentJob = getComponentJob();
+            if (_analysisListener == null) {
+                logger.error("Error occurred in component '" + componentJob + "' and no AnalysisListener is available",
+                        e);
+                throw e;
+            } else {
+                _analysisListener.errorInComponent(_analysisJob, componentJob, row, e);
+            }
+        }
+    }
+
+    /**
+     * Overrideable method for subclasses
+     * 
+     * @param row
+     * @param distinctCount
+     * @param outcomes
+     * @param chain
+     */
+    protected abstract void consumeInternal(InputRow row, int distinctCount, OutcomeSink outcomes,
+            RowProcessingChain chain);
 
     private boolean satisfiedInputsForConsume(InputRow row, Outcome[] outcomes) {
         if (_sourceJobsOfInputColumns.isEmpty()) {
