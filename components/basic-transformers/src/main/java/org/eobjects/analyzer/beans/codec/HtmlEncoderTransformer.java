@@ -17,9 +17,8 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.transform;
+package org.eobjects.analyzer.beans.codec;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -31,34 +30,37 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MockInputColumn;
 
-@TransformerBean("XML decoder")
-@Description("Decodes XML content into plain text")
+import com.google.common.html.HtmlEscapers;
+
+@TransformerBean("HTML encoder")
+@Description("Encodes/escapes plain text into HTML content")
 @Categorized({ StringManipulationCategory.class })
-public class XmlDecoderTransformer implements Transformer<String> {
+public class HtmlEncoderTransformer implements Transformer<String> {
 
-	@Configured
-	InputColumn<String> column;
-	
-	public XmlDecoderTransformer() {
-	}
+    @Configured
+    InputColumn<String> column;
 
-	public XmlDecoderTransformer(MockInputColumn<String> column) {
-		this();
-		this.column = column;
-	}
+    public HtmlEncoderTransformer() {
+    }
 
-	@Override
-	public OutputColumns getOutputColumns() {
-		return new OutputColumns(column.getName() + " (XML decoded)");
-	}
+    public HtmlEncoderTransformer(MockInputColumn<String> column) {
+        this();
+        this.column = column;
+    }
 
-	@Override
-	public String[] transform(InputRow inputRow) {
-		String value = inputRow.getValue(column);
-		if (value != null) {
-			value = StringEscapeUtils.unescapeXml(value);
-		}
-		return new String[] { value };
-	}
+    @Override
+    public OutputColumns getOutputColumns() {
+        return new OutputColumns(column.getName() + " (HTML encoded)");
+    }
+
+    @Override
+    public String[] transform(final InputRow inputRow) {
+        final String value = inputRow.getValue(column);
+        if (value == null) {
+            return new String[1];
+        }
+        final String escaped = HtmlEscapers.htmlEscaper().escape(value);
+        return new String[] { escaped };
+    }
 
 }

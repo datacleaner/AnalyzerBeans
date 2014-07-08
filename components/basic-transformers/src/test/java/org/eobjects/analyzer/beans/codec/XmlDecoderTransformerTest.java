@@ -17,9 +17,10 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.transform;
+package org.eobjects.analyzer.beans.codec;
 
 import org.eobjects.analyzer.beans.api.OutputColumns;
+import org.eobjects.analyzer.beans.codec.XmlDecoderTransformer;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 
