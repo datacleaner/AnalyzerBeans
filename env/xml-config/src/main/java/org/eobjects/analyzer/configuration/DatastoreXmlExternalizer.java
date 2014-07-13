@@ -19,16 +19,24 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import java.util.Arrays;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eobjects.analyzer.connection.CsvDatastore;
+import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.ExcelDatastore;
+import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.csv.CsvConfiguration;
+import org.eobjects.metamodel.schema.TableType;
+import org.eobjects.metamodel.util.FileResource;
 import org.eobjects.metamodel.util.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.base.Strings;
 
 /**
  * Utility class for externalizing datastores to the XML format of conf.xml.
@@ -38,6 +46,97 @@ import org.w3c.dom.Element;
  * {@link JaxbConfigurationReader}.
  */
 public class DatastoreXmlExternalizer {
+
+    /**
+     * Determines if the given datastore is externalizable by this object.
+     * 
+     * @param datastore
+     * @return
+     */
+    public boolean isExternalizable(final Datastore datastore) {
+        if (datastore == null) {
+            return false;
+        }
+
+        if (datastore instanceof JdbcDatastore) {
+            return true;
+        }
+
+        if (datastore instanceof CsvDatastore) {
+            final Resource resource = ((CsvDatastore) datastore).getResource();
+            if (resource instanceof FileResource) {
+                return true;
+            }
+        }
+
+        if (datastore instanceof ExcelDatastore) {
+            final Resource resource = ((ExcelDatastore) datastore).getResource();
+            if (resource instanceof FileResource) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Externalizes the given datastore
+     * 
+     * @param datastore
+     * @return
+     * @throws UnsupportedOperationException
+     */
+    public Element externalize(Datastore datastore) throws UnsupportedOperationException {
+        return externalize(datastore, createDocument());
+    }
+
+    /**
+     * Externalizes the given datastore
+     * 
+     * @param datastore
+     * @param doc
+     * @return
+     * @throws UnsupportedOperationException
+     */
+    public Element externalize(final Datastore datastore, final Document doc) throws UnsupportedOperationException {
+        if (datastore == null) {
+            throw new IllegalArgumentException("Datastore cannot be null");
+        }
+
+        if (datastore instanceof CsvDatastore) {
+            final Resource resource = ((CsvDatastore) datastore).getResource();
+            final String filename = toFilename(resource);
+            return externalize((CsvDatastore) datastore, filename, doc);
+        }
+
+        if (datastore instanceof ExcelDatastore) {
+            final Resource resource = ((ExcelDatastore) datastore).getResource();
+            final String filename = toFilename(resource);
+            return externalize((ExcelDatastore) datastore, filename, doc);
+        }
+
+        if (datastore instanceof JdbcDatastore) {
+            return externalize((JdbcDatastore) datastore, doc);
+        }
+
+        throw new UnsupportedOperationException("Non-supported datastore: " + datastore);
+    }
+
+    /**
+     * Creates a filename string to externalize, based on a given
+     * {@link Resource}.
+     * 
+     * @param resource
+     * @return
+     * @throws UnsupportedOperationException
+     */
+    protected String toFilename(final Resource resource) throws UnsupportedOperationException {
+        if (resource instanceof FileResource) {
+            return ((FileResource) resource).getFile().getPath();
+        }
+
+        throw new UnsupportedOperationException("Unsupported resource type: " + resource);
+    }
 
     /**
      * Externalizes a {@link ExcelDatastore} to a XML element.
@@ -52,6 +151,59 @@ public class DatastoreXmlExternalizer {
      */
     public Element externalize(ExcelDatastore datastore, String filename) {
         return externalize(datastore, filename, createDocument());
+    }
+
+    /**
+     * Externalizes a {@link JdbcDatastore} to a XML element.
+     * 
+     * @param datastore
+     * @return
+     */
+    public Element externalize(JdbcDatastore datastore) {
+        return externalize(datastore, createDocument());
+    }
+
+    /**
+     * Externalizes a {@link JdbcDatastore} to a XML element.
+     * 
+     * @param datastore
+     * @param doc
+     * @return
+     */
+    public Element externalize(JdbcDatastore datastore, Document doc) {
+        final Element ds = doc.createElement("jdbc-datastore");
+        ds.setAttribute("name", datastore.getName());
+        if (!StringUtils.isNullOrEmpty(datastore.getDescription())) {
+            ds.setAttribute("description", datastore.getDescription());
+        }
+
+        String jndiUrl = datastore.getDatasourceJndiUrl();
+        if (Strings.isNullOrEmpty(jndiUrl)) {
+            appendElement(doc, ds, "url", datastore.getJdbcUrl());
+            appendElement(doc, ds, "driver", datastore.getDriverClass());
+            appendElement(doc, ds, "username", datastore.getUsername());
+            appendElement(doc, ds, "password", datastore.getPassword());
+            appendElement(doc, ds, "multiple-connections", datastore.isMultipleConnections() + "");
+        } else {
+            appendElement(doc, ds, "datasource-jndi-url", jndiUrl);
+        }
+
+        final TableType[] tableTypes = datastore.getTableTypes();
+        if (tableTypes != null && tableTypes.length != 0 && !Arrays.equals(TableType.DEFAULT_TABLE_TYPES, tableTypes)) {
+            final Element tableTypesElement = doc.createElement("table-types");
+            ds.appendChild(tableTypesElement);
+
+            for (final TableType tableType : tableTypes) {
+                appendElement(doc, tableTypesElement, "table-type", tableType.name());
+            }
+        }
+
+        final String catalogName = datastore.getCatalogName();
+        if (!Strings.isNullOrEmpty(catalogName)) {
+            appendElement(doc, ds, "catalog-name", catalogName);
+        }
+
+        return ds;
     }
 
     /**
@@ -74,9 +226,7 @@ public class DatastoreXmlExternalizer {
             ds.setAttribute("description", datastore.getDescription());
         }
 
-        final Element filenameElem = doc.createElement("filename");
-        filenameElem.setTextContent(filename);
-        ds.appendChild(filenameElem);
+        appendElement(doc, ds, "filename", filename);
 
         return ds;
     }
