@@ -106,18 +106,6 @@ public class DatastoreXmlExternalizer {
      * @throws UnsupportedOperationException
      */
     public Element externalize(Datastore datastore) throws UnsupportedOperationException {
-        return externalize(datastore, getDocument());
-    }
-
-    /**
-     * Externalizes the given datastore
-     * 
-     * @param datastore
-     * @param doc
-     * @return
-     * @throws UnsupportedOperationException
-     */
-    public Element externalize(final Datastore datastore, final Document doc) throws UnsupportedOperationException {
         if (datastore == null) {
             throw new IllegalArgumentException("Datastore cannot be null");
         }
@@ -127,13 +115,13 @@ public class DatastoreXmlExternalizer {
         if (datastore instanceof CsvDatastore) {
             final Resource resource = ((CsvDatastore) datastore).getResource();
             final String filename = toFilename(resource);
-            elem = toElement((CsvDatastore) datastore, filename, doc);
+            elem = toElement((CsvDatastore) datastore, filename);
         } else if (datastore instanceof ExcelDatastore) {
             final Resource resource = ((ExcelDatastore) datastore).getResource();
             final String filename = toFilename(resource);
-            elem = toElement((ExcelDatastore) datastore, filename, doc);
+            elem = toElement((ExcelDatastore) datastore, filename);
         } else if (datastore instanceof JdbcDatastore) {
-            elem = toElement((JdbcDatastore) datastore, doc);
+            elem = toElement((JdbcDatastore) datastore);
         } else {
             throw new UnsupportedOperationException("Non-supported datastore: " + datastore);
         }
@@ -161,39 +149,14 @@ public class DatastoreXmlExternalizer {
     }
 
     /**
-     * Externalizes a {@link ExcelDatastore} to a XML element.
-     * 
-     * @param datastore
-     * @param filename
-     *            the filename/path to use in the XML element. Since the
-     *            appropriate path will depend on the reading application's
-     *            environment (supported {@link Resource} types), this specific
-     *            property of the datastore is provided separately.
-     * @return
-     */
-    public Element toElement(ExcelDatastore datastore, String filename) {
-        return toElement(datastore, filename, getDocument());
-    }
-
-    /**
-     * Externalizes a {@link JdbcDatastore} to a XML element.
-     * 
-     * @param datastore
-     * @return
-     */
-    public Element toElement(JdbcDatastore datastore) {
-        return toElement(datastore, getDocument());
-    }
-
-    /**
      * Externalizes a {@link JdbcDatastore} to a XML element.
      * 
      * @param datastore
      * @param doc
      * @return
      */
-    public Element toElement(JdbcDatastore datastore, Document doc) {
-        final Element ds = doc.createElement("jdbc-datastore");
+    public Element toElement(JdbcDatastore datastore) {
+        final Element ds = getDocument().createElement("jdbc-datastore");
         ds.setAttribute("name", datastore.getName());
         if (!StringUtils.isNullOrEmpty(datastore.getDescription())) {
             ds.setAttribute("description", datastore.getDescription());
@@ -212,7 +175,7 @@ public class DatastoreXmlExternalizer {
 
         final TableType[] tableTypes = datastore.getTableTypes();
         if (tableTypes != null && tableTypes.length != 0 && !Arrays.equals(TableType.DEFAULT_TABLE_TYPES, tableTypes)) {
-            final Element tableTypesElement = doc.createElement("table-types");
+            final Element tableTypesElement = getDocument().createElement("table-types");
             ds.appendChild(tableTypesElement);
 
             for (final TableType tableType : tableTypes) {
@@ -237,11 +200,10 @@ public class DatastoreXmlExternalizer {
      *            appropriate path will depend on the reading application's
      *            environment (supported {@link Resource} types), this specific
      *            property of the datastore is provided separately.
-     * @param doc
      * @return
      */
-    public Element toElement(ExcelDatastore datastore, String filename, Document doc) {
-        final Element ds = doc.createElement("excel-datastore");
+    public Element toElement(ExcelDatastore datastore, String filename) {
+        final Element ds = getDocument().createElement("excel-datastore");
 
         ds.setAttribute("name", datastore.getName());
         if (!StringUtils.isNullOrEmpty(datastore.getDescription())) {
@@ -266,25 +228,7 @@ public class DatastoreXmlExternalizer {
      * @return a XML element representing the datastore.
      */
     public Element toElement(CsvDatastore datastore, String filename) {
-        return toElement(datastore, filename, getDocument());
-    }
-
-    /**
-     * Externalizes a {@link CsvDatastore} to a XML element.
-     * 
-     * @param datastore
-     *            the datastore to externalize
-     * @param filename
-     *            the filename/path to use in the XML element. Since the
-     *            appropriate path will depend on the reading application's
-     *            environment (supported {@link Resource} types), this specific
-     *            property of the datastore is provided separately.
-     * @param doc
-     *            the document used to create the element.
-     * @return a XML element representing the datastore.
-     */
-    public Element toElement(CsvDatastore datastore, String filename, Document doc) {
-        final Element datastoreElement = doc.createElement("csv-datastore");
+        final Element datastoreElement = getDocument().createElement("csv-datastore");
         datastoreElement.setAttribute("name", datastore.getName());
 
         final String description = datastore.getDescription();
