@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.configuration;
 
+import java.io.InputStream;
 import java.util.Arrays;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +34,7 @@ import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.schema.TableType;
 import org.eobjects.metamodel.util.FileResource;
+import org.eobjects.metamodel.util.Func;
 import org.eobjects.metamodel.util.Resource;
 import org.eobjects.metamodel.xml.XmlDomDataContext;
 import org.w3c.dom.Attr;
@@ -63,6 +65,22 @@ public class DatastoreXmlExternalizer {
             throw new IllegalStateException(e);
         }
         _document = documentBuilder.newDocument();
+    }
+
+    public DatastoreXmlExternalizer(Resource resource) {
+        _document = resource.read(new Func<InputStream, Document>() {
+            @Override
+            public Document eval(InputStream in) {
+                try {
+                    final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+                    final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+                    return documentBuilder.parse(in);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        });
+
     }
 
     public DatastoreXmlExternalizer(Document document) {
@@ -123,13 +141,16 @@ public class DatastoreXmlExternalizer {
                         if (datastoreName.equals(value)) {
                             // we have a match
                             datastoreCatalogElement.removeChild(element);
+                            
+                            onDocumentChanged(getDocument());
+                            
                             return true;
                         }
                     }
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -164,7 +185,17 @@ public class DatastoreXmlExternalizer {
         final Element datastoreCatalogElement = getDatastoreCatalogElement();
         datastoreCatalogElement.appendChild(elem);
 
+        onDocumentChanged(getDocument());
+
         return elem;
+    }
+
+    /**
+     * Overrideable method, invoked whenever the document has changed
+     * 
+     * @param document
+     */
+    protected void onDocumentChanged(Document document) {
     }
 
     /**
@@ -288,7 +319,7 @@ public class DatastoreXmlExternalizer {
      * 
      * @return
      */
-    public Document getDocument() {
+    public final Document getDocument() {
         return _document;
     }
 
