@@ -26,6 +26,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.util.StringUtils;
@@ -33,6 +34,8 @@ import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.schema.TableType;
 import org.eobjects.metamodel.util.FileResource;
 import org.eobjects.metamodel.util.Resource;
+import org.eobjects.metamodel.xml.XmlDomDataContext;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -95,6 +98,38 @@ public class DatastoreXmlExternalizer {
             }
         }
 
+        return false;
+    }
+
+    /**
+     * Removes a datastore by it's name, if it exists and is recognizeable by
+     * the externalizer.
+     * 
+     * @param datastoreName
+     * @return true if a datastore element was removed from the XML document.
+     */
+    public boolean removeDatastore(final String datastoreName) {
+        final Element datastoreCatalogElement = getDatastoreCatalogElement();
+        final NodeList childNodes = datastoreCatalogElement.getChildNodes();
+        final int length = childNodes.getLength();
+        for (int i = 0; i < length; i++) {
+            final Node node = childNodes.item(i);
+            if (node instanceof Element) {
+                final Element element = (Element) node;
+                final Attr[] attributes = XmlDomDataContext.getAttributes(element);
+                for (Attr attr : attributes) {
+                    if ("name".equals(attr.getName())) {
+                        final String value = attr.getValue();
+                        if (datastoreName.equals(value)) {
+                            // we have a match
+                            datastoreCatalogElement.removeChild(element);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
         return false;
     }
 
@@ -257,6 +292,11 @@ public class DatastoreXmlExternalizer {
         return _document;
     }
 
+    /**
+     * Gets the XML element that represents the {@link DatastoreCatalog}.
+     * 
+     * @return
+     */
     public Element getDatastoreCatalogElement() {
         final Element configurationFileDocumentElement = getDocumentElement();
 

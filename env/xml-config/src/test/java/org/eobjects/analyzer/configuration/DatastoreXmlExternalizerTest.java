@@ -106,23 +106,32 @@ public class DatastoreXmlExternalizerTest extends TestCase {
     }
 
     public void testExternalizeJdbcDatastore() throws Exception {
-        final JdbcDatastore datastore1 = new JdbcDatastore("foo ds", "jdbc:foo//bar", "foo.bar.Baz");
+        final JdbcDatastore datastore1 = new JdbcDatastore("foo ds 1", "jdbc:foo//bar", "foo.bar.Baz");
 
         assertTrue(externalizer.isExternalizable(datastore1));
         final String str1 = transform(externalizer.externalize(datastore1));
-        assertEquals("<jdbc-datastore name=\"foo ds\">" + "<url>jdbc:foo//bar</url><driver>foo.bar.Baz</driver>"
+        assertEquals("<jdbc-datastore name=\"foo ds 1\">" + "<url>jdbc:foo//bar</url><driver>foo.bar.Baz</driver>"
                 + "<multiple-connections>true</multiple-connections></jdbc-datastore>", str1);
 
-        final JdbcDatastore datastore2 = new JdbcDatastore("foo ds", "JNDI_URL", new TableType[] { TableType.VIEW,
+        final JdbcDatastore datastore2 = new JdbcDatastore("foo ds 2", "JNDI_URL", new TableType[] { TableType.VIEW,
                 TableType.ALIAS }, "mycatalog");
         assertTrue(externalizer.isExternalizable(datastore2));
         final String str2 = transform(externalizer.externalize(datastore2));
-        assertEquals("<jdbc-datastore name=\"foo ds\">" + "<datasource-jndi-url>JNDI_URL</datasource-jndi-url>"
+        assertEquals("<jdbc-datastore name=\"foo ds 2\">" + "<datasource-jndi-url>JNDI_URL</datasource-jndi-url>"
                 + "<table-types><table-type>VIEW</table-type><table-type>ALIAS</table-type></table-types>"
                 + "<catalog-name>mycatalog</catalog-name></jdbc-datastore>", str2);
 
         final Element datastoreCatalogElement = externalizer.getDocument().getDocumentElement();
         assertEquals("<configuration><datastore-catalog>" + str1 + str2 + "</datastore-catalog></configuration>",
+                transform(datastoreCatalogElement));
+        
+        boolean removed = externalizer.removeDatastore("foo ds");
+        assertFalse(removed);
+        
+        removed = externalizer.removeDatastore("foo ds 1");
+        assertTrue(removed);
+        
+        assertEquals("<configuration><datastore-catalog>" + str2 + "</datastore-catalog></configuration>",
                 transform(datastoreCatalogElement));
     }
 
