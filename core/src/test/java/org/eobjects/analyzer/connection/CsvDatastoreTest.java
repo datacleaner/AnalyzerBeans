@@ -24,9 +24,9 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.metamodel.schema.Column;
 import org.eobjects.metamodel.schema.Table;
+import org.eobjects.metamodel.util.Resource;
 
 public class CsvDatastoreTest extends TestCase {
-
 
     public void testConvertToColumnWithNoSchema() throws Exception {
         CsvDatastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
@@ -38,5 +38,12 @@ public class CsvDatastoreTest extends TestCase {
         assertEquals("projects", table.getName());
         col = schemaNavigator.convertToColumn("projects.product");
         assertNotNull(col);
+    }
+    
+    public void testGetResourceBasedOnString() throws Exception {
+        CsvDatastore datastore = new CsvDatastore("foo", "src/test/resources/projects.csv");
+        Resource resource = datastore.getResource();
+        assertNotNull(resource);
+        assertEquals("projects.csv", resource.getName());
     }
 }

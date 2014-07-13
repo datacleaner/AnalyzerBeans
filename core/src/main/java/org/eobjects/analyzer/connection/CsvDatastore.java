@@ -29,6 +29,7 @@ import org.eobjects.metamodel.UpdateableDataContext;
 import org.eobjects.metamodel.csv.CsvConfiguration;
 import org.eobjects.metamodel.csv.CsvDataContext;
 import org.eobjects.metamodel.util.FileHelper;
+import org.eobjects.metamodel.util.FileResource;
 import org.eobjects.metamodel.util.Resource;
 import org.eobjects.metamodel.util.SerializableRef;
 import org.slf4j.Logger;
@@ -106,6 +107,9 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
             int headerLineNumber) {
         super(name);
         _filename = filename;
+        if (resource == null) {
+            resource = new FileResource(filename);
+        }
         _resourceRef = new SerializableRef<Resource>(resource);
         _quoteChar = quoteChar;
         _separatorChar = separatorChar;
