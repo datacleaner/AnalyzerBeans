@@ -22,6 +22,7 @@ package org.eobjects.analyzer.configuration;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -42,18 +43,23 @@ import org.w3c.dom.Element;
 
 public class DatastoreXmlExternalizerTest extends TestCase {
 
-    private final DatastoreXmlExternalizer externalizer = new DatastoreXmlExternalizer();
+    private DatastoreXmlExternalizer externalizer;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        externalizer = new DatastoreXmlExternalizer();
+    }
 
     public void testExternalizeCsvDatastore() throws Exception {
         CsvDatastore ds = new CsvDatastore("foo", "foo.txt");
         ds.setDescription("bar");
 
-        Element elem = externalizer.externalize(ds, "baz.txt");
+        Element elem = externalizer.toElement(ds, "baz.txt");
 
         String str = transform(elem);
 
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                + "<csv-datastore description=\"bar\" name=\"foo\"><filename>baz.txt</filename>"
+        assertEquals("<csv-datastore description=\"bar\" name=\"foo\"><filename>baz.txt</filename>"
                 + "<quote-char>\"</quote-char><separator-char>,</separator-char>"
                 + "<escape-char>\\</escape-char><encoding>UTF-8</encoding>"
                 + "<fail-on-inconsistencies>true</fail-on-inconsistencies><multiline-values>true</multiline-values>"
@@ -64,13 +70,12 @@ public class DatastoreXmlExternalizerTest extends TestCase {
         ExcelDatastore ds = new ExcelDatastore("foo", new FileResource("foo.txt"), "foo.txt");
         ds.setDescription("bar");
 
-        Element elem = externalizer.externalize(ds, "baz.txt");
+        Element elem = externalizer.toElement(ds, "baz.txt");
 
         String str = transform(elem);
 
         assertEquals(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><excel-datastore description=\"bar\" name=\"foo\"><filename>baz.txt</filename></excel-datastore>",
-                str);
+                "<excel-datastore description=\"bar\" name=\"foo\"><filename>baz.txt</filename></excel-datastore>", str);
     }
 
     public void testIsExternalizableAndExternalize() throws Exception {
@@ -93,8 +98,8 @@ public class DatastoreXmlExternalizerTest extends TestCase {
         final String str = transform(elem);
 
         final char sep = File.separatorChar;
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><csv-datastore name=\"foo\">" + "<filename>src" + sep
-                + "test" + sep + "resources" + sep + "example-dates.csv</filename><quote-char>\"</quote-char>"
+        assertEquals("<csv-datastore name=\"foo\">" + "<filename>src" + sep + "test" + sep + "resources" + sep
+                + "example-dates.csv</filename><quote-char>\"</quote-char>"
                 + "<separator-char>,</separator-char><escape-char>\\</escape-char><encoding>UTF-8</encoding>"
                 + "<fail-on-inconsistencies>true</fail-on-inconsistencies><multiline-values>true</multiline-values>"
                 + "<header-line-number>1</header-line-number></csv-datastore>", str);
@@ -105,18 +110,20 @@ public class DatastoreXmlExternalizerTest extends TestCase {
 
         assertTrue(externalizer.isExternalizable(datastore1));
         final String str1 = transform(externalizer.externalize(datastore1));
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><jdbc-datastore name=\"foo ds\">"
-                + "<url>jdbc:foo//bar</url><driver>foo.bar.Baz</driver>"
+        assertEquals("<jdbc-datastore name=\"foo ds\">" + "<url>jdbc:foo//bar</url><driver>foo.bar.Baz</driver>"
                 + "<multiple-connections>true</multiple-connections></jdbc-datastore>", str1);
 
         final JdbcDatastore datastore2 = new JdbcDatastore("foo ds", "JNDI_URL", new TableType[] { TableType.VIEW,
                 TableType.ALIAS }, "mycatalog");
         assertTrue(externalizer.isExternalizable(datastore2));
         final String str2 = transform(externalizer.externalize(datastore2));
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><jdbc-datastore name=\"foo ds\">"
-                + "<datasource-jndi-url>JNDI_URL</datasource-jndi-url>"
+        assertEquals("<jdbc-datastore name=\"foo ds\">" + "<datasource-jndi-url>JNDI_URL</datasource-jndi-url>"
                 + "<table-types><table-type>VIEW</table-type><table-type>ALIAS</table-type></table-types>"
                 + "<catalog-name>mycatalog</catalog-name></jdbc-datastore>", str2);
+
+        final Element datastoreCatalogElement = externalizer.getDocument().getDocumentElement();
+        assertEquals("<configuration><datastore-catalog>" + str1 + str2 + "</datastore-catalog></configuration>",
+                transform(datastoreCatalogElement));
     }
 
     private String transform(Element elem) throws Exception {
@@ -124,7 +131,9 @@ public class DatastoreXmlExternalizerTest extends TestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Result outputTarget = new StreamResult(baos);
 
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         transformer.transform(source, outputTarget);
 
         String str = new String(baos.toByteArray());

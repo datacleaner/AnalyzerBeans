@@ -35,6 +35,8 @@ import org.eobjects.metamodel.util.FileResource;
 import org.eobjects.metamodel.util.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.google.common.base.Strings;
 
@@ -46,6 +48,23 @@ import com.google.common.base.Strings;
  * {@link JaxbConfigurationReader}.
  */
 public class DatastoreXmlExternalizer {
+
+    private final Document _document;
+
+    public DatastoreXmlExternalizer() {
+        final DocumentBuilder documentBuilder;
+        try {
+            final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        _document = documentBuilder.newDocument();
+    }
+
+    public DatastoreXmlExternalizer(Document document) {
+        _document = document;
+    }
 
     /**
      * Determines if the given datastore is externalizable by this object.
@@ -87,7 +106,7 @@ public class DatastoreXmlExternalizer {
      * @throws UnsupportedOperationException
      */
     public Element externalize(Datastore datastore) throws UnsupportedOperationException {
-        return externalize(datastore, createDocument());
+        return externalize(datastore, getDocument());
     }
 
     /**
@@ -103,23 +122,26 @@ public class DatastoreXmlExternalizer {
             throw new IllegalArgumentException("Datastore cannot be null");
         }
 
+        final Element elem;
+
         if (datastore instanceof CsvDatastore) {
             final Resource resource = ((CsvDatastore) datastore).getResource();
             final String filename = toFilename(resource);
-            return externalize((CsvDatastore) datastore, filename, doc);
-        }
-
-        if (datastore instanceof ExcelDatastore) {
+            elem = toElement((CsvDatastore) datastore, filename, doc);
+        } else if (datastore instanceof ExcelDatastore) {
             final Resource resource = ((ExcelDatastore) datastore).getResource();
             final String filename = toFilename(resource);
-            return externalize((ExcelDatastore) datastore, filename, doc);
+            elem = toElement((ExcelDatastore) datastore, filename, doc);
+        } else if (datastore instanceof JdbcDatastore) {
+            elem = toElement((JdbcDatastore) datastore, doc);
+        } else {
+            throw new UnsupportedOperationException("Non-supported datastore: " + datastore);
         }
 
-        if (datastore instanceof JdbcDatastore) {
-            return externalize((JdbcDatastore) datastore, doc);
-        }
+        final Element datastoreCatalogElement = getDatastoreCatalogElement();
+        datastoreCatalogElement.appendChild(elem);
 
-        throw new UnsupportedOperationException("Non-supported datastore: " + datastore);
+        return elem;
     }
 
     /**
@@ -149,8 +171,8 @@ public class DatastoreXmlExternalizer {
      *            property of the datastore is provided separately.
      * @return
      */
-    public Element externalize(ExcelDatastore datastore, String filename) {
-        return externalize(datastore, filename, createDocument());
+    public Element toElement(ExcelDatastore datastore, String filename) {
+        return toElement(datastore, filename, getDocument());
     }
 
     /**
@@ -159,8 +181,8 @@ public class DatastoreXmlExternalizer {
      * @param datastore
      * @return
      */
-    public Element externalize(JdbcDatastore datastore) {
-        return externalize(datastore, createDocument());
+    public Element toElement(JdbcDatastore datastore) {
+        return toElement(datastore, getDocument());
     }
 
     /**
@@ -170,7 +192,7 @@ public class DatastoreXmlExternalizer {
      * @param doc
      * @return
      */
-    public Element externalize(JdbcDatastore datastore, Document doc) {
+    public Element toElement(JdbcDatastore datastore, Document doc) {
         final Element ds = doc.createElement("jdbc-datastore");
         ds.setAttribute("name", datastore.getName());
         if (!StringUtils.isNullOrEmpty(datastore.getDescription())) {
@@ -179,13 +201,13 @@ public class DatastoreXmlExternalizer {
 
         String jndiUrl = datastore.getDatasourceJndiUrl();
         if (Strings.isNullOrEmpty(jndiUrl)) {
-            appendElement(doc, ds, "url", datastore.getJdbcUrl());
-            appendElement(doc, ds, "driver", datastore.getDriverClass());
-            appendElement(doc, ds, "username", datastore.getUsername());
-            appendElement(doc, ds, "password", datastore.getPassword());
-            appendElement(doc, ds, "multiple-connections", datastore.isMultipleConnections() + "");
+            appendElement(ds, "url", datastore.getJdbcUrl());
+            appendElement(ds, "driver", datastore.getDriverClass());
+            appendElement(ds, "username", datastore.getUsername());
+            appendElement(ds, "password", datastore.getPassword());
+            appendElement(ds, "multiple-connections", datastore.isMultipleConnections() + "");
         } else {
-            appendElement(doc, ds, "datasource-jndi-url", jndiUrl);
+            appendElement(ds, "datasource-jndi-url", jndiUrl);
         }
 
         final TableType[] tableTypes = datastore.getTableTypes();
@@ -194,13 +216,13 @@ public class DatastoreXmlExternalizer {
             ds.appendChild(tableTypesElement);
 
             for (final TableType tableType : tableTypes) {
-                appendElement(doc, tableTypesElement, "table-type", tableType.name());
+                appendElement(tableTypesElement, "table-type", tableType.name());
             }
         }
 
         final String catalogName = datastore.getCatalogName();
         if (!Strings.isNullOrEmpty(catalogName)) {
-            appendElement(doc, ds, "catalog-name", catalogName);
+            appendElement(ds, "catalog-name", catalogName);
         }
 
         return ds;
@@ -218,7 +240,7 @@ public class DatastoreXmlExternalizer {
      * @param doc
      * @return
      */
-    public Element externalize(ExcelDatastore datastore, String filename, Document doc) {
+    public Element toElement(ExcelDatastore datastore, String filename, Document doc) {
         final Element ds = doc.createElement("excel-datastore");
 
         ds.setAttribute("name", datastore.getName());
@@ -226,7 +248,7 @@ public class DatastoreXmlExternalizer {
             ds.setAttribute("description", datastore.getDescription());
         }
 
-        appendElement(doc, ds, "filename", filename);
+        appendElement(ds, "filename", filename);
 
         return ds;
     }
@@ -243,8 +265,8 @@ public class DatastoreXmlExternalizer {
      *            property of the datastore is provided separately.
      * @return a XML element representing the datastore.
      */
-    public Element externalize(CsvDatastore datastore, String filename) {
-        return externalize(datastore, filename, createDocument());
+    public Element toElement(CsvDatastore datastore, String filename) {
+        return toElement(datastore, filename, getDocument());
     }
 
     /**
@@ -261,7 +283,7 @@ public class DatastoreXmlExternalizer {
      *            the document used to create the element.
      * @return a XML element representing the datastore.
      */
-    public Element externalize(CsvDatastore datastore, String filename, Document doc) {
+    public Element toElement(CsvDatastore datastore, String filename, Document doc) {
         final Element datastoreElement = doc.createElement("csv-datastore");
         datastoreElement.setAttribute("name", datastore.getName());
 
@@ -270,30 +292,74 @@ public class DatastoreXmlExternalizer {
             datastoreElement.setAttribute("description", description);
         }
 
-        appendElement(doc, datastoreElement, "filename", filename);
-        appendElement(doc, datastoreElement, "quote-char", datastore.getQuoteChar());
-        appendElement(doc, datastoreElement, "separator-char", datastore.getSeparatorChar());
-        appendElement(doc, datastoreElement, "escape-char", datastore.getEscapeChar());
-        appendElement(doc, datastoreElement, "encoding", datastore.getEncoding());
-        appendElement(doc, datastoreElement, "fail-on-inconsistencies", datastore.isFailOnInconsistencies());
-        appendElement(doc, datastoreElement, "multiline-values", datastore.isMultilineValues());
-        appendElement(doc, datastoreElement, "header-line-number", datastore.getHeaderLineNumber());
+        appendElement(datastoreElement, "filename", filename);
+        appendElement(datastoreElement, "quote-char", datastore.getQuoteChar());
+        appendElement(datastoreElement, "separator-char", datastore.getSeparatorChar());
+        appendElement(datastoreElement, "escape-char", datastore.getEscapeChar());
+        appendElement(datastoreElement, "encoding", datastore.getEncoding());
+        appendElement(datastoreElement, "fail-on-inconsistencies", datastore.isFailOnInconsistencies());
+        appendElement(datastoreElement, "multiline-values", datastore.isMultilineValues());
+        appendElement(datastoreElement, "header-line-number", datastore.getHeaderLineNumber());
 
         return datastoreElement;
     }
 
-    private Document createDocument() {
-        final DocumentBuilder documentBuilder;
-        try {
-            final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        return documentBuilder.newDocument();
+    /**
+     * Gets the XML document that has been built.
+     * 
+     * @return
+     */
+    public Document getDocument() {
+        return _document;
     }
 
-    private void appendElement(Document doc, Element parent, String elementName, Object value) {
+    public Element getDatastoreCatalogElement() {
+        final Element configurationFileDocumentElement = getDocumentElement();
+
+        final Element datastoreCatalogElement = getOrCreateChildElementByTagName(configurationFileDocumentElement,
+                "datastore-catalog");
+        if (datastoreCatalogElement == null) {
+            throw new IllegalStateException("Could not find <datastore-catalog> element in configuration file");
+        }
+        return datastoreCatalogElement;
+    }
+
+    private Element getDocumentElement() {
+        final Document document = getDocument();
+        Element documentElement = document.getDocumentElement();
+        if (documentElement == null) {
+            documentElement = document.createElement("configuration");
+            document.appendChild(documentElement);
+        }
+        return documentElement;
+    }
+
+    private Element getOrCreateChildElementByTagName(Element element, String tagName) {
+        Element elem = getChildElementByTagName(element, tagName);
+        if (elem == null) {
+            elem = getDocument().createElement(tagName);
+            final Element configurationFileDocumentElement = getDocumentElement();
+            configurationFileDocumentElement.appendChild(elem);
+        }
+        return elem;
+    }
+
+    private Element getChildElementByTagName(Element element, String tagName) {
+        final NodeList nodeList = element.getElementsByTagName(tagName);
+        if (nodeList == null) {
+            return null;
+        }
+        final int length = nodeList.getLength();
+        for (int i = 0; i < length; i++) {
+            final Node node = nodeList.item(i);
+            if (node instanceof Element) {
+                return (Element) node;
+            }
+        }
+        return null;
+    }
+
+    private void appendElement(Element parent, String elementName, Object value) {
         if (value == null) {
             return;
         }
@@ -313,7 +379,7 @@ public class DatastoreXmlExternalizer {
             }
         }
 
-        final Element element = doc.createElement(elementName);
+        final Element element = getDocument().createElement(elementName);
         element.setTextContent(stringValue);
         parent.appendChild(element);
     }

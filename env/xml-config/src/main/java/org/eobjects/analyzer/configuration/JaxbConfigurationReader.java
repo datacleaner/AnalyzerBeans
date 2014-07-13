@@ -225,10 +225,10 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
      */
     public Configuration unmarshall(InputStream inputStream) {
         try {
-            Unmarshaller unmarshaller = _jaxbContext.createUnmarshaller();
-
+            final Unmarshaller unmarshaller = _jaxbContext.createUnmarshaller();
             unmarshaller.setEventHandler(new JaxbValidationEventHandler());
-            Configuration configuration = (Configuration) unmarshaller.unmarshal(inputStream);
+
+            final Configuration configuration = (Configuration) unmarshaller.unmarshal(inputStream);
             return configuration;
         } catch (JAXBException e) {
             throw new IllegalStateException(e);
@@ -244,7 +244,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
      */
     public void marshall(Configuration configuration, OutputStream outputStream) {
         try {
-            Marshaller marshaller = _jaxbContext.createMarshaller();
+            final Marshaller marshaller = _jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             marshaller.setEventHandler(new JaxbValidationEventHandler());
             marshaller.marshal(configuration, outputStream);
@@ -254,7 +254,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     public AnalyzerBeansConfiguration create(Configuration configuration) {
-        ConfigurationMetadataType metadata = configuration.getConfigurationMetadata();
+        final ConfigurationMetadataType metadata = configuration.getConfigurationMetadata();
         if (metadata != null) {
             logger.info("Configuration name: {}", metadata.getConfigurationName());
             logger.info("Configuration version: {}", metadata.getConfigurationVersion());
@@ -313,7 +313,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             descriptorProvider = createCustomElement(customDescriptorProviderElement, DescriptorProvider.class,
                     injectionManager, true);
         } else {
-            Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats = new HashSet<Class<? extends RenderingFormat<?>>>();
+            final Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats = new HashSet<Class<? extends RenderingFormat<?>>>();
             if (classpathScannerElement != null) {
                 final List<String> excludedRenderingFormatList = classpathScannerElement.getExcludedRenderingFormat();
                 for (String excludedRenderingFormat : excludedRenderingFormatList) {
@@ -357,7 +357,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             return new InMemoryStorageProvider();
         }
 
-        CombinedStorageProviderType combinedStorageProvider = storageProviderType.getCombined();
+        final CombinedStorageProviderType combinedStorageProvider = storageProviderType.getCombined();
         if (combinedStorageProvider != null) {
             final StorageProviderType collectionsStorage = combinedStorageProvider.getCollectionsStorage();
             final StorageProviderType rowAnnotationStorage = combinedStorageProvider.getRowAnnotationStorage();
@@ -370,36 +370,36 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             return new CombinedStorageProvider(collectionsStorageProvider, rowAnnotationStorageProvider);
         }
 
-        InMemoryStorageProviderType inMemoryStorageProvider = storageProviderType.getInMemory();
+        final InMemoryStorageProviderType inMemoryStorageProvider = storageProviderType.getInMemory();
         if (inMemoryStorageProvider != null) {
             int maxRowsThreshold = inMemoryStorageProvider.getMaxRowsThreshold();
             return new InMemoryStorageProvider(maxRowsThreshold);
         }
 
-        CustomElementType customStorageProvider = storageProviderType.getCustomStorageProvider();
+        final CustomElementType customStorageProvider = storageProviderType.getCustomStorageProvider();
         if (customStorageProvider != null) {
             return createCustomElement(customStorageProvider, StorageProvider.class, injectionManager, true);
         }
 
-        BerkeleyDbStorageProviderType berkeleyDbStorageProvider = storageProviderType.getBerkeleyDb();
+        final BerkeleyDbStorageProviderType berkeleyDbStorageProvider = storageProviderType.getBerkeleyDb();
         if (berkeleyDbStorageProvider != null) {
-            File parentDirectory = new File(_interceptor.getTemporaryStorageDirectory());
-            BerkeleyDbStorageProvider storageProvider = new BerkeleyDbStorageProvider(parentDirectory);
-            Boolean cleanDirectoryOnStartup = berkeleyDbStorageProvider.isCleanDirectoryOnStartup();
+            final File parentDirectory = new File(_interceptor.getTemporaryStorageDirectory());
+            final BerkeleyDbStorageProvider storageProvider = new BerkeleyDbStorageProvider(parentDirectory);
+            final Boolean cleanDirectoryOnStartup = berkeleyDbStorageProvider.isCleanDirectoryOnStartup();
             if (cleanDirectoryOnStartup != null && cleanDirectoryOnStartup.booleanValue()) {
                 storageProvider.cleanDirectory();
             }
             return storageProvider;
         }
 
-        HsqldbStorageProviderType hsqldbStorageProvider = storageProviderType.getHsqldb();
+        final HsqldbStorageProviderType hsqldbStorageProvider = storageProviderType.getHsqldb();
         if (hsqldbStorageProvider != null) {
             String directoryPath = hsqldbStorageProvider.getTempDirectory();
             if (directoryPath == null) {
                 directoryPath = _interceptor.getTemporaryStorageDirectory();
             }
 
-            directoryPath = _interceptor.createFilename(directoryPath);
+            directoryPath = createFilename(directoryPath);
 
             if (directoryPath == null) {
                 return new HsqldbStorageProvider();
@@ -408,14 +408,14 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             }
         }
 
-        H2StorageProviderType h2StorageProvider = storageProviderType.getH2Database();
+        final H2StorageProviderType h2StorageProvider = storageProviderType.getH2Database();
         if (h2StorageProvider != null) {
             String directoryPath = h2StorageProvider.getTempDirectory();
             if (directoryPath == null) {
                 directoryPath = _interceptor.getTemporaryStorageDirectory();
             }
 
-            directoryPath = _interceptor.createFilename(directoryPath);
+            directoryPath = createFilename(directoryPath);
 
             if (directoryPath == null) {
                 return new H2StorageProvider();
@@ -427,31 +427,36 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         throw new IllegalStateException("Unknown storage provider type: " + storageProviderType);
     }
 
+    @SuppressWarnings("deprecation")
+    private String createFilename(String filename) {
+        return _interceptor.createFilename(filename);
+    }
+
     private ReferenceDataCatalog createReferenceDataCatalog(ReferenceDataCatalogType referenceDataCatalog,
             InjectionManager injectionManager) {
-        List<Dictionary> dictionaryList = new ArrayList<Dictionary>();
-        List<SynonymCatalog> synonymCatalogList = new ArrayList<SynonymCatalog>();
+        final List<Dictionary> dictionaryList = new ArrayList<Dictionary>();
+        final List<SynonymCatalog> synonymCatalogList = new ArrayList<SynonymCatalog>();
 
-        List<StringPattern> stringPatterns = new ArrayList<StringPattern>();
+        final List<StringPattern> stringPatterns = new ArrayList<StringPattern>();
 
         if (referenceDataCatalog != null) {
 
-            Dictionaries dictionaries = referenceDataCatalog.getDictionaries();
+            final Dictionaries dictionaries = referenceDataCatalog.getDictionaries();
             if (dictionaries != null) {
                 for (Object dictionaryType : dictionaries
                         .getTextFileDictionaryOrValueListDictionaryOrDatastoreDictionary()) {
                     if (dictionaryType instanceof DatastoreDictionaryType) {
-                        DatastoreDictionaryType ddt = (DatastoreDictionaryType) dictionaryType;
+                        final DatastoreDictionaryType ddt = (DatastoreDictionaryType) dictionaryType;
 
-                        String name = ddt.getName();
+                        final String name = ddt.getName();
                         checkName(name, Dictionary.class, dictionaryList);
 
                         addVariablePath(name);
 
-                        String dsName = getStringVariable("datastoreName", ddt.getDatastoreName());
-                        String columnPath = getStringVariable("columnPath", ddt.getColumnPath());
+                        final String dsName = getStringVariable("datastoreName", ddt.getDatastoreName());
+                        final String columnPath = getStringVariable("columnPath", ddt.getColumnPath());
 
-                        DatastoreDictionary dict = new DatastoreDictionary(name, dsName, columnPath);
+                        final DatastoreDictionary dict = new DatastoreDictionary(name, dsName, columnPath);
                         dict.setDescription(ddt.getDescription());
 
                         dictionaryList.add(dict);
@@ -459,36 +464,37 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                         removeVariablePath();
 
                     } else if (dictionaryType instanceof TextFileDictionaryType) {
-                        TextFileDictionaryType tfdt = (TextFileDictionaryType) dictionaryType;
+                        final TextFileDictionaryType tfdt = (TextFileDictionaryType) dictionaryType;
 
-                        String name = tfdt.getName();
+                        final String name = tfdt.getName();
                         checkName(name, Dictionary.class, dictionaryList);
 
                         addVariablePath(name);
 
                         String filenamePath = getStringVariable("filename", tfdt.getFilename());
-                        String filename = _interceptor.createFilename(filenamePath);
+                        String filename = createFilename(filenamePath);
                         String encoding = getStringVariable("encoding", tfdt.getEncoding());
                         if (encoding == null) {
                             encoding = FileHelper.UTF_8_ENCODING;
                         }
-                        TextFileDictionary dict = new TextFileDictionary(name, filename, encoding);
+
+                        final TextFileDictionary dict = new TextFileDictionary(name, filename, encoding);
                         dict.setDescription(tfdt.getDescription());
                         dictionaryList.add(dict);
 
                         removeVariablePath();
                     } else if (dictionaryType instanceof ValueListDictionaryType) {
-                        ValueListDictionaryType vldt = (ValueListDictionaryType) dictionaryType;
+                        final ValueListDictionaryType vldt = (ValueListDictionaryType) dictionaryType;
 
-                        String name = vldt.getName();
+                        final String name = vldt.getName();
                         checkName(name, Dictionary.class, dictionaryList);
 
-                        List<String> values = vldt.getValue();
-                        SimpleDictionary dict = new SimpleDictionary(name, values);
+                        final List<String> values = vldt.getValue();
+                        final SimpleDictionary dict = new SimpleDictionary(name, values);
                         dict.setDescription(vldt.getDescription());
                         dictionaryList.add(dict);
                     } else if (dictionaryType instanceof CustomElementType) {
-                        Dictionary customDictionary = createCustomElement((CustomElementType) dictionaryType,
+                        final Dictionary customDictionary = createCustomElement((CustomElementType) dictionaryType,
                                 Dictionary.class, injectionManager, false);
                         checkName(customDictionary.getName(), Dictionary.class, dictionaryList);
                         dictionaryList.add(customDictionary);
@@ -498,52 +504,53 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 }
             }
 
-            SynonymCatalogs synonymCatalogs = referenceDataCatalog.getSynonymCatalogs();
+            final SynonymCatalogs synonymCatalogs = referenceDataCatalog.getSynonymCatalogs();
             if (synonymCatalogs != null) {
                 for (Object synonymCatalogType : synonymCatalogs
                         .getTextFileSynonymCatalogOrDatastoreSynonymCatalogOrCustomSynonymCatalog()) {
                     if (synonymCatalogType instanceof TextFileSynonymCatalogType) {
-                        TextFileSynonymCatalogType tfsct = (TextFileSynonymCatalogType) synonymCatalogType;
+                        final TextFileSynonymCatalogType tfsct = (TextFileSynonymCatalogType) synonymCatalogType;
 
-                        String name = tfsct.getName();
+                        final String name = tfsct.getName();
                         checkName(name, SynonymCatalog.class, synonymCatalogList);
 
                         addVariablePath(name);
 
-                        String filenamePath = getStringVariable("filename", tfsct.getFilename());
-                        String filename = _interceptor.createFilename(filenamePath);
+                        final String filenamePath = getStringVariable("filename", tfsct.getFilename());
+                        final String filename = createFilename(filenamePath);
                         String encoding = getStringVariable("encoding", tfsct.getEncoding());
                         if (encoding == null) {
                             encoding = FileHelper.UTF_8_ENCODING;
                         }
-                        boolean caseSensitive = getBooleanVariable("caseSensitive", tfsct.isCaseSensitive(), true);
-                        TextFileSynonymCatalog sc = new TextFileSynonymCatalog(name, filename, caseSensitive, encoding);
+                        final boolean caseSensitive = getBooleanVariable("caseSensitive", tfsct.isCaseSensitive(), true);
+                        final TextFileSynonymCatalog sc = new TextFileSynonymCatalog(name, filename, caseSensitive,
+                                encoding);
                         sc.setDescription(tfsct.getDescription());
                         synonymCatalogList.add(sc);
 
                         removeVariablePath();
 
                     } else if (synonymCatalogType instanceof CustomElementType) {
-                        SynonymCatalog customSynonymCatalog = createCustomElement(
+                        final SynonymCatalog customSynonymCatalog = createCustomElement(
                                 (CustomElementType) synonymCatalogType, SynonymCatalog.class, injectionManager, false);
                         checkName(customSynonymCatalog.getName(), SynonymCatalog.class, synonymCatalogList);
                         synonymCatalogList.add(customSynonymCatalog);
                     } else if (synonymCatalogType instanceof DatastoreSynonymCatalogType) {
-                        DatastoreSynonymCatalogType datastoreSynonymCatalogType = (DatastoreSynonymCatalogType) synonymCatalogType;
+                        final DatastoreSynonymCatalogType datastoreSynonymCatalogType = (DatastoreSynonymCatalogType) synonymCatalogType;
 
-                        String name = datastoreSynonymCatalogType.getName();
+                        final String name = datastoreSynonymCatalogType.getName();
                         checkName(name, SynonymCatalog.class, synonymCatalogList);
 
                         addVariablePath(name);
 
-                        String dataStoreName = getStringVariable("datastoreName",
+                        final String dataStoreName = getStringVariable("datastoreName",
                                 datastoreSynonymCatalogType.getDatastoreName());
-                        String masterTermColumnPath = getStringVariable("masterTermColumnPath",
+                        final String masterTermColumnPath = getStringVariable("masterTermColumnPath",
                                 datastoreSynonymCatalogType.getMasterTermColumnPath());
 
-                        String[] synonymColumnPaths = datastoreSynonymCatalogType.getSynonymColumnPath().toArray(
+                        final String[] synonymColumnPaths = datastoreSynonymCatalogType.getSynonymColumnPath().toArray(
                                 new String[0]);
-                        DatastoreSynonymCatalog sc = new DatastoreSynonymCatalog(name, dataStoreName,
+                        final DatastoreSynonymCatalog sc = new DatastoreSynonymCatalog(name, dataStoreName,
                                 masterTermColumnPath, synonymColumnPaths);
                         sc.setDescription(datastoreSynonymCatalogType.getDescription());
                         synonymCatalogList.add(sc);
@@ -555,35 +562,35 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 }
             }
 
-            StringPatterns stringPatternTypes = referenceDataCatalog.getStringPatterns();
+            final StringPatterns stringPatternTypes = referenceDataCatalog.getStringPatterns();
             if (stringPatternTypes != null) {
                 for (Object obj : stringPatternTypes.getRegexPatternOrSimplePattern()) {
                     if (obj instanceof RegexPatternType) {
-                        RegexPatternType regexPatternType = (RegexPatternType) obj;
+                        final RegexPatternType regexPatternType = (RegexPatternType) obj;
 
-                        String name = regexPatternType.getName();
+                        final String name = regexPatternType.getName();
                         checkName(name, StringPattern.class, stringPatterns);
 
                         addVariablePath(name);
 
-                        String expression = getStringVariable("expression", regexPatternType.getExpression());
-                        boolean matchEntireString = getBooleanVariable("matchEntireString",
+                        final String expression = getStringVariable("expression", regexPatternType.getExpression());
+                        final boolean matchEntireString = getBooleanVariable("matchEntireString",
                                 regexPatternType.isMatchEntireString(), true);
-                        RegexStringPattern sp = new RegexStringPattern(name, expression, matchEntireString);
+                        final RegexStringPattern sp = new RegexStringPattern(name, expression, matchEntireString);
                         sp.setDescription(regexPatternType.getDescription());
                         stringPatterns.add(sp);
 
                         removeVariablePath();
                     } else if (obj instanceof SimplePatternType) {
-                        SimplePatternType simplePatternType = (SimplePatternType) obj;
+                        final SimplePatternType simplePatternType = (SimplePatternType) obj;
 
-                        String name = simplePatternType.getName();
+                        final String name = simplePatternType.getName();
                         checkName(name, StringPattern.class, stringPatterns);
 
                         addVariablePath(name);
 
-                        String expression = getStringVariable("expression", simplePatternType.getExpression());
-                        SimpleStringPattern sp = new SimpleStringPattern(name, expression);
+                        final String expression = getStringVariable("expression", simplePatternType.getExpression());
+                        final SimpleStringPattern sp = new SimpleStringPattern(name, expression);
                         sp.setDescription(simplePatternType.getDescription());
                         stringPatterns.add(sp);
 
@@ -746,13 +753,13 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     private Datastore createDatastore(String name, CouchdbDatastoreType couchdbDatastoreType) {
-        String hostname = getStringVariable("hostname", couchdbDatastoreType.getHostname());
-        Integer port = getIntegerVariable("port", couchdbDatastoreType.getPort());
-        String username = getStringVariable("username", couchdbDatastoreType.getUsername());
-        String password = getStringVariable("password", couchdbDatastoreType.getPassword());
-        boolean sslEnabled = getBooleanVariable("ssl", couchdbDatastoreType.isSsl(), false);
+        final String hostname = getStringVariable("hostname", couchdbDatastoreType.getHostname());
+        final Integer port = getIntegerVariable("port", couchdbDatastoreType.getPort());
+        final String username = getStringVariable("username", couchdbDatastoreType.getUsername());
+        final String password = getStringVariable("password", couchdbDatastoreType.getPassword());
+        final boolean sslEnabled = getBooleanVariable("ssl", couchdbDatastoreType.isSsl(), false);
 
-        List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef> tableDefList = couchdbDatastoreType
+        final List<org.eobjects.analyzer.configuration.jaxb.CouchdbDatastoreType.TableDef> tableDefList = couchdbDatastoreType
                 .getTableDef();
         final SimpleTableDef[] tableDefs;
         if (tableDefList.isEmpty()) {
@@ -783,26 +790,27 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             }
         }
 
-        CouchDbDatastore ds = new CouchDbDatastore(name, hostname, port, username, password, sslEnabled, tableDefs);
+        final CouchDbDatastore ds = new CouchDbDatastore(name, hostname, port, username, password, sslEnabled,
+                tableDefs);
         return ds;
     }
 
     private Datastore createDatastore(String name, PojoDatastoreType pojoDatastore) {
-        JaxbPojoDatastoreAdaptor adaptor = new JaxbPojoDatastoreAdaptor();
-        PojoDatastore datastore = adaptor.read(pojoDatastore);
+        final JaxbPojoDatastoreAdaptor adaptor = new JaxbPojoDatastoreAdaptor();
+        final PojoDatastore datastore = adaptor.read(pojoDatastore);
         return datastore;
     }
 
     private Datastore createDatastore(String name, OpenOfficeDatabaseDatastoreType odbDatastoreType) {
-        String filenamePath = getStringVariable("filename", odbDatastoreType.getFilename());
-        String filename = _interceptor.createFilename(filenamePath);
-        OdbDatastore ds = new OdbDatastore(name, filename);
+        final String filenamePath = getStringVariable("filename", odbDatastoreType.getFilename());
+        final String filename = createFilename(filenamePath);
+        final OdbDatastore ds = new OdbDatastore(name, filename);
         return ds;
     }
 
     private Datastore createDatastore(String name, DbaseDatastoreType dbaseDatastoreType) {
         final String filenamePath = getStringVariable("filename", dbaseDatastoreType.getFilename());
-        final String filename = _interceptor.createFilename(filenamePath);
+        final String filename = createFilename(filenamePath);
         final DbaseDatastore ds = new DbaseDatastore(name, filename);
         return ds;
     }
@@ -815,17 +823,17 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     private Datastore createDatastore(String name, XmlDatastoreType xmlDatastoreType) {
-        String filenamePath = getStringVariable("filename", xmlDatastoreType.getFilename());
-        String filename = _interceptor.createFilename(filenamePath);
-        List<TableDef> tableDefList = xmlDatastoreType.getTableDef();
+        final String filenamePath = getStringVariable("filename", xmlDatastoreType.getFilename());
+        final String filename = createFilename(filenamePath);
+        final List<TableDef> tableDefList = xmlDatastoreType.getTableDef();
         final XmlSaxTableDef[] tableDefs;
         if (tableDefList.isEmpty()) {
             tableDefs = null;
         } else {
             tableDefs = new XmlSaxTableDef[tableDefList.size()];
             for (int i = 0; i < tableDefs.length; i++) {
-                String rowXpath = tableDefList.get(i).getRowXpath();
-                String[] valueXpaths = tableDefList.get(i).getValueXpath().toArray(new String[0]);
+                final String rowXpath = tableDefList.get(i).getRowXpath();
+                final String[] valueXpaths = tableDefList.get(i).getValueXpath().toArray(new String[0]);
                 tableDefs[i] = new XmlSaxTableDef(rowXpath, valueXpaths);
             }
         }
@@ -835,9 +843,9 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     private Datastore createDatastore(String name, AccessDatastoreType accessDatastoreType) {
-        String filenamePath = getStringVariable("filename", accessDatastoreType.getFilename());
-        String filename = _interceptor.createFilename(filenamePath);
-        AccessDatastore ds = new AccessDatastore(name, filename);
+        final String filenamePath = getStringVariable("filename", accessDatastoreType.getFilename());
+        final String filename = createFilename(filenamePath);
+        final AccessDatastore ds = new AccessDatastore(name, filename);
         return ds;
     }
 
@@ -849,13 +857,15 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
     }
 
     private Datastore createDatastore(String name, FixedWidthDatastoreType fixedWidthDatastore) {
-        String filename = _interceptor.createFilename(getStringVariable("filename", fixedWidthDatastore.getFilename()));
+        @SuppressWarnings("deprecation")
+        final String filename = _interceptor.createFilename(getStringVariable("filename",
+                fixedWidthDatastore.getFilename()));
         String encoding = getStringVariable("encoding", fixedWidthDatastore.getEncoding());
         if (!StringUtils.isNullOrEmpty(encoding)) {
             encoding = FileHelper.UTF_8_ENCODING;
         }
 
-        boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
+        final boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
                 fixedWidthDatastore.isFailOnInconsistencies(), true);
 
         Integer headerLineNumber = getIntegerVariable("headerLineNumber", fixedWidthDatastore.getHeaderLineNumber());
@@ -937,19 +947,19 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             encoding = FileHelper.UTF_8_ENCODING;
         }
 
-        boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
+        final boolean failOnInconsistencies = getBooleanVariable("failOnInconsistencies",
                 csvDatastoreType.isFailOnInconsistencies(), true);
-        
-        boolean multilineValues = getBooleanVariable("multilineValues",
-                csvDatastoreType.isMultilineValues(), true);
+
+        final boolean multilineValues = getBooleanVariable("multilineValues", csvDatastoreType.isMultilineValues(),
+                true);
 
         Integer headerLineNumber = getIntegerVariable("headerLineNumber", csvDatastoreType.getHeaderLineNumber());
         if (headerLineNumber == null) {
             headerLineNumber = CsvConfiguration.DEFAULT_COLUMN_NAME_LINE;
         }
 
-        CsvDatastore ds = new CsvDatastore(name, resource, filename, quoteChar, separatorChar, escapeChar, encoding,
-                failOnInconsistencies, multilineValues, headerLineNumber);
+        final CsvDatastore ds = new CsvDatastore(name, resource, filename, quoteChar, separatorChar, escapeChar,
+                encoding, failOnInconsistencies, multilineValues, headerLineNumber);
         return ds;
     }
 
