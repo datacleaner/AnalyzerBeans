@@ -47,9 +47,14 @@ import org.slf4j.LoggerFactory;
  * Datastore implementation for JDBC based connections. Connections can either
  * be based on JDBC urls or JNDI urls.
  */
-public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> implements UpdateableDatastore, UsernameDatastore {
+public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> implements UpdateableDatastore,
+        UsernameDatastore {
 
     private static final long serialVersionUID = 1L;
+
+    public static final String SYSTEM_PROPERTY_CONNECTION_POOL_MAX_SIZE = "datastore.jdbc.connection.pool.max.size";
+    public static final String SYSTEM_PROPERTY_CONNECTION_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS = "datastore.jdbc.connection.pool.idle.timeout";
+    public static final String SYSTEM_PROPERTY_CONNECTION_POOL_TIME_BETWEEN_EVICTION_RUNS_MILLIS = "datastore.jdbc.connection.pool.eviction.period.millis";
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcDatastore.class);
 
@@ -189,15 +194,33 @@ public class JdbcDatastore extends UsageAwareDatastore<UpdateableDataContext> im
         initializeDriver();
 
         BasicDataSource ds = new BasicDataSource();
-        ds.setMaxActive(-1);
         ds.setDefaultAutoCommit(false);
         ds.setUrl(_jdbcUrl);
+
+        ds.setMaxActive(getSystemPropertyValue(SYSTEM_PROPERTY_CONNECTION_POOL_MAX_SIZE, -1));
+        ds.setMinEvictableIdleTimeMillis(getSystemPropertyValue(
+                SYSTEM_PROPERTY_CONNECTION_POOL_MIN_EVICTABLE_IDLE_TIME_MILLIS, 500));
+        ds.setTimeBetweenEvictionRunsMillis(getSystemPropertyValue(
+                SYSTEM_PROPERTY_CONNECTION_POOL_TIME_BETWEEN_EVICTION_RUNS_MILLIS, 1000));
 
         if (_username != null && _password != null) {
             ds.setUsername(_username);
             ds.setPassword(_password);
         }
         return ds;
+    }
+
+    private int getSystemPropertyValue(String property, int defaultValue) {
+        String str = System.getProperty(property);
+        if (str == null) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            logger.debug("Failed to parse system property '{}': '{}'", property, str);
+            return defaultValue;
+        }
     }
 
     private void initializeDriver() {
