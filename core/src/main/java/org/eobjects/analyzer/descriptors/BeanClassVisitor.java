@@ -33,13 +33,13 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.metamodel.util.Predicate;
 import org.eobjects.metamodel.util.TruePredicate;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import org.kohsuke.asm5.AnnotationVisitor;
+import org.kohsuke.asm5.Attribute;
+import org.kohsuke.asm5.ClassVisitor;
+import org.kohsuke.asm5.FieldVisitor;
+import org.kohsuke.asm5.MethodVisitor;
+import org.kohsuke.asm5.Opcodes;
+import org.kohsuke.asm5.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +88,8 @@ final class BeanClassVisitor extends ClassVisitor {
                         renderingFormatClass = cls;
                     } catch (Exception e) {
                         if (_logger.isWarnEnabled()) {
-                            _logger.warn("Failed to read rendering format of renderer class '" + renderingFormatClassName + "', ignoring: " + _name, e);
+                            _logger.warn("Failed to read rendering format of renderer class '"
+                                    + renderingFormatClassName + "', ignoring: " + _name, e);
                         }
                         return;
                     }

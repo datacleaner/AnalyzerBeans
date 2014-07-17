@@ -57,7 +57,7 @@ import org.eobjects.metamodel.util.FileHelper;
 import org.eobjects.metamodel.util.Predicate;
 import org.eobjects.metamodel.util.Ref;
 import org.eobjects.metamodel.util.TruePredicate;
-import org.objectweb.asm.ClassReader;
+import org.kohsuke.asm5.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
