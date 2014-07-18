@@ -48,27 +48,27 @@ public class SchemaNavigatorTest extends TestCase {
         sn.refreshSchemas();
 
         // columns
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]", sn
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]", sn
                 .convertToColumn("email").toString());
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]", sn
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]", sn
                 .convertToColumn("employees.csv.email").toString());
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]", sn
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]", sn
                 .convertToColumn("resources.employees.csv.email").toString());
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]", sn
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]", sn
                 .convertToColumn("resources.email").toString());
 
         assertNull(sn.convertToColumns("foo", "bar", null));
         assertEquals(0, (sn.convertToColumns("foo", "bar", new String[0])).length);
 
         assertEquals(
-                "[Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], Column[name=name,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]]",
+                "[Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null], Column[name=name,columnNumber=0,type=STRING,nullable=true,nativeType=null,columnSize=null]]",
                 Arrays.toString(sn.convertToColumns(new String[] { "email", "employees.csv.name" })));
         assertEquals(
-                "[Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], null, Column[name=name,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]]",
+                "[Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null], null, Column[name=name,columnNumber=0,type=STRING,nullable=true,nativeType=null,columnSize=null]]",
                 Arrays.toString(sn.convertToColumns("resources", "employees.csv", new String[] { "email",
                         "not-existing", "name" })));
         assertEquals(
-                "[Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], null, Column[name=name,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]]",
+                "[Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null], null, Column[name=name,columnNumber=0,type=STRING,nullable=true,nativeType=null,columnSize=null]]",
                 Arrays.toString(sn
                         .convertToColumns(null, "employees.csv", new String[] { "email", "not-existing", "name" })));
 
@@ -129,7 +129,7 @@ public class SchemaNavigatorTest extends TestCase {
         SchemaNavigator sn = new SchemaNavigator(dc);
 
         Column column = sn.convertToColumn("resources.employees.csv.email");
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]",
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]",
                 column.toString());
     }
 

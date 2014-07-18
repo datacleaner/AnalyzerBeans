@@ -58,7 +58,7 @@ public class ExcelDatastoreTest extends TestCase {
 		Column col3 = con.getSchemaNavigator().convertToColumn("date");
 		assertNotNull(col3);
 		assertEquals(
-				"Column[name=date,columnNumber=2,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]",
+				"Column[name=date,columnNumber=2,type=STRING,nullable=true,nativeType=null,columnSize=null]",
 				col3.toString());
 	}
 
