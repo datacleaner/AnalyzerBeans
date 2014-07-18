@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.util;
 
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -28,16 +29,23 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.metamodel.util.EqualsBuilder;
+import org.apache.metamodel.util.HasName;
+import org.apache.metamodel.util.LegacyDeserializationObjectInputStream;
+import org.eobjects.analyzer.beans.api.ComponentCategory;
+import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.descriptors.MetricDescriptor;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.reference.TextFileDictionary;
 import org.eobjects.analyzer.reference.TextFileSynonymCatalog;
-import org.apache.metamodel.util.EqualsBuilder;
-import org.apache.metamodel.util.LegacyDeserializationObjectInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +71,13 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
      */
     private static final Map<String, Class<?>> PRIMITIVE_CLASSES = new HashMap<String, Class<?>>(8, 1.0F);
 
+    /**
+     * Since the change from eobjects.org MetaModel to Apache MetaModel, a lot
+     * of interfaces (especially those that extend {@link HasName}) have
+     * transparently changed their serialization IDs.
+     */
+    private static final Set<String> INTERFACES_WITH_SERIAL_ID_CHANGES = new HashSet<String>();
+
     static {
         PRIMITIVE_CLASSES.put("boolean", boolean.class);
         PRIMITIVE_CLASSES.put("byte", byte.class);
@@ -73,6 +88,13 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
         PRIMITIVE_CLASSES.put("float", float.class);
         PRIMITIVE_CLASSES.put("double", double.class);
         PRIMITIVE_CLASSES.put("void", void.class);
+
+        INTERFACES_WITH_SERIAL_ID_CHANGES.add(InputColumn.class.getName());
+        INTERFACES_WITH_SERIAL_ID_CHANGES.add(ComponentJob.class.getName());
+        INTERFACES_WITH_SERIAL_ID_CHANGES.add(Datastore.class.getName());
+        INTERFACES_WITH_SERIAL_ID_CHANGES.add(MetricDescriptor.class.getName());
+        INTERFACES_WITH_SERIAL_ID_CHANGES.add(PropertyDescriptor.class.getName());
+        INTERFACES_WITH_SERIAL_ID_CHANGES.add(ComponentCategory.class.getName());
     }
 
     private static final Comparator<String> comparator = new Comparator<String>() {
@@ -177,6 +199,11 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
             }
         }
 
+        if (INTERFACES_WITH_SERIAL_ID_CHANGES.contains(originalClassName)) {
+            final ObjectStreamClass newClassDescriptor = ObjectStreamClass.lookup(resolveClass(originalClassName));
+            return newClassDescriptor;
+        }
+
         return resultClassDescriptor;
     }
 
@@ -214,7 +241,7 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
         if (className.startsWith("org.eobjects.metamodel") || className.startsWith("[Lorg.eobjects.metamodel")) {
             return super.resolveClass(desc);
         }
-        return resolveClass(desc.getName());
+        return resolveClass(className);
     }
 
     private Class<?> resolveClass(String className) throws ClassNotFoundException {
