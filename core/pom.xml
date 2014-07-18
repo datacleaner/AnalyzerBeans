@@ -20,6 +20,11 @@
 			<version>${metamodel.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.metamodel</groupId>
+			<artifactId>MetaModel-hbase</artifactId>
+			<version>${metamodel.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.eobjects.metamodel-extras</groupId>
 			<artifactId>MetaModel-extras-sas</artifactId>
 			<version>${metamodel.extras.version}</version>
