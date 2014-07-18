@@ -19,9 +19,9 @@
 	<source>
 		<data-context ref="employees_csv" />
 		<columns>
-			<column id="col_name" path="employees.csv.employees.name" />
-			<column id="col_email" path="employees.csv.employees.email" />
-			<column id="col_birthdate" path="employees.birthdate" />
+			<column id="col_name" path="name" />
+			<column id="col_email" path="email" />
+			<column id="col_birthdate" path="birthdate" />
 		</columns>
 	</source>
 

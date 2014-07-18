@@ -325,7 +325,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
                 DataContext dataContext = con.getDataContext();
                 String[] schemaNames = dataContext.getSchemaNames();
                 assertEquals(
-                        "[PUBLIC, Spreadsheet2003.xls, developers.mdb, employees.csv]",
+                        "[PUBLIC, Spreadsheet2003.xls, developers.mdb, resources]",
                         Arrays.toString(schemaNames));
             } finally {
                 con.close();
