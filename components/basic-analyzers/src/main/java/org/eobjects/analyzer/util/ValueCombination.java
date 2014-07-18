@@ -42,6 +42,7 @@ public class ValueCombination<E> extends BaseObject implements Comparable<ValueC
     private static final Logger logger = LoggerFactory.getLogger(ValueCombination.class);
     private final E[] _values;
 
+    @SafeVarargs
     public ValueCombination(E... values) {
         _values = values;
     }

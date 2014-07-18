@@ -36,7 +36,6 @@ public class CoalesceDatesTransformerTest extends TestCase {
 		MockInputColumn<Date> col2 = new MockInputColumn<Date>("col2", Date.class);
 		MockInputColumn<Date> col3 = new MockInputColumn<Date>("col3", Date.class);
 
-		@SuppressWarnings("unchecked")
 		CoalesceDatesTransformer t = new CoalesceDatesTransformer(col1, col2, col3);
 		assertEquals(1, t.getOutputColumns().getColumnCount());
 

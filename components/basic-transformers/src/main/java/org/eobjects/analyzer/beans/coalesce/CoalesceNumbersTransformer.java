@@ -41,6 +41,7 @@ public class CoalesceNumbersTransformer implements Transformer<Number> {
 	public CoalesceNumbersTransformer() {
 	}
 
+	@SafeVarargs
 	public CoalesceNumbersTransformer(InputColumn<Number>... input) {
 		this();
 		this.input = input;

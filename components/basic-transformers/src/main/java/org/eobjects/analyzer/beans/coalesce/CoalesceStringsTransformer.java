@@ -46,6 +46,7 @@ public class CoalesceStringsTransformer implements Transformer<String> {
 	public CoalesceStringsTransformer() {
 	}
 
+	@SafeVarargs
 	public CoalesceStringsTransformer(InputColumn<String>... input) {
 		this();
 		this.input = input;

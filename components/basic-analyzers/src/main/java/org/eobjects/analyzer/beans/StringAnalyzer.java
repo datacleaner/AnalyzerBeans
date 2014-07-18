@@ -90,6 +90,7 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 	public StringAnalyzer() {
 	}
 
+	@SafeVarargs
 	public StringAnalyzer(InputColumn<String>... columns) {
 		_columns = columns;
 		_annotationFactory = new InMemoryRowAnnotationFactory();

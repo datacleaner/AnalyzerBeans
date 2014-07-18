@@ -101,6 +101,7 @@ public class NumberAnalyzer implements Analyzer<NumberAnalyzerResult> {
     public NumberAnalyzer() {
     }
 
+    @SafeVarargs
     public NumberAnalyzer(InputColumn<? extends Number>... columns) {
         this();
         _columns = columns;
