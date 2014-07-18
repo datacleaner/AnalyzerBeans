@@ -22,7 +22,7 @@ package org.eobjects.analyzer.metadata;
 import java.util.Collection;
 import java.util.List;
 
-import org.eobjects.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Schema;
 
 import com.google.common.collect.ImmutableList;
 

@@ -29,8 +29,8 @@ import org.eobjects.analyzer.test.MockFilter;
 import org.eobjects.analyzer.test.MockFilter.Category;
 import org.eobjects.analyzer.test.MockTransformer;
 import org.eobjects.analyzer.test.mock.MockDatastore;
-import org.eobjects.metamodel.schema.MutableColumn;
-import org.eobjects.metamodel.schema.MutableTable;
+import org.apache.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableTable;
 
 public class AnalysisJobBuilderTest extends TestCase {
 

@@ -27,8 +27,8 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
-import org.eobjects.metamodel.util.DateUtils;
-import org.eobjects.metamodel.util.Month;
+import org.apache.metamodel.util.DateUtils;
+import org.apache.metamodel.util.Month;
 
 import junit.framework.TestCase;
 

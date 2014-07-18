@@ -6,7 +6,8 @@
 		<javadoc.version>2.9.1</javadoc.version>
 		<slf4j.version>1.7.6</slf4j.version>
 		<junit.version>4.11</junit.version>
-		<metamodel.version>3.4.11</metamodel.version>
+		<metamodel.version>4.1.0-RC1-incubating</metamodel.version>
+		<metamodel.extras.version>4.0.0</metamodel.extras.version>
 		<easymock.version>3.2</easymock.version>
 		<scala.version>2.10.4</scala.version>
 		<httpcomponents.version>4.2.5</httpcomponents.version>
@@ -343,12 +344,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>${javadoc.version}</version>
-				<configuration>
-					<links>
-						<link>http://metamodel.eobjects.org/apidocs/</link>
-						<link>http://sassyreader.eobjects.org/apidocs/</link>
-					</links>
-				</configuration>
 				<reportSets>
 					<reportSet>
 						<id>aggregate</id>

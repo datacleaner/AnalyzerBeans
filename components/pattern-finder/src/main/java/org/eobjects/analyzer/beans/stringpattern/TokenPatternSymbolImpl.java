@@ -21,7 +21,7 @@ package org.eobjects.analyzer.beans.stringpattern;
 
 import java.util.Arrays;
 
-import org.eobjects.metamodel.util.EqualsBuilder;
+import org.apache.metamodel.util.EqualsBuilder;
 
 public class TokenPatternSymbolImpl implements TokenPatternSymbol {
 

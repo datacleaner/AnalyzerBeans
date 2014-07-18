@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.beans.api;
 
-import org.eobjects.metamodel.query.Query;
+import org.apache.metamodel.query.Query;
 
 /**
  * A filter which can, under certain circumstances, be optimized by using a

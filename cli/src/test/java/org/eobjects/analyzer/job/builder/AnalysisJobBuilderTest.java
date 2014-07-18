@@ -50,8 +50,8 @@ import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 
 public class AnalysisJobBuilderTest extends TestCase {
 

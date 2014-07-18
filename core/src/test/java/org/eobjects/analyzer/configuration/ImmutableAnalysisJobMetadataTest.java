@@ -27,9 +27,9 @@ import java.util.Map;
 
 import org.eobjects.analyzer.job.AnalysisJobMetadata;
 import org.eobjects.analyzer.job.ImmutableAnalysisJobMetadata;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.util.DateUtils;
-import org.eobjects.metamodel.util.Month;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.util.DateUtils;
+import org.apache.metamodel.util.Month;
 
 import junit.framework.TestCase;
 

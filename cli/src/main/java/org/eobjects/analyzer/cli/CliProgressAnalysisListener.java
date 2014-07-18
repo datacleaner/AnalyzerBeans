@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.runner.AnalysisListenerAdaptor;
 import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

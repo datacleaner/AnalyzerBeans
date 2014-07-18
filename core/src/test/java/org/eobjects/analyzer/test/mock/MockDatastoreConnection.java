@@ -22,7 +22,7 @@ package org.eobjects.analyzer.test.mock;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 
 public final class MockDatastoreConnection implements DatastoreConnection {
 

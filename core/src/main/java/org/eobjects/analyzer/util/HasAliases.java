@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.util;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Represents any object (typically a {@link HasName} instance) which has

@@ -47,7 +47,7 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.metamodel.util.Weekday;
+import org.apache.metamodel.util.Weekday;
 
 @AnalyzerBean("Week number distribution")
 @Description("Finds the distribution of week numbers from Date values.")

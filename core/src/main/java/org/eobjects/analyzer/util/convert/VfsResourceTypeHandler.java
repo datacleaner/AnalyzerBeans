@@ -24,7 +24,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.VFSUtils;
 import org.eobjects.analyzer.util.VfsResource;
 import org.eobjects.analyzer.util.convert.ResourceConverter.ResourceTypeHandler;
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.util.Resource;
 
 public class VfsResourceTypeHandler implements ResourceTypeHandler<VfsResource> {
 

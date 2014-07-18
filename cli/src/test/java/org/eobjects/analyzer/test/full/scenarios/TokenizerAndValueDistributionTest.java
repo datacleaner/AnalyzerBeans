@@ -45,9 +45,9 @@ import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 
 public class TokenizerAndValueDistributionTest extends TestCase {
 

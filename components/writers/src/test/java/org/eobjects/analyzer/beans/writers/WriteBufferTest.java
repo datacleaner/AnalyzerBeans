@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
-import org.eobjects.metamodel.util.Action;
+import org.apache.metamodel.util.Action;
 
 public class WriteBufferTest extends TestCase {
 

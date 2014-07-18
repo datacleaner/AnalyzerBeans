@@ -50,8 +50,8 @@ import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.FileHelper;
 
 public class JaxbJobWriterTest extends TestCase {
 

@@ -37,7 +37,7 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.StringUtils;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 @AnalyzerBean("Completeness analyzer")
 @Description("Asserts the completeness of your data by ensuring that all required fields are filled.")

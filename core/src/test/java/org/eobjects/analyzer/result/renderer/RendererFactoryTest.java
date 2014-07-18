@@ -33,7 +33,7 @@ import org.eobjects.analyzer.test.mock.MockRenderers.BarPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.ConditionalPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.FooPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.RenderableString;
-import org.eobjects.metamodel.data.Row;
+import org.apache.metamodel.data.Row;
 
 public class RendererFactoryTest extends TestCase {
 

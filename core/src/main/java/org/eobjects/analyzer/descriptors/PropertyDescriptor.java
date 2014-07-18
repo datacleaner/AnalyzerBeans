@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Super-interface for descriptor objects that describe metadata about

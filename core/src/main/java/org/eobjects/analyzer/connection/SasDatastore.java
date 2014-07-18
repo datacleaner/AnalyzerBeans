@@ -21,7 +21,7 @@ package org.eobjects.analyzer.connection;
 
 import java.io.File;
 
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 import org.eobjects.sassy.metamodel.SasDataContext;
 
 /**

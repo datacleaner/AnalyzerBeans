@@ -56,15 +56,15 @@ import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
 import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.csv.CsvConfiguration;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.ExclusionPredicate;
-import org.eobjects.metamodel.util.Predicate;
-import org.eobjects.metamodel.util.SimpleTableDef;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.csv.CsvConfiguration;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.ExclusionPredicate;
+import org.apache.metamodel.util.Predicate;
+import org.apache.metamodel.util.SimpleTableDef;
 import org.junit.Assert;
 
 public class JaxbConfigurationReaderTest extends TestCase {

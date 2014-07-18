@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.beans.writers;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 public enum ErrorHandlingOption implements HasName {
 	

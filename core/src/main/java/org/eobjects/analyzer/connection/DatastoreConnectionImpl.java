@@ -26,7 +26,7 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 
 public class DatastoreConnectionImpl<E extends DataContext> extends UsageAwareDatastoreConnection<E> {
 

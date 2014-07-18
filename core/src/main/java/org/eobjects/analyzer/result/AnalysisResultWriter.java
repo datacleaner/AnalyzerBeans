@@ -23,7 +23,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
-import org.eobjects.metamodel.util.Ref;
+import org.apache.metamodel.util.Ref;
 
 /**
  * Defines the interface for components that write an {@link AnalysisResult},

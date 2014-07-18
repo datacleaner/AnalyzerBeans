@@ -43,7 +43,7 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.CrosstabResult;
-import org.eobjects.metamodel.util.Month;
+import org.apache.metamodel.util.Month;
 
 @AnalyzerBean("Month distribution")
 @Description("Finds the distribution of months from Date values.")

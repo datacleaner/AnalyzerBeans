@@ -35,10 +35,10 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
-import org.eobjects.metamodel.schema.TableType;
-import org.eobjects.metamodel.util.ClasspathResource;
-import org.eobjects.metamodel.util.FileResource;
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.schema.TableType;
+import org.apache.metamodel.util.ClasspathResource;
+import org.apache.metamodel.util.FileResource;
+import org.apache.metamodel.util.Resource;
 import org.w3c.dom.Element;
 
 public class DatastoreXmlExternalizerTest extends TestCase {

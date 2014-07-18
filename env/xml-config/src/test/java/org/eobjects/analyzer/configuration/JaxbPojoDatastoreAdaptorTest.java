@@ -40,11 +40,11 @@ import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.PojoDatastoreType;
 import org.eobjects.analyzer.connection.PojoDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.pojo.ArrayTableDataProvider;
-import org.eobjects.metamodel.pojo.TableDataProvider;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.util.SimpleTableDef;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.pojo.ArrayTableDataProvider;
+import org.apache.metamodel.pojo.TableDataProvider;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.util.SimpleTableDef;
 
 public class JaxbPojoDatastoreAdaptorTest extends TestCase {
 

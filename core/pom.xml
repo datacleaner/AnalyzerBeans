@@ -15,14 +15,24 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
+			<groupId>org.apache.metamodel</groupId>
 			<artifactId>MetaModel-full</artifactId>
 			<version>${metamodel.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eobjects.sassyreader</groupId>
-			<artifactId>SassyReader</artifactId>
-			<version>0.5</version>
+			<groupId>org.eobjects.metamodel-extras</groupId>
+			<artifactId>MetaModel-extras-sas</artifactId>
+			<version>${metamodel.extras.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel-extras</groupId>
+			<artifactId>MetaModel-extras-dbase</artifactId>
+			<version>${metamodel.extras.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel-extras</groupId>
+			<artifactId>MetaModel-extras-access</artifactId>
+			<version>${metamodel.extras.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>

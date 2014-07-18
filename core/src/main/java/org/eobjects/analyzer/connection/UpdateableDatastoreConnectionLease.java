@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
-import org.eobjects.metamodel.UpdateableDataContext;
+import org.apache.metamodel.UpdateableDataContext;
 
 /**
  * Subclass of {@link DatastoreConnectionLease} for {@link UpdateableDatastore}

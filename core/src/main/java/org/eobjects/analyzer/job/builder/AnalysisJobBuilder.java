@@ -54,8 +54,8 @@ import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

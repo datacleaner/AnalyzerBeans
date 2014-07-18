@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.util.BaseObject;
 
 /**
  * Immutable implementation of {@link AnalysisJobMetadata}.

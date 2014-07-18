@@ -37,9 +37,9 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
-import org.eobjects.metamodel.UpdateableDataContext;
-import org.eobjects.metamodel.jdbc.JdbcDataContext;
-import org.eobjects.metamodel.schema.TableType;
+import org.apache.metamodel.UpdateableDataContext;
+import org.apache.metamodel.jdbc.JdbcDataContext;
+import org.apache.metamodel.schema.TableType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

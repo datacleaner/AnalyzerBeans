@@ -42,7 +42,7 @@ import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
-import org.eobjects.metamodel.query.Query;
+import org.apache.metamodel.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

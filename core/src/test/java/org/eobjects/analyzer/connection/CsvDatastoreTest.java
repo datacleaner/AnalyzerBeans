@@ -22,9 +22,9 @@ package org.eobjects.analyzer.connection;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.Resource;
 
 public class CsvDatastoreTest extends TestCase {
 

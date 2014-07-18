@@ -43,10 +43,10 @@ import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.util.InputColumnComparator;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.schema.MutableColumn;
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.HasNameMapper;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.MutableColumn;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.HasNameMapper;
 
 public class TransformerJobBuilderTest extends TestCase {
 

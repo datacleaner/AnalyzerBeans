@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.util.Resource;
 
 /**
  * Interface for datastores that are based upon a {@link Resource}.

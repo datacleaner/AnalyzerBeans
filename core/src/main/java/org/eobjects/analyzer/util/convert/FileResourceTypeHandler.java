@@ -23,8 +23,8 @@ import java.io.File;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.convert.ResourceConverter.ResourceTypeHandler;
-import org.eobjects.metamodel.util.FileResource;
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.util.FileResource;
+import org.apache.metamodel.util.Resource;
 
 /**
  * {@link ResourceTypeHandler} for {@link FileResource}s.

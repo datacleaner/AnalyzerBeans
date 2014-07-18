@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
-import org.eobjects.metamodel.sugarcrm.SugarCrmDataContext;
+import org.apache.metamodel.sugarcrm.SugarCrmDataContext;
 
 /**
  * A datastore that connects to a SugarCRM instance to fetch data

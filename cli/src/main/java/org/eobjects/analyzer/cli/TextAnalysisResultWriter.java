@@ -31,7 +31,7 @@ import org.eobjects.analyzer.result.AnalysisResultWriter;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
-import org.eobjects.metamodel.util.Ref;
+import org.apache.metamodel.util.Ref;
 
 public class TextAnalysisResultWriter implements AnalysisResultWriter {
 

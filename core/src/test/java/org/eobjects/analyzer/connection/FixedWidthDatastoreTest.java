@@ -21,8 +21,8 @@ package org.eobjects.analyzer.connection;
 
 import java.util.Arrays;
 
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
 
 import junit.framework.TestCase;
 

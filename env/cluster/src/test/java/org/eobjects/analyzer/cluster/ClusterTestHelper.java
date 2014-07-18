@@ -64,11 +64,11 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.JobStatus;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.UpdateCallback;
-import org.eobjects.metamodel.UpdateScript;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.schema.Schema;
+import org.apache.metamodel.UpdateCallback;
+import org.apache.metamodel.UpdateScript;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.Schema;
 import org.junit.Assert;
 
 public class ClusterTestHelper {

@@ -31,7 +31,7 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.JobStatus;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.metamodel.util.LazyRef;
+import org.apache.metamodel.util.LazyRef;
 
 /**
  * An {@link AnalysisResultFuture} implementation which uses a {@link LazyRef}

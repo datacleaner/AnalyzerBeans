@@ -21,8 +21,8 @@ package org.eobjects.analyzer.util.convert;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.convert.ResourceConverter.ResourceTypeHandler;
-import org.eobjects.metamodel.util.ClasspathResource;
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.util.ClasspathResource;
+import org.apache.metamodel.util.Resource;
 
 /**
  * {@link ResourceTypeHandler} for {@link ClasspathResource}s.

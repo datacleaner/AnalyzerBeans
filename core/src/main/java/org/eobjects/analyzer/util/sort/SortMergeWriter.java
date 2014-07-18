@@ -37,7 +37,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.eobjects.analyzer.util.ImmutableEntry;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

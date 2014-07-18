@@ -28,9 +28,9 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.util.VFSUtils;
 import org.eobjects.analyzer.util.VfsResource;
 import org.eobjects.analyzer.util.convert.ResourceConverter.ResourceTypeHandler;
-import org.eobjects.metamodel.util.FileResource;
-import org.eobjects.metamodel.util.Resource;
-import org.eobjects.metamodel.util.UrlResource;
+import org.apache.metamodel.util.FileResource;
+import org.apache.metamodel.util.Resource;
+import org.apache.metamodel.util.UrlResource;
 
 public class ResourceConverterTest extends TestCase {
 

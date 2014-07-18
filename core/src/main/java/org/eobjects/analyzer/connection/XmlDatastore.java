@@ -25,10 +25,10 @@ import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.xml.XmlSaxDataContext;
-import org.eobjects.metamodel.xml.XmlSaxTableDef;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.DataContextFactory;
+import org.apache.metamodel.xml.XmlSaxDataContext;
+import org.apache.metamodel.xml.XmlSaxTableDef;
 
 /**
  * Datastore implementation for XML files.

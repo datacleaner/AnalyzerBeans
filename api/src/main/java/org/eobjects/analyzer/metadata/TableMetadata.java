@@ -21,8 +21,8 @@ package org.eobjects.analyzer.metadata;
 
 import java.util.List;
 
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Defines metadata about a {@link Table}.

@@ -41,9 +41,9 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.eobjects.metamodel.MetaModelHelper;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.MetaModelHelper;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 
 /**
  * Class which partitions a single {@link AnalysisJob}'s components into

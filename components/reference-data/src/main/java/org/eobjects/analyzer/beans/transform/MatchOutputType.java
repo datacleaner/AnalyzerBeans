@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Defines a type of matching output, which can be either true/false or the

@@ -22,10 +22,10 @@ package org.eobjects.analyzer.util;
 import java.util.Arrays;
 
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
 
 /**
  * A convenient component used for exploring/navigating the schema of a

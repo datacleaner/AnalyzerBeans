@@ -36,7 +36,7 @@ import java.util.TreeMap;
 
 import org.eobjects.analyzer.reference.TextFileDictionary;
 import org.eobjects.analyzer.reference.TextFileSynonymCatalog;
-import org.eobjects.metamodel.util.EqualsBuilder;
+import org.apache.metamodel.util.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

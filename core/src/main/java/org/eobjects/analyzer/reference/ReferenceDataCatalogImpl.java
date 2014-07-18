@@ -26,9 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.HasName;
-import org.eobjects.metamodel.util.HasNameMapper;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.HasName;
+import org.apache.metamodel.util.HasNameMapper;
 
 public class ReferenceDataCatalogImpl implements ReferenceDataCatalog {
 

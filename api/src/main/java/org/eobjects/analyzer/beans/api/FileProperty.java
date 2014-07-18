@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 
 import javax.inject.Qualifier;
 
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.util.Resource;
 
 /**
  * Annotation containing supplementary metadata about a {@link File} or

@@ -38,7 +38,7 @@ import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * Helper class to perform the somewhat intricate

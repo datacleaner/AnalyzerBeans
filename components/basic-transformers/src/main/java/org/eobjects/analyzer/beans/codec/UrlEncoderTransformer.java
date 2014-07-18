@@ -29,7 +29,7 @@ import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MockInputColumn;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;

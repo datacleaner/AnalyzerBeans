@@ -31,7 +31,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.job.AnalysisJobMetadata;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * A class that represents a mapping between column paths as defined in a

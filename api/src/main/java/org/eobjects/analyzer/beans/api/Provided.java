@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
  * <li>org.eobjects.analyzer.storage.CollectionFactory</li>
  * <li>org.eobjects.analyzer.storage.RowAnnotationFactory</li>
  * <li>org.eobjecta.analyzer.util.SchemaNavigator</li>
- * <li>org.eobjects.metamodel.DataContext</li>
+ * <li>org.apache.metamodel.DataContext</li>
  * </ul>
  * Generic/parameterized types for the List, Set or Map can be any of:
  * <ul>

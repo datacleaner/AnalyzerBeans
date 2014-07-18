@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.ReadObjectBuilder.Moved;
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 public abstract class AbstractReferenceData extends BaseObject implements ReferenceData {
 

@@ -24,8 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.util.MutableRef;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.util.MutableRef;
 
 public class UsageAwareDatastoreConnectionTest extends TestCase {
 

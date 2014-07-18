@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.test.mock.MockDatastore;
-import org.eobjects.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableColumn;
 
 public class SourceColumnMappingTest extends TestCase {
 

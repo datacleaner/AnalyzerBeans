@@ -20,8 +20,8 @@
 package org.eobjects.analyzer.data;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.ColumnType;
 
 public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 

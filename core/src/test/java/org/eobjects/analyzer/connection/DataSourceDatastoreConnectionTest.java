@@ -31,7 +31,7 @@ import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Table;
 import org.springframework.mock.jndi.SimpleNamingContext;
 
 public class DataSourceDatastoreConnectionTest extends TestCase {

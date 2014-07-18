@@ -52,9 +52,9 @@ import org.slf4j.LoggerFactory;
  * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
  * <li>org.eobjects.analyzer.reference.StringPattern</li>
  * <li>org.eobjects.analyzer.connection.Datastore</li>
- * <li>org.eobjects.metamodel.schema.Column</li>
- * <li>org.eobjects.metamodel.schema.Table</li>
- * <li>org.eobjects.metamodel.schema.Schema</li>
+ * <li>org.apache.metamodel.schema.Column</li>
+ * <li>org.apache.metamodel.schema.Table</li>
+ * <li>org.apache.metamodel.schema.Schema</li>
  * </ul>
  */
 public final class StringConverter {
