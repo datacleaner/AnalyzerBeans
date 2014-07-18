@@ -211,7 +211,7 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
     @Override
     protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
         final String className = desc.getName();
-        if (className.startsWith("org.apache.metamodel") || className.startsWith("[Lorg.apache.metamodel")) {
+        if (className.startsWith("org.eobjects.metamodel") || className.startsWith("[Lorg.eobjects.metamodel")) {
             return super.resolveClass(desc);
         }
         return resolveClass(desc.getName());
