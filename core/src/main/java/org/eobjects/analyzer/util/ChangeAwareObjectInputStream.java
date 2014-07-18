@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import org.eobjects.analyzer.reference.TextFileDictionary;
 import org.eobjects.analyzer.reference.TextFileSynonymCatalog;
 import org.apache.metamodel.util.EqualsBuilder;
+import org.apache.metamodel.util.LegacyDeserializationObjectInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * 
  * 
  */
-public class ChangeAwareObjectInputStream extends ObjectInputStream {
+public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInputStream {
 
     private static final Logger logger = LoggerFactory.getLogger(ChangeAwareObjectInputStream.class);
 
@@ -209,6 +210,10 @@ public class ChangeAwareObjectInputStream extends ObjectInputStream {
 
     @Override
     protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+        final String className = desc.getName();
+        if (className.startsWith("org.apache.metamodel") || className.startsWith("[Lorg.apache.metamodel")) {
+            return super.resolveClass(desc);
+        }
         return resolveClass(desc.getName());
     }
 

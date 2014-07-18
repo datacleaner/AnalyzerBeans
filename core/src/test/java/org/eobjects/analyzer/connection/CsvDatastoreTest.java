@@ -35,8 +35,8 @@ public class CsvDatastoreTest extends TestCase {
         assertNotNull(col);
 
         Table table = datastore.openConnection().getDataContext().getDefaultSchema().getTables()[0];
-        assertEquals("projects", table.getName());
-        col = schemaNavigator.convertToColumn("projects.product");
+        assertEquals("projects.csv", table.getName());
+        col = schemaNavigator.convertToColumn("projects.csv.product");
         assertNotNull(col);
     }
     

@@ -14,7 +14,7 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
+			<groupId>org.apache.metamodel</groupId>
 			<artifactId>MetaModel-full</artifactId>
 			<version>${metamodel.version}</version>
 		</dependency>

@@ -82,6 +82,11 @@ public class VfsResource implements Resource {
             throw new ResourceException(this, e);
         }
     }
+    
+    @Override
+    public String getQualifiedPath() {
+        return _fileObject.getName().getURI();
+    }
 
     @Override
     public long getSize() {
@@ -173,5 +178,4 @@ public class VfsResource implements Resource {
             throw new ResourceException(this, e);
         }
     }
-
 }

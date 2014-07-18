@@ -22,7 +22,7 @@ package org.eobjects.analyzer.connection;
 import java.io.File;
 
 import org.apache.metamodel.DataContext;
-import org.eobjects.sassy.metamodel.SasDataContext;
+import org.eobjects.metamodel.sas.metamodel.SasDataContext;
 
 /**
  * Datastore implementation for directories with SAS datasets.

@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
 
-import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.apache.metamodel.DataContext;
-import org.apache.metamodel.access.AccessDataContext;
+import org.eobjects.analyzer.util.ReadObjectBuilder;
+import org.eobjects.metamodel.access.AccessDataContext;
 
 /**
  * Datastore implementation for MS Access databases.

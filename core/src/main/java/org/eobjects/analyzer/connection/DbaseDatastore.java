@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
 
-import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.apache.metamodel.DataContext;
-import org.apache.metamodel.DataContextFactory;
+import org.eobjects.analyzer.util.ReadObjectBuilder;
+import org.eobjects.metamodel.deebase.DbaseDataContext;
 
 /**
  * Datastore implementation for dBase databases.
@@ -52,7 +52,7 @@ public final class DbaseDatastore extends UsageAwareDatastore<DataContext> imple
 
 	@Override
 	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
-		DataContext dc = DataContextFactory.createDbaseDataContext(_filename);
+		DataContext dc = new DbaseDataContext(_filename);
 		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}
 
