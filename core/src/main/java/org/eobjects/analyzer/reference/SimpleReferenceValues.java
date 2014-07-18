@@ -41,7 +41,8 @@ public final class SimpleReferenceValues<E> extends BaseObject implements Refere
 
 	private final E[] _values;
 
-	public SimpleReferenceValues(E... values) {
+	@SafeVarargs
+    public SimpleReferenceValues(E... values) {
 		_values = values;
 	}
 

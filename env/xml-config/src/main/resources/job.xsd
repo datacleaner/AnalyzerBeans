@@ -168,8 +168,8 @@
 	</complexType>
 
 	<complexType name="outputType">
-		<attribute name="name" type="string" use="optional" />
 		<attribute name="id" type="token" use="required" />
+		<attribute name="name" type="string" use="optional" />
 		<attribute name="hidden" type="boolean" use="optional"></attribute>
 	</complexType>
 
@@ -195,8 +195,8 @@
 	</complexType>
 
 	<complexType name="outcomeType">
-		<attribute name="category" type="string" use="required" />
 		<attribute name="id" type="token" use="required" />
+		<attribute name="category" type="string" use="required" />
 	</complexType>
 
 	<complexType name="configuredPropertiesType">
