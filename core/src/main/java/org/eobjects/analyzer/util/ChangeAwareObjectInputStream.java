@@ -95,6 +95,7 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
         INTERFACES_WITH_SERIAL_ID_CHANGES.add(MetricDescriptor.class.getName());
         INTERFACES_WITH_SERIAL_ID_CHANGES.add(PropertyDescriptor.class.getName());
         INTERFACES_WITH_SERIAL_ID_CHANGES.add(ComponentCategory.class.getName());
+        INTERFACES_WITH_SERIAL_ID_CHANGES.add("org.eobjects.analyzer.beans.writers.WriteDataResult");
     }
 
     private static final Comparator<String> comparator = new Comparator<String>() {
@@ -239,7 +240,7 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
     @Override
     protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
         final String className = desc.getName();
-        if (className.startsWith("org.eobjects.metamodel") || className.startsWith("[Lorg.eobjects.metamodel")) {
+        if (className.startsWith("org.apache.metamodel") || className.startsWith("[Lorg.apache.metamodel")) {
             return super.resolveClass(desc);
         }
         return resolveClass(className);
