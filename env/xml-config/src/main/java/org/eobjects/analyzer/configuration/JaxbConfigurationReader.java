@@ -144,6 +144,7 @@ import org.eobjects.analyzer.util.convert.StringConverter;
 import org.apache.metamodel.csv.CsvConfiguration;
 import org.apache.metamodel.fixedwidth.FixedWidthConfiguration;
 import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.ColumnTypeImpl;
 import org.apache.metamodel.schema.TableType;
 import org.apache.metamodel.util.FileHelper;
 import org.apache.metamodel.util.Resource;
@@ -738,7 +739,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                     if (StringUtils.isNullOrEmpty(propertyTypeName)) {
                         propertyType = ColumnType.VARCHAR;
                     } else {
-                        propertyType = ColumnType.valueOf(propertyTypeName);
+                        propertyType = ColumnTypeImpl.valueOf(propertyTypeName);
                     }
                     propertyNames[j] = propertyName;
                     columnTypes[j] = propertyType;
@@ -780,7 +781,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                     if (StringUtils.isNullOrEmpty(propertyTypeName)) {
                         propertyType = ColumnType.VARCHAR;
                     } else {
-                        propertyType = ColumnType.valueOf(propertyTypeName);
+                        propertyType = ColumnTypeImpl.valueOf(propertyTypeName);
                     }
                     propertyNames[j] = propertyName;
                     columnTypes[j] = propertyType;

@@ -279,7 +279,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("pass", couchDbDatastore.getPassword());
         assertEquals(true, couchDbDatastore.isSslEnabled());
         assertEquals(1, couchDbDatastore.getTableDefs().length);
-        assertEquals("SimpleDbTableDef[name=foobar,columnNames=[foo, bar, baz],columnTypes=[MAP, INTEGER, VARCHAR]]",
+        assertEquals("SimpleTableDef[name=foobar,columnNames=[foo, bar, baz],columnTypes=[MAP, INTEGER, VARCHAR]]",
                 couchDbDatastore.getTableDefs()[0].toString());
 
         MongoDbDatastore mongoDbDatastore = (MongoDbDatastore) datastoreCatalog.getDatastore("my mongo");
@@ -288,7 +288,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals(27017, mongoDbDatastore.getPort());
         SimpleTableDef[] tableDefs = mongoDbDatastore.getTableDefs();
         assertEquals(
-                "[SimpleDbTableDef[name=my_col_1,columnNames=[foo, bar, baz],columnTypes=[VARCHAR, INTEGER, DATE]]]",
+                "[SimpleTableDef[name=my_col_1,columnNames=[foo, bar, baz],columnTypes=[VARCHAR, INTEGER, DATE]]]",
                 Arrays.toString(tableDefs));
 
         XmlDatastore xmlDatastore = (XmlDatastore) datastoreCatalog.getDatastore("my_sax_xml");

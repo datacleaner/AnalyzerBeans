@@ -39,6 +39,20 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.MetaModelHelper;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.data.Row;
+import org.apache.metamodel.pojo.ArrayTableDataProvider;
+import org.apache.metamodel.pojo.TableDataProvider;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.ColumnTypeImpl;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.SimpleTableDef;
 import org.eobjects.analyzer.configuration.jaxb.AbstractDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.PojoDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.PojoTableType;
@@ -51,19 +65,6 @@ import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.apache.metamodel.DataContext;
-import org.apache.metamodel.MetaModelHelper;
-import org.apache.metamodel.data.DataSet;
-import org.apache.metamodel.data.Row;
-import org.apache.metamodel.pojo.ArrayTableDataProvider;
-import org.apache.metamodel.pojo.TableDataProvider;
-import org.apache.metamodel.query.Query;
-import org.apache.metamodel.schema.Column;
-import org.apache.metamodel.schema.ColumnType;
-import org.apache.metamodel.schema.Schema;
-import org.apache.metamodel.schema.Table;
-import org.apache.metamodel.util.CollectionUtils;
-import org.apache.metamodel.util.SimpleTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -103,7 +104,7 @@ public class JaxbPojoDatastoreAdaptor {
             for (int i = 0; i < columnCount; i++) {
                 final Columns.Column column = columns.get(i);
                 columnNames[i] = column.getName();
-                columnTypes[i] = ColumnType.valueOf(column.getType());
+                columnTypes[i] = ColumnTypeImpl.valueOf(column.getType());
             }
 
             final SimpleTableDef tableDef = new SimpleTableDef(tableName, columnNames, columnTypes);

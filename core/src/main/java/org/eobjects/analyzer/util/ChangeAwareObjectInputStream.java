@@ -181,6 +181,7 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
         final ObjectStreamClass resultClassDescriptor = super.readClassDescriptor();
 
         final String originalClassName = resultClassDescriptor.getName();
+        
         if (renamedClasses.containsKey(originalClassName)) {
             final String className = renamedClasses.get(originalClassName);
             logger.info("Class '{}' was encountered. Returning class descriptor of new class name: '{}'",
@@ -243,19 +244,19 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
         }
         return resolveClass(className);
     }
-
+    
     private Class<?> resolveClass(String className) throws ClassNotFoundException {
         logger.debug("Resolving class '{}'", className);
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
-            Class<?> primitiveClass = PRIMITIVE_CLASSES.get(className);
+            final Class<?> primitiveClass = PRIMITIVE_CLASSES.get(className);
             if (primitiveClass != null) {
                 return primitiveClass;
             }
 
             logger.info("Class '{}' was not resolved in main class loader.", className);
-            List<Exception> exceptions = new ArrayList<Exception>(additionalClassLoaders.size());
+            final List<Exception> exceptions = new ArrayList<Exception>(additionalClassLoaders.size());
             for (ClassLoader classLoader : additionalClassLoaders) {
                 try {
                     return Class.forName(className, true, classLoader);
@@ -270,7 +271,7 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
             // if we reach this stage, all classloaders have failed, log their
             // issues
             int i = 1;
-            for (Exception exception : exceptions) {
+            for (final Exception exception : exceptions) {
                 int numExceptions = exceptions.size();
                 logger.error("Exception " + i + " of " + numExceptions, exception);
                 i++;

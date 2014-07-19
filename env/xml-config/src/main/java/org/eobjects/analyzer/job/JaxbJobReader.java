@@ -43,6 +43,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.FileHelper;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.api.Filter;
@@ -91,8 +93,6 @@ import org.eobjects.analyzer.job.jaxb.VariablesType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.apache.metamodel.schema.Column;
-import org.apache.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -264,7 +264,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                     types.add(null);
                 } else {
                     try {
-                        final org.apache.metamodel.schema.ColumnType type = org.apache.metamodel.schema.ColumnType
+                        final org.apache.metamodel.schema.ColumnType type = org.apache.metamodel.schema.ColumnTypeImpl
                                 .valueOf(typeName);
                         types.add(type);
                     } catch (IllegalArgumentException e) {
