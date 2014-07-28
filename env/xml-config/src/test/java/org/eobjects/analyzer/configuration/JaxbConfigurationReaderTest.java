@@ -28,6 +28,16 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.csv.CsvConfiguration;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.hbase.HBaseConfiguration;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.ExclusionPredicate;
+import org.apache.metamodel.util.Predicate;
+import org.apache.metamodel.util.SimpleTableDef;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.connection.CouchDbDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -35,6 +45,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
+import org.eobjects.analyzer.connection.HBaseDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.connection.PojoDatastore;
@@ -56,15 +67,6 @@ import org.eobjects.analyzer.storage.BerkeleyDbStorageProvider;
 import org.eobjects.analyzer.storage.CombinedStorageProvider;
 import org.eobjects.analyzer.storage.HsqldbStorageProvider;
 import org.eobjects.analyzer.storage.StorageProvider;
-import org.apache.metamodel.DataContext;
-import org.apache.metamodel.csv.CsvConfiguration;
-import org.apache.metamodel.data.DataSet;
-import org.apache.metamodel.schema.Column;
-import org.apache.metamodel.schema.Schema;
-import org.apache.metamodel.schema.Table;
-import org.apache.metamodel.util.ExclusionPredicate;
-import org.apache.metamodel.util.Predicate;
-import org.apache.metamodel.util.SimpleTableDef;
 import org.junit.Assert;
 
 public class JaxbConfigurationReaderTest extends TestCase {
@@ -79,13 +81,13 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
         assertTrue("Unexpected separator: " + csv.getSeparatorChar(), '\t' == csv.getSeparatorChar());
         assertTrue("Unexpected escape: " + csv.getEscapeChar(), CsvConfiguration.NOT_A_CHAR == csv.getEscapeChar());
-        
+
         assertTrue(csv.isMultilineValues());
-        
+
         csv = (CsvDatastore) configuration.getDatastoreCatalog().getDatastore("csv_quot");
-        
+
         assertEquals("\"", csv.getQuoteChar().toString());
-        
+
         assertFalse(csv.isMultilineValues());
     }
 
@@ -206,7 +208,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
         String[] datastoreNames = datastoreCatalog.getDatastoreNames();
         assertEquals(
-                "[my couch, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, "
+                "[my couch, my hbase, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, "
                         + "my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_pojo, "
                         + "my_sas, my_sax_xml, my_sfdc_ds, my_sugarcrm]", Arrays.toString(datastoreNames));
 
@@ -220,7 +222,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertTrue(myCsvDatastore.isMultilineValues());
         assertTrue(myCsvDatastore.isFailOnInconsistencies());
         assertEquals('\\', myCsvDatastore.getEscapeChar().charValue());
-        
+
         assertEquals("a SugarCRM instance", datastoreCatalog.getDatastore("my_sugarcrm").getDescription());
         assertEquals("dom xml", datastoreCatalog.getDatastore("my_dom_xml").getDescription());
         assertEquals("sax xml", datastoreCatalog.getDatastore("my_sax_xml").getDescription());
@@ -307,11 +309,24 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertEquals("[4, 17, 19]", Arrays.toString(ds.getValueWidths()));
         assertEquals(1, ds.getHeaderLineNumber());
 
+        HBaseDatastore hbaseDatastore = (HBaseDatastore) datastoreCatalog.getDatastore("my hbase");
+        assertEquals("HBaseDatastore[name=my hbase]", hbaseDatastore.toString());
+        assertEquals("localhost", hbaseDatastore.getZookeeperHostname());
+        assertEquals(HBaseConfiguration.DEFAULT_ZOOKEEPER_PORT, hbaseDatastore.getZookeeperPort());
+        tableDefs = hbaseDatastore.getTableDefs();
+        assertNotNull(tableDefs);
+        assertEquals(2, tableDefs.length);
+        assertEquals(
+                "SimpleTableDef[name=table1,columnNames=[fam1:foo, fam1:bar, fam2:baz],columnTypes=[STRING, STRING, INTEGER]]",
+                tableDefs[0].toString());
+        assertEquals("SimpleTableDef[name=table2,columnNames=[fam3:hello, fam3:world],columnTypes=[STRING, VARCHAR]]",
+                tableDefs[1].toString());
+
         for (String name : datastoreNames) {
             // test that all connections, except the JNDI-, MongoDB- and
             // CouchDB-based on will work
             if (!"my_jdbc_datasource".equals(name) && !"my mongo".equals(name) && !"my couch".equals(name)
-                    && !"my_sfdc_ds".equals(name) && !"my_sugarcrm".equals(name)) {
+                    && !"my hbase".equals(name) && !"my_sfdc_ds".equals(name) && !"my_sugarcrm".equals(name)) {
                 Datastore datastore = datastoreCatalog.getDatastore(name);
                 DataContext dc = datastore.openConnection().getDataContext();
                 assertNotNull(dc);
@@ -320,15 +335,10 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
         Datastore compositeDatastore = datastoreCatalog.getDatastore("my_composite");
         {
-            DatastoreConnection con = compositeDatastore.openConnection();
-            try {
+            try (DatastoreConnection con = compositeDatastore.openConnection();) {
                 DataContext dataContext = con.getDataContext();
                 String[] schemaNames = dataContext.getSchemaNames();
-                assertEquals(
-                        "[PUBLIC, Spreadsheet2003.xls, developers.mdb, resources]",
-                        Arrays.toString(schemaNames));
-            } finally {
-                con.close();
+                assertEquals("[PUBLIC, Spreadsheet2003.xls, developers.mdb, resources]", Arrays.toString(schemaNames));
             }
         }
     }

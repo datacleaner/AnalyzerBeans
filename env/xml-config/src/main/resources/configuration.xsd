@@ -193,6 +193,14 @@
 						</documentation>
 					</annotation>
 				</element>
+				<element name="hbase-datastore" type="ab:hbaseDatastoreType">
+					<annotation>
+						<documentation>
+							Defines a datastore based on an Apache HBase
+							database.
+						</documentation>
+					</annotation>
+				</element>
 				<element name="mongodb-datastore" type="ab:mongodbDatastoreType">
 					<annotation>
 						<documentation>
@@ -203,7 +211,8 @@
 				<element name="couchdb-datastore" type="ab:couchdbDatastoreType">
 					<annotation>
 						<documentation>
-							Defines a datastore based on a CouchDB database.
+							Defines a datastore based on an Apache CouchDB
+							database.
 						</documentation>
 					</annotation>
 				</element>
@@ -452,6 +461,38 @@
 				</complexType>
 			</element>
 		</sequence>
+	</complexType>
+
+	<complexType name="hbaseDatastoreType">
+		<complexContent>
+			<extension base="ab:abstractDatastoreType">
+				<sequence>
+					<element name="zookeeper-hostname" minOccurs="0" maxOccurs="1"
+						type="string" />
+					<element name="zookeeper-port" minOccurs="0" maxOccurs="1"
+						type="int" />
+					<element name="table-def" minOccurs="0" maxOccurs="unbounded">
+						<complexType>
+							<sequence>
+								<element name="name" minOccurs="1" maxOccurs="1" type="normalizedString" />
+								<element name="column" minOccurs="1" maxOccurs="unbounded">
+									<complexType>
+										<sequence>
+											<element name="family" minOccurs="0" maxOccurs="1"
+												type="normalizedString" />
+											<element name="name" minOccurs="1" maxOccurs="1"
+												type="normalizedString" />
+											<element name="type" minOccurs="0" maxOccurs="1"
+												type="normalizedString" />
+										</sequence>
+									</complexType>
+								</element>
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
 	</complexType>
 
 	<complexType name="mongodbDatastoreType">

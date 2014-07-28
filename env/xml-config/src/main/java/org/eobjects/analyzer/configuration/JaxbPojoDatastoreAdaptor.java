@@ -422,14 +422,11 @@ public class JaxbPojoDatastoreAdaptor {
             final DocumentBuilder documentBuilder = createDocumentBuilder();
             final Document document = documentBuilder.newDocument();
             final Rows rowsType = new Rows();
-            final DataSet ds = dataContext.executeQuery(q);
-            try {
+            try (final DataSet ds = dataContext.executeQuery(q)) {
                 while (ds.next()) {
-                    Row row = ds.getRow();
+                    final Row row = ds.getRow();
                     rowsType.getRow().add(createPojoRow(row, document));
                 }
-            } finally {
-                ds.close();
             }
 
             tableType.setRows(rowsType);
@@ -437,13 +434,14 @@ public class JaxbPojoDatastoreAdaptor {
 
         return tableType;
     }
-    
-    public AbstractDatastoreType createPojoDatastore(final String datastoreName, final String schemaName, final Collection<PojoTableType> tables) {
+
+    public AbstractDatastoreType createPojoDatastore(final String datastoreName, final String schemaName,
+            final Collection<PojoTableType> tables) {
         final PojoDatastoreType datastoreType = new PojoDatastoreType();
         datastoreType.setName(datastoreName);
         datastoreType.setSchemaName(schemaName);
         datastoreType.getTable().addAll(tables);
-        
+
         return datastoreType;
     }
 
@@ -468,8 +466,7 @@ public class JaxbPojoDatastoreAdaptor {
         datastoreType.setName(datastore.getName());
         datastoreType.setDescription(datastore.getDescription());
 
-        final DatastoreConnection con = datastore.openConnection();
-        try {
+        try (final DatastoreConnection con = datastore.openConnection()) {
             final DataContext dataContext = con.getDataContext();
 
             final Schema schema;
@@ -499,8 +496,6 @@ public class JaxbPojoDatastoreAdaptor {
                 final PojoTableType tableType = createPojoTable(dataContext, table, usedColumns, maxRowsToQuery);
                 datastoreType.getTable().add(tableType);
             }
-        } finally {
-            con.close();
         }
 
         return datastoreType;

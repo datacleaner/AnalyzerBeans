@@ -64,6 +64,7 @@ import org.eobjects.analyzer.configuration.jaxb.ExcelDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.FixedWidthDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.FixedWidthDatastoreType.WidthSpecification;
 import org.eobjects.analyzer.configuration.jaxb.H2StorageProviderType;
+import org.eobjects.analyzer.configuration.jaxb.HbaseDatastoreType.TableDef.Column;
 import org.eobjects.analyzer.configuration.jaxb.HsqldbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.InMemoryStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
@@ -77,6 +78,7 @@ import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.Dictionaries;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.StringPatterns;
 import org.eobjects.analyzer.configuration.jaxb.ReferenceDataCatalogType.SynonymCatalogs;
+import org.eobjects.analyzer.configuration.jaxb.HbaseDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.RegexPatternType;
 import org.eobjects.analyzer.configuration.jaxb.SalesforceDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.SasDatastoreType;
@@ -100,6 +102,7 @@ import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DbaseDatastore;
 import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
+import org.eobjects.analyzer.connection.HBaseDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
@@ -152,6 +155,8 @@ import org.apache.metamodel.util.SimpleTableDef;
 import org.apache.metamodel.xml.XmlSaxTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 /**
  * Configuration reader that uses the JAXB model to read XML file based
@@ -643,6 +648,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 ds = createDatastore(name, (CouchdbDatastoreType) datastoreType);
             } else if (datastoreType instanceof MongodbDatastoreType) {
                 ds = createDatastore(name, (MongodbDatastoreType) datastoreType);
+            } else if (datastoreType instanceof HbaseDatastoreType) {
+                ds = createDatastore(name, (HbaseDatastoreType) datastoreType);
             } else if (datastoreType instanceof SalesforceDatastoreType) {
                 ds = createDatastore(name, (SalesforceDatastoreType) datastoreType);
             } else if (datastoreType instanceof SugarCrmDatastoreType) {
@@ -697,6 +704,51 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         return result;
     }
 
+    private Datastore createDatastore(String name, HbaseDatastoreType datastoreType) {
+        final String zookeeperHostname = getStringVariable("zookeeperHostname", datastoreType.getZookeeperHostname());
+        final int zookeeperPort = getIntegerVariable("zookeeperPort", datastoreType.getZookeeperPort());
+        final List<org.eobjects.analyzer.configuration.jaxb.HbaseDatastoreType.TableDef> tableDefList = datastoreType
+                .getTableDef();
+
+        final SimpleTableDef[] tableDefs;
+        if (tableDefList.isEmpty()) {
+            tableDefs = null;
+        } else {
+            tableDefs = new SimpleTableDef[tableDefList.size()];
+            for (int i = 0; i < tableDefs.length; i++) {
+                final org.eobjects.analyzer.configuration.jaxb.HbaseDatastoreType.TableDef tableDef = tableDefList
+                        .get(i);
+                final String tableName = tableDef.getName();
+                final List<org.eobjects.analyzer.configuration.jaxb.HbaseDatastoreType.TableDef.Column> columnList = tableDef
+                        .getColumn();
+                final String[] columnNames = new String[columnList.size()];
+                final ColumnType[] columnTypes = new ColumnType[columnList.size()];
+                for (int j = 0; j < columnTypes.length; j++) {
+                    final Column column = columnList.get(j);
+                    final String columnName;
+                    final String family = column.getFamily();
+                    if (Strings.isNullOrEmpty(family)) {
+                        columnName = column.getName();
+                    } else {
+                        columnName = family + ":" + column.getName();
+                    }
+                    final String columnTypeName = column.getType();
+                    final ColumnType columnType;
+                    if (StringUtils.isNullOrEmpty(columnTypeName)) {
+                        columnType = ColumnType.STRING;
+                    } else {
+                        columnType = ColumnTypeImpl.valueOf(columnTypeName);
+                    }
+                    columnNames[j] = columnName;
+                    columnTypes[j] = columnType;
+                }
+
+                tableDefs[i] = new SimpleTableDef(tableName, columnNames, columnTypes);
+            }
+        }
+        return new HBaseDatastore(name, zookeeperHostname, zookeeperPort, tableDefs);
+    }
+
     private Datastore createDatastore(String name, SalesforceDatastoreType datastoreType) {
         String username = getStringVariable("username", datastoreType.getUsername());
         String password = getStringVariable("password", datastoreType.getPassword());
@@ -726,15 +778,16 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
         } else {
             tableDefs = new SimpleTableDef[tableDefList.size()];
             for (int i = 0; i < tableDefs.length; i++) {
-                org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef tableDef = tableDefList.get(i);
-                String collectionName = tableDef.getCollection();
-                List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef.Property> propertyList = tableDef
+                final org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef tableDef = tableDefList
+                        .get(i);
+                final String collectionName = tableDef.getCollection();
+                final List<org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType.TableDef.Property> propertyList = tableDef
                         .getProperty();
-                String[] propertyNames = new String[propertyList.size()];
-                ColumnType[] columnTypes = new ColumnType[propertyList.size()];
+                final String[] propertyNames = new String[propertyList.size()];
+                final ColumnType[] columnTypes = new ColumnType[propertyList.size()];
                 for (int j = 0; j < columnTypes.length; j++) {
-                    String propertyName = propertyList.get(j).getName();
-                    String propertyTypeName = propertyList.get(j).getType();
+                    final String propertyName = propertyList.get(j).getName();
+                    final String propertyTypeName = propertyList.get(j).getType();
                     final ColumnType propertyType;
                     if (StringUtils.isNullOrEmpty(propertyTypeName)) {
                         propertyType = ColumnType.VARCHAR;

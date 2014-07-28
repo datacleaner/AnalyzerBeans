@@ -122,21 +122,15 @@ public class JaxbJobReader implements JobReader<InputStream> {
     @Override
     public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException, NoSuchColumnException,
             NoSuchComponentException, ComponentConfigurationException, IllegalStateException {
-        AnalysisJobBuilder ajb = create(inputStream);
-        try {
+        try (AnalysisJobBuilder ajb = create(inputStream)) {
             return ajb.toAnalysisJob();
-        } finally {
-            ajb.close();
         }
     }
 
     @Override
     public AnalysisJob read(InputStream inputStream, SourceColumnMapping sourceColumnMapping) {
-        AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping);
-        try {
+        try (AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping)) {
             return ajb.toAnalysisJob();
-        } finally {
-            ajb.close();
         }
     }
 
