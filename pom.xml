@@ -4,7 +4,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sshwagon.version>2.6</sshwagon.version>
 		<javadoc.version>2.9.1</javadoc.version>
-		<slf4j.version>1.7.6</slf4j.version>
+		<slf4j.version>1.7.7</slf4j.version>
 		<junit.version>4.11</junit.version>
 		<metamodel.version>4.2.0-incubating</metamodel.version>
 		<metamodel.extras.version>4.2.0</metamodel.extras.version>
