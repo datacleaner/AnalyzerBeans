@@ -71,39 +71,30 @@ public class ConfigurationItemConverter implements Converter<Object> {
     @Override
     public Object fromString(Class<?> type, String str) {
         if (ReflectionUtils.isColumn(type)) {
-            DatastoreConnection connection = datastore.openConnection();
-            try {
-                Column column = connection.getSchemaNavigator().convertToColumn(str);
+            try (DatastoreConnection connection = datastore.openConnection()) {
+                final Column column = connection.getSchemaNavigator().convertToColumn(str);
                 if (column == null) {
                     throw new IllegalArgumentException("Column not found: " + str);
                 }
                 return column;
-            } finally {
-                connection.close();
             }
         }
         if (ReflectionUtils.isTable(type)) {
-            DatastoreConnection connection = datastore.openConnection();
-            try {
+            try (DatastoreConnection connection = datastore.openConnection()) {
                 Table table = connection.getSchemaNavigator().convertToTable(str);
                 if (table == null) {
                     throw new IllegalArgumentException("Table not found: " + str);
                 }
                 return table;
-            } finally {
-                connection.close();
             }
         }
         if (ReflectionUtils.isSchema(type)) {
-            DatastoreConnection connection = datastore.openConnection();
-            try {
+            try (DatastoreConnection connection = datastore.openConnection()) {
                 Schema schema = connection.getSchemaNavigator().convertToSchema(str);
                 if (schema == null) {
                     throw new IllegalArgumentException("Schema not found: " + str);
                 }
                 return schema;
-            } finally {
-                connection.close();
             }
         }
         if (ReflectionUtils.is(type, Dictionary.class)) {

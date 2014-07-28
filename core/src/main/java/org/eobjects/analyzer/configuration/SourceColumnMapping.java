@@ -74,8 +74,7 @@ public final class SourceColumnMapping {
      */
     public void autoMap(Datastore datastore) {
         setDatastore(datastore);
-        final DatastoreConnection con = datastore.openConnection();
-        try {
+        try (final DatastoreConnection con = datastore.openConnection()) {
             final SchemaNavigator schemaNavigator = con.getSchemaNavigator();
             for (final Entry<String, Column> entry : _map.entrySet()) {
                 if (entry.getValue() == null) {
@@ -84,8 +83,6 @@ public final class SourceColumnMapping {
                     entry.setValue(column);
                 }
             }
-        } finally {
-            con.close();
         }
     }
 

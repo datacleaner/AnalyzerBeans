@@ -47,6 +47,7 @@ import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.HBaseDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.JsonDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.connection.PojoDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
@@ -209,7 +210,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         String[] datastoreNames = datastoreCatalog.getDatastoreNames();
         assertEquals(
                 "[my couch, my hbase, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, "
-                        + "my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_odb, my_pojo, "
+                        + "my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_json, my_odb, my_pojo, "
                         + "my_sas, my_sax_xml, my_sfdc_ds, my_sugarcrm]", Arrays.toString(datastoreNames));
 
         assertEquals("a mongo db based datastore", datastoreCatalog.getDatastore("my mongo").getDescription());
@@ -238,8 +239,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
 
         PojoDatastore pojoDatastore = (PojoDatastore) datastoreCatalog.getDatastore("my_pojo");
         {
-            UpdateableDatastoreConnection con = pojoDatastore.openConnection();
-            try {
+            try (UpdateableDatastoreConnection con = pojoDatastore.openConnection()) {
                 DataContext dc = con.getDataContext();
                 Schema schema = dc.getDefaultSchema();
                 assertEquals("my_schema", schema.getName());
@@ -254,24 +254,22 @@ public class JaxbConfigurationReaderTest extends TestCase {
                         "[Column[name=Baz,columnNumber=0,type=BOOLEAN,nullable=true,nativeType=null,columnSize=null]]",
                         Arrays.toString(schema.getTable(1).getColumns()));
 
-                DataSet ds = dc.query().from("table1").select("Foo", "Bar").execute();
-                assertTrue(ds.next());
-                assertEquals("Row[values=[Hello, 1]]", ds.getRow().toString());
-                assertEquals(String.class, ds.getRow().getValue(0).getClass());
-                assertEquals(Integer.class, ds.getRow().getValue(1).getClass());
+                try (DataSet ds = dc.query().from("table1").select("Foo", "Bar").execute()) {
+                    assertTrue(ds.next());
+                    assertEquals("Row[values=[Hello, 1]]", ds.getRow().toString());
+                    assertEquals(String.class, ds.getRow().getValue(0).getClass());
+                    assertEquals(Integer.class, ds.getRow().getValue(1).getClass());
 
-                assertTrue(ds.next());
-                assertEquals("Row[values=[There, null]]", ds.getRow().toString());
-                assertNull(ds.getRow().getValue(1));
+                    assertTrue(ds.next());
+                    assertEquals("Row[values=[There, null]]", ds.getRow().toString());
+                    assertNull(ds.getRow().getValue(1));
+                }
 
-                ds.close();
-
-                ds = dc.query().from("table2").select("Baz").execute();
-                assertTrue(ds.next());
-                assertEquals("Row[values=[true]]", ds.getRow().toString());
-                assertEquals(Boolean.class, ds.getRow().getValue(0).getClass());
-            } finally {
-                con.close();
+                try (DataSet ds = dc.query().from("table2").select("Baz").execute()) {
+                    assertTrue(ds.next());
+                    assertEquals("Row[values=[true]]", ds.getRow().toString());
+                    assertEquals(Boolean.class, ds.getRow().getValue(0).getClass());
+                }
             }
         }
 
@@ -321,6 +319,9 @@ public class JaxbConfigurationReaderTest extends TestCase {
                 tableDefs[0].toString());
         assertEquals("SimpleTableDef[name=table2,columnNames=[fam3:hello, fam3:world],columnTypes=[STRING, VARCHAR]]",
                 tableDefs[1].toString());
+
+        JsonDatastore jsonDatastore = (JsonDatastore) datastoreCatalog.getDatastore("my_json");
+        assertEquals("JsonDatastore[name=my_json]", jsonDatastore.toString());
 
         for (String name : datastoreNames) {
             // test that all connections, except the JNDI-, MongoDB- and

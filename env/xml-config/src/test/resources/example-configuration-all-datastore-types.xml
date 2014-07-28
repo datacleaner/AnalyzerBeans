@@ -52,6 +52,10 @@
 		<excel-datastore name="my_excel_2003" description="xls">
 			<filename>../../core/src/test/resources/Spreadsheet2003.xls</filename>
 		</excel-datastore>
+		
+		<json-datastore name="my_json">
+			<filename>../../core/src/test/resources/example.json</filename>
+		</json-datastore>
 
 		<access-datastore name="my_access" description="mdb">
 			<filename>../../core/src/test/resources/developers.mdb</filename>

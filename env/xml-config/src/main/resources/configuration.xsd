@@ -241,6 +241,13 @@
 						</documentation>
 					</annotation>
 				</element>
+				<element name="json-datastore" type="ab:jsonDatastoreType">
+					<annotation>
+						<documentation>
+							Defines a datastore based on a JSON file.
+						</documentation>
+					</annotation>
+				</element>
 				<element name="dbase-datastore" type="ab:dbaseDatastoreType">
 					<annotation>
 						<documentation>
@@ -474,7 +481,8 @@
 					<element name="table-def" minOccurs="0" maxOccurs="unbounded">
 						<complexType>
 							<sequence>
-								<element name="name" minOccurs="1" maxOccurs="1" type="normalizedString" />
+								<element name="name" minOccurs="1" maxOccurs="1"
+									type="normalizedString" />
 								<element name="column" minOccurs="1" maxOccurs="unbounded">
 									<complexType>
 										<sequence>
@@ -603,8 +611,18 @@
 			</extension>
 		</complexContent>
 	</complexType>
-
+	
 	<complexType name="excelDatastoreType">
+		<complexContent>
+			<extension base="ab:abstractDatastoreType">
+				<sequence>
+					<element name="filename" minOccurs="1" maxOccurs="1" type="string" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="jsonDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">
 				<sequence>

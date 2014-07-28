@@ -105,7 +105,7 @@ public class TableLookupTransformer implements Transformer<Object> {
     }
 
     @Inject
-    @Configured(value=PROPERTY_NAME_DATASTORE)
+    @Configured(value = PROPERTY_NAME_DATASTORE)
     Datastore datastore;
 
     @Inject
@@ -125,14 +125,14 @@ public class TableLookupTransformer implements Transformer<Object> {
     String[] outputColumns;
 
     @Inject
-    @Configured(value=PROPERTY_NAME_SCHEMA_NAME)
+    @Configured(value = PROPERTY_NAME_SCHEMA_NAME)
     @Alias("Schema")
     @SchemaProperty
     @MappedProperty(PROPERTY_NAME_DATASTORE)
     String schemaName;
 
     @Inject
-    @Configured(value=PROPERTY_NAME_TABLE_NAME)
+    @Configured(value = PROPERTY_NAME_TABLE_NAME)
     @Alias("Table")
     @TableProperty
     @MappedProperty(PROPERTY_NAME_SCHEMA_NAME)
@@ -200,12 +200,9 @@ public class TableLookupTransformer implements Transformer<Object> {
             if (isCarthesianProductMode()) {
                 queryConditionColumns = new Column[0];
             } else {
-                final DatastoreConnection con = datastore.openConnection();
-                try {
+                try (final DatastoreConnection con = datastore.openConnection()) {
                     queryConditionColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName,
                             conditionColumns);
-                } finally {
-                    con.close();
                 }
             }
         }
@@ -221,11 +218,8 @@ public class TableLookupTransformer implements Transformer<Object> {
      */
     private Column[] getQueryOutputColumns(boolean checkNames) {
         if (queryOutputColumns == null) {
-            final DatastoreConnection con = datastore.openConnection();
-            try {
+            try (final DatastoreConnection con = datastore.openConnection()) {
                 queryOutputColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName, outputColumns);
-            } finally {
-                con.close();
             }
         } else if (checkNames) {
             if (!isQueryOutputColumnsUpdated()) {
@@ -377,11 +371,9 @@ public class TableLookupTransformer implements Transformer<Object> {
                 parameterValues[i] = queryInput.get(i);
             }
 
-            final DataSet dataSet = datastoreConnection.getDataContext().executeQuery(lookupQuery, parameterValues);
-            try {
+            try (final DataSet dataSet = datastoreConnection.getDataContext()
+                    .executeQuery(lookupQuery, parameterValues)) {
                 return handleDataSet(dataSet);
-            } finally {
-                dataSet.close();
             }
         } catch (RuntimeException e) {
             logger.error("Error occurred while looking up based on conditions: " + queryInput, e);

@@ -69,6 +69,7 @@ import org.eobjects.analyzer.configuration.jaxb.HsqldbStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.InMemoryStorageProviderType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.JdbcDatastoreType.TableTypes;
+import org.eobjects.analyzer.configuration.jaxb.JsonDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MongodbDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.MultithreadedTaskrunnerType;
 import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
@@ -104,6 +105,7 @@ import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.HBaseDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
+import org.eobjects.analyzer.connection.JsonDatastore;
 import org.eobjects.analyzer.connection.MongoDbDatastore;
 import org.eobjects.analyzer.connection.OdbDatastore;
 import org.eobjects.analyzer.connection.PojoDatastore;
@@ -638,6 +640,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 ds = createDatastore(name, (XmlDatastoreType) datastoreType);
             } else if (datastoreType instanceof ExcelDatastoreType) {
                 ds = createDatastore(name, (ExcelDatastoreType) datastoreType);
+            } else if (datastoreType instanceof JsonDatastoreType) {
+                ds = createDatastore(name, (JsonDatastoreType) datastoreType);
             } else if (datastoreType instanceof DbaseDatastoreType) {
                 ds = createDatastore(name, (DbaseDatastoreType) datastoreType);
             } else if (datastoreType instanceof OpenOfficeDatabaseDatastoreType) {
@@ -702,6 +706,12 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
         final DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
         return result;
+    }
+
+    private Datastore createDatastore(String name, JsonDatastoreType datastoreType) {
+        final String filename = getStringVariable("filename", datastoreType.getFilename());
+        final Resource resource = _interceptor.createResource(filename);
+        return new JsonDatastore(name, resource);
     }
 
     private Datastore createDatastore(String name, HbaseDatastoreType datastoreType) {
