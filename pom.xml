@@ -6,10 +6,10 @@
 		<javadoc.version>2.9.1</javadoc.version>
 		<slf4j.version>1.7.6</slf4j.version>
 		<junit.version>4.11</junit.version>
-		<metamodel.version>4.2.0-incubating-SNAPSHOT</metamodel.version>
-		<metamodel.extras.version>4.2.0-SNAPSHOT</metamodel.extras.version>
+		<metamodel.version>4.2.0-incubating</metamodel.version>
+		<metamodel.extras.version>4.2.0</metamodel.extras.version>
 		<easymock.version>3.2</easymock.version>
-		<scala.version>2.10.4</scala.version>
+		<scala.version>2.11.2</scala.version>
 		<httpcomponents.version>4.2.5</httpcomponents.version>
 		<guava.version>17.0</guava.version>
 	</properties>
@@ -254,7 +254,7 @@
 									<pluginExecutionFilter>
 										<groupId>net.alchim31.maven</groupId>
 										<artifactId>scala-maven-plugin</artifactId>
-										<versionRange>[3.1.0,)</versionRange>
+										<versionRange>[3.2.0,)</versionRange>
 										<goals>
 											<goal>add-source</goal>
 											<goal>compile</goal>
@@ -273,7 +273,7 @@
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.1.6</version>
+					<version>3.2.0</version>
 					<executions>
 						<execution>
 							<id>scala-compile-first</id>
