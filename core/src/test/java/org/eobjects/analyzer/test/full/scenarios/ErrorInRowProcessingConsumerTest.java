@@ -48,7 +48,7 @@ import org.eobjects.analyzer.test.ActivityAwareMultiThreadedTaskRunner;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * Tests that a job where one of the row processing consumers fail is gracefully

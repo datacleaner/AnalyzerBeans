@@ -52,6 +52,10 @@
 		<excel-datastore name="my_excel_2003" description="xls">
 			<filename>../../core/src/test/resources/Spreadsheet2003.xls</filename>
 		</excel-datastore>
+		
+		<json-datastore name="my_json">
+			<filename>../../core/src/test/resources/example.json</filename>
+		</json-datastore>
 
 		<access-datastore name="my_access" description="mdb">
 			<filename>../../core/src/test/resources/developers.mdb</filename>
@@ -60,7 +64,7 @@
 		<dbase-datastore name="my_dbase" description="dbf">
 			<filename>../../core/src/test/resources/report.dbf</filename>
 		</dbase-datastore>
-
+		
 		<odb-datastore name="my_odb" description="odb">
 			<filename>../../core/src/test/resources/openoffice_db.odb</filename>
 		</odb-datastore>
@@ -89,7 +93,39 @@
 			<encoding>UTF-8</encoding>
 			<fail-on-inconsistencies>true</fail-on-inconsistencies>
 		</fixed-width-datastore>
-
+		
+		<hbase-datastore name="my hbase">
+			<zookeeper-hostname>localhost</zookeeper-hostname>
+			<zookeeper-port>2181</zookeeper-port>
+			<table-def>
+				<name>table1</name>
+				<column>
+					<family>fam1</family>
+					<name>foo</name>
+					<type>STRING</type>
+				</column>
+				<column>
+					<name>fam1:bar</name>
+					<type>STRING</type>
+				</column>
+				<column>
+					<name>fam2:baz</name>
+					<type>INTEGER</type>
+				</column>
+			</table-def>
+			<table-def>
+				<name>table2</name>
+				<column>
+					<name>fam3:hello</name>
+					<type>STRING</type>
+				</column>
+				<column>
+					<name>fam3:world</name>
+					<type>VARCHAR</type>
+				</column>
+			</table-def>
+		</hbase-datastore>
+		
 		<mongodb-datastore name="my mongo" description="a mongo db based datastore">
 			<hostname>localhost</hostname>
 			<port>27017</port>

@@ -43,7 +43,7 @@ import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.eobjects.metamodel.util.MutableRef;
+import org.apache.metamodel.util.MutableRef;
 import org.junit.Ignore;
 
 public class InjectionManagerImplTest extends TestCase {

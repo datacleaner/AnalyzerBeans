@@ -32,8 +32,8 @@ import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Column;
 
 @FilterBean("Max rows")
 @Description("Sets a maximum number of rows to process.")

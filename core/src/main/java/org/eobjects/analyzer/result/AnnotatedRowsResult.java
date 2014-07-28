@@ -36,8 +36,8 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
-import org.eobjects.metamodel.util.Ref;
-import org.eobjects.metamodel.util.SerializableRef;
+import org.apache.metamodel.util.Ref;
+import org.apache.metamodel.util.SerializableRef;
 
 /**
  * Represents a typical "drill to detail" result consisting of a set of

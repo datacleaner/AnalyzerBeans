@@ -35,7 +35,7 @@ import org.eobjects.analyzer.descriptors.MetricParameters;
 import org.eobjects.analyzer.result.GroupedValueCountingAnalyzerResult;
 import org.eobjects.analyzer.result.ValueCountList;
 import org.eobjects.analyzer.result.ValueCountingAnalyzerResult;
-import org.eobjects.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableColumn;
 
 public class ValueDistributionAnalyzerTest extends TestCase {
 

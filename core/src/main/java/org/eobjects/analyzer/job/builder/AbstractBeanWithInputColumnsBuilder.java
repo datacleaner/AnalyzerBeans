@@ -37,7 +37,7 @@ import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

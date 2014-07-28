@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.util.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

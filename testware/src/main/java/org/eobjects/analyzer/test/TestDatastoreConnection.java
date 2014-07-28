@@ -22,9 +22,9 @@ package org.eobjects.analyzer.test;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.UpdateableDataContext;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.DataContextFactory;
+import org.apache.metamodel.UpdateableDataContext;
 
 final class TestDatastoreConnection implements UpdateableDatastoreConnection {
 

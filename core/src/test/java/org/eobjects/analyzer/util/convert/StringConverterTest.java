@@ -42,11 +42,11 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.util.Percentage;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.convert.MyConvertable.SecondaryConverter;
-import org.eobjects.metamodel.schema.MutableColumn;
-import org.eobjects.metamodel.schema.MutableSchema;
-import org.eobjects.metamodel.schema.MutableTable;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.util.EqualsBuilder;
+import org.apache.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableSchema;
+import org.apache.metamodel.schema.MutableTable;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.util.EqualsBuilder;
 
 public class StringConverterTest extends TestCase {
 

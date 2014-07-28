@@ -61,7 +61,7 @@ import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +130,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             jaxbColumn.setPath(physicalColumn.getQualifiedLabel());
             jaxbColumn.setId(getId(inputColumn, columnMappings));
 
-            final org.eobjects.metamodel.schema.ColumnType columnType = physicalColumn.getType();
+            final org.apache.metamodel.schema.ColumnType columnType = physicalColumn.getType();
             if (columnType != null) {
                 jaxbColumn.setType(columnType.toString());
             }

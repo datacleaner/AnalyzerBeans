@@ -21,7 +21,7 @@ package org.eobjects.analyzer.connection;
 
 import java.io.Closeable;
 
-import org.eobjects.metamodel.UpdateableDataContext;
+import org.apache.metamodel.UpdateableDataContext;
 
 public class UpdateableDatastoreConnectionImpl<E extends UpdateableDataContext> extends DatastoreConnectionImpl<E> implements
 		UpdateableDatastoreConnection {

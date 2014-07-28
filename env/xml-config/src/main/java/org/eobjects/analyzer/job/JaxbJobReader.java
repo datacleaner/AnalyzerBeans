@@ -43,6 +43,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.FileHelper;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.api.Filter;
@@ -91,8 +93,6 @@ import org.eobjects.analyzer.job.jaxb.VariablesType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,21 +122,15 @@ public class JaxbJobReader implements JobReader<InputStream> {
     @Override
     public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException, NoSuchColumnException,
             NoSuchComponentException, ComponentConfigurationException, IllegalStateException {
-        AnalysisJobBuilder ajb = create(inputStream);
-        try {
+        try (AnalysisJobBuilder ajb = create(inputStream)) {
             return ajb.toAnalysisJob();
-        } finally {
-            ajb.close();
         }
     }
 
     @Override
     public AnalysisJob read(InputStream inputStream, SourceColumnMapping sourceColumnMapping) {
-        AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping);
-        try {
+        try (AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping)) {
             return ajb.toAnalysisJob();
-        } finally {
-            ajb.close();
         }
     }
 
@@ -173,7 +167,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
     public AnalysisJobMetadata readMetadata(Job job) {
         final String datastoreName = job.getSource().getDataContext().getRef();
         final List<String> sourceColumnPaths = getSourceColumnPaths(job);
-        final List<org.eobjects.metamodel.schema.ColumnType> sourceColumnTypes = getSourceColumnTypes(job);
+        final List<org.apache.metamodel.schema.ColumnType> sourceColumnTypes = getSourceColumnTypes(job);
         final Map<String, String> variables = getVariables(job);
 
         final String jobName;
@@ -251,20 +245,20 @@ public class JaxbJobReader implements JobReader<InputStream> {
         return paths;
     }
 
-    private List<org.eobjects.metamodel.schema.ColumnType> getSourceColumnTypes(Job job) {
-        final List<org.eobjects.metamodel.schema.ColumnType> types;
+    private List<org.apache.metamodel.schema.ColumnType> getSourceColumnTypes(Job job) {
+        final List<org.apache.metamodel.schema.ColumnType> types;
 
         final ColumnsType columnsType = job.getSource().getColumns();
         if (columnsType != null) {
             final List<ColumnType> columns = columnsType.getColumn();
-            types = new ArrayList<org.eobjects.metamodel.schema.ColumnType>(columns.size());
+            types = new ArrayList<org.apache.metamodel.schema.ColumnType>(columns.size());
             for (ColumnType columnType : columns) {
                 final String typeName = columnType.getType();
                 if (StringUtils.isNullOrEmpty(typeName)) {
                     types.add(null);
                 } else {
                     try {
-                        final org.eobjects.metamodel.schema.ColumnType type = org.eobjects.metamodel.schema.ColumnType
+                        final org.apache.metamodel.schema.ColumnType type = org.apache.metamodel.schema.ColumnTypeImpl
                                 .valueOf(typeName);
                         types.add(type);
                     } catch (IllegalArgumentException e) {
@@ -439,7 +433,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
                 final String expectedType = column.getType();
                 if (expectedType != null) {
-                    org.eobjects.metamodel.schema.ColumnType actualType = physicalColumn.getType();
+                    org.apache.metamodel.schema.ColumnType actualType = physicalColumn.getType();
                     if (actualType != null && !expectedType.equals(actualType.toString())) {
                         logger.warn("Column '{}' had type '{}', but '{}' was expected.", new Object[] { path,
                                 actualType, expectedType });

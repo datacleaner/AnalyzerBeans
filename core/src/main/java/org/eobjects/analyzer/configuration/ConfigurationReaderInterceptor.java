@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.configuration;
 
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.util.Resource;
 
 /**
  * Defines an interface that allows for interception, decoration and other

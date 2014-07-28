@@ -22,7 +22,7 @@ package org.eobjects.analyzer.connection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -88,7 +88,7 @@ public class AnalyzerJobHelperTest extends TestCase {
         job = ajb.toAnalysisJob();
         column = AnalyzerJobHelper.getIdentifyingInputColumn(job.getAnalyzerJobs().iterator().next());
         assertNotNull(column);
-        assertEquals("MetaModelInputColumn[employees.csv.employees.name]", column.toString());
+        assertEquals("MetaModelInputColumn[resources.employees.csv.name]", column.toString());
 
         ajb.close();
     }

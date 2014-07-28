@@ -25,8 +25,8 @@ import java.util.List;
 import org.eobjects.analyzer.beans.api.Convertable;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.HasNameMapper;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.HasNameMapper;
 
 /**
  * Represents a set of columns to be coalesced.

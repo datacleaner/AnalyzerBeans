@@ -25,11 +25,11 @@ import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.UpdateableDataContext;
-import org.eobjects.metamodel.excel.ExcelConfiguration;
-import org.eobjects.metamodel.excel.ExcelDataContext;
-import org.eobjects.metamodel.util.Resource;
-import org.eobjects.metamodel.util.SerializableRef;
+import org.apache.metamodel.UpdateableDataContext;
+import org.apache.metamodel.excel.ExcelConfiguration;
+import org.apache.metamodel.excel.ExcelDataContext;
+import org.apache.metamodel.util.Resource;
+import org.apache.metamodel.util.SerializableRef;
 
 /**
  * Datastore implementation for Excel spreadsheets.

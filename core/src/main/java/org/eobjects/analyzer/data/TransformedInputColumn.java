@@ -26,7 +26,7 @@ import java.util.HashSet;
 
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.util.InputColumnComparator;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

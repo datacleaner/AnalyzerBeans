@@ -27,8 +27,8 @@ import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.DatastoreConnectionImpl;
 import org.eobjects.analyzer.connection.PerformanceCharacteristics;
 import org.eobjects.analyzer.connection.PerformanceCharacteristicsImpl;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.DataContextFactory;
 import org.junit.Ignore;
 
 @Ignore

@@ -21,7 +21,7 @@ package org.eobjects.analyzer.connection;
 
 import java.util.Arrays;
 
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 
 import junit.framework.TestCase;
 

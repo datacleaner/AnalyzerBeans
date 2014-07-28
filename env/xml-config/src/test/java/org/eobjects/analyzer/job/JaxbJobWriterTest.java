@@ -50,8 +50,8 @@ import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.FileHelper;
 
 public class JaxbJobWriterTest extends TestCase {
 
@@ -114,8 +114,8 @@ public class JaxbJobWriterTest extends TestCase {
         assertEquals("    <source>", lines[7]);
         assertEquals("        <data-context ref=_db_/>", lines[8]);
         assertEquals("        <columns>", lines[9]);
-        assertEquals("            <column type=_TIMESTAMP_ path=_PUBLIC.ORDERS.ORDERDATE_ id=_col_0_/>", lines[10]);
-        assertEquals("            <column type=_TIMESTAMP_ path=_PUBLIC.ORDERS.SHIPPEDDATE_ id=_col_1_/>", lines[11]);
+        assertEquals("            <column id=_col_0_ path=_PUBLIC.ORDERS.ORDERDATE_ type=_TIMESTAMP_/>", lines[10]);
+        assertEquals("            <column id=_col_1_ path=_PUBLIC.ORDERS.SHIPPEDDATE_ type=_TIMESTAMP_/>", lines[11]);
         assertEquals("        </columns>", lines[12]);
         assertEquals("    </source>", lines[13]);
         assertEquals("    <transformation/>", lines[14]);
@@ -124,12 +124,12 @@ public class JaxbJobWriterTest extends TestCase {
         assertEquals("            <descriptor ref=_Date gap analyzer_/>", lines[17]);
         assertEquals("            <properties>", lines[18]);
         assertEquals(
-                "                <property value=_true_ name=_Count intersecting from and to dates as overlaps_/>",
+                "                <property name=_Count intersecting from and to dates as overlaps_ value=_true_/>",
                 lines[19]);
-        assertEquals("                <property value=_true_ name=_Fault tolerant switch from/to dates_/>", lines[20]);
+        assertEquals("                <property name=_Fault tolerant switch from/to dates_ value=_true_/>", lines[20]);
         assertEquals("            </properties>", lines[21]);
-        assertEquals("            <input name=_From column_ ref=_col_0_/>", lines[22]);
-        assertEquals("            <input name=_To column_ ref=_col_1_/>", lines[23]);
+        assertEquals("            <input ref=_col_0_ name=_From column_/>", lines[22]);
+        assertEquals("            <input ref=_col_1_ name=_To column_/>", lines[23]);
         assertEquals("        </analyzer>", lines[24]);
         assertEquals("    </analysis>", lines[25]);
         assertEquals("</job>", lines[26]);

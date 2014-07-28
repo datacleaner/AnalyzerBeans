@@ -44,7 +44,8 @@ public class CoalesceDatesTransformer implements Transformer<Date> {
 	public CoalesceDatesTransformer() {
 	}
 
-	public CoalesceDatesTransformer(InputColumn<Date>... input) {
+	@SafeVarargs
+    public CoalesceDatesTransformer(InputColumn<Date>... input) {
 		this();
 		this.input = input;
 	}

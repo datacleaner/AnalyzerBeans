@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job;
 import java.io.Serializable;
 
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Super-interface for all job entries in an Analysis. A {@link ComponentJob}

@@ -37,9 +37,9 @@ import org.eobjects.analyzer.job.runner.ConsumeRowHandler.Configuration;
 import org.eobjects.analyzer.job.tasks.MockMultiRowTransformer;
 import org.eobjects.analyzer.test.MockAnalyzer;
 import org.eobjects.analyzer.test.MockTransformer;
-import org.eobjects.metamodel.pojo.ArrayTableDataProvider;
-import org.eobjects.metamodel.pojo.TableDataProvider;
-import org.eobjects.metamodel.util.SimpleTableDef;
+import org.apache.metamodel.pojo.ArrayTableDataProvider;
+import org.apache.metamodel.pojo.TableDataProvider;
+import org.apache.metamodel.util.SimpleTableDef;
 
 import junit.framework.TestCase;
 

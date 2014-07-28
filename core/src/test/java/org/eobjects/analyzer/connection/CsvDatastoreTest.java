@@ -22,9 +22,9 @@ package org.eobjects.analyzer.connection;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.Resource;
 
 public class CsvDatastoreTest extends TestCase {
 
@@ -35,8 +35,8 @@ public class CsvDatastoreTest extends TestCase {
         assertNotNull(col);
 
         Table table = datastore.openConnection().getDataContext().getDefaultSchema().getTables()[0];
-        assertEquals("projects", table.getName());
-        col = schemaNavigator.convertToColumn("projects.product");
+        assertEquals("projects.csv", table.getName());
+        col = schemaNavigator.convertToColumn("projects.csv.product");
         assertNotNull(col);
     }
     

@@ -45,9 +45,9 @@ import org.eobjects.analyzer.job.JaxbJobWriter;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.util.ChangeAwareObjectInputStream;
-import org.eobjects.metamodel.util.Action;
-import org.eobjects.metamodel.util.FileHelper;
-import org.eobjects.metamodel.util.LazyRef;
+import org.apache.metamodel.util.Action;
+import org.apache.metamodel.util.FileHelper;
+import org.apache.metamodel.util.LazyRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

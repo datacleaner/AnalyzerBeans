@@ -20,7 +20,7 @@
 package org.eobjects.analyzer.data;
 
 import org.eobjects.analyzer.util.InputColumnComparator;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 public abstract class AbstractInputColumn<E> implements InputColumn<E> {
 	

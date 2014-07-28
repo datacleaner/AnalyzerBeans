@@ -19,8 +19,8 @@
  */
 package org.eobjects.analyzer.metadata;
 
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Defines metadata about a single {@link Column}.

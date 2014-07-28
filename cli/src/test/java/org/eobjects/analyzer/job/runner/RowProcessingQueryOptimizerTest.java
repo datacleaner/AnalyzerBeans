@@ -54,8 +54,8 @@ import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Column;
 
 public class RowProcessingQueryOptimizerTest extends TestCase {
 

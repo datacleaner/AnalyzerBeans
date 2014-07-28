@@ -58,7 +58,7 @@ import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.util.ToStringComparator;
+import org.apache.metamodel.util.ToStringComparator;
 
 public class JaxbJobReaderTest extends TestCase {
 

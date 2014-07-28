@@ -21,7 +21,7 @@ package org.eobjects.analyzer.beans.api;
 
 import java.io.Serializable;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Represents a category that a component can be applied to. Categories aid the

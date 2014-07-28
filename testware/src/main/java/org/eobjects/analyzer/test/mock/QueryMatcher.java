@@ -21,7 +21,7 @@ package org.eobjects.analyzer.test.mock;
 
 import org.easymock.IArgumentMatcher;
 
-import org.eobjects.metamodel.query.Query;
+import org.apache.metamodel.query.Query;
 import org.junit.Assert;
 
 /**

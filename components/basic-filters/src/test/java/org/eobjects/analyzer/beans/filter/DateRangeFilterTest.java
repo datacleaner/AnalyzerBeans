@@ -37,8 +37,8 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.ListResult;
 import org.eobjects.analyzer.test.MockAnalyzer;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.util.DateUtils;
-import org.eobjects.metamodel.util.Month;
+import org.apache.metamodel.util.DateUtils;
+import org.apache.metamodel.util.Month;
 
 import junit.framework.TestCase;
 

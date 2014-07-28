@@ -27,8 +27,8 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Column;
 
 public class EqualsFilterTest extends TestCase {
     

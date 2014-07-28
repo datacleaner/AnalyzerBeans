@@ -3,13 +3,13 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans</artifactId>
-		<version>0.46-SNAPSHOT</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-api</artifactId>
 	<description>Public API for component developers of AnalyzerBeans</description>
 	<dependencies>
 		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
+			<groupId>org.apache.metamodel</groupId>
 			<artifactId>MetaModel-core</artifactId>
 			<version>${metamodel.version}</version>
 		</dependency>
@@ -36,7 +36,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
+			<groupId>org.apache.metamodel</groupId>
 			<artifactId>MetaModel-full</artifactId>
 			<version>${metamodel.version}</version>
 			<scope>test</scope>

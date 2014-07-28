@@ -36,7 +36,7 @@ import org.eobjects.analyzer.result.ValueFrequency;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.LabelUtils;
-import org.eobjects.metamodel.util.SerializableRef;
+import org.apache.metamodel.util.SerializableRef;
 
 /**
  * Represents the result of the {@link ValueMatchAnalyzer}.

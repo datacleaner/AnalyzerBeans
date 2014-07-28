@@ -24,8 +24,8 @@ import java.util.Date;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 
-import org.eobjects.metamodel.util.DateUtils;
-import org.eobjects.metamodel.util.Month;
+import org.apache.metamodel.util.DateUtils;
+import org.apache.metamodel.util.Month;
 
 import junit.framework.TestCase;
 
@@ -36,7 +36,6 @@ public class CoalesceDatesTransformerTest extends TestCase {
 		MockInputColumn<Date> col2 = new MockInputColumn<Date>("col2", Date.class);
 		MockInputColumn<Date> col3 = new MockInputColumn<Date>("col3", Date.class);
 
-		@SuppressWarnings("unchecked")
 		CoalesceDatesTransformer t = new CoalesceDatesTransformer(col1, col2, col3);
 		assertEquals(1, t.getOutputColumns().getColumnCount());
 

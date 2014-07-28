@@ -49,7 +49,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.SimpleAnalysisResult;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.CollectionUtils2;
-import org.eobjects.metamodel.util.ObjectComparator;
+import org.apache.metamodel.util.ObjectComparator;
 
 public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCase {
 

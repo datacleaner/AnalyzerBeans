@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
-import org.eobjects.metamodel.salesforce.SalesforceDataContext;
+import org.apache.metamodel.salesforce.SalesforceDataContext;
 
 /**
  * A datastore that uses a Salesforce.com account as it's source.

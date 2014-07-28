@@ -21,8 +21,8 @@ package org.eobjects.analyzer.data;
 
 import junit.framework.TestCase;
 
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.MutableColumn;
 
 public class MetaModelInputColumnTest extends TestCase {
 

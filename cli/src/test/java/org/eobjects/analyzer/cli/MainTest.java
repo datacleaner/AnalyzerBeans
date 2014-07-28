@@ -40,7 +40,7 @@ import nu.validator.htmlparser.sax.HtmlParser;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.PropertyConfigurator;
 import org.eobjects.analyzer.result.AnalysisResult;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 import org.w3c.tidy.Tidy;
 import org.xml.sax.Attributes;
 import org.xml.sax.ErrorHandler;

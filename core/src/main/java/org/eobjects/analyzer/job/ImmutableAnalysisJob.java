@@ -27,7 +27,7 @@ import java.util.List;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 public final class ImmutableAnalysisJob extends BaseObject implements AnalysisJob {
 

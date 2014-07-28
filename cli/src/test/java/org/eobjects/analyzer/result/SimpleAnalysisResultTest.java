@@ -44,9 +44,14 @@ public class SimpleAnalysisResultTest extends TestCase {
         for (int i = 0; i < analysisResults.length; i++) {
             String filename = "src/test/resources/resultfiles/out" + (i + 1) + ".analysis.result.dat";
             
-            ChangeAwareObjectInputStream in = new ChangeAwareObjectInputStream(new FileInputStream(filename));
-            analysisResults[i] = (AnalysisResult) in.readObject();
-            in.close();
+            try {
+                ChangeAwareObjectInputStream in = new ChangeAwareObjectInputStream(new FileInputStream(filename));
+                analysisResults[i] = (AnalysisResult) in.readObject();
+                in.close();
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to deserialize file: " + filename, e);
+            }
+            
             assertNotNull(analysisResults[i]);
             assertTrue(analysisResults[i] instanceof SimpleAnalysisResult);
             

@@ -23,8 +23,8 @@ import java.net.URI;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.eobjects.analyzer.util.convert.ResourceConverter.ResourceTypeHandler;
-import org.eobjects.metamodel.util.Resource;
-import org.eobjects.metamodel.util.UrlResource;
+import org.apache.metamodel.util.Resource;
+import org.apache.metamodel.util.UrlResource;
 
 /**
  * {@link ResourceTypeHandler} for {@link UrlResource}s.

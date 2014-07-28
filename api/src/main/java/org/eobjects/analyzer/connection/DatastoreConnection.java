@@ -22,7 +22,7 @@ package org.eobjects.analyzer.connection;
 import java.io.Closeable;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 
 /**
  * Represents an open connection to a {@link Datastore}.

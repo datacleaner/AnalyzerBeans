@@ -32,7 +32,7 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.query.Query;
+import org.apache.metamodel.query.Query;
 
 public class NullCheckFilterTest extends TestCase {
 

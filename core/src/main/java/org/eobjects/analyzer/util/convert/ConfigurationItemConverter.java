@@ -35,9 +35,9 @@ import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.reference.StringPattern;
 import org.eobjects.analyzer.reference.SynonymCatalog;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +50,9 @@ import org.slf4j.LoggerFactory;
  * <li>org.eobjects.analyzer.reference.SynonymCatalog</li>
  * <li>org.eobjects.analyzer.reference.StringPattern</li>
  * <li>org.eobjects.analyzer.connection.Datastore</li>
- * <li>org.eobjects.metamodel.schema.Column</li>
- * <li>org.eobjects.metamodel.schema.Table</li>
- * <li>org.eobjects.metamodel.schema.Schema</li>
+ * <li>org.apache.metamodel.schema.Column</li>
+ * <li>org.apache.metamodel.schema.Table</li>
+ * <li>org.apache.metamodel.schema.Schema</li>
  * </ul>
  */
 public class ConfigurationItemConverter implements Converter<Object> {
@@ -71,39 +71,30 @@ public class ConfigurationItemConverter implements Converter<Object> {
     @Override
     public Object fromString(Class<?> type, String str) {
         if (ReflectionUtils.isColumn(type)) {
-            DatastoreConnection connection = datastore.openConnection();
-            try {
-                Column column = connection.getSchemaNavigator().convertToColumn(str);
+            try (DatastoreConnection connection = datastore.openConnection()) {
+                final Column column = connection.getSchemaNavigator().convertToColumn(str);
                 if (column == null) {
                     throw new IllegalArgumentException("Column not found: " + str);
                 }
                 return column;
-            } finally {
-                connection.close();
             }
         }
         if (ReflectionUtils.isTable(type)) {
-            DatastoreConnection connection = datastore.openConnection();
-            try {
+            try (DatastoreConnection connection = datastore.openConnection()) {
                 Table table = connection.getSchemaNavigator().convertToTable(str);
                 if (table == null) {
                     throw new IllegalArgumentException("Table not found: " + str);
                 }
                 return table;
-            } finally {
-                connection.close();
             }
         }
         if (ReflectionUtils.isSchema(type)) {
-            DatastoreConnection connection = datastore.openConnection();
-            try {
+            try (DatastoreConnection connection = datastore.openConnection()) {
                 Schema schema = connection.getSchemaNavigator().convertToSchema(str);
                 if (schema == null) {
                     throw new IllegalArgumentException("Schema not found: " + str);
                 }
                 return schema;
-            } finally {
-                connection.close();
             }
         }
         if (ReflectionUtils.is(type, Dictionary.class)) {

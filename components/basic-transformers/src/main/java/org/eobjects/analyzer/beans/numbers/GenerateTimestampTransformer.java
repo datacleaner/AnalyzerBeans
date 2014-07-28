@@ -29,7 +29,7 @@ import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.beans.categories.NumbersCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 @TransformerBean("Generate timestamp")
 @Description("Generates a timestamp representing the millisecond or nanosecond of processing the record")

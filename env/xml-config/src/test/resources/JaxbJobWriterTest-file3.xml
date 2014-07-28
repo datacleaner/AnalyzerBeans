@@ -8,9 +8,9 @@
     <source>
         <data-context ref="my db"/>
         <columns>
-            <column type="VARCHAR" path="PUBLIC.EMPLOYEES.FIRSTNAME" id="col_0"/>
-            <column type="VARCHAR" path="PUBLIC.EMPLOYEES.LASTNAME" id="col_1"/>
-            <column type="VARCHAR" path="PUBLIC.EMPLOYEES.EMAIL" id="col_2"/>
+            <column id="col_0" path="PUBLIC.EMPLOYEES.FIRSTNAME" type="VARCHAR"/>
+            <column id="col_1" path="PUBLIC.EMPLOYEES.LASTNAME" type="VARCHAR"/>
+            <column id="col_2" path="PUBLIC.EMPLOYEES.EMAIL" type="VARCHAR"/>
         </columns>
     </source>
     <transformation>
@@ -24,7 +24,7 @@
         <filter>
             <descriptor ref="Null check"/>
             <properties>
-                <property value="false" name="Consider empty string as null"/>
+                <property name="Consider empty string as null" value="false"/>
             </properties>
             <input ref="col_0"/>
             <outcome id="outcome_0" category="NOT_NULL"/>

@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-components</artifactId>
-		<version>0.46-SNAPSHOT</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-referential-integrity</artifactId>
 	<description>Referential Integrity component for AnalyzerBeans</description>

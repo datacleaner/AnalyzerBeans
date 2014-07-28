@@ -21,7 +21,7 @@ package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Table;
 
 final class AnalysisJobMetricsImpl implements AnalysisJobMetrics {
 

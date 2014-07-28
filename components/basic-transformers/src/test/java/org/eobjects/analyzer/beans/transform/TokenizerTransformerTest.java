@@ -28,7 +28,7 @@ import org.eobjects.analyzer.beans.transform.TokenizerTransformer.TokenTarget;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-import org.eobjects.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableColumn;
 
 public class TokenizerTransformerTest extends TestCase {
 

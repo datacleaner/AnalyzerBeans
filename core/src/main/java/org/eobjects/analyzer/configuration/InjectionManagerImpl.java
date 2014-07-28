@@ -39,9 +39,9 @@ import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.util.LazyRef;
-import org.eobjects.metamodel.util.Ref;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.util.LazyRef;
+import org.apache.metamodel.util.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

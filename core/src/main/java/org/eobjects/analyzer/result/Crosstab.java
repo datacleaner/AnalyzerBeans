@@ -31,8 +31,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.util.Ref;
-import org.eobjects.metamodel.util.SerializableRef;
+import org.apache.metamodel.util.Ref;
+import org.apache.metamodel.util.SerializableRef;
 
 public final class Crosstab<E extends Serializable> implements Serializable {
 

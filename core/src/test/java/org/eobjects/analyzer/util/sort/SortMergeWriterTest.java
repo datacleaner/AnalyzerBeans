@@ -27,8 +27,8 @@ import java.util.Comparator;
 
 import junit.framework.TestCase;
 
-import org.eobjects.metamodel.util.FileHelper;
-import org.eobjects.metamodel.util.ToStringComparator;
+import org.apache.metamodel.util.FileHelper;
+import org.apache.metamodel.util.ToStringComparator;
 
 public class SortMergeWriterTest extends TestCase {
 

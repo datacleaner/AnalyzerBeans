@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.data;
 
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * A mock-implementation of the input column. Use this only for testing purposes

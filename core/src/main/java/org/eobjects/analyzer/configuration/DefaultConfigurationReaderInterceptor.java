@@ -29,8 +29,8 @@ import org.eobjects.analyzer.util.convert.ResourceConverter;
 import org.eobjects.analyzer.util.convert.ResourceConverter.ResourceTypeHandler;
 import org.eobjects.analyzer.util.convert.UrlResourceTypeHandler;
 import org.eobjects.analyzer.util.convert.VfsResourceTypeHandler;
-import org.eobjects.metamodel.util.FileHelper;
-import org.eobjects.metamodel.util.Resource;
+import org.apache.metamodel.util.FileHelper;
+import org.apache.metamodel.util.Resource;
 
 /**
  * Defines a default implementation of the

@@ -31,7 +31,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.filemonitor.FileMonitor;
 import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 
 /**
  * Dictionary based on a simple text file containing the values of the

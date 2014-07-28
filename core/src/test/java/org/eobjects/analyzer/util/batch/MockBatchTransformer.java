@@ -27,8 +27,8 @@ import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.Func;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.Func;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

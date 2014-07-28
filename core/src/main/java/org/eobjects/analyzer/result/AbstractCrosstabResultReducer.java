@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eobjects.metamodel.util.NumberComparator;
+import org.apache.metamodel.util.NumberComparator;
 
 /**
  * Abstract reducer class for {@link CrosstabResult}s that are two dimensional

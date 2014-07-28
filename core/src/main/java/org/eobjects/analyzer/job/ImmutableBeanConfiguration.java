@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.PropertyDescriptor;
-import org.eobjects.metamodel.util.EqualsBuilder;
+import org.apache.metamodel.util.EqualsBuilder;
 
 /**
  * Default (immutable) implementation of {@link BeanConfiguration}.

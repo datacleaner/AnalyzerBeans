@@ -22,7 +22,7 @@ package org.eobjects.analyzer.util;
 import java.util.Comparator;
 
 import org.eobjects.analyzer.job.ComponentJob;
-import org.eobjects.metamodel.util.ToStringComparator;
+import org.apache.metamodel.util.ToStringComparator;
 
 /**
  * Compares and sorts {@link ComponentJob}s for visual presentation

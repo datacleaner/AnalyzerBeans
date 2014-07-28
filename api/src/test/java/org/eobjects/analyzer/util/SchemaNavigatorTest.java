@@ -25,19 +25,19 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.MetaModelException;
-import org.eobjects.metamodel.QueryPostprocessDataContext;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.MutableColumn;
-import org.eobjects.metamodel.schema.MutableSchema;
-import org.eobjects.metamodel.schema.MutableTable;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.HasNameMapper;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.DataContextFactory;
+import org.apache.metamodel.MetaModelException;
+import org.apache.metamodel.QueryPostprocessDataContext;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableSchema;
+import org.apache.metamodel.schema.MutableTable;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.HasNameMapper;
 
 public class SchemaNavigatorTest extends TestCase {
 
@@ -48,50 +48,50 @@ public class SchemaNavigatorTest extends TestCase {
         sn.refreshSchemas();
 
         // columns
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]", sn
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]", sn
                 .convertToColumn("email").toString());
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]", sn
-                .convertToColumn("employees.email").toString());
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]", sn
-                .convertToColumn("employees.csv.employees.email").toString());
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]", sn
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]", sn
                 .convertToColumn("employees.csv.email").toString());
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]", sn
+                .convertToColumn("resources.employees.csv.email").toString());
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]", sn
+                .convertToColumn("resources.email").toString());
 
         assertNull(sn.convertToColumns("foo", "bar", null));
         assertEquals(0, (sn.convertToColumns("foo", "bar", new String[0])).length);
 
         assertEquals(
-                "[Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], Column[name=name,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]]",
-                Arrays.toString(sn.convertToColumns(new String[] { "email", "employees.name" })));
+                "[Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null], Column[name=name,columnNumber=0,type=STRING,nullable=true,nativeType=null,columnSize=null]]",
+                Arrays.toString(sn.convertToColumns(new String[] { "email", "employees.csv.name" })));
         assertEquals(
-                "[Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], null, Column[name=name,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]]",
-                Arrays.toString(sn.convertToColumns("employees.csv", "employees", new String[] { "email",
+                "[Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null], null, Column[name=name,columnNumber=0,type=STRING,nullable=true,nativeType=null,columnSize=null]]",
+                Arrays.toString(sn.convertToColumns("resources", "employees.csv", new String[] { "email",
                         "not-existing", "name" })));
         assertEquals(
-                "[Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null], null, Column[name=name,columnNumber=0,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]]",
+                "[Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null], null, Column[name=name,columnNumber=0,type=STRING,nullable=true,nativeType=null,columnSize=null]]",
                 Arrays.toString(sn
-                        .convertToColumns(null, "employees", new String[] { "email", "not-existing", "name" })));
+                        .convertToColumns(null, "employees.csv", new String[] { "email", "not-existing", "name" })));
 
         try {
-            sn.convertToColumns("not-existing", "employees", new String[] { "email", "not-existing", "name" });
+            sn.convertToColumns("not-existing", "employees.csv", new String[] { "email", "not-existing", "name" });
             fail("Exception expected");
         } catch (Exception e) {
             assertEquals(
-                    "Schema not-existing not found. Available schema names are: [information_schema, employees.csv]",
+                    "Schema not-existing not found. Available schema names are: [information_schema, resources]",
                     e.getMessage());
         }
 
         try {
-            sn.convertToColumns("employees.csv", "not-existing", new String[] { "email", "not-existing", "name" });
+            sn.convertToColumns("resources", "not-existing", new String[] { "email", "not-existing", "name" });
             fail("Exception expected");
         } catch (Exception e) {
-            assertEquals("Table not found. Available table names are: [employees]", e.getMessage());
+            assertEquals("Table not found. Available table names are: [employees.csv]", e.getMessage());
         }
 
         // tables
-        assertEquals("Table[name=employees,type=TABLE,remarks=null]", sn.convertToTable("employees").toString());
-        assertEquals("Table[name=employees,type=TABLE,remarks=null]", sn.convertToTable(null, "employees").toString());
-        assertEquals("Table[name=employees,type=TABLE,remarks=null]", sn.convertToTable(null, null).toString());
+        assertEquals("Table[name=employees.csv,type=TABLE,remarks=null]", sn.convertToTable("employees.csv").toString());
+        assertEquals("Table[name=employees.csv,type=TABLE,remarks=null]", sn.convertToTable(null, "employees.csv").toString());
+        assertEquals("Table[name=employees.csv,type=TABLE,remarks=null]", sn.convertToTable(null, null).toString());
 
         try {
             sn.convertToTable("information_schema", null);
@@ -102,22 +102,22 @@ public class SchemaNavigatorTest extends TestCase {
                     e.getMessage());
         }
 
-        assertEquals("Table[name=employees,type=TABLE,remarks=null]", sn.convertToTable("employees.csv", "employees")
+        assertEquals("Table[name=employees.csv,type=TABLE,remarks=null]", sn.convertToTable("resources", "employees.csv")
                 .toString());
         assertEquals(
-                "[Table[name=employees,type=TABLE,remarks=null], Table[name=employees,type=TABLE,remarks=null], null]",
-                Arrays.toString(sn.convertToTables(new String[] { "employees", "employees.csv.employees", "foo" })));
+                "[Table[name=employees.csv,type=TABLE,remarks=null], Table[name=employees.csv,type=TABLE,remarks=null], null]",
+                Arrays.toString(sn.convertToTables(new String[] { "employees.csv", "resources.employees.csv", "foo" })));
 
         // schemas
-        assertEquals("Schema[name=employees.csv]", sn.convertToSchema("employees.csv").toString());
+        assertEquals("Schema[name=resources]", sn.convertToSchema("resources").toString());
         assertEquals(null, sn.convertToSchema("foo"));
 
-        assertEquals("[null, Schema[name=employees.csv], Schema[name=information_schema]]",
-                Arrays.toString(sn.convertToSchemas(new String[] { "foo", "employees.csv", "information_schema" })));
+        assertEquals("[null, Schema[name=resources], Schema[name=information_schema]]",
+                Arrays.toString(sn.convertToSchemas(new String[] { "foo", "resources", "information_schema" })));
 
-        assertEquals("Schema[name=employees.csv]", sn.getDefaultSchema().toString());
+        assertEquals("Schema[name=resources]", sn.getDefaultSchema().toString());
         assertEquals(null, sn.getSchemaByName("foo"));
-        assertEquals("[Schema[name=information_schema], Schema[name=employees.csv]]", Arrays.toString(sn.getSchemas()));
+        assertEquals("[Schema[name=information_schema], Schema[name=resources]]", Arrays.toString(sn.getSchemas()));
     }
 
     public void testSchemaWithDot() throws Exception {
@@ -128,8 +128,8 @@ public class SchemaNavigatorTest extends TestCase {
 
         SchemaNavigator sn = new SchemaNavigator(dc);
 
-        Column column = sn.convertToColumn("employees.csv.employees.email");
-        assertEquals("Column[name=email,columnNumber=1,type=VARCHAR,nullable=true,nativeType=null,columnSize=null]",
+        Column column = sn.convertToColumn("resources.employees.csv.email");
+        assertEquals("Column[name=email,columnNumber=1,type=STRING,nullable=true,nativeType=null,columnSize=null]",
                 column.toString());
     }
 

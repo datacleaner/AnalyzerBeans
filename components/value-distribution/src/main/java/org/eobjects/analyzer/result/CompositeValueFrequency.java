@@ -22,8 +22,8 @@ package org.eobjects.analyzer.result;
 import java.util.Collection;
 import java.util.List;
 
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.Func;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.Func;
 
 /**
  * Represents a group of values, counted as one item.

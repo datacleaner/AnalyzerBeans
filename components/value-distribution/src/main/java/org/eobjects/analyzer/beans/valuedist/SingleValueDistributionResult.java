@@ -36,8 +36,8 @@ import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.LabelUtils;
 import org.eobjects.analyzer.util.NullTolerableComparator;
-import org.eobjects.metamodel.util.Ref;
-import org.eobjects.metamodel.util.SerializableRef;
+import org.apache.metamodel.util.Ref;
+import org.apache.metamodel.util.SerializableRef;
 
 public class SingleValueDistributionResult extends ValueDistributionAnalyzerResult implements
         Comparable<SingleValueDistributionResult> {

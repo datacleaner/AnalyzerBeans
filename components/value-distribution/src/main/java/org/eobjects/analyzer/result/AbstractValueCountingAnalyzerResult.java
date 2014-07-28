@@ -30,9 +30,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.eobjects.analyzer.util.LabelUtils;
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.Func;
-import org.eobjects.metamodel.util.Predicate;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.Func;
+import org.apache.metamodel.util.Predicate;
 
 /**
  * An abstract implementation of {@link ValueCountingAnalyzerResult} which

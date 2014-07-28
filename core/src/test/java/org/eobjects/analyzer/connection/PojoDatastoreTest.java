@@ -27,10 +27,10 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.eobjects.metamodel.pojo.MapTableDataProvider;
-import org.eobjects.metamodel.pojo.TableDataProvider;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.util.SimpleTableDef;
+import org.apache.metamodel.pojo.MapTableDataProvider;
+import org.apache.metamodel.pojo.TableDataProvider;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.SimpleTableDef;
 
 public class PojoDatastoreTest extends TestCase {
 

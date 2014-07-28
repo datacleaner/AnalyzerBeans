@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
 
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 /**
  * Provides hashCode, equals and toString implementations for FilterOutcome,
