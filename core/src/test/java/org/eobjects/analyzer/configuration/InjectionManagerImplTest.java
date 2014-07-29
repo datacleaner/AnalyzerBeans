@@ -48,75 +48,75 @@ import org.junit.Ignore;
 
 public class InjectionManagerImplTest extends TestCase {
 
-	private static final MutableRef<List<String>> listRef = new MutableRef<List<String>>();
+    private static final MutableRef<List<String>> listRef = new MutableRef<List<String>>();
 
-	@Ignore
-	@AnalyzerBean("Fancy transformer")
-	public static class FancyTransformer implements Analyzer<AnnotatedRowsResult> {
+    @Ignore
+    @AnalyzerBean("Fancy transformer")
+    public static class FancyTransformer implements Analyzer<AnnotatedRowsResult> {
 
-		@Provided
-		List<String> stringList;
+        @Provided
+        List<String> stringList;
 
-		@Configured
-		InputColumn<Number> col;
+        @Configured
+        InputColumn<Number> col;
 
-		@Inject
-		RowAnnotation rowAnnotation;
+        @Inject
+        RowAnnotation rowAnnotation;
 
-		@Inject
-		RowAnnotationFactory rowAnnotationFactory;
+        @Inject
+        RowAnnotationFactory rowAnnotationFactory;
 
-		@Override
-		public void run(InputRow row, int distinctCount) {
-			Number value = row.getValue(col);
-			if (value.intValue() % 2 == 0) {
-				rowAnnotationFactory.annotate(row, distinctCount, rowAnnotation);
-			} else {
-				stringList.add(value.toString());
-			}
-		}
+        @Override
+        public void run(InputRow row, int distinctCount) {
+            Number value = row.getValue(col);
+            if (value.intValue() % 2 == 0) {
+                rowAnnotationFactory.annotate(row, distinctCount, rowAnnotation);
+            } else {
+                stringList.add(value.toString());
+            }
+        }
 
-		@Override
-		public AnnotatedRowsResult getResult() {
-			listRef.set(stringList);
-			return new AnnotatedRowsResult(rowAnnotation, rowAnnotationFactory, col);
-		}
-	}
+        @Override
+        public AnnotatedRowsResult getResult() {
+            listRef.set(stringList);
+            return new AnnotatedRowsResult(rowAnnotation, rowAnnotationFactory, col);
+        }
+    }
 
-	public void testInjectCustomClass() throws Exception {
-		assertNull(listRef.get());
+    public void testInjectCustomClass() throws Exception {
+        assertNull(listRef.get());
 
-		final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
-		descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(FancyTransformer.class));
+        final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(FancyTransformer.class));
 
-		final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(
-				TestHelper.createSampleDatabaseDatastore("orderdb")));
+        final AnalyzerBeansConfigurationImpl conf = new AnalyzerBeansConfigurationImpl()
+                .replace(new DatastoreCatalogImpl(TestHelper.createSampleDatabaseDatastore("orderdb")));
 
-		final AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
-		ajb.setDatastore("orderdb");
-		ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
+        try (final AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf)) {
 
-		final AnalyzerJobBuilder<FancyTransformer> analyzerBuilder = ajb
-				.addAnalyzer(FancyTransformer.class);
-		analyzerBuilder.addInputColumns(ajb.getSourceColumns());
+            ajb.setDatastore("orderdb");
+            ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
 
-		final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());
-		assertTrue(result.isSuccessful());
+            final AnalyzerJobBuilder<FancyTransformer> analyzerBuilder = ajb.addAnalyzer(FancyTransformer.class);
+            analyzerBuilder.addInputColumns(ajb.getSourceColumns());
 
-		AnnotatedRowsResult res = (AnnotatedRowsResult) result.getResults().get(0);
-		assertEquals(13, res.getAnnotatedRowCount());
-		assertNotNull(listRef.get());
-		assertEquals(10, listRef.get().size());
-		
-		ajb.close();
-	}
-	
-	public void testGetInstanceUsingSimpleInjectionPoint() throws Exception {
-		InjectionManagerImpl injectionManager = new InjectionManagerImpl(null);
-		
-		InjectionPoint<StringConverter> point = SimpleInjectionPoint.of(StringConverter.class);
-		
-		StringConverter instance = injectionManager.getInstance(point);
-		assertNotNull(instance);
-	}
+            final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());
+            assertTrue(result.isSuccessful());
+
+            AnnotatedRowsResult res = (AnnotatedRowsResult) result.getResults().get(0);
+            assertEquals(13, res.getAnnotatedRowCount());
+            assertNotNull(listRef.get());
+            assertEquals(10, listRef.get().size());
+
+        }
+    }
+
+    public void testGetInstanceUsingSimpleInjectionPoint() throws Exception {
+        InjectionManagerImpl injectionManager = new InjectionManagerImpl(null);
+
+        InjectionPoint<StringConverter> point = SimpleInjectionPoint.of(StringConverter.class);
+
+        StringConverter instance = injectionManager.getInstance(point);
+        assertNotNull(instance);
+    }
 }

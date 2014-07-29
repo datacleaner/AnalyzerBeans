@@ -278,13 +278,10 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                         } else {
                             logger.info("Scanning JAR file: {}", file);
 
-                            JarFile jarFile = new JarFile(file);
-                            try {
+                            try (JarFile jarFile = new JarFile(file)) {
                                 scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
                             } catch (Exception e) {
                                 logger.error("Failed to scan package '" + packageName + "' in file: " + file, e);
-                            } finally {
-                                jarFile.close();
                             }
                         }
                     }
@@ -339,12 +336,13 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                 // format. We'll also handle paths with and without leading
                 // "file:" prefix.
 
-                JarFile jarFile = null;
                 String rootEntryPath;
 
                 final String jarFileUrl;
                 final int separatorIndex = file.indexOf("!/");
 
+                @SuppressWarnings("resource")
+                JarFile jarFile = null;
                 try {
                     if (separatorIndex != -1) {
                         jarFileUrl = file.substring(0, separatorIndex);

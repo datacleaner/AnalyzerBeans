@@ -37,15 +37,16 @@ public class ChangeAwareObjectInputStreamTest extends TestCase {
         final URL[] urls = new URL[] { JAR_FILE.toURI().toURL() };
         final ClassLoader classLoader = new URLClassLoader(urls);
 
-        final ChangeAwareObjectInputStream ois = new ChangeAwareObjectInputStream(new FileInputStream(
-                SERIALIZED_OBJECT_FILE));
-        ois.addClassLoader(classLoader);
-
         final Object obj;
-        try {
-            obj = ois.readObject();
-        } finally {
-            ois.close();
+        try (final ChangeAwareObjectInputStream ois = new ChangeAwareObjectInputStream(new FileInputStream(
+                SERIALIZED_OBJECT_FILE))) {
+            ois.addClassLoader(classLoader);
+
+            try {
+                obj = ois.readObject();
+            } finally {
+                ois.close();
+            }
         }
 
         assertNotNull(obj);

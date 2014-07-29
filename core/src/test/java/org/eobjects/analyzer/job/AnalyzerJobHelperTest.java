@@ -50,16 +50,17 @@ public class AnalyzerJobHelperTest extends TestCase {
         final AnalyzerJob analyzer1 = job1.getAnalyzerJobs().iterator().next();
 
         // create a copy
+        final AnalysisJob job2;
         final Datastore datastore2 = new CsvDatastore("ds", "src/test/resources/employees.csv");
-        final AnalysisJobBuilder ajb2 = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
-        ajb2.setDatastore(datastore2);
-        ajb2.addSourceColumns("name", "email");
-        ajb2.addAnalyzer(MockAnalyzer.class).addInputColumns(new MockInputColumn<String>("name"));
+        try (final AnalysisJobBuilder ajb2 = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl())) {
 
-        final AnalysisJob job2 = ajb2.toAnalysisJob();
+            ajb2.setDatastore(datastore2);
+            ajb2.addSourceColumns("name", "email");
+            ajb2.addAnalyzer(MockAnalyzer.class).addInputColumns(new MockInputColumn<String>("name"));
+
+            job2 = ajb2.toAnalysisJob();
+        }
         final AnalyzerJob analyzer2 = job2.getAnalyzerJobs().iterator().next();
-
-        ajb2.close();
 
         assertNotSame(job1, job2);
         assertNotSame(analyzer1, analyzer2);

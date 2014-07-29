@@ -29,10 +29,10 @@ import org.apache.commons.lang.SerializationUtils;
 public class RowAnnotationImplTest extends TestCase {
 
     public void testDeserializeOlderVersion() throws Exception {
-        InputStream in = new FileInputStream("src/test/resources/old_row_annotation_impl.ser");
-
-        Object obj = SerializationUtils.deserialize(in);
-        in.close();
+        Object obj;
+        try (InputStream in = new FileInputStream("src/test/resources/old_row_annotation_impl.ser")) {
+            obj = SerializationUtils.deserialize(in);
+        }
 
         assertTrue(obj instanceof RowAnnotationImpl);
         RowAnnotationImpl annotation = (RowAnnotationImpl) obj;

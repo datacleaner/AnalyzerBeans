@@ -102,17 +102,19 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
         AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(taskRunner).replace(
                 new DatastoreCatalogImpl(datastore));
 
-        AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
-        ajb.setDatastore(datastore);
-
-        SchemaNavigator schemaNavigator = datastore.openConnection().getSchemaNavigator();
-        Column column = schemaNavigator.convertToColumn("PUBLIC.EMPLOYEES.EMAIL");
-        assertNotNull(column);
-
-        ajb.addSourceColumn(column);
-        ajb.addAnalyzer(ErrornousAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
-
-        AnalysisJob job = ajb.toAnalysisJob();
+        AnalysisJob job;
+        try (AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf)) {
+            ajb.setDatastore(datastore);
+            
+            SchemaNavigator schemaNavigator = datastore.openConnection().getSchemaNavigator();
+            Column column = schemaNavigator.convertToColumn("PUBLIC.EMPLOYEES.EMAIL");
+            assertNotNull(column);
+            
+            ajb.addSourceColumn(column);
+            ajb.addAnalyzer(ErrornousAnalyzer.class).addInputColumn(ajb.getSourceColumns().get(0));
+            
+            job = ajb.toAnalysisJob();
+        }
 
         AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(conf).run(job);
 
@@ -167,7 +169,5 @@ public class ErrorInRowProcessingConsumerTest extends TestCase {
         assertTrue("taskCount was: " + taskCount, taskCount > 4);
 
         assertTrue(closed.get());
-        
-        ajb.close();
     }
 }

@@ -109,10 +109,11 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
      */
     @Close
     public void close() {
-        DatastoreConnection dataContextProvider = getDatastoreConnections().poll();
-        if (dataContextProvider != null) {
+        @SuppressWarnings("resource")
+        DatastoreConnection datastoreConnection = getDatastoreConnections().poll();
+        if (datastoreConnection != null) {
             logger.info("Closing dictionary: {}", this);
-            dataContextProvider.close();
+            datastoreConnection.close();
         }
     }
 
@@ -160,30 +161,32 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
 
     @Override
     public Collection<Synonym> getSynonyms() {
+        final Datastore datastore = getDatastore();
 
-        Datastore datastore = getDatastore();
+        try (DatastoreConnection datastoreConnection = datastore.openConnection()) {
+            final DataContext dataContext = datastoreConnection.getDataContext();
 
-        DatastoreConnection dataContextProvider = datastore.openConnection();
-        DataContext dataContext = dataContextProvider.getDataContext();
+            final SchemaNavigator schemaNavigator = datastoreConnection.getSchemaNavigator();
 
-        SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+            final Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
+            final Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
 
-        Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
-        Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
+            final Table table = masterTermColumn.getTable();
 
-        Table table = masterTermColumn.getTable();
+            final Query query = dataContext.query().from(table.getName()).select(masterTermColumn).select(columns)
+                    .toQuery();
+            final DataSet results = dataContext.executeQuery(query);
 
-        Query query = dataContext.query().from(table.getName()).select(masterTermColumn).select(columns).toQuery();
-        DataSet results = dataContext.executeQuery(query);
+            final List<Synonym> synonyms = new ArrayList<Synonym>();
 
-        List<Synonym> synonyms = new ArrayList<Synonym>();
+            while (results.next()) {
+                final Row row = results.getRow();
+                synonyms.add(new SimpleSynonym(getMasterTerm(row, masterTermColumn), getSynonyms(row,
+                        table.getColumns())));
+            }
 
-        while (results.next()) {
-            Row row = results.getRow();
-            synonyms.add(new SimpleSynonym(getMasterTerm(row, masterTermColumn), getSynonyms(row, table.getColumns())));
+            return synonyms;
         }
-        dataContextProvider.close();
-        return synonyms;
     }
 
     @Override
@@ -201,27 +204,26 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
             result = cache.getIfPresent(term);
 
             if (result == null) {
-                Datastore datastore = getDatastore();
+                final Datastore datastore = getDatastore();
 
-                DatastoreConnection dataContextProvider = datastore.openConnection();
-                try {
+                try (final DatastoreConnection datastoreConnection = datastore.openConnection()) {
 
-                    SchemaNavigator schemaNavigator = dataContextProvider.getSchemaNavigator();
+                    final SchemaNavigator schemaNavigator = datastoreConnection.getSchemaNavigator();
 
-                    Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
-                    Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
+                    final Column masterTermColumn = schemaNavigator.convertToColumn(_masterTermColumnPath);
+                    final Column[] columns = schemaNavigator.convertToColumns(_synonymColumnPaths);
 
-                    DataContext dataContext = dataContextProvider.getDataContext();
-                    Table table = masterTermColumn.getTable();
+                    final DataContext dataContext = datastoreConnection.getDataContext();
+                    final Table table = masterTermColumn.getTable();
 
                     // create a query that gets the master term where any of the
                     // synonym columns are equal to the synonym
-                    Query query = dataContext.query().from(table.getName()).select(masterTermColumn).toQuery();
-                    List<FilterItem> filterItems = new ArrayList<FilterItem>();
+                    final Query query = dataContext.query().from(table.getName()).select(masterTermColumn).toQuery();
+                    final List<FilterItem> filterItems = new ArrayList<FilterItem>();
                     for (int i = 0; i < columns.length; i++) {
-                        Column column = columns[i];
+                        final Column column = columns[i];
                         if (column.getType().isNumber()) {
-                            Number numberValue = ConvertToNumberTransformer.transformValue(term);
+                            final Number numberValue = ConvertToNumberTransformer.transformValue(term);
                             if (numberValue != null) {
                                 filterItems.add(new FilterItem(new SelectItem(column), OperatorType.EQUALS_TO,
                                         numberValue));
@@ -235,18 +237,15 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
                     } else {
                         query.where(new FilterItem(filterItems.toArray(new FilterItem[0])));
 
-                        DataSet dataSet = dataContext.executeQuery(query);
-
-                        if (dataSet.next()) {
-                            Row row = dataSet.getRow();
-                            result = getMasterTerm(row, masterTermColumn);
-                        } else {
-                            result = "";
+                        try (final DataSet dataSet = dataContext.executeQuery(query)) {
+                            if (dataSet.next()) {
+                                final Row row = dataSet.getRow();
+                                result = getMasterTerm(row, masterTermColumn);
+                            } else {
+                                result = "";
+                            }
                         }
-                        dataSet.close();
                     }
-                } finally {
-                    dataContextProvider.close();
                 }
 
                 cache.put(term, result);

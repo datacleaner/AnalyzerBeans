@@ -83,26 +83,20 @@ final class RowProcessingMetricsImpl implements RowProcessingMetrics {
                     countQuery.selectCount();
                     countQuery.getSelectClause().getItem(0).setFunctionApproximationAllowed(true);
 
-                    Datastore datastore = _publishers.getDatastore();
-                    DatastoreConnection connection = datastore.openConnection();
-                    try {
-                        final DataSet countDataSet = connection.getDataContext().executeQuery(countQuery);
-                        try {
+                    final Datastore datastore = _publishers.getDatastore();
+                    try (final DatastoreConnection connection = datastore.openConnection()) {
+                        try (final DataSet countDataSet = connection.getDataContext().executeQuery(countQuery)) {
                             if (countDataSet.next()) {
-                                Number count = ConvertToNumberTransformer.transformValue(countDataSet.getRow()
+                                final Number count = ConvertToNumberTransformer.transformValue(countDataSet.getRow()
                                         .getValue(0));
                                 if (count != null) {
                                     expectedRows = count.intValue();
                                 }
                             }
-                        } finally {
-                            countDataSet.close();
                         }
-                    } finally {
-                        connection.close();
                     }
 
-                    Integer maxRows = originalQuery.getMaxRows();
+                    final Integer maxRows = originalQuery.getMaxRows();
                     if (maxRows != null) {
                         expectedRows = Math.min(expectedRows, maxRows.intValue());
                     }

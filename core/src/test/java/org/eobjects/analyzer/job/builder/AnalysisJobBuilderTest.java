@@ -45,36 +45,35 @@ public class AnalysisJobBuilderTest extends TestCase {
         table.addColumn(column);
 
         // set up
-        AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl());
-        MockDatastore datastore = new MockDatastore();
-        ajb.setDatastore(datastore);
-        ajb.addSourceColumn(new MetaModelInputColumn(column));
+        try (AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl())) {
+            MockDatastore datastore = new MockDatastore();
+            ajb.setDatastore(datastore);
+            ajb.addSourceColumn(new MetaModelInputColumn(column));
 
-        // add a transformer
-        TransformerJobBuilder<MockTransformer> tjb1 = ajb.addTransformer(MockTransformer.class);
-        tjb1.addInputColumn(ajb.getSourceColumns().get(0));
-        assertTrue(tjb1.isConfigured(true));
+            // add a transformer
+            TransformerJobBuilder<MockTransformer> tjb1 = ajb.addTransformer(MockTransformer.class);
+            tjb1.addInputColumn(ajb.getSourceColumns().get(0));
+            assertTrue(tjb1.isConfigured(true));
 
-        // add filter
-        FilterJobBuilder<MockFilter, Category> filter = ajb.addFilter(MockFilter.class);
-        filter.addInputColumn(tjb1.getOutputColumns().get(0));
-        filter.getConfigurableBean().setSomeEnum(Category.VALID);
-        filter.getConfigurableBean().setSomeFile(new File("."));
-        assertTrue(filter.isConfigured(true));
-        
-        // set default requirement
-        ajb.setDefaultRequirement(filter, Category.VALID);
-        
-        // add another transformer
-        TransformerJobBuilder<MockTransformer> tjb2 = ajb.addTransformer(MockTransformer.class);
-        tjb2.addInputColumn(tjb1.getOutputColumns().get(0));
-        assertTrue(tjb2.isConfigured(true));
-        
-        // assertions
-        assertEquals("FilterOutcome[category=VALID]", tjb2.getRequirement().toString());
-        assertEquals(null, filter.getRequirement());
-        assertEquals(null, tjb1.getRequirement());
-        
-        ajb.close();
+            // add filter
+            FilterJobBuilder<MockFilter, Category> filter = ajb.addFilter(MockFilter.class);
+            filter.addInputColumn(tjb1.getOutputColumns().get(0));
+            filter.getConfigurableBean().setSomeEnum(Category.VALID);
+            filter.getConfigurableBean().setSomeFile(new File("."));
+            assertTrue(filter.isConfigured(true));
+
+            // set default requirement
+            ajb.setDefaultRequirement(filter, Category.VALID);
+
+            // add another transformer
+            TransformerJobBuilder<MockTransformer> tjb2 = ajb.addTransformer(MockTransformer.class);
+            tjb2.addInputColumn(tjb1.getOutputColumns().get(0));
+            assertTrue(tjb2.isConfigured(true));
+
+            // assertions
+            assertEquals("FilterOutcome[category=VALID]", tjb2.getRequirement().toString());
+            assertEquals(null, filter.getRequirement());
+            assertEquals(null, tjb1.getRequirement());
+        }
     }
 }

@@ -168,8 +168,7 @@ public final class RowProcessingPublisher {
             @Override
             protected RowProcessingQueryOptimizer fetch() {
                 final Datastore datastore = _publishers.getDatastore();
-                final DatastoreConnection con = datastore.openConnection();
-                try {
+                try (final DatastoreConnection con = datastore.openConnection()) {
                     final DataContext dataContext = con.getDataContext();
 
                     final Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
@@ -182,8 +181,6 @@ public final class RowProcessingPublisher {
                     final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore,
                             sortedConsumers, baseQuery);
                     return optimizer;
-                } finally {
-                    con.close();
                 }
             }
         };
@@ -279,9 +276,8 @@ public final class RowProcessingPublisher {
                 taskRunner);
 
         final Datastore datastore = _publishers.getDatastore();
-        final DatastoreConnection con = datastore.openConnection();
 
-        try {
+        try (final DatastoreConnection con = datastore.openConnection()) {
             final DataContext dataContext = con.getDataContext();
 
             if (logger.isDebugEnabled()) {
@@ -296,13 +292,11 @@ public final class RowProcessingPublisher {
                 logger.debug("Final query firstRow={}, maxRows={}", finalQuery.getFirstRow(), finalQuery.getMaxRows());
             }
 
-            final DataSet dataSet = dataContext.executeQuery(finalQuery);
-
             // represents the distinct count of rows as well as the number of
             // tasks to execute
             int numTasks = 0;
 
-            try {
+            try (final DataSet dataSet = dataContext.executeQuery(finalQuery)) {
                 final ConsumeRowHandler consumeRowHandler = new ConsumeRowHandler(consumers, availableOutcomes);
                 while (dataSet.next()) {
                     if (taskListener.isErrornous()) {
@@ -320,13 +314,8 @@ public final class RowProcessingPublisher {
                     taskRunner.run(task, taskListener);
 
                 }
-            } finally {
-                dataSet.close();
             }
             taskListener.awaitTasks(numTasks);
-
-        } finally {
-            con.close();
         }
 
         if (taskListener.isErrornous()) {

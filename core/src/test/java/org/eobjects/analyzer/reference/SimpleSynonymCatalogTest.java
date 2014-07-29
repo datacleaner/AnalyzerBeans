@@ -40,16 +40,14 @@ public class SimpleSynonymCatalogTest extends TestCase {
         assertEquals("NLD", sc.getMasterTerm("The netherlands"));
         assertNull(sc.getMasterTerm("Danemark"));
     }
-    
+
     public void testDeserializePreviousVersion() throws Exception {
-        FileInputStream in = new FileInputStream("src/test/resources/analyzerbeans-0.34-simple-synonym-catalog.ser");
         SynonymCatalog sc;
-        try {
+        try (FileInputStream in = new FileInputStream(
+                "src/test/resources/analyzerbeans-0.34-simple-synonym-catalog.ser")) {
             sc = (SynonymCatalog) SerializationUtils.deserialize(in);
-        } finally {
-            in.close();
         }
-        
+
         assertEquals("DNK", sc.getMasterTerm("DNK"));
         assertEquals("NLD", sc.getMasterTerm("NLD"));
         assertEquals("DNK", sc.getMasterTerm("Denmark"));

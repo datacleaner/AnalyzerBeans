@@ -49,7 +49,7 @@ public class QueryOptimizationAndAnalysisListeningTest extends TestCase {
     public void testScenario() throws Exception {
         final List<Integer> rowNumbers = new ArrayList<Integer>();
         final AtomicInteger expectedRows = new AtomicInteger();
-        
+
         final Datastore datastore = TestHelper.createSampleDatabaseDatastore("orderdb");
         final AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl()
                 .replace(new DatastoreCatalogImpl(datastore));
@@ -59,7 +59,7 @@ public class QueryOptimizationAndAnalysisListeningTest extends TestCase {
                 final int expected = metrics.getExpectedRows();
                 expectedRows.set(expected);
             }
-            
+
             @Override
             public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
                 rowNumbers.add(currentRow);
@@ -67,8 +67,7 @@ public class QueryOptimizationAndAnalysisListeningTest extends TestCase {
         };
 
         final AnalysisJob job;
-        {
-            final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        try (final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration)) {
             jobBuilder.setDatastore("orderdb");
             jobBuilder.addSourceColumns("customers.contactfirstname", "customers.contactlastname");
 
@@ -81,8 +80,6 @@ public class QueryOptimizationAndAnalysisListeningTest extends TestCase {
             analyzer.addInputColumns(jobBuilder.getSourceColumns());
 
             job = jobBuilder.toAnalysisJob();
-
-            jobBuilder.close();
         }
 
         final AnalysisRunner runner = new AnalysisRunnerImpl(configuration, analysisListener);
@@ -91,7 +88,7 @@ public class QueryOptimizationAndAnalysisListeningTest extends TestCase {
         // task runner is single-threaded, so we expect it to be immediately
         // finished
         assertTrue(resultFuture.isSuccessful());
-        
+
         assertEquals("10", expectedRows.toString());
         assertEquals("[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]", rowNumbers.toString());
     }

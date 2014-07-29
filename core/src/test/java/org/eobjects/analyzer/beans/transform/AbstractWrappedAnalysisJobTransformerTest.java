@@ -88,8 +88,7 @@ public class AbstractWrappedAnalysisJobTransformerTest extends TestCase {
 
     public void testWrappedExecution() throws Throwable {
         final AnalysisJob job;
-        {
-            AnalysisJobBuilder builder = new AnalysisJobBuilder(analyzerBeansConfiguration);
+        try (AnalysisJobBuilder builder = new AnalysisJobBuilder(analyzerBeansConfiguration)) {
             builder.setDatastore("actual_input");
             builder.addSourceColumns("table.name");
             builder.addTransformer(MockWrappedAnalysisJobTransformer.class).addInputColumn(
@@ -97,7 +96,6 @@ public class AbstractWrappedAnalysisJobTransformerTest extends TestCase {
             builder.addAnalyzer(MockAnalyzer.class).addInputColumns(builder.getAvailableInputColumns(Object.class));
 
             job = builder.toAnalysisJob();
-            builder.close();
         }
 
         AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(analyzerBeansConfiguration).run(job);
@@ -132,14 +130,14 @@ public class AbstractWrappedAnalysisJobTransformerTest extends TestCase {
 
         @Override
         protected AnalysisJob createWrappedAnalysisJob() {
-            AnalysisJobBuilder builder = new AnalysisJobBuilder(_analyzerBeansConfiguration);
-            builder.setDatastore("orig_input");
-            builder.addSourceColumns("table.foo");
-            builder.addTransformer(MockTransformer.class).addInputColumns(builder.getSourceColumns());
-            builder.addAnalyzer(MockAnalyzer.class).addInputColumns(builder.getAvailableInputColumns(Object.class));
-            AnalysisJob job = builder.toAnalysisJob();
-            builder.close();
-            return job;
+            try (AnalysisJobBuilder builder = new AnalysisJobBuilder(_analyzerBeansConfiguration)) {
+                builder.setDatastore("orig_input");
+                builder.addSourceColumns("table.foo");
+                builder.addTransformer(MockTransformer.class).addInputColumns(builder.getSourceColumns());
+                builder.addAnalyzer(MockAnalyzer.class).addInputColumns(builder.getAvailableInputColumns(Object.class));
+                AnalysisJob job = builder.toAnalysisJob();
+                return job;
+            }
         }
 
         @Override

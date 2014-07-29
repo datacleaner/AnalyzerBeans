@@ -53,75 +53,77 @@ public class AnalysisRunnerImplTest extends TestCase {
 
     public void testCloseMethodOnFailure() throws Exception {
 
-        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
-        jobBuilder.setDatastore(datastore);
-        jobBuilder.addSourceColumns("name");
+        try (final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration)) {
+            jobBuilder.setDatastore(datastore);
+            jobBuilder.addSourceColumns("name");
 
-        final TransformerJobBuilder<TestTransformer1> transformer1 = jobBuilder.addTransformer(TestTransformer1.class);
-        transformer1.addInputColumn(jobBuilder.getSourceColumnByName("name"));
-        final List<MutableInputColumn<?>> outputColumns1 = transformer1.getOutputColumns();
+            final TransformerJobBuilder<TestTransformer1> transformer1 = jobBuilder
+                    .addTransformer(TestTransformer1.class);
+            transformer1.addInputColumn(jobBuilder.getSourceColumnByName("name"));
+            final List<MutableInputColumn<?>> outputColumns1 = transformer1.getOutputColumns();
 
-        final TransformerJobBuilder<TestTransformer2> transformer2 = jobBuilder.addTransformer(TestTransformer2.class);
-        transformer2.addInputColumn(jobBuilder.getSourceColumnByName("name"));
-        final List<MutableInputColumn<?>> outputColumns2 = transformer2.getOutputColumns();
+            final TransformerJobBuilder<TestTransformer2> transformer2 = jobBuilder
+                    .addTransformer(TestTransformer2.class);
+            transformer2.addInputColumn(jobBuilder.getSourceColumnByName("name"));
+            final List<MutableInputColumn<?>> outputColumns2 = transformer2.getOutputColumns();
 
-        final TransformerJobBuilder<TestTransformer3> transformer3 = jobBuilder.addTransformer(TestTransformer3.class);
-        transformer3.addInputColumn(jobBuilder.getSourceColumnByName("name"));
-        final List<MutableInputColumn<?>> outputColumns3 = transformer3.getOutputColumns();
+            final TransformerJobBuilder<TestTransformer3> transformer3 = jobBuilder
+                    .addTransformer(TestTransformer3.class);
+            transformer3.addInputColumn(jobBuilder.getSourceColumnByName("name"));
+            final List<MutableInputColumn<?>> outputColumns3 = transformer3.getOutputColumns();
 
-        final AnalyzerJobBuilder<TestAnalyzer> analyzer = jobBuilder.addAnalyzer(TestAnalyzer.class);
-        analyzer.addInputColumns(outputColumns1);
-        analyzer.addInputColumns(outputColumns2);
-        analyzer.addInputColumns(outputColumns3);
+            final AnalyzerJobBuilder<TestAnalyzer> analyzer = jobBuilder.addAnalyzer(TestAnalyzer.class);
+            analyzer.addInputColumns(outputColumns1);
+            analyzer.addInputColumns(outputColumns2);
+            analyzer.addInputColumns(outputColumns3);
 
-        AnalysisJob analysisJob;
+            AnalysisJob analysisJob;
+            analysisJob = jobBuilder.toAnalysisJob();
 
-        // run a succesful job to show the effect on MY_BOOL
-        MY_BOOL1.set(false);
-        MY_BOOL2.set(false);
-        MY_BOOL3.set(false);
-        analysisJob = jobBuilder.toAnalysisJob();
-        AnalysisResultFuture resultFuture = runner.run(analysisJob);
-        resultFuture.await();
-        assertTrue(resultFuture.isSuccessful());
-        assertTrue(MY_BOOL1.get());
-        assertFalse(MY_BOOL2.get());
-        assertTrue(MY_BOOL3.get());
+            // run a succesful job to show the effect on MY_BOOL
+            MY_BOOL1.set(false);
+            MY_BOOL2.set(false);
+            MY_BOOL3.set(false);
+            AnalysisResultFuture resultFuture = runner.run(analysisJob);
+            resultFuture.await();
+            assertTrue(resultFuture.isSuccessful());
+            assertTrue(MY_BOOL1.get());
+            assertFalse(MY_BOOL2.get());
+            assertTrue(MY_BOOL3.get());
 
-        // modify the job to make it crash
-        analyzer.setConfiguredProperty("Produce an error", true);
-        analysisJob = jobBuilder.toAnalysisJob();
+            // modify the job to make it crash
+            analyzer.setConfiguredProperty("Produce an error", true);
+            analysisJob = jobBuilder.toAnalysisJob();
 
-        // run again but this time produce an error
-        MY_BOOL1.set(false);
-        MY_BOOL2.set(false);
-        MY_BOOL3.set(false);
-        resultFuture = runner.run(analysisJob);
-        resultFuture.await();
-        assertFalse(resultFuture.isSuccessful());
-        assertEquals("produceAnError=true", resultFuture.getErrors().get(0).getMessage());
-        assertFalse(MY_BOOL1.get());
-        assertTrue(MY_BOOL2.get());
-        assertTrue(MY_BOOL3.get());
+            // run again but this time produce an error
+            MY_BOOL1.set(false);
+            MY_BOOL2.set(false);
+            MY_BOOL3.set(false);
+            resultFuture = runner.run(analysisJob);
+            resultFuture.await();
+            assertFalse(resultFuture.isSuccessful());
+            assertEquals("produceAnError=true", resultFuture.getErrors().get(0).getMessage());
+            assertFalse(MY_BOOL1.get());
+            assertTrue(MY_BOOL2.get());
+            assertTrue(MY_BOOL3.get());
 
-        // Error on get result
-        analyzer.setConfiguredProperty("Produce an error", false);
-        analyzer.setConfiguredProperty("Produce an error on get result", true);
-        analysisJob = jobBuilder.toAnalysisJob();
+            // Error on get result
+            analyzer.setConfiguredProperty("Produce an error", false);
+            analyzer.setConfiguredProperty("Produce an error on get result", true);
+            analysisJob = jobBuilder.toAnalysisJob();
 
-        // run again but this time produce an error
-        MY_BOOL1.set(false);
-        MY_BOOL2.set(false);
-        MY_BOOL3.set(false);
-        resultFuture = runner.run(analysisJob);
-        resultFuture.await();
-        assertFalse(resultFuture.isSuccessful());
-        assertEquals("produceAnErrorOnGetResult=true", resultFuture.getErrors().get(0).getMessage());
-        assertFalse(MY_BOOL1.get());
-        assertTrue(MY_BOOL2.get());
-        assertTrue(MY_BOOL3.get());
-
-        jobBuilder.close();
+            // run again but this time produce an error
+            MY_BOOL1.set(false);
+            MY_BOOL2.set(false);
+            MY_BOOL3.set(false);
+            resultFuture = runner.run(analysisJob);
+            resultFuture.await();
+            assertFalse(resultFuture.isSuccessful());
+            assertEquals("produceAnErrorOnGetResult=true", resultFuture.getErrors().get(0).getMessage());
+            assertFalse(MY_BOOL1.get());
+            assertTrue(MY_BOOL2.get());
+            assertTrue(MY_BOOL3.get());
+        }
     }
 
     @AnalyzerBean("Test analyzer")

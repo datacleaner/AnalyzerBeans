@@ -89,18 +89,19 @@ public class InjectionManagerFactoryTest extends TestCase {
                 new DatastoreCatalogImpl(TestHelper.createSampleDatabaseDatastore("orderdb"))).replace(
                 injectionManagerFactory);
 
-        final AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf);
-        ajb.setDatastore("orderdb");
-        ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
+        try (final AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf)) {
 
-        final AnalyzerJobBuilder<FancyAnalyzer> analyzerBuilder = ajb.addAnalyzer(FancyAnalyzer.class);
-        analyzerBuilder.addInputColumns(ajb.getSourceColumns());
+            ajb.setDatastore("orderdb");
+            ajb.addSourceColumns("PUBLIC.EMPLOYEES.EMPLOYEENUMBER");
 
-        final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());
-        assertTrue(result.isSuccessful());
-        assertTrue(touched.get());
-        assertEquals("42", result.getResults().get(0).toString());
+            final AnalyzerJobBuilder<FancyAnalyzer> analyzerBuilder = ajb.addAnalyzer(FancyAnalyzer.class);
+            analyzerBuilder.addInputColumns(ajb.getSourceColumns());
 
-        ajb.close();
+            final AnalysisResultFuture result = new AnalysisRunnerImpl(conf).run(ajb.toAnalysisJob());
+            assertTrue(result.isSuccessful());
+            assertTrue(touched.get());
+            assertEquals("42", result.getResults().get(0).toString());
+
+        }
     }
 }

@@ -66,8 +66,7 @@ public final class ForeignKey {
         if (datastore == null) {
             return null;
         }
-        DatastoreConnection connection = datastore.openConnection();
-        try {
+        try (DatastoreConnection connection = datastore.openConnection()) {
             DataContext dataContext = connection.getDataContext();
             Schema schema = dataContext.getSchemaByName(getForeignSchemaName());
             if (schema == null) {
@@ -79,8 +78,6 @@ public final class ForeignKey {
             }
             Column column = table.getColumnByName(getForeignColumnName());
             return column;
-        } finally {
-            connection.close();
         }
     }
 }
