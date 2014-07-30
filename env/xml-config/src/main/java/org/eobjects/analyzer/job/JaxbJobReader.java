@@ -495,7 +495,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         ref = inputType.getRef();
                         if (StringUtils.isNullOrEmpty(ref)) {
                             String value = inputType.getValue();
-                            if (StringUtils.isNullOrEmpty(value)) {
+                            if (value == null) {
                                 throw new IllegalStateException("Transformer input column ref & value cannot be null");
                             }
                         } else if (!inputColumns.containsKey(ref)) {
