@@ -136,7 +136,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5</version><!--$NO-MVN-MAN-VER$-->
+				<version>2.5</version><!--$NO-MVN-MAN-VER$ -->
 				<configuration>
 					<autoVersionSubmodules>true</autoVersionSubmodules>
 				</configuration>
@@ -421,6 +421,11 @@
 				<groupId>org.scala-lang</groupId>
 				<artifactId>scala-library</artifactId>
 				<version>${scala.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scala-lang.modules</groupId>
+				<artifactId>scala-xml_2.11</artifactId>
+				<version>1.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.scala-lang</groupId>
