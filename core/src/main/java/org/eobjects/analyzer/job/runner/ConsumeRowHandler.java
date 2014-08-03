@@ -113,10 +113,10 @@ public class ConsumeRowHandler {
      * @return
      */
     public List<InputColumn<?>> getOutputColumns() {
-        List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
-        for (RowProcessingConsumer consumer : _consumers) {
-            InputColumn<?>[] outputColumns = consumer.getOutputColumns();
-            for (InputColumn<?> outputColumn : outputColumns) {
+        final List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
+        for (final RowProcessingConsumer consumer : _consumers) {
+            final InputColumn<?>[] outputColumns = consumer.getOutputColumns();
+            for (final InputColumn<?> outputColumn : outputColumns) {
                 result.add(outputColumn);
             }
         }
@@ -127,8 +127,8 @@ public class ConsumeRowHandler {
      * @deprecated use {@link #consumeRow(InputRow)} instead
      */
     @Deprecated
-    public List<InputRow> consume(InputRow row) {
-        ConsumeRowResult result = consumeRow(row);
+    public List<InputRow> consume(final InputRow row) {
+        final ConsumeRowResult result = consumeRow(row);
         return result.getRows();
     }
 
@@ -139,10 +139,10 @@ public class ConsumeRowHandler {
      * @param row
      * @return
      */
-    public ConsumeRowResult consumeRow(InputRow row) {
-        OutcomeSink outcomes = new OutcomeSinkImpl(_alwaysSatisfiedOutcomes);
-        ConsumeRowHandlerDelegate delegate = new ConsumeRowHandlerDelegate(_consumers, row, 0, outcomes);
-        ConsumeRowResult result = delegate.consume();
+    public ConsumeRowResult consumeRow(final InputRow row) {
+        final OutcomeSink outcomes = new OutcomeSinkImpl(_alwaysSatisfiedOutcomes);
+        final ConsumeRowHandlerDelegate delegate = new ConsumeRowHandlerDelegate(_consumers, row, 0, outcomes);
+        final ConsumeRowResult result = delegate.consume();
         return result;
     }
 

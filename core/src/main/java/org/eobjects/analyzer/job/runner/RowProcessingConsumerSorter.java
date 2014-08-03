@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
+import org.eobjects.analyzer.job.AnyOutcome;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.Outcome;
@@ -53,6 +54,7 @@ class RowProcessingConsumerSorter {
 		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(_consumers);
 		Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
 		Set<Outcome> availableOutcomes = new HashSet<Outcome>();
+		availableOutcomes.add(AnyOutcome.get());
 
 		while (!remainingConsumers.isEmpty()) {
 			boolean changed = false;

@@ -38,13 +38,14 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
     private final List<InputRow> _resultRecords;
     private final List<OutcomeSink> _resultOutcomes;
 
-    public ConsumeRowHandlerDelegate(List<RowProcessingConsumer> consumers, InputRow row, int consumerIndex,
-            OutcomeSink outcomes) {
+    public ConsumeRowHandlerDelegate(final List<RowProcessingConsumer> consumers, final InputRow row,
+            final int consumerIndex, final OutcomeSink outcomes) {
         this(consumers, row, consumerIndex, outcomes, new ArrayList<InputRow>(1), new ArrayList<OutcomeSink>(1));
     }
 
-    private ConsumeRowHandlerDelegate(List<RowProcessingConsumer> consumers, InputRow row, int consumerIndex,
-            OutcomeSink outcomes, List<InputRow> resultRecords, List<OutcomeSink> resultOutcomes) {
+    private ConsumeRowHandlerDelegate(final List<RowProcessingConsumer> consumers, final InputRow row,
+            final int consumerIndex, final OutcomeSink outcomes, final List<InputRow> resultRecords,
+            final List<OutcomeSink> resultOutcomes) {
         _consumers = consumers;
         _row = row;
         _consumerIndex = consumerIndex;
@@ -54,7 +55,7 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
     }
 
     public ConsumeRowResult consume() {
-        RowProcessingConsumer consumer = _consumers.get(_consumerIndex);
+        final RowProcessingConsumer consumer = _consumers.get(_consumerIndex);
 
         final boolean process = consumer.satisfiedForConsume(_outcomes.getOutcomes(), _row);
         if (process) {
@@ -74,7 +75,7 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
     }
 
     @Override
-    public void processNext(InputRow row, int distinctCount, OutcomeSink outcomes) {
+    public void processNext(final InputRow row, final int distinctCount, final OutcomeSink outcomes) {
         final int nextIndex = _consumerIndex + 1;
         if (nextIndex >= _consumers.size()) {
             // finished!

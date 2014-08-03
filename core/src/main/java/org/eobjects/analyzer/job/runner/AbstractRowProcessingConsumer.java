@@ -27,6 +27,7 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.AnyOutcome;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.Outcome;
@@ -136,12 +137,17 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
         if (_sourceJobsOfInputColumns.isEmpty()) {
             return true;
         }
+        
+        final Outcome[] requirements = _outcomeSinkJob.getRequirements();
+        if (requirements.length == 1 && requirements[0] == AnyOutcome.get()) {
+            return true;
+        }
 
-        for (Object sourceJobsOfInputColumn : _sourceJobsOfInputColumns) {
+        for (final Object sourceJobsOfInputColumn : _sourceJobsOfInputColumns) {
             // if any of the source jobs is satisfied, then continue
             if (sourceJobsOfInputColumn instanceof OutcomeSinkJob) {
-                OutcomeSinkJob outcomeSinkJob = (OutcomeSinkJob) sourceJobsOfInputColumn;
-                boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(outcomeSinkJob, outcomes);
+                final OutcomeSinkJob outcomeSinkJob = (OutcomeSinkJob) sourceJobsOfInputColumn;
+                final boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(outcomeSinkJob, outcomes);
                 if (satisfiedOutcomesForConsume) {
                     return true;
                 }
@@ -153,16 +159,20 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
     private boolean satisfiedOutcomesForConsume(OutcomeSinkJob outcomeSinkJob, Outcome[] outcomes) {
         boolean isSatisfiedOutcomes = false;
-        Outcome[] requirements = outcomeSinkJob.getRequirements();
+        final Outcome[] requirements = outcomeSinkJob.getRequirements();
         if (requirements == null || requirements.length == 0) {
             isSatisfiedOutcomes = true;
         } else {
-            // each merge input has to be satisfied
-            for (Outcome requiredOutcome : requirements) {
-                for (Outcome availableOutcome : outcomes) {
-                    if (availableOutcome.satisfiesRequirement(requiredOutcome)) {
-                        isSatisfiedOutcomes = true;
-                        break;
+            // each requirement has to be satisfied
+            for (final Outcome requiredOutcome : requirements) {
+                if (requiredOutcome == AnyOutcome.get()) {
+                    isSatisfiedOutcomes = true;
+                } else {
+                    for (final Outcome availableOutcome : outcomes) {
+                        if (availableOutcome.satisfiesRequirement(requiredOutcome)) {
+                            isSatisfiedOutcomes = true;
+                            break;
+                        }
                     }
                 }
             }

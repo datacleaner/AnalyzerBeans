@@ -378,9 +378,9 @@ public class JaxbJobReader implements JobReader<InputStream> {
     private AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping,
             final Map<String, String> variables, final AnalysisJobBuilder analysisJobBuilder) {
         String ref;
+
         final Datastore datastore;
         final DatastoreConnection datastoreConnection;
-
         final SourceType source = job.getSource();
 
         if (sourceColumnMapping == null) {
@@ -448,6 +448,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         final StringConverter stringConverter = createStringConverter(analysisJobBuilder);
 
         final Map<String, Outcome> outcomeMapping = new HashMap<String, Outcome>();
+        outcomeMapping.put(AnyOutcome.KEYWORD, AnyOutcome.get());
 
         final TransformationType transformation = job.getTransformation();
         if (transformation != null) {

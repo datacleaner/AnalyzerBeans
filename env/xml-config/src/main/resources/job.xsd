@@ -124,7 +124,17 @@
 			<element name="output" type="ab:outputType" minOccurs="1"
 				maxOccurs="unbounded" />
 		</sequence>
-		<attribute name="requires" type="token" use="optional" />
+		<attribute name="requires" type="token" use="optional">
+			<annotation>
+				<documentation>
+					The ID of a filter outcome that should function as a
+					requirement for execution of this component. Requirements are
+					applied transitively to successive components. Use the keyword
+					'_all_' to override transitive behaviour and don't apply any
+					requirements
+				</documentation>
+			</annotation>
+		</attribute>
 		<attribute name="name" type="string" use="optional" />
 	</complexType>
 
@@ -143,7 +153,17 @@
 			<element name="outcome" type="ab:outcomeType" minOccurs="1"
 				maxOccurs="unbounded" />
 		</sequence>
-		<attribute name="requires" type="token" use="optional" />
+		<attribute name="requires" type="token" use="optional">
+			<annotation>
+				<documentation>
+					The ID of a filter outcome that should function as a
+					requirement for execution of this component. Requirements are
+					applied transitively to successive components. Use the keyword
+					'_all_' to override transitive behaviour and don't apply any
+					requirements
+				</documentation>
+			</annotation>
+		</attribute>
 		<attribute name="name" type="string" use="optional" />
 	</complexType>
 
@@ -182,7 +202,17 @@
 			<element name="input" type="ab:inputType" minOccurs="0"
 				maxOccurs="unbounded" />
 		</sequence>
-		<attribute name="requires" type="token" use="optional" />
+		<attribute name="requires" type="token" use="optional">
+			<annotation>
+				<documentation>
+					The ID of a filter outcome that should function as a
+					requirement for execution of this component. Requirements are
+					applied transitively to successive components. Use the keyword
+					'_all_' to override transitive behaviour and don't apply any
+					requirements
+				</documentation>
+			</annotation>
+		</attribute>
 		<attribute name="name" type="string" use="optional" />
 	</complexType>
 

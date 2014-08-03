@@ -40,28 +40,28 @@ import org.apache.metamodel.util.BaseObject;
  * 
  */
 public abstract class AbstractFilterOutcome extends BaseObject implements FilterOutcome {
-	
-	private static final long serialVersionUID = 1L;
 
-	@Override
-	protected final void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(getCategory());
-		identifiers.add(getSourceJob());
-	}
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	protected final boolean classEquals(BaseObject obj) {
-		// works with all subtypes
-		return obj instanceof FilterOutcome;
-	}
+    @Override
+    protected final void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(getCategory());
+        identifiers.add(getSourceJob());
+    }
 
-	@Override
-	public String toString() {
-		return "FilterOutcome[category=" + getCategory() + "]";
-	}
+    @Override
+    protected final boolean classEquals(BaseObject obj) {
+        // works with all subtypes
+        return obj instanceof FilterOutcome;
+    }
 
-	@Override
-	public final boolean satisfiesRequirement(Outcome requirement) {
-		return equals(requirement);
-	}
+    @Override
+    public String toString() {
+        return "FilterOutcome[category=" + getCategory() + "]";
+    }
+
+    @Override
+    public final boolean satisfiesRequirement(Outcome requirement) {
+        return equals(requirement);
+    }
 }

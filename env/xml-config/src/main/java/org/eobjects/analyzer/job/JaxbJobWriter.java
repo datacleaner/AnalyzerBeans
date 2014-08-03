@@ -376,6 +376,9 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
     }
 
     private String getId(Outcome requirement, Map<Outcome, String> outcomeMappings, boolean create) {
+        if (requirement == AnyOutcome.get()) {
+            return AnyOutcome.KEYWORD;
+        }
         String id = outcomeMappings.get(requirement);
         if (id == null) {
             if (create) {
