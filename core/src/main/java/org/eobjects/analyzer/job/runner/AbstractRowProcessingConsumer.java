@@ -49,6 +49,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
     private final AnalysisListener _analysisListener;
     private final OutcomeSinkJob _outcomeSinkJob;
     private final Set<OutcomeSinkJob> _sourceJobsOfInputColumns;
+    private final boolean _alwaysSatisfiedForConsume;
 
     protected AbstractRowProcessingConsumer(RowProcessingPublishers publishers, OutcomeSinkJob outcomeSinkJob,
             InputColumnSinkJob inputColumnSinkJob) {
@@ -68,6 +69,26 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
         _analysisListener = analysisListener;
         _outcomeSinkJob = outcomeSinkJob;
         _sourceJobsOfInputColumns = sourceJobsOfInputColumns;
+        _alwaysSatisfiedForConsume = isAlwaysSatisfiedForConsume();
+    }
+
+    private boolean isAlwaysSatisfiedForConsume() {
+        if (_sourceJobsOfInputColumns.isEmpty()) {
+            return true;
+        }
+
+        if (isAlwaysSatisfiedRequirement()) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isAlwaysSatisfiedRequirement() {
+        final Outcome[] requirements = _outcomeSinkJob.getRequirements();
+        if (requirements.length == 1 && requirements[0] == AnyOutcome.get()) {
+            return true;
+        }
+        return false;
     }
 
     private static Set<OutcomeSinkJob> buildSourceJobsOfInputColumns(InputColumnSinkJob inputColumnSinkJob,
@@ -134,13 +155,8 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
             RowProcessingChain chain);
 
     private boolean satisfiedInputsForConsume(InputRow row, Outcome[] outcomes) {
-        if (_sourceJobsOfInputColumns.isEmpty()) {
-            return true;
-        }
-        
-        final Outcome[] requirements = _outcomeSinkJob.getRequirements();
-        if (requirements.length == 1 && requirements[0] == AnyOutcome.get()) {
-            return true;
+        if (_alwaysSatisfiedForConsume) {
+            return _alwaysSatisfiedForConsume;
         }
 
         for (final Object sourceJobsOfInputColumn : _sourceJobsOfInputColumns) {
@@ -187,6 +203,10 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
     public final boolean satisfiedForFlowOrdering(Collection<Outcome> outcomes) {
         Outcome[] requirements = _outcomeSinkJob.getRequirements();
         if (requirements == null || requirements.length == 0) {
+            return true;
+        }
+
+        if (isAlwaysSatisfiedRequirement()) {
             return true;
         }
 

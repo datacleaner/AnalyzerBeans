@@ -54,7 +54,6 @@ class RowProcessingConsumerSorter {
 		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(_consumers);
 		Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
 		Set<Outcome> availableOutcomes = new HashSet<Outcome>();
-		availableOutcomes.add(AnyOutcome.get());
 
 		while (!remainingConsumers.isEmpty()) {
 			boolean changed = false;
