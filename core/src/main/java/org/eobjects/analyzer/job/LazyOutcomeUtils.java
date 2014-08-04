@@ -34,4 +34,10 @@ public final class LazyOutcomeUtils {
         }
         return outcome;
     }
+
+    public static ComponentRequirement load(ComponentRequirement req) {
+        // TODO: Consider loading any lazy outcomes nested in the component
+        // requirement
+        return req;
+    }
 }

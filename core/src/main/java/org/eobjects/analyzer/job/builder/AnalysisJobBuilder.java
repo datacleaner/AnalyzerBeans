@@ -43,6 +43,7 @@ import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.IdGenerator;
@@ -89,7 +90,7 @@ public final class AnalysisJobBuilder implements Closeable {
     private final List<AnalyzerChangeListener> _analyzerChangeListeners = new ArrayList<AnalyzerChangeListener>();
     private final List<TransformerChangeListener> _transformerChangeListeners = new ArrayList<TransformerChangeListener>();
     private final List<FilterChangeListener> _filterChangeListeners = new ArrayList<FilterChangeListener>();
-    private Outcome _defaultRequirement;
+    private ComponentRequirement _defaultRequirement;
 
     public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
         _configuration = configuration;
@@ -104,7 +105,7 @@ public final class AnalysisJobBuilder implements Closeable {
      * Private constructor for {@link #withoutListeners()} method
      */
     private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, DatastoreConnection dataContextProvider,
-            List<MetaModelInputColumn> sourceColumns, Outcome defaultRequirement, IdGenerator idGenerator,
+            List<MetaModelInputColumn> sourceColumns, ComponentRequirement defaultRequirement, IdGenerator idGenerator,
             List<TransformerJobBuilder<?>> transformerJobBuilders, List<FilterJobBuilder<?, ?>> filterJobBuilders,
             List<AnalyzerJobBuilder<?>> analyzerJobBuilders) {
         _configuration = configuration;
@@ -286,8 +287,8 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerJobBuilder<T> tjb) {
-        if (tjb.getRequirement() == null) {
-            tjb.setRequirement(_defaultRequirement);
+        if (tjb.getComponentRequirement() == null) {
+            tjb.setComponentRequirement(_defaultRequirement);
         }
         _transformerJobBuilders.add(tjb);
 
@@ -373,8 +374,8 @@ public final class AnalysisJobBuilder implements Closeable {
     public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterJobBuilder<F, C> fjb) {
         _filterJobBuilders.add(fjb);
 
-        if (fjb.getRequirement() == null) {
-            fjb.setRequirement(_defaultRequirement);
+        if (fjb.getComponentRequirement() == null) {
+            fjb.setComponentRequirement(_defaultRequirement);
         }
 
         List<FilterChangeListener> listeners = new ArrayList<FilterChangeListener>(_filterChangeListeners);
@@ -388,7 +389,7 @@ public final class AnalysisJobBuilder implements Closeable {
         boolean removed = _filterJobBuilders.remove(filterJobBuilder);
 
         if (removed) {
-            final Outcome previousRequirement = filterJobBuilder.getRequirement();
+            final ComponentRequirement previousRequirement = filterJobBuilder.getComponentRequirement();
 
             // clean up components who depend on this filter
             Outcome[] outcomes = filterJobBuilder.getOutcomes();
@@ -440,8 +441,8 @@ public final class AnalysisJobBuilder implements Closeable {
     public <A extends Analyzer<?>> AnalyzerJobBuilder<A> addAnalyzer(AnalyzerJobBuilder<A> analyzerJobBuilder) {
         _analyzerJobBuilders.add(analyzerJobBuilder);
 
-        if (analyzerJobBuilder.getRequirement() == null) {
-            analyzerJobBuilder.setRequirement(_defaultRequirement);
+        if (analyzerJobBuilder.getComponentRequirement() == null) {
+            analyzerJobBuilder.setComponentRequirement(_defaultRequirement);
         }
 
         // make a copy since some of the listeners may add additional listeners

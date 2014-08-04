@@ -19,20 +19,28 @@
  */
 package org.eobjects.analyzer.job;
 
-/**
- * Defines an interface for jobs that require outcomes
- * 
- * @deprecated use {@link HasComponentRequirement} instead
- */
-@Deprecated
-public interface OutcomeSinkJob {
+import java.util.Collection;
 
-    /**
-     * 
-     * @return
-     * 
-     * @deprecated use {@link ComponentJob#getRequirement()) instead.
-     */
-    @Deprecated
-    public Outcome[] getRequirements();
+import org.eobjects.analyzer.util.LabelUtils;
+
+public class SimpleComponentRequirement implements ComponentRequirement {
+
+    private static final long serialVersionUID = 1L;
+
+    private final FilterOutcome _outcome;
+
+    public SimpleComponentRequirement(FilterOutcome outcome) {
+        _outcome = outcome;
+    }
+
+    @Override
+    public boolean isSatisfied(Collection<Outcome> outcomes) {
+        return outcomes.contains(_outcome);
+    }
+
+    @Override
+    public String toString() {
+        final String filterLabel = LabelUtils.getLabel(_outcome.getFilterJob());
+        return filterLabel + "=" + _outcome.getCategory();
+    }
 }

@@ -27,7 +27,7 @@ import java.util.Set;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.AnyOutcome;
+import org.eobjects.analyzer.job.AnyComponentRequirement;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.Outcome;
@@ -85,7 +85,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
     private boolean isAlwaysSatisfiedRequirement() {
         final Outcome[] requirements = _outcomeSinkJob.getRequirements();
-        if (requirements.length == 1 && requirements[0] == AnyOutcome.get()) {
+        if (requirements.length == 1 && requirements[0] == AnyComponentRequirement.get()) {
             return true;
         }
         return false;
@@ -181,7 +181,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
         } else {
             // each requirement has to be satisfied
             for (final Outcome requiredOutcome : requirements) {
-                if (requiredOutcome == AnyOutcome.get()) {
+                if (requiredOutcome == AnyComponentRequirement.get()) {
                     isSatisfiedOutcomes = true;
                 } else {
                     for (final Outcome availableOutcome : outcomes) {
@@ -201,7 +201,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
      */
     @Override
     public final boolean satisfiedForFlowOrdering(Collection<Outcome> outcomes) {
-        Outcome[] requirements = _outcomeSinkJob.getRequirements();
+        final Outcome[] requirements = _outcomeSinkJob.getRequirements();
         if (requirements == null || requirements.length == 0) {
             return true;
         }

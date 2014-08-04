@@ -39,7 +39,8 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.AnyOutcome;
+import org.eobjects.analyzer.job.AnyComponentRequirement;
+import org.eobjects.analyzer.job.CompoundComponentRequirement;
 import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
@@ -224,7 +225,7 @@ public class FilterRequirementMergingTest extends TestCase {
 
         // add only outputcolumn 1 - it has a single requirement
         analyzer.addInputColumns(sourceColumn, outputColumn1);
-        analyzer.setRequirement(AnyOutcome.get());
+        analyzer.setComponentRequirement(AnyComponentRequirement.get());
 
         AnalysisJob job = jobBuilder.toAnalysisJob();
 
@@ -255,7 +256,68 @@ public class FilterRequirementMergingTest extends TestCase {
                 .toString());
 
         assertEquals(5, list.size());
+    }
 
+    /**
+     * Tests the use of the '_any_' requirement. This should override the
+     * transitive requirement behaviour
+     */
+    public void testConsumeRecordsWhenCompoundOutcomeRequirementIsSet() throws Throwable {
+        jobBuilder.addSourceColumns("col1");
+        InputColumn<?> sourceColumn = jobBuilder.getSourceColumnByName("col1");
+        FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
+                .addInputColumn(sourceColumn);
+
+        Outcome req1 = filter.getOutcome(EvenOddFilter.Category.EVEN);
+        Outcome req2 = filter.getOutcome(EvenOddFilter.Category.ODD);
+
+        TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
+                .addInputColumn(sourceColumn);
+        transformer1.setRequirement(req1);
+        MutableInputColumn<?> outputColumn1 = transformer1.getOutputColumns().get(0);
+        outputColumn1.setName("outputColumn1");
+
+        TransformerJobBuilder<MockTransformer> transformer2 = jobBuilder.addTransformer(MockTransformer.class)
+                .addInputColumn(sourceColumn);
+        transformer2.setRequirement(req2);
+        MutableInputColumn<?> outputColumn2 = transformer2.getOutputColumns().get(0);
+        outputColumn2.setName("outputColumn2");
+
+        AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);
+
+        // add only outputcolumn 1 - it has a single requirement
+        analyzer.addInputColumns(sourceColumn, outputColumn1);
+        analyzer.setComponentRequirement(new CompoundComponentRequirement(req1, req2));
+
+        AnalysisJob job = jobBuilder.toAnalysisJob();
+
+        AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(job);
+
+        resultFuture.await();
+
+        if (resultFuture.isErrornous()) {
+            throw resultFuture.getErrors().get(0);
+        }
+
+        @SuppressWarnings("unchecked")
+        ListResult<InputRow> listResult = (ListResult<InputRow>) resultFuture.getResults().get(0);
+        List<InputRow> list = listResult.getValues();
+
+        assertFalse("List is empty - this indicates that no records passed through the 'any requirements' rule",
+                list.isEmpty());
+
+        assertEquals("[foo, null, mocked: foo]", list.get(0).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[bar, mocked: bar, null]", list.get(1).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[baz, null, mocked: baz]", list.get(2).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[hello, mocked: hello, null]", list.get(3).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[world, null, mocked: world]", list.get(4).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+
+        assertEquals(5, list.size());
     }
 
     @FilterBean("Even/odd record filter")

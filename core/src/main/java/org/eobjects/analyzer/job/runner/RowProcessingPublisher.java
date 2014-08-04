@@ -181,6 +181,9 @@ public final class RowProcessingPublisher {
                     final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore,
                             sortedConsumers, baseQuery);
                     return optimizer;
+                } catch (RuntimeException e) {
+                    logger.error("Failed to build query optimizer! {}", e.getMessage(), e);
+                    throw e;
                 }
             }
         };

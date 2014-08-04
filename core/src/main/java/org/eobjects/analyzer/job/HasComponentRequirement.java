@@ -20,36 +20,15 @@
 package org.eobjects.analyzer.job;
 
 /**
- * An outcome that represents "Any outcome", ie. all other requirements/outcomes
- * are satisifed.
+ * Represents any object that contains a {@link ComponentRequirement}.
  */
-public class AnyOutcome implements Outcome {
+public interface HasComponentRequirement {
 
-    private static final long serialVersionUID = 1L;
-
-    public static final String KEYWORD = "_any_";
-    
-    private static final Outcome INSTANCE = new AnyOutcome();
-    
-    public static Outcome get() {
-        return INSTANCE;
-    }
-
-    private AnyOutcome() {
-    }
-
-    @Override
-    public OutcomeSourceJob getSourceJob() {
-        return null;
-    }
-
-    @Override
-    public boolean satisfiesRequirement(Outcome requirement) {
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "AnyOutcome[]";
-    }
+    /**
+     * 
+     /** Gets the requirement (if any) for running this component.
+     * 
+     * @return
+     */
+    public ComponentRequirement getComponentRequirement();
 }

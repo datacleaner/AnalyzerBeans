@@ -19,20 +19,34 @@
  */
 package org.eobjects.analyzer.job;
 
-/**
- * Defines an interface for jobs that require outcomes
- * 
- * @deprecated use {@link HasComponentRequirement} instead
- */
-@Deprecated
-public interface OutcomeSinkJob {
+import java.util.Collection;
 
-    /**
-     * 
-     * @return
-     * 
-     * @deprecated use {@link ComponentJob#getRequirement()) instead.
-     */
-    @Deprecated
-    public Outcome[] getRequirements();
+/**
+ * An outcome that represents "Any outcome", ie. all other requirements/outcomes
+ * are satisifed.
+ */
+public class AnyComponentRequirement implements ComponentRequirement {
+
+    private static final long serialVersionUID = 1L;
+
+    public static final String KEYWORD = "_any_";
+
+    private static final ComponentRequirement INSTANCE = new AnyComponentRequirement();
+
+    public static ComponentRequirement get() {
+        return INSTANCE;
+    }
+
+    private AnyComponentRequirement() {
+    }
+
+    @Override
+    public String toString() {
+        return "AnyComponentRequirement[]";
+    }
+
+    @Override
+    public boolean isSatisfied(Collection<Outcome> outcomes) {
+        return true;
+    }
 }

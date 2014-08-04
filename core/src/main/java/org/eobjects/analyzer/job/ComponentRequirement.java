@@ -19,20 +19,21 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.io.Serializable;
+import java.util.Collection;
+
 /**
- * Defines an interface for jobs that require outcomes
- * 
- * @deprecated use {@link HasComponentRequirement} instead
+ * Represents a requirement set on a {@link ComponentJob}, to only run it
+ * conditionally.
  */
-@Deprecated
-public interface OutcomeSinkJob {
+public interface ComponentRequirement extends Serializable {
 
     /**
+     * Determines if the requirement is satisfied or not, given the available
+     * outcomes of previous components.
      * 
+     * @param availableOutcomes
      * @return
-     * 
-     * @deprecated use {@link ComponentJob#getRequirement()) instead.
      */
-    @Deprecated
-    public Outcome[] getRequirements();
+    public boolean isSatisfied(Collection<Outcome> availableOutcomes);
 }
