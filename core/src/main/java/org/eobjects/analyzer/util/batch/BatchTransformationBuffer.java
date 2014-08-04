@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -53,14 +52,14 @@ public class BatchTransformationBuffer<I, O> {
     // default max 20 items in buffer
     public static final int DEFAULT_MAX_BATCH_SIZE = 20;
 
+    private static final long[] AWAIT_TIMES = { 20, 50, 100, 100, 200 };
+
     private final BatchTransformation<I, O> _transformation;
     private final BlockingQueue<BatchEntry<I, O>> _queue;
     private final AtomicInteger _batchNo;
     private final int _maxBatchSize;
     private final ScheduledExecutorService _threadPool;
     private final int _flushInterval;
-
-    private volatile CountDownLatch _countDownLatch;
 
     public BatchTransformationBuffer(BatchTransformation<I, O> transformation) {
         this(transformation, DEFAULT_MAX_BATCH_SIZE, DEFAULT_FLUSH_INTERVAL);
@@ -71,7 +70,6 @@ public class BatchTransformationBuffer<I, O> {
         _flushInterval = flushIntervalMillis;
         _maxBatchSize = maxBatchSize;
         _queue = new ArrayBlockingQueue<BatchEntry<I, O>>(maxBatchSize);
-        _countDownLatch = new CountDownLatch(1);
         _batchNo = new AtomicInteger();
         _threadPool = Executors.newScheduledThreadPool(1);
     }
@@ -112,16 +110,7 @@ public class BatchTransformationBuffer<I, O> {
 
         final List<BatchEntry<?, O>> entries = new ArrayList<BatchEntry<?, O>>(_maxBatchSize);
 
-        // pick the current countdownlatch and replace it with a new one
-        // for the next batch
-        final CountDownLatch batchCountDownLatch;
-        final int batchSize;
-        synchronized (_countDownLatch) {
-            batchCountDownLatch = _countDownLatch;
-            _countDownLatch = new CountDownLatch(1);
-
-            batchSize = _queue.drainTo(entries);
-        }
+        final int batchSize = _queue.drainTo(entries);
 
         if (batchSize == 0) {
             logger.debug("Batch ignored, no elements left in queue");
@@ -132,7 +121,7 @@ public class BatchTransformationBuffer<I, O> {
 
         final int batchNumber = _batchNo.incrementAndGet();
 
-        logger.info("Batch #{} - Preparing {} entries", batchNumber, batchSize);
+        logger.info("Batch #{} - Preparing {} entries, scheduled={}", batchNumber, batchSize, scheduled);
 
         final Object[] input = new Object[batchSize];
         for (int i = 0; i < batchSize; i++) {
@@ -145,8 +134,6 @@ public class BatchTransformationBuffer<I, O> {
         _transformation.map(source, sink);
 
         logger.info("Batch #{} - Finished", batchNumber, batchSize);
-
-        batchCountDownLatch.countDown();
 
         if (scheduled) {
             if (!_queue.isEmpty()) {
@@ -162,22 +149,30 @@ public class BatchTransformationBuffer<I, O> {
 
     public O transform(I input) {
         final BatchEntry<I, O> entry = new BatchEntry<I, O>(input);
-        final CountDownLatch batchCountDownLatch;
 
         while (!_queue.offer(entry)) {
             flushBuffer();
         }
 
-        try {
-            // input was accepted into a pending batch
-            batchCountDownLatch = _countDownLatch;
-            batchCountDownLatch.await();
-            return entry.getOuput();
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
+        int attemptIndex = 0;
+        while (true) {
+            final long waitTime = (attemptIndex < AWAIT_TIMES.length ? AWAIT_TIMES[attemptIndex]
+                    : AWAIT_TIMES[AWAIT_TIMES.length - 1]);
+
+            try {
+                final boolean finished = entry.await(waitTime);
+                if (finished) {
+                    return entry.getOuput();
+                }
+
+                flushBuffer();
+                attemptIndex++;
+            } catch (Exception e) {
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new IllegalStateException(e);
             }
-            throw new IllegalStateException(e);
         }
     }
 }

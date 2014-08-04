@@ -17,36 +17,20 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.util.batch;
+package org.eobjects.analyzer.beans.writers;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import org.apache.metamodel.util.Action;
 
-final class BatchEntry<I, O> {
+/**
+ * Provides a buffering mechanism that enables writing rows periodically instead
+ * of instantly.
+ * 
+ * @deprecated use {@link org.eobjects.analyzer.util.WriteBuffer} instead.
+ */
+@Deprecated
+public final class WriteBuffer extends org.eobjects.analyzer.util.WriteBuffer {
 
-    private final I _input;
-    private final CountDownLatch _countDownLatch;
-    private volatile O _output;
-
-    public BatchEntry(I input) {
-        _input = input;
-        _countDownLatch = new CountDownLatch(1);
-    }
-
-    public I getInput() {
-        return _input;
-    }
-
-    public O getOuput() {
-        return _output;
-    }
-
-    public void setOutput(O output) {
-        _output = output;
-        _countDownLatch.countDown();
-    }
-
-    public boolean await(long waitMillis) throws InterruptedException {
-        return _countDownLatch.await(waitMillis, TimeUnit.MILLISECONDS);
+    public WriteBuffer(int bufferSize, Action<Iterable<Object[]>> flushAction) {
+        super(bufferSize, flushAction);
     }
 }
