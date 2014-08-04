@@ -168,16 +168,25 @@ public class BatchTransformationBuffer<I, O> {
             flushBuffer();
         }
 
-        try {
-            // input was accepted into a pending batch
-            batchCountDownLatch = _countDownLatch;
-            batchCountDownLatch.await();
-            return entry.getOuput();
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
+        batchCountDownLatch = _countDownLatch;
+        while (true) {
+            try {
+                // input was accepted into a pending batch
+                boolean finished = batchCountDownLatch.await(100, TimeUnit.MILLISECONDS);
+                if (finished) {
+                    return entry.getOuput();
+                }
+                
+                if (!_queue.offer(entry)) {
+                    flushBuffer();
+                }
+                
+            } catch (Exception e) {
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new IllegalStateException(e);
             }
-            throw new IllegalStateException(e);
         }
     }
 }

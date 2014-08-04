@@ -69,7 +69,7 @@ public class BatchTransformationBufferTest extends TestCase {
     public int runScenario(int numThreads, int maxBatchSize, int flushInterval) {
         System.out.println("Running scenario with " + numThreads + ", maxBatchSize=" + maxBatchSize
                 + ", flushInterval=" + flushInterval + "ms");
-        
+
         final BatchTransformation<Integer, String> batchTransformation = new BatchTransformation<Integer, String>() {
             @Override
             public void map(BatchSource<Integer> source, BatchSink<String> sink) {
