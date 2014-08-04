@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-components</artifactId>
-		<version>1.0-RC2</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-json</artifactId>
 	<description>Provides Transformers to extract values from Json and create Json from values.</description>
