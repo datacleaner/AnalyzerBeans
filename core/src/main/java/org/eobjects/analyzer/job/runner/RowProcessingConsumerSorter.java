@@ -29,7 +29,6 @@ import java.util.Set;
 
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.job.AnyOutcome;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.Outcome;
