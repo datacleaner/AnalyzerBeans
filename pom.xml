@@ -139,6 +139,7 @@
 				<version>2.5</version><!--$NO-MVN-MAN-VER$ -->
 				<configuration>
 					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<goals>deploy</goals>
 				</configuration>
 				<dependencies>
 					<dependency>
