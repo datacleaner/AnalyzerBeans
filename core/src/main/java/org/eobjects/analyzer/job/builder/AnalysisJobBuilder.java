@@ -27,6 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -46,17 +48,15 @@ import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
+import org.eobjects.analyzer.job.SimpleComponentRequirement;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.apache.metamodel.schema.Column;
-import org.apache.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -392,30 +392,30 @@ public final class AnalysisJobBuilder implements Closeable {
             final ComponentRequirement previousRequirement = filterJobBuilder.getComponentRequirement();
 
             // clean up components who depend on this filter
-            Outcome[] outcomes = filterJobBuilder.getOutcomes();
-            for (final Outcome outcome : outcomes) {
+            final FilterOutcome[] outcomes = filterJobBuilder.getOutcomes();
+            for (final FilterOutcome outcome : outcomes) {
                 if (outcome.equals(_defaultRequirement)) {
-                    setDefaultRequirement(null);
+                    setDefaultRequirement((ComponentRequirement) null);
                 }
 
                 for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
-                    Outcome requirement = ajb.getRequirement();
-                    if (outcome.equals(requirement)) {
-                        ajb.setRequirement(previousRequirement);
+                    ComponentRequirement requirement = ajb.getComponentRequirement();
+                    if (requirement.getProcessingDependencies().contains(outcome)) {
+                        ajb.setComponentRequirement(previousRequirement);
                     }
                 }
 
                 for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
-                    Outcome requirement = tjb.getRequirement();
-                    if (outcome.equals(requirement)) {
-                        tjb.setRequirement(previousRequirement);
+                    ComponentRequirement requirement = tjb.getComponentRequirement();
+                    if (requirement.getProcessingDependencies().contains(outcome)) {
+                        tjb.setComponentRequirement(previousRequirement);
                     }
                 }
 
                 for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
-                    Outcome requirement = fjb.getRequirement();
-                    if (outcome.equals(requirement)) {
-                        fjb.setRequirement(previousRequirement);
+                    ComponentRequirement requirement = fjb.getComponentRequirement();
+                    if (requirement.getProcessingDependencies().contains(outcome)) {
+                        fjb.setComponentRequirement(previousRequirement);
                     }
                 }
             }
@@ -476,49 +476,14 @@ public final class AnalysisJobBuilder implements Closeable {
      * Finds the available input columns (source or transformed) that match the
      * given data type specification.
      * 
-     * @param dataTypeFamily
-     *            the {@link DataTypeFamily} to search for
-     * @return a list of matching InputColumns.
-     * @deprecated use {@link #getAvailableInputColumns(Class)} instead
-     */
-    @Deprecated
-    public List<InputColumn<?>> getAvailableInputColumns(org.eobjects.analyzer.data.DataTypeFamily dataTypeFamily) {
-        return getAvailableInputColumns(dataTypeFamily, null);
-    }
-
-    /**
-     * Finds the available input columns (source or transformed) that match the
-     * given data type specification.
-     * 
      * @param dataType
      *            the data type to look for
      * @return a list of matching input columns
      */
     public List<InputColumn<?>> getAvailableInputColumns(Class<?> dataType) {
-        return getAvailableInputColumns(null, dataType);
-    }
-
-    /**
-     * Finds the available input columns (source or transformed) that match the
-     * given data type specification.
-     * 
-     * @param dataTypeFamily
-     *            the {@link org.eobjects.analyzer.data.DataTypeFamily} to
-     *            search for
-     * @param dataType
-     *            optionally a concrete type to look for, if the
-     *            {@link org.eobjects.analyzer.data.DataTypeFamily} is null or
-     *            {@link org.eobjects.analyzer.data.DataTypeFamily#UNDEFINED}.
-     * @return a list of matching InputColumns.
-     * 
-     * @deprecated use {@link #getAvailableInputColumns(Class)} instead
-     */
-    @Deprecated
-    public List<InputColumn<?>> getAvailableInputColumns(org.eobjects.analyzer.data.DataTypeFamily dataTypeFamily,
-            Class<?> dataType) {
         SourceColumnFinder finder = new SourceColumnFinder();
         finder.addSources(this);
-        return finder.findInputColumns(dataTypeFamily, dataType);
+        return finder.findInputColumns(dataType);
     }
 
     /**
@@ -709,7 +674,7 @@ public final class AnalysisJobBuilder implements Closeable {
 
             for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
                 if (fjb != filterJobBuilder) {
-                    if (fjb.getRequirement() == null) {
+                    if (fjb.getComponentRequirement() == null) {
                         Table foundTable = getOriginatingTable(fjb);
                         if (requiredTable == null || requiredTable.equals(foundTable)) {
                             result.add(fjb);
@@ -719,7 +684,7 @@ public final class AnalysisJobBuilder implements Closeable {
             }
 
             for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
-                if (tjb.getRequirement() == null) {
+                if (tjb.getComponentRequirement() == null) {
                     Table foundTable = getOriginatingTable(tjb);
                     if (requiredTable == null || requiredTable.equals(foundTable)) {
                         result.add(tjb);
@@ -730,7 +695,7 @@ public final class AnalysisJobBuilder implements Closeable {
             for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
                 if (ajb instanceof AnalyzerJobBuilder<?>) {
                     AnalyzerJobBuilder<?> rpajb = (AnalyzerJobBuilder<?>) ajb;
-                    if (rpajb.getRequirement() == null) {
+                    if (rpajb.getComponentRequirement() == null) {
                         Table foundTable = getOriginatingTable(rpajb);
                         if (requiredTable == null || requiredTable.equals(foundTable)) {
                             result.add(rpajb);
@@ -759,44 +724,54 @@ public final class AnalysisJobBuilder implements Closeable {
      * 
      * @param defaultRequirement
      */
-    public void setDefaultRequirement(final Outcome defaultRequirement) {
+    public void setDefaultRequirement(final FilterOutcome defaultRequirement) {
+        setDefaultRequirement(new SimpleComponentRequirement(defaultRequirement));
+    }
+
+    public void setDefaultRequirement(final ComponentRequirement defaultRequirement) {
         _defaultRequirement = defaultRequirement;
         if (defaultRequirement != null) {
 
             final FilterJobBuilder<?, ?> sourceFilterJobBuilder;
-            if (defaultRequirement instanceof LazyFilterOutcome) {
-                sourceFilterJobBuilder = ((LazyFilterOutcome) defaultRequirement).getFilterJobBuilder();
+            if (defaultRequirement instanceof SimpleComponentRequirement) {
+                final FilterOutcome outcome = ((SimpleComponentRequirement) defaultRequirement).getOutcome();
+                if (outcome instanceof LazyFilterOutcome) {
+                    sourceFilterJobBuilder = ((LazyFilterOutcome) outcome).getFilterJobBuilder();
+                } else {
+                    logger.warn("Default requirement is not a LazyFilterOutcome. This might cause self-referring requirements.");
+                    sourceFilterJobBuilder = null;
+                }
             } else {
                 logger.warn("Default requirement is not a LazyFilterOutcome. This might cause self-referring requirements.");
                 sourceFilterJobBuilder = null;
             }
 
             // make a set of components that succeeds the requirement
-            final OutcomeSourceJob source = defaultRequirement.getSourceJob();
             final SourceColumnFinder sourceColumnFinder = new SourceColumnFinder();
             sourceColumnFinder.addSources(this);
-            final Set<Object> excludedSet = sourceColumnFinder.findAllSourceJobs(source);
+            final Set<Object> excludedSet = sourceColumnFinder.findAllSourceJobs(defaultRequirement);
 
             for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
                 if (ajb instanceof AnalyzerJobBuilder) {
-                    AnalyzerJobBuilder<?> analyzerJobBuilder = (AnalyzerJobBuilder<?>) ajb;
-                    Outcome requirement = analyzerJobBuilder.getRequirement();
+                    final AnalyzerJobBuilder<?> analyzerJobBuilder = (AnalyzerJobBuilder<?>) ajb;
+                    final ComponentRequirement requirement = analyzerJobBuilder.getComponentRequirement();
                     if (requirement == null) {
-                        analyzerJobBuilder.setRequirement(defaultRequirement);
+                        analyzerJobBuilder.setComponentRequirement(defaultRequirement);
                     }
                 }
             }
 
             for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
-                if (tjb.getRequirement() == null && !excludedSet.contains(tjb)) {
-                    tjb.setRequirement(defaultRequirement);
+                if (tjb.getComponentRequirement() == null && !excludedSet.contains(tjb)) {
+                    tjb.setComponentRequirement(defaultRequirement);
                 }
             }
 
             for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
-                if (fjb != sourceFilterJobBuilder && fjb.getRequirement() == null && !excludedSet.contains(fjb)) {
+                if (fjb != sourceFilterJobBuilder && fjb.getComponentRequirement() == null
+                        && !excludedSet.contains(fjb)) {
                     if (fjb.validateRequirementCandidate(defaultRequirement)) {
-                        fjb.setRequirement(defaultRequirement);
+                        fjb.setComponentRequirement(defaultRequirement);
                     }
                 }
             }
@@ -810,7 +785,7 @@ public final class AnalysisJobBuilder implements Closeable {
      * @return a default requirement, which will be applied to all newly added
      *         row processing components.
      */
-    public Outcome getDefaultRequirement() {
+    public ComponentRequirement getDefaultRequirement() {
         return _defaultRequirement;
     }
 

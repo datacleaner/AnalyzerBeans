@@ -28,6 +28,17 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.data.Row;
+import org.apache.metamodel.jdbc.JdbcDataContext;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.Func;
+import org.apache.metamodel.util.LazyRef;
+import org.apache.metamodel.util.Predicate;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -42,8 +53,8 @@ import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
+import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ForkTaskListener;
 import org.eobjects.analyzer.job.concurrent.JoinTaskListener;
@@ -60,17 +71,6 @@ import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SystemProperties;
-import org.apache.metamodel.DataContext;
-import org.apache.metamodel.data.DataSet;
-import org.apache.metamodel.data.Row;
-import org.apache.metamodel.jdbc.JdbcDataContext;
-import org.apache.metamodel.query.Query;
-import org.apache.metamodel.schema.Column;
-import org.apache.metamodel.schema.Table;
-import org.apache.metamodel.util.CollectionUtils;
-import org.apache.metamodel.util.Func;
-import org.apache.metamodel.util.LazyRef;
-import org.apache.metamodel.util.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -271,7 +271,7 @@ public final class RowProcessingPublisher {
             }
         }
         final List<RowProcessingConsumer> consumers = queryOptimizer.getOptimizedConsumers();
-        final Collection<? extends Outcome> availableOutcomes = queryOptimizer.getOptimizedAvailableOutcomes();
+        final Collection<? extends FilterOutcome> availableOutcomes = queryOptimizer.getOptimizedAvailableOutcomes();
 
         analysisListener.rowProcessingBegin(analysisJob, rowProcessingMetrics);
 
@@ -342,13 +342,13 @@ public final class RowProcessingPublisher {
         addConsumer(new FilterConsumer(filter, filterJob, inputColumns, _publishers));
     }
 
-    public boolean containsOutcome(Outcome prerequisiteOutcome) {
+    public boolean containsOutcome(FilterOutcome prerequisiteOutcome) {
         for (RowProcessingConsumer consumer : _consumers) {
             ComponentJob componentJob = consumer.getComponentJob();
-            if (componentJob instanceof OutcomeSourceJob) {
-                Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
-                for (Outcome outcome : outcomes) {
-                    if (outcome.satisfiesRequirement(prerequisiteOutcome)) {
+            if (componentJob instanceof HasFilterOutcomes) {
+                FilterOutcome[] outcomes = ((HasFilterOutcomes) componentJob).getOutcomes();
+                for (FilterOutcome outcome : outcomes) {
+                    if (outcome.isEquals(prerequisiteOutcome)) {
                         return true;
                     }
                 }

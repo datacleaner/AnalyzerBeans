@@ -73,12 +73,4 @@ public interface InputColumn<E> extends HasName, Comparable<InputColumn<E>>, Ser
 	 */
 	public Class<? extends E> getDataType();
 
-	/**
-	 * @return the family of datatypes that matches column's data type. This
-	 *         value should be corresponding to the type-parameter <E>.
-	 * 
-	 * @deprecated use {@link #getDataType()} instead.
-	 */
-	@Deprecated
-	public DataTypeFamily getDataTypeFamily();
 }

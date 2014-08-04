@@ -118,12 +118,6 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
         return true;
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public DataTypeFamily getDataTypeFamily() {
-        return DataTypeFamily.valueOf(_dataType);
-    }
-
     @Override
     public String toString() {
         return "TransformedInputColumn[id=" + _id + ",name=" + _name + "]";

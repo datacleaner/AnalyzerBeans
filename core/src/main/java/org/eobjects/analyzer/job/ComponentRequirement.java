@@ -22,6 +22,8 @@ package org.eobjects.analyzer.job;
 import java.io.Serializable;
 import java.util.Collection;
 
+import org.eobjects.analyzer.job.runner.FilterOutcomes;
+
 /**
  * Represents a requirement set on a {@link ComponentJob}, to only run it
  * conditionally.
@@ -35,5 +37,15 @@ public interface ComponentRequirement extends Serializable {
      * @param availableOutcomes
      * @return
      */
-    public boolean isSatisfied(Collection<Outcome> availableOutcomes);
+    public boolean isSatisfied(FilterOutcomes availableOutcomes);
+
+    /**
+     * Gets the {@link FilterOutcome}s that this requirement depends on at
+     * processing time. During processing, each {@link FilterOutcome} returned
+     * from this method will have been evaluated before calling
+     * {@link #isSatisfied(FilterOutcomes)}.
+     * 
+     * @return
+     */
+    public Collection<FilterOutcome> getProcessingDependencies();
 }

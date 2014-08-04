@@ -19,16 +19,22 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.io.Serializable;
+
+import org.eobjects.analyzer.beans.api.Filter;
+
 /**
- * Represents an outcome of a filter.
+ * Represents an outcome of a {@link Filter}.
  * 
  * @see FilterJob
- * 
- * 
  */
-public interface FilterOutcome extends Outcome {
+public interface FilterOutcome extends Serializable {
+    
+    public HasFilterOutcomes getSource();
 
-	public FilterJob getFilterJob();
+    public FilterJob getFilterJob();
 
-	public Enum<?> getCategory();
+    public Enum<?> getCategory();
+
+    public boolean isEquals(FilterOutcome filterOutcome);
 }

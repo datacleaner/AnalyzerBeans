@@ -35,10 +35,8 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.HasComponentRequirement;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSinkJob;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
 import org.eobjects.analyzer.job.SimpleComponentRequirement;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -252,11 +250,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         setRequirement(filterJobBuilder.getOutcome(category));
     }
 
-    /**
-     * @deprecated use {@link #setComponentRequirement(ComponentRequirement)} instead.
-     */
-    @Deprecated
-    public void setRequirement(Outcome outcome) throws IllegalArgumentException {
+    public void setRequirement(FilterOutcome outcome) throws IllegalArgumentException {
         if (!validateRequirementCandidate(outcome)) {
             throw new IllegalArgumentException("Cyclic dependency detected when setting requirement: " + outcome);
         }
@@ -276,12 +270,12 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         }
     }
 
-    public boolean validateRequirementSource(OutcomeSourceJob outcomeSourceJob) {
-        if (outcomeSourceJob == null) {
+    public boolean validateRequirementSource(HasFilterOutcomes outcomeSource) {
+        if (outcomeSource == null) {
             return true;
         }
 
-        Outcome[] outcomes = outcomeSourceJob.getOutcomes();
+        FilterOutcome[] outcomes = outcomeSource.getOutcomes();
         if (outcomes == null || outcomes.length == 0) {
             return true;
         }
@@ -289,20 +283,33 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         return validateRequirementCandidate(outcomes[0]);
     }
 
-    public boolean validateRequirementCandidate(Outcome requirement) {
+    public boolean validateRequirementCandidate(final ComponentRequirement requirement) {
+        if (requirement instanceof SimpleComponentRequirement) {
+            final SimpleComponentRequirement simpleComponentRequirement = (SimpleComponentRequirement) requirement;
+            final FilterOutcome outcome = simpleComponentRequirement.getOutcome();
+            return validateRequirementCandidate(outcome);
+        }
+        return true;
+    }
+
+    public boolean validateRequirementCandidate(final FilterOutcome requirement) {
         if (requirement == null) {
             return true;
         }
-        OutcomeSourceJob sourceJob = requirement.getSourceJob();
-        if (sourceJob == this) {
+        final HasFilterOutcomes source = requirement.getSource();
+        if (source == this) {
             return false;
         }
-        if (sourceJob instanceof OutcomeSinkJob) {
-            Outcome[] requirements = ((OutcomeSinkJob) sourceJob).getRequirements();
-            for (Outcome transitiveRequirement : requirements) {
-                boolean transitiveValidation = validateRequirementCandidate(transitiveRequirement);
-                if (!transitiveValidation) {
-                    return false;
+        if (source instanceof HasComponentRequirement) {
+            final ComponentRequirement componentRequirement = ((HasComponentRequirement) source)
+                    .getComponentRequirement();
+            if (componentRequirement != null) {
+                final Collection<FilterOutcome> requirements = componentRequirement.getProcessingDependencies();
+                for (FilterOutcome transitiveRequirement : requirements) {
+                    boolean transitiveValidation = validateRequirementCandidate(transitiveRequirement);
+                    if (!transitiveValidation) {
+                        return false;
+                    }
                 }
             }
         }

@@ -19,56 +19,56 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.FilterOutcome;
 
 /**
- * Default implementation of {@link OutcomeSink}
+ * Default implementation of {@link FilterOutcomes}
  */
-public final class OutcomeSinkImpl implements OutcomeSink {
+public final class FilterOutcomesImpl implements FilterOutcomes {
 
-    private final List<Outcome> outcomes;
+    private final Set<FilterOutcome> _outcomes;
 
     @SuppressWarnings("unchecked")
-    public OutcomeSinkImpl() {
+    public FilterOutcomesImpl() {
         this(Collections.EMPTY_LIST);
     }
 
-    public OutcomeSinkImpl(Collection<? extends Outcome> availableOutcomes) {
+    public FilterOutcomesImpl(Collection<? extends FilterOutcome> availableOutcomes) {
         if (availableOutcomes == null) {
-            outcomes = new ArrayList<Outcome>();
+            _outcomes = new HashSet<FilterOutcome>();
         } else {
             // always take a copy of the collection argument
-            outcomes = new ArrayList<Outcome>(availableOutcomes);
+            _outcomes = new HashSet<FilterOutcome>(availableOutcomes);
         }
     }
 
     @Override
-    public void add(Outcome filterOutcome) {
-        outcomes.add(filterOutcome);
+    public void add(FilterOutcome filterOutcome) {
+        _outcomes.add(filterOutcome);
     }
 
     @Override
-    public boolean contains(Outcome outcome) {
-        return outcomes.contains(outcome);
+    public boolean contains(FilterOutcome outcome) {
+        return _outcomes.contains(outcome);
     }
 
     @Override
-    public Outcome[] getOutcomes() {
-        return outcomes.toArray(new Outcome[outcomes.size()]);
+    public FilterOutcome[] getOutcomes() {
+        return _outcomes.toArray(new FilterOutcome[_outcomes.size()]);
     }
 
     @Override
     public String toString() {
-        return "OutcomeSink[" + outcomes + "]";
+        return "FilterOutcomes[" + _outcomes + "]";
     }
 
     @Override
-    public OutcomeSink clone() {
-        return new OutcomeSinkImpl(outcomes);
+    public FilterOutcomes clone() {
+        return new FilterOutcomesImpl(_outcomes);
     }
 }

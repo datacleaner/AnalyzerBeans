@@ -19,7 +19,6 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -29,9 +28,9 @@ import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnyComponentRequirement;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ComponentRequirement;
+import org.eobjects.analyzer.job.HasComponentRequirement;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.util.SourceColumnFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,27 +46,28 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
     private final AnalysisJob _analysisJob;
     private final AnalysisListener _analysisListener;
-    private final OutcomeSinkJob _outcomeSinkJob;
-    private final Set<OutcomeSinkJob> _sourceJobsOfInputColumns;
+    private final HasComponentRequirement _hasComponentRequirement;
+    private final Set<HasComponentRequirement> _sourceJobsOfInputColumns;
     private final boolean _alwaysSatisfiedForConsume;
 
-    protected AbstractRowProcessingConsumer(RowProcessingPublishers publishers, OutcomeSinkJob outcomeSinkJob,
+    protected AbstractRowProcessingConsumer(RowProcessingPublishers publishers, HasComponentRequirement outcomeSinkJob,
             InputColumnSinkJob inputColumnSinkJob) {
         this(publishers.getAnalysisJob(), publishers.getAnalysisListener(), outcomeSinkJob, inputColumnSinkJob,
                 publishers.getSourceColumnFinder());
     }
 
     protected AbstractRowProcessingConsumer(AnalysisJob analysisJob, AnalysisListener analysisListener,
-            OutcomeSinkJob outcomeSinkJob, InputColumnSinkJob inputColumnSinkJob, SourceColumnFinder sourceColumnFinder) {
+            HasComponentRequirement outcomeSinkJob, InputColumnSinkJob inputColumnSinkJob,
+            SourceColumnFinder sourceColumnFinder) {
         this(analysisJob, analysisListener, outcomeSinkJob, buildSourceJobsOfInputColumns(inputColumnSinkJob,
                 sourceColumnFinder));
     }
 
     protected AbstractRowProcessingConsumer(AnalysisJob analysisJob, AnalysisListener analysisListener,
-            OutcomeSinkJob outcomeSinkJob, Set<OutcomeSinkJob> sourceJobsOfInputColumns) {
+            HasComponentRequirement outcomeSinkJob, Set<HasComponentRequirement> sourceJobsOfInputColumns) {
         _analysisJob = analysisJob;
         _analysisListener = analysisListener;
-        _outcomeSinkJob = outcomeSinkJob;
+        _hasComponentRequirement = outcomeSinkJob;
         _sourceJobsOfInputColumns = sourceJobsOfInputColumns;
         _alwaysSatisfiedForConsume = isAlwaysSatisfiedForConsume();
     }
@@ -84,24 +84,29 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
     }
 
     private boolean isAlwaysSatisfiedRequirement() {
-        final Outcome[] requirements = _outcomeSinkJob.getRequirements();
-        if (requirements.length == 1 && requirements[0] == AnyComponentRequirement.get()) {
+        final ComponentRequirement componentRequirement = _hasComponentRequirement.getComponentRequirement();
+        if (componentRequirement == null) {
+            return false;
+        }
+        
+        if (componentRequirement instanceof AnyComponentRequirement) {
             return true;
         }
+
         return false;
     }
 
-    private static Set<OutcomeSinkJob> buildSourceJobsOfInputColumns(InputColumnSinkJob inputColumnSinkJob,
+    private static Set<HasComponentRequirement> buildSourceJobsOfInputColumns(InputColumnSinkJob inputColumnSinkJob,
             SourceColumnFinder sourceColumnFinder) {
-        final Set<OutcomeSinkJob> result = new HashSet<OutcomeSinkJob>();
+        final Set<HasComponentRequirement> result = new HashSet<HasComponentRequirement>();
 
         final Set<Object> sourceJobsOfInputColumns = sourceColumnFinder.findAllSourceJobs(inputColumnSinkJob);
         for (Iterator<Object> it = sourceJobsOfInputColumns.iterator(); it.hasNext();) {
-            Object sourceJob = it.next();
-            if (sourceJob instanceof OutcomeSinkJob) {
-                OutcomeSinkJob sourceOutcomeSinkJob = (OutcomeSinkJob) sourceJob;
-                Outcome[] requirements = sourceOutcomeSinkJob.getRequirements();
-                if (requirements != null && requirements.length > 0) {
+            final Object sourceJob = it.next();
+            if (sourceJob instanceof HasComponentRequirement) {
+                final HasComponentRequirement sourceOutcomeSinkJob = (HasComponentRequirement) sourceJob;
+                final ComponentRequirement componentRequirement = sourceOutcomeSinkJob.getComponentRequirement();
+                if (componentRequirement != null) {
                     result.add(sourceOutcomeSinkJob);
                 }
             }
@@ -113,8 +118,8 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
      * Ensures that just a single outcome is satisfied
      */
     @Override
-    public final boolean satisfiedForConsume(Outcome[] outcomes, InputRow row) {
-        boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(_outcomeSinkJob, outcomes);
+    public final boolean satisfiedForConsume(FilterOutcomes outcomes, InputRow row) {
+        boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(_hasComponentRequirement, outcomes);
         if (!satisfiedOutcomesForConsume) {
             return false;
         }
@@ -128,7 +133,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
     }
 
     @Override
-    public final void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
+    public final void consume(InputRow row, int distinctCount, FilterOutcomes outcomes, RowProcessingChain chain) {
         try {
             consumeInternal(row, distinctCount, outcomes, chain);
         } catch (RuntimeException e) {
@@ -151,47 +156,40 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
      * @param outcomes
      * @param chain
      */
-    protected abstract void consumeInternal(InputRow row, int distinctCount, OutcomeSink outcomes,
-            RowProcessingChain chain);
+    protected abstract void consumeInternal(InputRow row, int distinctCount, FilterOutcomes outcomes, RowProcessingChain chain);
 
-    private boolean satisfiedInputsForConsume(InputRow row, Outcome[] outcomes) {
+    private boolean satisfiedInputsForConsume(InputRow row, FilterOutcomes outcomes) {
         if (_alwaysSatisfiedForConsume) {
             return _alwaysSatisfiedForConsume;
         }
 
-        for (final Object sourceJobsOfInputColumn : _sourceJobsOfInputColumns) {
-            // if any of the source jobs is satisfied, then continue
-            if (sourceJobsOfInputColumn instanceof OutcomeSinkJob) {
-                final OutcomeSinkJob outcomeSinkJob = (OutcomeSinkJob) sourceJobsOfInputColumn;
-                final boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(outcomeSinkJob, outcomes);
-                if (satisfiedOutcomesForConsume) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean satisfiedOutcomesForConsume(OutcomeSinkJob outcomeSinkJob, Outcome[] outcomes) {
-        boolean isSatisfiedOutcomes = false;
-        final Outcome[] requirements = outcomeSinkJob.getRequirements();
-        if (requirements == null || requirements.length == 0) {
-            isSatisfiedOutcomes = true;
-        } else {
-            // each requirement has to be satisfied
-            for (final Outcome requiredOutcome : requirements) {
-                if (requiredOutcome == AnyComponentRequirement.get()) {
-                    isSatisfiedOutcomes = true;
-                } else {
-                    for (final Outcome availableOutcome : outcomes) {
-                        if (availableOutcome.satisfiesRequirement(requiredOutcome)) {
-                            isSatisfiedOutcomes = true;
-                            break;
-                        }
+        final ComponentRequirement componentRequirement = _hasComponentRequirement.getComponentRequirement();
+        if (componentRequirement == null) {
+            for (final Object sourceJobsOfInputColumn : _sourceJobsOfInputColumns) {
+                // if any of the source jobs is satisfied, then continue
+                if (sourceJobsOfInputColumn instanceof HasComponentRequirement) {
+                    final HasComponentRequirement hasComponentRequirement = (HasComponentRequirement) sourceJobsOfInputColumn;
+                    final boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(hasComponentRequirement, outcomes);
+                    if (satisfiedOutcomesForConsume) {
+                        return true;
                     }
                 }
             }
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean satisfiedOutcomesForConsume(HasComponentRequirement component, FilterOutcomes outcomes) {
+        boolean isSatisfiedOutcomes = false;
+        
+        final ComponentRequirement componentRequirement = component.getComponentRequirement();
+        
+        if (componentRequirement == null) {
+            isSatisfiedOutcomes = true;
+        } else {
+            isSatisfiedOutcomes = componentRequirement.isSatisfied(outcomes);
         }
         return isSatisfiedOutcomes;
     }
@@ -200,29 +198,15 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
      * Ensures that ALL outcomes are available
      */
     @Override
-    public final boolean satisfiedForFlowOrdering(Collection<Outcome> outcomes) {
-        final Outcome[] requirements = _outcomeSinkJob.getRequirements();
-        if (requirements == null || requirements.length == 0) {
-            return true;
-        }
-
+    public final boolean satisfiedForFlowOrdering(FilterOutcomes outcomes) {
         if (isAlwaysSatisfiedRequirement()) {
             return true;
         }
 
-        // each outcome has to be satisfied
-        for (Outcome requiredOutcome : requirements) {
-            boolean found = false;
-            for (Outcome availableOutcome : outcomes) {
-                if (availableOutcome.satisfiesRequirement(requiredOutcome)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return false;
-            }
+        final ComponentRequirement componentRequirement = _hasComponentRequirement.getComponentRequirement();
+        if (componentRequirement == null) {
+            return true;
         }
-        return true;
+        return componentRequirement.isSatisfied(outcomes);
     }
 }

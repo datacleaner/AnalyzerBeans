@@ -134,7 +134,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         final Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
         if (!_multipleJobsSupported) {
             ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(configuredProperties), getRequirement());
+                    new ImmutableBeanConfiguration(configuredProperties), getComponentRequirement());
             return new AnalyzerJob[] { job };
         }
 
@@ -175,7 +175,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
             // there's only a single table involved - leave the input columns
             // untouched
             ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(configuredProperties), getRequirement());
+                    new ImmutableBeanConfiguration(configuredProperties), getComponentRequirement());
             return new AnalyzerJob[] { job };
         }
 
@@ -246,7 +246,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
                 configuredProperties);
         jobProperties.put(_inputProperty, columnValue);
         ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                jobProperties), getRequirement());
+                jobProperties), getComponentRequirement());
         return job;
     }
 

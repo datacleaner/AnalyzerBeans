@@ -71,9 +71,9 @@ public class AnalysisJobBuilderTest extends TestCase {
             assertTrue(tjb2.isConfigured(true));
 
             // assertions
-            assertEquals("FilterOutcome[category=VALID]", tjb2.getRequirement().toString());
-            assertEquals(null, filter.getRequirement());
-            assertEquals(null, tjb1.getRequirement());
+            assertEquals("Mock filter=VALID", tjb2.getComponentRequirement().toString());
+            assertEquals(null, filter.getComponentRequirement());
+            assertEquals(null, tjb1.getComponentRequirement());
         }
     }
 }

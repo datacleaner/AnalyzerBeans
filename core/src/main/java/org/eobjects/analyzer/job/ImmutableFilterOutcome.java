@@ -37,12 +37,12 @@ public final class ImmutableFilterOutcome extends AbstractFilterOutcome {
 	}
 
 	@Override
-	public FilterJob getSourceJob() {
-		return _filterJob;
-	}
-
-	@Override
 	public Enum<?> getCategory() {
 		return _category;
 	}
+
+    @Override
+    public HasFilterOutcomes getSource() {
+        return _filterJob;
+    }
 }

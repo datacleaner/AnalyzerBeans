@@ -65,13 +65,6 @@ final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> e
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public org.eobjects.analyzer.data.DataTypeFamily getOutputDataTypeFamily() {
-        Class<?> outputDataType = getOutputDataType();
-        return org.eobjects.analyzer.data.DataTypeFamily.valueOf(outputDataType);
-    }
-
-    @Override
     public boolean isDistributable() {
         final Distributed annotation = getAnnotation(Distributed.class);
         if (annotation != null) {

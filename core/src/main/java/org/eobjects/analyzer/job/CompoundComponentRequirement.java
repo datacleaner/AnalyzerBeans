@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eobjects.analyzer.job.runner.FilterOutcomes;
+
 /**
  * Represents an outcome that is a product of multiple other outcomes and thus
  * requires just any of the provided outcomes.
@@ -31,25 +33,40 @@ public class CompoundComponentRequirement implements ComponentRequirement {
 
     private static final long serialVersionUID = 1L;
 
-    private final Set<Outcome> _outcomes;
+    private final Set<FilterOutcome> _outcomes;
 
-    public CompoundComponentRequirement(Collection<? extends Outcome> outcomes) {
-        _outcomes = new HashSet<Outcome>();
-        for (Outcome outcome : outcomes) {
+    public CompoundComponentRequirement(Collection<? extends FilterOutcome> outcomes) {
+        _outcomes = new HashSet<FilterOutcome>();
+        for (FilterOutcome outcome : outcomes) {
             _outcomes.add(outcome);
         }
     }
 
-    public CompoundComponentRequirement(Outcome... outcomes) {
-        _outcomes = new HashSet<Outcome>();
-        for (Outcome outcome : outcomes) {
+    public CompoundComponentRequirement(FilterOutcome... outcomes) {
+        _outcomes = new HashSet<FilterOutcome>();
+        for (FilterOutcome outcome : outcomes) {
             _outcomes.add(outcome);
         }
+    }
+
+    /**
+     * Gets the {@link FilterOutcome} that this
+     * {@link CompoundComponentRequirement} represents.
+     * 
+     * @return
+     */
+    public Set<FilterOutcome> getOutcomes() {
+        return _outcomes;
     }
 
     @Override
-    public boolean isSatisfied(Collection<Outcome> outcomes) {
-        for (Outcome outcome : outcomes) {
+    public Collection<FilterOutcome> getProcessingDependencies() {
+        return getOutcomes();
+    }
+
+    @Override
+    public boolean isSatisfied(FilterOutcomes outcomes) {
+        for (FilterOutcome outcome : outcomes.getOutcomes()) {
             if (_outcomes.contains(outcome)) {
                 return true;
             }
@@ -60,7 +77,7 @@ public class CompoundComponentRequirement implements ComponentRequirement {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        for (Outcome outcome : _outcomes) {
+        for (FilterOutcome outcome : _outcomes) {
             if (sb.length() != 0) {
                 sb.append(" OR ");
             }

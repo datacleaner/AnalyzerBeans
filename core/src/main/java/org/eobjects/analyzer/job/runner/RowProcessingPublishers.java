@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.metamodel.MetaModelHelper;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -34,16 +37,14 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.apache.metamodel.MetaModelHelper;
-import org.apache.metamodel.schema.Column;
-import org.apache.metamodel.schema.Table;
 
 /**
  * Class which partitions a single {@link AnalysisJob}'s components into
@@ -100,9 +101,11 @@ public final class RowProcessingPublishers {
         for (InputColumn<?> inputColumn : inputColumns) {
             physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(inputColumn));
         }
-        final Outcome[] requirements = componentJob.getRequirements();
-        for (Outcome requirement : requirements) {
-            physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(requirement));
+        final ComponentRequirement requirement = componentJob.getComponentRequirement();
+        if (requirement != null) {
+            for (FilterOutcome filterOutcome : requirement.getProcessingDependencies()) {
+                physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(filterOutcome));
+            }
         }
 
         final Column[] physicalColumnsArray = physicalColumns.toArray(new Column[physicalColumns.size()]);

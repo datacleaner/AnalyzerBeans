@@ -17,22 +17,42 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.job;
+package org.eobjects.analyzer.job.runner;
+
+import org.eobjects.analyzer.job.FilterOutcome;
 
 /**
- * Defines an interface for jobs that require outcomes
- * 
- * @deprecated use {@link HasComponentRequirement} instead
+ * Interface for RowProcessingConsumers to add outcomes to and for others to
+ * detect the {@link FilterOutcome} state of a record.
  */
-@Deprecated
-public interface OutcomeSinkJob {
+public interface FilterOutcomes extends Cloneable {
 
     /**
+     * Adds a {@link FilterOutcome} to the set of active outcomes
+     * 
+     * @param filterOutcome
+     */
+    public void add(FilterOutcome filterOutcome);
+
+    /**
+     * Gets the currently active outcomes.
      * 
      * @return
-     * 
-     * @deprecated use {@link ComponentJob#getRequirement()) instead.
      */
-    @Deprecated
-    public Outcome[] getRequirements();
+    public FilterOutcome[] getOutcomes();
+
+    /**
+     * Determines if a particular outcome is active in the current state.
+     * 
+     * @param outcome
+     * @return
+     */
+    public boolean contains(FilterOutcome outcome);
+
+    /**
+     * Clones the instance.
+     * 
+     * @return
+     */
+    public FilterOutcomes clone();
 }

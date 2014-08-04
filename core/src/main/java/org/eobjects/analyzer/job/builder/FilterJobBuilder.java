@@ -29,13 +29,13 @@ import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableFilterJob;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
 
 public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> extends
         AbstractBeanWithInputColumnsBuilder<FilterBeanDescriptor<F, C>, F, FilterJobBuilder<F, C>> implements
-        OutcomeSourceJob {
+        HasFilterOutcomes {
 
     // We keep a cached version of the resulting filter job because of
     // references coming from other objects, particular LazyFilterOutcome.
@@ -66,10 +66,10 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 
         if (_cachedJob == null) {
             _cachedJob = new ImmutableFilterJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                    getConfiguredProperties()), getRequirement());
+                    getConfiguredProperties()), getComponentRequirement());
         } else {
             ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(getConfiguredProperties()), getRequirement());
+                    new ImmutableBeanConfiguration(getConfiguredProperties()), getComponentRequirement());
             if (!newFilterJob.equals(_cachedJob)) {
                 _cachedJob = newFilterJob;
             }
@@ -146,7 +146,7 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
             listener.onRemove(this);
         }
     }
-    
+
     /**
      * Adds a change listener to this component
      * 

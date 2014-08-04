@@ -20,6 +20,9 @@
 package org.eobjects.analyzer.job;
 
 import java.util.Collection;
+import java.util.Collections;
+
+import org.eobjects.analyzer.job.runner.FilterOutcomes;
 
 /**
  * An outcome that represents "Any outcome", ie. all other requirements/outcomes
@@ -46,7 +49,12 @@ public class AnyComponentRequirement implements ComponentRequirement {
     }
 
     @Override
-    public boolean isSatisfied(Collection<Outcome> outcomes) {
+    public boolean isSatisfied(FilterOutcomes outcomes) {
         return true;
+    }
+    
+    @Override
+    public Collection<FilterOutcome> getProcessingDependencies() {
+        return Collections.emptyList();
     }
 }

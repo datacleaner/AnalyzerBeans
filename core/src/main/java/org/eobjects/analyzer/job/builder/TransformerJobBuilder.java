@@ -32,12 +32,12 @@ import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.BeanConfiguration;
+import org.eobjects.analyzer.job.HasComponentRequirement;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableTransformerJob;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
-import org.eobjects.analyzer.job.OutcomeSinkJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.StringUtils;
@@ -50,7 +50,7 @@ import org.eobjects.analyzer.util.StringUtils;
  */
 public final class TransformerJobBuilder<T extends Transformer<?>> extends
         AbstractBeanWithInputColumnsBuilder<TransformerBeanDescriptor<T>, T, TransformerJobBuilder<T>> implements
-        InputColumnSourceJob, InputColumnSinkJob, OutcomeSinkJob {
+        InputColumnSourceJob, InputColumnSinkJob, HasComponentRequirement {
 
     private final String _id;
     private final List<MutableInputColumn<?>> _outputColumns = new ArrayList<MutableInputColumn<?>>();
@@ -193,7 +193,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
         }
 
         return new ImmutableTransformerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                getConfiguredProperties()), getOutputColumns(), getRequirement());
+                getConfiguredProperties()), getOutputColumns(), getComponentRequirement());
     }
 
     @Override

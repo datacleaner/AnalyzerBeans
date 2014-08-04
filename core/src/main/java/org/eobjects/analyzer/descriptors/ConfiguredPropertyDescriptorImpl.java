@@ -20,7 +20,6 @@
 package org.eobjects.analyzer.descriptors;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Configured;
@@ -82,20 +81,6 @@ final class ConfiguredPropertyDescriptorImpl extends AbstractPropertyDescriptor 
             return true;
         }
         return configured.required();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public org.eobjects.analyzer.data.DataTypeFamily getInputColumnDataTypeFamily() {
-        if (isInputColumn()) {
-            int count = getTypeArgumentCount();
-            if (count == 0) {
-                return org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED;
-            }
-            Type typeArgument = getTypeArgument(0);
-            return org.eobjects.analyzer.data.DataTypeFamily.valueOf(typeArgument);
-        }
-        return null;
     }
 
     @Override

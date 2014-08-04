@@ -19,8 +19,10 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.util.Arrays;
 import java.util.Collection;
 
+import org.eobjects.analyzer.job.runner.FilterOutcomes;
 import org.eobjects.analyzer.util.LabelUtils;
 
 public class SimpleComponentRequirement implements ComponentRequirement {
@@ -30,11 +32,27 @@ public class SimpleComponentRequirement implements ComponentRequirement {
     private final FilterOutcome _outcome;
 
     public SimpleComponentRequirement(FilterOutcome outcome) {
+        if (outcome == null) {
+            throw new IllegalArgumentException("FilterOutcome cannot be null");
+        }
         _outcome = outcome;
+    }
+    
+    /**
+     * Gets the outcome that this {@link ComponentRequirement} represents
+     * @return
+     */
+    public FilterOutcome getOutcome() {
+        return _outcome;
+    }
+    
+    @Override
+    public Collection<FilterOutcome> getProcessingDependencies() {
+        return Arrays.asList(_outcome);
     }
 
     @Override
-    public boolean isSatisfied(Collection<Outcome> outcomes) {
+    public boolean isSatisfied(FilterOutcomes outcomes) {
         return outcomes.contains(_outcome);
     }
 

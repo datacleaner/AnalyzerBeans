@@ -27,7 +27,7 @@ public final class LazyOutcomeUtils {
         // prevent instantiation
     }
 
-    public static Outcome load(Outcome outcome) {
+    public static FilterOutcome load(FilterOutcome outcome) {
         if (outcome instanceof LazyFilterOutcome) {
             LazyFilterOutcome lfo = (LazyFilterOutcome) outcome;
             return new ImmutableFilterOutcome(lfo.getFilterJob(), lfo.getCategory());
