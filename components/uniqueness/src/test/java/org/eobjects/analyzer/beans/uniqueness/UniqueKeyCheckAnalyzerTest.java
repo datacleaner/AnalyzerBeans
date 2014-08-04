@@ -64,5 +64,8 @@ public class UniqueKeyCheckAnalyzerTest extends TestCase {
 
         Map<String, Integer> samples = result.getNonUniqueSamples();
         assertEquals("{bar=2, dolor=2, dolore=2, foo=2, in=3, ut=2}", samples.toString());
+
+        assertEquals("Unique key check result:\n" + " - Row count: 73\n" + " - Null count: 0\n"
+                + " - Unique count: 60\n" + " - Non-unique count: 13", result.toString());
     }
 }

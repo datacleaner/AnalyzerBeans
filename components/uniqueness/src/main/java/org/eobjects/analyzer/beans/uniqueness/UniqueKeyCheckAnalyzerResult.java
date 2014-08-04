@@ -74,4 +74,11 @@ public class UniqueKeyCheckAnalyzerResult implements AnalyzerResult {
     public Map<String, Integer> getNonUniqueSamples() {
         return _nonUniqueSamples;
     }
+
+    @Override
+    public String toString() {
+        return "Unique key check result:" + "\n - Row count: " + getRowCount() + "\n - Null count: " + getNullCount()
+                + "" + "\n - Unique count: " + getUniqueCount() + "\n - Non-unique count: " + getNonUniqueCount();
+    }
+
 }
