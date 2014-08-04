@@ -177,14 +177,4 @@ public class ValueDistributionAnalyzerTest extends TestCase {
         assertEquals("Group: 2200", resultLines[i++]);
         assertEquals(" - Copenhagen N: 3", resultLines[i++]);
     }
-
-    @SuppressWarnings("deprecation")
-    public void testDataTypeFamilyDescriptor() throws Exception {
-        AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
-        Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput(false);
-        assertEquals(1, configuredProperties.size());
-        ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
-        assertEquals(org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED,
-                propertyDescriptor.getInputColumnDataTypeFamily());
-    }
 }
