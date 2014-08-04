@@ -30,18 +30,22 @@ import org.apache.metamodel.csv.CsvConfiguration;
 import org.apache.metamodel.csv.CsvDataContext;
 import org.apache.metamodel.csv.CsvWriter;
 import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.util.Action;
 import org.apache.metamodel.util.FileHelper;
 import org.apache.metamodel.util.ToStringComparator;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.WriteBuffer;
 import org.eobjects.analyzer.util.sort.SortMergeWriter;
 
 @AnalyzerBean("Unique key check")
 @Description("Check your keys (or other fields) for uniqueness")
+@Concurrent(true)
 public class UniqueKeyCheckAnalyzer implements Analyzer<UniqueKeyCheckAnalyzerResult> {
 
     private static final int BUFFER_SIZE = 20000;
@@ -52,6 +56,7 @@ public class UniqueKeyCheckAnalyzer implements Analyzer<UniqueKeyCheckAnalyzerRe
     InputColumn<?> column;
 
     private final int _bufferSize;
+    private WriteBuffer _writeBuffer;
     private SortMergeWriter<String, Writer> _sorter;
     private AtomicInteger _rowCount;
     private AtomicInteger _nullCount;
@@ -90,7 +95,15 @@ public class UniqueKeyCheckAnalyzer implements Analyzer<UniqueKeyCheckAnalyzerRe
                 return FileHelper.getBufferedWriter(file);
             }
         };
-
+        _writeBuffer = new WriteBuffer(_bufferSize, new Action<Iterable<Object[]>>() {
+            @Override
+            public void run(Iterable<Object[]> rows) throws Exception {
+                for (Object[] objects : rows) {
+                    final String string = (String) objects[0];
+                    _sorter.append(string);
+                }
+            }
+        });
     }
 
     @Override
@@ -103,14 +116,17 @@ public class UniqueKeyCheckAnalyzer implements Analyzer<UniqueKeyCheckAnalyzerRe
             _nullCount.addAndGet(distinctCount);
         } else {
             String str = value.toString();
-            synchronized (_sorter) {
-                _sorter.append(str, distinctCount);
+
+            for (int i = 0; i < distinctCount; i++) {
+                _writeBuffer.addToBuffer(new Object[] { str });
             }
         }
     }
 
     @Override
     public UniqueKeyCheckAnalyzerResult getResult() {
+        _writeBuffer.flushBuffer();
+
         File file;
         try {
             file = File.createTempFile("UniqueKeyCheckAnalyzer", ".txt");
@@ -118,7 +134,7 @@ public class UniqueKeyCheckAnalyzer implements Analyzer<UniqueKeyCheckAnalyzerRe
             File tempDir = FileHelper.getTempDir();
             file = new File(tempDir, "UniqueKeyCheckAnalyzer-" + System.currentTimeMillis() + ".txt");
         }
-        
+
         _sorter.write(file);
 
         final AtomicInteger nonUniques = new AtomicInteger();
