@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.writers;
+package org.eobjects.analyzer.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +33,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides a buffering mechanism that enables writing rows periodically instead
  * of instantly.
- * 
- * 
  */
-public final class WriteBuffer {
+public class WriteBuffer {
 
     private static final Logger logger = LoggerFactory.getLogger(WriteBuffer.class);
 
