@@ -28,26 +28,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.metamodel.util.CollectionUtils;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.job.ComponentRequirement;
+import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.HasComponentRequirement;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSinkJob;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
+import org.eobjects.analyzer.job.SimpleComponentRequirement;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.apache.metamodel.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends
-        AbstractBeanJobBuilder<D, E, B> implements InputColumnSinkJob, OutcomeSinkJob {
+        AbstractBeanJobBuilder<D, E, B> implements InputColumnSinkJob, HasComponentRequirement {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBeanWithInputColumnsBuilder.class);
 
-    private Outcome _requirement;
+    private ComponentRequirement _componentRequirement;
 
     public AbstractBeanWithInputColumnsBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor,
             Class<?> builderClass) {
@@ -133,7 +135,8 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 
     // this is the main "addInputColumns" method that the other similar methods
     // delegate to
-    public B addInputColumns(Collection<? extends InputColumn<?>> inputColumns, ConfiguredPropertyDescriptor propertyDescriptor) {
+    public B addInputColumns(Collection<? extends InputColumn<?>> inputColumns,
+            ConfiguredPropertyDescriptor propertyDescriptor) {
         if (propertyDescriptor == null || !propertyDescriptor.isInputColumn()) {
             throw new IllegalArgumentException("Property is not of InputColumn type: " + propertyDescriptor);
         }
@@ -239,10 +242,6 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         return Collections.unmodifiableList(result);
     }
 
-    public Outcome getRequirement() {
-        return _requirement;
-    }
-
     public void setRequirement(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
         EnumSet<?> categories = filterJobBuilder.getDescriptor().getOutcomeCategories();
         if (!categories.contains(category)) {
@@ -251,22 +250,34 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         setRequirement(filterJobBuilder.getOutcome(category));
     }
 
-    public void setRequirement(Outcome requirement) throws IllegalArgumentException {
-        if (!validateRequirementCandidate(requirement)) {
-            throw new IllegalArgumentException("Cyclic dependency detected when setting requirement: " + requirement);
+    public void setRequirement(FilterOutcome outcome) throws IllegalArgumentException {
+        if (!validateRequirementCandidate(outcome)) {
+            throw new IllegalArgumentException("Cyclic dependency detected when setting requirement: " + outcome);
         }
-        if (_requirement != requirement) {
-            _requirement = requirement;
+
+        if (outcome == null) {
+            setComponentRequirement(null);
+        } else if (outcome instanceof FilterOutcome) {
+            setComponentRequirement(new SimpleComponentRequirement((FilterOutcome) outcome));
+        } else {
+            throw new IllegalArgumentException("Unsupported outcome type (use ComponentRequirement instead): "
+                    + outcome);
+        }
+    }
+
+    public void setComponentRequirement(ComponentRequirement requirement) {
+        if (_componentRequirement != requirement) {
+            _componentRequirement = requirement;
             onRequirementChanged();
         }
     }
 
-    public boolean validateRequirementSource(OutcomeSourceJob outcomeSourceJob) {
-        if (outcomeSourceJob == null) {
+    public boolean validateRequirementSource(HasFilterOutcomes outcomeSource) {
+        if (outcomeSource == null) {
             return true;
         }
 
-        Outcome[] outcomes = outcomeSourceJob.getOutcomes();
+        FilterOutcome[] outcomes = outcomeSource.getOutcomes();
         if (outcomes == null || outcomes.length == 0) {
             return true;
         }
@@ -274,20 +285,33 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         return validateRequirementCandidate(outcomes[0]);
     }
 
-    public boolean validateRequirementCandidate(Outcome requirement) {
+    public boolean validateRequirementCandidate(final ComponentRequirement requirement) {
+        if (requirement instanceof SimpleComponentRequirement) {
+            final SimpleComponentRequirement simpleComponentRequirement = (SimpleComponentRequirement) requirement;
+            final FilterOutcome outcome = simpleComponentRequirement.getOutcome();
+            return validateRequirementCandidate(outcome);
+        }
+        return true;
+    }
+
+    public boolean validateRequirementCandidate(final FilterOutcome requirement) {
         if (requirement == null) {
             return true;
         }
-        OutcomeSourceJob sourceJob = requirement.getSourceJob();
-        if (sourceJob == this) {
+        final HasFilterOutcomes source = requirement.getSource();
+        if (source == this) {
             return false;
         }
-        if (sourceJob instanceof OutcomeSinkJob) {
-            Outcome[] requirements = ((OutcomeSinkJob) sourceJob).getRequirements();
-            for (Outcome transitiveRequirement : requirements) {
-                boolean transitiveValidation = validateRequirementCandidate(transitiveRequirement);
-                if (!transitiveValidation) {
-                    return false;
+        if (source instanceof HasComponentRequirement) {
+            final ComponentRequirement componentRequirement = ((HasComponentRequirement) source)
+                    .getComponentRequirement();
+            if (componentRequirement != null) {
+                final Collection<FilterOutcome> requirements = componentRequirement.getProcessingDependencies();
+                for (FilterOutcome transitiveRequirement : requirements) {
+                    boolean transitiveValidation = validateRequirementCandidate(transitiveRequirement);
+                    if (!transitiveValidation) {
+                        return false;
+                    }
                 }
             }
         }
@@ -313,11 +337,8 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
     }
 
     @Override
-    public Outcome[] getRequirements() {
-        if (_requirement == null) {
-            return new Outcome[0];
-        }
-        return new Outcome[] { _requirement };
+    public ComponentRequirement getComponentRequirement() {
+        return _componentRequirement;
     }
 
     @Override

@@ -19,19 +19,12 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
-import java.util.Set;
-
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
-import org.eobjects.analyzer.descriptors.Descriptors;
-import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 
-@SuppressWarnings("deprecation")
 public class ConcatenatorTransformerTest extends TestCase {
 
     public void testConcat() throws Exception {
@@ -62,18 +55,5 @@ public class ConcatenatorTransformerTest extends TestCase {
         result = t.transform(new MockInputRow().put(col1, null).put(col2, null));
         assertEquals(1, result.length);
         assertEquals("", result[0]);
-    }
-
-    private DataTypeFamily getDataTypeFamily(TransformerBeanDescriptor<?> descriptor) {
-        Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
-        assertEquals(1, configuredProperties.size());
-        ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
-        return propertyDescriptor.getInputColumnDataTypeFamily();
-    }
-
-    public void testDescriptor() throws Exception {
-        TransformerBeanDescriptor<?> descriptor = Descriptors.ofTransformer(ConcatenatorTransformer.class);
-        assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));
-        assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
     }
 }

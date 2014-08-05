@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.metamodel.query.Query;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
@@ -36,13 +37,12 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.HasComponentRequirement;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSinkJob;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
-import org.apache.metamodel.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,24 +149,27 @@ public class RowProcessingQueryOptimizer {
             }
         }
 
-        Set<InputColumn<?>> satisfiedColumns = new HashSet<InputColumn<?>>();
-        Set<Outcome> satisfiedRequirements = new HashSet<Outcome>();
+        final Set<InputColumn<?>> satisfiedColumns = new HashSet<InputColumn<?>>();
+        final Set<FilterOutcome> satisfiedRequirements = new HashSet<FilterOutcome>();
         satisfiedRequirements.add(filterOutcome);
 
         for (int i = consumerIndex + 1; i < _consumers.size(); i++) {
             boolean independentComponent = true;
 
             final RowProcessingConsumer nextConsumer = _consumers.get(i);
-            ComponentJob componentJob = nextConsumer.getComponentJob();
-            if (componentJob instanceof OutcomeSinkJob) {
-                Outcome[] requirements = ((OutcomeSinkJob) componentJob).getRequirements();
-                for (Outcome requirement : requirements) {
-                    if (!satisfiedRequirements.contains(requirement)) {
-                        logger.debug("Requirement {} is not met using query optimization of {}", requirement,
-                                filterConsumer);
-                        return false;
-                    } else {
-                        independentComponent = false;
+            final ComponentJob componentJob = nextConsumer.getComponentJob();
+            if (componentJob instanceof HasComponentRequirement) {
+                final ComponentRequirement componentRequirement = componentJob.getComponentRequirement();
+                if (componentRequirement != null) {
+                    final Collection<FilterOutcome> requirements = componentRequirement.getProcessingDependencies();
+                    for (final FilterOutcome requirement : requirements) {
+                        if (!satisfiedRequirements.contains(requirement)) {
+                            logger.debug("Requirement {} is not met using query optimization of {}", requirement,
+                                    filterConsumer);
+                            return false;
+                        } else {
+                            independentComponent = false;
+                        }
                     }
                 }
             }
@@ -197,9 +200,9 @@ public class RowProcessingQueryOptimizer {
 
             // this component is accepted now, add it's outcomes to the
             // satisfied requirements
-            if (componentJob instanceof OutcomeSourceJob) {
-                Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
-                for (Outcome outcome : outcomes) {
+            if (componentJob instanceof HasFilterOutcomes) {
+                final FilterOutcome[] outcomes = ((HasFilterOutcomes) componentJob).getOutcomes();
+                for (final FilterOutcome outcome : outcomes) {
                     satisfiedRequirements.add(outcome);
                 }
             }
@@ -221,10 +224,10 @@ public class RowProcessingQueryOptimizer {
      * @return
      */
     public Query getOptimizedQuery() {
-//        if (isOptimizable()) {
-//            return _baseQuery;
-//        }
-        
+        // if (isOptimizable()) {
+        // return _baseQuery;
+        // }
+
         // create a copy/clone of the original query
         Query q = _baseQuery.clone();
 
@@ -278,7 +281,7 @@ public class RowProcessingQueryOptimizer {
      * 
      * @return
      */
-    public Collection<? extends Outcome> getOptimizedAvailableOutcomes() {
+    public Collection<? extends FilterOutcome> getOptimizedAvailableOutcomes() {
         return _optimizedFilters.values();
     }
 

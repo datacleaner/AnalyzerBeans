@@ -27,7 +27,8 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
  * @see Filter
  * @See FilterBean
  */
-public interface FilterJob extends ConfigurableBeanJob<FilterBeanDescriptor<?, ?>>, OutcomeSourceJob {
+public interface FilterJob extends ConfigurableBeanJob<FilterBeanDescriptor<?, ?>>, HasFilterOutcomes {
 
+    @Override
 	public FilterOutcome[] getOutcomes();
 }

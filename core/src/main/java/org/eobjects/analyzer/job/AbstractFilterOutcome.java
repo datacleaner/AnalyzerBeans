@@ -35,18 +35,20 @@ import org.apache.metamodel.util.BaseObject;
  * 
  * @see ImmutableFilterOutcome
  * @see LazyFilterOutcome
- * 
- * 
- * 
  */
 public abstract class AbstractFilterOutcome extends BaseObject implements FilterOutcome {
 
     private static final long serialVersionUID = 1L;
+    
+    @Override
+    public boolean isEquals(FilterOutcome filterOutcome) {
+        return equals(filterOutcome);
+    }
 
     @Override
     protected final void decorateIdentity(List<Object> identifiers) {
         identifiers.add(getCategory());
-        identifiers.add(getSourceJob());
+        identifiers.add(getFilterJob());
     }
 
     @Override
@@ -58,10 +60,5 @@ public abstract class AbstractFilterOutcome extends BaseObject implements Filter
     @Override
     public String toString() {
         return "FilterOutcome[category=" + getCategory() + "]";
-    }
-
-    @Override
-    public final boolean satisfiesRequirement(Outcome requirement) {
-        return equals(requirement);
     }
 }

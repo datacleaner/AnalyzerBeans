@@ -28,7 +28,7 @@ import org.apache.metamodel.util.HasName;
  * Super-interface for all job entries in an Analysis. A {@link ComponentJob}
  * represents a component's configuration in a {@link AnalysisJob}.
  */
-public interface ComponentJob extends HasName, Serializable {
+public interface ComponentJob extends HasName, HasComponentRequirement, Serializable {
 
     /**
      * Gets the descriptor of this component type.

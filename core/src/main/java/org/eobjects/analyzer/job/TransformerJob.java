@@ -30,6 +30,6 @@ import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
  * @see TransformerBean
  */
 public interface TransformerJob extends ConfigurableBeanJob<TransformerBeanDescriptor<?>>, InputColumnSourceJob,
-        InputColumnSinkJob, OutcomeSinkJob {
+        InputColumnSinkJob, HasComponentRequirement {
 
 }

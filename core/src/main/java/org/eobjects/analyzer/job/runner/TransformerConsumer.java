@@ -102,7 +102,7 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
     }
 
     @Override
-    public void consumeInternal(final InputRow row, final int distinctCount, final OutcomeSink outcomes,
+    public void consumeInternal(final InputRow row, final int distinctCount, final FilterOutcomes outcomes,
             final RowProcessingChain chain) {
         final InputColumn<?>[] outputColumns = getOutputColumns();
 
@@ -138,7 +138,7 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
         }
     }
 
-    private void registerListener(final Transformer<?> transformer, final InputRow row, final OutcomeSink outcomes,
+    private void registerListener(final Transformer<?> transformer, final InputRow row, final FilterOutcomes outcomes,
             final RowProcessingChain chain, final InputColumn<?>[] outputColumns) {
         final Set<ProvidedPropertyDescriptor> outputRowCollectorProperties = _transformerJob.getDescriptor()
                 .getProvidedPropertiesByType(OutputRowCollector.class);
@@ -163,7 +163,7 @@ final class TransformerConsumer extends AbstractRowProcessingConsumer implements
 
                 addValuesToRow(resultRow, outputColumns, values);
 
-                OutcomeSink clonedOutcomeSink = outcomes.clone();
+                FilterOutcomes clonedOutcomeSink = outcomes.clone();
                 chain.processNext(resultRow, 1, clonedOutcomeSink);
             }
         };

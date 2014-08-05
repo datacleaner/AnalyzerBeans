@@ -19,27 +19,27 @@
  */
 package org.eobjects.analyzer.job.runner;
 
-import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.FilterOutcome;
 
 /**
  * Interface for RowProcessingConsumers to add outcomes to and for others to
- * detect the {@link Outcome} state of a record.
+ * detect the {@link FilterOutcome} state of a record.
  */
-public interface OutcomeSink extends Cloneable {
+public interface FilterOutcomes extends Cloneable {
 
     /**
-     * Adds a {@link Outcome} to the set of active outcomes
+     * Adds a {@link FilterOutcome} to the set of active outcomes
      * 
      * @param filterOutcome
      */
-    public void add(Outcome filterOutcome);
+    public void add(FilterOutcome filterOutcome);
 
     /**
      * Gets the currently active outcomes.
      * 
      * @return
      */
-    public Outcome[] getOutcomes();
+    public FilterOutcome[] getOutcomes();
 
     /**
      * Determines if a particular outcome is active in the current state.
@@ -47,12 +47,12 @@ public interface OutcomeSink extends Cloneable {
      * @param outcome
      * @return
      */
-    public boolean contains(Outcome outcome);
+    public boolean contains(FilterOutcome outcome);
 
     /**
      * Clones the instance.
      * 
      * @return
      */
-    public OutcomeSink clone();
+    public FilterOutcomes clone();
 }

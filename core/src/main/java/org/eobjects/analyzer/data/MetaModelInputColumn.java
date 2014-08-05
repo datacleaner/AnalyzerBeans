@@ -81,28 +81,6 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public DataTypeFamily getDataTypeFamily() {
-        ColumnType type = _column.getType();
-        if (type == null) {
-            return DataTypeFamily.UNDEFINED;
-        }
-        if (type.isBoolean()) {
-            return DataTypeFamily.BOOLEAN;
-        }
-        if (type.isLiteral()) {
-            return DataTypeFamily.STRING;
-        }
-        if (type.isNumber()) {
-            return DataTypeFamily.NUMBER;
-        }
-        if (type.isTimeBased()) {
-            return DataTypeFamily.DATE;
-        }
-        return DataTypeFamily.UNDEFINED;
-    }
-
-    @Override
     public String toString() {
         return "MetaModelInputColumn[" + _column.getQualifiedLabel() + "]";
     }

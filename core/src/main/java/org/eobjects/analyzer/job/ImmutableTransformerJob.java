@@ -34,80 +34,77 @@ import org.eobjects.analyzer.util.CollectionUtils2;
 import org.apache.metamodel.util.BaseObject;
 
 public final class ImmutableTransformerJob extends BaseObject implements TransformerJob {
-	
-	private static final long serialVersionUID = 1L;
 
-	private final String _name;
-	private final TransformerBeanDescriptor<?> _descriptor;
-	private final BeanConfiguration _beanConfiguration;
-	private final List<MutableInputColumn<?>> _output;
-	private final Outcome _requirement;
+    private static final long serialVersionUID = 1L;
 
-	public ImmutableTransformerJob(String name, TransformerBeanDescriptor<?> descriptor,
-			BeanConfiguration beanConfiguration, Collection<MutableInputColumn<?>> output, Outcome requirement) {
-		_name = name;
-		_descriptor = descriptor;
-		_beanConfiguration = beanConfiguration;
-		_output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
-		_requirement = LazyOutcomeUtils.load(requirement);
-	}
+    private final String _name;
+    private final TransformerBeanDescriptor<?> _descriptor;
+    private final BeanConfiguration _beanConfiguration;
+    private final List<MutableInputColumn<?>> _output;
+    private final ComponentRequirement _componentRequirement;
 
-	@Override
-	public String getName() {
-		return _name;
-	}
+    public ImmutableTransformerJob(String name, TransformerBeanDescriptor<?> descriptor,
+            BeanConfiguration beanConfiguration, Collection<MutableInputColumn<?>> output,
+            ComponentRequirement requirement) {
+        _name = name;
+        _descriptor = descriptor;
+        _beanConfiguration = beanConfiguration;
+        _output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
+        _componentRequirement = requirement;
+    }
 
-	@Override
-	public TransformerBeanDescriptor<?> getDescriptor() {
-		return _descriptor;
-	}
+    @Override
+    public String getName() {
+        return _name;
+    }
 
-	@Override
-	public BeanConfiguration getConfiguration() {
-		return _beanConfiguration;
-	}
+    @Override
+    public TransformerBeanDescriptor<?> getDescriptor() {
+        return _descriptor;
+    }
 
-	@Override
-	public InputColumn<?>[] getInput() {
-		List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
-		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
-		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
-			Object property = _beanConfiguration.getProperty(propertyDescriptor);
-			InputColumn<?>[] inputs = CollectionUtils2.arrayOf(InputColumn.class, property);
-			if (inputs != null) {
-				for (InputColumn<?> inputColumn : inputs) {
-					result.add(inputColumn);
-				}
-			}
-		}
-		return result.toArray(new InputColumn<?>[result.size()]);
-	}
+    @Override
+    public BeanConfiguration getConfiguration() {
+        return _beanConfiguration;
+    }
 
-	@Override
-	public MutableInputColumn<?>[] getOutput() {
-		return _output.toArray(new MutableInputColumn<?>[_output.size()]);
-	}
+    @Override
+    public InputColumn<?>[] getInput() {
+        List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
+        Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
+        for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
+            Object property = _beanConfiguration.getProperty(propertyDescriptor);
+            InputColumn<?>[] inputs = CollectionUtils2.arrayOf(InputColumn.class, property);
+            if (inputs != null) {
+                for (InputColumn<?> inputColumn : inputs) {
+                    result.add(inputColumn);
+                }
+            }
+        }
+        return result.toArray(new InputColumn<?>[result.size()]);
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_name);
-		identifiers.add(_beanConfiguration);
-		identifiers.add(_descriptor);
-		identifiers.add(_output);
-		identifiers.add(_requirement);
-	}
+    @Override
+    public MutableInputColumn<?>[] getOutput() {
+        return _output.toArray(new MutableInputColumn<?>[_output.size()]);
+    }
 
-	@Override
-	public String toString() {
-		return "ImmutableTransformerJob[name=" + _name + ",transformer=" + _descriptor.getDisplayName() + "]";
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(_name);
+        identifiers.add(_beanConfiguration);
+        identifiers.add(_descriptor);
+        identifiers.add(_output);
+        identifiers.add(_componentRequirement);
+    }
 
-	@Override
-	public Outcome[] getRequirements() {
-		if (_requirement == null) {
-			return new Outcome[0];
-		}
-		return new Outcome[] { _requirement };
-	}
+    @Override
+    public String toString() {
+        return "ImmutableTransformerJob[name=" + _name + ",transformer=" + _descriptor.getDisplayName() + "]";
+    }
 
+    @Override
+    public ComponentRequirement getComponentRequirement() {
+        return _componentRequirement;
+    }
 }

@@ -36,14 +36,19 @@ public final class ImmutableAnalyzerJob extends BaseObject implements AnalyzerJo
 	private final String _name;
 	private final AnalyzerBeanDescriptor<?> _descriptor;
 	private final BeanConfiguration _beanConfiguration;
-	private final Outcome _requirement;
+	private final ComponentRequirement _componentRequirement;
 
 	public ImmutableAnalyzerJob(String name, AnalyzerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
-			Outcome requirement) {
+	        ComponentRequirement requirement) {
 		_name = name;
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
-		_requirement = LazyOutcomeUtils.load(requirement);
+		_componentRequirement = requirement;
+	}
+	
+	@Override
+	public ComponentRequirement getComponentRequirement() {
+	    return _componentRequirement;
 	}
 
 	@Override
@@ -82,19 +87,11 @@ public final class ImmutableAnalyzerJob extends BaseObject implements AnalyzerJo
 		identifiers.add(_name);
 		identifiers.add(_beanConfiguration);
 		identifiers.add(_descriptor);
-		identifiers.add(_requirement);
+		identifiers.add(_componentRequirement);
 	}
 
 	@Override
 	public String toString() {
 		return "ImmutableAnalyzerJob[name=" + _name + ",analyzer=" + _descriptor.getDisplayName() + "]";
-	}
-
-	@Override
-	public Outcome[] getRequirements() {
-		if (_requirement == null) {
-			return new Outcome[0];
-		}
-		return new Outcome[] { _requirement };
 	}
 }

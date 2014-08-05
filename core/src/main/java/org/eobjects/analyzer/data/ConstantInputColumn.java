@@ -46,12 +46,6 @@ public final class ConstantInputColumn extends AbstractExpressionBasedInputColum
 		return _value;
 	}
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public org.eobjects.analyzer.data.DataTypeFamily getDataTypeFamily() {
-		return org.eobjects.analyzer.data.DataTypeFamily.STRING;
-	}
-
 	@Override
 	public String evaluate(InputRow row) {
 		return _value;
