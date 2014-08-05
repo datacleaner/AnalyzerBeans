@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.runner.FilterOutcomes;
 import org.eobjects.analyzer.util.LabelUtils;
 
@@ -52,7 +53,7 @@ public class SimpleComponentRequirement implements ComponentRequirement {
     }
 
     @Override
-    public boolean isSatisfied(FilterOutcomes outcomes) {
+    public boolean isSatisfied(InputRow row, FilterOutcomes outcomes) {
         return outcomes.contains(_outcome);
     }
 

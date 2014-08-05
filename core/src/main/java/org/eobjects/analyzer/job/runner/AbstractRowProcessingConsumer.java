@@ -119,7 +119,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
      */
     @Override
     public final boolean satisfiedForConsume(FilterOutcomes outcomes, InputRow row) {
-        boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(_hasComponentRequirement, outcomes);
+        boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(_hasComponentRequirement, row, outcomes);
         if (!satisfiedOutcomesForConsume) {
             return false;
         }
@@ -169,7 +169,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
                 // if any of the source jobs is satisfied, then continue
                 if (sourceJobsOfInputColumn instanceof HasComponentRequirement) {
                     final HasComponentRequirement hasComponentRequirement = (HasComponentRequirement) sourceJobsOfInputColumn;
-                    final boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(hasComponentRequirement, outcomes);
+                    final boolean satisfiedOutcomesForConsume = satisfiedOutcomesForConsume(hasComponentRequirement, row, outcomes);
                     if (satisfiedOutcomesForConsume) {
                         return true;
                     }
@@ -181,7 +181,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
         return true;
     }
 
-    private boolean satisfiedOutcomesForConsume(HasComponentRequirement component, FilterOutcomes outcomes) {
+    private boolean satisfiedOutcomesForConsume(HasComponentRequirement component, InputRow row, FilterOutcomes outcomes) {
         boolean isSatisfiedOutcomes = false;
         
         final ComponentRequirement componentRequirement = component.getComponentRequirement();
@@ -189,7 +189,7 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
         if (componentRequirement == null) {
             isSatisfiedOutcomes = true;
         } else {
-            isSatisfiedOutcomes = componentRequirement.isSatisfied(outcomes);
+            isSatisfiedOutcomes = componentRequirement.isSatisfied(row, outcomes);
         }
         return isSatisfiedOutcomes;
     }
@@ -207,6 +207,6 @@ abstract class AbstractRowProcessingConsumer implements RowProcessingConsumer {
         if (componentRequirement == null) {
             return true;
         }
-        return componentRequirement.isSatisfied(outcomes);
+        return componentRequirement.isSatisfied(null, outcomes);
     }
 }

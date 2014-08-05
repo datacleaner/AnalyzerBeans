@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job;
 import java.io.Serializable;
 import java.util.Collection;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.runner.FilterOutcomes;
 
 /**
@@ -34,10 +35,15 @@ public interface ComponentRequirement extends Serializable {
      * Determines if the requirement is satisfied or not, given the available
      * outcomes of previous components.
      * 
+     * @param row
+     *            the current input row being processed. During flow process
+     *            ordering, this parameter will be null.
      * @param availableOutcomes
+     *            the {@link FilterOutcomes} that are currently active/available
+     *            in the flow.
      * @return
      */
-    public boolean isSatisfied(FilterOutcomes availableOutcomes);
+    public boolean isSatisfied(InputRow row, FilterOutcomes availableOutcomes);
 
     /**
      * Gets the {@link FilterOutcome}s that this requirement depends on at

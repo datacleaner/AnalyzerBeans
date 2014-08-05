@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.runner.FilterOutcomes;
 
 /**
@@ -65,7 +66,7 @@ public class CompoundComponentRequirement implements ComponentRequirement {
     }
 
     @Override
-    public boolean isSatisfied(FilterOutcomes outcomes) {
+    public boolean isSatisfied(InputRow row, FilterOutcomes outcomes) {
         for (FilterOutcome outcome : outcomes.getOutcomes()) {
             if (_outcomes.contains(outcome)) {
                 return true;

@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.runner.FilterOutcomes;
 
 /**
@@ -49,7 +50,7 @@ public class AnyComponentRequirement implements ComponentRequirement {
     }
 
     @Override
-    public boolean isSatisfied(FilterOutcomes outcomes) {
+    public boolean isSatisfied(InputRow row, FilterOutcomes outcomes) {
         return true;
     }
     
