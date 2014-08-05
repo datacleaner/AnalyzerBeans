@@ -356,13 +356,13 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         for (final Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
             final FilterJob job = entry.getKey();
             final FilterType filterType = entry.getValue();
-            final FilterOutcome[] outcomes = job.getOutcomes();
-            for (FilterOutcome outcome : outcomes) {
+            final Collection<FilterOutcome> outcomes = job.getFilterOutcomes();
+            for (final FilterOutcome outcome : outcomes) {
                 // note that we DONT use the getId(...) method here
-                String id = getId(outcome, outcomeMappings, false);
+                final String id = getId(outcome, outcomeMappings, false);
                 // only the outcome element if it is being mapped
                 if (id != null) {
-                    OutcomeType outcomeType = new OutcomeType();
+                    final OutcomeType outcomeType = new OutcomeType();
                     outcomeType.setCategory(outcome.getCategory().name());
                     outcomeType.setId(id);
                     filterType.getOutcome().add(outcomeType);

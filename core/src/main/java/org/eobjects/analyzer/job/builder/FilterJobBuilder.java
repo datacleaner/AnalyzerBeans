@@ -121,28 +121,44 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
     @Override
     public void onRequirementChanged() {
         super.onRequirementChanged();
-        List<FilterChangeListener> listeners = getAllListeners();
-        for (FilterChangeListener listener : listeners) {
+        final List<FilterChangeListener> listeners = getAllListeners();
+        for (final FilterChangeListener listener : listeners) {
             listener.onRequirementChanged(this);
         }
     }
 
     @Override
-    public FilterOutcome[] getOutcomes() {
-        Collection<FilterOutcome> outcomes = _outcomes.values();
-        return outcomes.toArray(new FilterOutcome[outcomes.size()]);
+    public Collection<FilterOutcome> getFilterOutcomes() {
+        final Collection<FilterOutcome> outcomes = _outcomes.values();
+        return outcomes;
     }
 
+    /**
+     * @deprecated use {@link #getFilterOutcome(Enum)} instead
+     */
+    @Deprecated
     public FilterOutcome getOutcome(C category) {
-        FilterOutcome outcome = _outcomes.get(category);
+        return getFilterOutcome(category);
+    }
+
+    public FilterOutcome getFilterOutcome(C category) {
+        final FilterOutcome outcome = _outcomes.get(category);
         if (outcome == null) {
             throw new IllegalArgumentException(category + " is not a valid category for " + this);
         }
         return outcome;
     }
 
+    /**
+     * @deprecated use {@link #getFilterOutcome(Object)} instead
+     */
+    @Deprecated
     public FilterOutcome getOutcome(Object category) {
-        FilterOutcome outcome = _outcomes.get(category);
+        return getFilterOutcome(category);
+    }
+
+    public FilterOutcome getFilterOutcome(Object category) {
+        final FilterOutcome outcome = _outcomes.get(category);
         if (outcome == null) {
             throw new IllegalArgumentException(category + " is not a valid category for " + this);
         }

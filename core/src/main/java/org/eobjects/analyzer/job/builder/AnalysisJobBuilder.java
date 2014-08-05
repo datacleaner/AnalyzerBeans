@@ -393,7 +393,7 @@ public final class AnalysisJobBuilder implements Closeable {
             final ComponentRequirement previousRequirement = filterJobBuilder.getComponentRequirement();
 
             // clean up components who depend on this filter
-            final FilterOutcome[] outcomes = filterJobBuilder.getOutcomes();
+            final Collection<FilterOutcome> outcomes = filterJobBuilder.getFilterOutcomes();
             for (final FilterOutcome outcome : outcomes) {
                 if (_defaultRequirement != null && _defaultRequirement.getProcessingDependencies().contains(outcome)) {
                     setDefaultRequirement((ComponentRequirement) null);
@@ -718,7 +718,7 @@ public final class AnalysisJobBuilder implements Closeable {
      * @param category
      */
     public void setDefaultRequirement(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
-        setDefaultRequirement(filterJobBuilder.getOutcome(category));
+        setDefaultRequirement(filterJobBuilder.getFilterOutcome(category));
     }
 
     /**

@@ -19,10 +19,12 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.util.Collection;
+
 /**
  * Represents an object that has/produces {@link FilterOutcome}.
  */
 public interface HasFilterOutcomes {
 
-    public FilterOutcome[] getOutcomes();
+    public Collection<FilterOutcome> getFilterOutcomes();
 }

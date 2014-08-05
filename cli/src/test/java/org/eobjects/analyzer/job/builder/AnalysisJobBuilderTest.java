@@ -98,10 +98,10 @@ public class AnalysisJobBuilderTest extends TestCase {
                 .addFilter(MaxRowsFilter.class);
         FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filter2 = analysisJobBuilder
                 .addFilter(MaxRowsFilter.class);
-        filter1.setRequirement(filter2.getOutcome(MaxRowsFilter.Category.INVALID));
+        filter1.setRequirement(filter2.getFilterOutcome(MaxRowsFilter.Category.INVALID));
 
         try {
-            filter2.setRequirement(filter1.getOutcome(MaxRowsFilter.Category.VALID));
+            filter2.setRequirement(filter1.getFilterOutcome(MaxRowsFilter.Category.VALID));
             fail("Exception expected");
         } catch (IllegalArgumentException e) {
             assertEquals("Cyclic dependency detected when setting requirement: FilterOutcome[category=VALID]",
@@ -243,13 +243,13 @@ public class AnalysisJobBuilderTest extends TestCase {
             TransformerJobBuilder<EmailStandardizerTransformer> emailStdTransformer = analysisJobBuilder
                     .addTransformer(EmailStandardizerTransformer.class);
             ComponentRequirement componentRequirement = emailStdTransformer.getComponentRequirement();
-            assertSame(filter1.getOutcome(MaxRowsFilter.Category.VALID), componentRequirement
+            assertSame(filter1.getFilterOutcome(MaxRowsFilter.Category.VALID), componentRequirement
                     .getProcessingDependencies().iterator().next());
 
             FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filter2 = analysisJobBuilder
                     .addFilter(MaxRowsFilter.class);
             filter2.setRequirement(null);
-            filter1.setRequirement(filter2.getOutcome(MaxRowsFilter.Category.VALID));
+            filter1.setRequirement(filter2.getFilterOutcome(MaxRowsFilter.Category.VALID));
 
             assertNull(filter2.getComponentRequirement());
 
@@ -259,15 +259,15 @@ public class AnalysisJobBuilderTest extends TestCase {
             AnalyzerJobBuilder<StringAnalyzer> stringAnalyzer = analysisJobBuilder.addAnalyzer(StringAnalyzer.class);
             stringAnalyzer.addInputColumns(emailStdTransformer.getOutputColumns());
 
-            assertSame(filter1.getOutcome(MaxRowsFilter.Category.VALID), stringAnalyzer.getComponentRequirement()
+            assertSame(filter1.getFilterOutcome(MaxRowsFilter.Category.VALID), stringAnalyzer.getComponentRequirement()
                     .getProcessingDependencies().iterator().next());
 
             analysisJobBuilder.removeFilter(filter1);
 
             assertNull(analysisJobBuilder.getDefaultRequirement());
-            assertSame(filter2.getOutcome(MaxRowsFilter.Category.VALID), stringAnalyzer.getComponentRequirement()
+            assertSame(filter2.getFilterOutcome(MaxRowsFilter.Category.VALID), stringAnalyzer.getComponentRequirement()
                     .getProcessingDependencies().iterator().next());
-            assertSame(filter2.getOutcome(MaxRowsFilter.Category.VALID), emailStdTransformer.getComponentRequirement()
+            assertSame(filter2.getFilterOutcome(MaxRowsFilter.Category.VALID), emailStdTransformer.getComponentRequirement()
                     .getProcessingDependencies().iterator().next());
         }
     }

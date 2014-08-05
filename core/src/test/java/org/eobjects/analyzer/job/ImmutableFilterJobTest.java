@@ -19,7 +19,9 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -38,22 +40,22 @@ public class ImmutableFilterJobTest extends TestCase {
 		assertEquals("foo", job.getName());
 		assertEquals(null, job.getComponentRequirement());
 
-		FilterOutcome[] outcomes1 = job.getOutcomes();
-		assertEquals(2, outcomes1.length);
-		assertEquals("FilterOutcome[category=VALID]", outcomes1[0].toString());
-		assertEquals("FilterOutcome[category=INVALID]", outcomes1[1].toString());
+		List<FilterOutcome> outcomes1 = new ArrayList<>( job.getFilterOutcomes());
+		assertEquals(2, outcomes1.size());
+		assertEquals("FilterOutcome[category=VALID]", outcomes1.get(0).toString());
+		assertEquals("FilterOutcome[category=INVALID]", outcomes1.get(1).toString());
 
-		FilterOutcome[] outcomes2 = job.getOutcomes();
-		assertEquals(2, outcomes2.length);
-		assertEquals("FilterOutcome[category=VALID]", outcomes2[0].toString());
-		assertEquals("FilterOutcome[category=INVALID]", outcomes2[1].toString());
+		List<FilterOutcome> outcomes2 = new ArrayList<>(  job.getFilterOutcomes());
+		assertEquals(2, outcomes2.size());
+		assertEquals("FilterOutcome[category=VALID]", outcomes2.get(0).toString());
+		assertEquals("FilterOutcome[category=INVALID]", outcomes2.get(1).toString());
 
 		// the arrays are not the same, but their contents are equal
 		assertNotSame(outcomes1, outcomes2);
 
-		assertNotSame(outcomes1[0], outcomes2[0]);
-		assertEquals(outcomes1[0], outcomes2[0]);
-		assertNotSame(outcomes1[1], outcomes2[1]);
-		assertEquals(outcomes1[1], outcomes2[1]);
+		assertNotSame(outcomes1.get(0), outcomes2.get(0));
+		assertEquals(outcomes1.get(0), outcomes2.get(0));
+		assertNotSame(outcomes1.get(1), outcomes2.get(1));
+		assertEquals(outcomes1.get(1), outcomes2.get(1));
 	}
 }

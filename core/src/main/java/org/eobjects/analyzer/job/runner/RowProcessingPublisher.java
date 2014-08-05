@@ -346,15 +346,15 @@ public final class RowProcessingPublisher {
         addConsumer(new TransformerConsumer(transformer, transformerJob, inputColumns, _publishers));
     }
 
-    public void addFilterBean(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns) {
+    public void addFilterBean(final Filter<?> filter, final FilterJob filterJob, final InputColumn<?>[] inputColumns) {
         addConsumer(new FilterConsumer(filter, filterJob, inputColumns, _publishers));
     }
 
-    public boolean containsOutcome(FilterOutcome prerequisiteOutcome) {
-        for (RowProcessingConsumer consumer : _consumers) {
-            ComponentJob componentJob = consumer.getComponentJob();
+    public boolean containsOutcome(final FilterOutcome prerequisiteOutcome) {
+        for (final RowProcessingConsumer consumer : _consumers) {
+            final ComponentJob componentJob = consumer.getComponentJob();
             if (componentJob instanceof HasFilterOutcomes) {
-                FilterOutcome[] outcomes = ((HasFilterOutcomes) componentJob).getOutcomes();
+                final Collection<FilterOutcome> outcomes = ((HasFilterOutcomes) componentJob).getFilterOutcomes();
                 for (FilterOutcome outcome : outcomes) {
                     if (outcome.isEquals(prerequisiteOutcome)) {
                         return true;
@@ -365,7 +365,7 @@ public final class RowProcessingPublisher {
         return false;
     }
 
-    private void addConsumer(RowProcessingConsumer consumer) {
+    private void addConsumer(final RowProcessingConsumer consumer) {
         _consumers.add(consumer);
     }
 

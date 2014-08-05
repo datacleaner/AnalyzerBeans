@@ -96,8 +96,8 @@ public class FilterRequirementMergingTest extends TestCase {
         FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
                 .addInputColumn(sourceColumn);
 
-        FilterOutcome req1 = filter.getOutcome(EvenOddFilter.Category.EVEN);
-        FilterOutcome req2 = filter.getOutcome(EvenOddFilter.Category.ODD);
+        FilterOutcome req1 = filter.getFilterOutcome(EvenOddFilter.Category.EVEN);
+        FilterOutcome req2 = filter.getFilterOutcome(EvenOddFilter.Category.ODD);
 
         TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
                 .addInputColumn(sourceColumn);
@@ -155,8 +155,8 @@ public class FilterRequirementMergingTest extends TestCase {
         FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
                 .addInputColumn(sourceColumn);
 
-        FilterOutcome req1 = filter.getOutcome(EvenOddFilter.Category.EVEN);
-        FilterOutcome req2 = filter.getOutcome(EvenOddFilter.Category.ODD);
+        FilterOutcome req1 = filter.getFilterOutcome(EvenOddFilter.Category.EVEN);
+        FilterOutcome req2 = filter.getFilterOutcome(EvenOddFilter.Category.ODD);
 
         TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
                 .addInputColumn(sourceColumn);
@@ -208,8 +208,8 @@ public class FilterRequirementMergingTest extends TestCase {
         FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
                 .addInputColumn(sourceColumn);
 
-        FilterOutcome req1 = filter.getOutcome(EvenOddFilter.Category.EVEN);
-        FilterOutcome req2 = filter.getOutcome(EvenOddFilter.Category.ODD);
+        FilterOutcome req1 = filter.getFilterOutcome(EvenOddFilter.Category.EVEN);
+        FilterOutcome req2 = filter.getFilterOutcome(EvenOddFilter.Category.ODD);
 
         TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
                 .addInputColumn(sourceColumn);
@@ -270,8 +270,8 @@ public class FilterRequirementMergingTest extends TestCase {
         FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
                 .addInputColumn(sourceColumn);
 
-        FilterOutcome req1 = filter.getOutcome(EvenOddFilter.Category.EVEN);
-        FilterOutcome req2 = filter.getOutcome(EvenOddFilter.Category.ODD);
+        FilterOutcome req1 = filter.getFilterOutcome(EvenOddFilter.Category.EVEN);
+        FilterOutcome req2 = filter.getFilterOutcome(EvenOddFilter.Category.ODD);
 
         TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
                 .addInputColumn(sourceColumn);

@@ -201,7 +201,7 @@ final class AnalysisJobBuilderImportHelper {
         final Enum<?> category = originalFilterOutcome.getCategory();
 
         final FilterJobBuilder<?, ?> filterJobBuilder = (FilterJobBuilder<?, ?>) builder;
-        final FilterOutcome newOutcome = filterJobBuilder.getOutcome(category);
+        final FilterOutcome newOutcome = filterJobBuilder.getFilterOutcome(category);
         return newOutcome;
     }
 

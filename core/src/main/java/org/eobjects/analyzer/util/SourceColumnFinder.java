@@ -178,10 +178,10 @@ public class SourceColumnFinder {
         return null;
     }
 
-    public HasFilterOutcomes findOutcomeSource(FilterOutcome requirement) {
-        for (HasFilterOutcomes source : _outcomeSources) {
-            FilterOutcome[] outcomes = source.getOutcomes();
-            for (FilterOutcome outcome : outcomes) {
+    public HasFilterOutcomes findOutcomeSource(final FilterOutcome requirement) {
+        for (final HasFilterOutcomes source : _outcomeSources) {
+            final Collection<FilterOutcome> outcomes = source.getFilterOutcomes();
+            for (final FilterOutcome outcome : outcomes) {
                 if (requirement.equals(outcome)) {
                     return source;
                 }

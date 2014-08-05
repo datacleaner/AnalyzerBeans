@@ -29,6 +29,4 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
  */
 public interface FilterJob extends ConfigurableBeanJob<FilterBeanDescriptor<?, ?>>, HasFilterOutcomes {
 
-    @Override
-	public FilterOutcome[] getOutcomes();
 }

@@ -73,9 +73,9 @@ public class RowProcessingQueryOptimizer {
 
     private void init() {
         int consumerIndex = 0;
-        for (RowProcessingConsumer consumer : _consumers) {
+        for (final RowProcessingConsumer consumer : _consumers) {
             if (consumer instanceof FilterConsumer) {
-                FilterConsumer filterConsumer = (FilterConsumer) consumer;
+                final FilterConsumer filterConsumer = (FilterConsumer) consumer;
 
                 if (!isOptimizable(filterConsumer)) {
                     logger.debug("Breaking optimization. Not optimizable: {}", filterConsumer);
@@ -87,11 +87,11 @@ public class RowProcessingQueryOptimizer {
                     break;
                 }
 
-                FilterOutcome[] outcomes = filterConsumer.getComponentJob().getOutcomes();
+                final Collection<FilterOutcome> outcomes = filterConsumer.getComponentJob().getFilterOutcomes();
                 FilterOutcome optimizableOutcome = null;
 
-                for (FilterOutcome outcome : outcomes) {
-                    boolean optimizable = isOptimizable(filterConsumer, outcome, consumerIndex);
+                for (final FilterOutcome outcome : outcomes) {
+                    final boolean optimizable = isOptimizable(filterConsumer, outcome, consumerIndex);
                     if (optimizable) {
                         if (optimizableOutcome != null) {
                             // cannot have multiple optimizable outcomes for a
@@ -201,7 +201,7 @@ public class RowProcessingQueryOptimizer {
             // this component is accepted now, add it's outcomes to the
             // satisfied requirements
             if (componentJob instanceof HasFilterOutcomes) {
-                final FilterOutcome[] outcomes = ((HasFilterOutcomes) componentJob).getOutcomes();
+                final Collection<FilterOutcome> outcomes = ((HasFilterOutcomes) componentJob).getFilterOutcomes();
                 for (final FilterOutcome outcome : outcomes) {
                     satisfiedRequirements.add(outcome);
                 }

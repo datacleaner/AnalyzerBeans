@@ -247,29 +247,25 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
     private AnalysisJob buildSlaveJob(AnalysisJob job, int slaveJobIndex, int firstRow, int maxRows) {
         logger.info("Building slave job {} with firstRow={} and maxRow={}", slaveJobIndex + 1, firstRow, maxRows);
 
-        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job);
+        try (final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job)) {
 
-        final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
-        maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
-        maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
+            final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
+            maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
+            maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
 
-        final boolean naturalRecordOrderConsistent = jobBuilder.getDatastore().getPerformanceCharacteristics()
-                .isNaturalRecordOrderConsistent();
-        if (!naturalRecordOrderConsistent) {
-            final InputColumn<?> orderColumn = findOrderByColumn(jobBuilder);
-            maxRowsFilter.getConfigurableBean().setOrderColumn(orderColumn);
-        }
+            final boolean naturalRecordOrderConsistent = jobBuilder.getDatastore().getPerformanceCharacteristics()
+                    .isNaturalRecordOrderConsistent();
+            if (!naturalRecordOrderConsistent) {
+                final InputColumn<?> orderColumn = findOrderByColumn(jobBuilder);
+                maxRowsFilter.getConfigurableBean().setOrderColumn(orderColumn);
+            }
 
-        jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
-
-        try {
+            jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);
 
             // in assertion/test mode do an early validation
             assert jobBuilder.isConfigured(true);
 
             return jobBuilder.toAnalysisJob();
-        } finally {
-            jobBuilder.close();
         }
     }
 

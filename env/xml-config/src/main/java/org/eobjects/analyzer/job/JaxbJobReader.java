@@ -626,7 +626,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         if (outcomeMapping.containsKey(id)) {
                             throw new ComponentConfigurationException("Outcome id '" + id + "' is not unique");
                         }
-                        outcomeMapping.put(id, filterJobBuilder.getOutcome(category));
+                        outcomeMapping.put(id, filterJobBuilder.getFilterOutcome(category));
                     }
                 }
             }

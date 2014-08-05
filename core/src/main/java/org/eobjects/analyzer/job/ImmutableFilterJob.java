@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -84,13 +86,11 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
     }
 
     @Override
-    public FilterOutcome[] getOutcomes() {
-        EnumSet<?> categories = _descriptor.getOutcomeCategories();
-        FilterOutcome[] outcomes = new FilterOutcome[categories.size()];
-        int i = 0;
-        for (Enum<?> category : categories) {
-            outcomes[i] = new ImmutableFilterOutcome(this, category);
-            i++;
+    public Collection<FilterOutcome> getFilterOutcomes() {
+        final EnumSet<?> categories = _descriptor.getOutcomeCategories();
+        final List<FilterOutcome> outcomes = new ArrayList<>(categories.size());
+        for (final Enum<?> category : categories) {
+            outcomes.add(new ImmutableFilterOutcome(this, category));
         }
         return outcomes;
     }
