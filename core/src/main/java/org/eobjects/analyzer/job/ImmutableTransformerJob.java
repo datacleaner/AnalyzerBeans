@@ -50,7 +50,7 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
         _descriptor = descriptor;
         _beanConfiguration = beanConfiguration;
         _output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
-        _requirement = LazyOutcomeUtils.load(requirement);
+        _requirement = LazyFilterOutcomes.load(requirement);
     }
 
     @Override

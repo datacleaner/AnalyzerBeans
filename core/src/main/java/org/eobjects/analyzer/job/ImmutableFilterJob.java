@@ -44,7 +44,7 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
         _name = name;
         _descriptor = descriptor;
         _beanConfiguration = beanConfiguration;
-        _requirement = LazyOutcomeUtils.load(requirement);
+        _requirement = LazyFilterOutcomes.load(requirement);
     }
 
     @Override

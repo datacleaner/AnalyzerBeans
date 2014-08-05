@@ -43,7 +43,7 @@ public final class ImmutableAnalyzerJob extends BaseObject implements AnalyzerJo
 		_name = name;
 		_descriptor = descriptor;
 		_beanConfiguration = beanConfiguration;
-		_requirement = LazyOutcomeUtils.load(requirement);
+		_requirement = LazyFilterOutcomes.load(requirement);
 	}
 	
 	@Override
