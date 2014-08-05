@@ -61,4 +61,29 @@ public class SimpleComponentRequirement implements ComponentRequirement {
         final String filterLabel = LabelUtils.getLabel(_outcome.getFilterJob());
         return filterLabel + "=" + _outcome.getCategory();
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((_outcome == null) ? 0 : _outcome.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final SimpleComponentRequirement other = (SimpleComponentRequirement) obj;
+        if (_outcome == null) {
+            if (other._outcome != null)
+                return false;
+        } else if (!_outcome.equals(other._outcome))
+            return false;
+        return true;
+    }
 }

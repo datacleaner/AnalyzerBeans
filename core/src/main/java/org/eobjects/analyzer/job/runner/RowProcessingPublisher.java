@@ -225,7 +225,15 @@ public final class RowProcessingPublisher {
     }
 
     public RowProcessingQueryOptimizer getQueryOptimizer() {
-        return _queryOptimizerRef.get();
+        final RowProcessingQueryOptimizer optimizer = _queryOptimizerRef.get();
+        if (optimizer == null) {
+            final Throwable e = _queryOptimizerRef.getError();
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new IllegalStateException(e);
+        }
+        return optimizer;
     }
 
     public Query getQuery() {

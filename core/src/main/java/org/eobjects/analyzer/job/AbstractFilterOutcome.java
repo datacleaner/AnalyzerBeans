@@ -35,9 +35,6 @@ import org.apache.metamodel.util.BaseObject;
  * 
  * @see ImmutableFilterOutcome
  * @see LazyFilterOutcome
- * 
- * 
- * 
  */
 public abstract class AbstractFilterOutcome extends BaseObject implements FilterOutcome {
 
@@ -50,8 +47,8 @@ public abstract class AbstractFilterOutcome extends BaseObject implements Filter
 
     @Override
     protected final void decorateIdentity(List<Object> identifiers) {
-        identifiers.add(getFilterJob());
         identifiers.add(getCategory());
+        identifiers.add(getFilterJob());
     }
 
     @Override

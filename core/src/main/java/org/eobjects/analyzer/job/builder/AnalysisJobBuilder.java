@@ -43,6 +43,7 @@ import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.AnalysisJobImmutabilizer;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ComponentRequirement;
@@ -565,11 +566,13 @@ public final class AnalysisJobBuilder implements Closeable {
         if (validate && !isConfigured(true)) {
             throw new IllegalStateException("Analysis job is not correctly configured");
         }
+        
+        final AnalysisJobImmutabilizer immutabilizer = new AnalysisJobImmutabilizer();
 
-        Collection<FilterJob> filterJobs = new LinkedList<FilterJob>();
-        for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
+        final Collection<FilterJob> filterJobs = new LinkedList<FilterJob>();
+        for (final FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
             try {
-                FilterJob filterJob = fjb.toFilterJob(validate);
+                final FilterJob filterJob = fjb.toFilterJob(validate, immutabilizer);
                 filterJobs.add(filterJob);
             } catch (IllegalStateException e) {
                 throw new IllegalStateException("Could not create filter job from builder: " + fjb + ", ("
@@ -577,10 +580,10 @@ public final class AnalysisJobBuilder implements Closeable {
             }
         }
 
-        Collection<TransformerJob> transformerJobs = new LinkedList<TransformerJob>();
-        for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
+        final Collection<TransformerJob> transformerJobs = new LinkedList<TransformerJob>();
+        for (final TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
             try {
-                TransformerJob transformerJob = tjb.toTransformerJob(validate);
+                final TransformerJob transformerJob = tjb.toTransformerJob(validate, immutabilizer);
                 transformerJobs.add(transformerJob);
             } catch (IllegalStateException e) {
                 throw new IllegalStateException("Could not create transformer job from builder: " + tjb + ", ("
@@ -588,10 +591,10 @@ public final class AnalysisJobBuilder implements Closeable {
             }
         }
 
-        Collection<AnalyzerJob> analyzerJobs = new LinkedList<AnalyzerJob>();
-        for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
+        final Collection<AnalyzerJob> analyzerJobs = new LinkedList<AnalyzerJob>();
+        for (final AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
             try {
-                AnalyzerJob[] analyzerJob = ajb.toAnalyzerJobs(validate);
+                final AnalyzerJob[] analyzerJob = ajb.toAnalyzerJobs(validate, immutabilizer);
                 for (AnalyzerJob job : analyzerJob) {
                     analyzerJobs.add(job);
                 }
@@ -601,8 +604,8 @@ public final class AnalysisJobBuilder implements Closeable {
             }
         }
 
-        DatastoreConnection con = _datastoreConnection;
-        Datastore datastore = con.getDatastore();
+        final DatastoreConnection con = _datastoreConnection;
+        final Datastore datastore = con.getDatastore();
         return new ImmutableAnalysisJob(datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs);
     }
 

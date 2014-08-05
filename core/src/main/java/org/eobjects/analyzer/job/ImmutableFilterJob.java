@@ -37,14 +37,14 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
     private final String _name;
     private final FilterBeanDescriptor<?, ?> _descriptor;
     private final BeanConfiguration _beanConfiguration;
-    private final ComponentRequirement _requirement;
+    private final ComponentRequirement _componentRequirement;
 
     public ImmutableFilterJob(String name, FilterBeanDescriptor<?, ?> descriptor, BeanConfiguration beanConfiguration,
             ComponentRequirement requirement) {
         _name = name;
         _descriptor = descriptor;
         _beanConfiguration = beanConfiguration;
-        _requirement = LazyFilterOutcomes.load(requirement);
+        _componentRequirement = requirement;
     }
 
     @Override
@@ -54,7 +54,7 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
 
     @Override
     public ComponentRequirement getComponentRequirement() {
-        return _requirement;
+        return _componentRequirement;
     }
 
     @Override
@@ -100,7 +100,7 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
         identifiers.add(_name);
         identifiers.add(_beanConfiguration);
         identifiers.add(_descriptor);
-        identifiers.add(_requirement);
+        identifiers.add(_componentRequirement);
     }
 
     @Override

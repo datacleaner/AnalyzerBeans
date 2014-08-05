@@ -31,7 +31,9 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
+import org.eobjects.analyzer.job.AnalysisJobImmutabilizer;
 import org.eobjects.analyzer.job.BeanConfiguration;
+import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.HasComponentRequirement;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
@@ -187,13 +189,23 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
         return toTransformerJob(true);
     }
 
-    public TransformerJob toTransformerJob(boolean validate) {
+    public TransformerJob toTransformerJob(final AnalysisJobImmutabilizer immutabilizer) throws IllegalStateException {
+        return toTransformerJob(true, immutabilizer);
+    }
+
+    public TransformerJob toTransformerJob(final boolean validate) {
+        return toTransformerJob(validate, new AnalysisJobImmutabilizer());
+    }
+
+    public TransformerJob toTransformerJob(final boolean validate, final AnalysisJobImmutabilizer immutabilizer) {
         if (validate && !isConfigured(true)) {
             throw new IllegalStateException("Transformer job is not correctly configured");
         }
 
+        final ComponentRequirement componentRequirement = immutabilizer.load(getComponentRequirement());
+
         return new ImmutableTransformerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                getConfiguredProperties()), getOutputColumns(), getComponentRequirement());
+                getConfiguredProperties()), getOutputColumns(), componentRequirement);
     }
 
     @Override

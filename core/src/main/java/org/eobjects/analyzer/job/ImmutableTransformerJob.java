@@ -41,7 +41,7 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
     private final TransformerBeanDescriptor<?> _descriptor;
     private final BeanConfiguration _beanConfiguration;
     private final List<MutableInputColumn<?>> _output;
-    private final ComponentRequirement _requirement;
+    private final ComponentRequirement _componentRequirement;
 
     public ImmutableTransformerJob(String name, TransformerBeanDescriptor<?> descriptor,
             BeanConfiguration beanConfiguration, Collection<MutableInputColumn<?>> output,
@@ -50,7 +50,7 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
         _descriptor = descriptor;
         _beanConfiguration = beanConfiguration;
         _output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
-        _requirement = LazyFilterOutcomes.load(requirement);
+        _componentRequirement = requirement;
     }
 
     @Override
@@ -95,7 +95,7 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
         identifiers.add(_beanConfiguration);
         identifiers.add(_descriptor);
         identifiers.add(_output);
-        identifiers.add(_requirement);
+        identifiers.add(_componentRequirement);
     }
 
     @Override
@@ -105,6 +105,6 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
 
     @Override
     public ComponentRequirement getComponentRequirement() {
-        return _requirement;
+        return _componentRequirement;
     }
 }

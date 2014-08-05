@@ -57,4 +57,14 @@ public class AnyComponentRequirement implements ComponentRequirement {
     public Collection<FilterOutcome> getProcessingDependencies() {
         return Collections.emptyList();
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this || obj instanceof AnyComponentRequirement;
+    }
+    
+    @Override
+    public int hashCode() {
+        return 42;
+    }
 }

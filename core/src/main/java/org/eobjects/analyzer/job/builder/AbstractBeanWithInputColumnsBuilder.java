@@ -49,7 +49,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBeanWithInputColumnsBuilder.class);
 
-    private ComponentRequirement _requirement;
+    private ComponentRequirement _componentRequirement;
 
     public AbstractBeanWithInputColumnsBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor,
             Class<?> builderClass) {
@@ -266,8 +266,8 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
     }
 
     public void setComponentRequirement(ComponentRequirement requirement) {
-        if (_requirement != requirement) {
-            _requirement = requirement;
+        if (_componentRequirement != requirement) {
+            _componentRequirement = requirement;
             onRequirementChanged();
         }
     }
@@ -338,7 +338,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 
     @Override
     public ComponentRequirement getComponentRequirement() {
-        return _requirement;
+        return _componentRequirement;
     }
 
     @Override
