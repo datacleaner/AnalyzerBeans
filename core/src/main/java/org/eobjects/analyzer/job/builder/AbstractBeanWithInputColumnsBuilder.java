@@ -255,7 +255,9 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
             throw new IllegalArgumentException("Cyclic dependency detected when setting requirement: " + outcome);
         }
 
-        if (outcome instanceof FilterOutcome) {
+        if (outcome == null) {
+            setComponentRequirement(null);
+        } else if (outcome instanceof FilterOutcome) {
             setComponentRequirement(new SimpleComponentRequirement((FilterOutcome) outcome));
         } else {
             throw new IllegalArgumentException("Unsupported outcome type (use ComponentRequirement instead): "

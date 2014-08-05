@@ -24,7 +24,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 
 import javax.xml.datatype.DatatypeFactory;
@@ -80,7 +79,7 @@ public class JaxbJobWriterTest extends TestCase {
         _writer = new JaxbJobWriter(new AnalyzerBeansConfigurationImpl(), _metadataFactory);
     };
 
-    public void testReadAndWriteAnyOutcomeJob() throws Exception {
+    public void testReadAndWriteAnyComponentRequirementJob() throws Exception {
         Datastore ds = TestHelper.createSampleDatabaseDatastore("my database");
         SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
         descriptorProvider.addFilterBeanDescriptor(Descriptors.ofFilter(NullCheckFilter.class));
@@ -91,14 +90,35 @@ public class JaxbJobWriterTest extends TestCase {
 
         JaxbJobReader reader = new JaxbJobReader(conf);
         AnalysisJob job;
-        try (AnalysisJobBuilder jobBuilder = reader.create(new File("src/test/resources/example-job-any-outcome.xml"))) {
+        try (AnalysisJobBuilder jobBuilder = reader.create(new File("src/test/resources/example-job-any-component-requirement.xml"))) {
             job = jobBuilder.toAnalysisJob();
         }
 
-        Outcome[] requirements = job.getAnalyzerJobs().get(0).getRequirements();
-        assertEquals("[AnyOutcome[]]", Arrays.toString(requirements));
+        ComponentRequirement requirement = job.getAnalyzerJobs().get(0).getComponentRequirement();
+        assertEquals("AnyComponentRequirement[]", requirement.toString());
 
-        assertMatchesBenchmark(job, "JaxbJobWriterTest-testReadAndWriteAnyOutcomeJob.xml");
+        assertMatchesBenchmark(job, "JaxbJobWriterTest-testReadAndWriteAnyComponentRequirementJob.xml");
+    }
+    
+    public void testReadAndWriteCompoundComponentRequirementJob() throws Exception {
+        Datastore ds = TestHelper.createSampleDatabaseDatastore("my database");
+        SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
+        descriptorProvider.addFilterBeanDescriptor(Descriptors.ofFilter(NullCheckFilter.class));
+        descriptorProvider.addTransformerBeanDescriptor(Descriptors.ofTransformer(ConcatenatorTransformer.class));
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(StringAnalyzer.class));
+        AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(new DatastoreCatalogImpl(ds))
+                .replace(descriptorProvider);
+
+        JaxbJobReader reader = new JaxbJobReader(conf);
+        AnalysisJob job;
+        try (AnalysisJobBuilder jobBuilder = reader.create(new File("src/test/resources/example-job-compound-component-requirement.xml"))) {
+            job = jobBuilder.toAnalysisJob();
+        }
+
+        ComponentRequirement requirement = job.getAnalyzerJobs().get(0).getComponentRequirement();
+        assertEquals("FilterOutcome[category=NOT_NULL] OR FilterOutcome[category=NULL]", requirement.toString());
+
+        assertMatchesBenchmark(job, "JaxbJobWriterTest-testReadAndWriteCompoundComponentRequirementJob.xml");
     }
 
     @SuppressWarnings("unchecked")

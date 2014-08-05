@@ -20,7 +20,7 @@
 package org.eobjects.analyzer.job;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eobjects.analyzer.job.runner.FilterOutcomes;
@@ -36,14 +36,14 @@ public class CompoundComponentRequirement implements ComponentRequirement {
     private final Set<FilterOutcome> _outcomes;
 
     public CompoundComponentRequirement(Collection<? extends FilterOutcome> outcomes) {
-        _outcomes = new HashSet<FilterOutcome>();
+        _outcomes = new LinkedHashSet<FilterOutcome>();
         for (FilterOutcome outcome : outcomes) {
             _outcomes.add(outcome);
         }
     }
 
     public CompoundComponentRequirement(FilterOutcome... outcomes) {
-        _outcomes = new HashSet<FilterOutcome>();
+        _outcomes = new LinkedHashSet<FilterOutcome>();
         for (FilterOutcome outcome : outcomes) {
             _outcomes.add(outcome);
         }

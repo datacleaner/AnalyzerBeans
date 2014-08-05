@@ -394,27 +394,27 @@ public final class AnalysisJobBuilder implements Closeable {
             // clean up components who depend on this filter
             final FilterOutcome[] outcomes = filterJobBuilder.getOutcomes();
             for (final FilterOutcome outcome : outcomes) {
-                if (outcome.equals(_defaultRequirement)) {
+                if (_defaultRequirement != null && _defaultRequirement.getProcessingDependencies().contains(outcome)) {
                     setDefaultRequirement((ComponentRequirement) null);
                 }
 
-                for (AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
-                    ComponentRequirement requirement = ajb.getComponentRequirement();
-                    if (requirement.getProcessingDependencies().contains(outcome)) {
+                for (final AnalyzerJobBuilder<?> ajb : _analyzerJobBuilders) {
+                    final ComponentRequirement requirement = ajb.getComponentRequirement();
+                    if (requirement != null && requirement.getProcessingDependencies().contains(outcome)) {
                         ajb.setComponentRequirement(previousRequirement);
                     }
                 }
 
-                for (TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
-                    ComponentRequirement requirement = tjb.getComponentRequirement();
-                    if (requirement.getProcessingDependencies().contains(outcome)) {
+                for (final TransformerJobBuilder<?> tjb : _transformerJobBuilders) {
+                    final ComponentRequirement requirement = tjb.getComponentRequirement();
+                    if (requirement != null && requirement.getProcessingDependencies().contains(outcome)) {
                         tjb.setComponentRequirement(previousRequirement);
                     }
                 }
 
-                for (FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
-                    ComponentRequirement requirement = fjb.getComponentRequirement();
-                    if (requirement.getProcessingDependencies().contains(outcome)) {
+                for (final FilterJobBuilder<?, ?> fjb : _filterJobBuilders) {
+                    final ComponentRequirement requirement = fjb.getComponentRequirement();
+                    if (requirement != null && requirement.getProcessingDependencies().contains(outcome)) {
                         fjb.setComponentRequirement(previousRequirement);
                     }
                 }
