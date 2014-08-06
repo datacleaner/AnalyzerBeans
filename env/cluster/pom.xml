@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-env</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.0-RC3</version>
 	</parent>
 	<artifactId>AnalyzerBeans-cluster</artifactId>
 	<description>Clustered (master-slave) set-up of AnalyzerBeans</description>
