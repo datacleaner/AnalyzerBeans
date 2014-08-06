@@ -61,7 +61,11 @@ public class AbstractFilterOutcomeTest extends TestCase {
             assertTrue(fo2 instanceof ImmutableFilterOutcome);
         }
         
-        assertTrue(fo1.equals(fo2));
-        assertEquals(fo1.hashCode(), fo2.hashCode());
+        final AnalysisJobImmutabilizer immutabilizer = new AnalysisJobImmutabilizer();
+        final FilterOutcome loadedFilterOutcome1 = immutabilizer.load(fo1);
+        final FilterOutcome loadedFilterOutcome2 = immutabilizer.load(fo2);
+        
+        assertTrue(loadedFilterOutcome1.equals(loadedFilterOutcome2));
+        assertEquals(loadedFilterOutcome1.hashCode(), loadedFilterOutcome2.hashCode());
     }
 }

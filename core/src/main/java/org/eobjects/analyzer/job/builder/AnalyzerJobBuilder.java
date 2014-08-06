@@ -259,8 +259,9 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         Map<ConfiguredPropertyDescriptor, Object> jobProperties = new HashMap<ConfiguredPropertyDescriptor, Object>(
                 configuredProperties);
         jobProperties.put(_inputProperty, columnValue);
+        ComponentRequirement componentRequirement = new AnalysisJobImmutabilizer().load(getComponentRequirement());
         ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                jobProperties), getComponentRequirement());
+                jobProperties), componentRequirement);
         return job;
     }
 
