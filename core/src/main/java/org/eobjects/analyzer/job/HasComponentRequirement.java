@@ -24,8 +24,6 @@ package org.eobjects.analyzer.job;
  */
 public interface HasComponentRequirement {
 
-    /**
-     * 
      /** Gets the requirement (if any) for running this component.
      * 
      * @return
