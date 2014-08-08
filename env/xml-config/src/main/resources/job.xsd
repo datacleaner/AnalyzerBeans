@@ -32,9 +32,47 @@
 				maxOccurs="1" />
 			<element name="updated-date" type="date" minOccurs="0"
 				maxOccurs="1" />
+			<element name="job-metadata-properties-type" type="ab:jobMetadataPropertiesType" minOccurs="0"
+				maxOccurs="1" />  
 		</all>
 	</complexType>
 
+ <!-- 
+	<complexType name="jobMetadataPropertiesType">
+		<sequence>
+			<element name="jobMetadataProperties" minOccurs="0" maxOccurs="unbounded">
+				<complexType>
+					<simpleContent>
+						<extension base="string">
+							<attribute name="propertyName" type="string" use="required" />
+							<attribute name="propertyValue" type="string" use="required" />
+						</extension>
+					</simpleContent>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+	
+	 -->
+
+  <complexType name="jobMetadataPropertiesType">
+      <sequence>
+        <element name="property" minOccurs="0" maxOccurs="unbounded">
+          <complexType>
+            <simpleContent>
+              <extension base="string">
+                <attribute type="string" name="name"/>
+              </extension>
+            </simpleContent>
+          </complexType>
+        </element>
+      </sequence>
+  </complexType>
+ 
+ 
+ 
+ 
+ 
 	<complexType name="sourceType">
 		<sequence>
 			<element name="data-context" type="ab:dataContextType"
