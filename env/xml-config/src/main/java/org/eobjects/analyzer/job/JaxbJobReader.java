@@ -78,12 +78,11 @@ import org.eobjects.analyzer.job.jaxb.DataContextType;
 import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
-import org.eobjects.analyzer.job.jaxb.JobMetadataPropertiesType;
-//import org.eobjects.analyzer.job.jaxb.JobMetadataPropertiesType.JobMetadataProperties;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
+import org.eobjects.analyzer.job.jaxb.Properties;
 import org.eobjects.analyzer.job.jaxb.SourceType;
 import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
@@ -184,7 +183,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         final String author;
         final Date createdDate;
         final Date updatedDate;
-        final Map<String,String> jobMetadataProperties;
+        final Map<String,String> metadataProperties;
        
 
         JobMetadataType metadata = job.getJobMetadata();
@@ -195,13 +194,13 @@ public class JaxbJobReader implements JobReader<InputStream> {
             author = null;
             createdDate = null;
             updatedDate = null;
-            jobMetadataProperties = null;
+            metadataProperties = null;
         } else {
             jobName = metadata.getJobName();
             jobVersion = metadata.getJobVersion();
             jobDescription = metadata.getJobDescription();
             author = metadata.getAuthor();
-            jobMetadataProperties = getJobMetadataProperties(metadata);
+            metadataProperties = getMetadataProperties(metadata);
 
             final XMLGregorianCalendar createdDateCal = metadata.getCreatedDate();
 
@@ -221,19 +220,24 @@ public class JaxbJobReader implements JobReader<InputStream> {
         }
 
         return new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author, createdDate, updatedDate,
-                datastoreName, sourceColumnPaths, sourceColumnTypes, variables, jobMetadataProperties);
+                datastoreName, sourceColumnPaths, sourceColumnTypes, variables, metadataProperties);
     }
 
-    private Map<String, String> getJobMetadataProperties(JobMetadataType metadata) {
-    	if(metadata.getJobMetadataPropertiesType()==null){
+    private Map<String, String> getMetadataProperties(JobMetadataType metadata) {
+    	Properties properties = metadata.getProperties();
+    	
+		if(properties==null){
     		return null;
     	}
     	
     	Map<String, String> metadataProperties = new HashMap<String,String>();
-    	 List<org.eobjects.analyzer.job.jaxb.JobMetadataPropertiesType.Property> properties = metadata.getJobMetadataPropertiesType().getProperty() ;
-    	for (org.eobjects.analyzer.job.jaxb.JobMetadataPropertiesType.Property jobMetadataProperty : properties) {
-			metadataProperties.put(jobMetadataProperty.getName(), jobMetadataProperty.getValue());
-		}
+    	List<org.eobjects.analyzer.job.jaxb.Properties.Property> property = properties.getProperty() ;
+    	
+    	for(int i = 0; i < property.size(); i++) {
+    		String name = property.get(i).getName() ;
+    		String value = property.get(i).getValue() ;
+    		metadataProperties.put(name, value) ;
+    	}
     	
 		return metadataProperties;
 	}
@@ -388,7 +392,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
             logger.info("Author: {}", metadata.getAuthor());
             logger.info("Created date: {}", metadata.getCreatedDate());
             logger.info("Updated date: {}", metadata.getUpdatedDate());
-            logger.info("Job metadata properties: {}", metadata.getJobMetadataPropertiesType().getProperty());
+            logger.info("Job metadata properties: {}", getMetadataProperties(metadata));
         }
 
         final AnalysisJobBuilder builder = new AnalysisJobBuilder(_configuration);

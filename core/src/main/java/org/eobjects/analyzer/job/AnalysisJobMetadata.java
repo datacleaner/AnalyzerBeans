@@ -57,5 +57,5 @@ public interface AnalysisJobMetadata {
 
 	public Map<String, String> getVariables();
 	
-	public Map<String,String> getjobMetadataProperties();
+	public Map<String,String> getProperties();
 }

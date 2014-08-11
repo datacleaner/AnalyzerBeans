@@ -44,11 +44,11 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
     private final List<String> _sourceColumnPaths;
     private final Map<String, String> _variables;
     private final List<ColumnType> _sourceColumnTypes;
-    private final Map<String,String> _jobMetadataProperties;
+    private final Map<String,String> _properties;
 
     public ImmutableAnalysisJobMetadata(String jobName, String jobVersion, String jobDescription, String author,
             Date createdDate, Date updatedDate, String datastoreName, List<String> sourceColumnPaths,
-            List<ColumnType> sourceColumnTypes, Map<String, String> variables,Map<String,String> jobMetadataProperties) {
+            List<ColumnType> sourceColumnTypes, Map<String, String> variables,Map<String,String> properties) {
         _jobName = jobName;
         _jobVersion = jobVersion;
         _jobDescription = jobDescription;
@@ -56,7 +56,7 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
         _createdDate = createdDate;
         _updatedDate = updatedDate;
         _datastoreName = datastoreName;
-        _jobMetadataProperties = jobMetadataProperties ;
+        _properties = properties ;
         if (sourceColumnPaths == null) {
             sourceColumnPaths = Collections.emptyList();
         } else {
@@ -88,7 +88,7 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
         identifiers.add(_datastoreName);
         identifiers.add(_sourceColumnPaths);
         identifiers.add(_variables);
-        identifiers.add(_jobMetadataProperties);
+        identifiers.add(_properties);
     }
 
     @Override
@@ -142,8 +142,8 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
     }
 
 	@Override
-	public Map<String, String> getjobMetadataProperties() {
-		return _jobMetadataProperties;
+	public Map<String, String> getProperties() {
+		return _properties;
 	}
 
 }
