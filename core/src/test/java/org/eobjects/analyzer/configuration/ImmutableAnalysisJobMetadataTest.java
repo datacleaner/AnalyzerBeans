@@ -48,8 +48,11 @@ public class ImmutableAnalysisJobMetadataTest extends TestCase {
         Map<String, String> variables = new HashMap<String, String>();
         variables.put("foo", "bar");
 
+        Map<String, String> jobMetadataProperties = new HashMap<String,String>() ;
+        jobMetadataProperties.put("abc", "def") ;
+        
         AnalysisJobMetadata metadata = new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author,
-                createdDate, updatedDate, datastoreName, sourceColumnPaths, sourceColumnTypes, variables);
+                createdDate, updatedDate, datastoreName, sourceColumnPaths, sourceColumnTypes, variables,jobMetadataProperties);
 
         assertEquals(jobName, metadata.getJobName());
         assertEquals(jobDescription, metadata.getJobDescription());
@@ -60,11 +63,11 @@ public class ImmutableAnalysisJobMetadataTest extends TestCase {
         assertEquals(datastoreName, metadata.getDatastoreName());
         assertEquals(sourceColumnPaths, metadata.getSourceColumnPaths());
         assertEquals(sourceColumnTypes, metadata.getSourceColumnTypes());
-
         assertEquals(variables, metadata.getVariables());
+        assertEquals(jobMetadataProperties, metadata.getjobMetadataProperties());
 
         AnalysisJobMetadata metadata2 = new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author,
-                createdDate, updatedDate, datastoreName, sourceColumnPaths, sourceColumnTypes, variables);
+                createdDate, updatedDate, datastoreName, sourceColumnPaths, sourceColumnTypes, variables, jobMetadataProperties);
 
         assertEquals(metadata, metadata2);
     }
