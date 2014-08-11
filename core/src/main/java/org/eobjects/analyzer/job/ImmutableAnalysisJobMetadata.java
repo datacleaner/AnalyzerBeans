@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JPopupMenu;
-
 import org.eobjects.metamodel.schema.ColumnType;
 import org.eobjects.metamodel.util.BaseObject;
 
