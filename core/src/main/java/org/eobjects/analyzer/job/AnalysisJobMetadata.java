@@ -56,4 +56,6 @@ public interface AnalysisJobMetadata {
 	public List<ColumnType> getSourceColumnTypes();
 
 	public Map<String, String> getVariables();
+	
+	public Map<String,String> getProperties();
 }
