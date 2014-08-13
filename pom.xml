@@ -7,7 +7,7 @@
 		<slf4j.version>1.7.7</slf4j.version>
 		<junit.version>4.11</junit.version>
 		<metamodel.version>4.2.0-incubating</metamodel.version>
-		<metamodel.extras.version>4.2.0</metamodel.extras.version>
+		<metamodel.extras.version>4.2.1</metamodel.extras.version>
 		<easymock.version>3.2</easymock.version>
 		<scala.version>2.11.2</scala.version>
 		<httpcomponents.version>4.2.5</httpcomponents.version>
