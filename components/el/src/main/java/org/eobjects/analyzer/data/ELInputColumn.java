@@ -86,12 +86,6 @@ public class ELInputColumn extends AbstractExpressionBasedInputColumn<String> {
 		return _expression;
 	}
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public org.eobjects.analyzer.data.DataTypeFamily getDataTypeFamily() {
-		return org.eobjects.analyzer.data.DataTypeFamily.STRING;
-	}
-
 	@Override
 	public Class<? extends String> getDataType() {
 		return String.class;

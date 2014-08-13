@@ -27,8 +27,6 @@ import org.eobjects.analyzer.beans.api.Filter;
 /**
  * Descriptor interface for {@link Filter}s.
  * 
- * 
- * 
  * @param <B>
  */
 public interface FilterBeanDescriptor<F extends Filter<C>, C extends Enum<C>> extends BeanDescriptor<F> {

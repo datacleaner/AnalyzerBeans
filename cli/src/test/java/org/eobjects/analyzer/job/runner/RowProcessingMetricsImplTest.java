@@ -69,7 +69,7 @@ public class RowProcessingMetricsImplTest extends TestCase {
 
         FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filter = ajb.addFilter(MaxRowsFilter.class);
         filter.getConfigurableBean().setMaxRows(10);
-        ajb.setDefaultRequirement(filter.getOutcome(MaxRowsFilter.Category.VALID));
+        ajb.setDefaultRequirement(filter.getFilterOutcome(MaxRowsFilter.Category.VALID));
 
         job = ajb.toAnalysisJob();
 
@@ -83,7 +83,7 @@ public class RowProcessingMetricsImplTest extends TestCase {
         filter.addInputColumns(ajb.getSourceColumns());
         filter.getConfigurableBean().setValues(new String[] { "1002", "1165" });
 
-        ajb.setDefaultRequirement(filter.getOutcome(ValidationCategory.VALID));
+        ajb.setDefaultRequirement(filter.getFilterOutcome(ValidationCategory.VALID));
 
         job = ajb.toAnalysisJob();
 
@@ -104,10 +104,10 @@ public class RowProcessingMetricsImplTest extends TestCase {
         ajb.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
         filter2.addInputColumn(ajb.getSourceColumnByName("reportsto"));
         filter2.getConfigurableBean().setConsiderEmptyStringAsNull(true);
-        filter2.setRequirement(filter1.getOutcome(ValidationCategory.INVALID));
+        filter2.setRequirement(filter1.getFilterOutcome(ValidationCategory.INVALID));
 
         ajb.getAnalyzerJobBuilders().get(0)
-                .setRequirement(filter2.getOutcome(NullCheckFilter.NullCheckCategory.NOT_NULL));
+                .setRequirement(filter2.getFilterOutcome(NullCheckFilter.NullCheckCategory.NOT_NULL));
 
         job = ajb.toAnalysisJob();
 

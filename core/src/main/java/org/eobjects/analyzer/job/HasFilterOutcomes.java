@@ -19,37 +19,12 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.util.Collection;
+
 /**
- * An outcome that represents "Any outcome", ie. all other requirements/outcomes
- * are satisifed.
+ * Represents an object that has/produces {@link FilterOutcome}.
  */
-public class AnyOutcome implements Outcome {
+public interface HasFilterOutcomes {
 
-    private static final long serialVersionUID = 1L;
-
-    public static final String KEYWORD = "_any_";
-    
-    private static final Outcome INSTANCE = new AnyOutcome();
-    
-    public static Outcome get() {
-        return INSTANCE;
-    }
-
-    private AnyOutcome() {
-    }
-
-    @Override
-    public OutcomeSourceJob getSourceJob() {
-        return null;
-    }
-
-    @Override
-    public boolean satisfiesRequirement(Outcome requirement) {
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "AnyOutcome[]";
-    }
+    public Collection<FilterOutcome> getFilterOutcomes();
 }

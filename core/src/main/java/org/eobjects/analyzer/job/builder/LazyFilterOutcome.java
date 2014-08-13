@@ -22,47 +22,47 @@ package org.eobjects.analyzer.job.builder;
 import org.eobjects.analyzer.job.AbstractFilterOutcome;
 import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.FilterJob;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableFilterJob;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
 
 public final class LazyFilterOutcome extends AbstractFilterOutcome {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final FilterJobBuilder<?, ?> _filterJobBuilder;
-	private final Enum<?> _category;
+    private final FilterJobBuilder<?, ?> _filterJobBuilder;
+    private final Enum<?> _category;
 
-	protected LazyFilterOutcome(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
-		_filterJobBuilder = filterJobBuilder;
-		_category = category;
-	}
+    protected LazyFilterOutcome(FilterJobBuilder<?, ?> filterJobBuilder, Enum<?> category) {
+        _filterJobBuilder = filterJobBuilder;
+        _category = category;
+    }
 
-	@Override
-	public OutcomeSourceJob getSourceJob() {
-		return _filterJobBuilder;
-	}
+    @Override
+    public HasFilterOutcomes getSource() {
+        return _filterJobBuilder;
+    }
 
-	@Override
-	public FilterJob getFilterJob() {
-		if (_filterJobBuilder.isConfigured()) {
-			return _filterJobBuilder.toFilterJob();
-		} else {
-			// Create an incomplete job. This representation is typically used
-			// for comparison, not execution.
-			final BeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(
-					_filterJobBuilder.getConfiguredProperties());
-			return new ImmutableFilterJob(_filterJobBuilder.getName(), _filterJobBuilder.getDescriptor(), beanConfiguration,
-					_filterJobBuilder.getRequirement());
-		}
-	}
+    @Override
+    public FilterJob getFilterJob() {
+        if (_filterJobBuilder.isConfigured()) {
+            return _filterJobBuilder.toFilterJob();
+        } else {
+            // Create an incomplete job. This representation is typically used
+            // for comparison, not execution.
+            final BeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(
+                    _filterJobBuilder.getConfiguredProperties());
+            return new ImmutableFilterJob(_filterJobBuilder.getName(), _filterJobBuilder.getDescriptor(),
+                    beanConfiguration, _filterJobBuilder.getComponentRequirement());
+        }
+    }
 
-	@Override
-	public Enum<?> getCategory() {
-		return _category;
-	}
+    @Override
+    public Enum<?> getCategory() {
+        return _category;
+    }
 
-	public FilterJobBuilder<?, ?> getFilterJobBuilder() {
-		return _filterJobBuilder;
-	}
+    public FilterJobBuilder<?, ?> getFilterJobBuilder() {
+        return _filterJobBuilder;
+    }
 }

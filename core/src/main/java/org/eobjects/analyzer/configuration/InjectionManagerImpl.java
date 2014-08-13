@@ -101,7 +101,7 @@ public class InjectionManagerImpl implements InjectionManager {
     public final <E> E getInstance(InjectionPoint<E> injectionPoint) {
         Object instance = getInstanceInternal(injectionPoint);
         if (instance == null) {
-            logger.warn("Could not handle injection for injection point: {}", injectionPoint);
+            logger.debug("Could not handle injection for injection point: {}", injectionPoint);
         }
         return (E) instance;
     }

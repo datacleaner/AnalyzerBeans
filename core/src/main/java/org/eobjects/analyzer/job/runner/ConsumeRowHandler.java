@@ -24,19 +24,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.metamodel.schema.Table;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.InjectionManager;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.apache.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +51,13 @@ public class ConsumeRowHandler {
     private static final Logger logger = LoggerFactory.getLogger(ConsumeRowHandler.class);
 
     private final List<RowProcessingConsumer> _consumers;
-    private final Collection<? extends Outcome> _alwaysSatisfiedOutcomes;
+    private final Collection<? extends FilterOutcome> _alwaysSatisfiedOutcomes;
 
     public static class Configuration {
         public boolean includeNonDistributedTasks = true;
         public AnalysisListener analysisListener = new InfoLoggingAnalysisListener();
         public boolean includeAnalyzers = true;
-        public Collection<? extends Outcome> alwaysSatisfiedOutcomes;
+        public Collection<? extends FilterOutcome> alwaysSatisfiedOutcomes;
         public Table table;
     }
 
@@ -92,7 +92,7 @@ public class ConsumeRowHandler {
      * @param alwaysSatisfiedOutcomes
      */
     public ConsumeRowHandler(List<RowProcessingConsumer> consumers,
-            Collection<? extends Outcome> alwaysSatisfiedOutcomes) {
+            Collection<? extends FilterOutcome> alwaysSatisfiedOutcomes) {
         _consumers = consumers;
         _alwaysSatisfiedOutcomes = alwaysSatisfiedOutcomes;
     }
@@ -134,13 +134,13 @@ public class ConsumeRowHandler {
 
     /**
      * Consumes a {@link InputRow} by applying all transformations etc. to it,
-     * returning a result of transformed rows and their {@link OutcomeSink}s.
+     * returning a result of transformed rows and their {@link FilterOutcomes}s.
      * 
      * @param row
      * @return
      */
     public ConsumeRowResult consumeRow(final InputRow row) {
-        final OutcomeSink outcomes = new OutcomeSinkImpl(_alwaysSatisfiedOutcomes);
+        final FilterOutcomes outcomes = new FilterOutcomesImpl(_alwaysSatisfiedOutcomes);
         final ConsumeRowHandlerDelegate delegate = new ConsumeRowHandlerDelegate(_consumers, row, 0, outcomes);
         final ConsumeRowResult result = delegate.consume();
         return result;

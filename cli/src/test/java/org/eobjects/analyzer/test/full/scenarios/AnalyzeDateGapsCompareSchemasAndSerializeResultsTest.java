@@ -79,7 +79,7 @@ public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCa
 
 			FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRows = analysisJobBuilder.addFilter(MaxRowsFilter.class);
 			maxRows.getConfigurableBean().setMaxRows(5);
-			analysisJobBuilder.setDefaultRequirement(maxRows.getOutcome(MaxRowsFilter.Category.VALID));
+			analysisJobBuilder.setDefaultRequirement(maxRows.getFilterOutcome(MaxRowsFilter.Category.VALID));
 
 			TransformerJobBuilder<ConvertToStringTransformer> convertToNumber = analysisJobBuilder
 					.addTransformer(ConvertToStringTransformer.class);

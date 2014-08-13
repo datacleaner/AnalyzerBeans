@@ -115,7 +115,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 
         // mappings for lookup of ID's
         final Map<InputColumn<?>, String> columnMappings = new LinkedHashMap<InputColumn<?>, String>();
-        final Map<Outcome, String> outcomeMappings = new LinkedHashMap<Outcome, String>();
+        final Map<FilterOutcome, String> outcomeMappings = new LinkedHashMap<FilterOutcome, String>();
 
         // mappings for lookup of component's elements
         final Map<TransformerJob, TransformerType> transformerMappings = new LinkedHashMap<TransformerJob, TransformerType>();
@@ -146,8 +146,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         addTransformedColumns(columnMappings, transformerMappings);
 
         // register all requirements
-        addRequirements(outcomeMappings, transformerMappings, filterMappings, analyzerMappings,
-                columnMappings);
+        addRequirements(outcomeMappings, transformerMappings, filterMappings, analyzerMappings, columnMappings);
 
         addConfiguration(analysisJob, transformerMappings, filterMappings, analyzerMappings, columnMappings);
 
@@ -317,56 +316,53 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         }
     }
 
-    private void addRequirements(final Map<Outcome, String> outcomeMappings,
+    private void addRequirements(final Map<FilterOutcome, String> outcomeMappings,
             final Map<TransformerJob, TransformerType> transformerMappings,
-            final Map<FilterJob, FilterType> filterMappings,
-            final Map<AnalyzerJob, AnalyzerType> analyzerMappings, final Map<InputColumn<?>, String> columnMappings) {
+            final Map<FilterJob, FilterType> filterMappings, final Map<AnalyzerJob, AnalyzerType> analyzerMappings,
+            final Map<InputColumn<?>, String> columnMappings) {
 
         // add requirements based on all transformer requirements
-        for (Entry<TransformerJob, TransformerType> entry : transformerMappings.entrySet()) {
-            TransformerJob job = entry.getKey();
-            Outcome[] requirements = job.getRequirements();
-            if (requirements != null && requirements.length != 0) {
-                assert requirements.length == 1;
-                String id = getId(requirements[0], outcomeMappings, true);
+        for (final Entry<TransformerJob, TransformerType> entry : transformerMappings.entrySet()) {
+            final TransformerJob job = entry.getKey();
+            final ComponentRequirement requirement = job.getComponentRequirement();
+            if (requirement != null) {
+                String id = getId(requirement, outcomeMappings);
                 entry.getValue().setRequires(id);
             }
         }
 
         // add requirements based on all filter requirements
-        for (Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
-            FilterJob job = entry.getKey();
-            Outcome[] requirements = job.getRequirements();
-            if (requirements != null && requirements.length != 0) {
-                assert requirements.length == 1;
-                String id = getId(requirements[0], outcomeMappings, true);
+        for (final Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
+            final FilterJob job = entry.getKey();
+            final ComponentRequirement requirement = job.getComponentRequirement();
+            if (requirement != null) {
+                String id = getId(requirement, outcomeMappings);
                 entry.getValue().setRequires(id);
             }
         }
 
         // add requirements based on all analyzer requirements
         for (Entry<AnalyzerJob, AnalyzerType> entry : analyzerMappings.entrySet()) {
-            AnalyzerJob job = entry.getKey();
-            Outcome[] requirements = job.getRequirements();
-            if (requirements != null && requirements.length != 0) {
-                assert requirements.length == 1;
-                String id = getId(requirements[0], outcomeMappings, true);
+            final AnalyzerJob job = entry.getKey();
+            final ComponentRequirement requirement = job.getComponentRequirement();
+            if (requirement != null) {
+                String id = getId(requirement, outcomeMappings);
                 entry.getValue().setRequires(id);
             }
         }
 
         // add outcome elements only for those filter requirements that
         // have been mapped
-        for (Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
-            FilterJob job = entry.getKey();
-            FilterType filterType = entry.getValue();
-            FilterOutcome[] outcomes = job.getOutcomes();
-            for (FilterOutcome outcome : outcomes) {
+        for (final Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
+            final FilterJob job = entry.getKey();
+            final FilterType filterType = entry.getValue();
+            final Collection<FilterOutcome> outcomes = job.getFilterOutcomes();
+            for (final FilterOutcome outcome : outcomes) {
                 // note that we DONT use the getId(...) method here
-                String id = getId(outcome, outcomeMappings, false);
+                final String id = getId(outcome, outcomeMappings, false);
                 // only the outcome element if it is being mapped
                 if (id != null) {
-                    OutcomeType outcomeType = new OutcomeType();
+                    final OutcomeType outcomeType = new OutcomeType();
                     outcomeType.setCategory(outcome.getCategory().name());
                     outcomeType.setId(id);
                     filterType.getOutcome().add(outcomeType);
@@ -375,15 +371,38 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         }
     }
 
-    private String getId(Outcome requirement, Map<Outcome, String> outcomeMappings, boolean create) {
-        if (requirement == AnyOutcome.get()) {
-            return AnyOutcome.KEYWORD;
+    private String getId(ComponentRequirement requirement, Map<FilterOutcome, String> outcomeMappings) {
+        if (requirement instanceof AnyComponentRequirement) {
+            return AnyComponentRequirement.KEYWORD;
         }
-        String id = outcomeMappings.get(requirement);
+
+        if (requirement instanceof SimpleComponentRequirement) {
+            final FilterOutcome outcome = ((SimpleComponentRequirement) requirement).getOutcome();
+            return getId(outcome, outcomeMappings, true);
+        }
+
+        if (requirement instanceof CompoundComponentRequirement) {
+            final Set<FilterOutcome> outcomes = ((CompoundComponentRequirement) requirement).getOutcomes();
+            final StringBuilder sb = new StringBuilder();
+            for (FilterOutcome outcome : outcomes) {
+                if (sb.length() != 0) {
+                    sb.append(" OR ");
+                }
+                final String id = getId(outcome, outcomeMappings, true);
+                sb.append(id);
+            }
+            return sb.toString();
+        }
+
+        throw new UnsupportedOperationException("Unsupported ComponentRequirement type: " + requirement);
+    }
+
+    private String getId(FilterOutcome outcome, Map<FilterOutcome, String> outcomeMappings, boolean create) {
+        String id = outcomeMappings.get(outcome);
         if (id == null) {
             if (create) {
                 id = "outcome_" + outcomeMappings.size();
-                outcomeMappings.put(requirement, id);
+                outcomeMappings.put(outcome, id);
             }
         }
         return id;

@@ -97,6 +97,7 @@ import org.eobjects.analyzer.util.convert.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 
@@ -427,7 +428,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
             sourceColumnMapping.autoMap(datastore);
         } else {
             datastore = sourceColumnMapping.getDatastore();
-            datastoreConnection = datastore.openConnection();
+            final DatastoreConnection connection = datastore.openConnection();
+            datastoreConnection = connection;
         }
 
         // map column id's to input columns
@@ -472,8 +474,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
         final StringConverter stringConverter = createStringConverter(analysisJobBuilder);
 
-        final Map<String, Outcome> outcomeMapping = new HashMap<String, Outcome>();
-        outcomeMapping.put(AnyOutcome.KEYWORD, AnyOutcome.get());
+        final Map<String, FilterOutcome> outcomeMapping = new HashMap<String, FilterOutcome>();
 
         final TransformationType transformation = job.getTransformation();
         if (transformation != null) {
@@ -650,7 +651,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         if (outcomeMapping.containsKey(id)) {
                             throw new ComponentConfigurationException("Outcome id '" + id + "' is not unique");
                         }
-                        outcomeMapping.put(id, filterJobBuilder.getOutcome(category));
+                        outcomeMapping.put(id, filterJobBuilder.getFilterOutcome(category));
                     }
                 }
             }
@@ -660,22 +661,16 @@ public class JaxbJobReader implements JobReader<InputStream> {
                 if (o instanceof TransformerType) {
                     ref = ((TransformerType) o).getRequires();
                     if (ref != null) {
-                        TransformerJobBuilder<?> builder = transformerJobBuilders.get(o);
-                        Outcome requirement = outcomeMapping.get(ref);
-                        if (requirement == null) {
-                            throw new ComponentConfigurationException("No such outcome id: " + ref);
-                        }
-                        builder.setRequirement(requirement);
+                        final TransformerJobBuilder<?> builder = transformerJobBuilders.get(o);
+                        final ComponentRequirement requirement = getRequirement(ref, outcomeMapping);
+                        builder.setComponentRequirement(requirement);
                     }
                 } else if (o instanceof FilterType) {
                     ref = ((FilterType) o).getRequires();
                     if (ref != null) {
-                        FilterJobBuilder<?, ?> builder = filterJobBuilders.get(o);
-                        Outcome requirement = outcomeMapping.get(ref);
-                        if (requirement == null) {
-                            throw new ComponentConfigurationException("No such outcome id: " + ref);
-                        }
-                        builder.setRequirement(requirement);
+                        final FilterJobBuilder<?, ?> builder = filterJobBuilders.get(o);
+                        final ComponentRequirement requirement = getRequirement(ref, outcomeMapping);
+                        builder.setComponentRequirement(requirement);
                     }
                 } else {
                     throw new IllegalStateException("Unexpected transformation child element: " + o);
@@ -710,11 +705,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
             ref = analyzerType.getRequires();
             if (ref != null) {
-                Outcome requirement = outcomeMapping.get(ref);
-                if (requirement == null) {
-                    throw new ComponentConfigurationException("No such outcome id: " + ref);
-                }
-                analyzerJobBuilder.setRequirement(requirement);
+                final ComponentRequirement requirement = getRequirement(ref, outcomeMapping);
+                analyzerJobBuilder.setComponentRequirement(requirement);
             }
 
         }
@@ -722,6 +714,37 @@ public class JaxbJobReader implements JobReader<InputStream> {
         datastoreConnection.close();
 
         return analysisJobBuilder;
+    }
+
+    private ComponentRequirement getRequirement(String ref, Map<String, FilterOutcome> outcomeMapping) {
+        if (AnyComponentRequirement.KEYWORD.equals(ref)) {
+            return AnyComponentRequirement.get();
+        }
+
+        // check for simple component requirements
+        {
+            final FilterOutcome filterOutcome = outcomeMapping.get(ref);
+            if (filterOutcome != null) {
+                return new SimpleComponentRequirement(filterOutcome);
+            }
+        }
+
+        // check for compound component requirements
+        final List<String> tokens = Splitter.on(" OR ").omitEmptyStrings().trimResults().splitToList(ref);
+        if (tokens.size() > 1) {
+            final List<FilterOutcome> list = new ArrayList<>(tokens.size());
+            for (final String token : tokens) {
+                final FilterOutcome filterOutcome = outcomeMapping.get(token);
+                if (filterOutcome == null) {
+                    throw new ComponentConfigurationException("Could not resolve outcome '" + token
+                            + "' in requirement: " + ref);
+                }
+                list.add(filterOutcome);
+            }
+            return new CompoundComponentRequirement(list);
+        }
+
+        throw new ComponentConfigurationException("Could not resolve requirement: " + ref);
     }
 
     private void applyInputColumns(List<InputType> input, Map<String, InputColumn<?>> inputColumns,
