@@ -36,9 +36,11 @@ import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.AnalysisJobImmutabilizer;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentConfigurationException;
 import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.ImmutableAnalyzerJob;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
+import org.eobjects.analyzer.util.LabelUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.apache.metamodel.schema.Table;
 import org.slf4j.Logger;
@@ -72,15 +74,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         if (inputProperties.size() == 1) {
             _inputProperty = inputProperties.iterator().next();
             final ColumnProperty columnProperty = _inputProperty.getAnnotation(ColumnProperty.class);
-            if (_inputProperty.isArray()) {
-                // for column-arrays, the default is to escalate to multiple
-                // jobs
-                _multipleJobsSupported = columnProperty == null || columnProperty.escalateToMultipleJobs();
-            } else {
-                // for single columns, the default is NOT to escalate to
-                // multiple jobs
-                _multipleJobsSupported = columnProperty != null && columnProperty.escalateToMultipleJobs();
-            }
+            _multipleJobsSupported = columnProperty != null && columnProperty.escalateToMultipleJobs();
             _inputColumns = new ArrayList<InputColumn<?>>();
         } else {
             _multipleJobsSupported = false;
@@ -244,7 +238,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
                     }
                 }
                 if (throwException) {
-                    throw new IllegalStateException("No input columns have been added to " + this);
+                    throw new ComponentConfigurationException("No input columns configured for " + LabelUtils.getLabel(this));
                 } else {
                     return false;
                 }
