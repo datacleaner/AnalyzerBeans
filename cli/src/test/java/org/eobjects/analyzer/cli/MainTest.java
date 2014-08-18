@@ -199,7 +199,8 @@ public class MainTest extends TestCase {
         String out = _stringWriter.toString().replaceAll("\r\n", "\n");
         String[] lines = out.split("\n");
 
-        assertTrue(out.indexOf(" - company.com: 4\n" + " - eobjects.org: 2") != -1);
+        assertTrue(out, out.indexOf("- Value count (company.com): 4") != -1);
+        assertTrue(out, out.indexOf("- Value count (eobjects.org): 2") != -1);
 
         assertTrue("lines length was: " + lines.length, lines.length > 60);
         assertTrue("lines length was: " + lines.length, lines.length < 90);
@@ -308,7 +309,9 @@ public class MainTest extends TestCase {
 
             if (!warningsAndErrors.isEmpty()) {
                 for (Exception error : warningsAndErrors) {
-                    if (error.getMessage().startsWith("No explicit character encoding declaration has been seen yet")) {
+                    String message = error.getMessage();
+                    if (message.startsWith("No explicit character encoding declaration has been seen yet")
+                            || message.startsWith("The character encoding of the document was not declared.")) {
                         // ignore/accept this one
                         continue;
                     }

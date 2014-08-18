@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
-import org.eobjects.analyzer.result.renderer.DefaultTextRenderer;
+import org.eobjects.analyzer.result.renderer.ToStringTextRenderer;
 import org.eobjects.analyzer.result.renderer.Renderable;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer1;
@@ -34,7 +34,7 @@ import org.eobjects.analyzer.test.mock.MockRenderers.InvalidRenderer4;
 
 public class AnnotationBasedRendererBeanDescriptorTest extends TestCase {
 
-	private RendererBeanDescriptor<DefaultTextRenderer> descriptor = Descriptors.ofRenderer(DefaultTextRenderer.class);
+	private RendererBeanDescriptor<ToStringTextRenderer> descriptor = Descriptors.ofRenderer(ToStringTextRenderer.class);
 
 	public void testGetRenderingFormat() throws Exception {
 		assertEquals(TextRenderingFormat.class, descriptor.getRenderingFormat());

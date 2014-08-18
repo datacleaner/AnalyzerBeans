@@ -19,29 +19,21 @@
  */
 package org.eobjects.analyzer.result.renderer;
 
-import org.eobjects.analyzer.beans.api.Renderer;
-import org.eobjects.analyzer.beans.api.RendererBean;
 import org.eobjects.analyzer.beans.api.RendererPrecedence;
-import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.NumberResult;
 
-/**
- * A very (very!) simple renderer that simply "renders" the toString() method of
- * results. Mostly used for testing (or result types that implement a meaningful
- * toString() method.
- * 
- * 
- */
-@RendererBean(TextRenderingFormat.class)
-public class DefaultTextRenderer implements Renderer<AnalyzerResult, String> {
+import junit.framework.TestCase;
 
-	@Override
-	public RendererPrecedence getPrecedence(AnalyzerResult renderable) {
-		return RendererPrecedence.LOWEST;
-	}
+public class MetricBasedResultTextRendererTest extends TestCase {
 
-	@Override
-	public String render(AnalyzerResult result) {
-		return result.toString();
-	}
+    public void testRenderNumberResult() throws Exception {
+        NumberResult result = new NumberResult(1234);
 
+        MetricBasedResultTextRenderer renderer = new MetricBasedResultTextRenderer();
+        assertEquals(RendererPrecedence.LOWEST, renderer.getPrecedence(result));
+        
+        String str = renderer.render(result);
+        assertEquals("NumberResult:\n" + 
+                " - Number: 1234", str);
+    }
 }

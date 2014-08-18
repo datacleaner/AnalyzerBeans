@@ -49,7 +49,7 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
 
         @SuppressWarnings("unchecked")
         Class<? extends AnalyzerResult> resultClass = (Class<? extends AnalyzerResult>) typeParameter;
-        _resultDescriptor = new ResultDescriptorImpl(resultClass);
+        _resultDescriptor = Descriptors.ofResult(resultClass);
     }
     
     @Override
