@@ -33,8 +33,12 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.apache.metamodel.MetaModelHelper;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Schema;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -60,12 +64,16 @@ import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
+import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.apache.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JaxbJobWriter implements JobWriter<OutputStream> {
+
+    private static final String COLUMN_PATH_QUALIFICATION_FULL = "full";
+    private static final String COLUMN_PATH_QUALIFICATION_TABLE = "table";
+    private static final String COLUMN_PATH_QUALIFICATION_COLUMN = "column";
 
     private static final Logger logger = LoggerFactory.getLogger(JaxbJobWriter.class);
 
@@ -124,10 +132,11 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 
         // register all source columns
         final Collection<InputColumn<?>> sourceColumns = analysisJob.getSourceColumns();
+        final String columnPathQualification = getColumnPathQualification(datastore, sourceColumns);
         for (InputColumn<?> inputColumn : sourceColumns) {
             final ColumnType jaxbColumn = new ColumnType();
             final Column physicalColumn = inputColumn.getPhysicalColumn();
-            jaxbColumn.setPath(physicalColumn.getQualifiedLabel());
+            jaxbColumn.setPath(getColumnPath(physicalColumn, columnPathQualification));
             jaxbColumn.setId(getId(inputColumn, columnMappings));
 
             final org.apache.metamodel.schema.ColumnType columnType = physicalColumn.getType();
@@ -157,6 +166,46 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             marshaller.marshal(jobType, outputStream);
         } catch (JAXBException e) {
             throw new IllegalStateException(e);
+        }
+    }
+
+    private String getColumnPath(Column column, String columnPathQualification) {
+        switch (columnPathQualification) {
+        case COLUMN_PATH_QUALIFICATION_COLUMN:
+            return column.getName();
+        case COLUMN_PATH_QUALIFICATION_TABLE:
+            return column.getTable().getName() + '.' + column.getName();
+        case COLUMN_PATH_QUALIFICATION_FULL:
+        default:
+            return column.getQualifiedLabel();
+        }
+    }
+
+    private String getColumnPathQualification(Datastore datastore, Collection<InputColumn<?>> sourceColumns) {
+        if (sourceColumns == null || sourceColumns.isEmpty()) {
+            return COLUMN_PATH_QUALIFICATION_FULL;
+        }
+        
+        try (DatastoreConnection connection = datastore.openConnection()) {
+            SchemaNavigator schemaNavigator = connection.getSchemaNavigator();
+            Schema[] schemas = schemaNavigator.getSchemas();
+            Schema singleSchema = null;
+            int realSchemas = 0;
+            for (Schema schema : schemas) {
+                if (!MetaModelHelper.isInformationSchema(schema)) {
+                    realSchemas++;
+                    singleSchema = schema;
+                }
+            }
+
+            if (realSchemas == 1) {
+                if (singleSchema.getTableCount() == 1) {
+                    return COLUMN_PATH_QUALIFICATION_COLUMN;
+                }
+                return COLUMN_PATH_QUALIFICATION_TABLE;
+            }
+
+            return COLUMN_PATH_QUALIFICATION_FULL;
         }
     }
 

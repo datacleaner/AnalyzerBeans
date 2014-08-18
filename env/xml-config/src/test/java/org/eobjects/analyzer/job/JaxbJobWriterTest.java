@@ -160,8 +160,8 @@ public class JaxbJobWriterTest extends TestCase {
             assertEquals("    <source>", lines[7]);
             assertEquals("        <data-context ref=_db_/>", lines[8]);
             assertEquals("        <columns>", lines[9]);
-            assertEquals("            <column id=_col_0_ path=_PUBLIC.ORDERS.ORDERDATE_ type=_TIMESTAMP_/>", lines[10]);
-            assertEquals("            <column id=_col_1_ path=_PUBLIC.ORDERS.SHIPPEDDATE_ type=_TIMESTAMP_/>",
+            assertEquals("            <column id=_col_0_ path=_ORDERS.ORDERDATE_ type=_TIMESTAMP_/>", lines[10]);
+            assertEquals("            <column id=_col_1_ path=_ORDERS.SHIPPEDDATE_ type=_TIMESTAMP_/>",
                     lines[11]);
             assertEquals("        </columns>", lines[12]);
             assertEquals("    </source>", lines[13]);

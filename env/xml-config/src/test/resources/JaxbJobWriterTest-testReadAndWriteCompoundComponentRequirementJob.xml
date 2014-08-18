@@ -8,9 +8,9 @@
     <source>
         <data-context ref="my database"/>
         <columns>
-            <column id="col_0" path="PUBLIC.EMPLOYEES.FIRSTNAME" type="VARCHAR"/>
-            <column id="col_1" path="PUBLIC.EMPLOYEES.LASTNAME" type="VARCHAR"/>
-            <column id="col_2" path="PUBLIC.EMPLOYEES.REPORTSTO" type="INTEGER"/>
+            <column id="col_0" path="EMPLOYEES.FIRSTNAME" type="VARCHAR"/>
+            <column id="col_1" path="EMPLOYEES.LASTNAME" type="VARCHAR"/>
+            <column id="col_2" path="EMPLOYEES.REPORTSTO" type="INTEGER"/>
         </columns>
     </source>
     <transformation>
