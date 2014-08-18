@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -82,6 +83,7 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 	private final Map<InputColumn<String>, StringAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, StringAnalyzerColumnDelegate>();
 
 	@Configured
+	@ColumnProperty(escalateToMultipleJobs=true)
 	InputColumn<String>[] _columns;
 
 	@Provided
