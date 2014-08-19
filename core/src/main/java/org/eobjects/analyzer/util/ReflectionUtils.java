@@ -480,22 +480,39 @@ public final class ReflectionUtils {
      */
     public static Method[] getMethods(Class<?> clazz) {
         List<Method> allMethods = new ArrayList<>();
-        addMethods(allMethods, clazz);
+
+        final String version = SystemProperties.getString("java.version", "");
+        final boolean legacyApproach = version.startsWith("1.7");
+
+        addMethods(allMethods, clazz, legacyApproach);
         return allMethods.toArray(new Method[allMethods.size()]);
     }
 
-    private static void addMethods(List<Method> allMethods, Class<?> clazz) {
+    private static void addMethods(final List<Method> allMethods, final Class<?> clazz, final boolean legacyApproach) {
         if (clazz == Object.class || clazz == null) {
             return;
         }
 
-        Method[] methods = clazz.getDeclaredMethods();
-        for (Method method : methods) {
-            allMethods.add(method);
-        }
+        if (legacyApproach) {
+            // in java 7 and previous, getDeclaredMethods() is used and a
+            // recursive call is applied throughout the hierarchy
+            final Method[] methods = clazz.getDeclaredMethods();
+            for (final Method method : methods) {
+                allMethods.add(method);
+            }
 
-        Class<?> superclass = clazz.getSuperclass();
-        addMethods(allMethods, superclass);
+            final Class<?> superclass = clazz.getSuperclass();
+            addMethods(allMethods, superclass, legacyApproach);
+        } else {
+            // since java 8, getMethods() returns all relevant methods
+            final Method[] methods = clazz.getMethods();
+            for (final Method method : methods) {
+                final Class<?> declaringClass = method.getDeclaringClass();
+                if (declaringClass != Object.class) {
+                    allMethods.add(method);
+                }
+            }
+        }
     }
 
     /**
