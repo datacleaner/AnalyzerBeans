@@ -24,19 +24,33 @@ import org.junit.Ignore;
 @Ignore
 public class ReflectionUtilTestHelpClass {
 
-	public static class ClassA {
-		private int a;
+    public static class ClassA {
+        private int a;
 
-		public int getA() {
-			return a;
-		}
-	}
+        public int getA() {
+            return a;
+        }
+    }
 
-	public static class ClassB extends ClassA {
-		private boolean b;
+    public static class ClassB extends ClassA {
+        private boolean b;
 
-		public boolean getB() {
-			return b;
-		}
-	}
+        public boolean getB() {
+            return b;
+        }
+
+        @Override
+        public int getA() {
+            // override a method in ClassA
+            return super.getA() + 0;
+        }
+    }
+
+    public static class ClassC extends ClassA {
+        private boolean c;
+
+        public boolean getC() {
+            return c;
+        }
+    }
 }

@@ -31,6 +31,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -439,7 +441,7 @@ public final class ReflectionUtils {
         if (clazz == Object.class || clazz == null) {
             return null;
         }
-        
+
         try {
             // first try without parameters
             Method method = clazz.getDeclaredMethod(name);
@@ -480,13 +482,35 @@ public final class ReflectionUtils {
      * @return
      */
     public static Method[] getMethods(Class<?> clazz) {
-        if (clazz == Object.class || clazz == null) {
-            return new Method[0];
+        final List<Method> methods = new ArrayList<Method>();
+        addMethods(methods, clazz);
+
+        // remove duplicate initialize and validate methods which do not take
+        // any params
+        final Set<String> noParamMethodNames = new HashSet<String>();
+        for (final Iterator<Method> it = methods.iterator(); it.hasNext();) {
+            final Method method = it.next();
+            final boolean added = noParamMethodNames.add(method.getName());
+            if (!added) {
+                it.remove();
+            }
         }
-        Method[] m = clazz.getDeclaredMethods();
-        Class<?> superclass = clazz.getSuperclass();
-        m = CollectionUtils.array(m, getMethods(superclass));
-        return m;
+
+        return methods.toArray(new Method[methods.size()]);
+    }
+
+    private static void addMethods(List<Method> allMethods, Class<?> clazz) {
+        if (clazz == Object.class || clazz == null) {
+            return;
+        }
+
+        final Method[] methods = clazz.getDeclaredMethods();
+        for (final Method method : methods) {
+            allMethods.add(method);
+        }
+
+        final Class<?> superclass = clazz.getSuperclass();
+        addMethods(allMethods, superclass);
     }
 
     /**

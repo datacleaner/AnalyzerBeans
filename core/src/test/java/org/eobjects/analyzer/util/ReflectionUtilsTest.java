@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
@@ -29,6 +30,7 @@ import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.util.ReflectionUtilTestHelpClass.ClassA;
 import org.eobjects.analyzer.util.ReflectionUtilTestHelpClass.ClassB;
+import org.eobjects.analyzer.util.ReflectionUtilTestHelpClass.ClassC;
 
 public class ReflectionUtilsTest extends TestCase {
 
@@ -140,4 +142,28 @@ public class ReflectionUtilsTest extends TestCase {
 		assertTrue(ReflectionUtils.is(Byte.class, Object.class));
 	}
 
+    public void testGetMethods() throws Exception {
+        final Method[] methods1 = ReflectionUtils.getMethods(ClassA.class);
+        assertEquals(1, methods1.length);
+        assertEquals("getA", methods1[0].getName());
+
+        final Method[] methods2 = ReflectionUtils.getMethods(ClassB.class);
+        assertEquals(2, methods2.length);
+
+        for (Method method : methods2) {
+            final String name = method.getName();
+            if (!"getA".equals(name) && !"getB".equals(name)) {
+                fail("Unexpected method: " + method);
+            }
+        }
+
+        final Method[] methods3 = ReflectionUtils.getMethods(ClassC.class);
+        assertEquals(2, methods3.length);
+        for (Method method : methods3) {
+            final String name = method.getName();
+            if (!"getA".equals(name) && !"getC".equals(name)) {
+                fail("Unexpected method: " + method);
+            }
+        }
+    }
 }
