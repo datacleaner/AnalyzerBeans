@@ -479,11 +479,11 @@ public final class ReflectionUtils {
      * @return
      */
     public static Method[] getMethods(Class<?> clazz) {
-        List<Method> allMethods = new ArrayList<>();
 
         final String version = SystemProperties.getString("java.version", "");
         final boolean legacyApproach = version.startsWith("1.7");
 
+        final List<Method> allMethods = new ArrayList<>();
         addMethods(allMethods, clazz, legacyApproach);
         return allMethods.toArray(new Method[allMethods.size()]);
     }
@@ -496,11 +496,11 @@ public final class ReflectionUtils {
         if (legacyApproach) {
             // in java 7 and previous, getDeclaredMethods() is used and a
             // recursive call is applied throughout the hierarchy
+
             final Method[] methods = clazz.getDeclaredMethods();
             for (final Method method : methods) {
                 allMethods.add(method);
             }
-
             final Class<?> superclass = clazz.getSuperclass();
             addMethods(allMethods, superclass, legacyApproach);
         } else {
