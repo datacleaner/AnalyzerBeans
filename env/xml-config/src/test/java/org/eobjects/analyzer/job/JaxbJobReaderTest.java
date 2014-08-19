@@ -110,7 +110,7 @@ public class JaxbJobReaderTest extends TestCase {
         assertNull(metadata.getJobName());
         assertNull(metadata.getJobDescription());
         assertNull(metadata.getJobVersion());
-        assertNull(metadata.getProperties());
+        assertTrue(metadata.getProperties().isEmpty());
         assertEquals("my database", metadata.getDatastoreName());
         assertEquals("[PUBLIC.EMPLOYEES.FIRSTNAME, PUBLIC.EMPLOYEES.LASTNAME, PUBLIC.EMPLOYEES.EMAIL]", metadata
                 .getSourceColumnPaths().toString());

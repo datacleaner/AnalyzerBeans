@@ -81,10 +81,10 @@ import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
+import org.eobjects.analyzer.job.jaxb.MetadataProperties;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
-import org.eobjects.analyzer.job.jaxb.Properties;
 import org.eobjects.analyzer.job.jaxb.SourceType;
 import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
@@ -189,7 +189,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
             author = null;
             createdDate = null;
             updatedDate = null;
-            metadataProperties = null;
+            metadataProperties = Collections.emptyMap();
         } else {
             jobName = metadata.getJobName();
             jobVersion = metadata.getJobVersion();
@@ -219,14 +219,14 @@ public class JaxbJobReader implements JobReader<InputStream> {
     }
 
     private Map<String, String> getMetadataProperties(JobMetadataType metadata) {
-    	Properties properties = metadata.getProperties();
+    	MetadataProperties properties = metadata.getProperties();
     	
 		if(properties==null){
-    		return null;
-    	}
+			return Collections.emptyMap() ;
+		}
     	
     	Map<String, String> metadataProperties = new HashMap<String,String>();
-    	List<org.eobjects.analyzer.job.jaxb.Properties.Property> property = properties.getProperty() ;
+    	List<org.eobjects.analyzer.job.jaxb.MetadataProperties.Property> property = properties.getProperty() ;
     	
     	for(int i = 0; i < property.size(); i++) {
     		String name = property.get(i).getName() ;

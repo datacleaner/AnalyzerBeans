@@ -32,12 +32,12 @@
 				maxOccurs="1" />
 			<element name="updated-date" type="date" minOccurs="0"
 				maxOccurs="1" />
-			<element name="properties" type="ab:properties" minOccurs="0"
+			<element name="properties" type="ab:metadataProperties" minOccurs="0"
 				maxOccurs="1" />  
 		</all>
 	</complexType>
 
-	<complexType name="properties">
+	<complexType name="metadataProperties">
 		<sequence>
 			<element name="property" minOccurs="0" maxOccurs="unbounded">
 				<complexType>
