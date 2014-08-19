@@ -39,14 +39,19 @@ public class ClasspathScanDescriptorProviderTest extends TestCase {
 
         ClasspathScanDescriptorProvider provider = new ClasspathScanDescriptorProvider(taskRunner);
         assertEquals(0, provider.getAnalyzerBeanDescriptors().size());
-        assertEquals(0, provider.getTransformerBeanDescriptors().size());
+        Collection<TransformerBeanDescriptor<?>> transformerBeanDescriptors = provider.getTransformerBeanDescriptors();
+        assertEquals(0, transformerBeanDescriptors.size());
         File[] files = new File[] { pluginFile1 };
         provider = provider.scanPackage("org.eobjects", true, ClassLoaderUtils.createClassLoader(files), false, files);
         assertEquals(0, provider.getAnalyzerBeanDescriptors().size());
-        assertEquals(27, provider.getTransformerBeanDescriptors().size());
+        
+        transformerBeanDescriptors = provider.getTransformerBeanDescriptors();
+        assertEquals(27, transformerBeanDescriptors.size());
 
-        assertEquals("org.eobjects.analyzer.beans.coalesce.CoalesceStringsTransformer", provider
-                .getTransformerBeanDescriptors().iterator().next().getComponentClass().getName());
+        transformerBeanDescriptors = new TreeSet<>(transformerBeanDescriptors);
+        
+        assertEquals("org.eobjects.analyzer.beans.coalesce.CoalesceDatesTransformer", transformerBeanDescriptors
+                .iterator().next().getComponentClass().getName());
     }
 
     public void testScanNonExistingPackage() throws Exception {

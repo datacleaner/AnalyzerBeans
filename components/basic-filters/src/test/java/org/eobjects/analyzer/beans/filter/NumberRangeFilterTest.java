@@ -24,6 +24,7 @@ import java.util.Set;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.Descriptors;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ValidateMethodDescriptor;
 
 import junit.framework.TestCase;
 
@@ -44,7 +45,8 @@ public class NumberRangeFilterTest extends TestCase {
 
         assertEquals("java.lang.Number", input.getTypeArgument(0).getName());
 
-        assertEquals(1, filter.getValidateMethods().size());
+        Set<ValidateMethodDescriptor> validateMethods = filter.getValidateMethods();
+        assertEquals(1, validateMethods.size());
     }
 
     public void testFilter() throws Exception {

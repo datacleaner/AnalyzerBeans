@@ -35,11 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eobjects.analyzer.data.InputColumn;
 import org.apache.metamodel.schema.Column;
 import org.apache.metamodel.schema.Schema;
 import org.apache.metamodel.schema.Table;
-import org.apache.metamodel.util.CollectionUtils;
+import org.eobjects.analyzer.data.InputColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -439,7 +438,7 @@ public final class ReflectionUtils {
         if (clazz == Object.class || clazz == null) {
             return null;
         }
-        
+
         try {
             // first try without parameters
             Method method = clazz.getDeclaredMethod(name);
@@ -480,13 +479,23 @@ public final class ReflectionUtils {
      * @return
      */
     public static Method[] getMethods(Class<?> clazz) {
+        List<Method> allMethods = new ArrayList<>();
+        addMethods(allMethods, clazz);
+        return allMethods.toArray(new Method[allMethods.size()]);
+    }
+
+    private static void addMethods(List<Method> allMethods, Class<?> clazz) {
         if (clazz == Object.class || clazz == null) {
-            return new Method[0];
+            return;
         }
-        Method[] m = clazz.getDeclaredMethods();
+
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method method : methods) {
+            allMethods.add(method);
+        }
+
         Class<?> superclass = clazz.getSuperclass();
-        m = CollectionUtils.array(m, getMethods(superclass));
-        return m;
+        addMethods(allMethods, superclass);
     }
 
     /**
@@ -496,13 +505,21 @@ public final class ReflectionUtils {
      * @return
      */
     public static Field[] getFields(Class<?> clazz) {
+        List<Field> allFields = new ArrayList<>();
+        addFields(allFields, clazz);
+        return allFields.toArray(new Field[allFields.size()]);
+    }
+
+    private static void addFields(List<Field> allFields, Class<?> clazz) {
         if (clazz == Object.class) {
-            return new Field[0];
+            return;
         }
         Field[] f = clazz.getDeclaredFields();
+        for (Field field : f) {
+            allFields.add(field);
+        }
         Class<?> superclass = clazz.getSuperclass();
-        f = CollectionUtils.array(f, getFields(superclass));
-        return f;
+        addFields(allFields, superclass);
     }
 
     public static <E> E newInstance(Class<? extends E> clazz) {
