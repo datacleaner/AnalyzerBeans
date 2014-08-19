@@ -108,6 +108,8 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 
         insertIntoTable.values = new InputColumn[] { col1, col2 };
 
+        insertIntoTable.validate();
+        
         try {
             insertIntoTable.init();
             fail("Exception expected");
@@ -132,6 +134,7 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 
         insertIntoTable.values = new InputColumn[] { col1, col2 };
 
+        insertIntoTable.validate();
         insertIntoTable.init();
 
         insertIntoTable.run(new MockInputRow().put(col1, "blabla").put(col2, "hello int"), 2);
@@ -165,6 +168,7 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
         insertIntoTable.values = new InputColumn[] { col1, col2 };
         insertIntoTable.additionalErrorLogValues = new InputColumn[] { col3, col4 };
 
+        insertIntoTable.validate();
         insertIntoTable.init();
 
         // valid row
@@ -207,6 +211,7 @@ public class InsertIntoTableAnalyzerTest extends TestCase {
 
         insertIntoTable.values = new InputColumn[] { col1, col2 };
 
+        insertIntoTable.validate();
         insertIntoTable.init();
 
         // a valid row

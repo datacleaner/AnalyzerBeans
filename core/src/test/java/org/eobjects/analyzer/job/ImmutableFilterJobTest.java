@@ -33,7 +33,7 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 public class ImmutableFilterJobTest extends TestCase {
 
 	public void testGetOutcomes() throws Exception {
-		FilterBeanDescriptor<?, ?> descriptor = Descriptors.ofFilter(MaxRowsFilter.class);
+		FilterBeanDescriptor<?, ?> descriptor = Descriptors.ofFilterUnbound(MaxRowsFilter.class);
 		BeanConfiguration configuration = new ImmutableBeanConfiguration(new HashMap<ConfiguredPropertyDescriptor, Object>());
 
 		ImmutableFilterJob job = new ImmutableFilterJob("foo", descriptor, configuration, null);
