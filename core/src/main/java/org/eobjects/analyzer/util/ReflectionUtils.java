@@ -31,6 +31,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -485,6 +487,22 @@ public final class ReflectionUtils {
 
         final List<Method> allMethods = new ArrayList<>();
         addMethods(allMethods, clazz, legacyApproach);
+        
+        if (legacyApproach) {
+            // remove duplicate methods (at least those who do not take any params)
+            final Set<String> noParamMethodNames = new HashSet<String>();
+            for (final Iterator<Method> it = allMethods.iterator(); it.hasNext();) {
+                final Method method = it.next();
+                final Class<?>[] parameterTypes = method.getParameterTypes();
+                if (parameterTypes == null || parameterTypes.length == 0) {
+                    final boolean added = noParamMethodNames.add(method.getName());
+                    if (!added) {
+                        it.remove();
+                    }
+                }
+            }
+        }
+        
         return allMethods.toArray(new Method[allMethods.size()]);
     }
 
