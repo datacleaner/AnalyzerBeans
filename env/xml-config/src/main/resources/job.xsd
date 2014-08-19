@@ -32,9 +32,25 @@
 				maxOccurs="1" />
 			<element name="updated-date" type="date" minOccurs="0"
 				maxOccurs="1" />
+			<element name="properties" type="ab:metadataProperties" minOccurs="0"
+				maxOccurs="1" />  
 		</all>
 	</complexType>
 
+	<complexType name="metadataProperties">
+		<sequence>
+			<element name="property" minOccurs="0" maxOccurs="unbounded">
+				<complexType>
+					<simpleContent>
+						<extension base="string">
+							<attribute type="string" name="name"/>
+						</extension>
+					</simpleContent>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+ 
 	<complexType name="sourceType">
 		<sequence>
 			<element name="data-context" type="ab:dataContextType"

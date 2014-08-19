@@ -95,6 +95,7 @@ public class JaxbJobReaderTest extends TestCase {
         assertEquals("An example job with complete metadata", metadata.getJobDescription());
         assertEquals("1.1", metadata.getJobVersion());
         assertEquals("[PUBLIC.PERSONS.FIRSTNAME, PUBLIC.PERSONS.LASTNAME]", metadata.getSourceColumnPaths().toString());
+        assertEquals("propertyValue", metadata.getProperties().get("propertyName")) ;
 
         assertNotNull(metadata.getCreatedDate());
         assertNotNull(metadata.getUpdatedDate());
@@ -109,6 +110,7 @@ public class JaxbJobReaderTest extends TestCase {
         assertNull(metadata.getJobName());
         assertNull(metadata.getJobDescription());
         assertNull(metadata.getJobVersion());
+        assertTrue(metadata.getProperties().isEmpty());
         assertEquals("my database", metadata.getDatastoreName());
         assertEquals("[PUBLIC.EMPLOYEES.FIRSTNAME, PUBLIC.EMPLOYEES.LASTNAME, PUBLIC.EMPLOYEES.EMAIL]", metadata
                 .getSourceColumnPaths().toString());
