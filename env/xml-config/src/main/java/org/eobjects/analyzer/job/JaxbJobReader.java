@@ -178,8 +178,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         final String author;
         final Date createdDate;
         final Date updatedDate;
-        final Map<String,String> metadataProperties;
-       
+        final Map<String, String> metadataProperties;
 
         JobMetadataType metadata = job.getJobMetadata();
         if (metadata == null) {
@@ -219,25 +218,25 @@ public class JaxbJobReader implements JobReader<InputStream> {
     }
 
     private Map<String, String> getMetadataProperties(JobMetadataType metadata) {
-    	MetadataProperties properties = metadata.getProperties();
-    	
-		if(properties==null){
-			return Collections.emptyMap() ;
-		}
-    	
-    	Map<String, String> metadataProperties = new HashMap<String,String>();
-    	List<org.eobjects.analyzer.job.jaxb.MetadataProperties.Property> property = properties.getProperty() ;
-    	
-    	for(int i = 0; i < property.size(); i++) {
-    		String name = property.get(i).getName() ;
-    		String value = property.get(i).getValue() ;
-    		metadataProperties.put(name, value) ;
-    	}
-    	
-		return metadataProperties;
-	}
+        MetadataProperties properties = metadata.getProperties();
 
-	public Map<String, String> getVariables(Job job) {
+        if (properties == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> metadataProperties = new HashMap<String, String>();
+        List<org.eobjects.analyzer.job.jaxb.MetadataProperties.Property> property = properties.getProperty();
+
+        for (int i = 0; i < property.size(); i++) {
+            String name = property.get(i).getName();
+            String value = property.get(i).getValue();
+            metadataProperties.put(name, value);
+        }
+
+        return metadataProperties;
+    }
+
+    public Map<String, String> getVariables(Job job) {
         final Map<String, String> result = new HashMap<String, String>();
 
         VariablesType variablesType = job.getSource().getVariables();
