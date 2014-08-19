@@ -37,7 +37,7 @@ import org.apache.metamodel.query.Query;
 public class NullCheckFilterTest extends TestCase {
 
 	public void testAliases() throws Exception {
-		FilterBeanDescriptor<?, ?> desc1 = Descriptors.ofFilter(NullCheckFilter.class);
+		FilterBeanDescriptor<?, ?> desc1 = Descriptors.ofFilterUnbound(NullCheckFilter.class);
 
 		SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
 		descriptorProvider.addFilterBeanDescriptor(desc1);

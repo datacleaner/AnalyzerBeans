@@ -205,7 +205,7 @@ public class SourceColumnFinder {
     private Table findOriginatingTable(FilterOutcome requirement, Set<Object> resolvedSet) {
         HasFilterOutcomes source = findOutcomeSource(requirement);
         if (!resolvedSet.add(source)) {
-            logger.info(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
+            logger.debug(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
             return null;
         }
         return findOriginatingTableOfSource(source, resolvedSet);
@@ -217,7 +217,7 @@ public class SourceColumnFinder {
 
     private Table findOriginatingTable(InputColumn<?> inputColumn, Set<Object> resolvedSet) {
         if (!resolvedSet.add(inputColumn)) {
-            logger.info(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
+            logger.debug(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
             return null;
         }
 
@@ -231,7 +231,7 @@ public class SourceColumnFinder {
 
         final InputColumnSourceJob inputColumnSource = findInputColumnSource(inputColumn);
         if (!resolvedSet.add(inputColumnSource)) {
-            logger.info(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
+            logger.debug(LOG_MESSAGE_RECURSIVE_TRAVERSAL);
             return null;
         }
 

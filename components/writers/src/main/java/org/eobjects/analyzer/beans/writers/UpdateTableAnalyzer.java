@@ -53,6 +53,7 @@ import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.SchemaNavigator;
+import org.eobjects.analyzer.util.WriteBuffer;
 import org.apache.metamodel.BatchUpdateScript;
 import org.apache.metamodel.UpdateCallback;
 import org.apache.metamodel.UpdateScript;
@@ -81,7 +82,7 @@ import org.slf4j.LoggerFactory;
 public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<Iterable<Object[]>> {
 
     private static final String PROPERTY_NAME_VALUES = "Values";
-    
+
     private static final File TEMP_DIR = FileHelper.getTempDir();
 
     private static final String ERROR_MESSAGE_COLUMN_NAME = "update_table_error_message";
