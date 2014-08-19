@@ -31,8 +31,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -475,34 +473,35 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Gets all methods of a class, excluding those from Object
+     * Tells which approach {@link #getMethods(Class)} is being implemented with
+     * 
+     * @return
+     */
+    public static boolean isGetMethodsLegacyApproach() {
+        final String version = SystemProperties.getString("java.version", "");
+        final boolean legacyApproach = version.startsWith("1.7");
+        return legacyApproach;
+    }
+
+    /**
+     * Gets all methods of a class, excluding those from Object.
+     * 
+     * Warning: This method's result varies slightly on Java 7 and on Java 8.
+     * With Java 8 overridden methods are properly removed from the result, and
+     * inherited annotations thus also available from the result. On Java 7,
+     * overridden methods will be returned multiple times.
+     * 
+     * @see #isGetMethodsLegacyApproach()
      * 
      * @param clazz
      * @return
      */
     public static Method[] getMethods(Class<?> clazz) {
-
-        final String version = SystemProperties.getString("java.version", "");
-        final boolean legacyApproach = version.startsWith("1.7");
+        final boolean legacyApproach = isGetMethodsLegacyApproach();
 
         final List<Method> allMethods = new ArrayList<>();
         addMethods(allMethods, clazz, legacyApproach);
-        
-        if (legacyApproach) {
-            // remove duplicate methods (at least those who do not take any params)
-            final Set<String> noParamMethodNames = new HashSet<String>();
-            for (final Iterator<Method> it = allMethods.iterator(); it.hasNext();) {
-                final Method method = it.next();
-                final Class<?>[] parameterTypes = method.getParameterTypes();
-                if (parameterTypes == null || parameterTypes.length == 0) {
-                    final boolean added = noParamMethodNames.add(method.getName());
-                    if (!added) {
-                        it.remove();
-                    }
-                }
-            }
-        }
-        
+
         return allMethods.toArray(new Method[allMethods.size()]);
     }
 
