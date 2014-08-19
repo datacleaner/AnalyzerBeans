@@ -206,11 +206,9 @@ public class JaxbJobReaderTest extends TestCase {
             factory.create(new File("src/test/resources/example-job-invalid.xml"));
             fail("Exception expected");
         } catch (IllegalArgumentException e) {
-            assertEquals("javax.xml.bind.UnmarshalException: unexpected element "
-                    + "(uri:\"http://eobjects.org/analyzerbeans/job/1.0\", local:\"datacontext\"). "
-                    + "Expected elements are <{http://eobjects.org/analyzerbeans/job/1.0}variables>,"
-                    + "<{http://eobjects.org/analyzerbeans/job/1.0}columns>,"
-                    + "<{http://eobjects.org/analyzerbeans/job/1.0}data-context>", e.getMessage());
+            String message = e.getMessage();
+            assertTrue(message, message.startsWith("javax.xml.bind.UnmarshalException: unexpected element "
+                    + "(uri:\"http://eobjects.org/analyzerbeans/job/1.0\", local:\"datacontext\")."));
         }
     }
 
