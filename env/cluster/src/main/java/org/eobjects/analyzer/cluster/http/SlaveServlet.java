@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
+import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 
 /**
@@ -42,9 +43,13 @@ public class SlaveServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     public static final String SERVLET_CONTEXT_ATTRIBUTE_CONFIGURATION = "org.eobjects.analyzer.configuration";
+    public static final String SERVLET_CONTEXT_ATTRIBUTE_ANALYSIS_LISTENER = "org.eobjects.analyzer.analysislistener";
 
     @Inject
     AnalyzerBeansConfiguration _configuration;
+
+    @Inject
+    AnalysisListener _analysisListener;
 
     private final ConcurrentMap<String, AnalysisResultFuture> _runningJobs;
 
@@ -53,19 +58,31 @@ public class SlaveServlet extends HttpServlet {
     }
 
     public SlaveServlet(AnalyzerBeansConfiguration configuration) {
+        this(configuration, null);
+    }
+
+    public SlaveServlet(AnalyzerBeansConfiguration configuration, AnalysisListener analysisListener) {
         super();
         _configuration = configuration;
+        _analysisListener = analysisListener;
         _runningJobs = new ConcurrentHashMap<String, AnalysisResultFuture>();
     }
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        final ServletContext servletContext = config.getServletContext();
         if (_configuration == null) {
-            final ServletContext servletContext = config.getServletContext();
-            final Object attribute = servletContext.getAttribute(SERVLET_CONTEXT_ATTRIBUTE_CONFIGURATION);
-            if (attribute != null && attribute instanceof AnalyzerBeansConfiguration) {
-                _configuration = (AnalyzerBeansConfiguration) attribute;
+            final Object configurationAttribute = servletContext.getAttribute(SERVLET_CONTEXT_ATTRIBUTE_CONFIGURATION);
+            if (configurationAttribute != null && configurationAttribute instanceof AnalyzerBeansConfiguration) {
+                _configuration = (AnalyzerBeansConfiguration) configurationAttribute;
+            }
+        }
+        if (_analysisListener == null) {
+            final Object analysisListenerAttribute = servletContext
+                    .getAttribute(SERVLET_CONTEXT_ATTRIBUTE_ANALYSIS_LISTENER);
+            if (analysisListenerAttribute != null && analysisListenerAttribute instanceof AnalysisListener) {
+                _analysisListener = (AnalysisListener) analysisListenerAttribute;
             }
         }
     }
@@ -73,6 +90,6 @@ public class SlaveServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final SlaveServletHelper helper = new SlaveServletHelper(_configuration, _runningJobs);
-        helper.handleRequest(req, resp);
+        helper.handleRequest(req, resp, _analysisListener);
     }
 }

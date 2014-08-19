@@ -39,6 +39,7 @@ import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.JaxbJobReader;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
+import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.result.SimpleAnalysisResult;
@@ -121,7 +122,7 @@ public class SlaveServletHelper {
         _jobInterceptor = jobInterceptor;
         _runningJobs = runningJobsMap;
     }
-
+    
     /**
      * Completely handles a HTTP request and response. This method is
      * functionally equivalent of calling these methods in sequence:
@@ -139,6 +140,27 @@ public class SlaveServletHelper {
      * @throws IOException
      */
     public void handleRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        handleRequest(request, response, new AnalysisListener[0]);
+    }
+
+    /**
+     * Completely handles a HTTP request and response. This method is
+     * functionally equivalent of calling these methods in sequence:
+     * 
+     * {@link #readJob(HttpServletRequest)}
+     * 
+     * {@link #runJob(AnalysisJob, String, AnalysisListener...)
+     * 
+     * {@link #serializeResult(AnalysisResultFuture, String)}
+     * 
+     * {@link #sendResponse(HttpServletResponse, Serializable)}
+     * 
+     * @param request
+     * @param response
+     * @param analysisListeners
+     * @throws IOException
+     */
+    public void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final AnalysisListener ... analysisListeners) throws IOException {
         final String jobId = request.getParameter(HttpClusterManager.HTTP_PARAM_SLAVE_JOB_ID);
         final String action = request.getParameter(HttpClusterManager.HTTP_PARAM_ACTION);
 
@@ -150,7 +172,7 @@ public class SlaveServletHelper {
 
         if (HttpClusterManager.ACTION_RUN.equals(action)) {
             logger.info("Handling 'run' request: {}", jobId);
-            
+
             final AnalysisJob job;
             try {
                 job = readJob(request);
@@ -158,26 +180,26 @@ public class SlaveServletHelper {
                 logger.error("Failed to read job definition from HTTP request", e);
                 throw e;
             }
-            
+
             final Serializable resultObject;
             try {
-                final AnalysisResultFuture resultFuture = runJob(job, jobId);
+                final AnalysisResultFuture resultFuture = runJob(job, jobId, analysisListeners);
                 resultObject = serializeResult(resultFuture, jobId);
             } catch (RuntimeException e) {
                 logger.error("Unexpected error occurred while running slave job", e);
                 throw e;
             }
-            
+
             try {
                 sendResponse(response, resultObject);
             } catch (IOException e) {
                 logger.error("Failed to send job result through HTTP response", e);
                 throw e;
             }
-            
+
             return;
         }
-        
+
         logger.warn("Unspecified action request: {}", jobId);
     }
 
@@ -238,6 +260,7 @@ public class SlaveServletHelper {
     }
 
     /**
+     * Runs a slave job
      * 
      * @param job
      * @return
@@ -257,7 +280,19 @@ public class SlaveServletHelper {
      * @return
      */
     public AnalysisResultFuture runJob(AnalysisJob job, String slaveJobId) {
-        final AnalysisRunner runner = new SlaveAnalysisRunner(_configuration);
+        return runJob(job, slaveJobId, new AnalysisListener[0]);
+    }
+
+    /**
+     * Runs a slave job
+     * 
+     * @param job
+     * @param slaveJobId
+     * @param analysisListeners
+     * @return
+     */
+    public AnalysisResultFuture runJob(AnalysisJob job, String slaveJobId, AnalysisListener... analysisListeners) {
+        final AnalysisRunner runner = new SlaveAnalysisRunner(_configuration, analysisListeners);
         final AnalysisResultFuture resultFuture = runner.run(job);
         if (slaveJobId != null) {
             _runningJobs.put(slaveJobId, resultFuture);

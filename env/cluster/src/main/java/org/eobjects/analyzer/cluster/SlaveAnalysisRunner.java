@@ -23,6 +23,7 @@ import org.eobjects.analyzer.beans.api.Close;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.runner.AnalysisListener;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
@@ -35,13 +36,17 @@ import org.slf4j.LoggerFactory;
  * methods that are marked with distributed=false.
  */
 public class SlaveAnalysisRunner extends AnalysisRunnerImpl {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(SlaveAnalysisRunner.class);
 
     public SlaveAnalysisRunner(AnalyzerBeansConfiguration configuration) {
         super(configuration);
     }
-    
+
+    public SlaveAnalysisRunner(AnalyzerBeansConfiguration configuration, AnalysisListener... sharedAnalysisListeners) {
+        super(configuration, sharedAnalysisListeners);
+    }
+
     @Override
     public AnalysisResultFuture run(AnalysisJob job) {
         logger.info("Running slave job: {}", job);
