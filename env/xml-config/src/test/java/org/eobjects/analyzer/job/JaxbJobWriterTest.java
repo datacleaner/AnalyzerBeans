@@ -19,18 +19,24 @@
  */
 package org.eobjects.analyzer.job;
 
+import static org.junit.Assert.*;
+
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.datatype.DatatypeFactory;
 
 import junit.framework.TestCase;
 
 import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 import org.apache.metamodel.util.FileHelper;
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.beans.StringAnalyzer;
@@ -43,6 +49,7 @@ import org.eobjects.analyzer.beans.stringpattern.PatternFinderAnalyzer;
 import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
+import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.data.InputColumn;
@@ -54,7 +61,9 @@ import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
+import org.eobjects.analyzer.test.MockAnalyzer;
 import org.eobjects.analyzer.test.TestHelper;
+import org.junit.Test;
 
 public class JaxbJobWriterTest extends TestCase {
 
@@ -79,6 +88,49 @@ public class JaxbJobWriterTest extends TestCase {
         _writer = new JaxbJobWriter(new AnalyzerBeansConfigurationImpl(), _metadataFactory);
     };
 
+    public void testColumnPathWhenColumnNameIsBlank() throws Exception {
+        final CsvDatastore ds = new CsvDatastore("input", "src/test/resources/csv_with_blank_column_name.txt", null,
+                ';', "UTF8");
+
+        final SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
+        descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(MockAnalyzer.class));
+
+        final DatastoreCatalogImpl datastoreCatalog = new DatastoreCatalogImpl(ds);
+        
+        final AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(datastoreCatalog).replace(
+                descriptorProvider);
+        
+        final AnalysisJob builtJob;
+        try (final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(conf)) {
+            jobBuilder.setDatastore(ds);
+            final Table table = jobBuilder.getDatastoreConnection().getDataContext().getDefaultSchema().getTable(0);
+            assertEquals("[foo, bar, baz, ]", Arrays.toString(table.getColumnNames()));
+            assertEquals(4, table.getColumnCount());
+            jobBuilder.addSourceColumns(table.getColumns());
+
+            final AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);
+            analyzer.addInputColumns(jobBuilder.getSourceColumns());
+
+            builtJob = jobBuilder.toAnalysisJob();
+        }
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        _writer.write(builtJob, out);
+
+        final byte[] bytes = out.toByteArray();
+        final String str = new String(bytes);
+        assertTrue(str,
+                str.indexOf("<column id=\"col_3\" path=\"csv_with_blank_column_name.txt.\" type=\"STRING\"/>") != -1);
+
+        final AnalysisJob readJob = new JaxbJobReader(conf).read(new ByteArrayInputStream(bytes));
+
+        List<InputColumn<?>> sourceColumns = readJob.getSourceColumns();
+        assertEquals("[MetaModelInputColumn[resources.csv_with_blank_column_name.txt.foo], "
+                + "MetaModelInputColumn[resources.csv_with_blank_column_name.txt.bar], "
+                + "MetaModelInputColumn[resources.csv_with_blank_column_name.txt.baz], "
+                + "MetaModelInputColumn[resources.csv_with_blank_column_name.txt.]]", sourceColumns.toString());
+    }
+
     public void testReadAndWriteAnyComponentRequirementJob() throws Exception {
         Datastore ds = TestHelper.createSampleDatabaseDatastore("my database");
         SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
@@ -90,7 +142,8 @@ public class JaxbJobWriterTest extends TestCase {
 
         JaxbJobReader reader = new JaxbJobReader(conf);
         AnalysisJob job;
-        try (AnalysisJobBuilder jobBuilder = reader.create(new File("src/test/resources/example-job-any-component-requirement.xml"))) {
+        try (AnalysisJobBuilder jobBuilder = reader.create(new File(
+                "src/test/resources/example-job-any-component-requirement.xml"))) {
             job = jobBuilder.toAnalysisJob();
         }
 
@@ -99,7 +152,7 @@ public class JaxbJobWriterTest extends TestCase {
 
         assertMatchesBenchmark(job, "JaxbJobWriterTest-testReadAndWriteAnyComponentRequirementJob.xml");
     }
-    
+
     public void testReadAndWriteCompoundComponentRequirementJob() throws Exception {
         Datastore ds = TestHelper.createSampleDatabaseDatastore("my database");
         SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
@@ -111,7 +164,8 @@ public class JaxbJobWriterTest extends TestCase {
 
         JaxbJobReader reader = new JaxbJobReader(conf);
         AnalysisJob job;
-        try (AnalysisJobBuilder jobBuilder = reader.create(new File("src/test/resources/example-job-compound-component-requirement.xml"))) {
+        try (AnalysisJobBuilder jobBuilder = reader.create(new File(
+                "src/test/resources/example-job-compound-component-requirement.xml"))) {
             job = jobBuilder.toAnalysisJob();
         }
 
@@ -161,8 +215,7 @@ public class JaxbJobWriterTest extends TestCase {
             assertEquals("        <data-context ref=_db_/>", lines[8]);
             assertEquals("        <columns>", lines[9]);
             assertEquals("            <column id=_col_0_ path=_ORDERS.ORDERDATE_ type=_TIMESTAMP_/>", lines[10]);
-            assertEquals("            <column id=_col_1_ path=_ORDERS.SHIPPEDDATE_ type=_TIMESTAMP_/>",
-                    lines[11]);
+            assertEquals("            <column id=_col_1_ path=_ORDERS.SHIPPEDDATE_ type=_TIMESTAMP_/>", lines[11]);
             assertEquals("        </columns>", lines[12]);
             assertEquals("    </source>", lines[13]);
             assertEquals("    <transformation/>", lines[14]);

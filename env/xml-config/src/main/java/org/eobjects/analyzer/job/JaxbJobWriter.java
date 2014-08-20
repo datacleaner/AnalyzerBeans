@@ -69,6 +69,8 @@ import org.eobjects.analyzer.util.convert.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
+
 public class JaxbJobWriter implements JobWriter<OutputStream> {
 
     private static final String COLUMN_PATH_QUALIFICATION_FULL = "full";
@@ -172,6 +174,10 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
     private String getColumnPath(Column column, String columnPathQualification) {
         switch (columnPathQualification) {
         case COLUMN_PATH_QUALIFICATION_COLUMN:
+            final String columnName = column.getName();
+            if (Strings.isNullOrEmpty(columnName)) {
+                return column.getTable().getName() + '.' + column.getName(); 
+            }
             return column.getName();
         case COLUMN_PATH_QUALIFICATION_TABLE:
             return column.getTable().getName() + '.' + column.getName();
@@ -185,7 +191,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         if (sourceColumns == null || sourceColumns.isEmpty()) {
             return COLUMN_PATH_QUALIFICATION_FULL;
         }
-        
+
         try (DatastoreConnection connection = datastore.openConnection()) {
             SchemaNavigator schemaNavigator = connection.getSchemaNavigator();
             Schema[] schemas = schemaNavigator.getSchemas();
