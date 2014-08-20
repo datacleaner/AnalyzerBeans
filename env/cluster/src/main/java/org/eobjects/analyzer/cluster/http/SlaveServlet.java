@@ -90,6 +90,10 @@ public class SlaveServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final SlaveServletHelper helper = new SlaveServletHelper(_configuration, _runningJobs);
-        helper.handleRequest(req, resp, _analysisListener);
+        if (_analysisListener == null) {
+            helper.handleRequest(req, resp);
+        } else {
+            helper.handleRequest(req, resp, _analysisListener);
+        }
     }
 }
