@@ -45,7 +45,7 @@ public final class CompositeAnalysisListener implements AnalysisListener {
 
     public CompositeAnalysisListener(AnalysisListener firstDelegate, AnalysisListener... delegates) {
         _delegates = new ArrayList<AnalysisListener>(1 + delegates.length);
-        _delegates.add(firstDelegate);
+        addDelegate(firstDelegate);
         for (AnalysisListener analysisListener : delegates) {
             addDelegate(analysisListener);
         }
@@ -57,6 +57,9 @@ public final class CompositeAnalysisListener implements AnalysisListener {
      * @param analysisListener
      */
     public void addDelegate(AnalysisListener analysisListener) {
+        if (analysisListener == null) {
+            return;
+        }
         _delegates.add(analysisListener);
     }
 
