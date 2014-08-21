@@ -9,9 +9,9 @@
 		<job-description>An example job with complete metadata</job-description>
 		<job-version>1.1</job-version>
 		
-		<properties>
+		<metadata-properties>
 			<property name="propertyName">propertyValue</property>
-		</properties>
+		</metadata-properties>
 		
 	</job-metadata>
 
