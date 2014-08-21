@@ -19,8 +19,6 @@
  */
 package org.eobjects.analyzer.job;
 
-import static org.junit.Assert.*;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -63,7 +61,6 @@ import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 import org.eobjects.analyzer.test.MockAnalyzer;
 import org.eobjects.analyzer.test.TestHelper;
-import org.junit.Test;
 
 public class JaxbJobWriterTest extends TestCase {
 
