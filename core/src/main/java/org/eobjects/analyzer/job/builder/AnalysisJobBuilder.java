@@ -114,12 +114,13 @@ public final class AnalysisJobBuilder implements Closeable {
     /**
      * Private constructor for {@link #withoutListeners()} method
      */
-    private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, DatastoreConnection datastoreConnection,
-            Map<String, String> metadataProperties, List<MetaModelInputColumn> sourceColumns,
-            ComponentRequirement defaultRequirement, IdGenerator idGenerator,
+    private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, Datastore datastore,
+            DatastoreConnection datastoreConnection, Map<String, String> metadataProperties,
+            List<MetaModelInputColumn> sourceColumns, ComponentRequirement defaultRequirement, IdGenerator idGenerator,
             List<TransformerJobBuilder<?>> transformerJobBuilders, List<FilterJobBuilder<?, ?>> filterJobBuilders,
             List<AnalyzerJobBuilder<?>> analyzerJobBuilders) {
         _configuration = configuration;
+        _datastore = datastore;
         _datastoreConnection = datastoreConnection;
         _metadataProperties = metadataProperties;
         _sourceColumns = sourceColumns;
@@ -165,7 +166,10 @@ public final class AnalysisJobBuilder implements Closeable {
         _datastoreConnection = datastoreConnection;
 
         if (datastoreConnection != null && _datastore == null) {
-            _datastore = datastoreConnection.getDatastore();
+            Datastore datastore = datastoreConnection.getDatastore();
+            if (datastore != null) {
+                setDatastore(datastore);
+            }
         }
 
         return this;
@@ -912,7 +916,7 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public AnalysisJobBuilder withoutListeners() {
-        final AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _datastoreConnection,
+        final AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _datastore, _datastoreConnection,
                 _metadataProperties, _sourceColumns, _defaultRequirement, _transformedColumnIdGenerator,
                 _transformerJobBuilders, _filterJobBuilders, _analyzerJobBuilders);
         return clone;

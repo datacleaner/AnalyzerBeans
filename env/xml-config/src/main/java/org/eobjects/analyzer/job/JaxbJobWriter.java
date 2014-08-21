@@ -188,7 +188,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
     }
 
     private String getColumnPathQualification(Datastore datastore, Collection<InputColumn<?>> sourceColumns) {
-        if (sourceColumns == null || sourceColumns.isEmpty()) {
+        if (datastore == null || sourceColumns == null || sourceColumns.isEmpty()) {
             return COLUMN_PATH_QUALIFICATION_FULL;
         }
 
