@@ -219,7 +219,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
     }
 
     private Map<String, String> getMetadataProperties(JobMetadataType metadata) {
-    	MetadataProperties properties = metadata.getProperties();
+    	MetadataProperties properties = metadata.getMetadataProperties();
     	
 		if(properties==null){
 			return Collections.emptyMap() ;

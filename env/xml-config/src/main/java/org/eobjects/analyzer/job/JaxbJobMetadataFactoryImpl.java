@@ -20,10 +20,13 @@
 package org.eobjects.analyzer.job;
 
 import java.util.GregorianCalendar;
+import java.util.Map;
 
 import javax.xml.datatype.DatatypeFactory;
 
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
+import org.eobjects.analyzer.job.jaxb.MetadataProperties;
+import org.eobjects.analyzer.job.jaxb.MetadataProperties.Property;
 
 public class JaxbJobMetadataFactoryImpl implements JaxbJobMetadataFactory {
 
@@ -32,16 +35,19 @@ public class JaxbJobMetadataFactoryImpl implements JaxbJobMetadataFactory {
 	private final String _jobName;
 	private final String _jobDescription;
 	private final String _jobVersion;
+	private final Map<String,String> _properties;
 
 	public JaxbJobMetadataFactoryImpl() {
-		this(null, null, null, null);
+		this(null, null, null, null,null);
 	}
 
-	public JaxbJobMetadataFactoryImpl(String author, String jobName, String jobDescription, String jobVersion) {
+	public JaxbJobMetadataFactoryImpl(String author, String jobName, String jobDescription, String jobVersion, Map<String,String> properties){
 		_author = author;
 		_jobName = jobName;
 		_jobDescription = jobDescription;
 		_jobVersion = jobVersion;
+		_properties=properties;
+		
 		try {
 			_datatypeFactory = DatatypeFactory.newInstance();
 		} catch (Exception e) {
@@ -58,8 +64,24 @@ public class JaxbJobMetadataFactoryImpl implements JaxbJobMetadataFactory {
 		jobMetadata.setJobName(_jobName);
 		jobMetadata.setJobDescription(_jobDescription);
 		jobMetadata.setJobVersion(_jobVersion);
+		MetadataProperties metadataProperties = null;
+		if(_properties!=null && _properties.size() > 0){
+			metadataProperties = getMetadataProperties(_properties);
+		}
+		jobMetadata.setMetadataProperties(metadataProperties);
 
 		return jobMetadata;
+	}
+	
+	private MetadataProperties getMetadataProperties(Map<String,String> properties){
+		 MetadataProperties metadataProperties = new MetadataProperties();
+		for(Map.Entry<String, String> metadataProperty : properties.entrySet()){
+			Property property = new Property();
+			property.setName(metadataProperty.getKey());
+			property.setValue(metadataProperty.getValue());
+			metadataProperties.getProperty().add(property);
+		}
+		return metadataProperties;
 	}
 
 }

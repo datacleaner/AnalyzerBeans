@@ -20,16 +20,21 @@
 package org.eobjects.analyzer.job;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
+import org.eobjects.analyzer.job.jaxb.MetadataProperties;
 
 public class JaxbJobMetadataFactoryImplTest extends TestCase {
 
 	public void testCreate() throws Exception {
-		JaxbJobMetadataFactory factory = new JaxbJobMetadataFactoryImpl("kasper", "my job", "desc", "1.0");
+		Map<String,String> properties = new HashMap<String,String>();
+		properties.put("propertyName", "propertyValue");
+		JaxbJobMetadataFactory factory = new JaxbJobMetadataFactoryImpl("kasper", "my job", "desc", "1.0",properties);
 
 		JobMetadataType metadata = factory.create(EasyMock.createMock(AnalysisJob.class));
 		int year = Calendar.getInstance().get(Calendar.YEAR);
@@ -38,6 +43,9 @@ public class JaxbJobMetadataFactoryImplTest extends TestCase {
 		assertEquals("my job", metadata.getJobName());
 		assertEquals("desc", metadata.getJobDescription());
 		assertEquals("1.0", metadata.getJobVersion());
+		MetadataProperties metadataProperties = metadata.getMetadataProperties();
+		assertEquals("propertyName", metadataProperties.getProperty().get(0).getName());
+		assertEquals("propertyValue",metadataProperties.getProperty().get(0).getValue());
 
 		assertEquals(year, metadata.getUpdatedDate().getYear());
 		assertEquals(null, metadata.getCreatedDate());
