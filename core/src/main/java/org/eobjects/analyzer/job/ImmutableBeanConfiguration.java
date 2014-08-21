@@ -20,13 +20,14 @@
 package org.eobjects.analyzer.job;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.metamodel.util.EqualsBuilder;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.PropertyDescriptor;
-import org.apache.metamodel.util.EqualsBuilder;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Default (immutable) implementation of {@link BeanConfiguration}.
@@ -37,11 +38,11 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
 
     private final Map<PropertyDescriptor, Object> _properties;
 
-    public ImmutableBeanConfiguration(Map<ConfiguredPropertyDescriptor, Object> properties) {
+    public ImmutableBeanConfiguration(Map<? extends PropertyDescriptor, Object> properties) {
         if (properties == null) {
-            _properties = new HashMap<PropertyDescriptor, Object>();
+            _properties = ImmutableMap.of();
         } else {
-            _properties = new HashMap<PropertyDescriptor, Object>(properties);
+            _properties = ImmutableMap.copyOf(properties);
         }
 
         // validate contents

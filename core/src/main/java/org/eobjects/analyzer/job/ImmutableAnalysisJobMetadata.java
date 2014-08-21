@@ -22,12 +22,14 @@ package org.eobjects.analyzer.job;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.metamodel.schema.ColumnType;
 import org.apache.metamodel.util.BaseObject;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Immutable implementation of {@link AnalysisJobMetadata}.
@@ -44,11 +46,11 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
     private final List<String> _sourceColumnPaths;
     private final Map<String, String> _variables;
     private final List<ColumnType> _sourceColumnTypes;
-    private final Map<String,String> _properties;
+    private final Map<String, String> _properties;
 
     public ImmutableAnalysisJobMetadata(String jobName, String jobVersion, String jobDescription, String author,
             Date createdDate, Date updatedDate, String datastoreName, List<String> sourceColumnPaths,
-            List<ColumnType> sourceColumnTypes, Map<String, String> variables,Map<String,String> properties) {
+            List<ColumnType> sourceColumnTypes, Map<String, String> variables, Map<String, String> properties) {
         _jobName = jobName;
         _jobVersion = jobVersion;
         _jobDescription = jobDescription;
@@ -56,23 +58,28 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
         _createdDate = createdDate;
         _updatedDate = updatedDate;
         _datastoreName = datastoreName;
-        _properties = properties ;
-        if (sourceColumnPaths == null) {
-            sourceColumnPaths = Collections.emptyList();
+
+        if (properties == null) {
+            _properties = Collections.emptyMap();
         } else {
-            sourceColumnPaths = new ArrayList<String>(sourceColumnPaths);
+            _properties = ImmutableMap.copyOf(properties);
         }
-        _sourceColumnPaths = Collections.unmodifiableList(sourceColumnPaths);
+        if (sourceColumnPaths == null) {
+            _sourceColumnPaths = Collections.emptyList();
+        } else {
+            _sourceColumnPaths = ImmutableList.copyOf(sourceColumnPaths);
+        }
         if (sourceColumnTypes == null) {
             _sourceColumnTypes = new ArrayList<ColumnType>(sourceColumnPaths.size());
         } else {
+            // we don't use ImmutableList here because it does not allow nulls
             _sourceColumnTypes = Collections.unmodifiableList(sourceColumnTypes);
         }
 
         if (variables == null) {
             variables = Collections.emptyMap();
         } else {
-            variables = new HashMap<String, String>(variables);
+            variables = ImmutableMap.copyOf(variables);
         }
         _variables = Collections.unmodifiableMap(variables);
     }
@@ -141,9 +148,9 @@ public class ImmutableAnalysisJobMetadata extends BaseObject implements Analysis
         return _sourceColumnTypes;
     }
 
-	@Override
-	public Map<String, String> getProperties() {
-		return _properties;
-	}
+    @Override
+    public Map<String, String> getProperties() {
+        return _properties;
+    }
 
 }

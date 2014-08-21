@@ -19,15 +19,14 @@
  */
 package org.eobjects.analyzer.job;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
+import org.apache.metamodel.util.BaseObject;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 
-import org.apache.metamodel.util.BaseObject;
+import com.google.common.collect.ImmutableList;
 
 public final class ImmutableAnalysisJob extends BaseObject implements AnalysisJob {
 
@@ -36,15 +35,46 @@ public final class ImmutableAnalysisJob extends BaseObject implements AnalysisJo
     private final List<TransformerJob> _transformerJobs;
     private final List<AnalyzerJob> _analyzerJobs;
     private final List<FilterJob> _filterJobs;
+    private final AnalysisJobMetadata _metadata;
 
+    /**
+     * Creates an AnalysisJob
+     * 
+     * @param datastore
+     * @param sourceColumns
+     * @param filterJobs
+     * @param transformerJobs
+     * @param analyzerJobs
+     * @deprecated use
+     *             {@link #ImmutableAnalysisJob(AnalysisJobMetadata, Datastore, Collection, Collection, Collection, Collection)}
+     *             instead
+     */
+    @Deprecated
     public ImmutableAnalysisJob(Datastore datastore, Collection<? extends InputColumn<?>> sourceColumns,
             Collection<FilterJob> filterJobs, Collection<TransformerJob> transformerJobs,
             Collection<AnalyzerJob> analyzerJobs) {
+        this(AnalysisJobMetadata.EMPTY_METADATA, datastore, sourceColumns, filterJobs, transformerJobs, analyzerJobs);
+    }
+
+    /**
+     * Creates an AnalysisJob
+     * 
+     * @param metadata
+     * @param datastore
+     * @param sourceColumns
+     * @param filterJobs
+     * @param transformerJobs
+     * @param analyzerJobs
+     */
+    public ImmutableAnalysisJob(AnalysisJobMetadata metadata, Datastore datastore,
+            Collection<? extends InputColumn<?>> sourceColumns, Collection<FilterJob> filterJobs,
+            Collection<TransformerJob> transformerJobs, Collection<AnalyzerJob> analyzerJobs) {
+        _metadata = metadata;
         _datastore = datastore;
-        _sourceColumns = Collections.unmodifiableList(new ArrayList<InputColumn<?>>(sourceColumns));
-        _transformerJobs = Collections.unmodifiableList(new ArrayList<TransformerJob>(transformerJobs));
-        _analyzerJobs = Collections.unmodifiableList(new ArrayList<AnalyzerJob>(analyzerJobs));
-        _filterJobs = Collections.unmodifiableList(new ArrayList<FilterJob>(filterJobs));
+        _sourceColumns = ImmutableList.copyOf(sourceColumns);
+        _transformerJobs = ImmutableList.copyOf(transformerJobs);
+        _analyzerJobs = ImmutableList.copyOf(analyzerJobs);
+        _filterJobs = ImmutableList.copyOf(filterJobs);
     }
 
     @Override
@@ -54,6 +84,14 @@ public final class ImmutableAnalysisJob extends BaseObject implements AnalysisJo
         identifiers.add(_transformerJobs);
         identifiers.add(_analyzerJobs);
         identifiers.add(_filterJobs);
+    }
+
+    @Override
+    public AnalysisJobMetadata getMetadata() {
+        if (_metadata == null) {
+            return AnalysisJobMetadata.EMPTY_METADATA;
+        }
+        return _metadata;
     }
 
     @Override

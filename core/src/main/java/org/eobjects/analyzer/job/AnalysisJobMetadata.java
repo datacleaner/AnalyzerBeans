@@ -37,25 +37,27 @@ import org.apache.metamodel.schema.ColumnType;
  */
 public interface AnalysisJobMetadata {
 
-	public String getJobName();
+    public static final AnalysisJobMetadata EMPTY_METADATA = new EmptyAnalysisJobMetadata();
 
-	public String getJobVersion();
+    public String getJobName();
 
-	public String getJobDescription();
+    public String getJobVersion();
 
-	public String getAuthor();
+    public String getJobDescription();
 
-	public Date getCreatedDate();
+    public String getAuthor();
 
-	public Date getUpdatedDate();
+    public Date getCreatedDate();
 
-	public String getDatastoreName();
+    public Date getUpdatedDate();
 
-	public List<String> getSourceColumnPaths();
-	
-	public List<ColumnType> getSourceColumnTypes();
+    public String getDatastoreName();
 
-	public Map<String, String> getVariables();
-	
-	public Map<String,String> getProperties();
+    public List<String> getSourceColumnPaths();
+
+    public List<ColumnType> getSourceColumnTypes();
+
+    public Map<String, String> getVariables();
+
+    public Map<String, String> getProperties();
 }

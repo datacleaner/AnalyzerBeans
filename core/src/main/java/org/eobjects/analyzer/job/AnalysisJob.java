@@ -42,6 +42,14 @@ import org.apache.metamodel.schema.Column;
 public interface AnalysisJob {
 
     /**
+     * Gets the {@link AnalysisJobMetadata} which add additional descriptions
+     * and properties of the job.
+     * 
+     * @return
+     */
+    public AnalysisJobMetadata getMetadata();
+
+    /**
      * Gets the {@link Datastore} that this job uses as it's source.
      * 
      * @return

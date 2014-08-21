@@ -21,8 +21,12 @@ package org.eobjects.analyzer.job;
 
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 
+/**
+ * Interface that acts as an optional hook for {@link JaxbJobWriter} to define
+ * custom job metadata.
+ */
 public interface JaxbJobMetadataFactory {
 
-	public JobMetadataType create(AnalysisJob analysisJob) throws Exception;
+    public JobMetadataType create(AnalysisJob analysisJob) throws Exception;
 
 }

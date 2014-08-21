@@ -71,16 +71,16 @@ public class JaxbJobWriterTest extends TestCase {
     private JaxbJobWriter _writer;
 
     protected void setUp() throws Exception {
-        _metadataFactory = new JaxbJobMetadataFactory() {
+        _metadataFactory = new JaxbJobMetadataFactoryImpl() {
+
             @Override
-            public JobMetadataType create(AnalysisJob analysisJob) throws Exception {
-                JobMetadataType jobMetadata = new JobMetadataType();
+            protected void buildMainSection(JobMetadataType jobMetadata, AnalysisJob analysisJob) throws Exception {
                 jobMetadata.setAuthor("John Doe");
                 jobMetadata.setJobVersion("2.0");
                 jobMetadata.setCreatedDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(2010, 11, 12, 13, 48,
                         0, 0, 0));
-                return jobMetadata;
             }
+
         };
         _writer = new JaxbJobWriter(new AnalyzerBeansConfigurationImpl(), _metadataFactory);
     };
@@ -93,10 +93,10 @@ public class JaxbJobWriterTest extends TestCase {
         descriptorProvider.addAnalyzerBeanDescriptor(Descriptors.ofAnalyzer(MockAnalyzer.class));
 
         final DatastoreCatalogImpl datastoreCatalog = new DatastoreCatalogImpl(ds);
-        
+
         final AnalyzerBeansConfiguration conf = new AnalyzerBeansConfigurationImpl().replace(datastoreCatalog).replace(
                 descriptorProvider);
-        
+
         final AnalysisJob builtJob;
         try (final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(conf)) {
             jobBuilder.setDatastore(ds);
@@ -236,6 +236,7 @@ public class JaxbJobWriterTest extends TestCase {
 
     public void testEmptyJobEnvelope() throws Exception {
         AnalysisJob job = EasyMock.createMock(AnalysisJob.class);
+        EasyMock.expect(job.getMetadata()).andReturn(AnalysisJobMetadata.EMPTY_METADATA).anyTimes();
         Datastore ds = EasyMock.createMock(Datastore.class);
 
         EasyMock.expect(job.getDatastore()).andReturn(ds);

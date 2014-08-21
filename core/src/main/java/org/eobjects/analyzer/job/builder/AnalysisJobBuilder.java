@@ -23,11 +23,15 @@ import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.ColumnType;
 import org.apache.metamodel.schema.Table;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
@@ -44,6 +48,7 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalysisJobImmutabilizer;
+import org.eobjects.analyzer.job.AnalysisJobMetadata;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ComponentRequirement;
@@ -52,6 +57,7 @@ import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
+import org.eobjects.analyzer.job.ImmutableAnalysisJobMetadata;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.SimpleComponentRequirement;
@@ -86,6 +92,8 @@ public final class AnalysisJobBuilder implements Closeable {
     private final List<TransformerJobBuilder<?>> _transformerJobBuilders;
     private final List<AnalyzerJobBuilder<?>> _analyzerJobBuilders;
 
+    private final Map<String, String> _metadataProperties;
+
     // listeners, typically for UI that uses the builders
     private final List<SourceColumnChangeListener> _sourceColumnListeners = new ArrayList<SourceColumnChangeListener>();
     private final List<AnalyzerChangeListener> _analyzerChangeListeners = new ArrayList<AnalyzerChangeListener>();
@@ -100,17 +108,20 @@ public final class AnalysisJobBuilder implements Closeable {
         _filterJobBuilders = new ArrayList<FilterJobBuilder<?, ?>>();
         _transformerJobBuilders = new ArrayList<TransformerJobBuilder<?>>();
         _analyzerJobBuilders = new ArrayList<AnalyzerJobBuilder<?>>();
+        _metadataProperties = new HashMap<>();
     }
 
     /**
      * Private constructor for {@link #withoutListeners()} method
      */
-    private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, DatastoreConnection dataContextProvider,
-            List<MetaModelInputColumn> sourceColumns, ComponentRequirement defaultRequirement, IdGenerator idGenerator,
+    private AnalysisJobBuilder(AnalyzerBeansConfiguration configuration, DatastoreConnection datastoreConnection,
+            Map<String, String> metadataProperties, List<MetaModelInputColumn> sourceColumns,
+            ComponentRequirement defaultRequirement, IdGenerator idGenerator,
             List<TransformerJobBuilder<?>> transformerJobBuilders, List<FilterJobBuilder<?, ?>> filterJobBuilders,
             List<AnalyzerJobBuilder<?>> analyzerJobBuilders) {
         _configuration = configuration;
-        _datastoreConnection = dataContextProvider;
+        _datastoreConnection = datastoreConnection;
+        _metadataProperties = metadataProperties;
         _sourceColumns = sourceColumns;
         _defaultRequirement = defaultRequirement;
         _transformedColumnIdGenerator = idGenerator;
@@ -138,13 +149,13 @@ public final class AnalysisJobBuilder implements Closeable {
 
     public AnalysisJobBuilder setDatastore(Datastore datastore) {
         _datastore = datastore;
-        final DatastoreConnection dataContextProvider;
+        final DatastoreConnection datastoreConnection;
         if (datastore == null) {
-            dataContextProvider = null;
+            datastoreConnection = null;
         } else {
-            dataContextProvider = datastore.openConnection();
+            datastoreConnection = datastore.openConnection();
         }
-        return setDatastoreConnection(dataContextProvider);
+        return setDatastoreConnection(datastoreConnection);
     }
 
     public AnalysisJobBuilder setDatastoreConnection(DatastoreConnection datastoreConnection) {
@@ -152,15 +163,12 @@ public final class AnalysisJobBuilder implements Closeable {
             _datastoreConnection.close();
         }
         _datastoreConnection = datastoreConnection;
-        return this;
-    }
 
-    /**
-     * @deprecated use {@link #getDatastoreConnection()} instead.
-     */
-    @Deprecated
-    public DatastoreConnection getDataContextProvider() {
-        return _datastoreConnection;
+        if (datastoreConnection != null && _datastore == null) {
+            _datastore = datastoreConnection.getDatastore();
+        }
+
+        return this;
     }
 
     public DatastoreConnection getDatastoreConnection() {
@@ -566,7 +574,7 @@ public final class AnalysisJobBuilder implements Closeable {
         if (validate && !isConfigured(true)) {
             throw new IllegalStateException("Analysis job is not correctly configured");
         }
-        
+
         final AnalysisJobImmutabilizer immutabilizer = new AnalysisJobImmutabilizer();
 
         final Collection<FilterJob> filterJobs = new LinkedList<FilterJob>();
@@ -604,9 +612,32 @@ public final class AnalysisJobBuilder implements Closeable {
             }
         }
 
-        final DatastoreConnection con = _datastoreConnection;
-        final Datastore datastore = con.getDatastore();
-        return new ImmutableAnalysisJob(datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs);
+        final Datastore datastore = getDatastore();
+
+        final AnalysisJobMetadata metadata = createMetadata();
+
+        return new ImmutableAnalysisJob(metadata, datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs);
+    }
+
+    public AnalysisJobMetadata createMetadata() {
+        final Datastore datastore = getDatastore();
+        final String datastoreName = (datastore == null ? null : datastore.getName());
+
+        final List<MetaModelInputColumn> sourceColumns = getSourceColumns();
+        final List<String> sourceColumnPaths = new ArrayList<>(sourceColumns.size());
+        final List<ColumnType> sourceColumnTypes = new ArrayList<>(sourceColumns.size());
+        for (final MetaModelInputColumn sourceColumn : sourceColumns) {
+            final Column column = sourceColumn.getPhysicalColumn();
+            final String path = column.getQualifiedLabel();
+            final ColumnType type = column.getType();
+
+            sourceColumnPaths.add(path);
+            sourceColumnTypes.add(type);
+        }
+
+        final AnalysisJobMetadata metadata = new ImmutableAnalysisJobMetadata(null, null, null, null, new Date(), null,
+                datastoreName, sourceColumnPaths, sourceColumnTypes, null, _metadataProperties);
+        return metadata;
     }
 
     /**
@@ -863,6 +894,16 @@ public final class AnalysisJobBuilder implements Closeable {
         assert _filterJobBuilders.isEmpty();
     }
 
+    /**
+     * Gets a mutable {@link Map} for setting properties that will eventually be
+     * available via {@link AnalysisJobMetadata#getProperties()}.
+     * 
+     * @return
+     */
+    public Map<String, String> getMetadataProperties() {
+        return _metadataProperties;
+    }
+
     @Override
     public void close() {
         if (_datastoreConnection != null) {
@@ -871,9 +912,9 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public AnalysisJobBuilder withoutListeners() {
-        final AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _datastoreConnection, _sourceColumns,
-                _defaultRequirement, _transformedColumnIdGenerator, _transformerJobBuilders, _filterJobBuilders,
-                _analyzerJobBuilders);
+        final AnalysisJobBuilder clone = new AnalysisJobBuilder(_configuration, _datastoreConnection,
+                _metadataProperties, _sourceColumns, _defaultRequirement, _transformedColumnIdGenerator,
+                _transformerJobBuilders, _filterJobBuilders, _analyzerJobBuilders);
         return clone;
     }
 }
