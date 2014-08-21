@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans-components</artifactId>
-		<version>1.0-RC4</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-uniqueness</artifactId>
 	<description>Unique key checking component for AnalyzerBeans</description>
