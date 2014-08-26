@@ -29,10 +29,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 /**
- * Abstract descriptor for things that are represented by a method on a component class.
+ * Abstract descriptor for things that are represented by a method on a
+ * component class.
  */
 class AbstractMethodDescriptor extends BaseObject implements Serializable {
 

@@ -35,11 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ import com.googlecode.gentyref.GenericTypeReflector;
 /**
  * Various static methods for reflection related tasks.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ReflectionUtils {
 
@@ -439,7 +438,7 @@ public final class ReflectionUtils {
         if (clazz == Object.class || clazz == null) {
             return null;
         }
-        
+
         try {
             // first try without parameters
             Method method = clazz.getDeclaredMethod(name);
@@ -474,19 +473,63 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Gets all methods of a class, excluding those from Object
+     * Tells which approach {@link #getMethods(Class)} is being implemented with
+     * 
+     * @return
+     */
+    public static boolean isGetMethodsLegacyApproach() {
+        final String version = SystemProperties.getString("java.version", "");
+        final boolean legacyApproach = version.startsWith("1.7");
+        return legacyApproach;
+    }
+
+    /**
+     * Gets all methods of a class, excluding those from Object.
+     * 
+     * Warning: This method's result varies slightly on Java 7 and on Java 8.
+     * With Java 8 overridden methods are properly removed from the result, and
+     * inherited annotations thus also available from the result. On Java 7,
+     * overridden methods will be returned multiple times.
+     * 
+     * @see #isGetMethodsLegacyApproach()
      * 
      * @param clazz
      * @return
      */
     public static Method[] getMethods(Class<?> clazz) {
+        final boolean legacyApproach = isGetMethodsLegacyApproach();
+
+        final List<Method> allMethods = new ArrayList<>();
+        addMethods(allMethods, clazz, legacyApproach);
+
+        return allMethods.toArray(new Method[allMethods.size()]);
+    }
+
+    private static void addMethods(final List<Method> allMethods, final Class<?> clazz, final boolean legacyApproach) {
         if (clazz == Object.class || clazz == null) {
-            return new Method[0];
+            return;
         }
-        Method[] m = clazz.getDeclaredMethods();
-        Class<?> superclass = clazz.getSuperclass();
-        m = CollectionUtils.array(m, getMethods(superclass));
-        return m;
+
+        if (legacyApproach) {
+            // in java 7 and previous, getDeclaredMethods() is used and a
+            // recursive call is applied throughout the hierarchy
+
+            final Method[] methods = clazz.getDeclaredMethods();
+            for (final Method method : methods) {
+                allMethods.add(method);
+            }
+            final Class<?> superclass = clazz.getSuperclass();
+            addMethods(allMethods, superclass, legacyApproach);
+        } else {
+            // since java 8, getMethods() returns all relevant methods
+            final Method[] methods = clazz.getMethods();
+            for (final Method method : methods) {
+                final Class<?> declaringClass = method.getDeclaringClass();
+                if (declaringClass != Object.class) {
+                    allMethods.add(method);
+                }
+            }
+        }
     }
 
     /**
@@ -496,13 +539,21 @@ public final class ReflectionUtils {
      * @return
      */
     public static Field[] getFields(Class<?> clazz) {
+        List<Field> allFields = new ArrayList<>();
+        addFields(allFields, clazz);
+        return allFields.toArray(new Field[allFields.size()]);
+    }
+
+    private static void addFields(List<Field> allFields, Class<?> clazz) {
         if (clazz == Object.class) {
-            return new Field[0];
+            return;
         }
         Field[] f = clazz.getDeclaredFields();
+        for (Field field : f) {
+            allFields.add(field);
+        }
         Class<?> superclass = clazz.getSuperclass();
-        f = CollectionUtils.array(f, getFields(superclass));
-        return f;
+        addFields(allFields, superclass);
     }
 
     public static <E> E newInstance(Class<? extends E> clazz) {
@@ -528,7 +579,8 @@ public final class ReflectionUtils {
 
     public static <A extends Annotation> A getAnnotation(AnnotatedElement element, Class<A> annotationClass) {
         synchronized (ANNOTATION_REFLECTION_LOCK) {
-            return element.getAnnotation(annotationClass);
+            A annotation = element.getAnnotation(annotationClass);
+            return annotation;
         }
     }
 

@@ -36,8 +36,6 @@ import org.eobjects.analyzer.result.HasAnalyzerResult;
  * 
  * @see AnalyzerBean
  * 
- * @author Kasper Sørensen
- * 
  * @param <R>
  *            the result type of this analyzer.
  */

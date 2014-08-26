@@ -33,7 +33,7 @@ import org.eobjects.analyzer.beans.api.Validate;
  * Defines an interface for descriptors of components that support
  * initialization, closing and configuration properties.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?>>, Serializable {
 

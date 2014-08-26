@@ -28,8 +28,6 @@ import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 /**
  * Represents the different types of output types that can be selected in the
  * CLI.
- * 
- * @author Kasper Sørensen
  */
 public enum CliOutputType {
 

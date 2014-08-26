@@ -37,7 +37,7 @@ import org.eobjects.analyzer.result.ValueCountingAnalyzerResult;
  * Ungrouped results only contain a single/global value distribution. A grouped
  * result contain multiple value distributions, based on groups.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class GroupedValueDistributionResult extends ValueDistributionAnalyzerResult implements
         GroupedValueCountingAnalyzerResult {

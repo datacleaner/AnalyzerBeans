@@ -20,17 +20,21 @@
 package org.eobjects.analyzer.cluster.http;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.eobjects.analyzer.cluster.ClusterManager;
 import org.eobjects.analyzer.cluster.DistributedJobContext;
 import org.eobjects.analyzer.cluster.FixedDivisionsCountJobDivisionManager;
@@ -41,15 +45,26 @@ import org.eobjects.analyzer.job.JaxbJobWriter;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.util.ChangeAwareObjectInputStream;
-import org.eobjects.metamodel.util.Action;
-import org.eobjects.metamodel.util.FileHelper;
-import org.eobjects.metamodel.util.LazyRef;
+import org.apache.metamodel.util.Action;
+import org.apache.metamodel.util.FileHelper;
+import org.apache.metamodel.util.LazyRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A cluster manager that uses HTTP servlet transport to communicate between
  * nodes.
  */
 public class HttpClusterManager implements ClusterManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpClusterManager.class);
+
+    public static final String HTTP_PARAM_SLAVE_JOB_ID = "slave-job-id";
+    public static final String HTTP_PARAM_ACTION = "action";
+    public static final String HTTP_PARAM_JOB_DEF = "job-def";
+
+    public static final String ACTION_RUN = "run";
+    public static final String ACTION_CANCEL = "cancel";
 
     private final HttpClient _httpClient;
     private final List<String> _slaveEndpoints;
@@ -98,7 +113,10 @@ public class HttpClusterManager implements ClusterManager {
 
         // send the request in another thread
         final List<Throwable> errors = new LinkedList<Throwable>();
-        final LazyRef<AnalysisResult> resultRef = sendRequest(slaveEndpoint, bytes, errors);
+
+        final String slaveJobUuid = UUID.randomUUID().toString();
+
+        final LazyRef<AnalysisResult> resultRef = sendExecuteRequest(slaveEndpoint, bytes, errors, slaveJobUuid);
         resultRef.requestLoad(new Action<Throwable>() {
             @Override
             public void run(Throwable error) throws Exception {
@@ -106,24 +124,40 @@ public class HttpClusterManager implements ClusterManager {
             }
         });
 
-        return new LazyRefAnalysisResultFuture(resultRef, errors);
+        return new LazyRefAnalysisResultFuture(resultRef, errors) {
+            @Override
+            public void cancel() {
+                sendCancelRequest(slaveEndpoint, slaveJobUuid);
+            }
+        };
     }
 
-    private LazyRef<AnalysisResult> sendRequest(final String slaveEndpoint, final byte[] bytes,
-            final List<Throwable> errors) {
+    private LazyRef<AnalysisResult> sendExecuteRequest(final String slaveEndpoint, final byte[] bytes,
+            final List<Throwable> errors, final String slaveJobId) {
         return new LazyRef<AnalysisResult>() {
             @Override
             protected AnalysisResult fetch() throws Throwable {
                 // send the HTTP request
                 final HttpPost request = new HttpPost(slaveEndpoint);
-                request.setEntity(new ByteArrayEntity(bytes));
+
+                final List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+                parameters.add(new BasicNameValuePair(HTTP_PARAM_SLAVE_JOB_ID, slaveJobId));
+                parameters.add(new BasicNameValuePair(HTTP_PARAM_ACTION, ACTION_RUN));
+                parameters.add(new BasicNameValuePair(HTTP_PARAM_JOB_DEF, new String(bytes)));
+
+                final UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters);
+                request.setEntity(entity);
+
+                logger.info("Firing run request to slave server '{}' for job id '{}'", slaveEndpoint, slaveJobId);
+
                 final HttpResponse response = _httpClient.execute(request);
 
                 // handle the response
                 final StatusLine statusLine = response.getStatusLine();
                 if (statusLine.getStatusCode() != 200) {
-                    throw new IllegalStateException("Slave server responded with an error: "
-                            + statusLine.getReasonPhrase() + " (" + statusLine.getStatusCode() + ")");
+                    throw new IllegalStateException("Slave server '" + slaveEndpoint
+                            + "' responded with an error to 'run' request: " + statusLine.getReasonPhrase() + " ("
+                            + statusLine.getStatusCode() + ")");
                 }
 
                 final InputStream inputStream = response.getEntity().getContent();
@@ -135,6 +169,31 @@ public class HttpClusterManager implements ClusterManager {
                 }
             }
         };
+    }
+
+    private void sendCancelRequest(String slaveEndpoint, String slaveJobId) {
+        final HttpPost request = new HttpPost(slaveEndpoint);
+        request.getParams().setParameter(HTTP_PARAM_SLAVE_JOB_ID, slaveJobId);
+        request.getParams().setParameter(HTTP_PARAM_ACTION, ACTION_CANCEL);
+
+        try {
+            final HttpResponse response = _httpClient.execute(request);
+
+            // handle the response
+            final StatusLine statusLine = response.getStatusLine();
+            if (statusLine.getStatusCode() != 200) {
+                throw new IllegalStateException("Slave server '" + slaveEndpoint
+                        + "' responded with an error to 'cancel' request: " + statusLine.getReasonPhrase() + " ("
+                        + statusLine.getStatusCode() + ")");
+            }
+
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new IllegalStateException("Failed to fire cancel request to slave server '" + slaveEndpoint
+                    + "' for job id '" + slaveJobId + "'", e);
+        }
     }
 
     protected AnalysisResult readResult(InputStream inputStream, List<Throwable> errors) throws Exception {

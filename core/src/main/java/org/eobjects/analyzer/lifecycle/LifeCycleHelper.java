@@ -35,7 +35,7 @@ import org.eobjects.analyzer.job.runner.ReferenceDataActivationManager;
  * Utility/convenience class for doing simple lifecycle management and/or
  * mimicing the lifecycle of components lifecycle in a job execution.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class LifeCycleHelper {
 

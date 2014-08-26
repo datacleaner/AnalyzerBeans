@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
+import org.apache.metamodel.pojo.ArrayTableDataProvider;
+import org.apache.metamodel.util.SimpleTableDef;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.FilterBean;
@@ -37,18 +39,19 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.AnyComponentRequirement;
+import org.eobjects.analyzer.job.CompoundComponentRequirement;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
+import org.eobjects.analyzer.job.concurrent.SingleThreadedTaskRunner;
 import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.result.ListResult;
 import org.eobjects.analyzer.test.MockAnalyzer;
 import org.eobjects.analyzer.test.MockTransformer;
-import org.eobjects.metamodel.pojo.ArrayTableDataProvider;
-import org.eobjects.metamodel.util.SimpleTableDef;
 
 public class FilterRequirementMergingTest extends TestCase {
 
@@ -69,7 +72,8 @@ public class FilterRequirementMergingTest extends TestCase {
         datastore = new PojoDatastore("ds", "sch", new ArrayTableDataProvider(tableDef, rowData));
 
         DatastoreCatalog datastoreCatalog = new DatastoreCatalogImpl(datastore);
-        configuration = new AnalyzerBeansConfigurationImpl().replace(datastoreCatalog);
+        configuration = new AnalyzerBeansConfigurationImpl().replace(datastoreCatalog).replace(
+                new SingleThreadedTaskRunner());
 
         jobBuilder = new AnalysisJobBuilder(configuration);
         jobBuilder.setDatastore(datastore);
@@ -92,8 +96,8 @@ public class FilterRequirementMergingTest extends TestCase {
         FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
                 .addInputColumn(sourceColumn);
 
-        Outcome req1 = filter.getOutcome(EvenOddFilter.Category.EVEN);
-        Outcome req2 = filter.getOutcome(EvenOddFilter.Category.ODD);
+        FilterOutcome req1 = filter.getFilterOutcome(EvenOddFilter.Category.EVEN);
+        FilterOutcome req2 = filter.getFilterOutcome(EvenOddFilter.Category.ODD);
 
         TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
                 .addInputColumn(sourceColumn);
@@ -151,8 +155,8 @@ public class FilterRequirementMergingTest extends TestCase {
         FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
                 .addInputColumn(sourceColumn);
 
-        Outcome req1 = filter.getOutcome(EvenOddFilter.Category.EVEN);
-        Outcome req2 = filter.getOutcome(EvenOddFilter.Category.ODD);
+        FilterOutcome req1 = filter.getFilterOutcome(EvenOddFilter.Category.EVEN);
+        FilterOutcome req2 = filter.getFilterOutcome(EvenOddFilter.Category.ODD);
 
         TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
                 .addInputColumn(sourceColumn);
@@ -185,13 +189,137 @@ public class FilterRequirementMergingTest extends TestCase {
         ListResult<InputRow> listResult = (ListResult<InputRow>) resultFuture.getResults().get(0);
         List<InputRow> list = listResult.getValues();
 
-        assertFalse("List is empty - this indicates that no records passed through the 'multiple requirements' rule",
+        assertFalse("List is empty - this indicates that no records passed through the 'single requirements' rule",
                 list.isEmpty());
         assertEquals("[bar, mocked: bar, null]", list.get(0).getValues(sourceColumn, outputColumn1, outputColumn2)
                 .toString());
         assertEquals("[hello, mocked: hello, null]", list.get(1).getValues(sourceColumn, outputColumn1, outputColumn2)
                 .toString());
         assertEquals(2, list.size());
+    }
+
+    /**
+     * Tests the use of the '_any_' requirement. This should override the
+     * transitive requirement behaviour
+     */
+    public void testConsumeRecordsWhenAnyOutcomeRequirementIsSet() throws Throwable {
+        jobBuilder.addSourceColumns("col1");
+        InputColumn<?> sourceColumn = jobBuilder.getSourceColumnByName("col1");
+        FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
+                .addInputColumn(sourceColumn);
+
+        FilterOutcome req1 = filter.getFilterOutcome(EvenOddFilter.Category.EVEN);
+        FilterOutcome req2 = filter.getFilterOutcome(EvenOddFilter.Category.ODD);
+
+        TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
+                .addInputColumn(sourceColumn);
+        transformer1.setRequirement(req1);
+        MutableInputColumn<?> outputColumn1 = transformer1.getOutputColumns().get(0);
+        outputColumn1.setName("outputColumn1");
+
+        TransformerJobBuilder<MockTransformer> transformer2 = jobBuilder.addTransformer(MockTransformer.class)
+                .addInputColumn(sourceColumn);
+        transformer2.setRequirement(req2);
+        MutableInputColumn<?> outputColumn2 = transformer2.getOutputColumns().get(0);
+        outputColumn2.setName("outputColumn2");
+
+        AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);
+
+        // add only outputcolumn 1 - it has a single requirement
+        analyzer.addInputColumns(sourceColumn, outputColumn1);
+        analyzer.setComponentRequirement(AnyComponentRequirement.get());
+
+        AnalysisJob job = jobBuilder.toAnalysisJob();
+
+        AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(job);
+
+        resultFuture.await();
+
+        if (resultFuture.isErrornous()) {
+            throw resultFuture.getErrors().get(0);
+        }
+
+        @SuppressWarnings("unchecked")
+        ListResult<InputRow> listResult = (ListResult<InputRow>) resultFuture.getResults().get(0);
+        List<InputRow> list = listResult.getValues();
+
+        assertFalse("List is empty - this indicates that no records passed through the 'any requirements' rule",
+                list.isEmpty());
+
+        assertEquals("[foo, null, mocked: foo]", list.get(0).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[bar, mocked: bar, null]", list.get(1).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[baz, null, mocked: baz]", list.get(2).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[hello, mocked: hello, null]", list.get(3).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[world, null, mocked: world]", list.get(4).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+
+        assertEquals(5, list.size());
+    }
+
+    /**
+     * Tests the use of the '_any_' requirement. This should override the
+     * transitive requirement behaviour
+     */
+    public void testConsumeRecordsWhenCompoundOutcomeRequirementIsSet() throws Throwable {
+        jobBuilder.addSourceColumns("col1");
+        InputColumn<?> sourceColumn = jobBuilder.getSourceColumnByName("col1");
+        FilterJobBuilder<EvenOddFilter, EvenOddFilter.Category> filter = jobBuilder.addFilter(EvenOddFilter.class)
+                .addInputColumn(sourceColumn);
+
+        FilterOutcome req1 = filter.getFilterOutcome(EvenOddFilter.Category.EVEN);
+        FilterOutcome req2 = filter.getFilterOutcome(EvenOddFilter.Category.ODD);
+
+        TransformerJobBuilder<MockTransformer> transformer1 = jobBuilder.addTransformer(MockTransformer.class)
+                .addInputColumn(sourceColumn);
+        transformer1.setRequirement(req1);
+        MutableInputColumn<?> outputColumn1 = transformer1.getOutputColumns().get(0);
+        outputColumn1.setName("outputColumn1");
+
+        TransformerJobBuilder<MockTransformer> transformer2 = jobBuilder.addTransformer(MockTransformer.class)
+                .addInputColumn(sourceColumn);
+        transformer2.setRequirement(req2);
+        MutableInputColumn<?> outputColumn2 = transformer2.getOutputColumns().get(0);
+        outputColumn2.setName("outputColumn2");
+
+        AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);
+
+        // add only outputcolumn 1 - it has a single requirement
+        analyzer.addInputColumns(sourceColumn, outputColumn1);
+        analyzer.setComponentRequirement(new CompoundComponentRequirement(req1, req2));
+
+        AnalysisJob job = jobBuilder.toAnalysisJob();
+
+        AnalysisResultFuture resultFuture = new AnalysisRunnerImpl(configuration).run(job);
+
+        resultFuture.await();
+
+        if (resultFuture.isErrornous()) {
+            throw resultFuture.getErrors().get(0);
+        }
+
+        @SuppressWarnings("unchecked")
+        ListResult<InputRow> listResult = (ListResult<InputRow>) resultFuture.getResults().get(0);
+        List<InputRow> list = listResult.getValues();
+
+        assertFalse("List is empty - this indicates that no records passed through the 'any requirements' rule",
+                list.isEmpty());
+        
+        assertEquals("[foo, null, mocked: foo]", list.get(0).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[bar, mocked: bar, null]", list.get(1).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[baz, null, mocked: baz]", list.get(2).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[hello, mocked: hello, null]", list.get(3).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+        assertEquals("[world, null, mocked: world]", list.get(4).getValues(sourceColumn, outputColumn1, outputColumn2)
+                .toString());
+
+        assertEquals(5, list.size());
     }
 
     @FilterBean("Even/odd record filter")

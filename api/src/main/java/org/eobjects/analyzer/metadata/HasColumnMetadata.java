@@ -21,7 +21,7 @@ package org.eobjects.analyzer.metadata;
 
 import java.util.List;
 
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * Defines methods for objects that contain column metadata.

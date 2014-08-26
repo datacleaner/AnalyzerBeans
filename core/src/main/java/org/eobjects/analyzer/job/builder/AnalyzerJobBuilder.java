@@ -34,11 +34,15 @@ import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.job.AnalysisJobImmutabilizer;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentConfigurationException;
+import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.ImmutableAnalyzerJob;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
+import org.eobjects.analyzer.util.LabelUtils;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,15 +74,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         if (inputProperties.size() == 1) {
             _inputProperty = inputProperties.iterator().next();
             final ColumnProperty columnProperty = _inputProperty.getAnnotation(ColumnProperty.class);
-            if (_inputProperty.isArray()) {
-                // for column-arrays, the default is to escalate to multiple
-                // jobs
-                _multipleJobsSupported = columnProperty == null || columnProperty.escalateToMultipleJobs();
-            } else {
-                // for single columns, the default is NOT to escalate to
-                // multiple jobs
-                _multipleJobsSupported = columnProperty != null && columnProperty.escalateToMultipleJobs();
-            }
+            _multipleJobsSupported = columnProperty != null && columnProperty.escalateToMultipleJobs();
             _inputColumns = new ArrayList<InputColumn<?>>();
         } else {
             _multipleJobsSupported = false;
@@ -130,11 +126,23 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         return toAnalyzerJobs(true);
     }
 
+    public AnalyzerJob[] toAnalyzerJobs(AnalysisJobImmutabilizer immutabilizer) throws IllegalStateException {
+        return toAnalyzerJobs(true, immutabilizer);
+    }
+
     public AnalyzerJob[] toAnalyzerJobs(boolean validate) throws IllegalStateException {
+        return toAnalyzerJobs(validate, new AnalysisJobImmutabilizer());
+    }
+
+    public AnalyzerJob[] toAnalyzerJobs(boolean validate, AnalysisJobImmutabilizer immutabilizer)
+            throws IllegalStateException {
         final Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
+
+        final ComponentRequirement componentRequirement = immutabilizer.load(getComponentRequirement());
+
         if (!_multipleJobsSupported) {
             ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(configuredProperties), getRequirement());
+                    new ImmutableBeanConfiguration(configuredProperties), componentRequirement);
             return new AnalyzerJob[] { job };
         }
 
@@ -175,7 +183,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
             // there's only a single table involved - leave the input columns
             // untouched
             ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(configuredProperties), getRequirement());
+                    new ImmutableBeanConfiguration(configuredProperties), componentRequirement);
             return new AnalyzerJob[] { job };
         }
 
@@ -230,7 +238,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
                     }
                 }
                 if (throwException) {
-                    throw new IllegalStateException("No input columns have been added to " + this);
+                    throw new ComponentConfigurationException("No input columns configured for " + LabelUtils.getLabel(this));
                 } else {
                     return false;
                 }
@@ -245,8 +253,9 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         Map<ConfiguredPropertyDescriptor, Object> jobProperties = new HashMap<ConfiguredPropertyDescriptor, Object>(
                 configuredProperties);
         jobProperties.put(_inputProperty, columnValue);
+        ComponentRequirement componentRequirement = new AnalysisJobImmutabilizer().load(getComponentRequirement());
         ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                jobProperties), getRequirement());
+                jobProperties), componentRequirement);
         return job;
     }
 

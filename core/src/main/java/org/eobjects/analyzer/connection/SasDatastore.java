@@ -21,13 +21,11 @@ package org.eobjects.analyzer.connection;
 
 import java.io.File;
 
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.sassy.metamodel.SasDataContext;
+import org.apache.metamodel.DataContext;
+import org.eobjects.metamodel.sas.metamodel.SasDataContext;
 
 /**
  * Datastore implementation for directories with SAS datasets.
- * 
- * @author Kasper Sørensen
  */
 public class SasDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
@@ -41,7 +39,7 @@ public class SasDatastore extends UsageAwareDatastore<DataContext> implements Fi
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
+		return new PerformanceCharacteristicsImpl(false, true);
 	}
 
 	@Override

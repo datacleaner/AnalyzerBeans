@@ -29,10 +29,12 @@ import org.eobjects.analyzer.connection.Datastore;
 public class ReadObjectBuilderTest extends TestCase {
 
     public void testDeserializeLegacyDatastores() throws Exception {
-        ChangeAwareObjectInputStream objectInputStream = new ChangeAwareObjectInputStream(new FileInputStream(
-                "src/test/resources/analyzerbeans-0.4-datastores.dat"));
-        Object deserializedObject = objectInputStream.readObject();
-        objectInputStream.close();
+        Object deserializedObject;
+        try (ChangeAwareObjectInputStream objectInputStream = new ChangeAwareObjectInputStream(new FileInputStream(
+                "src/test/resources/analyzerbeans-0.4-datastores.dat"))) {
+            deserializedObject = objectInputStream.readObject();
+        }
+        
         assertTrue(deserializedObject instanceof List);
 
         @SuppressWarnings("unchecked")

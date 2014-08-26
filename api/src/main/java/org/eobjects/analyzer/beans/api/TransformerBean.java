@@ -37,8 +37,6 @@ import java.lang.annotation.Target;
  * 
  * @see Transformer
  * @see Concurrent
- * 
- * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

@@ -20,8 +20,8 @@
 package org.eobjects.analyzer.data;
 
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.ColumnType;
 
 public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
 
@@ -78,28 +78,6 @@ public final class MetaModelInputColumn extends AbstractInputColumn<Object> {
     @Override
     protected int hashCodeInternal() {
         return _column.hashCode();
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public DataTypeFamily getDataTypeFamily() {
-        ColumnType type = _column.getType();
-        if (type == null) {
-            return DataTypeFamily.UNDEFINED;
-        }
-        if (type.isBoolean()) {
-            return DataTypeFamily.BOOLEAN;
-        }
-        if (type.isLiteral()) {
-            return DataTypeFamily.STRING;
-        }
-        if (type.isNumber()) {
-            return DataTypeFamily.NUMBER;
-        }
-        if (type.isTimeBased()) {
-            return DataTypeFamily.DATE;
-        }
-        return DataTypeFamily.UNDEFINED;
     }
 
     @Override

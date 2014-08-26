@@ -27,7 +27,7 @@ import org.eobjects.analyzer.descriptors.PropertyDescriptor;
 /**
  * {@link InjectionPoint} implementation for {@link PropertyDescriptor}s
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class PropertyInjectionPoint implements InjectionPoint<Object> {
 

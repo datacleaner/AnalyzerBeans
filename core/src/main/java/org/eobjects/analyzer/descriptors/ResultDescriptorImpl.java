@@ -35,7 +35,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * Default {@link ResultDescriptor} implementation which can be used stand-alone
  * or as a delegate for e.g. an {@link AnalyzerBeanDescriptor} implementation.
  */
-public class ResultDescriptorImpl implements ResultDescriptor {
+final class ResultDescriptorImpl implements ResultDescriptor {
 
     private static final long serialVersionUID = 1L;
 

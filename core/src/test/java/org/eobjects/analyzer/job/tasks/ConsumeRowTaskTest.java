@@ -53,8 +53,7 @@ public class ConsumeRowTaskTest extends TestCase {
         final AnalysisJob job;
 
         // build example job
-        {
-            AnalysisJobBuilder builder = new AnalysisJobBuilder(configuration);
+        try (AnalysisJobBuilder builder = new AnalysisJobBuilder(configuration)) {
 
             // number_col,string_col
             // 3,foo
@@ -77,8 +76,6 @@ public class ConsumeRowTaskTest extends TestCase {
             builder.addAnalyzer(MockAnalyzer.class).addInputColumns(mockTransformerColumns);
 
             job = builder.toAnalysisJob();
-            
-            builder.close();
         }
 
         ListResult<InputRow> result;
@@ -128,9 +125,7 @@ public class ConsumeRowTaskTest extends TestCase {
         AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl();
         final AnalysisJob job;
         // build example job
-        {
-            AnalysisJobBuilder builder = new AnalysisJobBuilder(configuration);
-
+        try (AnalysisJobBuilder builder = new AnalysisJobBuilder(configuration)) {
             builder.setDatastore(new CsvDatastore("Names", "src/test/resources/example-name-lengths.csv"));
             builder.addSourceColumns("name");
             FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filterJobBuilder = builder
@@ -144,8 +139,6 @@ public class ConsumeRowTaskTest extends TestCase {
             convertTransformer.setRequirement(filterJobBuilder, MaxRowsFilter.Category.VALID);
             builder.addAnalyzer(MockAnalyzer.class).addInputColumns(numberColumn);
             job = builder.toAnalysisJob();
-            
-            builder.close();
         }
 
         ListResult<InputRow> result;

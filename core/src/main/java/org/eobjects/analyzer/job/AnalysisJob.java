@@ -25,7 +25,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * Defines a job to be executed by AnalyzerBeans.
@@ -40,6 +40,14 @@ import org.eobjects.metamodel.schema.Column;
  * Executing jobs is usually done using the {@link AnalysisRunner} interface.
  */
 public interface AnalysisJob {
+
+    /**
+     * Gets the {@link AnalysisJobMetadata} which add additional descriptions
+     * and properties of the job.
+     * 
+     * @return
+     */
+    public AnalysisJobMetadata getMetadata();
 
     /**
      * Gets the {@link Datastore} that this job uses as it's source.
@@ -69,13 +77,6 @@ public interface AnalysisJob {
      * @return
      */
     public List<FilterJob> getFilterJobs();
-
-    /**
-     * Gets all {@link MergedOutcomeJob}s contained in this job.
-     * 
-     * @return
-     */
-    public List<MergedOutcomeJob> getMergedOutcomeJobs();
 
     /**
      * Gets all {@link AnalyzerJob}s contained in this job.

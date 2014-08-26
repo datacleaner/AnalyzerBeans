@@ -39,7 +39,7 @@ import org.eobjects.analyzer.util.ReadObjectBuilder;
  * 
  * @see TokenPattern
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class SimpleStringPattern extends AbstractReferenceData implements StringPattern {
 

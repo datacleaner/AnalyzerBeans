@@ -28,6 +28,8 @@ import java.util.Queue;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.StringAnalyzer;
+import org.eobjects.analyzer.beans.coalesce.CoalesceMultipleFieldsTransformer;
+import org.eobjects.analyzer.beans.coalesce.CoalesceUnit;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
@@ -37,15 +39,13 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
-import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.schema.MutableColumn;
-import org.eobjects.metamodel.schema.MutableTable;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableTable;
 
 public class RowProcessingConsumerSorterTest extends TestCase {
 
@@ -82,10 +82,12 @@ public class RowProcessingConsumerSorterTest extends TestCase {
         tjb1.setName("tjb1");
 
         // 3: merge either the null or the trimmed value
-        MergedOutcomeJobBuilder mojb = ajb.addMergedOutcomeJobBuilder();
-        mojb.addMergedOutcome(fjb1, MockFilter.Category.VALID).addInputColumn(tjb1.getOutputColumns().get(0));
-        mojb.addMergedOutcome(fjb1, MockFilter.Category.INVALID).addInputColumn(inputColumn);
-        MutableInputColumn<?> mergedColumn1 = mojb.getOutputColumns().get(0);
+        TransformerJobBuilder<CoalesceMultipleFieldsTransformer> coalesce = ajb.addTransformer(CoalesceMultipleFieldsTransformer.class);
+        CoalesceUnit unit1 = new CoalesceUnit(tjb1.getOutputColumns().get(0));
+        CoalesceUnit unit2 = new CoalesceUnit(inputColumn);
+        coalesce.getConfigurableBean().configureUsingCoalesceUnits(unit1, unit2);
+        
+        MutableInputColumn<?> mergedColumn1 = coalesce.getOutputColumns().get(0);
 
         // 4: add another filter (depends on merged output)
         FilterJobBuilder<MockFilter, MockFilter.Category> fjb2 = ajb.addFilter(MockFilter.class);
@@ -108,7 +110,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
         assertEquals("ImmutableTransformerJob[name=tjb1,transformer=Transformer mock]", consumers.get(1)
                 .getComponentJob().toString());
         assertEquals(
-                "ImmutableMergedOutcomeJob[name=null,mergeInputs=[ImmutableMergeInput[FilterOutcome[category=VALID]], ImmutableMergeInput[FilterOutcome[category=INVALID]]]]",
+                "ImmutableTransformerJob[name=null,transformer=Coalesce multiple fields]",
                 consumers.get(2).getComponentJob().toString());
         assertEquals("ImmutableFilterJob[name=fjb2,filter=Mock filter]", consumers.get(3).getComponentJob().toString());
         assertEquals("ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", consumers.get(4).getComponentJob()
@@ -246,10 +248,6 @@ public class RowProcessingConsumerSorterTest extends TestCase {
         for (FilterJob filterJob : analysisJob.getFilterJobs()) {
             FilterConsumer consumer = new FilterConsumer(filterJob.getDescriptor().newInstance(), filterJob,
                     filterJob.getInput(), publishers);
-            consumers.add(consumer);
-        }
-        for (MergedOutcomeJob mergedOutcomeJob : analysisJob.getMergedOutcomeJobs()) {
-            MergedOutcomeConsumer consumer = new MergedOutcomeConsumer(mergedOutcomeJob, publishers);
             consumers.add(consumer);
         }
 

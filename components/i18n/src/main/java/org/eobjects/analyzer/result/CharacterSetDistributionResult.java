@@ -31,7 +31,7 @@ import org.eobjects.analyzer.data.InputColumn;
 /**
  * Represents the result of a {@link CharacterSetDistributionAnalyzer} analyzer
  * 
- * @author Kasper Sørensen
+ * 
  * 
  */
 @Distributed(reducer = CharacterSetDistributionResultReducer.class)

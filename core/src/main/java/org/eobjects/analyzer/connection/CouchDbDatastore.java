@@ -22,8 +22,8 @@ package org.eobjects.analyzer.connection;
 import java.util.List;
 
 import org.ektorp.http.StdHttpClient;
-import org.eobjects.metamodel.couchdb.CouchDbDataContext;
-import org.eobjects.metamodel.util.SimpleTableDef;
+import org.apache.metamodel.couchdb.CouchDbDataContext;
+import org.apache.metamodel.util.SimpleTableDef;
 
 public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> implements UpdateableDatastore,
         UsernameDatastore {
@@ -63,7 +63,7 @@ public class CouchDbDatastore extends UsageAwareDatastore<CouchDbDataContext> im
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(true);
+        return new PerformanceCharacteristicsImpl(true, false);
     }
 
     @Override

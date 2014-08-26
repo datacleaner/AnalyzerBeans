@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
+import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An analyzer for various typical String measures.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @AnalyzerBean("String analyzer")
 @Description("The String analyzer is used to collect a variety of typical metrics on string values.\nMetrics include statistics on character case, words, diacritics, white-spaces and more...")
@@ -82,6 +83,7 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 	private final Map<InputColumn<String>, StringAnalyzerColumnDelegate> _columnDelegates = new HashMap<InputColumn<String>, StringAnalyzerColumnDelegate>();
 
 	@Configured
+	@ColumnProperty(escalateToMultipleJobs=true)
 	InputColumn<String>[] _columns;
 
 	@Provided
@@ -90,6 +92,7 @@ public class StringAnalyzer implements Analyzer<StringAnalyzerResult> {
 	public StringAnalyzer() {
 	}
 
+	@SafeVarargs
 	public StringAnalyzer(InputColumn<String>... columns) {
 		_columns = columns;
 		_annotationFactory = new InMemoryRowAnnotationFactory();

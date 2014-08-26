@@ -47,14 +47,14 @@ import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.CollectionUtils2;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.query.CompiledQuery;
-import org.eobjects.metamodel.query.OperatorType;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.query.QueryParameter;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.query.CompiledQuery;
+import org.apache.metamodel.query.OperatorType;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.query.QueryParameter;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.HasName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,8 +63,6 @@ import com.google.common.cache.Cache;
 /**
  * A transformer that can do a lookup (like a left join) based on a set of
  * columns in any datastore.
- * 
- * @author Kasper Sørensen
  */
 @TransformerBean("Table lookup")
 @Alias("Datastore lookup")
@@ -107,7 +105,7 @@ public class TableLookupTransformer implements Transformer<Object> {
     }
 
     @Inject
-    @Configured(value=PROPERTY_NAME_DATASTORE)
+    @Configured(value = PROPERTY_NAME_DATASTORE)
     Datastore datastore;
 
     @Inject
@@ -127,14 +125,14 @@ public class TableLookupTransformer implements Transformer<Object> {
     String[] outputColumns;
 
     @Inject
-    @Configured(value=PROPERTY_NAME_SCHEMA_NAME)
+    @Configured(value = PROPERTY_NAME_SCHEMA_NAME)
     @Alias("Schema")
     @SchemaProperty
     @MappedProperty(PROPERTY_NAME_DATASTORE)
     String schemaName;
 
     @Inject
-    @Configured(value=PROPERTY_NAME_TABLE_NAME)
+    @Configured(value = PROPERTY_NAME_TABLE_NAME)
     @Alias("Table")
     @TableProperty
     @MappedProperty(PROPERTY_NAME_SCHEMA_NAME)
@@ -202,12 +200,9 @@ public class TableLookupTransformer implements Transformer<Object> {
             if (isCarthesianProductMode()) {
                 queryConditionColumns = new Column[0];
             } else {
-                final DatastoreConnection con = datastore.openConnection();
-                try {
+                try (final DatastoreConnection con = datastore.openConnection()) {
                     queryConditionColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName,
                             conditionColumns);
-                } finally {
-                    con.close();
                 }
             }
         }
@@ -223,11 +218,8 @@ public class TableLookupTransformer implements Transformer<Object> {
      */
     private Column[] getQueryOutputColumns(boolean checkNames) {
         if (queryOutputColumns == null) {
-            final DatastoreConnection con = datastore.openConnection();
-            try {
+            try (final DatastoreConnection con = datastore.openConnection()) {
                 queryOutputColumns = con.getSchemaNavigator().convertToColumns(schemaName, tableName, outputColumns);
-            } finally {
-                con.close();
             }
         } else if (checkNames) {
             if (!isQueryOutputColumnsUpdated()) {
@@ -379,11 +371,9 @@ public class TableLookupTransformer implements Transformer<Object> {
                 parameterValues[i] = queryInput.get(i);
             }
 
-            final DataSet dataSet = datastoreConnection.getDataContext().executeQuery(lookupQuery, parameterValues);
-            try {
+            try (final DataSet dataSet = datastoreConnection.getDataContext()
+                    .executeQuery(lookupQuery, parameterValues)) {
                 return handleDataSet(dataSet);
-            } finally {
-                dataSet.close();
             }
         } catch (RuntimeException e) {
             logger.error("Error occurred while looking up based on conditions: " + queryInput, e);
@@ -393,7 +383,7 @@ public class TableLookupTransformer implements Transformer<Object> {
 
     private Object[] handleDataSet(DataSet dataSet) {
         if (!dataSet.next()) {
-            logger.warn("Result of lookup: None!");
+            logger.info("Result of lookup: None!");
             switch (joinSemantic) {
             case LEFT_JOIN_MAX_ONE:
             case LEFT_JOIN:

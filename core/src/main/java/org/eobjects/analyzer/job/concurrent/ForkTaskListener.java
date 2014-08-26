@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * Task listener that will fork into a new set of tasks, once it's predecessors
  * have ben completed.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ForkTaskListener implements TaskListener {
 

@@ -32,7 +32,7 @@ import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
 /**
  * Text renderer for {@link PatternFinderResult}s
  * 
- * @author Kasper Sørensen
+ * 
  */
 @RendererBean(TextRenderingFormat.class)
 public class PatternFinderResultTextRenderer extends AbstractRenderer<PatternFinderResult, String> {

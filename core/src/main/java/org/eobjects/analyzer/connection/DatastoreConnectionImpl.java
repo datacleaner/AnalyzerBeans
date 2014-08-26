@@ -26,7 +26,7 @@ import org.eobjects.analyzer.util.SchemaNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 
 public class DatastoreConnectionImpl<E extends DataContext> extends UsageAwareDatastoreConnection<E> {
 
@@ -56,7 +56,8 @@ public class DatastoreConnectionImpl<E extends DataContext> extends UsageAwareDa
 	@Override
 	protected final void closeInternal() {
 		for (int i = 0; i < _closeables.length; i++) {
-			Closeable closeable = _closeables[i];
+			@SuppressWarnings("resource")
+            final Closeable closeable = _closeables[i];
 			try {
 				closeable.close();
 			} catch (IOException e) {

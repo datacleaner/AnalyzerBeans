@@ -27,5 +27,5 @@ import org.eobjects.analyzer.data.InputRow;
  */
 public interface RowProcessingChain {
 
-    public void processNext(InputRow row, int distinctCount, OutcomeSink outcomes);
+    public void processNext(InputRow row, int distinctCount, FilterOutcomes outcomes);
 }

@@ -26,95 +26,96 @@ import java.util.List;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.util.CollectionUtils2;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.data.Row;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.data.Row;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.BaseObject;
 
 import com.google.common.cache.Cache;
 
 /**
  * Reference values implementation based on a datastore column.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class DatastoreReferenceValues extends BaseObject implements ReferenceValues<String> {
 
-	private final Datastore _datastore;
-	private final Column _column;
-	
-	private transient Cache<String, Boolean> _containsValueCache = CollectionUtils2.createCache(1000, 60);
+    private final Datastore _datastore;
+    private final Column _column;
 
-	public DatastoreReferenceValues(Datastore datastore, Column column) {
-		_datastore = datastore;
-		_column = column;
-	}
+    private transient Cache<String, Boolean> _containsValueCache = CollectionUtils2.createCache(1000, 60);
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_datastore);
-		identifiers.add(_column);
-	}
+    public DatastoreReferenceValues(Datastore datastore, Column column) {
+        _datastore = datastore;
+        _column = column;
+    }
 
-	public void clearCache() {
-		_containsValueCache.invalidateAll();
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(_datastore);
+        identifiers.add(_column);
+    }
 
-	@Override
-	public boolean containsValue(String value) {
-		Boolean result = _containsValueCache.getIfPresent(value);
-		if (result == null) {
-			synchronized (_containsValueCache) {
-				result = _containsValueCache.getIfPresent(value);
-				if (result == null) {
-					result = false;
-					DatastoreConnection con = _datastore.openConnection();
-					DataContext dataContext = con.getDataContext();
-					Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).eq(value)
-							.toQuery();
-					DataSet dataSet = dataContext.executeQuery(q);
-					if (dataSet.next()) {
-						Row row = dataSet.getRow();
-						if (row != null) {
-							Number count = (Number) row.getValue(0);
-							if (count != null && count.intValue() > 0) {
-								result = true;
-							}
-							assert !dataSet.next();
-						}
-					}
-					dataSet.close();
-					con.close();
-					_containsValueCache.put(value, result);
-				}
-			}
-		}
-		return result;
+    public void clearCache() {
+        _containsValueCache.invalidateAll();
+    }
 
-	}
+    @Override
+    public boolean containsValue(String value) {
+        Boolean result = _containsValueCache.getIfPresent(value);
+        if (result == null) {
+            synchronized (_containsValueCache) {
+                result = _containsValueCache.getIfPresent(value);
+                if (result == null) {
+                    result = false;
+                    try (DatastoreConnection con = _datastore.openConnection()) {
+                        DataContext dataContext = con.getDataContext();
+                        Query q = dataContext.query().from(_column.getTable()).selectCount().where(_column).eq(value)
+                                .toQuery();
+                        try (DataSet dataSet = dataContext.executeQuery(q)) {
+                            if (dataSet.next()) {
+                                Row row = dataSet.getRow();
+                                if (row != null) {
+                                    Number count = (Number) row.getValue(0);
+                                    if (count != null && count.intValue() > 0) {
+                                        result = true;
+                                    }
+                                    assert !dataSet.next();
+                                }
+                            }
+                        }
+                    }
+                    _containsValueCache.put(value, result);
+                }
+            }
+        }
+        return result;
 
-	@Override
-	public Collection<String> getValues() {
-		DatastoreConnection con = _datastore.openConnection();
-		DataContext dataContext = con.getDataContext();
+    }
 
-		Query q = dataContext.query().from(_column.getTable()).select(_column).toQuery();
-		q.selectDistinct();
+    @Override
+    public Collection<String> getValues() {
+        try (final DatastoreConnection con = _datastore.openConnection()) {
+            final DataContext dataContext = con.getDataContext();
 
-		DataSet dataSet = dataContext.executeQuery(q);
-		List<String> values = new ArrayList<String>();
-		while (dataSet.next()) {
-			Row row = dataSet.getRow();
-			Object value = row.getValue(0);
-			if (value != null) {
-				value = value.toString();
-			}
-			values.add((String) value);
-		}
-		dataSet.close();
-		con.close();
-		return values;
-	}
+            final Query q = dataContext.query().from(_column.getTable()).select(_column).toQuery();
+            q.selectDistinct();
+
+            try (final DataSet dataSet = dataContext.executeQuery(q)) {
+                final List<String> values = new ArrayList<String>();
+                while (dataSet.next()) {
+                    final Row row = dataSet.getRow();
+                    
+                    Object value = row.getValue(0);
+                    if (value != null) {
+                        value = value.toString();
+                    }
+                    values.add((String) value);
+                }
+                return values;
+            }
+        }
+    }
 }

@@ -25,19 +25,18 @@ import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.UpdateableDataContext;
-import org.eobjects.metamodel.csv.CsvConfiguration;
-import org.eobjects.metamodel.csv.CsvDataContext;
-import org.eobjects.metamodel.util.FileHelper;
-import org.eobjects.metamodel.util.Resource;
-import org.eobjects.metamodel.util.SerializableRef;
+import org.apache.metamodel.UpdateableDataContext;
+import org.apache.metamodel.csv.CsvConfiguration;
+import org.apache.metamodel.csv.CsvDataContext;
+import org.apache.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileResource;
+import org.apache.metamodel.util.Resource;
+import org.apache.metamodel.util.SerializableRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Datastore implementation for CSV files.
- * 
- * @author Kasper Sørensen
  */
 public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContext> implements FileDatastore,
         ResourceDatastore, UpdateableDatastore {
@@ -108,6 +107,9 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
             int headerLineNumber) {
         super(name);
         _filename = filename;
+        if (resource == null) {
+            resource = new FileResource(filename);
+        }
         _resourceRef = new SerializableRef<Resource>(resource);
         _quoteChar = quoteChar;
         _separatorChar = separatorChar;
@@ -187,7 +189,7 @@ public final class CsvDatastore extends UsageAwareDatastore<UpdateableDataContex
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(false);
+        return new PerformanceCharacteristicsImpl(false, true);
     }
 
     public boolean isFailOnInconsistencies() {

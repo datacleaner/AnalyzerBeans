@@ -44,12 +44,12 @@ public class HttpClusterManagerTest extends TestCase {
         server1 = createServer(8882, false);
         server2 = createServer(8883, false);
         server3 = createServer(8884, true);
-        
+
         final List<String> slaveEndpoints = new ArrayList<String>();
         slaveEndpoints.add("http://localhost:8882/slave_endpoint");
         slaveEndpoints.add("http://localhost:8883/slave_endpoint");
         slaveEndpoints.add("http://localhost:8884/slave_endpoint");
-        
+
         clusterManager = new HttpClusterManager(slaveEndpoints);
     }
 
@@ -63,14 +63,22 @@ public class HttpClusterManagerTest extends TestCase {
     }
 
     public void testConcatAndInsert() throws Throwable {
-        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass().getSimpleName() + "_" + getName(), false);
+        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass()
+                .getSimpleName() + "_" + getName(), false);
         ClusterTestHelper.runConcatAndInsertJob(configuration, clusterManager);
     }
-    
+
+    public void testCancel() throws Throwable {
+        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass()
+                .getSimpleName() + "_" + getName(), false);
+        ClusterTestHelper.runCancelJobJob(configuration, clusterManager);
+    }
+
     public void testErrorHandling() throws Exception {
-        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass().getSimpleName() + "_" + getName(), false);
+        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass()
+                .getSimpleName() + "_" + getName(), false);
         final List<Throwable> errors = ClusterTestHelper.runErrorHandlingJob(configuration, clusterManager);
-        
+
         for (Throwable throwable : errors) {
             String message = throwable.getMessage();
             if (!"I am just a dummy transformer!".equals(message)
@@ -78,13 +86,14 @@ public class HttpClusterManagerTest extends TestCase {
                 fail("Unexpected exception: " + message + " (" + throwable.getClass().getName() + ")");
             }
         }
-        
+
         assertTrue(errors.size() >= 4);
     }
-    
+
     public void testCompletenessAnalyzer() throws Throwable {
-    	 final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass().getSimpleName() + "_" + getName(), false);
-         ClusterTestHelper.runCompletenessAndValueMatcherAnalyzerJob(configuration, clusterManager);
+        final AnalyzerBeansConfiguration configuration = ClusterTestHelper.createConfiguration(getClass()
+                .getSimpleName() + "_" + getName(), false);
+        ClusterTestHelper.runCompletenessAndValueMatcherAnalyzerJob(configuration, clusterManager);
     }
 
     private Server createServer(int port, boolean multiThreaded) throws Exception {

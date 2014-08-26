@@ -29,8 +29,6 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 /**
  * Helper class for the number analyzer, which handles the processing of a
  * single column's values.
- * 
- * @author Kasper Sørensen
  */
 final class NumberAnalyzerColumnDelegate {
 

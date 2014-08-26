@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.SerializationUtils;
 
@@ -40,16 +41,14 @@ public class SimpleSynonymCatalogTest extends TestCase {
         assertEquals("NLD", sc.getMasterTerm("The netherlands"));
         assertNull(sc.getMasterTerm("Danemark"));
     }
-    
+
     public void testDeserializePreviousVersion() throws Exception {
-        FileInputStream in = new FileInputStream("src/test/resources/analyzerbeans-0.34-simple-synonym-catalog.ser");
         SynonymCatalog sc;
-        try {
+        try (FileInputStream in = new FileInputStream(
+                "src/test/resources/analyzerbeans-0.34-simple-synonym-catalog.ser")) {
             sc = (SynonymCatalog) SerializationUtils.deserialize(in);
-        } finally {
-            in.close();
         }
-        
+
         assertEquals("DNK", sc.getMasterTerm("DNK"));
         assertEquals("NLD", sc.getMasterTerm("NLD"));
         assertEquals("DNK", sc.getMasterTerm("Denmark"));
@@ -69,12 +68,12 @@ public class SimpleSynonymCatalogTest extends TestCase {
         Synonym s1 = it.next();
         assertNotNull(s1);
         assertEquals("DNK", s1.getMasterTerm());
-        assertEquals("[DNK, Denmark, Danmark]", s1.getSynonyms().getValues().toString());
+        assertEquals("[DNK, Danmark, Denmark]", new TreeSet<>(s1.getSynonyms().getValues()).toString());
 
         assertTrue(it.hasNext());
         Synonym s2 = it.next();
         assertEquals("NLD", s2.getMasterTerm());
-        assertEquals("SimpleStringReferenceValues[[NLD, The netherlands]]", s2.getSynonyms().toString());
+        assertEquals("[NLD, The netherlands]", new TreeSet<>(s2.getSynonyms().getValues()).toString());
 
         assertFalse(it.hasNext());
     }

@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job;
 /**
  * An object that enables writing/serializing an AnalysisJob to an output.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <E>
  *            The output type of the writer, typically OutputStream, but could

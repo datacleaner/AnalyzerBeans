@@ -22,8 +22,6 @@ package org.eobjects.analyzer.result.renderer;
 /**
  * Marker interface for all objects that can be rendered, typically for display
  * of results or for user configuration screens.
- * 
- * @author Kasper Sørensen
  */
 public interface Renderable {
 

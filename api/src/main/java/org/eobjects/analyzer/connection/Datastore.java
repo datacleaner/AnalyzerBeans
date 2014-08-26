@@ -21,15 +21,13 @@ package org.eobjects.analyzer.connection;
 
 import java.io.Serializable;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Defines a datastore from which data can be queried.
  * 
  * Datastores are kept in the {@link AnalyzerBeansConfiguration}, or rather in
  * the {@link DatastoreCatalog}.
- * 
- * @author Kasper Sørensen
  */
 public interface Datastore extends Serializable, HasName {
 

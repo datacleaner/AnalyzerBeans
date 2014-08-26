@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * Completion listener for a full AnalysisJob. Use the isDone() method to ask
  * whether or not the job is finished.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class JobCompletionTaskListener implements StatusAwareTaskListener {
 

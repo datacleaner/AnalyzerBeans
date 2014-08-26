@@ -31,7 +31,8 @@ import org.eobjects.analyzer.result.AnalysisResultWriter;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.result.renderer.TextRenderingFormat;
-import org.eobjects.metamodel.util.Ref;
+import org.eobjects.analyzer.util.LabelUtils;
+import org.apache.metamodel.util.Ref;
 
 public class TextAnalysisResultWriter implements AnalysisResultWriter {
 
@@ -45,10 +46,7 @@ public class TextAnalysisResultWriter implements AnalysisResultWriter {
         for (Entry<ComponentJob, AnalyzerResult> entry : result.getResultMap().entrySet()) {
             final ComponentJob componentJob = entry.getKey();
             final AnalyzerResult analyzerResult = entry.getValue();
-            String name = componentJob.getName();
-            if (name == null) {
-                name = componentJob.toString();
-            }
+            final String name = LabelUtils.getLabel(componentJob);
 
             writer.write("\nRESULT: ");
             writer.write(name);

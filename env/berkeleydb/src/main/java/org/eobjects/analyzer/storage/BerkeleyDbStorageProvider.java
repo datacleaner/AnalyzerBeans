@@ -51,7 +51,7 @@ import com.sleepycat.je.EnvironmentConfig;
 /**
  * Berkeley DB based implementation of the {@link StorageProvider} interface.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class BerkeleyDbStorageProvider implements StorageProvider {
 

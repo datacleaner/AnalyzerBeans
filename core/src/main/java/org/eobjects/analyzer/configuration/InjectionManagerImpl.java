@@ -29,6 +29,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.concurrent.ThreadLocalOutputRowCollector;
 import org.eobjects.analyzer.reference.ReferenceDataCatalog;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
@@ -38,17 +39,15 @@ import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.util.LazyRef;
-import org.eobjects.metamodel.util.Ref;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.util.LazyRef;
+import org.apache.metamodel.util.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Simple injection manager implementation, which is aware of catalogs used
  * within the {@link AnalyzerBeansConfiguration}, but not anymore.
- * 
- * @author Kasper Sørensen
  */
 public class InjectionManagerImpl implements InjectionManager {
 
@@ -102,7 +101,7 @@ public class InjectionManagerImpl implements InjectionManager {
     public final <E> E getInstance(InjectionPoint<E> injectionPoint) {
         Object instance = getInstanceInternal(injectionPoint);
         if (instance == null) {
-            logger.warn("Could not handle injection for injection point: {}", injectionPoint);
+            logger.debug("Could not handle injection for injection point: {}", injectionPoint);
         }
         return (E) instance;
     }
@@ -123,6 +122,8 @@ public class InjectionManagerImpl implements InjectionManager {
             return _rowAnntationFactoryRef.get();
         } else if (baseType == AnalyzerBeansConfiguration.class) {
             return _configuration;
+        } else if (baseType == TaskRunner.class) {
+            return _configuration.getTaskRunner();
         } else if (baseType == AnalysisJob.class) {
             return _job;
         } else if (baseType == StringConverter.class) {

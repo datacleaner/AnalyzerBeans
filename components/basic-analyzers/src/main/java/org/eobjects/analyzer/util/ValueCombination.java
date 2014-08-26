@@ -25,7 +25,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 /**
  * Represents a combination of values that are of interest to the user.
@@ -35,13 +35,14 @@ import org.eobjects.metamodel.util.BaseObject;
  * A ValueCombination has proper hashCode and equals methods. It also implements
  * Comparable, comparing value-by-value.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class ValueCombination<E> extends BaseObject implements Comparable<ValueCombination<E>> {
 
     private static final Logger logger = LoggerFactory.getLogger(ValueCombination.class);
     private final E[] _values;
 
+    @SafeVarargs
     public ValueCombination(E... values) {
         _values = values;
     }

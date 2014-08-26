@@ -32,7 +32,7 @@ import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.filemonitor.FileMonitor;
 import org.eobjects.analyzer.util.filemonitor.FileMonitorFactory;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 
 import com.google.common.cache.Cache;
 
@@ -50,7 +50,7 @@ import com.google.common.cache.Cache;
  * FR,France
  * </pre>
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class TextFileSynonymCatalog extends AbstractReferenceData implements SynonymCatalog {
 

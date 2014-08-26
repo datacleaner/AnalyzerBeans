@@ -29,14 +29,14 @@ import org.eobjects.analyzer.data.InputRow;
 public class ConsumeRowResult {
 
     private final List<InputRow> _rows;
-    private final List<OutcomeSink> _outcomeSinks;
+    private final List<FilterOutcomes> _outcomeSinks;
 
-    public ConsumeRowResult(List<InputRow> rows, List<OutcomeSink> outcomeSinks) {
+    public ConsumeRowResult(List<InputRow> rows, List<FilterOutcomes> outcomeSinks) {
         _rows = rows;
         _outcomeSinks = outcomeSinks;
     }
 
-    public List<OutcomeSink> getOutcomeSinks() {
+    public List<FilterOutcomes> getOutcomeSinks() {
         return _outcomeSinks;
     }
 

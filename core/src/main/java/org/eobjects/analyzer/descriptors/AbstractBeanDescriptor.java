@@ -37,7 +37,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * Abstract implementation of the {@link BeanDescriptor} interface. Convenient
  * for implementing it's subclasses.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  */

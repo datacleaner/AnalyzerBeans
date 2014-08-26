@@ -116,13 +116,11 @@ public class UsageAwareCloseableTest extends TestCase {
                         System.out.println("Usage (B" + action + "): " + _closeable.getUsageCount() + ", Creates: "
                                 + _createdCounter.get() + ", Closes: " + _closedCounter.get());
 
-                        UsageAwareCloseable closeable = giveMeUsage(action);
-
-                        // do something
-                        System.out.println("Usage (A" + action + "): " + _closeable.getUsageCount() + ", Creates: "
-                                + _createdCounter.get() + ", Closes: " + _closedCounter.get());
-
-                        closeable.close();
+                        try (UsageAwareCloseable closeable = giveMeUsage(action)) {
+                            // do something
+                            System.out.println("Usage (A" + action + "): " + _closeable.getUsageCount() + ", Creates: "
+                                    + _createdCounter.get() + ", Closes: " + _closedCounter.get());
+                        }
                     }
                 }
             };

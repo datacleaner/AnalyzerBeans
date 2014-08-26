@@ -31,7 +31,7 @@ import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 @TransformerBean("Timestamp converter")
 @Description("Convert a timestamp (string or number) to a date field. Epoch is assumed to be 1970-01-01.")

@@ -23,14 +23,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.eobjects.analyzer.beans.CompletenessAnalyzer;
+import org.eobjects.analyzer.beans.CompletenessAnalyzer.Condition;
+import org.eobjects.analyzer.beans.CompletenessAnalyzerResult;
 import org.eobjects.analyzer.beans.NumberAnalyzer;
 import org.eobjects.analyzer.beans.NumberAnalyzerResult;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.StringAnalyzerResult;
-import org.eobjects.analyzer.beans.CompletenessAnalyzer.Condition;
-import org.eobjects.analyzer.beans.CompletenessAnalyzerResult;
 import org.eobjects.analyzer.beans.filter.EqualsFilter;
 import org.eobjects.analyzer.beans.filter.MaxRowsFilter;
+import org.eobjects.analyzer.beans.filter.MaxRowsFilter.Category;
 import org.eobjects.analyzer.beans.filter.ValidationCategory;
 import org.eobjects.analyzer.beans.transform.ConcatenatorTransformer;
 import org.eobjects.analyzer.beans.valuematch.ValueMatchAnalyzer;
@@ -63,11 +64,11 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.JobStatus;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.UpdateCallback;
-import org.eobjects.metamodel.UpdateScript;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.schema.Schema;
+import org.apache.metamodel.UpdateCallback;
+import org.apache.metamodel.UpdateScript;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.Schema;
 import org.junit.Assert;
 
 public class ClusterTestHelper {
@@ -340,7 +341,40 @@ public class ClusterTestHelper {
                 Assert.fail("Unexpected analyzer result found: " + analyzerResult);
             }
         }
+    }
 
+    public static void runExistingMaxRowsJob(AnalyzerBeansConfiguration configuration, ClusterManager clusterManager)
+            throws Throwable {
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        jobBuilder.setDatastore("orderdb");
+        jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER", "CUSTOMERS.CONTACTFIRSTNAME",
+                "CUSTOMERS.CONTACTLASTNAME");
+
+        final InputColumn<?> col1 = jobBuilder.getSourceColumnByName("CONTACTFIRSTNAME");
+        final InputColumn<?> col2 = jobBuilder.getSourceColumnByName("CONTACTLASTNAME");
+
+        final FilterJobBuilder<MaxRowsFilter, Category> filter = jobBuilder.addFilter(MaxRowsFilter.class);
+        filter.getConfigurableBean().setFirstRow(5);
+        filter.getConfigurableBean().setMaxRows(20);
+
+        final AnalyzerJobBuilder<StringAnalyzer> analyzer = jobBuilder.addAnalyzer(StringAnalyzer.class);
+        analyzer.addInputColumn(col1);
+        analyzer.addInputColumn(col2);
+        analyzer.setRequirement(filter, MaxRowsFilter.Category.VALID);
+
+        final AnalysisJob job = jobBuilder.toAnalysisJob();
+
+        jobBuilder.close();
+
+        final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
+
+        try {
+            runner.run(job);
+            Assert.fail("Exception expected");
+        } catch (Exception e) {
+            Assert.assertEquals("Component is not distributable: ImmutableFilterJob[name=null,filter=Max rows]",
+                    e.getMessage());
+        }
     }
 
     /**
@@ -374,8 +408,9 @@ public class ClusterTestHelper {
         final Datastore dbDatastore = configuration.getDatastoreCatalog().getDatastore("orderdb");
         final DatastoreConnection csvCon = csvDatastore.openConnection();
         final DatastoreConnection dbCon = dbDatastore.openConnection();
+
         try {
-            Schema schema = csvCon.getDataContext().getDefaultSchema();
+            final Schema schema = csvCon.getDataContext().getDefaultSchema();
             final String schemaName = schema.getName();
             final String tableName = schema.getTable(0).getName();
 
@@ -492,5 +527,60 @@ public class ClusterTestHelper {
 
         final AnalyzerResult analyzerResult = results.get(0);
         Assert.assertTrue(analyzerResult instanceof StringAnalyzerResult);
+    }
+
+    public static void runCancelJobJob(AnalyzerBeansConfiguration configuration, ClusterManager clusterManager)
+            throws Throwable {
+        // build a job that concats names and inserts the concatenated names
+        // into a file
+        final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
+        jobBuilder.setDatastore("orderdb");
+        jobBuilder.addSourceColumns("CUSTOMERS.CUSTOMERNUMBER", "CUSTOMERS.CONTACTFIRSTNAME",
+                "CUSTOMERS.CONTACTLASTNAME");
+
+        // concatenate firstname + lastname
+        final TransformerJobBuilder<ConcatenatorTransformer> concatenator = jobBuilder
+                .addTransformer(ConcatenatorTransformer.class);
+        concatenator.addInputColumn(jobBuilder.getSourceColumnByName("CONTACTFIRSTNAME"));
+        concatenator.addInputColumn(jobBuilder.getSourceColumnByName("CONTACTLASTNAME"));
+        concatenator.setConfiguredProperty("Separator", " ");
+
+        // insert into CSV file
+        final Datastore csvDatastore = configuration.getDatastoreCatalog().getDatastore("csv");
+        final Datastore dbDatastore = configuration.getDatastoreCatalog().getDatastore("orderdb");
+        final DatastoreConnection csvCon = csvDatastore.openConnection();
+        final DatastoreConnection dbCon = dbDatastore.openConnection();
+
+        try {
+            final Schema schema = csvCon.getDataContext().getDefaultSchema();
+            final String schemaName = schema.getName();
+            final String tableName = schema.getTable(0).getName();
+
+            final AnalyzerJobBuilder<InsertIntoTableAnalyzer> insert = jobBuilder
+                    .addAnalyzer(InsertIntoTableAnalyzer.class);
+            insert.setConfiguredProperty("Datastore", csvDatastore);
+            insert.addInputColumn(jobBuilder.getSourceColumnByName("CUSTOMERNUMBER"));
+            insert.addInputColumn(concatenator.getOutputColumns().get(0));
+            insert.setConfiguredProperty("Schema name", schemaName);
+            insert.setConfiguredProperty("Table name", tableName);
+            insert.setConfiguredProperty("Column names", new String[] { "id", "name" });
+            insert.setConfiguredProperty("Buffer size", WriteBufferSizeOption.TINY);
+
+            // build the job
+            final AnalysisJob job = jobBuilder.toAnalysisJob();
+
+            // run the job in a distributed fashion
+            final DistributedAnalysisRunner runner = new DistributedAnalysisRunner(configuration, clusterManager);
+            final AnalysisResultFuture resultFuture = runner.run(job);
+
+            resultFuture.cancel();
+
+            Assert.assertTrue(resultFuture.isCancelled());
+
+        } finally {
+            dbCon.close();
+            csvCon.close();
+            jobBuilder.close();
+        }
     }
 }

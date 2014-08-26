@@ -27,7 +27,7 @@ import org.eobjects.analyzer.beans.api.Alias;
  * 
  * Mostly used for testing purposes.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class NumberResult implements AnalyzerResult {
 

@@ -52,12 +52,12 @@ import org.eobjects.analyzer.job.concurrent.TaskListener;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.util.ClassLoaderUtils;
-import org.eobjects.metamodel.util.ExclusionPredicate;
-import org.eobjects.metamodel.util.FileHelper;
-import org.eobjects.metamodel.util.Predicate;
-import org.eobjects.metamodel.util.Ref;
-import org.eobjects.metamodel.util.TruePredicate;
-import org.objectweb.asm.ClassReader;
+import org.apache.metamodel.util.ExclusionPredicate;
+import org.apache.metamodel.util.FileHelper;
+import org.apache.metamodel.util.Predicate;
+import org.apache.metamodel.util.Ref;
+import org.apache.metamodel.util.TruePredicate;
+import org.kohsuke.asm5.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ import org.slf4j.LoggerFactory;
  * <li>{@link RendererBean}</li>
  * </ul>
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ClasspathScanDescriptorProvider extends AbstractDescriptorProvider {
 
@@ -278,13 +278,10 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                         } else {
                             logger.info("Scanning JAR file: {}", file);
 
-                            JarFile jarFile = new JarFile(file);
-                            try {
+                            try (JarFile jarFile = new JarFile(file)) {
                                 scanJar(jarFile, classLoader, packagePath, recursive, strictClassLoader);
                             } catch (Exception e) {
                                 logger.error("Failed to scan package '" + packageName + "' in file: " + file, e);
-                            } finally {
-                                jarFile.close();
                             }
                         }
                     }
@@ -339,12 +336,13 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                 // format. We'll also handle paths with and without leading
                 // "file:" prefix.
 
-                JarFile jarFile = null;
                 String rootEntryPath;
 
                 final String jarFileUrl;
                 final int separatorIndex = file.indexOf("!/");
 
+                @SuppressWarnings("resource")
+                JarFile jarFile = null;
                 try {
                     if (separatorIndex != -1) {
                         jarFileUrl = file.substring(0, separatorIndex);

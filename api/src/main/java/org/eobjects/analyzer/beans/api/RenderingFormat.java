@@ -27,8 +27,6 @@ package org.eobjects.analyzer.beans.api;
  * interface and reference the class in the @RendererBean annotation when
  * implementing renderers.
  * 
- * @author Kasper Sørensen
- * 
  * @param <T>
  * 
  * @see RendererBean

@@ -26,14 +26,12 @@ import java.util.HashSet;
 
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.util.InputColumnComparator;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Represents an InputColumn that is a result of a transformer.
- * 
- * @author Kasper Sørensen
  * 
  * @param <E>
  */
@@ -118,12 +116,6 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
     @Override
     public boolean isVirtualColumn() {
         return true;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public DataTypeFamily getDataTypeFamily() {
-        return DataTypeFamily.valueOf(_dataType);
     }
 
     @Override

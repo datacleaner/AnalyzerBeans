@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.Predicate;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.Predicate;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -38,7 +38,7 @@ import com.google.common.cache.CacheBuilder;
  * Additional (to {@link CollectionUtils} utility methods for common collection
  * or array operations.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class CollectionUtils2 {
 

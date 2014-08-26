@@ -33,7 +33,7 @@ import org.eobjects.analyzer.test.mock.MockRenderers.BarPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.ConditionalPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.FooPrecedenceRenderer;
 import org.eobjects.analyzer.test.mock.MockRenderers.RenderableString;
-import org.eobjects.metamodel.data.Row;
+import org.apache.metamodel.data.Row;
 
 public class RendererFactoryTest extends TestCase {
 
@@ -45,13 +45,13 @@ public class RendererFactoryTest extends TestCase {
         Renderer<?, ? extends CharSequence> r;
 
         r = rendererFactory.getRenderer(new NumberResult(1), TextRenderingFormat.class);
-        assertEquals(DefaultTextRenderer.class, r.getClass());
+        assertEquals(ToStringTextRenderer.class, r.getClass());
 
         r = rendererFactory.getRenderer(new CrosstabResult(null), TextRenderingFormat.class);
         assertEquals(CrosstabTextRenderer.class, r.getClass());
 
         r = rendererFactory.getRenderer(new DataSetResult(new LinkedList<Row>()), TextRenderingFormat.class);
-        assertEquals(DefaultTextRenderer.class, r.getClass());
+        assertEquals(MetricBasedResultTextRenderer.class, r.getClass());
     }
 
     public void testGetRendererByPrecedence() throws Exception {

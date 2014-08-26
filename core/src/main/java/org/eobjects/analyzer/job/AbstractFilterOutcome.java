@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
 
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 /**
  * Provides hashCode, equals and toString implementations for FilterOutcome,
@@ -35,33 +35,30 @@ import org.eobjects.metamodel.util.BaseObject;
  * 
  * @see ImmutableFilterOutcome
  * @see LazyFilterOutcome
- * 
- * @author Kasper Sørensen
- * 
  */
 public abstract class AbstractFilterOutcome extends BaseObject implements FilterOutcome {
-	
-	private static final long serialVersionUID = 1L;
 
-	@Override
-	protected final void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(getCategory());
-		identifiers.add(getSourceJob());
-	}
+    private static final long serialVersionUID = 1L;
+    
+    @Override
+    public boolean isEquals(FilterOutcome filterOutcome) {
+        return equals(filterOutcome);
+    }
 
-	@Override
-	protected final boolean classEquals(BaseObject obj) {
-		// works with all subtypes
-		return obj instanceof FilterOutcome;
-	}
+    @Override
+    protected final void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(getCategory());
+        identifiers.add(getSource());
+    }
 
-	@Override
-	public String toString() {
-		return "FilterOutcome[category=" + getCategory() + "]";
-	}
+    @Override
+    protected final boolean classEquals(BaseObject obj) {
+        // works with all subtypes
+        return obj instanceof FilterOutcome;
+    }
 
-	@Override
-	public final boolean satisfiesRequirement(Outcome requirement) {
-		return equals(requirement);
-	}
+    @Override
+    public String toString() {
+        return "FilterOutcome[category=" + getCategory() + "]";
+    }
 }

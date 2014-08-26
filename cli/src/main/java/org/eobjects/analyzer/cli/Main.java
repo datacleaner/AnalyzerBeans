@@ -21,12 +21,10 @@ package org.eobjects.analyzer.cli;
 
 import java.io.PrintWriter;
 
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 
 /**
  * Main class for the AnalyzerBeans Command-line interface (CLI).
- * 
- * @author Kasper Sørensen
  */
 public final class Main {
 

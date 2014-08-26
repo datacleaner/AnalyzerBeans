@@ -30,9 +30,11 @@ import javax.xml.bind.JAXBContext;
 
 import junit.framework.TestCase;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.pojo.ArrayTableDataProvider;
+import org.apache.metamodel.pojo.TableDataProvider;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.util.SimpleTableDef;
 import org.eobjects.analyzer.configuration.jaxb.AbstractDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.Configuration;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreCatalogType;
@@ -40,11 +42,10 @@ import org.eobjects.analyzer.configuration.jaxb.ObjectFactory;
 import org.eobjects.analyzer.configuration.jaxb.PojoDatastoreType;
 import org.eobjects.analyzer.connection.PojoDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.pojo.ArrayTableDataProvider;
-import org.eobjects.metamodel.pojo.TableDataProvider;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.util.SimpleTableDef;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JaxbPojoDatastoreAdaptorTest extends TestCase {
 

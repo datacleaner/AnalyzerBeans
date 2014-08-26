@@ -35,7 +35,7 @@ import org.joda.time.LocalTime;
  * statistics for a single column. The Date/time Analyzer then consists of a
  * number of these delegates.
  * 
- * @author Kasper Sørensen
+ * 
  */
 final class DateAndTimeAnalyzerColumnDelegate {
 

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents the result of a Date and Time Analyzer.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class DateAndTimeAnalyzerResult extends CrosstabResult {
 

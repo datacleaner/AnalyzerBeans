@@ -38,12 +38,10 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.beans.categories.ConversionCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 
 /**
  * Attempts to convert anything to a String value.
- * 
- * @author Kasper Sørensen
  */
 @TransformerBean("Convert to string")
 @Description("Converts anything to a string (or null).")

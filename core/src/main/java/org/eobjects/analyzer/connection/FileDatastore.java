@@ -23,8 +23,6 @@ package org.eobjects.analyzer.connection;
  * Interface for datastores that are based upon a file.
  * 
  * File datastores are often also {@link ResourceDatastore}s.
- * 
- * @author Kasper Sørensen
  */
 public interface FileDatastore extends Datastore {
 

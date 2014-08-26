@@ -26,7 +26,7 @@ import org.eobjects.analyzer.descriptors.ComponentDescriptor;
  * component. A step might be to call any initializing methods, inject
  * properties or to close the component.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <C>
  *            the component type

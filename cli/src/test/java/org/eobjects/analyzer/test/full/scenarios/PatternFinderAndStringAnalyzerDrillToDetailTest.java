@@ -48,9 +48,9 @@ import org.eobjects.analyzer.result.DefaultResultProducer;
 import org.eobjects.analyzer.result.ResultProducer;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 
 public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
 

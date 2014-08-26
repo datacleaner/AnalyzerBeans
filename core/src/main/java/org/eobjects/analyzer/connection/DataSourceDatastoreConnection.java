@@ -22,9 +22,9 @@ package org.eobjects.analyzer.connection;
 import javax.sql.DataSource;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.UpdateableDataContext;
-import org.eobjects.metamodel.jdbc.JdbcDataContext;
-import org.eobjects.metamodel.schema.TableType;
+import org.apache.metamodel.UpdateableDataContext;
+import org.apache.metamodel.jdbc.JdbcDataContext;
+import org.apache.metamodel.schema.TableType;
 
 /**
  * A {@link DatastoreConnection} based on a {@link DataSource}.

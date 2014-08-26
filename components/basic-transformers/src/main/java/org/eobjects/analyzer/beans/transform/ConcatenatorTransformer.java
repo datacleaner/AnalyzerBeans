@@ -32,7 +32,7 @@ import org.eobjects.analyzer.data.InputRow;
 /**
  * Concatenates several values into one String value.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @TransformerBean("Concatenator")
 @Description("Concatenate several column values into one.")

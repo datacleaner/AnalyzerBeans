@@ -22,10 +22,10 @@ package org.eobjects.analyzer.metadata;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreConnection;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
 
 /**
  * A metadata object representing a foreign key
@@ -66,8 +66,7 @@ public final class ForeignKey {
         if (datastore == null) {
             return null;
         }
-        DatastoreConnection connection = datastore.openConnection();
-        try {
+        try (DatastoreConnection connection = datastore.openConnection()) {
             DataContext dataContext = connection.getDataContext();
             Schema schema = dataContext.getSchemaByName(getForeignSchemaName());
             if (schema == null) {
@@ -79,8 +78,6 @@ public final class ForeignKey {
             }
             Column column = table.getColumnByName(getForeignColumnName());
             return column;
-        } finally {
-            connection.close();
         }
     }
 }

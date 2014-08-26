@@ -25,8 +25,8 @@ import java.util.Date;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
-import org.eobjects.metamodel.util.FileHelper;
-import org.eobjects.metamodel.util.FileResource;
+import org.apache.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileResource;
 
 import junit.framework.TestCase;
 

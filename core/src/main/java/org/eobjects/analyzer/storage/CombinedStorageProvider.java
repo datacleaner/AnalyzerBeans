@@ -27,7 +27,7 @@ import java.util.Set;
  * A storage provider that delegates to different backing storage providers,
  * depending on which type of storage entity to use.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class CombinedStorageProvider implements StorageProvider {
 

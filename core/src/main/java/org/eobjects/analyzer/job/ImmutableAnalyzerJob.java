@@ -27,74 +27,71 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.util.CollectionUtils2;
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 public final class ImmutableAnalyzerJob extends BaseObject implements AnalyzerJob {
-	
-	private static final long serialVersionUID = 1L;
 
-	private final String _name;
-	private final AnalyzerBeanDescriptor<?> _descriptor;
-	private final BeanConfiguration _beanConfiguration;
-	private final Outcome _requirement;
+    private static final long serialVersionUID = 1L;
 
-	public ImmutableAnalyzerJob(String name, AnalyzerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
-			Outcome requirement) {
-		_name = name;
-		_descriptor = descriptor;
-		_beanConfiguration = beanConfiguration;
-		_requirement = LazyOutcomeUtils.load(requirement);
-	}
+    private final String _name;
+    private final AnalyzerBeanDescriptor<?> _descriptor;
+    private final BeanConfiguration _beanConfiguration;
+    private final ComponentRequirement _componentRequirement;
 
-	@Override
-	public String getName() {
-		return _name;
-	}
+    public ImmutableAnalyzerJob(String name, AnalyzerBeanDescriptor<?> descriptor, BeanConfiguration beanConfiguration,
+            ComponentRequirement requirement) {
+        _name = name;
+        _descriptor = descriptor;
+        _beanConfiguration = beanConfiguration;
+        _componentRequirement = requirement;
+    }
 
-	@Override
-	public AnalyzerBeanDescriptor<?> getDescriptor() {
-		return _descriptor;
-	}
+    @Override
+    public ComponentRequirement getComponentRequirement() {
+        return _componentRequirement;
+    }
 
-	@Override
-	public BeanConfiguration getConfiguration() {
-		return _beanConfiguration;
-	}
+    @Override
+    public String getName() {
+        return _name;
+    }
 
-	@Override
-	public InputColumn<?>[] getInput() {
-		List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
-		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
-		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
-			Object property = _beanConfiguration.getProperty(propertyDescriptor);
-			InputColumn<?>[] inputs = CollectionUtils2.arrayOf(InputColumn.class, property);
-			if (inputs != null) {
-				for (InputColumn<?> inputColumn : inputs) {
-					result.add(inputColumn);
-				}
-			}
-		}
-		return result.toArray(new InputColumn<?>[result.size()]);
-	}
+    @Override
+    public AnalyzerBeanDescriptor<?> getDescriptor() {
+        return _descriptor;
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_name);
-		identifiers.add(_beanConfiguration);
-		identifiers.add(_descriptor);
-		identifiers.add(_requirement);
-	}
+    @Override
+    public BeanConfiguration getConfiguration() {
+        return _beanConfiguration;
+    }
 
-	@Override
-	public String toString() {
-		return "ImmutableAnalyzerJob[name=" + _name + ",analyzer=" + _descriptor.getDisplayName() + "]";
-	}
+    @Override
+    public InputColumn<?>[] getInput() {
+        List<InputColumn<?>> result = new ArrayList<InputColumn<?>>();
+        Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
+        for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
+            Object property = _beanConfiguration.getProperty(propertyDescriptor);
+            InputColumn<?>[] inputs = CollectionUtils2.arrayOf(InputColumn.class, property);
+            if (inputs != null) {
+                for (InputColumn<?> inputColumn : inputs) {
+                    result.add(inputColumn);
+                }
+            }
+        }
+        return result.toArray(new InputColumn<?>[result.size()]);
+    }
 
-	@Override
-	public Outcome[] getRequirements() {
-		if (_requirement == null) {
-			return new Outcome[0];
-		}
-		return new Outcome[] { _requirement };
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(_name);
+        identifiers.add(_beanConfiguration);
+        identifiers.add(_descriptor);
+        identifiers.add(_componentRequirement);
+    }
+
+    @Override
+    public String toString() {
+        return "ImmutableAnalyzerJob[name=" + _name + ",analyzer=" + _descriptor.getDisplayName() + "]";
+    }
 }

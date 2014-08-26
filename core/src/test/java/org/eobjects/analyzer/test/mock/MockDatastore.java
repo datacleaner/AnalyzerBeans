@@ -55,4 +55,9 @@ public class MockDatastore implements Datastore, PerformanceCharacteristics {
 	public boolean isQueryOptimizationPreferred() {
 		return true;
 	}
+
+    @Override
+    public boolean isNaturalRecordOrderConsistent() {
+        return true;
+    }
 }

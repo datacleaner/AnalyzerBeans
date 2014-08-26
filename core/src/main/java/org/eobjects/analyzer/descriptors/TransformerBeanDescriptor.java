@@ -24,29 +24,18 @@ import org.eobjects.analyzer.beans.api.Transformer;
 /**
  * Descriptor interface for {@link Transformer}s.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  */
 public interface TransformerBeanDescriptor<B extends Transformer<?>> extends BeanDescriptor<B> {
 
-	/**
-	 * Gets the output data's {@link org.eobjects.analyzer.data.DataTypeFamily}.
-	 * 
-	 * @return a {@link org.eobjects.analyzer.data.DataTypeFamily} value that
-	 *         represents the data type of this transformer bean's output.
-	 * 
-	 * @deprecated use {@link #getOutputDataType()} instead.
-	 */
-	@Deprecated
-	public org.eobjects.analyzer.data.DataTypeFamily getOutputDataTypeFamily();
-
-	/**
-	 * Gets the output data's default data type. Note that individual output
-	 * columns of the transformer can override this data type.
-	 * 
-	 * @return the default data type of the transformed columns.
-	 */
-	public Class<?> getOutputDataType();
+    /**
+     * Gets the output data's default data type. Note that individual output
+     * columns of the transformer can override this data type.
+     * 
+     * @return the default data type of the transformed columns.
+     */
+    public Class<?> getOutputDataType();
 
 }

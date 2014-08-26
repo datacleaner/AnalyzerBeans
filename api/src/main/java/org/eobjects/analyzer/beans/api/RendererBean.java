@@ -46,8 +46,6 @@ import java.lang.annotation.Target;
  * 
  * @see RenderingFormat
  * @see Renderer
- * 
- * @author Kasper Sørensen
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

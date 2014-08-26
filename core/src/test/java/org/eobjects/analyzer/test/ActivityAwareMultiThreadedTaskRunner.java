@@ -42,7 +42,7 @@ import org.junit.Assert;
  * perspective of a unittest (typically to assert that no tasks are waiting or
  * such).
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class ActivityAwareMultiThreadedTaskRunner implements TaskRunner {
 

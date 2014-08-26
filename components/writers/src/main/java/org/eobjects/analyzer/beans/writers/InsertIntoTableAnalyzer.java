@@ -30,6 +30,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.metamodel.BatchUpdateScript;
+import org.apache.metamodel.UpdateCallback;
+import org.apache.metamodel.UpdateScript;
+import org.apache.metamodel.UpdateableDataContext;
+import org.apache.metamodel.create.TableCreationBuilder;
+import org.apache.metamodel.csv.CsvDataContext;
+import org.apache.metamodel.delete.RowDeletionBuilder;
+import org.apache.metamodel.insert.RowInsertionBuilder;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.Action;
+import org.apache.metamodel.util.FileHelper;
+import org.apache.metamodel.util.Resource;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Categorized;
@@ -38,11 +53,12 @@ import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FileProperty;
+import org.eobjects.analyzer.beans.api.Validate;
+import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
+import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.MappedProperty;
 import org.eobjects.analyzer.beans.api.SchemaProperty;
 import org.eobjects.analyzer.beans.api.TableProperty;
-import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
-import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -52,21 +68,7 @@ import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.BatchUpdateScript;
-import org.eobjects.metamodel.UpdateCallback;
-import org.eobjects.metamodel.UpdateScript;
-import org.eobjects.metamodel.UpdateableDataContext;
-import org.eobjects.metamodel.create.TableCreationBuilder;
-import org.eobjects.metamodel.csv.CsvDataContext;
-import org.eobjects.metamodel.delete.RowDeletionBuilder;
-import org.eobjects.metamodel.insert.RowInsertionBuilder;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.schema.Schema;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.Action;
-import org.eobjects.metamodel.util.FileHelper;
-import org.eobjects.metamodel.util.Resource;
+import org.eobjects.analyzer.util.WriteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +79,7 @@ import org.slf4j.LoggerFactory;
 public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Action<Iterable<Object[]>> {
 
     private static final String PROPERTY_NAME_VALUES = "Values";
-    
+
     private static final File TEMP_DIR = FileHelper.getTempDir();
 
     private static final String ERROR_MESSAGE_COLUMN_NAME = "insert_into_table_error_message";
@@ -144,6 +146,14 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
     private AtomicInteger _errorRowCount;
     private CsvDataContext _errorDataContext;
 
+    @Validate
+    public void validate() {
+        if (values.length != columnNames.length) {
+            throw new IllegalStateException("Length of 'Values' (" + values.length + ") and 'Column names' ("
+                    + columnNames.length + ") must be equal");
+        }
+    }
+
     /**
      * Truncates the database table if necesary. This is NOT a distributable
      * initializer, since it can only happen once.
@@ -208,6 +218,11 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
             }
         } finally {
             con.close();
+        }
+
+        if (_targetColumns.length != values.length) {
+            throw new IllegalArgumentException("Configuration yielded unexpected target column count (got "
+                    + _targetColumns.length + ", expected " + values.length + ")");
         }
     }
 

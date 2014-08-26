@@ -35,12 +35,12 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.beans.categories.StringManipulationCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Tokenizes values into a configurable amount of tokens.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @TransformerBean("Tokenizer")
 @Description("Tokenizes a String value (splits into substrings).")

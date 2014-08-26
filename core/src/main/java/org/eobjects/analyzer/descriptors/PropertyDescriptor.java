@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Super-interface for descriptor objects that describe metadata about
@@ -32,7 +32,7 @@ import org.eobjects.metamodel.util.HasName;
  * A property exist within a component, which are described by the
  * {@link ComponentDescriptor} interface.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface PropertyDescriptor extends Comparable<PropertyDescriptor>, Serializable, HasName {
 

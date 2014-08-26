@@ -47,8 +47,6 @@ import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Attempts to convert anything to a Date value
- * 
- * @author Kasper Sørensen
  */
 @TransformerBean("Convert to date")
 @Description("Converts anything to a date (or null).")

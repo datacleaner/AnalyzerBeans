@@ -39,8 +39,6 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * @see Configured
  * @see ExploringAnalyzer
  * 
- * @author Kasper Sørensen
- * 
  * @param <R>
  *            the result type returned by this analyzer
  * 

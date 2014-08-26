@@ -28,8 +28,6 @@ package org.eobjects.analyzer.beans.api;
  * Usually Converters are registered on a class or a configured property using
  * the {@link Convertable} annotation.
  * 
- * @author Kasper Sørensen
- * 
  * @param <E>
  */
 public interface Converter<E> {

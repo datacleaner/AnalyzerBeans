@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * Task listener that will wait (join) for a set of tasks to complete before
  * invoking onComplete(...) on a nested task listener.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class JoinTaskListener implements TaskListener {
 

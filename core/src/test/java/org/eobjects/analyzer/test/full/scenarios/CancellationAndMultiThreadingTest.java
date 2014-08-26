@@ -35,91 +35,91 @@ import org.eobjects.analyzer.job.runner.AnalysisResultFuture;
 import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.eobjects.analyzer.job.runner.AnalysisRunnerImpl;
 import org.eobjects.analyzer.test.TestHelper;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 
 public class CancellationAndMultiThreadingTest extends TestCase {
 
-	public void test10Times() throws Exception {
-		Thread[] threads = new Thread[10];
-		for (int i = 0; i < threads.length; i++) {
-			Thread thread = new Thread() {
-				public void run() {
-					runScenario();
-				};
-			};
-			thread.start();
-			threads[i] = thread;
-		}
+    public void test10Times() throws Exception {
+        Thread[] threads = new Thread[10];
+        for (int i = 0; i < threads.length; i++) {
+            Thread thread = new Thread() {
+                public void run() {
+                    runScenario();
+                };
+            };
+            thread.start();
+            threads[i] = thread;
+        }
 
-		for (int i = 0; i < threads.length; i++) {
-			threads[i].join();
-		}
-	}
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].join();
+        }
+    }
 
-	public void runScenario() {
-		MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(30);
+    public void runScenario() {
+        MultiThreadedTaskRunner taskRunner = new MultiThreadedTaskRunner(30);
 
-		ThreadPoolExecutor executorService = (ThreadPoolExecutor) taskRunner.getExecutorService();
-		assertEquals(30, executorService.getMaximumPoolSize());
-		assertEquals(0, executorService.getActiveCount());
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) taskRunner.getExecutorService();
+        assertEquals(30, executorService.getMaximumPoolSize());
+        assertEquals(0, executorService.getActiveCount());
 
-		AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
+        AnalyzerBeansConfiguration configuration = new AnalyzerBeansConfigurationImpl().replace(taskRunner);
 
-		AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
+        AnalysisRunner runner = new AnalysisRunnerImpl(configuration);
 
-		Datastore ds = TestHelper.createSampleDatabaseDatastore("foobar");
-		DatastoreConnection con = ds.openConnection();
+        Datastore ds = TestHelper.createSampleDatabaseDatastore("foobar");
+        try (DatastoreConnection con = ds.openConnection()) {
 
-		AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration);
-		analysisJobBuilder.setDatastore(ds);
+            AnalysisJob job;
+            try (AnalysisJobBuilder analysisJobBuilder = new AnalysisJobBuilder(configuration)) {
+                analysisJobBuilder.setDatastore(ds);
 
-		Table table = con.getDataContext().getDefaultSchema().getTableByName("ORDERFACT");
-		assertNotNull(table);
+                Table table = con.getDataContext().getDefaultSchema().getTableByName("ORDERFACT");
+                assertNotNull(table);
 
-		Column statusColumn = table.getColumnByName("STATUS");
-		Column commentsColumn = table.getColumnByName("COMMENTS");
+                Column statusColumn = table.getColumnByName("STATUS");
+                Column commentsColumn = table.getColumnByName("COMMENTS");
 
-		analysisJobBuilder.addSourceColumns(statusColumn, commentsColumn);
-		analysisJobBuilder.addAnalyzer(AnalyzerMock.class).addInputColumns(
-				analysisJobBuilder.getSourceColumns());
+                analysisJobBuilder.addSourceColumns(statusColumn, commentsColumn);
+                analysisJobBuilder.addAnalyzer(AnalyzerMock.class).addInputColumns(
+                        analysisJobBuilder.getSourceColumns());
 
-		AnalysisJob job = analysisJobBuilder.toAnalysisJob();
+                job = analysisJobBuilder.toAnalysisJob();
+            }
 
-		AnalysisResultFuture resultFuture = runner.run(job);
+            AnalysisResultFuture resultFuture = runner.run(job);
 
-		try {
-			Thread.sleep(550);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			fail("Interrupted! " + e.getMessage());
-		}
+            try {
+                Thread.sleep(550);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                fail("Interrupted! " + e.getMessage());
+            }
 
-		resultFuture.cancel();
+            resultFuture.cancel();
 
-		assertFalse(resultFuture.isSuccessful());
-		assertTrue(resultFuture.isCancelled());
-		assertTrue(resultFuture.isErrornous());
+            assertFalse(resultFuture.isSuccessful());
+            assertTrue(resultFuture.isCancelled());
+            assertTrue(resultFuture.isErrornous());
 
-		try {
-			Thread.sleep(400);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			fail("Interrupted! " + e.getMessage());
-		}
+            try {
+                Thread.sleep(400);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                fail("Interrupted! " + e.getMessage());
+            }
 
-		assertEquals(30, executorService.getMaximumPoolSize());
+            assertEquals(30, executorService.getMaximumPoolSize());
 
-		long completedTaskCount = executorService.getCompletedTaskCount();
-		assertTrue("completedTaskCount was: " + completedTaskCount, completedTaskCount > 3);
+            long completedTaskCount = executorService.getCompletedTaskCount();
+            assertTrue("completedTaskCount was: " + completedTaskCount, completedTaskCount > 3);
 
-		int largestPoolSize = executorService.getLargestPoolSize();
-		assertTrue("largestPoolSize was: " + largestPoolSize, largestPoolSize > 5);
-		assertEquals(0, executorService.getActiveCount());
+            int largestPoolSize = executorService.getLargestPoolSize();
+            assertTrue("largestPoolSize was: " + largestPoolSize, largestPoolSize > 5);
+            assertEquals(0, executorService.getActiveCount());
+        }
 
-		con.close();
-		analysisJobBuilder.close();
-
-		taskRunner.shutdown();
-	}
+        taskRunner.shutdown();
+    }
 }

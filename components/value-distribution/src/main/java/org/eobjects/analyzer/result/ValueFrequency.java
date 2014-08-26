@@ -22,7 +22,7 @@ package org.eobjects.analyzer.result;
 import java.io.Serializable;
 import java.util.List;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Represents a frequency of values. Value frequencies can either represent a single

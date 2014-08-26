@@ -22,8 +22,7 @@ package org.eobjects.analyzer.job.runner;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.TransformerJob;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * AnalysisListener used for DEBUG level logging. This listener is obviously
  * very verbose.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class DebugLoggingAnalysisListener implements AnalysisListener {
 
@@ -62,8 +61,8 @@ public class DebugLoggingAnalysisListener implements AnalysisListener {
     }
 
     @Override
-    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
-        logger.debug("rowProcessingProgress({}, {}, {})", new Object[] { job, metrics.getTable(), currentRow });
+    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, InputRow row, int currentRow) {
+        logger.debug("rowProcessingProgress({}, {}, {}, {})", new Object[] { job, metrics.getTable(), row, currentRow });
     }
 
     @Override
@@ -82,18 +81,8 @@ public class DebugLoggingAnalysisListener implements AnalysisListener {
     }
 
     @Override
-    public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
-        logger.debug("errorInFilter(" + job + "," + filterJob + "," + row + ")", throwable);
-    }
-
-    @Override
-    public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
-        logger.debug("errorInTransformer(" + job + "," + transformerJob + "," + row + ")", throwable);
-    }
-
-    @Override
-    public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
-        logger.debug("errorInAnalyzer(" + job + "," + analyzerJob + "," + row + ")", throwable);
+    public void errorInComponent(AnalysisJob job, ComponentJob componentJob, InputRow row, Throwable throwable) {
+        logger.debug("errorInComponent(" + job + "," + componentJob + "," + row + ")", throwable);
     }
 
     @Override

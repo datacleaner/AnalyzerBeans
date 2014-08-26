@@ -43,7 +43,7 @@ import org.eobjects.analyzer.result.QueryParameterizableMetric;
  * Ungrouped results only contain a single/global crosstab. A grouped result
  * contain multiple crosstabs, based on groups.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @Distributed(reducer = PatternFinderResultReducer.class)
 public class PatternFinderResult implements AnalyzerResult {

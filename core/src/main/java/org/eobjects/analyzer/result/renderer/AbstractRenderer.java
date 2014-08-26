@@ -26,7 +26,7 @@ import org.eobjects.analyzer.beans.api.RendererPrecedence;
  * Abstract implementation of the {@link Renderable} interface. Only implements
  * the {@link #getPrecedence(Renderable)} method (returns MEDIUM precedence).
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <I>
  * @param <O>

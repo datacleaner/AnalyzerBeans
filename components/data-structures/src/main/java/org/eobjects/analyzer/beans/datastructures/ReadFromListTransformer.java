@@ -37,10 +37,6 @@ import org.eobjects.analyzer.data.InputRow;
 
 /**
  * Transformer for extracting elements from lists.
- * 
- * @author Kasper Sørensen
- * @author Shekhar Gulati
- * @author Saurabh Gupta
  */
 @TransformerBean("Read elements from list")
 @Description("Reads all elements of a list, creating a record for each value")

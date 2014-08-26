@@ -26,8 +26,6 @@ import org.eobjects.analyzer.result.renderer.Renderable;
  * the logical results into readable results such as HTML pages, Swing
  * components, Text or XML files.
  * 
- * @author Kasper Sørensen
- * 
  * @param <I>
  *            the input of the renderer, ie. the result type (or
  *            {@link Renderable} in general) to render

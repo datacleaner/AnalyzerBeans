@@ -27,15 +27,17 @@ import java.util.List;
 
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
+import org.eobjects.analyzer.job.AnalysisJobImmutabilizer;
+import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableFilterJob;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
 
 public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> extends
         AbstractBeanWithInputColumnsBuilder<FilterBeanDescriptor<F, C>, F, FilterJobBuilder<F, C>> implements
-        OutcomeSourceJob {
+        HasFilterOutcomes {
 
     // We keep a cached version of the resulting filter job because of
     // references coming from other objects, particular LazyFilterOutcome.
@@ -59,17 +61,27 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
         return toFilterJob(true);
     }
 
-    public FilterJob toFilterJob(boolean validate) {
+    public FilterJob toFilterJob(AnalysisJobImmutabilizer immutabilizer) {
+        return toFilterJob(true, immutabilizer);
+    }
+
+    public FilterJob toFilterJob(final boolean validate) {
+        return toFilterJob(validate, new AnalysisJobImmutabilizer());
+    }
+
+    public FilterJob toFilterJob(final boolean validate, final AnalysisJobImmutabilizer immutabilizer) {
         if (validate && !isConfigured(true)) {
             throw new IllegalStateException("Filter job is not correctly configured");
         }
 
+        final ComponentRequirement componentRequirement = immutabilizer.load(getComponentRequirement());
+
         if (_cachedJob == null) {
             _cachedJob = new ImmutableFilterJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                    getConfiguredProperties()), getRequirement());
+                    getConfiguredProperties()), componentRequirement);
         } else {
-            ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(getConfiguredProperties()), getRequirement());
+            final ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getName(), getDescriptor(),
+                    new ImmutableBeanConfiguration(getConfiguredProperties()), componentRequirement);
             if (!newFilterJob.equals(_cachedJob)) {
                 _cachedJob = newFilterJob;
             }
@@ -109,28 +121,44 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
     @Override
     public void onRequirementChanged() {
         super.onRequirementChanged();
-        List<FilterChangeListener> listeners = getAllListeners();
-        for (FilterChangeListener listener : listeners) {
+        final List<FilterChangeListener> listeners = getAllListeners();
+        for (final FilterChangeListener listener : listeners) {
             listener.onRequirementChanged(this);
         }
     }
 
     @Override
-    public FilterOutcome[] getOutcomes() {
-        Collection<FilterOutcome> outcomes = _outcomes.values();
-        return outcomes.toArray(new FilterOutcome[outcomes.size()]);
+    public Collection<FilterOutcome> getFilterOutcomes() {
+        final Collection<FilterOutcome> outcomes = _outcomes.values();
+        return outcomes;
     }
 
+    /**
+     * @deprecated use {@link #getFilterOutcome(Enum)} instead
+     */
+    @Deprecated
     public FilterOutcome getOutcome(C category) {
-        FilterOutcome outcome = _outcomes.get(category);
+        return getFilterOutcome(category);
+    }
+
+    public FilterOutcome getFilterOutcome(C category) {
+        final FilterOutcome outcome = _outcomes.get(category);
         if (outcome == null) {
             throw new IllegalArgumentException(category + " is not a valid category for " + this);
         }
         return outcome;
     }
 
+    /**
+     * @deprecated use {@link #getFilterOutcome(Object)} instead
+     */
+    @Deprecated
     public FilterOutcome getOutcome(Object category) {
-        FilterOutcome outcome = _outcomes.get(category);
+        return getFilterOutcome(category);
+    }
+
+    public FilterOutcome getFilterOutcome(Object category) {
+        final FilterOutcome outcome = _outcomes.get(category);
         if (outcome == null) {
             throw new IllegalArgumentException(category + " is not a valid category for " + this);
         }
@@ -146,7 +174,7 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
             listener.onRemove(this);
         }
     }
-    
+
     /**
      * Adds a change listener to this component
      * 

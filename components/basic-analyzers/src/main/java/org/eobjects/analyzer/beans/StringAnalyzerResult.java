@@ -28,7 +28,7 @@ import org.eobjects.analyzer.result.Metric;
 /**
  * Result type of the StringAnalyzer
  * 
- * @author Kasper Sørensen
+ * 
  */
 @Distributed(reducer = StringAnalyzerResultReducer.class)
 public class StringAnalyzerResult extends CrosstabResult {

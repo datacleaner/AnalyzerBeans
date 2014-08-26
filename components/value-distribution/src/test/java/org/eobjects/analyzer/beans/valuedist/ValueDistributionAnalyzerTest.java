@@ -35,7 +35,7 @@ import org.eobjects.analyzer.descriptors.MetricParameters;
 import org.eobjects.analyzer.result.GroupedValueCountingAnalyzerResult;
 import org.eobjects.analyzer.result.ValueCountList;
 import org.eobjects.analyzer.result.ValueCountingAnalyzerResult;
-import org.eobjects.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableColumn;
 
 public class ValueDistributionAnalyzerTest extends TestCase {
 
@@ -176,15 +176,5 @@ public class ValueDistributionAnalyzerTest extends TestCase {
         assertEquals("", resultLines[i++]);
         assertEquals("Group: 2200", resultLines[i++]);
         assertEquals(" - Copenhagen N: 3", resultLines[i++]);
-    }
-
-    @SuppressWarnings("deprecation")
-    public void testDataTypeFamilyDescriptor() throws Exception {
-        AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(ValueDistributionAnalyzer.class);
-        Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput(false);
-        assertEquals(1, configuredProperties.size());
-        ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
-        assertEquals(org.eobjects.analyzer.data.DataTypeFamily.UNDEFINED,
-                propertyDescriptor.getInputColumnDataTypeFamily());
     }
 }

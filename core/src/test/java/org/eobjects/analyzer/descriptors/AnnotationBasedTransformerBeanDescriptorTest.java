@@ -24,35 +24,9 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
-import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
-import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
-import org.eobjects.analyzer.beans.mock.TransformerMock;
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.job.tasks.MockMultiRowTransformer;
 
-@SuppressWarnings("deprecation")
 public class AnnotationBasedTransformerBeanDescriptorTest extends TestCase {
-
-    public void testGetDataTypeFamilies() throws Exception {
-        TransformerBeanDescriptor<?> descriptor = Descriptors.ofTransformer(TransformerMock.class);
-        assertEquals(DataTypeFamily.STRING, getDataTypeFamily(descriptor));
-        assertEquals(DataTypeFamily.NUMBER, descriptor.getOutputDataTypeFamily());
-
-        descriptor = Descriptors.ofTransformer(ConvertToNumberTransformer.class);
-        assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));
-        assertEquals(DataTypeFamily.NUMBER, descriptor.getOutputDataTypeFamily());
-
-        descriptor = Descriptors.ofTransformer(ConvertToStringTransformer.class);
-        assertEquals(DataTypeFamily.UNDEFINED, getDataTypeFamily(descriptor));
-        assertEquals(DataTypeFamily.STRING, descriptor.getOutputDataTypeFamily());
-    }
-
-    private DataTypeFamily getDataTypeFamily(TransformerBeanDescriptor<?> descriptor) {
-        Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
-        assertEquals(1, configuredProperties.size());
-        ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
-        return propertyDescriptor.getInputColumnDataTypeFamily();
-    }
 
     public void testGetProvidedPropertiesOfType() throws Exception {
         TransformerBeanDescriptor<MockMultiRowTransformer> descriptor = Descriptors

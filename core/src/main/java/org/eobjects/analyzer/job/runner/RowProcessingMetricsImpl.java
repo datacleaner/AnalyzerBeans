@@ -23,11 +23,11 @@ import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.LazyRef;
-import org.eobjects.metamodel.util.Ref;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.LazyRef;
+import org.apache.metamodel.util.Ref;
 
 final class RowProcessingMetricsImpl implements RowProcessingMetrics {
 
@@ -77,31 +77,26 @@ final class RowProcessingMetricsImpl implements RowProcessingMetrics {
                     final Query originalQuery = getQuery();
                     final Query countQuery = originalQuery.clone();
                     countQuery.setMaxRows(null);
+                    countQuery.setFirstRow(null);
                     countQuery.getSelectClause().removeItems();
                     countQuery.getOrderByClause().removeItems();
                     countQuery.selectCount();
                     countQuery.getSelectClause().getItem(0).setFunctionApproximationAllowed(true);
 
-                    Datastore datastore = _publishers.getDatastore();
-                    DatastoreConnection connection = datastore.openConnection();
-                    try {
-                        final DataSet countDataSet = connection.getDataContext().executeQuery(countQuery);
-                        try {
+                    final Datastore datastore = _publishers.getDatastore();
+                    try (final DatastoreConnection connection = datastore.openConnection()) {
+                        try (final DataSet countDataSet = connection.getDataContext().executeQuery(countQuery)) {
                             if (countDataSet.next()) {
-                                Number count = ConvertToNumberTransformer.transformValue(countDataSet.getRow()
+                                final Number count = ConvertToNumberTransformer.transformValue(countDataSet.getRow()
                                         .getValue(0));
                                 if (count != null) {
                                     expectedRows = count.intValue();
                                 }
                             }
-                        } finally {
-                            countDataSet.close();
                         }
-                    } finally {
-                        connection.close();
                     }
 
-                    Integer maxRows = originalQuery.getMaxRows();
+                    final Integer maxRows = originalQuery.getMaxRows();
                     if (maxRows != null) {
                         expectedRows = Math.min(expectedRows, maxRows.intValue());
                     }

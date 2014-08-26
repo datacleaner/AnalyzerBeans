@@ -22,7 +22,7 @@ package org.eobjects.analyzer.metadata;
 import java.util.List;
 
 import org.eobjects.analyzer.connection.Datastore;
-import org.eobjects.metamodel.schema.Schema;
+import org.apache.metamodel.schema.Schema;
 
 /**
  * Defines metadata about a {@link Datastore}.

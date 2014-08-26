@@ -26,7 +26,7 @@ import java.util.Comparator;
  * A comparable that delegates to {@link Comparator} methods, but tolerates null
  * values by checking for this before delegating.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <E>
  *            any comparable type

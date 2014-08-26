@@ -58,7 +58,7 @@ import org.eobjects.analyzer.result.CrosstabResult;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.util.ToStringComparator;
+import org.apache.metamodel.util.ToStringComparator;
 
 public class JaxbJobReaderTest extends TestCase {
 
@@ -72,7 +72,7 @@ public class JaxbJobReaderTest extends TestCase {
     public void testReadComponentNames() throws Exception {
         JobReader<InputStream> reader = new JaxbJobReader(conf);
         AnalysisJob job = reader
-                .read(new FileInputStream(new File("src/test/resources/example-job-merged-outcome.xml")));
+                .read(new FileInputStream(new File("src/test/resources/example-job-component-names.xml")));
 
         assertEquals(1, job.getAnalyzerJobs().size());
         assertEquals("analyzer_1", job.getAnalyzerJobs().iterator().next().getName());
@@ -82,9 +82,6 @@ public class JaxbJobReaderTest extends TestCase {
 
         assertEquals(1, job.getTransformerJobs().size());
         assertEquals("email_std_1", job.getTransformerJobs().iterator().next().getName());
-
-        assertEquals(2, job.getMergedOutcomeJobs().size());
-        assertEquals("merge_1", job.getMergedOutcomeJobs().iterator().next().getName());
     }
 
     public void testReadMetadataFull() throws Exception {
@@ -98,6 +95,7 @@ public class JaxbJobReaderTest extends TestCase {
         assertEquals("An example job with complete metadata", metadata.getJobDescription());
         assertEquals("1.1", metadata.getJobVersion());
         assertEquals("[PUBLIC.PERSONS.FIRSTNAME, PUBLIC.PERSONS.LASTNAME]", metadata.getSourceColumnPaths().toString());
+        assertEquals("propertyValue", metadata.getProperties().get("propertyName")) ;
 
         assertNotNull(metadata.getCreatedDate());
         assertNotNull(metadata.getUpdatedDate());
@@ -112,6 +110,7 @@ public class JaxbJobReaderTest extends TestCase {
         assertNull(metadata.getJobName());
         assertNull(metadata.getJobDescription());
         assertNull(metadata.getJobVersion());
+        assertTrue(metadata.getProperties().isEmpty());
         assertEquals("my database", metadata.getDatastoreName());
         assertEquals("[PUBLIC.EMPLOYEES.FIRSTNAME, PUBLIC.EMPLOYEES.LASTNAME, PUBLIC.EMPLOYEES.EMAIL]", metadata
                 .getSourceColumnPaths().toString());
@@ -207,11 +206,9 @@ public class JaxbJobReaderTest extends TestCase {
             factory.create(new File("src/test/resources/example-job-invalid.xml"));
             fail("Exception expected");
         } catch (IllegalArgumentException e) {
-            assertEquals("javax.xml.bind.UnmarshalException: unexpected element "
-                    + "(uri:\"http://eobjects.org/analyzerbeans/job/1.0\", local:\"datacontext\"). "
-                    + "Expected elements are <{http://eobjects.org/analyzerbeans/job/1.0}variables>,"
-                    + "<{http://eobjects.org/analyzerbeans/job/1.0}columns>,"
-                    + "<{http://eobjects.org/analyzerbeans/job/1.0}data-context>", e.getMessage());
+            String message = e.getMessage();
+            assertTrue(message, message.startsWith("javax.xml.bind.UnmarshalException: unexpected element "
+                    + "(uri:\"http://eobjects.org/analyzerbeans/job/1.0\", local:\"datacontext\")."));
         }
     }
 

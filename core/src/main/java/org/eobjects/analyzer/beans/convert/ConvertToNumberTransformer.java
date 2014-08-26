@@ -41,8 +41,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Attempts to convert anything to a Number (Double) value
- * 
- * @author Kasper Sørensen
  */
 @TransformerBean("Convert to number")
 @Description("Converts anything to a number (or null if not possible).")

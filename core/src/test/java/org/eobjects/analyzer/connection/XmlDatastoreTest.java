@@ -27,27 +27,26 @@ import junit.framework.TestCase;
 
 public class XmlDatastoreTest extends TestCase {
 
-	private XmlDatastore ds = new XmlDatastore("foobar", "src/test/resources/example-xml-file.xml");
+    private XmlDatastore ds = new XmlDatastore("foobar", "src/test/resources/example-xml-file.xml");
 
-	public void testGetters() throws Exception {
-		assertEquals("foobar", ds.getName());
-		assertEquals("src/test/resources/example-xml-file.xml", ds.getFilename());
-	}
+    public void testGetters() throws Exception {
+        assertEquals("foobar", ds.getName());
+        assertEquals("src/test/resources/example-xml-file.xml", ds.getFilename());
+    }
 
-	public void testGetDatastoreConnection() throws Exception {
-		DatastoreConnection con = ds.openConnection();
-		String[] tableNames = con.getDataContext().getDefaultSchema().getTableNames();
-		assertEquals("[greeting]", Arrays.toString(tableNames));
+    public void testGetDatastoreConnection() throws Exception {
+        try (DatastoreConnection con = ds.openConnection();) {
+            String[] tableNames = con.getDataContext().getDefaultSchema().getTableNames();
+            assertEquals("[greeting]", Arrays.toString(tableNames));
+        }
+    }
 
-		con.close();
-	}
+    public void testGetPerformanceCharacteristics() throws Exception {
+        assertEquals(false, ds.getPerformanceCharacteristics().isQueryOptimizationPreferred());
+    }
 
-	public void testGetPerformanceCharacteristics() throws Exception {
-		assertEquals(false, ds.getPerformanceCharacteristics().isQueryOptimizationPreferred());
-	}
-
-	public void testCloneAndEquals() throws Exception {
-		Object clone = SerializationUtils.clone(ds);
-		assertEquals(ds, clone);
-	}
+    public void testCloneAndEquals() throws Exception {
+        Object clone = SerializationUtils.clone(ds);
+        assertEquals(ds, clone);
+    }
 }

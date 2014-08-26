@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.data;
 
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 abstract class AbstractExpressionBasedInputColumn<E> extends AbstractInputColumn<E> implements ExpressionBasedInputColumn<E> {
 	

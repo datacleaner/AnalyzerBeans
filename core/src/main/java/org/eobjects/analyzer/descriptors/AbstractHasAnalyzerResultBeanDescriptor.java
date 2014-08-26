@@ -30,7 +30,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * Abstract implementation of the {@link HasAnalyzerResultBeanDescriptor}
  * interface. Convenient for implementing it's subclasses.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  */
@@ -49,7 +49,7 @@ abstract class AbstractHasAnalyzerResultBeanDescriptor<B extends HasAnalyzerResu
 
         @SuppressWarnings("unchecked")
         Class<? extends AnalyzerResult> resultClass = (Class<? extends AnalyzerResult>) typeParameter;
-        _resultDescriptor = new ResultDescriptorImpl(resultClass);
+        _resultDescriptor = Descriptors.ofResult(resultClass);
     }
     
     @Override

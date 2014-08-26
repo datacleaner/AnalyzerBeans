@@ -30,53 +30,40 @@ import org.eobjects.analyzer.util.HasAliases;
  * 
  * @see Configured
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface ConfiguredPropertyDescriptor extends PropertyDescriptor, HasAliases {
 
-	/**
-	 * Determines whether this configured property is an input column (either
-	 * single instance or array)
-	 * 
-	 * @return true if the configured property is a input column type.
-	 */
-	public boolean isInputColumn();
+    /**
+     * Determines whether this configured property is an input column (either
+     * single instance or array)
+     * 
+     * @return true if the configured property is a input column type.
+     */
+    public boolean isInputColumn();
 
-	/**
-	 * Gets the optional description of the configured property
-	 * 
-	 * @return a humanly readable description of the property
-	 */
-	public String getDescription();
+    /**
+     * Gets the optional description of the configured property
+     * 
+     * @return a humanly readable description of the property
+     */
+    public String getDescription();
 
-	/**
-	 * Gets the {@link org.eobjects.analyzer.data.DataTypeFamily} of the
-	 * configured property, if it is an input column type property (see
-	 * {@link #isInputColumn()})
-	 * 
-	 * @return
-	 * 
-	 * @deprecated use {@link #getType()} and {@link #getTypeArgument(int)}
-	 *             instead
-	 */
-	@Deprecated
-	public org.eobjects.analyzer.data.DataTypeFamily getInputColumnDataTypeFamily();
+    /**
+     * Determines whether or not the configured property is required in order
+     * for it's component to execute.
+     * 
+     * @return true if the configured property is required
+     */
+    public boolean isRequired();
 
-	/**
-	 * Determines whether or not the configured property is required in order
-	 * for it's component to execute.
-	 * 
-	 * @return true if the configured property is required
-	 */
-	public boolean isRequired();
-
-	/**
-	 * Gets an optional custom {@link Converter} class, in case the configured
-	 * property should be converted using custom rules.
-	 * 
-	 * @see Convertable
-	 * 
-	 * @return a custom converter, or null
-	 */
-	public Class<? extends Converter<?>> getCustomConverter();
+    /**
+     * Gets an optional custom {@link Converter} class, in case the configured
+     * property should be converted using custom rules.
+     * 
+     * @see Convertable
+     * 
+     * @return a custom converter, or null
+     */
+    public Class<? extends Converter<?>> getCustomConverter();
 }

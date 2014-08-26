@@ -35,7 +35,7 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
  * A simple transformer that uses a synonym catalog to replace a synonym with
  * it's master term.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @TransformerBean("Synonym lookup")
 @Alias("Synonym replacement")

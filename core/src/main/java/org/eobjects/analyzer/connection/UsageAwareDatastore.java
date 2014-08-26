@@ -27,8 +27,8 @@ import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.ReadObjectBuilder.Moved;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.util.BaseObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
  * UsageAwareDataContextProvider when posssible.
  * 
  * @see UsageAwareDatastoreConnection
- * 
- * @author Kasper Sørensen
  */
 public abstract class UsageAwareDatastore<E extends DataContext> extends BaseObject implements Datastore {
 

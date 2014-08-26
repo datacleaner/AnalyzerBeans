@@ -27,7 +27,7 @@ import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
-import org.eobjects.metamodel.util.Action;
+import org.apache.metamodel.util.Action;
 
 import junit.framework.TestCase;
 

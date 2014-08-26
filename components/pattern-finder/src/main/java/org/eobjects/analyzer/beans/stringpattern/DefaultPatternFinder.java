@@ -30,7 +30,7 @@ import org.eobjects.analyzer.storage.RowAnnotationFactory;
 /**
  * Default PatternFinder implementation, used by the PatternFinderAnalyzer.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class DefaultPatternFinder extends PatternFinder<InputRow> {
 

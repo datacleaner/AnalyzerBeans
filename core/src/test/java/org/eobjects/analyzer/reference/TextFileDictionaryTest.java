@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
 
 import junit.framework.TestCase;
 
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 
 public class TextFileDictionaryTest extends TestCase {
 

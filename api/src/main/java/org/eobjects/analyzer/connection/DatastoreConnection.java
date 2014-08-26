@@ -22,7 +22,7 @@ package org.eobjects.analyzer.connection;
 import java.io.Closeable;
 
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 
 /**
  * Represents an open connection to a {@link Datastore}.
@@ -32,8 +32,6 @@ import org.eobjects.metamodel.DataContext;
  * 
  * {@link DatastoreConnection}s should be closed using the {@link #close()}
  * method.
- * 
- * @author Kasper Sørensen
  */
 public interface DatastoreConnection extends Closeable {
 

@@ -28,18 +28,23 @@ import org.eobjects.analyzer.job.jaxb.JobMetadataType;
 
 public class JaxbJobMetadataFactoryImplTest extends TestCase {
 
-	public void testCreate() throws Exception {
-		JaxbJobMetadataFactory factory = new JaxbJobMetadataFactoryImpl("kasper", "my job", "desc", "1.0");
+    public void testCreate() throws Exception {
+        JaxbJobMetadataFactory factory = new JaxbJobMetadataFactoryImpl("kasper", "my job", "desc", "1.0");
 
-		JobMetadataType metadata = factory.create(EasyMock.createMock(AnalysisJob.class));
-		int year = Calendar.getInstance().get(Calendar.YEAR);
+        AnalysisJob job = EasyMock.createMock(AnalysisJob.class);
+        EasyMock.expect(job.getMetadata()).andReturn(AnalysisJobMetadata.EMPTY_METADATA).anyTimes();
+        
+        EasyMock.replay(job);
 
-		assertEquals("kasper", metadata.getAuthor());
-		assertEquals("my job", metadata.getJobName());
-		assertEquals("desc", metadata.getJobDescription());
-		assertEquals("1.0", metadata.getJobVersion());
+        JobMetadataType metadata = factory.create(job);
+        int year = Calendar.getInstance().get(Calendar.YEAR);
 
-		assertEquals(year, metadata.getUpdatedDate().getYear());
-		assertEquals(null, metadata.getCreatedDate());
-	}
+        assertEquals("kasper", metadata.getAuthor());
+        assertEquals("my job", metadata.getJobName());
+        assertEquals("desc", metadata.getJobDescription());
+        assertEquals("1.0", metadata.getJobVersion());
+
+        assertEquals(year, metadata.getUpdatedDate().getYear());
+        assertEquals(null, metadata.getCreatedDate());
+    }
 }

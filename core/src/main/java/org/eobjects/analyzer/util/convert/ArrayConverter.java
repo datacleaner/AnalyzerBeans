@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A {@link Converter} implementation for array types.
- * 
- * @author Kasper Sørensen
  */
 public class ArrayConverter implements Converter<Object> {
 

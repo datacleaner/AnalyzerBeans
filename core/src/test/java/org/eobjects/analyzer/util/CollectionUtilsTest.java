@@ -26,8 +26,8 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.ToStringComparator;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.ToStringComparator;
 
 public class CollectionUtilsTest extends TestCase {
 

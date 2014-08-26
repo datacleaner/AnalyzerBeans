@@ -8,6 +8,11 @@
 		<job-name>Job metadata</job-name>
 		<job-description>An example job with complete metadata</job-description>
 		<job-version>1.1</job-version>
+		
+		<properties>
+			<property name="propertyName">propertyValue</property>
+		</properties>
+		
 	</job-metadata>
 
 	<source>

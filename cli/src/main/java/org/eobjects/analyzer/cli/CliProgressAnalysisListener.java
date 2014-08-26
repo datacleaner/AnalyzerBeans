@@ -23,33 +23,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
-import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.TransformerJob;
-import org.eobjects.analyzer.job.runner.AnalysisJobMetrics;
-import org.eobjects.analyzer.job.runner.AnalysisListener;
-import org.eobjects.analyzer.job.runner.AnalyzerMetrics;
+import org.eobjects.analyzer.job.runner.AnalysisListenerAdaptor;
 import org.eobjects.analyzer.job.runner.RowProcessingMetrics;
-import org.eobjects.analyzer.result.AnalyzerResult;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class CliProgressAnalysisListener implements AnalysisListener {
+final class CliProgressAnalysisListener extends AnalysisListenerAdaptor {
 
 	private static final Logger logger = LoggerFactory.getLogger(CliProgressAnalysisListener.class);
 
 	private Map<Table, AtomicInteger> rowCounts = new HashMap<Table, AtomicInteger>();
-
-	@Override
-	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
-	}
-
-	@Override
-	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
-	}
 
 	@Override
 	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
@@ -76,29 +61,5 @@ final class CliProgressAnalysisListener implements AnalysisListener {
 	@Override
 	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
 		logger.info("Done processing rows from table: {}", metrics.getTable().getName());
-	}
-
-	@Override
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
-	}
-
-	@Override
-	public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
-	}
-
-	@Override
-	public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
-	}
-
-	@Override
-	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
-	}
-
-	@Override
-	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
-	}
-
-	@Override
-	public void errorUknown(AnalysisJob job, Throwable throwable) {
 	}
 }

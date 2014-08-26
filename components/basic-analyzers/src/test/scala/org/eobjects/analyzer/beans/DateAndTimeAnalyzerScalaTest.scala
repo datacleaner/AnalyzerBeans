@@ -1,14 +1,16 @@
 package org.eobjects.analyzer.beans
-import org.scalatest.junit.AssertionsForJUnit
-import org.junit.Test
+
+import java.util.Date
+
+import org.apache.metamodel.util.DateUtils
+import org.apache.metamodel.util.Month
 import org.eobjects.analyzer.data.MockInputColumn
 import org.eobjects.analyzer.data.MockInputRow
 import org.eobjects.analyzer.result.renderer.CrosstabTextRenderer
-import org.junit.Assert
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory
-import java.util.Date
-import org.eobjects.metamodel.util.DateUtils
-import org.eobjects.metamodel.util.Month
+import org.junit.Assert
+import org.junit.Test
+import org.scalatest.junit.AssertionsForJUnit
 
 class DateAndTimeAnalyzerScalaTest extends AssertionsForJUnit {
 
@@ -48,7 +50,7 @@ Skewness             0
 Kurtosis          -1.2 
 """.replaceAll("\r\n", "\n"), text.replaceAll("\r\n", "\n"));
   }
-  
+
   @Test
   def testMetricParsing() = {
     val col1 = new MockInputColumn("date", classOf[Date]);
@@ -75,7 +77,7 @@ Kurtosis          -1.2
     Assert.assertEquals(15708, result.getMedian(col1));
     Assert.assertEquals(15706, result.getPercentile25(col1));
     Assert.assertEquals(15709, result.getPercentile75(col1));
-    
+
     Assert.assertEquals(0.0, result.getSkewness(col1).doubleValue(), 0.001);
     Assert.assertEquals(-1.1999, result.getKurtosis(col1).doubleValue(), 0.001);
   }

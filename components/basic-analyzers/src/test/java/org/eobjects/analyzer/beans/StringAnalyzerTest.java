@@ -25,7 +25,6 @@ import javax.swing.table.TableModel;
 
 import junit.framework.TestCase;
 
-import org.eobjects.analyzer.data.DataTypeFamily;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MockInputColumn;
 import org.eobjects.analyzer.data.MockInputRow;
@@ -205,14 +204,5 @@ public class StringAnalyzerTest extends TestCase {
         assertEquals("MetricDescriptorImpl[name=Entirely lowercase count]", metric.toString());
         assertTrue(metric.isParameterizedByInputColumn());
         assertFalse(metric.isParameterizedByString());
-    }
-
-    public void testDataTypeFamilyDescriptor() throws Exception {
-        AnalyzerBeanDescriptor<?> descriptor = Descriptors.ofAnalyzer(StringAnalyzer.class);
-        Set<ConfiguredPropertyDescriptor> configuredProperties = descriptor.getConfiguredPropertiesForInput();
-        assertEquals(1, configuredProperties.size());
-        ConfiguredPropertyDescriptor propertyDescriptor = configuredProperties.iterator().next();
-
-        assertEquals(DataTypeFamily.STRING, propertyDescriptor.getInputColumnDataTypeFamily());
     }
 }

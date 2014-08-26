@@ -24,7 +24,7 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 /**
  * Descriptor interface for {@link Analyzer}s.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <B>
  */

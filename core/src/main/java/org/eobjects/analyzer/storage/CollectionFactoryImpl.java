@@ -28,7 +28,7 @@ import java.util.Set;
  * Simple collection factory, which delegates to the storage provider for
  * everything.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  */
 public final class CollectionFactoryImpl implements CollectionFactory {

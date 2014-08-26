@@ -22,8 +22,7 @@ package org.eobjects.analyzer.job.runner;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.TransformerJob;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
@@ -32,37 +31,53 @@ import org.eobjects.analyzer.result.AnalyzerResult;
  * to progress notifications or errors occurring in the execution of the
  * analysis.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface AnalysisListener {
 
-	public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics);
+    public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics);
 
-	public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics);
+    public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics);
 
-	/**
-	 * 
-	 * @param job
-	 * @param table
-	 * @param expectedRows
-	 *            the amount of rows (may be approximated) in the table or -1 if
-	 *            the count could not be determined.
-	 */
-	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics);
+    /**
+     * Notifies the listener that a row processing operation is about to begin.
+     * 
+     * @param job
+     *            the job that is being run
+     * @param metrics
+     *            metrics for the row processing operation
+     */
+    public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics);
 
-	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow);
+    /**
+     * Notifies the listener about progress in the row processing operation.
+     * 
+     * @param job
+     *            the job that is being run
+     * @param metrics
+     *            metrics for the row processing operation
+     * @param row
+     *            the {@link InputRow} that just finished processing
+     * @param rowNumber
+     *            the number of the row that just finished processing. This will
+     *            start at 1 and continue typically to
+     *            {@link RowProcessingMetrics#getExpectedRows()}.
+     */
+    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, InputRow row, int rowNumber);
 
-	public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics);
+    /**
+     * Notifies the listener that row processing has finished succesfully.
+     * 
+     * @param job
+     * @param metrics
+     */
+    public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics);
 
-	public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics);
+    public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics);
 
-	public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result);
+    public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result);
 
-	public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable);
+    public void errorInComponent(AnalysisJob job, ComponentJob componentJob, InputRow row, Throwable throwable);
 
-	public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable);
-
-	public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable);
-
-	public void errorUknown(AnalysisJob job, Throwable throwable);
+    public void errorUknown(AnalysisJob job, Throwable throwable);
 }

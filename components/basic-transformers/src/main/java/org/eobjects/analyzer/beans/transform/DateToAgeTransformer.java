@@ -47,7 +47,7 @@ import org.joda.time.Years;
  * >Developing a value transformer</a>.
  * </p>
  * 
- * @author Kasper Sørensen
+ * 
  */
 @TransformerBean("Date to age")
 @Description("Turn a Date-column into columns of age (both in years and in days).")

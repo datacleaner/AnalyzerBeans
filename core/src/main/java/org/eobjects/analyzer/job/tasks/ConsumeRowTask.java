@@ -35,20 +35,22 @@ public final class ConsumeRowTask implements Task {
     private final InputRow _row;
     private final AnalysisListener _analysisListener;
     private final ConsumeRowHandler _consumeRowHandler;
+    private final int _rowNumber;
 
     public ConsumeRowTask(ConsumeRowHandler consumeRowHandler, RowProcessingMetrics rowProcessingMetrics, InputRow row,
-            AnalysisListener analysisListener) {
+            AnalysisListener analysisListener, int rowNumber) {
         _consumeRowHandler = consumeRowHandler;
         _rowProcessingMetrics = rowProcessingMetrics;
         _row = row;
         _analysisListener = analysisListener;
+        _rowNumber = rowNumber;
     }
 
     @Override
     public void execute() {
         _consumeRowHandler.consumeRow(_row).getRows();
         _analysisListener.rowProcessingProgress(_rowProcessingMetrics.getAnalysisJobMetrics().getAnalysisJob(),
-                _rowProcessingMetrics, _row.getId());
+                _rowProcessingMetrics, _row, _rowNumber);
     }
 
 }

@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * named and not nescesarily ordered in the way specified by the enum that holds
  * the group names.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class NamedPattern<E extends Enum<E>> {
 

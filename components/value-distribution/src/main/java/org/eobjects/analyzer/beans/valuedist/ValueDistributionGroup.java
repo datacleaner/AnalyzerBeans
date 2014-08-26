@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * {@link ValueDistributionGroup} contains the counted values within a single
  * group.
  * 
- * @author Kasper Sørensen
+ * 
  */
 class ValueDistributionGroup {
 

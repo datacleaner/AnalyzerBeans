@@ -23,14 +23,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
 
+import org.apache.metamodel.DataContext;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.metamodel.deebase.DbaseDataContext;
 
 /**
  * Datastore implementation for dBase databases.
- * 
- * @author Kasper Sørensen
  */
 public final class DbaseDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
@@ -54,13 +52,13 @@ public final class DbaseDatastore extends UsageAwareDatastore<DataContext> imple
 
 	@Override
 	protected UsageAwareDatastoreConnection<DataContext> createDatastoreConnection() {
-		DataContext dc = DataContextFactory.createDbaseDataContext(_filename);
+		DataContext dc = new DbaseDataContext(_filename);
 		return new DatastoreConnectionImpl<DataContext>(dc, this);
 	}
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
+		return new PerformanceCharacteristicsImpl(false, true);
 	}
 
 	@Override

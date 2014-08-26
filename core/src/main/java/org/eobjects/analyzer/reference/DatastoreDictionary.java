@@ -35,7 +35,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * entirely able to gracefully deserialize. The user of the dictionary will have
  * to inject the DatastoreCatalog using the setter method for this.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class DatastoreDictionary extends AbstractReferenceData implements Dictionary {
 
@@ -108,7 +108,8 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 	 */
 	@Close
 	public void close() {
-		DatastoreConnection con = getDatastoreConnections().poll();
+		@SuppressWarnings("resource")
+        DatastoreConnection con = getDatastoreConnections().poll();
 		if (con != null) {
 			logger.info("Closing dictionary: {}", this);
 			con.close();

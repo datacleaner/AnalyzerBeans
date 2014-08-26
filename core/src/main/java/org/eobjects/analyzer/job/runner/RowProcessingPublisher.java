@@ -28,6 +28,17 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.data.DataSet;
+import org.apache.metamodel.data.Row;
+import org.apache.metamodel.jdbc.JdbcDataContext;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.Func;
+import org.apache.metamodel.util.LazyRef;
+import org.apache.metamodel.util.Predicate;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -42,9 +53,8 @@ import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
+import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.ForkTaskListener;
 import org.eobjects.analyzer.job.concurrent.JoinTaskListener;
@@ -61,17 +71,6 @@ import org.eobjects.analyzer.job.tasks.RunRowProcessingPublisherTask;
 import org.eobjects.analyzer.job.tasks.Task;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SystemProperties;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.data.DataSet;
-import org.eobjects.metamodel.data.Row;
-import org.eobjects.metamodel.jdbc.JdbcDataContext;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.Func;
-import org.eobjects.metamodel.util.LazyRef;
-import org.eobjects.metamodel.util.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,8 +168,7 @@ public final class RowProcessingPublisher {
             @Override
             protected RowProcessingQueryOptimizer fetch() {
                 final Datastore datastore = _publishers.getDatastore();
-                final DatastoreConnection con = datastore.openConnection();
-                try {
+                try (final DatastoreConnection con = datastore.openConnection()) {
                     final DataContext dataContext = con.getDataContext();
 
                     final Column[] columnArray = _physicalColumns.toArray(new Column[_physicalColumns.size()]);
@@ -183,8 +181,9 @@ public final class RowProcessingPublisher {
                     final RowProcessingQueryOptimizer optimizer = new RowProcessingQueryOptimizer(datastore,
                             sortedConsumers, baseQuery);
                     return optimizer;
-                } finally {
-                    con.close();
+                } catch (RuntimeException e) {
+                    logger.error("Failed to build query optimizer! {}", e.getMessage(), e);
+                    throw e;
                 }
             }
         };
@@ -225,8 +224,16 @@ public final class RowProcessingPublisher {
         }
     }
 
-    private RowProcessingQueryOptimizer getQueryOptimizer() {
-        return _queryOptimizerRef.get();
+    public RowProcessingQueryOptimizer getQueryOptimizer() {
+        final RowProcessingQueryOptimizer optimizer = _queryOptimizerRef.get();
+        if (optimizer == null) {
+            final Throwable e = _queryOptimizerRef.getError();
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new IllegalStateException(e);
+        }
+        return optimizer;
     }
 
     public Query getQuery() {
@@ -272,18 +279,16 @@ public final class RowProcessingPublisher {
             }
         }
         final List<RowProcessingConsumer> consumers = queryOptimizer.getOptimizedConsumers();
-        final Collection<? extends Outcome> availableOutcomes = queryOptimizer.getOptimizedAvailableOutcomes();
+        final Collection<? extends FilterOutcome> availableOutcomes = queryOptimizer.getOptimizedAvailableOutcomes();
 
         analysisListener.rowProcessingBegin(analysisJob, rowProcessingMetrics);
 
-        // TODO: Needs to delegate errors downstream
         final RowConsumerTaskListener taskListener = new RowConsumerTaskListener(analysisJob, analysisListener,
                 taskRunner);
 
         final Datastore datastore = _publishers.getDatastore();
-        final DatastoreConnection con = datastore.openConnection();
 
-        try {
+        try (final DatastoreConnection con = datastore.openConnection()) {
             final DataContext dataContext = con.getDataContext();
 
             if (logger.isDebugEnabled()) {
@@ -298,36 +303,30 @@ public final class RowProcessingPublisher {
                 logger.debug("Final query firstRow={}, maxRows={}", finalQuery.getFirstRow(), finalQuery.getMaxRows());
             }
 
-            final DataSet dataSet = dataContext.executeQuery(finalQuery);
-
             // represents the distinct count of rows as well as the number of
             // tasks to execute
             int numTasks = 0;
 
-            try {
+            try (final DataSet dataSet = dataContext.executeQuery(finalQuery)) {
                 final ConsumeRowHandler consumeRowHandler = new ConsumeRowHandler(consumers, availableOutcomes);
                 while (dataSet.next()) {
                     if (taskListener.isErrornous()) {
                         break;
                     }
 
+                    numTasks++;
+
                     final Row metaModelRow = dataSet.getRow();
                     final int rowId = idGenerator.nextPhysicalRowId();
                     final MetaModelInputRow inputRow = new MetaModelInputRow(rowId, metaModelRow);
 
                     final ConsumeRowTask task = new ConsumeRowTask(consumeRowHandler, rowProcessingMetrics, inputRow,
-                            analysisListener);
+                            analysisListener, numTasks);
                     taskRunner.run(task, taskListener);
 
-                    numTasks++;
                 }
-            } finally {
-                dataSet.close();
             }
             taskListener.awaitTasks(numTasks);
-
-        } finally {
-            con.close();
         }
 
         if (taskListener.isErrornous()) {
@@ -347,21 +346,17 @@ public final class RowProcessingPublisher {
         addConsumer(new TransformerConsumer(transformer, transformerJob, inputColumns, _publishers));
     }
 
-    public void addFilterBean(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns) {
+    public void addFilterBean(final Filter<?> filter, final FilterJob filterJob, final InputColumn<?>[] inputColumns) {
         addConsumer(new FilterConsumer(filter, filterJob, inputColumns, _publishers));
     }
 
-    public void addMergedOutcomeJob(MergedOutcomeJob mergedOutcomeJob) {
-        addConsumer(new MergedOutcomeConsumer(mergedOutcomeJob, _publishers));
-    }
-
-    public boolean containsOutcome(Outcome prerequisiteOutcome) {
-        for (RowProcessingConsumer consumer : _consumers) {
-            ComponentJob componentJob = consumer.getComponentJob();
-            if (componentJob instanceof OutcomeSourceJob) {
-                Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
-                for (Outcome outcome : outcomes) {
-                    if (outcome.satisfiesRequirement(prerequisiteOutcome)) {
+    public boolean containsOutcome(final FilterOutcome prerequisiteOutcome) {
+        for (final RowProcessingConsumer consumer : _consumers) {
+            final ComponentJob componentJob = consumer.getComponentJob();
+            if (componentJob instanceof HasFilterOutcomes) {
+                final Collection<FilterOutcome> outcomes = ((HasFilterOutcomes) componentJob).getFilterOutcomes();
+                for (FilterOutcome outcome : outcomes) {
+                    if (outcome.isEquals(prerequisiteOutcome)) {
                         return true;
                     }
                 }
@@ -370,7 +365,7 @@ public final class RowProcessingPublisher {
         return false;
     }
 
-    private void addConsumer(RowProcessingConsumer consumer) {
+    private void addConsumer(final RowProcessingConsumer consumer) {
         _consumers.add(consumer);
     }
 

@@ -27,9 +27,9 @@ import java.util.Map;
 
 import org.eobjects.analyzer.job.AnalysisJobMetadata;
 import org.eobjects.analyzer.job.ImmutableAnalysisJobMetadata;
-import org.eobjects.metamodel.schema.ColumnType;
-import org.eobjects.metamodel.util.DateUtils;
-import org.eobjects.metamodel.util.Month;
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.util.DateUtils;
+import org.apache.metamodel.util.Month;
 
 import junit.framework.TestCase;
 
@@ -48,8 +48,11 @@ public class ImmutableAnalysisJobMetadataTest extends TestCase {
         Map<String, String> variables = new HashMap<String, String>();
         variables.put("foo", "bar");
 
+        Map<String, String> properties = new HashMap<String,String>() ;
+        properties.put("abc", "def") ;
+        
         AnalysisJobMetadata metadata = new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author,
-                createdDate, updatedDate, datastoreName, sourceColumnPaths, sourceColumnTypes, variables);
+                createdDate, updatedDate, datastoreName, sourceColumnPaths, sourceColumnTypes, variables, properties);
 
         assertEquals(jobName, metadata.getJobName());
         assertEquals(jobDescription, metadata.getJobDescription());
@@ -60,11 +63,11 @@ public class ImmutableAnalysisJobMetadataTest extends TestCase {
         assertEquals(datastoreName, metadata.getDatastoreName());
         assertEquals(sourceColumnPaths, metadata.getSourceColumnPaths());
         assertEquals(sourceColumnTypes, metadata.getSourceColumnTypes());
-
         assertEquals(variables, metadata.getVariables());
+        assertEquals(properties, metadata.getProperties());
 
         AnalysisJobMetadata metadata2 = new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author,
-                createdDate, updatedDate, datastoreName, sourceColumnPaths, sourceColumnTypes, variables);
+                createdDate, updatedDate, datastoreName, sourceColumnPaths, sourceColumnTypes, variables, properties);
 
         assertEquals(metadata, metadata2);
     }

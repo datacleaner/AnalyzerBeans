@@ -30,15 +30,15 @@ import java.util.Set;
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
 
 /**
  * Helping class for the row processing publisher, that will help sort the
  * consumers correctly
  * 
- * @author Kasper Sørensen
+ * 
  */
 class RowProcessingConsumerSorter {
 
@@ -49,15 +49,15 @@ class RowProcessingConsumerSorter {
 	}
 
 	public List<RowProcessingConsumer> createProcessOrderedConsumerList() {
-		List<RowProcessingConsumer> orderedConsumers = new ArrayList<RowProcessingConsumer>();
-		Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(_consumers);
-		Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
-		Set<Outcome> availableOutcomes = new HashSet<Outcome>();
+	    final List<RowProcessingConsumer> orderedConsumers = new ArrayList<RowProcessingConsumer>();
+		final Collection<RowProcessingConsumer> remainingConsumers = new LinkedList<RowProcessingConsumer>(_consumers);
+		final Set<InputColumn<?>> availableVirtualColumns = new HashSet<InputColumn<?>>();
+		final FilterOutcomes availableOutcomes = new FilterOutcomesImpl();
 
 		while (!remainingConsumers.isEmpty()) {
 			boolean changed = false;
-			for (Iterator<RowProcessingConsumer> it = remainingConsumers.iterator(); it.hasNext();) {
-				RowProcessingConsumer consumer = it.next();
+			for (final Iterator<RowProcessingConsumer> it = remainingConsumers.iterator(); it.hasNext();) {
+			    final RowProcessingConsumer consumer = it.next();
 
 				boolean accepted = true;
 
@@ -87,9 +87,9 @@ class RowProcessingConsumerSorter {
 					it.remove();
 					changed = true;
 
-					ComponentJob componentJob = consumer.getComponentJob();
+					final ComponentJob componentJob = consumer.getComponentJob();
 
-					InputColumn<?>[] requiredInput = consumer.getRequiredInput();
+					final InputColumn<?>[] requiredInput = consumer.getRequiredInput();
 					for (InputColumn<?> inputColumn : requiredInput) {
 						if (inputColumn instanceof ExpressionBasedInputColumn) {
 							availableVirtualColumns.add(inputColumn);
@@ -97,15 +97,15 @@ class RowProcessingConsumerSorter {
 					}
 
 					if (componentJob instanceof InputColumnSourceJob) {
-						InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();
+					    final InputColumn<?>[] output = ((InputColumnSourceJob) componentJob).getOutput();
 						for (InputColumn<?> col : output) {
 							availableVirtualColumns.add(col);
 						}
 					}
 
-					if (componentJob instanceof OutcomeSourceJob) {
-						Outcome[] outcomes = ((OutcomeSourceJob) componentJob).getOutcomes();
-						for (Outcome outcome : outcomes) {
+					if (componentJob instanceof HasFilterOutcomes) {
+					    final Collection<FilterOutcome> outcomes = ((HasFilterOutcomes) componentJob).getFilterOutcomes();
+						for (FilterOutcome outcome : outcomes) {
 							availableOutcomes.add(outcome);
 						}
 					}

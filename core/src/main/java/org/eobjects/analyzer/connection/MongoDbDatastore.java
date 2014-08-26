@@ -22,9 +22,9 @@ package org.eobjects.analyzer.connection;
 import java.util.List;
 
 import org.eobjects.analyzer.util.StringUtils;
-import org.eobjects.metamodel.UpdateableDataContext;
-import org.eobjects.metamodel.mongodb.MongoDbDataContext;
-import org.eobjects.metamodel.util.SimpleTableDef;
+import org.apache.metamodel.UpdateableDataContext;
+import org.apache.metamodel.mongodb.MongoDbDataContext;
+import org.apache.metamodel.util.SimpleTableDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +91,7 @@ public class MongoDbDatastore extends UsageAwareDatastore<UpdateableDataContext>
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(true);
+        return new PerformanceCharacteristicsImpl(true, false);
     }
 
     @Override

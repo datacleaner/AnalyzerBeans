@@ -24,7 +24,7 @@ import org.eobjects.analyzer.data.InputColumn;
 /**
  * Interface for job objects that generate (virtual) input columns in a job.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface InputColumnSourceJob {
 

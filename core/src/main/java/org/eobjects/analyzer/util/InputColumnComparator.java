@@ -25,13 +25,13 @@ import java.util.Comparator;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.TransformedInputColumn;
 
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * Comparator for input columns. Physical columns will be ordered first, sorted
  * by their column numbers.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class InputColumnComparator implements Comparator<InputColumn<?>>, Serializable {
 

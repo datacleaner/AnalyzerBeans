@@ -30,8 +30,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents a row with transformed values as well as a delegate row (typically
  * a {@link MetaModelInputRow} delegate).
- * 
- * @author Kasper Sørensen
  */
 public final class TransformedInputRow extends AbstractInputRow {
 

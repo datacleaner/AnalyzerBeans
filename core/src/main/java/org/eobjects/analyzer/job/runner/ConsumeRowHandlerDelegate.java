@@ -34,17 +34,18 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
     private final List<RowProcessingConsumer> _consumers;
     private final InputRow _row;
     private final int _consumerIndex;
-    private final OutcomeSink _outcomes;
+    private final FilterOutcomes _outcomes;
     private final List<InputRow> _resultRecords;
-    private final List<OutcomeSink> _resultOutcomes;
+    private final List<FilterOutcomes> _resultOutcomes;
 
-    public ConsumeRowHandlerDelegate(List<RowProcessingConsumer> consumers, InputRow row, int consumerIndex,
-            OutcomeSink outcomes) {
-        this(consumers, row, consumerIndex, outcomes, new ArrayList<InputRow>(1), new ArrayList<OutcomeSink>(1));
+    public ConsumeRowHandlerDelegate(final List<RowProcessingConsumer> consumers, final InputRow row,
+            final int consumerIndex, final FilterOutcomes outcomes) {
+        this(consumers, row, consumerIndex, outcomes, new ArrayList<InputRow>(1), new ArrayList<FilterOutcomes>(1));
     }
 
-    private ConsumeRowHandlerDelegate(List<RowProcessingConsumer> consumers, InputRow row, int consumerIndex,
-            OutcomeSink outcomes, List<InputRow> resultRecords, List<OutcomeSink> resultOutcomes) {
+    private ConsumeRowHandlerDelegate(final List<RowProcessingConsumer> consumers, final InputRow row,
+            final int consumerIndex, final FilterOutcomes outcomes, final List<InputRow> resultRecords,
+            final List<FilterOutcomes> resultOutcomes) {
         _consumers = consumers;
         _row = row;
         _consumerIndex = consumerIndex;
@@ -54,9 +55,9 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
     }
 
     public ConsumeRowResult consume() {
-        RowProcessingConsumer consumer = _consumers.get(_consumerIndex);
+        final RowProcessingConsumer consumer = _consumers.get(_consumerIndex);
 
-        final boolean process = consumer.satisfiedForConsume(_outcomes.getOutcomes(), _row);
+        final boolean process = consumer.satisfiedForConsume(_outcomes, _row);
         if (process) {
             if (consumer.isConcurrent()) {
                 consumer.consume(_row, 1, _outcomes, this);
@@ -74,7 +75,7 @@ final class ConsumeRowHandlerDelegate implements RowProcessingChain {
     }
 
     @Override
-    public void processNext(InputRow row, int distinctCount, OutcomeSink outcomes) {
+    public void processNext(final InputRow row, final int distinctCount, final FilterOutcomes outcomes) {
         final int nextIndex = _consumerIndex + 1;
         if (nextIndex >= _consumers.size()) {
             // finished!

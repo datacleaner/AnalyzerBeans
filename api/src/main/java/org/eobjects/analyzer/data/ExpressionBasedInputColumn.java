@@ -24,8 +24,6 @@ package org.eobjects.analyzer.data;
  * the a value is extracted from the row, as opposed to being written to the row
  * in advance.
  * 
- * @author Kasper Sørensen
- * 
  * @param <E>
  */
 public interface ExpressionBasedInputColumn<E> extends InputColumn<E> {

@@ -25,7 +25,6 @@ import org.eobjects.analyzer.beans.api.Optimizeable;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.ImmutableFilterOutcome;
@@ -34,34 +33,26 @@ import org.eobjects.analyzer.util.SourceColumnFinder;
 
 final class FilterConsumer extends AbstractRowProcessingConsumer implements RowProcessingConsumer {
 
-    private final AnalysisJob _job;
     private final Filter<?> _filter;
     private final FilterJob _filterJob;
     private final InputColumn<?>[] _inputColumns;
-    private final AnalysisListener _analysisListener;
     private final boolean _concurrent;
 
     public FilterConsumer(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns,
             SourceColumnFinder sourceColumnFinder) {
-        super(filterJob, filterJob, sourceColumnFinder);
+        super(null, null, filterJob, filterJob, sourceColumnFinder);
         _filter = filter;
         _filterJob = filterJob;
         _inputColumns = inputColumns;
-        _job = null;
-        _analysisListener = null;
-
         _concurrent = determineConcurrent();
     }
     
     public FilterConsumer(Filter<?> filter, FilterJob filterJob, InputColumn<?>[] inputColumns,
             RowProcessingPublishers publishers) {
-        super(filterJob, filterJob, publishers);
+        super(publishers, filterJob, filterJob);
         _filter = filter;
         _filterJob = filterJob;
         _inputColumns = inputColumns;
-        _job = publishers.getAnalysisJob();
-        _analysisListener = publishers.getAnalysisListener();
-
         _concurrent = determineConcurrent();
     }
 
@@ -90,15 +81,11 @@ final class FilterConsumer extends AbstractRowProcessingConsumer implements RowP
     }
 
     @Override
-    public void consume(InputRow row, int distinctCount, OutcomeSink outcomes, RowProcessingChain chain) {
-        try {
-            Enum<?> category = _filter.categorize(row);
-            FilterOutcome outcome = new ImmutableFilterOutcome(_filterJob, category);
-            outcomes.add(outcome);
-            chain.processNext(row, distinctCount, outcomes);
-        } catch (RuntimeException e) {
-            _analysisListener.errorInFilter(_job, _filterJob, row, e);
-        }
+    public void consumeInternal(InputRow row, int distinctCount, FilterOutcomes outcomes, RowProcessingChain chain) {
+        Enum<?> category = _filter.categorize(row);
+        FilterOutcome outcome = new ImmutableFilterOutcome(_filterJob, category);
+        outcomes.add(outcome);
+        chain.processNext(row, distinctCount, outcomes);
     }
 
     @Override

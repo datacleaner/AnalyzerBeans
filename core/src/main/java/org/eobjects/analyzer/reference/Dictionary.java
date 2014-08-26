@@ -46,7 +46,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
  * @see Initialize
  * @see Close
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface Dictionary extends ReferenceData {
 

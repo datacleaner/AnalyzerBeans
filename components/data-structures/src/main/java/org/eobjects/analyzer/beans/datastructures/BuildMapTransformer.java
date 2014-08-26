@@ -41,10 +41,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Transformer for building maps based on values in a row.
- * 
- * @author Kasper Sørensen
- * @author Shekhar Gulati
- * @author Saurabh Gupta
  */
 @TransformerBean("Build key/value map")
 @Alias("Build map")

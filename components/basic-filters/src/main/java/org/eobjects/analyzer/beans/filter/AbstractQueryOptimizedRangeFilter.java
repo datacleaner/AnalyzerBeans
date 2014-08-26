@@ -21,20 +21,22 @@ package org.eobjects.analyzer.beans.filter;
 
 import java.util.Comparator;
 
+import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
-import org.eobjects.metamodel.query.FilterItem;
-import org.eobjects.metamodel.query.OperatorType;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.query.SelectItem;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.query.FilterItem;
+import org.apache.metamodel.query.OperatorType;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.query.SelectItem;
+import org.apache.metamodel.schema.Column;
 
 /**
  * Abstract {@link QueryOptimizedFilter} which implementation for range filters
  * which demarcate valid value bounds.
  */
+@Distributed(true)
 abstract class AbstractQueryOptimizedRangeFilter<E> implements QueryOptimizedFilter<RangeFilterCategory>, Comparator<E> {
 
     @Validate

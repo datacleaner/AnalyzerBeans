@@ -19,13 +19,13 @@
  */
 package org.eobjects.analyzer.beans.transform;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Defines a type of matching output, which can be either true/false or the
  * matched input (if correct) or null (if incorrect).
  * 
- * @author Kasper Sørensen
+ * 
  */
 public enum MatchOutputType implements HasName {
 

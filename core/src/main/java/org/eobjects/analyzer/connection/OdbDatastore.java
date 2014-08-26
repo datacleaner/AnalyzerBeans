@@ -25,13 +25,11 @@ import java.io.ObjectInputStream;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.DataContextFactory;
 
 /**
  * Datastore implementation for OpenOffice database files (.odb).
- * 
- * @author Kasper Sørensen
  */
 public final class OdbDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
@@ -61,7 +59,7 @@ public final class OdbDatastore extends UsageAwareDatastore<DataContext> impleme
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(true);
+		return new PerformanceCharacteristicsImpl(true, false);
 	}
 
 	@Override

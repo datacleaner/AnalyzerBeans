@@ -36,7 +36,7 @@ import org.eobjects.analyzer.data.InputRow;
 /**
  * Transformer for selecting values from maps.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @TransformerBean("Select values from list")
 @Description("Given a specified list of indices, this transformer will select the values from a list and place them as columns within the record")

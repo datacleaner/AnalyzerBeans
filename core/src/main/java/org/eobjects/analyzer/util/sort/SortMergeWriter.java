@@ -37,7 +37,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.eobjects.analyzer.util.ImmutableEntry;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +46,6 @@ import org.slf4j.LoggerFactory;
  * support high volume sorted data.
  * 
  * Note: This class is NOT thread-safe.
- * 
- * @author Kasper Sørensen
  * 
  * @param <R>
  *            the row type, HAS to be serializable

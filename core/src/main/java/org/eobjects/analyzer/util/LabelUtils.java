@@ -23,30 +23,20 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
-import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.FilterOutcome;
-import org.eobjects.analyzer.job.MergeInput;
-import org.eobjects.analyzer.job.MergedOutcome;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
-import org.eobjects.analyzer.job.Outcome;
 import org.eobjects.analyzer.job.builder.AbstractBeanJobBuilder;
-import org.eobjects.analyzer.job.builder.MergeInputBuilder;
-import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for reusable methods and constants that represent user readable
  * labels
- * 
- * @author Kasper Sørensen
  */
 public final class LabelUtils {
 
@@ -98,11 +88,6 @@ public final class LabelUtils {
             if (job instanceof ConfigurableBeanJob) {
                 BeanDescriptor<?> descriptor = ((ConfigurableBeanJob<?>) job).getDescriptor();
                 label.append(descriptor.getDisplayName());
-            } else if (job instanceof MergedOutcomeJob) {
-                MergeInput[] inputs = ((MergedOutcomeJob) job).getMergeInputs();
-                label.append("MergedOutcome[");
-                label.append(inputs.length);
-                label.append(']');
             } else {
                 label.append(job.toString());
             }
@@ -144,62 +129,15 @@ public final class LabelUtils {
                 label.append(")");
             }
 
-            final Outcome[] requirements = analyzerJob.getRequirements();
-            if (includeRequirements && requirements != null && requirements.length != 0) {
+            final ComponentRequirement requirement = analyzerJob.getComponentRequirement();
+            if (includeRequirements && requirement != null) {
                 label.append(" (");
-                for (int i = 0; i < requirements.length; i++) {
-                    if (i != 0) {
-                        label.append(" ,");
-                    }
-                    appendRequirement(label, requirements[i]);
-                }
+                label.append(requirement.toString());
                 label.append(")");
             }
         }
 
         return label.toString();
-    }
-
-    private static void appendRequirement(StringBuilder sb, Outcome req) {
-        if (req instanceof FilterOutcome) {
-            FilterJob filterJob = ((FilterOutcome) req).getFilterJob();
-            Enum<?> category = ((FilterOutcome) req).getCategory();
-
-            String filterLabel = LabelUtils.getLabel(filterJob);
-
-            sb.append(filterLabel);
-            sb.append("=");
-            sb.append(category);
-        } else if (req instanceof MergedOutcome) {
-            sb.append('[');
-            MergedOutcomeJob mergedOutcomeJob = ((MergedOutcome) req).getMergedOutcomeJob();
-
-            MergeInput[] mergeInputs = mergedOutcomeJob.getMergeInputs();
-            for (int i = 0; i < mergeInputs.length; i++) {
-                if (i != 0) {
-                    sb.append(',');
-                }
-                MergeInput mergeInput = mergeInputs[i];
-                Outcome outcome = mergeInput.getOutcome();
-                appendRequirement(sb, outcome);
-            }
-            sb.append(']');
-        } else {
-            // should not happen
-            sb.append(req.toString());
-        }
-    }
-
-    public static String getLabel(MergedOutcomeJobBuilder builder) {
-        String label = builder.getName();
-        if (StringUtils.isNullOrEmpty(label)) {
-            List<MergeInputBuilder> inputs = builder.getMergeInputs();
-            StringBuilder sb = new StringBuilder();
-            sb.append("MergedOutcome[");
-            sb.append(inputs.size());
-            sb.append(']');
-        }
-        return label;
     }
 
     public static String getLabel(String text) {

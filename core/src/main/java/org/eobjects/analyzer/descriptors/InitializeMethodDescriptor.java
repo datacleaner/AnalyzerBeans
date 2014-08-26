@@ -31,7 +31,7 @@ import org.eobjects.analyzer.beans.api.Initialize;
  * 
  * @see Initialize
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface InitializeMethodDescriptor extends Serializable {
 

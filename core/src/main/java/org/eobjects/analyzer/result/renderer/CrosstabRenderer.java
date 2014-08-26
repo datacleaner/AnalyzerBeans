@@ -27,7 +27,7 @@ import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.CrosstabNavigator;
 import org.eobjects.analyzer.result.ResultProducer;
-import org.eobjects.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.CollectionUtils;
 
 /**
  * A class that encapsulates all the complicated logic of traversing a crosstab
@@ -37,7 +37,7 @@ import org.eobjects.metamodel.util.CollectionUtils;
  * 
  * @see CrosstabRendererCallback
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class CrosstabRenderer {
 

@@ -16,7 +16,7 @@ import org.eobjects.analyzer.result.AnalysisResult
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration
 import org.eobjects.analyzer.result.AnalyzerResult
 import org.eobjects.analyzer.job.ImmutableAnalyzerJob
-import org.eobjects.metamodel.util.FileHelper
+import org.apache.metamodel.util.FileHelper
 import java.io.File
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider
 import org.eobjects.analyzer.descriptors.Descriptors

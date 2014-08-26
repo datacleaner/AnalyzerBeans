@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,87 +30,81 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.util.CollectionUtils2;
-
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 public final class ImmutableFilterJob extends BaseObject implements FilterJob {
-	
-	private static final long serialVersionUID = 1L;
 
-	private final String _name;
-	private final FilterBeanDescriptor<?, ?> _descriptor;
-	private final BeanConfiguration _beanConfiguration;
-	private final Outcome _requirement;
+    private static final long serialVersionUID = 1L;
 
-	public ImmutableFilterJob(String name, FilterBeanDescriptor<?, ?> descriptor, BeanConfiguration beanConfiguration,
-			Outcome requirement) {
-		_name = name;
-		_descriptor = descriptor;
-		_beanConfiguration = beanConfiguration;
-		_requirement = LazyOutcomeUtils.load(requirement);
-	}
+    private final String _name;
+    private final FilterBeanDescriptor<?, ?> _descriptor;
+    private final BeanConfiguration _beanConfiguration;
+    private final ComponentRequirement _componentRequirement;
 
-	@Override
-	public String getName() {
-		return _name;
-	}
+    public ImmutableFilterJob(String name, FilterBeanDescriptor<?, ?> descriptor, BeanConfiguration beanConfiguration,
+            ComponentRequirement requirement) {
+        _name = name;
+        _descriptor = descriptor;
+        _beanConfiguration = beanConfiguration;
+        _componentRequirement = requirement;
+    }
 
-	@Override
-	public FilterBeanDescriptor<?, ?> getDescriptor() {
-		return _descriptor;
-	}
+    @Override
+    public String getName() {
+        return _name;
+    }
 
-	@Override
-	public BeanConfiguration getConfiguration() {
-		return _beanConfiguration;
-	}
+    @Override
+    public ComponentRequirement getComponentRequirement() {
+        return _componentRequirement;
+    }
 
-	@Override
-	public InputColumn<?>[] getInput() {
-		List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
-		Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
-		for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
-			Object property = _beanConfiguration.getProperty(propertyDescriptor);
-			InputColumn<?>[] inputs = CollectionUtils2.arrayOf(InputColumn.class, property);
-			if (inputs != null) {
-				for (InputColumn<?> inputColumn : inputs) {
-					result.add(inputColumn);
-				}
-			}
-		}
-		return result.toArray(new InputColumn<?>[result.size()]);
-	}
+    @Override
+    public FilterBeanDescriptor<?, ?> getDescriptor() {
+        return _descriptor;
+    }
 
-	@Override
-	public FilterOutcome[] getOutcomes() {
-		EnumSet<?> categories = _descriptor.getOutcomeCategories();
-		FilterOutcome[] outcomes = new FilterOutcome[categories.size()];
-		int i = 0;
-		for (Enum<?> category : categories) {
-			outcomes[i] = new ImmutableFilterOutcome(this, category);
-			i++;
-		}
-		return outcomes;
-	}
+    @Override
+    public BeanConfiguration getConfiguration() {
+        return _beanConfiguration;
+    }
 
-	@Override
-	protected void decorateIdentity(List<Object> identifiers) {
-		identifiers.add(_name);
-		identifiers.add(_beanConfiguration);
-		identifiers.add(_descriptor);
-		identifiers.add(_requirement);
-	}
+    @Override
+    public InputColumn<?>[] getInput() {
+        List<InputColumn<?>> result = new LinkedList<InputColumn<?>>();
+        Set<ConfiguredPropertyDescriptor> propertiesForInput = _descriptor.getConfiguredPropertiesForInput();
+        for (ConfiguredPropertyDescriptor propertyDescriptor : propertiesForInput) {
+            Object property = _beanConfiguration.getProperty(propertyDescriptor);
+            InputColumn<?>[] inputs = CollectionUtils2.arrayOf(InputColumn.class, property);
+            if (inputs != null) {
+                for (InputColumn<?> inputColumn : inputs) {
+                    result.add(inputColumn);
+                }
+            }
+        }
+        return result.toArray(new InputColumn<?>[result.size()]);
+    }
 
-	@Override
-	public String toString() {
-		return "ImmutableFilterJob[name=" + _name + ",filter=" + _descriptor.getDisplayName() + "]";
-	}
+    @Override
+    public Collection<FilterOutcome> getFilterOutcomes() {
+        final EnumSet<?> categories = _descriptor.getOutcomeCategories();
+        final List<FilterOutcome> outcomes = new ArrayList<>(categories.size());
+        for (final Enum<?> category : categories) {
+            outcomes.add(new ImmutableFilterOutcome(this, category));
+        }
+        return outcomes;
+    }
 
-	@Override
-	public Outcome[] getRequirements() {
-		if (_requirement == null) {
-			return new Outcome[0];
-		}
-		return new Outcome[] { _requirement };
-	}
+    @Override
+    protected void decorateIdentity(List<Object> identifiers) {
+        identifiers.add(_name);
+        identifiers.add(_beanConfiguration);
+        identifiers.add(_descriptor);
+        identifiers.add(_componentRequirement);
+    }
+
+    @Override
+    public String toString() {
+        return "ImmutableFilterJob[name=" + _name + ",filter=" + _descriptor.getDisplayName() + "]";
+    }
 }

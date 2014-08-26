@@ -49,7 +49,7 @@ import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.SimpleAnalysisResult;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.CollectionUtils2;
-import org.eobjects.metamodel.util.ObjectComparator;
+import org.apache.metamodel.util.ObjectComparator;
 
 public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCase {
 
@@ -79,7 +79,7 @@ public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCa
 
 			FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRows = analysisJobBuilder.addFilter(MaxRowsFilter.class);
 			maxRows.getConfigurableBean().setMaxRows(5);
-			analysisJobBuilder.setDefaultRequirement(maxRows.getOutcome(MaxRowsFilter.Category.VALID));
+			analysisJobBuilder.setDefaultRequirement(maxRows.getFilterOutcome(MaxRowsFilter.Category.VALID));
 
 			TransformerJobBuilder<ConvertToStringTransformer> convertToNumber = analysisJobBuilder
 					.addTransformer(ConvertToStringTransformer.class);

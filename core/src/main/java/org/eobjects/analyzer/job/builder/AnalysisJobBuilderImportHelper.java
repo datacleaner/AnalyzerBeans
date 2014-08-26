@@ -1,5 +1,5 @@
 /**
- * eobjects.org AnalyzerBeans
+. * eobjects.org AnalyzerBeans
  * Copyright (C) 2010 eobjects.org
  *
  * This copyrighted material is made available to anyone wishing to use, modify,
@@ -22,25 +22,27 @@ package org.eobjects.analyzer.job.builder;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.AnyComponentRequirement;
 import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.job.ComponentRequirement;
+import org.eobjects.analyzer.job.CompoundComponentRequirement;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterOutcome;
+import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
-import org.eobjects.analyzer.job.MergeInput;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
-import org.eobjects.analyzer.job.Outcome;
-import org.eobjects.analyzer.job.OutcomeSourceJob;
+import org.eobjects.analyzer.job.SimpleComponentRequirement;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * Helper class to perform the somewhat intricate
@@ -68,7 +70,6 @@ final class AnalysisJobBuilderImportHelper {
         // map that translates original component jobs to their builder objects
         final Map<ComponentJob, Object> componentBuilders = new IdentityHashMap<ComponentJob, Object>();
         addComponentBuilders(job.getFilterJobs(), componentBuilders);
-        addComponentBuilders(job.getMergedOutcomeJobs(), componentBuilders);
         addComponentBuilders(job.getTransformerJobs(), componentBuilders);
         addComponentBuilders(job.getAnalyzerJobs(), componentBuilders);
 
@@ -76,35 +77,12 @@ final class AnalysisJobBuilderImportHelper {
         for (Entry<ComponentJob, Object> entry : componentBuilders.entrySet()) {
             ComponentJob componentJob = entry.getKey();
             if (componentJob instanceof ConfigurableBeanJob<?>) {
-                Outcome[] requirements = ((ConfigurableBeanJob<?>) componentJob).getRequirements();
-                if (requirements != null && requirements.length > 0) {
-                    assert requirements.length == 1;
-
-                    final AbstractBeanWithInputColumnsBuilder<?, ?, ?> builder = (AbstractBeanWithInputColumnsBuilder<?, ?, ?>) entry
-                            .getValue();
-
-                    final Outcome originalRequirement = requirements[0];
-                    final Outcome requirement = findImportedRequirement(originalRequirement, componentBuilders);
-                    builder.setRequirement(requirement);
-                }
-            } else if (componentJob instanceof MergedOutcomeJob) {
-                final MergedOutcomeJobBuilder builder = (MergedOutcomeJobBuilder) entry.getValue();
-                final MergedOutcomeJob mergedOutcomeJob = (MergedOutcomeJob) componentJob;
-                final MergeInput[] mergeInputs = mergedOutcomeJob.getMergeInputs();
-                for (MergeInput mergeInput : mergeInputs) {
-                    final Outcome requirement = findImportedRequirement(mergeInput.getOutcome(), componentBuilders);
-                    final MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(requirement);
-
-                    // we need to also build input columns here. There's a risk
-                    // that these input columns are not available (imported)
-                    // yet.
-                    final InputColumn<?>[] inputColumns = mergeInput.getInputColumns();
-                    for (InputColumn<?> originalInputColumn : inputColumns) {
-                        final InputColumn<?> inputColumn = findImportedInputColumn(originalInputColumn,
-                                componentBuilders, sourceColumnFinder);
-                        mergedOutcomeBuilder.addInputColumn(inputColumn);
-                    }
-                }
+                final ComponentRequirement originalRequirement = componentJob.getComponentRequirement();
+                final ComponentRequirement componentRequirement = findImportedRequirement(originalRequirement,
+                        componentBuilders);
+                final AbstractBeanWithInputColumnsBuilder<?, ?, ?> builder = (AbstractBeanWithInputColumnsBuilder<?, ?, ?>) entry
+                        .getValue();
+                builder.setComponentRequirement(componentRequirement);
             }
         }
 
@@ -181,23 +159,50 @@ final class AnalysisJobBuilderImportHelper {
                 + "' in output column candidate set: " + Arrays.toString(candidates));
     }
 
-    private Outcome findImportedRequirement(Outcome originalRequirement, Map<ComponentJob, Object> componentBuilders) {
-        final OutcomeSourceJob sourceJob = originalRequirement.getSourceJob();
-        final Object builder = componentBuilders.get(sourceJob);
-        if (builder == null) {
-            throw new IllegalStateException("Could not find builder corresponding to " + sourceJob
-                    + " in builder map: " + componentBuilders);
+    private ComponentRequirement findImportedRequirement(ComponentRequirement originalRequirement,
+            Map<ComponentJob, Object> componentBuilders) {
+        if (originalRequirement == null) {
+            return null;
         }
 
-        if (builder instanceof MergedOutcomeJobBuilder) {
-            return ((MergedOutcomeJobBuilder) builder).getOutcomes()[0];
-        } else if (builder instanceof FilterJobBuilder<?, ?>) {
-            final FilterOutcome filterOutcome = (FilterOutcome) originalRequirement;
-            final Enum<?> category = filterOutcome.getCategory();
-            return ((FilterJobBuilder<?, ?>) builder).getOutcome(category);
-        } else {
-            throw new UnsupportedOperationException("Unsupported outcome builder type: " + builder);
+        if (originalRequirement instanceof AnyComponentRequirement) {
+            return AnyComponentRequirement.get();
         }
+
+        if (originalRequirement instanceof SimpleComponentRequirement) {
+            final FilterOutcome originalFilterOutcome = ((SimpleComponentRequirement) originalRequirement).getOutcome();
+            final FilterOutcome newOutcome = findFilterOutcome(originalFilterOutcome, componentBuilders);
+            return new SimpleComponentRequirement(newOutcome);
+        }
+
+        if (originalRequirement instanceof CompoundComponentRequirement) {
+            final Set<FilterOutcome> originalOutcomes = ((CompoundComponentRequirement) originalRequirement)
+                    .getOutcomes();
+            final Collection<FilterOutcome> newOutcomes = new HashSet<>();
+            for (final FilterOutcome originalOutcome : originalOutcomes) {
+                FilterOutcome newOutcome = findFilterOutcome(originalOutcome, componentBuilders);
+                newOutcomes.add(newOutcome);
+            }
+
+            return new CompoundComponentRequirement(newOutcomes);
+        }
+
+        throw new UnsupportedOperationException("Unsupported requirement type: " + originalRequirement);
+    }
+
+    private FilterOutcome findFilterOutcome(FilterOutcome originalFilterOutcome,
+            Map<ComponentJob, Object> componentBuilders) {
+        final HasFilterOutcomes source = originalFilterOutcome.getSource();
+        final Object builder = componentBuilders.get(source);
+        if (builder == null) {
+            throw new IllegalStateException("Could not find builder corresponding to " + source + " in builder map: "
+                    + componentBuilders);
+        }
+        final Enum<?> category = originalFilterOutcome.getCategory();
+
+        final FilterJobBuilder<?, ?> filterJobBuilder = (FilterJobBuilder<?, ?>) builder;
+        final FilterOutcome newOutcome = filterJobBuilder.getFilterOutcome(category);
+        return newOutcome;
     }
 
     private void addComponentBuilders(Collection<? extends ComponentJob> componentJobs,

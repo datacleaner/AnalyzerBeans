@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * {@link Renderable}. The resolving mechanism inspects the available renderers
  * in the {@link DescriptorProvider}.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class RendererFactory {
 
@@ -46,7 +46,7 @@ public final class RendererFactory {
      * Represents a selection of a renderer. Will be used to store everything
      * related to a renderer while finding the most suited renderer.
      * 
-     * @author Kasper Sørensen
+     * 
      * 
      */
     private static class RendererSelection {

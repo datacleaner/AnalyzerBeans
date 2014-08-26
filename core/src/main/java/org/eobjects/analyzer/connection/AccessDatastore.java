@@ -23,14 +23,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
 
+import org.apache.metamodel.DataContext;
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.DataContext;
 import org.eobjects.metamodel.access.AccessDataContext;
 
 /**
  * Datastore implementation for MS Access databases.
- * 
- * @author Kasper Sørensen
  */
 public final class AccessDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
@@ -59,7 +57,7 @@ public final class AccessDatastore extends UsageAwareDatastore<DataContext> impl
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
+		return new PerformanceCharacteristicsImpl(false, true);
 	}
 	
 	@Override

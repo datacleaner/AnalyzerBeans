@@ -27,8 +27,8 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.result.AnalysisResult;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.util.ChangeAwareObjectInputStream;
-import org.eobjects.metamodel.util.CollectionUtils;
-import org.eobjects.metamodel.util.HasNameMapper;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.HasNameMapper;
 
 public class StringAnalyzerResultTest extends TestCase {
 

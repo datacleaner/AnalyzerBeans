@@ -31,7 +31,7 @@ import org.eobjects.analyzer.data.InputColumn;
  * 
  * @see TransformerChangeListener
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface SourceColumnChangeListener {
 

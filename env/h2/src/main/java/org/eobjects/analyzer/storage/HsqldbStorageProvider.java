@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Hsqldb based implementation of the StorageProvider.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  */
 public final class HsqldbStorageProvider extends SqlDatabaseStorageProvider implements StorageProvider {

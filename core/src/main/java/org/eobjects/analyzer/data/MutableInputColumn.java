@@ -24,8 +24,6 @@ package org.eobjects.analyzer.data;
  * 
  * Mutable columns have editable names but unique id's to identify them (whereas
  * the names identify the immutable columns).
- * 
- * @author Kasper Sørensen
  */
 public interface MutableInputColumn<E> extends InputColumn<E> {
 

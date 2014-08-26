@@ -19,13 +19,11 @@
  */
 package org.eobjects.analyzer.connection;
 
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.UpdateableDataContext;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.UpdateableDataContext;
 
 /**
  * Represents a connection to a datastore that is updateable/writable.
- * 
- * @author Kasper Sørensen
  */
 public interface UpdateableDatastoreConnection extends DatastoreConnection {
 

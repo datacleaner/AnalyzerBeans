@@ -43,6 +43,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.FileHelper;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Converter;
 import org.eobjects.analyzer.beans.api.Filter;
@@ -67,8 +69,6 @@ import org.eobjects.analyzer.job.builder.AbstractBeanWithInputColumnsBuilder;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.AnalyzerJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
-import org.eobjects.analyzer.job.builder.MergeInputBuilder;
-import org.eobjects.analyzer.job.builder.MergedOutcomeJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
 import org.eobjects.analyzer.job.jaxb.AnalysisType;
 import org.eobjects.analyzer.job.jaxb.AnalyzerType;
@@ -81,7 +81,7 @@ import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
-import org.eobjects.analyzer.job.jaxb.MergedOutcomeType;
+import org.eobjects.analyzer.job.jaxb.MetadataProperties;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
@@ -94,11 +94,10 @@ import org.eobjects.analyzer.job.jaxb.VariablesType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
 import org.eobjects.analyzer.util.StringUtils;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 
@@ -125,21 +124,15 @@ public class JaxbJobReader implements JobReader<InputStream> {
     @Override
     public AnalysisJob read(InputStream inputStream) throws NoSuchDatastoreException, NoSuchColumnException,
             NoSuchComponentException, ComponentConfigurationException, IllegalStateException {
-        AnalysisJobBuilder ajb = create(inputStream);
-        try {
+        try (AnalysisJobBuilder ajb = create(inputStream)) {
             return ajb.toAnalysisJob();
-        } finally {
-            ajb.close();
         }
     }
 
     @Override
     public AnalysisJob read(InputStream inputStream, SourceColumnMapping sourceColumnMapping) {
-        AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping);
-        try {
+        try (AnalysisJobBuilder ajb = create(inputStream, sourceColumnMapping)) {
             return ajb.toAnalysisJob();
-        } finally {
-            ajb.close();
         }
     }
 
@@ -176,7 +169,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
     public AnalysisJobMetadata readMetadata(Job job) {
         final String datastoreName = job.getSource().getDataContext().getRef();
         final List<String> sourceColumnPaths = getSourceColumnPaths(job);
-        final List<org.eobjects.metamodel.schema.ColumnType> sourceColumnTypes = getSourceColumnTypes(job);
+        final List<org.apache.metamodel.schema.ColumnType> sourceColumnTypes = getSourceColumnTypes(job);
         final Map<String, String> variables = getVariables(job);
 
         final String jobName;
@@ -185,6 +178,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         final String author;
         final Date createdDate;
         final Date updatedDate;
+        final Map<String, String> metadataProperties;
 
         JobMetadataType metadata = job.getJobMetadata();
         if (metadata == null) {
@@ -194,11 +188,13 @@ public class JaxbJobReader implements JobReader<InputStream> {
             author = null;
             createdDate = null;
             updatedDate = null;
+            metadataProperties = Collections.emptyMap();
         } else {
             jobName = metadata.getJobName();
             jobVersion = metadata.getJobVersion();
             jobDescription = metadata.getJobDescription();
             author = metadata.getAuthor();
+            metadataProperties = getMetadataProperties(metadata);
 
             final XMLGregorianCalendar createdDateCal = metadata.getCreatedDate();
 
@@ -218,7 +214,26 @@ public class JaxbJobReader implements JobReader<InputStream> {
         }
 
         return new ImmutableAnalysisJobMetadata(jobName, jobVersion, jobDescription, author, createdDate, updatedDate,
-                datastoreName, sourceColumnPaths, sourceColumnTypes, variables);
+                datastoreName, sourceColumnPaths, sourceColumnTypes, variables, metadataProperties);
+    }
+
+    private Map<String, String> getMetadataProperties(JobMetadataType metadata) {
+        MetadataProperties properties = metadata.getProperties();
+
+        if (properties == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> metadataProperties = new HashMap<String, String>();
+        List<org.eobjects.analyzer.job.jaxb.MetadataProperties.Property> property = properties.getProperty();
+
+        for (int i = 0; i < property.size(); i++) {
+            String name = property.get(i).getName();
+            String value = property.get(i).getValue();
+            metadataProperties.put(name, value);
+        }
+
+        return metadataProperties;
     }
 
     public Map<String, String> getVariables(Job job) {
@@ -254,20 +269,20 @@ public class JaxbJobReader implements JobReader<InputStream> {
         return paths;
     }
 
-    private List<org.eobjects.metamodel.schema.ColumnType> getSourceColumnTypes(Job job) {
-        final List<org.eobjects.metamodel.schema.ColumnType> types;
+    private List<org.apache.metamodel.schema.ColumnType> getSourceColumnTypes(Job job) {
+        final List<org.apache.metamodel.schema.ColumnType> types;
 
         final ColumnsType columnsType = job.getSource().getColumns();
         if (columnsType != null) {
             final List<ColumnType> columns = columnsType.getColumn();
-            types = new ArrayList<org.eobjects.metamodel.schema.ColumnType>(columns.size());
+            types = new ArrayList<org.apache.metamodel.schema.ColumnType>(columns.size());
             for (ColumnType columnType : columns) {
                 final String typeName = columnType.getType();
                 if (StringUtils.isNullOrEmpty(typeName)) {
                     types.add(null);
                 } else {
                     try {
-                        final org.eobjects.metamodel.schema.ColumnType type = org.eobjects.metamodel.schema.ColumnType
+                        final org.apache.metamodel.schema.ColumnType type = org.apache.metamodel.schema.ColumnTypeImpl
                                 .valueOf(typeName);
                         types.add(type);
                     } catch (IllegalArgumentException e) {
@@ -371,6 +386,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
             logger.info("Author: {}", metadata.getAuthor());
             logger.info("Created date: {}", metadata.getCreatedDate());
             logger.info("Updated date: {}", metadata.getUpdatedDate());
+            logger.info("Job metadata properties: {}", getMetadataProperties(metadata));
         }
 
         final AnalysisJobBuilder builder = new AnalysisJobBuilder(_configuration);
@@ -387,9 +403,9 @@ public class JaxbJobReader implements JobReader<InputStream> {
     private AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping,
             final Map<String, String> variables, final AnalysisJobBuilder analysisJobBuilder) {
         String ref;
+
         final Datastore datastore;
         final DatastoreConnection datastoreConnection;
-
         final SourceType source = job.getSource();
 
         if (sourceColumnMapping == null) {
@@ -411,7 +427,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
             sourceColumnMapping.autoMap(datastore);
         } else {
             datastore = sourceColumnMapping.getDatastore();
-            datastoreConnection = datastore.openConnection();
+            final DatastoreConnection connection = datastore.openConnection();
+            datastoreConnection = connection;
         }
 
         // map column id's to input columns
@@ -442,7 +459,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
                 final String expectedType = column.getType();
                 if (expectedType != null) {
-                    org.eobjects.metamodel.schema.ColumnType actualType = physicalColumn.getType();
+                    org.apache.metamodel.schema.ColumnType actualType = physicalColumn.getType();
                     if (actualType != null && !expectedType.equals(actualType.toString())) {
                         logger.warn("Column '{}' had type '{}', but '{}' was expected.", new Object[] { path,
                                 actualType, expectedType });
@@ -456,12 +473,12 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
         final StringConverter stringConverter = createStringConverter(analysisJobBuilder);
 
-        final Map<String, Outcome> outcomeMapping = new HashMap<String, Outcome>();
+        final Map<String, FilterOutcome> outcomeMapping = new HashMap<String, FilterOutcome>();
 
         final TransformationType transformation = job.getTransformation();
         if (transformation != null) {
 
-            final List<Object> transformersAndFilters = transformation.getTransformerOrFilterOrMergedOutcome();
+            final List<Object> transformersAndFilters = transformation.getTransformerOrFilter();
 
             final Map<TransformerType, TransformerJobBuilder<?>> transformerJobBuilders = new HashMap<TransformerType, TransformerJobBuilder<?>>();
             final Map<FilterType, FilterJobBuilder<?, ?>> filterJobBuilders = new HashMap<FilterType, FilterJobBuilder<?, ?>>();
@@ -504,7 +521,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         ref = inputType.getRef();
                         if (StringUtils.isNullOrEmpty(ref)) {
                             String value = inputType.getValue();
-                            if (StringUtils.isNullOrEmpty(value)) {
+                            if (value == null) {
                                 throw new IllegalStateException("Transformer input column ref & value cannot be null");
                             }
                         } else if (!inputColumns.containsKey(ref)) {
@@ -633,81 +650,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
                         if (outcomeMapping.containsKey(id)) {
                             throw new ComponentConfigurationException("Outcome id '" + id + "' is not unique");
                         }
-                        outcomeMapping.put(id, filterJobBuilder.getOutcome(category));
-                    }
-                }
-
-                if (o instanceof MergedOutcomeType) {
-                    MergedOutcomeType mergedOutcomeType = (MergedOutcomeType) o;
-                    String id = mergedOutcomeType.getId();
-                    if (StringUtils.isNullOrEmpty(id)) {
-                        throw new IllegalStateException("Outcome id cannot be null");
-                    }
-                    if (outcomeMapping.containsKey(id)) {
-                        throw new ComponentConfigurationException("Outcome id '" + id + "' is not unique");
-                    }
-
-                    MergedOutcomeJobBuilder mojb = analysisJobBuilder.addMergedOutcomeJobBuilder();
-                    mojb.setName(mergedOutcomeType.getName());
-                    outcomeMapping.put(id, new LazyMergedOutcome(mojb));
-                }
-            }
-
-            // iterate again to initialize all MergedOutcomes and collect all
-            // outcomes
-            for (Object o : transformersAndFilters) {
-                if (o instanceof MergedOutcomeType) {
-                    MergedOutcomeType mergedOutcomeType = (MergedOutcomeType) o;
-                    String id = mergedOutcomeType.getId();
-
-                    // we added this element during the previous iteration
-                    LazyMergedOutcome outcome = (LazyMergedOutcome) outcomeMapping.get(id);
-                    MergedOutcomeJobBuilder builder = outcome.getSourceJob();
-
-                    // map the input requirements and columns
-                    List<MergedOutcomeType.Outcome> mergedOutcomes = ((MergedOutcomeType) o).getOutcome();
-                    for (MergedOutcomeType.Outcome mergedOutcome : mergedOutcomes) {
-                        ref = mergedOutcome.getRef();
-                        if (StringUtils.isNullOrEmpty(ref)) {
-                            throw new IllegalStateException("Merged outcome ref cannot be null");
-                        }
-                        Outcome outcomeToMerge = outcomeMapping.get(ref);
-                        MergeInputBuilder mergedOutcomeBuilder = builder.addMergedOutcome(outcomeToMerge);
-
-                        List<InputType> inputs = mergedOutcome.getInput();
-                        for (InputType inputType : inputs) {
-                            ref = inputType.getRef();
-                            InputColumn<?> inputColumn;
-                            if (StringUtils.isNullOrEmpty(ref)) {
-                                inputColumn = createExpressionBasedInputColumn(inputType);
-                            } else {
-                                inputColumn = inputColumns.get(ref);
-                                if (inputColumn == null) {
-                                    throw new ComponentConfigurationException("No such input column: " + ref);
-                                }
-                            }
-                            mergedOutcomeBuilder.addInputColumn(inputColumn);
-                        }
-                    }
-
-                    // map the output columns
-                    List<MutableInputColumn<?>> outputColumns = builder.getOutputColumns();
-
-                    List<OutputType> output = ((MergedOutcomeType) o).getOutput();
-
-                    assert output.size() == outputColumns.size();
-
-                    for (int i = 0; i < output.size(); i++) {
-                        OutputType outputType = output.get(i);
-                        MutableInputColumn<?> outputColumn = outputColumns.get(i);
-                        id = outputType.getId();
-                        String name = outputType.getName();
-
-                        if (!StringUtils.isNullOrEmpty(name)) {
-                            outputColumn.setName(name);
-                        }
-
-                        registerInputColumn(inputColumns, id, outputColumn);
+                        outcomeMapping.put(id, filterJobBuilder.getFilterOutcome(category));
                     }
                 }
             }
@@ -717,25 +660,17 @@ public class JaxbJobReader implements JobReader<InputStream> {
                 if (o instanceof TransformerType) {
                     ref = ((TransformerType) o).getRequires();
                     if (ref != null) {
-                        TransformerJobBuilder<?> builder = transformerJobBuilders.get(o);
-                        Outcome requirement = outcomeMapping.get(ref);
-                        if (requirement == null) {
-                            throw new ComponentConfigurationException("No such outcome id: " + ref);
-                        }
-                        builder.setRequirement(requirement);
+                        final TransformerJobBuilder<?> builder = transformerJobBuilders.get(o);
+                        final ComponentRequirement requirement = getRequirement(ref, outcomeMapping);
+                        builder.setComponentRequirement(requirement);
                     }
                 } else if (o instanceof FilterType) {
                     ref = ((FilterType) o).getRequires();
                     if (ref != null) {
-                        FilterJobBuilder<?, ?> builder = filterJobBuilders.get(o);
-                        Outcome requirement = outcomeMapping.get(ref);
-                        if (requirement == null) {
-                            throw new ComponentConfigurationException("No such outcome id: " + ref);
-                        }
-                        builder.setRequirement(requirement);
+                        final FilterJobBuilder<?, ?> builder = filterJobBuilders.get(o);
+                        final ComponentRequirement requirement = getRequirement(ref, outcomeMapping);
+                        builder.setComponentRequirement(requirement);
                     }
-                } else if (o instanceof MergedOutcomeType) {
-                    // do nothing
                 } else {
                     throw new IllegalStateException("Unexpected transformation child element: " + o);
                 }
@@ -769,11 +704,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
             ref = analyzerType.getRequires();
             if (ref != null) {
-                Outcome requirement = outcomeMapping.get(ref);
-                if (requirement == null) {
-                    throw new ComponentConfigurationException("No such outcome id: " + ref);
-                }
-                analyzerJobBuilder.setRequirement(requirement);
+                final ComponentRequirement requirement = getRequirement(ref, outcomeMapping);
+                analyzerJobBuilder.setComponentRequirement(requirement);
             }
 
         }
@@ -781,6 +713,37 @@ public class JaxbJobReader implements JobReader<InputStream> {
         datastoreConnection.close();
 
         return analysisJobBuilder;
+    }
+
+    private ComponentRequirement getRequirement(String ref, Map<String, FilterOutcome> outcomeMapping) {
+        if (AnyComponentRequirement.KEYWORD.equals(ref)) {
+            return AnyComponentRequirement.get();
+        }
+
+        // check for simple component requirements
+        {
+            final FilterOutcome filterOutcome = outcomeMapping.get(ref);
+            if (filterOutcome != null) {
+                return new SimpleComponentRequirement(filterOutcome);
+            }
+        }
+
+        // check for compound component requirements
+        final List<String> tokens = Splitter.on(" OR ").omitEmptyStrings().trimResults().splitToList(ref);
+        if (tokens.size() > 1) {
+            final List<FilterOutcome> list = new ArrayList<>(tokens.size());
+            for (final String token : tokens) {
+                final FilterOutcome filterOutcome = outcomeMapping.get(token);
+                if (filterOutcome == null) {
+                    throw new ComponentConfigurationException("Could not resolve outcome '" + token
+                            + "' in requirement: " + ref);
+                }
+                list.add(filterOutcome);
+            }
+            return new CompoundComponentRequirement(list);
+        }
+
+        throw new ComponentConfigurationException("Could not resolve requirement: " + ref);
     }
 
     private void applyInputColumns(List<InputType> input, Map<String, InputColumn<?>> inputColumns,

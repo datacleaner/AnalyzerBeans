@@ -26,8 +26,6 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * Abstract implementation of {@link ComponentCategory}. This implementation
  * assumes that all instances of a category class are equal, which is also the
  * recommended approach.
- * 
- * @author Kasper Sørensen
  */
 public abstract class AbstractComponentCategory implements ComponentCategory {
 

@@ -23,13 +23,13 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.FileDatastore;
-import org.eobjects.metamodel.schema.Table;
-import org.eobjects.metamodel.util.Func;
+import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.Func;
 
 /**
  * Default implementation of {@link WriteDataResult}.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class WriteDataResultImpl implements WriteDataResult {
 

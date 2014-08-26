@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.connection;
 
-import org.eobjects.metamodel.salesforce.SalesforceDataContext;
+import org.apache.metamodel.salesforce.SalesforceDataContext;
 
 /**
  * A datastore that uses a Salesforce.com account as it's source.
@@ -75,7 +75,7 @@ public class SalesforceDatastore extends UsageAwareDatastore<SalesforceDataConte
 
     @Override
     public PerformanceCharacteristics getPerformanceCharacteristics() {
-        return new PerformanceCharacteristicsImpl(true);
+        return new PerformanceCharacteristicsImpl(true, false);
     }
 
     @Override

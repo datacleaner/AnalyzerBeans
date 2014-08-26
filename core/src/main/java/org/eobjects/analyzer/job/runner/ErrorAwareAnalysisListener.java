@@ -31,29 +31,20 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.PreviousErrorsExistException;
-import org.eobjects.analyzer.result.AnalyzerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * AnalysisListener that will register errors
  * 
- * @author Kasper Sørensen
+ * 
  */
-final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
+final class ErrorAwareAnalysisListener extends AnalysisListenerAdaptor implements ErrorAware {
 
     private static final Logger logger = LoggerFactory.getLogger(ErrorAwareAnalysisListener.class);
 
     private final List<Throwable> _errors = new LinkedList<Throwable>();
     private final AtomicBoolean _cancelled = new AtomicBoolean(false);
-
-    @Override
-    public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
-    }
-
-    @Override
-    public void jobSuccess(AnalysisJob job, AnalysisJobMetrics metrics) {
-    }
 
     protected void handleError(AnalysisJob job, Throwable throwable) {
         if (throwable instanceof AnalysisJobCancellation) {
@@ -123,26 +114,6 @@ final class ErrorAwareAnalysisListener implements AnalysisListener, ErrorAware {
     public void errorUknown(AnalysisJob job, Throwable throwable) {
         logger.warn("errorUnknown({},{})", new Object[] { job, throwable });
         handleError(job, throwable);
-    }
-
-    @Override
-    public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
-    }
-
-    @Override
-    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
-    }
-
-    @Override
-    public void rowProcessingSuccess(AnalysisJob job, RowProcessingMetrics metrics) {
-    }
-
-    @Override
-    public void analyzerBegin(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerMetrics metrics) {
-    }
-
-    @Override
-    public void analyzerSuccess(AnalysisJob job, AnalyzerJob analyzerJob, AnalyzerResult result) {
     }
 
     @Override

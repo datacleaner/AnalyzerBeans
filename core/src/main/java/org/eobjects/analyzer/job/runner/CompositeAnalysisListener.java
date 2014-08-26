@@ -25,8 +25,7 @@ import java.util.List;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.TransformerJob;
+import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.result.AnalyzerResult;
 
 /**
@@ -46,7 +45,7 @@ public final class CompositeAnalysisListener implements AnalysisListener {
 
     public CompositeAnalysisListener(AnalysisListener firstDelegate, AnalysisListener... delegates) {
         _delegates = new ArrayList<AnalysisListener>(1 + delegates.length);
-        _delegates.add(firstDelegate);
+        addDelegate(firstDelegate);
         for (AnalysisListener analysisListener : delegates) {
             addDelegate(analysisListener);
         }
@@ -58,6 +57,9 @@ public final class CompositeAnalysisListener implements AnalysisListener {
      * @param analysisListener
      */
     public void addDelegate(AnalysisListener analysisListener) {
+        if (analysisListener == null) {
+            return;
+        }
         _delegates.add(analysisListener);
     }
 
@@ -102,9 +104,9 @@ public final class CompositeAnalysisListener implements AnalysisListener {
     }
 
     @Override
-    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
+    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, InputRow row, int currentRow) {
         for (AnalysisListener delegate : _delegates) {
-            delegate.rowProcessingProgress(job, metrics, currentRow);
+            delegate.rowProcessingProgress(job, metrics, row, currentRow);
         }
     }
 
@@ -130,23 +132,9 @@ public final class CompositeAnalysisListener implements AnalysisListener {
     }
 
     @Override
-    public void errorInFilter(AnalysisJob job, FilterJob filterJob, InputRow row, Throwable throwable) {
+    public void errorInComponent(AnalysisJob job, ComponentJob componentJob, InputRow row, Throwable throwable) {
         for (AnalysisListener delegate : _delegates) {
-            delegate.errorInFilter(job, filterJob, row, throwable);
-        }
-    }
-
-    @Override
-    public void errorInTransformer(AnalysisJob job, TransformerJob transformerJob, InputRow row, Throwable throwable) {
-        for (AnalysisListener delegate : _delegates) {
-            delegate.errorInTransformer(job, transformerJob, row, throwable);
-        }
-    }
-
-    @Override
-    public void errorInAnalyzer(AnalysisJob job, AnalyzerJob analyzerJob, InputRow row, Throwable throwable) {
-        for (AnalysisListener delegate : _delegates) {
-            delegate.errorInAnalyzer(job, analyzerJob, row, throwable);
+            delegate.errorInComponent(job, componentJob, row, throwable);
         }
     }
 

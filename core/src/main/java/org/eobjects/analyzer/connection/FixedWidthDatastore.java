@@ -26,15 +26,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eobjects.analyzer.util.ReadObjectBuilder;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
-import org.eobjects.metamodel.fixedwidth.FixedWidthConfiguration;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.DataContextFactory;
+import org.apache.metamodel.fixedwidth.FixedWidthConfiguration;
 
 /**
  * Datastore based on fixed width files
- * 
- * @author Kasper Sørensen
- * 
  */
 public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implements FileDatastore {
 
@@ -94,7 +91,7 @@ public class FixedWidthDatastore extends UsageAwareDatastore<DataContext> implem
 
 	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return new PerformanceCharacteristicsImpl(false);
+		return new PerformanceCharacteristicsImpl(false, true);
 	}
 
 	@Override

@@ -35,7 +35,7 @@ import org.eobjects.analyzer.result.html.HtmlRenderingContext;
 import org.eobjects.analyzer.result.renderer.AnnotatedRowsHtmlRenderer;
 import org.eobjects.analyzer.result.renderer.RendererFactory;
 import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory;
-import org.eobjects.metamodel.util.FileHelper;
+import org.apache.metamodel.util.FileHelper;
 
 public class PatternFinderResultHtmlRendererTest extends TestCase {
 

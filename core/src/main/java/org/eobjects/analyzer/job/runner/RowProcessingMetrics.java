@@ -20,8 +20,8 @@
 package org.eobjects.analyzer.job.runner;
 
 import org.eobjects.analyzer.job.AnalyzerJob;
-import org.eobjects.metamodel.query.Query;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.schema.Table;
 
 /**
  * Provides useful metrics about a row processing flow and it's execution.

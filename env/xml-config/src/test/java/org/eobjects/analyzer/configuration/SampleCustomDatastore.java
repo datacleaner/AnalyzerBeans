@@ -26,12 +26,13 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.connection.DatastoreConnectionImpl;
 import org.eobjects.analyzer.connection.PerformanceCharacteristics;
-import org.eobjects.metamodel.DataContext;
-import org.eobjects.metamodel.DataContextFactory;
+import org.eobjects.analyzer.connection.PerformanceCharacteristicsImpl;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.DataContextFactory;
 import org.junit.Ignore;
 
 @Ignore
-public class SampleCustomDatastore implements Datastore, PerformanceCharacteristics {
+public class SampleCustomDatastore implements Datastore {
 
 	private static final long serialVersionUID = 1L;
 
@@ -56,13 +57,8 @@ public class SampleCustomDatastore implements Datastore, PerformanceCharacterist
 	}
 
 	@Override
-	public boolean isQueryOptimizationPreferred() {
-		return false;
-	}
-
-	@Override
 	public PerformanceCharacteristics getPerformanceCharacteristics() {
-		return this;
+		return new PerformanceCharacteristicsImpl(true, true);
 	}
 
 	@Override

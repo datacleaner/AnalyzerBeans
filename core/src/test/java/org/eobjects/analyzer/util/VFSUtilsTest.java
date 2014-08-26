@@ -76,13 +76,10 @@ public class VFSUtilsTest extends TestCase {
         }
 
         FileObject file = VFSUtils.getFileSystemManager().resolveFile("http://eobjects.org");
-        InputStream in = file.getContent().getInputStream();
-        try {
+        try (InputStream in = file.getContent().getInputStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             String readLine = reader.readLine();
             assertNotNull(readLine);
-        } finally {
-            in.close();
         }
     }
 

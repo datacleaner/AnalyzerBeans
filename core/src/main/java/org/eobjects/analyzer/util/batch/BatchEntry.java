@@ -19,13 +19,18 @@
  */
 package org.eobjects.analyzer.util.batch;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 final class BatchEntry<I, O> {
 
     private final I _input;
+    private final CountDownLatch _countDownLatch;
     private volatile O _output;
 
     public BatchEntry(I input) {
         _input = input;
+        _countDownLatch = new CountDownLatch(1);
     }
 
     public I getInput() {
@@ -38,5 +43,10 @@ final class BatchEntry<I, O> {
 
     public void setOutput(O output) {
         _output = output;
+        _countDownLatch.countDown();
+    }
+
+    public boolean await(long waitMillis) throws InterruptedException {
+        return _countDownLatch.await(waitMillis, TimeUnit.MILLISECONDS);
     }
 }

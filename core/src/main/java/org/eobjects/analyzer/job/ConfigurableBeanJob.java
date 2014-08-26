@@ -31,7 +31,7 @@ import org.eobjects.analyzer.descriptors.BeanDescriptor;
  * @param <E>
  */
 public interface ConfigurableBeanJob<E extends BeanDescriptor<?>> extends ComponentJob, HasBeanConfiguration,
-        InputColumnSinkJob, OutcomeSinkJob {
+        InputColumnSinkJob, HasComponentRequirement {
 
     /**
      * {@inheritDoc}

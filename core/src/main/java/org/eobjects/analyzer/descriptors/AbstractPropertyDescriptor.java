@@ -33,7 +33,7 @@ import org.eobjects.analyzer.util.ReflectionUtils;
  * implementing sub-interfaces such as {@link ConfiguredPropertyDescriptor} and
  * {@link ProvidedPropertyDescriptor}.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public abstract class AbstractPropertyDescriptor implements PropertyDescriptor {
 

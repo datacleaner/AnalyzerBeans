@@ -22,7 +22,7 @@ package org.eobjects.analyzer.job.runner;
 /**
  * A throwable that will be thrown if a job should be cancelled.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class AnalysisJobCancellation extends Throwable {
 

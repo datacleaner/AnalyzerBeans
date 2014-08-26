@@ -20,15 +20,13 @@
 package org.eobjects.analyzer.connection;
 
 import org.eobjects.analyzer.util.UsageAwareCloseable;
-import org.eobjects.metamodel.DataContext;
+import org.apache.metamodel.DataContext;
 
 /**
  * An abstract pooled {@link DatastoreConnection} that is aware of the amount of
  * times it has been acquired and closed. It encapsulates the closing logic,
  * making sure that it will only close if all usages of the datastore are
  * closed.
- * 
- * @author Kasper Sørensen
  */
 public abstract class UsageAwareDatastoreConnection<E extends DataContext> extends UsageAwareCloseable implements DatastoreConnection {
 

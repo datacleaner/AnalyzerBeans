@@ -21,7 +21,7 @@ package org.eobjects.analyzer.result;
 
 import java.io.Serializable;
 
-import org.eobjects.metamodel.data.IRowFilter;
+import org.apache.metamodel.data.IRowFilter;
 
 public interface SerializableRowFilter extends IRowFilter, Serializable {
 

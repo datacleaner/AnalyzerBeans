@@ -21,7 +21,7 @@ package org.eobjects.analyzer.metadata;
 
 import java.util.Map;
 
-import org.eobjects.metamodel.util.HasName;
+import org.apache.metamodel.util.HasName;
 
 /**
  * Represents an annotation of a metadata element such as a

@@ -37,8 +37,6 @@ import javax.inject.Inject;
  * 
  * {@link OutputRowCollector} can be injected into {@link Transformer}s using
  * the {@link Provided} and {@link Inject} annotations.
- * 
- * @author Kasper Sørensen
  */
 public interface OutputRowCollector {
 

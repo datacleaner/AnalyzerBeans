@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.eobjects.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.ColumnType;
 
 /**
  * Defines the metadata of a job. This metadata type can be used to present
@@ -33,27 +33,31 @@ import org.eobjects.metamodel.schema.ColumnType;
  * matched in the current AnalyzerBeansConfiguration and that the source column
  * paths are present in that particular datastore.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface AnalysisJobMetadata {
 
-	public String getJobName();
+    public static final AnalysisJobMetadata EMPTY_METADATA = new EmptyAnalysisJobMetadata();
 
-	public String getJobVersion();
+    public String getJobName();
 
-	public String getJobDescription();
+    public String getJobVersion();
 
-	public String getAuthor();
+    public String getJobDescription();
 
-	public Date getCreatedDate();
+    public String getAuthor();
 
-	public Date getUpdatedDate();
+    public Date getCreatedDate();
 
-	public String getDatastoreName();
+    public Date getUpdatedDate();
 
-	public List<String> getSourceColumnPaths();
-	
-	public List<ColumnType> getSourceColumnTypes();
+    public String getDatastoreName();
 
-	public Map<String, String> getVariables();
+    public List<String> getSourceColumnPaths();
+
+    public List<ColumnType> getSourceColumnTypes();
+
+    public Map<String, String> getVariables();
+
+    public Map<String, String> getProperties();
 }

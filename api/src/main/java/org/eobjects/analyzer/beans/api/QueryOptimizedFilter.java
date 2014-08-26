@@ -19,7 +19,7 @@
  */
 package org.eobjects.analyzer.beans.api;
 
-import org.eobjects.metamodel.query.Query;
+import org.apache.metamodel.query.Query;
 
 /**
  * A filter which can, under certain circumstances, be optimized by using a
@@ -31,8 +31,6 @@ import org.eobjects.metamodel.query.Query;
  * that the filter will be optimizing the query, but in cases where a filter is
  * among the first steps in a job, and all succeeding steps depend on a single
  * outcome of the particular filter, it will be allowed to optimize the query.
- * 
- * @author Kasper Sørensen
  * 
  * @param <C>
  *            the filter category enum

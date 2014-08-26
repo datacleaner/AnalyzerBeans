@@ -34,8 +34,6 @@ import org.junit.Ignore;
 /**
  * Simple transformer with output row collector, that counts to eg.
  * (1,42)-(2,42)-(3,42), if the input is 3.
- * 
- * @author kasper
  */
 @Ignore
 @TransformerBean("Mock multi row transformer")

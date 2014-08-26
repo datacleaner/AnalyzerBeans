@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A very simple ID generator that generates id with a prefix and an
  * incrementing suffix.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public final class PrefixedIdGenerator implements IdGenerator {
 

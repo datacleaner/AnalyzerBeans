@@ -25,7 +25,7 @@ import java.util.ListIterator;
  * An iterator (with additional helper methods) for characters. The iterator
  * does not support the add(...) method.
  * 
- * @author Kasper Sørensen
+ * 
  */
 public class CharIterator implements ListIterator<Character> {
 

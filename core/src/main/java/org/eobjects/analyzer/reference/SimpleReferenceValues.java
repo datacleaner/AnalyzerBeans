@@ -24,13 +24,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.eobjects.metamodel.util.BaseObject;
+import org.apache.metamodel.util.BaseObject;
 
 /**
  * Simple array/in-memory based implementation of the {@link ReferenceValues}
  * interface.
  * 
- * @author Kasper Sørensen
+ * 
  * 
  * @param <E>
  *            the type of values
@@ -41,7 +41,8 @@ public final class SimpleReferenceValues<E> extends BaseObject implements Refere
 
 	private final E[] _values;
 
-	public SimpleReferenceValues(E... values) {
+	@SafeVarargs
+    public SimpleReferenceValues(E... values) {
 		_values = values;
 	}
 

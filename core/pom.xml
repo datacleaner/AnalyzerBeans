@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.eobjects.analyzerbeans</groupId>
 		<artifactId>AnalyzerBeans</artifactId>
-		<version>0.42-SNAPSHOT</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>AnalyzerBeans-core</artifactId>
 	<description>Core module of AnalyzerBeans, provides a bare-bones engine for composing and executing AnalyzerBeans jobs</description>
@@ -15,14 +15,29 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eobjects.metamodel</groupId>
+			<groupId>org.apache.metamodel</groupId>
 			<artifactId>MetaModel-full</artifactId>
 			<version>${metamodel.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eobjects.sassyreader</groupId>
-			<artifactId>SassyReader</artifactId>
-			<version>0.5</version>
+			<groupId>org.apache.metamodel</groupId>
+			<artifactId>MetaModel-hbase</artifactId>
+			<version>${metamodel.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel-extras</groupId>
+			<artifactId>MetaModel-extras-sas</artifactId>
+			<version>${metamodel.extras.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel-extras</groupId>
+			<artifactId>MetaModel-extras-dbase</artifactId>
+			<version>${metamodel.extras.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.metamodel-extras</groupId>
+			<artifactId>MetaModel-extras-access</artifactId>
+			<version>${metamodel.extras.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -92,9 +107,9 @@
 		<!-- Used for classpath scanning. Required if the ClasspathScanDescriptorProvider 
 			is used -->
 		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-			<version>4.1</version>
+			<groupId>org.kohsuke</groupId>
+			<artifactId>asm5</artifactId>
+			<version>5.0.1</version>
 		</dependency>
 
 		<!-- Logging dependencies -->

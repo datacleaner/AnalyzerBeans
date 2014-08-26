@@ -32,12 +32,12 @@ import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.SimpleDescriptorProvider;
 import org.eobjects.analyzer.test.TestHelper;
 import org.eobjects.analyzer.util.SchemaNavigator;
-import org.eobjects.metamodel.query.Query;
+import org.apache.metamodel.query.Query;
 
 public class NullCheckFilterTest extends TestCase {
 
 	public void testAliases() throws Exception {
-		FilterBeanDescriptor<?, ?> desc1 = Descriptors.ofFilter(NullCheckFilter.class);
+		FilterBeanDescriptor<?, ?> desc1 = Descriptors.ofFilterUnbound(NullCheckFilter.class);
 
 		SimpleDescriptorProvider descriptorProvider = new SimpleDescriptorProvider();
 		descriptorProvider.addFilterBeanDescriptor(desc1);

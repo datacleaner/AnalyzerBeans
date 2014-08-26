@@ -33,8 +33,12 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.apache.metamodel.MetaModelHelper;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Schema;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfiguration;
 import org.eobjects.analyzer.connection.Datastore;
+import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.ExpressionBasedInputColumn;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
@@ -52,7 +56,6 @@ import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
-import org.eobjects.analyzer.job.jaxb.MergedOutcomeType;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
@@ -61,12 +64,18 @@ import org.eobjects.analyzer.job.jaxb.TransformationType;
 import org.eobjects.analyzer.job.jaxb.TransformerDescriptorType;
 import org.eobjects.analyzer.job.jaxb.TransformerType;
 import org.eobjects.analyzer.util.JaxbValidationEventHandler;
+import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.eobjects.metamodel.schema.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
+
 public class JaxbJobWriter implements JobWriter<OutputStream> {
+
+    private static final String COLUMN_PATH_QUALIFICATION_FULL = "full";
+    private static final String COLUMN_PATH_QUALIFICATION_TABLE = "table";
+    private static final String COLUMN_PATH_QUALIFICATION_COLUMN = "column";
 
     private static final Logger logger = LoggerFactory.getLogger(JaxbJobWriter.class);
 
@@ -116,23 +125,23 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 
         // mappings for lookup of ID's
         final Map<InputColumn<?>, String> columnMappings = new LinkedHashMap<InputColumn<?>, String>();
-        final Map<Outcome, String> outcomeMappings = new LinkedHashMap<Outcome, String>();
+        final Map<FilterOutcome, String> outcomeMappings = new LinkedHashMap<FilterOutcome, String>();
 
         // mappings for lookup of component's elements
         final Map<TransformerJob, TransformerType> transformerMappings = new LinkedHashMap<TransformerJob, TransformerType>();
         final Map<FilterJob, FilterType> filterMappings = new LinkedHashMap<FilterJob, FilterType>();
         final Map<AnalyzerJob, AnalyzerType> analyzerMappings = new LinkedHashMap<AnalyzerJob, AnalyzerType>();
-        final Map<MergedOutcomeJob, MergedOutcomeType> mergedOutcomeMappings = new LinkedHashMap<MergedOutcomeJob, MergedOutcomeType>();
 
         // register all source columns
         final Collection<InputColumn<?>> sourceColumns = analysisJob.getSourceColumns();
+        final String columnPathQualification = getColumnPathQualification(datastore, sourceColumns);
         for (InputColumn<?> inputColumn : sourceColumns) {
             final ColumnType jaxbColumn = new ColumnType();
             final Column physicalColumn = inputColumn.getPhysicalColumn();
-            jaxbColumn.setPath(physicalColumn.getQualifiedLabel());
+            jaxbColumn.setPath(getColumnPath(physicalColumn, columnPathQualification));
             jaxbColumn.setId(getId(inputColumn, columnMappings));
 
-            final org.eobjects.metamodel.schema.ColumnType columnType = physicalColumn.getType();
+            final org.apache.metamodel.schema.ColumnType columnType = physicalColumn.getType();
             if (columnType != null) {
                 jaxbColumn.setType(columnType.toString());
             }
@@ -141,16 +150,14 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         }
 
         // adds all components to the job and their corresponding mappings
-        addComponents(jobType, analysisJob, transformerMappings, filterMappings, analyzerMappings,
-                mergedOutcomeMappings);
+        addComponents(jobType, analysisJob, transformerMappings, filterMappings, analyzerMappings);
 
         // add all transformed columns to their originating components and the
         // mappings
-        addTransformedColumns(columnMappings, transformerMappings, mergedOutcomeMappings);
+        addTransformedColumns(columnMappings, transformerMappings);
 
         // register all requirements
-        addRequirements(outcomeMappings, transformerMappings, filterMappings, mergedOutcomeMappings, analyzerMappings,
-                columnMappings);
+        addRequirements(outcomeMappings, transformerMappings, filterMappings, analyzerMappings, columnMappings);
 
         addConfiguration(analysisJob, transformerMappings, filterMappings, analyzerMappings, columnMappings);
 
@@ -161,6 +168,50 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             marshaller.marshal(jobType, outputStream);
         } catch (JAXBException e) {
             throw new IllegalStateException(e);
+        }
+    }
+
+    private String getColumnPath(Column column, String columnPathQualification) {
+        switch (columnPathQualification) {
+        case COLUMN_PATH_QUALIFICATION_COLUMN:
+            final String columnName = column.getName();
+            if (Strings.isNullOrEmpty(columnName)) {
+                return column.getTable().getName() + '.' + column.getName(); 
+            }
+            return column.getName();
+        case COLUMN_PATH_QUALIFICATION_TABLE:
+            return column.getTable().getName() + '.' + column.getName();
+        case COLUMN_PATH_QUALIFICATION_FULL:
+        default:
+            return column.getQualifiedLabel();
+        }
+    }
+
+    private String getColumnPathQualification(Datastore datastore, Collection<InputColumn<?>> sourceColumns) {
+        if (datastore == null || sourceColumns == null || sourceColumns.isEmpty()) {
+            return COLUMN_PATH_QUALIFICATION_FULL;
+        }
+
+        try (DatastoreConnection connection = datastore.openConnection()) {
+            SchemaNavigator schemaNavigator = connection.getSchemaNavigator();
+            Schema[] schemas = schemaNavigator.getSchemas();
+            Schema singleSchema = null;
+            int realSchemas = 0;
+            for (Schema schema : schemas) {
+                if (!MetaModelHelper.isInformationSchema(schema)) {
+                    realSchemas++;
+                    singleSchema = schema;
+                }
+            }
+
+            if (realSchemas == 1) {
+                if (singleSchema.getTableCount() == 1) {
+                    return COLUMN_PATH_QUALIFICATION_COLUMN;
+                }
+                return COLUMN_PATH_QUALIFICATION_TABLE;
+            }
+
+            return COLUMN_PATH_QUALIFICATION_FULL;
         }
     }
 
@@ -297,8 +348,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
     }
 
     private void addTransformedColumns(final Map<InputColumn<?>, String> columnMappings,
-            final Map<TransformerJob, TransformerType> transformerMappings,
-            final Map<MergedOutcomeJob, MergedOutcomeType> mergedOutcomeMappings) {
+            final Map<TransformerJob, TransformerType> transformerMappings) {
         // register all transformed columns
         for (Entry<TransformerJob, TransformerType> entry : transformerMappings.entrySet()) {
             final TransformerJob transformerJob = entry.getKey();
@@ -319,99 +369,55 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
                 transformerType.getOutput().add(outputType);
             }
         }
-
-        // register all merged columns
-        for (Entry<MergedOutcomeJob, MergedOutcomeType> entry : mergedOutcomeMappings.entrySet()) {
-            MergedOutcomeJob mergedOutcomeJob = entry.getKey();
-            MergedOutcomeType mergedOutcomeType = entry.getValue();
-            InputColumn<?>[] columns = mergedOutcomeJob.getOutput();
-            for (InputColumn<?> inputColumn : columns) {
-                String id = getId(inputColumn, columnMappings);
-                OutputType outputType = new OutputType();
-                outputType.setId(id);
-                outputType.setName(inputColumn.getName());
-                mergedOutcomeType.getOutput().add(outputType);
-            }
-        }
     }
 
-    private void addRequirements(final Map<Outcome, String> outcomeMappings,
+    private void addRequirements(final Map<FilterOutcome, String> outcomeMappings,
             final Map<TransformerJob, TransformerType> transformerMappings,
-            final Map<FilterJob, FilterType> filterMappings,
-            final Map<MergedOutcomeJob, MergedOutcomeType> mergedOutcomeMappings,
-            final Map<AnalyzerJob, AnalyzerType> analyzerMappings, final Map<InputColumn<?>, String> columnMappings) {
+            final Map<FilterJob, FilterType> filterMappings, final Map<AnalyzerJob, AnalyzerType> analyzerMappings,
+            final Map<InputColumn<?>, String> columnMappings) {
 
         // add requirements based on all transformer requirements
-        for (Entry<TransformerJob, TransformerType> entry : transformerMappings.entrySet()) {
-            TransformerJob job = entry.getKey();
-            Outcome[] requirements = job.getRequirements();
-            if (requirements != null && requirements.length != 0) {
-                assert requirements.length == 1;
-                String id = getId(requirements[0], outcomeMappings, true);
+        for (final Entry<TransformerJob, TransformerType> entry : transformerMappings.entrySet()) {
+            final TransformerJob job = entry.getKey();
+            final ComponentRequirement requirement = job.getComponentRequirement();
+            if (requirement != null) {
+                String id = getId(requirement, outcomeMappings);
                 entry.getValue().setRequires(id);
             }
         }
 
         // add requirements based on all filter requirements
-        for (Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
-            FilterJob job = entry.getKey();
-            Outcome[] requirements = job.getRequirements();
-            if (requirements != null && requirements.length != 0) {
-                assert requirements.length == 1;
-                String id = getId(requirements[0], outcomeMappings, true);
+        for (final Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
+            final FilterJob job = entry.getKey();
+            final ComponentRequirement requirement = job.getComponentRequirement();
+            if (requirement != null) {
+                String id = getId(requirement, outcomeMappings);
                 entry.getValue().setRequires(id);
             }
         }
 
-        // add requirements based on all merged outcome requirements
-        for (Entry<MergedOutcomeJob, MergedOutcomeType> entry : mergedOutcomeMappings.entrySet()) {
-            MergedOutcomeJob job = entry.getKey();
-            MergedOutcomeType mergedOutcomeType = entry.getValue();
-            MergeInput[] mergeInputs = job.getMergeInputs();
-            for (MergeInput mergeInput : mergeInputs) {
-                Outcome requirement = mergeInput.getOutcome();
-                String id = getId(requirement, outcomeMappings, true);
-                MergedOutcomeType.Outcome mergeInputType = new MergedOutcomeType.Outcome();
-                mergeInputType.setRef(id);
-                InputColumn<?>[] columns = mergeInput.getInputColumns();
-
-                for (InputColumn<?> inputColumn : columns) {
-                    InputType inputType = new InputType();
-                    inputType.setRef(getId(inputColumn, columnMappings));
-                    mergeInputType.getInput().add(inputType);
-                }
-
-                mergedOutcomeType.getOutcome().add(mergeInputType);
-            }
-
-            // add the single outcome element of this merged outcome to the
-            // mappings
-            mergedOutcomeType.setId(getId(job.getOutcome(), outcomeMappings, true));
-        }
-
         // add requirements based on all analyzer requirements
         for (Entry<AnalyzerJob, AnalyzerType> entry : analyzerMappings.entrySet()) {
-            AnalyzerJob job = entry.getKey();
-            Outcome[] requirements = job.getRequirements();
-            if (requirements != null && requirements.length != 0) {
-                assert requirements.length == 1;
-                String id = getId(requirements[0], outcomeMappings, true);
+            final AnalyzerJob job = entry.getKey();
+            final ComponentRequirement requirement = job.getComponentRequirement();
+            if (requirement != null) {
+                String id = getId(requirement, outcomeMappings);
                 entry.getValue().setRequires(id);
             }
         }
 
         // add outcome elements only for those filter requirements that
         // have been mapped
-        for (Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
-            FilterJob job = entry.getKey();
-            FilterType filterType = entry.getValue();
-            FilterOutcome[] outcomes = job.getOutcomes();
-            for (FilterOutcome outcome : outcomes) {
+        for (final Entry<FilterJob, FilterType> entry : filterMappings.entrySet()) {
+            final FilterJob job = entry.getKey();
+            final FilterType filterType = entry.getValue();
+            final Collection<FilterOutcome> outcomes = job.getFilterOutcomes();
+            for (final FilterOutcome outcome : outcomes) {
                 // note that we DONT use the getId(...) method here
-                String id = getId(outcome, outcomeMappings, false);
+                final String id = getId(outcome, outcomeMappings, false);
                 // only the outcome element if it is being mapped
                 if (id != null) {
-                    OutcomeType outcomeType = new OutcomeType();
+                    final OutcomeType outcomeType = new OutcomeType();
                     outcomeType.setCategory(outcome.getCategory().name());
                     outcomeType.setId(id);
                     filterType.getOutcome().add(outcomeType);
@@ -420,12 +426,38 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         }
     }
 
-    private String getId(Outcome requirement, Map<Outcome, String> outcomeMappings, boolean create) {
-        String id = outcomeMappings.get(requirement);
+    private String getId(ComponentRequirement requirement, Map<FilterOutcome, String> outcomeMappings) {
+        if (requirement instanceof AnyComponentRequirement) {
+            return AnyComponentRequirement.KEYWORD;
+        }
+
+        if (requirement instanceof SimpleComponentRequirement) {
+            final FilterOutcome outcome = ((SimpleComponentRequirement) requirement).getOutcome();
+            return getId(outcome, outcomeMappings, true);
+        }
+
+        if (requirement instanceof CompoundComponentRequirement) {
+            final Set<FilterOutcome> outcomes = ((CompoundComponentRequirement) requirement).getOutcomes();
+            final StringBuilder sb = new StringBuilder();
+            for (FilterOutcome outcome : outcomes) {
+                if (sb.length() != 0) {
+                    sb.append(" OR ");
+                }
+                final String id = getId(outcome, outcomeMappings, true);
+                sb.append(id);
+            }
+            return sb.toString();
+        }
+
+        throw new UnsupportedOperationException("Unsupported ComponentRequirement type: " + requirement);
+    }
+
+    private String getId(FilterOutcome outcome, Map<FilterOutcome, String> outcomeMappings, boolean create) {
+        String id = outcomeMappings.get(outcome);
         if (id == null) {
             if (create) {
                 id = "outcome_" + outcomeMappings.size();
-                outcomeMappings.put(requirement, id);
+                outcomeMappings.put(outcome, id);
             }
         }
         return id;
@@ -433,8 +465,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
 
     private void addComponents(final Job jobType, final AnalysisJob analysisJob,
             final Map<TransformerJob, TransformerType> transformerMappings,
-            final Map<FilterJob, FilterType> filterMappings, final Map<AnalyzerJob, AnalyzerType> analyzerMappings,
-            final Map<MergedOutcomeJob, MergedOutcomeType> mergedOutcomeMappings) {
+            final Map<FilterJob, FilterType> filterMappings, final Map<AnalyzerJob, AnalyzerType> analyzerMappings) {
         final TransformationType transformationType = new TransformationType();
         jobType.setTransformation(transformationType);
 
@@ -449,7 +480,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             TransformerDescriptorType descriptorType = new TransformerDescriptorType();
             descriptorType.setRef(transformerJob.getDescriptor().getDisplayName());
             transformerType.setDescriptor(descriptorType);
-            transformationType.getTransformerOrFilterOrMergedOutcome().add(transformerType);
+            transformationType.getTransformerOrFilter().add(transformerType);
             transformerMappings.put(transformerJob, transformerType);
         }
 
@@ -461,17 +492,8 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             FilterDescriptorType descriptorType = new FilterDescriptorType();
             descriptorType.setRef(filterJob.getDescriptor().getDisplayName());
             filterType.setDescriptor(descriptorType);
-            transformationType.getTransformerOrFilterOrMergedOutcome().add(filterType);
+            transformationType.getTransformerOrFilter().add(filterType);
             filterMappings.put(filterJob, filterType);
-        }
-
-        // add all merged outcomes to the transformation element
-        Collection<MergedOutcomeJob> mergedOutcomeJobs = analysisJob.getMergedOutcomeJobs();
-        for (MergedOutcomeJob mergedOutcomeJob : mergedOutcomeJobs) {
-            MergedOutcomeType mergedOutcomeType = new MergedOutcomeType();
-            mergedOutcomeType.setName(mergedOutcomeJob.getName());
-            transformationType.getTransformerOrFilterOrMergedOutcome().add(mergedOutcomeType);
-            mergedOutcomeMappings.put(mergedOutcomeJob, mergedOutcomeType);
         }
 
         // add all analyzers to the analysis element

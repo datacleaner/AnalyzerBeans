@@ -25,14 +25,14 @@ import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.FileDatastore;
 import org.eobjects.analyzer.result.AnalyzerResult;
 import org.eobjects.analyzer.result.Metric;
-import org.eobjects.metamodel.schema.Table;
+import org.apache.metamodel.schema.Table;
 
 /**
  * Represents the result of a Writer analyzer (see {@link WriteDataCategory}).
  * The result will not be an analysis result as such, but a pointer to a written
  * dataset.
  * 
- * @author Kasper Sørensen
+ * 
  */
 @Distributed(reducer = WriteDataResultReducer.class)
 public interface WriteDataResult extends AnalyzerResult {

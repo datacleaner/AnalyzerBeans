@@ -55,22 +55,22 @@ public class BatchTransformerTest extends TestCase {
         configuration = new AnalyzerBeansConfigurationImpl().replace(new MultiThreadedTaskRunner(10)).replace(
                 datastoreCatalog);
 
-        AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration);
-        jobBuilder.setDatastore("foo");
-        jobBuilder.addSourceColumns("name");
+        try (AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(configuration)) {
+            jobBuilder.setDatastore("foo");
+            jobBuilder.addSourceColumns("name");
 
-        TransformerJobBuilder<MockBatchTransformer> transformerBuilder = jobBuilder
-                .addTransformer(MockBatchTransformer.class);
-        sourceColumn = jobBuilder.getSourceColumns().get(0);
-        transformerBuilder.addInputColumns(sourceColumn);
+            TransformerJobBuilder<MockBatchTransformer> transformerBuilder = jobBuilder
+                    .addTransformer(MockBatchTransformer.class);
+            sourceColumn = jobBuilder.getSourceColumns().get(0);
+            transformerBuilder.addInputColumns(sourceColumn);
 
-        AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);
-        analyzer.addInputColumns(sourceColumn);
-        sortedColumn = transformerBuilder.getOutputColumns().get(0);
-        analyzer.addInputColumns(sortedColumn);
+            AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);
+            analyzer.addInputColumns(sourceColumn);
+            sortedColumn = transformerBuilder.getOutputColumns().get(0);
+            analyzer.addInputColumns(sortedColumn);
 
-        job = jobBuilder.toAnalysisJob();
-        jobBuilder.close();
+            job = jobBuilder.toAnalysisJob();
+        }
     }
 
     public void testScenario() throws Exception {

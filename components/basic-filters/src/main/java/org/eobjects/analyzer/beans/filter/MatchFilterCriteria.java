@@ -22,7 +22,7 @@ package org.eobjects.analyzer.beans.filter;
 /**
  * Defines available criteria for matching filters
  * 
- * @author Kasper Sørensen
+ * 
  */
 public enum MatchFilterCriteria {
 

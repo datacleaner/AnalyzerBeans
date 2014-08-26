@@ -28,7 +28,7 @@ import org.eobjects.analyzer.descriptors.ValidateMethodDescriptor;
 /**
  * Life cycle callback for the initialize phase.
  * 
- * @author Kasper Sørensen
+ * 
  */
 final class InitializeCallback implements LifeCycleCallback<Object, ComponentDescriptor<?>> {
 	

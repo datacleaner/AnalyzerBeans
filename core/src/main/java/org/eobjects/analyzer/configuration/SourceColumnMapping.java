@@ -31,15 +31,13 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.job.AnalysisJobMetadata;
 import org.eobjects.analyzer.util.SchemaNavigator;
 
-import org.eobjects.metamodel.schema.Column;
+import org.apache.metamodel.schema.Column;
 
 /**
  * A class that represents a mapping between column paths as defined in a
  * serialized/saved job and their actual column objects. Having this in a
  * separate class allows the user to apply the flow defined in a job on to
  * another set of columns that have been mapped to the original column paths.
- * 
- * @author Kasper Sørensen
  */
 public final class SourceColumnMapping {
 
@@ -76,8 +74,7 @@ public final class SourceColumnMapping {
      */
     public void autoMap(Datastore datastore) {
         setDatastore(datastore);
-        final DatastoreConnection con = datastore.openConnection();
-        try {
+        try (final DatastoreConnection con = datastore.openConnection()) {
             final SchemaNavigator schemaNavigator = con.getSchemaNavigator();
             for (final Entry<String, Column> entry : _map.entrySet()) {
                 if (entry.getValue() == null) {
@@ -86,8 +83,6 @@ public final class SourceColumnMapping {
                     entry.setValue(column);
                 }
             }
-        } finally {
-            con.close();
         }
     }
 

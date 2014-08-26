@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.metamodel.MetaModelHelper;
+import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.Table;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -34,25 +37,21 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
+import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
 import org.eobjects.analyzer.job.FilterJob;
-import org.eobjects.analyzer.job.MergeInput;
-import org.eobjects.analyzer.job.MergedOutcomeJob;
-import org.eobjects.analyzer.job.Outcome;
+import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.concurrent.TaskRunner;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.util.SourceColumnFinder;
-import org.eobjects.metamodel.MetaModelHelper;
-import org.eobjects.metamodel.schema.Column;
-import org.eobjects.metamodel.schema.Table;
 
 /**
  * Class which partitions a single {@link AnalysisJob}'s components into
  * {@link RowProcessingPublisher}s.
  */
 public final class RowProcessingPublishers {
-    
+
     private final AnalysisJob _analysisJob;
     private final AnalysisListener _analysisListener;
     private final TaskRunner _taskRunner;
@@ -83,9 +82,6 @@ public final class RowProcessingPublishers {
         for (FilterJob filterJob : _analysisJob.getFilterJobs()) {
             registerRowProcessingPublishers(filterJob);
         }
-        for (MergedOutcomeJob mergedOutcomeJob : _analysisJob.getMergedOutcomeJobs()) {
-            registerRowProcessingPublishers(mergedOutcomeJob);
-        }
         for (TransformerJob transformerJob : _analysisJob.getTransformerJobs()) {
             registerRowProcessingPublishers(transformerJob);
         }
@@ -105,9 +101,11 @@ public final class RowProcessingPublishers {
         for (InputColumn<?> inputColumn : inputColumns) {
             physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(inputColumn));
         }
-        final Outcome[] requirements = componentJob.getRequirements();
-        for (Outcome requirement : requirements) {
-            physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(requirement));
+        final ComponentRequirement requirement = componentJob.getComponentRequirement();
+        if (requirement != null) {
+            for (FilterOutcome filterOutcome : requirement.getProcessingDependencies()) {
+                physicalColumns.addAll(_sourceColumnFinder.findOriginatingColumns(filterOutcome));
+            }
         }
 
         final Column[] physicalColumnsArray = physicalColumns.toArray(new Column[physicalColumns.size()]);
@@ -201,25 +199,6 @@ public final class RowProcessingPublishers {
         return result.toArray(new InputColumn<?>[result.size()]);
     }
 
-    private void registerRowProcessingPublishers(MergedOutcomeJob mergedOutcomeJob) {
-        Collection<RowProcessingPublisher> publishers = _rowProcessingPublishers.values();
-        for (RowProcessingPublisher rowProcessingPublisher : publishers) {
-            boolean prerequisiteOutcomesExist = true;
-            MergeInput[] mergeInputs = mergedOutcomeJob.getMergeInputs();
-            for (MergeInput mergeInput : mergeInputs) {
-                Outcome prerequisiteOutcome = mergeInput.getOutcome();
-                if (!rowProcessingPublisher.containsOutcome(prerequisiteOutcome)) {
-                    prerequisiteOutcomesExist = false;
-                    break;
-                }
-            }
-
-            if (prerequisiteOutcomesExist) {
-                rowProcessingPublisher.addMergedOutcomeJob(mergedOutcomeJob);
-            }
-        }
-    }
-
     public int size() {
         return _rowProcessingPublishers.size();
     }
@@ -240,7 +219,7 @@ public final class RowProcessingPublishers {
     public AnalysisJobMetrics getAnalysisJobMetrics() {
         return new AnalysisJobMetricsImpl(_analysisJob, this);
     }
-    
+
     public SourceColumnFinder getSourceColumnFinder() {
         return _sourceColumnFinder;
     }

@@ -8,9 +8,9 @@
     <source>
         <data-context ref="my db"/>
         <columns>
-            <column type="VARCHAR" path="PUBLIC.EMPLOYEES.FIRSTNAME" id="col_0"/>
-            <column type="VARCHAR" path="PUBLIC.EMPLOYEES.LASTNAME" id="col_1"/>
-            <column type="VARCHAR" path="PUBLIC.EMPLOYEES.EMAIL" id="col_2"/>
+            <column id="col_0" path="EMPLOYEES.FIRSTNAME" type="VARCHAR"/>
+            <column id="col_1" path="EMPLOYEES.LASTNAME" type="VARCHAR"/>
+            <column id="col_2" path="EMPLOYEES.EMAIL" type="VARCHAR"/>
         </columns>
     </source>
     <transformation>
@@ -24,7 +24,7 @@
         <filter>
             <descriptor ref="Null check"/>
             <properties>
-                <property value="false" name="Consider empty string as null"/>
+                <property name="Consider empty string as null" value="false"/>
             </properties>
             <input ref="col_0"/>
             <outcome id="outcome_0" category="NOT_NULL"/>
@@ -42,38 +42,38 @@
         <analyzer>
             <descriptor ref="Pattern finder"/>
             <properties>
-                <property value="true" name="Discriminate text case"/>
-                <property value="false" name="Discriminate negative numbers"/>
-                <property value="true" name="Discriminate decimals"/>
-                <property value="false" name="Enable mixed tokens"/>
-                <property value="false" name="Ignore repeated spaces"/>
-                <property value="false" name="Upper case patterns expand in size"/>
-                <property value="true" name="Lower case patterns expand in size"/>
-                <property value="&lt;null&gt;" name="Predefined token name"/>
-                <property value="&lt;null&gt;" name="Predefined token regexes"/>
-                <property value="." name="Decimal separator"/>
-                <property value="&amp;#44;" name="Thousands separator"/>
-                <property value="-" name="Minus sign"/>
+                <property name="Discriminate text case" value="true"/>
+                <property name="Discriminate negative numbers" value="false"/>
+                <property name="Discriminate decimals" value="true"/>
+                <property name="Enable mixed tokens" value="false"/>
+                <property name="Ignore repeated spaces" value="false"/>
+                <property name="Upper case patterns expand in size" value="false"/>
+                <property name="Lower case patterns expand in size" value="true"/>
+                <property name="Predefined token name" value="&lt;null&gt;"/>
+                <property name="Predefined token regexes" value="&lt;null&gt;"/>
+                <property name="Decimal separator" value="."/>
+                <property name="Thousands separator" value="&amp;#44;"/>
+                <property name="Minus sign" value="-"/>
             </properties>
-            <input name="Column" ref="col_0"/>
+            <input ref="col_0" name="Column"/>
         </analyzer>
         <analyzer>
             <descriptor ref="Pattern finder"/>
             <properties>
-                <property value="true" name="Discriminate text case"/>
-                <property value="false" name="Discriminate negative numbers"/>
-                <property value="true" name="Discriminate decimals"/>
-                <property value="false" name="Enable mixed tokens"/>
-                <property value="false" name="Ignore repeated spaces"/>
-                <property value="false" name="Upper case patterns expand in size"/>
-                <property value="true" name="Lower case patterns expand in size"/>
-                <property value="&lt;null&gt;" name="Predefined token name"/>
-                <property value="&lt;null&gt;" name="Predefined token regexes"/>
-                <property value="." name="Decimal separator"/>
-                <property value="&amp;#44;" name="Thousands separator"/>
-                <property value="-" name="Minus sign"/>
+                <property name="Discriminate text case" value="true"/>
+                <property name="Discriminate negative numbers" value="false"/>
+                <property name="Discriminate decimals" value="true"/>
+                <property name="Enable mixed tokens" value="false"/>
+                <property name="Ignore repeated spaces" value="false"/>
+                <property name="Upper case patterns expand in size" value="false"/>
+                <property name="Lower case patterns expand in size" value="true"/>
+                <property name="Predefined token name" value="&lt;null&gt;"/>
+                <property name="Predefined token regexes" value="&lt;null&gt;"/>
+                <property name="Decimal separator" value="."/>
+                <property name="Thousands separator" value="&amp;#44;"/>
+                <property name="Minus sign" value="-"/>
             </properties>
-            <input name="Column" ref="col_3"/>
+            <input ref="col_3" name="Column"/>
         </analyzer>
     </analysis>
 </job>

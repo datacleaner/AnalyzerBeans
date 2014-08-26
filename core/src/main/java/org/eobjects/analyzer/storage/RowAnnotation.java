@@ -31,7 +31,7 @@ import java.io.Serializable;
  * 
  * @see RowAnnotationFactory
  * 
- * @author Kasper Sørensen
+ * 
  */
 public interface RowAnnotation extends Serializable {
 

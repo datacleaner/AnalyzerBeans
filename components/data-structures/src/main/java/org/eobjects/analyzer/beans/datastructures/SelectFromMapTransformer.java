@@ -38,10 +38,6 @@ import org.eobjects.analyzer.data.InputRow;
 
 /**
  * Transformer for selecting values from maps.
- * 
- * @author Kasper Sørensen
- * @author Shekhar Gulati
- * @author Saurabh Gupta
  */
 @TransformerBean("Select values from key/value map")
 @Description("Given a specified list of keys, this transformer will select the values from a key/value map and place them as columns within the record")

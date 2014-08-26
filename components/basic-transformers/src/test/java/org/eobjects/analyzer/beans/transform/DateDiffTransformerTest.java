@@ -22,8 +22,8 @@ package org.eobjects.analyzer.beans.transform;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
-import org.eobjects.metamodel.util.DateUtils;
-import org.eobjects.metamodel.util.Month;
+import org.apache.metamodel.util.DateUtils;
+import org.apache.metamodel.util.Month;
 
 public class DateDiffTransformerTest extends TestCase {
 
