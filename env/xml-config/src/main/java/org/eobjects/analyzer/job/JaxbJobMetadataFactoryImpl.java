@@ -84,7 +84,7 @@ public class JaxbJobMetadataFactoryImpl implements JaxbJobMetadataFactory {
                     propertyList.add(property);
                 }
 
-                jobMetadata.setProperties(propertiesType);
+                jobMetadata.setMetadataProperties(propertiesType);
             }
         }
     }
