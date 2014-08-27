@@ -434,12 +434,14 @@ public class JaxbJobReader implements JobReader<InputStream> {
         // map column id's to input columns
 
         analysisJobBuilder.setDatastore(datastore);
-        final ImmutableAnalysisJobMetadata immutableAnalysisJobMetadata = new ImmutableAnalysisJobMetadata(metadata.getJobName(),
-                metadata.getJobVersion(), metadata.getJobDescription(), metadata.getAuthor(), convertToDate(metadata.getCreatedDate()),
-                convertToDate(metadata.getUpdatedDate()), datastore.getName(), getSourceColumnPaths(job), getSourceColumnTypes(job),
-                variables,
-                getMetadataProperties(metadata));
-        analysisJobBuilder.setAnalysisJobMetadata(immutableAnalysisJobMetadata);
+        if (metadata != null) {
+            final ImmutableAnalysisJobMetadata immutableAnalysisJobMetadata = new ImmutableAnalysisJobMetadata(metadata.getJobName(),
+                    metadata.getJobVersion(), metadata.getJobDescription(), metadata.getAuthor(), convertToDate(metadata.getCreatedDate()),
+                    convertToDate(metadata.getUpdatedDate()), datastore.getName(), getSourceColumnPaths(job), getSourceColumnTypes(job),
+                    variables,
+                    getMetadataProperties(metadata));
+            analysisJobBuilder.setAnalysisJobMetadata(immutableAnalysisJobMetadata);
+        }
 
         final Map<String, InputColumn<?>> inputColumns = new HashMap<String, InputColumn<?>>();
 
