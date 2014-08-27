@@ -392,7 +392,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         final AnalysisJobBuilder builder = new AnalysisJobBuilder(_configuration);
 
         try {
-            final AnalysisJobBuilder result = create(job, sourceColumnMapping, variables, builder);
+            final AnalysisJobBuilder result = create(job, sourceColumnMapping, metadata, variables, builder);
             return result;
         } catch (RuntimeException e) {
             FileHelper.safeClose(builder);
@@ -400,7 +400,7 @@ public class JaxbJobReader implements JobReader<InputStream> {
         }
     }
 
-    private AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping,
+    private AnalysisJobBuilder create(Job job, SourceColumnMapping sourceColumnMapping, JobMetadataType metadata,
             final Map<String, String> variables, final AnalysisJobBuilder analysisJobBuilder) {
         String ref;
 
@@ -434,6 +434,14 @@ public class JaxbJobReader implements JobReader<InputStream> {
         // map column id's to input columns
 
         analysisJobBuilder.setDatastore(datastore);
+        if (metadata != null) {
+            final ImmutableAnalysisJobMetadata immutableAnalysisJobMetadata = new ImmutableAnalysisJobMetadata(metadata.getJobName(),
+                    metadata.getJobVersion(), metadata.getJobDescription(), metadata.getAuthor(), convertToDate(metadata.getCreatedDate()),
+                    convertToDate(metadata.getUpdatedDate()), datastore.getName(), getSourceColumnPaths(job), getSourceColumnTypes(job),
+                    variables,
+                    getMetadataProperties(metadata));
+            analysisJobBuilder.setAnalysisJobMetadata(immutableAnalysisJobMetadata);
+        }
 
         final Map<String, InputColumn<?>> inputColumns = new HashMap<String, InputColumn<?>>();
 
@@ -713,6 +721,13 @@ public class JaxbJobReader implements JobReader<InputStream> {
         datastoreConnection.close();
 
         return analysisJobBuilder;
+    }
+
+    private Date convertToDate(XMLGregorianCalendar calendar) {
+        if (calendar != null) {
+            return calendar.toGregorianCalendar().getTime();
+        }
+        return null;
     }
 
     private ComponentRequirement getRequirement(String ref, Map<String, FilterOutcome> outcomeMapping) {
