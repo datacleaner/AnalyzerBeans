@@ -23,6 +23,7 @@ import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.schema.ColumnType;
 import org.apache.metamodel.schema.Table;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
@@ -55,6 +57,7 @@ import org.eobjects.analyzer.job.FilterJob;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.IdGenerator;
 import org.eobjects.analyzer.job.ImmutableAnalysisJob;
+import org.eobjects.analyzer.job.ImmutableAnalysisJobMetadata;
 import org.eobjects.analyzer.job.InputColumnSourceJob;
 import org.eobjects.analyzer.job.PrefixedIdGenerator;
 import org.eobjects.analyzer.job.SimpleComponentRequirement;
@@ -90,6 +93,7 @@ public final class AnalysisJobBuilder implements Closeable {
     private final List<AnalyzerJobBuilder<?>> _analyzerJobBuilders;
 
     private final Map<String, String> _metadataProperties;
+    private AnalysisJobMetadata _analysisJobMetadata;
 
     // listeners, typically for UI that uses the builders
     private final List<SourceColumnChangeListener> _sourceColumnListeners = new ArrayList<SourceColumnChangeListener>();
@@ -97,8 +101,6 @@ public final class AnalysisJobBuilder implements Closeable {
     private final List<TransformerChangeListener> _transformerChangeListeners = new ArrayList<TransformerChangeListener>();
     private final List<FilterChangeListener> _filterChangeListeners = new ArrayList<FilterChangeListener>();
     private ComponentRequirement _defaultRequirement;
-
-    private AnalysisJobMetadata _analysisJobMetadata;
 
     public AnalysisJobBuilder(AnalyzerBeansConfiguration configuration) {
         _configuration = configuration;
@@ -164,6 +166,9 @@ public final class AnalysisJobBuilder implements Closeable {
 
     public AnalysisJobBuilder setAnalysisJobMetadata(AnalysisJobMetadata analysisJobMetadata) {
         _analysisJobMetadata = analysisJobMetadata;
+        if (analysisJobMetadata != null) {
+            _metadataProperties.clear();
+        }
         return this;
     }
 
@@ -626,7 +631,35 @@ public final class AnalysisJobBuilder implements Closeable {
 
         final Datastore datastore = getDatastore();
 
-        return new ImmutableAnalysisJob(_analysisJobMetadata, datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs);
+        final AnalysisJobMetadata metadata;
+        if (_analysisJobMetadata == null) {
+            metadata = createMetadata();
+        } else {
+            metadata = _analysisJobMetadata;
+        }
+
+        return new ImmutableAnalysisJob(metadata, datastore, _sourceColumns, filterJobs, transformerJobs, analyzerJobs);
+    }
+
+    public AnalysisJobMetadata createMetadata() {
+        final Datastore datastore = getDatastore();
+        final String datastoreName = (datastore == null ? null : datastore.getName());
+
+        final List<MetaModelInputColumn> sourceColumns = getSourceColumns();
+        final List<String> sourceColumnPaths = new ArrayList<>(sourceColumns.size());
+        final List<ColumnType> sourceColumnTypes = new ArrayList<>(sourceColumns.size());
+        for (final MetaModelInputColumn sourceColumn : sourceColumns) {
+            final Column column = sourceColumn.getPhysicalColumn();
+            final String path = column.getQualifiedLabel();
+            final ColumnType type = column.getType();
+
+            sourceColumnPaths.add(path);
+            sourceColumnTypes.add(type);
+        }
+
+        final AnalysisJobMetadata metadata = new ImmutableAnalysisJobMetadata(null, null, null, null, new Date(), null,
+                datastoreName, sourceColumnPaths, sourceColumnTypes, null, _metadataProperties);
+        return metadata;
     }
 
     /**
