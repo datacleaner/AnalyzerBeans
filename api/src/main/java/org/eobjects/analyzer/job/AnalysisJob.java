@@ -23,8 +23,6 @@ import java.util.List;
 
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.data.InputColumn;
-import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
-import org.eobjects.analyzer.job.runner.AnalysisRunner;
 import org.apache.metamodel.schema.Column;
 
 /**
@@ -35,9 +33,11 @@ import org.apache.metamodel.schema.Column;
  * A {@link AnalysisJob} references a source {@link Datastore} and some
  * {@link Column}s (represented via {@link InputColumn}s) of this datastore.
  * 
- * Building jobs is usually done using the {@link AnalysisJobBuilder} class.
+ * Building jobs is usually done using the
+ * {@link org.eobjects.analyzer.job.builder.AnalysisJobBuilder} class.
  * 
- * Executing jobs is usually done using the {@link AnalysisRunner} interface.
+ * Executing jobs is usually done using the
+ * {@link org.eobjects.analyzer.job.runner.AnalysisRunner} interface.
  */
 public interface AnalysisJob {
 
