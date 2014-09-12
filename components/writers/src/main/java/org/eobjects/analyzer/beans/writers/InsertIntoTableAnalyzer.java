@@ -372,12 +372,6 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
             _writeBuffer.addToBuffer(rowData);
         }
     }
-
-    public void publishBatchMessage(ComponentContext componentContext, ComponentMessage message) {
-
-        componentContext.publishMessage(message);
-    }
-
     private Object convertType(final Object value, Column targetColumn) throws IllegalArgumentException {
         if (value == null) {
             return null;
@@ -439,7 +433,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
                 logger.debug("Inserting into columns: {}", Arrays.toString(columns));
             }
             
-           final String messageCore= "Insert records into table: ";
+           final String messageCore= "Inserted " ;  
             
             final UpdateableDataContext dc = con.getUpdateableDataContext();
             dc.executeUpdate(new BatchUpdateScript() {
@@ -458,7 +452,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
                         try {
                             insertBuilder.execute();
                             final int incrementAndGet = _writtenRowCount.incrementAndGet();
-                            messageCore.concat(""+incrementAndGet); 
+                            messageCore.concat(""+incrementAndGet +" records into table"); 
                         } catch (final RuntimeException e) {
                             errorOccurred(rowData, e);
                         }
