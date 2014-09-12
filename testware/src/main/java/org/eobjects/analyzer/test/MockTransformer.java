@@ -19,6 +19,9 @@
  */
 package org.eobjects.analyzer.test;
 
+import javax.inject.Inject;
+
+import org.eobjects.analyzer.beans.api.ComponentContext;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -32,6 +35,9 @@ public class MockTransformer implements Transformer<String> {
     @Configured
     InputColumn<?> input;
 
+    @Inject
+    ComponentContext componentContext;
+
     @Override
     public OutputColumns getOutputColumns() {
         return new OutputColumns("mock output");
@@ -40,15 +46,18 @@ public class MockTransformer implements Transformer<String> {
     @Override
     public String[] transform(InputRow inputRow) {
         Object value = inputRow.getValue(input);
+
+        componentContext.publishMessage(new MockTransformerMessage("Mocking: " + value, input));
+
         return new String[] { "mocked: " + value };
     }
-    
+
     public void setInput(InputColumn<?> input) {
         this.input = input;
     }
-    
+
     public InputColumn<?> getInput() {
         return input;
     }
-
+    
 }

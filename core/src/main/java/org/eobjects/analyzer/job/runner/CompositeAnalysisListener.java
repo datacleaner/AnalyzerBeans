@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job.runner;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.ComponentMessage;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -86,6 +87,13 @@ public final class CompositeAnalysisListener implements AnalysisListener {
     public void jobBegin(AnalysisJob job, AnalysisJobMetrics metrics) {
         for (AnalysisListener delegate : _delegates) {
             delegate.jobBegin(job, metrics);
+        }
+    }
+
+    @Override
+    public void onComponentMessage(AnalysisJob job, ComponentJob componentJob, ComponentMessage message) {
+        for (AnalysisListener delegate : _delegates) {
+            delegate.onComponentMessage(job, componentJob, message);
         }
     }
 

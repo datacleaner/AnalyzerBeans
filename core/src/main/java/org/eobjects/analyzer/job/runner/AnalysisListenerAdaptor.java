@@ -19,6 +19,7 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.beans.api.ComponentMessage;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -49,6 +50,11 @@ public class AnalysisListenerAdaptor implements AnalysisListener {
     @Override
     public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, InputRow row, int currentRow) {
         rowProcessingProgress(job, metrics, currentRow);
+    }
+    
+    @Override
+    public void onComponentMessage(AnalysisJob job, ComponentJob componentJob, ComponentMessage message) {
+        // do nothing
     }
 
     /**

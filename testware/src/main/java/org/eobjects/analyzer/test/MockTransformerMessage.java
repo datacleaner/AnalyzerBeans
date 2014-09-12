@@ -17,33 +17,31 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.eobjects.analyzer.beans.api;
+package org.eobjects.analyzer.test;
 
-import javax.inject.Inject;
+import org.eobjects.analyzer.beans.api.ComponentMessage;
+import org.eobjects.analyzer.data.InputColumn;
 
-import org.eobjects.analyzer.job.AnalysisJob;
+public class MockTransformerMessage implements ComponentMessage {
 
-/**
- * Injectable (using {@link Inject} and/or {@link Provided}) context object for
- * any component ( {@link Transformer}, {@link Analyzer} or {@link Filter}) that
- * provides information and actions that affect the outside environment of the
- * component.
- */
-public interface ComponentContext {
+    private final String _message;
+    private final InputColumn<?> _column;
 
-    /**
-     * Gets the {@link AnalysisJob} (if any) that the component is configured
-     * in.
-     * 
-     * @return
-     */
-    public AnalysisJob getAnalysisJob();
+    public MockTransformerMessage(String message, InputColumn<?> column) {
+        _message = message;
+        _column = column;
+    }
+
+    public InputColumn<?> getColumn() {
+        return _column;
+    }
+
+    public String getMessage() {
+        return _message;
+    }
     
-    /**
-     * Publishes a {@link ComponentMessage} containing information to any
-     * appropriate listeners.
-     * 
-     * @param message
-     */
-    public void publishMessage(ComponentMessage message);
+    @Override
+    public String toString() {
+        return "MockTransformerMessage[" + _message + "]";
+    }
 }

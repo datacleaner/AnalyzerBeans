@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * 
  * 
  */
-public class DebugLoggingAnalysisListener implements AnalysisListener {
+public class DebugLoggingAnalysisListener extends AnalysisListenerAdaptor {
 
     private static final Logger logger = LoggerFactory.getLogger(DebugLoggingAnalysisListener.class);
 

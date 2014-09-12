@@ -19,6 +19,8 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.beans.api.ComponentContext;
+import org.eobjects.analyzer.beans.api.ComponentMessage;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.AnalyzerJob;
@@ -64,6 +66,19 @@ public interface AnalysisListener {
      *            {@link RowProcessingMetrics#getExpectedRows()}.
      */
     public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, InputRow row, int rowNumber);
+
+    /**
+     * Notifies the listener that a component published a message (using
+     * {@link ComponentContext#publishMessage(ComponentMessage)}).
+     * 
+     * @param job
+     *            the job that is being run
+     * @param componentJob
+     *            the component that sent the message
+     * @param message
+     *            the message itself
+     */
+    public void onComponentMessage(AnalysisJob job, ComponentJob componentJob, ComponentMessage message);
 
     /**
      * Notifies the listener that row processing has finished succesfully.

@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.util.LazyRef;
+import org.apache.metamodel.util.Ref;
 import org.eobjects.analyzer.beans.api.OutputRowCollector;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.connection.Datastore;
@@ -39,9 +42,6 @@ import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.convert.StringConverter;
-import org.apache.metamodel.DataContext;
-import org.apache.metamodel.util.LazyRef;
-import org.apache.metamodel.util.Ref;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

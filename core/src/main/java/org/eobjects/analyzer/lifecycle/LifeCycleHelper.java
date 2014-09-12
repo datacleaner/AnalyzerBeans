@@ -98,6 +98,18 @@ public final class LifeCycleHelper {
         _referenceDataActivationManager = referenceDataActivationManager;
         _includeNonDistributedTasks = includeNonDistributedTasks;
     }
+    
+    public boolean isIncludeNonDistributedTasks() {
+        return _includeNonDistributedTasks;
+    }
+    
+    public InjectionManager getInjectionManager() {
+        return _injectionManager;
+    }
+    
+    public ReferenceDataActivationManager getReferenceDataActivationManager() {
+        return _referenceDataActivationManager;
+    }
 
     /**
      * Assigns/injects {@link Configured} property values to a component.
