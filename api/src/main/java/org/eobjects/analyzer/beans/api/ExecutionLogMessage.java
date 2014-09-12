@@ -19,31 +19,30 @@
  */
 package org.eobjects.analyzer.beans.api;
 
-import javax.inject.Inject;
-
-import org.eobjects.analyzer.job.AnalysisJob;
+import org.slf4j.Logger;
 
 /**
- * Injectable (using {@link Inject} and/or {@link Provided}) context object for
- * any component ( {@link Transformer}, {@link Analyzer} or {@link Filter}) that
- * provides information and actions that affect the outside environment of the
- * component.
+ * Commonly used {@link ComponentMessage} which represents a message from the
+ * component to the end user inspecting the log of a job's execution.
+ * 
+ * Components are advised to only publish this type of message with especially
+ * relevant information. Use a regular {@link Logger} for background information
+ * of relevance to the system administration.
  */
-public interface ComponentContext {
+public class ExecutionLogMessage implements ComponentMessage {
 
-    /**
-     * Gets the {@link AnalysisJob} (if any) that the component is configured
-     * in.
-     * 
-     * @return
-     */
-    public AnalysisJob getAnalysisJob();
+    private final String _message;
 
-    /**
-     * Publishes a {@link ComponentMessage} containing information to any
-     * appropriate listeners.
-     * 
-     * @param message
-     */
-    public void publishMessage(ComponentMessage message);
+    public ExecutionLogMessage(String message) {
+        _message = message;
+    }
+
+    public String getMessage() {
+        return _message;
+    }
+
+    @Override
+    public String toString() {
+        return "ExecutionLogMessage[" + _message + "]";
+    }
 }

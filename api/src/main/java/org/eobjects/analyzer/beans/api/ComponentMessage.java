@@ -19,31 +19,11 @@
  */
 package org.eobjects.analyzer.beans.api;
 
-import javax.inject.Inject;
-
-import org.eobjects.analyzer.job.AnalysisJob;
-
 /**
- * Injectable (using {@link Inject} and/or {@link Provided}) context object for
- * any component ( {@link Transformer}, {@link Analyzer} or {@link Filter}) that
- * provides information and actions that affect the outside environment of the
- * component.
+ * Represents a message sent by a component. Message implementations may vary
+ * widely, allowing them to carry information of different granularity and
+ * relevance.
  */
-public interface ComponentContext {
+public interface ComponentMessage {
 
-    /**
-     * Gets the {@link AnalysisJob} (if any) that the component is configured
-     * in.
-     * 
-     * @return
-     */
-    public AnalysisJob getAnalysisJob();
-
-    /**
-     * Publishes a {@link ComponentMessage} containing information to any
-     * appropriate listeners.
-     * 
-     * @param message
-     */
-    public void publishMessage(ComponentMessage message);
 }
