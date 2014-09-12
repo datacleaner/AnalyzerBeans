@@ -59,9 +59,12 @@ public class ServiceSessionTest extends TestCase {
         }
 
         assertEquals(threads.length, executionTimes.size());
+        
         for (int i = 0; i < poolSize; i++) {
             // the first threads will take only some millis to run
-            assertTrue(executionTimes.get(i) < executionTimeMillis * 1.5);
+            final double executionTime = executionTimes.get(i).doubleValue();
+            final double marginValue = executionTimeMillis * 1.5;
+            assertTrue("executionTime=" + executionTime + ", should be less than " + marginValue, executionTime < marginValue);
         }
 
         // The last thread will have taken more time, because it has
