@@ -34,11 +34,14 @@ import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.ColumnProperty;
+import org.eobjects.analyzer.beans.api.ComponentContext;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
+import org.eobjects.analyzer.beans.api.ExecutionLogMessage;
 import org.eobjects.analyzer.beans.api.FileProperty;
 import org.eobjects.analyzer.beans.api.MappedProperty;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.SchemaProperty;
 import org.eobjects.analyzer.beans.api.TableProperty;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
@@ -148,6 +151,10 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
     @Configured(required = false)
     @Description("Additional values to write to error log")
     InputColumn<?>[] additionalErrorLogValues;
+
+    @Inject
+    @Provided
+    ComponentContext _componentContext;
 
     private Column[] _targetColumns;
     private Column[] _targetConditionColumns;
@@ -439,6 +446,7 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
             dc.executeUpdate(new BatchUpdateScript() {
                 @Override
                 public void run(UpdateCallback callback) {
+                    int updateCount = 0;
                     for (Object[] rowData : buffer) {
                         RowUpdationBuilder updationBuilder = callback.update(updateColumns[0].getTable());
                         for (int i = 0; i < updateColumns.length; i++) {
@@ -461,10 +469,15 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
 
                         try {
                             updationBuilder.execute();
+                            updateCount++;
                             _updatedRowCount.incrementAndGet();
                         } catch (final RuntimeException e) {
                             errorOccurred(rowData, e);
                         }
+                    }
+
+                    if (updateCount > 0) {
+                        _componentContext.publishMessage(new ExecutionLogMessage(updateCount + " updates executed"));
                     }
                 }
             });

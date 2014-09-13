@@ -23,6 +23,8 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.easymock.EasyMock;
+import org.eobjects.analyzer.beans.api.ComponentContext;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.JdbcDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
@@ -104,6 +106,7 @@ public class UpdateTableAnalyzerTest extends TestCase {
         updateTableAnalyzer.values = new InputColumn<?>[] { col3, col1 };
         updateTableAnalyzer.conditionColumnNames = new String[] { "bar" };
         updateTableAnalyzer.conditionValues = new InputColumn<?>[] { col2 };
+        updateTableAnalyzer._componentContext = EasyMock.createMock(ComponentContext.class);
         updateTableAnalyzer.validate();
         updateTableAnalyzer.init();
         updateTableAnalyzer.run(new MockInputRow().put(col1, "aaa").put(col2, 1).put(col3, "hello"), 1);
@@ -148,6 +151,7 @@ public class UpdateTableAnalyzerTest extends TestCase {
         updateTableAnalyzer.columnNames = new String[] { "name" };
         updateTableAnalyzer.conditionColumnNames = new String[] { "id" };
         updateTableAnalyzer.errorHandlingOption = ErrorHandlingOption.SAVE_TO_FILE;
+        updateTableAnalyzer._componentContext = EasyMock.createMock(ComponentContext.class);
 
         InputColumn<Object> inputId = new MockInputColumn<Object>("id", Object.class);
         InputColumn<Object> inputNewName = new MockInputColumn<Object>("new_name", Object.class);

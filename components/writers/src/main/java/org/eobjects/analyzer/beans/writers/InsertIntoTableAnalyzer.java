@@ -50,19 +50,18 @@ import org.eobjects.analyzer.beans.api.AnalyzerBean;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.ColumnProperty;
 import org.eobjects.analyzer.beans.api.ComponentContext;
-import org.eobjects.analyzer.beans.api.ComponentMessage;
 import org.eobjects.analyzer.beans.api.Concurrent;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.ExecutionLogMessage;
 import org.eobjects.analyzer.beans.api.FileProperty;
-import org.eobjects.analyzer.beans.api.Provided;
-import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.MappedProperty;
+import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.SchemaProperty;
 import org.eobjects.analyzer.beans.api.TableProperty;
+import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.convert.ConvertToBooleanTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -372,6 +371,7 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
             _writeBuffer.addToBuffer(rowData);
         }
     }
+
     private Object convertType(final Object value, Column targetColumn) throws IllegalArgumentException {
         if (value == null) {
             return null;
@@ -432,13 +432,12 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
             if (logger.isDebugEnabled()) {
                 logger.debug("Inserting into columns: {}", Arrays.toString(columns));
             }
-            
-           final String messageCore= "Inserted " ;  
-            
+
             final UpdateableDataContext dc = con.getUpdateableDataContext();
             dc.executeUpdate(new BatchUpdateScript() {
                 @Override
                 public void run(UpdateCallback callback) {
+                    int insertCount = 0;
                     for (Object[] rowData : buffer) {
                         RowInsertionBuilder insertBuilder = callback.insertInto(columns[0].getTable());
                         for (int i = 0; i < columns.length; i++) {
@@ -451,19 +450,20 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
 
                         try {
                             insertBuilder.execute();
-                            final int incrementAndGet = _writtenRowCount.incrementAndGet();
-                            messageCore.concat(""+incrementAndGet +" records into table"); 
+                            insertCount++;
+                            _writtenRowCount.incrementAndGet();
                         } catch (final RuntimeException e) {
                             errorOccurred(rowData, e);
                         }
                     }
+
+                    if (insertCount > 0) {
+                        _componentContext.publishMessage(new ExecutionLogMessage(insertCount
+                                + " inserts executed"));
+                    }
                 }
             });
-            
-           
-            final ComponentMessage message = new ExecutionLogMessage(messageCore);
-            _componentContext.publishMessage(message);
-            
+
         } finally {
 
             con.close();
