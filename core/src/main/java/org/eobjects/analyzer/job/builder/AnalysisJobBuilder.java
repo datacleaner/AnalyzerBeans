@@ -877,6 +877,7 @@ public final class AnalysisJobBuilder implements Closeable {
      * Removes all source columns and all components from the job
      */
     public void reset() {
+        setAnalysisJobMetadata(AnalysisJobMetadata.EMPTY_METADATA);
         removeAllSourceColumns();
         removeAllFilters();
         removeAllTransformers();
