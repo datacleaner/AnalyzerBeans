@@ -19,7 +19,11 @@
  */
 package org.eobjects.analyzer.job.runner;
 
+import org.eobjects.analyzer.beans.api.ComponentMessage;
+import org.eobjects.analyzer.beans.api.ExecutionLogMessage;
 import org.eobjects.analyzer.job.AnalysisJob;
+import org.eobjects.analyzer.job.ComponentJob;
+import org.eobjects.analyzer.util.LabelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,25 +33,32 @@ import org.slf4j.LoggerFactory;
  */
 public class InfoLoggingAnalysisListener extends AnalysisListenerAdaptor {
 
-	private static final Logger logger = LoggerFactory.getLogger(InfoLoggingAnalysisListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(InfoLoggingAnalysisListener.class);
 
-	/**
-	 * @return whether or not the debug logging level is enabled. Can be used to
-	 *         find out of it is even feasable to add this listener or not.
-	 */
-	public static boolean isEnabled() {
-		return logger.isInfoEnabled();
-	}
+    /**
+     * @return whether or not the debug logging level is enabled. Can be used to
+     *         find out of it is even feasable to add this listener or not.
+     */
+    public static boolean isEnabled() {
+        return logger.isInfoEnabled();
+    }
 
-	@Override
-	public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
-		logger.info("Beginning row processing of {}", metrics.getTable());
-	}
+    @Override
+    public void rowProcessingBegin(AnalysisJob job, RowProcessingMetrics metrics) {
+        logger.info("Beginning row processing of {}", metrics.getTable());
+    }
 
-	@Override
-	public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
-		if (currentRow > 0 && currentRow % 1000 == 0) {
-			logger.info("Reading row no. {} in {}", new Object[] { currentRow, metrics.getTable().getName() });
-		}
-	}
+    @Override
+    public void rowProcessingProgress(AnalysisJob job, RowProcessingMetrics metrics, int currentRow) {
+        if (currentRow > 0 && currentRow % 1000 == 0) {
+            logger.info("Reading row no. {} in {}", new Object[] { currentRow, metrics.getTable().getName() });
+        }
+    }
+
+    @Override
+    public void onComponentMessage(AnalysisJob job, ComponentJob componentJob, ComponentMessage message) {
+        if (message instanceof ExecutionLogMessage) {
+            logger.info(((ExecutionLogMessage) message).getMessage() + " (" + LabelUtils.getLabel(componentJob) + ")");
+        }
+    }
 }
