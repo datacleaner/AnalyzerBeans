@@ -1,6 +1,6 @@
 /**
- * DataCleaner (community edition)
- * Copyright (C) 2013 Human Inference
+ * eobjects.org AnalyzerBeans
+ * Copyright (C) 2010 eobjects.org
  *
  * This copyrighted material is made available to anyone wishing to use, modify,
  * copy, or redistribute it subject to the terms and conditions of the GNU
