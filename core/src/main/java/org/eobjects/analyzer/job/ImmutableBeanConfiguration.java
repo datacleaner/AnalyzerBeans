@@ -44,7 +44,7 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
     public ImmutableBeanConfiguration(Map<? extends PropertyDescriptor, Object> properties) {
         if (properties == null) {
             _properties = ImmutableMap.of();
-            _transientProperties = ImmutableMap.of();
+            _transientProperties = null;
         } else {
             // separate transient and serializable properties to make sure we
             // can serialize later on
@@ -75,7 +75,7 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
     @Override
     public Object getProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
         final Object result = _properties.get(propertyDescriptor);
-        if (result == null) {
+        if (result == null && _transientProperties != null) {
             return _transientProperties.get(propertyDescriptor);
         }
         return result;
