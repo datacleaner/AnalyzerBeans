@@ -159,6 +159,10 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
                 "org.eobjects.analyzer.result.ValueCountList");
         addRenamedClass("org.eobjects.analyzer.beans.valuedist.ValueCountListImpl",
                 "org.eobjects.analyzer.result.ValueCountListImpl");
+
+        // duplicate detection analyzer changed
+        addRenamedClass("com.hi.contacts.datacleaner.DuplicateDetectionAnalyzer",
+                "com.hi.hiqmr.datacleaner.deduplication.Identify7DeduplicationAnalyzer");
     }
 
     public void addClassLoader(ClassLoader classLoader) {
@@ -182,7 +186,7 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
         final ObjectStreamClass resultClassDescriptor = super.readClassDescriptor();
 
         final String originalClassName = resultClassDescriptor.getName();
-        
+
         if (renamedClasses.containsKey(originalClassName)) {
             final String className = renamedClasses.get(originalClassName);
             logger.info("Class '{}' was encountered. Returning class descriptor of new class name: '{}'",
@@ -211,7 +215,17 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
 
     private ObjectStreamClass getClassDescriptor(final String className, final ObjectStreamClass originalClassDescriptor)
             throws ClassNotFoundException {
-        final ObjectStreamClass newClassDescriptor = ObjectStreamClass.lookup(resolveClass(className));
+        
+        if (originalClassDescriptor == null) {
+            logger.warn("Original ClassDescriptor resolved to null for '{}'", className);
+        }
+
+        final Class<?> newClass = resolveClass(className);
+        final ObjectStreamClass newClassDescriptor = ObjectStreamClass.lookupAny(newClass);
+        if (newClassDescriptor == null) {
+            logger.warn("New ClassDescriptor resolved to null for {}", newClass);
+        }
+        
         final String[] newFieldNames = getFieldNames(newClassDescriptor);
         final String[] originalFieldNames = getFieldNames(originalClassDescriptor);
         if (!EqualsBuilder.equals(originalFieldNames, newFieldNames)) {
@@ -245,7 +259,7 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
         }
         return resolveClass(className);
     }
-    
+
     private Class<?> resolveClass(String className) throws ClassNotFoundException {
         logger.debug("Resolving class '{}'", className);
         try {
@@ -283,8 +297,11 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
     }
 
     private String[] getFieldNames(ObjectStreamClass classDescriptor) {
-        ObjectStreamField[] fields = classDescriptor.getFields();
-        String[] fieldNames = new String[fields.length];
+        if (classDescriptor == null) {
+            return new String[0];
+        }
+        final ObjectStreamField[] fields = classDescriptor.getFields();
+        final String[] fieldNames = new String[fields.length];
         for (int i = 0; i < fieldNames.length; i++) {
             fieldNames[i] = fields[i].getName();
         }
