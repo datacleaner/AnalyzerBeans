@@ -19,7 +19,9 @@
  */
 package org.eobjects.analyzer.job;
 
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,28 +39,46 @@ public final class ImmutableBeanConfiguration implements BeanConfiguration {
     private static final long serialVersionUID = 1L;
 
     private final Map<PropertyDescriptor, Object> _properties;
+    private final transient Map<PropertyDescriptor, Object> _transientProperties;
 
     public ImmutableBeanConfiguration(Map<? extends PropertyDescriptor, Object> properties) {
         if (properties == null) {
             _properties = ImmutableMap.of();
+            _transientProperties = ImmutableMap.of();
         } else {
-            _properties = ImmutableMap.copyOf(properties);
+            // separate transient and serializable properties to make sure we
+            // can serialize later on
+            final Map<PropertyDescriptor, Object> serializableProperties = new HashMap<>();
+            final Map<PropertyDescriptor, Object> transientProperties = new HashMap<>();
+
+            // validate contents
+            for (final Map.Entry<? extends PropertyDescriptor, Object> entry : properties.entrySet()) {
+                final PropertyDescriptor key = entry.getKey();
+                final Object value = entry.getValue();
+                if (value instanceof Collection) {
+                    throw new IllegalArgumentException(
+                            "Collection values are not allowed in BeanConfigurations. Violating entry: " + key + " -> "
+                                    + value);
+                }
+                if (value instanceof Serializable) {
+                    serializableProperties.put(key, value);
+                } else {
+                    transientProperties.put(key, value);
+                }
+            }
+            _properties = ImmutableMap.copyOf(serializableProperties);
+            _transientProperties = ImmutableMap.copyOf(transientProperties);
         }
 
-        // validate contents
-        for (Map.Entry<PropertyDescriptor, Object> entry : _properties.entrySet()) {
-            Object value = entry.getValue();
-            if (value instanceof Collection) {
-                throw new IllegalArgumentException(
-                        "Collection values are not allowed in BeanConfigurations. Violating entry: " + entry.getKey()
-                                + " -> " + entry.getValue());
-            }
-        }
     }
 
     @Override
     public Object getProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
-        return _properties.get(propertyDescriptor);
+        final Object result = _properties.get(propertyDescriptor);
+        if (result == null) {
+            return _transientProperties.get(propertyDescriptor);
+        }
+        return result;
     }
 
     @Override
