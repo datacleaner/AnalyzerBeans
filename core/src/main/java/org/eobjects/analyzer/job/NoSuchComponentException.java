@@ -32,18 +32,26 @@ public class NoSuchComponentException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private final Class<?> _expectedComponentType;
-    private final String _name;
+    private final Class<?> _componentType;
+    private final String _componentName;
 
-    public NoSuchComponentException(Class<?> expectedComponentType, String name) {
+    public NoSuchComponentException(Class<?> componentType, String componentName) {
         super();
-        _expectedComponentType = expectedComponentType;
-        _name = name;
+        _componentType = componentType;
+        _componentName = componentName;
     }
 
     @Override
     public String getMessage() {
-        return "No such " + (_expectedComponentType == null ? "component" : _expectedComponentType.getSimpleName())
-                + " descriptor: " + _name;
+        return "No such " + (_componentType == null ? "component" : _componentType.getSimpleName())
+                + " descriptor: " + _componentName;
+    }
+    
+    public String getComponentName() {
+        return _componentName;
+    }
+    
+    public Class<?> getComponentType() {
+        return _componentType;
     }
 }
