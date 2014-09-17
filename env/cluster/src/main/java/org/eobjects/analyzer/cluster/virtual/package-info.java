@@ -1,6 +1,6 @@
 /**
- * eobjects.org AnalyzerBeans
- * Copyright (C) 2010 eobjects.org
+ * AnalyzerBeans
+ * Copyright (C) 2014 Neopost - Customer Information Management
  *
  * This copyrighted material is made available to anyone wishing to use, modify,
  * copy, or redistribute it subject to the terms and conditions of the GNU
@@ -17,7 +17,6 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-
 /**
  * This package contains a cluster implementation which is virtual - i.e. it will simulate separate nodes, but they will actually be running on the same machine, even in the same JVM. Mostly useful for testing purposes, or potentially when parallel database access is desired.
  */

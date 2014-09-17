@@ -1,6 +1,6 @@
 /**
- * eobjects.org AnalyzerBeans
- * Copyright (C) 2010 eobjects.org
+ * AnalyzerBeans
+ * Copyright (C) 2014 Neopost - Customer Information Management
  *
  * This copyrighted material is made available to anyone wishing to use, modify,
  * copy, or redistribute it subject to the terms and conditions of the GNU
@@ -17,7 +17,6 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-
 /**
  * Various utilities for making web service (HTTP, SOAP, REST etc.) integrations easier. While not used directly by any built-in AnalyzerBeans components, these classes may very well be handy when integrating with third party services.
  */

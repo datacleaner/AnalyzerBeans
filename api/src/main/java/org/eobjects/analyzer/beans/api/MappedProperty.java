@@ -1,6 +1,6 @@
 /**
- * eobjects.org AnalyzerBeans
- * Copyright (C) 2010 eobjects.org
+ * AnalyzerBeans
+ * Copyright (C) 2014 Neopost - Customer Information Management
  *
  * This copyrighted material is made available to anyone wishing to use, modify,
  * copy, or redistribute it subject to the terms and conditions of the GNU
@@ -16,8 +16,6 @@
  * Free Software Foundation, Inc.
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
- * 
- * This annotation is used to specify string inputs as single line or multiline
  */
 package org.eobjects.analyzer.beans.api;
 
