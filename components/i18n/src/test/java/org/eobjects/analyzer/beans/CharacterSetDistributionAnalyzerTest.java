@@ -78,9 +78,9 @@ public class CharacterSetDistributionAnalyzerTest extends TestCase {
 
 		analyzer.run(new MockInputRow().put(col1, "foobar").put(col2, "foobar"), 10);
 		analyzer.run(new MockInputRow().put(col1, "DåtåClænør"), 1);
-		analyzer.run(new MockInputRow().put(col1, "Данныечи�?того"), 1);
-		analyzer.run(new MockInputRow().put(col1, "數據清潔"), 1);
-		analyzer.run(new MockInputRow().put(col1, "بيانات الأنظ�?"), 1);
+        analyzer.run(new MockInputRow().put(col1, "Данныечистого"), 1);
+        analyzer.run(new MockInputRow().put(col1, "數據清潔"), 1);
+        analyzer.run(new MockInputRow().put(col1, "بيانات الأنظف"), 1);
 		analyzer.run(new MockInputRow().put(col1, "dữ liệu sạch hơn"), 1);
 
 		CharacterSetDistributionResult result = analyzer.getResult();
@@ -97,7 +97,7 @@ public class CharacterSetDistributionAnalyzerTest extends TestCase {
 		AnnotatedRowsResult cyrillicAnnotatedRowsResult = (AnnotatedRowsResult) cyrillicNavigation.explore().getResult();
 		InputRow[] annotatedRows = cyrillicAnnotatedRowsResult.getRows();
 		assertEquals(1, annotatedRows.length);
-		assertEquals("Данныечи�?того", annotatedRows[0].getValue(col1));
+		assertEquals("Данныечистого", annotatedRows[0].getValue(col1));
 		assertEquals("12", crosstab.navigate().where("Column", "foo").where("Measures", "Latin, ASCII").get().toString());
 		assertEquals("2", crosstab.navigate().where("Column", "foo").where("Measures", "Latin, non-ASCII").get().toString());
 
