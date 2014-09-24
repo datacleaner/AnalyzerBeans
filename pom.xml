@@ -78,13 +78,6 @@
 		<developerConnection>scm:git:https://github.com/datacleaner/AnalyzerBeans.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
-	<distributionManagement>
-		<site>
-			<id>analyzerbeans.eobjects.org</id>
-			<name>AnalyzerBeans website</name>
-			<url>scp://192.168.3.110/var/www/analyzerbeans</url>
-		</site>
-	</distributionManagement>
 	<build>
 		<plugins>
 			<plugin>
