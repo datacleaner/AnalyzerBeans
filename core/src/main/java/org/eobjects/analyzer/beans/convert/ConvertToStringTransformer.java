@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.sql.Clob;
 import java.util.Arrays;
 
 import javax.inject.Inject;
@@ -107,6 +108,13 @@ public class ConvertToStringTransformer implements Transformer<String> {
                 FileHelper.safeClose(reader);
             }
             stringValue = sb.toString();
+        } else if (value instanceof Clob) {
+            try {
+                Clob clob = (Clob) value;
+                stringValue = clob.getSubString(1, (int) clob.length());
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to read CLOB value", e);
+            }
         } else {
             stringValue = value.toString();
         }
