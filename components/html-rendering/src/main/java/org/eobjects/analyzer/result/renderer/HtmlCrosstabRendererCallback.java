@@ -23,6 +23,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.List;
 
 import org.eobjects.analyzer.result.AnalyzerResult;
+import org.eobjects.analyzer.result.AnnotatedRowsResult;
 import org.eobjects.analyzer.result.Crosstab;
 import org.eobjects.analyzer.result.CrosstabDimension;
 import org.eobjects.analyzer.result.ResultProducer;
@@ -116,6 +117,16 @@ public class HtmlCrosstabRendererCallback implements CrosstabRendererCallback<Ht
         }
 
         final AnalyzerResult drillResult = drillToDetailResultProducer.getResult();
+        if (drillResult == null) {
+            simpleValueCell(value);
+            return;
+        }
+
+        if (drillResult instanceof AnnotatedRowsResult
+                && ((AnnotatedRowsResult) drillResult).getAnnotatedRowCount() == 0) {
+            simpleValueCell(value);
+            return;
+        }
 
         final String drillElementId = htmlRenderingContext.createElementId();
 

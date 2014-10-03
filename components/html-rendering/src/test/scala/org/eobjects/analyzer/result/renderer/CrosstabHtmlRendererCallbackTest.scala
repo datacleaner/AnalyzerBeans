@@ -1,12 +1,23 @@
 package org.eobjects.analyzer.result.renderer
 
 import java.lang.Integer
-
 import org.eobjects.analyzer.result.html.DefaultHtmlRenderingContext
 import org.eobjects.analyzer.result.Crosstab
 import org.junit.Test
 import org.junit.Assert
 import org.scalatest.junit.AssertionsForJUnit
+import org.eobjects.analyzer.result.ResultProducer
+import org.eobjects.analyzer.storage.InMemoryRowAnnotationFactory
+import org.eobjects.analyzer.data.InputRow
+import org.eobjects.analyzer.data.MockInputRow
+import org.eobjects.analyzer.storage.RowAnnotationImpl
+import org.eobjects.analyzer.result.DefaultResultProducer
+import org.eobjects.analyzer.result.CrosstabResult
+import org.eobjects.analyzer.result.AnnotatedRowsResult
+import org.eobjects.analyzer.result.NumberResult
+import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl
+import org.eobjects.analyzer.data.InputColumn
+import org.eobjects.analyzer.data.MockInputColumn
 
 class CrosstabHtmlRendererCallbackTest extends AssertionsForJUnit {
   
@@ -28,6 +39,24 @@ class CrosstabHtmlRendererCallbackTest extends AssertionsForJUnit {
     Assert.assertEquals("<table class='crosstabTable'><tr class='odd'><td class='crosstabVerticalHeader'>EU</td><td class='value'>1</td></tr><tr class='even'><td class='crosstabVerticalHeader'>USA</td><td class='value'>2</td></tr><tr class='odd'><td class='crosstabVerticalHeader'>Asia</td><td class='value'>3</td></tr></table>", result2.replaceAll("\"", "'"));
   }
 
+  @Test
+  def testCellValue() = {
+    val rendererFactory = new RendererFactory(new AnalyzerBeansConfigurationImpl());
+    val callback = new HtmlCrosstabRendererCallback(rendererFactory,renderingContext);
+    val rowFactory = new InMemoryRowAnnotationFactory;
+    val rowAnnotation = new RowAnnotationImpl;
+    val row = new MockInputRow;
+    row.put(new MockInputColumn("mock"), "mocktest");
+    rowFactory.annotate(row, 1, rowAnnotation);
+
+    callback.valueCell("nullResultProducer", null);
+    callback.valueCell("emptyResultProducer", new DefaultResultProducer(null));
+    callback.valueCell("singleResultProducer", new DefaultResultProducer(new AnnotatedRowsResult(rowAnnotation, rowFactory)));
+    callback.valueCell("notAnnotatedResultProducer", new DefaultResultProducer(new NumberResult(new Integer(1))));
+    
+    Assert.assertEquals("<td class=\"value\">nullResultProducer</td><td class=\"value\">emptyResultProducer</td><td class=\"value\"><a class=\"drillToDetailsLink\" href=\"#\" onclick=\"drillToDetails('reselem_1'); return false;\">singleResultProducer</a></td><td class=\"value\"><a class=\"drillToDetailsLink\" href=\"#\" onclick=\"drillToDetails('reselem_2'); return false;\">notAnnotatedResultProducer</a></td>", callback.getResult().getBodyElements().get(2).toHtml(renderingContext));
+  }
+  
   @Test
   def testMultipleDimensions() = {
     // creates a crosstab of some metric (simply iterated for simplicity)
