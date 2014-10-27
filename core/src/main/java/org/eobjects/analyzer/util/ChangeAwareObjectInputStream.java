@@ -163,6 +163,9 @@ public class ChangeAwareObjectInputStream extends LegacyDeserializationObjectInp
         // duplicate detection analyzer changed
         addRenamedClass("com.hi.contacts.datacleaner.DuplicateDetectionAnalyzer",
                 "com.hi.hiqmr.datacleaner.deduplication.Identify7DeduplicationAnalyzer");
+        
+        // DataCleaner output writers package changed
+        addRenamedPackage("org.eobjects.datacleaner.output.beans", "org.eobjects.datacleaner.extension.output");
     }
 
     public void addClassLoader(ClassLoader classLoader) {
