@@ -3,8 +3,6 @@ AnalyzerBeans
 
 An extensible and high-performance data processing engine.
 
-See the main website at http://analyzerbeans.eobjects.org for more information.
-
 
 ## Module structure
 
