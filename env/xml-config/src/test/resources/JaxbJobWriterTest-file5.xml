@@ -25,6 +25,7 @@
             <descriptor ref="Null check"/>
             <properties>
                 <property name="Consider empty string as null" value="false"/>
+                <property name="Evaluation mode" value="ANY_FIELD"/>
             </properties>
             <input ref="col_0"/>
             <outcome id="outcome_0" category="NOT_NULL"/>
