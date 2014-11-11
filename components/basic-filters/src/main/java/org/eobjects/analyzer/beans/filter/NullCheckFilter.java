@@ -55,8 +55,8 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
     }
 
     public static enum EvaluationMode implements HasName {
-        ALL_FIELDS("When all fields are incomplete, the record is incomplete"), ANY_FIELD(
-                "When any field is incomplete, the record is incomplete");
+        ALL_FIELDS("When all fields are NULL, the record is considered NULL"), ANY_FIELD(
+                "When any field is NULL, the record is considered NULL");
 
         private final String _name;
 
