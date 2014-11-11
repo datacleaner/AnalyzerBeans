@@ -37,6 +37,7 @@ import org.apache.metamodel.query.OperatorType;
 import org.apache.metamodel.query.Query;
 import org.apache.metamodel.query.SelectItem;
 import org.apache.metamodel.schema.Column;
+import org.apache.metamodel.util.HasName;
 
 @FilterBean("Null check")
 @Alias("Not null")
@@ -53,6 +54,23 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
         NOT_NULL;
     }
 
+    public static enum EvaluationMode implements HasName {
+        ALL_FIELDS("When all fields are NULL, the record is considered NULL"), ANY_FIELD(
+                "When any field is NULL, the record is considered NULL");
+
+        private final String _name;
+
+        private EvaluationMode(String name) {
+            _name = name;
+        }
+
+        @Override
+        public String getName() {
+            return _name;
+        }
+
+    }
+
     @Configured
     @Description("Select columns that should NOT have null values")
     InputColumn<?>[] columns;
@@ -60,6 +78,9 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
     @Configured
     @Description("Consider empty strings (\"\") as null also?")
     boolean considerEmptyStringAsNull = false;
+
+    @Configured("Evaluation mode")
+    EvaluationMode evaluationMode = EvaluationMode.ANY_FIELD;;
 
     public NullCheckFilter() {
     }
@@ -69,6 +90,13 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
         this.columns = columns;
         this.considerEmptyStringAsNull = considerEmptyStringAsNull;
     }
+    
+    public NullCheckFilter(InputColumn<?>[] columns, boolean considerEmptyStringAsNull, EvaluationMode evaluationMode) {
+        this();
+        this.columns = columns;
+        this.considerEmptyStringAsNull = considerEmptyStringAsNull;
+        this.evaluationMode = evaluationMode;
+    }
 
     public void setConsiderEmptyStringAsNull(boolean considerEmptyStringAsNull) {
         this.considerEmptyStringAsNull = considerEmptyStringAsNull;
@@ -76,7 +104,11 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
 
     @Override
     public boolean isOptimizable(NullCheckCategory category) {
-        return true;
+        if (evaluationMode == EvaluationMode.ANY_FIELD) {
+            return true;
+        }
+        // can be further improved but requires changes to optimizeQuery(...)
+        return false;
     }
 
     @Override
@@ -116,6 +148,14 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
 
     @Override
     public NullCheckCategory categorize(InputRow inputRow) {
+        if (evaluationMode.equals(EvaluationMode.ANY_FIELD)) {
+            return categorizeAnyFieldMode(inputRow);
+        } else {
+            return categorizeAllFieldMode(inputRow);
+        }
+    }
+
+    private NullCheckCategory categorizeAnyFieldMode(InputRow inputRow) {
         for (InputColumn<?> col : columns) {
             Object value = inputRow.getValue(col);
             if (value == null) {
@@ -127,5 +167,25 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
             }
         }
         return NullCheckCategory.NOT_NULL;
+    }
+    
+    private NullCheckCategory categorizeAllFieldMode(InputRow inputRow) {
+        NullCheckCategory result = NullCheckCategory.NULL;
+        for (InputColumn<?> col : columns) {
+            Object value = inputRow.getValue(col);
+            if (value != null) {
+                if (considerEmptyStringAsNull) {
+                    if (!"".equals(value)) {
+                        result = NullCheckCategory.NOT_NULL;
+                        break;
+                    }
+                } else {
+                    result = NullCheckCategory.NOT_NULL;
+                    break;
+                }
+            }
+            
+        }
+        return result;
     }
 }

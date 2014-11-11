@@ -21,6 +21,7 @@ package org.eobjects.analyzer.beans.filter;
 
 import junit.framework.TestCase;
 
+import org.eobjects.analyzer.beans.filter.NullCheckFilter.EvaluationMode;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
@@ -79,6 +80,35 @@ public class NullCheckFilterTest extends TestCase {
 		assertEquals(NullCheckFilter.NullCheckCategory.NULL,
 				filter.categorize(new MockInputRow().put(col1, null).put(col2, null).put(col3, null)));
 	}
+	
+	public void testCategorizeAllFieldsMode() throws Exception {
+        InputColumn<Integer> col1 = new MockInputColumn<Integer>("col1", Integer.class);
+        InputColumn<Boolean> col2 = new MockInputColumn<Boolean>("col2", Boolean.class);
+        InputColumn<String> col3 = new MockInputColumn<String>("col3", String.class);
+        InputColumn<?>[] columns = new InputColumn[] { col1, col2, col3 };
+
+        NullCheckFilter filter = new NullCheckFilter(columns, true, EvaluationMode.ALL_FIELDS);
+        assertEquals(NullCheckFilter.NullCheckCategory.NOT_NULL,
+                filter.categorize(new MockInputRow().put(col1, 1).put(col2, true).put(col3, "foo")));
+
+        assertEquals(NullCheckFilter.NullCheckCategory.NOT_NULL,
+                filter.categorize(new MockInputRow().put(col1, 1).put(col2, null).put(col3, "foo")));
+
+        assertEquals(NullCheckFilter.NullCheckCategory.NOT_NULL,
+                filter.categorize(new MockInputRow().put(col1, 1).put(col2, true).put(col3, "")));
+
+        assertEquals(NullCheckFilter.NullCheckCategory.NOT_NULL,
+                filter.categorize(new MockInputRow().put(col1, 1).put(col2, true).put(col3, null)));
+
+        assertEquals(NullCheckFilter.NullCheckCategory.NULL,
+                filter.categorize(new MockInputRow().put(col1, null).put(col2, null).put(col3, null)));
+        
+        assertEquals(NullCheckFilter.NullCheckCategory.NULL,
+                filter.categorize(new MockInputRow().put(col1, "").put(col2, "").put(col3, "")));
+        
+        assertEquals(NullCheckFilter.NullCheckCategory.NULL,
+                filter.categorize(new MockInputRow().put(col1, null).put(col2, "").put(col3, null)));
+    }
 
 	public void testDescriptor() throws Exception {
 		FilterBeanDescriptor<NullCheckFilter, NullCheckFilter.NullCheckCategory> desc = Descriptors
