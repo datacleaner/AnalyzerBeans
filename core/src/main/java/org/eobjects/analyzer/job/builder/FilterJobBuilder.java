@@ -78,10 +78,10 @@ public final class FilterJobBuilder<F extends Filter<C>, C extends Enum<C>> exte
 
         if (_cachedJob == null) {
             _cachedJob = new ImmutableFilterJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                    getConfiguredProperties()), componentRequirement);
+                    getConfiguredProperties()), componentRequirement, getMetadataProperties());
         } else {
             final ImmutableFilterJob newFilterJob = new ImmutableFilterJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(getConfiguredProperties()), componentRequirement);
+                    new ImmutableBeanConfiguration(getConfiguredProperties()), componentRequirement, getMetadataProperties());
             if (!newFilterJob.equals(_cachedJob)) {
                 _cachedJob = newFilterJob;
             }

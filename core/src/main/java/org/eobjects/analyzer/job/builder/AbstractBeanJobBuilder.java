@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job.builder;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
+import org.eobjects.analyzer.metadata.HasMetadataProperties;
 import org.eobjects.analyzer.result.renderer.Renderable;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
@@ -45,14 +47,15 @@ import org.slf4j.LoggerFactory;
  *            the concrete job builder type (eg. AnalyzerJobBuilder)
  */
 @SuppressWarnings("unchecked")
-public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implements Renderable {
+public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implements Renderable, HasMetadataProperties {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBeanJobBuilder.class);
 
     private final D _descriptor;
     private final E _configurableBean;
-    private volatile String _name;
     private final AnalysisJobBuilder _analysisJobBuilder;
+    private final Map<String, String> _metadataProperties;
+    private volatile String _name;
 
     public AbstractBeanJobBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor, Class<?> builderClass) {
         if (analysisJobBuilder == null) {
@@ -71,6 +74,47 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
         }
 
         _configurableBean = ReflectionUtils.newInstance(_descriptor.getComponentClass());
+        _metadataProperties = new LinkedHashMap<>();
+    }
+
+    /**
+     * Gets metadata properties as a map.
+     * 
+     * @return
+     */
+    @Override
+    public Map<String, String> getMetadataProperties() {
+        return _metadataProperties;
+    }
+
+    /**
+     * Gets a metadata property
+     * 
+     * @param key
+     * @return
+     */
+    @Override
+    public String getMetadataProperty(String key) {
+        return _metadataProperties.get(key);
+    }
+
+    /**
+     * Sets a metadata property
+     * 
+     * @param key
+     * @param value
+     */
+    public void setMetadataProperty(String key, String value) {
+        _metadataProperties.put(key, value);
+    }
+
+    /**
+     * Removes/clears a metadata property
+     * 
+     * @param key
+     */
+    public void removeMetadataProperty(String key) {
+        _metadataProperties.remove(key);
     }
 
     public final AnalysisJobBuilder getAnalysisJobBuilder() {

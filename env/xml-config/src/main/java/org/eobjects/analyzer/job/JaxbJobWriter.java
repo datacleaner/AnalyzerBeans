@@ -56,6 +56,7 @@ import org.eobjects.analyzer.job.jaxb.FilterType;
 import org.eobjects.analyzer.job.jaxb.InputType;
 import org.eobjects.analyzer.job.jaxb.Job;
 import org.eobjects.analyzer.job.jaxb.JobMetadataType;
+import org.eobjects.analyzer.job.jaxb.MetadataProperties;
 import org.eobjects.analyzer.job.jaxb.ObjectFactory;
 import org.eobjects.analyzer.job.jaxb.OutcomeType;
 import org.eobjects.analyzer.job.jaxb.OutputType;
@@ -176,7 +177,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
         case COLUMN_PATH_QUALIFICATION_COLUMN:
             final String columnName = column.getName();
             if (Strings.isNullOrEmpty(columnName)) {
-                return column.getTable().getName() + '.' + column.getName(); 
+                return column.getTable().getName() + '.' + column.getName();
             }
             return column.getName();
         case COLUMN_PATH_QUALIFICATION_TABLE:
@@ -236,6 +237,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             configuredProperties = job.getDescriptor().getConfiguredProperties();
             elementType
                     .setProperties(createPropertyConfiguration(configuration, configuredProperties, stringConverter));
+            elementType.setMetadataProperties(createMetadataProperties(job.getMetadataProperties()));
         }
 
         // configure filters
@@ -252,6 +254,7 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             configuredProperties = job.getDescriptor().getConfiguredProperties();
             elementType
                     .setProperties(createPropertyConfiguration(configuration, configuredProperties, stringConverter));
+            elementType.setMetadataProperties(createMetadataProperties(job.getMetadataProperties()));
         }
 
         // configure analyzers
@@ -268,7 +271,23 @@ public class JaxbJobWriter implements JobWriter<OutputStream> {
             configuredProperties = job.getDescriptor().getConfiguredProperties();
             elementType
                     .setProperties(createPropertyConfiguration(configuration, configuredProperties, stringConverter));
+            elementType.setMetadataProperties(createMetadataProperties(job.getMetadataProperties()));
         }
+    }
+
+    private MetadataProperties createMetadataProperties(Map<String, String> metadataProperties) {
+        if (metadataProperties == null || metadataProperties.isEmpty()) {
+            return null;
+        }
+        final MetadataProperties result = new MetadataProperties();
+        final Set<Entry<String, String>> entries = metadataProperties.entrySet();
+        for (Entry<String, String> entry : entries) {
+            final org.eobjects.analyzer.job.jaxb.MetadataProperties.Property property = new org.eobjects.analyzer.job.jaxb.MetadataProperties.Property();
+            property.setName(entry.getKey());
+            property.setValue(entry.getValue());
+            result.getProperty().add(property);
+        }
+        return result;
     }
 
     private List<InputType> createInputConfiguration(final BeanConfiguration configuration,

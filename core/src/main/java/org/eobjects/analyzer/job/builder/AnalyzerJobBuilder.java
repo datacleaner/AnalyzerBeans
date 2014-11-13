@@ -142,7 +142,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
 
         if (!_multipleJobsSupported) {
             ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(configuredProperties), componentRequirement);
+                    new ImmutableBeanConfiguration(configuredProperties), componentRequirement, getMetadataProperties());
             return new AnalyzerJob[] { job };
         }
 
@@ -183,7 +183,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
             // there's only a single table involved - leave the input columns
             // untouched
             ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(),
-                    new ImmutableBeanConfiguration(configuredProperties), componentRequirement);
+                    new ImmutableBeanConfiguration(configuredProperties), componentRequirement, getMetadataProperties());
             return new AnalyzerJob[] { job };
         }
 
@@ -238,7 +238,8 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
                     }
                 }
                 if (throwException) {
-                    throw new ComponentConfigurationException("No input columns configured for " + LabelUtils.getLabel(this));
+                    throw new ComponentConfigurationException("No input columns configured for "
+                            + LabelUtils.getLabel(this));
                 } else {
                     return false;
                 }
@@ -255,7 +256,7 @@ public final class AnalyzerJobBuilder<A extends Analyzer<?>> extends
         jobProperties.put(_inputProperty, columnValue);
         ComponentRequirement componentRequirement = new AnalysisJobImmutabilizer().load(getComponentRequirement());
         ImmutableAnalyzerJob job = new ImmutableAnalyzerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                jobProperties), componentRequirement);
+                jobProperties), componentRequirement, getMetadataProperties());
         return job;
     }
 

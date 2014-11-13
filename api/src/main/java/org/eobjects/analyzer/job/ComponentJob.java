@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.job;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.apache.metamodel.util.HasName;
@@ -38,11 +39,18 @@ public interface ComponentJob extends HasName, HasComponentRequirement, Serializ
     public ComponentDescriptor<?> getDescriptor();
 
     /**
-     * Gets the name of this component job
+     * Gets the name of this component job.
      * 
      * @return an optional name given by the user to identify this component in
      *         a job (can be null if no name is assigned).
      */
     @Override
     public String getName();
+
+    /**
+     * Gets metadata properties associated with this component.
+     * 
+     * @return
+     */
+    public Map<String, String> getMetadataProperties();
 }
