@@ -435,11 +435,11 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
         analysisJobBuilder.setDatastore(datastore);
         if (metadata != null) {
-            final ImmutableAnalysisJobMetadata immutableAnalysisJobMetadata = new ImmutableAnalysisJobMetadata(metadata.getJobName(),
-                    metadata.getJobVersion(), metadata.getJobDescription(), metadata.getAuthor(), convertToDate(metadata.getCreatedDate()),
-                    convertToDate(metadata.getUpdatedDate()), datastore.getName(), getSourceColumnPaths(job), getSourceColumnTypes(job),
-                    variables,
-                    getMetadataProperties(metadata));
+            final ImmutableAnalysisJobMetadata immutableAnalysisJobMetadata = new ImmutableAnalysisJobMetadata(
+                    metadata.getJobName(), metadata.getJobVersion(), metadata.getJobDescription(),
+                    metadata.getAuthor(), convertToDate(metadata.getCreatedDate()),
+                    convertToDate(metadata.getUpdatedDate()), datastore.getName(), getSourceColumnPaths(job),
+                    getSourceColumnTypes(job), variables, getMetadataProperties(metadata));
             analysisJobBuilder.setAnalysisJobMetadata(immutableAnalysisJobMetadata);
         }
 
@@ -509,7 +509,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
                     transformerJobBuilder.setName(transformer.getName());
 
-                    applyProperties(transformerJobBuilder, transformer.getProperties(), stringConverter, variables);
+                    applyProperties(transformerJobBuilder, transformer.getProperties(),
+                            transformer.getMetadataProperties(), stringConverter, variables);
 
                     transformerJobBuilders.put(transformer, transformerJobBuilder);
                 }
@@ -638,7 +639,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
                     List<InputType> input = filter.getInput();
                     applyInputColumns(input, inputColumns, filterJobBuilder);
-                    applyProperties(filterJobBuilder, filter.getProperties(), stringConverter, variables);
+                    applyProperties(filterJobBuilder, filter.getProperties(), filter.getMetadataProperties(),
+                            stringConverter, variables);
 
                     filterJobBuilders.put(filter, filterJobBuilder);
 
@@ -708,7 +710,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
             List<InputType> input = analyzerType.getInput();
 
             applyInputColumns(input, inputColumns, analyzerJobBuilder);
-            applyProperties(analyzerJobBuilder, analyzerType.getProperties(), stringConverter, variables);
+            applyProperties(analyzerJobBuilder, analyzerType.getProperties(), analyzerType.getMetadataProperties(),
+                    stringConverter, variables);
 
             ref = analyzerType.getRequires();
             if (ref != null) {
@@ -824,8 +827,8 @@ public class JaxbJobReader implements JobReader<InputStream> {
     }
 
     private void applyProperties(AbstractBeanJobBuilder<? extends BeanDescriptor<?>, ?, ?> builder,
-            ConfiguredPropertiesType configuredPropertiesType, StringConverter stringConverter,
-            Map<String, String> variables) {
+            ConfiguredPropertiesType configuredPropertiesType, MetadataProperties metadataPropertiesType,
+            StringConverter stringConverter, Map<String, String> variables) {
         if (configuredPropertiesType != null) {
             List<Property> properties = configuredPropertiesType.getProperty();
             BeanDescriptor<?> descriptor = builder.getDescriptor();
@@ -857,6 +860,15 @@ public class JaxbJobReader implements JobReader<InputStream> {
 
                 logger.debug("Setting property '{}' to {}", name, value);
                 builder.setConfiguredProperty(configuredProperty, value);
+            }
+        }
+        if (metadataPropertiesType != null) {
+            final List<org.eobjects.analyzer.job.jaxb.MetadataProperties.Property> propertyList = metadataPropertiesType
+                    .getProperty();
+            for (org.eobjects.analyzer.job.jaxb.MetadataProperties.Property property : propertyList) {
+                final String name = property.getName();
+                final String value = property.getValue();
+                builder.setMetadataProperty(name, value);
             }
         }
     }

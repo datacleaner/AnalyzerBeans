@@ -24,10 +24,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.metamodel.util.CollectionUtils;
@@ -40,7 +38,6 @@ import org.eobjects.analyzer.job.HasComponentRequirement;
 import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.SimpleComponentRequirement;
-import org.eobjects.analyzer.metadata.HasMetadataProperties;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
@@ -48,57 +45,15 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends
-        AbstractBeanJobBuilder<D, E, B> implements InputColumnSinkJob, HasComponentRequirement, HasMetadataProperties {
+        AbstractBeanJobBuilder<D, E, B> implements InputColumnSinkJob, HasComponentRequirement {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBeanWithInputColumnsBuilder.class);
 
     private ComponentRequirement _componentRequirement;
-    private final Map<String, String> _metadataProperties;
 
     public AbstractBeanWithInputColumnsBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor,
             Class<?> builderClass) {
         super(analysisJobBuilder, descriptor, builderClass);
-        _metadataProperties = new LinkedHashMap<>();
-    }
-
-    /**
-     * Gets metadata properties as a map.
-     * 
-     * @return
-     */
-    @Override
-    public Map<String, String> getMetadataProperties() {
-        return _metadataProperties;
-    }
-
-    /**
-     * Gets a metadata property
-     * 
-     * @param key
-     * @return
-     */
-    @Override
-    public String getMetadataProperty(String key) {
-        return _metadataProperties.get(key);
-    }
-
-    /**
-     * Sets a metadata property
-     * 
-     * @param key
-     * @param value
-     */
-    public void setMetadataProperty(String key, String value) {
-        _metadataProperties.put(key, value);
-    }
-
-    /**
-     * Removes/clears a metadata property
-     * 
-     * @param key
-     */
-    public void removeMetadataProperty(String key) {
-        _metadataProperties.remove(key);
     }
 
     /**
