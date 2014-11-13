@@ -983,4 +983,14 @@ public final class AnalysisJobBuilder implements Closeable {
                 _transformerJobBuilders, _filterJobBuilders, _analyzerJobBuilders);
         return clone;
     }
+
+    /**
+     * Gets the total number of active components (transformation or analysis)
+     * in this job.
+     * 
+     * @return
+     */
+    public int getComponentCount() {
+        return _filterJobBuilders.size() + _transformerJobBuilders.size() + _analyzerJobBuilders.size();
+    }
 }
