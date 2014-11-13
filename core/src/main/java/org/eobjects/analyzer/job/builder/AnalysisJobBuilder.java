@@ -257,6 +257,20 @@ public final class AnalysisJobBuilder implements Closeable {
         return addSourceColumns(columns);
     }
 
+    /**
+     * Removes the specified table (or rather - all columns of that table) from
+     * this job's source.
+     * 
+     * @param table
+     */
+    public AnalysisJobBuilder removeSourceTable(Table table) {
+        final Column[] cols = table.getColumns();
+        for (Column col : cols) {
+            removeSourceColumn(col);
+        }
+        return this;
+    }
+
     public AnalysisJobBuilder removeSourceColumn(Column column) {
         MetaModelInputColumn inputColumn = new MetaModelInputColumn(column);
         return removeSourceColumn(inputColumn);
@@ -296,6 +310,17 @@ public final class AnalysisJobBuilder implements Closeable {
 
     public List<MetaModelInputColumn> getSourceColumns() {
         return Collections.unmodifiableList(_sourceColumns);
+    }
+
+    public List<MetaModelInputColumn> getSourceColumnsOfTable(Table table) {
+        final List<MetaModelInputColumn> result = new ArrayList<>();
+        for (MetaModelInputColumn column : _sourceColumns) {
+            final Column physicalColumn = column.getPhysicalColumn();
+            if (physicalColumn != null && physicalColumn.getTable() == table) {
+                result.add(column);
+            }
+        }
+        return result;
     }
 
     public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(Class<T> transformerClass) {
