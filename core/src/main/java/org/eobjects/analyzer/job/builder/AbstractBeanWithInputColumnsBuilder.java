@@ -40,6 +40,7 @@ import org.eobjects.analyzer.job.HasComponentRequirement;
 import org.eobjects.analyzer.job.HasFilterOutcomes;
 import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.SimpleComponentRequirement;
+import org.eobjects.analyzer.metadata.HasMetadataProperties;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends
-        AbstractBeanJobBuilder<D, E, B> implements InputColumnSinkJob, HasComponentRequirement {
+        AbstractBeanJobBuilder<D, E, B> implements InputColumnSinkJob, HasComponentRequirement, HasMetadataProperties {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBeanWithInputColumnsBuilder.class);
 
@@ -65,6 +66,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
      * 
      * @return
      */
+    @Override
     public Map<String, String> getMetadataProperties() {
         return _metadataProperties;
     }
@@ -75,6 +77,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
      * @param key
      * @return
      */
+    @Override
     public String getMetadataProperty(String key) {
         return _metadataProperties.get(key);
     }
