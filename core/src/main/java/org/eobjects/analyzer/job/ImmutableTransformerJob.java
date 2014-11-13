@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eobjects.analyzer.data.InputColumn;
@@ -32,6 +33,8 @@ import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.apache.metamodel.util.BaseObject;
+
+import com.google.common.collect.ImmutableMap;
 
 public final class ImmutableTransformerJob extends BaseObject implements TransformerJob {
 
@@ -42,15 +45,27 @@ public final class ImmutableTransformerJob extends BaseObject implements Transfo
     private final BeanConfiguration _beanConfiguration;
     private final List<MutableInputColumn<?>> _output;
     private final ComponentRequirement _componentRequirement;
+    private final Map<String, String> _metadataProperties;
 
     public ImmutableTransformerJob(String name, TransformerBeanDescriptor<?> descriptor,
             BeanConfiguration beanConfiguration, Collection<MutableInputColumn<?>> output,
-            ComponentRequirement requirement) {
+            ComponentRequirement requirement, Map<String, String> metadataProperties) {
         _name = name;
         _descriptor = descriptor;
         _beanConfiguration = beanConfiguration;
         _output = Collections.unmodifiableList(new ArrayList<MutableInputColumn<?>>(output));
         _componentRequirement = requirement;
+        
+        if (metadataProperties == null) {
+            _metadataProperties = Collections.emptyMap();
+        } else {
+            _metadataProperties = ImmutableMap.copyOf(metadataProperties);
+        }
+    }
+    
+    @Override
+    public Map<String, String> getMetadataProperties() {
+        return _metadataProperties;
     }
 
     @Override

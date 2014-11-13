@@ -36,7 +36,7 @@ public class ImmutableFilterJobTest extends TestCase {
 		FilterBeanDescriptor<?, ?> descriptor = Descriptors.ofFilterUnbound(MaxRowsFilter.class);
 		BeanConfiguration configuration = new ImmutableBeanConfiguration(new HashMap<ConfiguredPropertyDescriptor, Object>());
 
-		ImmutableFilterJob job = new ImmutableFilterJob("foo", descriptor, configuration, null);
+		ImmutableFilterJob job = new ImmutableFilterJob("foo", descriptor, configuration, null, null);
 		assertEquals("foo", job.getName());
 		assertEquals(null, job.getComponentRequirement());
 

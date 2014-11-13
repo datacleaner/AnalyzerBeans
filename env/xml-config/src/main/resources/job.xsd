@@ -32,8 +32,8 @@
 				maxOccurs="1" />
 			<element name="updated-date" type="date" minOccurs="0"
 				maxOccurs="1" />
-			<element name="metadata-properties" type="ab:metadataProperties" minOccurs="0"
-				maxOccurs="1" />  
+			<element name="metadata-properties" type="ab:metadataProperties"
+				minOccurs="0" maxOccurs="1" />
 		</all>
 	</complexType>
 
@@ -43,14 +43,14 @@
 				<complexType>
 					<simpleContent>
 						<extension base="string">
-							<attribute type="string" name="name"/>
+							<attribute type="string" name="name" />
 						</extension>
 					</simpleContent>
 				</complexType>
 			</element>
 		</sequence>
 	</complexType>
- 
+
 	<complexType name="sourceType">
 		<sequence>
 			<element name="data-context" type="ab:dataContextType"
@@ -133,6 +133,8 @@
 		<sequence>
 			<element name="descriptor" type="ab:transformerDescriptorType"
 				minOccurs="1" maxOccurs="1" />
+			<element name="metadata-properties" type="ab:metadataProperties"
+				minOccurs="0" maxOccurs="1" />
 			<element name="properties" type="ab:configuredPropertiesType"
 				minOccurs="0" maxOccurs="1" />
 			<element name="input" type="ab:inputType" minOccurs="0"
@@ -162,6 +164,8 @@
 		<sequence>
 			<element name="descriptor" type="ab:filterDescriptorType"
 				minOccurs="1" maxOccurs="1" />
+			<element name="metadata-properties" type="ab:metadataProperties"
+				minOccurs="0" maxOccurs="1" />
 			<element name="properties" type="ab:configuredPropertiesType"
 				minOccurs="0" maxOccurs="1" />
 			<element name="input" type="ab:inputType" minOccurs="0"
@@ -213,6 +217,8 @@
 		<sequence>
 			<element name="descriptor" type="ab:analyzerDescriptorType"
 				minOccurs="1" maxOccurs="1" />
+			<element name="metadata-properties" type="ab:metadataProperties"
+				minOccurs="0" maxOccurs="1" />
 			<element name="properties" type="ab:configuredPropertiesType"
 				minOccurs="0" maxOccurs="1" />
 			<element name="input" type="ab:inputType" minOccurs="0"

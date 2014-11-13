@@ -21,16 +21,20 @@ package org.eobjects.analyzer.job;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.metamodel.util.BaseObject;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.util.CollectionUtils2;
-import org.apache.metamodel.util.BaseObject;
+
+import com.google.common.collect.ImmutableMap;
 
 public final class ImmutableFilterJob extends BaseObject implements FilterJob {
 
@@ -40,13 +44,25 @@ public final class ImmutableFilterJob extends BaseObject implements FilterJob {
     private final FilterBeanDescriptor<?, ?> _descriptor;
     private final BeanConfiguration _beanConfiguration;
     private final ComponentRequirement _componentRequirement;
+    private final Map<String, String> _metadataProperties;
 
     public ImmutableFilterJob(String name, FilterBeanDescriptor<?, ?> descriptor, BeanConfiguration beanConfiguration,
-            ComponentRequirement requirement) {
+            ComponentRequirement requirement, Map<String, String> metadataProperties) {
         _name = name;
         _descriptor = descriptor;
         _beanConfiguration = beanConfiguration;
         _componentRequirement = requirement;
+        
+        if (metadataProperties == null) {
+            _metadataProperties = Collections.emptyMap();
+        } else {
+            _metadataProperties = ImmutableMap.copyOf(metadataProperties);
+        }
+    }
+    
+    @Override
+    public Map<String, String> getMetadataProperties() {
+        return _metadataProperties;
     }
 
     @Override

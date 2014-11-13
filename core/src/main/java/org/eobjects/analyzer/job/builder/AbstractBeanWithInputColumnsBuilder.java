@@ -24,8 +24,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.metamodel.util.CollectionUtils;
@@ -50,10 +52,50 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
     private static final Logger logger = LoggerFactory.getLogger(AbstractBeanWithInputColumnsBuilder.class);
 
     private ComponentRequirement _componentRequirement;
+    private final Map<String, String> _metadataProperties;
 
     public AbstractBeanWithInputColumnsBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor,
             Class<?> builderClass) {
         super(analysisJobBuilder, descriptor, builderClass);
+        _metadataProperties = new LinkedHashMap<>();
+    }
+
+    /**
+     * Gets metadata properties as a map.
+     * 
+     * @return
+     */
+    public Map<String, String> getMetadataProperties() {
+        return _metadataProperties;
+    }
+
+    /**
+     * Gets a metadata property
+     * 
+     * @param key
+     * @return
+     */
+    public String getMetadataProperty(String key) {
+        return _metadataProperties.get(key);
+    }
+
+    /**
+     * Sets a metadata property
+     * 
+     * @param key
+     * @param value
+     */
+    public void setMetadataProperty(String key, String value) {
+        _metadataProperties.put(key, value);
+    }
+
+    /**
+     * Removes/clears a metadata property
+     * 
+     * @param key
+     */
+    public void removeMetadataProperty(String key) {
+        _metadataProperties.remove(key);
     }
 
     /**

@@ -205,7 +205,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
         final ComponentRequirement componentRequirement = immutabilizer.load(getComponentRequirement());
 
         return new ImmutableTransformerJob(getName(), getDescriptor(), new ImmutableBeanConfiguration(
-                getConfiguredProperties()), getOutputColumns(), componentRequirement);
+                getConfiguredProperties()), getOutputColumns(), componentRequirement, getMetadataProperties());
     }
 
     @Override
