@@ -40,11 +40,9 @@ public class UsageAwareDatastoreConnectionTest extends TestCase {
             assertTrue(ds.isDatastoreConnectionOpen());
             assertEquals(1, usageAware.getUsageCount());
 
-            @SuppressWarnings("resource")
             DatastoreConnection con2 = ds.openConnection();
             assertEquals(2, usageAware.getUsageCount());
 
-            @SuppressWarnings("resource")
             DatastoreConnection con3 = ds.openConnection();
             assertEquals(3, usageAware.getUsageCount());
 

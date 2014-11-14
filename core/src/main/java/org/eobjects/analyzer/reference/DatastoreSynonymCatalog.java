@@ -109,7 +109,6 @@ public final class DatastoreSynonymCatalog extends AbstractReferenceData impleme
      */
     @Close
     public void close() {
-        @SuppressWarnings("resource")
         DatastoreConnection datastoreConnection = getDatastoreConnections().poll();
         if (datastoreConnection != null) {
             logger.info("Closing dictionary: {}", this);

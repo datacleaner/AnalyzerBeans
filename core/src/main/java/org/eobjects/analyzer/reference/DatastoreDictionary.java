@@ -108,7 +108,6 @@ public final class DatastoreDictionary extends AbstractReferenceData implements 
 	 */
 	@Close
 	public void close() {
-		@SuppressWarnings("resource")
         DatastoreConnection con = getDatastoreConnections().poll();
 		if (con != null) {
 			logger.info("Closing dictionary: {}", this);

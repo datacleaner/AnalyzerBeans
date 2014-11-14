@@ -341,7 +341,6 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
                 final String jarFileUrl;
                 final int separatorIndex = file.indexOf("!/");
 
-                @SuppressWarnings("resource")
                 JarFile jarFile = null;
                 try {
                     if (separatorIndex != -1) {

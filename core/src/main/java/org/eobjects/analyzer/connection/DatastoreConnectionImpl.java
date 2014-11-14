@@ -56,7 +56,6 @@ public class DatastoreConnectionImpl<E extends DataContext> extends UsageAwareDa
 	@Override
 	protected final void closeInternal() {
 		for (int i = 0; i < _closeables.length; i++) {
-			@SuppressWarnings("resource")
             final Closeable closeable = _closeables[i];
 			try {
 				closeable.close();
