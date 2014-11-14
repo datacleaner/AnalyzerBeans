@@ -54,4 +54,13 @@ public interface ComponentRequirement extends Serializable {
      * @return
      */
     public Collection<FilterOutcome> getProcessingDependencies();
+
+    /**
+     * Gets a simple representation of this {@link ComponentRequirement}'s name,
+     * whereas {@link #toString()} will usually contain more context and
+     * technical information.
+     * 
+     * @return
+     */
+    public String getSimpleName();
 }

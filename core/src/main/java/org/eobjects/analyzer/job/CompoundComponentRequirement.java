@@ -74,6 +74,11 @@ public class CompoundComponentRequirement implements ComponentRequirement {
         }
         return false;
     }
+    
+    @Override
+    public String getSimpleName() {
+        return toString();
+    }
 
     @Override
     public String toString() {

@@ -62,6 +62,11 @@ public class SimpleComponentRequirement implements ComponentRequirement {
         final String filterLabel = LabelUtils.getLabel(_outcome.getFilterJob());
         return filterLabel + "=" + _outcome.getCategory();
     }
+    
+    @Override
+    public String getSimpleName() {
+        return _outcome.getCategory() + "";
+    }
 
     @Override
     public int hashCode() {

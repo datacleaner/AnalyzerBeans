@@ -48,6 +48,11 @@ public class AnyComponentRequirement implements ComponentRequirement {
     public String toString() {
         return "AnyComponentRequirement[]";
     }
+    
+    @Override
+    public String getSimpleName() {
+        return KEYWORD;
+    }
 
     @Override
     public boolean isSatisfied(InputRow row, FilterOutcomes outcomes) {
