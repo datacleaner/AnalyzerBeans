@@ -9,9 +9,9 @@
 		<metamodel.version>4.2.0-incubating</metamodel.version>
 		<metamodel.extras.version>4.2.1</metamodel.extras.version>
 		<easymock.version>3.2</easymock.version>
-		<scala.version>2.11.2</scala.version>
+		<scala.version>2.11.4</scala.version>
 		<httpcomponents.version>4.2.5</httpcomponents.version>
-		<guava.version>17.0</guava.version>
+		<guava.version>18.0</guava.version>
 	</properties>
 	<parent>
 		<!-- Uses the OSS sonatype nexus repository for distribution -->
