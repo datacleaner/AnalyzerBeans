@@ -37,4 +37,6 @@ public interface FilterOutcome extends Serializable {
     public Enum<?> getCategory();
 
     public boolean isEquals(FilterOutcome filterOutcome);
+    
+    public String getSimpleName();
 }

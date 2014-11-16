@@ -22,7 +22,6 @@ package org.eobjects.analyzer.job;
 import java.util.List;
 
 import org.eobjects.analyzer.job.builder.LazyFilterOutcome;
-
 import org.apache.metamodel.util.BaseObject;
 
 /**
@@ -60,5 +59,10 @@ public abstract class AbstractFilterOutcome extends BaseObject implements Filter
     @Override
     public String toString() {
         return "FilterOutcome[category=" + getCategory() + "]";
+    }
+    
+    @Override
+    public final String getSimpleName() {
+        return getCategory().toString();
     }
 }
