@@ -36,7 +36,6 @@ import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.FilterOutcome;
 import org.eobjects.analyzer.job.HasComponentRequirement;
 import org.eobjects.analyzer.job.HasFilterOutcomes;
-import org.eobjects.analyzer.job.InputColumnSinkJob;
 import org.eobjects.analyzer.job.SimpleComponentRequirement;
 import org.eobjects.analyzer.util.CollectionUtils2;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -44,8 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
-public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B> extends
-        AbstractBeanJobBuilder<D, E, B> implements InputColumnSinkJob, HasComponentRequirement {
+public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E, B extends ComponentBuilder> extends
+        AbstractBeanJobBuilder<D, E, B> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBeanWithInputColumnsBuilder.class);
 
@@ -59,6 +58,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
     /**
      * Removes/clears all input columns
      */
+    @Override
     public void clearInputColumns() {
         Set<ConfiguredPropertyDescriptor> configuredProperties = getDescriptor().getConfiguredPropertiesForInput();
         for (ConfiguredPropertyDescriptor configuredProperty : configuredProperties) {
@@ -77,12 +77,14 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
      *             if the input column data type family doesn't match the types
      *             accepted by this transformer.
      */
+    @Override
     public B addInputColumn(InputColumn<?> inputColumn) throws IllegalArgumentException {
         ConfiguredPropertyDescriptor propertyDescriptor = getDefaultConfiguredPropertyForInput();
         return addInputColumn(inputColumn, propertyDescriptor);
     }
 
-    public ConfiguredPropertyDescriptor getDefaultConfiguredPropertyForInput() {
+    @Override
+    public ConfiguredPropertyDescriptor getDefaultConfiguredPropertyForInput() throws UnsupportedOperationException {
         Collection<ConfiguredPropertyDescriptor> inputProperties = getDescriptor().getConfiguredPropertiesForInput(
                 false);
 
@@ -104,7 +106,9 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 
     // this is the main "addInputColumn" method that the other similar methods
     // delegate to
-    public B addInputColumn(InputColumn<?> inputColumn, ConfiguredPropertyDescriptor propertyDescriptor) {
+    @Override
+    public B addInputColumn(InputColumn<?> inputColumn, ConfiguredPropertyDescriptor propertyDescriptor)
+            throws IllegalArgumentException {
         if (propertyDescriptor == null || !propertyDescriptor.isInputColumn()) {
             throw new IllegalArgumentException("Property is not of InputColumn type: " + propertyDescriptor);
         }
@@ -135,6 +139,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
 
     // this is the main "addInputColumns" method that the other similar methods
     // delegate to
+    @Override
     public B addInputColumns(Collection<? extends InputColumn<?>> inputColumns,
             ConfiguredPropertyDescriptor propertyDescriptor) {
         if (propertyDescriptor == null || !propertyDescriptor.isInputColumn()) {
@@ -176,12 +181,14 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         return (B) this;
     }
 
+    @Override
     public B addInputColumns(Collection<? extends InputColumn<?>> inputColumns) {
         ConfiguredPropertyDescriptor propertyDescriptor = getDefaultConfiguredPropertyForInput();
         addInputColumns(inputColumns, propertyDescriptor);
         return (B) this;
     }
 
+    @Override
     public B addInputColumns(InputColumn<?>... inputColumns) {
         List<InputColumn<?>> list = Arrays.asList(inputColumns);
         ConfiguredPropertyDescriptor propertyDescriptor = getDefaultConfiguredPropertyForInput();
@@ -189,6 +196,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         return (B) this;
     }
 
+    @Override
     public B removeInputColumn(InputColumn<?> inputColumn) {
         Set<ConfiguredPropertyDescriptor> propertyDescriptors = getDescriptor().getConfiguredPropertiesForInput();
         if (propertyDescriptors.size() == 1) {
@@ -200,6 +208,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         }
     }
 
+    @Override
     public B removeInputColumn(InputColumn<?> inputColumn, ConfiguredPropertyDescriptor propertyDescriptor) {
         Object inputColumns = getConfiguredProperty(propertyDescriptor);
         if (inputColumns != null) {
@@ -265,6 +274,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
         }
     }
 
+    @Override
     public void setComponentRequirement(ComponentRequirement requirement) {
         if (_componentRequirement != requirement) {
             _componentRequirement = requirement;

@@ -19,19 +19,11 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.eobjects.analyzer.beans.api.Alias;
-import org.eobjects.analyzer.beans.api.Categorized;
-import org.eobjects.analyzer.beans.api.ComponentCategory;
-import org.eobjects.analyzer.beans.api.Description;
-import org.eobjects.analyzer.util.ReflectionUtils;
 
 /**
  * Abstract implementation of the {@link BeanDescriptor} interface. Convenient
@@ -93,46 +85,6 @@ abstract class AbstractBeanDescriptor<B> extends SimpleComponentDescriptor<B> im
 			}
 		}
 		return descriptors;
-	}
-
-    @Override
-	public String getDescription() {
-		Description description = getAnnotation(Description.class);
-		if (description == null) {
-			return null;
-		}
-		return description.value();
-	}
-
-	@Override
-	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-		return ReflectionUtils.getAnnotation(getComponentClass(), annotationClass);
-	}
-
-	@Override
-	public Set<Annotation> getAnnotations() {
-		Annotation[] annotations = getComponentClass().getAnnotations();
-		return new HashSet<Annotation>(Arrays.asList(annotations));
-	}
-
-	@Override
-	public Set<ComponentCategory> getComponentCategories() {
-		Categorized categorized = getAnnotation(Categorized.class);
-		if (categorized == null) {
-			return Collections.emptySet();
-		}
-		Class<? extends ComponentCategory>[] value = categorized.value();
-		if (value == null || value.length == 0) {
-			return Collections.emptySet();
-		}
-
-		Set<ComponentCategory> result = new HashSet<ComponentCategory>();
-		for (Class<? extends ComponentCategory> categoryClass : value) {
-			ComponentCategory category = ReflectionUtils.newInstance(categoryClass);
-			result.add(category);
-		}
-
-		return result;
 	}
 
 	@Override

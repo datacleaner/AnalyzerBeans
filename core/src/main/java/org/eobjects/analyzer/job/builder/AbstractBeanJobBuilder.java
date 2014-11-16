@@ -30,7 +30,6 @@ import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
-import org.eobjects.analyzer.metadata.HasMetadataProperties;
 import org.eobjects.analyzer.result.renderer.Renderable;
 import org.eobjects.analyzer.util.ReflectionUtils;
 import org.slf4j.Logger;
@@ -44,10 +43,11 @@ import org.slf4j.LoggerFactory;
  * @param <E>
  *            the actual component type (eg. Analyzer)
  * @param <B>
- *            the concrete job builder type (eg. AnalyzerJobBuilder)
+ *            the concrete {@link ComponentBuilder} (eg. AnalyzerJobBuilder)
  */
 @SuppressWarnings("unchecked")
-public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implements Renderable, HasMetadataProperties {
+public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B extends ComponentBuilder> implements
+        ComponentBuilder, Renderable {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractBeanJobBuilder.class);
 
@@ -83,7 +83,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
      * @return
      */
     @Override
-    public Map<String, String> getMetadataProperties() {
+    public final Map<String, String> getMetadataProperties() {
         return _metadataProperties;
     }
 
@@ -94,7 +94,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
      * @return
      */
     @Override
-    public String getMetadataProperty(String key) {
+    public final String getMetadataProperty(String key) {
         return _metadataProperties.get(key);
     }
 
@@ -104,7 +104,8 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
      * @param key
      * @param value
      */
-    public void setMetadataProperty(String key, String value) {
+    @Override
+    public final void setMetadataProperty(String key, String value) {
         _metadataProperties.put(key, value);
     }
 
@@ -113,7 +114,8 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
      * 
      * @param key
      */
-    public void removeMetadataProperty(String key) {
+    @Override
+    public final void removeMetadataProperty(String key) {
         _metadataProperties.remove(key);
     }
 
@@ -121,6 +123,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
         return _analysisJobBuilder;
     }
 
+    @Override
     public final D getDescriptor() {
         return _descriptor;
     }
@@ -143,6 +146,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
         }
     }
 
+    @Override
     public final boolean isConfigured(boolean throwException) throws IllegalStateException,
             UnconfiguredConfiguredPropertyException {
         for (ConfiguredPropertyDescriptor configuredProperty : _descriptor.getConfiguredProperties()) {
@@ -178,11 +182,14 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
         return (B) this;
     }
 
+    @Override
     public boolean isConfigured() {
         return isConfigured(false);
     }
 
-    public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty, boolean throwException) {
+    @Override
+    public boolean isConfigured(ConfiguredPropertyDescriptor configuredProperty, boolean throwException)
+            throws UnconfiguredConfiguredPropertyException {
         if (configuredProperty.isRequired()) {
             Map<ConfiguredPropertyDescriptor, Object> configuredProperties = getConfiguredProperties();
             Object value = configuredProperties.get(configuredProperty);
@@ -203,6 +210,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
         return true;
     }
 
+    @Override
     public B setConfiguredProperty(String configuredName, Object value) {
         ConfiguredPropertyDescriptor configuredProperty = _descriptor.getConfiguredProperty(configuredName);
         if (configuredProperty == null) {
@@ -211,6 +219,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
         return setConfiguredProperty(configuredProperty, value);
     }
 
+    @Override
     public B setConfiguredProperty(ConfiguredPropertyDescriptor configuredProperty, Object value) {
         if (configuredProperty == null) {
             throw new IllegalArgumentException("configuredProperty cannot be null");
@@ -252,6 +261,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
         return (B) this;
     }
 
+    @Override
     public Map<ConfiguredPropertyDescriptor, Object> getConfiguredProperties() {
         Map<ConfiguredPropertyDescriptor, Object> map = new HashMap<ConfiguredPropertyDescriptor, Object>();
         Set<ConfiguredPropertyDescriptor> configuredProperties = getDescriptor().getConfiguredProperties();
@@ -271,6 +281,7 @@ public class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B> implement
     public void onConfigurationChanged() {
     }
 
+    @Override
     public Object getConfiguredProperty(ConfiguredPropertyDescriptor propertyDescriptor) {
         return propertyDescriptor.getValue(getConfigurableBean());
     }

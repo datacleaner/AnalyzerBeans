@@ -23,6 +23,7 @@ import java.io.Closeable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,8 +34,11 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.ComponentCategory;
 import org.eobjects.analyzer.beans.api.Configured;
+import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
 import org.eobjects.analyzer.beans.api.Validate;
@@ -94,6 +98,46 @@ class SimpleComponentDescriptor<B> extends AbstractDescriptor<B> implements Comp
     @Override
     public String getDisplayName() {
         return getComponentClass().getSimpleName();
+    }
+
+    @Override
+    public String getDescription() {
+        Description description = getAnnotation(Description.class);
+        if (description == null) {
+            return null;
+        }
+        return description.value();
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+        return ReflectionUtils.getAnnotation(getComponentClass(), annotationClass);
+    }
+
+    @Override
+    public Set<Annotation> getAnnotations() {
+        Annotation[] annotations = getComponentClass().getAnnotations();
+        return new HashSet<Annotation>(Arrays.asList(annotations));
+    }
+
+    @Override
+    public Set<ComponentCategory> getComponentCategories() {
+        Categorized categorized = getAnnotation(Categorized.class);
+        if (categorized == null) {
+            return Collections.emptySet();
+        }
+        Class<? extends ComponentCategory>[] value = categorized.value();
+        if (value == null || value.length == 0) {
+            return Collections.emptySet();
+        }
+
+        Set<ComponentCategory> result = new HashSet<ComponentCategory>();
+        for (Class<? extends ComponentCategory> categoryClass : value) {
+            ComponentCategory category = ReflectionUtils.newInstance(categoryClass);
+            result.add(category);
+        }
+
+        return result;
     }
 
     @Override

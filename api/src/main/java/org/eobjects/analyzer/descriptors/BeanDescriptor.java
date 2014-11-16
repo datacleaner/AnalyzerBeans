@@ -19,10 +19,8 @@
  */
 package org.eobjects.analyzer.descriptors;
 
-import java.lang.annotation.Annotation;
 import java.util.Set;
 
-import org.eobjects.analyzer.beans.api.ComponentCategory;
 import org.eobjects.analyzer.beans.api.Distributed;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.util.HasAliases;
@@ -32,27 +30,10 @@ import org.eobjects.analyzer.util.HasAliases;
  * that support configured properties, provided properties, initialize methods
  * and close methods.
  * 
- * 
- * 
  * @param <B>
  *            the Bean type
  */
 public interface BeanDescriptor<B> extends ComponentDescriptor<B>, HasAliases {
-
-    /**
-     * @return a humanly readable description of the bean.
-     */
-    public String getDescription();
-
-    /**
-     * @return a set of component categories that the bean has been assigned to.
-     */
-    public Set<ComponentCategory> getComponentCategories();
-
-    /**
-     * @return a set of annotations for the bean.
-     */
-    public Set<Annotation> getAnnotations();
 
     /**
      * Determines if the bean is a distributable component or not.
@@ -62,16 +43,6 @@ public interface BeanDescriptor<B> extends ComponentDescriptor<B>, HasAliases {
      * @see Distributed
      */
     public boolean isDistributable();
-
-    /**
-     * Gets an annotation of a specific type
-     * 
-     * @param <A>
-     * @param annotationClass
-     * @return an annotation of the specified type, or null of no such
-     *         annotation exists.
-     */
-    public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
     /**
      * Gets the configured properties that have {@link InputColumn} type.

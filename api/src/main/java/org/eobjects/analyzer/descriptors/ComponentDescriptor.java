@@ -24,6 +24,7 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import org.eobjects.analyzer.beans.api.Close;
+import org.eobjects.analyzer.beans.api.ComponentCategory;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Initialize;
 import org.eobjects.analyzer.beans.api.Provided;
@@ -32,8 +33,6 @@ import org.eobjects.analyzer.beans.api.Validate;
 /**
  * Defines an interface for descriptors of components that support
  * initialization, closing and configuration properties.
- * 
- * 
  */
 public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?>>, Serializable {
 
@@ -64,6 +63,32 @@ public interface ComponentDescriptor<B> extends Comparable<ComponentDescriptor<?
      * @return a set of all properties
      */
     public Set<ConfiguredPropertyDescriptor> getConfiguredProperties();
+
+    /**
+     * Gets an annotation of a specific type
+     * 
+     * @param <A>
+     * @param annotationClass
+     * @return an annotation of the specified type, or null of no such
+     *         annotation exists.
+     */
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+
+    /**
+     * @return a humanly readable description of the component.
+     */
+    public String getDescription();
+
+    /**
+     * @return a set of component categories that the component has been
+     *         assigned to.
+     */
+    public Set<ComponentCategory> getComponentCategories();
+
+    /**
+     * @return a set of annotations for the component.
+     */
+    public Set<Annotation> getAnnotations();
 
     /**
      * Gets all configuration properties with a particular annotation.
