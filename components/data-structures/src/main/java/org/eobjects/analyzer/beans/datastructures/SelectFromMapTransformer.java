@@ -19,13 +19,12 @@
  */
 package org.eobjects.analyzer.beans.datastructures;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.metamodel.util.CollectionUtils;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
@@ -92,7 +91,7 @@ public class SelectFromMapTransformer implements Transformer<Object> {
     }
 
     @Override
-    public Object[] transform(InputRow row) {
+    public Object[] transform(final InputRow row) {
         final Map<String, ?> map = row.getValue(mapColumn);
         final Object[] result = new Object[keys.length];
 
@@ -131,85 +130,6 @@ public class SelectFromMapTransformer implements Transformer<Object> {
      *         it does not exist.
      */
     public static Object find(Map<String, ?> map, String key) {
-        if (map == null || key == null) {
-            return null;
-        }
-        final Object result = map.get(key);
-        if (result == null) {
-            return find(map, key, 0);
-        }
-        return result;
+        return CollectionUtils.find(map, key);
     }
-
-    private static Object find(Map<String, ?> map, String key, int fromIndex) {
-        final int indexOfDot = key.indexOf('.', fromIndex);
-        final int indexOfBracket = key.indexOf('[', fromIndex);
-        int indexOfEndBracket = -1;
-        int arrayIndex = -1;
-
-        boolean hasDot = indexOfDot != -1;
-        boolean hasBracket = indexOfBracket != -1;
-
-        if (hasBracket) {
-            // also check that there is an end-bracket
-            indexOfEndBracket = key.indexOf("].", indexOfBracket);
-            hasBracket = indexOfEndBracket != -1;
-            if (hasBracket) {
-                final String indexString = key.substring(indexOfBracket + 1, indexOfEndBracket);
-                try {
-                    arrayIndex = Integer.parseInt(indexString);
-                } catch (NumberFormatException e) {
-                    // not a valid array/list index
-                    hasBracket = false;
-                }
-            }
-        }
-
-        if (hasDot && hasBracket) {
-            if (indexOfDot > indexOfBracket) {
-                hasDot = false;
-            } else {
-                hasBracket = false;
-            }
-        }
-
-        if (hasDot) {
-            final String prefix = key.substring(0, indexOfDot);
-            final Object nestedObject = map.get(prefix);
-            if (nestedObject == null) {
-                return find(map, key, indexOfDot + 1);
-            }
-            if (nestedObject instanceof Map) {
-                final String remainingPart = key.substring(indexOfDot + 1);
-                @SuppressWarnings("unchecked")
-                final Map<String, ?> nestedMap = (Map<String, ?>) nestedObject;
-                return find(nestedMap, remainingPart);
-            }
-        }
-
-        if (hasBracket) {
-            final String prefix = key.substring(0, indexOfBracket);
-            final Object nestedObject = map.get(prefix);
-            if (nestedObject == null) {
-                return find(map, key, indexOfBracket + 1);
-            }
-            final String remainingPart = key.substring(indexOfEndBracket + 2);
-            try {
-                if (nestedObject instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    final Map<String, ?> nestedMap = ((List<Map<String, ?>>) nestedObject).get(arrayIndex);
-                    return find(nestedMap, remainingPart);
-                } else if (nestedObject.getClass().isArray()) {
-                    @SuppressWarnings("unchecked")
-                    final Map<String, ?> nestedMap = (Map<String, ?>) Array.get(nestedObject, arrayIndex);
-                    return find(nestedMap, remainingPart);
-                }
-            } catch (IndexOutOfBoundsException e) {
-                return null;
-            }
-        }
-
-        return null;
-    }
-
 }
