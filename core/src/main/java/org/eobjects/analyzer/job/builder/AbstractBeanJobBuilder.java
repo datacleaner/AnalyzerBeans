@@ -29,6 +29,7 @@ import java.util.Set;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.BeanConfiguration;
+import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
 import org.eobjects.analyzer.result.renderer.Renderable;
 import org.eobjects.analyzer.util.ReflectionUtils;
@@ -108,7 +109,15 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
     public final void setMetadataProperty(String key, String value) {
         _metadataProperties.put(key, value);
     }
-
+    
+    @Override
+    public void setMetadataProperties(Map<String, String> metadataProperties) {
+        _metadataProperties.clear();
+        if (metadataProperties != null) {
+            _metadataProperties.putAll(metadataProperties);
+        }
+    }
+    
     /**
      * Removes/clears a metadata property
      * 
@@ -130,6 +139,12 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
 
     public final E getConfigurableBean() {
         return _configurableBean;
+    }
+    
+    @Override
+    public void setConfiguredProperties(Map<ConfiguredPropertyDescriptor, Object> configuredPropeties) {
+        final ImmutableBeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(configuredPropeties);
+        setConfiguredProperties(beanConfiguration);
     }
 
     /**

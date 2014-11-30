@@ -67,6 +67,14 @@ public interface ComponentBuilder extends HasMetadataProperties, InputColumnSink
     public void setMetadataProperty(String key, String value);
 
     /**
+     * Sets all the provided metadata properties, removing any existing metadata
+     * properties.
+     * 
+     * @param metadataProperties
+     */
+    public void setMetadataProperties(Map<String, String> metadataProperties);
+
+    /**
      * Removes a metadata property
      * 
      * @param key
@@ -119,6 +127,13 @@ public interface ComponentBuilder extends HasMetadataProperties, InputColumnSink
      * @return
      */
     public Map<ConfiguredPropertyDescriptor, Object> getConfiguredProperties();
+
+    /**
+     * Sets the configured properties onto the underlying component.
+     * 
+     * @param configuredPropeties
+     */
+    public void setConfiguredProperties(Map<ConfiguredPropertyDescriptor, Object> configuredPropeties);
 
     /**
      * Gets the value of a particular configured property in the underlying

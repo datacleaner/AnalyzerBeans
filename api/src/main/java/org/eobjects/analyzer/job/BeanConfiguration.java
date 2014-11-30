@@ -23,7 +23,11 @@ import java.io.Serializable;
 
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 
+/**
+ * Represents the configuration (values of all
+ * {@link ConfiguredPropertyDescriptor}s) of a component.
+ */
 public interface BeanConfiguration extends Serializable {
 
-	public Object getProperty(ConfiguredPropertyDescriptor propertyDescriptor);
+    public Object getProperty(ConfiguredPropertyDescriptor propertyDescriptor);
 }

@@ -42,6 +42,7 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MetaModelInputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.descriptors.AnalyzerBeanDescriptor;
+import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.descriptors.DescriptorProvider;
 import org.eobjects.analyzer.descriptors.FilterBeanDescriptor;
 import org.eobjects.analyzer.descriptors.TransformerBeanDescriptor;
@@ -337,8 +338,16 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor) {
-        TransformerJobBuilder<T> tjb = new TransformerJobBuilder<T>(this, descriptor, _transformedColumnIdGenerator);
-        return addTransformer(tjb);
+        return addTransformer(descriptor, null, null, null);
+    }
+
+    public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerBeanDescriptor<T> descriptor,
+            Map<ConfiguredPropertyDescriptor, Object> configuredProperties, ComponentRequirement requirement,
+            Map<String, String> metadataProperties) {
+        final TransformerJobBuilder<T> transformer = new TransformerJobBuilder<T>(this, descriptor,
+                _transformedColumnIdGenerator);
+        initializeComponentBuilder(transformer, configuredProperties, requirement, metadataProperties);
+        return addTransformer(transformer);
     }
 
     public <T extends Transformer<?>> TransformerJobBuilder<T> addTransformer(TransformerJobBuilder<T> tjb) {
@@ -422,8 +431,29 @@ public final class AnalysisJobBuilder implements Closeable {
 
     public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(
             FilterBeanDescriptor<F, C> descriptor) {
-        FilterJobBuilder<F, C> fjb = new FilterJobBuilder<F, C>(this, descriptor);
-        return addFilter(fjb);
+        return addFilter(descriptor, null, null, null);
+    }
+
+    public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(
+            FilterBeanDescriptor<F, C> descriptor, Map<ConfiguredPropertyDescriptor, Object> configuredProperties,
+            ComponentRequirement requirement, Map<String, String> metadataProperties) {
+        final FilterJobBuilder<F, C> filter = new FilterJobBuilder<F, C>(this, descriptor);
+        initializeComponentBuilder(filter, configuredProperties, requirement, metadataProperties);
+        return addFilter(filter);
+    }
+
+    private void initializeComponentBuilder(ComponentBuilder component,
+            Map<ConfiguredPropertyDescriptor, Object> configuredProperties, ComponentRequirement requirement,
+            Map<String, String> metadataProperties) {
+        if (configuredProperties != null) {
+            component.setConfiguredProperties(configuredProperties);
+        }
+        if (requirement != null) {
+            component.setComponentRequirement(requirement);
+        }
+        if (metadataProperties != null) {
+            component.setMetadataProperties(metadataProperties);
+        }
     }
 
     public <F extends Filter<C>, C extends Enum<C>> FilterJobBuilder<F, C> addFilter(FilterJobBuilder<F, C> fjb) {
@@ -489,7 +519,14 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     public <A extends Analyzer<?>> AnalyzerJobBuilder<A> addAnalyzer(AnalyzerBeanDescriptor<A> descriptor) {
-        AnalyzerJobBuilder<A> analyzerJobBuilder = new AnalyzerJobBuilder<A>(this, descriptor);
+        return addAnalyzer(descriptor, null, null, null);
+    }
+
+    public <A extends Analyzer<?>> AnalyzerJobBuilder<A> addAnalyzer(AnalyzerBeanDescriptor<A> descriptor,
+            Map<ConfiguredPropertyDescriptor, Object> configuredProperties, ComponentRequirement requirement,
+            Map<String, String> metadataProperties) {
+        final AnalyzerJobBuilder<A> analyzerJobBuilder = new AnalyzerJobBuilder<A>(this, descriptor);
+        initializeComponentBuilder(analyzerJobBuilder, configuredProperties, requirement, metadataProperties);
         return addAnalyzer(analyzerJobBuilder);
     }
 
