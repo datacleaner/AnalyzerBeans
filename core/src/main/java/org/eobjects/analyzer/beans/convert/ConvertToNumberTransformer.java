@@ -36,6 +36,7 @@ import org.eobjects.analyzer.beans.categories.NumbersCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.Percentage;
+import org.eobjects.analyzer.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,7 +150,12 @@ public class ConvertToNumberTransformer implements Transformer<Number> {
 					n = (int) c;
 				}
 			} else {
-				String stringValue = value.toString().trim();
+				String stringValue = value.toString();
+				stringValue = StringUtils.replaceWhitespaces(stringValue, "");
+				
+				if (stringValue.startsWith("+")) {
+				    stringValue = stringValue.substring(1);
+				}
 
 				try {
 					if (stringValue.indexOf('%') != -1) {

@@ -39,6 +39,8 @@ public class ConvertToNumberTransformerTest extends TestCase {
 		assertEquals(2000l, ConvertToNumberTransformer.transformValue("2000.0"));
 		assertEquals(-2000l, ConvertToNumberTransformer.transformValue("-2,000.0"));
 		assertEquals(987654321l, ConvertToNumberTransformer.transformValue("987654321"));
+		
+		assertEquals(2000l, ConvertToNumberTransformer.transformValue("+ 2 000"));
 	}
 	
 	public void testTransformUntrimmed() throws Exception {
