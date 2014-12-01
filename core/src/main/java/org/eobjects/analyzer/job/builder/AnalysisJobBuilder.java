@@ -32,6 +32,8 @@ import java.util.Set;
 import org.apache.metamodel.schema.Column;
 import org.apache.metamodel.schema.ColumnType;
 import org.apache.metamodel.schema.Table;
+import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.Predicate;
 import org.eobjects.analyzer.beans.api.Analyzer;
 import org.eobjects.analyzer.beans.api.Filter;
 import org.eobjects.analyzer.beans.api.Transformer;
@@ -1029,5 +1031,61 @@ public final class AnalysisJobBuilder implements Closeable {
      */
     public int getComponentCount() {
         return _filterJobBuilders.size() + _transformerJobBuilders.size() + _analyzerJobBuilders.size();
+    }
+
+    /**
+     * Gets all available {@link InputColumn}s to map to a particular
+     * {@link ComponentBuilder}
+     * 
+     * @param componentBuilder
+     * @return
+     */
+    public List<InputColumn<?>> getAvailableInputColumns(ComponentBuilder componentBuilder) {
+        return getAvailableInputColumns(componentBuilder, Object.class);
+    }
+
+    /**
+     * Gets all available {@link InputColumn}s of a particular type to map to a
+     * particular {@link ComponentBuilder}
+     * 
+     * @param componentBuilder
+     * @param dataType
+     * @return
+     */
+    public List<InputColumn<?>> getAvailableInputColumns(final ComponentBuilder componentBuilder,
+            final Class<?> dataType) {
+        List<InputColumn<?>> result = getAvailableInputColumns(dataType);
+
+        final SourceColumnFinder finder = new SourceColumnFinder();
+        finder.addSources(this);
+
+        result = CollectionUtils.filter(result, new Predicate<InputColumn<?>>() {
+            @Override
+            public Boolean eval(InputColumn<?> inputColumn) {
+                if (inputColumn.isPhysicalColumn()) {
+                    return true;
+                }
+
+                final InputColumnSourceJob origin = finder.findInputColumnSource(inputColumn);
+                if (origin == null) {
+                    return true;
+                }
+
+                if (origin == componentBuilder) {
+                    // exclude columns from the component itself
+                    return false;
+                }
+
+                final Set<Object> sourceComponents = finder.findAllSourceJobs(origin);
+                if (sourceComponents.contains(componentBuilder)) {
+                    // exclude columns that depend 
+                    return false;
+                }
+
+                return true;
+            }
+        });
+
+        return result;
     }
 }

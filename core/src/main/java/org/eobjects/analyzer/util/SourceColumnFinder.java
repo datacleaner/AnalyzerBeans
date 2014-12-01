@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -54,7 +55,7 @@ public class SourceColumnFinder {
     private static final Logger logger = LoggerFactory.getLogger(SourceColumnFinder.class);
 
     private Set<InputColumnSinkJob> _inputColumnSinks = new HashSet<InputColumnSinkJob>();
-    private Set<InputColumnSourceJob> _inputColumnSources = new HashSet<InputColumnSourceJob>();
+    private Set<InputColumnSourceJob> _inputColumnSources = new LinkedHashSet<InputColumnSourceJob>();
     private Set<HasFilterOutcomes> _outcomeSources = new HashSet<HasFilterOutcomes>();
     private Set<HasComponentRequirement> _outcomeSinks = new HashSet<HasComponentRequirement>();
 
