@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.metamodel.util.EqualsBuilder;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
 import org.eobjects.analyzer.job.BeanConfiguration;
@@ -109,7 +110,7 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
     public final void setMetadataProperty(String key, String value) {
         _metadataProperties.put(key, value);
     }
-    
+
     @Override
     public void setMetadataProperties(Map<String, String> metadataProperties) {
         _metadataProperties.clear();
@@ -117,7 +118,7 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
             _metadataProperties.putAll(metadataProperties);
         }
     }
-    
+
     /**
      * Removes/clears a metadata property
      * 
@@ -140,7 +141,7 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
     public final E getConfigurableBean() {
         return _configurableBean;
     }
-    
+
     @Override
     public void setConfiguredProperties(Map<ConfiguredPropertyDescriptor, Object> configuredPropeties) {
         final ImmutableBeanConfiguration beanConfiguration = new ImmutableBeanConfiguration(configuredPropeties);
@@ -154,10 +155,17 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
      * @param configuration
      */
     public void setConfiguredProperties(BeanConfiguration configuration) {
+        boolean changed = false;
         final Set<ConfiguredPropertyDescriptor> properties = getDescriptor().getConfiguredProperties();
         for (ConfiguredPropertyDescriptor property : properties) {
             final Object value = configuration.getProperty(property);
-            setConfiguredProperty(property, value);
+            final boolean changedValue = setConfiguredPropertyIfChanged(property, value);
+            if (changedValue) {
+                changed = true;
+            }
+        }
+        if (changed) {
+            onConfigurationChanged();
         }
     }
 
@@ -236,9 +244,37 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
 
     @Override
     public B setConfiguredProperty(ConfiguredPropertyDescriptor configuredProperty, Object value) {
+        final boolean changed = setConfiguredPropertyIfChanged(configuredProperty, value);
+        if (changed) {
+            onConfigurationChanged();
+        }
+        return (B) this;
+    }
+
+    /**
+     * Sets a configured property if it has changed.
+     * 
+     * Note that this method is for internal use. It does not invoke
+     * {@link #onConfigurationChanged()} even if changes happen. The reason for
+     * this is to allow code reuse and avoid chatty use of the notification
+     * method.
+     * 
+     * @param configuredProperty
+     * @param value
+     * @return true if the value was changed or false if it was not
+     */
+    protected boolean setConfiguredPropertyIfChanged(final ConfiguredPropertyDescriptor configuredProperty,
+            final Object value) {
         if (configuredProperty == null) {
             throw new IllegalArgumentException("configuredProperty cannot be null");
         }
+
+        final Object currentValue = configuredProperty.getValue(_configurableBean);
+        if (EqualsBuilder.equals(currentValue, value)) {
+            // no change
+            return false;
+        }
+
         if (value != null) {
             boolean correctType = true;
             if (configuredProperty.isArray()) {
@@ -272,8 +308,7 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
         }
 
         configuredProperty.setValue(_configurableBean, value);
-        onConfigurationChanged();
-        return (B) this;
+        return true;
     }
 
     @Override

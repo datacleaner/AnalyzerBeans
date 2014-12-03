@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.metamodel.util.CollectionUtils;
+import org.apache.metamodel.util.EqualsBuilder;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -219,8 +220,8 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
                     inputColumns = CollectionUtils.arrayRemove(inputColumns, inputColumn);
                 }
             }
+            setConfiguredProperty(propertyDescriptor, inputColumns);
             propertyDescriptor.setValue(getConfigurableBean(), inputColumns);
-            onConfigurationChanged();
         }
         return (B) this;
     }
@@ -275,8 +276,8 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
     }
 
     @Override
-    public void setComponentRequirement(ComponentRequirement requirement) {
-        if (_componentRequirement != requirement) {
+    public void setComponentRequirement(final ComponentRequirement requirement) {
+        if (!EqualsBuilder.equals(_componentRequirement, requirement)) {
             _componentRequirement = requirement;
             onRequirementChanged();
         }
