@@ -141,11 +141,11 @@ public class TransformedInputColumn<E> implements MutableInputColumn<E>, Seriali
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof TransformedInputColumn) {
-            TransformedInputColumn<?> that = (TransformedInputColumn<?>) obj;
-            return getId().equals(that.getId());
-        }
-        return false;
+        // transformed input columns should always rely on identity equality -
+        // other transformed columns with the same name, id etc. are NOT
+        // necesarily equal (may come from another job, or even a copy of the
+        // job).
+        return this == obj;
     }
 
     @Override

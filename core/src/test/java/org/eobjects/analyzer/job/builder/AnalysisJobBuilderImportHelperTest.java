@@ -24,6 +24,7 @@ import java.util.List;
 import org.eobjects.analyzer.configuration.AnalyzerBeansConfigurationImpl;
 import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
+import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.MutableInputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.test.MockAnalyzer;
@@ -88,7 +89,13 @@ public class AnalysisJobBuilderImportHelperTest extends TestCase {
             assertEquals("bar", transformer2.getOutputColumns().get(0).getName());
             assertEquals("FIRSTNAME", transformer2.getInputColumns().get(0).getName());
 
-            assertSame(transformer1.getInputColumns().get(0), transformer2.getOutputColumns().get(0));
+            final List<InputColumn<?>> inputColumns1 = transformer1.getInputColumns();
+            final List<MutableInputColumn<?>> outputColumns2 = transformer2.getOutputColumns();
+            final InputColumn<?> expected = inputColumns1.get(0);
+            final MutableInputColumn<?> actual = outputColumns2.get(0);
+            
+            assertEquals(expected, actual);
+            assertSame(expected, actual);
         }
     }
 
