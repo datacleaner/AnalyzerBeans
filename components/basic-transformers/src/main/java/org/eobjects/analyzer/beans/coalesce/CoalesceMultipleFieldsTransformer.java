@@ -23,24 +23,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.OutputColumns;
 import org.eobjects.analyzer.beans.api.Transformer;
 import org.eobjects.analyzer.beans.api.TransformerBean;
-import org.eobjects.analyzer.beans.categories.FilterCategory;
+import org.eobjects.analyzer.beans.categories.CompositionCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@TransformerBean("Coalesce multiple fields")
-@Description("Returns the first non-null values of multiple fields and groups of fields. Use it to identify the most "
-        + "accurate or most recent observation, if multiple entries have been recorded in separate columns.")
-@Categorized({ FilterCategory.class })
+@TransformerBean("Fuse / Coalesce fields")
+@Alias("Coalesce multiple fields")
+@Description("Lets you combine multiple fields into one, selecting the first value that is non-null.\n\n"
+        + "Use it to fuse data streams coming from different filter requirements. You can define new fields whose values represent whatever is available from one of the input streams.\n\n"
+        + "Or use it to identify the most accurate or most recent observation, if multiple entries have been recorded in separate columns.")
+@Categorized(CompositionCategory.class)
 public class CoalesceMultipleFieldsTransformer implements Transformer<Object> {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CoalesceMultipleFieldsTransformer.class);
 
     @Configured

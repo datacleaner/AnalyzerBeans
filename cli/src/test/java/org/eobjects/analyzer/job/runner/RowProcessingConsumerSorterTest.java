@@ -27,6 +27,9 @@ import java.util.Queue;
 
 import junit.framework.TestCase;
 
+import org.apache.metamodel.schema.ColumnType;
+import org.apache.metamodel.schema.MutableColumn;
+import org.apache.metamodel.schema.MutableTable;
 import org.eobjects.analyzer.beans.StringAnalyzer;
 import org.eobjects.analyzer.beans.coalesce.CoalesceMultipleFieldsTransformer;
 import org.eobjects.analyzer.beans.coalesce.CoalesceUnit;
@@ -43,9 +46,6 @@ import org.eobjects.analyzer.job.TransformerJob;
 import org.eobjects.analyzer.job.builder.AnalysisJobBuilder;
 import org.eobjects.analyzer.job.builder.FilterJobBuilder;
 import org.eobjects.analyzer.job.builder.TransformerJobBuilder;
-import org.apache.metamodel.schema.ColumnType;
-import org.apache.metamodel.schema.MutableColumn;
-import org.apache.metamodel.schema.MutableTable;
 
 public class RowProcessingConsumerSorterTest extends TestCase {
 
@@ -110,7 +110,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
         assertEquals("ImmutableTransformerJob[name=tjb1,transformer=Transformer mock]", consumers.get(1)
                 .getComponentJob().toString());
         assertEquals(
-                "ImmutableTransformerJob[name=null,transformer=Coalesce multiple fields]",
+                "ImmutableTransformerJob[name=null,transformer=Fuse / Coalesce fields]",
                 consumers.get(2).getComponentJob().toString());
         assertEquals("ImmutableFilterJob[name=fjb2,filter=Mock filter]", consumers.get(3).getComponentJob().toString());
         assertEquals("ImmutableAnalyzerJob[name=null,analyzer=String analyzer]", consumers.get(4).getComponentJob()

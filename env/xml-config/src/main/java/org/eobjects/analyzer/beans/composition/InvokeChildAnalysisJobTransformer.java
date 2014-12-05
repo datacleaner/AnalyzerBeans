@@ -25,11 +25,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
 import org.eobjects.analyzer.beans.api.Description;
 import org.eobjects.analyzer.beans.api.FileProperty;
 import org.eobjects.analyzer.beans.api.FileProperty.FileAccessMode;
 import org.eobjects.analyzer.beans.api.TransformerBean;
+import org.eobjects.analyzer.beans.categories.CompositionCategory;
 import org.eobjects.analyzer.beans.transform.AbstractWrappedAnalysisJobTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.job.AnalysisJob;
@@ -40,6 +42,7 @@ import org.apache.metamodel.util.Resource;
 
 @TransformerBean("Invoke child Analysis job")
 @Description("Wraps another (external) Analysis job's transformations and invokes them as an integrated part of the current job. Using this transformation you can compose parent and child jobs for more coarse or more fine granularity of transformations.")
+@Categorized(CompositionCategory.class)
 public class InvokeChildAnalysisJobTransformer extends AbstractWrappedAnalysisJobTransformer {
 
     @Configured

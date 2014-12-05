@@ -33,6 +33,7 @@ import org.eobjects.analyzer.data.InputRow;
 @Description("Returns the first non-null number. Use it to identify the most "
 		+ "accurate or most recent number if multiple observations have been recorded in columns.")
 @Categorized({ NumbersCategory.class })
+@Deprecated
 public class CoalesceNumbersTransformer implements Transformer<Number> {
 
 	@Configured

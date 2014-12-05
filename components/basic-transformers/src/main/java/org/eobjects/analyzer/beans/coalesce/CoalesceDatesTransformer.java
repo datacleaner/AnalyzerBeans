@@ -36,6 +36,7 @@ import org.eobjects.analyzer.data.InputRow;
 		+ "Use it to identify relative dates such as 'latest activity' date "
 		+ "if multiple stages in a process may have been recorded in different columns.")
 @Categorized({ DateAndTimeCategory.class })
+@Deprecated
 public class CoalesceDatesTransformer implements Transformer<Date> {
 
 	@Configured
