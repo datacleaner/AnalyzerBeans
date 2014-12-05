@@ -140,8 +140,10 @@ public class SourceColumnFinder {
             for (final InputColumn<?> inputColumn : inputColumns) {
                 final InputColumnSourceJob source = findInputColumnSource(inputColumn);
                 if (source != null) {
-                    result.add(source);
-                    findAllSourceJobs(source, result);
+                    final boolean added = result.add(source);
+                    if (added) {
+                        findAllSourceJobs(source, result);
+                    }
                 }
             }
         }
@@ -157,8 +159,10 @@ public class SourceColumnFinder {
             for (final FilterOutcome outcome : requirements) {
                 HasFilterOutcomes source = findOutcomeSource(outcome);
                 if (source != null) {
-                    result.add(source);
-                    findAllSourceJobs(source, result);
+                    final boolean added = result.add(source);
+                    if (added) {
+                        findAllSourceJobs(source, result);
+                    }
                 }
             }
         }
