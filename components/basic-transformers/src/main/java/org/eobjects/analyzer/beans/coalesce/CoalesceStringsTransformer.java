@@ -34,6 +34,7 @@ import org.eobjects.analyzer.data.InputRow;
 		+ "accurate or most recent observation, if multiple entries "
 		+ "have been recorded in separate columns.")
 @Categorized({ StringManipulationCategory.class })
+@Deprecated
 public class CoalesceStringsTransformer implements Transformer<String> {
 
 	@Configured
