@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.metamodel.util.ImmutableRef;
 import org.apache.metamodel.util.LazyRef;
 import org.apache.metamodel.util.Ref;
@@ -127,5 +128,31 @@ public class AnalyzerResultFutureTest extends TestCase {
 
         assertEquals("[43, 43, 43, 43, 43, 43, 43, 43, 43, 43]", resultQueue.toString());
         assertEquals(threads.length, resultQueue.size());
+    }
+    
+    public void testSerializationAndDeserialization() throws Exception {
+        final NumberResult result1 = new NumberResult(42);
+
+        final AnalyzerResultFuture<NumberResult> future = new AnalyzerResultFuture<>("foo",
+                new ImmutableRef<NumberResult>(result1));
+        
+        future.addListener(new Listener<NumberResult>() {
+            @Override
+            public void onSuccess(NumberResult result) {
+                // do nothing - this is just a non-serializable listener
+            }
+
+            @Override
+            public void onError(RuntimeException error) {
+                // do nothing - this is just a non-serializable listener
+            }
+        });
+        
+        final byte[] bytes = SerializationUtils.serialize(future);
+        
+        final AnalyzerResultFuture<?> copy = (AnalyzerResultFuture<?>) SerializationUtils.deserialize(bytes);
+        
+        assertEquals("foo", copy.getName());
+        assertEquals("42", copy.get().toString());
     }
 }
