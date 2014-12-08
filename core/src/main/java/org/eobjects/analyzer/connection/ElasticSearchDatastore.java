@@ -99,4 +99,10 @@ public class ElasticSearchDatastore extends UsageAwareDatastore<ElasticSearchDat
     public String getIndexName() {
         return _indexName;
     }
+    
+
+    @Override
+    public String toString() {
+        return "ElasticSearchDatastore[name=" + getName() + "]";
+    }
 }
