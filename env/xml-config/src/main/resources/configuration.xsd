@@ -216,6 +216,14 @@
 						</documentation>
 					</annotation>
 				</element>
+				<element name="cassandra-datastore" type="ab:cassandraDatastoreType">
+					<annotation>
+						<documentation>
+							Defines a datastore based on an Cassandra
+							index.
+						</documentation>
+					</annotation>
+				</element>
 				<element name="couchdb-datastore" type="ab:couchdbDatastoreType">
 					<annotation>
 						<documentation>
@@ -560,6 +568,39 @@
 								<element name="document-type" minOccurs="1" maxOccurs="1"
 									type="string" />
 								<element name="field" minOccurs="1" maxOccurs="unbounded">
+									<complexType>
+										<sequence>
+											<element name="name" minOccurs="1" maxOccurs="1"
+												type="string" />
+											<element name="type" minOccurs="0" maxOccurs="1"
+												type="normalizedString" />
+										</sequence>
+									</complexType>
+								</element>
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="cassandraDatastoreType">
+		<complexContent>
+			<extension base="ab:abstractDatastoreType">
+				<sequence>
+					<element name="keyspace" minOccurs="1" maxOccurs="1" type="string" />
+					<element name="hostname" minOccurs="1" maxOccurs="1" type="string" />
+					<element name="port" minOccurs="0" maxOccurs="1" type="int" />
+					<element name="username" minOccurs="0" maxOccurs="1" type="string" />
+					<element name="password" minOccurs="0" maxOccurs="1" type="string" />
+					<element name="ssl" minOccurs="0" maxOccurs="1" type="boolean" />
+					<element name="table-def" minOccurs="0" maxOccurs="unbounded">
+						<complexType>
+							<sequence>
+								<element name="table-name" minOccurs="1" maxOccurs="1"
+									type="string" />
+								<element name="column" minOccurs="1" maxOccurs="unbounded">
 									<complexType>
 										<sequence>
 											<element name="name" minOccurs="1" maxOccurs="1"

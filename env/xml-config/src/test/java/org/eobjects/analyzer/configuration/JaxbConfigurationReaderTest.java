@@ -39,6 +39,7 @@ import org.apache.metamodel.util.ExclusionPredicate;
 import org.apache.metamodel.util.Predicate;
 import org.apache.metamodel.util.SimpleTableDef;
 import org.eobjects.analyzer.beans.api.RenderingFormat;
+import org.eobjects.analyzer.connection.CassandraDatastore;
 import org.eobjects.analyzer.connection.CouchDbDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
 import org.eobjects.analyzer.connection.Datastore;
@@ -210,7 +211,7 @@ public class JaxbConfigurationReaderTest extends TestCase {
         DatastoreCatalog datastoreCatalog = getDataStoreCatalog(getConfiguration());
         String[] datastoreNames = datastoreCatalog.getDatastoreNames();
         assertEquals(
-                "[my couch, my es index, my hbase, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, "
+                "[my cassandra db, my couch, my es index, my hbase, my mongo, my_access, my_composite, my_csv, my_custom, my_dbase, my_dom_xml, my_excel_2003, "
                         + "my_fixed_width_1, my_fixed_width_2, my_jdbc_connection, my_jdbc_datasource, my_json, my_odb, my_pojo, "
                         + "my_sas, my_sax_xml, my_sfdc_ds, my_sugarcrm]", Arrays.toString(datastoreNames));
 
@@ -224,6 +225,15 @@ public class JaxbConfigurationReaderTest extends TestCase {
         assertTrue(myCsvDatastore.isMultilineValues());
         assertTrue(myCsvDatastore.isFailOnInconsistencies());
         assertEquals('\\', myCsvDatastore.getEscapeChar().charValue());
+
+        CassandraDatastore cassandraDatastore = (CassandraDatastore) datastoreCatalog.getDatastore("my cassandra db");
+        assertEquals("localhost", cassandraDatastore.getHostname());
+        assertEquals(9042, cassandraDatastore.getPort());
+        assertEquals("my_keyspace", cassandraDatastore.getKeySpace());
+        assertEquals("foo", cassandraDatastore.getUsername());
+        assertEquals("bar", cassandraDatastore.getPassword());
+        assertEquals("[SimpleTableDef[name=table,columnNames=[bah, baz],columnTypes=[STRING, STRING]]]",
+                Arrays.toString(cassandraDatastore.getTableDefs()));
 
         ElasticSearchDatastore esDatastore = (ElasticSearchDatastore) datastoreCatalog.getDatastore("my es index");
         assertEquals("localhost", esDatastore.getHostname());

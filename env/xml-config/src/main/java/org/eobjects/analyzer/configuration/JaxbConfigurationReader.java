@@ -46,6 +46,7 @@ import org.eobjects.analyzer.beans.api.RenderingFormat;
 import org.eobjects.analyzer.configuration.jaxb.AbstractDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.AccessDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.BerkeleyDbStorageProviderType;
+import org.eobjects.analyzer.configuration.jaxb.CassandraDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType;
 import org.eobjects.analyzer.configuration.jaxb.ClasspathScannerType.Package;
 import org.eobjects.analyzer.configuration.jaxb.CombinedStorageProviderType;
@@ -96,6 +97,7 @@ import org.eobjects.analyzer.configuration.jaxb.ValueListDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.XmlDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.XmlDatastoreType.TableDef;
 import org.eobjects.analyzer.connection.AccessDatastore;
+import org.eobjects.analyzer.connection.CassandraDatastore;
 import org.eobjects.analyzer.connection.CompositeDatastore;
 import org.eobjects.analyzer.connection.CouchDbDatastore;
 import org.eobjects.analyzer.connection.CsvDatastore;
@@ -657,6 +659,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 ds = createDatastore(name, (MongodbDatastoreType) datastoreType);
             } else if (datastoreType instanceof ElasticSearchDatastoreType) {
                 ds = createDatastore(name, (ElasticSearchDatastoreType) datastoreType);
+            } else if (datastoreType instanceof CassandraDatastoreType) {
+                ds = createDatastore(name, (CassandraDatastoreType) datastoreType);
             } else if (datastoreType instanceof HbaseDatastoreType) {
                 ds = createDatastore(name, (HbaseDatastoreType) datastoreType);
             } else if (datastoreType instanceof SalesforceDatastoreType) {
@@ -711,6 +715,55 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
         final DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
         return result;
+    }
+
+    private Datastore createDatastore(String name, CassandraDatastoreType datastoreType) {
+
+        final String hostname = getStringVariable("hostname", datastoreType.getHostname());
+        Integer port = getIntegerVariable("port", datastoreType.getPort());
+        if (port == null) {
+            port = CassandraDatastore.DEFAULT_PORT;
+        }
+        final String keySpace = getStringVariable("keyspace", datastoreType.getKeyspace());
+        final String username = getStringVariable("username", datastoreType.getUsername());
+        final String password = getStringVariable("password", datastoreType.getPassword());
+        final boolean ssl = getBooleanVariable("ssl", datastoreType.isSsl(), false);
+
+        final List<org.eobjects.analyzer.configuration.jaxb.CassandraDatastoreType.TableDef> tableDefList = datastoreType
+                .getTableDef();
+        final SimpleTableDef[] tableDefs;
+        if (tableDefList == null || tableDefList.isEmpty()) {
+            tableDefs = null;
+        } else {
+            tableDefs = new SimpleTableDef[tableDefList.size()];
+            for (int i = 0; i < tableDefs.length; i++) {
+                final org.eobjects.analyzer.configuration.jaxb.CassandraDatastoreType.TableDef tableDef = tableDefList
+                        .get(i);
+                final String tableName = tableDef.getTableName();
+                final List<org.eobjects.analyzer.configuration.jaxb.CassandraDatastoreType.TableDef.Column> columnList = tableDef
+                        .getColumn();
+
+                final String[] columnNames = new String[columnList.size()];
+                final ColumnType[] columnTypes = new ColumnType[columnList.size()];
+
+                for (int j = 0; j < columnTypes.length; j++) {
+                    final String propertyName = columnList.get(j).getName();
+                    final String propertyTypeName = columnList.get(j).getType();
+                    final ColumnType propertyType;
+                    if (StringUtils.isNullOrEmpty(propertyTypeName)) {
+                        propertyType = ColumnType.STRING;
+                    } else {
+                        propertyType = ColumnTypeImpl.valueOf(propertyTypeName);
+                    }
+                    columnNames[j] = propertyName;
+                    columnTypes[j] = propertyType;
+                }
+
+                tableDefs[i] = new SimpleTableDef(tableName, columnNames, columnTypes);
+            }
+        }
+
+        return new CassandraDatastore(name, hostname, port, keySpace, username, password, ssl, tableDefs);
     }
 
     private Datastore createDatastore(String name, ElasticSearchDatastoreType datastoreType) {

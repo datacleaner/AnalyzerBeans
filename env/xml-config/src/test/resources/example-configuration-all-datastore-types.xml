@@ -67,6 +67,26 @@
 			<cluster-name>my_es_cluster</cluster-name>
 			<index-name>my_index</index-name>
 		</elasticsearch-datastore>
+		
+		<cassandra-datastore name="my cassandra db" description="Apache Cassandra rocks">
+			<keyspace>my_keyspace</keyspace>
+			<hostname>localhost</hostname>
+			<port>9042</port>
+			<username>foo</username>
+			<password>bar</password>
+			<ssl>true</ssl>
+			<table-def>
+				<table-name>table</table-name>
+				<column>
+					<name>bah</name>
+					<type>STRING</type>
+				</column>
+				<column>
+					<name>baz</name>
+					<type>STRING</type>
+				</column>
+			</table-def>
+		</cassandra-datastore>
 
 		<dbase-datastore name="my_dbase" description="dbf">
 			<filename>../../core/src/test/resources/report.dbf</filename>

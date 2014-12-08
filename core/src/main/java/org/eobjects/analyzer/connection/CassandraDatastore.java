@@ -89,6 +89,34 @@ public class CassandraDatastore extends UsageAwareDatastore<CassandraDataContext
         return new DatastoreConnectionImpl<CassandraDataContext>(dataContext, this);
     }
 
+    public String getHostname() {
+        return _hostname;
+    }
+
+    public int getPort() {
+        return _port;
+    }
+
+    public String getKeySpace() {
+        return _keySpace;
+    }
+
+    public String getUsername() {
+        return _username;
+    }
+
+    public String getPassword() {
+        return _password;
+    }
+
+    public SimpleTableDef[] getTableDefs() {
+        return _tableDefs;
+    }
+
+    public boolean isSsl() {
+        return _ssl;
+    }
+
     @Override
     public String toString() {
         return "CassandraDatastore[name=" + getName() + "]";
