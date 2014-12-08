@@ -758,7 +758,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
             }
         }
 
-        return new ElasticSearchDatastore(clusterName, hostname, port, clusterName, indexName, tableDefs);
+        return new ElasticSearchDatastore(name, hostname, port, clusterName, indexName, tableDefs);
     }
 
     private Datastore createDatastore(String name, JsonDatastoreType datastoreType) {

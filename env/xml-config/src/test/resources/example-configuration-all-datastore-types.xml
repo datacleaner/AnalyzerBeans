@@ -60,6 +60,13 @@
 		<access-datastore name="my_access" description="mdb">
 			<filename>../../core/src/test/resources/developers.mdb</filename>
 		</access-datastore>
+		
+		<elasticsearch-datastore name="my es index" description="yay, search!">
+			<hostname>localhost</hostname>
+			<port>9300</port>
+			<cluster-name>my_es_cluster</cluster-name>
+			<index-name>my_index</index-name>
+		</elasticsearch-datastore>
 
 		<dbase-datastore name="my_dbase" description="dbf">
 			<filename>../../core/src/test/resources/report.dbf</filename>
