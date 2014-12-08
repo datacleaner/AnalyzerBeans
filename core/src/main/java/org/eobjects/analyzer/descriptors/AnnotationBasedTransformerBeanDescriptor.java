@@ -39,7 +39,7 @@ final class AnnotationBasedTransformerBeanDescriptor<T extends Transformer<?>> e
             throw new DescriptorException(transformerClass + " does not implement " + Transformer.class.getName());
         }
 
-        TransformerBean transformerAnnotation = ReflectionUtils.getAnnotation(transformerClass, TransformerBean.class);
+        final TransformerBean transformerAnnotation = ReflectionUtils.getAnnotation(transformerClass, TransformerBean.class);
         if (transformerAnnotation == null) {
             throw new DescriptorException(transformerClass + " doesn't implement the TransformerBean annotation");
         }

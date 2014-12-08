@@ -208,6 +208,14 @@
 						</documentation>
 					</annotation>
 				</element>
+				<element name="elasticsearch-datastore" type="ab:elasticSearchDatastoreType">
+					<annotation>
+						<documentation>
+							Defines a datastore based on an ElasticSearch
+							index.
+						</documentation>
+					</annotation>
+				</element>
 				<element name="couchdb-datastore" type="ab:couchdbDatastoreType">
 					<annotation>
 						<documentation>
@@ -536,6 +544,39 @@
 		</complexContent>
 	</complexType>
 
+	<complexType name="elasticSearchDatastoreType">
+		<complexContent>
+			<extension base="ab:abstractDatastoreType">
+				<sequence>
+					<element name="hostname" minOccurs="1" maxOccurs="1" type="string" />
+					<element name="port" minOccurs="0" maxOccurs="1" type="int" />
+					<element name="cluster-name" minOccurs="1" maxOccurs="1"
+						type="string" />
+					<element name="index-name" minOccurs="1" maxOccurs="1"
+						type="string" />
+					<element name="table-def" minOccurs="0" maxOccurs="unbounded">
+						<complexType>
+							<sequence>
+								<element name="document-type" minOccurs="1" maxOccurs="1"
+									type="string" />
+								<element name="field" minOccurs="1" maxOccurs="unbounded">
+									<complexType>
+										<sequence>
+											<element name="name" minOccurs="1" maxOccurs="1"
+												type="string" />
+											<element name="type" minOccurs="0" maxOccurs="1"
+												type="normalizedString" />
+										</sequence>
+									</complexType>
+								</element>
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
 	<complexType name="couchdbDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">
@@ -611,7 +652,7 @@
 			</extension>
 		</complexContent>
 	</complexType>
-	
+
 	<complexType name="excelDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">
@@ -621,7 +662,7 @@
 			</extension>
 		</complexContent>
 	</complexType>
-	
+
 	<complexType name="jsonDatastoreType">
 		<complexContent>
 			<extension base="ab:abstractDatastoreType">

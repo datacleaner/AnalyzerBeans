@@ -60,6 +60,8 @@ import org.eobjects.analyzer.configuration.jaxb.DatastoreCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreDictionaryType;
 import org.eobjects.analyzer.configuration.jaxb.DatastoreSynonymCatalogType;
 import org.eobjects.analyzer.configuration.jaxb.DbaseDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.ElasticSearchDatastoreType;
+import org.eobjects.analyzer.configuration.jaxb.ElasticSearchDatastoreType.TableDef.Field;
 import org.eobjects.analyzer.configuration.jaxb.ExcelDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.FixedWidthDatastoreType;
 import org.eobjects.analyzer.configuration.jaxb.FixedWidthDatastoreType.WidthSpecification;
@@ -101,6 +103,7 @@ import org.eobjects.analyzer.connection.Datastore;
 import org.eobjects.analyzer.connection.DatastoreCatalog;
 import org.eobjects.analyzer.connection.DatastoreCatalogImpl;
 import org.eobjects.analyzer.connection.DbaseDatastore;
+import org.eobjects.analyzer.connection.ElasticSearchDatastore;
 import org.eobjects.analyzer.connection.ExcelDatastore;
 import org.eobjects.analyzer.connection.FixedWidthDatastore;
 import org.eobjects.analyzer.connection.HBaseDatastore;
@@ -652,6 +655,8 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                 ds = createDatastore(name, (CouchdbDatastoreType) datastoreType);
             } else if (datastoreType instanceof MongodbDatastoreType) {
                 ds = createDatastore(name, (MongodbDatastoreType) datastoreType);
+            } else if (datastoreType instanceof ElasticSearchDatastoreType) {
+                ds = createDatastore(name, (ElasticSearchDatastoreType) datastoreType);
             } else if (datastoreType instanceof HbaseDatastoreType) {
                 ds = createDatastore(name, (HbaseDatastoreType) datastoreType);
             } else if (datastoreType instanceof SalesforceDatastoreType) {
@@ -706,6 +711,54 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
 
         final DatastoreCatalogImpl result = new DatastoreCatalogImpl(datastores.values());
         return result;
+    }
+
+    private Datastore createDatastore(String name, ElasticSearchDatastoreType datastoreType) {
+        final String clusterName = getStringVariable("clusterName", datastoreType.getClusterName());
+        final String hostname = getStringVariable("hostname", datastoreType.getHostname());
+
+        Integer port = getIntegerVariable("port", datastoreType.getPort());
+        if (port == null) {
+            port = ElasticSearchDatastore.DEFAULT_PORT;
+        }
+
+        final String indexName = getStringVariable("indexName", datastoreType.getIndexName());
+
+        final List<org.eobjects.analyzer.configuration.jaxb.ElasticSearchDatastoreType.TableDef> tableDefList = datastoreType
+                .getTableDef();
+        final SimpleTableDef[] tableDefs;
+        if (tableDefList.isEmpty()) {
+            tableDefs = null;
+        } else {
+            tableDefs = new SimpleTableDef[tableDefList.size()];
+            for (int i = 0; i < tableDefs.length; i++) {
+                final org.eobjects.analyzer.configuration.jaxb.ElasticSearchDatastoreType.TableDef tableDef = tableDefList
+                        .get(i);
+
+                final String docType = tableDef.getDocumentType();
+                final List<Field> fieldList = tableDef.getField();
+
+                final String[] columnNames = new String[fieldList.size()];
+                final ColumnType[] columnTypes = new ColumnType[fieldList.size()];
+
+                for (int j = 0; j < columnTypes.length; j++) {
+                    final String propertyName = fieldList.get(j).getName();
+                    final String propertyTypeName = fieldList.get(j).getType();
+                    final ColumnType propertyType;
+                    if (StringUtils.isNullOrEmpty(propertyTypeName)) {
+                        propertyType = ColumnType.STRING;
+                    } else {
+                        propertyType = ColumnTypeImpl.valueOf(propertyTypeName);
+                    }
+                    columnNames[j] = propertyName;
+                    columnTypes[j] = propertyType;
+                }
+
+                tableDefs[i] = new SimpleTableDef(docType, columnNames, columnTypes);
+            }
+        }
+
+        return new ElasticSearchDatastore(clusterName, hostname, port, clusterName, indexName, tableDefs);
     }
 
     private Datastore createDatastore(String name, JsonDatastoreType datastoreType) {
@@ -800,7 +853,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                     final String propertyTypeName = propertyList.get(j).getType();
                     final ColumnType propertyType;
                     if (StringUtils.isNullOrEmpty(propertyTypeName)) {
-                        propertyType = ColumnType.VARCHAR;
+                        propertyType = ColumnType.STRING;
                     } else {
                         propertyType = ColumnTypeImpl.valueOf(propertyTypeName);
                     }
@@ -842,7 +895,7 @@ public final class JaxbConfigurationReader implements ConfigurationReader<InputS
                     String propertyTypeName = fieldList.get(j).getType();
                     final ColumnType propertyType;
                     if (StringUtils.isNullOrEmpty(propertyTypeName)) {
-                        propertyType = ColumnType.VARCHAR;
+                        propertyType = ColumnType.STRING;
                     } else {
                         propertyType = ColumnTypeImpl.valueOf(propertyTypeName);
                     }
