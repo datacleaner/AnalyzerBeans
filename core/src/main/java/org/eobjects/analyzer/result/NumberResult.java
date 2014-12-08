@@ -26,8 +26,6 @@ import org.eobjects.analyzer.beans.api.Alias;
  * KPI or something like that).
  * 
  * Mostly used for testing purposes.
- * 
- * 
  */
 public class NumberResult implements AnalyzerResult {
 
