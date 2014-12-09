@@ -39,6 +39,7 @@ import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.categories.DateAndTimeCategory;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.beans.convert.ConvertToDateTransformer;
+import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.StringUtils;
@@ -78,16 +79,17 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
     @Description("A custom identifier for this captured state. If omitted, the name of the 'Last modified column' will be used.")
     String captureStateIdentifier;
 
-    private Date _lastModifiedThreshold;
-    private Date _greatestEncounteredDate;
+    private long _lastModifiedThreshold = -1l;
+    private long _greatestEncounteredDate = -1l;
 
     @Initialize
     public void initialize() throws IOException {
         final Properties properties = loadProperties();
         final String key = getPropertyKey();
-        final String lastModified = properties.getProperty(key);
-        final Date date = ConvertToDateTransformer.getInternalInstance().transformValue(lastModified);
-        _lastModifiedThreshold = date;
+        final Object lastModified = properties.get(key);
+        if (lastModified != null) {
+            _lastModifiedThreshold = ConvertToNumberTransformer.transformValue(lastModified).longValue();
+        }
     }
 
     @Override
@@ -100,25 +102,19 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
     public Query optimizeQuery(final Query q, final ValidationCategory category) {
         assert category == ValidationCategory.VALID;
 
-        if (_lastModifiedThreshold != null) {
+        if (_lastModifiedThreshold != -1l) {
             final Column column = lastModifiedColumn.getPhysicalColumn();
-            if (column.getType().isNumber()) {
-                final long timestamp = _lastModifiedThreshold.getTime();
-                q.where(column, OperatorType.GREATER_THAN, timestamp);
-            } else {
-                q.where(column, OperatorType.GREATER_THAN, _lastModifiedThreshold);
-            }
+            q.where(column, OperatorType.GREATER_THAN, _lastModifiedThreshold);
         }
-
         return q;
     }
 
     @Close(onFailure = false)
     public void close() throws IOException {
-        if (_greatestEncounteredDate != null) {
+        if (_greatestEncounteredDate != -1) {
             final Properties properties = loadProperties();
             final String key = getPropertyKey();
-            properties.setProperty(key, "" + _greatestEncounteredDate.getTime());
+            properties.setProperty(key, "" + _greatestEncounteredDate);
 
             captureStateFile.write(new Action<OutputStream>() {
                 @Override
@@ -170,27 +166,37 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
     @Override
     public ValidationCategory categorize(InputRow inputRow) {
         final Object lastModified = inputRow.getValue(lastModifiedColumn);
-        final Date date = ConvertToDateTransformer.getInternalInstance().transformValue(lastModified);
+        long _rowColumnValue = -1l;
+        if (lastModified != null) {
+            if (lastModified instanceof String) {
+                final Date date = ConvertToDateTransformer.getInternalInstance().transformValue(lastModified);
+                if (date != null)
+                    _rowColumnValue = date.getTime();
 
-        if (date != null) {
+            } else {
+                _rowColumnValue = ConvertToNumberTransformer.transformValue(lastModified).longValue();
+            }
+        }
+
+        if (_rowColumnValue != -1l) {
             synchronized (this) {
-                if (_greatestEncounteredDate == null || _greatestEncounteredDate.before(date)) {
-                    _greatestEncounteredDate = date;
+                if (_greatestEncounteredDate == -1l || _greatestEncounteredDate < _rowColumnValue) {
+                    _greatestEncounteredDate = _rowColumnValue;
                 }
             }
         }
 
-        if (_lastModifiedThreshold == null) {
+        if (_lastModifiedThreshold == -1l) {
             return ValidationCategory.VALID;
         }
 
-        if (date == null) {
-            logger.info("Date value of {} was null, returning INVALID category: {}", lastModifiedColumn.getName(),
+        if (_rowColumnValue == -1l) {
+            logger.info("Value of {} was not comparable, returning INVALID category: {}", lastModifiedColumn.getName(),
                     inputRow);
             return ValidationCategory.INVALID;
         }
 
-        if (_lastModifiedThreshold.before(date)) {
+        if (_lastModifiedThreshold < _rowColumnValue) {
             return ValidationCategory.VALID;
         }
         return ValidationCategory.INVALID;
