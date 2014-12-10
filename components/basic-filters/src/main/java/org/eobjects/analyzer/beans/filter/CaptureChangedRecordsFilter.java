@@ -88,7 +88,10 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
         final String key = getPropertyKey();
         final Object lastModified = properties.get(key);
         if (lastModified != null) {
-            _lastModifiedThreshold = ConvertToNumberTransformer.transformValue(lastModified).longValue();
+            final Number lastModifiedAsNumber = convertToNumber(lastModified);
+            if (lastModifiedAsNumber != null) {
+                _lastModifiedThreshold = lastModifiedAsNumber.longValue();
+            }
         }
     }
 
@@ -104,7 +107,12 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
 
         if (_lastModifiedThreshold != -1l) {
             final Column column = lastModifiedColumn.getPhysicalColumn();
-            q.where(column, OperatorType.GREATER_THAN, _lastModifiedThreshold);
+            if (column.getType().isTimeBased()) {
+                q.where(column, OperatorType.GREATER_THAN, new Date(_lastModifiedThreshold));
+            } else {
+                q.where(column, OperatorType.GREATER_THAN, _lastModifiedThreshold);
+            }
+
         }
         return q;
     }
@@ -170,11 +178,15 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
         if (lastModified != null) {
             if (lastModified instanceof String) {
                 final Date date = ConvertToDateTransformer.getInternalInstance().transformValue(lastModified);
-                if (date != null)
+                if (date != null) {
                     _rowColumnValue = date.getTime();
+                }
 
             } else {
-                _rowColumnValue = ConvertToNumberTransformer.transformValue(lastModified).longValue();
+                final Number lastModifiedAsNumber = convertToNumber(lastModified);
+                if (lastModifiedAsNumber != null) {
+                    _rowColumnValue = lastModifiedAsNumber.longValue();
+                }
             }
         }
 
@@ -201,4 +213,9 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
         }
         return ValidationCategory.INVALID;
     }
+
+    private Number convertToNumber(final Object lastModified) {
+        return ConvertToNumberTransformer.transformValue(lastModified);
+    }
+
 }
