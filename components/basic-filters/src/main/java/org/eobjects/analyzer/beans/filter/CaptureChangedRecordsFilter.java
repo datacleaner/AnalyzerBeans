@@ -174,26 +174,26 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
     @Override
     public ValidationCategory categorize(InputRow inputRow) {
         final Object lastModified = inputRow.getValue(lastModifiedColumn);
-        long _rowColumnValue = -1l;
+        long rowColumnValue = -1l;
         if (lastModified != null) {
             if (lastModified instanceof String) {
                 final Date date = ConvertToDateTransformer.getInternalInstance().transformValue(lastModified);
                 if (date != null) {
-                    _rowColumnValue = date.getTime();
+                    rowColumnValue = date.getTime();
                 }
 
             } else {
                 final Number lastModifiedAsNumber = convertToNumber(lastModified);
                 if (lastModifiedAsNumber != null) {
-                    _rowColumnValue = lastModifiedAsNumber.longValue();
+                    rowColumnValue = lastModifiedAsNumber.longValue();
                 }
             }
         }
 
-        if (_rowColumnValue != -1l) {
+        if (rowColumnValue != -1l) {
             synchronized (this) {
-                if (_greatestEncounteredDate == -1l || _greatestEncounteredDate < _rowColumnValue) {
-                    _greatestEncounteredDate = _rowColumnValue;
+                if (_greatestEncounteredDate == -1l || _greatestEncounteredDate < rowColumnValue) {
+                    _greatestEncounteredDate = rowColumnValue;
                 }
             }
         }
@@ -202,13 +202,13 @@ public class CaptureChangedRecordsFilter implements QueryOptimizedFilter<Validat
             return ValidationCategory.VALID;
         }
 
-        if (_rowColumnValue == -1l) {
+        if (rowColumnValue == -1l) {
             logger.info("Value of {} was not comparable, returning INVALID category: {}", lastModifiedColumn.getName(),
                     inputRow);
             return ValidationCategory.INVALID;
         }
 
-        if (_lastModifiedThreshold < _rowColumnValue) {
+        if (_lastModifiedThreshold < rowColumnValue) {
             return ValidationCategory.VALID;
         }
         return ValidationCategory.INVALID;
