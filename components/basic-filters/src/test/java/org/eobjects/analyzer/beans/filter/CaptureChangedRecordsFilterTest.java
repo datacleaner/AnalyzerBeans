@@ -111,4 +111,78 @@ public class CaptureChangedRecordsFilterTest extends TestCase {
         assertEquals("my_id.GreatestLastModifiedTimestamp=" + benchmarkDate.getTime(), lines[1]);
         assertEquals("Foo\\ LastModified.GreatestLastModifiedTimestamp=" + benchmarkDate.getTime(), lines[2]);
     }
+    
+    
+    public void testFilterOnNumber() throws Exception {
+        File file = new File("target/test_capture_changed_records_filter.properties");
+        file.delete();
+
+        MockInputColumn<Object> column = new MockInputColumn<Object>("Foo LastId");
+
+        CaptureChangedRecordsFilter filter = new CaptureChangedRecordsFilter();
+
+        filter.captureStateFile = new FileResource(file);
+        filter.lastModifiedColumn = column;
+        filter.initialize();
+
+        assertFalse(file.exists());
+
+        assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, 123456)));
+        assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, 123457)));
+        assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, 564738)));
+
+        filter.close();
+
+        assertTrue(file.exists());
+
+        String[] lines = FileHelper.readFileAsString(file).split("\n");
+
+        // the first line is a comment with a date of writing
+        assertEquals(2, lines.length);
+
+
+        assertEquals("Foo\\ LastId.GreatestLastModifiedTimestamp=564738" , lines[1]);
+
+        filter = new CaptureChangedRecordsFilter();
+
+        filter.captureStateFile = new FileResource(file);
+        filter.lastModifiedColumn = column;
+        filter.initialize();
+
+        assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, 12345)));
+        assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, 78688)));
+        assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, 8457)));
+        assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, 564738)));
+        assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, 564737)));
+        assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, 564739)));
+        assertEquals(ValidationCategory.INVALID, filter.categorize(new MockInputRow().put(column, -1)));
+
+        filter.close();
+
+        lines = FileHelper.readFileAsString(file).split("\n");
+
+        // the first line is a comment with a date of writing
+        assertEquals(2, lines.length);
+
+        assertEquals("Foo\\ LastId.GreatestLastModifiedTimestamp=564739" , lines[1]);
+
+        // create a new session with a custom capture state identifier
+        filter = new CaptureChangedRecordsFilter();
+
+        filter.captureStateFile = new FileResource(file);
+        filter.lastModifiedColumn = column;
+        filter.captureStateIdentifier = "my_id";
+        filter.initialize();
+        assertEquals(ValidationCategory.VALID, filter.categorize(new MockInputRow().put(column, 83627834)));
+
+        filter.close();
+
+        lines = FileHelper.readFileAsString(file).split("\n");
+
+        // the first line is a comment with a date of writing
+        assertEquals(3, lines.length);
+
+        assertEquals("my_id.GreatestLastModifiedTimestamp=83627834" , lines[1]);
+        assertEquals("Foo\\ LastId.GreatestLastModifiedTimestamp=564739" , lines[2]);
+    }
 }
