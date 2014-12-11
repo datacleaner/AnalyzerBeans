@@ -32,6 +32,7 @@ import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 import org.apache.metamodel.query.FilterItem;
 import org.apache.metamodel.query.OperatorType;
 import org.apache.metamodel.query.Query;
@@ -44,7 +45,7 @@ import org.apache.metamodel.util.HasName;
 @Description("Filter rows that contain null values.")
 @Categorized(FilterCategory.class)
 @Distributed(true)
-public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.NullCheckCategory> {
+public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.NullCheckCategory>, HasLabelAdvice {
 
     public static enum NullCheckCategory {
         @Alias("INVALID")
@@ -96,6 +97,15 @@ public class NullCheckFilter implements QueryOptimizedFilter<NullCheckFilter.Nul
         this.columns = columns;
         this.considerEmptyStringAsNull = considerEmptyStringAsNull;
         this.evaluationMode = evaluationMode;
+    }
+    
+    @Override
+    public String getSuggestedLabel() {
+        if (columns == null || columns.length != 1) {
+            return null;
+        }
+        final InputColumn<?> column = columns[0];
+        return column.getName() + " is null?";
     }
 
     public void setConsiderEmptyStringAsNull(boolean considerEmptyStringAsNull) {

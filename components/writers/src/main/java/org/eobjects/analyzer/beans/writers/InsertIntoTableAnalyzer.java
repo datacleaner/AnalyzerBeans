@@ -70,6 +70,7 @@ import org.eobjects.analyzer.connection.UpdateableDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.WriteBuffer;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ import org.slf4j.LoggerFactory;
 @Description("Insert records into a table in a registered datastore. This component allows you to map the values available in the flow with the columns of the target table, in order to insert these values into the table.")
 @Categorized(WriteDataCategory.class)
 @Concurrent(true)
-public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Action<Iterable<Object[]>> {
+public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Action<Iterable<Object[]>>, HasLabelAdvice {
 
     private static final String PROPERTY_NAME_VALUES = "Values";
 
@@ -231,6 +232,14 @@ public class InsertIntoTableAnalyzer implements Analyzer<WriteDataResult>, Actio
             throw new IllegalArgumentException("Configuration yielded unexpected target column count (got "
                     + _targetColumns.length + ", expected " + values.length + ")");
         }
+    }
+    
+    @Override
+    public String getSuggestedLabel() {
+        if (datastore == null || tableName == null) {
+            return null;
+        }
+        return datastore.getName() + " - " + tableName;
     }
 
     private void validateCsvHeaders(CsvDataContext dc) {

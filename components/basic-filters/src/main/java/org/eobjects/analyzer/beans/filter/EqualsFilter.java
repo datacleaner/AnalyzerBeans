@@ -24,6 +24,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.metamodel.query.FilterItem;
+import org.apache.metamodel.query.OperatorType;
+import org.apache.metamodel.query.Query;
+import org.apache.metamodel.query.SelectItem;
+import org.apache.metamodel.schema.Column;
 import org.eobjects.analyzer.beans.api.Alias;
 import org.eobjects.analyzer.beans.api.Categorized;
 import org.eobjects.analyzer.beans.api.Configured;
@@ -40,18 +45,16 @@ import org.eobjects.analyzer.beans.convert.ConvertToNumberTransformer;
 import org.eobjects.analyzer.beans.convert.ConvertToStringTransformer;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 import org.eobjects.analyzer.util.ReflectionUtils;
-import org.apache.metamodel.query.FilterItem;
-import org.apache.metamodel.query.OperatorType;
-import org.apache.metamodel.query.Query;
-import org.apache.metamodel.query.SelectItem;
-import org.apache.metamodel.schema.Column;
+
+import com.google.common.base.Joiner;
 
 @FilterBean("Equals")
 @Description("A filter that excludes values that are not equal (=) to specific set of valid values")
 @Categorized(FilterCategory.class)
 @Distributed(true)
-public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
+public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory>, HasLabelAdvice {
 
     @Inject
     @Configured(order = 1)
@@ -129,6 +132,25 @@ public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
         operands = operandList.toArray();
     }
 
+    @Override
+    public String getSuggestedLabel() {
+        if (inputColumn == null) {
+            return null;
+        }
+        if (compareColumn != null) {
+            return inputColumn.getName() + " = " + compareColumn.getName();
+        }
+        if (compareValues == null || compareValues.length == 0) {
+            return null;
+        }
+
+        if (compareValues.length == 1) {
+            return inputColumn.getName() + " = " + compareValues[0];
+        }
+
+        return inputColumn.getName() + " IN (" + Joiner.on(',').join(compareValues) + ")";
+    }
+
     private Object toOperand(Object value) {
         Class<?> dataType = inputColumn.getDataType();
         if (ReflectionUtils.isBoolean(dataType)) {
@@ -178,7 +200,7 @@ public class EqualsFilter implements QueryOptimizedFilter<ValidationCategory> {
         } else {
             for (Object operand : operands) {
                 if (operand != null) {
-                    
+
                     if (number) {
                         Number n1 = (Number) operand;
                         Number n2 = (Number) v;

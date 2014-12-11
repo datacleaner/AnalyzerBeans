@@ -55,6 +55,7 @@ import org.eobjects.analyzer.connection.UpdateableDatastore;
 import org.eobjects.analyzer.connection.UpdateableDatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 import org.eobjects.analyzer.util.SchemaNavigator;
 import org.eobjects.analyzer.util.WriteBuffer;
 import org.apache.metamodel.BatchUpdateScript;
@@ -82,7 +83,7 @@ import org.slf4j.LoggerFactory;
 @Description("Update records in a table in a registered datastore. This component allows you to map the values available in the flow with the columns of the target table, in order to update the values of these columns in the datastore.")
 @Categorized(WriteDataCategory.class)
 @Concurrent(true)
-public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<Iterable<Object[]>> {
+public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<Iterable<Object[]>>, HasLabelAdvice {
 
     private static final String PROPERTY_NAME_VALUES = "Values";
 
@@ -217,6 +218,14 @@ public class UpdateTableAnalyzer implements Analyzer<WriteDataResult>, Action<It
         } finally {
             con.close();
         }
+    }
+
+    @Override
+    public String getSuggestedLabel() {
+        if (datastore == null || tableName == null) {
+            return null;
+        }
+        return datastore.getName() + " - " + tableName;
     }
 
     private void validateCsvHeaders(CsvDataContext dc) {

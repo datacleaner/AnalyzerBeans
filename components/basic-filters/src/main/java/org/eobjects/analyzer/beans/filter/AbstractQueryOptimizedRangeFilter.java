@@ -26,6 +26,7 @@ import org.eobjects.analyzer.beans.api.QueryOptimizedFilter;
 import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 import org.apache.metamodel.query.FilterItem;
 import org.apache.metamodel.query.OperatorType;
 import org.apache.metamodel.query.Query;
@@ -37,7 +38,8 @@ import org.apache.metamodel.schema.Column;
  * which demarcate valid value bounds.
  */
 @Distributed(true)
-abstract class AbstractQueryOptimizedRangeFilter<E> implements QueryOptimizedFilter<RangeFilterCategory>, Comparator<E> {
+abstract class AbstractQueryOptimizedRangeFilter<E> implements QueryOptimizedFilter<RangeFilterCategory>,
+        Comparator<E>, HasLabelAdvice {
 
     @Validate
     public void validate() {
@@ -75,6 +77,20 @@ abstract class AbstractQueryOptimizedRangeFilter<E> implements QueryOptimizedFil
     @Override
     public boolean isOptimizable(RangeFilterCategory category) {
         return true;
+    }
+
+    @Override
+    public String getSuggestedLabel() {
+        final E highestValue = getHighestValue();
+        final E lowestValue = getLowestValue();
+        if (highestValue == null || lowestValue == null) {
+            return null;
+        }
+        final InputColumn<? extends E> column = getColumn();
+        if (column == null) {
+            return null;
+        }
+        return lowestValue + " =< " + column.getName() + " =< " + highestValue;
     }
 
     @Override
