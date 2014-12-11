@@ -68,7 +68,7 @@ public class RowProcessingMetricsImplTest extends TestCase {
         AnalysisJobBuilder ajb = createAnalysisJobBuilder();
 
         FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> filter = ajb.addFilter(MaxRowsFilter.class);
-        filter.getConfigurableBean().setMaxRows(10);
+        filter.getComponentInstance().setMaxRows(10);
         ajb.setDefaultRequirement(filter.getFilterOutcome(MaxRowsFilter.Category.VALID));
 
         job = ajb.toAnalysisJob();
@@ -81,7 +81,7 @@ public class RowProcessingMetricsImplTest extends TestCase {
 
         FilterJobBuilder<EqualsFilter, ValidationCategory> filter = ajb.addFilter(EqualsFilter.class);
         filter.addInputColumns(ajb.getSourceColumns());
-        filter.getConfigurableBean().setValues(new String[] { "1002", "1165" });
+        filter.getComponentInstance().setValues(new String[] { "1002", "1165" });
 
         ajb.setDefaultRequirement(filter.getFilterOutcome(ValidationCategory.VALID));
 
@@ -96,14 +96,14 @@ public class RowProcessingMetricsImplTest extends TestCase {
         // there's 21 records that are not 1056 or 1165
         FilterJobBuilder<EqualsFilter, ValidationCategory> filter1 = ajb.addFilter(EqualsFilter.class);
         filter1.addInputColumns(ajb.getSourceColumns());
-        filter1.getConfigurableBean().setValues(new String[] { "1056", "1165" });
+        filter1.getComponentInstance().setValues(new String[] { "1056", "1165" });
 
         // there's 1 record which has a reportsto value of null.
         FilterJobBuilder<NullCheckFilter, NullCheckFilter.NullCheckCategory> filter2 = ajb
                 .addFilter(NullCheckFilter.class);
         ajb.addSourceColumns("PUBLIC.EMPLOYEES.REPORTSTO");
         filter2.addInputColumn(ajb.getSourceColumnByName("reportsto"));
-        filter2.getConfigurableBean().setConsiderEmptyStringAsNull(true);
+        filter2.getComponentInstance().setConsiderEmptyStringAsNull(true);
         filter2.setRequirement(filter1.getFilterOutcome(ValidationCategory.INVALID));
 
         ajb.getAnalyzerJobBuilders().get(0)

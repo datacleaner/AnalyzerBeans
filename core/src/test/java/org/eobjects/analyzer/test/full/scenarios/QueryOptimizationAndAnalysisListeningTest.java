@@ -72,8 +72,8 @@ public class QueryOptimizationAndAnalysisListeningTest extends TestCase {
             jobBuilder.addSourceColumns("customers.contactfirstname", "customers.contactlastname");
 
             final FilterJobBuilder<MaxRowsFilter, Category> filter = jobBuilder.addFilter(MaxRowsFilter.class);
-            filter.getConfigurableBean().setFirstRow(42);
-            filter.getConfigurableBean().setMaxRows(10);
+            filter.getComponentInstance().setFirstRow(42);
+            filter.getComponentInstance().setMaxRows(10);
             jobBuilder.setDefaultRequirement(filter, MaxRowsFilter.Category.VALID);
 
             final AnalyzerJobBuilder<MockAnalyzer> analyzer = jobBuilder.addAnalyzer(MockAnalyzer.class);

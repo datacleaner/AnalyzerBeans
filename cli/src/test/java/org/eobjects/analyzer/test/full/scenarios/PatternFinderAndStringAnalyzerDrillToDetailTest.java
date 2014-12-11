@@ -85,7 +85,7 @@ public class PatternFinderAndStringAnalyzerDrillToDetailTest extends TestCase {
             AnalyzerJobBuilder<PatternFinderAnalyzer> pf = ajb.addAnalyzer(PatternFinderAnalyzer.class);
             InputColumn<?> jobtitleInputColumn = ajb.getSourceColumnByName("JOBTITLE");
             pf.addInputColumn(jobtitleInputColumn);
-            pf.getConfigurableBean().setDiscriminateTextCase(false);
+            pf.getComponentInstance().setDiscriminateTextCase(false);
 
             AnalyzerJobBuilder<StringAnalyzer> sa = ajb.addAnalyzer(StringAnalyzer.class);
             sa.addInputColumns(emailInputColumn, emailStd1.getOutputColumnByName("Username"),

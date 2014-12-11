@@ -29,6 +29,7 @@ import java.util.Set;
 import org.apache.metamodel.util.EqualsBuilder;
 import org.eobjects.analyzer.descriptors.BeanDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
+import org.eobjects.analyzer.job.AnalysisJob;
 import org.eobjects.analyzer.job.BeanConfiguration;
 import org.eobjects.analyzer.job.ImmutableBeanConfiguration;
 import org.eobjects.analyzer.lifecycle.LifeCycleHelper;
@@ -38,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Abstract {@link ComponentBuilder} for components of a {@link AnalysisJob}.
  * 
  * @param <D>
  *            the component descriptor type (eg. AnalyzerBeanDescriptor)
@@ -57,7 +58,7 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
     private final E _configurableBean;
     private final AnalysisJobBuilder _analysisJobBuilder;
     private final Map<String, String> _metadataProperties;
-    private volatile String _name;
+    private String _name;
 
     public AbstractBeanJobBuilder(AnalysisJobBuilder analysisJobBuilder, D descriptor, Class<?> builderClass) {
         if (analysisJobBuilder == null) {
@@ -138,8 +139,17 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
         return _descriptor;
     }
 
-    public final E getConfigurableBean() {
+    @Override
+    public final E getComponentInstance() {
         return _configurableBean;
+    }
+
+    /**
+     * @deprecated use {@link #getComponentInstance()} instead.
+     */
+    @Deprecated
+    public final E getConfigurableBean() {
+        return getComponentInstance();
     }
 
     @Override
@@ -196,6 +206,7 @@ public abstract class AbstractBeanJobBuilder<D extends BeanDescriptor<E>, E, B e
         return true;
     }
 
+    @Override
     public String getName() {
         return _name;
     }

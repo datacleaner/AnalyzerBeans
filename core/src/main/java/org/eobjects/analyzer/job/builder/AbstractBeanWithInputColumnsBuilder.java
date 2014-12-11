@@ -221,7 +221,7 @@ public class AbstractBeanWithInputColumnsBuilder<D extends BeanDescriptor<E>, E,
                 }
             }
             setConfiguredProperty(propertyDescriptor, inputColumns);
-            propertyDescriptor.setValue(getConfigurableBean(), inputColumns);
+            propertyDescriptor.setValue(getComponentInstance(), inputColumns);
         }
         return (B) this;
     }

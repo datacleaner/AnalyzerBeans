@@ -79,7 +79,7 @@ public class ReferenceDataActivationManagerTest extends TestCase {
 
         TransformerJobBuilder<DictionaryMatcherTransformer> tjb = ajb
                 .addTransformer(DictionaryMatcherTransformer.class);
-        DictionaryMatcherTransformer transformer = tjb.getConfigurableBean();
+        DictionaryMatcherTransformer transformer = tjb.getComponentInstance();
         transformer.setDictionaries(new Dictionary[] { dict1, dict2, dict3 });
         tjb.addInputColumn(usernameColumn);
         List<MutableInputColumn<?>> outputColumns = tjb.getOutputColumns();

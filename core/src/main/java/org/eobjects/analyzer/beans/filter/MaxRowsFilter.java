@@ -32,6 +32,7 @@ import org.eobjects.analyzer.beans.api.Validate;
 import org.eobjects.analyzer.beans.categories.FilterCategory;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 import org.apache.metamodel.query.Query;
 import org.apache.metamodel.schema.Column;
 
@@ -39,7 +40,7 @@ import org.apache.metamodel.schema.Column;
 @Description("Sets a maximum number of rows to process.")
 @Categorized(FilterCategory.class)
 @Distributed(false)
-public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Category> {
+public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Category>, HasLabelAdvice {
 
     public static enum Category {
         VALID, INVALID
@@ -68,6 +69,11 @@ public class MaxRowsFilter implements QueryOptimizedFilter<MaxRowsFilter.Categor
         this();
         this.firstRow = firstRow;
         this.maxRows = maxRows;
+    }
+    
+    @Override
+    public String getSuggestedLabel() {
+        return "Max " + getMaxRows() + " rows";
     }
 
     public void setMaxRows(int maxRows) {

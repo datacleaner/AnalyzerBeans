@@ -85,7 +85,7 @@ public class RowProcessingConsumerSorterTest extends TestCase {
         TransformerJobBuilder<CoalesceMultipleFieldsTransformer> coalesce = ajb.addTransformer(CoalesceMultipleFieldsTransformer.class);
         CoalesceUnit unit1 = new CoalesceUnit(tjb1.getOutputColumns().get(0));
         CoalesceUnit unit2 = new CoalesceUnit(inputColumn);
-        coalesce.getConfigurableBean().configureUsingCoalesceUnits(unit1, unit2);
+        coalesce.getComponentInstance().configureUsingCoalesceUnits(unit1, unit2);
         
         MutableInputColumn<?> mergedColumn1 = coalesce.getOutputColumns().get(0);
 

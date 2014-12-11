@@ -27,6 +27,18 @@ import junit.framework.TestCase;
 
 public class LabelUtilsTest extends TestCase {
 
+    public void testLabelAdvice() throws Exception {
+        HasLabelAdvice o = new HasLabelAdvice() {
+            @Override
+            public String getSuggestedLabel() {
+                return "foo";
+            }
+        };
+
+        final String label = LabelUtils.getValueLabel(o);
+        assertEquals("foo", label);
+    }
+
     public void testFormatNull() throws Exception {
         assertEquals("<null>", LabelUtils.getValueLabel(null));
     }

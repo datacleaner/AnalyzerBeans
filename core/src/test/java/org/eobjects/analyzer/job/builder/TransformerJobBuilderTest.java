@@ -231,7 +231,7 @@ public class TransformerJobBuilderTest extends TestCase {
                 new AnalysisJobBuilder(null), descriptor, IdGenerator);
         assertFalse(builder.isConfigured());
 
-        ConvertToNumberTransformer configurableBean = builder.getConfigurableBean();
+        ConvertToNumberTransformer configurableBean = builder.getComponentInstance();
         InputColumn<String> input = new MockInputColumn<String>("foo", String.class);
         configurableBean.setInput(input);
 

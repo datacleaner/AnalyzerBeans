@@ -30,9 +30,11 @@ import org.eobjects.analyzer.job.AnalyzerJob;
 import org.eobjects.analyzer.job.ComponentJob;
 import org.eobjects.analyzer.job.ComponentRequirement;
 import org.eobjects.analyzer.job.ConfigurableBeanJob;
-import org.eobjects.analyzer.job.builder.AbstractBeanJobBuilder;
+import org.eobjects.analyzer.job.builder.ComponentBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 /**
  * Utility class for reusable methods and constants that represent user readable
@@ -52,12 +54,25 @@ public final class LabelUtils {
         // prevent instantiation
     }
 
-    public static String getLabel(AbstractBeanJobBuilder<?, ?, ?> builder) {
-        String label = builder.getName();
-        if (StringUtils.isNullOrEmpty(label)) {
-            label = builder.getDescriptor().getDisplayName();
+    public static String getLabel(ComponentBuilder builder) {
+        final String name = builder.getName();
+        if (!Strings.isNullOrEmpty(name)) {
+            return name;
         }
-        return label;
+
+        final Object componentInstance = builder.getComponentInstance();
+        if (componentInstance != null) {
+            if (componentInstance instanceof HasLabelAdvice) {
+                final String suggestedLabel = ((HasLabelAdvice) componentInstance).getSuggestedLabel();
+                if (!Strings.isNullOrEmpty(suggestedLabel)) {
+                    return suggestedLabel;
+                }
+            }
+        }
+
+        final String descriptorDisplayName = builder.getDescriptor().getDisplayName();
+
+        return descriptorDisplayName;
     }
 
     /**
@@ -84,7 +99,7 @@ public final class LabelUtils {
             boolean includeRequirements) {
         String jobName = job.getName();
         StringBuilder label = new StringBuilder();
-        if (StringUtils.isNullOrEmpty(jobName)) {
+        if (Strings.isNullOrEmpty(jobName)) {
             if (job instanceof ConfigurableBeanJob) {
                 BeanDescriptor<?> descriptor = ((ConfigurableBeanJob<?>) job).getDescriptor();
                 label.append(descriptor.getDisplayName());
@@ -97,7 +112,7 @@ public final class LabelUtils {
 
         if (job instanceof AnalyzerJob) {
             AnalyzerJob analyzerJob = (AnalyzerJob) job;
-            if (includeDescriptorName && !StringUtils.isNullOrEmpty(jobName)) {
+            if (includeDescriptorName && !Strings.isNullOrEmpty(jobName)) {
                 label.append(" (");
                 label.append(analyzerJob.getDescriptor().getDisplayName());
                 label.append(')');
@@ -167,6 +182,13 @@ public final class LabelUtils {
     public static String getValueLabel(Object value) {
         if (value == null) {
             return NULL_LABEL;
+        }
+
+        if (value instanceof HasLabelAdvice) {
+            final String suggestedLabel = ((HasLabelAdvice) value).getSuggestedLabel();
+            if (!Strings.isNullOrEmpty(suggestedLabel)) {
+                return suggestedLabel;
+            }
         }
 
         // format decimals

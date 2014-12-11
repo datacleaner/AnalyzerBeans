@@ -22,6 +22,7 @@ package org.eobjects.analyzer.job.builder;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.metamodel.util.HasName;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.descriptors.ComponentDescriptor;
 import org.eobjects.analyzer.descriptors.ConfiguredPropertyDescriptor;
@@ -34,7 +35,7 @@ import org.eobjects.analyzer.metadata.HasMetadataProperties;
 /**
  * Represents a builder object for components in a {@link AnalysisJob}.
  */
-public interface ComponentBuilder extends HasMetadataProperties, InputColumnSinkJob, HasComponentRequirement {
+public interface ComponentBuilder extends HasMetadataProperties, InputColumnSinkJob, HasComponentRequirement, HasName {
 
     /**
      * Determines if the underlying component is fully configured or not. This
@@ -44,6 +45,15 @@ public interface ComponentBuilder extends HasMetadataProperties, InputColumnSink
      * @return
      */
     public boolean isConfigured();
+
+    /**
+     * Gets the underlying component object/instance that is being built.
+     * 
+     * @return the underlying component that is being built, or null if it was
+     *         not possible to build one given the current builder
+     *         configuration.
+     */
+    public Object getComponentInstance();
 
     /**
      * Determines if the underlying component is fully configured or not,

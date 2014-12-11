@@ -41,8 +41,8 @@ public class AbstractFilterOutcomeTest extends TestCase {
         try (final AnalysisJobBuilder ajb = new AnalysisJobBuilder(new AnalyzerBeansConfigurationImpl())) {
             FilterJobBuilder<MockFilter, Category> filterJobBuilder = ajb.addFilter(MockFilter.class);
             filterJobBuilder.addInputColumn(new MockInputColumn<String>("foo"));
-            filterJobBuilder.getConfigurableBean().setSomeEnum(Category.INVALID);
-            filterJobBuilder.getConfigurableBean().setSomeFile(new File("."));
+            filterJobBuilder.getComponentInstance().setSomeEnum(Category.INVALID);
+            filterJobBuilder.getComponentInstance().setSomeFile(new File("."));
 
             fo1 = filterJobBuilder.getFilterOutcome(Category.VALID);
             assertTrue(fo1 instanceof LazyFilterOutcome);

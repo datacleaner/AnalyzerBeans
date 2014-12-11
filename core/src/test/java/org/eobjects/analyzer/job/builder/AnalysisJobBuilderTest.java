@@ -120,8 +120,8 @@ public class AnalysisJobBuilderTest extends TestCase {
             // add filter
             FilterJobBuilder<MockFilter, Category> filter = ajb.addFilter(MockFilter.class);
             filter.addInputColumn(tjb1.getOutputColumns().get(0));
-            filter.getConfigurableBean().setSomeEnum(Category.VALID);
-            filter.getConfigurableBean().setSomeFile(new File("."));
+            filter.getComponentInstance().setSomeEnum(Category.VALID);
+            filter.getComponentInstance().setSomeFile(new File("."));
             assertTrue(filter.isConfigured(true));
 
             // set default requirement

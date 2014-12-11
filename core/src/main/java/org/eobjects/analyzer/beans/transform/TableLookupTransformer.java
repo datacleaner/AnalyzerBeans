@@ -47,6 +47,7 @@ import org.eobjects.analyzer.connection.DatastoreConnection;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.util.CollectionUtils2;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 import org.apache.metamodel.data.DataSet;
 import org.apache.metamodel.query.CompiledQuery;
 import org.apache.metamodel.query.OperatorType;
@@ -68,7 +69,7 @@ import com.google.common.cache.Cache;
 @Alias("Datastore lookup")
 @Description("Perform a lookup based on a table in any of your registered datastore (like a LEFT join).")
 @Concurrent(true)
-public class TableLookupTransformer implements Transformer<Object> {
+public class TableLookupTransformer implements Transformer<Object>, HasLabelAdvice {
 
     private static final Logger logger = LoggerFactory.getLogger(TableLookupTransformer.class);
 
@@ -188,6 +189,14 @@ public class TableLookupTransformer implements Transformer<Object> {
         this.cacheLookups = cacheLookups;
         this.outputColumns = outputColumns;
         this.joinSemantic = JoinSemantic.LEFT_JOIN_MAX_ONE;
+    }
+    
+    @Override
+    public String getSuggestedLabel() {
+        if (tableName == null) {
+            return null;
+        }
+        return "Lookup: " + tableName;
     }
 
     private void resetCachedColumns() {

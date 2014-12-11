@@ -81,7 +81,7 @@ public final class TransformerJobBuilder<T extends Transformer<?>> extends
             return Collections.emptyList();
         }
 
-        final Transformer<?> component = getConfigurableBean();
+        final Transformer<?> component = getComponentInstance();
         final TransformerBeanDescriptor<T> descriptor = getDescriptor();
 
         final InjectionManager injectionManager = getAnalysisJobBuilder().getConfiguration().getInjectionManager(null);

@@ -250,14 +250,14 @@ public final class DistributedAnalysisRunner implements AnalysisRunner {
         try (final AnalysisJobBuilder jobBuilder = new AnalysisJobBuilder(_configuration, job)) {
 
             final FilterJobBuilder<MaxRowsFilter, Category> maxRowsFilter = jobBuilder.addFilter(MaxRowsFilter.class);
-            maxRowsFilter.getConfigurableBean().setFirstRow(firstRow);
-            maxRowsFilter.getConfigurableBean().setMaxRows(maxRows);
+            maxRowsFilter.getComponentInstance().setFirstRow(firstRow);
+            maxRowsFilter.getComponentInstance().setMaxRows(maxRows);
 
             final boolean naturalRecordOrderConsistent = jobBuilder.getDatastore().getPerformanceCharacteristics()
                     .isNaturalRecordOrderConsistent();
             if (!naturalRecordOrderConsistent) {
                 final InputColumn<?> orderColumn = findOrderByColumn(jobBuilder);
-                maxRowsFilter.getConfigurableBean().setOrderColumn(orderColumn);
+                maxRowsFilter.getComponentInstance().setOrderColumn(orderColumn);
             }
 
             jobBuilder.setDefaultRequirement(maxRowsFilter, MaxRowsFilter.Category.VALID);

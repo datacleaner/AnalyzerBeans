@@ -331,11 +331,11 @@ public class JaxbJobReaderTest extends TestCase {
         List<TransformerJobBuilder<?>> tjbs = ajb.getTransformerJobBuilders();
 
         DateMaskMatcherTransformer dateMaskMatcherTransformer = (DateMaskMatcherTransformer) tjbs.get(0)
-                .getConfigurableBean();
+                .getComponentInstance();
         assertEquals("[yyyy-MM-dd]", Arrays.toString(dateMaskMatcherTransformer.getDateMasks()));
 
         ConvertToDateTransformer convertToDateTransformer = (ConvertToDateTransformer) tjbs.get(1)
-                .getConfigurableBean();
+                .getComponentInstance();
         assertEquals("[yyyy-MM-dd]", Arrays.toString(convertToDateTransformer.getDateMasks()));
         assertEquals("2000-01-01",
                 new SimpleDateFormat("yyyy-MM-dd").format(convertToDateTransformer.getNullReplacement()));

@@ -78,7 +78,7 @@ public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCa
 			assertEquals(3, analysisJobBuilder.getSourceColumns().size());
 
 			FilterJobBuilder<MaxRowsFilter, MaxRowsFilter.Category> maxRows = analysisJobBuilder.addFilter(MaxRowsFilter.class);
-			maxRows.getConfigurableBean().setMaxRows(5);
+			maxRows.getComponentInstance().setMaxRows(5);
 			analysisJobBuilder.setDefaultRequirement(maxRows.getFilterOutcome(MaxRowsFilter.Category.VALID));
 
 			TransformerJobBuilder<ConvertToStringTransformer> convertToNumber = analysisJobBuilder
@@ -88,12 +88,12 @@ public class AnalyzeDateGapsCompareSchemasAndSerializeResultsTest extends TestCa
 
 			AnalyzerJobBuilder<DateGapAnalyzer> dateGap = analysisJobBuilder.addAnalyzer(DateGapAnalyzer.class);
 			dateGap.setName("date gap job");
-			dateGap.getConfigurableBean().setSingleDateOverlaps(true);
-			dateGap.getConfigurableBean().setFromColumn(
+			dateGap.getComponentInstance().setSingleDateOverlaps(true);
+			dateGap.getComponentInstance().setFromColumn(
 					(InputColumn<Date>) analysisJobBuilder.getSourceColumnByName("orderdate"));
-			dateGap.getConfigurableBean().setToColumn(
+			dateGap.getComponentInstance().setToColumn(
 					(InputColumn<Date>) analysisJobBuilder.getSourceColumnByName("shippeddate"));
-			dateGap.getConfigurableBean().setGroupColumn(customer_no);
+			dateGap.getComponentInstance().setGroupColumn(customer_no);
 
 			job = analysisJobBuilder.toAnalysisJob();
 			analysisJobBuilder.close();

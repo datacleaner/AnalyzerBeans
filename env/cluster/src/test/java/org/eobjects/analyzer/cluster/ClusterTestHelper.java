@@ -354,8 +354,8 @@ public class ClusterTestHelper {
         final InputColumn<?> col2 = jobBuilder.getSourceColumnByName("CONTACTLASTNAME");
 
         final FilterJobBuilder<MaxRowsFilter, Category> filter = jobBuilder.addFilter(MaxRowsFilter.class);
-        filter.getConfigurableBean().setFirstRow(5);
-        filter.getConfigurableBean().setMaxRows(20);
+        filter.getComponentInstance().setFirstRow(5);
+        filter.getComponentInstance().setMaxRows(20);
 
         final AnalyzerJobBuilder<StringAnalyzer> analyzer = jobBuilder.addAnalyzer(StringAnalyzer.class);
         analyzer.addInputColumn(col1);
@@ -488,7 +488,7 @@ public class ClusterTestHelper {
                 final FilterJobBuilder<EqualsFilter, ValidationCategory> equalsFilter = jobBuilder
                         .addFilter(EqualsFilter.class);
                 equalsFilter.addInputColumn(jobBuilder.getSourceColumnByName("CUSTOMERNUMBER"));
-                equalsFilter.getConfigurableBean().setValues(new String[] { "-1000000" });
+                equalsFilter.getComponentInstance().setValues(new String[] { "-1000000" });
 
                 final AnalyzerJobBuilder<StringAnalyzer> stringAnalyzer = jobBuilder.addAnalyzer(StringAnalyzer.class);
                 stringAnalyzer.addInputColumns(jobBuilder.getAvailableInputColumns(String.class));

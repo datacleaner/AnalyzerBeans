@@ -179,7 +179,7 @@ public class JaxbJobWriterTest extends TestCase {
         try (AnalysisJobBuilder ajb = new AnalysisJobBuilder(conf)) {
             ajb.setDatastore(ds);
 
-            DateGapAnalyzer dga = ajb.addAnalyzer(DateGapAnalyzer.class).getConfigurableBean();
+            DateGapAnalyzer dga = ajb.addAnalyzer(DateGapAnalyzer.class).getComponentInstance();
             Column orderDateColumn = ds.openConnection().getSchemaNavigator()
                     .convertToColumn("PUBLIC.ORDERS.ORDERDATE");
             Column shippedDateColumn = ds.openConnection().getSchemaNavigator()
@@ -312,7 +312,7 @@ public class JaxbJobWriterTest extends TestCase {
             AnalyzerJobBuilder<PatternFinderAnalyzer> patternFinder1 = ajb.addAnalyzer(PatternFinderAnalyzer.class);
             makeCrossPlatformCompatible(patternFinder1);
             MutableInputColumn<?> usernameColumn = tjb.getOutputColumnByName("Username");
-            patternFinder1.addInputColumn(fnCol).addInputColumn(usernameColumn).getConfigurableBean()
+            patternFinder1.addInputColumn(fnCol).addInputColumn(usernameColumn).getComponentInstance()
                     .setEnableMixedTokens(false);
 
             assertMatchesBenchmark(ajb.toAnalysisJob(), "JaxbJobWriterTest-file4.xml");
@@ -346,7 +346,7 @@ public class JaxbJobWriterTest extends TestCase {
      * @param pfb
      */
     private void makeCrossPlatformCompatible(AnalyzerJobBuilder<PatternFinderAnalyzer> pfb) {
-        PatternFinderAnalyzer pf = pfb.getConfigurableBean();
+        PatternFinderAnalyzer pf = pfb.getComponentInstance();
         pf.setDecimalSeparator('.');
         pf.setMinusSign('-');
         pf.setThousandsSeparator(',');
