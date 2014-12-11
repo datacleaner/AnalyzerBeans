@@ -30,6 +30,7 @@ import org.eobjects.analyzer.beans.api.TransformerBean;
 import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.reference.SynonymCatalog;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 
 /**
  * A simple transformer that uses a synonym catalog to replace a synonym with
@@ -40,7 +41,7 @@ import org.eobjects.analyzer.reference.SynonymCatalog;
 @TransformerBean("Synonym lookup")
 @Alias("Synonym replacement")
 @Description("Replaces strings with their synonyms")
-public class SynonymLookupTransformer implements Transformer<String> {
+public class SynonymLookupTransformer implements Transformer<String>, HasLabelAdvice {
 
     @Configured
     InputColumn<String> column;
@@ -70,6 +71,14 @@ public class SynonymLookupTransformer implements Transformer<String> {
     @Override
     public OutputColumns getOutputColumns() {
         return new OutputColumns(new String[] { column.getName() + " (synonyms replaced)" });
+    }
+    
+    @Override
+    public String getSuggestedLabel() {
+        if (synonymCatalog == null) {
+            return null;
+        }
+        return "Lookup: " + synonymCatalog.getName();
     }
 
     @Override
