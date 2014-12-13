@@ -37,27 +37,28 @@ import org.eobjects.analyzer.data.InputColumn;
 import org.eobjects.analyzer.data.InputRow;
 import org.eobjects.analyzer.storage.RowAnnotation;
 import org.eobjects.analyzer.storage.RowAnnotationFactory;
+import org.eobjects.analyzer.util.HasLabelAdvice;
 import org.eobjects.analyzer.util.StringUtils;
 
 @AnalyzerBean("Value matcher")
 @Description("Matches actual values against a set of expected values.\nUse this analyzer as a way to narrow down unexpected values, spelling mistakes, missing values and errors.")
 @Concurrent(true)
-public class ValueMatchAnalyzer implements Analyzer<ValueMatchAnalyzerResult> {
+public class ValueMatchAnalyzer implements Analyzer<ValueMatchAnalyzerResult>, HasLabelAdvice {
 
     @Inject
-    @Configured(order=10)
+    @Configured(order = 10)
     InputColumn<?> column;
 
     @Inject
-    @Configured(order=20)
+    @Configured(order = 20)
     String[] expectedValues;
 
     @Inject
-    @Configured(order=30)
+    @Configured(order = 30)
     boolean caseSensitiveMatching = true;
 
     @Inject
-    @Configured(order=31)
+    @Configured(order = 31)
     boolean whiteSpaceSensitiveMatching = true;
 
     @Inject
@@ -127,6 +128,14 @@ public class ValueMatchAnalyzer implements Analyzer<ValueMatchAnalyzerResult> {
 
         return new ValueMatchAnalyzerResult(column, _rowAnnotationFactory, valueAnnotations, _nullAnnotation,
                 _nonMatchingValuesAnnotation, _totalCount.get());
+    }
+
+    @Override
+    public String getSuggestedLabel() {
+        if (column == null) {
+            return null;
+        }
+        return "Value matcher: " + column.getName();
     }
 
 }

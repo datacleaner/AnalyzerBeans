@@ -97,8 +97,8 @@ public final class LabelUtils {
      */
     public static String getLabel(ComponentJob job, boolean includeDescriptorName, boolean includeInputColumnNames,
             boolean includeRequirements) {
-        String jobName = job.getName();
-        StringBuilder label = new StringBuilder();
+        final String jobName = job.getName();
+        final StringBuilder label = new StringBuilder();
         if (Strings.isNullOrEmpty(jobName)) {
             if (job instanceof ConfigurableBeanJob) {
                 BeanDescriptor<?> descriptor = ((ConfigurableBeanJob<?>) job).getDescriptor();

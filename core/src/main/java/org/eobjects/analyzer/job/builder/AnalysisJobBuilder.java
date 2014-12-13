@@ -1034,6 +1034,20 @@ public final class AnalysisJobBuilder implements Closeable {
     }
 
     /**
+     * Gets all component builders contained within this
+     * {@link AnalysisJobBuilder}
+     * 
+     * @return
+     */
+    public Collection<ComponentBuilder> getComponentBuilders() {
+        Collection<ComponentBuilder> result = new ArrayList<>();
+        result.addAll(_filterJobBuilders);
+        result.addAll(_transformerJobBuilders);
+        result.addAll(_analyzerJobBuilders);
+        return result;
+    }
+
+    /**
      * Gets all available {@link InputColumn}s to map to a particular
      * {@link ComponentBuilder}
      * 
@@ -1078,7 +1092,7 @@ public final class AnalysisJobBuilder implements Closeable {
 
                 final Set<Object> sourceComponents = finder.findAllSourceJobs(origin);
                 if (sourceComponents.contains(componentBuilder)) {
-                    // exclude columns that depend 
+                    // exclude columns that depend
                     return false;
                 }
 

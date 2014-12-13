@@ -20,6 +20,7 @@
 package org.eobjects.analyzer.job.builder;
 
 import java.io.File;
+import java.util.Collection;
 
 import junit.framework.TestCase;
 
@@ -136,6 +137,13 @@ public class AnalysisJobBuilderTest extends TestCase {
             assertEquals("Mock filter=VALID", tjb2.getComponentRequirement().toString());
             assertEquals(null, filter.getComponentRequirement());
             assertEquals(null, tjb1.getComponentRequirement());
+
+            final Collection<ComponentBuilder> componentBuilders = ajb.getComponentBuilders();
+            assertEquals(
+                    "[FilterJobBuilder[filter=Mock filter,inputColumns=[TransformedInputColumn[id=trans-0001-0002,name=mock output]]], "
+                            + "TransformerJobBuilder[transformer=Mock transformer,inputColumns=[MetaModelInputColumn[table.foo]]], "
+                            + "TransformerJobBuilder[transformer=Mock transformer,inputColumns=[TransformedInputColumn[id=trans-0001-0002,name=mock output]]]]",
+                    componentBuilders.toString());
         }
     }
 }
