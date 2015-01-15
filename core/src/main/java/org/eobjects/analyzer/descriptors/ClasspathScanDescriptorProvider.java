@@ -126,12 +126,22 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
         this(taskRunner, createRenderingFormatPredicate(excludedRenderingFormats));
     }
 
-    private static Predicate<Class<? extends RenderingFormat<?>>> createRenderingFormatPredicate(
-            Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats) {
-        if (excludedRenderingFormats == null || excludedRenderingFormats.isEmpty()) {
-            return new TruePredicate<Class<? extends RenderingFormat<?>>>();
-        }
-        return new ExclusionPredicate<Class<? extends RenderingFormat<?>>>(excludedRenderingFormats);
+    /**
+     * Constructs a {@link ClasspathScanDescriptorProvider} using a specified
+     * {@link TaskRunner}. The taskrunner will be used to perform the classpath
+     * scan, potentially in a parallel fashion.
+     * 
+     * @param taskRunner
+     * @param excludedRenderingFormats
+     *            rendering formats to exclude from loading into the descriptor
+     *            provider
+     * @param autoLoadDescriptorClasses
+     *            whether or not to automatically load descriptors when they are
+     *            requested by class names.
+     */
+    public ClasspathScanDescriptorProvider(TaskRunner taskRunner,
+            Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats, boolean autoLoadDescriptorClasses) {
+        this(taskRunner, createRenderingFormatPredicate(excludedRenderingFormats), autoLoadDescriptorClasses);
     }
 
     /**
@@ -146,9 +156,36 @@ public final class ClasspathScanDescriptorProvider extends AbstractDescriptorPro
      */
     public ClasspathScanDescriptorProvider(TaskRunner taskRunner,
             Predicate<Class<? extends RenderingFormat<?>>> renderingFormatPredicate) {
+        this(taskRunner, renderingFormatPredicate, false);
+    }
+
+    /**
+     * Constructs a {@link ClasspathScanDescriptorProvider} using a specified
+     * {@link TaskRunner}. The taskrunner will be used to perform the classpath
+     * scan, potentially in a parallel fashion.
+     * 
+     * @param taskRunner
+     * @param renderingFormatPredicate
+     *            predicate function to apply when evaluating if a particular
+     *            rendering format is of interest or not
+     * @param autoLoadDescriptorClasses
+     *            whether or not to automatically load descriptors when they are
+     *            requested by class names.
+     */
+    public ClasspathScanDescriptorProvider(TaskRunner taskRunner,
+            Predicate<Class<? extends RenderingFormat<?>>> renderingFormatPredicate, boolean autoLoadDescriptorClasses) {
+        super(autoLoadDescriptorClasses);
         _taskRunner = taskRunner;
         _tasksPending = new AtomicInteger(0);
         _renderingFormatPredicate = renderingFormatPredicate;
+    }
+
+    private static Predicate<Class<? extends RenderingFormat<?>>> createRenderingFormatPredicate(
+            Collection<Class<? extends RenderingFormat<?>>> excludedRenderingFormats) {
+        if (excludedRenderingFormats == null || excludedRenderingFormats.isEmpty()) {
+            return new TruePredicate<Class<? extends RenderingFormat<?>>>();
+        }
+        return new ExclusionPredicate<Class<? extends RenderingFormat<?>>>(excludedRenderingFormats);
     }
 
     /**
