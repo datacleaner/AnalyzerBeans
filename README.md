@@ -3,6 +3,9 @@ AnalyzerBeans
 
 An extensible and high-performance data processing engine.
 
+NOTE: Beginning with DataCleaner 4.0 we have decided to discontinue AnalyzerBeans as a separate project. We have incorporated AnalyzerBeans as the engine of DataCleaner and decided to keep the merge the two.
+
+Please visit DataCleaner here: https://github.com/datacleaner/DataCleaner
 
 ## Module structure
 
